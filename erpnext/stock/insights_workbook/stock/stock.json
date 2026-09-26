@@ -1,0 +1,1952 @@
+{
+ "charts": {
+  "stock-below-reorder-level-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Days of Cover",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": "<",
+       "value": 7
+      },
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Open PO Qty",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": "=",
+       "value": 0
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Days of Cover",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "item_name",
+      "data_type": "String",
+      "dimension_name": "Item"
+     },
+     {
+      "column_name": "item_group",
+      "data_type": "String",
+      "dimension_name": "Group"
+     },
+     {
+      "column_name": "warehouse",
+      "data_type": "String",
+      "dimension_name": "Warehouse"
+     }
+    ],
+    "values": [
+     {
+      "aggregation": "sum",
+      "column_name": "qty_now",
+      "data_type": "Integer",
+      "measure_name": "Qty on Hand"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "reorder_level",
+      "data_type": "Integer",
+      "measure_name": "Reorder Level"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "min(cover_days).round(1)",
+       "type": "expression"
+      },
+      "measure_name": "Days of Cover"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "open_po",
+      "data_type": "Integer",
+      "measure_name": "Open PO Qty"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "stock-below-reorder-level-2",
+   "query": "stock-below-reorder-level",
+   "sort_order": 8,
+   "title": "Below Reorder Level",
+   "workbook": "stock"
+  },
+  "stock-days-of-inventory": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs prior 13 weeks",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum(stock_prior) / sum(cogs_prior_91) * 91",
+         "type": "expression"
+        },
+        "measure_name": "Prior 13 Weeks"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 0,
+      "negative_is_better": true,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(stock_now) / sum(cogs_91) * 91",
+       "type": "expression"
+      },
+      "id": "Days of Inventory",
+      "measure_name": "Days of Inventory"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-days-of-inventory",
+   "query": "stock-stock-position",
+   "sort_order": 2,
+   "title": "Days of Inventory",
+   "workbook": "stock"
+  },
+  "stock-dead-stock": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last month",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum(if_else(dead_last_month == 1, value_last_month, 0))",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Last Month"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "negative_is_better": true,
+      "shorten": true
+     },
+     {
+      "comparison": {
+       "label": "vs last month",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum(if_else(dead_last_month == 1, value_last_month, 0)) / sum(value_last_month)",
+         "type": "expression"
+        },
+        "format": "percent",
+        "measure_name": "Share of Stock Last Month"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "negative_is_better": true,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(if_else(dead == 1, value_now, 0))",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Dead Stock",
+      "measure_name": "Dead Stock"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(if_else(dead == 1, value_now, 0)) / sum(value_now)",
+       "type": "expression"
+      },
+      "format": "percent",
+      "id": "Share of Stock",
+      "measure_name": "Share of Stock"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-dead-stock",
+   "query": "stock-stock-by-item-warehouse",
+   "sort_order": 5,
+   "title": "Dead Stock",
+   "workbook": "stock"
+  },
+  "stock-dead-stock-by-item-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Days Since Last Issue",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": ">",
+       "value": 365
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Value": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "item_name",
+      "data_type": "String",
+      "dimension_name": "Item"
+     },
+     {
+      "column_name": "item_group",
+      "data_type": "String",
+      "dimension_name": "Group"
+     },
+     {
+      "column_name": "warehouse",
+      "data_type": "String",
+      "dimension_name": "Warehouse"
+     }
+    ],
+    "values": [
+     {
+      "aggregation": "sum",
+      "column_name": "qty_now",
+      "data_type": "Integer",
+      "measure_name": "Qty"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(value_now)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "measure_name": "Value"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "days_since_last_issue",
+      "data_type": "Integer",
+      "measure_name": "Days Since Last Issue"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "stock-dead-stock-by-item-2",
+   "query": "stock-dead-stock-by-item",
+   "sort_order": 9,
+   "title": "Dead Stock by Item",
+   "workbook": "stock"
+  },
+  "stock-items-below-reorder": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last week",
+       "measure": {
+        "data_type": "Integer",
+        "expression": {
+         "expression": "sum(below_reorder_last_week)",
+         "type": "expression"
+        },
+        "measure_name": "Last Week"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 0,
+      "negative_is_better": true,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "sum(below_reorder)",
+       "type": "expression"
+      },
+      "id": "Items Below Reorder",
+      "measure_name": "Items Below Reorder"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-items-below-reorder",
+   "query": "stock-stock-by-item-warehouse",
+   "sort_order": 3,
+   "title": "Items Below Reorder",
+   "workbook": "stock"
+  },
+  "stock-received-vs-issued-13-weeks": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Week",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "posting_date",
+      "data_type": "Date",
+      "dimension_name": "Week",
+      "granularity": "week"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "received_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Received"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "issued_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Issued"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "stock-received-vs-issued-13-weeks",
+   "query": "stock-stock-flows-13-weeks",
+   "sort_order": 7,
+   "title": "Received vs Issued, 13 Weeks",
+   "workbook": "stock"
+  },
+  "stock-stock-value": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last week",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum(stock_last_week)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Last Week"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(stock_now)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Stock Value",
+      "measure_name": "Stock Value"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-stock-value",
+   "query": "stock-stock-position",
+   "sort_order": 1,
+   "title": "Stock Value",
+   "workbook": "stock"
+  },
+  "stock-stock-value-and-turnover-13-weeks": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "number_formats": {
+     "Turnover (\u00d7 a year)": {
+      "decimals": 1,
+      "shorten": false
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Week",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Week",
+      "granularity": "week"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "align": "Right",
+       "axis": "y",
+       "dashed": true,
+       "id": "721a1e6e",
+       "label": "13-week average",
+       "measure_name": "Turnover (\u00d7 a year)"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "stock_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Stock Value"
+       },
+       "type": "bar"
+      },
+      {
+       "align": "Right",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum(issued_91) * 4 / sum(stock_value)",
+         "type": "expression"
+        },
+        "measure_name": "Turnover (\u00d7 a year)"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "stock-stock-value-and-turnover-13-weeks",
+   "query": "stock-stock-value-turnover-by-week",
+   "sort_order": 6,
+   "title": "Stock Value and Turnover, 13 Weeks",
+   "workbook": "stock"
+  },
+  "stock-stockouts": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last week",
+       "measure": {
+        "data_type": "Integer",
+        "expression": {
+         "expression": "sum(stockout_last_week)",
+         "type": "expression"
+        },
+        "measure_name": "Last Week"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 0,
+      "negative_is_better": true,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "sum(stockout)",
+       "type": "expression"
+      },
+      "id": "Stockouts",
+      "measure_name": "Stockouts"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-stockouts",
+   "query": "stock-stock-by-item-warehouse",
+   "sort_order": 4,
+   "title": "Stockouts",
+   "workbook": "stock"
+  }
+ },
+ "creation": "2026-09-19 18:34:16.540892",
+ "dashboards": {
+  "stock": {
+   "items": [
+    {
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "stock-below-reorder-level-2": "`stock-below-reorder-level`.`company`",
+      "stock-days-of-inventory": "`stock-stock-position`.`company`",
+      "stock-dead-stock": "`stock-stock-by-item-warehouse`.`company`",
+      "stock-dead-stock-by-item-2": "`stock-dead-stock-by-item`.`company`",
+      "stock-items-below-reorder": "`stock-stock-by-item-warehouse`.`company`",
+      "stock-received-vs-issued-13-weeks": "`stock-stock-flows-13-weeks`.`company`",
+      "stock-stock-value": "`stock-stock-position`.`company`",
+      "stock-stock-value-and-turnover-13-weeks": "`stock-stock-value-turnover-by-week`.`company`",
+      "stock-stockouts": "`stock-stock-by-item-warehouse`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Warehouse",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-warehouse",
+      "w": 4,
+      "x": 4,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "links": {
+      "stock-below-reorder-level-2": "`stock-below-reorder-level`.`warehouse`",
+      "stock-days-of-inventory": "`stock-stock-position`.`warehouse`",
+      "stock-dead-stock": "`stock-stock-by-item-warehouse`.`warehouse`",
+      "stock-dead-stock-by-item-2": "`stock-dead-stock-by-item`.`warehouse`",
+      "stock-items-below-reorder": "`stock-stock-by-item-warehouse`.`warehouse`",
+      "stock-received-vs-issued-13-weeks": "`stock-stock-flows-13-weeks`.`warehouse`",
+      "stock-stock-value": "`stock-stock-position`.`warehouse`",
+      "stock-stock-value-and-turnover-13-weeks": "`stock-stock-value-turnover-by-week`.`warehouse`",
+      "stock-stockouts": "`stock-stock-by-item-warehouse`.`warehouse`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Item Group",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-item-group",
+      "w": 4,
+      "x": 8,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "links": {
+      "stock-below-reorder-level-2": "`stock-below-reorder-level`.`item_group`",
+      "stock-days-of-inventory": "`stock-stock-position`.`item_group`",
+      "stock-dead-stock": "`stock-stock-by-item-warehouse`.`item_group`",
+      "stock-dead-stock-by-item-2": "`stock-dead-stock-by-item`.`item_group`",
+      "stock-items-below-reorder": "`stock-stock-by-item-warehouse`.`item_group`",
+      "stock-received-vs-issued-13-weeks": "`stock-stock-flows-13-weeks`.`item_group`",
+      "stock-stock-value": "`stock-stock-position`.`item_group`",
+      "stock-stock-value-and-turnover-13-weeks": "`stock-stock-value-turnover-by-week`.`item_group`",
+      "stock-stockouts": "`stock-stock-by-item-warehouse`.`item_group`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "stock-stock-value",
+     "layout": {
+      "h": 5,
+      "i": "chart-kp5on9s9m4",
+      "w": 4,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-days-of-inventory",
+     "layout": {
+      "h": 5,
+      "i": "chart-kp5s4rodjt",
+      "w": 4,
+      "x": 4,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-dead-stock",
+     "layout": {
+      "h": 5,
+      "i": "chart-kp5b4sl6ka",
+      "w": 4,
+      "x": 8,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 10
+      }
+     },
+     "reading": "Dead Stock",
+     "type": "chart"
+    },
+    {
+     "chart": "stock-dead-stock",
+     "layout": {
+      "h": 5,
+      "i": "chart-kp5b4sl6ka-2",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 10
+      }
+     },
+     "reading": "Share of Stock",
+     "type": "chart"
+    },
+    {
+     "chart": "stock-items-below-reorder",
+     "layout": {
+      "h": 5,
+      "i": "chart-kp5l883lkn",
+      "w": 4,
+      "x": 16,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 15
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-stockouts",
+     "layout": {
+      "h": 5,
+      "i": "chart-kp59t5frpv",
+      "w": 4,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 15
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-stock-value-and-turnover-13-weeks",
+     "layout": {
+      "h": 17,
+      "i": "chart-kp58fm4cqs",
+      "w": 10,
+      "x": 0,
+      "y": 13
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 20
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-received-vs-issued-13-weeks",
+     "layout": {
+      "h": 17,
+      "i": "chart-kp5duh3t8p",
+      "w": 10,
+      "x": 10,
+      "y": 12
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 37
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-below-reorder-level-2",
+     "layout": {
+      "h": 19,
+      "i": "chart-kp5geva84r",
+      "w": 10,
+      "x": 0,
+      "y": 30
+     },
+     "layouts": {
+      "sm": {
+       "h": 22,
+       "w": 20,
+       "x": 0,
+       "y": 54
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-dead-stock-by-item-2",
+     "layout": {
+      "h": 19,
+      "i": "chart-kp5g0455fe",
+      "w": 10,
+      "x": 10,
+      "y": 29
+     },
+     "layouts": {
+      "sm": {
+       "h": 22,
+       "w": 20,
+       "x": 0,
+       "y": 76
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "stock",
+   "title": "Stock",
+   "vertical_compact_layout": 1,
+   "workbook": "stock"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-25 15:51:53.214572",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "stock",
+ "owner": "Administrator",
+ "queries": {
+  "stock-below-reorder-level": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-below-reorder-level",
+   "operations": [
+    {
+     "table": {
+      "query_name": "stock-stock-by-item-warehouse",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "below_reorder",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column": {
+      "column_name": "cover_days",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Below Reorder Level",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-dead-stock-by-item": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-dead-stock-by-item",
+   "operations": [
+    {
+     "table": {
+      "query_name": "stock-stock-by-item-warehouse",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "dead",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column": {
+      "column_name": "value_now",
+      "type": "column"
+     },
+     "direction": "desc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Dead Stock by Item",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-open-purchase-orders": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-open-purchase-orders",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "status",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "status",
+        "type": "column"
+       },
+       "operator": "in",
+       "value": [
+        "To Receive and Bill",
+        "To Receive"
+       ]
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "item_code",
+      "warehouse",
+      "qty",
+      "received_qty"
+     ],
+     "type": "select"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "qty - received_qty",
+      "type": "expression"
+     },
+     "new_name": "open_qty",
+     "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "open_qty > 0",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(item_code, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "item_warehouse",
+       "data_type": "String",
+       "dimension_name": "item_warehouse"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(open_qty)",
+        "type": "expression"
+       },
+       "measure_name": "open_po_qty"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Open Purchase Orders",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-reorder-levels": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-reorder-levels",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem Reorder",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "column_names": [
+      "parent",
+      "warehouse",
+      "warehouse_reorder_level",
+      "warehouse_reorder_qty"
+     ],
+     "type": "select"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(parent, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "item_warehouse",
+       "data_type": "String",
+       "dimension_name": "item_warehouse"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "max(warehouse_reorder_level)",
+        "type": "expression"
+       },
+       "measure_name": "reorder_level"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "max(warehouse_reorder_qty)",
+        "type": "expression"
+       },
+       "measure_name": "reorder_qty"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Reorder Levels",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-by-item-warehouse": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-by-item-warehouse",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "posting_date <= today()",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "item_code",
+      "warehouse",
+      "company",
+      "actual_qty",
+      "stock_value_difference"
+     ],
+     "type": "select"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "item_code",
+       "data_type": "String",
+       "dimension_name": "item_code"
+      },
+      {
+       "column_name": "warehouse",
+       "data_type": "String",
+       "dimension_name": "warehouse"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= today(), actual_qty)",
+        "type": "expression"
+       },
+       "measure_name": "qty_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 7, 'day'), actual_qty)",
+        "type": "expression"
+       },
+       "measure_name": "qty_last_week"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 1, 'month'), actual_qty)",
+        "type": "expression"
+       },
+       "measure_name": "qty_last_month"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= today(), stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "value_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 1, 'month'), stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "value_last_month"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((actual_qty < 0) & posting_date.between(date_sub(today(), 89, 'day'), today()), -actual_qty)",
+        "type": "expression"
+       },
+       "measure_name": "issued_qty_rate_window"
+      },
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "max(posting_date, actual_qty < 0)",
+        "type": "expression"
+       },
+       "measure_name": "last_issue"
+      },
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "max(posting_date, (actual_qty < 0) & (posting_date <= date_sub(today(), 1, 'month')))",
+        "type": "expression"
+       },
+       "measure_name": "last_issue_last_month"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(item_code, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_group",
+       "type": "column"
+      },
+      {
+       "column_name": "item_name",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "reorder_level",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "stock-reorder-levels",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "open_po_qty",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "stock-open-purchase-orders",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), last_issue, 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_since_last_issue",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(date_sub(today(), 1, 'month'), last_issue_last_month, 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_since_last_issue_last_month",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "issued_qty_rate_window / 90",
+      "type": "expression"
+     },
+     "new_name": "daily_issue",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(daily_issue > 0, qty_now / daily_issue, 999)",
+      "type": "expression"
+     },
+     "new_name": "cover_days",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(is_set(open_po_qty), open_po_qty, 0)",
+      "type": "expression"
+     },
+     "new_name": "open_po",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if(is_set(reorder_level) & (qty_now <= reorder_level))",
+      "type": "expression"
+     },
+     "new_name": "below_reorder",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if(is_set(reorder_level) & (qty_last_week <= reorder_level))",
+      "type": "expression"
+     },
+     "new_name": "below_reorder_last_week",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if((qty_now <= 0) & (issued_qty_rate_window > 0))",
+      "type": "expression"
+     },
+     "new_name": "stockout",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if((qty_last_week <= 0) & (issued_qty_rate_window > 0))",
+      "type": "expression"
+     },
+     "new_name": "stockout_last_week",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if((qty_now > 0) & (days_since_last_issue > 180))",
+      "type": "expression"
+     },
+     "new_name": "dead",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if((qty_last_month > 0) & (days_since_last_issue_last_month > 180))",
+      "type": "expression"
+     },
+     "new_name": "dead_last_month",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "item_code",
+      "item_name",
+      "item_group",
+      "warehouse",
+      "company",
+      "qty_now",
+      "value_now",
+      "value_last_month",
+      "reorder_level",
+      "open_po",
+      "cover_days",
+      "days_since_last_issue",
+      "below_reorder",
+      "below_reorder_last_week",
+      "stockout",
+      "stockout_last_week",
+      "dead",
+      "dead_last_month"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Stock by Item & Warehouse",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-flows-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-flows-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_group",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "item_code",
+      "warehouse",
+      "item_group",
+      "company",
+      "voucher_type",
+      "actual_qty",
+      "stock_value_difference"
+     ],
+     "type": "select"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(actual_qty > 0, stock_value_difference, 0)",
+      "type": "expression"
+     },
+     "new_name": "received_value",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(actual_qty < 0, -stock_value_difference, 0)",
+      "type": "expression"
+     },
+     "new_name": "issued_value",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Stock Flows, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-position": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-position",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "posting_date <= today()",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_group",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "warehouse",
+      "item_group",
+      "company",
+      "actual_qty",
+      "stock_value_difference"
+     ],
+     "type": "select"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "warehouse",
+       "data_type": "String",
+       "dimension_name": "warehouse"
+      },
+      {
+       "column_name": "item_group",
+       "data_type": "String",
+       "dimension_name": "item_group"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= today(), stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "stock_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 7, 'day'), stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "stock_last_week"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 91, 'day'), stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "stock_prior"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((actual_qty < 0) & posting_date.between(date_sub(today(), 90, 'day'), today()), -stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "cogs_91"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((actual_qty < 0) & posting_date.between(date_sub(today(), 181, 'day'), date_sub(today(), 91, 'day')), -stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "cogs_prior_91"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Stock Position",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-value-turnover-by-week": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-value-turnover-by-week",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "posting_date <= date_sub(week_start(today()), 1, 'day')",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_group",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "warehouse",
+      "item_group",
+      "company",
+      "actual_qty",
+      "stock_value_difference"
+     ],
+     "type": "select"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "posting_date",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "week"
+      },
+      {
+       "column_name": "warehouse",
+       "data_type": "String",
+       "dimension_name": "warehouse"
+      },
+      {
+       "column_name": "item_group",
+       "data_type": "String",
+       "dimension_name": "item_group"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "movement"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(actual_qty < 0, -stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "issued"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "movement.sum().over(ibis.cumulative_window(order_by=period, group_by=[warehouse, item_group, company]))",
+      "type": "expression"
+     },
+     "new_name": "stock_value",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "issued.sum().over(ibis.window(order_by=period, group_by=[warehouse, item_group, company], preceding=12, following=0))",
+      "type": "expression"
+     },
+     "new_name": "issued_91",
+     "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "period >= date_sub(week_start(today()), 91, 'day')",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column": {
+      "column_name": "period",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Stock Value & Turnover by Week",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  }
+ },
+ "title": "Stock"
+}

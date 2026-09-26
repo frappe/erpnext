@@ -1,0 +1,1605 @@
+{
+ "charts": {
+  "selling-average-order-value": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs prior 13 weeks",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "aov_prior",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Prior 13 Weeks"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "aov",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Average Order Value",
+      "measure_name": "Average Order Value"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-average-order-value",
+   "query": "selling-average-order-value-13-weeks",
+   "sort_order": 4,
+   "title": "Average Order Value",
+   "workbook": "selling"
+  },
+  "selling-booked-by-brand": {
+   "chart_type": "Donut",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "label_column": {
+     "column_name": "brand",
+     "data_type": "String",
+     "dimension_name": "Brand"
+    },
+    "legend_position": "right",
+    "limit": 100,
+    "max_slices": 6,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [],
+    "show_inline_labels": true,
+    "value_column": {
+     "aggregation": "sum",
+     "column_name": "base_net_amount",
+     "data_type": "Decimal",
+     "format": "currency",
+     "measure_name": "Booked"
+    }
+   },
+   "folder": null,
+   "name": "selling-booked-by-brand",
+   "query": "selling-booked-lines-13-weeks",
+   "sort_order": 8,
+   "title": "Booked by Brand",
+   "workbook": "selling"
+  },
+  "selling-booked-by-territory": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Booked",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "territory",
+      "data_type": "String",
+      "dimension_name": "Territory"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "base_net_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Booked"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "selling-booked-by-territory",
+   "query": "selling-booked-lines-13-weeks",
+   "sort_order": 7,
+   "title": "Booked by Territory",
+   "workbook": "selling"
+  },
+  "selling-booked-by-week": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Week",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "transaction_date",
+      "data_type": "Date",
+      "dimension_name": "Week",
+      "granularity": "week"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "axis": "y",
+       "dashed": true,
+       "id": "993ae1e3",
+       "label": "13-week average",
+       "measure_name": "Booked"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "base_net_total",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Booked"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "selling-booked-by-week",
+   "query": "selling-booked-13-weeks",
+   "sort_order": 6,
+   "title": "Booked by Week",
+   "workbook": "selling"
+  },
+  "selling-booked-last-week": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs week before",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "booked_prior_week",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Week Before"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "booked_week",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Booked Last Week",
+      "measure_name": "Booked Last Week"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-booked-last-week",
+   "query": "selling-booked-week-over-week",
+   "sort_order": 2,
+   "title": "Booked Last Week",
+   "workbook": "selling"
+  },
+  "selling-booked-this-month-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "booked_ly_mtd",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Days Last Year"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "booked_mtd",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Booked This Month",
+      "measure_name": "Booked This Month"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-booked-this-month-2",
+   "query": "selling-booked-this-month",
+   "sort_order": 1,
+   "title": "Booked This Month",
+   "workbook": "selling"
+  },
+  "selling-new-customers": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs prior 13 weeks",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "new_customers_prior",
+        "data_type": "Integer",
+        "measure_name": "Prior 13 Weeks"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "new_customers",
+      "data_type": "Integer",
+      "id": "New Customers",
+      "measure_name": "New Customers"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-new-customers",
+   "query": "selling-new-customers-13-weeks",
+   "sort_order": 5,
+   "title": "New Customers",
+   "workbook": "selling"
+  },
+  "selling-quotation-funnel-13-weeks": {
+   "chart_type": "Funnel",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "measures": [
+     {
+      "aggregation": "count",
+      "column_name": "name",
+      "data_type": "Integer",
+      "measure_name": "Raised"
+     },
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "count_if(status != 'Open')",
+       "type": "expression"
+      },
+      "measure_name": "Decided"
+     },
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "count_if(status == 'Ordered')",
+       "type": "expression"
+      },
+      "measure_name": "Won"
+     }
+    ],
+    "order_by": [],
+    "show_percentage": true
+   },
+   "folder": null,
+   "name": "selling-quotation-funnel-13-weeks",
+   "query": "selling-quotations-13-weeks",
+   "sort_order": 9,
+   "title": "Quotation Funnel, 13 Weeks",
+   "workbook": "selling"
+  },
+  "selling-stalled-quotations-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Days Past Valid",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": ">",
+       "value": 0
+      },
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Value",
+        "type": "column"
+       },
+       "mode": "rank_rules",
+       "operator": "top_n",
+       "value": 3
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Value": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "name",
+      "data_type": "String",
+      "dimension_name": "Quotation"
+     },
+     {
+      "column_name": "customer",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     },
+     {
+      "column_name": "territory",
+      "data_type": "String",
+      "dimension_name": "Territory"
+     }
+    ],
+    "values": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(base_net_total)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "measure_name": "Value"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "days_open",
+      "data_type": "Integer",
+      "measure_name": "Days Open"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "days_past_valid",
+      "data_type": "Integer",
+      "measure_name": "Days Past Valid"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "selling-stalled-quotations-2",
+   "query": "selling-stalled-quotations",
+   "sort_order": 11,
+   "title": "Stalled Quotations",
+   "workbook": "selling"
+  },
+  "selling-top-8-customers": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 8,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Booked, 13 Weeks",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "customer",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(transaction_date >= date_sub(week_start(today()), 91, 'day'), base_net_total)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Booked, 13 Weeks"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(transaction_date <= date_sub(date_sub(week_start(today()), 1, 'day'), 1, 'year'), base_net_total)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Same 13 Weeks Last Year"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "selling-top-8-customers",
+   "query": "selling-top-customers-13-weeks",
+   "sort_order": 10,
+   "title": "Top 8 Customers",
+   "workbook": "selling"
+  },
+  "selling-win-rate": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs prior 13 weeks",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "win_rate_prior",
+        "data_type": "Decimal",
+        "format": "percent",
+        "measure_name": "Prior 13 Weeks"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "win_rate",
+      "data_type": "Decimal",
+      "format": "percent",
+      "id": "Win Rate, 13 Weeks",
+      "measure_name": "Win Rate, 13 Weeks"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-win-rate",
+   "query": "selling-win-rate-13-weeks",
+   "sort_order": 3,
+   "title": "Win Rate",
+   "workbook": "selling"
+  }
+ },
+ "creation": "2026-09-19 18:25:10.315028",
+ "dashboards": {
+  "selling": {
+   "items": [
+    {
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "selling-average-order-value": "`selling-sales-orders`.`company`",
+      "selling-booked-by-brand": "`selling-booked-lines-13-weeks`.`company`",
+      "selling-booked-by-territory": "`selling-booked-lines-13-weeks`.`company`",
+      "selling-booked-by-week": "`selling-booked-13-weeks`.`company`",
+      "selling-booked-last-week": "`selling-sales-orders`.`company`",
+      "selling-booked-this-month-2": "`selling-sales-orders`.`company`",
+      "selling-new-customers": "`selling-sales-orders`.`company`",
+      "selling-quotation-funnel-13-weeks": "`selling-quotations-13-weeks`.`company`",
+      "selling-stalled-quotations-2": "`selling-stalled-quotations`.`company`",
+      "selling-top-8-customers": "`selling-top-customers-13-weeks`.`company`",
+      "selling-win-rate": "`selling-quotations`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Territory",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-territory",
+      "w": 4,
+      "x": 4,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "links": {
+      "selling-average-order-value": "`selling-sales-orders`.`territory`",
+      "selling-booked-by-brand": "`selling-booked-lines-13-weeks`.`territory`",
+      "selling-booked-by-territory": "`selling-booked-lines-13-weeks`.`territory`",
+      "selling-booked-by-week": "`selling-booked-13-weeks`.`territory`",
+      "selling-booked-last-week": "`selling-sales-orders`.`territory`",
+      "selling-booked-this-month-2": "`selling-sales-orders`.`territory`",
+      "selling-new-customers": "`selling-sales-orders`.`territory`",
+      "selling-quotation-funnel-13-weeks": "`selling-quotations-13-weeks`.`territory`",
+      "selling-stalled-quotations-2": "`selling-stalled-quotations`.`territory`",
+      "selling-top-8-customers": "`selling-top-customers-13-weeks`.`territory`",
+      "selling-win-rate": "`selling-quotations`.`territory`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Customer",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-customer",
+      "w": 4,
+      "x": 8,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "links": {
+      "selling-average-order-value": "`selling-sales-orders`.`customer`",
+      "selling-booked-by-brand": "`selling-booked-lines-13-weeks`.`customer`",
+      "selling-booked-by-territory": "`selling-booked-lines-13-weeks`.`customer`",
+      "selling-booked-by-week": "`selling-booked-13-weeks`.`customer`",
+      "selling-booked-last-week": "`selling-sales-orders`.`customer`",
+      "selling-booked-this-month-2": "`selling-sales-orders`.`customer`",
+      "selling-new-customers": "`selling-sales-orders`.`customer`",
+      "selling-quotation-funnel-13-weeks": "`selling-quotations-13-weeks`.`customer`",
+      "selling-stalled-quotations-2": "`selling-stalled-quotations`.`customer`",
+      "selling-top-8-customers": "`selling-top-customers-13-weeks`.`customer`",
+      "selling-win-rate": "`selling-quotations`.`customer`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "selling-booked-this-month-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-fef5ksdkfl",
+      "w": 4,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-booked-last-week",
+     "layout": {
+      "h": 5,
+      "i": "chart-fefv8b908e",
+      "w": 4,
+      "x": 4,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-win-rate",
+     "layout": {
+      "h": 5,
+      "i": "chart-fefq7memds",
+      "w": 4,
+      "x": 8,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 10
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-average-order-value",
+     "layout": {
+      "h": 5,
+      "i": "chart-fef5b4s9qo",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 10
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-new-customers",
+     "layout": {
+      "h": 5,
+      "i": "chart-fef415ioen",
+      "w": 4,
+      "x": 16,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 20,
+       "x": 0,
+       "y": 15
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-booked-by-week",
+     "layout": {
+      "h": 17,
+      "i": "chart-fefjhk6fv6",
+      "w": 10,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 20
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-booked-by-territory",
+     "layout": {
+      "h": 17,
+      "i": "chart-fefphs6a26",
+      "w": 10,
+      "x": 10,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 37
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-booked-by-brand",
+     "layout": {
+      "h": 17,
+      "i": "chart-fefoc77tev",
+      "w": 10,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 56
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-top-8-customers",
+     "layout": {
+      "h": 17,
+      "i": "chart-fefqn2q6hs",
+      "w": 10,
+      "x": 10,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 73
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-quotation-funnel-13-weeks",
+     "layout": {
+      "h": 19,
+      "i": "chart-fef7g64585",
+      "w": 10,
+      "x": 0,
+      "y": 42
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 92
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-stalled-quotations-2",
+     "layout": {
+      "h": 19,
+      "i": "chart-fefngm7i26",
+      "w": 10,
+      "x": 10,
+      "y": 42
+     },
+     "layouts": {
+      "sm": {
+       "h": 24,
+       "w": 20,
+       "x": 0,
+       "y": 109
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "selling",
+   "title": "Selling",
+   "vertical_compact_layout": 1,
+   "workbook": "selling"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-19 20:58:21.610491",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "selling",
+ "owner": "Administrator",
+ "queries": {
+  "selling-average-order-value-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-average-order-value-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-sales-orders",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(week_start(today()), 182, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(transaction_date >= date_sub(week_start(today()), 91, 'day'), base_net_total) / count_if(transaction_date >= date_sub(week_start(today()), 91, 'day'))",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "aov"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(transaction_date <= date_sub(week_start(today()), 92, 'day'), base_net_total) / count_if(transaction_date <= date_sub(week_start(today()), 92, 'day'))",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "aov_prior"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Average Order Value, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-booked-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-booked-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-sales-orders",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Booked, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-booked-lines-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-booked-lines-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "transaction_date",
+       "type": "column"
+      },
+      {
+       "column_name": "customer",
+       "type": "column"
+      },
+      {
+       "column_name": "territory",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "brand",
+       "type": "column"
+      },
+      {
+       "column_name": "item_group",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "sales_order",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "sales_order",
+      "transaction_date",
+      "customer",
+      "territory",
+      "company",
+      "brand",
+      "item_group",
+      "base_net_amount"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Booked Lines, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-booked-this-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-booked-this-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-sales-orders",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(month_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(transaction_date >= month_start(today()), base_net_total)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "booked_mtd"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(transaction_date <= date_sub(today(), 1, 'year'), base_net_total)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "booked_ly_mtd"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Booked This Month",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-booked-week-over-week": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-booked-week-over-week",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-sales-orders",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(week_start(today()), 14, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(transaction_date >= date_sub(week_start(today()), 7, 'day'), base_net_total)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "booked_week"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(transaction_date <= date_sub(week_start(today()), 8, 'day'), base_net_total)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "booked_prior_week"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Booked, Week over Week",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-new-customers-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-new-customers-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-sales-orders",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "customer",
+       "data_type": "String",
+       "dimension_name": "customer"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "min(transaction_date)",
+        "type": "expression"
+       },
+       "measure_name": "first_order"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count_if(first_order.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day')))",
+        "type": "expression"
+       },
+       "measure_name": "new_customers"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count_if(first_order.between(date_sub(week_start(today()), 182, 'day'), date_sub(week_start(today()), 92, 'day')))",
+        "type": "expression"
+       },
+       "measure_name": "new_customers_prior"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 8,
+   "title": "New Customers, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-quotations": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-quotations",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabQuotation",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "transaction_date",
+      "valid_till",
+      "party_name",
+      "territory",
+      "company",
+      "status",
+      "base_net_total"
+     ],
+     "type": "select"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "party_name",
+      "type": "expression"
+     },
+     "new_name": "customer",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), transaction_date, 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_open",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), valid_till, 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_past_valid",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Quotations",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-quotations-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-quotations-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-quotations",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 11,
+   "title": "Quotations, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-sales-orders": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-sales-orders",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "transaction_date",
+      "customer",
+      "territory",
+      "company",
+      "status",
+      "base_net_total"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Sales Orders",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-stalled-quotations": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-stalled-quotations",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-quotations",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "status",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Open"
+      },
+      {
+       "column": {
+        "column_name": "days_open",
+        "type": "column"
+       },
+       "operator": ">=",
+       "value": 14
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 13,
+   "title": "Stalled Quotations",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-top-customers-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-top-customers-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-sales-orders",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(date_sub(week_start(today()), 91, 'day'), 1, 'year'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 12,
+   "title": "Top Customers, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-win-rate-13-weeks": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-win-rate-13-weeks",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-quotations",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(week_start(today()), 182, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "count_if((transaction_date >= date_sub(week_start(today()), 91, 'day')) & (status == 'Ordered')) / count_if((transaction_date >= date_sub(week_start(today()), 91, 'day')) & (status != 'Open'))",
+        "type": "expression"
+       },
+       "format": "percent",
+       "measure_name": "win_rate"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "count_if((transaction_date <= date_sub(week_start(today()), 92, 'day')) & (status == 'Ordered')) / count_if((transaction_date <= date_sub(week_start(today()), 92, 'day')) & (status != 'Open'))",
+        "type": "expression"
+       },
+       "format": "percent",
+       "measure_name": "win_rate_prior"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Win Rate, 13 Weeks",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  }
+ },
+ "title": "Selling"
+}
