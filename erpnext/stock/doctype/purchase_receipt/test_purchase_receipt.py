@@ -1166,6 +1166,35 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(receipts[1].per_billed, 100)
 
 	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_fully_returned_row_left_out_of_qty_billing(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_purchase_receipt(qty=10, rate=50, do_not_save=True)
+		pr.append("items", pr.items[0].as_dict(no_default_fields=True))
+		pr.submit()
+		returned_row, invoiced_row = pr.items
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.set(
+			"items", [row for row in pr_return.items if row.purchase_receipt_item == returned_row.name]
+		)
+		pr_return.submit()
+
+		pi = make_purchase_invoice(pr.name)
+		pi.set("items", [row for row in pi.items if row.pr_detail == invoiced_row.name])
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
+	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
 	def test_zero_rate_receipt_billed_by_qty(self):
