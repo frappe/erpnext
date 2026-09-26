@@ -1117,6 +1117,52 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		po.reload()
 		po.cancel()
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_per_billed_by_qty_when_landed_cost_follows_invoice_rate(self):
+		pr = make_purchase_receipt(qty=100, rate=50)
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].qty = 25
+		pi.items[0].rate = 200
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 25)
+		self.assertEqual(pr.status, "Partly Billed")
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_po_invoice_qty_spread_fifo_when_landed_cost_follows_invoice_rate(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = []
+		for qty, posting_time in ((60, "08:00"), (40, "10:00")):
+			pr = make_purchase_receipt(po.name)
+			pr.set_posting_time = 1
+			pr.posting_time = posting_time
+			pr.items[0].received_qty = qty
+			pr.items[0].qty = qty
+			pr.submit()
+			receipts.append(pr)
+
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.items[0].qty = 70
+		pi.items[0].rate = 40
+		pi.submit()
+
+		for pr in receipts:
+			pr.reload()
+
+		self.assertEqual(receipts[0].per_billed, 100)
+		self.assertEqual(receipts[1].per_billed, 25)
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
