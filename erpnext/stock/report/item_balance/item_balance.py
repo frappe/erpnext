@@ -4,7 +4,10 @@
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_masters_condition,
+	get_allowed_warehouses_condition,
+)
 
 
 def execute(filters=None):
@@ -38,10 +41,14 @@ def get_columns():
 def get_data():
 	item = frappe.qb.DocType("Item")
 	bin_table = frappe.qb.DocType("Bin")
+	bin_join = item.item_code == bin_table.item_code
+	if condition := get_allowed_warehouses_condition(bin_table.warehouse):
+		bin_join &= condition
+
 	query = (
 		frappe.qb.from_(item)
 		.left_join(bin_table)
-		.on(item.item_code == bin_table.item_code)
+		.on(bin_join)
 		.select(
 			item.item_code,
 			item.item_name,

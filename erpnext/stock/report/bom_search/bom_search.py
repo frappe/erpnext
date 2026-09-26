@@ -5,7 +5,10 @@
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
 
 
 def execute(filters=None):
@@ -47,13 +50,15 @@ def execute(filters=None):
 
 
 def get_parent_filters(doctype):
-	if doctype != "Product Bundle Item":
-		return []
+	if doctype == "Product Bundle Item":
+		parent = frappe.qb.DocType("Product Bundle")
+		condition = get_allowed_masters_condition(parent.new_item_code, "Item")
+	else:
+		parent = frappe.qb.DocType("BOM")
+		condition = get_allowed_companies_condition(parent.company, "BOM")
 
-	bundle = frappe.qb.DocType("Product Bundle")
-	condition = get_allowed_masters_condition(bundle.new_item_code, "Item")
 	if not condition:
 		return []
 
-	allowed_bundles = frappe.qb.from_(bundle).select(bundle.name).where(condition)
-	return [frappe.qb.DocType(doctype).parent.isin(allowed_bundles)]
+	allowed_parents = frappe.qb.from_(parent).select(parent.name).where(condition)
+	return [frappe.qb.DocType(doctype).parent.isin(allowed_parents)]

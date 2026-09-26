@@ -328,6 +328,71 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			self.assertIn(allowed_customer, customers)
 			self.assertNotIn(restricted_customer, customers)
 
+	def make_stock_in_both_companies(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code="_Test Item", qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item",
+			qty=5,
+			to_warehouse="Stores - _TC1",
+			company="_Test Company 1",
+			basic_rate=100,
+		)
+
+	def test_reports_keep_to_permitted_companies(self):
+		from erpnext.stock.report.stock_projected_qty.stock_projected_qty import (
+			execute as stock_projected_qty,
+		)
+
+		self.make_stock_in_both_companies()
+		own_request = make_material_request()
+		other_request = make_material_request(
+			company="_Test Company 1", warehouse="Stores - _TC1", cost_center="Main - _TC1"
+		)
+
+		with self.set_user(self.make_report_user()):
+			columns, rows = stock_projected_qty(frappe._dict(item_code="_Test Item"))
+			warehouse_index = [column["fieldname"] for column in columns].index("warehouse")
+			warehouses = {row[warehouse_index] for row in rows}
+			self.assertIn("Stores - _TC", warehouses)
+			self.assertNotIn("Stores - _TC1", warehouses)
+
+			requests = {
+				row["material_request_no"] for row in self.run_report("buying", "procurement_tracker", {})
+			}
+			self.assertIn(own_request.name, requests)
+			self.assertNotIn(other_request.name, requests)
+
+	def test_item_balance_keeps_to_permitted_warehouses(self):
+		self.make_stock_in_both_companies()
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "item_balance", {})
+			warehouses = {row.warehouse for row in rows if row.item_code == "_Test Item"}
+			self.assertIn("Stores - _TC", warehouses)
+			self.assertNotIn("Stores - _TC1", warehouses)
+
+	def test_batch_traceability_hides_other_company_sources(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRACE-.#####"}
+		).name
+		own_entry = make_stock_entry(item_code=item, qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		other_entry = make_stock_entry(
+			item_code=item, qty=5, to_warehouse="Stores - _TC1", company="_Test Company 1", basic_rate=100
+		)
+		own_batch = frappe.db.get_value("Batch", {"reference_name": own_entry.name})
+		other_batch = frappe.db.get_value("Batch", {"reference_name": other_entry.name})
+		filters = {"batches": [own_batch, other_batch], "traceability_direction": "Backward"}
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "serial_no_and_batch_traceability", filters)
+			batches = {row.get("batch_no") for row in rows}
+			self.assertIn(own_batch, batches)
+			self.assertNotIn(other_batch, batches)
+
 	def test_batch_split_tree_hides_chosen_batch_of_restricted_item(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 

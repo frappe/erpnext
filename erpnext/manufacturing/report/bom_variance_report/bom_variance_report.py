@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -76,6 +78,9 @@ def get_data(filters):
 
 	if filters.get("work_order"):
 		query = query.where(wo.name == filters.get("work_order"))
+
+	if condition := get_allowed_companies_condition(wo.company, "Work Order"):
+		query = query.where(condition)
 
 	results = []
 	for d in query.run(as_dict=True):

@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import Min
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -212,6 +214,8 @@ def get_mapped_mr_details(filters):
 		.where((parent.per_ordered >= 0) & (parent.name == child.parent) & (parent.docstatus == 1))
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
+	if condition := get_allowed_companies_condition(parent.company, "Material Request"):
+		query = query.where(condition)
 
 	mr_details = query.run(as_dict=True)
 
@@ -293,6 +297,8 @@ def get_po_entries(filters):
 		.groupby(child.parent, child.material_request_item)
 	)
 	representative_lines = apply_filters_on_query(filters, parent, child, representative_lines)
+	if condition := get_allowed_companies_condition(parent.company, "Purchase Order"):
+		representative_lines = representative_lines.where(condition)
 
 	query = (
 		frappe.qb.from_(parent)

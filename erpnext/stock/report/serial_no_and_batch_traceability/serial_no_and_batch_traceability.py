@@ -1,9 +1,16 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder import Case
+
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
 
 
 def execute(filters: dict | None = None):
@@ -170,6 +177,9 @@ class ReportData:
 		else:
 			query = query.where(sabb_entry.serial_no == row.serial_no)
 
+		if condition := get_allowed_companies_condition(sabb.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
+
 		results = query.run(as_dict=True)
 		return results[0] if results else {}
 
@@ -255,7 +265,35 @@ class ReportData:
 			else:
 				query = query.where(doctype.item == self.filters.item_code)
 
-		return query.run(as_dict=True)
+		item_field = doctype.item_code if self.doctype_name == "Serial No" else doctype.item
+		if condition := get_allowed_masters_condition(item_field, "Item"):
+			query = query.where(condition)
+
+		rows = query.run(as_dict=True)
+		hidden_references = self.get_other_company_references(rows)
+		return [row for row in rows if (row.reference_doctype, row.reference_name) not in hidden_references]
+
+	def get_other_company_references(self, rows):
+		references = defaultdict(set)
+		for row in rows:
+			if row.reference_doctype and row.reference_name:
+				references[row.reference_doctype].add(row.reference_name)
+
+		hidden_references = set()
+		for doctype, names in references.items():
+			if not frappe.get_meta(doctype).has_field("company"):
+				continue
+
+			condition = get_allowed_companies_condition(frappe.qb.DocType(doctype).company, doctype)
+			if not condition:
+				continue
+
+			allowed = frappe.get_all(
+				doctype, filters=[{"name": ("in", list(names))}, condition], pluck="name"
+			)
+			hidden_references.update((doctype, name) for name in names.difference(allowed))
+
+		return hidden_references
 
 	def get_doctype(self):
 		if self.filters.item_code:
@@ -318,6 +356,9 @@ class ReportData:
 			)
 		)
 
+		if condition := get_allowed_companies_condition(stock_entry.company, "Stock Entry"):
+			query = query.where(condition)
+
 		return query.run(as_dict=True)
 
 	def set_forward_data(self, value, sabb_data):
@@ -366,6 +407,9 @@ class ReportData:
 		)
 
 		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
+
+		if condition := get_allowed_companies_condition(SABB.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
 
 		return query.run(as_dict=True)
 
