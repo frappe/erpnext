@@ -250,11 +250,12 @@ def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -
 
 
 def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool) -> float:
-	"""Share of each row's qty that is invoiced, weighted by the row's value."""
+	"""Share of each row's qty that is invoiced, weighted by the row's value, or by qty when no row has one."""
 	returned_qty = get_item_wise_returned_qty([item.name for item in pr_doc.items])
 	invoiced_qty = get_invoiced_qty(pr_doc, bill_for_rejected)
+	weigh_by_value = any(flt(item.rate) for item in items)
 
-	total_value, billed_value = 0.0, 0.0
+	total_weight, billed_weight = 0.0, 0.0
 	for item in items:
 		billable_qty = get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected)
 		if billable_qty <= 0:
@@ -263,11 +264,11 @@ def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool) -> f
 		if not billable_qty:
 			continue
 
-		value = abs(billable_qty * flt(item.rate))
-		total_value += value
-		billed_value += value * min(flt(invoiced_qty.get(item.name)) / billable_qty, 1)
+		weight = abs(billable_qty * flt(item.rate)) if weigh_by_value else abs(billable_qty)
+		total_weight += weight
+		billed_weight += weight * min(flt(invoiced_qty.get(item.name)) / billable_qty, 1)
 
-	return round(100 * (billed_value / (total_value or 1)), 6)
+	return round(100 * (billed_weight / (total_weight or 1)), 6)
 
 
 def get_billable_qty(item, returned_qty: float | None, bill_for_rejected: bool) -> float:
