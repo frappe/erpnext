@@ -454,6 +454,10 @@ class Quotation(SellingController):
 			ignore_permissions=ignore_permissions,
 		)
 
+	def before_cancel(self):
+		super().before_cancel()
+		self.update_latest_revision()
+
 	def on_cancel(self):
 		if self.lost_reasons:
 			self.lost_reasons = []
@@ -463,7 +467,6 @@ class Quotation(SellingController):
 		self.set_status(update=True)
 		self.update_opportunity("Open")
 		self.update_lead()
-		self.update_latest_revision()
 
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications
