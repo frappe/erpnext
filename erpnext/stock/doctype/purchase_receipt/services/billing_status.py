@@ -382,7 +382,11 @@ def get_billed_qty_amount_against_purchase_receipt(pr_names: list) -> dict:
 			fn.Sum(table.base_net_amount).as_("amount"),
 			fn.Sum(table.qty).as_("qty"),
 		)
-		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
+		.where(
+			(table.pr_detail.isin(pr_names))
+			& (table.docstatus == 1)
+			& ((parent_table.is_return == 0) | (parent_table.update_billed_amount_in_purchase_receipt == 1))
+		)
 		.groupby(table.pr_detail)
 	)
 	invoice_data = query.run(as_dict=1)
