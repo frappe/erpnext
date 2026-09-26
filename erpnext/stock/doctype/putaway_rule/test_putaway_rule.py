@@ -417,17 +417,16 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(stock_entry.items[0].t_warehouse, self.warehouse_1)
 		self.assertEqual(stock_entry.items[0].qty, 3)
 		self.assertEqual(stock_entry.items[0].putaway_rule, rule_1.name)
-		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_nos[0:3]
-		)
+		first_serial_nos = get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		self.assertEqual(len(first_serial_nos), 3)
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle), batch_no)
 
 		self.assertEqual(stock_entry.items[1].t_warehouse, self.warehouse_2)
 		self.assertEqual(stock_entry.items[1].qty, 2)
 		self.assertEqual(stock_entry.items[1].putaway_rule, rule_2.name)
-		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_nos[3:5]
-		)
+		second_serial_nos = get_serial_nos_from_bundle(stock_entry.items[1].serial_and_batch_bundle)
+		self.assertEqual(len(second_serial_nos), 2)
+		self.assertCountEqual(first_serial_nos + second_serial_nos, serial_nos)
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[1].serial_and_batch_bundle), batch_no)
 
 		self.assertUnchangedItemsOnResave(stock_entry)

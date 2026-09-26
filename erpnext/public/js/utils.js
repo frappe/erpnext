@@ -167,6 +167,28 @@ $.extend(erpnext, {
 });
 
 $.extend(erpnext.utils, {
+	format_serial_batch_number(value, row, column, data, default_formatter) {
+		const reference = column.serial_batch;
+		if (!reference) {
+			return default_formatter(value, row, column, data);
+		}
+		const name = data?.[reference.fieldname];
+		const label = frappe.utils.escape_html(value || "");
+		if (
+			!name ||
+			(reference.multiple && /[\n,]/.test(name)) ||
+			!frappe.model.can_read(reference.doctype)
+		) {
+			return label;
+		}
+		return frappe.utils.get_form_link(
+			reference.doctype,
+			reference.multiple ? name.trim() : name,
+			true,
+			label
+		);
+	},
+
 	set_party_dashboard_indicators: function (frm) {
 		if (frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var company_wise_info = frm.doc.__onload.dashboard_info;

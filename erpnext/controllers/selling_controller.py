@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, get_link_to_form, nowtime
+from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -91,14 +91,14 @@ class SellingController(StockController):
 			if serial_nos := frappe.get_all(
 				"Serial No",
 				filters={"name": ("in", serial_nos), "customer": ("is", "set")},
-				fields=["name", "customer"],
+				fields=["serial_no", "customer"],
 			):
 				for sn in serial_nos:
 					if sn.customer and sn.customer != self.customer:
 						frappe.throw(
 							_(
 								"Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
-							).format(frappe.bold(sn.name), frappe.bold(sn.customer)),
+							).format(frappe.bold(escape_html(sn.serial_no)), frappe.bold(sn.customer)),
 							title=_("Serial No Already Assigned"),
 						)
 
@@ -1216,9 +1216,12 @@ def get_delivered_serial_batch_for_reservation(item):
 				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
 	else:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		if item.get("serial_no"):
-			serial_nos = get_serial_nos(item.serial_no)
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+			)
 		if item.get("batch_no"):
 			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
 

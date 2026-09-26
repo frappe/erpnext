@@ -12,6 +12,8 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def execute(filters: StockBalanceFilter | None = None):
@@ -28,6 +30,16 @@ def has_stock_closing_entry_before(from_date: str, company: str | None = None) -
 
 class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 	"""Stock Balance with a row per batch under each item row, and the serial nos in stock."""
+
+	def run(self):
+		columns, data = super().run()
+		columns, data = prepare_serial_batch_report(
+			columns, data, serial_fields=("serial_no",), batch_fields=("batch_no",)
+		)
+		for row in data:
+			sort_serial_nos_by_number(row)
+
+		return columns, data
 
 	def get_entries_from_stock_closing_balance(self) -> list:
 		return []
@@ -53,6 +65,10 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 
 		for batches in self.batch_map.values():
 			filter_items_with_no_transactions(batches, self.float_precision, self.inventory_dimensions)
+
+		self.batch_numbers = SerialBatchIdentity("Batch").get_number_map(
+			{batch_no for batches in self.batch_map.values() for batch_no in batches}
+		)
 
 	def get_serial_batch_query(self):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -123,7 +139,10 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		dimensions = {field: item_row.get(field) for field in self.inventory_dimensions}
 
 		rows = []
-		for batch_no, batch_data in sorted(self.batch_map.get(key, {}).items()):
+		batches = self.batch_map.get(key, {}).items()
+		for batch_no, batch_data in sorted(
+			batches, key=lambda item: self.batch_numbers.get(item[0], item[0])
+		):
 			if self.is_hidden_zero_stock(batch_data):
 				continue
 
@@ -147,7 +166,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		for batch_no in batch_nos:
 			serial_nos += [serial_no for serial_no, qty in batches.get(batch_no, {}).items() if qty > 0]
 
-		return "\n".join(sorted(serial_nos))
+		return "\n".join(serial_nos)
 
 	def get_columns(self):
 		columns = super().get_columns()
@@ -158,3 +177,11 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		]
 
 		return columns
+
+
+def sort_serial_nos_by_number(row):
+	serial_nos = sorted(
+		zip((row.serial_no_number or "").split("\n"), (row.serial_no or "").split("\n"), strict=True)
+	)
+	row.serial_no_number = "\n".join(number for number, _name in serial_nos)
+	row.serial_no = "\n".join(name for _number, name in serial_nos)

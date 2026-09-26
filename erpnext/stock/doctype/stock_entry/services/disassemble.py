@@ -7,6 +7,7 @@ from frappe.utils import flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
 from .manufacturing import (
@@ -494,7 +495,11 @@ class DisassembleStockEntry(BaseStockEntry):
 		if source_bundle.get("serial_nos"):
 			return get_serial_nos(source_bundle["serial_nos"])[: int(row.transfer_qty)]
 		elif source_row.serial_no:
-			return get_serial_nos(source_row.serial_no)[: int(row.transfer_qty)]
+			return SerialBatchIdentity("Serial No").resolve(
+				source_row.item_code,
+				get_serial_nos(source_row.serial_no)[: int(row.transfer_qty)],
+				ignore_permissions=True,
+			)
 		return []
 
 	def _set_serial_batch_for_disassembly_from_available_materials(self):
@@ -566,7 +571,15 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 				{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
 			)
 		_update_material_qty(available_materials[key], row, stock_entry_doc)
+	sort_serial_nos_by_number(available_materials)
 	return available_materials
+
+
+def sort_serial_nos_by_number(available_materials):
+	serial_nos = [serial_no for material in available_materials.values() for serial_no in material.serial_nos]
+	numbers = SerialBatchIdentity("Serial No").get_number_map(serial_nos)
+	for material in available_materials.values():
+		material.serial_nos.sort(key=lambda name: numbers.get(name, name))
 
 
 def _get_material_key(row, stock_entry_doc):
@@ -598,10 +611,8 @@ def _add_inward_material_qty(item_data, row):
 
 
 def _extend_serial_nos_from_row(item_data, row):
-	sn = row.serial_no or row.serial_nos
-	if sn:
-		item_data.serial_nos.extend(get_serial_nos(sn))
-		item_data.serial_nos.sort()
+	if row.serial_nos:
+		item_data.serial_nos.extend(row.serial_nos)
 
 
 def _deduct_consumed_material_qty(item_data, row):
@@ -615,10 +626,7 @@ def _deduct_consumed_material_qty(item_data, row):
 
 
 def _remove_serial_nos_from_available(item_data, row):
-	sn = row.serial_no or row.serial_nos
-	if not sn:
-		return
-	for serial_no in get_serial_nos(sn):
+	for serial_no in row.serial_nos or []:
 		if serial_no in item_data.serial_nos:
 			item_data.serial_nos.remove(serial_no)
 
@@ -628,6 +636,11 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 	if not data:
 		return []
 	_enrich_with_bundle_data(data, stock_entry_doc)
+	for row in data:
+		if row.serial_no and not row.serial_nos:
+			row.serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+			)
 	return data
 
 

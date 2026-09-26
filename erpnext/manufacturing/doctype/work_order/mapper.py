@@ -21,6 +21,7 @@ from frappe.utils import cint, flt, get_link_to_form, nowdate
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 @frappe.whitelist()
@@ -424,23 +425,25 @@ def get_serial_nos_for_job_card(row, wo_doc):
 	):
 		used_serial_nos.extend(get_serial_nos(d.serial_no))
 
+	used_serial_nos = [
+		d.serial_no
+		for d in SerialBatchIdentity("Serial No").get_records(
+			wo_doc.production_item, used_serial_nos, ["serial_no"]
+		)
+	]
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
 	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
 
 
 def get_serial_nos_for_work_order(work_order, production_item):
-	serial_nos = []
-	for d in frappe.get_all(
+	return frappe.get_all(
 		"Serial No",
-		fields=["name"],
 		filters={
 			"work_order": work_order,
 			"item_code": production_item,
 		},
-	):
-		serial_nos.append(d.name)
-
-	return serial_nos
+		pluck="serial_no",
+	)
 
 
 def validate_operation_data(row):

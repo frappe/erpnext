@@ -7,12 +7,14 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters=None):
-	columns, data = [], []
-	columns = get_columns()
-	data = get_data(filters)
+	columns, data = prepare_serial_batch_report(get_columns(), get_data(filters))
+	for row in data:
+		if row.total_label:
+			row.serial_no_number = row.total_label
 	return columns, data
 
 
@@ -68,10 +70,10 @@ def prepare_serial_nos(data, bundles):
 def get_incorrect_serial_nos(serial_nos_data):
 	result = []
 
-	total_value = frappe._dict({"qty": 0, "valuation_rate": 0, "serial_no": frappe.bold(_("Balance"))})
+	total_value = frappe._dict({"qty": 0, "valuation_rate": 0, "total_label": _("Balance")})
 
 	for _serial_no, data in serial_nos_data.items():
-		total_dict = frappe._dict({"qty": 0, "valuation_rate": 0, "serial_no": frappe.bold(_("Total"))})
+		total_dict = frappe._dict({"qty": 0, "valuation_rate": 0, "total_label": _("Total")})
 
 		if check_incorrect_serial_data(data, total_dict):
 			result.extend(data)

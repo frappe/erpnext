@@ -1277,7 +1277,7 @@ class TestItem(ERPNextTestSuite):
 		).name
 
 		serial_no = f"{item}-SN-01"
-		frappe.get_doc(
+		serial = frappe.get_doc(
 			{"doctype": "Serial No", "serial_no": serial_no, "item_code": item, "company": "_Test Company"}
 		).insert()
 
@@ -1290,7 +1290,7 @@ class TestItem(ERPNextTestSuite):
 				"qty": 1,
 				"rate": 100,
 				"voucher_type": "Stock Entry",
-				"serial_nos": [serial_no],
+				"serial_nos": [serial.name],
 				"type_of_transaction": "Inward",
 				"do_not_submit": True,
 				"ignore_sabb_validation": True,

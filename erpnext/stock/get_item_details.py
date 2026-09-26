@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 from typing import Any
 
 import frappe
@@ -26,6 +27,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 from erpnext.stock.doctype.price_list.price_list import get_price_list_details
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 ItemDetailsCtx = frappe._dict
 
@@ -346,13 +348,17 @@ def update_stock(ctx, out, doc=None):
 			serial_nos = get_serial_nos_for_outward(kwargs)
 			serial_nos = get_filtered_serial_nos(serial_nos, doc)
 
-			out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
+			out["serial_no"] = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
+			)
 
 		elif out.has_serial_no and not ctx.get("serial_no"):
 			serial_nos = get_serial_nos_for_outward(kwargs)
 			serial_nos = get_filtered_serial_nos(serial_nos, doc)
 
-			out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
+			out["serial_no"] = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
+			)
 
 
 def has_incorrect_serial_nos(ctx, out):
@@ -393,16 +399,18 @@ def filter_batches(batches, doc):
 def get_filtered_serial_nos(serial_nos, doc, table=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	if not table:
-		table = "items"
+	numbers_by_item = defaultdict(list)
+	for row in doc.get(table or "items"):
+		item_code = row.get("item_code") or row.get("rm_item_code")
+		if item_code and row.get("serial_no"):
+			numbers_by_item[item_code].extend(get_serial_nos(row.get("serial_no")))
 
-	for row in doc.get(table):
-		if row.get("serial_no"):
-			for serial_no in get_serial_nos(row.get("serial_no")):
-				if serial_no in serial_nos:
-					serial_nos.remove(serial_no)
+	used = set()
+	for item_code, numbers in numbers_by_item.items():
+		records = SerialBatchIdentity("Serial No").get_records(item_code, numbers, ["name"])
+		used.update(record.name for record in records)
 
-	return serial_nos
+	return [serial_no for serial_no in serial_nos if serial_no not in used]
 
 
 def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
@@ -423,11 +431,28 @@ def get_item_code(barcode=None, serial_no=None):
 		if not item_code:
 			frappe.throw(_("No Item with Barcode {0}").format(barcode))
 	elif serial_no:
-		item_code = frappe.db.get_value("Serial No", serial_no, "item_code")
-		if not item_code:
-			frappe.throw(_("No Item with Serial No {0}").format(serial_no))
+		item_codes = get_permitted_items_for_serial_number(serial_no)
+		if not item_codes:
+			frappe.throw(_("No Item with Serial No {0}").format(frappe.utils.escape_html(serial_no)))
+		if len(item_codes) > 1:
+			frappe.throw(
+				_("Serial No {0} belongs to multiple items. Please select an Item first.").format(
+					frappe.utils.escape_html(serial_no)
+				)
+			)
+		item_code = item_codes[0]
 
 	return item_code
+
+
+def get_permitted_items_for_serial_number(serial_no):
+	"""The Item entitles serial work: match the number first, then keep the Items the user may select."""
+	records = SerialBatchIdentity("Serial No").get_records(None, [serial_no.strip()], ["item_code"])
+	if not records:
+		return []
+	return frappe.get_list(
+		"Item", filters={"name": ("in", [record.item_code for record in records])}, pluck="name"
+	)
 
 
 def validate_item_details(ctx: frappe._dict, item):

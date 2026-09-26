@@ -9,6 +9,7 @@ from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 SLE_FIELDS = (
 	"name",
@@ -31,7 +32,7 @@ SLE_FIELDS = (
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_data(filters):

@@ -664,11 +664,12 @@ class TestInventoryDimension(ERPNextTestSuite):
 		receipt.items[0].to_legacy_serial_rack = "Rack 2"
 		receipt.save()
 		receipt.submit()
+		serial_id = frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "name")
 
 		frappe.db.set_value(
 			"Stock Ledger Entry",
 			{"voucher_no": receipt.name, "actual_qty": (">", 0), "is_cancelled": 0},
-			{"serial_and_batch_bundle": None, "serial_no": f"Other Legacy Serial, {serial_no}"},
+			{"serial_and_batch_bundle": None, "serial_no": f"Other Legacy Serial, {serial_id}"},
 		)
 
 		issue = make_stock_entry(

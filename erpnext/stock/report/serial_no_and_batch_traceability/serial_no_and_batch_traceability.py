@@ -11,6 +11,7 @@ from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_companies_condition,
 	get_allowed_masters_condition,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters: dict | None = None):
@@ -20,7 +21,7 @@ def execute(filters: dict | None = None):
 	has_serial_no, has_batch_no = check_has_serial_no_in_data(data)
 	columns = report.get_columns(has_serial_no, has_batch_no)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def check_has_serial_no_in_data(data):

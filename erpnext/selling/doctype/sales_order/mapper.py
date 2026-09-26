@@ -29,6 +29,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_ssb_bundle_for_voucher,
 )
 from erpnext.stock.get_item_details import get_bin_details, get_price_list_rate
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def get_requested_item_qty(sales_order: str) -> dict:
@@ -226,7 +227,9 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 					if len(batch_nos) == 1:
 						target_item.batch_no = batch_nos[0] if batch_nos else None
 					if serial_nos and len(batch_nos) < 2:
-						target_item.serial_no = "\n".join(serial_nos)
+						target_item.serial_no = "\n".join(
+							SerialBatchIdentity("Serial No").get_numbers(target_item.item_code, serial_nos)
+						)
 
 				if not use_serial_batch_fields or len(batch_nos) > 1:
 					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name
@@ -406,7 +409,9 @@ def make_delivery_note(
 						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
 						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
 						if serial_nos:
-							dn_item.serial_no = "\n".join(serial_nos)
+							dn_item.serial_no = "\n".join(
+								SerialBatchIdentity("Serial No").get_numbers(dn_item.item_code, serial_nos)
+							)
 						if len(batch_nos) == 1:
 							dn_item.batch_no = batch_nos[0]
 						elif len(batch_nos) > 1:

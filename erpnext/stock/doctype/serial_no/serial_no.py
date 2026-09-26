@@ -8,9 +8,10 @@ import frappe
 from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
+from frappe.utils import cint, cstr, escape_html, getdate, nowdate, safe_json_loads
 
 from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class SerialNoCannotCreateDirectError(ValidationError):
@@ -64,6 +65,10 @@ class SerialNo(StockController):
 		super().__init__(*args, **kwargs)
 		self.via_stock_ledger = False
 
+	def show_unique_validation_message(self, error):
+		SerialBatchIdentity("Serial No").raise_duplicate(error, self.item_code, self.serial_no)
+		super().show_unique_validation_message(error)
+
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
 			frappe.throw(
@@ -101,37 +106,32 @@ class SerialNo(StockController):
 			self.maintenance_status = "Under Warranty"
 
 	def on_trash(self):
-		sl_entries = frappe.get_all(
+		for serial_nos in frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"serial_no": ["like", f"%{self.name}%"], "item_code": self.item_code, "is_cancelled": 0},
-			fields=["serial_no"],
-		)
-
-		# Find the exact match
-		sle_exists = False
-		for d in sl_entries:
-			if self.name.upper() in get_serial_nos(d.serial_no):
-				sle_exists = True
-				break
-
-		if sle_exists:
-			frappe.throw(
-				_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name)
-			)
+			pluck="serial_no",
+		):
+			if self.name.upper() in (serial_no.upper() for serial_no in get_serial_nos(serial_nos)):
+				frappe.throw(
+					_("Cannot delete Serial No {0}, as it is used in stock transactions").format(
+						escape_html(self.serial_no)
+					)
+				)
 
 
-def get_available_serial_nos(serial_no_series, qty) -> list[str]:
+def get_available_serial_nos(serial_no_series, qty, item_code) -> list[str]:
 	serial_nos = []
 	for _i in range(cint(qty)):
-		serial_nos.append(get_new_serial_number(serial_no_series))
+		serial_nos.append(get_new_serial_number(serial_no_series, item_code))
 
 	return serial_nos
 
 
-def get_new_serial_number(series):
+def get_new_serial_number(series, item_code):
 	sr_no = make_autoname(series, "Serial No")
-	if frappe.db.exists("Serial No", sr_no):
-		sr_no = get_new_serial_number(series)
+	identity = SerialBatchIdentity("Serial No")
+	while identity.get_records(item_code, [sr_no], ["name"]):
+		sr_no = make_autoname(series, "Serial No")
 	return sr_no
 
 
@@ -192,7 +192,9 @@ def auto_fetch_serial_number(
 	batch_nos: str | list[str] | None = None,
 	for_doctype: str | None = None,
 	exclude_sr_nos: str | None = None,
+	as_numbers: bool = False,
 ) -> list[str]:
+	frappe.has_permission("Item", "select", doc=item_code, throw=True)
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
@@ -213,49 +215,37 @@ def auto_fetch_serial_number(
 
 	serial_numbers = []
 	if for_doctype == "POS Invoice":
-		exclude_sr_nos.extend(get_pos_reserved_serial_nos(filters))
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_reserved_serial_nos_for_pos,
+		)
+
+		exclude_sr_nos.extend(get_reserved_serial_nos_for_pos(filters))
 
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
-	return sorted([d.get("name") for d in serial_numbers])
+	serial_ids = [d.name for d in serial_numbers]
+	numbers = SerialBatchIdentity("Serial No").get_number_map(serial_ids, item_code=item_code)
+	serial_ids = sorted((name for name in serial_ids if name in numbers), key=numbers.get)
+	return [numbers[name] if as_numbers else name for name in serial_ids]
 
 
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters: str | dict):
-	filters = frappe.parse_json(filters)
-
-	POSInvoice = frappe.qb.DocType("POS Invoice")
-	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")
-	query = (
-		frappe.qb.from_(POSInvoice)
-		.from_(POSInvoiceItem)
-		.select(POSInvoice.is_return, POSInvoiceItem.serial_no)
-		.where(
-			(POSInvoice.name == POSInvoiceItem.parent)
-			& (POSInvoice.docstatus == 1)
-			& (POSInvoiceItem.docstatus == 1)
-			& (POSInvoiceItem.item_code == filters.get("item_code"))
-			& (POSInvoiceItem.warehouse == filters.get("warehouse"))
-			& (POSInvoiceItem.serial_no.isnotnull())
-			& (POSInvoiceItem.serial_no != "")
-		)
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		get_reserved_serial_nos_for_pos,
 	)
 
-	pos_transacted_sr_nos = query.run(as_dict=True)
+	filters = frappe._dict(frappe.parse_json(filters))
+	frappe.has_permission("Item", "select", doc=filters.item_code, throw=True)
+	serial_ids = get_reserved_serial_nos_for_pos(frappe._dict(item_code=filters.item_code))
+	if not serial_ids:
+		return []
 
-	reserved_sr_nos = list()
-	returned_sr_nos = list()
-	for d in pos_transacted_sr_nos:
-		if d.is_return == 0:
-			[reserved_sr_nos.append(x) for x in get_serial_nos(d.serial_no)]
-		elif d.is_return == 1:
-			[returned_sr_nos.append(x) for x in get_serial_nos(d.serial_no)]
-
-	for x in returned_sr_nos:
-		if x in reserved_sr_nos:
-			reserved_sr_nos.remove(x)
-
-	return reserved_sr_nos
+	return frappe.get_all(
+		"Serial No",
+		filters={"name": ("in", serial_ids), "item_code": filters.item_code, "warehouse": filters.warehouse},
+		pluck="serial_no",
+	)
 
 
 def fetch_serial_numbers(filters, qty, do_not_include=None):
@@ -307,3 +297,4 @@ def get_serial_nos_for_outward(kwargs):
 
 def on_doctype_update():
 	frappe.db.add_index("Serial No", ["item_code", "warehouse"])
+	SerialBatchIdentity("Serial No").add_unique_constraint()

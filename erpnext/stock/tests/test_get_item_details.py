@@ -77,7 +77,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 		).insert()
 
 		# create batch
-		frappe.get_doc(
+		batch = frappe.get_doc(
 			{
 				"doctype": "Batch",
 				"batch_id": "BATCH01",
@@ -92,7 +92,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 				"price_list": "Standard Selling",
 				"item_code": item.item_code,
 				"price_list_rate": 50,
-				"batch_no": "BATCH01",
+				"batch_no": batch.name,
 			}
 		).insert()
 
@@ -104,7 +104,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 			qty=100,
 			rate=100,
-			batch_no="BATCH01",
+			batch_no=batch.name,
 		)
 
 		# creating sales order just to create delivery note from it
@@ -122,7 +122,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		# Test 2 : On saving the DN, item's batch will be fetched and rate will be updated from Item Price
 		dn.save()
-		self.assertEqual(dn.items[0].batch_no, "BATCH01")
+		self.assertEqual(dn.items[0].batch_no, batch.name)
 		self.assertEqual(dn.items[0].rate, 50)
 
 	def test_maintain_same_rate_keeps_source_rate_on_refetch(self):
@@ -587,7 +587,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 	def test_serial_nos_picked_across_batches_when_no_batch_covers_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_serial_nos_from_bundle,
+			get_serial_numbers_from_bundle,
 		)
 
 		item_code, batches = self.make_batched_item_with_stock(
@@ -608,7 +608,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 			)
 			dn.reload()
 			self.assertEqual(
-				get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
+				get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
 			)
 
 	def test_same_document_rows_reduce_batch_by_stock_qty(self):
