@@ -84,7 +84,9 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		pr = self.make_draft_pr(item, qty=1)
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Scan-001"}))
 
-		summary = self.upsert(pr, serial_numbers=["Scan-001", "scan-001"])
+		summary = self.upsert(
+			pr, serial_numbers=[{"serial_number": "Scan-001"}, {"serial_number": "scan-001"}]
+		)
 		self.assertEqual(summary.total_count, 1)
 		self.assertEqual(summary.total_qty, 1)
 		serial_id = frappe.db.get_value("Serial and Batch Entry", {"parent": summary.bundle}, "serial_no")
@@ -94,10 +96,23 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(serial.company, pr.company)
 		self.assertNotIn(serial_id, ["Scan-001", other_serial])
 
+	def test_scanned_serials_are_created_in_their_batch(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc(doctype="Batch", item=item, batch_id="Scan-Batch").insert().name
+		pr = self.make_draft_pr(item, qty=1)
+
+		summary = self.upsert(pr, serial_numbers=[{"serial_number": "Scan-001", "batch_no": batch}])
+
+		entry = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": summary.bundle}, ["serial_no", "batch_no"], as_dict=True
+		)
+		self.assertEqual(entry.batch_no, batch)
+		self.assertEqual(frappe.db.get_value("Serial No", entry.serial_no, "batch_no"), batch)
+
 	def test_rescan_after_reselection_keeps_one_entry(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=1)
-		summary = self.upsert(pr, serial_numbers=["Scan-001"])
+		summary = self.upsert(pr, serial_numbers=[{"serial_number": "Scan-001"}])
 		pr.items[0].serial_and_batch_bundle = summary.bundle
 		entry_name = frappe.db.get_value("Serial and Batch Entry", {"parent": summary.bundle})
 		replacement = self.make_serial(item, "Scan-002")
@@ -105,7 +120,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		summary = self.upsert(
 			pr,
 			entries=[{"name": entry_name, "serial_no": replacement}],
-			serial_numbers=["scan-002"],
+			serial_numbers=[{"serial_number": "scan-002"}],
 		)
 		self.assertEqual(summary.total_count, 1)
 		self.assertEqual(summary.total_qty, 1)
@@ -116,7 +131,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		pr = self.make_draft_pr(item, qty=1)
 		pr.is_return = 1
 		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
-			self.upsert(pr, serial_numbers=["Missing-Scan"])
+			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
 	def test_scanned_serial_is_created_for_a_user_who_may_write_the_voucher(self):
@@ -132,7 +147,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			}
 		).insert()
 		with self.set_user(user.name):
-			self.upsert(pr, serial_numbers=["Missing-Scan"])
+			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
 		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
 	def test_scan_cannot_override_outward_transaction_type(self):
@@ -146,7 +161,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		)
 		doc.items[0].type_of_transaction = "Inward"
 		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
-			self.upsert(doc, serial_numbers=["Missing-Scan"])
+			self.upsert(doc, serial_numbers=[{"serial_number": "Missing-Scan"}])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
 	def test_incremental_append_preserves_existing_entries(self):
@@ -493,7 +508,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 	def test_csv_replace_uses_reselected_serial(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=1)
-		summary = self.upsert(pr, serial_numbers=["Original-Serial"])
+		summary = self.upsert(pr, serial_numbers=[{"serial_number": "Original-Serial"}])
 		pr.items[0].serial_and_batch_bundle = summary.bundle
 		selected = self.make_serial(item, "Selected-Serial")
 		summary = self.upsert(pr, csv_entries=[{"serial_no_id": selected, "qty": 1}], replace=1)
