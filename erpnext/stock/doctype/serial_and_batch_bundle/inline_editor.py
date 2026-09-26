@@ -277,19 +277,26 @@ def apply_incremental_changes(
 	return bundle
 
 
-def append_scanned_serials(entries, numbers, item_code, type_of_transaction, company, existing_serials=()):
-	serial_ids = SerialBatchIdentity("Serial No").resolve(
-		item_code,
-		numbers,
-		create=type_of_transaction == "Inward",
-		defaults={"company": company},
-	)
+def append_scanned_serials(entries, scans, item_code, type_of_transaction, company, existing_serials=()):
+	if not isinstance(scans, list) or any(not isinstance(scan, dict) for scan in scans):
+		frappe.throw(_("Scanned serials must be a list of numbers and batches"))
+	numbers_by_batch = defaultdict(list)
+	for scan in scans:
+		numbers_by_batch[scan.get("batch_no")].append(scan.get("serial_number"))
+
 	entries = [frappe._dict(row) for row in entries]
 	known = set(existing_serials) | {row.serial_no for row in entries if row.serial_no}
-	for serial_id in serial_ids:
-		if serial_id not in known:
-			entries.append(frappe._dict(serial_no=serial_id, qty=1))
-			known.add(serial_id)
+	for batch_no, numbers in numbers_by_batch.items():
+		serial_ids = SerialBatchIdentity("Serial No").resolve(
+			item_code,
+			numbers,
+			create=type_of_transaction == "Inward",
+			defaults={"company": company, "batch_no": batch_no},
+		)
+		for serial_id in serial_ids:
+			if serial_id not in known:
+				entries.append(frappe._dict(serial_no=serial_id, batch_no=batch_no, qty=1))
+				known.add(serial_id)
 	return entries
 
 

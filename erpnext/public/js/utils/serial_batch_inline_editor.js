@@ -691,7 +691,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 						let value = (dialog.get_value("scan_value") || "").trim();
 						if (!value) return;
 
-						if (this.add_scanned_value(value)) {
+						if (this.add_scanned_value(value, dialog.get_value("batch_no"))) {
 							scanned_count++;
 						}
 						dialog.fields_dict.scanned_info.$wrapper.html(
@@ -702,6 +702,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 						dialog.set_value("scan_value", "");
 					},
 				},
+				...(is_serial ? this.get_new_serial_batch_fields() : []),
 				{ fieldtype: "HTML", fieldname: "scanned_info" },
 			],
 			on_hide: () => this.refresh_view(),
@@ -752,7 +753,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		);
 	}
 
-	add_scanned_value(value) {
+	add_scanned_value(value, batch_no) {
 		let p = this.pending;
 
 		if (cint(this.item.has_serial_no)) {
@@ -764,7 +765,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				return false;
 			}
 
-			p.new_entries.push({ serial_number: value, qty: 1 });
+			p.new_entries.push({ serial_number: value, batch_no, qty: 1 });
 		} else {
 			const key = value.toLowerCase();
 			let existing = p.new_entries.find((d) => this.is_batch_number(d, key));
@@ -803,30 +804,31 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 						'"SN-01::10" for "SN-01" to "SN-10". Missing Serial Nos will be created on Save'
 					),
 				},
+				...this.get_new_serial_batch_fields(),
 			],
 			primary_action_label: __("Add"),
-			primary_action: ({ serial_no_range }) => {
+			primary_action: ({ serial_no_range, batch_no }) => {
 				let serial_nos = erpnext.stock.utils.get_serial_range(serial_no_range, "::");
 				if (!serial_nos || !serial_nos.length) {
 					frappe.throw(__("Invalid range. Use the format {0}", ["SN-01::10"]));
 				}
 
 				dialog.hide();
-				this.add_serial_range(serial_nos);
+				this.add_serial_range(serial_nos, batch_no);
 			},
 		});
 
 		dialog.show();
 	}
 
-	add_serial_range(serial_nos) {
+	add_serial_range(serial_nos, batch_no) {
 		let p = this.pending;
 		let known = this.get_known_identifiers();
 
 		let added = 0;
 		for (const serial_no of serial_nos) {
 			if (known.has(serial_no.toLowerCase())) continue;
-			p.new_entries.push({ serial_number: serial_no, qty: 1 });
+			p.new_entries.push({ serial_number: serial_no, batch_no, qty: 1 });
 			known.add(serial_no.toLowerCase());
 			added++;
 		}
@@ -837,6 +839,20 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			message: __("{0} Serial Nos added. They will be saved with the document.", [added]),
 			indicator: "green",
 		});
+	}
+
+	get_new_serial_batch_fields() {
+		if (!cint(this.item.has_batch_no) || this.get_type_of_transaction() !== "Inward") return [];
+
+		return [
+			{
+				fieldtype: "Link",
+				fieldname: "batch_no",
+				options: "Batch",
+				label: __("Batch No"),
+				get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
+			},
+		];
 	}
 
 	get total_pages() {
@@ -1330,7 +1346,7 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 				entries: entries,
 				serial_numbers: p.new_entries
 					.filter((d) => !d.from_csv && d.serial_number)
-					.map((d) => d.serial_number),
+					.map((d) => ({ serial_number: d.serial_number, batch_no: d.batch_no })),
 				batch_numbers: p.new_entries.filter((d) => !d.from_csv && d.batch_number),
 				csv_entries: p.new_entries
 					.filter((d) => d.from_csv)
