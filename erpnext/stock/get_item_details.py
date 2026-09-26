@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 from typing import Any
 
 import frappe
@@ -398,19 +399,18 @@ def filter_batches(batches, doc):
 def get_filtered_serial_nos(serial_nos, doc, table=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	if not table:
-		table = "items"
-
-	for row in doc.get(table):
+	numbers_by_item = defaultdict(list)
+	for row in doc.get(table or "items"):
 		item_code = row.get("item_code") or row.get("rm_item_code")
 		if item_code and row.get("serial_no"):
-			for serial in SerialBatchIdentity("Serial No").get_records(
-				item_code, get_serial_nos(row.get("serial_no")), ["name"]
-			):
-				if serial.name in serial_nos:
-					serial_nos.remove(serial.name)
+			numbers_by_item[item_code].extend(get_serial_nos(row.get("serial_no")))
 
-	return serial_nos
+	used = set()
+	for item_code, numbers in numbers_by_item.items():
+		records = SerialBatchIdentity("Serial No").get_records(item_code, numbers, ["name"])
+		used.update(record.name for record in records)
+
+	return [serial_no for serial_no in serial_nos if serial_no not in used]
 
 
 def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
