@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Consolidated Accounts Payable"] = {
+frappe.query_reports["Consolidated Accounts Payable Summary"] = {
 	filters: [
 		{
 			fieldname: "companies",
@@ -18,6 +18,26 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 			label: __("Report Date"),
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
+		},
+		{
+			fieldname: "ageing_based_on",
+			label: __("Ageing Based On"),
+			fieldtype: "Select",
+			options: "Posting Date\nDue Date\nSupplier Invoice Date",
+			default: "Due Date",
+		},
+		{
+			fieldname: "age_as_on",
+			label: __("Age as on"),
+			fieldtype: "Select",
+			options: "Report Date\nToday",
+			default: "Report Date",
+		},
+		{
+			fieldname: "range",
+			label: __("Ageing Range"),
+			fieldtype: "Data",
+			default: "30, 60, 90, 120",
 		},
 		{
 			fieldname: "party_type",
@@ -47,44 +67,19 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 			},
 		},
 		{
-			fieldname: "ageing_based_on",
-			label: __("Ageing Based On"),
-			fieldtype: "Select",
-			options: "Posting Date\nDue Date\nSupplier Invoice Date",
-			default: "Due Date",
-		},
-		{
-			fieldname: "age_as_on",
-			label: __("Age as on"),
-			fieldtype: "Select",
-			options: "Report Date\nToday",
-			default: "Report Date",
-		},
-		{
-			fieldname: "range",
-			label: __("Ageing Range"),
-			fieldtype: "Data",
-			default: "30, 60, 90, 120",
-		},
-		{
 			fieldname: "supplier_group",
 			label: __("Supplier Group"),
 			fieldtype: "Link",
 			options: "Supplier Group",
 		},
 		{
-			fieldname: "group_by_party",
-			label: __("Group By Supplier"),
+			fieldname: "show_future_payments",
+			label: __("Show Future Payments"),
 			fieldtype: "Check",
 		},
 		{
-			fieldname: "group_by_company",
-			label: __("Group By Company"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "ignore_accounts",
-			label: __("Group by Voucher"),
+			fieldname: "show_gl_balance",
+			label: __("Show GL Balance"),
 			fieldtype: "Check",
 		},
 		{
@@ -93,23 +88,8 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 			fieldtype: "Check",
 		},
 		{
-			fieldname: "show_future_payments",
-			label: __("Show Future Payments"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_remarks",
-			label: __("Show Remarks"),
-			fieldtype: "Check",
-		},
-		{
 			fieldname: "for_revaluation_journals",
 			label: __("Revaluation Journals"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "in_party_currency",
-			label: __("In Party Currency"),
 			fieldtype: "Check",
 		},
 	],
@@ -125,8 +105,8 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 	},
 
 	onload: function (report) {
-		report.page.add_inner_button(__("Consolidated Accounts Payable Summary"), function () {
-			frappe.set_route("query-report", "Consolidated Accounts Payable Summary", report.get_values());
+		report.page.add_inner_button(__("Consolidated Accounts Payable"), function () {
+			frappe.set_route("query-report", "Consolidated Accounts Payable", report.get_values());
 		});
 
 		const company = frappe.defaults.get_user_default("Company");
