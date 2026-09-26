@@ -74,7 +74,7 @@ class BillingStatusService:
 			update_billing_percentage(
 				pr_doc,
 				update_modified=update_modified,
-				adjust_incoming_rate=pr_doc.name in updated_pr,
+				adjust_incoming_rate=True,
 				invoiced=invoiced,
 			)
 

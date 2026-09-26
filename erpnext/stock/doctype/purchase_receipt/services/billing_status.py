@@ -201,8 +201,7 @@ def update_billing_percentage(
 		pr_doc.set_status(update=True)
 		pr_doc.notify_update()
 
-	if adjust_incoming_rate:
-		set_amount_difference_with_purchase_invoice(items, invoiced)
+	if adjust_incoming_rate and set_amount_difference_with_purchase_invoice(items, invoiced):
 		adjust_incoming_rate_for_pr(pr_doc)
 
 
@@ -432,7 +431,9 @@ def get_invoiced_qty_against_po_items(po_items: list) -> dict:
 	return frappe._dict(query.run())
 
 
-def set_amount_difference_with_purchase_invoice(items: list, invoiced: dict) -> None:
+def set_amount_difference_with_purchase_invoice(items: list, invoiced: dict) -> bool:
+	"""Store each row's gap to its invoiced value; returns True when any row moved."""
+	has_changed = False
 	for item in items:
 		adjusted_amt = 0.0
 		row = invoiced.get(item.name)
@@ -440,7 +441,13 @@ def set_amount_difference_with_purchase_invoice(items: list, invoiced: dict) -> 
 			adjusted_amt = flt(row.amount / row.qty) * flt(item.qty) - flt(item.base_net_amount)
 
 		adjusted_amt = flt(adjusted_amt, item.precision("amount"))
+		if adjusted_amt == flt(item.amount_difference_with_purchase_invoice, item.precision("amount")):
+			continue
+
 		item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
+		has_changed = True
+
+	return has_changed
 
 
 def get_billed_qty_amount_against_purchase_receipt(pr_names: list) -> dict:
