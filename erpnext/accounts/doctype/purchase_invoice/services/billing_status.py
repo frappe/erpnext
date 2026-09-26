@@ -9,6 +9,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	get_purchase_receipts_against_po_details,
 	update_billed_amount_based_on_po,
 	update_billing_percentage,
 )
@@ -53,6 +54,20 @@ class BillingStatusService:
 			update_billing_percentage(
 				pr_doc, update_modified=update_modified, adjust_incoming_rate=adjust_incoming_rate
 			)
+
+		if adjust_incoming_rate:
+			self.update_billing_status_in_receipts_on_po_lines(set(updated_pr), update_modified)
+
+	def update_billing_status_in_receipts_on_po_lines(self, updated_pr: set, update_modified: bool) -> None:
+		"""Order invoices are spread over every receipt on the line, so billing by qty can shift on any of them."""
+		po_details = list({d.po_detail for d in self.doc.get("items") if d.po_detail})
+		if not po_details:
+			return
+
+		receipts = {pr_item.parent for pr_item in get_purchase_receipts_against_po_details(po_details)}
+		for pr in receipts - updated_pr:
+			pr_doc = frappe.get_lazy_doc("Purchase Receipt", pr)
+			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 	def get_pr_details_billed_amt(self) -> dict:
 		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice

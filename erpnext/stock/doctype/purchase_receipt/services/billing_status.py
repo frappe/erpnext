@@ -257,6 +257,9 @@ def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool) -> f
 	total_value, billed_value = 0.0, 0.0
 	for item in items:
 		billable_qty = get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected)
+		if billable_qty <= 0:
+			billable_qty = flt(item.qty)
+
 		if not billable_qty:
 			continue
 
@@ -271,8 +274,7 @@ def get_billable_qty(item, returned_qty: float | None, bill_for_rejected: bool) 
 	if bill_for_rejected:
 		return flt(item.qty) + flt(item.rejected_qty)
 
-	pending_qty = flt(item.qty) - flt(returned_qty)
-	return pending_qty if pending_qty > 0 else flt(item.qty)
+	return flt(item.qty) - flt(returned_qty)
 
 
 def get_invoiced_qty(pr_doc, bill_for_rejected: bool) -> dict:
