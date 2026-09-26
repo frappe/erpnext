@@ -15,7 +15,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_empty_batches_based_work_order,
 	get_serial_nos_from_bundle,
 )
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.utils import get_combine_datetime
 
 from .serial_batch import create_serial_and_batch_bundle
@@ -337,7 +337,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 					serial_nos = SerialBatchIdentity("Serial No").resolve(
 						row.item_code, serial_nos, ignore_permissions=True
 					)
-				except frappe.DoesNotExistError:
+				except SerialBatchNotFoundError:
 					if not frappe.flags.mute_messages:
 						frappe.clear_last_message()
 					return True

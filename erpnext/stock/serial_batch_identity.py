@@ -10,6 +10,10 @@ from pypika.analytics import Min
 MATCH_CHUNK_SIZE = 1000
 
 
+class SerialBatchNotFoundError(frappe.ValidationError):
+	pass
+
+
 class SerialBatchIdentity:
 	def __init__(self, doctype):
 		self.doctype = doctype
@@ -109,7 +113,7 @@ class SerialBatchIdentity:
 	def throw_missing(self, item_code, labels):
 		frappe.throw(
 			_("{0} {1} does not exist for Item {2}").format(_(self.doctype), labels, escape_html(item_code)),
-			exc=frappe.DoesNotExistError,
+			exc=SerialBatchNotFoundError,
 		)
 
 	def get_number_map(self, names, *, item_code=None):
