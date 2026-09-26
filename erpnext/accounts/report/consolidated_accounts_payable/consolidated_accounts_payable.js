@@ -125,6 +125,10 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 	},
 
 	onload: function (report) {
+		report.page.add_inner_button(__("Consolidated Accounts Payable Summary"), function () {
+			frappe.set_route("query-report", "Consolidated Accounts Payable Summary", report.get_values());
+		});
+
 		const company = frappe.defaults.get_user_default("Company");
 		if (company && !(report.get_filter_value("companies") || []).length) {
 			report.set_filter_value("companies", [company]);
