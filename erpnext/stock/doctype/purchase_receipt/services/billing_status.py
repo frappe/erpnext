@@ -359,9 +359,7 @@ def set_amount_difference_with_purchase_invoice(pr_doc, items: list) -> None:
 				billed_qty_amt_based_on_po[item.purchase_order_item]["amount"] -= billed_amt
 
 			if qty:
-				adjusted_amt = (
-					flt(billed_amt / qty) - (flt(item.rate) * flt(pr_doc.conversion_rate))
-				) * item.qty
+				adjusted_amt = flt(billed_amt / qty) * item.qty - flt(item.base_net_amount)
 
 		adjusted_amt = flt(adjusted_amt, item.precision("amount"))
 		item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
