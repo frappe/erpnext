@@ -26,6 +26,44 @@ class TestStockClosingEntry(ERPNextTestSuite):
 	Use this class for testing interactions between multiple components.
 	"""
 
+	def test_reconciliation_quantity_in_closing_balance(self):
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		item_details = frappe._dict(
+			item_group="All Item Groups", item_name="Closing Test", stock_uom="Nos", has_serial_no=0
+		)
+		for reconciled_qty, expected_qty in ((0, 50), (20, 70), (None, 150)):
+			with self.subTest(reconciled_qty=reconciled_qty):
+				rows = [
+					frappe._dict(
+						item_code="Closing Test",
+						warehouse=WAREHOUSE,
+						actual_qty=qty,
+						qty_after_transaction=balance,
+						stock_value_difference=value,
+						posting_date="2026-01-01",
+					)
+					for qty, balance, value in (
+						(100, 100, 1000),
+						(0, reconciled_qty, (reconciled_qty - 100) * 10 if reconciled_qty is not None else 0),
+						(50, expected_qty, 500),
+					)
+				]
+				# Carried-forward balances have no qty_after_transaction and must not reset quantity.
+				if reconciled_qty is None:
+					del rows[1]["qty_after_transaction"]
+
+				with (
+					patch(f"{module}.get_inventory_dimensions", return_value=[]),
+					patch.object(StockClosing, "get_last_stock_closing_entry", return_value=None),
+					patch.object(StockClosing, "get_sle_entries", return_value=rows),
+					patch("frappe.get_cached_value", return_value=item_details),
+				):
+					entries = StockClosing(COMPANY, "2026-01-01", "2026-01-03").get_stock_closing_entries()
+
+				balance = entries[("Closing Test", WAREHOUSE)]
+				self.assertEqual(balance.actual_qty, expected_qty)
+				self.assertEqual(balance.stock_value_difference, expected_qty * 10)
+
 	def test_closing_entry_reads_previous_closing_balance(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		first_date = add_days(today(), -10)
