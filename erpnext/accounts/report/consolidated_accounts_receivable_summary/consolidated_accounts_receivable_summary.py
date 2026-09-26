@@ -13,6 +13,7 @@ from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_sum
 from erpnext.accounts.report.consolidated_accounts_receivable.consolidated_accounts_receivable import (
 	add_company_columns,
 	get_consolidated_companies,
+	row_currencies,
 	rows_per_company,
 )
 
@@ -30,7 +31,6 @@ def execute(filters=None):
 class ConsolidatedReceivablePayableSummary(AccountsReceivableSummary):
 	def run(self, args):
 		self.companies = get_consolidated_companies(self.filters)
-
 		return super().run(args)
 
 	def get_columns(self):
@@ -41,7 +41,9 @@ class ConsolidatedReceivablePayableSummary(AccountsReceivableSummary):
 		self.data = []
 		for rows in self.get_rows_by_party(args).values():
 			self.data.extend(rows)
-			self.data.append(self.total_row(rows))
+			# a total over companies of differing currencies would add unlike units
+			if len(row_currencies(rows)) <= 1:
+				self.data.append(self.total_row(rows))
 
 	def get_rows_by_party(self, args):
 		"""Rows of every company, regrouped so a party's companies sit together."""
