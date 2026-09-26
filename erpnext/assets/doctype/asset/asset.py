@@ -159,8 +159,16 @@ class Asset(AccountsController):
 		self.status = self.get_status()
 
 	def before_submit(self):
-		if self.is_composite_asset and not has_active_capitalization(self.name):
+		if self.is_composite_asset and not has_active_capitalization(self.get_original_asset()):
 			frappe.throw(_("Please capitalize this asset before submitting."))
+
+	def get_original_asset(self):
+		"""Return the asset this one was (transitively) split from, or itself."""
+		asset, parent = self.name, self.split_from
+		while parent:
+			asset = parent
+			parent = frappe.db.get_value("Asset", asset, "split_from")
+		return asset
 
 	def on_submit(self):
 		self.validate_in_use_date()
@@ -1276,7 +1284,7 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 
 
 @frappe.whitelist()
-def split_asset(asset_name, split_qty):
+def split_asset(asset_name: str, split_qty: int):
 	asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
 
@@ -1286,14 +1294,15 @@ def split_asset(asset_name, split_qty):
 	remaining_qty = asset.asset_quantity - split_qty
 
 	new_asset = create_new_asset_after_split(asset, split_qty)
-	update_existing_asset(asset, remaining_qty, new_asset.name)
+	update_existing_asset(asset, remaining_qty, new_asset)
 
 	return new_asset
 
 
-def update_existing_asset(asset, remaining_qty, new_asset_name):
+def update_existing_asset(asset, remaining_qty, new_asset):
 	remaining_gross_purchase_amount = flt(
-		(asset.gross_purchase_amount * remaining_qty) / asset.asset_quantity
+		asset.gross_purchase_amount - new_asset.gross_purchase_amount,
+		asset.precision("gross_purchase_amount"),
 	)
 	opening_accumulated_depreciation = flt(
 		(asset.opening_accumulated_depreciation * remaining_qty) / asset.asset_quantity
@@ -1303,20 +1312,20 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 		asset.precision("gross_purchase_amount"),
 	)
 
-	frappe.db.set_value(
-		"Asset",
-		asset.name,
-		{
-			"opening_accumulated_depreciation": opening_accumulated_depreciation,
-			"gross_purchase_amount": remaining_gross_purchase_amount,
-			"value_after_depreciation": value_after_depreciation,
-			"asset_quantity": remaining_qty,
-		},
-	)
+	remaining_asset_values = {
+		"opening_accumulated_depreciation": opening_accumulated_depreciation,
+		"gross_purchase_amount": remaining_gross_purchase_amount,
+		"value_after_depreciation": value_after_depreciation,
+		"asset_quantity": remaining_qty,
+	}
+	if asset.purchase_amount:
+		remaining_asset_values["purchase_amount"] = remaining_gross_purchase_amount
+
+	frappe.db.set_value("Asset", asset.name, remaining_asset_values)
 
 	add_asset_activity(
 		asset.name,
-		_("Asset updated after being split into Asset {0}").format(get_link_to_form("Asset", new_asset_name)),
+		_("Asset updated after being split into Asset {0}").format(get_link_to_form("Asset", new_asset.name)),
 	)
 
 	for row in asset.get("finance_books"):
@@ -1349,7 +1358,7 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 
 		notes = _(
 			"This schedule was created when Asset {0} was updated after being split into new Asset {1}."
-		).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset_name))
+		).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset.name))
 		new_asset_depr_schedule_doc.notes = notes
 
 		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
@@ -1360,7 +1369,10 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 
 def create_new_asset_after_split(asset, split_qty):
 	new_asset = frappe.copy_doc(asset)
-	new_gross_purchase_amount = flt((asset.gross_purchase_amount * split_qty) / asset.asset_quantity)
+	new_gross_purchase_amount = flt(
+		(asset.gross_purchase_amount * split_qty) / asset.asset_quantity,
+		asset.precision("gross_purchase_amount"),
+	)
 	opening_accumulated_depreciation = flt(
 		(asset.opening_accumulated_depreciation * split_qty) / asset.asset_quantity
 	)
