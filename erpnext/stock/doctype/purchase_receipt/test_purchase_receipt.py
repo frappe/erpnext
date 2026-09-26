@@ -1135,33 +1135,35 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
 	def test_po_invoice_qty_spread_fifo_when_landed_cost_follows_invoice_rate(self):
-		from erpnext.buying.doctype.purchase_order.mapper import (
-			make_purchase_invoice as make_purchase_invoice_from_po,
-		)
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		po = create_purchase_order(qty=100, rate=50)
-		receipts = []
-		for qty, posting_time in ((60, "08:00"), (40, "10:00")):
-			pr = make_purchase_receipt(po.name)
-			pr.set_posting_time = 1
-			pr.posting_time = posting_time
-			pr.items[0].received_qty = qty
-			pr.items[0].qty = qty
-			pr.submit()
-			receipts.append(pr)
-
-		pi = make_purchase_invoice_from_po(po.name)
-		pi.items[0].qty = 70
-		pi.items[0].rate = 40
-		pi.submit()
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		make_invoice_against_order(po.name, qty=70, rate=40)
 
 		for pr in receipts:
 			pr.reload()
 
 		self.assertEqual(receipts[0].per_billed, 100)
 		self.assertEqual(receipts[1].per_billed, 25)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_fully_returned_receipt_skipped_in_po_invoice_split(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		make_purchase_return(receipts[0].name).submit()
+		make_invoice_against_order(po.name, qty=40, rate=50)
+
+		for pr in receipts:
+			pr.reload()
+
+		self.assertEqual(receipts[0].per_billed, 0)
+		self.assertEqual(receipts[1].per_billed, 100)
 
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
@@ -7815,6 +7817,31 @@ def get_items(**args):
 			"cost_center": args.cost_center or "Main - _TC",
 		},
 	]
+
+
+def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
+	from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_receipt_from_order
+
+	receipt_docs = []
+	for qty, posting_time in receipts:
+		pr = make_receipt_from_order(purchase_order)
+		pr.set_posting_time = 1
+		pr.posting_time = posting_time
+		pr.items[0].received_qty = qty
+		pr.items[0].qty = qty
+		pr.submit()
+		receipt_docs.append(pr)
+
+	return receipt_docs
+
+
+def make_invoice_against_order(purchase_order: str, qty: float, rate: float) -> None:
+	from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_invoice_from_order
+
+	pi = make_invoice_from_order(purchase_order)
+	pi.items[0].qty = qty
+	pi.items[0].rate = rate
+	pi.submit()
 
 
 def make_purchase_receipt(**args):
