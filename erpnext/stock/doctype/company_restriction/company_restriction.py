@@ -7,6 +7,7 @@ from typing import NamedTuple
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull
 from frappe.utils import comma_and
 from pypika.terms import Bracket, Criterion, ExistsCriterion
 
@@ -120,16 +121,16 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 def get_linked_master_criterion(doctype, link, companies):
 	table = frappe.qb.DocType(doctype)
 	master = frappe.qb.DocType(link.doctype)
-	blocked_master = (
+	blocked_masters = (
 		frappe.qb.from_(master)
 		.select(master.name)
-		.where(master.name == table[link.fieldname])
 		.where(get_restriction_criterion(link.doctype, companies).negate())
 	)
+	criterion = (IfNull(table[link.fieldname], "") == "") | table[link.fieldname].notin(blocked_masters)
 	if link.doctype_fieldname:
-		blocked_master = blocked_master.where(table[link.doctype_fieldname] == link.doctype)
+		criterion = (IfNull(table[link.doctype_fieldname], "") != link.doctype) | criterion
 
-	return ExistsCriterion(blocked_master).negate()
+	return criterion
 
 
 def has_inherited_permission(doc, ptype=None, user=None):
