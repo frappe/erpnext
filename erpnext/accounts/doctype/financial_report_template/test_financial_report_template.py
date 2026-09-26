@@ -1,6 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import ClassVar
+
 import frappe
 from frappe.tests.utils import whitelist_for_tests
 
@@ -10,6 +12,7 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 	CalculationFormulaValidator,
 	FormulaValidator,
 	TemplateStructureValidator,
+	extract_reference_codes_from_formula,
 	get_valid_api_method,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -300,7 +303,7 @@ class TestFormulaEnvironment(FinancialReportTemplateTestCase):
 
 
 class TestCalculationFormula(FinancialReportTemplateTestCase):
-	"""Formulas are test-evaluated with dummy values before a template can be saved."""
+	"""A formula is read before a template can be saved."""
 
 	@staticmethod
 	def _validate(formula, codes=("A", "B", "C")):
@@ -309,18 +312,45 @@ class TestCalculationFormula(FinancialReportTemplateTestCase):
 		)
 		return CalculationFormulaValidator(set(codes)).validate(row)
 
-	def test_division_by_zero_is_not_a_validation_error(self):
-		# the dummy values are all 1.0, so a denominator can only be zero by accident;
-		# the engine tolerates real division by zero at run time
+	def test_broken_syntax_is_rejected(self):
+		self.assertFalse(self._validate("A +").is_valid)
+		self.assertFalse(self._validate("(A - B").is_valid)
+
+	def test_constructs_safe_eval_rejects_are_caught_on_save(self):
+		self.assertFalse(self._validate("(y := A)").is_valid)
+
+	def test_unknown_names_are_rejected_on_save(self):
+		self.assertFalse(self._validate("A + NOPE").is_valid)
+		self.assertFalse(self._validate("nosuchfn(A)").is_valid)
+
+	def test_unknown_names_are_only_warnings_for_the_engine(self):
+		# the engine validates against the codes computed so far, so a name it cannot
+		# resolve yet may still be valid
+		row = frappe._dict(
+			calculation_formula="A + NOPE", idx=1, data_source="Calculated Amount", reference_code="X"
+		)
+		result = CalculationFormulaValidator({"A"}, strict=False).validate(row)
+		self.assertTrue(result.is_valid)
+		self.assertTrue(result.has_warnings)
+
+	def test_divisors_are_left_to_the_engine(self):
+		# whether a divisor is zero depends on the data, so the engine decides
+		self.assertTrue(self._validate("A / B").is_valid)
 		self.assertTrue(self._validate("A / (B - C)").is_valid)
 		self.assertTrue(self._validate("(A - B) / (A - C)").is_valid)
+		self.assertTrue(self._validate("A / (0 + 1)").is_valid)
 		self.assertTrue(self._validate("ROM / (CAS + FDE - ROM)", ("ROM", "CAS", "FDE")).is_valid)
-		self.assertTrue(self._validate("A / 0").is_valid)
 
-	def test_broken_formulas_are_rejected(self):
-		self.assertFalse(self._validate("A +").is_valid)
-		self.assertFalse(self._validate("NOPE * 2").is_valid)
-		self.assertFalse(self._validate("'text'").is_valid)
+	def test_conditional_formulas_are_allowed(self):
+		# shipped templates use this shape for every ratio line
+		self.assertTrue(self._validate("A / B if B != 0 else 0").is_valid)
+		self.assertTrue(self._validate("A if A > B else B").is_valid)
+
+	def test_self_reference_is_an_error(self):
+		row = frappe._dict(
+			calculation_formula="X + 1", idx=1, data_source="Calculated Amount", reference_code="X"
+		)
+		self.assertFalse(CalculationFormulaValidator({"A", "X"}).validate(row).is_valid)
 
 
 class TestFilterOperatorCase(FinancialReportTemplateTestCase):
@@ -402,3 +432,33 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		message = frappe.get_message_log()[-1]["message"]
 		self.assertIn("&lt;img", message)
 		self.assertNotIn("<img", message)
+
+
+class TestReferenceCodeExtraction(FinancialReportTemplateTestCase):
+	"""Dependency ordering relies on knowing which codes a formula reads."""
+
+	CODES: ClassVar[set[str]] = {"REV", "COGS", "sum"}
+
+	def _extract(self, formula):
+		return extract_reference_codes_from_formula(formula, self.CODES)
+
+	def test_codes_the_formula_reads(self):
+		self.assertEqual(self._extract("REV - COGS"), ["COGS", "REV"])
+		self.assertEqual(self._extract("round(REV, 2)"), ["REV"])
+
+	def test_a_called_name_is_not_a_dependency(self):
+		# "sum" is also a reference code here, but it is being called, not read
+		self.assertEqual(self._extract("sum([REV])"), ["REV"])
+
+	def test_a_name_the_formula_creates_is_not_a_dependency(self):
+		self.assertEqual(self._extract("[REV for REV in [1]]"), [])
+
+	def test_unparseable_formula_falls_back_to_a_word_match(self):
+		self.assertEqual(self._extract("REV +"), ["REV"])
+
+	def test_empty_formula(self):
+		self.assertEqual(self._extract(""), [])
+		self.assertEqual(self._extract(None), [])
+
+	def test_result_is_sorted_so_it_is_stable(self):
+		self.assertEqual(self._extract("COGS + REV"), ["COGS", "REV"])
