@@ -4,9 +4,11 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters=None):
-	return get_columns(filters), get_data(filters)
+	return prepare_serial_batch_report(get_columns(filters), get_data(filters))
 
 
 def get_data(report_filters):
@@ -62,7 +64,8 @@ def append_filters(query, report_filters, operations, job_card):
 	):
 		if report_filters.get(field):
 			if field == "serial_no":
-				query = query.where(job_card[field].like(f"%{report_filters.get(field)}%"))
+				serial_no = frappe.db.get_value("Serial No", report_filters.get(field), "serial_no")
+				query = query.where(job_card[field].like(f"%{serial_no}%"))
 			elif field == "operation":
 				query = query.where(job_card[field].isin(operations))
 			else:
@@ -112,7 +115,13 @@ def get_columns(filters):
 			"width": "100",
 		},
 		{"label": _("Serial No"), "fieldtype": "Data", "fieldname": "serial_no", "width": "100"},
-		{"label": _("Batch No"), "fieldtype": "Data", "fieldname": "batch_no", "width": "100"},
+		{
+			"label": _("Batch No"),
+			"fieldtype": "Link",
+			"fieldname": "batch_no",
+			"options": "Batch",
+			"width": "100",
+		},
 		{
 			"label": _("Workstation"),
 			"fieldtype": "Link",
