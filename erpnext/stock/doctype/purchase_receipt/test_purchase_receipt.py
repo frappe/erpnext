@@ -1200,6 +1200,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 		self.assertEqual(pr.per_billed, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_landed_cost_takes_order_invoices_oldest_first(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		def get_amount_differences():
+			return [
+				frappe.db.get_value(
+					"Purchase Receipt Item", pr.items[0].name, "amount_difference_with_purchase_invoice"
+				)
+				for pr in receipts
+			]
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+
+		make_invoice_against_order(po.name, qty=60, rate=70)
+		self.assertEqual(get_amount_differences(), [1200, 0])
+
+		make_invoice_against_order(po.name, qty=40, rate=55)
+		self.assertEqual(get_amount_differences(), [1200, 200])
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
