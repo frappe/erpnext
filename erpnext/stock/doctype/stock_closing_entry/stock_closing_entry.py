@@ -431,7 +431,12 @@ class StockClosing:
 		entries = frappe.get_all(
 			"Stock Closing Entry",
 			fields=["name", "to_date"],
-			filters={"company": self.company, "to_date": ["<", self.from_date], "docstatus": 1},
+			filters={
+				"company": self.company,
+				"to_date": ["<", self.from_date],
+				"docstatus": 1,
+				"status": "Completed",
+			},
 			order_by="to_date desc, creation desc",
 			limit=1,
 		)
