@@ -11,6 +11,7 @@ frappe.query_reports["Consolidated Accounts Receivable"] = {
 			get_data: function (txt) {
 				return frappe.db.get_link_options("Company", txt);
 			},
+			description: __("Totals are dropped when the companies use different currencies"),
 		},
 		{
 			fieldname: "report_date",

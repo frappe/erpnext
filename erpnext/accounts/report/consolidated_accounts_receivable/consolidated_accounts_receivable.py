@@ -30,8 +30,12 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 		self.args = args  # the engine's get_data() takes no arguments
 		columns, data, _message, chart, _report_summary, skip_total_row = super().run(args)
 
-		if self.filters.get("group_by_company"):
-			# a grand total would double count the company subtotals
+		if (
+			self.filters.get("group_by_party")
+			or self.filters.get("group_by_company")
+			or len(row_currencies(data)) > 1
+		):
+			# a grand total would double count the subtotals or add unlike currencies
 			skip_total_row = 1
 
 		return columns, data, None, chart, None, skip_total_row
@@ -52,7 +56,7 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 		self.data = []
 		for rows in self.get_grouped_rows(group_by).values():
 			self.data.extend(rows)
-			if subtotal_of:
+			if subtotal_of and len(row_currencies(rows)) <= 1:
 				self.data.append(subtotal_of(rows))
 				self.data.append({})  # blank separator, like the engine's own grouping
 
@@ -109,6 +113,10 @@ def get_consolidated_companies(filters):
 				companies.append(company)
 
 	return companies
+
+
+def row_currencies(rows):
+	return {row.get("currency") for row in rows if row.get("currency")}
 
 
 def add_company_columns(columns):
