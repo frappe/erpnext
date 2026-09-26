@@ -3803,7 +3803,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(pr.status, "Completed")
 
 		extra_invoice = frappe.copy_doc(pi)
-		extra_invoice.items[0].qty = 1
+		extra_invoice.items[0].qty = 100
 		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})

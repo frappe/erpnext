@@ -1148,7 +1148,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(receipts[1].per_billed, 25)
 
 	@ERPNextTestSuite.change_settings(
-		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
 	)
 	def test_fully_returned_receipt_skipped_in_po_invoice_split(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
