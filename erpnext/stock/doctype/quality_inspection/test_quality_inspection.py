@@ -218,6 +218,17 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Quality Inspection", inspection, "item_serial_no"), serial_id)
 
+	def test_make_quality_inspections_skips_serial_not_received_yet(self):
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(
+			item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
+		)
+		row = {"item_code": item, "serial_no": "QI-Unreceived-Serial", "sample_size": 1, "qty": 1}
+
+		(inspection,) = make_quality_inspections(se.company, se.doctype, se.name, [row], "Incoming")
+
+		self.assertIsNone(frappe.db.get_value("Quality Inspection", inspection, "item_serial_no"))
+
 	def test_rejected_qi_validation(self):
 		"""Test if rejected QI blocks Stock Entry as per Stock Settings."""
 		se = make_stock_entry(
