@@ -111,6 +111,7 @@ def get_batchwise_data_from_stock_ledger(filters):
 		# batch.expiry_date comes from the Batch table; postgres requires its PK in the GROUP BY for
 		# it to be selectable. batch.name is 1:1 with the grouped batch_no, so groups are unchanged.
 		.groupby(table.batch_no, table.item_code, table.warehouse, batch.name)
+		.orderby(batch.batch_id, table.item_code, table.warehouse)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)
@@ -145,6 +146,7 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 		# ch_table.warehouse while selecting table.warehouse, which postgres rejects. Also group by
 		# the Batch PK so batch.expiry_date is selectable (1:1 with the grouped batch_no).
 		.groupby(ch_table.batch_no, table.item_code, table.warehouse, batch.name)
+		.orderby(batch.batch_id, table.item_code, table.warehouse)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)

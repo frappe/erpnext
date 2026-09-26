@@ -33,9 +33,13 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 
 	def run(self):
 		columns, data = super().run()
-		return prepare_serial_batch_report(
+		columns, data = prepare_serial_batch_report(
 			columns, data, serial_fields=("serial_no",), batch_fields=("batch_no",)
 		)
+		for row in data:
+			sort_serial_nos_by_number(row)
+
+		return columns, data
 
 	def get_entries_from_stock_closing_balance(self) -> list:
 		return []
@@ -162,7 +166,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		for batch_no in batch_nos:
 			serial_nos += [serial_no for serial_no, qty in batches.get(batch_no, {}).items() if qty > 0]
 
-		return "\n".join(sorted(serial_nos))
+		return "\n".join(serial_nos)
 
 	def get_columns(self):
 		columns = super().get_columns()
@@ -173,3 +177,11 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		]
 
 		return columns
+
+
+def sort_serial_nos_by_number(row):
+	serial_nos = sorted(
+		zip((row.serial_no_number or "").split("\n"), (row.serial_no or "").split("\n"), strict=True)
+	)
+	row.serial_no_number = "\n".join(number for number, _name in serial_nos)
+	row.serial_no = "\n".join(name for _number, name in serial_nos)
