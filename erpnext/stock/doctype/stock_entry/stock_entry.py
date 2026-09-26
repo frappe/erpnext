@@ -1530,20 +1530,21 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose not in ("Manufacture", "Repack"):
 			return
 
-		if self.from_bom and flt(self.fg_completed_qty):
+		if self.from_bom and self.bom_no and flt(self.fg_completed_qty):
 			self.set_process_loss_from_finished_goods()
 		else:
 			self.reset_process_loss_to_pending_qty()
 
 	def set_process_loss_from_finished_goods(self):
-		"""Loss is the part of Finished Good Quantity the first finished item does not cover.
-		Its row can differ from the BOM item, e.g. a variant made with the template's BOM."""
-		finished_rows = [row for row in self.items if row.is_finished_item]
-		if not finished_rows:
-			return
+		"""Loss is the part of Finished Good Quantity the rows of the BOM item or its variants do not cover."""
+		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
+		finished_qty = 0
+		for row in self.items:
+			if not row.is_finished_item:
+				continue
 
-		finished_item = finished_rows[0].item_code
-		finished_qty = sum(flt(row.transfer_qty) for row in finished_rows if row.item_code == finished_item)
+			if bom_item in (row.item_code, frappe.get_cached_value("Item", row.item_code, "variant_of")):
+				finished_qty += flt(row.transfer_qty)
 
 		process_loss_qty = max(flt(self.fg_completed_qty) - finished_qty, 0)
 		self.process_loss_qty = flt(process_loss_qty, self.precision("process_loss_qty"))
