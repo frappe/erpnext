@@ -3789,13 +3789,15 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	@ERPNextTestSuite.change_settings(
-		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
 	)
 	def test_receipt_over_billing_by_qty_when_landed_cost_follows_invoice_rate(self):
-		item_code = create_item("_Test Qty Over Billing Item", is_purchase_item=1).name
-		frappe.db.set_value("Item", item_code, "over_billing_allowance", 10)
-
-		pr = make_purchase_receipt(item_code=item_code, qty=100, rate=50)
+		pr = make_purchase_receipt(qty=100, rate=50)
 		for qty in (25, 75):
 			pi = create_purchase_invoice_from_receipt(pr.name)
 			pi.items[0].qty = qty
