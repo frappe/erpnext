@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.delivery_note.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.delivery_note.services.packing import PackingService
@@ -293,6 +294,7 @@ class DeliveryNote(SellingController):
 
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		pre_submit_validation(self, check_credit_limit=True, check_packed_qty=True)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(

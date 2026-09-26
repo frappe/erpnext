@@ -387,6 +387,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_cost_in_project()
 		self.update_quality_inspection()
 		super().on_submit_subcontracting_inward()
+		self.update_material_request_qty()
 
 	def on_cancel(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
@@ -422,6 +423,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
+		self.update_material_request_qty()
 
 	def on_update(self):
 		super().on_update()
@@ -1754,6 +1756,26 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.update_qty()
 
 		update_pick_list_status(self.pick_list)
+
+	def update_material_request_qty(self):
+		material_request_map = {}
+
+		for d in self.get("items"):
+			if d.material_request:
+				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
+
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
+
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(
+						_("{0} {1} is cancelled or stopped").format(_("Material Request"), mr),
+						frappe.InvalidStatusError,
+					)
+
+				mr_obj.update_completed_qty(mr_item_rows)
+				mr_obj.update_requested_qty(mr_item_rows)
 
 	def set_missing_values(self):
 		"Updates rate and availability of all the items of mapped doc."

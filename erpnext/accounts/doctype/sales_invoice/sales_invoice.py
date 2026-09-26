@@ -22,7 +22,11 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.accounts.utils import refresh_subscription_status, update_voucher_outstanding
+from erpnext.accounts.utils import (
+	pre_submit_validation,
+	refresh_subscription_status,
+	update_voucher_outstanding,
+)
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -386,6 +390,7 @@ class SalesInvoice(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
+		pre_submit_validation(self, check_prev_docstatus=True, check_credit_limit=True)
 
 	def validate_update_stock_for_pick_list_reference(self):
 		if self.update_stock or self.is_return:
