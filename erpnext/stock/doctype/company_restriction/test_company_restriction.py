@@ -372,3 +372,23 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			warehouses = {row.warehouse for row in rows if row.item_code == "_Test Item"}
 			self.assertIn("Stores - _TC", warehouses)
 			self.assertNotIn("Stores - _TC1", warehouses)
+
+	def test_batch_traceability_hides_other_company_sources(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRACE-.#####"}
+		).name
+		own_entry = make_stock_entry(item_code=item, qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		other_entry = make_stock_entry(
+			item_code=item, qty=5, to_warehouse="Stores - _TC1", company="_Test Company 1", basic_rate=100
+		)
+		own_batch = frappe.db.get_value("Batch", {"reference_name": own_entry.name})
+		other_batch = frappe.db.get_value("Batch", {"reference_name": other_entry.name})
+		filters = {"batches": [own_batch, other_batch], "traceability_direction": "Backward"}
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "serial_no_and_batch_traceability", filters)
+			batches = {row.get("batch_no") for row in rows}
+			self.assertIn(own_batch, batches)
+			self.assertNotIn(other_batch, batches)
