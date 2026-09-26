@@ -2374,6 +2374,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		for (const child of children) {
 			const existing_pricing_rule = frappe.model.get_value(child.doctype, child.name, "pricing_rules");
+			let has_discount_update = false;
+			const discount_keys_seen = [];
 
 			for (const [key, value] of Object.entries(child)) {
 				if (!["doctype", "name"].includes(key)) {
@@ -2397,7 +2399,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							}
 						}
 
-						frappe.model.set_value(child.doctype, child.name, key, value);
+						if (key === "discount_amount" || key === "discount_percentage") {
+							const doc = frappe.get_doc(child.doctype, child.name);
+							if (doc) doc[key] = value;
+							has_discount_update = true;
+							discount_keys_seen.push(key);
+						} else {
+							frappe.model.set_value(child.doctype, child.name, key, value);
+						}
 					}
 				}
 			}
@@ -2406,6 +2415,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"price_list_rate",
 				"discount_percentage",
 			]);
+
+			if (has_discount_update) {
+				const doc = frappe.get_doc(child.doctype, child.name);
+				if (doc) {
+					if (!discount_keys_seen.includes("discount_amount")) doc.discount_amount = 0.0;
+					if (!discount_keys_seen.includes("discount_percentage")) doc.discount_percentage = 0.0;
+					this.apply_pricing_rule_on_item(doc);
+				}
+			}
 
 			// if pricing rule set as blank from an existing value, apply price_list
 			if (!this.frm.doc.ignore_pricing_rule && existing_pricing_rule && !child.pricing_rules) {
