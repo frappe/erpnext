@@ -36,7 +36,8 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		if batch_no:
 			filters["batch_no"] = batch_no
 
-		return "\n".join(sorted(frappe.get_all("Serial No", filters=filters, pluck="name")))
+		serial_nos = frappe.get_all("Serial No", filters=filters, fields=["serial_no", "name"], as_list=True)
+		return "\n".join(name for _number, name in sorted(serial_nos))
 
 	def test_batch_rows_under_item_row(self):
 		rows = self.run_report(
