@@ -317,7 +317,7 @@
  "icon": "hash",
  "idx": 1,
  "links": [],
- "modified": "2026-09-26 08:18:14.988430",
+ "modified": "2026-09-26 10:01:10.264831",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -360,18 +360,22 @@
    "write": 1
   },
   {
+   "read": 1,
    "role": "Delivery Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Delivery User",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Maintenance User",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Quality Manager",
    "select": 1
   },

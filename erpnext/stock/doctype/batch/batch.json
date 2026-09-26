@@ -217,7 +217,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-09-23 15:28:28.772991",
+ "modified": "2026-09-26 10:01:10.264831",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -239,54 +239,67 @@
    "write": 1
   },
   {
+   "read": 1,
    "role": "Accounts Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Accounts User",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Delivery Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Delivery User",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Maintenance Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Maintenance User",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Manufacturing Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Manufacturing User",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Purchase Master Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Quality Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Sales Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Sales Master Manager",
    "select": 1
   },
   {
+   "read": 1,
    "role": "Sales User",
    "select": 1
   },
