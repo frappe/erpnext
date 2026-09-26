@@ -1545,7 +1545,10 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
 	def test_over_billing_by_qty_when_landed_cost_follows_invoice_rate(self):
-		po = create_purchase_order(qty=100, rate=50)
+		item_code = make_item(
+			"_Test Qty Over Billing Item", {"is_purchase_item": 1, "over_billing_allowance": 10}
+		).name
+		po = create_purchase_order(item_code=item_code, qty=100, rate=50)
 		for qty in (25, 75):
 			pi = make_pi_from_po(po.name)
 			pi.items[0].qty = qty
