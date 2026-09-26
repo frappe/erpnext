@@ -7,6 +7,7 @@ frappe.listview_settings["Quotation"] = {
 		"currency",
 		"valid_till",
 		"is_active",
+		"is_latest_revision",
 	],
 
 	onload: function (listview) {
@@ -38,6 +39,8 @@ frappe.listview_settings["Quotation"] = {
 			return [__("Lost"), "gray", "status,=,Lost"];
 		} else if (doc.docstatus === 1 && !doc.is_active) {
 			return [__("Inactive"), "red", "is_active,=,0"];
+		} else if (doc.status === "Open" && doc.is_latest_revision) {
+			return [__("Latest"), "orange", "is_latest_revision,=,1"];
 		} else if (doc.status === "Open") {
 			return [__("Open"), "orange", "status,=,Open"];
 		} else if (doc.status === "Partially Ordered") {

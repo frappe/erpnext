@@ -79,6 +79,7 @@ class Quotation(SellingController):
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		is_active: DF.Check
+		is_latest_revision: DF.Check
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[QuotationItem]
 		language: DF.Link | None
@@ -384,6 +385,7 @@ class Quotation(SellingController):
 		self.update_opportunity("Quotation")
 		self.update_lead()
 		self.deactivate_other_versions()
+		self.update_latest_revision()
 
 	def deactivate_other_versions(self):
 		if not (self.revision_of and self.is_active):
@@ -403,9 +405,31 @@ class Quotation(SellingController):
 		return bool(self.get_other_versions(VERSIONS_TO_SET_AS_LOST))
 
 	def update_other_versions(self, filters: dict, values: dict):
-		names = [version.name for version in self.get_other_versions(filters)]
-		frappe.db.bulk_update("Quotation", {name: values for name in names})
-		for name in names:
+		self.update_versions({version.name: values for version in self.get_other_versions(filters)})
+
+	def update_latest_revision(self):
+		versions = self.get_other_versions({})
+		if not (versions or self.is_latest_revision):
+			return
+
+		if self.docstatus == 1:
+			versions.append(self)
+
+		latest = max(versions, key=get_version_order).name if len(versions) > 1 else None
+		self.update_versions(
+			{
+				version.name: {"is_latest_revision": int(version.name == latest)}
+				for version in versions
+				if version.name != self.name
+			},
+			update_modified=False,
+		)
+		self.db_set("is_latest_revision", int(self.name == latest), update_modified=False)
+
+	@staticmethod
+	def update_versions(updates: dict[str, dict], update_modified: bool = True):
+		frappe.db.bulk_update("Quotation", updates, update_modified=update_modified)
+		for name in updates:
 			frappe.clear_document_cache("Quotation", name)
 
 	@property
@@ -413,12 +437,8 @@ class Quotation(SellingController):
 		return not self.get_newer_versions()
 
 	def get_newer_versions(self) -> list[frappe._dict]:
-		own_order = (getdate(self.transaction_date), get_datetime(self.creation))
-		return [
-			version
-			for version in self.get_other_versions({})
-			if (version.transaction_date, version.creation) > own_order
-		]
+		own_order = get_version_order(self)
+		return [version for version in self.get_other_versions({}) if get_version_order(version) > own_order]
 
 	def validate_can_be_revised(self):
 		if self.status in ("Lost", "Ordered"):
@@ -443,6 +463,7 @@ class Quotation(SellingController):
 		self.set_status(update=True)
 		self.update_opportunity("Open")
 		self.update_lead()
+		self.update_latest_revision()
 
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications
@@ -483,6 +504,10 @@ class Quotation(SellingController):
 				rows_with_alternatives.append(row.name)
 
 		return rows_with_alternatives
+
+
+def get_version_order(version) -> tuple:
+	return (getdate(version.transaction_date), get_datetime(version.creation))
 
 
 def get_list_context(context=None):
