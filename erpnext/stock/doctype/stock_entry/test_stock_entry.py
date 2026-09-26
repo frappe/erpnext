@@ -4925,6 +4925,21 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		self.assertEqual(se.process_loss_qty, 10)
 
+	def test_process_loss_counts_alternative_of_bom_item(self):
+		properties = {"is_stock_item": 1, "allow_alternative_item": 1}
+		fg_item = make_item("Process Loss Alternative Source", properties=properties).name
+		alternative = make_item("Process Loss Alternative FG", properties=properties).name
+		frappe.get_doc(
+			{"doctype": "Item Alternative", "item_code": fg_item, "alternative_item_code": alternative}
+		).insert()
+
+		se = self.make_process_loss_entry(fg_item=fg_item)
+		self.get_finished_good_row(se).item_code = alternative
+		self.get_finished_good_row(se).qty = 90
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 10)
+
 	def test_from_bom_entry_rejects_finished_item_other_than_bom_item(self):
 		other_item = make_item("Process Loss Unrelated FG", properties={"is_stock_item": 1}).name
 		for purpose in ("Manufacture", "Repack"):
