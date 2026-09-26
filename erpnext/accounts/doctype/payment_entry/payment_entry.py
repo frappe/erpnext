@@ -607,6 +607,7 @@ class PaymentEntry(AccountsController):
 				self.party_account_currency,
 				self.party_type,
 				self.party,
+				self.party_account,
 			)
 
 			# Only update exchange rate when the reference is Journal Entry
@@ -2500,6 +2501,28 @@ def get_company_defaults(company: str):
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
 
+def get_journal_entry_booked_exchange_rate(
+	reference_name, party_type, party, account, party_account_currency
+):
+	if not (party_type and party and account):
+		return None
+
+	rows = frappe.get_all(
+		"Journal Entry Account",
+		filters={
+			"parent": reference_name,
+			"party_type": party_type,
+			"party": party,
+			"account": account,
+			"account_currency": party_account_currency,
+		},
+		fields=["exchange_rate"],
+		order_by="idx asc",
+		limit=1,
+	)
+	return rows[0].exchange_rate if rows else None
+
+
 def get_outstanding_on_journal_entry(voucher_no, party_type, party):
 	ple = frappe.qb.DocType("Payment Ledger Entry")
 
@@ -2539,6 +2562,7 @@ def get_reference_details(
 	party_account_currency: str,
 	party_type: str | None = None,
 	party: str | None = None,
+	party_account: str | None = None,
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
@@ -2556,7 +2580,11 @@ def get_reference_details(
 
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		if ref_doc.multi_currency:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+			exchange_rate = flt(
+				get_journal_entry_booked_exchange_rate(
+					reference_name, party_type, party, party_account, party_account_currency
+				)
+			) or get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
 		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)
@@ -2607,8 +2635,13 @@ def get_reference_details(
 			party = ref_doc.get(party_field)
 			account = get_party_account(party_type, party, ref_doc.company)
 	else:
-		# Get the exchange rate based on the posting date of the ref doc.
-		exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+		# Get the exchange rate from the original ref doc
+		# or get it based on the posting date of the ref doc.
+		exchange_rate = flt(
+			get_journal_entry_booked_exchange_rate(
+				reference_name, party_type, party, party_account, party_account_currency
+			)
+		) or get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
 	res = frappe._dict(
 		{
