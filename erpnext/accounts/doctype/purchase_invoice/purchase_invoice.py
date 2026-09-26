@@ -40,6 +40,7 @@ from erpnext.accounts.utils import (
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -596,6 +597,9 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
 	def update_status_updater_args(self):
+		if is_billed_by_qty():
+			self.set_purchase_order_billing_by_qty()
+
 		if cint(self.update_stock):
 			self.status_updater.append(
 				{
@@ -646,6 +650,12 @@ class PurchaseInvoice(BuyingController):
 					}
 				)
 
+	def set_purchase_order_billing_by_qty(self):
+		"""The status updater keeps billed_amt current; billing % follows invoiced qty instead."""
+		for args in self.status_updater:
+			if args.get("overflow_type") == "billing":
+				args.pop("percent_join_field", None)
+
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
 			for item in self.get("items"):
@@ -679,6 +689,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		BillingStatusService(self).update_billing_status_in_po()
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
@@ -793,6 +804,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		BillingStatusService(self).update_billing_status_in_po()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")

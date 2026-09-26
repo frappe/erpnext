@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-"""Purchase Receipt billing sync and provisional-entry cancellation for Purchase Invoice."""
+"""Purchase Receipt and Purchase Order billing sync and provisional-entry cancellation for Purchase Invoice."""
 
 import frappe
 from frappe import qb
@@ -10,6 +10,7 @@ from frappe.utils import flt
 
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
 	get_purchase_receipts_against_po_details,
+	is_billed_by_qty,
 	update_billed_amount_based_on_po,
 	update_billing_percentage,
 )
@@ -68,6 +69,14 @@ class BillingStatusService:
 		for pr in receipts - updated_pr:
 			pr_doc = frappe.get_lazy_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
+
+	def update_billing_status_in_po(self) -> None:
+		doc = self.doc
+		if not is_billed_by_qty() or (doc.is_return and not doc.update_billed_amount_in_purchase_order):
+			return
+
+		for purchase_order in {item.purchase_order for item in doc.items if item.purchase_order}:
+			frappe.get_doc("Purchase Order", purchase_order).update_billing_percentage()
 
 	def get_pr_details_billed_amt(self) -> dict:
 		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice

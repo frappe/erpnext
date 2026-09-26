@@ -249,24 +249,36 @@ def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -
 	return round(100 * (total_billed_amount / (total_amount or 1)), 6)
 
 
+def is_billed_by_qty() -> bool:
+	"""Invoice-rate landed cost leaves qty as the only stable measure of billing."""
+	return bool(
+		frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate")
+	)
+
+
 def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool) -> float:
-	"""Share of each row's qty that is invoiced, weighted by the row's value, or by qty when no row has one."""
 	returned_qty = get_item_wise_returned_qty([item.name for item in pr_doc.items])
-	invoiced_qty = get_invoiced_qty(pr_doc, bill_for_rejected)
+	billable_qty = {}
+	for item in items:
+		qty = get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected)
+		billable_qty[item.name] = qty if qty > 0 else flt(item.qty)
+
+	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, bill_for_rejected))
+
+
+def get_qty_based_percent_billed(items: list, billable_qty: dict, invoiced_qty: dict) -> float:
+	"""Share of each row's billable qty that is invoiced, weighted by the row's value, or by qty when no row has one."""
 	weigh_by_value = any(flt(item.rate) for item in items)
 
 	total_weight, billed_weight = 0.0, 0.0
 	for item in items:
-		billable_qty = get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected)
-		if billable_qty <= 0:
-			billable_qty = flt(item.qty)
-
-		if not billable_qty:
+		qty = flt(billable_qty.get(item.name))
+		if not qty:
 			continue
 
-		weight = abs(billable_qty * flt(item.rate)) if weigh_by_value else abs(billable_qty)
+		weight = abs(qty * flt(item.rate)) if weigh_by_value else abs(qty)
 		total_weight += weight
-		billed_weight += weight * min(flt(invoiced_qty.get(item.name)) / billable_qty, 1)
+		billed_weight += weight * min(flt(invoiced_qty.get(item.name)) / qty, 1)
 
 	return round(100 * (billed_weight / (total_weight or 1)), 6)
 
@@ -315,6 +327,30 @@ def get_invoiced_qty_based_on_po(po_details: list, bill_for_rejected: bool) -> d
 		invoiced_qty[pr_item.name] = direct_qty + qty_from_po
 
 	return invoiced_qty
+
+
+def get_invoiced_qty_against_po_items(po_items: list) -> dict:
+	"""Invoiced qty per Purchase Order Item, leaving out returns that do not touch the order."""
+	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(purchase_invoice_item)
+		.inner_join(purchase_invoice)
+		.on(purchase_invoice_item.parent == purchase_invoice.name)
+		.select(purchase_invoice_item.po_detail, fn.Sum(purchase_invoice_item.qty))
+		.where(
+			(purchase_invoice_item.po_detail.isin(po_items))
+			& (purchase_invoice.docstatus == 1)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_order == 1)
+			)
+		)
+		.groupby(purchase_invoice_item.po_detail)
+	)
+
+	return frappe._dict(query.run())
 
 
 def set_amount_difference_with_purchase_invoice(pr_doc, items: list) -> None:
