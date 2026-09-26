@@ -3492,6 +3492,55 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		# Test 2 : Adjustment amount is positive
 		self.assertEqual(pr.status, "Completed")
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_pi_valuation_tax_adjusts_pr_stock_value(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=10,
+			rate=100,
+		)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 20,
+			},
+		)
+		pi.submit()
+
+		gle = frappe.qb.DocType("GL Entry")
+		srbnb_balance = (
+			frappe.qb.from_(gle)
+			.select(Sum(gle.debit - gle.credit))
+			.where(
+				(gle.voucher_no.isin([pr.name, pi.name]))
+				& (gle.account == "Stock Received But Not Billed - TCP1")
+				& (gle.is_cancelled == 0)
+			)
+		).run()[0][0]
+		pr_sle_filters = {"voucher_no": pr.name, "is_cancelled": 0}
+
+		self.assertEqual(
+			frappe.db.get_value("Stock Ledger Entry", pr_sle_filters, "stock_value_difference"), 1020
+		)
+		self.assertEqual(flt(srbnb_balance), 0)
+
+		pi.reload()
+		pi.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value("Stock Ledger Entry", pr_sle_filters, "stock_value_difference"), 1000
+		)
+
 	def test_opening_invoice_rounding_adjustment_validation(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		pi.items[0].rate = 99.98
