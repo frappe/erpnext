@@ -8,8 +8,12 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, flt, today
 
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+	StockClosing,
+	prepare_closing_stock_balance,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -69,9 +73,19 @@ class TestStockClosingEntry(ERPNextTestSuite):
 		"""
 		item = make_item(properties={"is_stock_item": 1}).name
 		first_date = add_days(today(), -10)
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=5,
+			rate=100,
+			posting_date=first_date,
+			company=COMPANY,
+		)
 
-		# A submitted closing entry makes the next closing look up its balance.
-		self.make_stock_closing_entry(first_date, first_date)
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			entry = self.make_stock_closing_entry(first_date, first_date)
+		prepare_closing_stock_balance(entry.name)
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", entry.name, "status"), "Completed")
 
 		second_from_date = add_days(first_date, 1)
 		make_stock_entry(
@@ -88,6 +102,36 @@ class TestStockClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(closing.last_closing_balance.name, self.last_closing_entry)
 		self.assertIn(item, {row.item_code for row in entries})
+
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			incomplete = self.make_stock_closing_entry(second_from_date, second_from_date)
+		report_date = add_days(second_from_date, 1)
+		for previous_status in ("Completed", "Failed"):
+			entry.db_set("status", previous_status)
+			for status in ("Failed", "In Progress", "Queued"):
+				with self.subTest(previous_status=previous_status, status=status):
+					incomplete.db_set("status", status)
+					closing = StockClosing(COMPANY, report_date, report_date)
+					if previous_status == "Completed":
+						self.assertEqual(closing.last_closing_balance.name, entry.name)
+					else:
+						self.assertFalse(closing.last_closing_balance)
+
+					balance = closing.get_stock_closing_entries()[(item, WAREHOUSE)]
+					self.assertEqual(balance.actual_qty, 15)
+					self.assertEqual(balance.stock_value_difference, 1500)
+					data = stock_balance(
+						frappe._dict(
+							company=COMPANY,
+							item_code=[item],
+							warehouse=WAREHOUSE,
+							from_date=report_date,
+							to_date=report_date,
+						)
+					)[1]
+					self.assertEqual(len(data), 1)
+					self.assertEqual(data[0]["opening_qty"], 15)
+					self.assertEqual(data[0]["opening_val"], 1500)
 
 	def test_adjustment_entry_write_off_uses_ledger_basis_for_batched_item(self):
 		"""An is_adjustment_entry writes off stock value stranded on the Stock Ledger Entry, so the
