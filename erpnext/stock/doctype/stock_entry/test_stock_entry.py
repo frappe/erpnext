@@ -4881,12 +4881,11 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		frappe.db.set_value("Work Order", wo.name, "produced_qty", wo.qty)
 		self.assertNotIn(wo.name, pending_work_orders())
 
-	def make_process_loss_entry(self, purpose="Manufacture"):
+	def make_process_loss_entry(self, purpose="Manufacture", fg_item=None):
 		"""Entry for 100 units from a BOM with 5% process loss, items fetched but not saved."""
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
-		fg_item = make_item("Process Loss FG", properties={"is_stock_item": 1}).name
+		fg_item = fg_item or make_item("Process Loss FG", properties={"is_stock_item": 1}).name
 		rm_item = make_item("Process Loss RM", properties={"is_stock_item": 1}).name
 
 		se = make_stock_entry(
@@ -4894,7 +4893,9 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		)
 		se.items = []
 		se.from_bom = 1
-		se.bom_no = make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=5).name
+		se.bom_no = make_bom(
+			item=fg_item, quantity=100, raw_materials=[rm_item], process_loss_percentage=5
+		).name
 		se.fg_completed_qty = 100
 		se.from_warehouse = "_Test Warehouse - _TC"
 		se.to_warehouse = "_Test Warehouse 1 - _TC"
@@ -4915,15 +4916,33 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 			self.assertEqual(se.process_loss_qty, 10)
 			self.assertEqual(se.process_loss_percentage, 10)
 
-	def test_process_loss_counts_finished_item_other_than_bom_item(self):
-		other_item = make_item("Process Loss FG Other", properties={"is_stock_item": 1}).name
-		for purpose in ("Manufacture", "Repack"):
-			se = self.make_process_loss_entry(purpose)
-			self.get_finished_good_row(se).item_code = other_item
-			self.get_finished_good_row(se).qty = 90
-			se.save()
+	def test_process_loss_counts_variant_of_bom_item(self):
+		make_item_variant()
+		se = self.make_process_loss_entry(fg_item="_Test Variant Item")
+		self.get_finished_good_row(se).item_code = "_Test Variant Item-S"
+		self.get_finished_good_row(se).qty = 90
+		se.save()
 
-			self.assertEqual(se.process_loss_qty, 10)
+		self.assertEqual(se.process_loss_qty, 10)
+
+	def test_process_loss_ignores_other_repack_outputs(self):
+		other_item = make_item("Process Loss Other Output", properties={"is_stock_item": 1}).name
+		se = self.make_process_loss_entry("Repack")
+		other_output = se.append(
+			"items",
+			{
+				"item_code": other_item,
+				"qty": 10,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+			},
+		)
+		se.items.remove(other_output)
+		se.items.insert(0, other_output)
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 5)
 
 	def test_zero_process_loss_saves_despite_bom_percentage(self):
 		se = self.make_process_loss_entry()
