@@ -97,7 +97,7 @@ def get_allowed_masters_condition(field, doctype, user=None):
 		return None
 
 	allowed_companies = get_allowed_companies(user, doctype)
-	if not allowed_companies:
+	if not allowed_companies or doctype not in get_restricted_master_doctypes():
 		return None
 
 	master = frappe.qb.DocType(doctype)
