@@ -327,3 +327,18 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			customers = {row.customer for row in rows}
 			self.assertIn(allowed_customer, customers)
 			self.assertNotIn(restricted_customer, customers)
+
+	def test_batch_split_tree_hides_chosen_batch_of_restricted_item(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SPLIT-.#####"}
+		).name
+		entry = make_stock_entry(item_code=item, qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		batch = frappe.db.get_value("Batch", {"reference_name": entry.name})
+		self.restrict_to_companies("Item", item, ["_Test Company 1"])
+
+		self.assertEqual(len(self.run_report("stock", "batch_split_tree", {"batch": batch})), 1)
+
+		with self.set_user(self.make_report_user()):
+			self.assertEqual(self.run_report("stock", "batch_split_tree", {"batch": batch}), [])
