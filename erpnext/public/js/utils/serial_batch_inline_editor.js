@@ -366,6 +366,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.new_serial_control = this.make_row_link_control($tr.find(".sbie-new-serial"), {
 			options: "Serial No",
 			fieldname: "sbie_new_serial",
+			label: __("Serial No"),
 			placeholder: __("Scan / select Serial No"),
 			get_query: () => ({ filters: { item_code: this.row.item_code } }),
 			onchange: () => this.on_new_serial_change($tr),
@@ -374,6 +375,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.new_batch_control = this.make_row_link_control($tr.find(".sbie-new-batch"), {
 			options: "Batch",
 			fieldname: "sbie_new_batch",
+			label: __("Batch No"),
 			placeholder: __("Select Batch No"),
 			get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
 			onchange: () => this.on_new_batch_change($tr),
@@ -451,6 +453,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.edit_link_cell($td, {
 			options: "Batch",
 			field: "batch_no",
+			label: __("Batch No"),
 			placeholder: __("Select Batch No"),
 			get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
 		});
@@ -460,6 +463,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.edit_link_cell($td, {
 			options: "Serial No",
 			field: "serial_no",
+			label: __("Serial No"),
 			placeholder: __("Select Serial No"),
 			get_query: () => ({ filters: { item_code: this.row.item_code } }),
 		});
@@ -483,6 +487,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		let control = this.make_row_link_control($td, {
 			options: opts.options,
 			fieldname: "sbie_edit_link",
+			label: opts.label,
 			placeholder: opts.placeholder,
 			get_query: opts.get_query,
 			onchange: () => {
