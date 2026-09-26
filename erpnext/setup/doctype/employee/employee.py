@@ -11,6 +11,7 @@ from frappe.permissions import (
 from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
+import erpnext
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -124,6 +125,7 @@ class Employee(NestedSet):
 
 		self.employee = self.name
 		self.set_employee_name()
+		self.set_salary_currency()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
@@ -148,6 +150,13 @@ class Employee(NestedSet):
 		self.employee_name = " ".join(
 			filter(lambda x: x, [self.first_name, self.middle_name, self.last_name])
 		)
+
+	def set_salary_currency(self):
+		"""Default the salary currency to the company's currency, if not set already."""
+		if self.salary_currency:
+			return
+
+		self.salary_currency = erpnext.get_company_currency(self.company)
 
 	def validate_user_details(self):
 		if not self.user_id:
