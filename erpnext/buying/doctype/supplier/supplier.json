@@ -153,11 +153,13 @@
   },
   {
    "depends_on": "is_internal_supplier",
+   "description": "The Company that this Supplier actually is (e.g. a sister, parent, or subsidiary company) -- used to link inter-company transactions between them",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "image",
