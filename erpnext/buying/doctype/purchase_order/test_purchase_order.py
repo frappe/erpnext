@@ -1556,7 +1556,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.per_billed, 100)
 
 		extra_invoice = frappe.copy_doc(pi)
-		extra_invoice.items[0].qty = 1
+		extra_invoice.items[0].qty = 100
 		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
