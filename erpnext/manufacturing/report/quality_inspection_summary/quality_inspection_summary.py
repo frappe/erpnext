@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -36,8 +38,13 @@ def get_data(filters):
 
 	query_filters["report_date"] = ["between", [filters.get("from_date"), filters.get("to_date")]]
 
+	inspection_filters = [query_filters]
+	company = frappe.qb.DocType("Quality Inspection").company
+	if condition := get_allowed_companies_condition(company, "Quality Inspection"):
+		inspection_filters.append(condition)
+
 	return frappe.get_all(
-		"Quality Inspection", fields=fields, filters=query_filters, order_by="report_date asc"
+		"Quality Inspection", fields=fields, filters=inspection_filters, order_by="report_date asc"
 	)
 
 

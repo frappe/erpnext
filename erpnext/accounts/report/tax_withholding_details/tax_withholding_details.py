@@ -6,6 +6,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 
 from erpnext.accounts.report.utils import validate_mandatory_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 class TaxWithholdingDetailsReport:
@@ -88,6 +89,8 @@ class TaxWithholdingDetailsReport:
 			query = query.where(twe.party_type == self.filters.party_type)
 		if self.filters.party:
 			query = query.where(twe.party == self.filters.party)
+		if condition := get_allowed_companies_condition(twe.company, "Tax Withholding Entry"):
+			query = query.where(condition)
 
 		return query
 

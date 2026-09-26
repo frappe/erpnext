@@ -238,3 +238,172 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			doc.reload()
 			self.assertEqual(doc.restrict_to_companies, 1)
 			self.assertEqual([row.company for row in doc.allowed_companies], ["_Test Company"])
+
+	def make_report_user(self):
+		user = self.make_user_with_roles(
+			"test_company_restriction_reports@example.com", ["Stock User", "Sales User", "Accounts User"]
+		)
+		self.allow_company(user, "_Test Company")
+		return user
+
+	def run_report(self, module, report, filters):
+		execute = frappe.get_attr(f"erpnext.{module}.report.{report}.{report}.execute")
+		return execute(frappe._dict(filters))[1]
+
+	def test_item_prices_report_hides_restricted_items(self):
+		restricted, allowed = make_item(), make_item()
+		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
+
+		items = {row[0] for row in self.run_report("stock", "item_prices", {})}
+		self.assertTrue({restricted.name, allowed.name} <= items)
+
+		with self.set_user(self.make_report_user()):
+			items = {row[0] for row in self.run_report("stock", "item_prices", {})}
+			self.assertIn(allowed.name, items)
+			self.assertNotIn(restricted.name, items)
+
+	def test_variant_reports_hide_restricted_variants(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = make_item(properties={"has_variants": 1, "attributes": [{"attribute": "Test Size"}]})
+		restricted = create_variant(template.name, {"Test Size": "Small"}).insert()
+		allowed = create_variant(template.name, {"Test Size": "Large"}).insert()
+		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "item_variant_details", {"item": template.name})
+			self.assertEqual([row["variant_name"] for row in rows], [allowed.name])
+
+			rows = self.run_report("stock", "item_where_used", {"item": template.name})
+			self.assertEqual([row.related_item for row in rows], [allowed.name])
+
+	def test_bom_search_hides_restricted_product_bundles(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item()
+		restricted = make_product_bundle(make_item(properties={"is_stock_item": 0}).name, [component.name])
+		allowed = make_product_bundle(make_item(properties={"is_stock_item": 0}).name, [component.name])
+		self.restrict_to_companies("Item", restricted.new_item_code, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report(
+				"stock", "bom_search", {"search_sub_assemblies": 0, "item1": component.name}
+			)
+			self.assertEqual([row[0] for row in rows], [allowed.name])
+
+	def test_trial_balance_for_party_hides_restricted_customers(self):
+		from erpnext.accounts.utils import get_fiscal_year
+
+		restricted = make_customer("_Test Trial Balance Restricted Customer")
+		allowed = make_customer("_Test Trial Balance Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		filters = {
+			"company": "_Test Company",
+			"fiscal_year": get_fiscal_year(frappe.utils.nowdate(), company="_Test Company")[0],
+			"party_type": "Customer",
+			"show_zero_values": 1,
+			"exclude_zero_balance_parties": 0,
+		}
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("accounts", "trial_balance_for_party", filters)
+			parties = {row.get("party") for row in rows}
+			self.assertIn(allowed, parties)
+			self.assertNotIn(restricted, parties)
+
+	def test_converted_query_reports_hide_restricted_masters(self):
+		restricted_item, allowed_item = make_item(), make_item()
+		restricted_customer = make_customer("_Test Query Report Restricted Customer")
+		allowed_customer = make_customer("_Test Query Report Allowed Customer")
+		self.restrict_to_companies("Item", restricted_item.name, ["_Test Company 1"])
+		self.restrict_to_companies("Customer", restricted_customer, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			items = {row.item_code for row in self.run_report("stock", "item_balance", {})}
+			self.assertIn(allowed_item.name, items)
+			self.assertNotIn(restricted_item.name, items)
+
+			rows = self.run_report("selling", "customers_without_any_sales_transactions", {})
+			customers = {row.customer for row in rows}
+			self.assertIn(allowed_customer, customers)
+			self.assertNotIn(restricted_customer, customers)
+
+	def make_stock_in_both_companies(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code="_Test Item", qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item",
+			qty=5,
+			to_warehouse="Stores - _TC1",
+			company="_Test Company 1",
+			basic_rate=100,
+		)
+
+	def test_reports_keep_to_permitted_companies(self):
+		from erpnext.stock.report.stock_projected_qty.stock_projected_qty import (
+			execute as stock_projected_qty,
+		)
+
+		self.make_stock_in_both_companies()
+		own_request = make_material_request()
+		other_request = make_material_request(
+			company="_Test Company 1", warehouse="Stores - _TC1", cost_center="Main - _TC1"
+		)
+
+		with self.set_user(self.make_report_user()):
+			columns, rows = stock_projected_qty(frappe._dict(item_code="_Test Item"))
+			warehouse_index = [column["fieldname"] for column in columns].index("warehouse")
+			warehouses = {row[warehouse_index] for row in rows}
+			self.assertIn("Stores - _TC", warehouses)
+			self.assertNotIn("Stores - _TC1", warehouses)
+
+			requests = {
+				row["material_request_no"] for row in self.run_report("buying", "procurement_tracker", {})
+			}
+			self.assertIn(own_request.name, requests)
+			self.assertNotIn(other_request.name, requests)
+
+	def test_item_balance_keeps_to_permitted_warehouses(self):
+		self.make_stock_in_both_companies()
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "item_balance", {})
+			warehouses = {row.warehouse for row in rows if row.item_code == "_Test Item"}
+			self.assertIn("Stores - _TC", warehouses)
+			self.assertNotIn("Stores - _TC1", warehouses)
+
+	def test_batch_traceability_hides_other_company_sources(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRACE-.#####"}
+		).name
+		own_entry = make_stock_entry(item_code=item, qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		other_entry = make_stock_entry(
+			item_code=item, qty=5, to_warehouse="Stores - _TC1", company="_Test Company 1", basic_rate=100
+		)
+		own_batch = frappe.db.get_value("Batch", {"reference_name": own_entry.name})
+		other_batch = frappe.db.get_value("Batch", {"reference_name": other_entry.name})
+		filters = {"batches": [own_batch, other_batch], "traceability_direction": "Backward"}
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "serial_no_and_batch_traceability", filters)
+			batches = {row.get("batch_no") for row in rows}
+			self.assertIn(own_batch, batches)
+			self.assertNotIn(other_batch, batches)
+
+	def test_batch_split_tree_hides_chosen_batch_of_restricted_item(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SPLIT-.#####"}
+		).name
+		entry = make_stock_entry(item_code=item, qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		batch = frappe.db.get_value("Batch", {"reference_name": entry.name})
+		self.restrict_to_companies("Item", item, ["_Test Company 1"])
+
+		self.assertEqual(len(self.run_report("stock", "batch_split_tree", {"batch": batch})), 1)
+
+		with self.set_user(self.make_report_user()):
+			self.assertEqual(self.run_report("stock", "batch_split_tree", {"batch": batch}), [])

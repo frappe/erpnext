@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns = get_columns()
@@ -75,7 +77,7 @@ def apply_representative_lines(rows, sales_orders):
 def get_data():
 	so = frappe.qb.DocType("Sales Order")
 	so_item = frappe.qb.DocType("Sales Order Item")
-	sales_order_entry = (
+	query = (
 		frappe.qb.from_(so)
 		.inner_join(so_item)
 		.on(so.name == so_item.parent)
@@ -93,8 +95,12 @@ def get_data():
 		)
 		.where((so.docstatus == 1) & so.status.notin(["Closed", "Completed", "Cancelled"]))
 		.groupby(so.name, so_item.item_code)
-		.run(as_dict=1)
 	)
+
+	if condition := get_allowed_companies_condition(so.company, "Sales Order"):
+		query = query.where(condition)
+
+	sales_order_entry = query.run(as_dict=1)
 
 	sales_orders = [row.name for row in sales_order_entry]
 	apply_representative_lines(sales_order_entry, sales_orders)

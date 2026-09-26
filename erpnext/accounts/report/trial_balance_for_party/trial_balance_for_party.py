@@ -10,6 +10,7 @@ from frappe.utils import cint, flt
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 from erpnext.accounts.utils import get_currency_precision
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
 def execute(filters=None):
@@ -31,7 +32,11 @@ def get_data(filters, show_party_name):
 	else:
 		party_name_field = "name"
 
-	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
+	party_filters = [{"name": filters.get("party")}] if filters.get("party") else []
+	party_type = frappe.qb.DocType(filters.get("party_type"))
+	if condition := get_allowed_masters_condition(party_type.name, filters.get("party_type")):
+		party_filters.append(condition)
+
 	parties = frappe.get_all(
 		filters.get("party_type"),
 		fields=["name", party_name_field],

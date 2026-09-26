@@ -3,6 +3,10 @@ from collections import defaultdict
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_masters_condition,
+	remove_restricted_masters,
+)
 from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
@@ -27,11 +31,19 @@ def get_data(filters):
 
 def get_root_batches(filters):
 	batch = frappe.qb.DocType("Batch")
-	child = frappe.qb.DocType("Batch").as_("child")
-
 	if filters.batch:
-		return [filters.batch]
+		query = frappe.qb.from_(batch).select(batch.name).where(batch.name == filters.batch)
+	else:
+		query = get_split_roots_query(batch, filters)
 
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
+
+	return query.run(pluck=True)
+
+
+def get_split_roots_query(batch, filters):
+	child = frappe.qb.DocType("Batch").as_("child")
 	query = (
 		frappe.qb.from_(batch)
 		.inner_join(child)
@@ -46,7 +58,7 @@ def get_root_batches(filters):
 	if filters.item_code:
 		query = query.where(batch.item == filters.item_code)
 
-	return query.run(pluck=True)
+	return query
 
 
 def get_children_map(roots):
@@ -79,7 +91,7 @@ def get_children_map(roots):
 	).run(as_dict=True)
 
 	children_map = defaultdict(dict)
-	for row in rows:
+	for row in remove_restricted_masters(rows, "item", "Item"):
 		children_map[row.parent_batch][row.name] = row
 
 	return children_map

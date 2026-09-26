@@ -62,6 +62,19 @@ def get_allowed_companies(user, doctype):
 	return get_allowed_docs_for_doctype(user_permissions["Company"], doctype) or None
 
 
+def get_allowed_companies_condition(field, doctype):
+	if allowed_companies := get_allowed_companies(frappe.session.user, doctype):
+		return field.isin(allowed_companies)
+	return None
+
+
+def get_allowed_warehouses_condition(field):
+	warehouse = frappe.qb.DocType("Warehouse")
+	if condition := get_allowed_companies_condition(warehouse.company, "Warehouse"):
+		return field.isin(frappe.qb.from_(warehouse).select(warehouse.name).where(condition))
+	return None
+
+
 def get_permission_query_conditions(user, doctype=None):
 	if not doctype:
 		return None
@@ -78,18 +91,34 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 		return None
 
 	master_doctype, fieldname = inherited
-	allowed_companies = get_allowed_companies(user, master_doctype)
+	return get_allowed_masters_condition(frappe.qb.DocType(doctype)[fieldname], master_doctype, user)
+
+
+def get_allowed_masters_condition(field, doctype, user=None):
+	if doctype not in RESTRICTABLE_MASTER_DOCTYPES:
+		return None
+
+	allowed_companies = get_allowed_companies(user, doctype)
 	if not allowed_companies:
 		return None
 
-	child = frappe.qb.DocType(doctype)
-	master = frappe.qb.DocType(master_doctype)
+	master = frappe.qb.DocType(doctype)
 	allowed_masters = (
 		frappe.qb.from_(master)
 		.select(master.name)
-		.where(get_restriction_criterion(master_doctype, allowed_companies))
+		.where(get_restriction_criterion(doctype, allowed_companies))
 	)
-	return child[fieldname].isin(allowed_masters)
+	return field.isin(allowed_masters)
+
+
+def remove_restricted_masters(rows, fieldname, doctype):
+	condition = get_allowed_masters_condition(frappe.qb.DocType(doctype).name, doctype)
+	names = list({row.get(fieldname) for row in rows if row.get(fieldname)})
+	if not condition or not names:
+		return rows
+
+	allowed = set(frappe.get_all(doctype, filters=[{"name": ("in", names)}, condition], pluck="name"))
+	return [row for row in rows if row.get(fieldname) in allowed]
 
 
 def get_restriction_criterion(doctype, companies):
