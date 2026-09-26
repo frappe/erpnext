@@ -39,7 +39,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
 from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -82,9 +82,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			with self.subTest(doctype=doctype):
 				record = self.make_number(doctype, "Unlinked-001")
 				identity = SerialBatchIdentity(doctype)
-				with self.assertRaisesRegex(frappe.DoesNotExistError, "Unlinked-001.*_Identity Item B"):
+				with self.assertRaisesRegex(SerialBatchNotFoundError, "Unlinked-001.*_Identity Item B"):
 					identity.get_numbers(self.other_item.name, [record.name])
-				with self.assertRaises(frappe.DoesNotExistError):
+				with self.assertRaises(SerialBatchNotFoundError):
 					identity.get_numbers(self.item.name, [record.name, "Missing-ID"])
 
 	def test_resolution_spans_match_chunks(self):
@@ -121,7 +121,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 	def test_missing_numbers_are_not_created(self):
 		for doctype in ("Serial No", "Batch"):
 			count = frappe.db.count(doctype)
-			with self.assertRaisesRegex(frappe.DoesNotExistError, "Missing-001.*_Identity Item A"):
+			with self.assertRaisesRegex(SerialBatchNotFoundError, "Missing-001.*_Identity Item A"):
 				SerialBatchIdentity(doctype).resolve(self.item.name, ["Missing-001"])
 			self.assertEqual(frappe.db.count(doctype), count)
 
@@ -1339,7 +1339,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			{second_batch.name: ["POS-Serial-2"], first_batch.name: ["POS-Serial-1"]},
 		)
 		count = frappe.db.count("Serial No")
-		with self.assertRaises(frappe.DoesNotExistError):
+		with self.assertRaises(SerialBatchNotFoundError):
 			get_serials_by_batch(self.item.name, "POS-Missing", self.pos_profile())
 		self.assertEqual(frappe.db.count("Serial No"), count)
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
