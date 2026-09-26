@@ -181,14 +181,17 @@ def get_billed_amount_against_po(po_items: list) -> dict:
 
 
 def update_billing_percentage(
-	pr_doc, update_modified: bool = True, adjust_incoming_rate: bool = False
+	pr_doc, update_modified: bool = True, adjust_incoming_rate: bool = False, invoiced: dict | None = None
 ) -> None:
+	"""`invoiced` from get_invoiced_qty_and_amount lets receipts on one order line share its invoice split."""
 	buying_settings = frappe.get_single("Buying Settings")
 	bill_for_rejected = buying_settings.bill_for_rejected_quantity_in_purchase_invoice
 	items = [item for item in pr_doc.items if not item.closed] or pr_doc.items
 
 	if buying_settings.set_landed_cost_based_on_purchase_invoice_rate:
-		percent_billed = get_percent_billed_by_qty(pr_doc, items, bill_for_rejected)
+		if invoiced is None:
+			invoiced = get_invoiced_qty_and_amount(pr_doc.items, bill_for_rejected)
+		percent_billed = get_percent_billed_by_qty(pr_doc, items, bill_for_rejected, invoiced)
 	else:
 		percent_billed = get_percent_billed_by_amount(pr_doc, items, bill_for_rejected)
 
@@ -199,7 +202,7 @@ def update_billing_percentage(
 		pr_doc.notify_update()
 
 	if adjust_incoming_rate:
-		set_amount_difference_with_purchase_invoice(pr_doc, items, bill_for_rejected)
+		set_amount_difference_with_purchase_invoice(items, invoiced)
 		adjust_incoming_rate_for_pr(pr_doc)
 
 
@@ -256,9 +259,9 @@ def is_billed_by_qty() -> bool:
 	)
 
 
-def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool) -> float:
+def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool, invoiced: dict) -> float:
 	billable_qty = get_billable_qty_by_row(pr_doc, items, bill_for_rejected)
-	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, bill_for_rejected))
+	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, invoiced))
 
 
 def get_qty_based_percent_billed(items: list, billable_qty: dict, invoiced_qty: dict) -> float:
@@ -297,11 +300,8 @@ def get_billable_qty(item, returned_qty: float | None, bill_for_rejected: bool) 
 	return flt(item.qty) - flt(returned_qty)
 
 
-def get_invoiced_qty(pr_doc, bill_for_rejected: bool) -> dict:
-	invoiced_qty = {
-		name: invoiced.qty
-		for name, invoiced in get_invoiced_qty_and_amount(pr_doc, bill_for_rejected).items()
-	}
+def get_invoiced_qty(pr_doc, invoiced: dict) -> dict:
+	invoiced_qty = {name: row.qty for name, row in invoiced.items()}
 
 	for item in pr_doc.items:
 		if item.purchase_invoice_item:
@@ -310,18 +310,18 @@ def get_invoiced_qty(pr_doc, bill_for_rejected: bool) -> dict:
 	return invoiced_qty
 
 
-def get_invoiced_qty_and_amount(pr_doc, bill_for_rejected: bool) -> dict:
+def get_invoiced_qty_and_amount(pr_items: list, bill_for_rejected: bool) -> dict:
 	"""Invoiced qty and base amount per Purchase Receipt Item, direct and through the Purchase Order."""
-	billed = get_billed_qty_amount_against_purchase_receipt([item.name for item in pr_doc.items])
+	billed = get_billed_qty_amount_against_purchase_receipt([item.name for item in pr_items])
 	invoiced = {
 		pr_detail: frappe._dict(qty=flt(row["qty"]), amount=flt(row["amount"]))
 		for pr_detail, row in billed.items()
 	}
 
-	po_details = [item.purchase_order_item for item in pr_doc.items if item.purchase_order_item]
+	po_details = list({item.purchase_order_item for item in pr_items if item.purchase_order_item})
 	po_invoice_share = get_po_invoice_share(po_details, bill_for_rejected) if po_details else {}
 
-	for item in pr_doc.items:
+	for item in pr_items:
 		share = po_invoice_share.get(item.name)
 		if not share or item.purchase_invoice_item:
 			continue
@@ -432,9 +432,7 @@ def get_invoiced_qty_against_po_items(po_items: list) -> dict:
 	return frappe._dict(query.run())
 
 
-def set_amount_difference_with_purchase_invoice(pr_doc, items: list, bill_for_rejected: bool) -> None:
-	invoiced = get_invoiced_qty_and_amount(pr_doc, bill_for_rejected)
-
+def set_amount_difference_with_purchase_invoice(items: list, invoiced: dict) -> None:
 	for item in items:
 		adjusted_amt = 0.0
 		row = invoiced.get(item.name)
