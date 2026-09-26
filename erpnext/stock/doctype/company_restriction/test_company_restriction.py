@@ -240,6 +240,29 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Party Specific Item", doc=records[restricted]))
 			self.assertTrue(frappe.has_permission("Party Specific Item", doc=records[allowed]))
 
+	def test_record_without_company_inherits_master_company_restriction(self):
+		restricted = make_customer("_Test Empty Company Restricted Customer")
+		allowed = make_customer("_Test Empty Company Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		leads = {
+			customer: frappe.get_doc({"doctype": "Lead", "first_name": "_Test", "customer": customer})
+			.insert()
+			.name
+			for customer in (restricted, allowed)
+		}
+
+		user = self.make_user_with_roles("test_empty_company_restriction@example.com", ["Sales Manager"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			visible = frappe.get_list(
+				"Lead", filters={"name": ("in", list(leads.values()))}, pluck="customer"
+			)
+			self.assertEqual(visible, [allowed])
+
+			self.assertFalse(frappe.has_permission("Lead", doc=leads[restricted]))
+			self.assertTrue(frappe.has_permission("Lead", doc=leads[allowed]))
+
 	def make_user_with_roles(self, email, roles):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
