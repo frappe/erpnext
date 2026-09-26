@@ -257,12 +257,7 @@ def is_billed_by_qty() -> bool:
 
 
 def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool) -> float:
-	returned_qty = get_item_wise_returned_qty([item.name for item in pr_doc.items])
-	billable_qty = {}
-	for item in items:
-		qty = get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected)
-		billable_qty[item.name] = qty if qty > 0 else flt(item.qty)
-
+	billable_qty = get_billable_qty_by_row(pr_doc, items, bill_for_rejected)
 	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, bill_for_rejected))
 
 
@@ -281,6 +276,18 @@ def get_qty_based_percent_billed(items: list, billable_qty: dict, invoiced_qty: 
 		billed_weight += weight * min(flt(invoiced_qty.get(item.name)) / qty, 1)
 
 	return round(100 * (billed_weight / (total_weight or 1)), 6)
+
+
+def get_billable_qty_by_row(pr_doc, items: list, bill_for_rejected: bool) -> dict:
+	"""Qty left to bill per row; a receipt returned in full is measured against what it received."""
+	returned_qty = get_item_wise_returned_qty([item.name for item in pr_doc.items])
+	billable_qty = {
+		item.name: get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected) for item in items
+	}
+	if any(qty > 0 for qty in billable_qty.values()):
+		return billable_qty
+
+	return {item.name: flt(item.qty) for item in items}
 
 
 def get_billable_qty(item, returned_qty: float | None, bill_for_rejected: bool) -> float:
@@ -432,8 +439,7 @@ def set_amount_difference_with_purchase_invoice(pr_doc, items: list, bill_for_re
 		adjusted_amt = 0.0
 		row = invoiced.get(item.name)
 		if row and row.qty:
-			receipt_rate = flt(item.rate) * flt(pr_doc.conversion_rate)
-			adjusted_amt = (row.amount / row.qty - receipt_rate) * flt(item.qty)
+			adjusted_amt = flt(row.amount / row.qty) * flt(item.qty) - flt(item.base_net_amount)
 
 		adjusted_amt = flt(adjusted_amt, item.precision("amount"))
 		item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
