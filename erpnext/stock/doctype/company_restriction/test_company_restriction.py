@@ -328,11 +328,8 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			self.assertIn(allowed_customer, customers)
 			self.assertNotIn(restricted_customer, customers)
 
-	def test_reports_keep_to_permitted_companies(self):
+	def make_stock_in_both_companies(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-		from erpnext.stock.report.stock_projected_qty.stock_projected_qty import (
-			execute as stock_projected_qty,
-		)
 
 		make_stock_entry(item_code="_Test Item", qty=5, to_warehouse="Stores - _TC", basic_rate=100)
 		make_stock_entry(
@@ -342,6 +339,13 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			company="_Test Company 1",
 			basic_rate=100,
 		)
+
+	def test_reports_keep_to_permitted_companies(self):
+		from erpnext.stock.report.stock_projected_qty.stock_projected_qty import (
+			execute as stock_projected_qty,
+		)
+
+		self.make_stock_in_both_companies()
 		own_request = make_material_request()
 		other_request = make_material_request(
 			company="_Test Company 1", warehouse="Stores - _TC1", cost_center="Main - _TC1"
@@ -359,3 +363,12 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			}
 			self.assertIn(own_request.name, requests)
 			self.assertNotIn(other_request.name, requests)
+
+	def test_item_balance_keeps_to_permitted_warehouses(self):
+		self.make_stock_in_both_companies()
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "item_balance", {})
+			warehouses = {row.warehouse for row in rows if row.item_code == "_Test Item"}
+			self.assertIn("Stores - _TC", warehouses)
+			self.assertNotIn("Stores - _TC1", warehouses)
