@@ -1177,6 +1177,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 		self.assertEqual(pr.per_billed, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_non_updating_debit_note_kept_out_of_qty_billing(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+
+		pr = make_purchase_receipt(qty=100, rate=50)
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].qty = 50
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -20
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.submit()
+
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].qty = 50
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
