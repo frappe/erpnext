@@ -778,7 +778,10 @@ def get_first_serial_id(item):
 	serial_numbers = get_serial_nos(item.get("serial_no"))
 	if not serial_numbers:
 		return None
-	return SerialBatchIdentity("Serial No").resolve(item.get("item_code"), serial_numbers[:1])[0]
+	records = SerialBatchIdentity("Serial No").get_records(
+		item.get("item_code"), serial_numbers[:1], ["name"]
+	)
+	return records[0].name if records else None
 
 
 def is_reposting_pending():
