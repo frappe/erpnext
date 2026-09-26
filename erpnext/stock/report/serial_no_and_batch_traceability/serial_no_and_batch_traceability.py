@@ -1,6 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder import Case
@@ -267,7 +269,31 @@ class ReportData:
 		if condition := get_allowed_masters_condition(item_field, "Item"):
 			query = query.where(condition)
 
-		return query.run(as_dict=True)
+		rows = query.run(as_dict=True)
+		hidden_references = self.get_other_company_references(rows)
+		return [row for row in rows if (row.reference_doctype, row.reference_name) not in hidden_references]
+
+	def get_other_company_references(self, rows):
+		references = defaultdict(set)
+		for row in rows:
+			if row.reference_doctype and row.reference_name:
+				references[row.reference_doctype].add(row.reference_name)
+
+		hidden_references = set()
+		for doctype, names in references.items():
+			if not frappe.get_meta(doctype).has_field("company"):
+				continue
+
+			condition = get_allowed_companies_condition(frappe.qb.DocType(doctype).company, doctype)
+			if not condition:
+				continue
+
+			allowed = frappe.get_all(
+				doctype, filters=[{"name": ("in", list(names))}, condition], pluck="name"
+			)
+			hidden_references.update((doctype, name) for name in names.difference(allowed))
+
+		return hidden_references
 
 	def get_doctype(self):
 		if self.filters.item_code:
