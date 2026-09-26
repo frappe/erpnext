@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
 
-from erpnext.stock.expected_valuation import iterate_expected_valuation
+from erpnext.stock.expected_valuation import iterate_expected_valuations
 
 SHOW_FIRST_DIFFERENCE = "First Difference per Item-Warehouse"
 SHOW_ALL_DIFFERENCES = "All Differences"
@@ -39,14 +39,20 @@ def execute(filters=None):
 def get_data(filters) -> list[dict]:
 	tolerance = get_default_tolerance() if filters.get("tolerance") in (None, "") else flt(filters.tolerance)
 
+	item_warehouses = [(row.item_code, row.warehouse) for row in get_item_warehouses(filters)]
+
 	data = []
-	for item_warehouse in get_item_warehouses(filters):
-		data.extend(get_rows_to_show(item_warehouse.item_code, item_warehouse.warehouse, filters, tolerance))
+	for item_code, warehouse, expected_valuation in iterate_expected_valuations(
+		item_warehouses, to_date=filters.to_date
+	):
+		data.extend(get_rows_to_show(item_code, warehouse, expected_valuation, filters, tolerance))
 
 	return data
 
 
-def get_rows_to_show(item_code: str, warehouse: str, filters, tolerance: float) -> list[dict]:
+def get_rows_to_show(
+	item_code: str, warehouse: str, expected_valuation, filters, tolerance: float
+) -> list[dict]:
 	"""Compare the item-warehouse's ledger with its expected values.
 
 	The replay has to start at the first entry, but it stops at To Date, and at the
@@ -56,7 +62,7 @@ def get_rows_to_show(item_code: str, warehouse: str, filters, tolerance: float) 
 	show = filters.show or SHOW_FIRST_DIFFERENCE
 
 	rows = []
-	for entry, expected in iterate_expected_valuation(item_code, warehouse, to_date=filters.to_date):
+	for entry, expected in expected_valuation:
 		if from_date and getdate(entry.posting_date) < from_date:
 			continue
 

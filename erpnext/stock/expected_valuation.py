@@ -35,6 +35,10 @@ How an entry is valued
   return from the top of the stack, as the stock ledger does.
 * A Stock Reconciliation without serial / batch nos sets the qty and the rate.
   With them, it is an issue of the counted-out lots and a receipt of the counted-in ones.
+  For an item valued in the pool alone (serial no wise valuation off, no batches) both
+  its entries set the counted qty: the count-out at the rate on hand, the count-in at
+  the reconciled rate. Either way the balance comes from the reconciliation row, never
+  from the ledger entry being checked.
 * Once the warehouse holds no stock, whatever value is left over is written off.
   A lot that runs out takes its leftover value with it.
 * Stock going out with nothing on hand to price it uses the warehouse's average
@@ -48,15 +52,16 @@ Known limits: the incoming rate of a transfer, repack or manufacture is not
 checked against its source here; replay always starts at the first entry.
 """
 
+import operator
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from functools import reduce
 
 import frappe
-from frappe.utils import cint, create_batch, flt
+from frappe.utils import cint, create_batch, flt, getdate
 
 from erpnext.controllers.sales_and_purchase_return import get_return_against_item_fields
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_valuation_method
 
 # Why an entry got the value it did; shown next to the expected values.
 BASIS_INCOMING_RATE = "Incoming rate"
@@ -72,6 +77,10 @@ BASIS_STANDARD_COST = "Standard cost"
 BASIS_NO_STOCK = "No stock on hand (fallback rate)"
 
 RETURNABLE_PURCHASE_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt")
+
+# Item-warehouses whose ledgers and details are read together, so a run over a whole
+# company makes a fixed number of queries per this many item-warehouses.
+ITEM_WAREHOUSES_PER_READ = 100
 
 LEDGER_FIELDS = (
 	"name",
@@ -367,21 +376,40 @@ def get_expected_valuation(
 	Returns every active Stock Ledger Entry in posting order, each with the values
 	it should carry.
 	"""
-	return list(iterate_expected_valuation(item_code, warehouse, to_date))
+	for _item_code, _warehouse, expected_valuation in iterate_expected_valuations(
+		[(item_code, warehouse)], to_date
+	):
+		return list(expected_valuation)
+
+	return []
 
 
-def iterate_expected_valuation(
-	item_code: str, warehouse: str, to_date=None
+def iterate_expected_valuations(
+	item_warehouses: list[tuple[str, str]], to_date=None
+) -> Iterator[tuple[str, str, Iterator[tuple[frappe._dict, ExpectedValues]]]]:
+	"""Replay the ledger of every (item, warehouse), from its first entry up to `to_date`.
+
+	Yields each item-warehouse that has entries, with its entries and their expected
+	values one at a time, so a caller can stop early. Everything the replay reads is
+	read in bulk for ITEM_WAREHOUSES_PER_READ item-warehouses at a time.
+	"""
+	settings = ValuationSettings()
+
+	for item_warehouses_to_read in create_batch(list(item_warehouses), ITEM_WAREHOUSES_PER_READ):
+		entries_by_item_warehouse = get_ledger_entries(item_warehouses_to_read, to_date, settings)
+		data = LedgerData(entries_by_item_warehouse, settings)
+
+		for item_code, warehouse in item_warehouses_to_read:
+			ledger_entries = entries_by_item_warehouse.get((item_code, warehouse))
+			if ledger_entries:
+				details = ValuationDetails(item_code, ledger_entries[0].company, data)
+				yield item_code, warehouse, replay_ledger(ledger_entries, details)
+
+
+def replay_ledger(
+	ledger_entries: list, details: "ValuationDetails"
 ) -> Iterator[tuple[frappe._dict, ExpectedValues]]:
-	"""The same as get_expected_valuation, one entry at a time, so a caller can stop early."""
-	ledger_entries = get_ledger_entries(item_code, warehouse, to_date)
-	if not ledger_entries:
-		return
-
-	company = ledger_entries[0].company
-	valuation_method = get_valuation_method(item_code, company)
-	details = ValuationDetails(item_code, warehouse, valuation_method, ledger_entries)
-	stock = ItemWarehouseStock(valuation_method)
+	stock = ItemWarehouseStock(details.valuation_method)
 
 	for entry in ledger_entries:
 		yield entry, value_ledger_entry(stock, entry, details)
@@ -476,10 +504,8 @@ def issue_stock(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -
 
 
 def value_at_standard_cost(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -> ExpectedValues:
-	from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
-
 	carried_value_before = stock.carried_value
-	rate = flt(get_item_standard_rate(entry.item_code, entry.company, entry.posting_date))
+	rate = details.get_standard_rate(entry.posting_date)
 
 	if details.is_reconciled_balance(entry):
 		qty, _rate = details.get_reconciled_balance(entry)
@@ -509,38 +535,46 @@ def make_expected_values(
 	)
 
 
-class ValuationDetails:
-	"""Everything the replay needs beyond the ledger entries themselves, read in bulk
-	up front: bundle rows, batch valuation flags, reconciled balances and return rates."""
+class ValuationSettings:
+	"""Site-wide settings the replay depends on, read once."""
 
-	def __init__(self, item_code: str, warehouse: str, valuation_method: str, ledger_entries: list):
-		self.item_code = item_code
-		self.warehouse = warehouse
-		self.valuation_method = valuation_method
+	def __init__(self):
 		float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
-		currency_precision = (
+		self.currency_precision = (
 			cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
 		)
-		self.currency_precision = currency_precision
 		self.qty_tolerance = 1.0 / 10**float_precision
-		self.value_tolerance = 1.0 / 10**currency_precision
-
-		self.bundle_rows = get_bundle_rows(
-			[entry.serial_and_batch_bundle for entry in ledger_entries if entry.serial_and_batch_bundle]
-		)
-		self.batch_wise_valued_batches = get_batch_wise_valued_batches(
-			self.get_batches(ledger_entries), valuation_method
-		)
-		self.reconciled_balances = get_reconciled_balances(ledger_entries)
+		self.value_tolerance = 1.0 / 10**self.currency_precision
 		self.dimension_fields = get_inventory_dimension_fields()
-		self.purchase_return_rates = {}
-
-		item = frappe.get_cached_value(
-			"Item", item_code, ["has_serial_no", "has_batch_no", "use_serial_no_wise_valuation"], as_dict=True
+		self.do_not_use_batchwise_valuation = cint(
+			frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
 		)
-		self.has_batch_no = bool(item.has_batch_no)
-		# with serial no wise valuation off, serial and batch nos are only labels on pool stock
-		self.values_everything_in_pool = bool(item.has_serial_no and not item.use_serial_no_wise_valuation)
+
+
+class LedgerData:
+	"""Everything the replay needs beyond the ledger entries themselves, read in bulk for
+	a set of item-warehouses: bundle rows, batch valuation flags, reconciled balances,
+	item and company settings, purchase return rates and standard costs."""
+
+	def __init__(self, entries_by_item_warehouse: dict, settings: ValuationSettings):
+		ledger_entries = [entry for entries in entries_by_item_warehouse.values() for entry in entries]
+
+		self.settings = settings
+		self.bundle_rows = get_bundle_rows(
+			{entry.serial_and_batch_bundle for entry in ledger_entries if entry.serial_and_batch_bundle}
+		)
+		self.batch_wise_valued_batches = get_batch_wise_valued_batches(self.get_batches(ledger_entries))
+		self.reconciled_balances = get_reconciled_balances(ledger_entries)
+		self.items = get_item_settings({entry.item_code for entry in ledger_entries})
+		self.company_valuation_methods = get_company_valuation_methods()
+		self.purchase_return_rates = get_purchase_return_rates(ledger_entries)
+		self.standard_rates = get_standard_rates(
+			[
+				entry
+				for entry in ledger_entries
+				if self.get_valuation_method(entry.item_code, entry.company) == "Standard Cost"
+			]
+		)
 
 	def get_batches(self, ledger_entries) -> set[str]:
 		batches = {entry.batch_no for entry in ledger_entries if entry.batch_no}
@@ -549,8 +583,40 @@ class ValuationDetails:
 
 		return batches
 
+	def get_valuation_method(self, item_code: str, company: str) -> str:
+		return (
+			self.items[item_code].valuation_method
+			or self.company_valuation_methods.get(company)
+			or frappe.db.get_single_value("Stock Settings", "valuation_method")
+			or "FIFO"
+		)
+
+
+class ValuationDetails:
+	"""What the replay of one item-warehouse needs to know, from the bulk-read LedgerData."""
+
+	def __init__(self, item_code: str, company: str, data: LedgerData):
+		self.item_code = item_code
+		self.company = company
+		self.data = data
+		self.valuation_method = data.get_valuation_method(item_code, company)
+
+		item = data.items[item_code]
+		self.has_batch_no = bool(item.has_batch_no)
+		# with serial no wise valuation off, serial and batch nos are only labels on pool stock
+		self.values_everything_in_pool = bool(item.has_serial_no and not item.use_serial_no_wise_valuation)
+		self.batch_wise_valuation_is_off = bool(
+			self.values_everything_in_pool
+			or (self.valuation_method == "Moving Average" and data.settings.do_not_use_batchwise_valuation)
+		)
+
+		self.currency_precision = data.settings.currency_precision
+		self.qty_tolerance = data.settings.qty_tolerance
+		self.value_tolerance = data.settings.value_tolerance
+		self.dimension_fields = data.settings.dimension_fields
+
 	def is_valued_batch_wise(self, batch_no: str) -> bool:
-		return not self.values_everything_in_pool and batch_no in self.batch_wise_valued_batches
+		return not self.batch_wise_valuation_is_off and batch_no in self.data.batch_wise_valued_batches
 
 	def is_reconciled_balance(self, entry) -> bool:
 		"""A Stock Reconciliation that sets the qty and rate outright, rather than moving lots."""
@@ -562,16 +628,21 @@ class ValuationDetails:
 		):
 			return False
 
-		if self.values_everything_in_pool:
-			return not self.has_batch_no
+		if self.values_everything_in_pool and not self.has_batch_no:
+			return True
 
+		# otherwise a serial / batch reconciliation is a count-out of the lots on hand and a
+		# count-in of the counted ones, which are replayed as movements
 		return not entry.serial_and_batch_bundle and not entry.serial_no
 
 	def get_reconciled_balance(self, entry) -> tuple[float, float]:
-		reconciled = self.reconciled_balances.get(entry.voucher_detail_no)
-		# a serial no reconciliation posts a count-out and a count-in entry, each with its own balance
-		if reconciled and not entry.serial_and_batch_bundle and not entry.serial_no:
-			return flt(reconciled.qty), flt(reconciled.valuation_rate, self.currency_precision)
+		reconciled = self.data.reconciled_balances.get(entry.voucher_detail_no)
+		if reconciled:
+			rate = reconciled.valuation_rate
+			if flt(entry.actual_qty) < 0 and (entry.serial_and_batch_bundle or entry.serial_no):
+				rate = reconciled.current_valuation_rate
+
+			return flt(reconciled.qty), flt(rate, self.currency_precision)
 
 		return flt(entry.qty_after_transaction), flt(entry.valuation_rate)
 
@@ -598,7 +669,8 @@ class ValuationDetails:
 		if self.values_everything_in_pool:
 			return [LotMovement(qty=qty, rate=flt(entry.incoming_rate))]
 
-		if entry.serial_and_batch_bundle and self.bundle_rows.get(entry.serial_and_batch_bundle):
+		bundle_rows = self.data.bundle_rows.get(entry.serial_and_batch_bundle)
+		if entry.serial_and_batch_bundle and bundle_rows:
 			return [
 				LotMovement(
 					qty=abs(flt(row.qty)),
@@ -606,7 +678,7 @@ class ValuationDetails:
 					batch_no=row.batch_no,
 					serial_no=row.serial_no,
 				)
-				for row in self.bundle_rows[entry.serial_and_batch_bundle]
+				for row in bundle_rows
 			]
 
 		# entries made before Serial and Batch Bundles carry their serial / batch nos inline
@@ -627,107 +699,208 @@ class ValuationDetails:
 		):
 			return None
 
-		if entry.name not in self.purchase_return_rates:
-			self.purchase_return_rates[entry.name] = get_rate_of_returned_receipt(entry)
+		return self.data.purchase_return_rates.get(entry.name)
 
-		return self.purchase_return_rates[entry.name]
+	def get_standard_rate(self, posting_date) -> float:
+		"""The standard rate in effect on the posting date: the latest one effective on or before it."""
+		rate = 0.0
+		for effective_date, standard_rate in self.data.standard_rates.get((self.item_code, self.company), []):
+			if effective_date > getdate(posting_date):
+				break
+			rate = standard_rate
+
+		return flt(rate)
 
 
-def get_ledger_entries(item_code: str, warehouse: str, to_date=None) -> list[frappe._dict]:
-	fields = list(LEDGER_FIELDS) + get_inventory_dimension_fields()
-	filters = {"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0}
-	if to_date:
-		filters["posting_date"] = ("<=", to_date)
+def get_ledger_entries(item_warehouses: list[tuple[str, str]], to_date, settings: ValuationSettings) -> dict:
+	"""Active ledger entries of the item-warehouses in posting order, grouped by (item, warehouse)."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	fields = [sle[fieldname] for fieldname in (*LEDGER_FIELDS, *settings.dimension_fields)]
 
-	return frappe.get_all(
-		"Stock Ledger Entry",
-		filters=filters,
-		fields=fields,
-		order_by="posting_datetime asc, creation asc",
+	of_item_warehouses = reduce(
+		operator.or_,
+		(
+			(sle.item_code == item_code) & (sle.warehouse == warehouse)
+			for item_code, warehouse in item_warehouses
+		),
 	)
+	query = (
+		frappe.qb.from_(sle)
+		.select(*fields)
+		.where((sle.is_cancelled == 0) & of_item_warehouses)
+		.orderby(sle.item_code)
+		.orderby(sle.warehouse)
+		.orderby(sle.posting_datetime)
+		.orderby(sle.creation)
+	)
+	if to_date:
+		query = query.where(sle.posting_date <= getdate(to_date))
+
+	entries_by_item_warehouse = {}
+	for entry in query.run(as_dict=True):
+		entries_by_item_warehouse.setdefault((entry.item_code, entry.warehouse), []).append(entry)
+
+	return entries_by_item_warehouse
 
 
-def get_bundle_rows(bundles: list[str]) -> dict[str, list[frappe._dict]]:
+def get_bundle_rows(bundles: set[str]) -> dict[str, list[frappe._dict]]:
 	rows_by_bundle = {}
-	if not bundles:
-		return rows_by_bundle
 
-	for rows in create_batch(bundles, 1000):
+	for bundles_to_read in create_batch(list(bundles), 1000):
 		for row in frappe.get_all(
 			"Serial and Batch Entry",
-			filters={"parent": ("in", rows)},
+			filters={"parent": ("in", bundles_to_read)},
 			fields=["parent", "serial_no", "batch_no", "qty", "incoming_rate"],
-			order_by="idx asc",
+			order_by="parent asc, idx asc",
 		):
 			rows_by_bundle.setdefault(row.parent, []).append(row)
 
 	return rows_by_bundle
 
 
-def get_batch_wise_valued_batches(batches: set[str], valuation_method: str) -> set[str]:
-	if not batches:
-		return set()
+def get_batch_wise_valued_batches(batches: set[str]) -> set[str]:
+	valued_batch_wise = set()
 
-	if valuation_method == "Moving Average" and frappe.db.get_single_value(
-		"Stock Settings", "do_not_use_batchwise_valuation"
-	):
-		return set()
-
-	return set(
-		frappe.get_all(
-			"Batch",
-			filters={"name": ("in", list(batches)), "use_batchwise_valuation": 1},
-			pluck="name",
+	for batches_to_read in create_batch(list(batches), 1000):
+		valued_batch_wise.update(
+			frappe.get_all(
+				"Batch",
+				filters={"name": ("in", batches_to_read), "use_batchwise_valuation": 1},
+				pluck="name",
+			)
 		)
-	)
+
+	return valued_batch_wise
 
 
 def get_reconciled_balances(ledger_entries) -> dict[str, frappe._dict]:
-	rows = [
+	rows = {
 		entry.voucher_detail_no
 		for entry in ledger_entries
 		if entry.voucher_type == "Stock Reconciliation" and entry.voucher_detail_no
-	]
-	if not rows:
+	}
+
+	reconciled_balances = {}
+	for rows_to_read in create_batch(list(rows), 1000):
+		for row in frappe.get_all(
+			"Stock Reconciliation Item",
+			filters={"name": ("in", rows_to_read)},
+			fields=["name", "qty", "valuation_rate", "current_valuation_rate"],
+		):
+			reconciled_balances[row.name] = row
+
+	return reconciled_balances
+
+
+def get_item_settings(item_codes: set[str]) -> dict[str, frappe._dict]:
+	if not item_codes:
 		return {}
 
 	return {
-		row.name: row
-		for row in frappe.get_all(
-			"Stock Reconciliation Item",
-			filters={"name": ("in", rows)},
-			fields=["name", "qty", "valuation_rate"],
+		item.name: item
+		for item in frappe.get_all(
+			"Item",
+			filters={"name": ("in", list(item_codes))},
+			fields=[
+				"name",
+				"valuation_method",
+				"has_serial_no",
+				"has_batch_no",
+				"use_serial_no_wise_valuation",
+			],
 		)
 	}
 
 
-def get_rate_of_returned_receipt(entry) -> float | None:
-	voucher = frappe.db.get_value(
-		entry.voucher_type, entry.voucher_no, ["is_return", "return_against"], as_dict=True
-	)
-	if not voucher or not voucher.is_return or not voucher.return_against:
-		return None
+def get_company_valuation_methods() -> dict[str, str]:
+	return dict(frappe.get_all("Company", fields=["name", "valuation_method"], as_list=True))
 
-	filters = {
-		"voucher_type": entry.voucher_type,
-		"voucher_no": voucher.return_against,
-		"item_code": entry.item_code,
-		"warehouse": entry.warehouse,
-		"is_cancelled": 0,
-		"actual_qty": (">", 0),
-	}
 
-	if entry.voucher_detail_no:
-		returned_row = frappe.db.get_value(
-			f"{entry.voucher_type} Item",
-			entry.voucher_detail_no,
-			get_return_against_item_fields(entry.voucher_type),
+def get_purchase_return_rates(ledger_entries) -> dict[str, float | None]:
+	"""For every outward purchase entry that is a return, the incoming rate of the receipt
+	row it returns, keyed by the Stock Ledger Entry. Returns whose receipt cannot be found
+	are left out."""
+	rates = {}
+
+	for voucher_type in RETURNABLE_PURCHASE_DOCTYPES:
+		entries = [
+			entry
+			for entry in ledger_entries
+			if entry.voucher_type == voucher_type and flt(entry.actual_qty) < 0
+		]
+		if not entries:
+			continue
+
+		returned_vouchers = dict(
+			frappe.get_all(
+				voucher_type,
+				filters={"name": ("in", list({entry.voucher_no for entry in entries})), "is_return": 1},
+				fields=["name", "return_against"],
+				as_list=True,
+			)
 		)
-		if returned_row:
-			filters["voucher_detail_no"] = returned_row
+		entries = [entry for entry in entries if returned_vouchers.get(entry.voucher_no)]
+		if not entries:
+			continue
 
-	rate = frappe.db.get_value("Stock Ledger Entry", filters, "incoming_rate")
-	return flt(rate) if rate is not None else None
+		returned_rows = dict(
+			frappe.get_all(
+				f"{voucher_type} Item",
+				filters={
+					"name": (
+						"in",
+						list({entry.voucher_detail_no for entry in entries if entry.voucher_detail_no}),
+					)
+				},
+				fields=["name", get_return_against_item_fields(voucher_type)],
+				as_list=True,
+			)
+		)
+
+		receipt_rates, receipt_row_rates = {}, {}
+		for receipt in frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"voucher_type": voucher_type,
+				"voucher_no": ("in", list(set(returned_vouchers.values()))),
+				"is_cancelled": 0,
+				"actual_qty": (">", 0),
+			},
+			fields=["voucher_no", "voucher_detail_no", "item_code", "warehouse", "incoming_rate"],
+			order_by="posting_datetime asc, creation asc",
+		):
+			key = (receipt.voucher_no, receipt.item_code, receipt.warehouse)
+			receipt_rates.setdefault(key, flt(receipt.incoming_rate))
+			receipt_row_rates.setdefault((*key, receipt.voucher_detail_no), flt(receipt.incoming_rate))
+
+		for entry in entries:
+			key = (returned_vouchers[entry.voucher_no], entry.item_code, entry.warehouse)
+			returned_row = returned_rows.get(entry.voucher_detail_no)
+			rate = receipt_row_rates.get((*key, returned_row)) if returned_row else receipt_rates.get(key)
+			if rate is not None:
+				rates[entry.name] = rate
+
+	return rates
+
+
+def get_standard_rates(ledger_entries) -> dict[tuple[str, str], list[tuple]]:
+	"""The submitted standard rates of the entries' items, per (item, company), oldest first."""
+	item_codes = {entry.item_code for entry in ledger_entries}
+	if not item_codes:
+		return {}
+
+	standard_rates = {}
+	for standard_cost in frappe.get_all(
+		"Item Standard Cost",
+		filters={"item_code": ("in", list(item_codes)), "docstatus": 1},
+		fields=["item_code", "company", "effective_date", "standard_rate"],
+		order_by="effective_date asc, creation asc",
+	):
+		standard_rates.setdefault((standard_cost.item_code, standard_cost.company), []).append(
+			(getdate(standard_cost.effective_date), flt(standard_cost.standard_rate))
+		)
+
+	return standard_rates
 
 
 def get_inventory_dimension_fields() -> list[str]:
