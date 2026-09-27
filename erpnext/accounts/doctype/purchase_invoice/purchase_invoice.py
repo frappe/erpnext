@@ -309,7 +309,9 @@ class PurchaseInvoice(BuyingController):
 				else "qty",
 				billing_flag="update_billed_amount_in_purchase_receipt",
 			)
-			billing_validation.validate_multiple_billing("Purchase Order", "po_detail", "qty")
+			billing_validation.validate_multiple_billing(
+				"Purchase Order", "po_detail", "qty", billing_flag="update_billed_amount_in_purchase_order"
+			)
 		else:
 			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
