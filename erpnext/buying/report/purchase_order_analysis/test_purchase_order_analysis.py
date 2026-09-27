@@ -1,6 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, nowdate
 
@@ -113,3 +115,21 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 			[(row["company"], row["qty"]) for row in group_by_item(rows)],
 			[("_Test Company", 16), ("_Test Company 1", 4)],
 		)
+
+	def test_company_falls_back_to_the_default(self):
+		po = self.make_purchase_order(qty=10)
+		filters = self.get_filters(company=None)
+
+		with patch("erpnext.get_default_company", return_value="_Test Company"):
+			columns, data, message, chart = execute(filters)
+
+		self.assertIn(po.name, [row["purchase_order"] for row in data])
+
+		with patch("erpnext.get_default_company", return_value="_Test Company 1"):
+			columns, data, message, chart = execute(filters)
+
+		self.assertNotIn(po.name, [row["purchase_order"] for row in data])
+
+	def test_company_is_mandatory_without_a_default(self):
+		with patch("erpnext.get_default_company", return_value=None):
+			self.assertRaises(frappe.ValidationError, execute, self.get_filters(company=None))
