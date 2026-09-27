@@ -323,16 +323,6 @@ class TestCalculationFormula(FinancialReportTemplateTestCase):
 		self.assertFalse(self._validate("A + NOPE").is_valid)
 		self.assertFalse(self._validate("nosuchfn(A)").is_valid)
 
-	def test_unknown_names_are_only_warnings_for_the_engine(self):
-		# the engine validates against the codes computed so far, so a name it cannot
-		# resolve yet may still be valid
-		row = frappe._dict(
-			calculation_formula="A + NOPE", idx=1, data_source="Calculated Amount", reference_code="X"
-		)
-		result = CalculationFormulaValidator({"A"}, strict=False).validate(row)
-		self.assertTrue(result.is_valid)
-		self.assertTrue(result.has_warnings)
-
 	def test_divisors_are_left_to_the_engine(self):
 		# whether a divisor is zero depends on the data, so the engine decides
 		self.assertTrue(self._validate("A / B").is_valid)

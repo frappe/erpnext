@@ -862,6 +862,22 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			calculator.evaluate_formula(self._create_mock_report_row("NUMERATOR / ZERO_VAL"))
 
+	def test_reject_results_that_are_not_numbers(self):
+		"""A row shows an amount, so anything else is a broken formula"""
+		calculator = FormulaCalculator({"VALUE": [100.0]}, [{"key": "2023_q1"}])
+
+		# a comparison gives True/False, and bool passes isinstance(x, int)
+		for formula in ("VALUE > 5", "VALUE == 100", "not VALUE", "'text'", "[VALUE]"):
+			with self.subTest(formula=formula), self.assertRaises(frappe.ValidationError):
+				calculator.evaluate_formula(self._create_mock_report_row(formula))
+
+		# these still return an amount
+		for formula in ("VALUE and 5", "VALUE if VALUE else 0", "-VALUE"):
+			with self.subTest(formula=formula):
+				self.assertIsInstance(
+					calculator.evaluate_formula(self._create_mock_report_row(formula))[0], float
+				)
+
 	# 2. DATA HANDLING TESTS
 	def test_handle_missing_values(self):
 		row_data = {
