@@ -43,7 +43,6 @@ from .services.manufacturing import (
 	MaterialConsumptionForManufactureStockEntry,
 	OperationsNotCompleteError,
 	RepackStockEntry,
-	get_alternative_finished_goods,
 )
 from .services.material_receipt_issue import (
 	MaterialIssueStockEntry,
@@ -1543,39 +1542,33 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_process_loss_percentage()
 
 	def get_bom_item_finished_qty(self):
-		"""Received qty of the BOM item, its variants and its alternatives, in the BOM item's stock UOM.
-		Other Repack outputs do not count."""
+		"""Received qty of the BOM item and its variants. Other Repack outputs do not count."""
 		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
-		stock_uom = frappe.get_cached_value("Item", bom_item, "stock_uom")
 		received_rows = [
 			row for row in self.items if row.is_finished_item and row.t_warehouse and not row.s_warehouse
 		]
-		bom_outputs = self.get_bom_item_equivalents(bom_item, {row.item_code for row in received_rows})
-		bom_item_rows = [
-			row for row in received_rows if row.item_code in bom_outputs and row.stock_uom == stock_uom
-		]
+		bom_outputs = [bom_item, *self.get_variants_of(bom_item, {row.item_code for row in received_rows})]
+		bom_item_rows = [row for row in received_rows if row.item_code in bom_outputs]
 
 		if not bom_item_rows:
 			frappe.throw(
 				_(
-					"This entry is made from BOM {0}, so its finished good must be {1}, a variant of it or one of its alternatives, with stock UOM {2}. Uncheck From BOM to make another item."
-				).format(frappe.bold(self.bom_no), frappe.bold(bom_item), frappe.bold(stock_uom)),
+					"This entry is made from BOM {0}, so its finished good must be {1} or a variant of it. Uncheck From BOM to make another item."
+				).format(frappe.bold(self.bom_no), frappe.bold(bom_item)),
 				title=_("Finished Good Does Not Match BOM"),
 				exc=FinishedGoodError,
 			)
 
 		return sum(flt(row.transfer_qty) for row in bom_item_rows)
 
-	def get_bom_item_equivalents(self, bom_item, item_codes):
-		"""Items that count as the BOM item: itself, its variants among item_codes and its alternatives."""
-		other_items = item_codes - {bom_item}
+	def get_variants_of(self, template, item_codes):
+		other_items = item_codes - {template}
 		if not other_items:
-			return {bom_item}
+			return []
 
-		variants = frappe.get_all(
-			"Item", filters={"name": ["in", list(other_items)], "variant_of": bom_item}, pluck="name"
+		return frappe.get_all(
+			"Item", filters={"name": ["in", list(other_items)], "variant_of": template}, pluck="name"
 		)
-		return {bom_item, *variants, *get_alternative_finished_goods(bom_item)}
 
 	def set_process_loss_percentage(self):
 		if not flt(self.fg_completed_qty):
