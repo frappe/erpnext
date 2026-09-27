@@ -351,6 +351,8 @@ class StockClosing:
 				"Stock Closing Balance",
 				fields=[
 					"name",
+					"stock_closing_entry",
+					"inventory_dimension_key",
 					"item_code",
 					"warehouse",
 					"posting_date",
@@ -452,6 +454,20 @@ class StockClosing:
 		return entries[0] if entries else frappe._dict()
 
 	def get_keys(self, row):
+		if row.stock_closing_entry:
+			# Closing balances already contain separate totals for each key.
+			if row.inventory_dimension_key:
+				fields = tuple(json.loads(row.inventory_dimension_key))
+				# Surviving dimensions and the item total have their own closing rows.
+				active_dimensions = {d.fieldname for d in self.inv_dimensions}
+				if not set(fields[2:]).issubset(active_dimensions):
+					return []
+			elif row.batch_no:
+				fields = ("item_code", "warehouse", "batch_no")
+			else:
+				fields = ("item_code", "warehouse")
+			return [{fields: tuple(row.get(field) for field in fields)}]
+
 		keys = []
 
 		keys.append({("item_code", "warehouse"): (row.item_code, row.warehouse)})
