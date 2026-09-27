@@ -305,10 +305,7 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 	if not rows:
 		frappe.throw(_("Please select rows to create GL Reposting Entries"))
 
-	if not from_date:
-		frappe.throw(_("Please select the date to repost the accounting ledgers from"))
-
-	from_date = getdate(from_date)
+	from_date = getdate(from_date) if from_date else None
 
 	entries = []
 	processed_vouchers = set()
@@ -339,7 +336,7 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 
 		# Rows posted before the From Date are skipped, so a stale selection cannot rewrite the
 		# accounting ledgers of an already reconciled period.
-		if getdate(posting.posting_date) < from_date:
+		if from_date and getdate(posting.posting_date) < from_date:
 			continue
 
 		# Skip duplicate vouchers in the selection: a single reposting entry is enough to rewrite the accounting ledgers for a given voucher.

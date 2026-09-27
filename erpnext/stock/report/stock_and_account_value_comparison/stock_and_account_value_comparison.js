@@ -41,8 +41,10 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 	},
 
 	onload(report) {
-		report.page.add_inner_button(__("Create Reposting Entries"), function () {
-			let message = `<div>
+		report.page.add_inner_button(
+			__("Repost Stock & GL Entries"),
+			function () {
+				let message = `<div>
 				<p>
 					${__(
 						"Reposting Entries will change the value of accounts Stock In Hand, and Stock Expenses in the Trial Balance report and will also change the Balance Value in the Stock Balance report."
@@ -51,54 +53,58 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 				<p>${__("Are you sure you want to create Reposting Entries?")}</p>
 				</div>
 			`;
-			let selected_rows = get_selected_rows(__("Reposting Entries"));
+				let selected_rows = get_selected_rows(__("Reposting Entries"));
 
-			frappe.confirm(message, () => {
-				frappe.call({
-					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
-					args: {
-						rows: selected_rows,
-						company: frappe.query_report.get_filter_values().company,
-					},
+				frappe.confirm(message, () => {
+					frappe.call({
+						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
+						args: {
+							rows: selected_rows,
+							company: frappe.query_report.get_filter_values().company,
+						},
+					});
 				});
-			});
-		});
+			},
+			__("Create")
+		);
 
-		report.page.add_inner_button(__("Create GL Reposting Entries"), function () {
-			let selected_rows = get_selected_rows(__("GL Reposting Entries"));
+		report.page.add_inner_button(
+			__("Repost GL Entries"),
+			function () {
+				let selected_rows = get_selected_rows(__("GL Reposting Entries"));
 
-			frappe.prompt(
-				[
-					{
-						label: __("From Date"),
-						fieldname: "from_date",
-						fieldtype: "Date",
-						reqd: 1,
-					},
-					{
-						fieldname: "note",
-						fieldtype: "HTML",
-						options: `<p class="text-muted small">
+				frappe.prompt(
+					[
+						{
+							label: __("From Date"),
+							fieldname: "from_date",
+							fieldtype: "Date",
+						},
+						{
+							fieldname: "note",
+							fieldtype: "HTML",
+							options: `<p class="text-muted small">
 							${__(
 								"Only the accounting ledgers (General Ledger and Payment Ledger) will be reposted, and only for the selected rows posted on or after the From Date. Selected rows posted before it are ignored. Stock Ledger Entries and item valuation rates are left untouched."
 							)}
 						</p>`,
-					},
-				],
-				(values) => {
-					frappe.call({
-						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_gl_reposting_entries",
-						args: {
-							rows: selected_rows,
-							company: frappe.query_report.get_filter_values().company,
-							from_date: values.from_date,
 						},
-					});
-				},
-				__("Create GL Reposting Entries"),
-				__("Create")
-			);
-		});
+					],
+					(values) => {
+						frappe.call({
+							method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_gl_reposting_entries",
+							args: {
+								rows: selected_rows,
+								company: frappe.query_report.get_filter_values().company,
+								from_date: values.from_date,
+							},
+						});
+					},
+					__("Create GL Reposting Entries")
+				);
+			},
+			__("Create")
+		);
 	},
 };
 
