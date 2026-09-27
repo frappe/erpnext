@@ -4940,6 +4940,24 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		self.assertEqual(se.process_loss_qty, 10)
 
+	def test_process_loss_ignores_finished_flag_on_source_row(self):
+		se = self.make_process_loss_entry()
+		se.append(
+			"items",
+			{
+				"item_code": self.get_finished_good_row(se).item_code,
+				"qty": 5,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"s_warehouse": "_Test Warehouse - _TC",
+				"is_finished_item": 1,
+			},
+		)
+		se.to_warehouse = None
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 5)
+
 	def test_from_bom_entry_rejects_finished_item_other_than_bom_item(self):
 		other_item = make_item("Process Loss Unrelated FG", properties={"is_stock_item": 1}).name
 		for purpose in ("Manufacture", "Repack"):
