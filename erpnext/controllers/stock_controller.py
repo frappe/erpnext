@@ -33,6 +33,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
@@ -340,6 +341,10 @@ class StockController(AccountsController):
 		if self.doctype == "Delivery Note":
 			# Bill by amount, falling back to qty when the invoiced amount is short (e.g. rate drop).
 			args["billing_percentage"] = self.get_delivery_note_billing_percentage()
+		elif self.doctype == "Purchase Order" and is_billed_by_qty():
+			from erpnext.buying.doctype.purchase_order.services.status import StatusService
+
+			args["billing_percentage"] = StatusService(self).get_percent_billed_by_qty()
 
 		self._update_percent_field(args, update_modified)
 
