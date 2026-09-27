@@ -1543,19 +1543,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_process_loss_percentage()
 
 	def get_bom_item_finished_qty(self):
-		"""Received qty of the BOM item, its variants and its alternatives. Other Repack outputs do not count."""
+		"""Received qty of the BOM item, its variants and its alternatives, in the BOM item's stock UOM.
+		Other Repack outputs do not count."""
 		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
+		stock_uom = frappe.get_cached_value("Item", bom_item, "stock_uom")
 		received_rows = [
 			row for row in self.items if row.is_finished_item and row.t_warehouse and not row.s_warehouse
 		]
 		bom_outputs = self.get_bom_item_equivalents(bom_item, {row.item_code for row in received_rows})
-		bom_item_rows = [row for row in received_rows if row.item_code in bom_outputs]
+		bom_item_rows = [
+			row for row in received_rows if row.item_code in bom_outputs and row.stock_uom == stock_uom
+		]
 
 		if not bom_item_rows:
 			frappe.throw(
 				_(
-					"This entry is made from BOM {0}, so its finished good must be {1}, a variant of it or one of its alternatives. Uncheck From BOM to make another item."
-				).format(frappe.bold(self.bom_no), frappe.bold(bom_item)),
+					"This entry is made from BOM {0}, so its finished good must be {1}, a variant of it or one of its alternatives, with stock UOM {2}. Uncheck From BOM to make another item."
+				).format(frappe.bold(self.bom_no), frappe.bold(bom_item), frappe.bold(stock_uom)),
 				title=_("Finished Good Does Not Match BOM"),
 				exc=FinishedGoodError,
 			)
