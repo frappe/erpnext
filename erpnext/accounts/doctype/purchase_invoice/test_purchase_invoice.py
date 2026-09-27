@@ -3812,6 +3812,25 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+		},
+	)
+	def test_qty_over_billing_counts_billed_rejected_qty(self):
+		pr = make_purchase_receipt(received_qty=100, qty=90, rejected_qty=10, rate=50)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+		self.assertEqual(pi.items[0].qty, 100)
+
+		extra_invoice = frappe.copy_doc(pi)
+		extra_invoice.items[0].qty = 50
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	def test_non_stock_item_over_billing_against_po_is_blocked(self):
 		service_item = create_item(
 			"_Test Service Item Non Stock PI",
