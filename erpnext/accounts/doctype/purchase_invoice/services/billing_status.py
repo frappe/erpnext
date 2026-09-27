@@ -9,8 +9,8 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
-	get_invoiced_qty_and_amount,
 	get_purchase_receipts_against_po_details,
+	get_receipt_billing_data,
 	is_billed_by_qty,
 	update_billed_amount_based_on_po,
 	update_billing_percentage,
@@ -68,14 +68,15 @@ class BillingStatusService:
 		bill_for_rejected = frappe.db.get_single_value(
 			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
 		)
-		invoiced = get_invoiced_qty_and_amount(pr_items, bill_for_rejected)
+		billing_data = get_receipt_billing_data(pr_items, bill_for_rejected)
 
 		for pr_doc in pr_docs:
 			update_billing_percentage(
 				pr_doc,
 				update_modified=update_modified,
 				adjust_incoming_rate=True,
-				invoiced=invoiced,
+				billing_data=billing_data,
+				is_refresh=True,
 			)
 
 	def get_receipts_on_po_lines(self) -> set:

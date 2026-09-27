@@ -181,28 +181,42 @@ def get_billed_amount_against_po(po_items: list) -> dict:
 
 
 def update_billing_percentage(
-	pr_doc, update_modified: bool = True, adjust_incoming_rate: bool = False, invoiced: dict | None = None
+	pr_doc,
+	update_modified: bool = True,
+	adjust_incoming_rate: bool = False,
+	billing_data: frappe._dict | None = None,
+	is_refresh: bool = False,
 ) -> None:
-	"""`invoiced` from get_invoiced_qty_and_amount lets receipts on one order line share its invoice split."""
+	"""`billing_data` from get_receipt_billing_data lets receipts on one order line share one fetch.
+	A refresh leaves the receipt alone when its billing % did not move."""
 	buying_settings = frappe.get_single("Buying Settings")
 	bill_for_rejected = buying_settings.bill_for_rejected_quantity_in_purchase_invoice
 	items = [item for item in pr_doc.items if not item.closed] or pr_doc.items
 
 	if buying_settings.set_landed_cost_based_on_purchase_invoice_rate:
-		if invoiced is None:
-			invoiced = get_invoiced_qty_and_amount(pr_doc.items, bill_for_rejected)
-		percent_billed = get_percent_billed_by_qty(pr_doc, items, bill_for_rejected, invoiced)
+		if billing_data is None:
+			billing_data = get_receipt_billing_data(pr_doc.items, bill_for_rejected)
+		percent_billed = get_percent_billed_by_qty(pr_doc, items, bill_for_rejected, billing_data)
 	else:
 		percent_billed = get_percent_billed_by_amount(pr_doc, items, bill_for_rejected)
 
-	pr_doc.db_set("per_billed", percent_billed)
+	precision = pr_doc.precision("per_billed")
+	if not is_refresh or flt(percent_billed, precision) != flt(pr_doc.per_billed, precision):
+		pr_doc.db_set("per_billed", percent_billed)
+		if update_modified:
+			pr_doc.set_status(update=True)
+			pr_doc.notify_update()
 
-	if update_modified:
-		pr_doc.set_status(update=True)
-		pr_doc.notify_update()
-
-	if adjust_incoming_rate and set_amount_difference_with_purchase_invoice(items, invoiced):
+	if adjust_incoming_rate and set_amount_difference_with_purchase_invoice(items, billing_data.invoiced):
 		adjust_incoming_rate_for_pr(pr_doc)
+
+
+def get_receipt_billing_data(pr_items: list, bill_for_rejected: bool) -> frappe._dict:
+	"""Invoice split and returned qty for a set of receipt rows, fetched once for all of them."""
+	return frappe._dict(
+		invoiced=get_invoiced_qty_and_amount(pr_items, bill_for_rejected),
+		returned_qty=get_item_wise_returned_qty([item.name for item in pr_items]),
+	)
 
 
 def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -> float:
@@ -258,9 +272,11 @@ def is_billed_by_qty() -> bool:
 	)
 
 
-def get_percent_billed_by_qty(pr_doc, items: list, bill_for_rejected: bool, invoiced: dict) -> float:
-	billable_qty = get_billable_qty_by_row(pr_doc, items, bill_for_rejected)
-	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, invoiced))
+def get_percent_billed_by_qty(
+	pr_doc, items: list, bill_for_rejected: bool, billing_data: frappe._dict
+) -> float:
+	billable_qty = get_billable_qty_by_row(items, billing_data.returned_qty, bill_for_rejected)
+	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, billing_data.invoiced))
 
 
 def get_qty_based_percent_billed(items: list, billable_qty: dict, invoiced_qty: dict) -> float:
@@ -280,9 +296,8 @@ def get_qty_based_percent_billed(items: list, billable_qty: dict, invoiced_qty: 
 	return round(100 * (billed_weight / (total_weight or 1)), 6)
 
 
-def get_billable_qty_by_row(pr_doc, items: list, bill_for_rejected: bool) -> dict:
+def get_billable_qty_by_row(items: list, returned_qty: dict, bill_for_rejected: bool) -> dict:
 	"""Qty left to bill per row; a receipt returned in full is measured against what it received."""
-	returned_qty = get_item_wise_returned_qty([item.name for item in pr_doc.items])
 	billable_qty = {
 		item.name: get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected) for item in items
 	}
