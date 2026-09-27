@@ -296,14 +296,19 @@ class PurchaseInvoice(BuyingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
-		receipt_billing_basis = (
-			"qty"
-			if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate")
-			else "amount"
-		)
-		BillingValidationService(self).validate_multiple_billing(
-			"Purchase Receipt", "pr_detail", receipt_billing_basis
-		)
+		buying_settings = frappe.get_cached_doc("Buying Settings")
+		billing_validation = BillingValidationService(self)
+		if buying_settings.set_landed_cost_based_on_purchase_invoice_rate:
+			billing_validation.validate_multiple_billing(
+				"Purchase Receipt",
+				"pr_detail",
+				"qty",
+				reference_field="received_qty"
+				if buying_settings.bill_for_rejected_quantity_in_purchase_invoice
+				else "qty",
+			)
+		else:
+			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		self.validate_exchange_rate_with_purchase_receipt()

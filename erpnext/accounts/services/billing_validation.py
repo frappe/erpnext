@@ -13,10 +13,15 @@ class BillingValidationService:
 	def __init__(self, doc):
 		self.doc = doc
 
-	def validate_multiple_billing(self, ref_dt: str, item_ref_dn: str, based_on: str) -> None:
+	def validate_multiple_billing(
+		self, ref_dt: str, item_ref_dn: str, based_on: str, reference_field: str | None = None
+	) -> None:
+		"""`reference_field` is the reference row's field to bill against, `based_on` by default."""
 		from erpnext.controllers.status_updater import get_allowance_for
 
-		ref_wise_billed_amount = self.get_reference_wise_billed_amt(ref_dt, item_ref_dn, based_on)
+		ref_wise_billed_amount = self.get_reference_wise_billed_amt(
+			ref_dt, item_ref_dn, based_on, reference_field or based_on
+		)
 		if not ref_wise_billed_amount:
 			return
 
@@ -41,11 +46,7 @@ class BillingValidationService:
 			total_overbilled_amt += overbill_amt
 
 			if overbill_amt > precision_allowance and not is_overbilling_allowed:
-				if self.doc.doctype != "Purchase Invoice" or not cint(
-					frappe.db.get_single_value(
-						"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-					)
-				):
+				if not self.is_rejected_qty_billed_by_amount(based_on):
 					overbilled_items.append(row)
 
 		if overbilled_items:
@@ -60,14 +61,30 @@ class BillingValidationService:
 				alert=True,
 			)
 
-	def get_reference_wise_billed_amt(self, ref_dt: str, item_ref_dn: str, based_on: str) -> dict | None:
+	def is_rejected_qty_billed_by_amount(self, based_on: str) -> bool:
+		"""Billed rejected qty has no value on the receipt, so an amount check cannot hold it."""
+		return (
+			based_on == "amount"
+			and self.doc.doctype == "Purchase Invoice"
+			and cint(
+				frappe.db.get_single_value(
+					"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+				)
+			)
+		)
+
+	def get_reference_wise_billed_amt(
+		self, ref_dt: str, item_ref_dn: str, based_on: str, reference_field: str
+	) -> dict | None:
 		"""Return sum of billed amounts per reference row, including previously submitted invoices."""
 		reference_names = [d.get(item_ref_dn) for d in self.doc.items if d.get(item_ref_dn)]
 		if not reference_names:
 			return
 
 		precision = self.doc.precision(based_on, "items")
-		reference_details = self.get_billing_reference_details(reference_names, ref_dt + " Item", based_on)
+		reference_details = self.get_billing_reference_details(
+			reference_names, ref_dt + " Item", reference_field
+		)
 		already_billed = self.get_already_billed_amount(reference_names, item_ref_dn, based_on)
 
 		ref_wise_billed_amount = {}
