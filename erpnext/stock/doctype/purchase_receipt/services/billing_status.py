@@ -128,6 +128,7 @@ def get_purchase_receipts_against_po_details(po_details: list) -> list[dict]:
 		)
 		.orderby(CombineDatetime(purchase_receipt.posting_date, purchase_receipt.posting_time))
 		.orderby(purchase_receipt.name)
+		.orderby(purchase_receipt_item.idx)
 	)
 
 	return query.run(as_dict=True)
@@ -384,8 +385,8 @@ def take_from_invoices(invoices: list, pending_qty: float) -> frappe._dict:
 
 
 def get_po_invoices(po_details: list) -> dict:
-	"""Net qty and base amount of each invoice made against the Purchase Order, oldest first.
-	Debit notes that do not update receipt billing are left out."""
+	"""Net qty and base amount of each invoice row made against the Purchase Order, oldest first.
+	Debit note rows net against the row they return; notes that do not update receipt billing are left out."""
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
@@ -394,12 +395,12 @@ def get_po_invoices(po_details: list) -> dict:
 		.inner_join(purchase_invoice)
 		.on(purchase_invoice_item.parent == purchase_invoice.name)
 		.select(
+			purchase_invoice_item.name,
 			purchase_invoice_item.po_detail,
 			purchase_invoice_item.qty,
 			purchase_invoice_item.base_net_amount,
-			purchase_invoice.name,
+			purchase_invoice_item.purchase_invoice_item,
 			purchase_invoice.is_return,
-			purchase_invoice.return_against,
 		)
 		.where(
 			(purchase_invoice_item.po_detail.isin(po_details))
@@ -418,9 +419,9 @@ def get_po_invoices(po_details: list) -> dict:
 
 	po_invoices = {}
 	for row in rows:
-		invoice_name = row.return_against if row.is_return else row.name
+		invoice_row = row.purchase_invoice_item if row.is_return else row.name
 		invoices = po_invoices.setdefault(row.po_detail, {})
-		invoice = invoices.setdefault(invoice_name, frappe._dict(qty=0.0, amount=0.0))
+		invoice = invoices.setdefault(invoice_row, frappe._dict(qty=0.0, amount=0.0))
 		invoice.qty += flt(row.qty)
 		invoice.amount += flt(row.base_net_amount)
 
@@ -430,20 +431,33 @@ def get_po_invoices(po_details: list) -> dict:
 
 
 def get_open_invoices(invoices: list) -> list:
-	"""Debit notes without an invoice of their own take qty back from the newest invoices first."""
+	"""Debit notes without an invoice row of their own take qty back from the newest rows first, at their own rate."""
 	open_invoices = [invoice for invoice in invoices if invoice.qty > 0]
 	qty_to_take_back = -sum(invoice.qty for invoice in invoices if invoice.qty < 0)
+	amount_to_take_back = -sum(invoice.amount for invoice in invoices if invoice.qty < 0)
 
 	for invoice in reversed(open_invoices):
 		qty = min(invoice.qty, qty_to_take_back)
 		if qty <= 0:
 			break
 
-		invoice.amount -= invoice.amount * qty / invoice.qty
+		amount = amount_to_take_back * qty / qty_to_take_back
 		invoice.qty -= qty
+		invoice.amount -= amount
 		qty_to_take_back -= qty
+		amount_to_take_back -= amount
 
-	return open_invoices
+	return keep_value_of_emptied_invoices(invoices)
+
+
+def keep_value_of_emptied_invoices(invoices: list) -> list:
+	"""A row returned in full at another rate leaves value behind; the newest remaining row keeps it."""
+	remaining = [invoice for invoice in invoices if invoice.qty > 0]
+	leftover = sum(invoice.amount for invoice in invoices if invoice.qty == 0)
+	if remaining and leftover:
+		remaining[-1].amount += leftover
+
+	return remaining
 
 
 def get_invoiced_qty_against_po_items(po_items: list) -> dict:
