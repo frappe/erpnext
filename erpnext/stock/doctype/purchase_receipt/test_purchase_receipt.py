@@ -1237,6 +1237,43 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
+	def test_landed_cost_takes_order_invoices_oldest_first(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+
+		make_invoice_against_order(po.name, qty=60, rate=70)
+		self.assertEqual(get_amount_differences(receipts), [1200, 0])
+
+		make_invoice_against_order(po.name, qty=40, rate=55)
+		self.assertEqual(get_amount_differences(receipts), [1200, 200])
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_landed_cost_takes_invoice_rows_in_order(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		pi.items[0].qty = 60
+		pi.items[0].rate = 70
+		pi.items[1].qty = 40
+		pi.items[1].rate = 55
+		pi.submit()
+
+		self.assertEqual(get_amount_differences(receipts), [1200, 200])
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
 	def test_non_updating_order_debit_note_kept_out_of_invoice_split(self):
 		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 		from erpnext.buying.doctype.purchase_order.mapper import (
@@ -1258,6 +1295,52 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		update_billing_percentage(frappe.get_doc("Purchase Receipt", pr.name))
 		pr.reload()
 		self.assertEqual(pr.per_billed, 100)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_unlinked_order_debit_note_takes_back_newest_invoice_qty(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.submit()
+
+		debit_note = frappe.copy_doc(pi)
+		debit_note.is_return = 1
+		debit_note.items[0].qty = -40
+		debit_note.submit()
+
+		for pr in receipts:
+			pr.reload()
+
+		self.assertEqual([pr.per_billed for pr in receipts], [100, 0])
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_unlinked_order_debit_note_takes_back_its_own_value(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((100, "08:00"),))
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.submit()
+
+		debit_note = frappe.copy_doc(pi)
+		debit_note.is_return = 1
+		debit_note.items[0].qty = -20
+		debit_note.items[0].rate = 60
+		debit_note.submit()
+
+		self.assertEqual(get_amount_differences(receipts), [-250])
 
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
@@ -7927,6 +8010,15 @@ def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
 		receipt_docs.append(pr)
 
 	return receipt_docs
+
+
+def get_amount_differences(receipts: list) -> list:
+	return [
+		frappe.db.get_value(
+			"Purchase Receipt Item", pr.items[0].name, "amount_difference_with_purchase_invoice"
+		)
+		for pr in receipts
+	]
 
 
 def make_invoice_against_order(purchase_order: str, qty: float, rate: float) -> None:
