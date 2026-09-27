@@ -3,7 +3,6 @@
 
 
 import json
-from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -316,7 +315,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		sbb.validate_warehouse_of_sabb()
 		self.validate_source_stock_entry()
 		self.validate_bom()
-		self.set_process_loss_qty()
 		self.validate_company_in_accounting_dimension()
 
 		if self.purpose in ("Manufacture", "Repack"):
@@ -342,7 +340,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.validate_batch()
 		self.validate_inspection()
-		self.validate_fg_completed_qty()
+		self.set_process_loss_qty()
 		self.validate_job_card_pending_production()
 		self.validate_difference_account()
 		self.validate_job_card_item()
@@ -516,41 +514,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 
 			item.validate_and_update_item_details(item_details, self.company, self.purpose)
-
-	def validate_fg_completed_qty(self):
-		if self.purpose != "Manufacture" or not self.from_bom:
-			return
-		fg_qty = self._aggregate_fg_qty()
-		if fg_qty:
-			self._check_process_loss_qty(fg_qty)
-
-	def _aggregate_fg_qty(self):
-		fg_qty = defaultdict(float)
-		for d in self.items:
-			if d.is_finished_item:
-				fg_qty[d.item_code] += flt(d.qty)
-		return fg_qty
-
-	def _check_process_loss_qty(self, fg_qty):
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
-		fg_item = next(iter(fg_qty.keys()))
-		fg_item_qty = flt(fg_qty[fg_item], precision)
-		fg_completed_qty = flt(self.fg_completed_qty, precision)
-		for d in self.items:
-			if fg_qty.get(d.item_code):
-				self._validate_fg_qty_with_process_loss(d, fg_item_qty, fg_completed_qty, precision)
-
-	def _validate_fg_qty_with_process_loss(self, d, fg_item_qty, fg_completed_qty, precision):
-		if (fg_completed_qty - fg_item_qty) > 0:
-			self.process_loss_qty = fg_completed_qty - fg_item_qty
-		if not self.process_loss_qty:
-			return
-		if fg_completed_qty != (flt(fg_item_qty, precision) + flt(self.process_loss_qty, precision)):
-			frappe.throw(
-				_(
-					"Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
-				).format(frappe.bold(self.process_loss_qty), frappe.bold(d.item_code))
-			)
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -1567,6 +1530,78 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose not in ("Manufacture", "Repack"):
 			return
 
+		if self.from_bom and self.bom_no and flt(self.fg_completed_qty) and not self.is_fg_conversion:
+			self.set_process_loss_from_finished_goods()
+		else:
+			self.reset_process_loss_to_pending_qty()
+
+	def set_process_loss_from_finished_goods(self):
+		"""Loss is the part of Finished Good Quantity the BOM item rows do not cover."""
+		process_loss_qty = max(flt(self.fg_completed_qty) - self.get_bom_item_finished_qty(), 0)
+		self.process_loss_qty = flt(process_loss_qty, self.precision("process_loss_qty"))
+		self.set_process_loss_percentage()
+
+	def get_bom_item_finished_qty(self):
+		"""Received qty of the BOM item and its variants. Other Repack outputs do not count."""
+		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
+		received_rows = [
+			row for row in self.items if row.is_finished_item and row.t_warehouse and not row.s_warehouse
+		]
+		bom_outputs = [bom_item, *self.get_variants_of(bom_item, {row.item_code for row in received_rows})]
+		bom_item_rows = [row for row in received_rows if row.item_code in bom_outputs]
+
+		if not bom_item_rows:
+			frappe.throw(
+				_(
+					"This entry is made from BOM {0}, so its finished good must be {1} or a variant of it. Uncheck From BOM to make another item."
+				).format(frappe.bold(self.bom_no), frappe.bold(bom_item)),
+				title=_("Finished Good Does Not Match BOM"),
+				exc=FinishedGoodError,
+			)
+
+		if not self.work_order:
+			self.validate_finished_good_stock_uom(bom_item, bom_item_rows)
+
+		return sum(flt(row.transfer_qty) for row in bom_item_rows)
+
+	def validate_finished_good_stock_uom(self, bom_item, rows):
+		"""Without a work order, Finished Good Quantity is in the BOM item's stock UOM."""
+		stock_uom = frappe.get_cached_value("Item", bom_item, "stock_uom")
+		for row in rows:
+			if row.stock_uom != stock_uom:
+				frappe.throw(
+					_(
+						"Row {0}: {1} has stock UOM {2}, but Finished Good Quantity is in {3}, the stock UOM of {4}. Make it through a Work Order, or uncheck From BOM."
+					).format(
+						row.idx,
+						frappe.bold(row.item_code),
+						frappe.bold(row.stock_uom),
+						frappe.bold(stock_uom),
+						frappe.bold(bom_item),
+					),
+					title=_("Finished Good UOM Mismatch"),
+					exc=FinishedGoodError,
+				)
+
+	def get_variants_of(self, template, item_codes):
+		other_items = item_codes - {template}
+		if not other_items:
+			return []
+
+		return frappe.get_all(
+			"Item", filters={"name": ["in", list(other_items)], "variant_of": template}, pluck="name"
+		)
+
+	def set_process_loss_percentage(self):
+		if not flt(self.fg_completed_qty):
+			return
+
+		self.process_loss_percentage = flt(
+			flt(self.process_loss_qty) / flt(self.fg_completed_qty) * 100,
+			self.precision("process_loss_percentage"),
+		)
+
+	def reset_process_loss_to_pending_qty(self):
 		precision = self.precision("process_loss_qty")
 		process_loss_qty = self.get_pending_process_loss_qty()
 		if process_loss_qty and flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
@@ -1575,20 +1610,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			frappe.msgprint(
 				_("The Process Loss Qty has been reset as per the job card's Process Loss Qty"),
 				alert=True,
-			)
-
-		if not self.process_loss_percentage and not self.process_loss_qty:
-			self.process_loss_percentage = frappe.get_cached_value(
-				"BOM", self.bom_no, "process_loss_percentage"
-			)
-
-		if self.process_loss_percentage and not self.process_loss_qty:
-			self.process_loss_qty = flt(
-				(flt(self.fg_completed_qty) * flt(self.process_loss_percentage)) / 100
-			)
-		elif self.process_loss_qty and self.fg_completed_qty:
-			self.process_loss_percentage = flt(
-				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
 
 	def validate_job_card_pending_production(self):

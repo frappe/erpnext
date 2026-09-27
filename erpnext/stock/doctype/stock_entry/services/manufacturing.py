@@ -126,37 +126,15 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			self.doc.append("items", item_args)
 
 	def set_process_loss_qty(self):
-		precision = self.doc.precision("process_loss_qty")
-		if self.doc.work_order:
-			data = frappe.get_all(
-				"Work Order Operation",
-				filters={"parent": self.doc.work_order},
-				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
-			)
-
-			if data and data[0].process_loss_qty:
-				process_loss_qty = data[0].process_loss_qty
-				if flt(self.doc.process_loss_qty, precision) != flt(process_loss_qty, precision):
-					self.doc.process_loss_qty = flt(process_loss_qty, precision)
-
-					frappe.msgprint(
-						_("The Process Loss Qty has been reset as per the Job Card's Process Loss Qty"),
-						alert=True,
-					)
-
-		if not self.doc.process_loss_percentage and not self.doc.process_loss_qty:
-			self.doc.process_loss_percentage = frappe.get_cached_value(
+		process_loss_qty = self.doc.get_pending_process_loss_qty()
+		if not process_loss_qty:
+			process_loss_percentage = frappe.get_cached_value(
 				"BOM", self.doc.bom_no, "process_loss_percentage"
 			)
+			process_loss_qty = flt(self.doc.fg_completed_qty) * flt(process_loss_percentage) / 100
 
-		if self.doc.process_loss_percentage and not self.doc.process_loss_qty:
-			self.doc.process_loss_qty = flt(
-				(flt(self.doc.fg_completed_qty) * flt(self.doc.process_loss_percentage)) / 100
-			)
-		elif self.doc.process_loss_qty and self.doc.fg_completed_qty:
-			self.doc.process_loss_percentage = flt(
-				(flt(self.doc.process_loss_qty) / flt(self.doc.fg_completed_qty)) * 100
-			)
+		self.doc.process_loss_qty = flt(process_loss_qty, self.doc.precision("process_loss_qty"))
+		self.doc.set_process_loss_percentage()
 
 	def add_finished_goods(self):
 		item_details = get_production_item_details(self.doc.work_order, self.doc.bom_no)
