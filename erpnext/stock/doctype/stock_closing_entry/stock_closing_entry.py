@@ -306,11 +306,15 @@ class StockClosing:
 					value_difference = self.get_value_difference(row, dimension_fields, key, counted_sles)
 
 					if key in closing_stock:
-						actual_qty = row.sabb_qty or row.actual_qty
+						actual_qty = row.sabb_qty if row.sabb_qty is not None else row.actual_qty
 						closing_stock[key].actual_qty += actual_qty
 						closing_stock[key].stock_value_difference += value_difference
 
-						if not row.actual_qty and row.qty_after_transaction is not None:
+						if (
+							row.sabb_qty is None
+							and not row.actual_qty
+							and row.qty_after_transaction is not None
+						):
 							closing_stock[key].actual_qty = row.qty_after_transaction
 
 						fifo_queue = closing_stock[key].fifo_queue
@@ -334,7 +338,9 @@ class StockClosing:
 		from a batch total that already nets out and strand a phantom balance value in the closing.
 		"""
 		if dimension_fields != ("item_code", "warehouse"):
-			return flt(row.sabb_stock_value_difference or row.stock_value_difference)
+			if row.sabb_stock_value_difference is not None:
+				return flt(row.sabb_stock_value_difference)
+			return flt(row.stock_value_difference)
 
 		# Only the first of an entry's fanned out rows carries the entry level value.
 		if row.name:
@@ -372,7 +378,9 @@ class StockClosing:
 		# A carried forward Stock Closing Balance row has no qty_after_transaction, so an item that
 		# closed at zero qty (what an is_adjustment_entry write-off leaves behind) would seed the
 		# entry with None and break the next closing's `actual_qty +=`.
-		actual_qty = flt(row.sabb_qty or row.actual_qty or row.qty_after_transaction)
+		actual_qty = flt(
+			row.sabb_qty if row.sabb_qty is not None else row.actual_qty or row.qty_after_transaction
+		)
 
 		entry = frappe._dict(
 			{
