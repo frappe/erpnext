@@ -369,7 +369,8 @@ def take_from_invoices(invoices: list, pending_qty: float) -> frappe._dict:
 
 
 def get_po_invoices(po_details: list) -> dict:
-	"""Net qty and base amount of each invoice made against the Purchase Order, oldest first."""
+	"""Net qty and base amount of each invoice made against the Purchase Order, oldest first.
+	Debit notes that do not update receipt billing are left out."""
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
@@ -390,6 +391,10 @@ def get_po_invoices(po_details: list) -> dict:
 			& ((purchase_invoice_item.pr_detail.isnull()) | (purchase_invoice_item.pr_detail == ""))
 			& (purchase_invoice.docstatus == 1)
 			& (purchase_invoice.update_stock == 0)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_receipt == 1)
+			)
 		)
 		.orderby(CombineDatetime(purchase_invoice.posting_date, purchase_invoice.posting_time))
 		.orderby(purchase_invoice.name)
@@ -404,7 +409,26 @@ def get_po_invoices(po_details: list) -> dict:
 		invoice.qty += flt(row.qty)
 		invoice.amount += flt(row.base_net_amount)
 
-	return {po_detail: list(invoices.values()) for po_detail, invoices in po_invoices.items()}
+	return {
+		po_detail: get_open_invoices(list(invoices.values())) for po_detail, invoices in po_invoices.items()
+	}
+
+
+def get_open_invoices(invoices: list) -> list:
+	"""Debit notes without an invoice of their own take qty back from the newest invoices first."""
+	open_invoices = [invoice for invoice in invoices if invoice.qty > 0]
+	qty_to_take_back = -sum(invoice.qty for invoice in invoices if invoice.qty < 0)
+
+	for invoice in reversed(open_invoices):
+		qty = min(invoice.qty, qty_to_take_back)
+		if qty <= 0:
+			break
+
+		invoice.amount -= invoice.amount * qty / invoice.qty
+		invoice.qty -= qty
+		qty_to_take_back -= qty
+
+	return open_invoices
 
 
 def get_invoiced_qty_against_po_items(po_items: list) -> dict:
