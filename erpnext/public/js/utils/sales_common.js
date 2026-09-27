@@ -521,14 +521,9 @@ erpnext.sales_common = {
 			}
 
 			project(doc, cdt, cdn) {
-				if (!cdt || !cdn) {
-					if (this.frm.doc.project) {
-						$.each(this.frm.doc["items"] || [], function (i, item) {
-							if (!item.project) {
-								frappe.model.set_value(item.doctype, item.name, "project", doc.project);
-							}
-						});
-					}
+				const is_parent = !cdt || cdt === doc.doctype;
+				if (is_parent) {
+					this.set_project_in_items();
 				} else {
 					const item = frappe.get_doc(cdt, cdn);
 					if (item.project) {
@@ -545,7 +540,7 @@ erpnext.sales_common = {
 					}
 				}
 				let me = this;
-				if (["Delivery Note", "Sales Invoice", "Sales Order"].includes(this.frm.doc.doctype)) {
+				if (is_parent && ["Delivery Note", "Sales Invoice", "Sales Order"].includes(doc.doctype)) {
 					if (this.frm.doc.project) {
 						frappe.call({
 							method: "erpnext.projects.doctype.project.project.get_cost_center_name",

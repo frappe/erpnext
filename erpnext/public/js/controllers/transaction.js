@@ -660,6 +660,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	refresh() {
+		this._project = this.frm.doc.project;
 		erpnext.toggle_naming_series(this.frm);
 		erpnext.hide_company(this.frm);
 		// Remember the currency the rendered document is denominated in, so that a
@@ -673,6 +674,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		this.set_route_options_for_new_doc();
 		erpnext.toggle_serial_batch_fields(this.frm);
+	}
+
+	set_project_in_items() {
+		const previous_project = this._project;
+		const project = this.frm.doc.project;
+		this._project = project;
+		if (!project) return;
+
+		for (const item of this.frm.doc.items || []) {
+			if (!item.project || item.project === previous_project) {
+				frappe.model.set_value(item.doctype, item.name, "project", project);
+			}
+		}
 	}
 
 	scan_barcode() {

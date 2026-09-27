@@ -294,6 +294,10 @@ erpnext.buying = {
 			}
 
 			project(doc, cdt, cdn) {
+				if (!cdt || cdt === doc.doctype) {
+					this.set_project_in_items();
+					return;
+				}
 				var item = frappe.get_doc(cdt, cdn);
 				if (item.project) {
 					$.each(this.frm.doc["items"] || [], function (i, other_item) {
