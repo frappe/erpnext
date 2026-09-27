@@ -9,10 +9,15 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
 
+import erpnext
+
 
 def execute(filters=None):
 	if not filters:
 		return [], []
+
+	filters = frappe._dict(filters)
+	filters.company = filters.get("company") or erpnext.get_default_company()
 
 	validate_filters(filters)
 
@@ -30,6 +35,9 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	if not filters.get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
 
 	if not from_date and to_date:
@@ -75,14 +83,12 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
+		.where(po.company == filters.get("company"))
 		# the selected po.* columns need the Purchase Order PK grouped on postgres; po.name is 1:1
 		# with the grouped po_item.name, so groups are unchanged.
 		.groupby(po_item.name, po.name)
 		.orderby(po.transaction_date)
 	)
-
-	if filters.get("company"):
-		query = query.where(po.company == filters.get("company"))
 
 	if filters.get("name"):
 		query = query.where(po.name.isin(filters.get("name")))
