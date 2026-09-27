@@ -37,6 +37,9 @@ def validate_filters(filters):
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
 
+	if filters.get("group_by_po") and filters.get("group_by_item"):
+		frappe.throw(_("Group the report by Purchase Order or by Item, not both."))
+
 
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
@@ -57,6 +60,7 @@ def get_data(filters):
 			po.status,
 			po.supplier,
 			po_item.item_code,
+			po_item.uom,
 			po_item.qty,
 			po_item.received_qty,
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
@@ -159,6 +163,8 @@ def prepare_data(data, filters):
 
 	if filters.get("group_by_po"):
 		data = group_by_purchase_order(data)
+	elif filters.get("group_by_item"):
+		data = group_by_item(data)
 
 	return data, chart_data
 
@@ -178,6 +184,26 @@ def group_by_purchase_order(data):
 	return list(purchase_order_map.values())
 
 
+def group_by_item(data):
+	"""Group on company and UOM as well as the item.
+
+	Quantities are in the line UOM and amounts are in the company currency, so neither sums
+	across a second UOM of the same item or a second company.
+	"""
+	item_map = {}
+
+	for row in data:
+		key = (row["company"], row["item_code"], row["uom"])
+		group = item_map.get(key)
+		if not group:
+			item_map[key] = copy.deepcopy(row)
+			continue
+
+		add_aggregated_fields(group, row)
+
+	return sorted(item_map.values(), key=lambda row: (row["company"], row["item_code"], row["uom"]))
+
+
 def add_aggregated_fields(group, row):
 	for field in AGGREGATED_FIELDS:
 		group[field] = flt(group[field]) + flt(row[field])
@@ -194,6 +220,9 @@ def prepare_chart_data(pending, completed):
 
 
 def get_columns(filters):
+	if filters.get("group_by_item"):
+		return get_grouped_by_item_columns()
+
 	columns = get_purchase_order_columns()
 
 	if not filters.get("group_by_po"):
@@ -201,6 +230,14 @@ def get_columns(filters):
 
 	columns += get_quantity_columns() + get_amount_columns()
 	columns += [get_warehouse_column(), get_company_column()]
+
+	return columns
+
+
+def get_grouped_by_item_columns():
+	columns = [get_item_code_column(), get_uom_column()]
+	columns += get_quantity_columns() + get_amount_columns()
+	columns.append(get_company_column())
 
 	return columns
 
@@ -240,6 +277,16 @@ def get_item_code_column():
 		"fieldname": "item_code",
 		"fieldtype": "Link",
 		"options": "Item",
+		"width": 100,
+	}
+
+
+def get_uom_column():
+	return {
+		"label": _("UOM"),
+		"fieldname": "uom",
+		"fieldtype": "Link",
+		"options": "UOM",
 		"width": 100,
 	}
 
