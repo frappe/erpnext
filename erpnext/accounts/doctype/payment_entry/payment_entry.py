@@ -306,6 +306,11 @@ class PaymentEntry(AccountsController):
 			alert=True,
 		)
 
+	def before_cancel(self):
+		super().before_cancel()
+		if self.cheque_book:
+			frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
@@ -330,6 +335,10 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+		if self.cheque_book:
+			frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).advance_next_cheque_no(
+				self.reference_no, freed=True
+			)
 
 	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
