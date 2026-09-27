@@ -269,7 +269,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
-		frm.events.set_cheque_book(frm);
+		frm.events.set_cheque_book(frm, false, frm.is_new());
 	},
 
 	validate: async function (frm) {
@@ -478,10 +478,10 @@ frappe.ui.form.on("Payment Entry", {
 		frm.events.set_cheque_book(frm);
 	},
 
-	set_cheque_book: async function (frm, reset) {
+	set_cheque_book: async function (frm, reset, suggest = true) {
 		const is_cheque = is_cheque_payment(frm);
 		frm.toggle_display("cheque_book", is_cheque);
-		if (frm.doc.docstatus !== 0) return;
+		if (frm.doc.docstatus !== 0 || !suggest) return;
 
 		if (!is_cheque || !frm.doc.paid_from) {
 			frm.set_value("cheque_book", "");
@@ -499,7 +499,7 @@ frappe.ui.form.on("Payment Entry", {
 			{ account }
 		);
 		// Paid From changed while waiting, a newer call will set the book
-		if (account !== frm.doc.paid_from) return;
+		if (account !== frm.doc.paid_from || !is_cheque_payment(frm)) return;
 
 		if (cheque_book === frm.doc.cheque_book) {
 			frm.events.cheque_book(frm);
@@ -510,20 +510,27 @@ frappe.ui.form.on("Payment Entry", {
 
 	cheque_book: async function (frm) {
 		const cheque_book = frm.doc.cheque_book;
+		const account = frm.doc.paid_from;
 		let cheque = {};
 		if (cheque_book) {
 			cheque = await frappe.xcall("erpnext.accounts.doctype.cheque_book.cheque_book.get_next_cheque", {
-				account: frm.doc.paid_from,
+				account,
 				cheque_book,
+				include_free: true,
 			});
-			if (cheque_book !== frm.doc.cheque_book) return;
+			if (
+				cheque_book !== frm.doc.cheque_book ||
+				account !== frm.doc.paid_from ||
+				!is_cheque_payment(frm)
+			)
+				return;
 		}
 
 		let description = "";
-		if (cheque.cheque_no) {
-			description = __("Remaining: {0}", [cheque.remaining]);
-		} else if (frm.doc.cheque_book) {
-			description = __("No unused cheque left in this Cheque Book");
+		if (cheque.cheque_book) {
+			description = cheque.cheque_no
+				? __("Free: {0}", [cheque.free])
+				: __("Free: {0}. Enter a cheque number manually.", [cheque.free]);
 		}
 		frm.set_df_property("cheque_book", "description", description);
 
@@ -1844,11 +1851,27 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			});
 		});
-		await frm.events.ask_cheque_cancellation(frm);
+		const cancellation = await frm.events.ask_cheque_cancellation(frm);
+		if (!cancellation) return;
+
+		try {
+			await frappe.xcall("erpnext.accounts.doctype.cheque_book.cheque_book.cancel_cheque_payment", {
+				name: frm.doc.name,
+				...cancellation,
+				ignore_doctypes_on_cancel_all: frm.ignore_doctypes_on_cancel_all,
+			});
+			await frm.reload_doc();
+			frappe.show_alert({ message: __("Cheque marked as cancelled"), indicator: "green" });
+		} catch (error) {
+			frappe.show_alert({
+				message: __("Cheque cancellation could not be completed"),
+				indicator: "red",
+			});
+		}
+		frappe.validated = false;
 	},
 
 	ask_cheque_cancellation: async function (frm) {
-		frm.cheque_cancellation = null;
 		if (!frm.doc.cheque_book) return;
 
 		await frappe.model.with_doctype("Cancelled Cheque");
@@ -1878,29 +1901,13 @@ frappe.ui.form.on("Payment Entry", {
 				primary_action_label: __("Continue"),
 				primary_action(values) {
 					answered = true;
-					frm.cheque_cancellation = values.reason ? values : null;
 					dialog.hide();
-					resolve();
+					resolve(values.reason ? values : null);
 				},
 			});
 			dialog.onhide = () => answered || reject();
 			dialog.show();
 		});
-	},
-
-	after_cancel: function (frm) {
-		if (!frm.cheque_cancellation) return;
-
-		frappe.db
-			.insert({
-				doctype: "Cancelled Cheque",
-				cheque_book: frm.doc.cheque_book,
-				cheque_no: frm.doc.reference_no,
-				payment_entry: frm.doc.name,
-				...frm.cheque_cancellation,
-			})
-			.then(() => frappe.show_alert({ message: __("Cheque marked as cancelled"), indicator: "green" }));
-		frm.cheque_cancellation = null;
 	},
 });
 
@@ -2068,11 +2075,9 @@ function prompt_for_missing_account(frm, account) {
 }
 
 function is_cheque_payment(frm) {
-	// the setup wizard creates this Mode of Payment as __("Cheque"), "Check" in the US
-	const cheque_modes = ["Cheque", "Check", __("Cheque"), __("Check")];
 	return (
 		["Pay", "Internal Transfer"].includes(frm.doc.payment_type) &&
-		cheque_modes.includes(frm.doc.mode_of_payment)
+		["Cheque", "Check"].includes(frm.doc.mode_of_payment)
 	);
 }
 

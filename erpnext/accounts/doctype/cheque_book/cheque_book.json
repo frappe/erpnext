@@ -92,7 +92,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque Start No",
-   "length": 9
+   "length": 20
   },
   {
    "fieldname": "column_break_range",
@@ -103,7 +103,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque End No",
-   "length": 9
+   "length": 20
   },
   {
    "description": "Enter any two of Cheque Start No, Cheque End No and Number of Cheques",
@@ -119,7 +119,7 @@
    "fieldname": "next_cheque_no",
    "fieldtype": "Data",
    "label": "Next Cheque No",
-   "length": 9,
+   "length": 21,
    "read_only": 1
   },
   {
