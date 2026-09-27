@@ -1282,6 +1282,30 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 		self.assertEqual(pr.per_billed, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_unlinked_order_debit_note_takes_back_newest_invoice_qty(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.submit()
+
+		debit_note = frappe.copy_doc(pi)
+		debit_note.is_return = 1
+		debit_note.items[0].qty = -40
+		debit_note.submit()
+
+		for pr in receipts:
+			pr.reload()
+
+		self.assertEqual([pr.per_billed for pr in receipts], [100, 0])
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
