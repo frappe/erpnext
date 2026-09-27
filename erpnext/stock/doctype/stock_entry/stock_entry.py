@@ -1543,11 +1543,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_process_loss_percentage()
 
 	def get_bom_item_finished_qty(self):
-		"""Finished qty of the BOM item, its variants and its alternatives. Other Repack outputs do not count."""
+		"""Received qty of the BOM item, its variants and its alternatives. Other Repack outputs do not count."""
 		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
-		finished_rows = [row for row in self.items if row.is_finished_item]
-		bom_outputs = self.get_bom_item_equivalents(bom_item, {row.item_code for row in finished_rows})
-		bom_item_rows = [row for row in finished_rows if row.item_code in bom_outputs]
+		received_rows = [
+			row for row in self.items if row.is_finished_item and row.t_warehouse and not row.s_warehouse
+		]
+		bom_outputs = self.get_bom_item_equivalents(bom_item, {row.item_code for row in received_rows})
+		bom_item_rows = [row for row in received_rows if row.item_code in bom_outputs]
 
 		if not bom_item_rows:
 			frappe.throw(
