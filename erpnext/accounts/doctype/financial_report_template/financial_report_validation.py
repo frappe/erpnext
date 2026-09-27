@@ -413,8 +413,6 @@ class CalculationFormulaValidator(Validator):
 				)
 			)
 
-		# Always an error. An unknown name raises at run time and the row shows zero, but a
-		# self-reference reads the row's own earlier value and prints a plausible wrong number.
 		if row.reference_code and row.reference_code in used_codes:
 			result.add_error(
 				ValidationIssue(
