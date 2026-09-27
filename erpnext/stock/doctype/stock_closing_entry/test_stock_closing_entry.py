@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import json
 from unittest.mock import patch
 
 import frappe
@@ -144,6 +145,92 @@ class TestStockClosingEntry(ERPNextTestSuite):
 		self.assertEqual(total.actual_qty, -20)
 		self.assertEqual(total.stock_value_difference, -100)
 
+	def test_carried_balances_only_update_their_stored_key(self):
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		item_details = frappe._dict(
+			item_group="All Item Groups", item_name="Closing Test", stock_uom="Nos", has_serial_no=0
+		)
+		stored_keys = [
+			("item_code", "warehouse"),
+			("item_code", "warehouse", "batch_no"),
+			("item_code", "warehouse", "location"),
+			("item_code", "warehouse", "shelf"),
+			("item_code", "warehouse", "location", "shelf"),
+		]
+		values = frappe._dict(
+			item_code="Closing Test",
+			warehouse=WAREHOUSE,
+			batch_no="Batch A",
+			location="Room A",
+			shelf="Shelf A",
+		)
+		for opening_qty, opening_value, movement_qty, deleted_shelf in (
+			(100, 1000, 0, False),
+			(100, 1000, 10, False),
+			(0, 50, 10, False),
+			(100, 1000, 0, True),
+			(100, 1000, 10, True),
+		):
+			with self.subTest(
+				opening_qty=opening_qty, movement_qty=movement_qty, deleted_shelf=deleted_shelf
+			):
+				dimension_fields = ["location"] if deleted_shelf else ["location", "shelf"]
+				dimensions = [frappe._dict(fieldname=field) for field in dimension_fields]
+				expected_keys = stored_keys[:3] if deleted_shelf else stored_keys
+				opening_rows = []
+				for index, fields in enumerate(stored_keys):
+					row = frappe._dict({field: values[field] for field in fields})
+					row.update(
+						name=f"Closing Balance {index}",
+						stock_closing_entry="Previous Closing",
+						inventory_dimension_key=json.dumps(fields) if index > 1 else None,
+						actual_qty=opening_qty,
+						stock_value_difference=opening_value,
+						posting_date="2026-01-31",
+					)
+					opening_rows.append(row)
+
+				movement = values.copy()
+				movement.update(
+					name="New SLE",
+					actual_qty=movement_qty,
+					stock_value_difference=movement_qty * 10,
+					posting_date="2026-02-01",
+				)
+
+				def get_entries(doctype, fields, filters):
+					rows = (
+						opening_rows
+						if doctype == "Stock Closing Balance"
+						else ([movement] if movement_qty else [])
+					)
+					fields = [*fields, *dimension_fields]
+					return [frappe._dict({field: row.get(field) for field in fields}) for row in rows]
+
+				with (
+					patch(f"{module}.get_inventory_dimensions", return_value=dimensions),
+					patch.object(
+						StockClosing,
+						"get_last_stock_closing_entry",
+						return_value=frappe._dict(name="Previous Closing", to_date="2026-01-31"),
+					),
+					patch.object(StockClosing, "get_entries", side_effect=get_entries),
+					patch("frappe.get_cached_value", return_value=item_details),
+				):
+					entries = StockClosing(COMPANY, "2026-02-01", "2026-02-28").get_stock_closing_entries()
+
+				self.assertEqual(
+					set(entries), {tuple(values[field] for field in fields) for fields in expected_keys}
+				)
+				for fields in expected_keys:
+					balance = entries[tuple(values[field] for field in fields)]
+					self.assertEqual(balance.actual_qty, opening_qty + movement_qty)
+					self.assertEqual(balance.stock_value_difference, opening_value + movement_qty * 10)
+					self.assertEqual(
+						balance.inventory_dimension_key,
+						json.dumps(fields) if len(fields) > 2 and fields[-1] != "batch_no" else None,
+					)
+
 	def test_closing_entry_reads_previous_closing_balance(self):
 		"""A closing entry created after another one must read the previous balance.
 
@@ -151,20 +238,48 @@ class TestStockClosingEntry(ERPNextTestSuite):
 		non-existent `closing_stock_balance` column, raising an OperationalError
 		for every closing entry created after the first one.
 		"""
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-CBAL-CARRY-.####",
+			}
+		).name
 		first_date = add_days(today(), -10)
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=100,
+			rate=100,
+			posting_date=first_date,
+			company=COMPANY,
+		)
 
 		# Complete the previous closing before looking up its balance.
 		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
 			entry = self.make_stock_closing_entry(first_date, first_date)
 		prepare_closing_stock_balance(entry.name)
 		self.assertEqual(frappe.db.get_value("Stock Closing Entry", entry.name, "status"), "Completed")
+		first_balances = frappe.get_all(
+			"Stock Closing Balance",
+			filters={"stock_closing_entry": entry.name, "item_code": item},
+			fields=["batch_no", "actual_qty", "stock_value_difference", "inventory_dimension_key"],
+		)
+		self.assertEqual(len(first_balances), 2)
+		batch_no = next(row.batch_no for row in first_balances if row.batch_no)
+		self.assertEqual({row.batch_no or None for row in first_balances}, {None, batch_no})
+		for row in first_balances:
+			self.assertEqual(row.actual_qty, 100)
+			self.assertEqual(row.stock_value_difference, 10000)
+			self.assertFalse(row.inventory_dimension_key)
 
 		second_from_date = add_days(first_date, 1)
 		make_stock_entry(
 			item_code=item,
 			to_warehouse=WAREHOUSE,
 			qty=10,
+			batch_no=batch_no,
 			rate=100,
 			posting_date=second_from_date,
 			company=COMPANY,
@@ -175,6 +290,22 @@ class TestStockClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(closing.last_closing_balance.name, self.last_closing_entry)
 		self.assertIn(item, {row.item_code for row in entries})
+
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			second_entry = self.make_stock_closing_entry(second_from_date, add_days(second_from_date, 1))
+		prepare_closing_stock_balance(second_entry.name)
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", second_entry.name, "status"), "Completed")
+		second_balances = frappe.get_all(
+			"Stock Closing Balance",
+			filters={"stock_closing_entry": second_entry.name, "item_code": item},
+			fields=["batch_no", "actual_qty", "stock_value_difference", "inventory_dimension_key"],
+		)
+		self.assertEqual(len(second_balances), 2)
+		self.assertEqual({row.batch_no or None for row in second_balances}, {None, batch_no})
+		for row in second_balances:
+			self.assertEqual(row.actual_qty, 110)
+			self.assertEqual(row.stock_value_difference, 11000)
+			self.assertFalse(row.inventory_dimension_key)
 
 	def test_adjustment_entry_write_off_uses_ledger_basis_for_batched_item(self):
 		"""An is_adjustment_entry writes off stock value stranded on the Stock Ledger Entry, so the
