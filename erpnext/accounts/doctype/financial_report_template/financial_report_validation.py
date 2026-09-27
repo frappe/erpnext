@@ -312,14 +312,12 @@ class DependencyValidator(Validator):
 class CalculationFormulaValidator(Validator):
 	"""Validates calculation formulas used in Calculated Amount rows"""
 
-	def __init__(self, reference_codes: set[str], strict: bool = True):
+	def __init__(self, reference_codes: set[str]):
 		"""
 		Args:
 		        reference_codes: line references the formula may use.
-		        strict: report an unknown name as an error instead of a warning.
 		"""
 		self.reference_codes = reference_codes
-		self.strict = strict
 
 	def validate(self, row) -> ValidationResult:
 		"""Validate calculation formula for a single row"""
@@ -389,15 +387,14 @@ class CalculationFormulaValidator(Validator):
 		"""
 		Validate the names a formula uses against the known codes and functions.
 
-		- Unknown names are reported according to `strict`.
-		- A self-reference is always an error: it evaluates without failing and produces a misleading value.
+		- A name that is neither a known code nor a known function is an error.
+		- So is a self-reference: it evaluates without failing and produces a misleading value.
 		"""
 		result = ValidationResult()
 		unknown_functions, unknown_codes, used_codes = self._resolve_names(tree)
-		report = result.add_error if self.strict else result.add_warning
 
 		if unknown_functions:
-			report(
+			result.add_error(
 				ValidationIssue(
 					message=_("Formula uses unknown functions: {0}").format(
 						", ".join(sorted(unknown_functions))
@@ -407,7 +404,7 @@ class CalculationFormulaValidator(Validator):
 			)
 
 		if unknown_codes:
-			report(
+			result.add_error(
 				ValidationIssue(
 					message=_("Formula references undefined codes: {0}").format(
 						", ".join(sorted(unknown_codes))
@@ -435,33 +432,19 @@ class CalculationFormulaValidator(Validator):
 		Returns:
 		        Unknown functions, unknown codes, and known codes the formula reads.
 		"""
-		called = {
-			node.func.id
-			for node in ast.walk(tree)
-			if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-		}
-
-		# Names the formula creates itself, such as a loop variable in [x for x in ...].
-		# Python marks those as Store; everything read from the context is Load.
-		created = {
-			node.id
-			for node in ast.walk(tree)
-			if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
-		}
+		called, created, read = collect_names(tree)
 
 		unknown_functions, unknown_codes, used_codes = set(), set(), set()
 
-		for node in ast.walk(tree):
-			if not isinstance(node, ast.Name) or node.id in created:
-				continue
-
-			if node.id in called:
-				if node.id not in ALLOWED_FUNCTIONS:
-					unknown_functions.add(node.id)
-			elif node.id in self.reference_codes:
-				used_codes.add(node.id)
-			elif node.id not in ALLOWED_FUNCTIONS:
-				unknown_codes.add(node.id)
+		# skip names the formula made itself, like REV in [REV for REV in ...]
+		for name in read - created:
+			if name in called:
+				if name not in ALLOWED_FUNCTIONS:
+					unknown_functions.add(name)
+			elif name in self.reference_codes:
+				used_codes.add(name)
+			elif name not in ALLOWED_FUNCTIONS:
+				unknown_codes.add(name)
 
 		return unknown_functions, unknown_codes, used_codes
 
@@ -631,6 +614,27 @@ class FormulaValidator(Validator):
 		return result
 
 
+def collect_names(tree: ast.Expression) -> tuple[set, set, set]:
+	"""
+	Read every name in a formula in one pass.
+
+	Returns three sets:
+	        - called: used as a function, like `sum` in `sum([A])`
+	        - created: made by the formula, like `x` in `[x for x in ...]`
+	        - read: everything read by name
+	"""
+	called, created, read = set(), set(), set()
+
+	for node in ast.walk(tree):
+		if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+			called.add(node.func.id)
+		elif isinstance(node, ast.Name):
+			target = created if isinstance(node.ctx, ast.Store) else read
+			target.add(node.id)
+
+	return called, created, read
+
+
 def extract_reference_codes_from_formula(formula: str, available_codes: set[str]) -> list[str]:
 	"""Return the reference codes a formula depends on, sorted so the result is stable."""
 	if not formula:
@@ -643,25 +647,8 @@ def extract_reference_codes_from_formula(formula: str, available_codes: set[str]
 		# a word match so dependency ordering still sees the codes it can recognise.
 		found = {code for code in available_codes if re.search(r"\b" + re.escape(code) + r"\b", formula)}
 	else:
-		called_names = {
-			node.func.id
-			for node in ast.walk(tree)
-			if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-		}
-		# Skip names the formula binds itself; a code shadowed that way is not a dependency.
-		bound = {
-			node.id
-			for node in ast.walk(tree)
-			if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
-		}
-		found = {
-			node.id
-			for node in ast.walk(tree)
-			if isinstance(node, ast.Name)
-			and node.id in available_codes
-			and node.id not in called_names
-			and node.id not in bound
-		}
+		called, created, read = collect_names(tree)
+		found = (read - called - created) & available_codes
 
 	# sorted so the order is the same in every process
 	return sorted(found)

@@ -1326,7 +1326,7 @@ class FormulaCalculator:
 		self.row_data = row_data
 		self.period_list = period_list
 		self.precision = get_currency_precision()
-		self.validator = CalculationFormulaValidator(set(row_data.keys()), strict=False)
+		self.validator = CalculationFormulaValidator(set(row_data.keys()))
 
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
@@ -1362,8 +1362,7 @@ class FormulaCalculator:
 				title=_("Invalid Formula"),
 			)
 
-		# frappe.throw outside the try, so the handlers above do not swallow it
-		if isinstance(result, bool) or not isinstance(result, int | float):
+		if type(result) not in (int, float):
 			frappe.throw(
 				_("Formula {0} must return a number, but it returned {1}").format(
 					frappe.bold(formula), frappe.bold(type(result).__name__)
