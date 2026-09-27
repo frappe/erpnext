@@ -305,8 +305,7 @@ def get_invoiced_qty(pr_doc, bill_for_rejected: bool) -> dict:
 
 def get_invoiced_qty_based_on_po(po_details: list, bill_for_rejected: bool) -> dict:
 	"""Fill receipts FIFO with the qty invoiced directly against the Purchase Order."""
-	po_billed = get_billed_amount_against_po(po_details)
-	pending_po_qty = {po_detail: row["billed_qty"] for po_detail, row in po_billed.items()}
+	pending_po_qty = get_qty_invoiced_against_po_for_receipts(po_details)
 
 	pr_items = get_purchase_receipts_against_po_details(po_details)
 	pr_item_names = [pr_item.name for pr_item in pr_items]
@@ -324,6 +323,32 @@ def get_invoiced_qty_based_on_po(po_details: list, bill_for_rejected: bool) -> d
 		invoiced_qty[pr_item.name] = direct_qty + qty_from_po
 
 	return invoiced_qty
+
+
+def get_qty_invoiced_against_po_for_receipts(po_details: list) -> dict:
+	"""Qty invoiced against the Purchase Order itself, leaving out debit notes that do not touch receipts."""
+	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(purchase_invoice_item)
+		.inner_join(purchase_invoice)
+		.on(purchase_invoice_item.parent == purchase_invoice.name)
+		.select(purchase_invoice_item.po_detail, fn.Sum(purchase_invoice_item.qty))
+		.where(
+			(purchase_invoice_item.po_detail.isin(po_details))
+			& ((purchase_invoice_item.pr_detail.isnull()) | (purchase_invoice_item.pr_detail == ""))
+			& (purchase_invoice.docstatus == 1)
+			& (purchase_invoice.update_stock == 0)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_receipt == 1)
+			)
+		)
+		.groupby(purchase_invoice_item.po_detail)
+	)
+
+	return frappe._dict(query.run())
 
 
 def set_amount_difference_with_purchase_invoice(pr_doc, items: list) -> None:
