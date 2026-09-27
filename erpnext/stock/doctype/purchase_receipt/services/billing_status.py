@@ -370,7 +370,8 @@ def take_from_invoices(invoices: list, pending_qty: float) -> frappe._dict:
 
 
 def get_po_invoices(po_details: list) -> dict:
-	"""Net qty and base amount of each invoice made against the Purchase Order, oldest first."""
+	"""Net qty and base amount of each invoice made against the Purchase Order, oldest first.
+	Debit notes that do not update receipt billing are left out."""
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
@@ -391,6 +392,10 @@ def get_po_invoices(po_details: list) -> dict:
 			& ((purchase_invoice_item.pr_detail.isnull()) | (purchase_invoice_item.pr_detail == ""))
 			& (purchase_invoice.docstatus == 1)
 			& (purchase_invoice.update_stock == 0)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_receipt == 1)
+			)
 		)
 		.orderby(CombineDatetime(purchase_invoice.posting_date, purchase_invoice.posting_time))
 		.orderby(purchase_invoice.name)
