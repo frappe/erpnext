@@ -128,6 +128,7 @@ def get_purchase_receipts_against_po_details(po_details: list) -> list[dict]:
 		)
 		.orderby(CombineDatetime(purchase_receipt.posting_date, purchase_receipt.posting_time))
 		.orderby(purchase_receipt.name)
+		.orderby(purchase_receipt_item.idx)
 	)
 
 	return query.run(as_dict=True)
