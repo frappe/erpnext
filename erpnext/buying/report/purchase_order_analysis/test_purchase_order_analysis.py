@@ -6,6 +6,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, nowdate
 
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -68,18 +69,32 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 
 	def test_group_by_item_across_purchase_orders(self):
 		po = self.make_purchase_order(qty=10)
-		self.make_purchase_order(qty=4)
+		billed_po = self.make_purchase_order(qty=4)
 		create_pr_against_po(po.name, received_qty=3)
+
+		pi = make_purchase_invoice(billed_po.name)
+		pi.items[0].qty = 2
+		pi.insert().submit()
 
 		columns, data, message, chart = execute(self.get_filters(group_by_item=1))
 
-		self.assertEqual(
-			[
-				(row["uom"], row["qty"], row["received_qty"], row["pending_qty"])
-				for row in self.get_item_rows(data)
-			],
-			[("Nos", 14, 3, 11)],
-		)
+		expected_value = {
+			"uom": "Nos",
+			"qty": 14,
+			"received_qty": 3,
+			"pending_qty": 11,
+			"billed_qty": 2,
+			"qty_to_bill": 12,
+			"amount": 7000,
+			"received_qty_amount": 1500,
+			"billed_amount": 1000,
+			"pending_amount": 6000,
+		}
+		rows = self.get_item_rows(data)
+		self.assertEqual(len(rows), 1)
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(rows[0][key], val)
 
 		fieldnames = [column["fieldname"] for column in columns]
 		self.assertIn("uom", fieldnames)
