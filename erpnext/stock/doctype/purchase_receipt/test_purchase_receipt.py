@@ -1257,6 +1257,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		make_invoice_against_order(po.name, qty=40, rate=55)
 		self.assertEqual(get_amount_differences(), [1200, 200])
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_non_updating_order_debit_note_kept_out_of_invoice_split(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.purchase_receipt.services.billing_status import update_billing_percentage
+
+		po = create_purchase_order(qty=100, rate=50)
+		(pr,) = make_receipts_against_order(po.name, ((100, "08:00"),))
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -20
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.submit()
+
+		update_billing_percentage(frappe.get_doc("Purchase Receipt", pr.name))
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
