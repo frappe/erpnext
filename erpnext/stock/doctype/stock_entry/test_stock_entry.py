@@ -4925,6 +4925,23 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		self.assertEqual(se.process_loss_qty, 10)
 
+	def test_from_bom_entry_rejects_variant_in_another_stock_uom(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+		with self.change_settings("Item Variant Settings", {"allow_different_uom": 1}):
+			variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+			variant.stock_uom = "_Test UOM 1"
+			variant.insert()
+
+		se = self.make_process_loss_entry(fg_item="_Test Variant Item")
+		fg_row = self.get_finished_good_row(se)
+		fg_row.item_code = variant.name
+		fg_row.uom = "_Test UOM 1"
+		fg_row.conversion_factor = 1
+
+		self.assertRaisesRegex(FinishedGoodError, "has stock UOM", se.save)
+
 	def test_from_bom_entry_rejects_alternative_of_bom_item(self):
 		properties = {"is_stock_item": 1, "allow_alternative_item": 1}
 		fg_item = make_item("Process Loss Alternative Source", properties=properties).name
