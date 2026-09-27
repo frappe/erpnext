@@ -4905,25 +4905,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	def get_finished_good_row(self, se):
 		return next(row for row in se.items if row.is_finished_item)
 
-	def add_finished_output(self, se, item_code, qty, uom="Nos"):
-		"""Repack needs a manual rate on every finished row once there is more than one."""
-		fg_row = self.get_finished_good_row(se)
-		fg_row.set_basic_rate_manually = 1
-		fg_row.basic_rate = 10
-		return se.append(
-			"items",
-			{
-				"item_code": item_code,
-				"qty": qty,
-				"uom": uom,
-				"conversion_factor": 1,
-				"t_warehouse": "_Test Warehouse 1 - _TC",
-				"is_finished_item": 1,
-				"set_basic_rate_manually": 1,
-				"basic_rate": 10,
-			},
-		)
-
 	def test_process_loss_follows_finished_good_qty(self):
 		for purpose in ("Manufacture", "Repack"):
 			se = self.make_process_loss_entry(purpose)
@@ -4944,7 +4925,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		self.assertEqual(se.process_loss_qty, 10)
 
-	def test_process_loss_counts_alternative_of_bom_item(self):
+	def test_from_bom_entry_rejects_alternative_of_bom_item(self):
 		properties = {"is_stock_item": 1, "allow_alternative_item": 1}
 		fg_item = make_item("Process Loss Alternative Source", properties=properties).name
 		alternative = make_item("Process Loss Alternative FG", properties=properties).name
@@ -4954,29 +4935,8 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		se = self.make_process_loss_entry(fg_item=fg_item)
 		self.get_finished_good_row(se).item_code = alternative
-		self.get_finished_good_row(se).qty = 90
-		se.save()
 
-		self.assertEqual(se.process_loss_qty, 10)
-
-	def test_process_loss_skips_alternative_in_another_stock_uom(self):
-		fg_item = make_item(
-			"Process Loss UOM Source", properties={"is_stock_item": 1, "allow_alternative_item": 1}
-		).name
-		alternative = make_item(
-			"Process Loss UOM Alternative",
-			properties={"is_stock_item": 1, "allow_alternative_item": 1, "stock_uom": "_Test UOM 1"},
-		).name
-		frappe.get_doc(
-			{"doctype": "Item Alternative", "item_code": fg_item, "alternative_item_code": alternative}
-		).insert()
-
-		se = self.make_process_loss_entry("Repack", fg_item=fg_item)
-		self.get_finished_good_row(se).qty = 90
-		self.add_finished_output(se, alternative, 5, uom="_Test UOM 1")
-		se.save()
-
-		self.assertEqual(se.process_loss_qty, 10)
+		self.assertRaises(FinishedGoodError, se.save)
 
 	def test_process_loss_ignores_finished_flag_on_source_row(self):
 		se = self.make_process_loss_entry()
@@ -5007,7 +4967,22 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	def test_process_loss_ignores_other_repack_outputs(self):
 		other_item = make_item("Process Loss Other Output", properties={"is_stock_item": 1}).name
 		se = self.make_process_loss_entry("Repack")
-		other_output = self.add_finished_output(se, other_item, 10)
+		fg_row = self.get_finished_good_row(se)
+		fg_row.set_basic_rate_manually = 1
+		fg_row.basic_rate = 10
+		other_output = se.append(
+			"items",
+			{
+				"item_code": other_item,
+				"qty": 10,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+				"is_finished_item": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": 10,
+			},
+		)
 		se.items.remove(other_output)
 		se.items.insert(0, other_output)
 		se.save()
