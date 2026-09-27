@@ -1559,7 +1559,29 @@ class StockEntry(StockController, SubcontractingInwardController):
 				exc=FinishedGoodError,
 			)
 
+		if not self.work_order:
+			self.validate_finished_good_stock_uom(bom_item, bom_item_rows)
+
 		return sum(flt(row.transfer_qty) for row in bom_item_rows)
+
+	def validate_finished_good_stock_uom(self, bom_item, rows):
+		"""Without a work order, Finished Good Quantity is in the BOM item's stock UOM."""
+		stock_uom = frappe.get_cached_value("Item", bom_item, "stock_uom")
+		for row in rows:
+			if row.stock_uom != stock_uom:
+				frappe.throw(
+					_(
+						"Row {0}: {1} has stock UOM {2}, but Finished Good Quantity is in {3}, the stock UOM of {4}. Make it through a Work Order, or uncheck From BOM."
+					).format(
+						row.idx,
+						frappe.bold(row.item_code),
+						frappe.bold(row.stock_uom),
+						frappe.bold(stock_uom),
+						frappe.bold(bom_item),
+					),
+					title=_("Finished Good UOM Mismatch"),
+					exc=FinishedGoodError,
+				)
 
 	def get_variants_of(self, template, item_codes):
 		other_items = item_codes - {template}
