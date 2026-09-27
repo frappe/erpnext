@@ -200,15 +200,33 @@ def _get_party_details(
 	return party_details
 
 
-def validate_party_company(party_type, party, company):
-	if not company or party_type not in ("Customer", "Supplier"):
+def validate_party_company(party_type, party, company, row=None):
+	if not company:
 		return
 
-	from erpnext.stock.doctype.company_restriction.company_restriction import (
-		validate_masters_for_company,
-	)
+	if party_type in ("Customer", "Supplier"):
+		from erpnext.stock.doctype.company_restriction.company_restriction import (
+			validate_masters_for_company,
+		)
 
-	validate_masters_for_company(party_type, [party], company)
+		validate_masters_for_company(party_type, [party], company)
+
+	# unlike Customer / Supplier, these are owned by a single company
+	elif party_type in ("Employee", "Shareholder"):
+		if frappe.flags.ignore_party_validation:
+			return
+
+		party_company = frappe.get_cached_value(party_type, party, "company")
+		if not party_company or party_company == company:
+			return
+
+		msg = _("{0} {1} does not belong to company {2}").format(
+			_(party_type), frappe.bold(party), frappe.bold(company)
+		)
+		if row:
+			msg = _("Row {0}: {1}").format(row, msg)
+
+		frappe.throw(msg)
 
 
 def set_address_details(
