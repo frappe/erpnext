@@ -306,6 +306,7 @@ class PurchaseInvoice(BuyingController):
 				reference_field="received_qty"
 				if buying_settings.bill_for_rejected_quantity_in_purchase_invoice
 				else "qty",
+				billing_flag="update_billed_amount_in_purchase_receipt",
 			)
 		else:
 			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
