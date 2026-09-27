@@ -417,20 +417,33 @@ def get_po_invoices(po_details: list) -> dict:
 
 
 def get_open_invoices(invoices: list) -> list:
-	"""Debit notes without an invoice of their own take qty back from the newest invoices first."""
+	"""Debit notes without an invoice row of their own take qty back from the newest rows first, at their own rate."""
 	open_invoices = [invoice for invoice in invoices if invoice.qty > 0]
 	qty_to_take_back = -sum(invoice.qty for invoice in invoices if invoice.qty < 0)
+	amount_to_take_back = -sum(invoice.amount for invoice in invoices if invoice.qty < 0)
 
 	for invoice in reversed(open_invoices):
 		qty = min(invoice.qty, qty_to_take_back)
 		if qty <= 0:
 			break
 
-		invoice.amount -= invoice.amount * qty / invoice.qty
+		amount = amount_to_take_back * qty / qty_to_take_back
 		invoice.qty -= qty
+		invoice.amount -= amount
 		qty_to_take_back -= qty
+		amount_to_take_back -= amount
 
-	return open_invoices
+	return keep_value_of_emptied_invoices(invoices)
+
+
+def keep_value_of_emptied_invoices(invoices: list) -> list:
+	"""A row returned in full at another rate leaves value behind; the newest remaining row keeps it."""
+	remaining = [invoice for invoice in invoices if invoice.qty > 0]
+	leftover = sum(invoice.amount for invoice in invoices if invoice.qty == 0)
+	if remaining and leftover:
+		remaining[-1].amount += leftover
+
+	return remaining
 
 
 def get_invoiced_qty_against_po_items(po_items: list) -> dict:
