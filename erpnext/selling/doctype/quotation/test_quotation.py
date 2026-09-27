@@ -539,6 +539,29 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(revision.items[0].rate, 250)
 		self.assertEqual(revision.items[0].prevdoc_docname, opportunity.name)
 
+	def test_latest_revision_is_flagged(self):
+		quotation = make_quotation()
+		self.assertEqual(quotation.is_latest_revision, 0)
+
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		second_revision = make_revision(first_revision.name)
+		second_revision.insert()
+		second_revision.submit()
+
+		self.assertEqual(self.get_latest_revision_flags(quotation), [0, 0, 1])
+
+		second_revision.cancel()
+
+		self.assertEqual(self.get_latest_revision_flags(quotation), [0, 1, 0])
+
+	def get_latest_revision_flags(self, quotation):
+		return [
+			frappe.db.get_value("Quotation", name, "is_latest_revision")
+			for name in (quotation.name, f"{quotation.name}-R1", f"{quotation.name}-R2")
+		]
+
 	def test_submitting_a_revision_deactivates_other_versions(self):
 		quotation = make_quotation()
 		first_revision = make_revision(quotation.name)

@@ -172,6 +172,21 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			.name
 		)
 
+	def make_party_specific_item(self, customer, item_code):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Party Specific Item",
+					"party_type": "Customer",
+					"party": customer,
+					"restrict_based_on": "Item",
+					"based_on_value": item_code,
+				}
+			)
+			.insert()
+			.name
+		)
+
 	def test_item_price_inherits_item_company_restriction(self):
 		restricted = make_item()
 		allowed = make_item()
@@ -201,6 +216,79 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		with self.set_user(user):
 			self.assertTrue(frappe.has_permission("Item Price", doc=price))
+
+	def test_dynamic_link_inherits_master_company_restriction(self):
+		item = make_item()
+		restricted = make_customer("_Test Dynamic Link Restricted Customer")
+		allowed = make_customer("_Test Dynamic Link Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		records = {
+			customer: self.make_party_specific_item(customer, item.name) for customer in (restricted, allowed)
+		}
+
+		user = self.make_user_with_roles("test_dynamic_link_restriction@example.com", ["System Manager"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			visible = frappe.get_list(
+				"Party Specific Item",
+				filters={"name": ("in", list(records.values()))},
+				pluck="party",
+			)
+			self.assertEqual(visible, [allowed])
+
+			self.assertFalse(frappe.has_permission("Party Specific Item", doc=records[restricted]))
+			self.assertTrue(frappe.has_permission("Party Specific Item", doc=records[allowed]))
+
+	def make_lead(self, customer, company=None):
+		return (
+			frappe.get_doc(
+				{"doctype": "Lead", "first_name": "_Test", "customer": customer, "company": company}
+			)
+			.insert()
+			.name
+		)
+
+	def test_optional_company_record_inherits_master_company_restriction(self):
+		restricted = make_customer("_Test Optional Company Restricted Customer")
+		restricted_later = make_customer("_Test Optional Company Restricted Later Customer")
+		allowed = make_customer("_Test Optional Company Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		leads = {
+			restricted: self.make_lead(restricted),
+			restricted_later: self.make_lead(restricted_later, "_Test Company"),
+			allowed: self.make_lead(allowed),
+		}
+		self.restrict_to_companies("Customer", restricted_later, ["_Test Company 1"])
+
+		user = self.make_user_with_roles("test_optional_company_restriction@example.com", ["Sales Manager"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			visible = frappe.get_list(
+				"Lead", filters={"name": ("in", list(leads.values()))}, pluck="customer"
+			)
+			self.assertEqual(visible, [allowed])
+
+			self.assertFalse(frappe.has_permission("Lead", doc=leads[restricted]))
+			self.assertFalse(frappe.has_permission("Lead", doc=leads[restricted_later]))
+			self.assertTrue(frappe.has_permission("Lead", doc=leads[allowed]))
+
+	def test_transaction_hides_when_master_is_restricted_later(self):
+		customer = make_customer("_Test Restricted Later Quotation Customer")
+		quotation = make_quotation(party_name=customer, do_not_submit=1)
+
+		user = self.make_user_with_roles("test_quotation_restriction@example.com", ["Sales User"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			self.assertTrue(frappe.has_permission("Quotation", doc=quotation.name))
+
+		self.restrict_to_companies("Customer", customer, ["_Test Company 1"])
+
+		with self.set_user(user):
+			self.assertEqual(frappe.get_list("Quotation", filters={"name": quotation.name}), [])
+			self.assertFalse(frappe.has_permission("Quotation", doc=quotation.name))
 
 	def make_user_with_roles(self, email, roles):
 		if not frappe.db.exists("User", email):

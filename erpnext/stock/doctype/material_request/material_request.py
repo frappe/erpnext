@@ -517,28 +517,6 @@ def is_valid_buying_price_list(price_list: str | None) -> bool:
 	return is_price_list_enabled(price_list) and bool(frappe.get_value("Price List", price_list, "buying"))
 
 
-def update_completed_and_requested_qty(stock_entry, method):
-	if stock_entry.doctype == "Stock Entry":
-		material_request_map = {}
-
-		for d in stock_entry.get("items"):
-			if d.material_request:
-				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
-
-		for mr, mr_item_rows in material_request_map.items():
-			if mr and mr_item_rows:
-				mr_obj = frappe.get_doc("Material Request", mr)
-
-				if mr_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(
-						_("{0} {1} is cancelled or stopped").format(_("Material Request"), mr),
-						frappe.InvalidStatusError,
-					)
-
-				mr_obj.update_completed_qty(mr_item_rows)
-				mr_obj.update_requested_qty(mr_item_rows)
-
-
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 
