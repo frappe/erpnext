@@ -1329,6 +1329,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual([pr.per_billed for pr in receipts], [100, 0])
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_invoice_refresh_leaves_unchanged_receipt_alone(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		untouched_modified = frappe.db.get_value("Purchase Receipt", receipts[1].name, "modified")
+
+		make_invoice_against_order(po.name, qty=60, rate=50)
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt", receipts[0].name, "per_billed"), 100)
+		self.assertEqual(
+			frappe.db.get_value("Purchase Receipt", receipts[1].name, "modified"), untouched_modified
+		)
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
