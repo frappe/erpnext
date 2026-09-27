@@ -3831,6 +3831,31 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_non_updating_debit_note_gives_no_qty_billing_room(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+
+		pr = make_purchase_receipt(qty=100, rate=50)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -20
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.submit()
+
+		extra_invoice = frappe.copy_doc(pi)
+		extra_invoice.items[0].qty = 20
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	def test_non_stock_item_over_billing_against_po_is_blocked(self):
 		service_item = create_item(
 			"_Test Service Item Non Stock PI",
