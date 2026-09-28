@@ -821,29 +821,30 @@ class FilterExpressionParser:
 
 	def build_condition(self, report_row, table, raise_on_invalid=False):
 		"""
-		Build SQL condition directly from filter formula.
+		Build an SQL condition from a filter formula.
 
-		Supports:
-		1. Simple condition: ["field", "operator", "value"]
-		   Example: ["account_type", "=", "Income"]
+		- A single condition is `["field", "operator", "value"]`:
 
-		2. Complex logical conditions:
-		   {"and": [condition1, condition2, ...]}  # All conditions must be true
-		   {"or": [condition1, condition2, ...]}   # Any condition can be true
+		```
+		["account_type", "=", "Income"]
+		```
 
-		   Example:
-		   {
-		         "and": [
-		           ["account_type", "=", "Income"],
-		           {"or": [
-		                 ["category", "=", "Direct Income"],
-		                 ["category", "=", "Indirect Income"]
-		           ]}
-		         ]
-		   }
+		- `and` and `or` nest them. `and` needs every condition to hold, `or` needs one:
 
-		Returns:
-		        SQL condition object or None if invalid
+		```
+		{
+		  "and": [
+		    ["account_type", "=", "Income"],
+		    {"or": [
+		      ["category", "=", "Direct Income"],
+		      ["category", "=", "Indirect Income"]
+		    ]}
+		  ]
+		}
+		```
+
+		---
+		Returns the condition, or None when the row has no filter or the filter is invalid.
 		"""
 		filter_formula = report_row.calculation_formula
 		if not filter_formula:
