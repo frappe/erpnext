@@ -1826,6 +1826,7 @@ def get_default_bom(item_code: str | None = None):
 def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
 	"""Whitelisted entry point: authorise the item, then return its cost price."""
 	frappe.has_permission("Item", doc=item_code, throw=True)
+	frappe.has_permission("Company", doc=company, ptype="select", throw=True)
 
 	return _get_valuation_rate(item_code, company, warehouse)
 
