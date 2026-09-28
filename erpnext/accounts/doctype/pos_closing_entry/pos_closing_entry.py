@@ -339,13 +339,13 @@ def get_payment_rows_by_invoice(invoices):
 
 
 def get_change_payment_row(rows, change_account):
-	"""The row the change was handed back from: a Cash row on the change account, any Cash row,
-	then any row on the change account."""
-	cash_rows = [row for row in rows if row.type == "Cash"]
+	"""The row the change was paid from: a Cash row on the change account, any row on the change
+	account, then any Cash row."""
+	change_account_rows = [row for row in rows if row.account == change_account]
 	return (
-		next((row for row in cash_rows if row.account == change_account), None)
-		or next(iter(cash_rows), None)
-		or next((row for row in rows if row.account == change_account), None)
+		next((row for row in change_account_rows if row.type == "Cash"), None)
+		or next(iter(change_account_rows), None)
+		or next((row for row in rows if row.type == "Cash"), None)
 	)
 
 
