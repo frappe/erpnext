@@ -445,7 +445,8 @@ def after_app_uninstall(app_name=None):
 
 		frappe.db.commit()  # nosemgrep
 
-	if app_name == "insights":
+	# a dry run calls this hook too, with Insights still installed
+	if app_name == "insights" and "insights" not in frappe.get_installed_apps():
 		from erpnext.setup.insights_dashboards import set_dashboard_links
 
 		set_dashboard_links()
