@@ -7,6 +7,7 @@ from frappe.query_builder.functions import Coalesce, Min, NullIf, Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
@@ -672,10 +673,60 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def assign_serial_batches_to_materials(self, item_args, row, qty):
 		if row.serial_nos:
 			self._append_with_serial_nos(item_args, row, qty)
-		elif len(row.batches) == 1:
-			self._append_with_single_batch(item_args, row)
 		elif row.batches:
-			self.split_items_based_on_batches(qty, item_args, row)
+			self.select_available_batches(row, item_args["qty"])
+			if len(row.batches) == 1:
+				self._append_with_single_batch(item_args, row)
+			else:
+				self.split_items_based_on_batches(item_args["qty"], item_args, row)
+
+	def select_available_batches(self, row, qty):
+		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+			return
+
+		if not hasattr(self, "available_batch_qty"):
+			self.available_batch_qty = {}
+			self.own_reservations = frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_type": "Work Order", "voucher_no": self.doc.work_order, "docstatus": 1},
+				pluck="name",
+			)
+
+		key = (row.item_code, row.warehouse)
+		if key not in self.available_batch_qty:
+			self.available_batch_qty[key] = {
+				batch.batch_no: batch.qty
+				for batch in get_auto_batch_nos(
+					frappe._dict(
+						item_code=row.item_code,
+						warehouse=row.warehouse,
+						company=self.doc.company,
+						posting_date=self.doc.posting_date,
+						posting_time=self.doc.posting_time,
+						ignore_voucher_nos=self.own_reservations,
+					)
+				)
+			}
+
+		available = self.available_batch_qty[key]
+		selected = {}
+		for batch_no, transferred_qty in row.batches.items():
+			batch_qty = min(max(transferred_qty, 0), max(available.get(batch_no, 0), 0), qty)
+			if batch_qty > 0:
+				selected[batch_no] = batch_qty
+				qty -= batch_qty
+
+		if flt(qty, frappe.get_precision("Stock Entry Detail", "qty")) > 0:
+			frappe.throw(
+				_("Insufficient unreserved batch stock for item {0} in warehouse {1}.").format(
+					row.item_code, row.warehouse
+				),
+				title=_("Insufficient Stock"),
+			)
+
+		for batch_no, batch_qty in selected.items():
+			available[batch_no] -= batch_qty
+		row.batches = selected
 
 	def _append_with_serial_nos(self, item_args, row, qty):
 		if serial_nos := row.serial_nos[: cint(qty)]:
@@ -759,7 +810,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				self.available_materials[key].qty += row.qty
 
 			if row.serial_and_batch_bundle:
-				self.available_materials[key].update(self.get_sabb_details(row.serial_and_batch_bundle))
+				material = self.available_materials[key]
+				details = self.get_sabb_details(row.serial_and_batch_bundle)
+				material.setdefault("serial_nos", []).extend(details.serial_nos)
+				batches = material.setdefault("batches", defaultdict(float))
+				for batch_no, qty in details.batches.items():
+					batches[batch_no] += qty
 
 	def get_consumption_entries(self):
 		stock_entry = frappe.qb.DocType("Stock Entry")
