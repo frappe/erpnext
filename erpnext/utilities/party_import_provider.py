@@ -9,7 +9,7 @@ from frappe import _
 from frappe.core.doctype.data_import.import_provider import ImportProvider
 from frappe.core.doctype.data_import.importer import INSERT, UPDATE
 
-from erpnext.selling.doctype.customer.mapper import parse_full_name
+from erpnext.selling.doctype.customer.customer import parse_full_name
 
 # Contact details come from the Contact rows. Importing them on the party too would make
 # the party create a second contact from them on insert.
