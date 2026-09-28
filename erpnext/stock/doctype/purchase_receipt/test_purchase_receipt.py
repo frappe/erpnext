@@ -1161,7 +1161,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		po = create_purchase_order(qty=100, rate=50)
 		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
-		make_purchase_return(receipts[0].name).submit()
+		purchase_return = make_purchase_return(receipts[0].name)
+		purchase_return.set_posting_time = 1
+		purchase_return.posting_time = "12:00"
+		purchase_return.submit()
 		make_invoice_against_order(po.name, qty=40, rate=50)
 
 		for pr in receipts:
