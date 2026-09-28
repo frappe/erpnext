@@ -641,12 +641,11 @@ def extract_reference_codes_from_formula(formula: str, available_codes: set[str]
 	try:
 		tree = ast.parse(formula, mode="eval")
 	except SyntaxError:
-		# An unparseable formula is reported by CalculationFormulaValidator. Fall back to
-		# a word match so dependency ordering still sees the codes it can recognise.
-		found = {code for code in available_codes if re.search(r"\b" + re.escape(code) + r"\b", formula)}
-	else:
-		called, created, read = collect_names(tree)
-		found = (read - called - created) & available_codes
+		# `CalculationFormulaValidator` reports the syntax error
+		return []
+
+	called, created, read = collect_names(tree)
+	found = (read - called - created) & available_codes
 
 	# sorted so the order is the same in every process
 	return sorted(found)

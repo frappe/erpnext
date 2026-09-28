@@ -443,8 +443,8 @@ class TestReferenceCodeExtraction(FinancialReportTemplateTestCase):
 	def test_a_name_the_formula_creates_is_not_a_dependency(self):
 		self.assertEqual(self._extract("[REV for REV in [1]]"), [])
 
-	def test_unparseable_formula_falls_back_to_a_word_match(self):
-		self.assertEqual(self._extract("REV +"), ["REV"])
+	def test_unparseable_formula_has_no_dependencies(self):
+		self.assertEqual(self._extract("REV +"), [])
 
 	def test_empty_formula(self):
 		self.assertEqual(self._extract(""), [])
