@@ -246,7 +246,7 @@ class StockClosing:
 						closing_stock[key].actual_qty += actual_qty
 						closing_stock[key].stock_value_difference += value_difference
 
-						if not row.actual_qty and row.qty_after_transaction:
+						if not row.actual_qty and row.qty_after_transaction is not None:
 							closing_stock[key].actual_qty = row.qty_after_transaction
 
 						fifo_queue = closing_stock[key].fifo_queue
