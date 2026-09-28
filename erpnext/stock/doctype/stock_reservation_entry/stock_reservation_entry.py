@@ -1236,17 +1236,6 @@ class StockReservation:
 			if not qty:
 				continue
 
-			self.available_qty_to_reserve = self.get_available_qty_to_reserve(item_code, warehouse)
-			if not self.available_qty_to_reserve:
-				self.throw_stock_not_exists_error(item.get("idx"), item_code, warehouse)
-
-			self.qty_to_be_reserved = (
-				qty if self.available_qty_to_reserve >= qty else self.available_qty_to_reserve
-			)
-
-			if not self.qty_to_be_reserved:
-				continue
-
 			sre.item_code = item_code
 			sre.warehouse = warehouse
 			sre.has_serial_no = item_details.has_serial_no
@@ -1254,15 +1243,27 @@ class StockReservation:
 			sre.voucher_type = item.get("voucher_type") or self.doc.doctype
 			sre.voucher_no = item.get("voucher_no") or self.doc.name
 			sre.voucher_detail_no = item.get(child_doctype) or item.name or item.get("voucher_detail_no")
+			sre.from_voucher_no = item.get("from_voucher_no")
+			sre.from_voucher_detail_no = item.get("from_voucher_detail_no")
+			sre.from_voucher_type = item.get("from_voucher_type")
+			pending_qty = self.get_pending_qty_to_reserve(sre, qty)
+			if pending_qty <= 0:
+				continue
+
+			self.available_qty_to_reserve = self.get_available_qty_to_reserve(item_code, warehouse)
+			if not self.available_qty_to_reserve:
+				self.throw_stock_not_exists_error(item.get("idx"), item_code, warehouse)
+
+			self.qty_to_be_reserved = min(qty, pending_qty, self.available_qty_to_reserve)
+
+			if self.qty_to_be_reserved <= 0:
+				continue
+
 			sre.available_qty = self.available_qty_to_reserve
-			sre.voucher_qty = qty
 			sre.reserved_qty = self.qty_to_be_reserved
 			sre.company = self.doc.company
 			sre.stock_uom = item_details.stock_uom
 			sre.project = self.doc.project
-			sre.from_voucher_no = item.get("from_voucher_no")
-			sre.from_voucher_detail_no = item.get("from_voucher_detail_no")
-			sre.from_voucher_type = item.get("from_voucher_type")
 			sre.reservation_based_on = sre.reservation_based_on or "Qty"
 			if item_details.has_batch_no or item_details.has_serial_no:
 				sre.reservation_based_on = "Serial and Batch"
@@ -1278,6 +1279,39 @@ class StockReservation:
 
 		return is_sre_created
 
+	def get_pending_qty_to_reserve(self, sre, qty):
+		# Lock the voucher even when it has no reservations yet, so retries cannot race.
+		frappe.db.get_value(sre.voucher_type, sre.voucher_no, "name", for_update=True)
+		filters = {
+			"docstatus": 1,
+			"item_code": sre.item_code,
+			"voucher_type": sre.voucher_type,
+			"voucher_no": sre.voucher_no,
+			"voucher_detail_no": sre.voucher_detail_no,
+		}
+		for field in ("from_voucher_type", "from_voucher_no", "from_voucher_detail_no"):
+			filters[field] = sre.get(field) or ("is", "not set")
+
+		# A locking read sees reservations committed while this request waited for the voucher.
+		reservations = frappe.qb.get_query(
+			"Stock Reservation Entry",
+			filters=filters,
+			fields=["name", "reserved_qty", "voucher_qty"],
+			for_update=True,
+		).run(as_dict=True)
+		self.reservation_entries = [row.name for row in reservations]
+		sre.voucher_qty = flt(qty)
+		if sre.from_voucher_no:
+			for row in reservations:
+				sre.voucher_qty = max(sre.voucher_qty, flt(row.voucher_qty))
+		if sre.voucher_type == "Subcontracting Order" and not sre.from_voucher_no:
+			# The reservation dialog sends the requested remainder, not the total demand.
+			sre.voucher_qty = frappe.db.get_value(
+				"Subcontracting Order Supplied Item", sre.voucher_detail_no, "required_qty"
+			)
+
+		return flt(sre.voucher_qty) - sum(flt(row.reserved_qty) for row in reservations)
+
 	def set_serial_batch(self, sre, serial_batch_bundles):
 		bundle_details = frappe.get_all(
 			"Serial and Batch Entry",
@@ -1286,16 +1320,38 @@ class StockReservation:
 			order_by="creation",
 		)
 
+		reserved_quantities = defaultdict(float)
+		if self.reservation_entries:
+			for row in frappe.get_all(
+				"Serial and Batch Entry",
+				fields=["serial_no", "batch_no", "qty"],
+				filters={"parent": ("in", self.reservation_entries), "parenttype": "Stock Reservation Entry"},
+			):
+				reserved_quantities[(row.serial_no, row.batch_no)] += flt(row.qty)
+
+		remaining_qty = sre.reserved_qty
 		for detail in bundle_details:
+			qty = abs(detail.qty)
+			key = (detail.serial_no, detail.batch_no)
+			skipped_qty = min(qty, reserved_quantities[key])
+			reserved_quantities[key] -= skipped_qty
+			qty = min(qty - skipped_qty, remaining_qty)
+			if qty <= 0:
+				continue
+
 			sre.append(
 				"sb_entries",
 				{
 					"serial_no": detail.serial_no,
 					"batch_no": detail.batch_no,
-					"qty": abs(detail.qty),
+					"qty": qty,
 					"warehouse": sre.warehouse,
 				},
 			)
+
+			remaining_qty -= qty
+			if remaining_qty <= 0:
+				break
 
 	def throw_stock_not_exists_error(self, idx, item_code, warehouse):
 		if idx:
