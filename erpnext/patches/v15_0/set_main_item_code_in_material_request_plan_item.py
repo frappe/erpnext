@@ -35,9 +35,13 @@ class MainItemCodeBackfill:
 			"Production Plan Sub Assembly Item",
 			production_plans,
 			["parent", "production_item", "parent_item_code", "bom_no", "sales_order"],
+			"modified desc, idx asc",
 		)
 		self.plan_items = get_rows_by_parent(
-			"Production Plan Item", production_plans, ["parent", "bom_no", "sales_order"]
+			"Production Plan Item",
+			production_plans,
+			["parent", "bom_no", "sales_order"],
+			"modified asc, idx asc",
 		)
 
 		boms = self.get_boms()
@@ -80,9 +84,12 @@ class MainItemCodeBackfill:
 		]
 
 
-def get_rows_by_parent(doctype, production_plans, fields):
+def get_rows_by_parent(doctype, production_plans, fields, order_by):
 	rows_by_parent = defaultdict(list)
-	for row in frappe.get_all(doctype, filters={"parent": ("in", production_plans)}, fields=fields):
+	rows = frappe.get_all(
+		doctype, filters={"parent": ("in", production_plans)}, fields=fields, order_by=order_by
+	)
+	for row in rows:
 		rows_by_parent[row.parent].append(row)
 
 	return rows_by_parent
