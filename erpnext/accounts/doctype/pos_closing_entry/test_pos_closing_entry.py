@@ -442,19 +442,20 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 	def test_change_is_taken_once_from_modes_sharing_an_account(self):
 		with self.set_user("Administrator"):
-			frappe.get_doc(
-				{
-					"doctype": "Mode of Payment",
-					"mode_of_payment": "_Test Wallet",
-					"type": "General",
-					"accounts": [{"company": "_Test Company", "default_account": "Cash - _TC"}],
-				}
-			).insert()
-			self.pos_profile.append("payments", {"mode_of_payment": "_Test Wallet"})
-			self.pos_profile.save()
+			add_wallet_mode_of_payment(self.pos_profile, "Cash - _TC")
 
 		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 		make_paid_pos_invoice([("Cash", 50), ("_Test Wallet", 50)])
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
+
+	def test_change_is_taken_from_the_mode_on_the_change_account(self):
+		with self.set_user("Administrator"):
+			wallet_account = make_cash_account("_Test Wallet Cash")
+			add_wallet_mode_of_payment(self.pos_profile, wallet_account)
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 40), ("_Test Wallet", 60)], account_for_change_amount=wallet_account)
 
 		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
 
@@ -575,3 +576,16 @@ def make_cash_account(account_name):
 		.insert()
 		.name
 	)
+
+
+def add_wallet_mode_of_payment(pos_profile, account):
+	frappe.get_doc(
+		{
+			"doctype": "Mode of Payment",
+			"mode_of_payment": "_Test Wallet",
+			"type": "General",
+			"accounts": [{"company": "_Test Company", "default_account": account}],
+		}
+	).insert()
+	pos_profile.append("payments", {"mode_of_payment": "_Test Wallet"})
+	pos_profile.save()
