@@ -7,19 +7,15 @@ def execute():
 	if not frappe.db.has_column("Material Request Plan Item", "main_item_code"):
 		return
 
+	updates = {}
 	for row in get_material_request_plan_items():
 		if row.main_item_code:
 			continue
 
-		main_item_code = get_main_item_code(row)
-		if main_item_code:
-			frappe.db.set_value(
-				"Material Request Plan Item",
-				row.name,
-				"main_item_code",
-				main_item_code,
-				update_modified=False,
-			)
+		if main_item_code := get_main_item_code(row):
+			updates[row.name] = {"main_item_code": main_item_code}
+
+	frappe.db.bulk_update("Material Request Plan Item", updates, update_modified=False)
 
 
 def get_material_request_plan_items():
