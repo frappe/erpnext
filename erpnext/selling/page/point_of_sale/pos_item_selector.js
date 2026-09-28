@@ -53,6 +53,9 @@ erpnext.PointOfSale.ItemSelector = class {
 	async load_items_data() {
 		await this.item_ready_group;
 
+		// drop memoized search results so stock qty reflects the latest ledger
+		this.search_index = {};
+
 		this.start_item_loading_animation();
 
 		if (!this.price_list) {
