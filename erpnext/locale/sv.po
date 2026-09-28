@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-20 09:36+0000\n"
-"PO-Revision-Date: 2026-09-21 04:08\n"
+"PO-Revision-Date: 2026-09-28 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -19419,7 +19419,7 @@ msgstr "Aktivera Försäljning Provisioner Spårning"
 #. DocType 'Projects Settings'
 #: erpnext/projects/doctype/projects_settings/projects_settings.json
 msgid "Enabling the check box will fetch timesheet on select of a Project in Sales Invoice"
-msgstr "Om aktiverad hämtas tidrapport vid val av ett Projekt i Försäljning Faktura"
+msgstr "Om aktiverad hämtas tidrapport vid val av Projekt i Försäljning Faktura"
 
 #. Description of the 'Enforce Time Logs' (Check) field in DocType
 #. 'Manufacturing Settings'
@@ -56487,7 +56487,7 @@ msgstr "Detta är plats där skrot material lagras."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:319
 msgid "This is a preview of the email to be sent. A PDF of the document will automatically be attached with the email."
-msgstr "Detta är förhandsvisning av e-postmeddelandet som ska skickas. En PDF av dokumentet kommer automatiskt att bifogas med e-postmeddelandet."
+msgstr "Detta är förhandsvisning av e-post meddelande som ska skickas. En PDF av dokument kommer automatiskt att bifogas med e-post meddelande."
 
 #: erpnext/accounts/doctype/account/account.js:45
 msgid "This is a root account and cannot be edited."

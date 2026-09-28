@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-20 09:36+0000\n"
-"PO-Revision-Date: 2026-09-21 04:08\n"
+"PO-Revision-Date: 2026-09-28 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Serbian (Latin)\n"
 "MIME-Version: 1.0\n"
@@ -8969,7 +8969,7 @@ msgstr "Kutija"
 #: erpnext/setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 #: erpnext/workspace_sidebar/organization.json
 msgid "Branch"
-msgstr "Filijala"
+msgstr "Organizaciona jedinica"
 
 #. Label of the branch_code (Data) field in DocType 'Bank Account'
 #. Label of the branch_code (Data) field in DocType 'Bank Guarantee'
