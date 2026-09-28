@@ -331,18 +331,8 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 		if isinstance(voucher_type, str) and isinstance(voucher_no, str):
 			vouchers.append((voucher_type, voucher_no))
 
-	# The posting date and time are taken from the voucher's own stock ledger entries, never from the
-	# selected row, so the closed period checks run against the real date.
-	# Vouchers without stock ledger entries (Journal Entries and the report's GL-only rows) have
-	# nothing to rebuild the accounting ledgers from, so they are skipped.
 	stock_vouchers = get_stock_voucher_postings(vouchers, company)
-
-	# Checked for the whole selection up front so nothing is queued when any selected row falls in
-	# a closed period, instead of failing midway through on the Repost Item Valuation's own check.
 	validate_closed_periods(stock_vouchers, company)
-
-	# One batched lookup for the whole selection. Checking each row on its own meant a query per
-	# row, which does not hold up when the report is used on the large selections it is meant for.
 	pending_vouchers = get_pending_gl_reposting_vouchers(list(stock_vouchers))
 
 	for voucher_type, voucher_no in vouchers:
@@ -374,8 +364,7 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 				"repost_only_accounting_ledgers": 1,
 			}
 		)
-		# The accounts role check above is what authorises this; see the note at the top.
-		doc.flags.ignore_permissions = True
+
 		doc.submit()
 
 		entries.append(get_link_to_form("Repost Item Valuation", doc.name))

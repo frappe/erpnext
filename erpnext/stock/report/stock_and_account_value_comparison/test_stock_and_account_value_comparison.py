@@ -367,7 +367,10 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		}
 
 		stock_manager = create_user("test_savc_stock_manager@example.com", "Stock User", "Stock Manager")
-		accounts_user = create_user("test_savc_accounts_user@example.com", "Accounts User")
+		# Stock User for access to the report (and its Stock Ledger Entry reference doctype).
+		accounts_user = create_user(
+			"test_savc_accounts_stock_user@example.com", "Accounts User", "Stock User"
+		)
 
 		frappe.flags.dont_execute_stock_reposts = True
 		try:
@@ -376,8 +379,8 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 			self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
-			# An Accounts User has no Repost Item Valuation permission of their own, but may still open
-			# the report and repost GL from it.
+			# Neither Accounts User nor Stock User can create a Repost Item Valuation, but the accounts
+			# role is enough to repost GL from the report.
 			with self.set_user(accounts_user.name):
 				from frappe.desk.query_report import run
 

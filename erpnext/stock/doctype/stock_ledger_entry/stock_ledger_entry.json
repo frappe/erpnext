@@ -363,7 +363,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-28 12:00:00.000000",
+ "modified": "2026-05-26 19:07:43.537450",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
@@ -382,12 +382,6 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
-  },
-  {
-   "export": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Accounts User"
   }
  ],
  "row_format": "Dynamic",
