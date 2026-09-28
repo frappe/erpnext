@@ -37,6 +37,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	async load_items_data() {
+<<<<<<< HEAD
 		if (!this.item_group) {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_parent_item_group",
@@ -46,6 +47,15 @@ erpnext.PointOfSale.ItemSelector = class {
 				},
 			});
 		}
+=======
+		await this.item_ready_group;
+
+		// drop memoized search results so stock qty reflects the latest ledger
+		this.search_index = {};
+
+		this.start_item_loading_animation();
+
+>>>>>>> 3345820 (fix: refresh POS item stock qty on new order)
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
 			this.price_list = res.message.selling_price_list;

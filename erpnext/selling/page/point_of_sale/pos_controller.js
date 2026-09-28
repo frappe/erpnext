@@ -523,6 +523,7 @@ erpnext.PointOfSale.Controller = class {
 			() => this.set_pos_profile_data(),
 			() => this.set_pos_profile_status(),
 			() => this.cart.load_invoice(),
+			() => this.item_selector && this.item_selector.load_items_data(),
 			() => frappe.dom.unfreeze(),
 		]);
 	}
