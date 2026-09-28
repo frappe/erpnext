@@ -2371,7 +2371,9 @@ class QueryPaymentLedger:
 				.where(Criterion.all(self.common_filter))
 				.where(Criterion.all(self.dimensions_filter))
 				.where(Criterion.all(self.voucher_posting_date))
-				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+				.groupby(
+					ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party
+				)
 				# order by the select aliases (postgres can't ORDER BY a non-existent ple column)
 				.orderby(qb.Field("invoice_date"), qb.Field("voucher_no"))
 				# postgres HAVING can't reference a select alias; use the aggregate expression
