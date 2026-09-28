@@ -431,11 +431,6 @@ def after_app_install(app_name=None):
 
 		remove_allowed_users_on_crm_install()
 
-	if app_name == "insights":
-		from erpnext.setup.insights_dashboards import set_dashboard_links
-
-		set_dashboard_links()
-
 
 def after_app_uninstall(app_name=None):
 	if app_name == "crm":
@@ -443,11 +438,4 @@ def after_app_uninstall(app_name=None):
 
 		disable_frappe_crm_data_synchronization_on_crm_uninstall()
 
-		frappe.db.commit()  # nosemgrep
-
-	# a dry run calls this hook too, with Insights still installed
-	if app_name == "insights" and "insights" not in frappe.get_installed_apps():
-		from erpnext.setup.insights_dashboards import set_dashboard_links
-
-		set_dashboard_links()
 		frappe.db.commit()  # nosemgrep
