@@ -109,6 +109,8 @@ class TestPartyImportProvider(ERPNextTestSuite):
 			"Customer", name, ["customer_primary_contact", "customer_primary_address"]
 		)
 
+		# Same records typed in a different case still match, on MariaDB and PostgreSQL alike.
+		values[4:7] = ["REIMPORT@EXAMPLE.COM", "1 MAIN ST", "berlin"]
 		self.run_import("Customer", UPDATE, [["ID", *columns], [name, *values]])
 
 		self.assertEqual(len(self.linked("Contact", "Customer", name)), 1)
