@@ -10,8 +10,6 @@ def execute():
 	if not frappe.db.has_column("Material Request Plan Item", "main_item_code"):
 		return
 
-	frappe.db.auto_commit_on_many_writes = 1
-
 	for production_plans in create_batch(get_production_plans(), 500):
 		MainItemCodeBackfill(production_plans).run()
 
@@ -49,15 +47,12 @@ class MainItemCodeBackfill:
 		)
 
 	def run(self):
+		updates = {}
 		for row in self.rows:
 			if main_item_code := self.get_main_item_code(row):
-				frappe.db.set_value(
-					"Material Request Plan Item",
-					row.name,
-					"main_item_code",
-					main_item_code,
-					update_modified=False,
-				)
+				updates[row.name] = {"main_item_code": main_item_code}
+
+		frappe.db.bulk_update("Material Request Plan Item", updates, update_modified=False)
 
 	def get_boms(self):
 		plan_rows = (*self.sub_assemblies.values(), *self.plan_items.values())
