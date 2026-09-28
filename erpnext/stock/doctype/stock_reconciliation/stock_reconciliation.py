@@ -781,6 +781,10 @@ class StockReconciliation(StockController):
 		and create stock ledger entries based on the difference"""
 		from erpnext.stock.stock_ledger import get_previous_sle
 
+		if self.docstatus == 2:
+			self.make_sle_on_cancel(allow_negative_stock)
+			return
+
 		sl_entries = []
 		for row in self.items:
 			if not row.qty and not row.valuation_rate and not row.current_qty:
@@ -991,7 +995,7 @@ class StockReconciliation(StockController):
 
 		return data
 
-	def make_sle_on_cancel(self):
+	def make_sle_on_cancel(self, allow_negative_stock=False):
 		sl_entries = []
 
 		has_serial_no = False
@@ -1005,7 +1009,9 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+			allow_negative_stock = allow_negative_stock or cint(
+				frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+			)
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 	def merge_similar_item_serial_nos(self, sl_entries):
