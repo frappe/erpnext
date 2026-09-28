@@ -362,8 +362,8 @@ class Customer(TransactionBase):
 
 		from erpnext.crm.utils import copy_comments, link_communications
 
-		copy_comments("Lead", self.lead_name, self)
-		link_communications("Lead", self.lead_name, self)
+		copy_comments("Lead", self.lead_name, self, self.flags.ignore_permissions)
+		link_communications("Lead", self.lead_name, self, self.flags.ignore_permissions)
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):

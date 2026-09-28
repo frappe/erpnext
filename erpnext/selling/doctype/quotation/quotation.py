@@ -324,8 +324,8 @@ class Quotation(SellingController):
 		):
 			return
 
-		copy_comments("Opportunity", self.opportunity, self)
-		link_communications("Opportunity", self.opportunity, self)
+		copy_comments("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
+		link_communications("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
 
 	def print_other_charges(self, docname):
 		print_lst = []

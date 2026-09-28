@@ -122,11 +122,12 @@ class Opportunity(TransactionBase, CRMNote):
 		if self.opportunity_from == "Lead":
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
-			link_open_tasks(self.opportunity_from, self.party_name, self)
-			link_open_events(self.opportunity_from, self.party_name, self)
+			ignore_permissions = self.flags.ignore_permissions
+			link_open_tasks(self.opportunity_from, self.party_name, self, ignore_permissions)
+			link_open_events(self.opportunity_from, self.party_name, self, ignore_permissions)
 			if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
-				copy_comments(self.opportunity_from, self.party_name, self)
-				link_communications(self.opportunity_from, self.party_name, self)
+				copy_comments(self.opportunity_from, self.party_name, self, ignore_permissions)
+				link_communications(self.opportunity_from, self.party_name, self, ignore_permissions)
 
 	def validate(self):
 		self.set_opportunity_type()
