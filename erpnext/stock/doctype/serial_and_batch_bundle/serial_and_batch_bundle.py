@@ -569,6 +569,7 @@ class SerialandBatchBundle(Document):
 			"Purchase Invoice": "purchase_invoice_item",
 			"Delivery Note": "dn_detail",
 			"Purchase Receipt": "purchase_receipt_item",
+			"Subcontracting Receipt": "subcontracting_receipt_item",
 		}.get(self.voucher_type)
 
 		return_against_voucher_detail_no = frappe.db.get_value(
@@ -590,7 +591,7 @@ class SerialandBatchBundle(Document):
 
 		# Added to handle rejected warehouse case
 		return_warehouse = None
-		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 			warehouses = get_warehouses_for_return(self.voucher_type, return_against_voucher_detail_no)
 			if self.warehouse in warehouses:
 				return_warehouse = self.warehouse
@@ -982,6 +983,7 @@ class SerialandBatchBundle(Document):
 			"Purchase Receipt",
 			"Purchase Invoice",
 			"Sales Invoice",
+			"Subcontracting Receipt",
 		] and parent.get("is_return"):
 			return_ref_field = frappe.scrub(parent.doctype) + "_item"
 			if parent.doctype == "Delivery Note":
@@ -1292,7 +1294,7 @@ class SerialandBatchBundle(Document):
 		if not (self.voucher_type and self.voucher_no):
 			return False
 
-		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 			return frappe.get_cached_value(self.voucher_type, self.voucher_no, "is_return")
 		elif self.voucher_type in ["Sales Invoice", "Delivery Note"]:
 			return not frappe.get_cached_value(self.voucher_type, self.voucher_no, "is_return")
@@ -1403,6 +1405,7 @@ class SerialandBatchBundle(Document):
 			"Purchase Invoice",
 			"Sales Invoice",
 			"Delivery Note",
+			"Subcontracting Receipt",
 		]:
 			return
 
@@ -1443,15 +1446,31 @@ class SerialandBatchBundle(Document):
 					)
 
 	def get_orignal_document_data(self):
-		fields = ["serial_and_batch_bundle", "stock_qty"]
+		child_doc = self.voucher_type + " Item"
+		qty_field = "stock_qty" if frappe.get_meta(child_doc).has_field("stock_qty") else "qty as stock_qty"
+		fields = ["serial_and_batch_bundle", qty_field]
+		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
+			fields.extend(["warehouse", "rejected_warehouse", "rejected_serial_and_batch_bundle"])
+			if self.has_serial_no:
+				fields.append("rejected_serial_no")
+
 		if self.has_serial_no:
 			fields.append("serial_no")
 
 		elif self.has_batch_no:
 			fields.append("batch_no")
 
-		child_doc = self.voucher_type + " Item"
-		return frappe.get_all(child_doc, fields=fields, filters={"name": self.returned_against})
+		data = frappe.get_all(child_doc, fields=fields, filters={"name": self.returned_against})
+		for d in data:
+			if self.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
+				if self.is_rejected or (
+					d.get("rejected_warehouse") and self.warehouse == d.get("rejected_warehouse")
+				):
+					d.serial_and_batch_bundle = d.get("rejected_serial_and_batch_bundle")
+					if self.has_serial_no and d.get("rejected_serial_no"):
+						d.serial_no = d.get("rejected_serial_no")
+
+		return data
 
 	def validate_duplicate_serial_and_batch_no(self):
 		serial_nos = []
@@ -2248,7 +2267,7 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 	if child_row and isinstance(child_row, str):
 		child_row = parse_json(child_row)
 
-	if not name and child_row and child_row.get("qty") < 0:
+	if not name and child_row and (flt(child_row.get("qty")) < 0 or flt(child_row.get("rejected_qty")) < 0):
 		bundle = get_reference_serial_and_batch_bundle(child_row)
 		if bundle:
 			voucher_no = None
@@ -2278,16 +2297,71 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 
 
 def get_reference_serial_and_batch_bundle(child_row):
-	field = {
-		"Sales Invoice Item": "sales_invoice_item",
-		"Delivery Note Item": "dn_detail",
-		"Purchase Receipt Item": "purchase_receipt_item",
-		"Purchase Invoice Item": "purchase_invoice_item",
-		"POS Invoice Item": "pos_invoice_item",
-	}.get(child_row.doctype)
+	if isinstance(child_row, str):
+		child_row = parse_json(child_row)
 
-	if field:
-		return frappe.get_cached_value(child_row.doctype, child_row.get(field), "serial_and_batch_bundle")
+	if not child_row:
+		return None
+
+	child_doctype = getattr(child_row, "doctype", None) or (
+		child_row.get("doctype") if isinstance(child_row, dict) else None
+	)
+	field = None
+	if child_doctype:
+		field = {
+			"Sales Invoice Item": "sales_invoice_item",
+			"Delivery Note Item": "dn_detail",
+			"Purchase Receipt Item": "purchase_receipt_item",
+			"Purchase Invoice Item": "purchase_invoice_item",
+			"POS Invoice Item": "pos_invoice_item",
+			"Subcontracting Receipt Item": "subcontracting_receipt_item",
+		}.get(child_doctype)
+	else:
+		for dt, ref_field in {
+			"Subcontracting Receipt Item": "subcontracting_receipt_item",
+			"Purchase Receipt Item": "purchase_receipt_item",
+			"Purchase Invoice Item": "purchase_invoice_item",
+			"Delivery Note Item": "dn_detail",
+			"Sales Invoice Item": "sales_invoice_item",
+			"POS Invoice Item": "pos_invoice_item",
+		}.items():
+			if child_row.get(ref_field):
+				child_doctype = dt
+				field = ref_field
+				break
+
+	if field and child_row.get(field):
+		return_against_detail = child_row.get(field)
+		if child_doctype in [
+			"Purchase Receipt Item",
+			"Purchase Invoice Item",
+			"Subcontracting Receipt Item",
+		]:
+			orig_row = frappe.get_cached_value(
+				child_doctype,
+				return_against_detail,
+				[
+					"warehouse",
+					"rejected_warehouse",
+					"serial_and_batch_bundle",
+					"rejected_serial_and_batch_bundle",
+				],
+				as_dict=True,
+			)
+			if orig_row:
+				return_warehouse = child_row.get("warehouse")
+				if (
+					child_row.get("is_rejected")
+					or child_row.get("return_qty_from_rejected_warehouse")
+					or (orig_row.rejected_warehouse and return_warehouse == orig_row.rejected_warehouse)
+				):
+					return orig_row.rejected_serial_and_batch_bundle
+
+				return orig_row.serial_and_batch_bundle
+		else:
+			return frappe.get_cached_value(child_doctype, return_against_detail, "serial_and_batch_bundle")
+
+	return None
 
 
 @frappe.whitelist()
