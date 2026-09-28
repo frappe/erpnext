@@ -8,8 +8,6 @@ import frappe
 from frappe import _
 from frappe.core.doctype.data_import.import_provider import ImportProvider
 from frappe.core.doctype.data_import.importer import INSERT, UPDATE
-from frappe.query_builder.functions import Lower
-from frappe.utils import cstr
 
 from erpnext.selling.doctype.customer.mapper import parse_full_name
 
@@ -166,26 +164,15 @@ class PartyImportProvider(ImportProvider):
 
 
 def _find_linked(doctype: str, link_doctype: str, link_name: str, filters: dict) -> str | None:
-	"""Name of a ``doctype`` record linked to the party that matches ``filters``, ignoring case."""
-	if not all(filters.values()):
-		return None
-
-	record = frappe.qb.DocType(doctype)
-	link = frappe.qb.DocType("Dynamic Link")
-	query = (
-		frappe.qb.from_(record)
-		.join(link)
-		.on((link.parent == record.name) & (link.parenttype == doctype))
-		.select(record.name)
-		.where((link.link_doctype == link_doctype) & (link.link_name == link_name))
-		.limit(1)
+	"""Name of a ``doctype`` record linked to the party that matches ``filters``."""
+	return frappe.db.get_value(
+		doctype,
+		[
+			["Dynamic Link", "link_doctype", "=", link_doctype],
+			["Dynamic Link", "link_name", "=", link_name],
+			*[[field, "=", value] for field, value in filters.items()],
+		],
 	)
-	# MariaDB ignores case when comparing text and PostgreSQL doesn't, so compare in lower case.
-	for field, value in filters.items():
-		query = query.where(Lower(record[field]) == cstr(value).lower())
-
-	result = query.run()
-	return result[0][0] if result else None
 
 
 def _demote_other_primary_contacts(link_doctype: str, link_name: str, keep: str) -> None:
