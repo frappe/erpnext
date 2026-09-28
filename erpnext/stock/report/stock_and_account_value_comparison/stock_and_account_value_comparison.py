@@ -6,6 +6,7 @@ from datetime import date
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Min
 from frappe.utils import create_batch, get_datetime, get_link_to_form, getdate, parse_json
 
 import erpnext
@@ -38,6 +39,11 @@ def get_data(report_filters):
 	# Optional lower bound: lets callers (e.g. the weekly auto-repost job) scope the scan to the current
 	# fiscal year in the query itself instead of loading every voucher ever posted and filtering later.
 	if report_filters.get("from_date"):
+		if report_filters.as_on_date and getdate(report_filters.from_date) > getdate(
+			report_filters.as_on_date
+		):
+			frappe.throw(_("From Date cannot be after As On Date"))
+
 		filters["posting_date"] = ("between", [report_filters.from_date, report_filters.as_on_date])
 
 	get_currency_precision() or 2
@@ -272,19 +278,27 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 				frappe.db.rollback(save_point="repost_based_on_transaction")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_gl_reposting_entries(rows: str | list, company: str, from_date: str | date | None = None):
-	"""Repost only the accounting ledgers for the selected vouchers posted on or after `from_date`.
+	"""Repost only the accounting ledgers for the selected vouchers.
 
 	Unlike `create_reposting_entries`, the stock ledgers and the valuation rates are left untouched.
 	This is meant for the case where the stock valuation itself is correct but the General Ledger has
 	drifted away from it, so there is no need to pay for a full (and much slower) revaluation.
 
-	`from_date` bounds how far back the accounting ledgers are rewritten: selected rows posted before
-	it are ignored, so a stale selection cannot reach into an already reconciled period.
+	The report scopes the rows with its own From Date filter; `from_date` is kept for direct callers
+	and skips vouchers posted before it.
 	"""
 
-	frappe.has_permission("Repost Item Valuation", "create", throw=True)
+	# Rewriting the General Ledger is an accounting decision, so it is left to Accounts Managers
+	# (who can also create the Repost Item Valuation) and not to Stock Managers.
+	if "Accounts Manager" not in frappe.get_roles():
+		frappe.throw(
+			_("Only users with the {0} role can repost GL entries").format(
+				frappe.bold(_("Accounts Manager"))
+			),
+			frappe.PermissionError,
+		)
 
 	if isinstance(rows, str):
 		rows = parse_json(rows)
@@ -292,30 +306,33 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 	if not rows:
 		frappe.throw(_("Please select rows to create GL Reposting Entries"))
 
-	if not from_date:
-		frappe.throw(_("Please select the date to repost the accounting ledgers from"))
-
-	from_date = getdate(from_date)
-
 	entries = []
 	processed_vouchers = set()
 
-	# One batched lookup for the whole selection. Checking each row on its own meant a query per
-	# row, which does not hold up when the report is used on the large selections it is meant for.
-	pending_vouchers = get_pending_gl_reposting_vouchers(
-		[(row.get("voucher_type"), row.get("voucher_no")) for row in rows]
-	)
-
+	vouchers = []
 	for row in rows:
-		# Rows posted before the From Date are skipped, so a stale selection cannot rewrite the
-		# accounting ledgers of an already reconciled period.
-		if getdate(row.get("posting_date")) < from_date:
+		if not isinstance(row, dict):
 			continue
 
 		voucher_type, voucher_no = row.get("voucher_type"), row.get("voucher_no")
+		if isinstance(voucher_type, str) and isinstance(voucher_no, str):
+			vouchers.append((voucher_type, voucher_no))
 
-		# journal entry has not stock stock value, so no need to create a reposting entry for it
-		if voucher_type == "Journal Entry":
+	stock_vouchers = get_stock_voucher_postings(vouchers, company)
+	if from_date:
+		from_date = getdate(from_date)
+		stock_vouchers = {
+			key: posting
+			for key, posting in stock_vouchers.items()
+			if getdate(posting.posting_date) >= from_date
+		}
+
+	validate_closed_periods(stock_vouchers, company)
+	pending_vouchers = get_pending_gl_reposting_vouchers(list(stock_vouchers))
+
+	for voucher_type, voucher_no in vouchers:
+		posting = stock_vouchers.get((voucher_type, voucher_no))
+		if not posting:
 			continue
 
 		# Skip duplicate vouchers in the selection: a single reposting entry is enough to rewrite the accounting ledgers for a given voucher.
@@ -336,12 +353,14 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 				"status": "Queued",
 				"voucher_type": voucher_type,
 				"voucher_no": voucher_no,
-				"posting_date": row.get("posting_date"),
-				"posting_time": row.get("posting_time"),
+				"posting_date": posting.posting_date,
+				"posting_time": posting.posting_time,
 				"company": company,
 				"repost_only_accounting_ledgers": 1,
 			}
-		).submit()
+		)
+
+		doc.submit()
 
 		entries.append(get_link_to_form("Repost Item Valuation", doc.name))
 
@@ -352,6 +371,104 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 		frappe.msgprint(_("GL reposting entries created: {0}").format(", ".join(entries)))
 	else:
 		frappe.msgprint(_("No new GL reposting entries were created for the selected rows."))
+
+
+def validate_closed_periods(stock_vouchers, company):
+	"""Throw if any selected voucher is posted in a period closed by a Period Closing Voucher or a
+	closed Accounting Period."""
+
+	if not stock_vouchers:
+		return
+
+	last_pcv_date = frappe.db.get_value(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, [{"MAX": "period_end_date"}]
+	)
+	last_pcv_date = getdate(last_pcv_date) if last_pcv_date else None
+
+	closed_periods = get_closed_accounting_periods(company)
+
+	pcv_vouchers, accounting_period_vouchers = [], []
+	for (voucher_type, voucher_no), posting in stock_vouchers.items():
+		posting_date = getdate(posting.posting_date)
+		link = get_link_to_form(voucher_type, voucher_no)
+
+		if last_pcv_date and posting_date <= last_pcv_date:
+			pcv_vouchers.append(link)
+			continue
+
+		for period in closed_periods:
+			if period.document_type == voucher_type and period.start_date <= posting_date <= period.end_date:
+				accounting_period_vouchers.append(
+					_("{0} (Accounting Period {1})").format(link, frappe.bold(period.name))
+				)
+				break
+
+	messages = []
+	if pcv_vouchers:
+		messages.append(
+			_("Books are closed till {0} by Period Closing Voucher, remove these rows: {1}").format(
+				frappe.bold(frappe.format(last_pcv_date, "Date")), ", ".join(pcv_vouchers)
+			)
+		)
+
+	if accounting_period_vouchers:
+		messages.append(
+			_("These rows fall in a closed Accounting Period, remove them: {0}").format(
+				", ".join(accounting_period_vouchers)
+			)
+		)
+
+	if messages:
+		frappe.throw("<br><br>".join(messages), title=_("Closed Period Rows Selected"))
+
+
+def get_closed_accounting_periods(company):
+	"""Closed Accounting Period windows per document type, leaving out the ones the user is exempted from."""
+
+	ap = frappe.qb.DocType("Accounting Period")
+	cd = frappe.qb.DocType("Closed Document")
+
+	periods = (
+		frappe.qb.from_(ap)
+		.inner_join(cd)
+		.on(ap.name == cd.parent)
+		.select(ap.name, ap.start_date, ap.end_date, ap.exempted_role, cd.document_type)
+		.where((ap.company == company) & (ap.disabled == 0) & (cd.closed == 1))
+	).run(as_dict=True)
+
+	roles = frappe.get_roles()
+	return [d for d in periods if not (d.exempted_role and d.exempted_role in roles)]
+
+
+def get_stock_voucher_postings(vouchers, company) -> dict[tuple[str, str], frappe._dict]:
+	"""Posting date and time of each voucher that has active stock ledger entries in the company."""
+
+	postings = {}
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	for chunk in create_batch(list(set(vouchers)), 1000):
+		chunk = set(chunk)
+		entries = (
+			frappe.qb.from_(sle)
+			.select(
+				sle.voucher_type,
+				sle.voucher_no,
+				Min(sle.posting_date).as_("posting_date"),
+				Min(sle.posting_time).as_("posting_time"),
+			)
+			.where(
+				(sle.is_cancelled == 0)
+				& (sle.company == company)
+				& (sle.voucher_no.isin([voucher_no for _, voucher_no in chunk]))
+			)
+			.groupby(sle.voucher_type, sle.voucher_no)
+		).run(as_dict=True)
+
+		for d in entries:
+			if (d.voucher_type, d.voucher_no) in chunk:
+				postings[(d.voucher_type, d.voucher_no)] = d
+
+	return postings
 
 
 def get_pending_gl_reposting_vouchers(transactions) -> set[tuple[str, str]]:
