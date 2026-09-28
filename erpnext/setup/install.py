@@ -444,3 +444,9 @@ def after_app_uninstall(app_name=None):
 		disable_frappe_crm_data_synchronization_on_crm_uninstall()
 
 		frappe.db.commit()  # nosemgrep
+
+	if app_name == "insights":
+		from erpnext.setup.insights_dashboards import set_dashboard_links
+
+		set_dashboard_links()
+		frappe.db.commit()  # nosemgrep
