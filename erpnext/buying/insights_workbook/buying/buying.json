@@ -1,8 +1,13 @@
 {
  "charts": {
-  "buying-lead-time": {
+  "buying-on-time-delivery": {
    "chart_type": "Number",
    "config": {
+    "date_column": {
+     "column_name": "decided_on",
+     "data_type": "Date",
+     "dimension_name": "decided_on"
+    },
     "filters": {
      "filters": [],
      "logical_operator": "And"
@@ -11,308 +16,129 @@
     "number_column_options": [
      {
       "comparison": {
-       "label": "vs prior 13 weeks",
-       "measure": {
-        "aggregation": "max",
-        "column_name": "lead_time_prior_days",
-        "data_type": "Decimal",
-        "measure_name": "Prior 13 Weeks"
-       },
+       "label": "vs last FY",
        "show": "delta",
-       "source": "measure"
+       "source": "last year"
       },
-      "decimals": 0,
-      "negative_is_better": true,
-      "shorten": false,
-      "suffix": " days"
+      "decimals": 1,
+      "shorten": false
      }
     ],
     "number_columns": [
      {
-      "aggregation": "max",
-      "column_name": "lead_time_days",
       "data_type": "Decimal",
-      "id": "Lead Time",
-      "measure_name": "Lead Time"
+      "expression": {
+       "expression": "sum(on_time) / count()",
+       "type": "expression"
+      },
+      "format": "percent",
+      "id": "On-Time Delivery",
+      "measure_name": "On-Time Delivery (This FY)"
      }
     ],
     "order_by": [],
-    "sparkline": false
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
    },
    "folder": null,
-   "name": "buying-lead-time",
-   "query": "buying-lead-time-13-weeks",
-   "sort_order": 4,
-   "title": "Lead Time",
+   "name": "buying-on-time-delivery",
+   "query": "buying-order-lines-due",
+   "sort_order": 5,
+   "title": "On-Time Delivery",
    "workbook": "buying"
   },
-  "buying-lead-time-by-supplier-13-weeks": {
-   "chart_type": "Row",
+  "buying-on-time-delivery-by-supplier": {
+   "chart_type": "Table",
    "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "On-Time %",
+        "type": "column"
+       },
+       "mode": "rank_rules",
+       "operator": "below_average",
+       "value": null
+      }
+     ]
+    },
     "filters": {
      "filters": [],
      "logical_operator": "And"
     },
     "limit": 10,
-    "number_format": {
-     "decimals": 1,
-     "shorten": false,
-     "suffix": " days"
+    "number_formats": {
+     "Items Due": {
+      "decimals": 0,
+      "shorten": false
+     },
+     "Items Late": {
+      "decimals": 0,
+      "shorten": false
+     },
+     "On-Time %": {
+      "decimals": 1,
+      "shorten": false
+     }
     },
     "order_by": [
      {
       "column": {
-       "column_name": "Lead Time",
+       "column_name": "Items Due",
        "type": "column"
       },
       "direction": "desc"
      }
     ],
-    "x_axis": {
-     "dimension": {
+    "rows": [
+     {
       "column_name": "supplier",
       "data_type": "String",
       "dimension_name": "Supplier"
      }
-    },
-    "y_axis": {
-     "reference_lines": [
-      {
-       "aggregate": "average",
-       "axis": "y",
-       "dashed": true,
-       "id": "092e4f37",
-       "label": "Board average",
-       "measure_name": "Lead Time"
-      }
-     ],
-     "series": [
-      {
-       "measure": {
-        "data_type": "Decimal",
-        "expression": {
-         "expression": "avg(lead_days)",
-         "type": "expression"
-        },
-        "measure_name": "Lead Time"
-       },
-       "type": "bar"
-      }
-     ]
-    }
+    ],
+    "values": [
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "count()",
+       "type": "expression"
+      },
+      "measure_name": "Items Due"
+     },
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "count_if(on_time == 0)",
+       "type": "expression"
+      },
+      "measure_name": "Items Late"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(on_time) / count()",
+       "type": "expression"
+      },
+      "format": "percent",
+      "measure_name": "On-Time %"
+     }
+    ]
    },
    "folder": null,
-   "name": "buying-lead-time-by-supplier-13-weeks",
-   "query": "buying-receipts-13-weeks",
+   "name": "buying-on-time-delivery-by-supplier",
+   "query": "buying-order-lines-due-fiscal-year-to-date",
    "sort_order": 9,
-   "title": "Lead Time by Supplier, 13 Weeks",
+   "title": "On-Time Delivery by Supplier (This FY)",
    "workbook": "buying"
   },
-  "buying-lead-time-by-week-13-weeks": {
-   "chart_type": "Line",
-   "config": {
-    "filters": {
-     "filters": [],
-     "logical_operator": "And"
-    },
-    "limit": 100,
-    "number_format": {
-     "decimals": 1,
-     "shorten": false,
-     "suffix": " days"
-    },
-    "order_by": [
-     {
-      "column": {
-       "column_name": "Week",
-       "type": "column"
-      },
-      "direction": "asc"
-     }
-    ],
-    "x_axis": {
-     "dimension": {
-      "column_name": "posting_date",
-      "data_type": "Date",
-      "dimension_name": "Week",
-      "granularity": "week"
-     }
-    },
-    "y_axis": {
-     "min": 0,
-     "reference_lines": [
-      {
-       "aggregate": "average",
-       "axis": "y",
-       "dashed": true,
-       "id": "bfd90ee5",
-       "label": "13-week average",
-       "measure_name": "Lead Time"
-      }
-     ],
-     "series": [
-      {
-       "measure": {
-        "data_type": "Decimal",
-        "expression": {
-         "expression": "avg(lead_days)",
-         "type": "expression"
-        },
-        "measure_name": "Lead Time"
-       },
-       "show_data_points": true,
-       "smooth": true,
-       "type": "line"
-      }
-     ]
-    }
-   },
-   "folder": null,
-   "name": "buying-lead-time-by-week-13-weeks",
-   "query": "buying-receipts-13-weeks",
-   "sort_order": 8,
-   "title": "Lead Time by Week, 13 Weeks",
-   "workbook": "buying"
-  },
-  "buying-open-order-value": {
-   "chart_type": "Number",
-   "config": {
-    "filters": {
-     "filters": [],
-     "logical_operator": "And"
-    },
-    "limit": 100,
-    "number_column_options": [
-     {
-      "comparison": {
-       "label": "vs last week",
-       "measure": {
-        "aggregation": "max",
-        "column_name": "open_value_last_week",
-        "data_type": "Decimal",
-        "format": "currency",
-        "measure_name": "Value Last Week"
-       },
-       "show": "change",
-       "source": "measure"
-      },
-      "decimals": 1,
-      "shorten": true
-     },
-     {
-      "comparison": {
-       "label": "vs last week",
-       "measure": {
-        "aggregation": "max",
-        "column_name": "open_orders_last_week",
-        "data_type": "Integer",
-        "measure_name": "Orders Last Week"
-       },
-       "show": "delta",
-       "source": "measure"
-      },
-      "decimals": 0,
-      "shorten": false
-     }
-    ],
-    "number_columns": [
-     {
-      "aggregation": "max",
-      "column_name": "open_value",
-      "data_type": "Decimal",
-      "format": "currency",
-      "id": "Open Order Value",
-      "measure_name": "Open Order Value"
-     },
-     {
-      "aggregation": "max",
-      "column_name": "open_orders",
-      "data_type": "Integer",
-      "id": "Open Orders",
-      "measure_name": "Open Orders"
-     }
-    ],
-    "order_by": [],
-    "sparkline": false
-   },
-   "folder": null,
-   "name": "buying-open-order-value",
-   "query": "buying-open-order-position",
-   "sort_order": 1,
-   "title": "Open Order Value",
-   "workbook": "buying"
-  },
-  "buying-overdue-orders": {
-   "chart_type": "Number",
-   "config": {
-    "filters": {
-     "filters": [],
-     "logical_operator": "And"
-    },
-    "limit": 100,
-    "number_column_options": [
-     {
-      "comparison": {
-       "label": "vs last week",
-       "measure": {
-        "aggregation": "max",
-        "column_name": "overdue_value_last_week",
-        "data_type": "Decimal",
-        "format": "currency",
-        "measure_name": "Value Last Week"
-       },
-       "show": "change",
-       "source": "measure"
-      },
-      "decimals": 1,
-      "negative_is_better": true,
-      "shorten": true
-     },
-     {
-      "comparison": {
-       "label": "vs last week",
-       "measure": {
-        "aggregation": "max",
-        "column_name": "overdue_orders_last_week",
-        "data_type": "Integer",
-        "measure_name": "Orders Last Week"
-       },
-       "show": "delta",
-       "source": "measure"
-      },
-      "decimals": 0,
-      "negative_is_better": true,
-      "shorten": false
-     }
-    ],
-    "number_columns": [
-     {
-      "aggregation": "max",
-      "column_name": "overdue_value",
-      "data_type": "Decimal",
-      "format": "currency",
-      "id": "Overdue Order Value",
-      "measure_name": "Overdue Order Value"
-     },
-     {
-      "aggregation": "max",
-      "column_name": "overdue_orders",
-      "data_type": "Integer",
-      "id": "Overdue Orders",
-      "measure_name": "Overdue Orders"
-     }
-    ],
-    "order_by": [],
-    "sparkline": false
-   },
-   "folder": null,
-   "name": "buying-overdue-orders",
-   "query": "buying-open-order-position",
-   "sort_order": 2,
-   "title": "Overdue Orders",
-   "workbook": "buying"
-  },
-  "buying-overdue-purchase-orders": {
+  "buying-overdue-order-lines": {
    "chart_type": "Table",
    "config": {
     "columns": [],
@@ -322,7 +148,7 @@
       {
        "color": "amber",
        "column": {
-        "column_name": "Order Value",
+        "column_name": "Amount to Receive",
         "type": "column"
        },
        "mode": "rank_rules",
@@ -335,7 +161,7 @@
      "filters": [
       {
        "column": {
-        "column_name": "overdue_now",
+        "column_name": "overdue",
         "type": "column"
        },
        "operator": "=",
@@ -344,17 +170,21 @@
      ],
      "logical_operator": "And"
     },
-    "limit": 12,
+    "limit": 20,
     "number_formats": {
-     "Order Value": {
+     "Amount to Receive": {
       "decimals": 1,
       "shorten": true
+     },
+     "Delay (Days)": {
+      "decimals": 0,
+      "shorten": false
      }
     },
     "order_by": [
      {
       "column": {
-       "column_name": "Days Late",
+       "column_name": "Delay (Days)",
        "type": "column"
       },
       "direction": "desc"
@@ -372,43 +202,46 @@
       "dimension_name": "Supplier"
      },
      {
-      "column_name": "item_group",
+      "column_name": "item_code",
       "data_type": "String",
-      "dimension_name": "Item Group"
+      "dimension_name": "Item"
+     },
+     {
+      "column_name": "required_by",
+      "data_type": "Date",
+      "dimension_name": "Required By"
      }
     ],
     "values": [
      {
+      "aggregation": "sum",
+      "column_name": "qty_to_receive",
       "data_type": "Decimal",
-      "expression": {
-       "expression": "sum(base_grand_total)",
-       "type": "expression"
-      },
-      "format": "currency",
-      "measure_name": "Order Value"
+      "measure_name": "Qty to Receive"
      },
      {
-      "aggregation": "min",
-      "column_name": "promised_date",
-      "data_type": "Date",
-      "measure_name": "Promised"
+      "aggregation": "sum",
+      "column_name": "value_to_receive",
+      "data_type": "Decimal",
+      "format": "currency",
+      "measure_name": "Amount to Receive"
      },
      {
       "aggregation": "max",
       "column_name": "days_late",
       "data_type": "Integer",
-      "measure_name": "Days Late"
+      "measure_name": "Delay (Days)"
      }
     ]
    },
    "folder": null,
-   "name": "buying-overdue-purchase-orders",
-   "query": "buying-purchase-orders",
+   "name": "buying-overdue-order-lines",
+   "query": "buying-order-lines-to-receive",
    "sort_order": 10,
-   "title": "Overdue Purchase Orders",
+   "title": "Overdue Purchase Order Items",
    "workbook": "buying"
   },
-  "buying-payables": {
+  "buying-overdue-to-receive": {
    "chart_type": "Number",
    "config": {
     "filters": {
@@ -423,40 +256,86 @@
       "shorten": true
      },
      {
-      "decimals": 1,
+      "decimals": 0,
       "negative_is_better": true,
-      "shorten": true
+      "shorten": false
      }
     ],
     "number_columns": [
      {
       "aggregation": "max",
-      "column_name": "payables",
+      "column_name": "overdue",
       "data_type": "Decimal",
       "format": "currency",
-      "id": "Payables Outstanding",
-      "measure_name": "Payables Outstanding"
+      "id": "Overdue to Receive",
+      "measure_name": "Overdue Purchase Orders"
      },
      {
       "aggregation": "max",
-      "column_name": "payables_past_due",
-      "data_type": "Decimal",
-      "format": "currency",
-      "id": "Past Due",
-      "measure_name": "Past Due"
+      "column_name": "overdue_orders",
+      "data_type": "Integer",
+      "id": "Overdue Orders",
+      "measure_name": "Order Count"
      }
     ],
     "order_by": [],
     "sparkline": false
    },
    "folder": null,
-   "name": "buying-payables",
-   "query": "buying-payables-position",
-   "sort_order": 3,
-   "title": "Payables",
+   "name": "buying-overdue-to-receive",
+   "query": "buying-to-receive",
+   "sort_order": 4,
+   "title": "Overdue Purchase Orders",
    "workbook": "buying"
   },
-  "buying-payables-by-supplier": {
+  "buying-purchases": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "posting_date",
+     "data_type": "Date",
+     "dimension_name": "posting_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "base_net_amount",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Purchases, Fiscal Year to Date",
+      "measure_name": "Purchase Amount (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "buying-purchases",
+   "query": "buying-purchase-lines",
+   "sort_order": 1,
+   "title": "Purchase Amount",
+   "workbook": "buying"
+  },
+  "buying-purchases-by-item-group": {
    "chart_type": "Row",
    "config": {
     "filters": {
@@ -471,7 +350,121 @@
     "order_by": [
      {
       "column": {
-       "column_name": "Past Due",
+       "column_name": "Purchase Amount",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "item_group",
+      "data_type": "String",
+      "dimension_name": "Item Group"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "base_net_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Purchase Amount"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "buying-purchases-by-item-group",
+   "query": "buying-purchase-lines-fiscal-year-to-date",
+   "sort_order": 8,
+   "title": "Purchase Amount by Item Group (This FY)",
+   "workbook": "buying"
+  },
+  "buying-purchases-by-month": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "purchases",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Purchase Amount"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "purchases_last_year",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Month Last Year"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "buying-purchases-by-month",
+   "query": "buying-purchase-lines-24-months",
+   "sort_order": 6,
+   "title": "Purchase Amount by Month",
+   "workbook": "buying"
+  },
+  "buying-purchases-by-supplier": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Purchase Amount",
        "type": "column"
       },
       "direction": "desc"
@@ -488,137 +481,25 @@
      "series": [
       {
        "measure": {
-        "data_type": "Decimal",
-        "expression": {
-         "expression": "sum_if(days_past_due > 0, outstanding_amount)",
-         "type": "expression"
-        },
-        "format": "currency",
-        "measure_name": "Past Due"
-       },
-       "type": "bar"
-      },
-      {
-       "measure": {
-        "data_type": "Decimal",
-        "expression": {
-         "expression": "sum_if(days_past_due <= 0, outstanding_amount)",
-         "type": "expression"
-        },
-        "format": "currency",
-        "measure_name": "Not Yet Due"
-       },
-       "type": "bar"
-      }
-     ],
-     "stack": true
-    }
-   },
-   "folder": null,
-   "name": "buying-payables-by-supplier",
-   "query": "buying-open-bills",
-   "sort_order": 11,
-   "title": "Payables by Supplier",
-   "workbook": "buying"
-  },
-  "buying-purchases-by-item-group-13-weeks": {
-   "chart_type": "Donut",
-   "config": {
-    "filters": {
-     "filters": [],
-     "logical_operator": "And"
-    },
-    "label_column": {
-     "column_name": "item_group",
-     "data_type": "String",
-     "dimension_name": "Item Group"
-    },
-    "legend_position": "right",
-    "limit": 100,
-    "max_slices": 6,
-    "number_format": {
-     "decimals": 1,
-     "shorten": true
-    },
-    "order_by": [],
-    "show_inline_labels": true,
-    "value_column": {
-     "aggregation": "sum",
-     "column_name": "base_net_amount",
-     "data_type": "Decimal",
-     "format": "currency",
-     "measure_name": "Purchases"
-    }
-   },
-   "folder": null,
-   "name": "buying-purchases-by-item-group-13-weeks",
-   "query": "buying-purchases-13-weeks",
-   "sort_order": 7,
-   "title": "Purchases by Item Group, 13 Weeks",
-   "workbook": "buying"
-  },
-  "buying-purchases-by-week-13-weeks": {
-   "chart_type": "Bar",
-   "config": {
-    "filters": {
-     "filters": [],
-     "logical_operator": "And"
-    },
-    "limit": 100,
-    "number_format": {
-     "decimals": 1,
-     "shorten": true
-    },
-    "order_by": [
-     {
-      "column": {
-       "column_name": "Week",
-       "type": "column"
-      },
-      "direction": "asc"
-     }
-    ],
-    "split_by": {
-     "dimension": {
-      "column_name": "supplier",
-      "data_type": "String",
-      "dimension_name": "Supplier"
-     },
-     "max_split_values": 4
-    },
-    "x_axis": {
-     "dimension": {
-      "column_name": "posting_date",
-      "data_type": "Date",
-      "dimension_name": "Week",
-      "granularity": "week"
-     }
-    },
-    "y_axis": {
-     "min": 0,
-     "series": [
-      {
-       "measure": {
         "aggregation": "sum",
         "column_name": "base_net_amount",
         "data_type": "Decimal",
         "format": "currency",
-        "measure_name": "Purchases"
+        "measure_name": "Purchase Amount"
        },
        "type": "bar"
       }
-     ],
-     "stack": true
+     ]
     }
    },
    "folder": null,
-   "name": "buying-purchases-by-week-13-weeks",
-   "query": "buying-purchases-13-weeks",
-   "sort_order": 6,
-   "title": "Purchases by Week, 13 Weeks",
+   "name": "buying-purchases-by-supplier",
+   "query": "buying-purchase-lines-fiscal-year-to-date",
+   "sort_order": 7,
+   "title": "Purchase Amount by Supplier (This FY)",
    "workbook": "buying"
   },
-  "buying-purchases-this-month-2": {
+  "buying-requested-not-ordered-2": {
    "chart_type": "Number",
    "config": {
     "filters": {
@@ -628,48 +509,94 @@
     "limit": 100,
     "number_column_options": [
      {
-      "comparison": {
-       "label": "vs last year",
-       "measure": {
-        "aggregation": "max",
-        "column_name": "purchases_ly_mtd",
-        "data_type": "Decimal",
-        "format": "currency",
-        "measure_name": "Same Days Last Year"
-       },
-       "show": "change",
-       "source": "measure"
-      },
-      "decimals": 1,
-      "shorten": true
+      "decimals": 0,
+      "shorten": false
+     },
+     {
+      "decimals": 0,
+      "negative_is_better": true,
+      "shorten": false
      }
     ],
     "number_columns": [
      {
       "aggregation": "max",
-      "column_name": "purchases_mtd",
-      "data_type": "Decimal",
-      "format": "currency",
-      "id": "Purchases This Month",
-      "measure_name": "Purchases This Month"
+      "column_name": "rows",
+      "data_type": "Integer",
+      "id": "Requested, Not Ordered",
+      "measure_name": "Material Requests to Order"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "overdue_rows",
+      "data_type": "Integer",
+      "id": "Past Required By",
+      "measure_name": "Overdue"
      }
     ],
     "order_by": [],
     "sparkline": false
    },
    "folder": null,
-   "name": "buying-purchases-this-month-2",
-   "query": "buying-purchases-this-month",
-   "sort_order": 5,
-   "title": "Purchases This Month",
+   "name": "buying-requested-not-ordered-2",
+   "query": "buying-requested-not-ordered",
+   "sort_order": 2,
+   "title": "Material Requests to Order",
+   "workbook": "buying"
+  },
+  "buying-to-receive-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "to_receive",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "To Receive",
+      "measure_name": "Purchase Orders to Receive"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "orders",
+      "data_type": "Integer",
+      "id": "Orders",
+      "measure_name": "Order Count"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "buying-to-receive-2",
+   "query": "buying-to-receive",
+   "sort_order": 3,
+   "title": "Purchase Orders to Receive",
    "workbook": "buying"
   }
  },
- "creation": "2026-09-19 18:39:39.089586",
+ "creation": "2026-09-26 21:12:10.643823",
  "dashboards": {
   "buying": {
    "items": [
     {
+     "default_operator": "=",
+     "default_user_key": "Company",
      "filter_name": "Company",
      "filter_type": "String",
      "layout": {
@@ -688,151 +615,102 @@
       }
      },
      "links": {
-      "buying-lead-time": "`buying-receipt-lines`.`company`",
-      "buying-lead-time-by-supplier-13-weeks": "`buying-receipts-13-weeks`.`company`",
-      "buying-lead-time-by-week-13-weeks": "`buying-receipts-13-weeks`.`company`",
-      "buying-open-order-value": "`buying-purchase-orders`.`company`",
-      "buying-overdue-orders": "`buying-purchase-orders`.`company`",
-      "buying-overdue-purchase-orders": "`buying-purchase-orders`.`company`",
-      "buying-payables": "`buying-open-bills`.`company`",
-      "buying-payables-by-supplier": "`buying-open-bills`.`company`",
-      "buying-purchases-by-item-group-13-weeks": "`buying-purchases-13-weeks`.`company`",
-      "buying-purchases-by-week-13-weeks": "`buying-purchases-13-weeks`.`company`",
-      "buying-purchases-this-month-2": "`buying-purchase-lines`.`company`"
+      "buying-on-time-delivery": "`buying-order-lines-due`.`company`",
+      "buying-on-time-delivery-by-supplier": "`buying-order-lines-due-fiscal-year-to-date`.`company`",
+      "buying-overdue-order-lines": "`buying-order-lines-to-receive`.`company`",
+      "buying-overdue-to-receive": "`buying-order-lines-to-receive`.`company`",
+      "buying-purchases": "`buying-purchase-lines`.`company`",
+      "buying-purchases-by-item-group": "`buying-purchase-lines-fiscal-year-to-date`.`company`",
+      "buying-purchases-by-month": "`buying-purchase-lines-24-months`.`company`",
+      "buying-purchases-by-supplier": "`buying-purchase-lines-fiscal-year-to-date`.`company`",
+      "buying-requested-not-ordered-2": "`buying-requested-lines-to-order`.`company`",
+      "buying-to-receive-2": "`buying-order-lines-to-receive`.`company`"
      },
      "type": "filter"
     },
     {
-     "filter_name": "Supplier",
-     "filter_type": "String",
+     "chart": "buying-purchases",
      "layout": {
-      "h": 2,
-      "i": "filter-supplier",
+      "h": 5,
+      "i": "chart-3hq9r0vndc",
       "w": 4,
-      "x": 4,
-      "y": 0
+      "x": 0,
+      "y": 3
      },
      "layouts": {
       "sm": {
-       "h": 2,
+       "h": 5,
        "w": 10,
        "x": 10,
        "y": 0
       }
      },
-     "links": {
-      "buying-lead-time": "`buying-receipt-lines`.`supplier`",
-      "buying-lead-time-by-supplier-13-weeks": "`buying-receipts-13-weeks`.`supplier`",
-      "buying-lead-time-by-week-13-weeks": "`buying-receipts-13-weeks`.`supplier`",
-      "buying-open-order-value": "`buying-purchase-orders`.`supplier`",
-      "buying-overdue-orders": "`buying-purchase-orders`.`supplier`",
-      "buying-overdue-purchase-orders": "`buying-purchase-orders`.`supplier`",
-      "buying-payables": "`buying-open-bills`.`supplier`",
-      "buying-payables-by-supplier": "`buying-open-bills`.`supplier`",
-      "buying-purchases-by-item-group-13-weeks": "`buying-purchases-13-weeks`.`supplier`",
-      "buying-purchases-by-week-13-weeks": "`buying-purchases-13-weeks`.`supplier`",
-      "buying-purchases-this-month-2": "`buying-purchase-lines`.`supplier`"
-     },
-     "type": "filter"
-    },
-    {
-     "filter_name": "Item Group",
-     "filter_type": "String",
-     "layout": {
-      "h": 2,
-      "i": "filter-item-group",
-      "w": 4,
-      "x": 8,
-      "y": 0
-     },
-     "layouts": {
-      "sm": {
-       "h": 2,
-       "w": 10,
-       "x": 0,
-       "y": 3
-      }
-     },
-     "links": {
-      "buying-lead-time": "`buying-receipt-lines`.`item_group`",
-      "buying-lead-time-by-supplier-13-weeks": "`buying-receipts-13-weeks`.`item_group`",
-      "buying-lead-time-by-week-13-weeks": "`buying-receipts-13-weeks`.`item_group`",
-      "buying-open-order-value": "`buying-purchase-orders`.`item_group`",
-      "buying-overdue-orders": "`buying-purchase-orders`.`item_group`",
-      "buying-overdue-purchase-orders": "`buying-purchase-orders`.`item_group`",
-      "buying-purchases-by-item-group-13-weeks": "`buying-purchases-13-weeks`.`item_group`",
-      "buying-purchases-by-week-13-weeks": "`buying-purchases-13-weeks`.`item_group`",
-      "buying-purchases-this-month-2": "`buying-purchase-lines`.`item_group`"
-     },
-     "type": "filter"
-    },
-    {
-     "chart": "buying-open-order-value",
-     "layout": {
-      "h": 5,
-      "i": "chart-ntvk972nai",
-      "w": 4,
-      "x": 0,
-      "y": 3
-     },
-     "layouts": {
-      "sm": {
-       "h": 5,
-       "w": 10,
-       "x": 0,
-       "y": 5
-      }
-     },
-     "reading": "Open Order Value",
      "type": "chart"
     },
     {
-     "chart": "buying-open-order-value",
+     "chart": "buying-requested-not-ordered-2",
      "layout": {
-      "h": 5,
-      "i": "chart-ntvk972nai-2",
+      "h": 4,
+      "i": "chart-3hqbe4o4mm",
       "w": 4,
       "x": 4,
       "y": 3
      },
      "layouts": {
       "sm": {
-       "h": 5,
+       "h": 4,
        "w": 10,
-       "x": 10,
+       "x": 0,
        "y": 5
       }
      },
-     "reading": "Open Orders",
      "type": "chart"
     },
     {
-     "chart": "buying-overdue-orders",
+     "chart": "buying-to-receive-2",
      "layout": {
-      "h": 5,
-      "i": "chart-ntvfvbo957",
+      "h": 4,
+      "i": "chart-3hqksmijmr",
       "w": 4,
       "x": 8,
       "y": 3
      },
      "layouts": {
       "sm": {
-       "h": 5,
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "buying-overdue-to-receive",
+     "layout": {
+      "h": 4,
+      "i": "chart-3hqs04i3tu",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
        "w": 10,
        "x": 0,
        "y": 10
       }
      },
-     "reading": "Overdue Order Value",
      "type": "chart"
     },
     {
-     "chart": "buying-overdue-orders",
+     "chart": "buying-on-time-delivery",
      "layout": {
       "h": 5,
-      "i": "chart-ntvfvbo957-2",
+      "i": "chart-3hqv25a3h0",
       "w": 4,
-      "x": 12,
+      "x": 16,
       "y": 3
      },
      "layouts": {
@@ -843,205 +721,112 @@
        "y": 10
       }
      },
-     "reading": "Overdue Orders",
      "type": "chart"
     },
     {
-     "chart": "buying-payables",
+     "chart": "buying-purchases-by-month",
      "layout": {
-      "h": 4,
-      "i": "chart-ntv57ccig9",
-      "w": 4,
+      "h": 17,
+      "i": "chart-3hqf6k8sok",
+      "w": 10,
       "x": 0,
       "y": 8
      },
      "layouts": {
       "sm": {
-       "h": 4,
-       "w": 10,
+       "h": 17,
+       "w": 20,
        "x": 0,
        "y": 15
       }
      },
-     "reading": "Payables Outstanding",
      "type": "chart"
     },
     {
-     "chart": "buying-payables",
-     "layout": {
-      "h": 4,
-      "i": "chart-ntv57ccig9-2",
-      "w": 4,
-      "x": 4,
-      "y": 8
-     },
-     "layouts": {
-      "sm": {
-       "h": 4,
-       "w": 10,
-       "x": 10,
-       "y": 15
-      }
-     },
-     "reading": "Past Due",
-     "type": "chart"
-    },
-    {
-     "chart": "buying-lead-time",
-     "layout": {
-      "h": 5,
-      "i": "chart-ntvr13r3aa",
-      "w": 4,
-      "x": 8,
-      "y": 8
-     },
-     "layouts": {
-      "sm": {
-       "h": 5,
-       "w": 10,
-       "x": 0,
-       "y": 19
-      }
-     },
-     "type": "chart"
-    },
-    {
-     "chart": "buying-purchases-this-month-2",
-     "layout": {
-      "h": 5,
-      "i": "chart-ntvemgshij",
-      "w": 4,
-      "x": 12,
-      "y": 8
-     },
-     "layouts": {
-      "sm": {
-       "h": 5,
-       "w": 10,
-       "x": 10,
-       "y": 19
-      }
-     },
-     "type": "chart"
-    },
-    {
-     "chart": "buying-purchases-by-week-13-weeks",
+     "chart": "buying-purchases-by-supplier",
      "layout": {
       "h": 17,
-      "i": "chart-ntvfrpnqg2",
-      "w": 10,
-      "x": 0,
-      "y": 13
-     },
-     "layouts": {
-      "sm": {
-       "h": 17,
-       "w": 20,
-       "x": 0,
-       "y": 24
-      }
-     },
-     "type": "chart"
-    },
-    {
-     "chart": "buying-purchases-by-item-group-13-weeks",
-     "layout": {
-      "h": 17,
-      "i": "chart-ntvvq2v48n",
+      "i": "chart-3hqouu5rci",
       "w": 10,
       "x": 10,
-      "y": 13
-     },
-     "layouts": {
-      "sm": {
-       "h": 17,
-       "w": 20,
-       "x": 0,
-       "y": 41
-      }
-     },
-     "type": "chart"
-    },
-    {
-     "chart": "buying-lead-time-by-week-13-weeks",
-     "layout": {
-      "h": 17,
-      "i": "chart-ntvscsf2ec",
-      "w": 10,
-      "x": 0,
-      "y": 30
-     },
-     "layouts": {
-      "sm": {
-       "h": 17,
-       "w": 20,
-       "x": 0,
-       "y": 58
-      }
-     },
-     "type": "chart"
-    },
-    {
-     "chart": "buying-lead-time-by-supplier-13-weeks",
-     "layout": {
-      "h": 17,
-      "i": "chart-ntvou2niqd",
-      "w": 10,
-      "x": 10,
-      "y": 30
+      "y": 8
      },
      "layouts": {
       "sm": {
        "h": 19,
        "w": 20,
        "x": 0,
-       "y": 75
+       "y": 32
       }
      },
      "type": "chart"
     },
     {
-     "chart": "buying-overdue-purchase-orders",
+     "chart": "buying-purchases-by-item-group",
      "layout": {
-      "h": 22,
-      "i": "chart-ntvtfb9p2f",
+      "h": 17,
+      "i": "chart-3hqc5es4rg",
       "w": 10,
       "x": 0,
-      "y": 47
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 51
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "buying-on-time-delivery-by-supplier",
+     "layout": {
+      "h": 17,
+      "i": "chart-3hq3aenj4l",
+      "w": 10,
+      "x": 10,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 70
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "buying-overdue-order-lines",
+     "layout": {
+      "h": 22,
+      "i": "chart-3hq7gsd6cr",
+      "w": 20,
+      "x": 0,
+      "y": 42
      },
      "layouts": {
       "sm": {
        "h": 24,
        "w": 20,
        "x": 0,
-       "y": 94
-      }
-     },
-     "type": "chart"
-    },
-    {
-     "chart": "buying-payables-by-supplier",
-     "layout": {
-      "h": 22,
-      "i": "chart-ntvkjnkp9r",
-      "w": 10,
-      "x": 10,
-      "y": 47
-     },
-     "layouts": {
-      "sm": {
-       "h": 22,
-       "w": 20,
-       "x": 0,
-       "y": 118
+       "y": 89
       }
      },
      "type": "chart"
     }
    ],
    "name": "buying",
-   "title": "Purchase & Payables",
+   "title": "Buying",
    "vertical_compact_layout": 1,
+   "visible_to_roles": [
+    {
+     "role": "Purchase User"
+    }
+   ],
    "workbook": "buying"
   }
  },
@@ -1050,351 +835,23 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-25 15:51:53.216962",
+ "modified": "2026-09-28 12:09:41.603404",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "buying",
  "owner": "Administrator",
  "queries": {
-  "buying-lead-time-13-weeks": {
+  "buying-invoice-receipt-lines": {
    "folder": null,
    "is_builder_query": 1,
    "is_native_query": 0,
    "is_script_query": 0,
-   "name": "buying-lead-time-13-weeks",
-   "operations": [
-    {
-     "table": {
-      "query_name": "buying-receipt-lines",
-      "type": "query",
-      "workbook": "buying"
-     },
-     "type": "source"
-    },
-    {
-     "filters": [
-      {
-       "expression": {
-        "expression": "posting_date.between(date_sub(week_start(today()), 182, 'day'), date_sub(week_start(today()), 1, 'day'))",
-        "type": "expression"
-       }
-      }
-     ],
-     "logical_operator": "And",
-     "type": "filter_group"
-    },
-    {
-     "dimensions": [],
-     "measures": [
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(posting_date >= date_sub(week_start(today()), 91, 'day'), lead_days) / count_if(posting_date >= date_sub(week_start(today()), 91, 'day'))",
-        "type": "expression"
-       },
-       "measure_name": "lead_time_days"
-      },
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(posting_date <= date_sub(week_start(today()), 92, 'day'), lead_days) / count_if(posting_date <= date_sub(week_start(today()), 92, 'day'))",
-        "type": "expression"
-       },
-       "measure_name": "lead_time_prior_days"
-      }
-     ],
-     "type": "summarize"
-    }
-   ],
-   "sort_order": 8,
-   "title": "Lead Time, 13 Weeks",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-open-bills": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-open-bills",
+   "name": "buying-invoice-receipt-lines",
    "operations": [
     {
      "table": {
       "data_source": "Site DB",
-      "table_name": "tabPurchase Invoice",
-      "type": "table"
-     },
-     "type": "source"
-    },
-    {
-     "filters": [
-      {
-       "column": {
-        "column_name": "docstatus",
-        "type": "column"
-       },
-       "operator": "=",
-       "value": 1
-      },
-      {
-       "expression": {
-        "expression": "abs(outstanding_amount) > 0.5",
-        "type": "expression"
-       }
-      }
-     ],
-     "logical_operator": "And",
-     "type": "filter_group"
-    },
-    {
-     "column_names": [
-      "name",
-      "supplier",
-      "company",
-      "posting_date",
-      "due_date",
-      "outstanding_amount"
-     ],
-     "type": "select"
-    },
-    {
-     "data_type": "Integer",
-     "expression": {
-      "expression": "date_diff(today(), due_date, 'day')",
-      "type": "expression"
-     },
-     "new_name": "days_past_due",
-     "type": "mutate"
-    },
-    {
-     "data_type": "String",
-     "expression": {
-      "expression": "name",
-      "type": "expression"
-     },
-     "new_name": "bill",
-     "type": "mutate"
-    }
-   ],
-   "sort_order": 5,
-   "title": "Open Bills",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-open-order-position": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-open-order-position",
-   "operations": [
-    {
-     "table": {
-      "query_name": "buying-purchase-orders",
-      "type": "query",
-      "workbook": "buying"
-     },
-     "type": "source"
-    },
-    {
-     "dimensions": [],
-     "measures": [
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(open_now == 1, base_grand_total)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "open_value"
-      },
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(open_last_week == 1, base_grand_total)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "open_value_last_week"
-      },
-      {
-       "data_type": "Integer",
-       "expression": {
-        "expression": "sum(open_now)",
-        "type": "expression"
-       },
-       "measure_name": "open_orders"
-      },
-      {
-       "data_type": "Integer",
-       "expression": {
-        "expression": "sum(open_last_week)",
-        "type": "expression"
-       },
-       "measure_name": "open_orders_last_week"
-      },
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(overdue_now == 1, base_grand_total)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "overdue_value"
-      },
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(overdue_last_week == 1, base_grand_total)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "overdue_value_last_week"
-      },
-      {
-       "data_type": "Integer",
-       "expression": {
-        "expression": "sum(overdue_now)",
-        "type": "expression"
-       },
-       "measure_name": "overdue_orders"
-      },
-      {
-       "data_type": "Integer",
-       "expression": {
-        "expression": "sum(overdue_last_week)",
-        "type": "expression"
-       },
-       "measure_name": "overdue_orders_last_week"
-      }
-     ],
-     "type": "summarize"
-    }
-   ],
-   "sort_order": 4,
-   "title": "Open Order Position",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-payables-position": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-payables-position",
-   "operations": [
-    {
-     "table": {
-      "query_name": "buying-open-bills",
-      "type": "query",
-      "workbook": "buying"
-     },
-     "type": "source"
-    },
-    {
-     "dimensions": [],
-     "measures": [
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum(outstanding_amount)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "payables"
-      },
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(days_past_due > 0, outstanding_amount)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "payables_past_due"
-      }
-     ],
-     "type": "summarize"
-    }
-   ],
-   "sort_order": 6,
-   "title": "Payables Position",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-po-line-summary": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-po-line-summary",
-   "operations": [
-    {
-     "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPurchase Order Item",
-      "type": "table"
-     },
-     "type": "source"
-    },
-    {
-     "filters": [
-      {
-       "column": {
-        "column_name": "docstatus",
-        "type": "column"
-       },
-       "operator": "=",
-       "value": 1
-      }
-     ],
-     "logical_operator": "And",
-     "type": "filter_group"
-    },
-    {
-     "dimensions": [
-      {
-       "column_name": "parent",
-       "data_type": "String",
-       "dimension_name": "purchase_order"
-      }
-     ],
-     "measures": [
-      {
-       "data_type": "Date",
-       "expression": {
-        "expression": "min(schedule_date)",
-        "type": "expression"
-       },
-       "measure_name": "promised_date"
-      },
-      {
-       "data_type": "String",
-       "expression": {
-        "expression": "min(item_group)",
-        "type": "expression"
-       },
-       "measure_name": "item_group"
-      }
-     ],
-     "type": "summarize"
-    }
-   ],
-   "sort_order": 1,
-   "title": "PO Line Summary",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-po-received-on": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-po-received-on",
-   "operations": [
-    {
-     "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPurchase Receipt Item",
+      "table_name": "tabPurchase Invoice Item",
       "type": "table"
      },
      "type": "source"
@@ -1429,19 +886,103 @@
       {
        "column_name": "posting_date",
        "type": "column"
+      },
+      {
+       "column_name": "update_stock",
+       "type": "column"
       }
      ],
      "table": {
       "data_source": "Site DB",
-      "table_name": "tabPurchase Receipt",
+      "table_name": "tabPurchase Invoice",
       "type": "table"
      },
      "type": "join"
     },
     {
+     "filters": [
+      {
+       "column": {
+        "column_name": "update_stock",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "po_detail",
+      "type": "expression"
+     },
+     "new_name": "purchase_order_item",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "purchase_order_item",
+      "qty",
+      "posting_date"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Invoice Receipt Lines",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-order-lines-due": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-order-lines-due",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "delivered_by_supplier",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "date_add(schedule_date, 1, 'day') <= today()",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
      "join_condition": {
       "left_column": {
-       "column_name": "purchase_order",
+       "column_name": "parent",
        "type": "column"
       },
       "right_column": {
@@ -1452,7 +993,217 @@
      "join_type": "inner",
      "select_columns": [
       {
-       "column_name": "per_received",
+       "column_name": "supplier",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "name",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "purchase_order_item",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "qty_on_time",
+       "type": "column"
+      },
+      {
+       "column_name": "last_receipt",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "buying-received-by-order-line",
+      "type": "query",
+      "workbook": "buying"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "purchase_order",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Date",
+     "expression": {
+      "expression": "schedule_date",
+      "type": "expression"
+     },
+     "new_name": "required_by",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Date",
+     "expression": {
+      "expression": "date_add(schedule_date, 1, 'day')",
+      "type": "expression"
+     },
+     "new_name": "decided_on",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_null(qty_on_time, 0)",
+      "type": "expression"
+     },
+     "new_name": "qty_on_time",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if(qty_on_time >= qty)",
+      "type": "expression"
+     },
+     "new_name": "on_time",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "purchase_order",
+      "supplier",
+      "item_code",
+      "required_by",
+      "decided_on",
+      "qty",
+      "qty_on_time",
+      "last_receipt",
+      "on_time",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 11,
+   "title": "Order Lines Due",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-order-lines-due-fiscal-year-to-date": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-order-lines-due-fiscal-year-to-date",
+   "operations": [
+    {
+     "table": {
+      "query_name": "buying-order-lines-due",
+      "type": "query",
+      "workbook": "buying"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "decided_on.between(fiscal_year_start(today()), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 12,
+   "title": "Order Lines Due, Fiscal Year to Date",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-order-lines-to-receive": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-order-lines-to-receive",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "closed",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "delivered_by_supplier",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "status",
+       "type": "column"
+      },
+      {
+       "column_name": "supplier",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
        "type": "column"
       }
      ],
@@ -1467,46 +1218,97 @@
      "filters": [
       {
        "column": {
-        "column_name": "per_received",
+        "column_name": "status",
         "type": "column"
        },
-       "operator": ">=",
-       "value": 100
+       "operator": "not_in",
+       "value": [
+        "Closed",
+        "On Hold",
+        "Delivered"
+       ]
+      },
+      {
+       "expression": {
+        "expression": "qty > received_qty",
+        "type": "expression"
+       }
       }
      ],
      "logical_operator": "And",
      "type": "filter_group"
     },
     {
-     "column_names": [
-      "purchase_order",
-      "posting_date"
-     ],
-     "type": "select"
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "purchase_order",
+     "type": "mutate"
     },
     {
-     "dimensions": [
-      {
-       "column_name": "purchase_order",
-       "data_type": "String",
-       "dimension_name": "purchase_order"
-      }
+     "data_type": "Date",
+     "expression": {
+      "expression": "schedule_date",
+      "type": "expression"
+     },
+     "new_name": "required_by",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "qty - received_qty",
+      "type": "expression"
+     },
+     "new_name": "qty_to_receive",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "(qty - received_qty) * base_net_rate",
+      "type": "expression"
+     },
+     "new_name": "value_to_receive",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), schedule_date, 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_late",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if(schedule_date < today())",
+      "type": "expression"
+     },
+     "new_name": "overdue",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "purchase_order",
+      "supplier",
+      "item_code",
+      "required_by",
+      "qty_to_receive",
+      "value_to_receive",
+      "days_late",
+      "overdue",
+      "company"
      ],
-     "measures": [
-      {
-       "data_type": "Date",
-       "expression": {
-        "expression": "max(posting_date)",
-        "type": "expression"
-       },
-       "measure_name": "received_on"
-      }
-     ],
-     "type": "summarize"
+     "type": "select"
     }
    ],
-   "sort_order": 2,
-   "title": "PO Received On",
+   "sort_order": 4,
+   "title": "Order Lines to Receive",
    "use_live_connection": 1,
    "workbook": "buying"
   },
@@ -1563,6 +1365,10 @@
       {
        "column_name": "company",
        "type": "column"
+      },
+      {
+       "column_name": "is_opening",
+       "type": "column"
       }
      ],
      "table": {
@@ -1573,192 +1379,145 @@
      "type": "join"
     },
     {
-     "column_names": [
-      "name",
-      "parent",
-      "item_code",
-      "item_group",
-      "base_net_amount",
-      "posting_date",
-      "supplier",
-      "company"
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_opening",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "No"
+      }
      ],
-     "type": "select"
+     "logical_operator": "And",
+     "type": "filter_group"
     },
     {
      "data_type": "String",
      "expression": {
-      "expression": "if_null(item_group, 'Not Set')",
+      "expression": "if_null(null_if(item_group, ''), 'Not Set')",
       "type": "expression"
      },
      "new_name": "item_group",
      "type": "mutate"
-    }
-   ],
-   "sort_order": 10,
-   "title": "Purchase Lines",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-purchase-orders": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-purchase-orders",
-   "operations": [
-    {
-     "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPurchase Order",
-      "type": "table"
-     },
-     "type": "source"
-    },
-    {
-     "filters": [
-      {
-       "column": {
-        "column_name": "docstatus",
-        "type": "column"
-       },
-       "operator": "=",
-       "value": 1
-      }
-     ],
-     "logical_operator": "And",
-     "type": "filter_group"
-    },
-    {
-     "column_names": [
-      "name",
-      "supplier",
-      "company",
-      "transaction_date",
-      "base_grand_total"
-     ],
-     "type": "select"
-    },
-    {
-     "join_condition": {
-      "left_column": {
-       "column_name": "name",
-       "type": "column"
-      },
-      "right_column": {
-       "column_name": "purchase_order",
-       "type": "column"
-      }
-     },
-     "join_type": "left",
-     "select_columns": [
-      {
-       "column_name": "promised_date",
-       "type": "column"
-      },
-      {
-       "column_name": "item_group",
-       "type": "column"
-      }
-     ],
-     "table": {
-      "query_name": "buying-po-line-summary",
-      "type": "query",
-      "workbook": "buying"
-     },
-     "type": "join"
-    },
-    {
-     "join_condition": {
-      "left_column": {
-       "column_name": "name",
-       "type": "column"
-      },
-      "right_column": {
-       "column_name": "purchase_order",
-       "type": "column"
-      }
-     },
-     "join_type": "left",
-     "select_columns": [
-      {
-       "column_name": "received_on",
-       "type": "column"
-      }
-     ],
-     "table": {
-      "query_name": "buying-po-received-on",
-      "type": "query",
-      "workbook": "buying"
-     },
-     "type": "join"
     },
     {
      "data_type": "String",
      "expression": {
-      "expression": "name",
+      "expression": "parent",
       "type": "expression"
      },
-     "new_name": "purchase_order",
+     "new_name": "invoice",
      "type": "mutate"
+    },
+    {
+     "column_names": [
+      "invoice",
+      "posting_date",
+      "supplier",
+      "item_code",
+      "item_group",
+      "base_net_amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Purchase Lines",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-purchase-lines-24-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-purchase-lines-24-months",
+   "operations": [
+    {
+     "table": {
+      "query_name": "buying-purchase-lines",
+      "type": "query",
+      "workbook": "buying"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(month_start(today()), 24, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
     },
     {
      "data_type": "Integer",
      "expression": {
-      "expression": "one_if((transaction_date <= today()) & (is_not_set(received_on) | (received_on > today())))",
+      "expression": "one_if(posting_date >= date_sub(month_start(today()), 12, 'month'))",
       "type": "expression"
      },
-     "new_name": "open_now",
+     "new_name": "recent",
      "type": "mutate"
     },
     {
-     "data_type": "Integer",
+     "data_type": "Date",
      "expression": {
-      "expression": "one_if((transaction_date <= date_sub(today(), 7, 'day')) & (is_not_set(received_on) | (received_on > date_sub(today(), 7, 'day'))))",
+      "expression": "if_else(recent == 1, posting_date, date_add(posting_date, 1, 'year'))",
       "type": "expression"
      },
-     "new_name": "open_last_week",
+     "new_name": "period",
      "type": "mutate"
     },
     {
-     "data_type": "Integer",
+     "data_type": "Decimal",
      "expression": {
-      "expression": "date_diff(today(), promised_date, 'day')",
+      "expression": "if_else(recent == 1, base_net_amount, 0)",
       "type": "expression"
      },
-     "new_name": "days_late",
+     "new_name": "purchases",
      "type": "mutate"
     },
     {
-     "data_type": "Integer",
+     "data_type": "Decimal",
      "expression": {
-      "expression": "one_if((open_now == 1) & (promised_date < today()))",
+      "expression": "if_else(recent == 1, 0, base_net_amount)",
       "type": "expression"
      },
-     "new_name": "overdue_now",
+     "new_name": "purchases_last_year",
      "type": "mutate"
     },
     {
-     "data_type": "Integer",
-     "expression": {
-      "expression": "one_if((open_last_week == 1) & (promised_date < date_sub(today(), 7, 'day')))",
-      "type": "expression"
-     },
-     "new_name": "overdue_last_week",
-     "type": "mutate"
+     "column_names": [
+      "invoice",
+      "posting_date",
+      "supplier",
+      "item_code",
+      "item_group",
+      "base_net_amount",
+      "period",
+      "purchases",
+      "purchases_last_year",
+      "company"
+     ],
+     "type": "select"
     }
    ],
    "sort_order": 3,
-   "title": "Purchase Orders",
+   "title": "Purchase Lines, 24 Months",
    "use_live_connection": 1,
    "workbook": "buying"
   },
-  "buying-purchases-13-weeks": {
+  "buying-purchase-lines-fiscal-year-to-date": {
    "folder": null,
    "is_builder_query": 1,
    "is_native_query": 0,
    "is_script_query": 0,
-   "name": "buying-purchases-13-weeks",
+   "name": "buying-purchase-lines-fiscal-year-to-date",
    "operations": [
     {
      "table": {
@@ -1772,7 +1531,7 @@
      "filters": [
       {
        "expression": {
-        "expression": "posting_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "expression": "posting_date.between(fiscal_year_start(today()), today())",
         "type": "expression"
        }
       }
@@ -1781,65 +1540,8 @@
      "type": "filter_group"
     }
    ],
-   "sort_order": 11,
-   "title": "Purchases, 13 Weeks",
-   "use_live_connection": 1,
-   "workbook": "buying"
-  },
-  "buying-purchases-this-month": {
-   "folder": null,
-   "is_builder_query": 1,
-   "is_native_query": 0,
-   "is_script_query": 0,
-   "name": "buying-purchases-this-month",
-   "operations": [
-    {
-     "table": {
-      "query_name": "buying-purchase-lines",
-      "type": "query",
-      "workbook": "buying"
-     },
-     "type": "source"
-    },
-    {
-     "filters": [
-      {
-       "expression": {
-        "expression": "posting_date.between(date_sub(month_start(today()), 1, 'year'), today())",
-        "type": "expression"
-       }
-      }
-     ],
-     "logical_operator": "And",
-     "type": "filter_group"
-    },
-    {
-     "dimensions": [],
-     "measures": [
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(posting_date >= month_start(today()), base_net_amount)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "purchases_mtd"
-      },
-      {
-       "data_type": "Decimal",
-       "expression": {
-        "expression": "sum_if(posting_date <= date_sub(today(), 1, 'year'), base_net_amount)",
-        "type": "expression"
-       },
-       "format": "currency",
-       "measure_name": "purchases_ly_mtd"
-      }
-     ],
-     "type": "summarize"
-    }
-   ],
-   "sort_order": 12,
-   "title": "Purchases This Month",
+   "sort_order": 2,
+   "title": "Purchase Lines, Fiscal Year to Date",
    "use_live_connection": 1,
    "workbook": "buying"
   },
@@ -1898,71 +1600,25 @@
      "type": "join"
     },
     {
-     "join_condition": {
-      "left_column": {
-       "column_name": "purchase_order",
-       "type": "column"
-      },
-      "right_column": {
-       "column_name": "name",
-       "type": "column"
-      }
-     },
-     "join_type": "inner",
-     "select_columns": [
-      {
-       "column_name": "transaction_date",
-       "type": "column"
-      },
-      {
-       "column_name": "supplier",
-       "type": "column"
-      },
-      {
-       "column_name": "company",
-       "type": "column"
-      }
-     ],
-     "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPurchase Order",
-      "type": "table"
-     },
-     "type": "join"
-    },
-    {
      "column_names": [
-      "name",
-      "purchase_order",
-      "item_group",
-      "posting_date",
-      "transaction_date",
-      "supplier",
-      "company"
+      "purchase_order_item",
+      "qty",
+      "posting_date"
      ],
      "type": "select"
-    },
-    {
-     "data_type": "Integer",
-     "expression": {
-      "expression": "date_diff(posting_date, transaction_date, 'day')",
-      "type": "expression"
-     },
-     "new_name": "lead_days",
-     "type": "mutate"
     }
    ],
-   "sort_order": 7,
+   "sort_order": 8,
    "title": "Receipt Lines",
    "use_live_connection": 1,
    "workbook": "buying"
   },
-  "buying-receipts-13-weeks": {
+  "buying-received-by-order-line": {
    "folder": null,
    "is_builder_query": 1,
    "is_native_query": 0,
    "is_script_query": 0,
-   "name": "buying-receipts-13-weeks",
+   "name": "buying-received-by-order-line",
    "operations": [
     {
      "table": {
@@ -1973,23 +1629,336 @@
      "type": "source"
     },
     {
+     "distinct": false,
+     "table": {
+      "query_name": "buying-invoice-receipt-lines",
+      "type": "query",
+      "workbook": "buying"
+     },
+     "type": "union"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "purchase_order_item",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "schedule_date",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order Item",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "purchase_order_item",
+       "data_type": "String",
+       "dimension_name": "purchase_order_item"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= schedule_date, qty)",
+        "type": "expression"
+       },
+       "measure_name": "qty_on_time"
+      },
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "max(posting_date)",
+        "type": "expression"
+       },
+       "measure_name": "last_receipt"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Received by Order Line",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-requested-lines-to-order": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-requested-lines-to-order",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabMaterial Request Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
      "filters": [
       {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
        "expression": {
-        "expression": "posting_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "expression": "stock_qty > ordered_qty",
         "type": "expression"
        }
       }
      ],
      "logical_operator": "And",
      "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "material_request_type",
+       "type": "column"
+      },
+      {
+       "column_name": "status",
+       "type": "column"
+      },
+      {
+       "column_name": "per_received",
+       "type": "column"
+      },
+      {
+       "column_name": "transaction_date",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabMaterial Request",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "material_request_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Purchase"
+      },
+      {
+       "column": {
+        "column_name": "status",
+        "type": "column"
+       },
+       "operator": "!=",
+       "value": "Stopped"
+      },
+      {
+       "expression": {
+        "expression": "per_received < 100",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "material_request",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Date",
+     "expression": {
+      "expression": "schedule_date",
+      "type": "expression"
+     },
+     "new_name": "required_by",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "stock_qty - ordered_qty",
+      "type": "expression"
+     },
+     "new_name": "qty_to_order",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "one_if(schedule_date < today())",
+      "type": "expression"
+     },
+     "new_name": "overdue",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "material_request",
+      "transaction_date",
+      "item_code",
+      "required_by",
+      "warehouse",
+      "qty_to_order",
+      "overdue",
+      "company"
+     ],
+     "type": "select"
     }
    ],
-   "sort_order": 9,
-   "title": "Receipts, 13 Weeks",
+   "sort_order": 6,
+   "title": "Requested Lines to Order",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-requested-not-ordered": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-requested-not-ordered",
+   "operations": [
+    {
+     "table": {
+      "query_name": "buying-requested-lines-to-order",
+      "type": "query",
+      "workbook": "buying"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count()",
+        "type": "expression"
+       },
+       "measure_name": "rows"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count_if(overdue == 1)",
+        "type": "expression"
+       },
+       "measure_name": "overdue_rows"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Requested, Not Ordered",
+   "use_live_connection": 1,
+   "workbook": "buying"
+  },
+  "buying-to-receive": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "buying-to-receive",
+   "operations": [
+    {
+     "table": {
+      "query_name": "buying-order-lines-to-receive",
+      "type": "query",
+      "workbook": "buying"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(value_to_receive)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "to_receive"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "distinct_count(purchase_order)",
+        "type": "expression"
+       },
+       "measure_name": "orders"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "if_null(sum_if(overdue == 1, value_to_receive), 0)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "overdue"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "distinct_count_if(overdue == 1, purchase_order)",
+        "type": "expression"
+       },
+       "measure_name": "overdue_orders"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 5,
+   "title": "To Receive",
    "use_live_connection": 1,
    "workbook": "buying"
   }
  },
- "title": "Purchase & Payables"
+ "title": "Buying"
 }
