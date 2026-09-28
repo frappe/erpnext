@@ -1013,6 +1013,8 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
+		elif self.is_inward_transfer_leg(sle):
+			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
@@ -1361,6 +1363,33 @@ class update_entries_after:
 				sle.incoming_rate = rate
 			else:
 				sle.outgoing_rate = rate
+
+	def is_inward_transfer_leg(self, sle):
+		return bool(
+			sle.voucher_type == "Stock Entry"
+			and sle.recalculate_rate
+			and flt(sle.actual_qty) > 0
+			and not sle.serial_and_batch_bundle
+		)
+
+	def get_incoming_rate_from_outward_leg(self, sle):
+		"""Value the inward leg at what left the source warehouse, so the transfer moves no value."""
+		outward_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no,
+				"voucher_detail_no": sle.voucher_detail_no,
+				"actual_qty": ("<", 0),
+				"is_cancelled": 0,
+			},
+			"stock_value_difference",
+		)
+		if outward_value is None:
+			return sle.incoming_rate
+
+		additional_cost = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "additional_cost")
+		return (abs(flt(outward_value)) + flt(additional_cost)) / flt(sle.actual_qty)
 
 	def has_landed_cost_based_on_pi(self, sle):
 		if sle.voucher_type == "Purchase Receipt" and frappe.db.get_single_value(
