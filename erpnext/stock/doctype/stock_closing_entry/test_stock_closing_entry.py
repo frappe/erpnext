@@ -8,7 +8,10 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, flt, today
 
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+	StockClosing,
+	prepare_closing_stock_balance,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -67,7 +70,12 @@ class TestStockClosingEntry(ERPNextTestSuite):
 	def test_closing_entry_reads_previous_closing_balance(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		first_date = add_days(today(), -10)
-		self.make_stock_closing_entry(first_date, first_date)
+
+		# Complete the previous closing before looking up its balance.
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			entry = self.make_stock_closing_entry(first_date, first_date)
+		prepare_closing_stock_balance(entry.name)
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", entry.name, "status"), "Completed")
 
 		second_from_date = add_days(first_date, 1)
 		make_stock_entry(
