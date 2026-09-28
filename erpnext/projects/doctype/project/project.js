@@ -64,6 +64,22 @@ frappe.ui.form.on("Project", {
 				},
 			};
 		});
+
+		frm.set_query("customer", () => {
+			return {
+				filters: {
+					disabled: 0,
+				},
+			};
+		});
+
+		frm.set_query("project_template", () => {
+			return {
+				filters: {
+					disabled: 0,
+				},
+			};
+		});
 	},
 
 	refresh: function (frm) {
@@ -75,6 +91,99 @@ frappe.ui.form.on("Project", {
 			frm.trigger("show_dashboard");
 		}
 		frm.trigger("set_custom_buttons");
+		frm.trigger("render_tasks");
+	},
+
+	render_tasks: function (frm) {
+		const $wrapper = frm.get_field("tasks_html").$wrapper.empty();
+		if (frm.is_new()) {
+			$wrapper.html(
+				`<p class="text-muted">${__("Save the Project first to add and view its Tasks.")}</p>`
+			);
+			return;
+		}
+
+		// loading Task's meta also loads task_list.js, whose indicators the Status column reuses
+		Promise.all([frappe.require("embedded_list.bundle.js"), frappe.model.with_doctype("Task")]).then(
+			() => {
+				const list = new frappe.ui.EmbeddedList({
+					wrapper: $wrapper,
+					doctype: "Task",
+					filters: { project: frm.doc.name },
+					fields: [
+						"name",
+						"subject",
+						"status",
+						"priority",
+						"_assign",
+						"exp_start_date",
+						"exp_end_date",
+						"progress",
+						"parent_task",
+					],
+					order_by: "creation asc",
+					empty_message: __("No Tasks in this Project yet."),
+					add_button: {
+						label: __("Add Task"),
+						action: () => {
+							frappe.model.with_doctype("Task", () => {
+								const task = frappe.model.get_new_doc("Task");
+								task.project = frm.doc.name;
+								// % Complete and status are recomputed on the server when a task changes
+								frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
+							});
+						},
+					},
+					on_row_click: (row) => frappe.set_route("Form", "Task", row.name),
+					columns: [
+						{ label: __("Subject"), fieldname: "subject" },
+						{
+							label: __("Status"),
+							render: (row) => {
+								const [label, color] = frappe.get_indicator(row, "Task") || [
+									__(row.status),
+									"gray",
+								];
+								// badge knows "darkgrey" but not the list view's "dark grey"
+								return frappe.ui.badge.html({ label, theme: color.replace(" ", "") });
+							},
+						},
+						{ label: __("Priority"), render: (row) => __(row.priority || "") },
+						{
+							label: __("Assigned To"),
+							render: (row) => {
+								const users = JSON.parse(row._assign || "[]");
+								if (!users.length) return "";
+								return frappe
+									.avatar_group(users, 3, { align: "left", overlap: true })
+									.prop("outerHTML");
+							},
+						},
+						{
+							label: __("Expected Dates"),
+							render: (row) => {
+								const start = frappe.datetime.str_to_user(row.exp_start_date, false, true);
+								const end = frappe.datetime.str_to_user(row.exp_end_date, false, true);
+								if (!start && !end) return "";
+								return `${start || "…"} → ${end || "…"}`;
+							},
+						},
+						{
+							label: __("Progress"),
+							render: (row) =>
+								frappe.ui.progress.html({ value: flt(row.progress), hint: true }),
+						},
+						{
+							label: __("Parent Task"),
+							type: "link",
+							fieldname: "parent_task",
+							route: (row) => ["Form", "Task", row.parent_task],
+						},
+					],
+				});
+				list.refresh();
+			}
+		);
 	},
 
 	set_custom_buttons: function (frm) {
