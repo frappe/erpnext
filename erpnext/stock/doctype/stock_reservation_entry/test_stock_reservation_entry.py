@@ -2,6 +2,7 @@
 # See license.txt
 
 from random import randint
+from unittest.mock import Mock, patch
 
 import frappe
 from frappe.utils import add_days, flt, today
@@ -12,6 +13,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
 	_get_stock_reservation_entries_for_voucher,
 	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
@@ -25,6 +27,67 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
 		self._sr_item = None
+
+	def test_repeated_reservation_request_does_not_reserve_twice(self):
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"enable_stock_reservation": 1,
+				"enable_serial_and_batch_no_for_item": 1,
+				"auto_reserve_serial_and_batch": 1,
+				"allow_partial_reservation": 1,
+			},
+		):
+			item = make_batch_item()
+			finished_item = make_item(properties={"is_stock_item": 1})
+			create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=4)
+			bom = frappe.get_doc(
+				{
+					"doctype": "BOM",
+					"company": "_Test Company",
+					"item": finished_item.name,
+					"quantity": 1,
+					"items": [{"item_code": item.name, "qty": 10, "rate": 100}],
+				}
+			).insert()
+			bom.submit()
+			work_order = frappe.get_doc(
+				{
+					"doctype": "Work Order",
+					"company": "_Test Company",
+					"production_item": finished_item.name,
+					"bom_no": bom.name,
+					"qty": 1,
+					"reserve_stock": 1,
+					"source_warehouse": self.warehouse,
+					"wip_warehouse": self.warehouse,
+					"fg_warehouse": "_Test Warehouse 1 - _TC",
+					"planned_start_date": today(),
+				}
+			)
+			work_order.get_items_and_operations_from_bom()
+			work_order.insert()
+			work_order.submit()
+			filters = {"voucher_type": "Work Order", "voucher_no": work_order.name, "docstatus": 1}
+			self.assertEqual(
+				frappe.get_all("Stock Reservation Entry", filters=filters, pluck="reserved_qty"), [4]
+			)
+			create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=26)
+			reservation = StockReservation(work_order)
+			self.assertTrue(reservation.make_stock_reservation_entries())
+			self.assertFalse(reservation.make_stock_reservation_entries())
+			entries = frappe.get_all(
+				"Stock Reservation Entry", filters=filters, fields=["name", "reserved_qty"]
+			)
+			self.assertEqual(sorted(row.reserved_qty for row in entries), [4, 6])
+			for row in entries:
+				sre = frappe.get_doc("Stock Reservation Entry", row.name)
+				self.assertEqual(sum(entry.qty for entry in sre.sb_entries), sre.reserved_qty)
+				sre.cancel()
+			self.assertTrue(reservation.make_stock_reservation_entries())
+			self.assertEqual(
+				frappe.get_all("Stock Reservation Entry", filters=filters, pluck="reserved_qty"), [10]
+			)
 
 	@property
 	def sr_item(self):
@@ -1166,6 +1229,59 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		)
 		doc.update(overrides)
 		return doc
+
+	def test_pending_reservation_qty_uses_current_demand(self):
+		reservation = StockReservation(frappe._dict(doctype="Work Order"))
+		sre = frappe._dict(
+			item_code="Steel",
+			voucher_type="Work Order",
+			voucher_no="Assembly Order",
+			voucher_detail_no="Material Row",
+		)
+		existing = frappe._dict(name="Partial Reservation", reserved_qty=4, voucher_qty=10)
+		query = Mock()
+		query.run.return_value = [existing]
+		with (
+			patch.object(frappe, "db", Mock()) as database,
+			patch.object(frappe.qb, "get_query", return_value=query) as get_query,
+		):
+			self.assertEqual(reservation.get_pending_qty_to_reserve(sre, 5), 1)
+			self.assertEqual(reservation.get_pending_qty_to_reserve(sre, 4), 0)
+			database.get_value.assert_called_with("Work Order", "Assembly Order", "name", for_update=True)
+
+			sre.from_voucher_type = "Stock Entry"
+			sre.from_voucher_no = "Material Transfer"
+			sre.from_voucher_detail_no = "Transfer Row"
+			self.assertEqual(reservation.get_pending_qty_to_reserve(sre, 6), 6)
+			for field in ("from_voucher_type", "from_voucher_no", "from_voucher_detail_no"):
+				self.assertEqual(get_query.call_args.kwargs["filters"][field], sre[field])
+			sre.update(reserved_qty=6, warehouse="Stores", append=Mock())
+			with patch.object(
+				frappe,
+				"get_all",
+				side_effect=[
+					[frappe._dict(batch_no="Batch A", qty=10)],
+					[frappe._dict(batch_no="Batch A", qty=4)],
+				],
+			) as get_all:
+				reservation.set_serial_batch(sre, ["Transfer Bundle"])
+			get_all.assert_called_with(
+				"Serial and Batch Entry",
+				fields=["serial_no", "batch_no", "qty"],
+				filters={"parent": ("in", [existing.name]), "parenttype": "Stock Reservation Entry"},
+			)
+			sre.append.assert_called_once_with(
+				"sb_entries", {"serial_no": None, "batch_no": "Batch A", "qty": 6, "warehouse": "Stores"}
+			)
+
+			sre.update(
+				voucher_type="Subcontracting Order",
+				from_voucher_type=None,
+				from_voucher_no=None,
+				from_voucher_detail_no=None,
+			)
+			database.get_value.return_value = 10
+			self.assertEqual(reservation.get_pending_qty_to_reserve(sre, 6), 6)
 
 	def test_all_mandatory_fields_are_required(self):
 		self.make_sre().validate_mandatory()  # everything set -> passes
