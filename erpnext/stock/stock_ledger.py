@@ -1199,7 +1199,7 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
-		elif self.is_inward_transfer_leg(sle):
+		elif self.is_inward_transfer_leg(sle) and not sle.serial_and_batch_bundle:
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if (
@@ -1422,7 +1422,13 @@ class update_entries_after:
 		):
 			self.wh_data.stock_queue = json.loads(stock_queue[0]) if stock_queue else []
 
-		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
+		amount = doc.total_amount
+		if self.is_inward_transfer_leg(sle):
+			outward_value = self.get_outward_leg_value(sle)
+			if outward_value is not None:
+				amount = outward_value
+
+		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
 		# total_qty. A valuation repost must never rewrite physical quantities; if the bundle's child
 		# rows were edited after submission, doc.total_qty would silently corrupt qty_after_transaction
@@ -1561,15 +1567,17 @@ class update_entries_after:
 			sle.outgoing_rate = flt(self.wh_data.valuation_rate)
 
 	def is_inward_transfer_leg(self, sle):
-		return bool(
-			sle.voucher_type == "Stock Entry"
-			and sle.recalculate_rate
-			and flt(sle.actual_qty) > 0
-			and not sle.serial_and_batch_bundle
-		)
+		return bool(sle.voucher_type == "Stock Entry" and sle.recalculate_rate and flt(sle.actual_qty) > 0)
 
 	def get_incoming_rate_from_outward_leg(self, sle):
-		"""Value the inward leg at what left the source warehouse, so the transfer moves no value."""
+		outward_value = self.get_outward_leg_value(sle)
+		if outward_value is None:
+			return sle.incoming_rate
+
+		return outward_value / flt(sle.actual_qty)
+
+	def get_outward_leg_value(self, sle):
+		"""Value that left the source warehouse for this transfer row, plus the row's additional cost."""
 		outward_value = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
@@ -1582,10 +1590,10 @@ class update_entries_after:
 			"stock_value_difference",
 		)
 		if outward_value is None:
-			return sle.incoming_rate
+			return None
 
 		additional_cost = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "additional_cost")
-		return (abs(flt(outward_value)) + flt(additional_cost)) / flt(sle.actual_qty)
+		return abs(flt(outward_value)) + flt(additional_cost)
 
 	def has_stale_serial_no_wise_outgoing_rate(self, sle):
 		return bool(
