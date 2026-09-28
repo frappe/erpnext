@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from unittest.mock import Mock, patch
+
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
@@ -27,10 +29,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+	ManufactureStockEntry,
+	MaterialConsumptionForManufactureStockEntry,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry import (
 	DuplicateEntryForWorkOrderError,
 	FinishedGoodError,
 	ManufacturedQtyMandatoryError,
+	StockEntry,
 	get_pending_work_orders,
 	make_stock_in_entry,
 )
@@ -4686,6 +4693,123 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		se.source_stock_entry = source_se.name
 		se.work_order = "WO-SAME-001"
 		se.validate_source_stock_entry()  # must not raise
+
+	def setup_manufacturing_batch_reservations(self):
+		self.doc = frappe._dict(
+			work_order="WO-B",
+			company="Test Company",
+			posting_date="2026-09-28",
+			posting_time="12:00:00",
+			append=Mock(),
+		)
+		self.appended_rows = []
+		self.doc.append.side_effect = lambda field, row: self.appended_rows.append(dict(row))
+		self.handler = ManufactureStockEntry(self.doc)
+		self.row = frappe._dict(
+			item_code="Raw Material",
+			warehouse="WIP",
+			stock_uom="Nos",
+			batches={"Batch X": 15, "Batch Y": 10},
+		)
+		self.enterContext(patch.object(frappe, "db", Mock()))
+		self.own_reservations = self.enterContext(patch.object(frappe, "get_all", return_value=["SRE-B"]))
+		self.enterContext(patch.object(frappe, "get_precision", return_value=6))
+		self.enterContext(patch.object(frappe, "get_system_settings", return_value="Banker's Rounding"))
+		self.enterContext(
+			patch("erpnext.stock.doctype.stock_entry.services.manufacturing._", side_effect=lambda s: s)
+		)
+		self.enterContext(patch.object(frappe, "throw", side_effect=frappe.ValidationError))
+		self.get_batches = self.enterContext(
+			patch(
+				"erpnext.stock.doctype.stock_entry.services.manufacturing.get_auto_batch_nos",
+				return_value=[
+					frappe._dict(batch_no="Batch X", qty=8),
+					frappe._dict(batch_no="Batch Y", qty=10),
+				],
+			)
+		)
+
+	def test_get_items_uses_all_transfers_for_batch_availability(self):
+		self.setup_manufacturing_batch_reservations()
+		self.doc.update(
+			purpose="Material Consumption for Manufacture",
+			purpose_cls=MaterialConsumptionForManufactureStockEntry,
+			fg_completed_qty=15,
+		)
+		for method in (
+			"set",
+			"set_serial_batch_from_reserved_entry",
+			"set_actual_qty",
+			"validate_customer_provided_item",
+			"calculate_rate_and_amount",
+		):
+			self.doc[method] = Mock()
+		transfers = [
+			frappe._dict(
+				item_code="Raw Material",
+				t_warehouse="WIP",
+				qty=qty,
+				uom="Nos",
+				stock_uom="Nos",
+				serial_and_batch_bundle=bundle,
+			)
+			for qty, bundle in ((5, "First Transfer"), (10, "Second Transfer"), (10, "Third Transfer"))
+		]
+		with (
+			patch.object(
+				frappe,
+				"get_doc",
+				return_value=frappe._dict(
+					material_transferred_for_manufacturing=25,
+					produced_qty=0,
+				),
+			),
+			patch.object(frappe, "get_cached_value", return_value=0),
+			patch(
+				"erpnext.stock.doctype.stock_entry.services.stock_entry_base.get_backflush_based_on",
+				return_value="Material Transferred for Manufacture",
+			),
+			patch.object(ManufactureStockEntry, "get_transfer_entries", return_value=transfers),
+			patch.object(ManufactureStockEntry, "get_consumption_entries", return_value=[]),
+			patch.object(
+				ManufactureStockEntry,
+				"get_sabb_details",
+				side_effect=lambda bundle: frappe._dict(
+					serial_nos=[],
+					batches={
+						"First Transfer": {"Batch X": 5},
+						"Second Transfer": {"Batch X": 10},
+						"Third Transfer": {"Batch Y": 10},
+					}[bundle],
+				),
+			),
+		):
+			for requested, available, expected in (
+				(25, 15, [("Batch X", 15), ("Batch Y", 10)]),
+				(15, 8, [("Batch X", 8), ("Batch Y", 7)]),
+			):
+				with self.subTest(requested=requested, available=available):
+					self.doc.fg_completed_qty = requested
+					self.get_batches.return_value[0].qty = available
+					self.appended_rows.clear()
+					StockEntry.get_items(self.doc)
+					self.assertEqual([(row["batch_no"], row["qty"]) for row in self.appended_rows], expected)
+		kwargs = self.get_batches.call_args.args[0]
+		self.assertEqual(kwargs.ignore_voucher_nos, ["SRE-B"])
+		self.assertEqual(kwargs.warehouse, "WIP")
+		self.assertEqual(kwargs.posting_date, self.doc.posting_date)
+		self.own_reservations.assert_called_with(
+			"Stock Reservation Entry",
+			filters={"voucher_type": "Work Order", "voucher_no": "WO-B", "docstatus": 1},
+			pluck="name",
+		)
+
+	def test_single_batch_shortage_is_reported_before_appending(self):
+		self.setup_manufacturing_batch_reservations()
+		self.row.batches = {"Batch X": 15}
+		with self.assertRaises(frappe.ValidationError):
+			self.handler.assign_serial_batches_to_materials({"qty": 15}, self.row, 15)
+		self.doc.append.assert_not_called()
 
 	# ── get_available_materials ────────────────────────────────────────────────
 
