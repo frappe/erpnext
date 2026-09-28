@@ -74,9 +74,13 @@ frappe.ui.form.on("Stock Settings", {
 		configure_naming_series(frm, "Serial and Batch Bundle", "naming_series_preview");
 	},
 
-	enable_serial_and_batch_no_for_item(frm) {
-		if (frm.doc.enable_serial_and_batch_no_for_item) {
-			frappe.msgprint(__("After save, please refresh the page to apply the changes."));
+	after_save(frm) {
+		// user_defaults are loaded at boot, so reload to apply the changed setting across forms
+		if (
+			cint(frappe.user_defaults?.enable_serial_and_batch_no_for_item) !==
+			cint(frm.doc.enable_serial_and_batch_no_for_item)
+		) {
+			window.location.reload();
 		}
 	},
 
