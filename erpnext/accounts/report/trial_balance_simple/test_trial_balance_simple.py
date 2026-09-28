@@ -1,5 +1,4 @@
 import frappe
-from frappe.desk.query_report import run
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -26,11 +25,8 @@ class TestTrialBalanceSimple(ERPNextTestSuite):
 			journal_entry.insert()
 			journal_entry.submit()
 
-		result = run("Trial Balance (Simple)", filters={"company": "_Test Company"})["result"]
-		rows = [
-			(row["finance_book"], row["debit"])
-			for row in result
-			if isinstance(row, dict) and row.get("account") == account.name
-		]
+		query = frappe.db.get_value("Report", "Trial Balance (Simple)", "query")
+		result = frappe.db.sql(query, {"company": "_Test Company"})
+		rows = [(row[6], row[4]) for row in result if row[3] == account.name]
 
 		self.assertEqual(rows, [("", 100), (book_a, 30), (book_b, 40)])
