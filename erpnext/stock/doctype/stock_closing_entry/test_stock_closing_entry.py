@@ -208,8 +208,6 @@ class TestStockClosingEntry(ERPNextTestSuite):
 		self.assertTrue(
 			frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": entry.name, "item_code": item})
 		)
-<<<<<<< HEAD
-=======
 
 	def test_chained_closing_does_not_double_count_batch_rows(self):
 		"""The previous closing's batch rows must only carry forward onto their own batch key.
@@ -307,4 +305,3 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 		first.reload()
 		first.cancel()
 		self.assertEqual(first.docstatus, 2)
->>>>>>> 97fbbf3 (fix: non mandatory from date filter (#59526))

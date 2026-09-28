@@ -61,16 +61,7 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			`;
 				let selected_rows = get_selected_rows(__("Reposting Entries"));
 
-<<<<<<< HEAD
-			frappe.confirm(__(message), () => {
-				frappe.call({
-					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
-					args: {
-						rows: selected_rows,
-						company: frappe.query_report.get_filter_values().company,
-					},
-=======
-				frappe.confirm(message, () => {
+				frappe.confirm(__(message), () => {
 					frappe.call({
 						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
 						args: {
@@ -78,7 +69,6 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 							company: frappe.query_report.get_filter_values().company,
 						},
 					});
->>>>>>> 97fbbf3 (fix: non mandatory from date filter (#59526))
 				});
 			},
 			__("Create")

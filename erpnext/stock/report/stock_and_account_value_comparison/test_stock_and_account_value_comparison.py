@@ -2,10 +2,11 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
 from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import (
@@ -93,11 +94,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		row = next((d for d in data if d.get("voucher_no") == pr.name), None)
 		self.assertIsNotNone(row, "Out-of-sync Purchase Receipt should appear in the report")
 
-<<<<<<< HEAD
-		create_gl_reposting_entries([row], PI_COMPANY, from_date=pr.posting_date)
-=======
-		create_gl_reposting_entries([row], COMPANY)
->>>>>>> 97fbbf3 (fix: non mandatory from date filter (#59526))
+		create_gl_reposting_entries([row], PI_COMPANY)
 
 		rivs = frappe.get_all(
 			"Repost Item Valuation",
@@ -131,13 +128,8 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		# duplicate reposting entries.
 		frappe.flags.dont_execute_stock_reposts = True
 		try:
-<<<<<<< HEAD
-			create_gl_reposting_entries([row, dict(row)], PI_COMPANY, from_date=pr.posting_date)
-			create_gl_reposting_entries([row], PI_COMPANY, from_date=pr.posting_date)
-=======
-			create_gl_reposting_entries([row, dict(row)], COMPANY)
-			create_gl_reposting_entries([row], COMPANY)
->>>>>>> 97fbbf3 (fix: non mandatory from date filter (#59526))
+			create_gl_reposting_entries([row, dict(row)], PI_COMPANY)
+			create_gl_reposting_entries([row], PI_COMPANY)
 		finally:
 			frappe.flags.dont_execute_stock_reposts = False
 
@@ -171,11 +163,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 			"posting_date": today(),
 		}
 
-<<<<<<< HEAD
-		create_gl_reposting_entries([journal_row, pr_row], PI_COMPANY, pr.posting_date)
-=======
-		create_gl_reposting_entries([journal_row, pr_row], COMPANY)
->>>>>>> 97fbbf3 (fix: non mandatory from date filter (#59526))
+		create_gl_reposting_entries([journal_row, pr_row], PI_COMPANY)
 
 		self.assertFalse(
 			frappe.db.exists("Repost Item Valuation", {"voucher_type": "Journal Entry"}),
@@ -185,7 +173,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 	def test_report_from_date_filter(self):
 		# Vouchers posted before the From Date are left out of the report.
-		warehouse = create_warehouse("_Test SAVC From Date WH", company=COMPANY)
+		warehouse = create_warehouse("_Test SAVC From Date WH", company=PI_COMPANY)
 		account = frappe.get_value("Warehouse", warehouse, "account")
 
 		receipts = []
@@ -195,7 +183,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 				to_warehouse=warehouse,
 				qty=10,
 				rate=100,
-				company=COMPANY,
+				company=PI_COMPANY,
 				posting_date=posting_date,
 			)
 			frappe.db.set_value(
@@ -223,18 +211,20 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 		old_pr = make_purchase_receipt(
 			item_code=item,
-			company=COMPANY,
+			company=PI_COMPANY,
 			warehouse=PI_STORES,
 			qty=5,
 			rate=100,
 			posting_date=add_days(today(), -10),
 		)
-		new_pr = make_purchase_receipt(item_code=item, company=COMPANY, warehouse=PI_STORES, qty=5, rate=100)
+		new_pr = make_purchase_receipt(
+			item_code=item, company=PI_COMPANY, warehouse=PI_STORES, qty=5, rate=100
+		)
 
 		period = create_accounting_period(
 			start_date=add_days(today(), -12),
 			end_date=add_days(today(), -8),
-			company=COMPANY,
+			company=PI_COMPANY,
 			period_name="_Test SAVC Closed Period",
 		)
 		period.closed_documents = []
@@ -254,7 +244,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 		frappe.flags.dont_execute_stock_reposts = True
 		try:
-			self.assertRaises(frappe.ValidationError, create_gl_reposting_entries, rows, COMPANY)
+			self.assertRaises(frappe.ValidationError, create_gl_reposting_entries, rows, PI_COMPANY)
 		finally:
 			frappe.flags.dont_execute_stock_reposts = False
 
@@ -272,7 +262,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 			"posting_date": today(),
 		}
 
-		create_gl_reposting_entries([row], COMPANY)
+		create_gl_reposting_entries([row], PI_COMPANY)
 
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": row["voucher_no"]}))
 
@@ -283,7 +273,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 		old_pr = make_purchase_receipt(
 			item_code=item,
-			company=COMPANY,
+			company=PI_COMPANY,
 			warehouse=PI_STORES,
 			qty=5,
 			rate=100,
@@ -300,7 +290,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 		frappe.flags.dont_execute_stock_reposts = True
 		try:
-			create_gl_reposting_entries([row], COMPANY)
+			create_gl_reposting_entries([row], PI_COMPANY)
 		finally:
 			frappe.flags.dont_execute_stock_reposts = False
 
@@ -316,7 +306,7 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		from frappe.desk.query_report import run
 
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
-		pr = make_purchase_receipt(item_code=item, company=COMPANY, warehouse=PI_STORES, qty=5, rate=100)
+		pr = make_purchase_receipt(item_code=item, company=PI_COMPANY, warehouse=PI_STORES, qty=5, rate=100)
 
 		row = {
 			"ledger_type": "Stock Ledger Entry",
@@ -336,13 +326,13 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		try:
 			for user in (stock_manager, accounts_user):
 				with self.set_user(user.name):
-					self.assertRaises(frappe.PermissionError, create_gl_reposting_entries, [row], COMPANY)
+					self.assertRaises(frappe.PermissionError, create_gl_reposting_entries, [row], PI_COMPANY)
 
 			self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
 			with self.set_user(accounts_manager.name):
-				run("Stock and Account Value Comparison", {"company": COMPANY, "as_on_date": today()})
-				create_gl_reposting_entries([row], COMPANY)
+				run("Stock and Account Value Comparison", {"company": PI_COMPANY, "as_on_date": today()})
+				create_gl_reposting_entries([row], PI_COMPANY)
 		finally:
 			frappe.flags.dont_execute_stock_reposts = False
 
@@ -388,19 +378,6 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": old_pr.name}))
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": new_pr.name}))
 
-<<<<<<< HEAD
-	def test_gl_reposting_requires_from_date(self):
-		row = {
-			"ledger_type": "Stock Ledger Entry",
-			"voucher_type": "Purchase Receipt",
-			"voucher_no": "some-receipt",
-			"posting_date": today(),
-		}
-
-		self.assertRaises(frappe.ValidationError, create_gl_reposting_entries, [row], PI_COMPANY, None)
-
-=======
->>>>>>> 97fbbf3 (fix: non mandatory from date filter (#59526))
 	def test_gl_reposting_not_allowed_against_gl_entry_voucher_type(self):
 		# Guard on the Repost Item Valuation itself, for anything creating one outside the report.
 		riv = frappe.new_doc("Repost Item Valuation")
@@ -419,3 +396,8 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 		riv.repost_only_accounting_ledgers = 0
 		riv.validate_repost_only_accounting_ledgers()
+
+	def run_report(self, **extra):
+		filters = {"company": PI_COMPANY, "as_on_date": "2026-12-31"}
+		filters.update(extra)
+		return execute(frappe._dict(filters))[1]
