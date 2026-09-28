@@ -431,6 +431,11 @@ def after_app_install(app_name=None):
 
 		remove_allowed_users_on_crm_install()
 
+	if app_name == "insights":
+		from erpnext.setup.insights_dashboards import set_dashboard_links
+
+		set_dashboard_links()
+
 
 def after_app_uninstall(app_name=None):
 	if app_name == "crm":
