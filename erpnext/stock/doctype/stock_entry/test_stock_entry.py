@@ -546,18 +546,34 @@ class TestStockEntry(ERPNextTestSuite):
 		).name
 		self.assert_half_cent_transfer_moves_no_value(item_code)
 
+	def test_serial_transfer_without_serial_wise_valuation_on_half_cent_moves_no_value(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_method": "Moving Average",
+				"has_serial_no": 1,
+				"serial_no_series": "HCSN-.#####",
+				"use_serial_no_wise_valuation": 0,
+			}
+		).name
+		self.assert_half_cent_transfer_moves_no_value(item_code)
+
 	def assert_half_cent_transfer_moves_no_value(self, item_code):
 		receipt = make_stock_entry(
-			item_code=item_code, target="_Test Warehouse - _TC", qty=4000, basic_rate=7189.1616125
+			item_code=item_code, target="_Test Warehouse - _TC", qty=2, basic_rate=10.005
 		)
 		bundle = receipt.items[0].serial_and_batch_bundle
+		has_batch_no, has_serial_no = frappe.get_cached_value(
+			"Item", item_code, ["has_batch_no", "has_serial_no"]
+		)
 
 		transfer = make_stock_entry(
 			item_code=item_code,
 			source="_Test Warehouse - _TC",
 			target="_Test Warehouse 1 - _TC",
-			qty=2000,
-			batch_no=bundle and get_batch_from_bundle(bundle),
+			qty=1,
+			batch_no=get_batch_from_bundle(bundle) if has_batch_no else None,
+			serial_no=get_serial_nos_from_bundle(bundle)[:1] if has_serial_no else None,
 		)
 
 		outward, inward = (
