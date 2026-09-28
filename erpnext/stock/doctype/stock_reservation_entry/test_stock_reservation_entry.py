@@ -425,6 +425,10 @@ class TestStockReservationEntry(FrappeTestCase):
 		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 		for item in dn.items:
 			if item.serial_and_batch_bundle:
+				self.assertEqual(
+					frappe.db.get_value("Serial and Batch Bundle", item.serial_and_batch_bundle, "company"),
+					dn.company,
+				)
 				reserved_sb_entries = (
 					frappe.qb.from_(sre)
 					.inner_join(sb_entry)

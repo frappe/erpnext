@@ -4237,6 +4237,7 @@ def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=N
 	doc = frappe.get_doc(
 		{
 			"doctype": "Serial and Batch Bundle",
+			"company": parent_doc.company,
 			"voucher_type": "Stock Entry",
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
