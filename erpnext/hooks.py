@@ -765,3 +765,12 @@ repost_allowed_doctypes = [
 	"Payment Entry",
 	"Purchase Receipt",
 ]
+
+
+# Data Import
+# -----------
+# Import a Customer or Supplier with its contacts and addresses in one file.
+data_import_providers = {
+	"Customer": "erpnext.utilities.party_import_provider.PartyImportProvider",
+	"Supplier": "erpnext.utilities.party_import_provider.PartyImportProvider",
+}
