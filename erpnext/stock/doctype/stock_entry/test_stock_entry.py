@@ -533,12 +533,31 @@ class TestStockEntry(ERPNextTestSuite):
 
 	def test_material_transfer_on_half_cent_moves_no_value(self):
 		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
-		make_stock_entry(
+		self.assert_half_cent_transfer_moves_no_value(item_code)
+
+	def test_batch_transfer_on_half_cent_moves_no_value(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "HCBT-.#####",
+			}
+		).name
+		self.assert_half_cent_transfer_moves_no_value(item_code)
+
+	def assert_half_cent_transfer_moves_no_value(self, item_code):
+		receipt = make_stock_entry(
 			item_code=item_code, target="_Test Warehouse - _TC", qty=4000, basic_rate=7189.1616125
 		)
+		bundle = receipt.items[0].serial_and_batch_bundle
 
 		transfer = make_stock_entry(
-			item_code=item_code, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=2000
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=2000,
+			batch_no=bundle and get_batch_from_bundle(bundle),
 		)
 
 		outward, inward = (
