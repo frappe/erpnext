@@ -55,6 +55,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		// drop memoized search results so stock qty reflects the latest ledger
 		this.search_index = {};
+		this.cache_epoch = (this.cache_epoch || 0) + 1;
 
 		this.start_item_loading_animation();
 
@@ -458,12 +459,13 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
+		const epoch = this.cache_epoch;
 		this.get_items({ search_term })
 			.then(({ message }) => {
 				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
-				if (search_term && !barcode) {
-					// a concurrent reload may have cleared the cache; recreate the bucket
+				// skip caching if a reload happened while this search was in flight (stale stock qty)
+				if (search_term && !barcode && epoch === this.cache_epoch) {
 					this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
 					this.search_index[selling_price_list][search_term] = items;
 				}
