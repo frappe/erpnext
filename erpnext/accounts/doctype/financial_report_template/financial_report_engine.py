@@ -833,13 +833,10 @@ class FilterExpressionParser:
 
 		```
 		{
-		  "and": [
-		    ["account_type", "=", "Income"],
-		    {"or": [
-		      ["category", "=", "Direct Income"],
-		      ["category", "=", "Indirect Income"]
-		    ]}
-		  ]
+		    "and": [
+		        ["account_type", "=", "Income"],
+		        {"or": [["category", "=", "Direct Income"], ["category", "=", "Indirect Income"]]},
+		    ]
 		}
 		```
 
