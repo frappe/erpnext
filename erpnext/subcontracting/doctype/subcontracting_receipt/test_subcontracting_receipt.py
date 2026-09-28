@@ -1457,6 +1457,98 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.cancel()
 		self.assertEqual(scr.docstatus, 2)
 
+	def test_subcontracting_receipt_return_bundle_valuation(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-RET-FG-.#####",
+			}
+		).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 10,
+				"rate": 50,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		for rmi in rm_items:
+			rmi["rate"] = 100
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		batch_doc = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": fg_item,
+				"batch_id": frappe.generate_hash(length=10),
+			}
+		).insert(ignore_permissions=True)
+
+		serial_batch_bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": sco.company,
+				"item_code": fg_item,
+				"warehouse": sco.items[0].warehouse,
+				"has_batch_no": 1,
+				"type_of_transaction": "Inward",
+				"voucher_type": "Subcontracting Receipt",
+				"entries": [{"batch_no": batch_doc.name, "qty": 10}],
+			}
+		).insert(ignore_permissions=True)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].serial_and_batch_bundle = serial_batch_bundle.name
+		scr.save()
+		scr.submit()
+		scr.reload()
+
+		fg_rate = scr.items[0].rate
+
+		return_scr = make_return_doc("Subcontracting Receipt", scr.name)
+		return_bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": return_scr.company,
+				"item_code": fg_item,
+				"warehouse": return_scr.items[0].warehouse,
+				"has_batch_no": 1,
+				"type_of_transaction": "Outward",
+				"voucher_type": "Subcontracting Receipt",
+				"entries": [{"batch_no": batch_doc.name, "qty": -10}],
+			}
+		).insert(ignore_permissions=True)
+		return_scr.items[0].serial_and_batch_bundle = return_bundle.name
+		return_scr.save()
+		return_scr.submit()
+		return_scr.reload()
+
+		return_bundle_doc = frappe.get_doc("Serial and Batch Bundle", return_bundle.name)
+		self.assertEqual(return_bundle_doc.returned_against, scr.items[0].name)
+		self.assertEqual(flt(return_bundle_doc.total_amount, 2), flt(-10 * fg_rate, 2))
+		self.assertEqual(flt(return_bundle_doc.entries[0].stock_value_difference, 2), flt(-10 * fg_rate, 2))
+		self.assertEqual(flt(return_bundle_doc.entries[0].incoming_rate, 2), flt(fg_rate, 2))
+
 	def test_subcontract_return_from_rejected_warehouse(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
@@ -1586,6 +1678,168 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		# Verify that the original document's rejected quantity is not affected
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
+
+	def test_subcontract_return_from_rejected_warehouse_with_different_batches(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_reference_serial_and_batch_bundle,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		# Create subcontracted batch item
+		fg_item = make_item(
+			"_Test Subcontract Item Return Diff Batches",
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+			},
+		).name
+
+		# Create service item
+		service_item = make_item(
+			"_Test Service Item Return Diff Batches", properties={"is_stock_item": 0}
+		).name
+
+		# Create BOM
+		rm_item = make_item("_Test RM Item Return Diff Batches", properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		rejected_warehouse = create_warehouse("_Test Subcontract Rejected Diff Batches Warehouse")
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			},
+		]
+
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(item_code=rm_item, qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create two distinct batches for accepted and rejected goods
+		batch_acc = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": fg_item,
+				"batch_id": f"BAT-ACC-{frappe.generate_hash(length=6)}",
+			}
+		).insert(ignore_permissions=True)
+
+		batch_rej = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": fg_item,
+				"batch_id": f"BAT-REJ-{frappe.generate_hash(length=6)}",
+			}
+		).insert(ignore_permissions=True)
+
+		bundle_acc = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": sco.company,
+				"item_code": fg_item,
+				"warehouse": sco.items[0].warehouse,
+				"has_batch_no": 1,
+				"type_of_transaction": "Inward",
+				"voucher_type": "Subcontracting Receipt",
+				"entries": [{"batch_no": batch_acc.name, "qty": 8}],
+			}
+		).insert(ignore_permissions=True)
+
+		bundle_rej = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": sco.company,
+				"item_code": fg_item,
+				"warehouse": rejected_warehouse,
+				"has_batch_no": 1,
+				"is_rejected": 1,
+				"type_of_transaction": "Inward",
+				"voucher_type": "Subcontracting Receipt",
+				"entries": [{"batch_no": batch_rej.name, "qty": 2}],
+			}
+		).insert(ignore_permissions=True)
+
+		# Create Subcontracting Receipt with different accepted and rejected batches
+		sr = make_subcontracting_receipt(sco.name)
+		sr.items[0].qty = 8
+		sr.items[0].rejected_qty = 2
+		sr.items[0].rejected_warehouse = rejected_warehouse
+		sr.items[0].serial_and_batch_bundle = bundle_acc.name
+		sr.items[0].rejected_serial_and_batch_bundle = bundle_rej.name
+		sr.save()
+		sr.submit()
+		sr.reload()
+
+		# Create return from rejected warehouse
+		sr_return = make_subcontract_return_against_rejected_warehouse(sr.name)
+		self.assertEqual(sr_return.items[0].warehouse, rejected_warehouse)
+		self.assertEqual(sr_return.items[0].qty, -2.0)
+		sr_return.save()
+
+		# Verify return bundle picker selects the rejected bundle, not the accepted bundle
+		ref_bundle = get_reference_serial_and_batch_bundle(sr_return.items[0])
+		self.assertEqual(ref_bundle, bundle_rej.name)
+
+		# Verify negative case: attempting to return accepted batch from rejected warehouse is blocked
+		bad_bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": sr_return.company,
+				"item_code": fg_item,
+				"warehouse": sr_return.items[0].warehouse,
+				"has_batch_no": 1,
+				"type_of_transaction": "Outward",
+				"voucher_type": "Subcontracting Receipt",
+				"voucher_no": sr_return.name,
+				"voucher_detail_no": sr.items[0].name,
+				"returned_against": sr.items[0].name,
+				"entries": [{"batch_no": batch_acc.name, "qty": -2}],
+			}
+		).insert(ignore_permissions=True)
+		bad_bundle.flags.ignore_voucher_validation = True
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"are not part of the original document",
+			bad_bundle.submit,
+		)
+
+		# Verify that returning with rejected batch succeeds
+		return_bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": sr_return.company,
+				"item_code": fg_item,
+				"warehouse": sr_return.items[0].warehouse,
+				"has_batch_no": 1,
+				"type_of_transaction": "Outward",
+				"voucher_type": "Subcontracting Receipt",
+				"entries": [{"batch_no": batch_rej.name, "qty": -2}],
+			}
+		).insert(ignore_permissions=True)
+		sr_return.items[0].serial_and_batch_bundle = return_bundle.name
+		sr_return.save()
+		sr_return.submit()
+		sr_return.reload()
+
+		self.assertEqual(sr_return.docstatus, 1)
+		self.assertEqual(sr_return.status, "Return")
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
