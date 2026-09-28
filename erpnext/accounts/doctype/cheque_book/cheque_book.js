@@ -58,7 +58,6 @@ frappe.ui.form.on("Cheque Book", {
 			);
 		}
 
-		// not awaited, the form refresh waits for this trigger
 		show_cheques(frm);
 	},
 
@@ -136,17 +135,17 @@ async function show_cheques(frm) {
 
 	await Promise.all([frm.issued_cheques.refresh(), frm.cancelled_cheques.refresh()]);
 
-	// counted from the range, so a book saved before this field existed still adds up
-	const total = Number(BigInt(frm.doc.cheque_end_no) - BigInt(frm.doc.cheque_start_no) + 1n);
+	const total = Number(frm.doc.cheque_end_no) - Number(frm.doc.cheque_start_no) + 1;
 	const issued = frm.issued_cheques.data.length;
 	const cancelled = frm.cancelled_cheques.data.length;
+	// Use the loaded rows for the same numeric free-count rule as the server, without another request.
 	const occupied = new Set(
 		[
 			...frm.issued_cheques.data.map((row) => row.reference_no),
 			...frm.cancelled_cheques.data.map((row) => row.cheque_no),
 		]
 			.filter((no) => /^\d+$/.test(no || ""))
-			.map((no) => BigInt(no).toString())
+			.map(Number)
 	).size;
 	frm.dashboard.set_headline(
 		__("Total: {0} · Issued: {1} · Cancelled: {2} · Free: {3}", [
@@ -185,18 +184,18 @@ function set_missing_range_value(frm, changed) {
 
 	if (changed !== "no_of_cheques" && start && end) {
 		if (!/^\d+$/.test(start) || !/^\d+$/.test(end)) return;
-		const total = BigInt(end) - BigInt(start) + 1n;
-		if (total > 0n && total <= 2147483647n) frm.set_value("no_of_cheques", Number(total));
+		const total = Number(end) - Number(start) + 1;
+		if (total > 0) frm.set_value("no_of_cheques", total);
 	} else if (changed !== "cheque_end_no" && start && count) {
 		if (!/^\d+$/.test(start)) return;
-		frm.set_value("cheque_end_no", pad(BigInt(start) + BigInt(count) - 1n));
+		frm.set_value("cheque_end_no", pad(Number(start) + Number(count) - 1));
 	} else if (changed !== "cheque_start_no" && end && count) {
 		if (!/^\d+$/.test(end)) return;
-		frm.set_value("cheque_start_no", pad(BigInt(end) - BigInt(count) + 1n));
+		frm.set_value("cheque_start_no", pad(Number(end) - Number(count) + 1));
 	}
 }
 
 function pad(value) {
 	// leave an invalid range to the server, which explains what is wrong
-	return value < 0n || value > 999999n ? "" : String(value).padStart(6, "0");
+	return value < 0 || value > 999999 ? "" : String(value).padStart(6, "0");
 }
