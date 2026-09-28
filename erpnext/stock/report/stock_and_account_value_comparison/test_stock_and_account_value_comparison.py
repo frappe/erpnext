@@ -376,8 +376,12 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 			self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
-			# An Accounts User has no Repost Item Valuation permission of their own, but may still repost GL.
+			# An Accounts User has no Repost Item Valuation permission of their own, but may still open
+			# the report and repost GL from it.
 			with self.set_user(accounts_user.name):
+				from frappe.desk.query_report import run
+
+				run("Stock and Account Value Comparison", {"company": COMPANY, "as_on_date": today()})
 				create_gl_reposting_entries([row], COMPANY)
 		finally:
 			frappe.flags.dont_execute_stock_reposts = False
