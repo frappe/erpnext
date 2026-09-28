@@ -7,7 +7,6 @@ from frappe.model.document import Document
 from frappe.utils import cint, get_link_to_form
 
 MAX_DIGITS = 6
-MAX_CHEQUES = 2_147_483_647
 
 
 class ChequeBook(Document):
@@ -77,8 +76,6 @@ class ChequeBook(Document):
 		self.set_missing_range_value()
 		if len(self.cheque_start_no) > MAX_DIGITS or len(self.cheque_end_no) > MAX_DIGITS:
 			frappe.throw(_("Cheque numbers must have at most {0} digits").format(MAX_DIGITS))
-		if self.no_of_cheques > MAX_CHEQUES:
-			frappe.throw(_("Number of Cheques cannot exceed {0}").format(MAX_CHEQUES))
 		self.cheque_start_no = self.cheque_start_no.zfill(MAX_DIGITS)
 		self.cheque_end_no = self.cheque_end_no.zfill(MAX_DIGITS)
 
@@ -98,13 +95,13 @@ class ChequeBook(Document):
 
 		elif self.cheque_start_no and self.no_of_cheques:
 			end_no = int(self.cheque_start_no) + self.no_of_cheques - 1
-			self.cheque_end_no = str(end_no).zfill(MAX_DIGITS)
+			self.cheque_end_no = str(end_no)
 
 		elif self.cheque_end_no and self.no_of_cheques:
 			start_no = int(self.cheque_end_no) - self.no_of_cheques + 1
 			if start_no < 0:
 				frappe.throw(_("Number of Cheques cannot be more than Cheque End No"))
-			self.cheque_start_no = str(start_no).zfill(MAX_DIGITS)
+			self.cheque_start_no = str(start_no)
 
 		else:
 			frappe.throw(_("Enter any two of Cheque Start No, Cheque End No and Number of Cheques"))
@@ -143,7 +140,8 @@ class ChequeBook(Document):
 
 		self.db_set("status", "Cancelled")
 
-	def format_cheque_no(self, cheque_no):
+	@staticmethod
+	def format_cheque_no(cheque_no):
 		"""Normalize a typed number to six digits."""
 		cheque_no = (cheque_no or "").strip()
 		return cheque_no.zfill(MAX_DIGITS) if cheque_no.isdigit() else cheque_no
@@ -261,22 +259,15 @@ def get_next_cheque(account: str, cheque_book: str | None = None, include_free: 
 		order_by="creation",
 	)
 
-	for book in books:
-		if int(book.next_cheque_no) <= int(book.cheque_end_no):
-			result = {
-				"cheque_book": book.name,
-				"cheque_no": book.next_cheque_no,
-			}
-			if include_free:
-				result["free"] = count_free_cheques(book)
-			return result
-
-	if books:
-		result = {"cheque_book": books[0].name}
-		if include_free:
-			result["free"] = count_free_cheques(books[0])
-		return result
-	return {}
+	if not books:
+		return {}
+	book = next((book for book in books if int(book.next_cheque_no) <= int(book.cheque_end_no)), books[0])
+	result = {"cheque_book": book.name}
+	if int(book.next_cheque_no) <= int(book.cheque_end_no):
+		result["cheque_no"] = book.next_cheque_no
+	if include_free:
+		result["free"] = count_free_cheques(book)
+	return result
 
 
 def is_cheque_payment(payment_entry) -> bool:
@@ -387,6 +378,7 @@ def cancel_cheque_payment(
 	remarks: str | None = None,
 	ignore_doctypes_on_cancel_all: str | list[str] | None = None,
 ):
+	"""Cancel the payment and record its voided cheque in the same transaction."""
 	from frappe.desk.form.linked_with import (
 		MAX_SYNCHRONOUS_LINKED_DOCS,
 		cancel_all_linked_docs,
@@ -404,7 +396,10 @@ def cancel_cheque_payment(
 	)
 	if truncated:
 		frappe.throw(_("Cancel linked documents separately before cancelling this cheque Payment Entry"))
-	cancel_all_linked_docs(linked, ignored, "Payment Entry", name)
+	if linked:
+		cancel_all_linked_docs(linked, ignored, "Payment Entry", name)
+	else:
+		payment.cancel()
 
 	if frappe.db.get_value("Payment Entry", name, "docstatus") != 2:
 		frappe.throw(_("Payment Entry cancellation must finish before marking its cheque cancelled"))

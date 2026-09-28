@@ -71,7 +71,7 @@
   {
    "allow_on_submit": 1,
    "default": "Draft",
-   "description": "A cheque book is Finished once its last cheque is used. Disable one you do not want to use.",
+   "description": "A cheque book is Finished when its bookmark passes the end and no cheque is free. Disable one you do not want to use.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -87,12 +87,12 @@
    "label": "Cheque Range"
   },
   {
-   "description": "Enter the number exactly as printed, including leading zeros, e.g. 000101",
+   "description": "Enter up to six digits. Short numbers are padded with leading zeros, e.g. 101 becomes 000101.",
    "fieldname": "cheque_start_no",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque Start No",
-   "length": 20
+   "length": 6
   },
   {
    "fieldname": "column_break_range",
@@ -103,7 +103,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque End No",
-   "length": 20
+   "length": 6
   },
   {
    "description": "Enter any two of Cheque Start No, Cheque End No and Number of Cheques",
@@ -119,7 +119,7 @@
    "fieldname": "next_cheque_no",
    "fieldtype": "Data",
    "label": "Next Cheque No",
-   "length": 21,
+   "length": 7,
    "read_only": 1
   },
   {

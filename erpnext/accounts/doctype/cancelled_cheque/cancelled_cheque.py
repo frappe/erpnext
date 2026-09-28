@@ -6,6 +6,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
 
+from erpnext.accounts.doctype.cheque_book.cheque_book import ChequeBook
+
 
 class CancelledCheque(Document):
 	# begin: auto-generated types
@@ -25,7 +27,7 @@ class CancelledCheque(Document):
 
 	def before_insert(self):
 		# Runs before naming, so the name gets the padded number
-		self.cheque_no = frappe.get_doc("Cheque Book", self.cheque_book).format_cheque_no(self.cheque_no)
+		self.cheque_no = ChequeBook.format_cheque_no(self.cheque_no)
 
 	def validate(self):
 		# Share the book lock with Payment Entry submission before checking whether the cheque is used.
@@ -77,6 +79,7 @@ class CancelledCheque(Document):
 		)
 
 	def on_trash(self):
+		# Lock before removal so submission cannot race with freeing this cheque.
 		frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
 
 	def after_delete(self):
