@@ -14,7 +14,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.model import numeric_fieldtypes
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Cast_, Sum
-from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils import cstr, date_diff, escape_html, flt, getdate
 from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
 
@@ -1336,38 +1336,52 @@ class FormulaCalculator:
 		if validation_result.issues:
 			frappe.throw(
 				"<br><br>".join(str(issue) for issue in validation_result.issues),
-				title=_("Invalid Formula"),
+				title=_("Formula Error in Template"),
 			)
+
+		# points at the template row the reader has to go and fix
+		where = _("Row {0} ({1})").format(
+			report_row.idx, report_row.display_name or report_row.reference_code
+		)
 
 		results = []
 		for i in range(len(self.period_list)):
-			result = self._evaluate_for_period(formula, i, negation_factor)
+			result = self._evaluate_for_period(where, formula, i, negation_factor)
 			results.append(result)
 
 		return results
 
-	def _evaluate_for_period(self, formula: str, period_index: int, negation_factor: int) -> float:
+	def _evaluate_for_period(
+		self, where: str, formula: str, period_index: int, negation_factor: int
+	) -> float:
+		# the formula is user input, and the message is rendered as HTML
+		shown_formula = frappe.bold(escape_html(formula))
+
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
 		except ZeroDivisionError:
 			frappe.throw(
-				_("Formula {0} divides by zero").format(frappe.bold(formula)),
-				title=_("Invalid Formula"),
+				_("{0}: {1} divides by zero.").format(where, shown_formula)
+				+ "<br><br>"
+				+ _("Check the divisor first, for example {0}.").format(frappe.bold("A / B if B else 0")),
+				title=_("Formula Error in Template"),
 			)
 		except Exception as e:
 			frappe.throw(
-				_("Formula {0} could not be calculated: {1}").format(frappe.bold(formula), str(e)),
-				title=_("Invalid Formula"),
+				_("{0}: {1} could not be calculated.").format(where, shown_formula)
+				+ "<br><br>"
+				+ escape_html(str(e)),
+				title=_("Formula Error in Template"),
 			)
 
 		if type(result) not in (int, float):
 			frappe.throw(
-				_("Formula {0} must return a number, but it returned {1}").format(
-					frappe.bold(formula), frappe.bold(type(result).__name__)
+				_("{0}: {1} must give a number, but it gave {2}.").format(
+					where, shown_formula, frappe.bold(type(result).__name__)
 				),
-				title=_("Invalid Formula"),
+				title=_("Formula Error in Template"),
 			)
 
 		return flt(result * negation_factor, self.precision)

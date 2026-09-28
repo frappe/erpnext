@@ -792,6 +792,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 			def __init__(self, formula, ref_code):
 				self.calculation_formula = formula
 				self.reference_code = ref_code
+				self.display_name = ref_code
 				self.data_source = "Calculated Amount"
 				self.idx = 1
 				self.reverse_sign = 0
