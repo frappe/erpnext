@@ -1236,6 +1236,7 @@ class TestItem(ERPNextTestSuite):
 		doc.save()
 		self.assertEqual(frappe.db.get_value("Item", item, "has_serial_no"), 0)
 
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_opening_stock_for_serial_batch(self):
 		items = {
 			"Test Opening Stock for Serial No": {
