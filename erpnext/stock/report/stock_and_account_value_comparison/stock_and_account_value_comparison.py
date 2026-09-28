@@ -290,25 +290,24 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 				frappe.db.rollback(save_point="repost_based_on_transaction")
 
 
-GL_REPOSTING_ROLES = ("Accounts User", "Accounts Manager")
-
-
 @frappe.whitelist(methods=["POST"])
-def create_gl_reposting_entries(rows: str | list, company: str):
+def create_gl_reposting_entries(rows: str | list, company: str, from_date: str | date | None = None):
 	"""Repost only the accounting ledgers for the selected vouchers.
 
 	Unlike `create_reposting_entries`, the stock ledgers and the valuation rates are left untouched.
 	This is meant for the case where the stock valuation itself is correct but the General Ledger has
 	drifted away from it, so there is no need to pay for a full (and much slower) revaluation.
+
+	The report scopes the rows with its own From Date filter; `from_date` is kept for direct callers
+	and skips vouchers posted before it.
 	"""
 
-	# Rewriting the General Ledger is an accounting decision, so it is gated on the accounts roles
-	# rather than on the Repost Item Valuation permission, which Stock Managers also have and
-	# Accounts Users do not.
-	if not set(GL_REPOSTING_ROLES) & set(frappe.get_roles()):
+	# Rewriting the General Ledger is an accounting decision, so it is left to Accounts Managers
+	# (who can also create the Repost Item Valuation) and not to Stock Managers.
+	if "Accounts Manager" not in frappe.get_roles():
 		frappe.throw(
-			_("Only users with the {0} or {1} role can repost GL entries").format(
-				frappe.bold(_("Accounts User")), frappe.bold(_("Accounts Manager"))
+			_("Only users with the {0} role can repost GL entries").format(
+				frappe.bold(_("Accounts Manager"))
 			),
 			frappe.PermissionError,
 		)
@@ -332,6 +331,14 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 			vouchers.append((voucher_type, voucher_no))
 
 	stock_vouchers = get_stock_voucher_postings(vouchers, company)
+	if from_date:
+		from_date = getdate(from_date)
+		stock_vouchers = {
+			key: posting
+			for key, posting in stock_vouchers.items()
+			if getdate(posting.posting_date) >= from_date
+		}
+
 	validate_closed_periods(stock_vouchers, company)
 	pending_vouchers = get_pending_gl_reposting_vouchers(list(stock_vouchers))
 

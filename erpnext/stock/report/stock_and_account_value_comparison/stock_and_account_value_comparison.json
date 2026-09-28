@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "",
- "modified": "2026-09-28 12:00:00.000000",
+ "modified": "2020-01-09 14:42:45.254751",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock and Account Value Comparison",
@@ -23,9 +23,6 @@
   },
   {
    "role": "Accounts Manager"
-  },
-  {
-   "role": "Accounts User"
   }
  ]
 }

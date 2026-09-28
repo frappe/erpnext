@@ -73,8 +73,8 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			__("Create")
 		);
 
-		// Rewriting the General Ledger is left to accounts users; the server enforces the same roles.
-		if (frappe.user.has_role(["Accounts User", "Accounts Manager"])) {
+		// Rewriting the General Ledger is left to Accounts Managers; the server enforces the same role.
+		if (frappe.user.has_role("Accounts Manager")) {
 			report.page.add_inner_button(
 				__("Repost GL Entries"),
 				function () {
