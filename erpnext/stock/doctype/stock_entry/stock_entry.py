@@ -2584,10 +2584,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 					pro_doc.remove_additional_items(self)
 
 				pro_doc.run_method("update_work_order_qty")
-				if self.purpose == "Manufacture":
-					pro_doc.run_method("update_planned_qty")
 
 			pro_doc.run_method("update_status")
+			if self.fg_completed_qty and self.purpose == "Manufacture":
+				pro_doc.run_method("update_planned_qty")
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
 
