@@ -1199,7 +1199,7 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
-		elif self.is_inward_transfer_leg(sle) and not sle.serial_and_batch_bundle:
+		elif self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if (
@@ -1227,7 +1227,7 @@ class update_entries_after:
 			# Inventory is always carried at the standard rate effective on the posting date;
 			# FIFO/Moving Average/serial-batch valuation is bypassed entirely.
 			self.process_standard_cost(sle)
-		elif sle.serial_and_batch_bundle and not self.skip_serial_batch_valuation:
+		elif self.has_bundle_valuation(sle):
 			self.calculate_valuation_for_serial_batch_bundle(sle)
 		elif sle.serial_no and not self.skip_serial_batch_valuation and not self.args.get("sle_id"):
 			# Only run in reposting
@@ -1565,6 +1565,9 @@ class update_entries_after:
 			# Serial No Wise Valuation is off, but the entry still carries its serial nos' rate and has
 			# no recalculate_rate flag to re-derive it. Value it at the rate running just before it.
 			sle.outgoing_rate = flt(self.wh_data.valuation_rate)
+
+	def has_bundle_valuation(self, sle):
+		return bool(sle.serial_and_batch_bundle and not self.skip_serial_batch_valuation)
 
 	def is_inward_transfer_leg(self, sle):
 		return bool(sle.voucher_type == "Stock Entry" and sle.recalculate_rate and flt(sle.actual_qty) > 0)
