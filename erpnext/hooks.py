@@ -776,9 +776,8 @@ repost_allowed_doctypes = [
 
 # Data Import
 # -----------
-# Custom Import Providers plug provider-owned field schema, validation and import logic into
-# the standard Data Import. See frappe.core.doctype.data_import.import_provider.
+# Import a Customer or Supplier with its contacts and addresses in one file.
 data_import_providers = {
-	"Customer": "erpnext.selling.doctype.customer.customer_import_provider.CustomerImportProvider",
-	"Supplier": "erpnext.buying.doctype.supplier.supplier_import_provider.SupplierImportProvider",
+	"Customer": "erpnext.utilities.party_import_provider.PartyImportProvider",
+	"Supplier": "erpnext.utilities.party_import_provider.PartyImportProvider",
 }
