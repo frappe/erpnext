@@ -1303,6 +1303,20 @@ erpnext.work_order = {
 					if (data.qty > max) {
 						frappe.msgprint(__("Quantity must not be more than {0}", [max]));
 						reject();
+						return;
+					}
+					if (
+						pending_process_loss &&
+						flt(flt(data.qty) - pending_process_loss, precision("qty")) <= 0
+					) {
+						frappe.msgprint(
+							__(
+								"Qty for Manufacture must be greater than the process loss of {0} to produce a finished good.",
+								[pending_process_loss]
+							)
+						);
+						reject();
+						return;
 					}
 					data.purpose = purpose;
 					resolve(data);

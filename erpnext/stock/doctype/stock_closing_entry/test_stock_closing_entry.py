@@ -292,17 +292,54 @@ class TestStockClosingEntry(ERPNextTestSuite):
 			frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": entry.name, "item_code": item})
 		)
 
+	def test_chained_closing_does_not_double_count_batch_rows(self):
+		"""The previous closing's batch rows must only carry forward onto their own batch key.
+		Spreading them onto the item + warehouse key too added them on top of the item + warehouse
+		row that already includes them, doubling the opening of every batched item."""
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-CBAL-CHAIN-.####",
+			}
+		).name
+		first_date = add_days(today(), -10)
 
-class TestStockClosingEntryDuplicate(ERPNextTestSuite):
-	"""validate_duplicate blocks a second submitted closing entry whose date range
-	overlaps an existing one for the same scope (company + warehouse/item filters)."""
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			rate=100,
+			posting_date=first_date,
+			company=COMPANY,
+		)
 
-	def make_closing(self, from_date, to_date, **fields):
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			first_closing = self.make_stock_closing_entry(first_date, first_date)
+
+		prepare_closing_stock_balance(first_closing.name)
+		self.assertEqual(
+			frappe.db.get_value("Stock Closing Entry", first_closing.name, "status"), "Completed"
+		)
+
+		second_from_date = add_days(first_date, 1)
+		entries = StockClosing(
+			COMPANY, second_from_date, add_days(second_from_date, 1)
+		).get_stock_closing_entries()
+
+		self.assertEqual(flt(entries[(item, WAREHOUSE)].actual_qty), 10)
+		self.assertEqual(flt(entries[(item, WAREHOUSE)].stock_value_difference), 1000)
+
+
+class TestStockClosingEntryDates(ERPNextTestSuite):
+	"""From Date is not entered by the user: it follows on from the previous closing, so closings
+	always form an unbroken chain."""
+
+	def make_closing(self, to_date):
 		doc = frappe.new_doc("Stock Closing Entry")
 		doc.company = COMPANY
-		doc.from_date = from_date
 		doc.to_date = to_date
-		doc.update(fields)
 		return doc
 
 	def submit_closing(self, doc):
@@ -311,25 +348,43 @@ class TestStockClosingEntryDuplicate(ERPNextTestSuite):
 			doc.submit()
 		return doc
 
-	def test_overlapping_range_is_rejected(self):
-		self.submit_closing(self.make_closing("2026-01-01", "2026-03-31"))
-		overlap = self.make_closing("2026-02-01", "2026-04-30")
-		self.assertRaises(frappe.ValidationError, overlap.insert)
+	def test_from_date_follows_previous_closing(self):
+		self.submit_closing(self.make_closing("2026-03-31"))
 
-	def test_fully_contained_range_is_rejected(self):
-		# a range entirely inside an existing entry's range is still a duplicate
-		self.submit_closing(self.make_closing("2026-01-01", "2026-12-31"))
-		contained = self.make_closing("2026-03-01", "2026-03-31")
-		self.assertRaises(frappe.ValidationError, contained.insert)
+		later = self.make_closing("2026-06-30")
+		later.from_date = "2026-01-01"  # a user supplied value is ignored
+		later.insert()
 
-	def test_enclosing_range_is_rejected(self):
-		# and so is a range that fully encloses an existing entry's range
-		self.submit_closing(self.make_closing("2026-03-01", "2026-03-31"))
-		enclosing = self.make_closing("2026-01-01", "2026-12-31")
-		self.assertRaises(frappe.ValidationError, enclosing.insert)
+		self.assertEqual(str(later.from_date), "2026-04-01")
 
-	def test_non_overlapping_range_is_allowed(self):
-		self.submit_closing(self.make_closing("2026-01-01", "2026-03-31"))
-		later = self.make_closing("2026-04-01", "2026-06-30")
-		later.insert()  # would raise if validate_duplicate wrongly flagged it as overlapping
-		self.assertTrue(frappe.db.exists("Stock Closing Entry", later.name))
+	def test_first_closing_starts_from_first_stock_ledger_entry(self):
+		first_posting_date = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"company": COMPANY, "is_cancelled": 0, "docstatus": 1},
+			[{"MIN": "posting_date"}],
+		)
+
+		doc = self.make_closing(today())
+		doc.insert()
+
+		self.assertEqual(str(doc.from_date), str(first_posting_date or today()))
+
+	def test_to_date_before_previous_closing_is_rejected(self):
+		self.submit_closing(self.make_closing("2026-06-30"))
+
+		earlier = self.make_closing("2026-03-31")
+		self.assertRaises(frappe.ValidationError, earlier.insert)
+
+		same = self.make_closing("2026-06-30")
+		self.assertRaises(frappe.ValidationError, same.insert)
+
+	def test_cannot_cancel_closing_with_later_closing(self):
+		first = self.submit_closing(self.make_closing("2026-03-31"))
+		later = self.submit_closing(self.make_closing("2026-06-30"))
+
+		self.assertRaises(frappe.ValidationError, first.cancel)
+
+		later.cancel()
+		first.reload()
+		first.cancel()
+		self.assertEqual(first.docstatus, 2)

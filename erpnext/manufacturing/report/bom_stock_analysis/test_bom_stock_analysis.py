@@ -7,7 +7,10 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import (
 	execute as bom_stock_analysis_report,
 )
-from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import get_bom_data
+from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import (
+	get_bom_data,
+	get_producible_fg_items,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -208,6 +211,27 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 			places=6,
 		)
 		self.assertAlmostEqual(flt(rows[0].actual_qty), 10.0, places=6)
+
+	def test_producible_qty_per_unit_sums_repeated_lines(self):
+		"""An item on two BOM lines shows the total per unit, the same basis as the producible qty."""
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10})
+		fg = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		bom = make_bom(item=fg, raw_materials=[rm.name], rm_qty=2, do_not_save=True)
+		bom.append(
+			"items",
+			{"item_code": rm.name, "qty": 3, "uom": rm.stock_uom, "stock_uom": rm.stock_uom},
+		)
+		bom.save()
+		bom.submit()
+
+		warehouse = create_warehouse("_Test BOM Stock Analysis Producible")
+		create_stock_reconciliation(item_code=rm.name, warehouse=warehouse, qty=10, rate=10)
+
+		rows = get_producible_fg_items({"bom": bom.name, "warehouse": warehouse})
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(flt(rows[0].qty_per_unit), 5.0)
+		self.assertEqual(flt(rows[0].producible_qty), 2.0)
 
 
 def run_report(bom, warehouse, exploded, qty_to_make):

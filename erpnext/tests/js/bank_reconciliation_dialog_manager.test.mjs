@@ -24,6 +24,7 @@ class Dialog {
     this.df_properties = {};
     this.hidden = false;
     this.shown = false;
+    this.display = false;
     this.fields_dict = {};
   }
   set_df_property(fieldname, property, value) {
@@ -46,9 +47,12 @@ class Dialog {
   }
   show() {
     this.shown = true;
+    this.display = true;
+    this.on_page_show?.();
   }
   hide() {
     this.hidden = true;
+    this.display = false;
   }
 }
 
@@ -161,6 +165,48 @@ const withdrawal = {
   withdrawal: 500,
   date: "2024-05-05",
 };
+
+describe("voucher table rendering", () => {
+  it("waits for the first opening, then refreshes the table when already shown", () => {
+    const { dialog_manager, sandbox } = load_dialog_manager();
+    const wrapper = {};
+    const proposals_wrapper = { get: () => wrapper };
+    const renders = [];
+    sandbox.frappe.DataTable = class {
+      constructor(element, options) {
+        assert.equal(dialog_manager.dialog.display, true);
+        assert.equal(element, wrapper);
+        renders.push(options.data);
+        this.rowmanager = { checkMap: [] };
+      }
+      refresh(data) {
+        assert.equal(dialog_manager.dialog.display, true);
+        renders.push(data);
+      }
+    };
+    dialog_manager.columns = ["Voucher", "Amount"];
+    dialog_manager.data = [["ACC-JV-2026-00007", 500]];
+
+    dialog_manager.get_datatable(proposals_wrapper);
+
+    assert.equal(dialog_manager.datatable, undefined);
+    assert.equal(renders.length, 0);
+
+    dialog_manager.dialog.show();
+
+    assert.deepEqual(renders, [dialog_manager.data]);
+    assert.equal(dialog_manager.dialog.on_page_show, null);
+    const table = dialog_manager.datatable;
+    table.rowmanager.checkMap = [1];
+    dialog_manager.data = [["ACC-JV-2026-00008", 250]];
+    dialog_manager.get_datatable(proposals_wrapper);
+
+    assert.equal(dialog_manager.datatable, table);
+    assert.equal(renders.length, 2);
+    assert.deepEqual(renders[1], dialog_manager.data);
+    assert.deepEqual(plain(table.rowmanager.checkMap), []);
+  });
+});
 
 describe("voucher type registry", () => {
   it("keeps types registered before the bundle loaded, after the built-in ones", () => {

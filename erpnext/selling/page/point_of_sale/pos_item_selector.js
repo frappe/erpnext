@@ -53,6 +53,10 @@ erpnext.PointOfSale.ItemSelector = class {
 	async load_items_data() {
 		await this.item_ready_group;
 
+		// drop memoized search results so stock qty reflects the latest ledger
+		this.search_index = {};
+		this.cache_epoch = (this.cache_epoch || 0) + 1;
+
 		this.start_item_loading_animation();
 
 		if (!this.price_list) {
@@ -451,6 +455,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		try {
 			let items = search_term && cache[cache_key];
 			if (!items) {
+				const epoch = this.cache_epoch;
 				let { message } = await this.get_items({ search_term });
 				if (message.candidates?.length) {
 					this.items = [];
@@ -464,7 +469,14 @@ erpnext.PointOfSale.ItemSelector = class {
 					}));
 				}
 				items = message.items || [];
-				if (search_term && !message.barcode_scan && !message.candidates) cache[cache_key] = items;
+				if (
+					search_term &&
+					!message.barcode_scan &&
+					!message.candidates &&
+					epoch === this.cache_epoch
+				) {
+					cache[cache_key] = items;
+				}
 			}
 			this.items = items;
 			this.render_item_list(items);
