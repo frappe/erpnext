@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-20 09:36+0000\n"
-"PO-Revision-Date: 2026-09-21 04:08\n"
+"PO-Revision-Date: 2026-09-28 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -147,7 +147,7 @@ msgstr "% Método completo"
 
 #: erpnext/projects/doctype/project/project.py:226
 msgid "% Complete must be between 0 and 100"
-msgstr ""
+msgstr "% completado debe estar entre 0 y 100"
 
 #. Label of the percent_complete (Percent) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -264,7 +264,7 @@ msgstr "% Devuelto"
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #, python-format
 msgid "% of Component Cost"
-msgstr ""
+msgstr "% del coste de componentes"
 
 #. Description of the '% Amount Billed' (Percent) field in DocType 'Sales
 #. Order'
@@ -357,7 +357,7 @@ msgstr "'Actualización de Inventario' no se puede comprobar en venta de activos
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:112
 msgid "'Verification Link Expiry Duration' must be between 15 to 60 minutes."
-msgstr ""
+msgstr "La «duración de caducidad del enlace de verificación» debe estar entre 15 y 60 minutos."
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:79
 msgid "'{0}' account is already used by {1}. Use another account."
@@ -487,7 +487,7 @@ msgstr "* Será calculado en la transacción."
 #: erpnext/stock/doctype/item/item_prices.html:128
 #: erpnext/stock/doctype/item/item_prices.html:136
 msgid "+ Add Price"
-msgstr ""
+msgstr "+ Añadir precio"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:112
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:360
@@ -977,7 +977,7 @@ msgstr "<span class=\"h4\"><b>Informes &amp; Datos Maestros</b></span>"
 #. Header text in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "<span class=\"h4\"><b>Subcontracting Inward and Outward</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Subcontratación Entrante y Saliente</b></span>"
 
 #. Header text in the ERPNext Settings Workspace
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
@@ -1137,7 +1137,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:636
 msgid "A draft reverse journal for {0} has been created: {1}"
-msgstr ""
+msgstr "Se ha creado un asiento de diario inverso en borrador de {0}: {1}"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:64
 msgid "A driver must be set to submit."
@@ -8969,7 +8969,7 @@ msgstr "Caja"
 #: erpnext/setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 #: erpnext/workspace_sidebar/organization.json
 msgid "Branch"
-msgstr "Sucursal"
+msgstr ""
 
 #. Label of the branch_code (Data) field in DocType 'Bank Account'
 #. Label of the branch_code (Data) field in DocType 'Bank Guarantee'
