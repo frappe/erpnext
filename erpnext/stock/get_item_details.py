@@ -208,6 +208,11 @@ def remove_standard_fields(out: ItemDetails):
 	return out
 
 
+@frappe.request_cache
+def has_source_doc_permission(doctype: str, docname: str, user: str) -> bool:
+	return bool(frappe.has_permission(doctype, doc=docname, user=user))
+
+
 def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	"""Return the persisted source-document row a mapped target row is locked to.
 
@@ -237,7 +242,12 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 			source = frappe.db.get_value(
 				source_doctype, source_name, [*LOCKED_RATE_FIELDS, "parent", "parenttype"], as_dict=True
 			)
-			if source and frappe.has_permission(source.parenttype, doc=source.parent):
+			if (
+				source
+				and source.parent
+				and source.parenttype
+				and has_source_doc_permission(source.parenttype, source.parent, frappe.session.user)
+			):
 				return source
 			return None
 	return None
