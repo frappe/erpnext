@@ -463,6 +463,8 @@ erpnext.PointOfSale.ItemSelector = class {
 				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
 				if (search_term && !barcode) {
+					// a concurrent reload may have cleared the cache; recreate the bucket
+					this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
 					this.search_index[selling_price_list][search_term] = items;
 				}
 				this.items = items;
