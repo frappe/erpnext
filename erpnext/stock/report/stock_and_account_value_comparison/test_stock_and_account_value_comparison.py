@@ -350,6 +350,44 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		)
 		self.assertEqual(getdate(posting_date), getdate(old_pr.posting_date))
 
+	def test_gl_reposting_requires_accounts_role(self):
+		# Stock users can create a Repost Item Valuation, but rewriting the General Ledger is left to
+		# accounts users.
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		pr = make_purchase_receipt(item_code=item, company=COMPANY, warehouse=PI_STORES, qty=5, rate=100)
+
+		row = {
+			"ledger_type": "Stock Ledger Entry",
+			"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name,
+			"posting_date": pr.posting_date,
+			"posting_time": pr.posting_time,
+		}
+
+		stock_manager = create_user("test_savc_stock_manager@example.com", "Stock User", "Stock Manager")
+		accounts_user = create_user("test_savc_accounts_user@example.com", "Accounts User")
+
+		frappe.flags.dont_execute_stock_reposts = True
+		try:
+			with self.set_user(stock_manager.name):
+				self.assertRaises(frappe.PermissionError, create_gl_reposting_entries, [row], COMPANY)
+
+			self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
+
+			# An Accounts User has no Repost Item Valuation permission of their own, but may still repost GL.
+			with self.set_user(accounts_user.name):
+				create_gl_reposting_entries([row], COMPANY)
+		finally:
+			frappe.flags.dont_execute_stock_reposts = False
+
+		self.assertTrue(
+			frappe.db.exists(
+				"Repost Item Valuation", {"voucher_no": pr.name, "repost_only_accounting_ledgers": 1}
+			)
+		)
+
 	def test_gl_reposting_not_allowed_against_gl_entry_voucher_type(self):
 		# Guard on the Repost Item Valuation itself, for anything creating one outside the report.
 		riv = frappe.new_doc("Repost Item Valuation")

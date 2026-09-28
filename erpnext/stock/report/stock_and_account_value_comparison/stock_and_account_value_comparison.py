@@ -290,7 +290,10 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 				frappe.db.rollback(save_point="repost_based_on_transaction")
 
 
-@frappe.whitelist()
+GL_REPOSTING_ROLES = ("Accounts User", "Accounts Manager")
+
+
+@frappe.whitelist(methods=["POST"])
 def create_gl_reposting_entries(rows: str | list, company: str):
 	"""Repost only the accounting ledgers for the selected vouchers.
 
@@ -299,7 +302,16 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 	drifted away from it, so there is no need to pay for a full (and much slower) revaluation.
 	"""
 
-	frappe.has_permission("Repost Item Valuation", "create", throw=True)
+	# Rewriting the General Ledger is an accounting decision, so it is gated on the accounts roles
+	# rather than on the Repost Item Valuation permission, which Stock Managers also have and
+	# Accounts Users do not.
+	if not set(GL_REPOSTING_ROLES) & set(frappe.get_roles()):
+		frappe.throw(
+			_("Only users with the {0} or {1} role can repost GL entries").format(
+				frappe.bold(_("Accounts User")), frappe.bold(_("Accounts Manager"))
+			),
+			frappe.PermissionError,
+		)
 
 	if isinstance(rows, str):
 		rows = parse_json(rows)
@@ -361,7 +373,10 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 				"company": company,
 				"repost_only_accounting_ledgers": 1,
 			}
-		).submit()
+		)
+		# The accounts role check above is what authorises this; see the note at the top.
+		doc.flags.ignore_permissions = True
+		doc.submit()
 
 		entries.append(get_link_to_form("Repost Item Valuation", doc.name))
 

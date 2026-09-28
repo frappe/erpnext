@@ -73,21 +73,24 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			__("Create")
 		);
 
-		report.page.add_inner_button(
-			__("Repost GL Entries"),
-			function () {
-				let selected_rows = get_selected_rows(__("GL Reposting Entries"));
+		// Rewriting the General Ledger is left to accounts users; the server enforces the same roles.
+		if (frappe.user.has_role(["Accounts User", "Accounts Manager"])) {
+			report.page.add_inner_button(
+				__("Repost GL Entries"),
+				function () {
+					let selected_rows = get_selected_rows(__("GL Reposting Entries"));
 
-				frappe.call({
-					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_gl_reposting_entries",
-					args: {
-						rows: selected_rows,
-						company: frappe.query_report.get_filter_values().company,
-					},
-				});
-			},
-			__("Create")
-		);
+					frappe.call({
+						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_gl_reposting_entries",
+						args: {
+							rows: selected_rows,
+							company: frappe.query_report.get_filter_values().company,
+						},
+					});
+				},
+				__("Create")
+			);
+		}
 	},
 };
 
