@@ -4767,6 +4767,54 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture.submit()
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_manufacture_skips_batch_qty_reserved_by_other_vouchers(self):
+		wo, rm_item, batches = self.make_transferred_batches("TST-RTB", [15, 10])
+		make_wo_order_test_record(
+			item=wo.production_item,
+			qty=7,
+			reserve_stock=1,
+			skip_transfer=1,
+			source_warehouse=wo.wip_warehouse,
+		)
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 15))
+		self.assertEqual(
+			[(row.batch_no, row.qty) for row in manufacture.items if row.item_code == rm_item],
+			[(batches[0], 8), (batches[1], 7)],
+		)
+		manufacture.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_manufacture_keeps_batches_when_unreserved_qty_is_short(self):
+		wo, rm_item, batches = self.make_transferred_batches("TST-SRB", [15, 10])
+		make_wo_order_test_record(
+			item=wo.production_item,
+			qty=12,
+			reserve_stock=1,
+			skip_transfer=1,
+			source_warehouse=wo.wip_warehouse,
+		)
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 15))
+		self.assertEqual(
+			[(row.batch_no, row.qty) for row in manufacture.items if row.item_code == rm_item],
+			[(batches[0], 15)],
+		)
+		self.assertRaises(frappe.ValidationError, manufacture.submit)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
