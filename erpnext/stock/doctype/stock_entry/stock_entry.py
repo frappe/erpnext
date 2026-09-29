@@ -3810,6 +3810,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if row.batch_details:
 				row.batches_to_be_consume = defaultdict(float)
+				self.use_unreserved_batches(row, qty)
 				batches = row.batch_details
 				self.update_batches_to_be_consume(batches, row, qty)
 
@@ -3819,6 +3820,41 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if flt(qty, precision) != 0.0:
 				self.update_item_in_stock_entry_detail(row, item, qty)
+
+	def use_unreserved_batches(self, row, qty):
+		"""Switch to batch qty not reserved by other vouchers when it covers the qty."""
+		if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+			return
+
+		unreserved_qty = self.get_unreserved_batch_qty(row)
+		batches = {
+			batch_no: min(batch_qty, unreserved_qty[batch_no])
+			for batch_no, batch_qty in row.batch_details.items()
+			if batch_qty > 0 and batch_no in unreserved_qty
+		}
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		if flt(sum(batches.values()), precision) >= flt(qty, precision):
+			row.batch_details = batches
+
+	def get_unreserved_batch_qty(self, row):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+
+		work_order_reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": "Work Order", "voucher_no": self.work_order, "docstatus": 1},
+			pluck="name",
+		)
+		batches = get_auto_batch_nos(
+			frappe._dict(
+				item_code=row.item_details.item_code,
+				warehouse=row.item_details.warehouse,
+				batch_no=list(row.batch_details),
+				posting_date=self.posting_date,
+				posting_time=self.posting_time,
+				ignore_voucher_nos=work_order_reservations,
+			)
+		)
+		return {batch.batch_no: batch.qty for batch in batches}
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
