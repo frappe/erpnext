@@ -47,6 +47,7 @@ email_css = "email_erpnext.bundle.css"
 
 app_include_icons = [
 	"/assets/erpnext/icons/pos-icons.svg",
+	"/assets/erpnext/icons/module-icons.svg",
 ]
 
 web_include_icons = [

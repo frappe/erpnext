@@ -8,7 +8,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "landmark",
+   "icon": "calculator-duotone",
    "link_to": "Accounts",
    "link_type": "Sidebar",
    "title": "Accounts"
@@ -24,7 +24,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "shopping-cart",
+   "icon": "shopping-cart-duotone",
    "link_to": "Buying",
    "link_type": "Sidebar",
    "title": "Buying"
@@ -32,7 +32,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "folder-kanban",
+   "icon": "gantt-chart-duotone",
    "link_to": "Projects",
    "link_type": "Sidebar",
    "title": "Projects"
@@ -40,7 +40,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "store",
+   "icon": "storefront-duotone",
    "link_to": "Selling",
    "link_type": "Sidebar",
    "title": "Selling"
@@ -56,7 +56,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "building-complex",
+   "icon": "factory-duotone",
    "link_to": "Manufacturing",
    "link_type": "Sidebar",
    "title": "Manufacturing"
@@ -64,7 +64,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "package",
+   "icon": "shelf-rack-duotone",
    "link_to": "Stock",
    "link_type": "Sidebar",
    "title": "Stock"
@@ -80,7 +80,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "pocket-knife",
+   "icon": "pocket-knife-duotone",
    "link_to": "Utilities",
    "link_type": "Sidebar",
    "title": "Utilities"
@@ -88,7 +88,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "archive",
+   "icon": "asset-hand-duotone",
    "link_to": "Assets",
    "link_type": "Sidebar",
    "title": "Assets"
@@ -120,7 +120,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "plug",
+   "icon": "plug-duotone",
    "link_to": "ERPNext Integrations",
    "link_type": "Sidebar",
    "title": "Integrations"
@@ -128,7 +128,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "shield-check",
+   "icon": "quality-seal-duotone",
    "link_to": "Quality",
    "link_type": "Sidebar",
    "title": "Quality"
@@ -142,7 +142,7 @@
    "title": "Subcontracting"
   }
  ],
- "modified": "2026-09-21 08:00:00.000000",
+ "modified": "2026-09-29 17:00:00.000000",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",
