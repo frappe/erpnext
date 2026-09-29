@@ -1272,7 +1272,7 @@ class Item(Document):
 
 		doc_before_save = self.get_doc_before_save()
 		for fieldname in ("has_serial_no", "has_batch_no"):
-			if self.get(fieldname) and not (doc_before_save and doc_before_save.get(fieldname)):
+			if cint(self.get(fieldname)) and not (doc_before_save and cint(doc_before_save.get(fieldname))):
 				frappe.throw(
 					_("Cannot enable {0} as {1} is disabled in {2}").format(
 						bold(self.meta.get_label(fieldname)),

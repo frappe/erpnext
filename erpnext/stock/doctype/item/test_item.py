@@ -965,6 +965,9 @@ class TestItem(ERPNextTestSuite):
 		)
 
 		for fieldname in ("has_serial_no", "has_batch_no"):
+			with self.assertRaisesRegex(frappe.ValidationError, "Activate Serial / Batch No for Item"):
+				make_item(f"_Test New {fieldname} Item", {fieldname: 1})
+
 			item = frappe.get_doc("Item", plain_item.name)
 			item.set(fieldname, 1)
 			with self.assertRaisesRegex(frappe.ValidationError, "Activate Serial / Batch No for Item"):
