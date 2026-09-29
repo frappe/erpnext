@@ -448,6 +448,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			# manual additions to the return should hit the return warehous, too
 			doc.set_warehouse = default_warehouse_for_sales_return
 
+		if doc.doctype in ["Sales Invoice", "POS Invoice", "Purchase Invoice"]:
+			# Keep the original invoice's advances out of the return.
+			doc.set("advances", [])
+			doc.allocate_advances_automatically = 0
+
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
