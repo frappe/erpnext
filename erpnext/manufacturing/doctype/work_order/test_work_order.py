@@ -2047,6 +2047,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		qty = sum(e.qty for e in bundle_doc.entries)
 		self.assertEqual(qty, -4.0)
 
+	def test_return_needs_completed_or_closed_work_order(self):
+		wo = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		for item_code in ("_Test Item", "_Test Item Home Desktop 100"):
+			test_stock_entry.make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+			)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
+
+		return_entry = make_stock_return_entry(wo.name)
+		return_entry.company = wo.company
+		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_entry.save)
+
 	###
 	def test_non_consumed_material_return_against_work_order(self):
 		frappe.db.set_single_value(
