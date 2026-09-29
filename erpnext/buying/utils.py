@@ -60,7 +60,7 @@ def validate_for_items(doc) -> None:
 
 def validate_duplicate_items(doc) -> None:
 	rows = [
-		(row.item_code, row.get("purchase_receipt") or row.get("purchase_order"))
+		(row.item_code, row.get("purchase_receipt"), row.get("purchase_order"))
 		for row in doc.get("items")
 		if row.item_code
 	]
