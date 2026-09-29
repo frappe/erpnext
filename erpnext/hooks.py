@@ -36,6 +36,21 @@ code_only_modules = {
 	"Communication": ["ERPNext Integrations"],
 	"EDI": ["Utilities"],
 	"Bulk Transaction": ["Utilities"],
+	# Its masters are already linked from the sidebars that use them. Accounts leads because it
+	# links Company, and it is the home for the org-level records no other sidebar lists
+	# (Party Type, Authorization Rule, Transaction Deletion Record). Stock comes before Selling so
+	# that Item Group goes to Stock, and Selling comes before CRM so that Customer Group, Territory
+	# and Sales Person go to Selling.
+	"Setup": ["Accounts", "Stock", "Selling", "Buying", "CRM"],
+	# Subcontracting is sending work out to be manufactured, so its orders and receipts live in the
+	# Manufacturing sidebar.
+	"Subcontracting": ["Manufacturing"],
+	# Its records are country-specific tax settings and returns, so they sit with the rest of the
+	# tax setup and reports in Accounts.
+	"Regional": ["Accounts"],
+	# Maintenance schedules and visits are after-sales upkeep of what was sold, so they live in a
+	# Maintenance section of the Quality sidebar.
+	"Maintenance": ["Quality Management"],
 }
 
 develop_version = "17.x.x-develop"
