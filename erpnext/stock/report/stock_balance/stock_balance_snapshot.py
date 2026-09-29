@@ -6,9 +6,11 @@ from operator import itemgetter
 import frappe
 import pyarrow as pa
 from frappe import _
-from frappe.database.duckdb.database import get_latest_sync
+from frappe.database import get_duckdb
+from frappe.database.duckdb.database import get_latest_complete_sync
 from frappe.utils import getdate
 
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
@@ -96,12 +98,13 @@ def execute(filters):
 			).format(frappe.bold(_("Show Stock Ageing Data")), frappe.bold(_("Snapshot Report")))
 		)
 
-	conn = get_latest_sync("Stock Ledger Entry")
-	if not conn:
+	sync = get_latest_complete_sync("Stock Ledger Entry")
+	if not sync:
 		frappe.throw(_("Stock Balance needs a DuckDB sync of Stock Ledger Entry"))
 
+	conn = get_duckdb(True, sync.filename)
 	try:
-		return StockBalanceSnapshotReport(filters, conn).run()
+		return StockBalanceSnapshotReport(filters, conn, sync.creation).run()
 	finally:
 		conn.close()
 
@@ -115,9 +118,19 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 	can, rarely, round the other way from the live report.
 	"""
 
-	def __init__(self, filters, conn):
+	def __init__(self, filters, conn, synced_at):
 		super().__init__(filters)
 		self.conn = conn
+		self.synced_at = synced_at
+
+	def get_entries_from_stock_closing_balance(self):
+		"""A closing submitted after the sync can count entries the sync does not have, so the
+		report then reads the whole ledger from the sync instead."""
+		closing = StockClosing(self.filters.company, self.from_date, self.from_date).last_closing_balance
+		if closing and frappe.db.get_value("Stock Closing Entry", closing.name, "modified") > self.synced_at:
+			return []
+
+		return super().get_entries_from_stock_closing_balance()
 
 	def prepare_item_warehouse_map_for_current_period(self):
 		self.opening_vouchers = self.get_opening_vouchers()
