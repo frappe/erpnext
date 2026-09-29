@@ -2116,6 +2116,44 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in return_ste_doc.items:
 			self.assertEqual(row.qty, 2)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "use_serial_batch_fields": 1}
+	)
+	def test_material_returns_net_off_transferred_materials(self):
+		production_item, rm_item = "TST-RTN FG", "TST-RTN RM"
+		make_item(production_item, {"is_stock_item": 1})
+		make_item(
+			rm_item,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "TST-RTN-.###",
+				"create_new_batch": 1,
+			},
+		)
+		make_bom(item=production_item, source_warehouse="Stores - _TC", raw_materials=[rm_item])
+		wo = make_wo_order_test_record(item=production_item, qty=4, source_warehouse="Stores - _TC")
+		receipt = test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="Stores - _TC", qty=4, basic_rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+		close_work_order(wo.name, "Closed")
+
+		first_return = make_stock_return_entry(wo.name)
+		first_return.company = wo.company
+		first_return.items[0].qty = 1
+		first_return.submit()
+
+		second_return = make_stock_return_entry(wo.name)
+		self.assertEqual(
+			[(row.s_warehouse, row.t_warehouse, row.batch_no, row.qty) for row in second_return.items],
+			[(wo.wip_warehouse, "Stores - _TC", batch_no, 3)],
+		)
+
 	def test_workstation_type_for_work_order(self):
 		prepare_data_for_workstation_type_check()
 
