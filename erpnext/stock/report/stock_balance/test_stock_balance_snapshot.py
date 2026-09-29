@@ -225,14 +225,10 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
 		self.assertNotEqual(stock_balance.execute(deepcopy(self.filters)), expected)
 
-	def test_ageing_columns_use_the_live_report(self):
-		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
+	def test_ageing_columns_are_refused(self):
 		filters = frappe._dict(self.filters, show_stock_ageing_data=1)
 		with patch(LATEST_SYNC, side_effect=AssertionError("Sync opened")):
-			self.assertEqual(
-				stock_balance.execute_snapshot_report(deepcopy(filters)),
-				stock_balance.execute(deepcopy(filters)),
-			)
+			self.assertRaises(frappe.ValidationError, stock_balance.execute_snapshot_report, filters)
 
 	def test_requires_a_sync(self):
 		with patch(LATEST_SYNC, return_value=None):
@@ -243,7 +239,7 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 
 @patch.object(live_tests, "execute", execute_from_snapshot)
 class TestStockBalanceFromSnapshot(live_tests.TestStockBalance):
-	"""The live Stock Balance tests, with the report read from a snapshot of the ledger. Ageing
-	columns keep the live report, which test_ageing_columns_use_the_live_report covers."""
+	"""The live Stock Balance tests, with the report read from a snapshot of the ledger. A snapshot
+	refuses ageing columns, which test_ageing_columns_are_refused covers."""
 
 	test_show_stock_ageing_data_adds_ageing_columns = None
