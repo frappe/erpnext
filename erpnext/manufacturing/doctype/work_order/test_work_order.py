@@ -20,6 +20,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_job_card,
 	make_material_request,
 	make_stock_entry,
+	make_stock_reservation_entries,
 	make_stock_return_entry,
 	stop_unstop,
 )
@@ -4032,6 +4033,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sre[0].voucher_qty, 10)
 		self.assertEqual(sre[0].status, "Partially Reserved")
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_top_up_reservation_records_full_voucher_qty(self):
+		wo = make_partially_reserved_work_order("Test Top Up Reservation RM")
+
+		make_stock_reservation_entries(wo, items=get_unreserved_items(wo), is_transfer=0)
+
+		reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": wo.name, "docstatus": 1},
+			fields=["reserved_qty", "voucher_qty"],
+			order_by="creation",
+		)
+		self.assertEqual([(row.reserved_qty, row.voucher_qty) for row in reservations], [(4, 10), (6, 10)])
+
 	def test_auto_stock_reservation_for_batched_raw_material(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
@@ -5487,3 +5505,36 @@ def make_wo_order_test_record(**args):
 		if not args.do_not_submit:
 			wo_order.submit()
 	return wo_order
+
+
+def make_partially_reserved_work_order(rm_item, rm_properties=None):
+	"""Work Order needing 10 of `rm_item`, submitted with 4 on hand, then 26 more received."""
+	from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+		make_stock_entry as make_stock_entry_test_record,
+	)
+
+	source_warehouse = "Stores - _TC"
+	production_item = make_item(properties={"is_stock_item": 1}).name
+	make_item(rm_item, {"is_stock_item": 1, **(rm_properties or {})})
+	make_bom(item=production_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+
+	make_stock_entry_test_record(item_code=rm_item, target=source_warehouse, qty=4, basic_rate=100)
+	wo = make_wo_order_test_record(
+		item=production_item, qty=10, reserve_stock=1, source_warehouse=source_warehouse
+	)
+	make_stock_entry_test_record(item_code=rm_item, target=source_warehouse, qty=26, basic_rate=100)
+	return wo
+
+
+def get_unreserved_items(wo):
+	"""Rows the Reserve dialog sends: the unreserved qty of each required item."""
+	wo.reload()
+	return [
+		{
+			"work_order_item": row.name,
+			"item_code": row.item_code,
+			"warehouse": row.source_warehouse,
+			"required_qty": row.required_qty - row.stock_reserved_qty,
+		}
+		for row in wo.required_items
+	]
