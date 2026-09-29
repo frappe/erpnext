@@ -45,6 +45,10 @@ def get_stock_value_by_item_group(company):
 		warehouse_filters.append(["company", "=", company])
 
 	warehouses = frappe.get_list("Warehouse", pluck="name", filters=warehouse_filters)
+	if not warehouses:
+		return [], []
+
+	permitted_items = frappe.qb.get_query("Item", fields=["name"], ignore_permissions=False)
 
 	stock_value = Sum(doctype.stock_value)
 
@@ -58,8 +62,8 @@ def get_stock_value_by_item_group(company):
 		.limit(10)
 	)
 
-	if warehouses:
-		query = query.where(doctype.warehouse.isin(warehouses))
+	query = query.where(doctype.warehouse.isin(warehouses))
+	query = query.where(doctype.item_code.isin(permitted_items))
 
 	results = query.run(as_dict=True)
 
