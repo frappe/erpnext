@@ -17,17 +17,23 @@ class TestInvoiceDiscounting(ERPNextTestSuite):
 			account_name="_Test Accounts Receivable Credit",
 			parent_account="Accounts Receivable - _TC",
 			company="_Test Company",
+			account_type="Receivable",
 		)
 		self.ar_discounted = create_account(
 			account_name="_Test Accounts Receivable Discounted",
 			parent_account="Accounts Receivable - _TC",
 			company="_Test Company",
+			account_type="Receivable",
 		)
 		self.ar_unpaid = create_account(
 			account_name="_Test Accounts Receivable Unpaid",
 			parent_account="Accounts Receivable - _TC",
 			company="_Test Company",
+			account_type="Receivable",
 		)
+		# create_account ignores account_type when the account already exists in the db
+		for account in (self.ar_credit, self.ar_discounted, self.ar_unpaid):
+			frappe.db.set_value("Account", account, "account_type", "Receivable")
 		self.short_term_loan = create_account(
 			account_name="_Test Short Term Loan",
 			parent_account="Source of Funds (Liabilities) - _TC",
