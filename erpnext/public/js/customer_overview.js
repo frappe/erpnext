@@ -40,12 +40,6 @@ frappe.ui.form.on("Customer", {
 erpnext.CustomerOverview = class CustomerOverview {
 	constructor(frm) {
 		this.frm = frm;
-		this.wrapper = frm.get_field("overview_html").$wrapper;
-		this.state = {
-			company: this.pref("company") || frappe.defaults.get_user_default("Company"),
-			period: PERIODS.includes(this.pref("period")) ? this.pref("period") : PERIODS[0],
-			doc_type: "All",
-		};
 		this.accounts = frappe.model.can_read("Sales Invoice") && frappe.model.can_read("GL Entry");
 		this.seq = { sales: 0, ar: 0 };
 	}
@@ -66,18 +60,39 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	refresh() {
-		if (this.built) {
+		if (this.customer === this.frm.doc.name) {
 			this.load();
+			this.refresh_list();
 			return;
 		}
 		this.build();
 	}
 
 	build() {
-		this.built = true;
+		this.reset();
+		this.wrapper = this.frm.get_field("overview_html").$wrapper;
 		this.wrapper.empty();
 		this.$root = $('<div class="customer-overview">').appendTo(this.wrapper);
+		this.build_header();
+		this.build_sections();
 
+		if (this.state.company) this.load();
+		this.load_companies();
+	}
+
+	reset() {
+		this.customer = this.frm.doc.name;
+		this.state = {
+			company: this.pref("company") || frappe.defaults.get_user_default("Company"),
+			period: PERIODS.includes(this.pref("period")) ? this.pref("period") : PERIODS[0],
+			doc_type: "All",
+		};
+		this.companies_ready = false;
+		this.list = null;
+		this.destroy_trend();
+	}
+
+	build_header() {
 		const $header = $('<div class="co-header">').appendTo(this.$root);
 		const $left = $('<div class="co-header-left">').appendTo($header);
 		$('<div class="co-htitle">').text(__("Overview")).appendTo($left);
@@ -96,7 +111,9 @@ erpnext.CustomerOverview = class CustomerOverview {
 			this.load({ receivables: false });
 		});
 		this.period_field.set_value(this.state.period);
+	}
 
+	build_sections() {
 		this.$body = $('<div class="co-body">').appendTo(this.$root);
 		this.$position = $('<div class="co-section co-kpis">').appendTo(this.$body);
 		this.$trend = $('<div class="co-section">').appendTo(this.$body);
@@ -106,32 +123,30 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.$empty = $('<div class="co-section">').hide().appendTo(this.$root);
 
 		this.build_recent();
+		const customer = this.customer;
 		frappe
 			.require("embedded_list.bundle.js")
-			.then(() => this.build_list())
+			.then(() => customer === this.customer && this.build_list())
 			.catch((e) => console.error("Customer Overview: failed to load embedded_list.bundle.js", e));
-
-		if (this.state.company) this.load();
-		this.load_companies();
 	}
 
 	load_companies() {
-		frappe
-			.xcall(OVERVIEW_METHOD + ".get_customer_companies", { customer: this.frm.doc.name })
-			.then((companies) => {
-				if (!companies.length) {
-					this.render_no_activity();
-					return;
-				}
-				this.company_field.df.options = companies.join("\n");
-				this.company_field.refresh();
-				const known = companies.includes(this.state.company);
-				if (!known) this.state.company = companies[0];
-				this.company_field.set_value(this.state.company);
-				this.companies_ready = true;
-				if (!known) this.load();
-				this.refresh_list();
-			});
+		const customer = this.customer;
+		frappe.xcall(OVERVIEW_METHOD + ".get_customer_companies", { customer }).then((companies) => {
+			if (customer !== this.customer) return;
+			if (!companies.length) {
+				this.render_no_activity();
+				return;
+			}
+			this.company_field.df.options = companies.join("\n");
+			this.company_field.refresh();
+			const known = companies.includes(this.state.company);
+			if (!known) this.state.company = companies[0];
+			this.company_field.set_value(this.state.company);
+			this.companies_ready = true;
+			if (!known) this.load();
+			this.refresh_list();
+		});
 	}
 
 	refresh_list() {
@@ -163,7 +178,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.render(key);
 		frappe
 			.xcall(OVERVIEW_METHOD + "." + method, {
-				customer: this.frm.doc.name,
+				customer: this.customer,
 				company: this.state.company,
 				...args,
 			})
@@ -306,7 +321,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 		};
 	}
 
+	destroy_trend() {
+		if (this.trend_chart) this.trend_chart.destroy();
+		this.trend_chart = null;
+	}
+
 	render_trend() {
+		this.destroy_trend();
 		this.$trend.empty().toggle(!!this.accounts);
 		if (!this.accounts) return;
 		const $panel = this.panel(this.$trend, {
@@ -321,7 +342,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return;
 		}
 
-		new frappe.Chart($('<div class="co-chart">').appendTo($panel)[0], {
+		this.trend_chart = new frappe.Chart($('<div class="co-chart">').appendTo($panel)[0], {
 			type: "line",
 			height: 220,
 			colors: [TREND_BLUE],
