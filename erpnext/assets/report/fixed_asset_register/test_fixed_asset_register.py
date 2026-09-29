@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import AssetSetup, create_asset
@@ -200,3 +201,43 @@ class TestFixedAssetRegister(AssetSetup):
 			consumed_asset.name, {row["asset_id"] for row in self.run_report(status="In Location")}
 		)
 		self.assertIn(consumed_asset.name, {row["asset_id"] for row in self.run_report(status="Disposed")})
+
+	def test_parent_cost_center_filter_includes_child_cost_center_assets(self):
+		create_cost_center(cost_center_name="_Test FAR Parent CC", is_group=1)
+		create_cost_center(
+			cost_center_name="_Test FAR Child CC", parent_cost_center="_Test FAR Parent CC - _TC"
+		)
+
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			available_for_use_date="2019-12-31",
+			depreciation_start_date="2020-12-31",
+			frequency_of_depreciation=12,
+			total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000,
+			net_purchase_amount=100000,
+			purchase_amount=100000,
+			do_not_save=1,
+		)
+		asset.cost_center = "_Test FAR Child CC - _TC"
+		asset.insert()
+		asset.submit()
+
+		other_asset = create_asset(
+			item_code="Macbook Pro", net_purchase_amount=100000, purchase_amount=100000, submit=True
+		)
+
+		post_depreciation_entries(date="2021-01-01")
+		make_asset_value_adjustment(
+			asset=asset.name, current_asset_value=70000, new_asset_value=60000
+		).submit()
+
+		rows = self.run_report(cost_center="_Test FAR Parent CC - _TC")
+		ids = {row["asset_id"] for row in rows}
+		self.assertIn(asset.name, ids)
+		self.assertNotIn(other_asset.name, ids)
+
+		row = next(row for row in rows if row["asset_id"] == asset.name)
+		self.assertEqual(row["depreciated_amount"], 30000)
+		self.assertEqual(row["asset_value"], 60000)
