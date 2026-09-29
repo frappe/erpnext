@@ -11,6 +11,9 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_receipt as create_purchase_receipt_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -83,6 +86,18 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(
 			[row.purchase_receipt for row in pi.items], [first_receipt.name, second_receipt.name]
 		)
+
+	def test_same_item_from_different_orders_in_one_receipt(self):
+		orders = [create_purchase_order(), create_purchase_order()]
+		receipt = create_purchase_receipt_from_order(orders[0].name)
+		receipt = create_purchase_receipt_from_order(orders[1].name, target_doc=receipt)
+
+		with change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			receipt.submit()
+			pi = create_purchase_invoice_from_receipt(receipt.name)
+			pi.save()
+
+		self.assertEqual([row.purchase_order for row in pi.items], [order.name for order in orders])
 
 	def test_purchase_invoice_received_qty(self):
 		"""
