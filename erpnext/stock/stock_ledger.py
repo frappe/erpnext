@@ -2159,37 +2159,45 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	if not args.get("posting_datetime"):
 		args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
-	voucher_condition = ""
-	if exclude_current_voucher:
-		voucher_no = args.get("voucher_no")
-		voucher_condition = f"and voucher_no != '{voucher_no}'"
+	sle_doctype = frappe.qb.DocType("Stock Ledger Entry")
+	posting_datetime = args.get("posting_datetime")
 
-	elif args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
-		creation = args.get("creation")
-		operator = "<="
-		voucher_condition = f"and creation < '{creation}'"
+	datetime_conditions = {
+		"<": sle_doctype.posting_datetime < posting_datetime,
+		"<=": sle_doctype.posting_datetime <= posting_datetime,
+		">": sle_doctype.posting_datetime > posting_datetime,
+		">=": sle_doctype.posting_datetime >= posting_datetime,
+	}
+	if operator not in datetime_conditions:
+		frappe.throw(_("Invalid operator {0}").format(operator))
 
-	sle = frappe.db.sql(  # nosemgrep
-		f"""
-		select *, posting_datetime as "timestamp"
-		from `tabStock Ledger Entry`
-		where item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and is_cancelled = 0
-			{voucher_condition}
-			and (
-				posting_datetime {operator} %(posting_datetime)s
-			)
-		order by posting_datetime desc, creation desc
-		limit 1
-		for update""",
-		{
-			"item_code": args.get("item_code"),
-			"warehouse": args.get("warehouse"),
-			"posting_datetime": args.get("posting_datetime"),
-		},
-		as_dict=1,
+	datetime_condition = datetime_conditions[operator]
+
+	query = (
+		frappe.qb.from_(sle_doctype)
+		.select(sle_doctype.star, sle_doctype.posting_datetime.as_("timestamp"))
+		.where(
+			(sle_doctype.item_code == args.get("item_code"))
+			& (sle_doctype.warehouse == args.get("warehouse"))
+			& (sle_doctype.is_cancelled == 0)
+		)
+		.orderby(sle_doctype.posting_datetime, order=Order.desc)
+		.orderby(sle_doctype.creation, order=Order.desc)
+		.limit(1)
+		.for_update()
 	)
+
+	if exclude_current_voucher:
+		query = query.where(sle_doctype.voucher_no != args.get("voucher_no"))
+
+	elif operator == "<" and args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
+		# creation only breaks ties at the same posting_datetime. Applying it to earlier rows too
+		# would skip a backdated SLE that a concurrent submit created just after this one.
+		datetime_condition = (sle_doctype.posting_datetime < posting_datetime) | (
+			(sle_doctype.posting_datetime == posting_datetime) & (sle_doctype.creation < args.get("creation"))
+		)
+
+	sle = query.where(datetime_condition).run(as_dict=True)
 
 	return sle[0] if sle else frappe._dict()
 
