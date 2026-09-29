@@ -1253,7 +1253,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(get_amount_differences(receipts), [1200, 200])
 
 	@ERPNextTestSuite.change_settings(
-		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"allow_multiple_items": 1,
+		},
 	)
 	def test_landed_cost_takes_invoice_rows_in_order(self):
 		from erpnext.buying.doctype.purchase_order.mapper import (
