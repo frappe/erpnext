@@ -269,9 +269,15 @@ class MaterialRequest(BuyingController):
 			)
 			result = query.run(as_dict=True)
 
+			requested_qty = {}
 			for item in items_from_pp:
+				plan_item = item.material_request_plan_item
+				requested_qty[plan_item] = requested_qty.get(plan_item, 0) + item.qty
 				row = next(r for r in result if r.name == item.material_request_plan_item)
-				if item.qty > row.available_qty:
+				if (
+					item.qty > row.available_qty
+					or flt(requested_qty[plan_item], item.precision("qty")) > row.available_qty
+				):
 					frappe.throw(
 						_("Quantity cannot be greater than {0} for Item {1}").format(
 							row.available_qty, item.item_code

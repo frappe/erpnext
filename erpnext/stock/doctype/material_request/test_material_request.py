@@ -41,6 +41,48 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 		self.assertEqual(mr.items[0].qty, 1)
 
+	def test_production_plan_qty_with_repeated_references(self):
+		from unittest.mock import patch
+
+		plan_items = [
+			frappe._dict(name="plan-item-1", available_qty=10),
+			frappe._dict(name="plan-item-2", available_qty=10),
+			frappe._dict(name="plan-item-3", available_qty=0.3),
+		]
+		cases = [
+			("above availability", [("plan-item-1", 6), ("plan-item-1", 6)], True),
+			("equal to availability", [("plan-item-1", 6), ("plan-item-1", 4)], False),
+			("below availability", [("plan-item-1", 3), ("plan-item-1", 4)], False),
+			("separate plan items", [("plan-item-1", 6), ("plan-item-2", 6)], False),
+			("unlinked item", [("plan-item-1", 6), (None, 6)], False),
+			("single row above availability", [("plan-item-1", 11)], True),
+			("negative row before excess", [("plan-item-1", -2), ("plan-item-1", 11)], True),
+			("negative row after excess", [("plan-item-1", 11), ("plan-item-1", -2)], True),
+			("fractional quantities", [("plan-item-3", 0.1), ("plan-item-3", 0.2)], False),
+		]
+		for label, quantities, should_raise in cases:
+			with self.subTest(label=label):
+				mr = frappe.new_doc("Material Request")
+				for plan_item, qty in quantities:
+					mr.append(
+						"items",
+						{
+							"item_code": "_Test Item",
+							"material_request_plan_item": plan_item,
+							"qty": qty,
+							"conversion_factor": 2,
+							"stock_qty": qty * 2,
+						},
+					)
+
+				with patch("frappe.qb.from_") as query:
+					query.return_value.select.return_value.where.return_value.run.return_value = plan_items
+					if should_raise:
+						with self.assertRaises(frappe.ValidationError):
+							mr.validate_pp_qty()
+					else:
+						mr.validate_pp_qty()
+
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
 
