@@ -4815,6 +4815,25 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, manufacture.submit)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_material_returns_net_off_transferred_materials(self):
+		wo, _rm_item, batches = self.make_transferred_batches("TST-RTN", [4])
+		close_work_order(wo.name, "Closed")
+
+		first_return = make_stock_return_entry(wo.name)
+		first_return.company = wo.company
+		first_return.items[0].qty = 1
+		first_return.submit()
+
+		second_return = make_stock_return_entry(wo.name)
+		self.assertEqual(
+			[(row.s_warehouse, row.t_warehouse, row.batch_no, row.qty) for row in second_return.items],
+			[(wo.wip_warehouse, "Stores - _TC", batches[0], 3)],
+		)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
