@@ -132,6 +132,21 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 
 		return super().get_entries_from_stock_closing_balance()
 
+	def get_opening_vouchers(self):
+		"""Opening vouchers cancelled after the sync still have ledger rows in it, so they count too."""
+		vouchers = super().get_opening_vouchers()
+		for voucher_type, opening in (
+			("Stock Entry", {"is_opening": "Yes"}),
+			("Stock Reconciliation", {"purpose": "Opening Stock"}),
+		):
+			vouchers[voucher_type] += frappe.get_all(
+				voucher_type,
+				filters={"docstatus": 2, "posting_date": ("<=", self.to_date), **opening},
+				pluck="name",
+			)
+
+		return vouchers
+
 	def prepare_item_warehouse_map_for_current_period(self):
 		self.opening_vouchers = self.get_opening_vouchers()
 		self.load_ledger()
