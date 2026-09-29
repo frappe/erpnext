@@ -2,21 +2,21 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Coalesce, Count, Sum
-from frappe.utils import add_days, add_months, add_to_date, cint, flt, getdate, today
+from frappe.utils import add_days, add_months, add_to_date, cint, date_diff, flt, getdate, today
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.selling.doctype.customer.customer import get_credit_limit
 
-PERIODS = ("Current fiscal year", "Last 12 months", "This quarter", "Last fiscal year")
+PERIODS = ("Current Fiscal Year", "Last 12 Months", "This Quarter", "Last Fiscal Year")
 OPEN_SO_STATUS = ("Closed", "Completed", "On Hold")
 
 
 @frappe.whitelist()
-def get_customer_overview(customer: str, company: str, period: str = "Current fiscal year"):
+def get_customer_overview(customer: str, company: str, period: str = "Current Fiscal Year"):
 	check_access(customer, company)
 
 	if period not in PERIODS:
-		period = "Current fiscal year"
+		period = "Current Fiscal Year"
 
 	as_of = getdate(today())
 	from_date, to_date = resolve_period(period, company, as_of)
@@ -69,7 +69,7 @@ def get_customer_receivables(customer: str, company: str):
 			"delta": pct_change(ar["overdue"], overdue_prev),
 			"delta_positive_is_good": False,
 		},
-		"advances": {"value": ar["advance"]} if ar["advance"] else None,
+		"advances": {"value": ar["advance"]},
 		"credit": {"limit": flt(get_credit_limit(customer, company))},
 		"ageing": ageing(ar),
 	}
@@ -89,10 +89,10 @@ def accounts_access():
 
 
 def resolve_period(period, company, as_of):
-	if period == "Last 12 months":
+	if period == "Last 12 Months":
 		return add_to_date(as_of, months=-12, as_string=False), as_of
 
-	if period == "This quarter":
+	if period == "This Quarter":
 		quarter_start_month = ((as_of.month - 1) // 3) * 3 + 1
 		return as_of.replace(month=quarter_start_month, day=1), as_of
 
@@ -100,7 +100,7 @@ def resolve_period(period, company, as_of):
 	if not fy:
 		return add_to_date(as_of, months=-12, as_string=False), as_of
 
-	if period == "Last fiscal year":
+	if period == "Last Fiscal Year":
 		prev = get_fiscal_year(
 			add_days(getdate(fy.year_start_date), -1), company=company, as_dict=True, raise_on_missing=False
 		)
@@ -166,10 +166,25 @@ def unpaid_invoice_count(customer, company):
 
 
 def collection_days(customer, company, as_of, outstanding):
-	trailing = net_sales(customer, company, add_days(as_of, -365), as_of)
+	first_invoice = frappe.get_all(
+		"Sales Invoice",
+		filters={
+			"docstatus": 1,
+			"customer": customer,
+			"company": company,
+			"posting_date": [">", add_days(as_of, -365)],
+		},
+		order_by="posting_date asc",
+		limit=1,
+		pluck="posting_date",
+	)
+	history = date_diff(as_of, first_invoice[0]) + 1 if first_invoice else 0
+	if history < 30:
+		return None
+	trailing = net_sales(customer, company, add_days(as_of, -history), as_of)
 	if trailing <= 0:
 		return None
-	days = int(round(outstanding / (trailing / 365)))
+	days = int(round(outstanding / (trailing / history)))
 	return days if days <= 730 else None
 
 

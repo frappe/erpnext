@@ -16,7 +16,7 @@ class TestCustomerOverview(ERPNextTestSuite):
 	def test_overview_sections(self):
 		data = customer_overview.get_customer_overview(CUSTOMER, COMPANY)
 		self.assertEqual(data["company"], COMPANY)
-		self.assertEqual(data["period"], "Current fiscal year")
+		self.assertEqual(data["period"], "Current Fiscal Year")
 		self.assertIn("net_sales", data["position"])
 		self.assertFalse(data["errors"])
 
@@ -28,7 +28,7 @@ class TestCustomerOverview(ERPNextTestSuite):
 
 	def test_unknown_period_falls_back(self):
 		data = customer_overview.get_customer_overview(CUSTOMER, COMPANY, period="Forever")
-		self.assertEqual(data["period"], "Current fiscal year")
+		self.assertEqual(data["period"], "Current Fiscal Year")
 
 	def test_invoice_data_needs_accounts_access(self):
 		with patch.object(customer_overview, "accounts_access", return_value=False):

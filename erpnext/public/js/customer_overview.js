@@ -1,7 +1,7 @@
 frappe.provide("erpnext");
 
 const OVERVIEW_METHOD = "erpnext.selling.doctype.customer.customer_overview";
-const PERIODS = ["Current fiscal year", "Last 12 months", "This quarter", "Last fiscal year"];
+const PERIODS = ["Current Fiscal Year", "Last 12 Months", "This Quarter", "Last Fiscal Year"];
 const TXN_TYPES = ["All", "Sales Invoice", "Sales Order", "Payment Entry"];
 const STATUS_THEME = {
 	Paid: "green",
@@ -22,6 +22,12 @@ const CHART_GREEN = "var(--chart-categorical-3)";
 const CHART_LIGHT_GREEN = "var(--chart-categorical-4)";
 const TREND_BLUE = "#2283c3";
 const RECENT_LIMIT = 10;
+const COUNT = {
+	invoices: (n) => (n === 1 ? __("1 invoice") : __("{0} invoices", [n])),
+	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
+	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
+	days_to_pay: (n) => (n === 1 ? __("1 day to pay") : __("{0} days to pay", [n])),
+};
 
 frappe.ui.form.on("Customer", {
 	refresh(frm) {
@@ -249,14 +255,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 			...card,
 			value: this.money0(p.value),
 			delta: this.delta_opts(p, __("since last year")),
-			caption: __("{0} invoices", [p.count || 0]),
+			caption: COUNT.invoices(p.count || 0),
 			onclick: () => this.open_analytics(),
 		};
 	}
 
 	receivable_cards() {
 		const ar = this.ar || { loading: true };
-		const labels = [__("Receivable"), __("Overdue")];
+		const labels = [__("Receivable"), __("Overdue"), __("Advances")];
 		if (ar.loading) return labels.map((label) => ({ label, loading: true }));
 		if (!ar.data) return labels.map((label) => ({ label, value: null }));
 		const { outstanding, overdue, advances } = ar.data;
@@ -273,10 +279,12 @@ erpnext.CustomerOverview = class CustomerOverview {
 				delta: this.delta_opts(overdue, __("since last month")),
 				onclick: () => this.open_ar(),
 			},
-			advances && {
-				label: __("Advances"),
+			{
+				label: labels[2],
 				value: this.money0(advances.value),
-				caption: __("Not yet applied to invoices"),
+				caption: flt(advances.value)
+					? __("Not yet applied to invoices")
+					: __("No unapplied payments"),
 				onclick: () => this.open_ar(),
 			},
 		];
@@ -285,7 +293,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	outstanding_sub(o) {
 		const parts = [];
 		if (o.unpaid_count) parts.push(__("{0} unpaid", [o.unpaid_count]));
-		if (o.days_to_pay) parts.push(__("{0} days to pay", [o.days_to_pay]));
+		if (o.days_to_pay) parts.push(COUNT.days_to_pay(o.days_to_pay));
 		return parts.join(" · ");
 	}
 
@@ -366,9 +374,12 @@ erpnext.CustomerOverview = class CustomerOverview {
 			})
 			.appendTo($('<div class="co-age-chart">').appendTo($panel));
 
-		const overdue = $('<span class="text-danger">').text(this.money0(a.overdue)).prop("outerHTML");
 		$('<div class="co-note text-muted">')
-			.html(__("Overdue {0} · {1}% of outstanding", [overdue, flt(a.overdue_pct, 1)]))
+			.text(
+				flt(a.overdue) > 0
+					? __("Overdue {0} · {1}% of outstanding", [this.money0(a.overdue), flt(a.overdue_pct, 1)])
+					: __("Nothing overdue")
+			)
 			.appendTo($panel);
 	}
 
@@ -378,18 +389,37 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const receivable = Math.max(flt(data && data.outstanding.value), 0);
 		const $panel = this.panel(this.$charts, {
 			title: __("Credit Limit"),
-			subtitle: data && this.credit_subtitle(receivable, limit),
+			subtitle: limit && __("{0} of {1} used", [this.short_money(receivable), this.short_money(limit)]),
 			right:
-				data &&
+				limit &&
 				frappe.ui.button({
 					icon: "pencil",
 					variant: "ghost",
-					tooltip: limit ? __("Edit credit limit") : __("Set credit limit"),
+					tooltip: __("Edit credit limit"),
 					onclick: () => this.edit_credit_limit(),
 				}),
 		});
 		if (this.show_state($panel, this.ar, 280, __("Could not load receivables"))) return;
-		if (!limit) return;
+		if (!limit) {
+			$('<div class="co-empty-state">')
+				.append(
+					frappe.ui.empty_state({
+						icon: "gauge",
+						title: __("No credit limit"),
+						description: __("Set one for {0} to check new orders and invoices against it.", [
+							this.state.company,
+						]),
+						actions: [
+							{
+								label: __("Set Credit Limit"),
+								onclick: () => this.edit_credit_limit(),
+							},
+						],
+					})
+				)
+				.appendTo($panel);
+			return;
+		}
 
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
 		frappe.ui
@@ -406,11 +436,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 				format: (v) => this.short_money(v),
 			})
 			.appendTo($('<div class="co-chart">').appendTo($panel));
-	}
-
-	credit_subtitle(receivable, limit) {
-		if (!limit) return __("No credit limit set for {0}", [this.state.company]);
-		return __("{0} of {1} used", [this.short_money(receivable), this.short_money(limit)]);
 	}
 
 	show_state($panel, source, height, error_text) {
@@ -471,13 +496,9 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return;
 		}
 		const pl = (this.sales.data && this.sales.data.pipeline) || {};
-		const specs = this.pipeline_specs(pl).filter((s) => s.data && (s.data.count || flt(s.data.value)));
+		const specs = this.pipeline_specs(pl).filter((s) => s.data);
 		if (!specs.length) {
-			this.empty_note(
-				this.$pipeline,
-				this.sales.error ? __("Could not load sales") : __("Nothing open"),
-				0
-			);
+			this.empty_note(this.$pipeline, __("Could not load sales"), 0).addClass("text-danger");
 			return;
 		}
 
@@ -485,7 +506,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			dot: s.dot,
 			label: s.label,
 			value: this.money0(s.data.value),
-			caption: s.caption(s.data),
+			caption: s.data.count ? s.caption(s.data) : __("None open"),
 			onclick: () => this.list_route(s.route[0], s.route[1]),
 		}));
 		frappe.ui.stat_cards({ items }).appendTo(this.$pipeline);
@@ -506,7 +527,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				dot: CHART_LIGHT_BLUE,
 				label: __("Open Quotations"),
 				data: pl.quotations,
-				caption: (d) => __("{0} quotations", [d.count]),
+				caption: (d) => COUNT.quotations(d.count),
 				route: ["Quotation", { quotation_to: "Customer", party_name: name, status: "Open" }],
 			});
 		if (frappe.model.can_read("Sales Order"))
@@ -516,10 +537,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 					label: __("Pending Delivery"),
 					data: pl.delivery,
 					caption: (d) =>
-						[
-							__("{0} orders", [d.count]),
-							d.past_due && __("{0} past promised date", [d.past_due]),
-						]
+						[COUNT.orders(d.count), d.past_due && __("{0} past promised date", [d.past_due])]
 							.filter(Boolean)
 							.join(" · "),
 					route: ["Sales Order", { customer: name, company, status: "To Deliver and Bill" }],
@@ -528,7 +546,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 					dot: CHART_BLUE,
 					label: __("Pending Billing"),
 					data: pl.billing,
-					caption: (d) => __("{0} orders · delivered, not invoiced", [d.count]),
+					caption: (d) => COUNT.orders(d.count) + " · " + __("delivered, not invoiced"),
 					route: ["Sales Order", { customer: name, company, status: "To Bill" }],
 				}
 			);
@@ -538,7 +556,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				label: __("Unpaid Invoices"),
 				data: pl.invoices,
 				caption: (d) =>
-					[__("{0} invoices", [d.count]), d.overdue && __("{0} overdue", [d.overdue])]
+					[COUNT.invoices(d.count), d.overdue && __("{0} overdue", [d.overdue])]
 						.filter(Boolean)
 						.join(" · "),
 				route: ["Sales Invoice", { customer: name, company, status: "Unpaid" }],
@@ -561,13 +579,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 			df: {
 				fieldtype: "Select",
 				fieldname: "doc_type",
-				options: TXN_TYPES.map((t) => (t === "All" ? "All document types" : t)).join("\n"),
+				options: TXN_TYPES.map((t) => (t === "All" ? "All Document Types" : t)).join("\n"),
 			},
 			render_input: true,
 			only_input: true,
 		});
 		control.refresh();
-		control.set_value("All document types");
+		control.set_value("All Document Types");
 		control.$input.on("change", () => {
 			const idx = control.$input.prop("selectedIndex");
 			this.state.doc_type = TXN_TYPES[idx] || "All";
@@ -628,7 +646,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const $head = $('<div class="co-head">').appendTo($parent);
 		const $top = $('<div class="co-head-top">').appendTo($head);
 		$('<div class="co-title">').text(title).appendTo($top);
-		if (right) $top.append(right);
+		if (right) $('<div class="co-head-action">').append(right).appendTo($top);
 		if (subtitle) $('<div class="co-subtitle text-muted">').text(subtitle).appendTo($head);
 		return $head;
 	}

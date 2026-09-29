@@ -23,6 +23,14 @@
 		font-size: var(--text-sm);
 	}
 
+	.co-head-action {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		height: 1lh;
+		font-size: var(--text-base);
+	}
+
 	.co-report-link {
 		flex-shrink: 0;
 		white-space: nowrap;
@@ -118,6 +126,13 @@
 		align-items: center;
 		justify-content: center;
 		font-size: var(--text-sm);
+	}
+
+	.co-empty-state {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.co-list .embedded-list-table {
