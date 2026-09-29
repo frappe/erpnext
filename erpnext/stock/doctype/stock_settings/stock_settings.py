@@ -155,6 +155,16 @@ class StockSettings(Document):
 					)
 				)
 
+			# settings hidden by this flag still apply to items that track serial / batch
+			if frappe.db.exists("Item", {"has_serial_no": 1}) or frappe.db.exists(
+				"Item", {"has_batch_no": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot disable Serial and Batch No for Item, as there are items with serial / batch enabled."
+					)
+				)
+
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
 		for field in warehouse_fields:
