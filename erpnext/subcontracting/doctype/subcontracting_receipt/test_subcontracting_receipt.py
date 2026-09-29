@@ -294,6 +294,51 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
+	def test_batch_return_value_matches_receipt(self):
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SCR-RET-BATCH-.####",
+			}
+		).name
+		make_bom(item=fg_item, raw_materials=[make_item(properties={"is_stock_item": 1}).name])
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-4)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			["stock_value_difference", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		bundle_value = frappe.db.get_value(
+			"Serial and Batch Bundle", sle.serial_and_batch_bundle, "total_amount"
+		)
+		self.assertEqual(sle.stock_value_difference, -4 * scr.items[0].rate)
+		self.assertEqual(bundle_value, sle.stock_value_difference)
+
 	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
