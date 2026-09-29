@@ -16,7 +16,7 @@ from frappe.utils.xlsxutils import (
 	read_xlsx_file_from_attached_file,
 )
 
-from erpnext.accounts.doctype.bank_account.bank_account import set_closing_balance_as_per_statement
+from erpnext.accounts.doctype.bank_account.bank_account import _set_closing_balance_as_per_statement
 
 
 class BankStatementImportLog(Document):
@@ -560,7 +560,7 @@ class BankStatementImportLog(Document):
 		)
 
 		if self.closing_balance is not None and self.end_date:
-			set_closing_balance_as_per_statement(
+			_set_closing_balance_as_per_statement(
 				self.bank_account, frappe.utils.getdate(self.end_date), self.closing_balance
 			)
 
