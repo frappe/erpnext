@@ -377,6 +377,8 @@ class StockReservationEntry(Document):
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
 		if self.voucher_type in ["Work Order", "Subcontracting Order"]:
+			if not self.from_voucher_type:
+				self.validate_with_allowed_qty(self.reserved_qty)
 			return
 
 		if self.reservation_based_on == "Serial and Batch":
