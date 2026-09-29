@@ -291,17 +291,21 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
-	def test_batch_return_value_matches_receipt(self):
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_batch_return_uses_accepted_receipt_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
 		fg_item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"is_sub_contracted_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "SCR-RET-BATCH-.####",
-			}
+			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
 		).name
 		make_bom(item=fg_item, raw_materials=[make_item(properties={"is_stock_item": 1}).name])
+		batch_no = (
+			frappe.get_doc({"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": fg_item})
+			.insert()
+			.name
+		)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 0)
 		sco = get_subcontracting_order(
 			service_items=[
 				{
@@ -320,6 +324,10 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
 		)
 		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].batch_no = batch_no
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = create_warehouse("_Test SCR Batch Return Rejected Warehouse")
 		scr.submit()
 
 		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-4)
