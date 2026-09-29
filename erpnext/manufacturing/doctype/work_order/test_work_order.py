@@ -1594,12 +1594,20 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer_entry.submit()
 		return work_order
 
+	def test_return_needs_completed_or_closed_work_order(self):
+		work_order = self._make_shared_alternative_transfer()
+
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.company = work_order.company
+		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_entry.save)
+
 	def test_return_attribution_when_item_doubles_as_alternative(self):
 		"""An item transferred for itself and as an alternative must return per requirement."""
 		work_order = self._make_shared_alternative_transfer()
 
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+		close_work_order(work_order.name, "Closed")
 
 		return_entry = make_stock_return_entry(work_order.name)
 		return_entry.company = work_order.company
