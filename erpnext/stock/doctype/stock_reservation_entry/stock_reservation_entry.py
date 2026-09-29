@@ -581,19 +581,7 @@ class StockReservationEntry(Document):
 			get_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),
 		)
 
-		from_voucher_detail_no = None
-		if self.from_voucher_type and self.from_voucher_type in ["Stock Entry", "Production Plan"]:
-			from_voucher_detail_no = self.from_voucher_detail_no
-
-		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
-			self.item_code,
-			self.voucher_type,
-			self.voucher_no,
-			self.voucher_detail_no,
-			ignore_sre=self.name,
-			warehouse=self.warehouse,
-			from_voucher_detail_no=from_voucher_detail_no,
-		)
+		total_reserved_qty = self.get_total_reserved_qty()
 
 		voucher_delivered_qty = 0
 		if self.voucher_type == "Sales Order":
@@ -650,6 +638,44 @@ class StockReservationEntry(Document):
 		if qty_to_be_reserved <= self.delivered_qty:
 			msg = _("Reserved Qty should be greater than Delivered Qty.")
 			frappe.throw(msg)
+
+	def get_total_reserved_qty(self) -> float:
+		"""Returns the qty other entries hold against the voucher row."""
+		if self.voucher_type in ["Work Order", "Subcontracting Order"] and not self.from_voucher_type:
+			return self.get_row_reserved_qty()
+
+		from_voucher_detail_no = None
+		if self.from_voucher_type in ["Stock Entry", "Production Plan"]:
+			from_voucher_detail_no = self.from_voucher_detail_no
+
+		return get_sre_reserved_qty_for_voucher_detail_no(
+			self.item_code,
+			self.voucher_type,
+			self.voucher_no,
+			self.voucher_detail_no,
+			ignore_sre=self.name,
+			warehouse=self.warehouse,
+			from_voucher_detail_no=from_voucher_detail_no,
+		)
+
+	def get_row_reserved_qty(self) -> float:
+		"""Returns the qty reserved for the row in any warehouse. Transferred stock stays counted in
+		the entry it moved to, and consumed stock stays counted."""
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		reserved_qty = (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty - sre.transferred_qty - sre.delivered_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.name != self.name)
+				& (sre.item_code == self.item_code)
+				& (sre.voucher_type == self.voucher_type)
+				& (sre.voucher_no == self.voucher_no)
+				& (sre.voucher_detail_no == self.voucher_detail_no)
+			)
+		).run()
+
+		return flt(reserved_qty[0][0])
 
 	def consume_serial_batch_for_material_transfer(self, row_wise_serial_batch):
 		for entry in self.sb_entries:
