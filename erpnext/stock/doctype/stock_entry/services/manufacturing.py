@@ -696,7 +696,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for batch_no, batch_qty in row.batches.items():
 			if qty <= 0:
 				return
-			qty = self._append_batch_split_item(item_args, row, batch_no, batch_qty, qty)
+			if batch_qty > 0:
+				qty = self._append_batch_split_item(item_args, row, batch_no, batch_qty, qty)
 
 	def _append_batch_split_item(self, item_args, row, batch_no, batch_qty, qty):
 		if batch_qty >= qty:
@@ -754,12 +755,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.warehouse = row.t_warehouse
 			key = (row.item_code, row.warehouse, row.original_item or None)
 			if key not in self.available_materials:
-				self.available_materials[key] = frappe._dict(row)
+				self.available_materials[key] = frappe._dict(row, serial_nos=[], batches=defaultdict(float))
 			else:
 				self.available_materials[key].qty += row.qty
 
 			if row.serial_and_batch_bundle:
-				self.available_materials[key].update(self.get_sabb_details(row.serial_and_batch_bundle))
+				material = self.available_materials[key]
+				details = self.get_sabb_details(row.serial_and_batch_bundle)
+				material.serial_nos.extend(details.serial_nos)
+				for batch_no, qty in details.batches.items():
+					material.batches[batch_no] += qty
 
 	def get_consumption_entries(self):
 		stock_entry = frappe.qb.DocType("Stock Entry")
@@ -818,7 +823,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self._deduct_consumed_serial_nos(buckets, _details.serial_nos)
 		elif _details.batches:
 			for batch_no, qty in _details.batches.items():
-				self._deduct_consumed_batch_qty(buckets, batch_no, -qty)
+				self._deduct_consumed_batch_qty(buckets, batch_no, qty)
 
 	def _deduct_consumed_serial_nos(self, buckets, serial_nos):
 		for serial_no in serial_nos:
@@ -957,7 +962,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
 			else:
-				batches[row.batch_no] += row.qty
+				batches[row.batch_no] += abs(row.qty)
 
 		return frappe._dict({"serial_nos": serial_nos, "batches": batches})
 
