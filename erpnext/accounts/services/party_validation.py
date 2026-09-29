@@ -5,6 +5,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.accounts.party import (
 	get_party_account_currency,
@@ -13,6 +14,7 @@ from erpnext.accounts.party import (
 )
 from erpnext.accounts.utils import get_account_currency
 from erpnext.exceptions import InvalidCurrency
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_item_restrictions
 
 
 class PartyValidator:
@@ -24,6 +26,7 @@ class PartyValidator:
 	def validate(self) -> None:
 		"""Run all party-related validations in order."""
 		self.validate_party()
+		self.validate_party_specific_items()
 		self.validate_party_accounts()
 		self.validate_currency()
 		self.validate_party_account_currency()
@@ -55,6 +58,81 @@ class PartyValidator:
 	def validate_party(self) -> None:
 		party_type, party = self.get_party()
 		validate_party_frozen_disabled(self.doc.company, party_type, party)
+
+	def validate_party_specific_items(self):
+		party_type, party = self.get_party()
+		if self.doc.doctype == "Quotation" and self.doc.quotation_to == "Customer":
+			party = self.doc.party_name
+		if not party:
+			return
+
+		items = self.get_items_for_party_validation(party_type, party)
+		item_codes = {item.item_code for item in items if item.get("item_code")}
+		if not item_codes:
+			return
+
+		# Read group and brand from the Item master, not editable transaction rows.
+		item_details = frappe.get_all(
+			"Item", filters={"name": ("in", list(item_codes))}, fields=["name", "item_group", "brand"]
+		)
+		item_values = {value for item in item_details for value in item.values() if value}
+		restrictions = get_party_item_restrictions(party_type, party, item_values=item_values)
+		if not restrictions:
+			return
+
+		restricted_items = {
+			item.name
+			for item in item_details
+			if any(item.get(field) in values for field, values in restrictions.items())
+		}
+
+		for item in items:
+			if item.get("item_code") in restricted_items:
+				frappe.throw(
+					_("Row {0}: Item {1} is not allowed for {2} {3}.").format(
+						item.idx, frappe.bold(item.item_code), _(party_type), frappe.bold(party)
+					),
+					title=_("Item Restricted for Party"),
+				)
+
+	def get_items_for_party_validation(self, party_type, party):
+		items = self.doc.get("items") or []
+		if not (
+			self.doc.meta.get_field("is_return")
+			and self.doc.get("is_return")
+			and self.doc.get("return_against")
+		):
+			return items
+
+		# Only rows reversing the original transaction inherit its item eligibility.
+		reference_field = (
+			"dn_detail" if self.doc.doctype == "Delivery Note" else frappe.scrub(self.doc.doctype) + "_item"
+		)
+		reference_names = [item.get(reference_field) for item in items if item.get(reference_field)]
+		if not reference_names:
+			return items
+
+		original = frappe.qb.DocType(self.doc.doctype)
+		original_item = frappe.qb.DocType(self.doc.doctype + " Item")
+		original_items = dict(
+			frappe.qb.from_(original_item)
+			.join(original)
+			.on(original.name == original_item.parent)
+			.select(original_item.name, original_item.item_code)
+			.where(
+				(original.name == self.doc.return_against)
+				& (original.docstatus == 1)
+				& (original.company == self.doc.company)
+				& (original[party_type.lower()] == party)
+				& (original_item.name.isin(reference_names))
+			)
+			.run()
+		)
+		return [
+			item
+			for item in items
+			if flt(item.qty) > 0 or original_items.get(item.get(reference_field)) != item.get("item_code")
+		]
 
 	def validate_party_accounts(self) -> None:
 		if self.doc.doctype not in ("Sales Invoice", "Purchase Invoice"):
