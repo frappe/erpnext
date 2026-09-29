@@ -232,7 +232,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_company_with_pos_company()
 		self.validate_full_payment()
 		self.update_packing_list()
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
@@ -257,7 +257,7 @@ class POSInvoice(SalesInvoice):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 			self.submit_serial_batch_bundle(table_name)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
@@ -298,7 +298,7 @@ class POSInvoice(SalesInvoice):
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
