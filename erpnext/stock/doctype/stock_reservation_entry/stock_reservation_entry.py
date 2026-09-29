@@ -1126,6 +1126,9 @@ class StockReservation:
 			self.warehouse_field = "source_warehouse"
 			if self.doc.skip_transfer and self.doc.from_wip_warehouse:
 				self.warehouse = self.doc.wip_warehouse
+		elif self.doc.doctype == "Subcontracting Order":
+			self.table_name = "supplied_items"
+			self.qty_field = "required_qty"
 		elif self.doc.doctype == "Production Plan" and self.kwargs:
 			for key, value in self.kwargs.items():
 				setattr(self, key, value)
@@ -1220,7 +1223,7 @@ class StockReservation:
 			sre.voucher_no = item.get("voucher_no") or self.doc.name
 			sre.voucher_detail_no = item.get(child_doctype) or item.name or item.get("voucher_detail_no")
 			sre.available_qty = self.available_qty_to_reserve
-			sre.voucher_qty = qty
+			sre.voucher_qty = self.get_voucher_qty(item, sre.voucher_detail_no) or qty
 			sre.reserved_qty = self.qty_to_be_reserved
 			sre.company = self.doc.company
 			sre.stock_uom = item_details.stock_uom
@@ -1242,6 +1245,14 @@ class StockReservation:
 			is_sre_created = True
 
 		return is_sre_created
+
+	def get_voucher_qty(self, item, voucher_detail_no):
+		"""Returns the voucher row's full requirement for a direct reservation."""
+		if item.get("from_voucher_type"):
+			return None
+
+		rows = self.doc.get(self.table_name, {"name": voucher_detail_no})
+		return rows[0].get(self.qty_field) if rows else None
 
 	def set_serial_batch(self, sre, serial_batch_bundles):
 		bundle_details = frappe.get_all(
