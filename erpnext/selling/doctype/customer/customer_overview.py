@@ -33,18 +33,9 @@ def get_customer_overview(customer: str, company: str, period: str = "Current fi
 		"errors": {},
 	}
 
-	ar = None
-	if accounts:
-		try:
-			ar = receivables(customer, company, as_of)
-		except Exception:
-			payload["errors"]["receivables"] = 1
-			frappe.log_error(title="Customer Overview: receivables")
-
 	for key, fn, args in (
-		("position", position, (customer, company, from_date, to_date, as_of, ar, accounts)),
+		("position", position, (customer, company, from_date, to_date, accounts)),
 		("trend", trend, (customer, company, from_date, to_date, as_of, accounts)),
-		("ageing", ageing, (ar,)),
 		("pipeline", pipeline, (customer, company, as_of, accounts)),
 	):
 		try:
@@ -55,6 +46,33 @@ def get_customer_overview(customer: str, company: str, period: str = "Current fi
 			frappe.log_error(title="Customer Overview: " + key)
 
 	return payload
+
+
+@frappe.whitelist()
+def get_customer_receivables(customer: str, company: str):
+	check_access(customer, company)
+	if not accounts_access():
+		return None
+
+	as_of = getdate(today())
+	ar = receivables(customer, company, as_of)
+	overdue_prev = receivables(customer, company, add_days(as_of, -30))["overdue"]
+	return {
+		"currency": frappe.get_cached_value("Company", company, "default_currency"),
+		"outstanding": {
+			"value": ar["outstanding"],
+			"unpaid_count": unpaid_invoice_count(customer, company),
+			"days_to_pay": collection_days(customer, company, as_of, ar["outstanding"]),
+		},
+		"overdue": {
+			"value": ar["overdue"],
+			"delta": pct_change(ar["overdue"], overdue_prev),
+			"delta_positive_is_good": False,
+		},
+		"advances": {"value": ar["advance"]} if ar["advance"] else None,
+		"credit": {"limit": flt(get_credit_limit(customer, company))},
+		"ageing": ageing(ar),
+	}
 
 
 def check_access(customer, company=None):
@@ -108,10 +126,9 @@ def net_sales(customer, company, from_date, to_date):
 	return flt(result[0][0])
 
 
-def position(customer, company, from_date, to_date, as_of, ar, accounts):
-	cards = {}
+def position(customer, company, from_date, to_date, accounts):
 	if not accounts:
-		return cards
+		return {}
 
 	current = net_sales(customer, company, from_date, to_date)
 	prev = net_sales(customer, company, add_to_date(from_date, years=-1), add_to_date(to_date, years=-1))
@@ -125,21 +142,18 @@ def position(customer, company, from_date, to_date, as_of, ar, accounts):
 			"posting_date": ["between", [from_date, to_date]],
 		},
 	)
-	cards["net_sales"] = {
-		"value": current,
-		"count": invoice_count,
-		"delta": pct_change(current, prev),
-		"delta_positive_is_good": True,
+	return {
+		"net_sales": {
+			"value": current,
+			"count": invoice_count,
+			"delta": pct_change(current, prev),
+			"delta_positive_is_good": True,
+		}
 	}
 
-	if not ar:
-		return cards
 
-	outstanding = ar["outstanding"]
-	overdue = ar["overdue"]
-	overdue_prev = receivables(customer, company, add_days(as_of, -30))["overdue"]
-
-	unpaid_count = frappe.db.count(
+def unpaid_invoice_count(customer, company):
+	return frappe.db.count(
 		"Sales Invoice",
 		{
 			"docstatus": 1,
@@ -149,26 +163,6 @@ def position(customer, company, from_date, to_date, as_of, ar, accounts):
 			"outstanding_amount": (">", 0),
 		},
 	)
-
-	cards["outstanding"] = {
-		"value": outstanding,
-		"unpaid_count": unpaid_count,
-		"days_to_pay": collection_days(customer, company, as_of, outstanding),
-	}
-	cards["overdue"] = {
-		"value": overdue,
-		"delta": pct_change(overdue, overdue_prev),
-		"delta_positive_is_good": False,
-	}
-
-	advance = flt(ar.get("advance"))
-	if advance:
-		cards["advances"] = {"value": advance}
-
-	credit_limit = flt(get_credit_limit(customer, company))
-	cards["credit"] = {"limit": credit_limit}
-
-	return cards
 
 
 def collection_days(customer, company, as_of, outstanding):
@@ -213,8 +207,6 @@ def receivables(customer, company, report_date):
 
 
 def ageing(ar):
-	if not ar:
-		return None
 	buckets = ar["buckets"]
 	total = flt(sum(b["value"] for b in buckets))
 	overdue = flt(sum(b["value"] for b in buckets if b["overdue"]))
@@ -232,7 +224,7 @@ def trend(customer, company, from_date, to_date, as_of, accounts):
 	si = DocType("Sales Invoice")
 	rows = (
 		frappe.qb.from_(si)
-		.select(si.posting_date, si.base_net_total)
+		.select(si.posting_date, Sum(si.base_net_total).as_("total"))
 		.where(
 			(si.docstatus == 1)
 			& (si.customer == customer)
@@ -240,11 +232,12 @@ def trend(customer, company, from_date, to_date, as_of, accounts):
 			& (si.posting_date >= from_date)
 			& (si.posting_date <= to_date)
 		)
+		.groupby(si.posting_date)
 	).run(as_dict=True)
 	by_month = {}
 	for r in rows:
 		month = getdate(r.posting_date).replace(day=1)
-		by_month[month] = by_month.get(month, 0.0) + flt(r.base_net_total)
+		by_month[month] = by_month.get(month, 0.0) + flt(r.total)
 
 	points, closed = [], []
 	cursor = getdate(from_date).replace(day=1)
@@ -456,16 +449,15 @@ def get_customer_companies(customer: str):
 	check_access(customer)
 
 	companies = set()
-	for doctype, field in (
-		("Sales Invoice", "customer"),
-		("Sales Order", "customer"),
-		("Quotation", "party_name"),
+	for doctype, filters in (
+		("Sales Invoice", {"customer": customer}),
+		("Sales Order", {"customer": customer}),
+		("Quotation", {"quotation_to": "Customer", "party_name": customer}),
+		("Payment Entry", {"party_type": "Customer", "party": customer}),
 	):
 		if frappe.has_permission(doctype, "read"):
 			companies.update(
-				frappe.get_list(
-					doctype, filters={field: customer, "docstatus": 1}, distinct=True, pluck="company"
-				)
+				frappe.get_list(doctype, filters={**filters, "docstatus": 1}, distinct=True, pluck="company")
 			)
 	companies.discard(None)
 	return sorted(companies)

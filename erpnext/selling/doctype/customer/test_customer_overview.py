@@ -18,8 +18,13 @@ class TestCustomerOverview(ERPNextTestSuite):
 		self.assertEqual(data["company"], COMPANY)
 		self.assertEqual(data["period"], "Current fiscal year")
 		self.assertIn("net_sales", data["position"])
-		self.assertIn("credit", data["position"])
 		self.assertFalse(data["errors"])
+
+	def test_receivables_ageing_adds_up_to_outstanding(self):
+		data = customer_overview.get_customer_receivables(CUSTOMER, COMPANY)
+		self.assertIn("limit", data["credit"])
+		self.assertEqual(data["ageing"]["total"], data["outstanding"]["value"])
+		self.assertEqual(data["ageing"]["overdue"], data["overdue"]["value"])
 
 	def test_unknown_period_falls_back(self):
 		data = customer_overview.get_customer_overview(CUSTOMER, COMPANY, period="Forever")
@@ -29,10 +34,12 @@ class TestCustomerOverview(ERPNextTestSuite):
 		with patch.object(customer_overview, "accounts_access", return_value=False):
 			data = customer_overview.get_customer_overview(CUSTOMER, COMPANY)
 
+			receivables = customer_overview.get_customer_receivables(CUSTOMER, COMPANY)
+
 		self.assertEqual(data["position"], {})
 		self.assertIsNone(data["trend"])
-		self.assertIsNone(data["ageing"])
 		self.assertNotIn("invoices", data["pipeline"])
+		self.assertIsNone(receivables)
 
 	def test_company_outside_user_permissions_is_refused(self):
 		with patch.object(
@@ -43,6 +50,9 @@ class TestCustomerOverview(ERPNextTestSuite):
 			)
 			self.assertRaises(
 				frappe.PermissionError, customer_overview.get_customer_transactions, CUSTOMER, COMPANY
+			)
+			self.assertRaises(
+				frappe.PermissionError, customer_overview.get_customer_receivables, CUSTOMER, COMPANY
 			)
 
 	def test_transactions_are_capped(self):
@@ -55,5 +65,8 @@ class TestCustomerOverview(ERPNextTestSuite):
 		with patch.object(frappe, "has_permission", return_value=False):
 			self.assertRaises(
 				frappe.PermissionError, customer_overview.get_customer_overview, CUSTOMER, COMPANY
+			)
+			self.assertRaises(
+				frappe.PermissionError, customer_overview.get_customer_receivables, CUSTOMER, COMPANY
 			)
 			self.assertRaises(frappe.PermissionError, customer_overview.get_customer_companies, CUSTOMER)
