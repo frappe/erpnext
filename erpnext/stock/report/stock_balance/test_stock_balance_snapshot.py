@@ -192,6 +192,23 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 		with ledger_snapshot(ledger, synced_at):
 			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
 
+	def test_opening_voucher_cancelled_after_the_sync_stays_opening(self):
+		reconciliation = create_stock_reconciliation(
+			item_code=self.item,
+			warehouse="Stores - _TC",
+			qty=10,
+			rate=100,
+			purpose="Opening Stock",
+			expense_account=frappe.db.get_value(
+				"Account", {"account_type": "Temporary", "company": self.filters.company}
+			),
+			posting_date=add_days(today(), -2),
+		)
+		ledger, expected = capture_ledger(self.filters), stock_balance.execute(deepcopy(self.filters))
+		reconciliation.cancel()
+		with ledger_snapshot(ledger):
+			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
+
 	def test_inventory_dimension_filter_and_grouping(self):
 		for entry in (
 			self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10)),
