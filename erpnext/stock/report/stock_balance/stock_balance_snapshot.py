@@ -99,9 +99,13 @@ SERIAL_RECONCILIATIONS_SQL = """
 
 
 def execute(filters):
-	"""Ageing columns replay the ledger with live serial and batch lookups, so they keep the live report."""
+	"""Ageing columns replay the ledger with live serial and batch lookups, which a snapshot cannot match."""
 	if filters.get("show_stock_ageing_data"):
-		return StockBalanceReport(filters).run()
+		frappe.throw(
+			_(
+				"Stock ageing data is not available from a snapshot. Uncheck {0}, or turn off {1} for this report."
+			).format(frappe.bold(_("Show Stock Ageing Data")), frappe.bold(_("Snapshot Report")))
+		)
 
 	conn = get_latest_sync("Stock Ledger Entry")
 	if not conn:
