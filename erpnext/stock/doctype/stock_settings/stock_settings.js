@@ -16,13 +16,9 @@ frappe.ui.form.on("Stock Settings", {
 
 		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 		const item_display = frm.doc.item_naming_by === "Naming Series";
-		const serial_and_batch_naming_display =
-			frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
 
 		frm.set_df_property("naming_series_details", "hidden", !item_display);
 		frm.set_df_property("configure", "hidden", !item_display);
-		frm.set_df_property("naming_series_preview", "hidden", !serial_and_batch_naming_display);
-		frm.set_df_property("configure_series", "hidden", !serial_and_batch_naming_display);
 
 		if (item_display) {
 			frm.naming_controller.load_master_series("Item", "naming_series_details");
@@ -30,11 +26,7 @@ frappe.ui.form.on("Stock Settings", {
 			frm.doc.naming_series_details = "";
 		}
 
-		if (serial_and_batch_naming_display) {
-			frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
-		} else {
-			frm.doc.naming_series_preview = "";
-		}
+		toggle_serial_and_batch_naming_series(frm);
 
 		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
 	},
@@ -55,15 +47,11 @@ frappe.ui.form.on("Stock Settings", {
 	},
 
 	set_serial_and_batch_bundle_naming_based_on_naming_series(frm) {
-		const display = frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
-		frm.set_df_property("naming_series_preview", "hidden", !display);
-		frm.set_df_property("configure_series", "hidden", !display);
-		if (display) {
-			frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
-		} else {
-			frm.doc.naming_series_preview = "";
-			frm.refresh_field("naming_series_preview");
-		}
+		toggle_serial_and_batch_naming_series(frm);
+	},
+
+	enable_serial_and_batch_no_for_item(frm) {
+		toggle_serial_and_batch_naming_series(frm);
 	},
 
 	configure(frm) {
@@ -74,9 +62,13 @@ frappe.ui.form.on("Stock Settings", {
 		configure_naming_series(frm, "Serial and Batch Bundle", "naming_series_preview");
 	},
 
-	enable_serial_and_batch_no_for_item(frm) {
-		if (frm.doc.enable_serial_and_batch_no_for_item) {
-			frappe.msgprint(__("After save, please refresh the page to apply the changes."));
+	after_save(frm) {
+		// user_defaults are loaded at boot, so reload to apply the changed setting across forms
+		if (
+			cint(frappe.user_defaults?.enable_serial_and_batch_no_for_item) !==
+			cint(frm.doc.enable_serial_and_batch_no_for_item)
+		) {
+			window.location.reload();
 		}
 	},
 
@@ -143,6 +135,22 @@ frappe.ui.form.on("Stock Settings", {
 		}
 	},
 });
+
+function toggle_serial_and_batch_naming_series(frm) {
+	const display =
+		frm.doc.enable_serial_and_batch_no_for_item &&
+		frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
+
+	frm.set_df_property("naming_series_preview", "hidden", !display);
+	frm.set_df_property("configure_series", "hidden", !display);
+
+	if (display) {
+		frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
+	} else {
+		frm.doc.naming_series_preview = "";
+		frm.refresh_field("naming_series_preview");
+	}
+}
 
 function get_transactions(frm) {
 	const transactions = [
