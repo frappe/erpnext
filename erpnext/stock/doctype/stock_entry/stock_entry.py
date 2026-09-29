@@ -4857,7 +4857,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 	available_materials = {}
 	for row in data:
 		key = (row.item_code, row.warehouse)
-		if row.purpose != "Material Transfer for Manufacture":
+		if row.purpose != "Material Transfer for Manufacture" or row.is_return:
 			key = (row.item_code, row.s_warehouse)
 
 		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
@@ -4873,7 +4873,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 
 		item_data = available_materials[key]
 
-		if row.purpose == "Material Transfer for Manufacture" or (
+		if (row.purpose == "Material Transfer for Manufacture" and not row.is_return) or (
 			stock_entry_doc and stock_entry_doc.purpose == "Disassemble" and row.purpose == "Manufacture"
 		):
 			item_data.qty += row.qty
@@ -4941,6 +4941,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 			stock_entry_detail.batch_no,
 			stock_entry_detail.serial_no,
 			stock_entry.purpose,
+			stock_entry.is_return,
 			stock_entry.name,
 		)
 		.where(
@@ -4985,7 +4986,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=voucher_nos)
 		for row in data:
 			key = (row.item_code, row.warehouse, row.name)
-			if row.purpose != "Material Transfer for Manufacture":
+			if row.purpose != "Material Transfer for Manufacture" or row.is_return:
 				key = (row.item_code, row.s_warehouse, row.name)
 
 			if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
