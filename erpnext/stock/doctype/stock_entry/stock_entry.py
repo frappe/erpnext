@@ -4,6 +4,7 @@
 
 import json
 from collections import defaultdict
+from functools import cached_property
 
 import frappe
 from frappe import _, bold
@@ -3810,8 +3811,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if row.batch_details:
 				row.batches_to_be_consume = defaultdict(float)
-				self.use_unreserved_batches(row, qty)
-				batches = row.batch_details
+				batches = self.get_batches_to_consume(row, qty)
 				self.update_batches_to_be_consume(batches, row, qty)
 
 			elif row.serial_nos:
@@ -3821,10 +3821,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if flt(qty, precision) != 0.0:
 				self.update_item_in_stock_entry_detail(row, item, qty)
 
-	def use_unreserved_batches(self, row, qty):
-		"""Switch to batch qty not reserved by other vouchers when it covers the qty."""
+	def get_batches_to_consume(self, row, qty):
+		"""Batch qty not reserved by other vouchers when it covers the qty, else the transferred batches."""
 		if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
-			return
+			return row.batch_details
 
 		unreserved_qty = self.get_unreserved_batch_qty(row)
 		batches = {
@@ -3834,16 +3834,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		}
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		if flt(sum(batches.values()), precision) >= flt(qty, precision):
-			row.batch_details = batches
+			return batches
+
+		return row.batch_details
 
 	def get_unreserved_batch_qty(self, row):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 
-		work_order_reservations = frappe.get_all(
-			"Stock Reservation Entry",
-			filters={"voucher_type": "Work Order", "voucher_no": self.work_order, "docstatus": 1},
-			pluck="name",
-		)
 		batches = get_auto_batch_nos(
 			frappe._dict(
 				item_code=row.item_details.item_code,
@@ -3851,10 +3848,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 				batch_no=list(row.batch_details),
 				posting_date=self.posting_date,
 				posting_time=self.posting_time,
-				ignore_voucher_nos=work_order_reservations,
+				ignore_voucher_nos=self.work_order_reservations,
 			)
 		)
 		return {batch.batch_no: batch.qty for batch in batches}
+
+	@cached_property
+	def work_order_reservations(self):
+		return frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": "Work Order", "voucher_no": self.work_order, "docstatus": 1},
+			pluck="name",
+		)
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
