@@ -348,11 +348,11 @@
   },
   {
    "default": "FIFO",
-   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "fieldname": "pick_serial_and_batch_based_on",
    "fieldtype": "Select",
    "label": "Pick Serial / Batch Based On",
-   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "mandatory_depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "options": "FIFO\nLIFO\nExpiry"
   },
   {

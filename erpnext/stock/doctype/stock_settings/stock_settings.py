@@ -161,6 +161,16 @@ class StockSettings(Document):
 					)
 				)
 
+			# settings hidden by this flag still apply to items that track serial / batch
+			if frappe.db.exists("Item", {"has_serial_no": 1}) or frappe.db.exists(
+				"Item", {"has_batch_no": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot disable Serial and Batch No for Item, as there are items with serial / batch enabled."
+					)
+				)
+
 	def cant_change_valuation_method(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
