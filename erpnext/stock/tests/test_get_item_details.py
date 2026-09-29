@@ -423,9 +423,42 @@ class TestGetItemDetail(FrappeTestCase):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
+<<<<<<< HEAD
 	def test_rate_lock_keeps_each_rows_rate_for_batch_items(self):
 		"""Batch rows mapped PR->PI must each keep their own rate, not collapse onto the first."""
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+=======
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1, "allow_multiple_items": 1})
+	def test_rate_lock_checks_source_permission_once_per_document(self):
+		from unittest.mock import patch
+
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"item_code": "_Test Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 1,
+					"rate": 90,
+					"schedule_date": add_days(nowdate(), 1),
+				}
+				for _ in range(2)
+			]
+		)
+
+		with patch("frappe.has_permission", wraps=frappe.has_permission) as has_permission:
+			for row in po.items:
+				ctx = frappe._dict(doctype="Purchase Receipt", purchase_order_item=row.name)
+				self.assertIsNotNone(get_rate_locked_source_row(ctx, {"doctype": "Purchase Receipt"}))
+
+		has_permission.assert_called_once()
+
+	def test_rate_lock_matches_unsaved_mapped_row(self):
+>>>>>>> 77d66c3 (perf(stock): cache source document permission checks in rate-locked source lookups (#59547))
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice

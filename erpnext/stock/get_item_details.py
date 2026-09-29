@@ -183,8 +183,23 @@ def remove_standard_fields(details):
 	return details
 
 
+<<<<<<< HEAD
 def get_rate_locked_source_row(args, doc):
 	"""Reads the source row from the DB, not the mutable target row, so an unsaved edit can't override the locked rate."""
+=======
+@frappe.request_cache
+def has_source_doc_permission(doctype: str, docname: str, user: str) -> bool:
+	return frappe.has_permission(doctype, doc=docname, user=user)
+
+
+def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
+	"""Return the persisted source-document row a mapped target row is locked to.
+
+	The rate is read from the linked source row in the database (not the mutable
+	target row), so a re-fetch always restores the source pricing the maintain-same-
+	rate validator checks against, even after an unsaved edit on the target row.
+	"""
+>>>>>>> 77d66c3 (perf(stock): cache source document permission checks in rate-locked source lookups (#59547))
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
@@ -206,7 +221,7 @@ def get_rate_locked_source_row(args, doc):
 			source = frappe.db.get_value(
 				source_doctype, source_name, [*LOCKED_RATE_FIELDS, "parent", "parenttype"], as_dict=True
 			)
-			if source and frappe.has_permission(source.parenttype, doc=source.parent):
+			if source and has_source_doc_permission(source.parenttype, source.parent, frappe.session.user):
 				return source
 			return None
 	return None
