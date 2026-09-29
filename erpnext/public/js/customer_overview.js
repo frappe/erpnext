@@ -16,7 +16,11 @@ const STATUS_THEME = {
 	Return: "gray",
 	Closed: "gray",
 };
-const CHART_BLUE = "#095895";
+const CHART_BLUE = "var(--chart-categorical-1)";
+const CHART_LIGHT_BLUE = "var(--chart-categorical-2)";
+const CHART_GREEN = "var(--chart-categorical-3)";
+const CHART_LIGHT_GREEN = "var(--chart-categorical-4)";
+const TREND_BLUE = "#2283c3";
 const RECENT_LIMIT = 10;
 
 frappe.ui.form.on("Customer", {
@@ -36,7 +40,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 			period: PERIODS.includes(this.pref("period")) ? this.pref("period") : PERIODS[0],
 			doc_type: "All",
 		};
-		this.seq = 0;
+		this.accounts = frappe.model.can_read("Sales Invoice") && frappe.model.can_read("GL Entry");
+		this.seq = { sales: 0, ar: 0 };
 	}
 
 	pref(key) {
@@ -63,6 +68,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	build() {
+		this.built = true;
 		this.wrapper.empty();
 		this.$root = $('<div class="customer-overview">').appendTo(this.wrapper);
 
@@ -81,43 +87,49 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.period_field = this.make_select($controls, __("Period"), PERIODS, (value) => {
 			this.state.period = value;
 			this.set_pref("period", value);
-			this.load();
+			this.load({ receivables: false });
 		});
 		this.period_field.set_value(this.state.period);
 
-		this.$position = $('<div class="co-section co-kpis">').appendTo(this.$root);
-		this.$trend = $('<div class="co-section">').appendTo(this.$root);
-		this.$charts = $('<div class="co-section co-two-col">').appendTo(this.$root);
-		this.$pipeline = $('<div class="co-section">').appendTo(this.$root);
-		this.$recent = $('<div class="co-section">').appendTo(this.$root);
+		this.$body = $('<div class="co-body">').appendTo(this.$root);
+		this.$position = $('<div class="co-section co-kpis">').appendTo(this.$body);
+		this.$trend = $('<div class="co-section">').appendTo(this.$body);
+		this.$charts = $('<div class="co-section co-two-col">').appendTo(this.$body);
+		this.$pipeline = $('<div class="co-section">').appendTo(this.$body);
+		this.$recent = $('<div class="co-section">').appendTo(this.$body);
+		this.$empty = $('<div class="co-section">').hide().appendTo(this.$root);
 
 		this.build_recent();
-
 		frappe
 			.require("embedded_list.bundle.js")
 			.then(() => this.build_list())
 			.catch((e) => console.error("Customer Overview: failed to load embedded_list.bundle.js", e));
 
+		if (this.state.company) this.load();
+		this.load_companies();
+	}
+
+	load_companies() {
 		frappe
 			.xcall(OVERVIEW_METHOD + ".get_customer_companies", { customer: this.frm.doc.name })
 			.then((companies) => {
-				const list = (companies && companies.length ? companies : [this.state.company]).filter(
-					Boolean
-				);
-				if (!list.length) return;
-				if (!list.includes(this.state.company)) this.state.company = list[0];
-				this.company_field.df.options = list.join("\n");
+				if (!companies.length) {
+					this.render_no_activity();
+					return;
+				}
+				this.company_field.df.options = companies.join("\n");
 				this.company_field.refresh();
+				const known = companies.includes(this.state.company);
+				if (!known) this.state.company = companies[0];
 				this.company_field.set_value(this.state.company);
-				this.built = true;
 				this.companies_ready = true;
-				this.load();
+				if (!known) this.load();
 				this.refresh_list();
 			});
 	}
 
 	refresh_list() {
-		if (this.list && this.state.company) this.list.refresh();
+		if (this.list && this.companies_ready) this.list.refresh();
 	}
 
 	make_select($parent, label, options, onchange) {
@@ -134,22 +146,65 @@ erpnext.CustomerOverview = class CustomerOverview {
 		return control;
 	}
 
-	load() {
-		const token = ++this.seq;
+	load({ receivables = true } = {}) {
+		this.fetch("sales", "get_customer_overview", { period: this.state.period });
+		if (receivables && this.accounts) this.fetch("ar", "get_customer_receivables");
+	}
+
+	fetch(key, method, args = {}) {
+		const token = ++this.seq[key];
+		this[key] = { loading: true };
+		this.render(key);
 		frappe
-			.xcall(OVERVIEW_METHOD + ".get_customer_overview", {
+			.xcall(OVERVIEW_METHOD + "." + method, {
 				customer: this.frm.doc.name,
 				company: this.state.company,
-				period: this.state.period,
+				...args,
 			})
-			.then((data) => {
-				if (token !== this.seq) return;
-				this.data = data;
-				this.currency = data.currency;
-				this.render_position();
-				this.render_charts();
-				this.render_pipeline();
+			.then((data) => (data ? { data } : { none: true }))
+			.catch(() => ({ error: true }))
+			.then((result) => {
+				if (token !== this.seq[key]) return;
+				this[key] = result;
+				if (result.data) this.currency = result.data.currency;
+				this.render(key);
 			});
+	}
+
+	render(key) {
+		this.render_position();
+		if (key === "sales") {
+			this.render_context();
+			this.render_trend();
+			this.render_pipeline();
+		} else {
+			this.render_receivables();
+		}
+	}
+
+	render_no_activity() {
+		this.$body.hide();
+		const actions = ["Quotation", "Sales Order"]
+			.filter((doctype) => frappe.model.can_create(doctype))
+			.map((doctype) => ({
+				label: __("New {0}", [__(doctype)]),
+				icon: "plus",
+				variant: doctype === "Quotation" ? "solid" : "subtle",
+				onclick: () => this.frm.make_methods[doctype](),
+			}));
+		this.$empty
+			.empty()
+			.append(
+				frappe.ui.empty_state({
+					icon: "chart-no-axes-column",
+					title: __("No activity yet"),
+					description: __(
+						"Quotations, orders, invoices and payments for this customer will show up here."
+					),
+					actions,
+				})
+			)
+			.show();
 	}
 
 	money(value) {
@@ -165,103 +220,228 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const short = frappe.utils.shorten_number(Math.abs(n), country, 4, 1);
 		return (n < 0 ? "-" : "") + window.get_currency_symbol(this.currency) + (short || "0");
 	}
-	date_range() {
-		const from = moment(this.data.period_range.from_date);
-		const to = moment(this.data.period_range.to_date);
+
+	render_context() {
+		const range = this.sales.data && this.sales.data.period_range;
+		if (!range) return;
+		const from = moment(range.from_date);
+		const to = moment(range.to_date);
 		const from_fmt = from.year() === to.year() ? "D MMM" : "D MMM YYYY";
-		return from.format(from_fmt) + " – " + to.format("D MMM YYYY");
+		this.$context.text(from.format(from_fmt) + " – " + to.format("D MMM YYYY"));
 	}
 
 	render_position() {
-		const p = this.data.position || {};
-		this.$context.text(this.date_range());
-		this.$position.empty();
-		const items = [];
-		if (p.net_sales)
-			items.push({
-				label: __("Net Sales"),
-				value: this.money0(p.net_sales.value),
-				delta: this.delta_opts(p.net_sales, __("since last year")),
-				caption: (p.net_sales.count || 0) + " " + __("invoices"),
-				onclick: () => this.open_analytics(),
-			});
-		if (p.outstanding)
-			items.push({
-				label: __("Receivable"),
-				value: this.money0(p.outstanding.value),
-				caption: this.outstanding_sub(p.outstanding),
+		if (!this.accounts) {
+			this.$position.hide();
+			return;
+		}
+		const items = [this.net_sales_card(), ...this.receivable_cards()].filter(Boolean);
+		this.$position.empty().append(frappe.ui.stat_cards({ items }));
+	}
+
+	net_sales_card() {
+		const card = { label: __("Net Sales") };
+		const sales = this.sales || { loading: true };
+		if (sales.loading) return { ...card, loading: true };
+		const p = sales.data && sales.data.position && sales.data.position.net_sales;
+		if (!p) return { ...card, value: null };
+		return {
+			...card,
+			value: this.money0(p.value),
+			delta: this.delta_opts(p, __("since last year")),
+			caption: __("{0} invoices", [p.count || 0]),
+			onclick: () => this.open_analytics(),
+		};
+	}
+
+	receivable_cards() {
+		const ar = this.ar || { loading: true };
+		const labels = [__("Receivable"), __("Overdue")];
+		if (ar.loading) return labels.map((label) => ({ label, loading: true }));
+		if (!ar.data) return labels.map((label) => ({ label, value: null }));
+		const { outstanding, overdue, advances } = ar.data;
+		return [
+			{
+				label: labels[0],
+				value: this.money0(outstanding.value),
+				caption: this.outstanding_sub(outstanding),
 				onclick: () => this.open_ar(),
-			});
-		if (p.overdue)
-			items.push({
-				label: __("Overdue"),
-				value: this.money0(p.overdue.value),
-				delta: this.delta_opts(p.overdue, __("since last month")),
+			},
+			{
+				label: labels[1],
+				value: this.money0(overdue.value),
+				delta: this.delta_opts(overdue, __("since last month")),
 				onclick: () => this.open_ar(),
-			});
-		if (p.advances)
-			items.push({
+			},
+			advances && {
 				label: __("Advances"),
-				value: this.money0(p.advances.value),
+				value: this.money0(advances.value),
 				caption: __("Not yet applied to invoices"),
 				onclick: () => this.open_ar(),
-			});
-		frappe.ui.stat_cards({ items }).appendTo(this.$position);
+			},
+		];
+	}
+
+	outstanding_sub(o) {
+		const parts = [];
+		if (o.unpaid_count) parts.push(__("{0} unpaid", [o.unpaid_count]));
+		if (o.days_to_pay) parts.push(__("{0} days to pay", [o.days_to_pay]));
+		return parts.join(" · ");
+	}
+
+	delta_opts(card, suffix) {
+		if (card.delta === null || card.delta === undefined) return null;
+		return {
+			value: card.delta,
+			positive_is_good: card.delta_positive_is_good,
+			suffix,
+		};
+	}
+
+	render_trend() {
+		this.$trend.empty().toggle(!!this.accounts);
+		if (!this.accounts) return;
+		const $panel = this.panel(this.$trend, {
+			title: __("Monthly Sales Trend"),
+			subtitle: __("Monthly, net of returns"),
+			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
+		});
+		const t = this.sales.data && this.sales.data.trend;
+		if (this.show_state($panel, this.sales, 220, __("Could not load sales"))) return;
+		if (!t || !t.points.some((p) => flt(p.value))) {
+			this.empty_note($panel, __("No sales in this period"), 220);
+			return;
+		}
+
+		new frappe.Chart($('<div class="co-chart">').appendTo($panel)[0], {
+			type: "line",
+			height: 220,
+			colors: [TREND_BLUE],
+			data: {
+				labels: t.points.map((p) => p.label),
+				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
+			},
+			lineOptions: { regionFill: 1, hideDots: 1 },
+			axisOptions: { xIsSeries: 1, shortenYAxisNumbers: 1 },
+			tooltipOptions: { formatTooltipY: (v) => this.money(v) },
+		});
+
+		const notes = [];
+		if (t.average) notes.push(__("Avg {0}", [this.money0(t.average)]));
+		if (t.has_mtd) notes.push(__("{0} is month to date", [t.points[t.points.length - 1].label]));
+		if (notes.length) $('<div class="co-note text-muted">').text(notes.join(" · ")).appendTo($panel);
+	}
+
+	render_receivables() {
+		this.$charts.empty().toggle(!!this.accounts);
+		if (!this.accounts) return;
+		this.render_ageing();
+		this.render_credit();
+	}
+
+	render_ageing() {
+		const $panel = this.panel(this.$charts, {
+			title: __("Receivables Ageing"),
+			subtitle: __("Outstanding by due date, net of credit notes"),
+			right: this.report_link(__("Accounts Receivable"), () => this.open_ar()),
+		});
+		if (this.show_state($panel, this.ar, 180, __("Could not load receivables"))) return;
+		const a = this.ar.data.ageing;
+		if (flt(a.total) <= 0) {
+			this.empty_note($panel, __("Nothing outstanding"), 180);
+			return;
+		}
+
+		frappe.ui
+			.bar_list({
+				items: a.buckets.map((b) => ({
+					label: b.label,
+					value: flt(b.value),
+					formatted: this.short_money(b.value),
+				})),
+				format: (v) => this.short_money(v),
+				color: CHART_BLUE,
+				on_click: () => this.open_ar(),
+				values_on_hover: true,
+			})
+			.appendTo($('<div class="co-age-chart">').appendTo($panel));
+
+		const overdue = $('<span class="text-danger">').text(this.money0(a.overdue)).prop("outerHTML");
+		$('<div class="co-note text-muted">')
+			.html(__("Overdue {0} · {1}% of outstanding", [overdue, flt(a.overdue_pct, 1)]))
+			.appendTo($panel);
 	}
 
 	render_credit() {
-		const p = this.data.position;
-		const limit = flt(p.credit.limit);
-		const receivable = Math.max(flt((p.outstanding || {}).value), 0);
-		const overdue = Math.min(Math.max(flt((p.overdue || {}).value), 0), receivable);
+		const data = this.ar.data;
+		const limit = flt(data && data.credit.limit);
+		const receivable = Math.max(flt(data && data.outstanding.value), 0);
 		const $panel = this.panel(this.$charts, {
 			title: __("Credit Limit"),
-			subtitle: limit
-				? __("{0} of {1} used", [this.short_money(receivable), this.short_money(limit)])
-				: __("No credit limit set for {0}", [this.state.company]),
-			right: frappe.ui.button({
-				icon: "pencil",
-				variant: "ghost",
-				tooltip: limit ? __("Edit credit limit") : __("Set credit limit"),
-				onclick: () => this.edit_credit_limit(),
-			}),
+			subtitle: data && this.credit_subtitle(receivable, limit),
+			right:
+				data &&
+				frappe.ui.button({
+					icon: "pencil",
+					variant: "ghost",
+					tooltip: limit ? __("Edit credit limit") : __("Set credit limit"),
+					onclick: () => this.edit_credit_limit(),
+				}),
 		});
+		if (this.show_state($panel, this.ar, 280, __("Could not load receivables"))) return;
 		if (!limit) return;
-		const over = receivable > limit;
+
+		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
 		frappe.ui
 			.donut({
 				segments: [
-					{ label: __("Overdue"), value: overdue, color: "rgb(40, 158, 96)" },
-					{ label: __("Not due"), value: receivable - overdue, color: CHART_BLUE },
-					{ label: __("Available"), value: limit - receivable, color: "var(--surface-gray-4)" },
+					{ label: __("Overdue"), value: overdue, color: CHART_BLUE },
+					{ label: __("Not due"), value: receivable - overdue, color: CHART_LIGHT_BLUE },
+					{ label: __("Available"), value: limit - receivable, color: CHART_GREEN },
 				],
 				center: {
 					value: flt((receivable / limit) * 100, 1) + "%",
-					label: over ? __("over limit") : __("used"),
+					label: receivable > limit ? __("over limit") : __("used"),
 				},
 				format: (v) => this.short_money(v),
 			})
 			.appendTo($('<div class="co-chart">').appendTo($panel));
 	}
 
-	outstanding_sub(o) {
-		const parts = [];
-		if (o.unpaid_count) parts.push(o.unpaid_count + " " + __("unpaid"));
-		if (o.days_to_pay) parts.push(o.days_to_pay + " " + __("days to pay"));
-		return parts.join(" · ");
+	credit_subtitle(receivable, limit) {
+		if (!limit) return __("No credit limit set for {0}", [this.state.company]);
+		return __("{0} of {1} used", [this.short_money(receivable), this.short_money(limit)]);
+	}
+
+	show_state($panel, source, height, error_text) {
+		if (!source || source.loading) {
+			$panel.attr("aria-busy", "true");
+			$('<div class="co-placeholder">')
+				.css("height", height)
+				.append(frappe.ui.skeleton({ width: "100%", height: "100%" }))
+				.appendTo($panel);
+			return true;
+		}
+		if (source.error) {
+			this.empty_note($panel, error_text, height).addClass("text-danger");
+			return true;
+		}
+		return false;
+	}
+
+	empty_note($panel, text, height) {
+		return $('<div class="co-empty text-muted">').css("min-height", height).text(text).appendTo($panel);
 	}
 
 	edit_credit_limit() {
-		if (this.frm.is_new()) return;
 		const company = this.state.company;
-		const credit = (this.data.position && this.data.position.credit) || {};
 		frappe.prompt(
 			[
 				{
 					fieldname: "credit_limit",
 					fieldtype: "Currency",
 					label: __("Credit Limit"),
-					default: flt(credit.limit),
+					default: flt(this.ar.data.credit.limit),
 					description: __("Applies to {0}", [company]),
 				},
 			],
@@ -279,159 +459,91 @@ erpnext.CustomerOverview = class CustomerOverview {
 		frm.dirty();
 		frm.save().then(() => {
 			frappe.show_alert({ message: __("Credit limit updated"), indicator: "green" });
-			this.load();
 		});
-	}
-
-	delta_opts(card, suffix) {
-		if (card.delta === null || card.delta === undefined) return null;
-		return {
-			value: card.delta,
-			positive_is_good: card.delta_positive_is_good,
-			suffix,
-		};
-	}
-
-	render_charts() {
-		this.$charts.empty();
-		this.$trend.empty();
-		const t = this.data.trend;
-		const a = this.data.ageing;
-		const credit = (this.data.position || {}).credit;
-		const has_ageing = a && flt(a.total) > 0;
-		const has_credit = credit && (flt(credit.limit) > 0 || has_ageing);
-		const has_trend = t && t.points && t.points.some((p) => flt(p.value) > 0);
-		if (has_trend) this.render_trend();
-		if (has_ageing) this.render_ageing();
-		if (has_credit) this.render_credit();
-		this.$charts.toggle(!!(has_credit || has_ageing));
-		this.$trend.toggle(!!has_trend);
-	}
-
-	render_trend() {
-		const t = this.data.trend;
-		const $panel = this.panel(this.$trend, {
-			title: __("Monthly Sales Trend"),
-			subtitle: __("Monthly, net of returns"),
-			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
-		});
-		const $chart = $('<div class="co-chart">').appendTo($panel);
-
-		const notes = [];
-		if (t.average) notes.push(__("avg") + " " + this.money0(t.average));
-		if (t.has_mtd && t.points.length)
-			notes.push(t.points[t.points.length - 1].label + " " + __("is month to date"));
-		if (notes.length) $('<div class="co-note text-muted">').text(notes.join(" · ")).appendTo($panel);
-
-		if (!t.points.length) return;
-		new frappe.Chart($chart[0], {
-			type: "line",
-			height: 220,
-			colors: [CHART_BLUE],
-			data: {
-				labels: t.points.map((p) => p.label),
-				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
-			},
-			lineOptions: { regionFill: 1, hideDots: 1 },
-			axisOptions: { xIsSeries: 1, shortenYAxisNumbers: 1 },
-			tooltipOptions: { formatTooltipY: (v) => this.money(v) },
-		});
-	}
-
-	render_ageing() {
-		const a = this.data.ageing;
-		const $panel = this.panel(this.$charts, {
-			title: __("Receivables Ageing"),
-			subtitle: __("Outstanding by due date, net of credit notes"),
-			right: this.report_link(__("Accounts Receivable"), () => this.open_ar()),
-		});
-		frappe.ui
-			.bar_list({
-				items: a.buckets.map((b) => ({
-					label: b.label,
-					value: flt(b.value),
-					formatted: this.short_money(b.value),
-				})),
-				format: (v) => this.short_money(v),
-				color: CHART_BLUE,
-				on_click: () => this.open_ar(),
-				values_on_hover: true,
-			})
-			.appendTo($('<div class="co-age-chart">').appendTo($panel));
-		$('<div class="co-note text-muted">')
-			.append($("<span>").text(__("Overdue") + " "))
-			.append($('<span class="text-danger">').text(this.money0(a.overdue)))
-			.append(" · " + flt(a.overdue_pct, 1) + "% " + __("of outstanding"))
-			.appendTo($panel);
 	}
 
 	render_pipeline() {
-		const pl = this.data.pipeline;
 		this.$pipeline.empty();
-		const any =
-			pl &&
-			["quotations", "delivery", "billing", "invoices"].some(
-				(k) => pl[k] && (pl[k].count || flt(pl[k].value))
-			);
-		this.$pipeline.toggle(!!any);
-		if (!any) return;
 		this.section_head(this.$pipeline, { title: __("Open Pipeline") });
-		const name = this.frm.doc.name;
-		const company = this.state.company;
-
-		const specs = [
-			pl.quotations && {
-				dot: "var(--gray-500)",
-				label: __("Open Quotations"),
-				data: pl.quotations,
-				caption: pl.quotations.count + " " + __("quotations"),
-				route: ["Quotation", { quotation_to: "Customer", party_name: name, status: "Open" }],
-			},
-			pl.delivery && {
-				dot: "var(--orange-500)",
-				label: __("Pending Delivery"),
-				data: pl.delivery,
-				caption: [
-					pl.delivery.count + " " + __("orders"),
-					pl.delivery.past_due && pl.delivery.past_due + " " + __("past promised date"),
-				]
-					.filter(Boolean)
-					.join(" · "),
-				route: ["Sales Order", { customer: name, company, status: "To Deliver and Bill" }],
-			},
-			pl.billing && {
-				dot: "var(--blue-500)",
-				label: __("Pending Billing"),
-				data: pl.billing,
-				caption: pl.billing.count + " " + __("orders") + " · " + __("delivered, not invoiced"),
-				route: ["Sales Order", { customer: name, company, status: "To Bill" }],
-			},
-			pl.invoices && {
-				dot: "var(--red-500)",
-				label: __("Unpaid Invoices"),
-				data: pl.invoices,
-				caption: [
-					pl.invoices.count + " " + __("invoices"),
-					pl.invoices.overdue && pl.invoices.overdue + " " + __("overdue"),
-				]
-					.filter(Boolean)
-					.join(" · "),
-				route: ["Sales Invoice", { customer: name, company, status: "Unpaid" }],
-			},
-		].filter(Boolean);
+		if (this.sales.loading) {
+			const items = this.pipeline_specs({}).map((s) => ({ label: s.label, loading: true }));
+			frappe.ui.stat_cards({ items }).appendTo(this.$pipeline);
+			return;
+		}
+		const pl = (this.sales.data && this.sales.data.pipeline) || {};
+		const specs = this.pipeline_specs(pl).filter((s) => s.data && (s.data.count || flt(s.data.value)));
+		if (!specs.length) {
+			this.empty_note(
+				this.$pipeline,
+				this.sales.error ? __("Could not load sales") : __("Nothing open"),
+				0
+			);
+			return;
+		}
 
 		const items = specs.map((s) => ({
 			dot: s.dot,
 			label: s.label,
 			value: this.money0(s.data.value),
-			caption: s.caption,
+			caption: s.caption(s.data),
 			onclick: () => this.list_route(s.route[0], s.route[1]),
 		}));
 		frappe.ui.stat_cards({ items }).appendTo(this.$pipeline);
 
-		$('<div class="co-note text-muted">')
-			.text(__("The same order can appear under both Pending Delivery and Pending Billing."))
-			.appendTo(this.$pipeline);
+		if (pl.delivery && pl.billing && pl.delivery.count && pl.billing.count) {
+			$('<div class="co-note text-muted">')
+				.text(__("The same order can appear under both Pending Delivery and Pending Billing."))
+				.appendTo(this.$pipeline);
+		}
+	}
+
+	pipeline_specs(pl) {
+		const name = this.frm.doc.name;
+		const company = this.state.company;
+		const specs = [];
+		if (frappe.model.can_read("Quotation"))
+			specs.push({
+				dot: CHART_LIGHT_BLUE,
+				label: __("Open Quotations"),
+				data: pl.quotations,
+				caption: (d) => __("{0} quotations", [d.count]),
+				route: ["Quotation", { quotation_to: "Customer", party_name: name, status: "Open" }],
+			});
+		if (frappe.model.can_read("Sales Order"))
+			specs.push(
+				{
+					dot: CHART_LIGHT_GREEN,
+					label: __("Pending Delivery"),
+					data: pl.delivery,
+					caption: (d) =>
+						[
+							__("{0} orders", [d.count]),
+							d.past_due && __("{0} past promised date", [d.past_due]),
+						]
+							.filter(Boolean)
+							.join(" · "),
+					route: ["Sales Order", { customer: name, company, status: "To Deliver and Bill" }],
+				},
+				{
+					dot: CHART_BLUE,
+					label: __("Pending Billing"),
+					data: pl.billing,
+					caption: (d) => __("{0} orders · delivered, not invoiced", [d.count]),
+					route: ["Sales Order", { customer: name, company, status: "To Bill" }],
+				}
+			);
+		if (this.accounts)
+			specs.push({
+				dot: CHART_GREEN,
+				label: __("Unpaid Invoices"),
+				data: pl.invoices,
+				caption: (d) =>
+					[__("{0} invoices", [d.count]), d.overdue && __("{0} overdue", [d.overdue])]
+						.filter(Boolean)
+						.join(" · "),
+				route: ["Sales Invoice", { customer: name, company, status: "Unpaid" }],
+			});
+		return specs;
 	}
 
 	build_recent() {
@@ -503,7 +615,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				});
 			},
 		});
-		if (this.companies_ready) this.refresh_list();
+		this.refresh_list();
 	}
 
 	outstanding_cell(row) {
@@ -547,12 +659,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 		frappe.set_route("query-report", "Accounts Receivable");
 	}
 	open_analytics() {
+		const range = (this.sales.data && this.sales.data.period_range) || {};
 		frappe.route_options = {
 			tree_type: "Customer",
 			doc_type: "Sales Invoice",
 			company: this.state.company,
-			from_date: this.data.period_range.from_date,
-			to_date: this.data.period_range.to_date,
+			from_date: range.from_date,
+			to_date: range.to_date,
 			value_quantity: "Value",
 		};
 		frappe.set_route("query-report", "Sales Analytics");

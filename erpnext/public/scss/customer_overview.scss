@@ -109,6 +109,17 @@
 		margin-top: var(--margin-sm);
 	}
 
+	.co-placeholder {
+		margin-top: var(--margin-md);
+	}
+
+	.co-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: var(--text-sm);
+	}
+
 	.co-list .embedded-list-table {
 		table-layout: auto;
 
