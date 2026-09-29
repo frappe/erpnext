@@ -196,7 +196,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			items.push({
 				label: __("Overdue"),
 				value: this.money0(p.overdue.value),
-				delta: this.delta_opts(p.overdue, __("since last month"), "red"),
+				delta: this.delta_opts(p.overdue, __("since last month")),
 				onclick: () => this.open_ar(),
 			});
 		if (p.advances)
@@ -233,7 +233,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				segments: [
 					{ label: __("Overdue"), value: overdue, color: "rgb(40, 158, 96)" },
 					{ label: __("Not due"), value: receivable - overdue, color: CHART_BLUE },
-					{ label: __("Available"), value: limit - receivable, color: "var(--surface-gray-3)" },
+					{ label: __("Available"), value: limit - receivable, color: "var(--surface-gray-4)" },
 				],
 				center: {
 					value: flt((receivable / limit) * 100, 1) + "%",
@@ -283,12 +283,11 @@ erpnext.CustomerOverview = class CustomerOverview {
 		});
 	}
 
-	delta_opts(card, suffix, force) {
+	delta_opts(card, suffix) {
 		if (card.delta === null || card.delta === undefined) return null;
 		return {
 			value: card.delta,
 			positive_is_good: card.delta_positive_is_good,
-			negative: force === "red",
 			suffix,
 		};
 	}
