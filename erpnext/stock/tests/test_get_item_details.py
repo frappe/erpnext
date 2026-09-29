@@ -423,7 +423,7 @@ class TestGetItemDetail(FrappeTestCase):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
-	@change_settings("Buying Settings", {"maintain_same_rate": 1})
+	@change_settings("Buying Settings", {"maintain_same_rate": 1, "allow_multiple_items": 1})
 	def test_rate_lock_checks_source_permission_once_per_document(self):
 		from unittest.mock import patch
 
