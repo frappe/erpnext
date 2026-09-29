@@ -11,6 +11,7 @@ import frappe.query_builder
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
+from frappe.permissions import get_user_permissions
 from frappe.query_builder.functions import Concat_ws, Sum
 from frappe.utils import (
 	cint,
@@ -27,6 +28,7 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
+from erpnext import _is_within_user_permissions, _refuse, require_permission
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
@@ -2160,7 +2162,48 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
+def get_serial_batch_ledgers(
+	item_code: str | None = None,
+	docstatus: str | list | int | None = None,
+	voucher_no: str | None = None,
+	name: str | list | None = None,
+	child_row: str | _dict | dict | None = None,
+):
+	if isinstance(child_row, dict):
+		child_row = _dict(child_row)
+
+	if not frappe.has_permission("Serial and Batch Bundle", "select"):
+		_refuse()
+
+	filters = get_filters_for_bundle(
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
+	)
+	parent_filters = []
+	for condition in filters:
+		if condition[0] == "Serial and Batch Entry" and condition[1] == "parent":
+			condition = ["Serial and Batch Bundle", "name", condition[2], condition[3]]
+		parent_filters.append(condition)
+
+	permitted = frappe.get_list("Serial and Batch Bundle", filters=parent_filters, pluck="name")
+	if not permitted:
+		return []
+
+	ledgers = _get_serial_batch_ledgers(name=permitted, child_row=child_row)
+	if not get_user_permissions(frappe.session.user):
+		return ledgers
+
+	visible = []
+	for ledger in ledgers:
+		if ledger.batch_no and not _is_within_user_permissions("Batch", ledger.batch_no):
+			continue
+		if ledger.serial_no and not _is_within_user_permissions("Serial No", ledger.serial_no):
+			continue
+		visible.append(ledger)
+
+	return visible
+
+
+def _get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = get_filters_for_bundle(
 		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
 	)
@@ -2252,11 +2295,37 @@ def add_serial_batch_ledgers(
 	if parent_doc and isinstance(parent_doc, str):
 		parent_doc = parse_json(parent_doc)
 
-	bundle = child_row.serial_and_batch_bundle
+	if do_not_save:
+		child_row.doctype = cstr(child_row.doctype)
+		child_row.name = cstr(child_row.name)
+		meta = frappe.get_meta(child_row.doctype)
+		if not meta.istable or not meta.has_field("serial_and_batch_bundle"):
+			frappe.throw(
+				_("{0} does not hold a Serial and Batch Bundle").format(child_row.doctype),
+				frappe.PermissionError,
+			)
+		fields = ["parenttype", "parent", "serial_and_batch_bundle"]
+		if meta.has_field("rejected_serial_and_batch_bundle"):
+			fields.append("rejected_serial_and_batch_bundle")
+		row = frappe._dict()
+		if child_row.name:
+			row = frappe.db.get_value(child_row.doctype, child_row.name, fields, as_dict=True)
+		row = row or frappe._dict()
+		require_permission(row.parenttype, row.parent, "write")
+		bundle_source = row
+	else:
+		bundle_source = child_row
+
+	bundle_field = "serial_and_batch_bundle"
 	if child_row.get("is_rejected"):
-		bundle = child_row.rejected_serial_and_batch_bundle
+		bundle_field = "rejected_serial_and_batch_bundle"
+	bundle = cstr(bundle_source.get(bundle_field))
 
 	if frappe.db.exists("Serial and Batch Bundle", bundle):
+		if do_not_save:
+			require_permission("Serial and Batch Bundle", bundle, "write")
+		elif not frappe.has_permission("Serial and Batch Bundle", "write", doc=bundle):
+			_refuse()
 		sb_doc = update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, warehouse)
 	else:
 		sb_doc = create_serial_batch_no_ledgers(
@@ -2763,7 +2832,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	if not ids:
 		return []
 
-	for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+	for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 		ignore_serial_nos.append(d.serial_no)
 
 	returned_serial_nos = []
@@ -2936,7 +3005,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	]
 
 	if ids:
-		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+		for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 			key = (d.batch_no, d.warehouse)
 			if key not in pos_batches:
 				pos_batches[key] = frappe._dict(
