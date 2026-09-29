@@ -52,7 +52,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 	customer_details = get_customer_details()
 
 	for d in item_list:
-		customer_record = customer_details.get(d.customer)
+		customer_record = customer_details.get(d.customer) or frappe._dict()
 
 		delivery_note = None
 		if d.delivery_note:
