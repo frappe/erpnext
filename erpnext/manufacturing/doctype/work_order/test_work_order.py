@@ -4074,6 +4074,53 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(reserved_qty, [4, 6])
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_reservation_counts_qty_transferred_and_consumed(self):
+		wo = make_partially_reserved_work_order("Test WIP Reservation Top Up RM")
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4)).submit()
+		items = get_unreserved_items(wo)
+		items[0]["required_qty"] = 6
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_reservation_entries,
+			wo,
+			items=[{**items[0], "required_qty": 10}],
+			is_transfer=0,
+		)
+
+		make_stock_reservation_entries(wo, items=items, is_transfer=0)
+		self.assertEqual(
+			frappe.db.get_value("Work Order Item", items[0]["work_order_item"], "stock_reserved_qty"), 6
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_reservation_counts_qty_reserved_in_other_warehouses(self):
+		rm_item = "Test Other Warehouse Reservation RM"
+		other_warehouse = "_Test Warehouse 2 - _TC"
+		wo = make_partially_reserved_work_order(rm_item)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target=other_warehouse, qty=10, basic_rate=100)
+		items = [{**row, "warehouse": other_warehouse} for row in get_unreserved_items(wo)]
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_reservation_entries,
+			wo,
+			items=[{**items[0], "required_qty": 10}],
+			is_transfer=0,
+		)
+
+		make_stock_reservation_entries(wo, items=items, is_transfer=0)
+		wo.reload()
+		self.assertEqual(wo.required_items[0].stock_reserved_qty, 10)
+
 	def test_auto_stock_reservation_for_batched_raw_material(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
