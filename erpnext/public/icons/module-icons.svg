@@ -1,0 +1,307 @@
+<!-- Dual-tone module icons for the desk dock and sidebar headers. Each symbol animates while its dock
+     tile is hovered, through the icon-motion custom properties the tile sets (see dock.scss). -->
+
+<svg id="erpnext-module-symbols" aria-hidden="true" style="display: none;" class="icon" xmlns="http://www.w3.org/2000/svg">
+	<style>
+		/* The smoke waits for its tile: the dock sets --icon-motion while an item is hovered. */
+		.factory-smoke {
+			opacity: var(--icon-motion-opacity, 0);
+			transition: opacity 0.2s ease;
+		}
+		.factory-smoke circle {
+			transform-box: fill-box;
+			transform-origin: center;
+			opacity: 0;
+			animation: factory-smoke 1.8s ease-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes factory-smoke {
+			0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
+			20% { opacity: 1; }
+			100% { transform: translate(2px, -7px) scale(1.8); opacity: 0; }
+		}
+		/* The display shows its number at rest, and types it in, digit by digit, while hovered. */
+		.calculator-digits {
+			opacity: calc(1 - var(--icon-motion-opacity, 0));
+		}
+		.calculator-typing {
+			opacity: var(--icon-motion-opacity, 0);
+		}
+		.calculator-typing rect {
+			animation: calculator-digit 2s ease-out infinite backwards;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes calculator-digit {
+			0%, 5% { opacity: 0; }
+			10%, 75% { opacity: 1; }
+			80%, 100% { opacity: 0; }
+		}
+		/* The shop door swings open on its left hinge while hovered, and shuts again after. */
+		.storefront-door {
+			transform-box: fill-box;
+			transform-origin: left center;
+			transform: scaleX(calc(1 - 0.75 * var(--icon-motion-opacity, 0)));
+			transition: transform 0.3s ease;
+		}
+		/* The plan redraws itself while hovered: each bar grows out from its start, one after another. */
+		.gantt-bars {
+			opacity: calc(1 - var(--icon-motion-opacity, 0));
+		}
+		.gantt-bars-moving {
+			opacity: var(--icon-motion-opacity, 0);
+		}
+		.gantt-bars-moving rect {
+			transform-box: fill-box;
+			transform-origin: left center;
+			animation: gantt-bar 2s ease-out infinite backwards;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes gantt-bar {
+			0% { transform: scaleX(0); }
+			25%, 85% { transform: scaleX(1); }
+			100% { transform: scaleX(1); }
+		}
+		/* The cart rolls forward and back while hovered, its load bumping on the way. */
+		.cart-body {
+			animation: cart-roll 1.4s ease-in-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.cart-load {
+			animation: cart-load 1.4s ease-in-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes cart-roll {
+			0%, 100% { transform: translateX(0); }
+			50% { transform: translateX(1.5px); }
+		}
+		@keyframes cart-load {
+			0%, 45%, 100% { transform: translateY(0); }
+			55% { transform: translateY(-1px); }
+			65% { transform: translateY(0); }
+		}
+		/* A box is shelved while hovered: the new one slides in from the right and settles. */
+		.shelf-new {
+			opacity: calc(1 - var(--icon-motion-opacity, 0));
+		}
+		.shelf-new-moving {
+			opacity: var(--icon-motion-opacity, 0);
+		}
+		.shelf-new-moving g {
+			animation: shelf-stock 1.8s infinite backwards;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes shelf-stock {
+			0% { transform: translateX(7px); opacity: 0; animation-timing-function: ease-out; }
+			15% { opacity: 1; }
+			40% { transform: translateX(-0.6px); animation-timing-function: ease-in-out; }
+			50%, 85% { transform: translateX(0); opacity: 1; }
+			100% { transform: translateX(0); opacity: 0; }
+		}
+		/* A building, a house and a money bag drop into the open hand, one after another, while hovered. */
+		.asset-hand-items {
+			opacity: calc(1 - var(--icon-motion-opacity, 0));
+		}
+		.asset-hand-items-moving {
+			opacity: var(--icon-motion-opacity, 0);
+		}
+		.asset-hand-items-moving > g {
+			animation: asset-hand-drop 2s infinite backwards;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes asset-hand-drop {
+			0% { transform: translateY(-5px); opacity: 0; animation-timing-function: ease-out; }
+			20% { transform: translateY(0); opacity: 1; animation-timing-function: ease-out; }
+			26% { transform: translateY(-0.8px); animation-timing-function: ease-in; }
+			32%, 85% { transform: translateY(0); opacity: 1; }
+			100% { transform: translateY(0); opacity: 0; }
+		}
+		/* While hovered, current runs up the cable, through the plug and out along both prongs,
+		   and the sparks show only once it reaches their tips. */
+		.plug-current,
+		.plug-spark {
+			opacity: var(--icon-motion-opacity, 0);
+		}
+		.plug-current rect,
+		.plug-spark path {
+			animation: 1.6s infinite backwards;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.plug-current .plug-cord {
+			animation-name: plug-cord;
+			animation-timing-function: ease-in;
+		}
+		.plug-current .plug-prong {
+			animation-name: plug-prong;
+			animation-timing-function: ease-in;
+		}
+		.plug-spark path {
+			transform-box: fill-box;
+			transform-origin: center bottom;
+			animation-name: plug-spark;
+			animation-timing-function: ease-out;
+		}
+		@keyframes plug-cord {
+			0% { transform: translateY(0); opacity: 0; }
+			5% { opacity: 1; }
+			28% { transform: translateY(-2.7px); opacity: 1; }
+			32%, 100% { transform: translateY(-2.7px); opacity: 0; }
+		}
+		@keyframes plug-prong {
+			0%, 30% { transform: translateY(0); opacity: 0; }
+			34% { opacity: 1; }
+			55% { transform: translateY(-3.4px); opacity: 1; }
+			60%, 100% { transform: translateY(-3.4px); opacity: 0; }
+		}
+		@keyframes plug-spark {
+			0%, 55% { transform: scale(0); opacity: 0; }
+			65% { transform: scale(1.3); opacity: 1; }
+			80% { transform: scale(1); opacity: 1; }
+			92%, 100% { transform: scale(0); opacity: 0; }
+		}
+		/* The quality seal alone at rest. While hovered, a shipping box rises in and the seal is pinned onto the right
+		   end of its lid, and stays there. On leave the seal lifts back off first and the box sinks away after it.
+		   Both follow --icon-motion-opacity through transitions, so leaving mid-way simply reverses from there. */
+		.quality-seal-box {
+			transform-box: view-box;
+			opacity: var(--icon-motion-opacity, 0);
+			transform: translateY(calc((1 - var(--icon-motion-opacity, 0)) * 3px));
+			transition: opacity 0.3s ease, transform 0.4s ease;
+			transition-delay: calc((1 - var(--icon-motion-opacity, 0)) * 0.25s);
+		}
+		.quality-seal-badge {
+			transform-box: view-box;
+			transform-origin: 0 0;
+			transform: translate(calc(var(--icon-motion-opacity, 0) * 14.16px), calc(var(--icon-motion-opacity, 0) * 5.36px))
+				scale(calc(1 - var(--icon-motion-opacity, 0) * 0.63));
+			transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+			transition-delay: calc(var(--icon-motion-opacity, 0) * 0.15s);
+		}
+		/* A closed pocket knife at rest. While hovered its blade and saw swing open on their pivots, and they fold
+		   back when the pointer leaves. Both follow --icon-motion-opacity through transitions, so leaving part-way
+		   simply folds them back from where they are. */
+		.knife-blade,
+		.knife-saw {
+			transform-box: view-box;
+			transform: rotate(calc(var(--icon-motion-opacity, 0) * 60deg));
+			transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+		}
+		.knife-blade {
+			transform-origin: 18px 9.3px;
+			transition-delay: calc((1 - var(--icon-motion-opacity, 0)) * 0.08s);
+		}
+		.knife-saw {
+			transform-origin: 6px 17.7px;
+			transition-delay: calc(var(--icon-motion-opacity, 0) * 0.12s);
+		}
+		@media (prefers-reduced-motion: reduce) {
+			.factory-smoke circle,
+			.calculator-typing rect,
+			.gantt-bars-moving rect,
+			.cart-body,
+			.cart-load,
+			.shelf-new-moving g,
+			.asset-hand-items-moving > g,
+			.plug-current rect,
+			.plug-spark path { animation: none; }
+			.storefront-door { transition: none; }
+			.quality-seal-box,
+			.quality-seal-badge,
+			.knife-blade,
+			.knife-saw { transition: none; }
+		}
+	</style>
+	<symbol viewBox="0 0 24 24" id="icon-factory-duotone" stroke="none" style="overflow: visible">
+		<g class="factory-smoke" style="fill: light-dark(#C2C2C2, #6A6A6A)">
+			<circle cx="4.5" cy="2.2" r="1.7" style="animation-delay: 0s" />
+			<circle cx="4.5" cy="2.2" r="1.7" style="animation-delay: 0.6s" />
+			<circle cx="4.5" cy="2.2" r="1.7" style="animation-delay: 1.2s" />
+		</g>
+		<rect x="3" y="3" width="3" height="8.5" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<path d="M7 11.5L12 7.5V11.5Z M12.6 11.5L17.3 7.5V11.5Z M17.9 11.5L22 7.5V11.5Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+		<path fill-rule="evenodd" d="M2 12.5H22V21H2Z M5 15h3v3H5Z M10.5 15h3v3h-3Z M16 15h3v3h-3Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-calculator-duotone" stroke="none">
+		<rect x="5" y="2" width="14" height="20" rx="2" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<rect x="7" y="4" width="10" height="5" rx="0.8" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="7.6" y="4.6" width="8.8" height="3.8" rx="0.4" style="fill: light-dark(#C2C2C2, #1E1E1E)" />
+		<g class="calculator-digits">
+			<rect x="14.4" y="5.6" width="1.3" height="1.8" style="fill: light-dark(#7C7C7C, #F5F5F5)" />
+			<rect x="12.4" y="5.6" width="1.3" height="1.8" style="fill: light-dark(#7C7C7C, #F5F5F5)" />
+			<rect x="10.4" y="5.6" width="1.3" height="1.8" style="fill: light-dark(#7C7C7C, #F5F5F5)" />
+		</g>
+		<g class="calculator-typing">
+			<rect x="14.4" y="5.6" width="1.3" height="1.8" style="fill: light-dark(#7C7C7C, #F5F5F5); animation-delay: 0s" />
+			<rect x="12.4" y="5.6" width="1.3" height="1.8" style="fill: light-dark(#7C7C7C, #F5F5F5); animation-delay: 0.25s" />
+			<rect x="10.4" y="5.6" width="1.3" height="1.8" style="fill: light-dark(#7C7C7C, #F5F5F5); animation-delay: 0.5s" />
+		</g>
+		<rect x="7.5" y="11" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="10.8" y="11" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="14.1" y="11" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="7.5" y="14.3" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="10.8" y="14.3" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="14.1" y="14.3" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="7.5" y="17.6" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="10.8" y="17.6" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#fff, #1E1E1E)" />
+		<rect x="14.1" y="17.6" width="2.4" height="2.4" rx="0.5" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-storefront-duotone" stroke="none">
+		<path d="M3.5 3H20.5L22 8A2 2 0 0 1 18 8A2 2 0 0 1 14 8A2 2 0 0 1 10 8A2 2 0 0 1 6 8A2 2 0 0 1 2 8Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+		<path fill-rule="evenodd" d="M3.5 11H20.5V21.5H3.5Z M6 14H11V18H6Z M13 13.5H18V21.5H13Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<rect class="storefront-door" x="13.6" y="14.1" width="3.8" height="7.4" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-gantt-chart-duotone" stroke="none">
+		<rect x="14.4" y="2" width="1.2" height="20" rx="0.6" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+		<g class="gantt-bars">
+			<rect x="3" y="4" width="8" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+			<rect x="7" y="9" width="9" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+			<rect x="12" y="14" width="9" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+			<rect x="5" y="19" width="7" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		</g>
+		<g class="gantt-bars-moving">
+			<rect x="3" y="4" width="8" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8); animation-delay: 0s" />
+			<rect x="7" y="9" width="9" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8); animation-delay: 0.15s" />
+			<rect x="12" y="14" width="9" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8); animation-delay: 0.3s" />
+			<rect x="5" y="19" width="7" height="3" rx="1" style="fill: light-dark(#7C7C7C, #B8B8B8); animation-delay: 0.45s" />
+		</g>
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-shopping-cart-duotone" stroke="none" style="overflow: visible">
+		<g class="cart-body">
+			<g class="cart-load">
+				<rect x="8" y="3" width="5" height="5" rx="0.6" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+				<rect x="13.5" y="4.5" width="5" height="3.5" rx="0.6" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+			</g>
+			<path d="M2 3.5H4.5L7.5 16.5H19" style="fill: none; stroke: light-dark(#7C7C7C, #B8B8B8); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round" />
+			<path d="M5.7 6.8H21L19.3 14H7.3Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+			<circle cx="9" cy="19.5" r="1.8" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+			<circle cx="17.5" cy="19.5" r="1.8" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		</g>
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-shelf-rack-duotone" stroke="none" style="overflow: visible">
+		<rect x="2.5" y="2" width="1.6" height="20" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<rect x="19.9" y="2" width="1.6" height="20" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<rect x="2.5" y="10" width="19" height="1.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<rect x="2.5" y="19.6" width="19" height="1.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<g><rect x="5.5" y="4.2" width="6" height="1.8" rx="0.4" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="5.5" y="6.7" width="6" height="2.6" rx="0.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="7.5" y="6.7" width="2" height="2" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g>
+		<g><rect x="5.5" y="13.8" width="5.5" height="1.8" rx="0.4" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="5.5" y="16.3" width="5.5" height="2.6" rx="0.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="7.25" y="16.3" width="2" height="2" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g>
+		<g><rect x="11.8" y="13.8" width="6.5" height="1.8" rx="0.4" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="11.8" y="16.3" width="6.5" height="2.6" rx="0.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="14.05" y="16.3" width="2" height="2" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g>
+		<g class="shelf-new"><rect x="12.3" y="4.2" width="6" height="1.8" rx="0.4" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="12.3" y="6.7" width="6" height="2.6" rx="0.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="14.3" y="6.7" width="2" height="2" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g>
+		<g class="shelf-new-moving"><g><rect x="12.3" y="4.2" width="6" height="1.8" rx="0.4" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="12.3" y="6.7" width="6" height="2.6" rx="0.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="14.3" y="6.7" width="2" height="2" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g></g>
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-asset-hand-duotone" stroke="none" style="overflow: visible">
+		<g class="asset-hand-items"><rect x="11.5" y="3.5" width="4" height="1.5" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="11.5" y="5.7" width="4" height="9.7" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="12.4" y="7" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="14" y="7" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="12.4" y="9.2" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="14" y="9.2" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M19 8.5L22 11.3H16Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="16.6" y="12" width="4.8" height="2.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="18.3" y="12.6" width="1.4" height="1.8" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M5.4 4L7 5L8.6 4L8 6.6H6Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M7 7.3C9.9 7.3 10.8 10.3 10.8 12.6C10.8 13.9 10.2 14.8 9.2 14.8H4.8C3.8 14.8 3.2 13.9 3.2 12.6C3.2 10.3 4.1 7.3 7 7.3Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="5.6" y="6.9" width="2.8" height="1" rx="0.5" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><path d="M7.95 10.4c-.3-.4-.6-.5-.95-.5-.6 0-1 .3-1 .8 0 1.1 2.1.6 2.1 1.7 0 .5-.5.8-1.1.8-.4 0-.8-.2-1.1-.5M7 9.3v4.6" style="fill: none; stroke: light-dark(#7C7C7C, #B8B8B8); stroke-width: 0.65; stroke-linecap: round; stroke-linejoin: round" /></g>
+		<g class="asset-hand-items-moving"><g style="animation-delay: 0s"><rect x="11.5" y="3.5" width="4" height="1.5" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="11.5" y="5.7" width="4" height="9.7" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="12.4" y="7" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="14" y="7" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="12.4" y="9.2" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="14" y="9.2" width="0.9" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g><g style="animation-delay: 0.15s"><path d="M19 8.5L22 11.3H16Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="16.6" y="12" width="4.8" height="2.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="18.3" y="12.6" width="1.4" height="1.8" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g><g style="animation-delay: 0.3s"><path d="M5.4 4L7 5L8.6 4L8 6.6H6Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M7 7.3C9.9 7.3 10.8 10.3 10.8 12.6C10.8 13.9 10.2 14.8 9.2 14.8H4.8C3.8 14.8 3.2 13.9 3.2 12.6C3.2 10.3 4.1 7.3 7 7.3Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="5.6" y="6.9" width="2.8" height="1" rx="0.5" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><path d="M7.95 10.4c-.3-.4-.6-.5-.95-.5-.6 0-1 .3-1 .8 0 1.1 2.1.6 2.1 1.7 0 .5-.5.8-1.1.8-.4 0-.8-.2-1.1-.5M7 9.3v4.6" style="fill: none; stroke: light-dark(#7C7C7C, #B8B8B8); stroke-width: 0.65; stroke-linecap: round; stroke-linejoin: round" /></g></g>
+		<path d="M5 15.5H9C10.5 15.5 11.5 16.3 12.3 17L18.8 15.4C20.4 15 21.8 16.4 20.9 17.6C19.6 19.3 17 21.5 13.8 21.8H5Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="2" y="14.6" width="2.3" height="8" rx="0.7" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-plug-duotone" stroke="none">
+		<rect x="8.1" y="3" width="1.8" height="5.3" rx="0.9" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="14.1" y="3" width="1.8" height="5.3" rx="0.9" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M6.8 9H17.2A0.8 0.8 0 0 1 18 9.8V10.9H6V9.8A0.8 0.8 0 0 1 6.8 9Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M6 11.6H18V13.8A4.2 4.2 0 0 1 13.8 18H10.2A4.2 4.2 0 0 1 6 13.8Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><path d="M12.6 12.4L10.5 15.3H11.9L11.3 17.2L13.6 14.1H12.2Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="11.1" y="18.7" width="1.8" height="4.3" rx="0.4" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<g class="plug-current"><rect class="plug-cord" x="11.1" y="21.4" width="1.8" height="1.4" rx="0.7" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect class="plug-prong" x="8.1" y="6.4" width="1.8" height="1.4" rx="0.7" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect class="plug-prong" x="14.1" y="6.4" width="1.8" height="1.4" rx="0.7" style="fill: light-dark(#7C7C7C, #B8B8B8)" /></g>
+		<g class="plug-spark"><path d="M9 1.9V0.6M7.7 2.3L6.9 1.5M15 1.9V0.6M16.3 2.3L17.1 1.5" style="fill: none; stroke: light-dark(#7C7C7C, #B8B8B8); stroke-width: 0.8; stroke-linecap: round" /></g>
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-quality-seal-duotone" stroke="none">
+		<g class="quality-seal-box"><rect x="2" y="7" width="20" height="5.5" rx="0.6" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="3" y="13.2" width="18" height="8.8" rx="0.5" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><rect x="7" y="13.2" width="2.8" height="3.6" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g>
+		<g class="quality-seal-badge"><path fill-rule="evenodd" d="M12.00 4.30A1.85 1.85 0 0 1 15.34 5.06A1.85 1.85 0 0 1 18.02 7.20A1.85 1.85 0 0 1 19.51 10.29A1.85 1.85 0 0 1 19.51 13.71A1.85 1.85 0 0 1 18.02 16.80A1.85 1.85 0 0 1 15.34 18.94A1.85 1.85 0 0 1 12.00 19.70A1.85 1.85 0 0 1 8.66 18.94A1.85 1.85 0 0 1 5.98 16.80A1.85 1.85 0 0 1 4.49 13.71A1.85 1.85 0 0 1 4.49 10.29A1.85 1.85 0 0 1 5.98 7.20A1.85 1.85 0 0 1 8.66 5.06A1.85 1.85 0 0 1 12.00 4.30ZM5.80 12a6.2 6.2 0 1 0 12.4 0a6.2 6.2 0 1 0 -12.4 0Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><circle cx="12" cy="12" r="5.35" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><path d="M9.45 12.24L11.27 14.06L14.67 10.54" style="fill: none; stroke: light-dark(#7C7C7C, #B8B8B8); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round" /></g>
+	</symbol>
+	<symbol viewBox="0 0 24 24" id="icon-pocket-knife-duotone" stroke="none">
+		<g transform="translate(12 12) scale(0.95) rotate(-45) translate(-12 -12)"><g class="knife-blade"><path d="M19.2 6.9H11.2L9.4 9.3H19.2Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g><g class="knife-saw"><path d="M4.8 17.7H13.6L14.4 18.9L13.6 20.1L12.8 19.4L12.0 20.1L11.2 19.4L10.4 20.1L9.6 19.4L8.8 20.1L8.0 19.4L7.2 20.1L6.4 19.4L5.6 20.1L4.8 19.4L4.8 20.1Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g><rect x="3.5" y="10" width="17" height="7" rx="3.5" style="fill: light-dark(#7C7C7C, #B8B8B8)" /><circle cx="18" cy="11.9" r="0.9" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><circle cx="6" cy="15.1" r="0.9" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><g transform="rotate(45 10.5 13.5)"><rect x="9.95" y="11.9" width="1.1" height="3.2" style="fill: light-dark(#C2C2C2, #6A6A6A)" /><rect x="8.9" y="12.95" width="3.2" height="1.1" style="fill: light-dark(#C2C2C2, #6A6A6A)" /></g></g>
+	</symbol>
+</svg>
