@@ -983,6 +983,35 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)[:3]:
 			self.assertEqual(status, "Delivered")
 
+	def test_reservation_counts_supplied_qty(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		sco.submit()
+
+		se = frappe.get_doc(make_rm_stock_entry(sco.name))
+		se.items[-1].use_serial_batch_fields = 1
+		se.save()
+		se.submit()
+
+		row = sco.supplied_items[0]
+		make_stock_in_entry(rm_items=[{"item_code": row.rm_item_code, "warehouse": row.reserve_warehouse}])
+		self.assertRaises(
+			frappe.ValidationError,
+			sco.reserve_raw_materials,
+			items=[{"name": row.name, "qty_to_reserve": 1}],
+		)
+
 	def test_stock_reservation_transfer(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_items_for_material_requests,
