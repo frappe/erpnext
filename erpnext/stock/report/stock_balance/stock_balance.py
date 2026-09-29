@@ -45,6 +45,12 @@ def execute(filters: StockBalanceFilter | None = None):
 	return StockBalanceReport(filters).run()
 
 
+def execute_snapshot_report(filters: StockBalanceFilter | None = None):
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import execute as execute_from_snapshot
+
+	return execute_from_snapshot(filters)
+
+
 class StockBalanceReport:
 	def __init__(self, filters: StockBalanceFilter | None) -> None:
 		self.filters = filters
