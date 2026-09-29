@@ -20,6 +20,8 @@ const CHART_BLUE = "var(--chart-categorical-1)";
 const CHART_LIGHT_BLUE = "var(--chart-categorical-2)";
 const CHART_GREEN = "var(--chart-categorical-3)";
 const CHART_LIGHT_GREEN = "var(--chart-categorical-4)";
+const CHART_LIGHT_VIOLET = "var(--chart-categorical-6)";
+const CLOSED_ORDER_STATUS = ["Closed", "Completed", "On Hold"];
 const TREND_BLUE = "#2283c3";
 const RECENT_LIMIT = 10;
 const COUNT = {
@@ -298,7 +300,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				label: labels[2],
 				value: this.money0(advances.value),
 				caption: flt(advances.value)
-					? __("Not yet applied to invoices")
+					? __("Already deducted from Receivable")
 					: __("No unapplied payments"),
 				onclick: () => this.open_ar(),
 			},
@@ -371,7 +373,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	render_ageing() {
 		const $panel = this.panel(this.$charts, {
 			title: __("Receivables Ageing"),
-			subtitle: __("Outstanding by due date, net of credit notes"),
+			subtitle: __("Outstanding by due date, net of credit notes and advances"),
 			right: this.report_link(__("Accounts Receivable"), () => this.open_ar()),
 		});
 		if (this.show_state($panel, this.ar, 180, __("Could not load receivables"))) return;
@@ -407,12 +409,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 	render_credit() {
 		const data = this.ar.data;
 		const limit = flt(data && data.credit.limit);
-		const receivable = Math.max(flt(data && data.outstanding.value), 0);
+		const used = Math.max(flt(data && data.credit.used), 0);
+		const can_edit = this.frm.has_perm("write");
 		const $panel = this.panel(this.$charts, {
 			title: __("Credit Limit"),
-			subtitle: limit && __("{0} of {1} used", [this.short_money(receivable), this.short_money(limit)]),
+			subtitle: limit && __("{0} of {1} used", [this.short_money(used), this.short_money(limit)]),
 			right:
 				limit &&
+				can_edit &&
 				frappe.ui.button({
 					icon: "pencil",
 					variant: "ghost",
@@ -421,42 +425,42 @@ erpnext.CustomerOverview = class CustomerOverview {
 				}),
 		});
 		if (this.show_state($panel, this.ar, 280, __("Could not load receivables"))) return;
-		if (!limit) {
-			$('<div class="co-empty-state">')
-				.append(
-					frappe.ui.empty_state({
-						icon: "gauge",
-						title: __("No credit limit"),
-						description: __("Set one for {0} to check new orders and invoices against it.", [
-							this.state.company,
-						]),
-						actions: [
-							{
-								label: __("Set Credit Limit"),
-								onclick: () => this.edit_credit_limit(),
-							},
-						],
-					})
-				)
-				.appendTo($panel);
-			return;
-		}
+		const $body = limit ? this.credit_donut(data, limit, used) : this.credit_empty(can_edit);
+		$body.appendTo($panel);
+	}
 
+	credit_donut(data, limit, used) {
+		const receivable = Math.min(Math.max(flt(data.outstanding.value), 0), used);
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
-		frappe.ui
-			.donut({
-				segments: [
-					{ label: __("Overdue"), value: overdue, color: CHART_BLUE },
-					{ label: __("Not due"), value: receivable - overdue, color: CHART_LIGHT_BLUE },
-					{ label: __("Available"), value: limit - receivable, color: CHART_GREEN },
-				],
-				center: {
-					value: flt((receivable / limit) * 100, 1) + "%",
-					label: receivable > limit ? __("over limit") : __("used"),
-				},
-				format: (v) => this.short_money(v),
+		const donut = frappe.ui.donut({
+			segments: [
+				{ label: __("Overdue"), value: overdue, color: CHART_BLUE },
+				{ label: __("Not due"), value: receivable - overdue, color: CHART_LIGHT_BLUE },
+				{ label: __("Unbilled orders"), value: used - receivable, color: CHART_LIGHT_VIOLET },
+				{ label: __("Available"), value: limit - used, color: CHART_GREEN },
+			],
+			center: {
+				value: flt((used / limit) * 100, 1) + "%",
+				label: used > limit ? __("over limit") : __("used"),
+			},
+			format: (v) => this.short_money(v),
+		});
+		return $('<div class="co-chart">').append(donut);
+	}
+
+	credit_empty(can_edit) {
+		return $('<div class="co-empty-state">').append(
+			frappe.ui.empty_state({
+				icon: "gauge",
+				title: __("No credit limit"),
+				description: __("Set one for {0} to check new orders and invoices against it.", [
+					this.state.company,
+				]),
+				actions: can_edit
+					? [{ label: __("Set Credit Limit"), onclick: () => this.edit_credit_limit() }]
+					: [],
 			})
-			.appendTo($('<div class="co-chart">').appendTo($panel));
+		);
 	}
 
 	show_state($panel, source, height, error_text) {
@@ -480,6 +484,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	edit_credit_limit() {
+		if (this.frm.is_dirty()) {
+			frappe.msgprint(__("Save or discard your other changes to this customer first."));
+			return;
+		}
 		const company = this.state.company;
 		frappe.prompt(
 			[
@@ -542,6 +550,12 @@ erpnext.CustomerOverview = class CustomerOverview {
 	pipeline_specs(pl) {
 		const name = this.frm.doc.name;
 		const company = this.state.company;
+		const open_orders = {
+			customer: name,
+			company,
+			docstatus: 1,
+			status: ["not in", CLOSED_ORDER_STATUS],
+		};
 		const specs = [];
 		if (frappe.model.can_read("Quotation"))
 			specs.push({
@@ -549,7 +563,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				label: __("Open Quotations"),
 				data: pl.quotations,
 				caption: (d) => COUNT.quotations(d.count),
-				route: ["Quotation", { quotation_to: "Customer", party_name: name, status: "Open" }],
+				route: ["Quotation", { quotation_to: "Customer", party_name: name, company, status: "Open" }],
 			});
 		if (frappe.model.can_read("Sales Order"))
 			specs.push(
@@ -561,14 +575,17 @@ erpnext.CustomerOverview = class CustomerOverview {
 						[COUNT.orders(d.count), d.past_due && __("{0} past promised date", [d.past_due])]
 							.filter(Boolean)
 							.join(" · "),
-					route: ["Sales Order", { customer: name, company, status: "To Deliver and Bill" }],
+					route: [
+						"Sales Order",
+						{ ...open_orders, per_delivered: ["<", 100], skip_delivery_note: 0 },
+					],
 				},
 				{
 					dot: CHART_BLUE,
 					label: __("Pending Billing"),
 					data: pl.billing,
-					caption: (d) => COUNT.orders(d.count) + " · " + __("delivered, not invoiced"),
-					route: ["Sales Order", { customer: name, company, status: "To Bill" }],
+					caption: (d) => COUNT.orders(d.count) + " · " + __("not fully billed"),
+					route: ["Sales Order", { ...open_orders, per_billed: ["<", 100] }],
 				}
 			);
 		if (this.accounts)
@@ -580,7 +597,16 @@ erpnext.CustomerOverview = class CustomerOverview {
 					[COUNT.invoices(d.count), d.overdue && __("{0} overdue", [d.overdue])]
 						.filter(Boolean)
 						.join(" · "),
-				route: ["Sales Invoice", { customer: name, company, status: "Unpaid" }],
+				route: [
+					"Sales Invoice",
+					{
+						customer: name,
+						company,
+						docstatus: 1,
+						is_return: 0,
+						outstanding_amount: [">", 0],
+					},
+				],
 			});
 		return specs;
 	}
@@ -658,7 +684,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	outstanding_cell(row) {
-		if (flt(row.outstanding) <= 0) return '<div class="text-right text-extra-muted">—</div>';
+		if (row.outstanding == null || flt(row.outstanding) <= 0)
+			return '<div class="text-right text-extra-muted">—</div>';
 		const cls = row.status === "Overdue" ? "text-danger" : "";
 		return `<div class="text-right ${cls}">${this.money(row.outstanding)}</div>`;
 	}

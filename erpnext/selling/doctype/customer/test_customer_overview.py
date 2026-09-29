@@ -4,8 +4,12 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.utils import getdate, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer import customer_overview
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 CUSTOMER = "_Test Customer"
@@ -70,3 +74,29 @@ class TestCustomerOverview(ERPNextTestSuite):
 				frappe.PermissionError, customer_overview.get_customer_receivables, CUSTOMER, COMPANY
 			)
 			self.assertRaises(frappe.PermissionError, customer_overview.get_customer_companies, CUSTOMER)
+
+	def test_credit_used_counts_unbilled_orders(self):
+		before = customer_overview.get_customer_receivables(CUSTOMER, COMPANY)["credit"]["used"]
+		so = make_sales_order(customer=CUSTOMER, company=COMPANY)
+		after = customer_overview.get_customer_receivables(CUSTOMER, COMPANY)["credit"]["used"]
+		self.assertEqual(after - before, so.base_grand_total)
+
+	def test_totals_follow_user_permissions(self):
+		si = create_sales_invoice(customer=CUSTOMER, company=COMPANY, parent_cost_center="Main - _TC")
+		as_of = getdate(today())
+		user = create_user("customer_overview_restricted@example.com", "Accounts User", "Sales User")
+		frappe.permissions.add_user_permission("Cost Center", "_Test Cost Center 2 - _TC", user.name)
+		self.addCleanup(
+			frappe.permissions.remove_user_permission, "Cost Center", "_Test Cost Center 2 - _TC", user.name
+		)
+
+		everyone = customer_overview.net_sales(CUSTOMER, COMPANY, as_of, as_of)
+		with self.set_user(user.name):
+			restricted = customer_overview.net_sales(CUSTOMER, COMPANY, as_of, as_of)
+			unpaid = customer_overview.unpaid_invoices(CUSTOMER, COMPANY, as_of)
+
+		self.assertEqual(everyone - restricted, si.base_net_total)
+		self.assertNotIn(
+			si.name, frappe.get_all("Sales Invoice", {"cost_center": "_Test Cost Center 2 - _TC"})
+		)
+		self.assertEqual(unpaid["count"], 0)

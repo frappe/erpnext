@@ -5,7 +5,7 @@ from frappe.query_builder.functions import Coalesce, Count, Sum
 from frappe.utils import add_days, add_months, add_to_date, cint, date_diff, flt, getdate, today
 
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.selling.doctype.customer.customer import get_credit_limit
+from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
 PERIODS = ("Current Fiscal Year", "Last 12 Months", "This Quarter", "Last Fiscal Year")
 OPEN_SO_STATUS = ("Closed", "Completed", "On Hold")
@@ -51,7 +51,7 @@ def get_customer_overview(customer: str, company: str, period: str = "Current Fi
 @frappe.whitelist()
 def get_customer_receivables(customer: str, company: str):
 	check_access(customer, company)
-	if not accounts_access():
+	if not receivables_access():
 		return None
 
 	as_of = getdate(today())
@@ -61,7 +61,7 @@ def get_customer_receivables(customer: str, company: str):
 		"currency": frappe.get_cached_value("Company", company, "default_currency"),
 		"outstanding": {
 			"value": ar["outstanding"],
-			"unpaid_count": unpaid_invoice_count(customer, company),
+			"unpaid_count": unpaid_invoices(customer, company, as_of)["count"],
 			"days_to_pay": collection_days(customer, company, as_of, ar["outstanding"]),
 		},
 		"overdue": {
@@ -70,7 +70,10 @@ def get_customer_receivables(customer: str, company: str):
 			"delta_positive_is_good": False,
 		},
 		"advances": {"value": ar["advance"]},
-		"credit": {"limit": flt(get_credit_limit(customer, company))},
+		"credit": {
+			"limit": flt(get_credit_limit(customer, company)),
+			"used": flt(get_customer_outstanding(customer, company)),
+		},
 		"ageing": ageing(ar),
 	}
 
@@ -86,6 +89,27 @@ def check_access(customer, company=None):
 
 def accounts_access():
 	return bool(frappe.has_permission("Sales Invoice", "read") and frappe.has_permission("GL Entry", "read"))
+
+
+def receivables_access():
+	return accounts_access() and frappe.get_cached_doc("Report", "Accounts Receivable Summary").is_permitted()
+
+
+def permitted(doctype, filters, fields, **kwargs):
+	return frappe.qb.get_query(
+		doctype, filters=filters, fields=fields, ignore_permissions=False, **kwargs
+	).run(as_dict=True)
+
+
+def invoice_filters(customer, company, from_date, to_date):
+	return [
+		["docstatus", "=", 1],
+		["customer", "=", customer],
+		["company", "=", company],
+		["is_opening", "!=", "Yes"],
+		["posting_date", ">=", from_date],
+		["posting_date", "<=", to_date],
+	]
 
 
 def resolve_period(period, company, as_of):
@@ -110,38 +134,29 @@ def resolve_period(period, company, as_of):
 	return getdate(fy.year_start_date), min(as_of, getdate(fy.year_end_date))
 
 
-def net_sales(customer, company, from_date, to_date):
+def sales_totals(customer, company, from_date, to_date):
 	si = DocType("Sales Invoice")
-	result = (
-		frappe.qb.from_(si)
-		.select(Coalesce(Sum(si.base_net_total), 0))
-		.where(
-			(si.docstatus == 1)
-			& (si.customer == customer)
-			& (si.company == company)
-			& (si.posting_date >= from_date)
-			& (si.posting_date <= to_date)
-		)
-	).run()
-	return flt(result[0][0])
+	row = permitted(
+		"Sales Invoice",
+		invoice_filters(customer, company, from_date, to_date),
+		[
+			Coalesce(Sum(si.base_net_total), 0).as_("total"),
+			Coalesce(Sum(Case().when(si.is_return == 0, 1).else_(0)), 0).as_("count"),
+		],
+	)[0]
+	return flt(row.total), cint(row.count)
+
+
+def net_sales(customer, company, from_date, to_date):
+	return sales_totals(customer, company, from_date, to_date)[0]
 
 
 def position(customer, company, from_date, to_date, accounts):
 	if not accounts:
 		return {}
 
-	current = net_sales(customer, company, from_date, to_date)
+	current, invoice_count = sales_totals(customer, company, from_date, to_date)
 	prev = net_sales(customer, company, add_to_date(from_date, years=-1), add_to_date(to_date, years=-1))
-	invoice_count = frappe.db.count(
-		"Sales Invoice",
-		{
-			"docstatus": 1,
-			"customer": customer,
-			"company": company,
-			"is_return": 0,
-			"posting_date": ["between", [from_date, to_date]],
-		},
-	)
 	return {
 		"net_sales": {
 			"value": current,
@@ -152,26 +167,14 @@ def position(customer, company, from_date, to_date, accounts):
 	}
 
 
-def unpaid_invoice_count(customer, company):
-	return frappe.db.count(
-		"Sales Invoice",
-		{
-			"docstatus": 1,
-			"customer": customer,
-			"company": company,
-			"is_return": 0,
-			"outstanding_amount": (">", 0),
-		},
-	)
-
-
 def collection_days(customer, company, as_of, outstanding):
-	first_invoice = frappe.get_all(
+	first_invoice = frappe.get_list(
 		"Sales Invoice",
 		filters={
 			"docstatus": 1,
 			"customer": customer,
 			"company": company,
+			"is_opening": ["!=", "Yes"],
 			"posting_date": [">", add_days(as_of, -365)],
 		},
 		order_by="posting_date asc",
@@ -208,7 +211,7 @@ def receivables(customer, company, report_date):
 	overdue = flt(row.get("total_due"))
 	buckets = [
 		{"key": "not_due", "label": _("Not due"), "value": outstanding - overdue, "overdue": False},
-		{"key": "b1", "label": _("1–30 days"), "value": flt(row.get("range1")), "overdue": True},
+		{"key": "b1", "label": _("0–30 days"), "value": flt(row.get("range1")), "overdue": True},
 		{"key": "b2", "label": _("31–60 days"), "value": flt(row.get("range2")), "overdue": True},
 		{"key": "b3", "label": _("61–90 days"), "value": flt(row.get("range3")), "overdue": True},
 		{"key": "b4", "label": _("90+ days"), "value": flt(row.get("range4")), "overdue": True},
@@ -237,18 +240,12 @@ def trend(customer, company, from_date, to_date, as_of, accounts):
 	if not accounts:
 		return None
 	si = DocType("Sales Invoice")
-	rows = (
-		frappe.qb.from_(si)
-		.select(si.posting_date, Sum(si.base_net_total).as_("total"))
-		.where(
-			(si.docstatus == 1)
-			& (si.customer == customer)
-			& (si.company == company)
-			& (si.posting_date >= from_date)
-			& (si.posting_date <= to_date)
-		)
-		.groupby(si.posting_date)
-	).run(as_dict=True)
+	rows = permitted(
+		"Sales Invoice",
+		invoice_filters(customer, company, from_date, to_date),
+		["posting_date", Sum(si.base_net_total).as_("total")],
+		group_by="posting_date",
+	)
 	by_month = {}
 	for r in rows:
 		month = getdate(r.posting_date).replace(day=1)
@@ -280,56 +277,53 @@ def pipeline(customer, company, as_of, accounts):
 	if frappe.has_permission("Sales Order", "read"):
 		tiles.update(sales_order_tiles(customer, company, as_of))
 	if accounts:
-		tiles.update(invoice_tiles(customer, company, as_of))
+		tiles["invoices"] = unpaid_invoices(customer, company, as_of)
 	return tiles
 
 
 def quotation_tiles(customer, company):
 	quotation = DocType("Quotation")
-	quote = (
-		frappe.qb.from_(quotation)
-		.select(
-			Coalesce(Sum(quotation.base_grand_total), 0).as_("value"),
-			Count(quotation.name).as_("count"),
-		)
-		.where(
-			(quotation.docstatus == 1)
-			& (quotation.status == "Open")
-			& (quotation.quotation_to == "Customer")
-			& (quotation.party_name == customer)
-			& (quotation.company == company)
-		)
-	).run(as_dict=True)[0]
+	quote = permitted(
+		"Quotation",
+		{
+			"docstatus": 1,
+			"status": "Open",
+			"quotation_to": "Customer",
+			"party_name": customer,
+			"company": company,
+		},
+		[Coalesce(Sum(quotation.base_grand_total), 0).as_("value"), Count(quotation.name).as_("count")],
+	)[0]
 	return {"quotations": {"value": flt(quote.value), "count": quote.count}}
 
 
 def sales_order_tiles(customer, company, as_of):
 	so = DocType("Sales Order")
-	open_so = (
-		(so.docstatus == 1)
-		& (so.customer == customer)
-		& (so.company == company)
-		& (so.status.notin(OPEN_SO_STATUS))
-	)
+	open_orders = {
+		"docstatus": 1,
+		"customer": customer,
+		"company": company,
+		"status": ["not in", OPEN_SO_STATUS],
+	}
 
-	delivery = (
-		frappe.qb.from_(so)
-		.select(
+	delivery = permitted(
+		"Sales Order",
+		{**open_orders, "per_delivered": ["<", 100], "skip_delivery_note": 0},
+		[
 			Coalesce(Sum(so.base_grand_total * (100 - so.per_delivered) / 100), 0).as_("value"),
 			Count(so.name).as_("count"),
 			Coalesce(Sum(Case().when(so.delivery_date < as_of, 1).else_(0)), 0).as_("past_due"),
-		)
-		.where(open_so & (so.per_delivered < 100))
-	).run(as_dict=True)[0]
+		],
+	)[0]
 
-	billing = (
-		frappe.qb.from_(so)
-		.select(
+	billing = permitted(
+		"Sales Order",
+		{**open_orders, "per_billed": ["<", 100]},
+		[
 			Coalesce(Sum(so.base_grand_total * (100 - so.per_billed) / 100), 0).as_("value"),
 			Count(so.name).as_("count"),
-		)
-		.where(open_so & (so.per_billed < 100))
-	).run(as_dict=True)[0]
+		],
+	)[0]
 	return {
 		"delivery": {
 			"value": flt(delivery.value),
@@ -340,30 +334,33 @@ def sales_order_tiles(customer, company, as_of):
 	}
 
 
-def invoice_tiles(customer, company, as_of):
+def base_outstanding(si, company):
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
+	return (
+		Case()
+		.when(si.party_account_currency == company_currency, si.outstanding_amount)
+		.else_(si.outstanding_amount * si.conversion_rate)
+	)
+
+
+def unpaid_invoices(customer, company, as_of):
 	si = DocType("Sales Invoice")
-	invoices = (
-		frappe.qb.from_(si)
-		.select(
-			Coalesce(Sum(si.outstanding_amount), 0).as_("value"),
+	row = permitted(
+		"Sales Invoice",
+		{
+			"docstatus": 1,
+			"customer": customer,
+			"company": company,
+			"is_return": 0,
+			"outstanding_amount": [">", 0],
+		},
+		[
+			Coalesce(Sum(base_outstanding(si, company)), 0).as_("value"),
 			Count(si.name).as_("count"),
 			Coalesce(Sum(Case().when(si.due_date < as_of, 1).else_(0)), 0).as_("overdue"),
-		)
-		.where(
-			(si.docstatus == 1)
-			& (si.customer == customer)
-			& (si.company == company)
-			& (si.is_return == 0)
-			& (si.outstanding_amount > 0)
-		)
-	).run(as_dict=True)[0]
-	return {
-		"invoices": {
-			"value": flt(invoices.value),
-			"count": invoices.count,
-			"overdue": invoices.overdue or 0,
-		}
-	}
+		],
+	)[0]
+	return {"value": flt(row.value), "count": row.count, "overdue": row.overdue or 0}
 
 
 TRANSACTION_TYPES = ("Sales Invoice", "Sales Order", "Payment Entry")
@@ -399,37 +396,31 @@ TXN_SPECS = {
 			"status",
 			"base_grand_total as amount",
 			"outstanding_amount as outstanding",
+			"party_account_currency",
+			"conversion_rate",
 			"is_return",
 		],
 		"order_by": "posting_date desc, creation desc",
-		"row": lambda r: {
+		"row": lambda r, currency: {
 			"status": "Return" if r.is_return else r.status,
 			"amount": flt(r.amount),
-			"outstanding": flt(r.outstanding),
+			"outstanding": flt(r.outstanding)
+			* (1 if r.party_account_currency == currency else flt(r.conversion_rate)),
 		},
 	},
 	"Sales Order": {
 		"party_field": "customer",
 		"extra": {},
-		"fields": ["name", "transaction_date as date", "status", "base_grand_total as amount", "per_billed"],
+		"fields": ["name", "transaction_date as date", "status", "base_grand_total as amount"],
 		"order_by": "transaction_date desc, creation desc",
-		"row": lambda r: {
-			"status": r.status,
-			"amount": flt(r.amount),
-			"outstanding": flt(r.amount) * (100 - flt(r.per_billed)) / 100,
-		},
+		"row": lambda r, currency: {"status": r.status, "amount": flt(r.amount), "outstanding": None},
 	},
 	"Payment Entry": {
 		"party_field": "party",
 		"extra": {"party_type": "Customer"},
-		"fields": [
-			"name",
-			"posting_date as date",
-			"base_paid_amount as amount",
-			"unallocated_amount as outstanding",
-		],
+		"fields": ["name", "posting_date as date", "base_paid_amount as amount"],
 		"order_by": "posting_date desc, creation desc",
-		"row": lambda r: {"status": "Submitted", "amount": flt(r.amount), "outstanding": flt(r.outstanding)},
+		"row": lambda r, currency: {"status": "Submitted", "amount": flt(r.amount), "outstanding": None},
 	},
 }
 
@@ -437,6 +428,7 @@ TXN_SPECS = {
 def _fetch_rows(doctype, customer, company, limit):
 	spec = TXN_SPECS[doctype]
 	filters = {"docstatus": 1, "company": company, spec["party_field"]: customer, **spec["extra"]}
+	currency = frappe.get_cached_value("Company", company, "default_currency")
 	rows = []
 	for r in frappe.get_list(
 		doctype, filters=filters, fields=spec["fields"], order_by=spec["order_by"], limit=limit
@@ -447,7 +439,7 @@ def _fetch_rows(doctype, customer, company, limit):
 				"doctype": doctype,
 				"type_label": _(doctype),
 				"date": str(r.date),
-				**spec["row"](r),
+				**spec["row"](r, currency),
 			}
 		)
 	return rows
