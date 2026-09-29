@@ -4699,7 +4699,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(wip_reservation.consumed_qty, 50)
 		self.assertEqual(wip_reservation.status, "Delivered")
 
-	def make_transferred_batches(self, prefix, transfer_qtys):
+	def make_transferred_batches(self, prefix, batch_qtys, transfer_qtys=None):
+		transfer_qtys = transfer_qtys or batch_qtys
 		production_item, rm_item = f"{prefix} FG", f"{prefix} RM"
 		make_item(production_item, {"is_stock_item": 1})
 		make_item(
@@ -4717,11 +4718,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		batches = []
-		for qty in transfer_qtys:
+		for qty in batch_qtys:
 			receipt = test_stock_entry.make_stock_entry(
 				item_code=rm_item, target="Stores - _TC", qty=qty, basic_rate=100
 			)
 			batches.append(get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle))
+
+		for qty in transfer_qtys:
 			frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)).submit()
 
 		return wo, rm_item, batches
@@ -4739,6 +4742,20 @@ class TestWorkOrder(ERPNextTestSuite):
 				[(row.batch_no, row.qty) for row in manufacture.items if row.item_code == rm_item], expected
 			)
 			manufacture.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_manufacture_splits_batches_from_one_transfer(self):
+		wo, rm_item, batches = self.make_transferred_batches("TST-OTB", [10, 5], transfer_qtys=[15])
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 15))
+		self.assertEqual(
+			[(row.batch_no, row.qty) for row in manufacture.items if row.item_code == rm_item],
+			[(batches[0], 10), (batches[1], 5)],
+		)
+		manufacture.submit()
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
