@@ -11,7 +11,7 @@ import frappe
 import pyarrow as pa
 from frappe.database.duckdb.database import DuckDBConnection
 from frappe.database.duckdb.schema import DuckDBTable
-from frappe.utils import add_days, today
+from frappe.utils import add_days, now_datetime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -20,7 +20,8 @@ from erpnext.stock.report.stock_balance import stock_balance
 from erpnext.stock.report.stock_balance import test_stock_balance as live_tests
 from erpnext.tests.utils import ERPNextTestSuite
 
-LATEST_SYNC = "erpnext.stock.report.stock_balance.stock_balance_snapshot.get_latest_sync"
+SNAPSHOT = "erpnext.stock.report.stock_balance.stock_balance_snapshot"
+LATEST_SYNC = f"{SNAPSHOT}.get_latest_complete_sync"
 
 
 def capture_ledger(filters):
@@ -38,7 +39,7 @@ def capture_ledger(filters):
 
 
 @contextmanager
-def ledger_snapshot(table):
+def ledger_snapshot(table, synced_at=None):
 	"""Serve the rows as the latest sync and fail on any live ledger query meanwhile."""
 	conn = duckdb.connect(":memory:")
 	DuckDBTable("Stock Ledger Entry").sync(conn)
@@ -53,7 +54,10 @@ def ledger_snapshot(table):
 		return live_sql(query, *args, **kwargs)
 
 	with (
-		patch(LATEST_SYNC, return_value=DuckDBConnection(conn)),
+		patch(
+			LATEST_SYNC, return_value=frappe._dict(filename="snapshot", creation=synced_at or now_datetime())
+		),
+		patch(f"{SNAPSHOT}.get_duckdb", return_value=DuckDBConnection(conn)),
 		patch.object(frappe.db, "sql", side_effect=sql),
 	):
 		yield
@@ -90,6 +94,17 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 
 	def set_ledger_values(self, voucher_no, values):
 		frappe.db.set_value("Stock Ledger Entry", {"voucher_no": voucher_no}, values)
+
+	def close_stock(self, from_date, to_date):
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			closing = frappe.get_doc(
+				doctype="Stock Closing Entry",
+				company=self.filters.company,
+				from_date=from_date,
+				to_date=to_date,
+			).submit()
+		closing.create_stock_closing_balance_entries()
+		closing.db_set("status", "Completed")
 
 	def use_item(self, name, properties):
 		self.item = make_item(name, properties).name
@@ -164,17 +179,18 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 
 	def test_stock_closing_balance_is_the_opening(self):
 		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
-		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
-			closing = frappe.get_doc(
-				doctype="Stock Closing Entry",
-				company=self.filters.company,
-				from_date=add_days(today(), -10),
-				to_date=add_days(today(), -6),
-			).submit()
-		closing.create_stock_closing_balance_entries()
-		closing.db_set("status", "Completed")
+		self.close_stock(add_days(today(), -10), add_days(today(), -6))
 		self.make_movement(qty=5, basic_rate=100)
 		self.assert_snapshot_matches()
+
+	def test_closing_after_the_sync_is_not_used(self):
+		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
+		ledger, synced_at = capture_ledger(self.filters), now_datetime()
+		expected = stock_balance.execute(deepcopy(self.filters))
+		self.make_movement(qty=5, basic_rate=100, posting_date=add_days(today(), -8))
+		self.close_stock(add_days(today(), -10), add_days(today(), -6))
+		with ledger_snapshot(ledger, synced_at):
+			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
 
 	def test_inventory_dimension_filter_and_grouping(self):
 		for entry in (
