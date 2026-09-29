@@ -292,6 +292,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
+		self.validate_work_order_status_for_return()
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
@@ -1084,6 +1085,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 				self.check_duplicate_entry_for_work_order()
 		elif self.purpose != "Material Transfer":
 			self.work_order = None
+
+	def validate_work_order_status_for_return(self):
+		if not (self.is_return and self.pro_doc) or self.pro_doc.status in ("Completed", "Closed"):
+			return
+
+		frappe.throw(
+			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
+				get_link_to_form("Work Order", self.work_order)
+			),
+			title=_("Work Order Not Finished"),
+		)
 
 	def validate_source_stock_entry(self):
 		if not self.get("source_stock_entry"):
