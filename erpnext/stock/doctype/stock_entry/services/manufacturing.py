@@ -676,16 +676,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self._append_with_serial_nos(item_args, row, qty)
 			return
 
-		self.use_unreserved_batches(row, item_args["qty"])
+		row.batches = self.get_batches_to_consume(row, item_args["qty"])
 		if len(row.batches) == 1:
 			self._append_with_single_batch(item_args, row)
 		elif row.batches:
 			self.split_items_based_on_batches(qty, item_args, row)
 
-	def use_unreserved_batches(self, row, qty):
-		"""Switch to batch qty not reserved by other vouchers when it covers the qty."""
+	def get_batches_to_consume(self, row, qty):
+		"""Batch qty not reserved by other vouchers when it covers the qty, else the transferred batches."""
 		if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
-			return
+			return row.batches
 
 		unreserved_qty = self.get_unreserved_batch_qty(row)
 		batches = {
@@ -695,7 +695,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		}
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		if flt(sum(batches.values()), precision) >= flt(qty, precision):
-			row.batches = batches
+			return batches
+
+		return row.batches
 
 	def get_unreserved_batch_qty(self, row):
 		batches = get_auto_batch_nos(
