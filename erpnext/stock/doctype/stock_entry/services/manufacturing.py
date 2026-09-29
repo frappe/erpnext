@@ -760,13 +760,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				self.available_materials[key].qty += row.qty
 
 			if row.serial_and_batch_bundle:
-				self.add_serial_batches(self.available_materials[key], row.serial_and_batch_bundle)
-
-	def add_serial_batches(self, material, sabb):
-		details = self.get_sabb_details(sabb)
-		material.serial_nos.extend(details.serial_nos)
-		for batch_no, qty in details.batches.items():
-			material.batches[batch_no] += qty
+				material = self.available_materials[key]
+				details = self.get_sabb_details(row.serial_and_batch_bundle)
+				material.serial_nos.extend(details.serial_nos)
+				for batch_no, qty in details.batches.items():
+					material.batches[batch_no] += qty
 
 	def get_consumption_entries(self):
 		stock_entry = frappe.qb.DocType("Stock Entry")
