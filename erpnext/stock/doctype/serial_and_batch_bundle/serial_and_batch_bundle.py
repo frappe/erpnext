@@ -565,6 +565,7 @@ class SerialandBatchBundle(Document):
 			"Purchase Invoice": "purchase_invoice_item",
 			"Delivery Note": "dn_detail",
 			"Purchase Receipt": "purchase_receipt_item",
+			"Subcontracting Receipt": "subcontracting_receipt_item",
 		}.get(self.voucher_type)
 
 		return_against_voucher_detail_no = frappe.db.get_value(
@@ -586,7 +587,7 @@ class SerialandBatchBundle(Document):
 
 		# Added to handle rejected warehouse case
 		return_warehouse = None
-		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+		if self.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 			warehouses = get_warehouses_for_return(self.voucher_type, return_against_voucher_detail_no)
 			if self.warehouse in warehouses:
 				return_warehouse = self.warehouse
