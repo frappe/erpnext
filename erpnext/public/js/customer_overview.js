@@ -16,13 +16,7 @@ const STATUS_THEME = {
 	Return: "gray",
 	Closed: "gray",
 };
-const CHART_BLUE = "var(--chart-categorical-1)";
-const CHART_LIGHT_BLUE = "var(--chart-categorical-2)";
-const CHART_GREEN = "var(--chart-categorical-3)";
-const CHART_LIGHT_GREEN = "var(--chart-categorical-4)";
-const CHART_LIGHT_VIOLET = "var(--chart-categorical-6)";
 const CLOSED_ORDER_STATUS = ["Closed", "Completed", "On Hold"];
-const TREND_BLUE = "#2283c3";
 const RECENT_LIMIT = 10;
 const COUNT = {
 	invoices: (n) => (n === 1 ? __("1 invoice") : __("{0} invoices", [n])),
@@ -98,16 +92,21 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const $header = $('<div class="co-header">').appendTo(this.$root);
 		const $left = $('<div class="co-header-left">').appendTo($header);
 		$('<div class="co-htitle">').text(__("Overview")).appendTo($left);
-		this.$context = $('<div class="co-hsub text-muted">').appendTo($left);
-		const $controls = $('<div class="co-header-controls">').appendTo($header);
+		this.$context = $('<div class="co-hsub">').appendTo($left);
+		this.$controls = $('<div class="co-header-controls">').appendTo($header);
 
-		this.company_field = this.make_select($controls, __("Company"), [this.state.company], (value) => {
-			this.state.company = value;
-			this.set_pref("company", value);
-			this.load();
-			this.refresh_list();
-		});
-		this.period_field = this.make_select($controls, __("Period"), PERIODS, (value) => {
+		this.company_field = this.make_select(
+			this.$controls,
+			__("Company"),
+			[this.state.company],
+			(value) => {
+				this.state.company = value;
+				this.set_pref("company", value);
+				this.load();
+				this.refresh_list();
+			}
+		);
+		this.period_field = this.make_select(this.$controls, __("Period"), PERIODS, (value) => {
 			this.state.period = value;
 			this.set_pref("period", value);
 			this.load({ receivables: false });
@@ -207,19 +206,20 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	render_no_activity() {
 		this.$body.hide();
+		this.$context.hide();
+		this.$controls.hide();
 		const actions = ["Quotation", "Sales Order"]
 			.filter((doctype) => frappe.model.can_create(doctype))
 			.map((doctype) => ({
 				label: __("New {0}", [__(doctype)]),
 				icon: "plus",
-				variant: doctype === "Quotation" ? "solid" : "subtle",
 				onclick: () => this.frm.make_methods[doctype](),
 			}));
 		this.$empty
 			.empty()
 			.append(
 				frappe.ui.empty_state({
-					icon: "chart-no-axes-column",
+					icon: "inbox",
 					title: __("No activity yet"),
 					description: __(
 						"Quotations, orders, invoices and payments for this customer will show up here."
@@ -347,7 +347,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.trend_chart = new frappe.Chart($('<div class="co-chart">').appendTo($panel)[0], {
 			type: "line",
 			height: 220,
-			colors: [TREND_BLUE],
+			colors: ["blue"],
 			data: {
 				labels: t.points.map((p) => p.label),
 				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
@@ -360,7 +360,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const notes = [];
 		if (t.average) notes.push(__("Avg {0}", [this.money0(t.average)]));
 		if (t.has_mtd) notes.push(__("{0} is month to date", [t.points[t.points.length - 1].label]));
-		if (notes.length) $('<div class="co-note text-muted">').text(notes.join(" · ")).appendTo($panel);
+		if (notes.length) $('<div class="co-note">').text(notes.join(" · ")).appendTo($panel);
 	}
 
 	render_receivables() {
@@ -391,13 +391,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 					formatted: this.short_money(b.value),
 				})),
 				format: (v) => this.short_money(v),
-				color: CHART_BLUE,
+				color: "blue",
 				on_click: () => this.open_ar(),
 				values_on_hover: true,
 			})
 			.appendTo($('<div class="co-age-chart">').appendTo($panel));
 
-		$('<div class="co-note text-muted">')
+		$('<div class="co-note">')
 			.text(
 				flt(a.overdue) > 0
 					? __("Overdue {0} · {1}% of outstanding", [this.money0(a.overdue), flt(a.overdue_pct, 1)])
@@ -434,10 +434,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
 		const donut = frappe.ui.donut({
 			segments: [
-				{ label: __("Overdue"), value: overdue, color: CHART_BLUE },
-				{ label: __("Not due"), value: receivable - overdue, color: CHART_LIGHT_BLUE },
-				{ label: __("Unbilled orders"), value: used - receivable, color: CHART_LIGHT_VIOLET },
-				{ label: __("Available"), value: limit - used, color: CHART_GREEN },
+				{ label: __("Overdue"), value: overdue, color: "var(--blue-700)" },
+				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
+				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--blue-300)" },
+				{ label: __("Available"), value: limit - used, color: "var(--green-500)" },
 			],
 			center: {
 				value: flt((used / limit) * 100, 1) + "%",
@@ -473,14 +473,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return true;
 		}
 		if (source.error) {
-			this.empty_note($panel, error_text, height).addClass("text-danger");
+			this.empty_note($panel, error_text, height).addClass("text-ink-red-7");
 			return true;
 		}
 		return false;
 	}
 
 	empty_note($panel, text, height) {
-		return $('<div class="co-empty text-muted">').css("min-height", height).text(text).appendTo($panel);
+		return $('<div class="co-empty">').css("min-height", height).text(text).appendTo($panel);
 	}
 
 	edit_credit_limit() {
@@ -527,12 +527,11 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const pl = (this.sales.data && this.sales.data.pipeline) || {};
 		const specs = this.pipeline_specs(pl).filter((s) => s.data);
 		if (!specs.length) {
-			this.empty_note(this.$pipeline, __("Could not load sales"), 0).addClass("text-danger");
+			this.empty_note(this.$pipeline, __("Could not load sales"), 0).addClass("text-ink-red-7");
 			return;
 		}
 
 		const items = specs.map((s) => ({
-			dot: s.dot,
 			label: s.label,
 			value: this.money0(s.data.value),
 			caption: s.data.count ? s.caption(s.data) : __("None open"),
@@ -541,7 +540,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		frappe.ui.stat_cards({ items }).appendTo(this.$pipeline);
 
 		if (pl.delivery && pl.billing && pl.delivery.count && pl.billing.count) {
-			$('<div class="co-note text-muted">')
+			$('<div class="co-note">')
 				.text(__("The same order can appear under both Pending Delivery and Pending Billing."))
 				.appendTo(this.$pipeline);
 		}
@@ -559,7 +558,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const specs = [];
 		if (frappe.model.can_read("Quotation"))
 			specs.push({
-				dot: CHART_LIGHT_BLUE,
 				label: __("Open Quotations"),
 				data: pl.quotations,
 				caption: (d) => COUNT.quotations(d.count),
@@ -568,7 +566,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 		if (frappe.model.can_read("Sales Order"))
 			specs.push(
 				{
-					dot: CHART_LIGHT_GREEN,
 					label: __("Pending Delivery"),
 					data: pl.delivery,
 					caption: (d) =>
@@ -581,7 +578,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 					],
 				},
 				{
-					dot: CHART_BLUE,
 					label: __("Pending Billing"),
 					data: pl.billing,
 					caption: (d) => COUNT.orders(d.count) + " · " + __("not fully billed"),
@@ -590,7 +586,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 			);
 		if (this.accounts)
 			specs.push({
-				dot: CHART_GREEN,
 				label: __("Unpaid Invoices"),
 				data: pl.invoices,
 				caption: (d) =>
@@ -685,8 +680,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	outstanding_cell(row) {
 		if (row.outstanding == null || flt(row.outstanding) <= 0)
-			return '<div class="text-right text-extra-muted">—</div>';
-		const cls = row.status === "Overdue" ? "text-danger" : "";
+			return '<div class="text-right text-ink-gray-4">—</div>';
+		const cls = row.status === "Overdue" ? "text-ink-red-7" : "";
 		return `<div class="text-right ${cls}">${this.money(row.outstanding)}</div>`;
 	}
 
@@ -695,25 +690,24 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const $top = $('<div class="co-head-top">').appendTo($head);
 		$('<div class="co-title">').text(title).appendTo($top);
 		if (right) $('<div class="co-head-action">').append(right).appendTo($top);
-		if (subtitle) $('<div class="co-subtitle text-muted">').text(subtitle).appendTo($head);
+		if (subtitle) $('<div class="co-subtitle">').text(subtitle).appendTo($head);
 		return $head;
 	}
 
 	panel($parent, opts = {}) {
-		const $panel = $('<div class="widget border co-panel">').appendTo($parent);
+		const $panel = $('<div class="co-panel">').appendTo($parent);
 		if (opts.title) this.section_head($panel, opts);
 		return $panel;
 	}
 
 	report_link(text, on_click) {
-		return $("<a>")
-			.attr("href", "#")
-			.addClass("co-report-link")
-			.text(text)
-			.on("click", (e) => {
-				e.preventDefault();
-				on_click();
-			});
+		return frappe.ui.button({
+			label: text,
+			variant: "ghost",
+			size: "sm",
+			icon_right: "arrow-up-right",
+			onclick: on_click,
+		});
 	}
 
 	open_ar() {
@@ -728,6 +722,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const range = (this.sales.data && this.sales.data.period_range) || {};
 		frappe.route_options = {
 			tree_type: "Customer",
+			entity: [this.frm.doc.name],
 			doc_type: "Sales Invoice",
 			company: this.state.company,
 			from_date: range.from_date,

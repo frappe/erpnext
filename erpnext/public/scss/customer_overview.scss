@@ -1,5 +1,10 @@
 .customer-overview {
-	--text-muted: var(--ink-gray-5);
+	.co-hsub,
+	.co-subtitle,
+	.co-note,
+	.co-empty {
+		color: var(--ink-gray-5);
+	}
 
 	.co-head {
 		margin-bottom: var(--margin-md);
@@ -15,7 +20,7 @@
 	.co-title {
 		font-size: var(--text-base);
 		font-weight: var(--weight-regular);
-		color: var(--text-color);
+		color: var(--ink-gray-8);
 	}
 
 	.co-subtitle {
@@ -31,13 +36,6 @@
 		font-size: var(--text-base);
 	}
 
-	.co-report-link {
-		flex-shrink: 0;
-		white-space: nowrap;
-		font-size: var(--text-sm);
-		color: var(--text-muted);
-	}
-
 	.co-two-col {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -51,10 +49,12 @@
 	}
 
 	.co-panel {
+		border: 1px solid var(--outline-gray-1);
+		background: var(--surface-base);
 		display: flex;
 		flex-direction: column;
-		padding: 12px 16px;
-		border-radius: 8px;
+		padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+		border-radius: var(--radius-lg);
 	}
 
 	.co-note {
@@ -78,7 +78,7 @@
 	.co-htitle {
 		font-size: var(--text-xl);
 		font-weight: var(--weight-semibold);
-		color: var(--text-color);
+		color: var(--ink-gray-8);
 	}
 
 	.co-hsub {
@@ -93,7 +93,7 @@
 	}
 
 	.co-filter {
-		min-width: 160px;
+		width: 180px;
 	}
 
 	.co-section {
