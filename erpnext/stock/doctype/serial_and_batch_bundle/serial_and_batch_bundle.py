@@ -1223,7 +1223,13 @@ class SerialandBatchBundle(Document):
 
 	def get_transfer_rates(self) -> dict:
 		"""Rate of each serial/batch where the same Stock Entry row took it out, plus the row's additional cost."""
-		if self.voucher_type != "Stock Entry" or not self.voucher_detail_no:
+		from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
+
+		if (
+			self.voucher_type != "Stock Entry"
+			or not self.voucher_detail_no
+			or is_serial_no_wise_valuation_disabled(self.item_code)
+		):
 			return {}
 
 		outward_bundle = frappe.db.get_value(
