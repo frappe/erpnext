@@ -94,6 +94,7 @@ class ProductionPlan(Document):
 		posting_date: DF.Date
 		prod_plan_references: DF.Table[ProductionPlanItemReference]
 		project: DF.Link | None
+		raw_material_group_warehouse: DF.Link | None
 		reserve_stock: DF.Check
 		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
 		sales_orders: DF.Table[ProductionPlanSalesOrder]
@@ -143,7 +144,37 @@ class ProductionPlan(Document):
 		self.validate_data()
 		self.validate_sales_orders()
 		self.validate_material_request_type()
+		self.validate_raw_material_group_warehouse()
 		self.enable_auto_reserve_stock()
+
+	def validate_raw_material_group_warehouse(self):
+		if not self.raw_material_group_warehouse:
+			return
+
+		group = frappe.db.get_value(
+			"Warehouse", self.raw_material_group_warehouse, ["lft", "rgt", "is_group"], as_dict=True
+		)
+		if not group.is_group:
+			frappe.throw(
+				_("{0} must be a group warehouse.").format(frappe.bold(_("Raw Material Group Warehouse")))
+			)
+
+		if self.for_warehouse:
+			child = frappe.db.get_value(
+				"Warehouse", self.for_warehouse, ["lft", "rgt", "is_group"], as_dict=True
+			)
+			if child.is_group:
+				frappe.throw(
+					_("For Warehouse {0} must not be a group warehouse.").format(
+						frappe.bold(self.for_warehouse)
+					)
+				)
+			if not (group.lft <= child.lft and child.rgt <= group.rgt):
+				frappe.throw(
+					_("For Warehouse {0} must be a child of the group warehouse {1}.").format(
+						frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
+					)
+				)
 
 	def enable_auto_reserve_stock(self):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
@@ -992,6 +1023,14 @@ class ProductionPlan(Document):
 
 			item_doc = frappe.get_cached_doc("Item", item.item_code)
 
+			# a group warehouse cannot receive stock; it must never reach a Material Request line
+			if item.warehouse and frappe.get_cached_value("Warehouse", item.warehouse, "is_group"):
+				frappe.throw(
+					_("Cannot create Material Request for item {0} in group warehouse {1}.").format(
+						frappe.bold(item.item_code), frappe.bold(item.warehouse)
+					)
+				)
+
 			material_request_type = item.material_request_type or item_doc.default_material_request_type
 
 			# key for Sales Order:Material Request Type:Customer
@@ -1465,11 +1504,19 @@ def get_material_request_items(
 	ignore_existing_ordered_qty,
 	include_safety_stock,
 	warehouse,
+	target_warehouse,
 	bin_dict,
 	consumed_qty,
+	shortage_bin=None,
 ):
+	# bin_dict feeds the stock columns; shortage_bin (if given) drives the required qty
 	required_qty = _required_qty_for_mr(
-		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+		row,
+		ignore_existing_ordered_qty,
+		warehouse,
+		shortage_bin or bin_dict,
+		consumed_qty,
+		include_safety_stock,
 	)
 
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
@@ -1497,7 +1544,7 @@ def get_material_request_items(
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
-		"warehouse": warehouse
+		"warehouse": target_warehouse
 		or row.get("source_warehouse")
 		or row.get("default_warehouse")
 		or item_group_defaults.get("default_warehouse"),
@@ -1794,6 +1841,7 @@ def get_items_for_material_requests(
 
 	doc = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
 	_authorize_mr_request(doc, warehouses)
+	_validate_group_warehouse_target(doc)
 
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))
@@ -1851,7 +1899,6 @@ def get_items_for_material_requests(
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
 		ignore_existing_ordered_qty = data.get("ignore_existing_ordered_qty") or ignore_existing_ordered_qty
-		warehouse = doc.get("for_warehouse")
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):
@@ -1944,13 +1991,27 @@ def get_items_for_material_requests(
 
 	mr_items = []
 	consumed_qty = defaultdict(float)
+	# raw_material_group_warehouse (optional, group) only widens the availability
+	# scope to its child warehouses; material is still received into for_warehouse.
+	target_warehouse = doc.get("for_warehouse")
+	scope_warehouse = doc.get("raw_material_group_warehouse") or target_warehouse
+	# when transfers are drawn from the selected warehouses, the shortage is taken
+	# against for_warehouse alone so child stock is not counted twice.
+	transferring = bool((ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses)
 
 	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
-			warehouse = warehouse or details.get("source_warehouse") or details.get("default_warehouse")
-			bin_dict = get_bin_details(details, doc.company, warehouse)
-			bin_dict = bin_dict[0] if bin_dict else {}
+			fallback = details.get("source_warehouse") or details.get("default_warehouse")
+			scope_warehouse = scope_warehouse or fallback
+			target_warehouse = target_warehouse or fallback
+			# get_bin_details scopes to the warehouse's descendants, returning one row per
+			# child warehouse; sum them so a group warehouse reflects combined child stock.
+			bin_dict = _aggregate_bin_details(get_bin_details(details, doc.company, scope_warehouse))
+			shortage_warehouse, shortage_bin = scope_warehouse, bin_dict
+			if transferring and scope_warehouse != target_warehouse:
+				shortage_warehouse = target_warehouse
+				shortage_bin = _aggregate_bin_details(get_bin_details(details, doc.company, target_warehouse))
 
 			if details.qty > 0:
 				items = get_material_request_items(
@@ -1960,9 +2021,11 @@ def get_items_for_material_requests(
 					company,
 					ignore_existing_ordered_qty,
 					include_safety_stock,
-					warehouse,
+					shortage_warehouse,
+					target_warehouse,
 					bin_dict,
 					consumed_qty,
+					shortage_bin,
 				)
 				if items:
 					mr_items.append(items)
@@ -2001,6 +2064,32 @@ def get_items_for_material_requests(
 		frappe.msgprint(message, title=_("Note"))
 
 	return mr_items
+
+
+def _validate_group_warehouse_target(doc):
+	# the group only scopes availability; raw materials still need a concrete
+	# receiving warehouse, so for_warehouse is required once we generate items.
+	if doc.get("raw_material_group_warehouse") and not doc.get("for_warehouse"):
+		frappe.throw(
+			_("{0} is required to get raw materials when {1} is set.").format(
+				frappe.bold(_("For Warehouse")), frappe.bold(_("Raw Material Group Warehouse"))
+			)
+		)
+
+
+def _aggregate_bin_details(bin_list):
+	qty_fields = (
+		"projected_qty",
+		"actual_qty",
+		"ordered_qty",
+		"reserved_qty_for_production",
+		"planned_qty",
+	)
+	aggregated = {field: 0 for field in qty_fields}
+	for row in bin_list or []:
+		for field in qty_fields:
+			aggregated[field] += flt(row.get(field))
+	return aggregated
 
 
 def get_materials_from_other_locations(
@@ -2498,3 +2587,41 @@ def cancel_stock_reservation_entries(doc, sre_list):
 	sre.cancel_stock_reservation_entries(sre_list)
 
 	doc.reload()
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_child_warehouses(
+	doctype: str | None, txt: str, searchfield: str | None, start: int, page_len: int, filters: dict
+):
+	"Leaf warehouses under the given group warehouse, for the For Warehouse link query."
+	group_warehouse = (filters or {}).get("group_warehouse")
+	if not group_warehouse or not isinstance(group_warehouse, str):
+		return []
+
+	bounds = frappe.db.get_value("Warehouse", group_warehouse, ["lft", "rgt"], as_dict=True)
+	if not bounds:
+		return []
+
+	list_filters = [
+		["is_group", "=", 0],
+		["disabled", "=", 0],
+		["lft", ">=", bounds.lft],
+		["rgt", "<=", bounds.rgt],
+	]
+	if filters.get("company"):
+		list_filters.append(["company", "=", filters.get("company")])
+
+	or_filters = [[field, "like", f"%{txt}%"] for field in ("name", "warehouse_name")] if txt else None
+
+	# ignore_permissions=False applies the doctype and user permissions
+	return frappe.qb.get_query(
+		"Warehouse",
+		fields=["name"],
+		filters=list_filters,
+		or_filters=or_filters,
+		order_by="name",
+		limit=page_len,
+		offset=start,
+		ignore_permissions=False,
+	).run()
