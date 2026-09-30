@@ -17,19 +17,6 @@ frappe.kanban_v2.settings["Opportunity"] = {
 		},
 
 		onBeforeCardMove(move) {
-			// as the form's Reopen, so the old reasons don't look like a later loss's
-			if (move.fromColumn === "Lost") {
-				return frappe
-					.xcall("frappe.client.set_value", {
-						doctype: "Opportunity",
-						name: move.cardId,
-						fieldname: { lost_reasons: [] },
-					})
-					.then(
-						() => true,
-						() => false
-					);
-			}
 			if (move.toColumn !== "Lost") return;
 			if (move.cardIds.length > 1) {
 				frappe.ui.toast({
