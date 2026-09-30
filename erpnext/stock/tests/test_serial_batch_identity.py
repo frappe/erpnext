@@ -1698,6 +1698,19 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			make_pos_profile()
 		return "_Test POS Profile"
 
+	def test_stock_entry_from_receipt_carries_serial_numbers(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_stock_entry
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item("_Identity Serial Only Item", {"has_serial_no": 1}).name
+		receipt = make_purchase_receipt(
+			item_code=item, qty=2, rate=100, use_serial_batch_fields=1, serial_no="Receipt-001\nReceipt-002"
+		)
+
+		stock_entry = make_stock_entry(receipt.name)
+
+		self.assertEqual(sorted(stock_entry.items[0].serial_no.split("\n")), ["Receipt-001", "Receipt-002"])
+
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
