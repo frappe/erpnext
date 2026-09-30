@@ -158,11 +158,13 @@
   },
   {
    "depends_on": "is_internal_supplier",
+   "description": "Select the related company that this Supplier represents for inter-company transactions.",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "image",
@@ -593,7 +595,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-08-21 23:11:49.780507",
+ "modified": "2026-09-30 12:25:43.461745",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
