@@ -336,9 +336,13 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				return_value={},
 			),
 			patch(
-				"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance",
-				return_value=(1, 100, serial.name),
-			) as balance,
+				"erpnext.stock.utils.get_available_serial_nos",
+				return_value=[frappe._dict(serial_no=serial.name)],
+			),
+			patch(
+				"erpnext.stock.stock_ledger.get_previous_sle",
+				return_value=frappe._dict(qty_after_transaction=1, valuation_rate=100),
+			) as previous_entry,
 		):
 			args = {
 				"warehouse": "_Test Warehouse - _TC",
@@ -353,7 +357,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertEqual(row["current_serial_no"], "Fetch-001")
 			self.assertEqual(row["qty"], 1)
 			self.assertEqual(row["valuation_rate"], 100)
-			balance.return_value = (0, 0, None)
+			previous_entry.return_value = None
 			self.assertEqual(get_items(**args), [])
 
 	def test_reconciliation_current_bundle_resolves_only_existing_item_serials(self):

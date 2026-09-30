@@ -137,7 +137,9 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 			doctype="Serial No", item_code=item.name, serial_no="COPQ-SN-01", company="_Test Company"
 		).insert()
 		batch = frappe.get_doc(doctype="Batch", item=item.name, batch_id="COPQ-B-01").insert()
-		corrective_jc.db_set({"serial_no": serial_no.serial_no, "batch_no": batch.name})
+		corrective_jc.db_set(
+			{"serial_no": serial_no.serial_no, "batch_no": batch.name, "production_item": item.name}
+		)
 
 		rows = self.run_report(company="_Test Company", serial_no=serial_no.name, batch_no=batch.name)
 
