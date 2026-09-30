@@ -1465,15 +1465,31 @@ def get_item_and_warehouses(item_code, warehouse):
 	from frappe.utils.nestedset import get_descendants_of
 
 	items = []
-	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	stock_uom, has_serial_no = frappe.get_cached_value("Item", item_code, ["stock_uom", "has_serial_no"])
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		childrens = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
 		for ch_warehouse in childrens:
 			items.append(
-				frappe._dict({"item_code": item_code, "warehouse": ch_warehouse, "stock_uom": stock_uom})
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": ch_warehouse,
+						"stock_uom": stock_uom,
+						"has_serial_no": has_serial_no,
+					}
+				)
 			)
 	else:
-		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse, "stock_uom": stock_uom})]
+		items = [
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"stock_uom": stock_uom,
+					"has_serial_no": has_serial_no,
+				}
+			)
+		]
 
 	return items
 
