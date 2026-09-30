@@ -78,6 +78,15 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 		self.assertEqual(result[0].balance, ids)
 		self.assertEqual(result[0].balance_number, "Report-002\nReport-001\nReport-002")
 
+	def test_batch_text_keeps_commas_in_legacy_ids(self):
+		legacy = frappe.get_doc(
+			{"doctype": "Batch", "item": self.item.name, "batch_id": "Legacy,Lot"}
+		).insert(set_name="Legacy,Lot")
+		columns = [{"label": "Batches", "fieldname": "batch_no", "fieldtype": "Small Text"}]
+		data = [{"batch_no": f"{legacy.name}\n{self.batch.name}"}]
+		_, result = prepare_serial_batch_report(columns, data, batch_fields=("batch_no",))
+		self.assertEqual(result[0].batch_no_number, "Legacy,Lot\nReport-001")
+
 	def test_link_ids_are_not_matched_as_physical_numbers(self):
 		self.make_number("Serial No", self.serial.name)
 		_, result = prepare_serial_batch_report(["Serial:Link/Serial No:120"], [[self.serial.name]])
