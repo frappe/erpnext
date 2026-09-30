@@ -45,9 +45,6 @@
   "more_info",
   "opportunity",
   "title",
-  "quotations_tab",
-  "quotations_section",
-  "quotations_html",
   "address_and_contact_tab",
   "billing_address",
   "billing_address_display",
@@ -359,21 +356,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Use HTML"
-  },
-  {
-   "fieldname": "quotations_tab",
-   "fieldtype": "Tab Break",
-   "label": "Quotations"
-  },
-  {
-   "fieldname": "quotations_section",
-   "fieldtype": "Section Break",
-   "hide_border": 1
-  },
-  {
-   "fieldname": "quotations_html",
-   "fieldtype": "HTML",
-   "label": "Quotations Content"
   },
   {
    "fieldname": "address_and_contact_tab",

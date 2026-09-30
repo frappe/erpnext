@@ -101,56 +101,6 @@
 		stroke: var(--text-muted, #7c7c7c);
 	}
 </style>
-{% if (!has_quotes) { %}
-<div class="quotations-tab-container my-2">
-	<div class="table-responsive">
-		<table class="table table-bordered quotations-table mb-0">
-			<thead>
-				<tr>
-					<th style="width: 50px; text-align: center;">#</th>
-					<th style="width: 220px;">{{ __("Item") }}</th>
-					{% if (suppliers && suppliers.length) { %}
-						{% for (let s = 0; s < suppliers.length; s++) { const sup = suppliers[s]; %}
-							<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
-								<div class="flex items-center justify-center truncate" title="{{ sup }}">
-									<a href="/app/supplier/{{ encodeURIComponent(sup) }}" class="supplier-link truncate">
-										{{ frappe.utils.escape_html(sup) }}
-									</a>
-								</div>
-							</th>
-						{% } %}
-					{% } else { %}
-						<th class="text-center text-muted" style="min-width: 270px; padding: 14px 16px;">{{ __("Supplier") }}</th>
-					{% } %}
-				</tr>
-			</thead>
-			<tbody>
-				<tr style="pointer-events: none;">
-					<td colspan="{{ 2 + (suppliers && suppliers.length ? suppliers.length : 1) }}" class="empty-state-cell p-0 border-0" style="pointer-events: auto;">
-						<div class="flex flex-col items-center justify-center text-center gap-3 min-h-48 py-5">
-							<div class="flex size-11 items-center justify-center rounded-full bg-surface-gray-2 text-ink-gray-5">
-								{{ frappe.utils.icon("file-text", "md") }}
-							</div>
-							<div class="flex flex-col items-center gap-1">
-								<div class="text-base-medium text-ink-gray-8">{{ __("No Supplier Quotations") }}</div>
-								<div class="text-p-sm text-ink-gray-5 max-w-xs">{{ __("No supplier quotations have been created for this Request for Quotation yet.") }}</div>
-							</div>
-							{% if (docstatus === 1) { %}
-								<div class="mt-2">
-									<button type="button" class="btn btn-primary btn-sm btn-new-supplier-quotation flex items-center gap-1">
-										{{ frappe.utils.icon("plus", "sm") }}
-										<span>{{ __("New Supplier Quotation") }}</span>
-									</button>
-								</div>
-							{% } %}
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-</div>
-{% } else { %}
 <div class="quotations-tab-wrapper my-2 w-full">
 	<div class="flex justify-end items-center w-full mb-3 gap-2.5 quotations-filters-bar">
 		<div class="item-filter-container" style="min-width: 180px; max-width: 240px;"></div>
@@ -337,4 +287,3 @@
 		</div>
 	</div>
 </div>
-{% } %}
