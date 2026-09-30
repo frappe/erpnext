@@ -490,6 +490,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				actual_tax_dict[tax.idx] = flt(tax.tax_amount, precision("tax_amount", tax));
 			}
 		});
+		this.set_actual_tax_distribution();
 
 		$.each(this.frm._items || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
@@ -508,7 +509,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				// Adjust divisional loss to the last item
 				if (tax.charge_type == "Actual") {
 					actual_tax_dict[tax.idx] -= current_tax_amount;
-					if (n == me.frm._items.length - 1) {
+					if (n == me._actual_tax_distribution[tax.idx].last_idx) {
 						current_tax_amount += actual_tax_dict[tax.idx];
 					}
 				}
@@ -601,6 +602,31 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		return item_tax_rate ? JSON.parse(item_tax_rate) : {};
 	}
 
+	set_actual_tax_distribution() {
+		// Actual taxes are split only over the items they apply to
+		const items = this.frm._items || [];
+		const item_tax_maps = items.map((item) => this._load_item_tax_rate(item.item_tax_rate));
+		this._actual_tax_distribution = {};
+
+		for (const tax of this.frm.doc.taxes || []) {
+			if (tax.charge_type != "Actual") continue;
+
+			let net_total = 0.0;
+			let last_idx = null;
+			items.forEach((item, n) => {
+				if (this._get_tax_rate(tax, item_tax_maps[n]) !== NOT_APPLICABLE_TAX) {
+					net_total += flt(item.net_amount);
+					last_idx = n;
+				}
+			});
+
+			// no applicable item: keep the remainder on the last item as before
+			if (last_idx === null) last_idx = items.length - 1;
+
+			this._actual_tax_distribution[tax.idx] = { net_total, last_idx };
+		}
+	}
+
 	get_current_tax_amount(item, tax, item_tax_map) {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
@@ -624,10 +650,21 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			current_net_amount = item.net_amount
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.tax_amount, precision("tax_amount", tax));
+<<<<<<< HEAD
 			current_tax_amount = this.frm.doc.net_total ?
 				((item.net_amount / this.frm.doc.net_total) * actual) : 0.0;
 
 		} else if(tax.charge_type == "On Net Total") {
+=======
+			var distribution = this._actual_tax_distribution[tax.idx];
+			if (distribution.net_total) {
+				current_tax_amount = (item.net_amount / distribution.net_total) * actual;
+			} else if (item === this.frm._items[distribution.last_idx]) {
+				// nothing to distribute over, allocate to the last applicable item
+				current_tax_amount = actual;
+			}
+		} else if (tax.charge_type == "On Net Total") {
+>>>>>>> 0ca4c81 (fix(accounts): split actual tax over applicable items only)
 			if (tax.account_head in item_tax_map) {
 				current_net_amount = item.net_amount
 			}
