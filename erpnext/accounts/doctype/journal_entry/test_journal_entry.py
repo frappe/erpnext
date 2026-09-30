@@ -398,6 +398,8 @@ class TestJournalEntry(ERPNextTestSuite):
 		)
 
 		jv.company = "_Test Company 1"
+		for row in jv.accounts:
+			row.cost_center = "Main - _TC1"
 		self.assertRaises(frappe.ValidationError, jv.save)
 
 	def test_jv_with_cost_centre(self):
