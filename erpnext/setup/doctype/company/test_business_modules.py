@@ -1,8 +1,11 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.utils.business_modules import get_business_modules
 
 from erpnext.hooks import business_modules
 from erpnext.patches.v16_0.enable_business_modules_on_existing_companies import execute as run_patch
+from erpnext.setup.setup_wizard.operations import install_fixtures
 from erpnext.tests.utils import ERPNextTestSuite
 
 FIELDNAMES = [m["fieldname"] for m in business_modules]
@@ -80,6 +83,44 @@ class TestCompanyBusinessModules(ERPNextTestSuite):
 		)
 		for fieldname in FIELDNAMES:
 			self.assertIn(fieldname, company)
+
+
+class TestSetupWizardModules(ERPNextTestSuite):
+	"""The setup wizard copies its module answers onto the new company."""
+
+	def test_wizard_answers_become_company_ticks(self):
+		args = frappe._dict(
+			module_stock=1,
+			module_manufacturing=0,
+			module_subcontracting=0,
+			module_assets=0,
+			module_projects=1,
+			module_pos=0,
+		)
+		self.assertEqual(
+			install_fixtures.get_module_ticks(args),
+			{"stock": 1, "manufacturing": 0, "subcontracting": 0, "assets": 0, "projects": 1, "pos": 0},
+		)
+
+	def test_module_the_wizard_did_not_ask_about_is_on(self):
+		ticks = install_fixtures.get_module_ticks(frappe._dict())
+		self.assertEqual(ticks, {fieldname: 1 for fieldname in FIELDNAMES})
+
+	def test_new_company_gets_the_ticks(self):
+		args = frappe._dict(
+			company_name="Wizard Company",
+			company_abbr="WC",
+			fy_start_date="2026-01-01",
+			fy_end_date="2026-12-31",
+			module_stock=1,
+			module_projects=0,
+		)
+		with patch.object(install_fixtures, "make_records") as make_records:
+			install_fixtures.install_company(args)
+
+		company = next(r for r in make_records.call_args.args[0] if r["doctype"] == "Company")
+		self.assertEqual(company["stock"], 1)
+		self.assertEqual(company["projects"], 0)
 
 
 class TestShowForModuleTags(ERPNextTestSuite):

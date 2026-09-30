@@ -90,9 +90,22 @@ erpnext.setup.slides_settings = [
 			},
 			{ fieldname: "module_accounting", label: __("Accounting"), fieldtype: "Check" },
 			{ fieldname: "module_stock", label: __("Stock"), fieldtype: "Check" },
+			{
+				fieldname: "module_manufacturing",
+				label: __("Manufacturing"),
+				fieldtype: "Check",
+				depends_on: "eval:doc.module_stock",
+			},
+			{
+				fieldname: "module_subcontracting",
+				label: __("Subcontracting"),
+				fieldtype: "Check",
+				depends_on: "eval:doc.module_manufacturing",
+			},
 			{ fieldtype: "Column Break" },
-			{ fieldname: "module_manufacturing", label: __("Manufacturing"), fieldtype: "Check" },
+			{ fieldname: "module_assets", label: __("Assets"), fieldtype: "Check" },
 			{ fieldname: "module_projects", label: __("Project Management"), fieldtype: "Check" },
+			{ fieldname: "module_pos", label: __("Point of Sale"), fieldtype: "Check" },
 		],
 
 		onload: function (slide) {
@@ -109,7 +122,16 @@ erpnext.setup.slides_settings = [
 		apply_industry_modules: function (slide) {
 			let industry = slide.get_field("persona_industry").get_value();
 			let modules = erpnext.setup.industry_modules[industry] || ["accounting"];
-			["accounting", "stock", "manufacturing", "projects"].forEach(function (module) {
+			const all_modules = [
+				"accounting",
+				"stock",
+				"manufacturing",
+				"subcontracting",
+				"assets",
+				"projects",
+				"pos",
+			];
+			all_modules.forEach(function (module) {
 				slide.get_field("module_" + module).set_value(modules.includes(module) ? 1 : 0);
 			});
 		},
