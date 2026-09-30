@@ -172,9 +172,9 @@
 								%}
 									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
 										<div class="flex items-center justify-center gap-1 truncate" title="{{ sup }}{% if (sq) { %} : {{ sq }}{% } %}">
-											<a href="/app/supplier/{{ encodeURIComponent(sup) }}" class="supplier-link whitespace-nowrap">
+											<div>
 												{{ frappe.utils.escape_html(sup) }}
-											</a>
+											</div>
 											{% if (sq) { %}
 												<span class="whitespace-nowrap">:</span>
 												<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ sq }}">{{ frappe.utils.escape_html(sq) }}</a>
@@ -285,9 +285,9 @@
 								<td style="width: 200px; min-width: 160px; vertical-align: middle; font-size: 14px;">
 									<div class="flex flex-col gap-1 truncate" title="{{ sup }}{% if (sq) { %} : {{ sq }}{% } %}">
 										<div class="truncate">
-											<a href="/app/supplier/{{ encodeURIComponent(sup) }}" class="supplier-link">
+											<span>
 												{{ frappe.utils.escape_html(sup) }}
-											</a>{% if (sq) { %} :{% } %}
+											</span>{% if (sq) { %} :{% } %}
 										</div>
 										{% if (sq) { %}
 											<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ sq }}">{{ frappe.utils.escape_html(sq) }}</a>
