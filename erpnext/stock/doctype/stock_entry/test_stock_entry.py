@@ -590,6 +590,99 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
+	def test_auto_picked_transfer_batches_keep_their_rates(self):
+		transfer = self.make_auto_picked_batch_transfer()
+
+		self.assertEqual((transfer.items[0].basic_amount, transfer.items[0].amount), (300, 320))
+		self.assertEqual((transfer.total_outgoing_value, transfer.total_incoming_value), (320, 320))
+		inward = self.get_inward_transfer_leg(transfer)
+		self.assertEqual(inward.incoming_rate, 160)
+		self.assertEqual(self.get_batch_rates(inward.serial_and_batch_bundle), [110, 210])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
+	def test_repost_restores_flattened_transfer_batch_rates(self):
+		from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+		transfer = self.make_auto_picked_batch_transfer()
+		bundle = self.get_inward_transfer_leg(transfer).serial_and_batch_bundle
+		frappe.db.set_value(
+			"Serial and Batch Entry",
+			{"parent": bundle},
+			{"incoming_rate": 160, "stock_value_difference": 160},
+		)
+
+		create_repost_item_valuation_entry(
+			{
+				"voucher_type": transfer.doctype,
+				"voucher_no": transfer.name,
+				"posting_date": transfer.posting_date,
+				"posting_time": transfer.posting_time,
+				"company": transfer.company,
+			}
+		)
+
+		self.assertEqual(self.get_batch_rates(bundle), [110, 210])
+
+	def make_auto_picked_batch_transfer(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "APBT-.#####",
+				"valuation_method": "Moving Average",
+			}
+		).name
+		for rate in (100, 200, 300):
+			make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=1,
+				rate=rate,
+				use_serial_batch_fields=1,
+			)
+
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=2,
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": frappe.get_value("Company", transfer.company, "default_expense_account"),
+				"description": "Freight",
+				"amount": 20,
+			},
+		)
+		transfer.insert()
+		transfer.submit()
+		transfer.reload()
+		return transfer
+
+	def get_inward_transfer_leg(self, transfer):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": transfer.name, "actual_qty": (">", 0), "is_cancelled": 0},
+			["incoming_rate", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+
+	def get_batch_rates(self, bundle):
+		return frappe.get_all(
+			"Serial and Batch Entry", filters={"parent": bundle}, pluck="incoming_rate", order_by="idx"
+		)
+
 	def test_repack_multiple_fg(self):
 		"Test `is_finished_item` for one item repacked into two items."
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=100)
