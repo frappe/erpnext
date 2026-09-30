@@ -145,7 +145,9 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 							dialog.set_df_property("record", "options", [
 								{ label: "", value: "" },
 								...matches.map((d) => ({
-									label: `${__(d.record_type)}: ${d.serial_no || d.batch_id || d.barcode}`,
+									label: `${__(d.record_type)}: ${frappe.utils.escape_html(
+										d.serial_no || d.batch_id || d.barcode
+									)}`,
 									value: String(candidates.indexOf(d)),
 								})),
 							]);
