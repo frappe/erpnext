@@ -161,3 +161,30 @@ class TestCustomerOverview(ERPNextTestSuite):
 		frappe.permissions.add_user_permission("Cost Center", "_Test Cost Center 2 - _TC", user.name)
 		with self.set_user(user.name):
 			self.assertNotIn(COMPANY, customer_overview.get_customer_companies(customer.name))
+
+	def test_advances_match_summary_report(self):
+		from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute
+
+		user = create_user("overview_advances@example.com", "Accounts User", "Sales User")
+		with self.set_user(user.name):
+			rows = execute(
+				{
+					"company": COMPANY,
+					"report_date": today(),
+					"party": [CUSTOMER],
+					"customer": CUSTOMER,
+					"range": "30, 60, 90",
+					"ageing_based_on": "Due Date",
+				}
+			)[1]
+			expected = next((r.get("advance") for r in rows if r.get("party") == CUSTOMER), None)
+			self.assertEqual(
+				customer_overview.get_customer_receivables(CUSTOMER, COMPANY)["advances"]["value"], expected
+			)
+
+	def test_advances_missing_report_row_is_not_zero(self):
+		with patch(
+			"erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary.execute",
+			return_value=([], []),
+		):
+			self.assertIsNone(customer_overview.reported_advances(CUSTOMER, COMPANY, today()))

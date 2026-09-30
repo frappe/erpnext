@@ -22,6 +22,8 @@ const COUNT = {
 	invoices: (n) => (n === 1 ? __("1 invoice") : __("{0} invoices", [n])),
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
+	reconcile: (n) =>
+		n === 1 ? __("Reconcile with 1 unpaid invoice") : __("Reconcile with {0} unpaid invoices", [n]),
 	days_to_pay: (n) => (n === 1 ? __("1 day to pay") : __("{0} days to pay", [n])),
 };
 
@@ -304,13 +306,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	receivable_cards() {
 		const ar = this.ar || { loading: true };
-		const labels = [__("Receivable"), __("Overdue")];
+		const labels = [__("Receivable"), __("Overdue"), __("Advances")];
 		if (ar.loading) return labels.map((label) => ({ label, loading: true }));
 		if (ar.none) return [];
 		if (ar.error)
 			return labels.map((label) => ({ label, value: "—", caption: __("Could not load receivables") }));
 		if (!ar.data) return labels.map((label) => ({ label, value: null }));
-		const { outstanding, overdue } = ar.data;
+		const { outstanding, overdue, advances } = ar.data;
 		return [
 			{
 				label: labels[0],
@@ -324,7 +326,28 @@ erpnext.CustomerOverview = class CustomerOverview {
 				delta: this.delta_opts(overdue, __("since last month")),
 				onclick: () => this.open_ar(),
 			},
+			this.advances_card(labels[2], advances, outstanding.unpaid_count),
 		];
+	}
+
+	advances_card(label, advances, unpaid_count) {
+		if (advances.value == null)
+			return {
+				label,
+				value: "—",
+				caption: __("Not available in Accounts Receivable Summary"),
+				onclick: () => this.open_ar(),
+			};
+		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ar() };
+		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
+		if (!unpaid_count) return { ...card, caption: __("Credit balance, no invoices to apply it to") };
+		if (!frappe.model.can_write("Payment Reconciliation"))
+			return { ...card, caption: __("Already deducted from Receivable") };
+		return {
+			...card,
+			caption: COUNT.reconcile(unpaid_count),
+			onclick: () => this.open_reconciliation(),
+		};
 	}
 
 	outstanding_sub(o) {
@@ -773,6 +796,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 			company: this.state.company,
 		};
 		frappe.set_route("query-report", "Accounts Receivable");
+	}
+	open_reconciliation() {
+		frappe.route_options = {
+			company: this.state.company,
+			party_type: "Customer",
+			party: this.frm.doc.name,
+		};
+		frappe.set_route("Form", "Payment Reconciliation");
 	}
 	open_analytics() {
 		const range = (this.sales.data && this.sales.data.period_range) || {};

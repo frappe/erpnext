@@ -69,6 +69,7 @@ def get_customer_receivables(customer: str, company: str):
 			"delta": pct_change(ar["overdue"], overdue_prev),
 			"delta_positive_is_good": False,
 		},
+		"advances": {"value": reported_advances(customer, company, as_of)},
 		"credit": credit_position(customer, company),
 		"ageing": ageing(ar),
 	}
@@ -241,6 +242,24 @@ def receivables(customer, company, report_date):
 		"outstanding": outstanding,
 		"overdue": overdue,
 	}
+
+
+def reported_advances(customer, company, report_date):
+	from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute
+
+	rows = execute(
+		{
+			"company": company,
+			"report_date": report_date,
+			"party_type": "Customer",
+			"party": [customer],
+			"customer": customer,
+			"ageing_based_on": "Due Date",
+			"age_as_on": "Report Date",
+			"range": "30, 60, 90",
+		}
+	)[1]
+	return next((row.get("advance") for row in rows if row.get("party") == customer), None)
 
 
 def ageing(ar):
