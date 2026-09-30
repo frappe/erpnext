@@ -41,6 +41,7 @@ from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -309,12 +310,19 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		first = self.make_number("Serial No", "Balance-001", item.name)
 		second = self.make_number("Serial No", "Balance-002", item.name)
 		self.make_number("Serial No", "Balance-001", self.other_item.name)
-		serial_ids = f"{second.name}\n{first.name}"
-		with patch(
-			"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance",
-			return_value=(2, 100, serial_ids),
+		available = [frappe._dict(serial_no=second.name), frappe._dict(serial_no=first.name)]
+		with (
+			patch("erpnext.stock.utils.get_available_serial_nos", return_value=available),
+			patch(
+				"erpnext.stock.stock_ledger.get_previous_sle",
+				return_value=frappe._dict(qty_after_transaction=2, valuation_rate=100),
+			),
 		):
 			balance = get_stock_balance_for(item.name, "_Test Warehouse - _TC", "2026-01-01", "12:00:00")
+			api_balance = get_stock_balance(
+				item.name, "_Test Warehouse - _TC", with_valuation_rate=True, with_serial_no=True
+			)
+		self.assertEqual(api_balance, (2, 100, "Balance-002\nBalance-001"))
 		self.assertEqual(balance["serial_nos"], "Balance-002\nBalance-001")
 		self.assertEqual(balance["qty"], 2)
 		self.assertEqual(balance["rate"], 100)
