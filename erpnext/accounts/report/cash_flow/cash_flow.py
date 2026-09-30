@@ -7,6 +7,7 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 from pypika import Order
 from pypika.terms import Bracket, LiteralValue
@@ -232,21 +233,8 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 
 
 def get_account_type_based_gl_data(company, filters=None):
-	cond = ""
 	filters = frappe._dict(filters or {})
 
-<<<<<<< HEAD
-	if filters.include_default_book_entries:
-		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")
-		cond = """ AND (finance_book in ({}, {}, '') OR finance_book IS NULL)
-			""".format(
-			frappe.db.escape(filters.finance_book),
-			frappe.db.escape(company_fb),
-		)
-	else:
-		cond = " AND (finance_book in (%s, '') OR finance_book IS NULL)" % (
-			frappe.db.escape(cstr(filters.finance_book))
-=======
 	gl = frappe.qb.DocType("GL Entry")
 	acc = frappe.qb.DocType("Account")
 
@@ -278,28 +266,10 @@ def get_account_type_based_gl_data(company, filters=None):
 	else:
 		query = query.where(
 			(gl.finance_book.isin([cstr(filters.finance_book), ""])) | (gl.finance_book.isnull())
->>>>>>> 95e2ce6 (feat: add grouping by dimension functionality in financial reports (#54650))
 		)
 
 	# cost center (with children)
 	if filters.get("cost_center"):
-<<<<<<< HEAD
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		cond += " and cost_center in %(cost_center)s"
-
-	gl_sum = frappe.db.sql_list(
-		f"""
-		select sum(credit) - sum(debit)
-		from `tabGL Entry`
-		where company=%(company)s and posting_date >= %(start_date)s and posting_date <= %(end_date)s
-			and voucher_type != 'Period Closing Voucher'
-			and account in ( SELECT name FROM tabAccount WHERE account_type = %(account_type)s) {cond}
-	""",
-		filters,
-	)
-
-	return gl_sum[0] if gl_sum and gl_sum[0] else 0
-=======
 		cost_centers = get_cost_centers_with_children(filters.cost_center)
 		query = query.where(gl.cost_center.isin(cost_centers))
 
@@ -330,7 +300,6 @@ def get_account_type_based_gl_data(company, filters=None):
 
 	result = query.run()
 	return flt(result[0][0]) if result and result[0][0] else 0
->>>>>>> 95e2ce6 (feat: add grouping by dimension functionality in financial reports (#54650))
 
 
 def get_start_date(period, accumulated_values, company):

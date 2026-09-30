@@ -307,7 +307,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		repost_doc.posting_date = today()
 		repost_doc.save()
 
-<<<<<<< HEAD
 	def test_stock_validations_before_period_closing(self):
 		from unittest.mock import patch
 
@@ -519,7 +518,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		sce.remove_stock_closing()
 		sce.create_stock_closing_balance_entries()
 		sce.db_set("status", "Completed")
-=======
+
 	def test_dimension_grouped_opening_balance_matches_gl_scan(self):
 		"""
 		A dimension-grouped Balance Sheet must produce identical per-dimension
@@ -590,7 +589,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		# the fast path must carry per-dimension opening balances, not aggregates or zeros
 		self.assertEqual(acb_figures["Cash"][key_for(cc1)], 400)
 		self.assertEqual(acb_figures["Cash"][key_for(cc2)], 200)
->>>>>>> 95e2ce6 (feat: add grouping by dimension functionality in financial reports (#54650))
 
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()
