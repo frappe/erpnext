@@ -25,7 +25,8 @@ frappe.ui.form.on("Quality Inspection", {
 			)
 			.then((record) => {
 				frm.doc.item_serial_no = record?.name || number;
-			});
+			})
+			.catch(() => {});
 	},
 
 	set_default_company(frm) {
