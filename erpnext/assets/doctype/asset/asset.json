@@ -57,7 +57,7 @@
   "other_info_tab",
   "accounting_dimensions_section",
   "cost_center",
-  "column_break_rjyw",
+  "dimension_col_break",
   "asset_owner_section",
   "asset_owner",
   "column_break_yeds",
@@ -548,7 +548,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_rjyw",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -627,7 +627,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2026-09-22 12:00:00.000000",
+ "modified": "2026-09-30 13:13:51.704193",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
