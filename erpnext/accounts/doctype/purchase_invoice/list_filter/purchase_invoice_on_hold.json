@@ -1,5 +1,5 @@
 {
- "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"bill_no\", \"label\": \"Supplier Invoice No\"}, {\"fieldname\": \"due_date\", \"label\": \"Due Date\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"bill_no\", \"label\": \"Supplier Invoice No\"}, {\"fieldname\": \"due_date\", \"label\": \"Due Date\"}, {\"fieldname\": \"release_date\", \"label\": \"Release Date\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
  "creation": "2026-09-30 21:12:56.554846",
  "docstatus": 0,
  "doctype": "List Filter",
@@ -9,7 +9,7 @@
  "idx": 0,
  "is_standard": 1,
  "layout_order": 4,
- "modified": "2026-09-30 21:12:56.554846",
+ "modified": "2026-09-30 22:30:19.146016",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice-On Hold",
