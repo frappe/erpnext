@@ -627,11 +627,7 @@
    "link_fieldname": "target_asset"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-09-22 12:00:00.000000",
-=======
  "modified": "2026-09-30 13:13:51.704193",
->>>>>>> da651af (fix: accounting dimension shows in connections tab on stock entry, asset (#59658))
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
