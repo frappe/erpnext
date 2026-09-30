@@ -28,7 +28,6 @@ class SerialBatchIdentity:
 		if frappe.db.has_index(f"tab{self.doctype}", self.constraint_name):
 			return
 		if frappe.db.db_type == "postgres":
-			# Frappe's add_unique accepts columns, not expressions.
 			frappe.db.sql_ddl(
 				f'CREATE UNIQUE INDEX "{self.constraint_name}" ON "tab{self.doctype}" '
 				f'(lower("{self.number_field}"), "{self.item_field}")'
@@ -187,7 +186,6 @@ class SerialBatchIdentity:
 
 	def _match_chunk(self, item_code, numbers):
 		table = frappe.qb.DocType(self.doctype)
-		# Retain the physical column's collation when comparing input on MariaDB.
 		inputs = (
 			frappe.qb.from_(table)
 			.select(table[self.number_field].as_("number"), ParameterizedValueWrapper(-1).as_("ordinal"))
