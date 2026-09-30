@@ -584,8 +584,7 @@
    "fieldtype": "Link",
    "label": "Set Accepted Warehouse",
    "options": "Warehouse",
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "depends_on": "update_stock",
@@ -595,8 +594,7 @@
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "fieldname": "col_break_warehouse",
@@ -1421,7 +1419,6 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
-   "show_for_module": "Stock",
    "width": "50px"
   },
   {
@@ -1434,7 +1431,6 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
-   "show_for_module": "Subcontracting",
    "width": "50px"
   },
   {
@@ -1707,7 +1703,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 15:53:03.761309",
+ "modified": "2026-09-30 17:24:02.960975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -746,8 +746,7 @@
    "hide_seconds": 1,
    "label": "Source Warehouse",
    "options": "Warehouse",
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "fieldname": "items_section",
@@ -1970,8 +1969,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Set Target Warehouse",
-   "options": "Warehouse",
-   "show_for_module": "Stock"
+   "options": "Warehouse"
   },
   {
    "default": "0",
@@ -2416,7 +2414,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-09-30 16:12:14.246673",
+ "modified": "2026-09-30 17:24:02.960975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -196,8 +196,7 @@
    "label": "Received Qty",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1,
-   "show_for_module": "Stock"
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -214,8 +213,7 @@
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
    "label": "Rejected Qty",
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.uom != doc.stock_uom",
@@ -446,16 +444,14 @@
    "fieldtype": "Link",
    "label": "Accepted Warehouse",
    "options": "Warehouse",
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
-   "options": "Warehouse",
-   "show_for_module": "Stock"
+   "options": "Warehouse"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -471,8 +467,7 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch",
-   "search_index": 1,
-   "show_for_module": "Stock"
+   "search_index": 1
   },
   {
    "fieldname": "col_br_wh",
@@ -482,16 +477,14 @@
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
-   "no_copy": 1,
-   "show_for_module": "Stock"
+   "no_copy": 1
   },
   {
    "fieldname": "rejected_serial_no",
    "fieldtype": "Text",
    "label": "Rejected Serial No",
    "no_copy": 1,
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "fieldname": "accounting",
@@ -603,8 +596,7 @@
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
    "no_copy": 1,
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "fieldname": "brand",
@@ -823,8 +815,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "From Warehouse",
-   "options": "Warehouse",
-   "show_for_module": "Stock"
+   "options": "Warehouse"
   },
   {
    "collapsible": 1,
@@ -927,8 +918,7 @@
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1,
-   "search_index": 1,
-   "show_for_module": "Stock"
+   "search_index": 1
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
@@ -938,8 +928,7 @@
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1,
-   "search_index": 1,
-   "show_for_module": "Stock"
+   "search_index": 1
   },
   {
    "fieldname": "wip_composite_asset",
@@ -953,16 +942,14 @@
    "depends_on": "eval:doc.use_serial_batch_fields === 0 && doc.docstatus === 0",
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
-   "label": "Add Serial / Batch No",
-   "show_for_module": "Stock"
+   "label": "Add Serial / Batch No"
   },
   {
    "default": "0",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial No / Batch Fields",
-   "print_hide": 1,
-   "show_for_module": "Stock"
+   "print_hide": 1
   },
   {
    "fieldname": "serial_batch_entries_section",
@@ -1051,7 +1038,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-30 15:53:03.761309",
+ "modified": "2026-09-30 17:24:02.960975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

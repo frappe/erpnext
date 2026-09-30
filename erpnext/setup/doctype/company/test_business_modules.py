@@ -107,7 +107,7 @@ class TestShowForModuleTags(ERPNextTestSuite):
 		self.assertEqual(invoice.get_field("update_stock").show_for_module, "Stock")
 		self.assertEqual(invoice.get_field("supplied_items").show_for_module, "Subcontracting")
 		self.assertEqual(invoice.get_field("project").show_for_module, "Projects")
-		self.assertEqual(item.get_field("warehouse").show_for_module, "Stock")
+		self.assertEqual(item.get_field("purchase_receipt").show_for_module, "Stock")
 		self.assertEqual(item.get_field("wip_composite_asset").show_for_module, "Assets")
 
 		# Not tagged on purpose. ERPNext asks for the location when it creates an asset

@@ -1120,10 +1120,10 @@
    "options": "Letter Head"
   },
   {
+   "description": "Tick the modules this company uses.",
    "fieldname": "modules_used_section",
    "fieldtype": "Section Break",
-   "label": "Modules Used",
-   "description": "Tick the modules this company uses."
+   "label": "Modules Used"
   },
   {
    "default": "0",
@@ -1133,17 +1133,17 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.stock",
    "fieldname": "manufacturing",
    "fieldtype": "Check",
-   "label": "Manufacturing",
-   "depends_on": "eval:doc.stock"
+   "label": "Manufacturing"
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.manufacturing",
    "fieldname": "subcontracting",
    "fieldtype": "Check",
-   "label": "Subcontracting",
-   "depends_on": "eval:doc.manufacturing"
+   "label": "Subcontracting"
   },
   {
    "fieldname": "modules_used_column",
@@ -1216,7 +1216,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-09-06 12:00:00.000000",
+ "modified": "2026-09-30 17:52:56.517974",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
