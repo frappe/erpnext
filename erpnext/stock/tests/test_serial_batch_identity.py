@@ -99,6 +99,12 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				with self.assertRaises(SerialBatchNotFoundError):
 					identity.get_numbers(self.item.name, [record.name, "Missing-ID"])
 
+	def test_number_map_spans_match_chunks(self):
+		records = [self.make_number("Serial No", f"Map-Chunk-{index}") for index in range(3)]
+		with patch("erpnext.stock.serial_batch_identity.MATCH_CHUNK_SIZE", 2):
+			numbers = SerialBatchIdentity("Serial No").get_number_map([record.name for record in records])
+		self.assertEqual(numbers, {record.name: record.serial_no for record in records})
+
 	def test_resolution_spans_match_chunks(self):
 		first = self.make_number("Serial No", "Chunk-001")
 		second = self.make_number("Serial No", "Chunk-002")
