@@ -449,6 +449,7 @@ class calculate_taxes_and_totals:
 				if tax.charge_type == "Actual"
 			]
 		)
+		self.set_actual_tax_distribution()
 
 		for n, item in enumerate(self._items):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
@@ -464,7 +465,7 @@ class calculate_taxes_and_totals:
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
 					actual_tax_dict[tax.idx] -= current_tax_amount
-					if n == len(self._items) - 1:
+					if n == self._actual_tax_distribution[tax.idx].last_idx:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# accumulate tax amount into tax.tax_amount
@@ -528,6 +529,27 @@ class calculate_taxes_and_totals:
 			self._set_in_company_currency(tax, ["total"])
 
 		self.adjust_rounding_in_item_wise_tax_details()
+
+	def set_actual_tax_distribution(self):
+		# Actual taxes are split only over the items they apply to
+		self._actual_tax_distribution = {}
+		item_tax_maps = [self._load_item_tax_rate(item.item_tax_rate) for item in self._items]
+
+		for tax in self.doc.taxes:
+			if tax.charge_type != "Actual":
+				continue
+
+			net_total, last_idx = 0.0, None
+			for n, item in enumerate(self._items):
+				if self._get_tax_rate(tax, item_tax_maps[n]) != NOT_APPLICABLE_TAX:
+					net_total += flt(item.net_amount)
+					last_idx = n
+
+			# no applicable item: keep the remainder on the last item as before
+			if last_idx is None:
+				last_idx = len(self._items) - 1
+
+			self._actual_tax_distribution[tax.idx] = frappe._dict(net_total=net_total, last_idx=last_idx)
 
 	def adjust_rounding_in_item_wise_tax_details(self):
 		if ignore_item_wise_tax_details(self.doc):
@@ -618,7 +640,12 @@ class calculate_taxes_and_totals:
 			current_net_amount = item.net_amount
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+			distribution = self._actual_tax_distribution[tax.idx]
+			if distribution.net_total:
+				current_tax_amount = item.net_amount * actual / distribution.net_total
+			elif item is self._items[distribution.last_idx]:
+				# nothing to distribute over, allocate to the last applicable item
+				current_tax_amount = actual
 
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
