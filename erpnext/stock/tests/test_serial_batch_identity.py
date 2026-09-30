@@ -1711,6 +1711,23 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 
 		self.assertEqual(sorted(stock_entry.items[0].serial_no.split("\n")), ["Receipt-001", "Receipt-002"])
 
+	def test_incoming_rate_skips_serial_numbers_not_created_yet(self):
+		from erpnext.stock.utils import get_incoming_rate
+
+		item = make_item("_Identity Serial Only Item", {"has_serial_no": 1}).name
+		rate = get_incoming_rate(
+			{
+				"item_code": item,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"qty": 1,
+				"serial_no": "Not-Created-001",
+				"voucher_type": "Stock Entry",
+			}
+		)
+
+		self.assertEqual(rate, 0)
+
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
