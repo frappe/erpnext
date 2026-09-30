@@ -364,7 +364,6 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Designation",
    "oldfieldname": "designation",
@@ -441,6 +440,7 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Mobile",
    "options": "Phone"
   },
@@ -461,6 +461,7 @@
    "description": "Provide Email Address registered in company",
    "fieldname": "company_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Company Email",
    "oldfieldname": "company_email",
    "oldfieldtype": "Data",
@@ -469,6 +470,7 @@
   {
    "fieldname": "personal_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Personal Email",
    "options": "Email"
   },
@@ -835,7 +837,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2026-08-21 23:11:42.091886",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
