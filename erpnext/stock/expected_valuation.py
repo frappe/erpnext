@@ -47,6 +47,9 @@ How an entry is valued
 * Like the ledger, the stock value is rounded to the currency precision after
   every entry, and a reconciled rate is rounded before it is applied.
 * Standard Cost items are carried at the standard rate on the posting date.
+* An Adjustment Entry (erpnext.stock.valuation_adjustment) resets the stock to its rows. Its
+  entries count out whatever the ledger holds, right or wrong, so they are taken as they are, up
+  to the last one of each item-warehouse, after which the stock must be what the rows count in.
 
 Known limits: the incoming rate of a transfer, repack or manufacture is not
 checked against its source here; replay always starts at the first entry.
@@ -58,7 +61,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 
 import frappe
-from frappe.utils import cint, create_batch, flt, getdate
+from frappe.utils import cint, create_batch, flt, get_datetime, getdate
 
 from erpnext.controllers.sales_and_purchase_return import get_return_against_item_fields
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -75,6 +78,11 @@ BASIS_RECONCILED = "Reconciled qty and rate"
 BASIS_WRITE_OFF = "Write-off of leftover value"
 BASIS_STANDARD_COST = "Standard cost"
 BASIS_NO_STOCK = "No stock on hand (fallback rate)"
+BASIS_ADJUSTMENT_RESET = "Counted out by an Adjustment Entry at the ledger's value"
+BASIS_ADJUSTED = "Set by an Adjustment Entry"
+
+# the purpose of a Stock Reconciliation that settles the ledger's differences on its date
+ADJUSTMENT_ENTRY = "Adjustment Entry"
 
 RETURNABLE_PURCHASE_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt")
 
@@ -362,6 +370,14 @@ class ItemWarehouseStock:
 	def set_reconciled_balance(self, qty: float, rate: float) -> None:
 		self.pool.set_balance(qty, rate)
 
+	def clear(self) -> None:
+		"""Hold nothing, as after every serial no, batch and the pool are counted out."""
+		self.pool = None
+		self.__post_init__()
+		self.batch_lots = {}
+		self.serial_rates = {}
+		self.serials_issued_before_receipt = {}
+
 	def write_off_leftover_value(self) -> None:
 		"""With no stock left in the warehouse, no value should be left either."""
 		self.pool.clear()
@@ -406,10 +422,45 @@ def iterate_expected_valuations(
 				yield item_code, warehouse, replay_ledger(ledger_entries, details)
 
 
+def iterate_expected_stock_at(
+	item_warehouses: list[tuple[str, str]], posting_datetime, exclude_voucher_no: str | None = None
+) -> Iterator[tuple[str, str, ItemWarehouseStock, frappe._dict, "ValuationDetails"]]:
+	"""Replay the ledger of every (item, warehouse) up to and including `posting_datetime`,
+	leaving out the entries of `exclude_voucher_no`.
+
+	Yields each item-warehouse that has entries by then, with the stock it should hold at that
+	moment, the last ledger entry (what the ledger holds) and its valuation details. A voucher
+	posted at that moment afterwards comes after all of them in the ledger.
+	"""
+	settings = ValuationSettings()
+	cutoff = get_datetime(posting_datetime)
+
+	for item_warehouses_to_read in create_batch(list(item_warehouses), ITEM_WAREHOUSES_PER_READ):
+		entries_by_item_warehouse = get_ledger_entries(item_warehouses_to_read, getdate(cutoff), settings)
+		data = LedgerData(entries_by_item_warehouse, settings)
+
+		for item_code, warehouse in item_warehouses_to_read:
+			ledger_entries = [
+				entry
+				for entry in entries_by_item_warehouse.get((item_code, warehouse), [])
+				if get_datetime(entry.posting_datetime) <= cutoff and entry.voucher_no != exclude_voucher_no
+			]
+			if not ledger_entries:
+				continue
+
+			details = ValuationDetails(item_code, ledger_entries[0].company, data)
+			stock = ItemWarehouseStock(details.valuation_method)
+			for _entry_and_values in replay_ledger(ledger_entries, details, stock):
+				pass
+
+			yield item_code, warehouse, stock, ledger_entries[-1], details
+
+
 def replay_ledger(
-	ledger_entries: list, details: "ValuationDetails"
+	ledger_entries: list, details: "ValuationDetails", stock: ItemWarehouseStock | None = None
 ) -> Iterator[tuple[frappe._dict, ExpectedValues]]:
-	stock = ItemWarehouseStock(details.valuation_method)
+	if stock is None:
+		stock = ItemWarehouseStock(details.valuation_method)
 
 	for entry in ledger_entries:
 		yield entry, value_ledger_entry(stock, entry, details)
@@ -417,6 +468,9 @@ def replay_ledger(
 
 def value_ledger_entry(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -> ExpectedValues:
 	"""Apply one entry to the expected stock and return what it should carry."""
+	if details.is_adjustment_voucher(entry):
+		return value_adjustment_entry(stock, entry, details)
+
 	if details.valuation_method == "Standard Cost":
 		return value_at_standard_cost(stock, entry, details)
 
@@ -451,6 +505,46 @@ def value_ledger_entry(stock: ItemWarehouseStock, entry, details: "ValuationDeta
 		)
 
 	return make_expected_values(stock, carried_value_before, basis)
+
+
+def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -> ExpectedValues:
+	"""The entries of an Adjustment Entry before its last one of the item-warehouse count out what
+	the ledger holds, at the ledger's value, and are taken as they are. After the last one, the
+	stock is what the rows count in."""
+	if entry.name not in details.data.adjustment_last_entries:
+		stock.carried_value = flt(entry.stock_value)
+		return ExpectedValues(
+			qty_after_transaction=flt(entry.qty_after_transaction),
+			stock_value_difference=flt(entry.stock_value_difference),
+			stock_value=flt(entry.stock_value),
+			valuation_rate=flt(entry.valuation_rate),
+			basis=BASIS_ADJUSTMENT_RESET,
+		)
+
+	carried_value_before = flt(entry.stock_value) - flt(entry.stock_value_difference)
+	stock.clear()
+
+	for row in details.data.adjustment_rows.get((entry.voucher_no, entry.item_code, entry.warehouse), []):
+		rate = flt(row.valuation_rate)
+		if row.serial_no:
+			for serial_no in get_serial_nos(row.serial_no):
+				if details.values_everything_in_pool or details.valuation_method == "Standard Cost":
+					stock.receive_into_pool(1, rate)
+				else:
+					stock.receive_serial(serial_no, rate)
+		elif (
+			row.batch_no
+			and details.valuation_method != "Standard Cost"
+			and details.is_valued_batch_wise(row.batch_no)
+		):
+			stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
+		elif flt(row.qty):
+			stock.receive_into_pool(flt(row.qty), rate)
+
+	stock.carried_value = flt(stock.value, details.currency_precision)
+	carry_moving_average_rate_from_rounded_value(stock)
+
+	return make_expected_values(stock, carried_value_before, BASIS_ADJUSTED)
 
 
 def carry_moving_average_rate_from_rounded_value(stock: ItemWarehouseStock) -> None:
@@ -565,6 +659,11 @@ class LedgerData:
 		)
 		self.batch_wise_valued_batches = get_batch_wise_valued_batches(self.get_batches(ledger_entries))
 		self.reconciled_balances = get_reconciled_balances(ledger_entries)
+		self.adjustment_vouchers = get_adjustment_vouchers(ledger_entries)
+		self.adjustment_rows = get_adjustment_rows(self.adjustment_vouchers)
+		self.adjustment_last_entries = get_adjustment_last_entries(
+			entries_by_item_warehouse, self.adjustment_vouchers
+		)
 		self.items = get_item_settings({entry.item_code for entry in ledger_entries})
 		self.company_valuation_methods = get_company_valuation_methods()
 		self.purchase_return_rates = get_purchase_return_rates(ledger_entries)
@@ -617,6 +716,11 @@ class ValuationDetails:
 
 	def is_valued_batch_wise(self, batch_no: str) -> bool:
 		return not self.batch_wise_valuation_is_off and batch_no in self.data.batch_wise_valued_batches
+
+	def is_adjustment_voucher(self, entry) -> bool:
+		return (
+			entry.voucher_type == "Stock Reconciliation" and entry.voucher_no in self.data.adjustment_vouchers
+		)
 
 	def is_reconciled_balance(self, entry) -> bool:
 		"""A Stock Reconciliation that sets the qty and rate outright, rather than moving lots."""
@@ -771,6 +875,50 @@ def get_batch_wise_valued_batches(batches: set[str]) -> set[str]:
 		)
 
 	return valued_batch_wise
+
+
+def get_adjustment_vouchers(ledger_entries) -> set[str]:
+	reconciliations = {
+		entry.voucher_no for entry in ledger_entries if entry.voucher_type == "Stock Reconciliation"
+	}
+
+	adjustment_vouchers = set()
+	for reconciliations_to_read in create_batch(list(reconciliations), 1000):
+		adjustment_vouchers.update(
+			frappe.get_all(
+				"Stock Reconciliation",
+				filters={"name": ("in", reconciliations_to_read), "purpose": ADJUSTMENT_ENTRY},
+				pluck="name",
+			)
+		)
+
+	return adjustment_vouchers
+
+
+def get_adjustment_rows(adjustment_vouchers: set[str]) -> dict[tuple[str, str, str], list]:
+	"""The rows of the Adjustment Entries, per voucher, item and warehouse, in their order."""
+	rows = {}
+	for vouchers_to_read in create_batch(list(adjustment_vouchers), 1000):
+		for row in frappe.get_all(
+			"Stock Reconciliation Item",
+			filters={"parent": ("in", vouchers_to_read)},
+			fields=["parent", "item_code", "warehouse", "qty", "valuation_rate", "batch_no", "serial_no"],
+			order_by="parent asc, idx asc",
+		):
+			rows.setdefault((row.parent, row.item_code, row.warehouse), []).append(row)
+
+	return rows
+
+
+def get_adjustment_last_entries(entries_by_item_warehouse: dict, adjustment_vouchers: set[str]) -> set[str]:
+	"""The last entry of each Adjustment Entry in each item-warehouse, after which its reset is done."""
+	last_entries = {}
+	for entries in entries_by_item_warehouse.values():
+		for entry in entries:
+			if entry.voucher_type == "Stock Reconciliation" and entry.voucher_no in adjustment_vouchers:
+				last_entries[(entry.voucher_no, entry.item_code, entry.warehouse)] = entry.name
+
+	return set(last_entries.values())
 
 
 def get_reconciled_balances(ledger_entries) -> dict[str, frappe._dict]:

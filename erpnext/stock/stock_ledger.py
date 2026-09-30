@@ -1149,7 +1149,12 @@ class update_entries_after:
 				).format(bold(sle.item_code), bold(self.company), bold(sle.posting_date))
 			)
 
-		if sle.voucher_type == "Stock Reconciliation" and sle.get("qty_after_transaction") is not None:
+		# an adjustment entry moves stock rather than setting a balance
+		if (
+			sle.voucher_type == "Stock Reconciliation"
+			and sle.get("qty_after_transaction") is not None
+			and not sle.is_adjustment_entry
+		):
 			self.wh_data.qty_after_transaction = flt(sle.qty_after_transaction)
 		else:
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -2613,6 +2618,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 
 def get_stock_reco_qty_shift(args):
 	stock_reco_qty_shift = 0
+	if args.get("is_adjustment_entry") and not args.get("is_cancelled"):
+		# an adjustment entry moves stock rather than setting a balance, which the reset of an
+		# Adjustment Entry does in several entries of one voucher
+		return flt(args.actual_qty)
+
 	if args.get("is_cancelled"):
 		if args.get("previous_qty_after_transaction"):
 			if args.get("serial_and_batch_bundle"):
