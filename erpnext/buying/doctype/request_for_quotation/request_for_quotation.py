@@ -515,9 +515,6 @@ def get_rfq_containing_supplier(
 		limit_start=start,
 		limit_page_length=page_len,
 	)
-	rfq_data = query.run(as_dict=1)
-
-	return rfq_data
 
 
 @frappe.whitelist()
@@ -525,6 +522,21 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 	"""Returns supplier quotation items linked to the RFQ"""
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 	sq = frappe.qb.DocType("Supplier Quotation")
+
+	rfq_item_names = frappe.get_all(
+		"Request for Quotation Item",
+		filters={"parent": rfq_name},
+		pluck="name",
+	)
+
+	rfq_doc = frappe.get_cached_doc("Request for Quotation", rfq_name) if frappe.db.exists("Request for Quotation", rfq_name) else None
+	linked_sq = getattr(rfq_doc, "supplier_quotation", None) if rfq_doc else None
+
+	conditions = (sq_item.request_for_quotation == rfq_name)
+	if rfq_item_names:
+		conditions = conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
+	if linked_sq:
+		conditions = conditions | (sq.name == linked_sq)
 
 	query = (
 		frappe.qb.from_(sq_item)
@@ -546,7 +558,7 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 			sq.status,
 			sq.docstatus,
 		)
-		.where((sq_item.request_for_quotation == rfq_name) & (sq.docstatus < 2))
+		.where(conditions & (sq.docstatus < 2))
 		.orderby(sq.transaction_date)
 	)
 
