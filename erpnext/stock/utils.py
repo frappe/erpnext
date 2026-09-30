@@ -370,9 +370,10 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		and not skip_serial_batch_valuation
 	):
 		args.actual_qty = args.qty
-		args.serial_nos = SerialBatchIdentity("Serial No").resolve(
-			args.item_code, get_serial_nos_data(args.serial_no), ignore_permissions=True
+		records = SerialBatchIdentity("Serial No").get_records(
+			args.item_code, get_serial_nos_data(args.serial_no), ["name"]
 		)
+		args.serial_nos = [record.name for record in records]
 
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
