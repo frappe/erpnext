@@ -169,6 +169,16 @@ class TestTask(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Task", task1.name, "status"), "Completed")
 		self.assertEqual(frappe.db.get_value("Task", task2.name, "status"), "Completed")
 
+	def test_completing_sets_completed_on(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		task = create_task("_Test Complete Without Date")
+		user = create_user("test_task_completer@example.com", "Projects User")
+		with self.set_user(user.name):
+			frappe.set_value("Task", task.name, "status", "Completed")
+
+		self.assertEqual(frappe.db.get_value("Task", task.name, "completed_on"), getdate())
+
 	def test_add_multiple_tasks_under_parent(self):
 		from erpnext.projects.doctype.task.task import add_multiple_tasks
 
