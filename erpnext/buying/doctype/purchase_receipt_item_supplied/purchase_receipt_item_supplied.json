@@ -53,7 +53,6 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_global_search": 1,
    "label": "Description",
    "oldfieldname": "description",
    "oldfieldtype": "Data",
@@ -208,7 +207,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",

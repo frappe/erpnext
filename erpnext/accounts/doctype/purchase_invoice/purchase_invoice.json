@@ -400,6 +400,7 @@
   {
    "fieldname": "bill_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier Invoice No",
@@ -467,7 +468,6 @@
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "label": "Contact Person",
    "options": "Contact",
    "print_hide": 1
@@ -1697,7 +1697,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:46.733125",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

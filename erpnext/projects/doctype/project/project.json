@@ -73,6 +73,7 @@
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Project Name",
    "oldfieldtype": "Data",
    "reqd": 1,
@@ -485,7 +486,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-08-21 23:11:46.332012",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
