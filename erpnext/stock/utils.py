@@ -173,9 +173,11 @@ def get_stock_balance(
 				)
 			)
 
-			serial_nos = ""
-			if serial_no_details:
-				serial_nos = "\n".join(d.serial_no for d in serial_no_details)
+			serial_nos = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(
+					item_code, [d.serial_no for d in serial_no_details]
+				)
+			)
 
 			return (
 				(last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)

@@ -1688,7 +1688,11 @@ def get_stock_balance_for(
 					}
 				)
 			)
-			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
+			serial_nos = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(
+					item_code, [d.serial_no for d in serial_no_details if d.batch_no == batch_no]
+				)
+			)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			# inherited from get_incoming_rate before the split; scoped here rather than at the top
@@ -1720,11 +1724,6 @@ def get_stock_balance_for(
 		standard_rate = get_item_standard_rate(item_code, company, posting_date)
 		if standard_rate is not None:
 			rate = standard_rate
-
-	if serial_nos:
-		serial_nos = "\n".join(
-			SerialBatchIdentity("Serial No").get_numbers(item_code, get_serial_nos(serial_nos))
-		)
 
 	return {
 		"qty": qty,
