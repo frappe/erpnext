@@ -66,3 +66,17 @@ class TestCompanyBusinessModules(ERPNextTestSuite):
 		run_patch()
 		values = frappe.db.get_value("Company", "_Test Company", FIELDNAMES, as_dict=True)
 		self.assertTrue(all(values[f] == 1 for f in FIELDNAMES), values)
+
+	def test_boot_sends_module_ticks_for_every_company(self):
+		# The browser reads these to decide which module fields to hide on a form.
+		from erpnext.startup.boot import boot_session, get_business_module_fields
+
+		self.assertEqual(get_business_module_fields(), FIELDNAMES)
+
+		bootinfo = frappe._dict(docs=[], sysdefaults=frappe._dict(), page_info=frappe._dict())
+		boot_session(bootinfo)
+		company = next(
+			d for d in bootinfo.docs if d.get("doctype") == ":Company" and d.name == "_Test Company"
+		)
+		for fieldname in FIELDNAMES:
+			self.assertIn(fieldname, company)
