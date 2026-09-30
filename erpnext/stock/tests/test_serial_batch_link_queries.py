@@ -139,15 +139,35 @@ class TestSerialBatchLinkQueries(ERPNextTestSuite):
 		rows = get_batch_balance_rows(filters)
 		self.assertEqual([row[4] for row in rows], [batch.name for batch in batches])
 
+	def test_batch_quantity_and_traceability_reports_list_batches_in_number_order(self):
+		from erpnext.stock.report.serial_no_and_batch_traceability.serial_no_and_batch_traceability import (
+			ReportData,
+		)
+		from erpnext.stock.report.stock_qty_vs_batch_qty.stock_qty_vs_batch_qty import (
+			get_data as get_batch_qty_rows,
+		)
+
+		batches = self.make_batches_with_names_against_number_order(
+			(("Order-B", "order-q"), ("Order-C", "order-p"), ("Order-A", "order-r"))
+		)
+		ordered_names = [batch.name for batch in sorted(batches, key=lambda batch: batch.batch_id)]
+
+		rows = get_batch_qty_rows(frappe._dict(item=self.item.name))
+		self.assertEqual([row["batch"] for row in rows], ordered_names)
+		rows = ReportData(frappe._dict(batches=list(reversed(ordered_names)))).get_serial_no_batches()
+		self.assertEqual([row.batch_no for row in rows], ordered_names)
+
 	def test_serial_cell_is_sorted_by_number_with_its_ids(self):
 		row = frappe._dict(serial_no="id-c\nid-a\nid-b", serial_no_number="SN-3\nSN-1\nSN-2")
 		sort_serial_nos_by_number(row)
 		self.assertEqual(row.serial_no_number, "SN-1\nSN-2\nSN-3")
 		self.assertEqual(row.serial_no, "id-a\nid-b\nid-c")
 
-	def make_batches_with_names_against_number_order(self):
+	def make_batches_with_names_against_number_order(
+		self, numbers_and_names=(("Order-A", "order-z"), ("Order-B", "order-y"), ("Order-C", "order-x"))
+	):
 		batches = []
-		for number, name in (("Order-A", "order-z"), ("Order-B", "order-y"), ("Order-C", "order-x")):
+		for number, name in numbers_and_names:
 			batch = frappe.get_doc(doctype="Batch", item=self.item.name, batch_id=number).insert(
 				set_name=name
 			)
