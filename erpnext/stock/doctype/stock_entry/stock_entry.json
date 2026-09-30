@@ -66,7 +66,7 @@
   "address_display",
   "accounting_dimensions_section",
   "project",
-  "column_break_wgvc",
+  "dimension_col_break",
   "cost_center",
   "other_info_tab",
   "printing_settings",
@@ -752,7 +752,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_wgvc",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -768,7 +768,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-06-11 18:23:12.340065",
+=======
+ "modified": "2026-09-30 13:11:01.498358",
+>>>>>>> da651af (fix: accounting dimension shows in connections tab on stock entry, asset (#59658))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
