@@ -145,6 +145,11 @@ frappe.ui.form.on("Sales Order", {
 							frm.set_df_property("reserve_stock", "hidden", 1);
 							frm.fields_dict.items.grid.update_docfield_property("reserve_stock", "hidden", 1);
 							frm.fields_dict.items.grid.update_docfield_property(
+								"ensure_delivery_based_on_produced_serial_no",
+								"hidden",
+								1
+							);
+							frm.fields_dict.items.grid.update_docfield_property(
 								"reserve_stock",
 								"default",
 								0

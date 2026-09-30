@@ -183,6 +183,11 @@ def remove_standard_fields(details):
 	return details
 
 
+@frappe.request_cache
+def has_source_doc_permission(doctype: str, docname: str, user: str) -> bool:
+	return frappe.has_permission(doctype, doc=docname, user=user)
+
+
 def get_rate_locked_source_row(args, doc):
 	"""Reads the source row from the DB, not the mutable target row, so an unsaved edit can't override the locked rate."""
 	if isinstance(doc, str):
@@ -206,7 +211,7 @@ def get_rate_locked_source_row(args, doc):
 			source = frappe.db.get_value(
 				source_doctype, source_name, [*LOCKED_RATE_FIELDS, "parent", "parenttype"], as_dict=True
 			)
-			if source and frappe.has_permission(source.parenttype, doc=source.parent):
+			if source and has_source_doc_permission(source.parenttype, source.parent, frappe.session.user):
 				return source
 			return None
 	return None
@@ -1691,6 +1696,8 @@ def get_default_bom(item_code=None):
 def get_valuation_rate(item_code, company, warehouse=None):
 	"""Whitelisted entry point: authorise the item, then return its cost price."""
 	frappe.has_permission("Item", doc=item_code, throw=True)
+	frappe.has_permission("Company", doc=company, ptype="select", throw=True)
+
 	return _get_valuation_rate(item_code, company, warehouse)
 
 

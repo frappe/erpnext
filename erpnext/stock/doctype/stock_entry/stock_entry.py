@@ -2232,10 +2232,10 @@ class StockEntry(StockController):
 
 			if self.fg_completed_qty:
 				pro_doc.run_method("update_work_order_qty")
-				if self.purpose == "Manufacture":
-					pro_doc.run_method("update_planned_qty")
 
 			pro_doc.run_method("update_status")
+			if self.fg_completed_qty and self.purpose == "Manufacture":
+				pro_doc.run_method("update_planned_qty")
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
 
@@ -4237,6 +4237,7 @@ def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=N
 	doc = frappe.get_doc(
 		{
 			"doctype": "Serial and Batch Bundle",
+			"company": parent_doc.company,
 			"voucher_type": "Stock Entry",
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,

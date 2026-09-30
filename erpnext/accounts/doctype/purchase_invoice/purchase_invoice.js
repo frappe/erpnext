@@ -88,7 +88,12 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0) {
+		if (
+			!doc.is_return &&
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			this.frm.has_perm("write")
+		) {
 			if (doc.on_hold) {
 				this.frm.add_custom_button(
 					__("Change Release Date"),
@@ -125,7 +130,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if (!doc.is_return && doc.docstatus == 1) {
+		if (!doc.is_return && doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__("Return / Debit Note"), this.make_debit_note, __("Create"));
 			}
@@ -214,7 +219,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted);
 
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (
+			doc.docstatus == 1 &&
+			!doc.inter_company_invoice_reference &&
+			frappe.model.can_create("Sales Invoice")
+		) {
 			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function () {
 				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
 				var internal = supplier.is_internal_supplier;
@@ -655,7 +664,12 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100 && frm.doc.update_stock == 0) {
+		if (
+			frm.doc.docstatus == 1 &&
+			frm.doc.per_received < 100 &&
+			frm.doc.update_stock == 0 &&
+			frappe.model.can_create("Purchase Receipt")
+		) {
 			frm.add_custom_button(
 				__("Purchase Receipt"),
 				() => {
@@ -679,7 +693,11 @@ frappe.ui.form.on("Purchase Invoice", {
 			);
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.update_stock) {
+		if (
+			frm.doc.docstatus === 1 &&
+			frm.doc.update_stock &&
+			frappe.model.can_create("Landed Cost Voucher")
+		) {
 			frm.add_custom_button(
 				__("Landed Cost Voucher"),
 				() => {

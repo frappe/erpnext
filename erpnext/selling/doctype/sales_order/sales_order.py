@@ -759,6 +759,9 @@ class SalesOrder(SellingController):
 			if item.reserve_stock and (not enable_stock_reservation or not cint(item.is_stock_item)):
 				item.reserve_stock = 0
 
+			if item.ensure_delivery_based_on_produced_serial_no and not enable_stock_reservation:
+				item.ensure_delivery_based_on_produced_serial_no = 0
+
 	def has_unreserved_stock(self) -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
 

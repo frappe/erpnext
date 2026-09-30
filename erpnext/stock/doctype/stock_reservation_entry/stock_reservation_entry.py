@@ -770,6 +770,33 @@ def get_sre_reserved_serial_nos_details(
 	return frappe._dict(query.run())
 
 
+def get_sre_reserved_serial_nos_for_voucher_detail_nos(voucher_type: str, voucher_detail_nos: list) -> dict:
+	"""Returns {voucher_detail_no: set of reserved Serial Nos}, including the delivered ones."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sre.voucher_detail_no, sb_entry.serial_no)
+		.distinct()
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_detail_no.isin(voucher_detail_nos))
+			& (sre.reservation_based_on == "Serial and Batch")
+			& (sb_entry.serial_no.isnotnull())
+		)
+	)
+
+	reserved_serial_nos = {}
+	for voucher_detail_no, serial_no in query.run():
+		reserved_serial_nos.setdefault(voucher_detail_no, set()).add(serial_no)
+
+	return reserved_serial_nos
+
+
 def get_sre_reserved_batch_nos_details(
 	item_code: str, warehouse: str, batch_nos: list | None = None, ignore_voucher_nos: list | None = None
 ) -> dict:
@@ -814,6 +841,7 @@ def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict
 		frappe.qb.from_(sre)
 		.select(
 			sre.name,
+			sre.company,
 			sre.item_code,
 			sre.warehouse,
 			sre.voucher_type,
@@ -868,7 +896,7 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		bundle.posting_date = nowdate()
 		bundle.posting_time = nowtime()
 
-		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
+		for field in ("company", "item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])
 
 		for sb_entry in sb_entries:
