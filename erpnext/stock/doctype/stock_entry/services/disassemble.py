@@ -611,8 +611,8 @@ def _add_inward_material_qty(item_data, row):
 
 
 def _extend_serial_nos_from_row(item_data, row):
-	if row.serial_nos:
-		item_data.serial_nos.extend(row.serial_nos)
+	known = set(item_data.serial_nos)
+	item_data.serial_nos.extend(serial_no for serial_no in row.serial_nos or [] if serial_no not in known)
 
 
 def _deduct_consumed_material_qty(item_data, row):
