@@ -378,7 +378,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return fields;
 	}
 
-	update_dialog_values(scanned_item, r) {
+	async update_dialog_values(scanned_item, r) {
+		if (r.message.candidates) {
+			r.message = await erpnext.utils.BarcodeScanner.select_scan_match(r.message.candidates);
+			if (!r.message) return;
+		}
 		const { item_code, barcode, batch_no, serial_no } = r.message;
 
 		this.dialog.set_value("barcode_scanner", "");
