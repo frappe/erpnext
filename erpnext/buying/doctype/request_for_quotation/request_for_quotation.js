@@ -34,6 +34,8 @@ frappe.ui.form.on("Request for Quotation", {
 	},
 
 	refresh: function (frm, cdt, cdn) {
+		frm.trigger("render_quotations_tab");
+
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__("Supplier Quotation"),
@@ -127,13 +129,13 @@ frappe.ui.form.on("Request for Quotation", {
 							var w = window.open(
 								frappe.urllib.get_full_url(
 									"/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?" +
-										new URLSearchParams({
-											name: frm.doc.name,
-											supplier: data.supplier,
-											print_format: data.print_format || "Standard",
-											language: data.language || frappe.boot.lang,
-											letterhead: data.letter_head || frm.doc.letter_head || "",
-										}).toString()
+									new URLSearchParams({
+										name: frm.doc.name,
+										supplier: data.supplier,
+										print_format: data.print_format || "Standard",
+										language: data.language || frappe.boot.lang,
+										letterhead: data.letter_head || frm.doc.letter_head || "",
+									}).toString()
 								)
 							);
 							if (!w) {
@@ -225,6 +227,181 @@ frappe.ui.form.on("Request for Quotation", {
 		});
 
 		dialog.show();
+	},
+
+	render_quotations_tab: function (frm) {
+		if (!frm.fields_dict.quotations_html) return;
+		const $wrapper = frm.fields_dict.quotations_html.$wrapper;
+		$wrapper.empty();
+
+		if (frm.is_new()) {
+			frm.events.draw_quotations_comparison_table(frm, $wrapper, []);
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_quotations_data",
+			args: { rfq_name: frm.doc.name },
+			callback: function (r) {
+				const quotes = r.message || [];
+				frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
+			},
+		});
+	},
+
+	draw_quotations_comparison_table: function (frm, $wrapper, quotes) {
+		$wrapper.empty();
+
+		const suppliers = (frm.doc.suppliers || [])
+			.map((s) => s.supplier)
+			.filter(Boolean);
+
+		const all_items = frm.doc.items || [];
+		const selected_item = frm.quotations_item_filter || "";
+		const items = selected_item
+			? all_items.filter((i) => i.item_code === selected_item || i.item_name === selected_item)
+			: all_items;
+
+		const quote_map = {};
+		(quotes || []).forEach((q) => {
+			const key = `${q.item_code}:::${q.supplier}`;
+			quote_map[key] = q;
+		});
+
+		const min_rates = {};
+		all_items.forEach((item) => {
+			const rates = suppliers
+				.map((sup) => quote_map[`${item.item_code}:::${sup}`]?.rate)
+				.filter((r) => r !== undefined && r > 0);
+			if (rates.length > 0) {
+				min_rates[item.item_code] = Math.min(...rates);
+			}
+		});
+
+		const supplier_totals = {};
+		const supplier_currencies = {};
+		suppliers.forEach((sup) => {
+			let total = 0;
+			let curr = "";
+			let has_any = false;
+			items.forEach((item) => {
+				const q = quote_map[`${item.item_code}:::${sup}`];
+				if (q && q.amount !== undefined && q.amount !== null) {
+					total += flt(q.amount);
+					curr = q.currency || curr;
+					has_any = true;
+				}
+			});
+			if (has_any) {
+				supplier_totals[sup] = total;
+				supplier_currencies[sup] = curr;
+			}
+		});
+
+		const total_values = Object.values(supplier_totals).filter((t) => t > 0);
+		const min_supplier_total = total_values.length > 0 ? Math.min(...total_values) : null;
+
+		const categorize_by = frm.quotations_categorize_by || "Supplier";
+		const has_quotes = quotes && quotes.length > 0;
+
+		const context = {
+			docstatus: frm.doc.docstatus,
+			suppliers: suppliers,
+			all_items: all_items,
+			items: items,
+			selected_item: selected_item,
+			categorize_by: categorize_by,
+			quotes: quotes || [],
+			quote_map: quote_map,
+			min_rates: min_rates,
+			supplier_totals: supplier_totals,
+			supplier_currencies: supplier_currencies,
+			min_supplier_total: min_supplier_total,
+			has_quotes: has_quotes,
+		};
+
+		const html = frappe.render_template("supplier_quotation_comparision", context);
+		const $container = $(html).appendTo($wrapper);
+
+		// Item Filter Control using Frappe UI Control
+		if ($container.find(".item-filter-container").length) {
+			const item_options = [
+				{ label: __("All Items"), value: "" },
+				...all_items.map((itm) => {
+					const label =
+						itm.item_name && itm.item_name !== itm.item_code
+							? `${itm.item_name} (${itm.item_code})`
+							: itm.item_name || itm.item_code;
+					return { label: label, value: itm.item_code };
+				}),
+			];
+
+			const item_control = frappe.ui.form.make_control({
+				df: {
+					fieldtype: "Select",
+					fieldname: "quotations_item_filter",
+					options: item_options,
+					input_class: "input-sm",
+					change: function () {
+						const val = item_control.get_value() || "";
+						if (val !== (frm.quotations_item_filter || "")) {
+							frm.quotations_item_filter = val;
+							frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
+						}
+					},
+				},
+				parent: $container.find(".item-filter-container"),
+				only_input: true,
+			});
+			item_control.set_value(selected_item || "");
+			item_control.refresh();
+			$(item_control.wrapper).css({ position: "relative", width: "100%", margin: "0" });
+			$(item_control.wrapper).find(".select-icon").css({
+				position: "absolute",
+				right: "10px",
+				top: "50%",
+				transform: "translateY(-50%)",
+				"pointer-events": "none",
+			});
+		}
+
+		// Categorize By Control using Frappe UI Control
+		if ($container.find(".categorize-by-filter-container").length) {
+			const categorize_control = frappe.ui.form.make_control({
+				df: {
+					fieldtype: "Select",
+					fieldname: "quotations_categorize_by",
+					options: [
+						{ label: __("Categorize by Supplier"), value: "Supplier" },
+						{ label: __("Categorize by Item"), value: "Item" },
+					],
+					input_class: "input-sm",
+					change: function () {
+						const val = categorize_control.get_value() || "Supplier";
+						if (val !== (frm.quotations_categorize_by || "Supplier")) {
+							frm.quotations_categorize_by = val;
+							frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
+						}
+					},
+				},
+				parent: $container.find(".categorize-by-filter-container"),
+				only_input: true,
+			});
+			categorize_control.set_value(categorize_by || "Supplier");
+			categorize_control.refresh();
+			$(categorize_control.wrapper).css({ position: "relative", width: "100%", margin: "0" });
+			$(categorize_control.wrapper).find(".select-icon").css({
+				position: "absolute",
+				right: "10px",
+				top: "50%",
+				transform: "translateY(-50%)",
+				"pointer-events": "none",
+			});
+		}
+
+		$container.find(".btn-new-supplier-quotation").on("click", function () {
+			frm.trigger("make_supplier_quotation");
+		});
 	},
 
 	schedule_date(frm) {
