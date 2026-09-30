@@ -2,7 +2,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	constructor(frm, item, callback) {
 		this.frm = frm;
 		this.item = item;
-		this.qty = item.qty;
 		this.callback = callback;
 		this.serial_field = this.item.is_rejected ? "rejected_serial_no" : "serial_no";
 		this.bundle = this.item?.is_rejected
@@ -50,6 +49,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		qty = Math.abs(qty);
+		this.qty = qty;
 		if (qty > 0) {
 			await this.dialog.set_value("qty", qty);
 		}
@@ -551,13 +551,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	get_auto_data() {
 		let { qty, based_on } = this.dialog.get_values();
 
-		if (this.item.serial_and_batch_bundle || this.item.rejected_serial_and_batch_bundle) {
-			if (this.qty && qty === Math.abs(this.qty)) {
-				return;
-			}
-		}
-
-		if (this.item[this.serial_field] || this.item.batch_no) {
+		const has_entries =
+			this.item.serial_and_batch_bundle ||
+			this.item.rejected_serial_and_batch_bundle ||
+			this.item[this.serial_field] ||
+			this.item.batch_no;
+		if (has_entries && this.qty && qty === this.qty) {
 			return;
 		}
 
