@@ -1813,6 +1813,15 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertIsNone(frappe.db.get_value("Serial No", own.name, "amc_expiry_date"))
 		self.assertEqual(str(frappe.db.get_value("Serial No", other.name, "amc_expiry_date")), "2027-12-31")
 
+	def test_new_names_are_distinct_when_hashes_repeat(self):
+		with patch(
+			"erpnext.stock.serial_batch_identity.make_autoname",
+			side_effect=["repeated-id", "repeated-id", "other-id"],
+		):
+			names = SerialBatchIdentity("Serial No").get_new_names(2)
+
+		self.assertCountEqual(names, ["repeated-id", "other-id"])
+
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
