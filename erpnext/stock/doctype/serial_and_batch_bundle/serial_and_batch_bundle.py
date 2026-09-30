@@ -913,11 +913,15 @@ class SerialandBatchBundle(Document):
 			"Buying Settings", "set_valuation_rate_for_rejected_materials"
 		)
 
+		transfer_rates = self.get_transfer_rates()
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
 			fifo_batch_wise_val = True
 			if valuation_method == "FIFO" and d.batch_no in batches:
 				fifo_batch_wise_val = False
+
+			if (d.serial_no, d.batch_no) in transfer_rates:
+				rate = transfer_rates[d.serial_no, d.batch_no]
 
 			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
 				rate = 0.0
@@ -1216,6 +1220,36 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				f"Total quantity {total_qty} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {set_qty} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
+
+	def get_transfer_rates(self) -> dict:
+		"""Rate of each serial/batch where the same Stock Entry row took it out, plus the row's additional cost."""
+		if self.voucher_type != "Stock Entry" or not self.voucher_detail_no:
+			return {}
+
+		outward_bundle = frappe.db.get_value(
+			"Serial and Batch Bundle",
+			{
+				"voucher_type": self.voucher_type,
+				"voucher_detail_no": self.voucher_detail_no,
+				"type_of_transaction": "Outward",
+				"is_cancelled": 0,
+			},
+		)
+		if not outward_bundle:
+			return {}
+
+		additional_cost, transfer_qty = frappe.db.get_value(
+			"Stock Entry Detail", self.voucher_detail_no, ["additional_cost", "transfer_qty"]
+		)
+		additional_cost_per_unit = flt(additional_cost) / flt(transfer_qty)
+		return {
+			(d.serial_no, d.batch_no): flt(d.incoming_rate) + additional_cost_per_unit
+			for d in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": outward_bundle},
+				fields=["serial_no", "batch_no", "incoming_rate"],
+			)
+		}
 
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:
