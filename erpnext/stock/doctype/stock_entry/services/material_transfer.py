@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, get_link_to_form
 
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
@@ -218,8 +218,20 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate(self):
 		self.validate_warehouse()
+		self.validate_work_order_status_for_return()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
+
+	def validate_work_order_status_for_return(self):
+		if not (self.doc.is_return and self.wo_doc) or self.wo_doc.status in ("Completed", "Closed"):
+			return
+
+		frappe.throw(
+			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
+				get_link_to_form("Work Order", self.doc.work_order)
+			),
+			title=_("Work Order Not Finished"),
+		)
 
 	def validate_component_and_quantities(self):
 		if self.doc.fg_completed_qty:

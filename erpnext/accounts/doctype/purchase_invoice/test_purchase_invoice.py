@@ -11,6 +11,9 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.mapper import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.mapper import (
+	make_purchase_receipt as create_purchase_receipt_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -56,6 +59,37 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.items[0].qty = 1
 		pi.save()
 		self.assertEqual(pi.items[0].qty, 1)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_duplicate_items_without_update_stock(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		self.assertRaisesRegex(frappe.ValidationError, "Same item cannot be entered", pi.save)
+
+	def test_same_item_from_different_receipts(self):
+		first_receipt = make_purchase_receipt()
+		second_receipt = make_purchase_receipt()
+		pi = create_purchase_invoice_from_receipt(first_receipt.name)
+		pi = create_purchase_invoice_from_receipt(second_receipt.name, target_doc=pi)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			pi.save()
+
+		self.assertEqual(
+			[row.purchase_receipt for row in pi.items], [first_receipt.name, second_receipt.name]
+		)
+
+	def test_same_item_from_different_orders_in_one_receipt(self):
+		orders = [create_purchase_order(), create_purchase_order()]
+		receipt = create_purchase_receipt_from_order(orders[0].name)
+		receipt = create_purchase_receipt_from_order(orders[1].name, target_doc=receipt)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			receipt.submit()
+			pi = create_purchase_invoice_from_receipt(receipt.name)
+			pi.save()
+
+		self.assertEqual([row.purchase_order for row in pi.items], [order.name for order in orders])
 
 	def test_purchase_invoice_received_qty(self):
 		"""

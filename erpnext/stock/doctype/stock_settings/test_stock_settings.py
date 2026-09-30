@@ -82,3 +82,23 @@ class TestStockSettings(ERPNextTestSuite):
 
 		set_by_naming_series.assert_called_once()
 		self.assertEqual(make_property_setter.call_count, 3)
+
+	def test_cannot_disable_serial_and_batch_with_tracked_items(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Serial Deactivation Item", {"has_serial_no": 1})
+
+		settings = frappe.get_single("Stock Settings")
+		settings.enable_serial_and_batch_no_for_item = 0
+
+		exists = frappe.db.exists
+
+		def exists_without_bundles(doctype, *args, **kwargs):
+			# test data has submitted bundles, which would throw before the item check
+			return doctype != "Serial and Batch Bundle" and exists(doctype, *args, **kwargs)
+
+		with (
+			patch.object(frappe.db, "exists", side_effect=exists_without_bundles),
+			self.assertRaisesRegex(frappe.ValidationError, "items with serial / batch enabled"),
+		):
+			settings.save()

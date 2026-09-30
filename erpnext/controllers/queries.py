@@ -6,7 +6,7 @@ import json
 from collections import OrderedDict, defaultdict
 
 import frappe
-from frappe import _, qb, scrub
+from frappe import _, qb
 from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import (
@@ -25,6 +25,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_item_restrictions
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import _get_item_tax_template
@@ -295,43 +296,8 @@ def item_query(
 		if filters.get("customer") or filters.get("supplier"):
 			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
-			group = "Customer Group" if filters.get("customer") else "Supplier Group"
-			item_rules_list = frappe.get_all(
-				"Party Specific Item",
-				filters={"party_type": party_type},
-				fields=["party", "restrict_based_on", "based_on_value"],
-			)
-
-			party_group_rules_list = frappe.get_all(
-				"Party Specific Item",
-				filters={"party_type": group},
-				fields=["party as party_group", "restrict_based_on", "based_on_value"],
-			)
-			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
-
-			restricted_items = defaultdict(set)
-			allowed_items = defaultdict(set)
-
-			for rule in item_rules_list:
-				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
-
-				if rule.party == party:
-					allowed_items[restrict_based_on].add(rule.based_on_value)
-				else:
-					restricted_items[restrict_based_on].add(rule.based_on_value)
-
-			for rule in party_group_rules_list:
-				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
-
-				if current_party_group == rule.party_group:
-					allowed_items[restrict_based_on].add(rule.based_on_value)
-				else:
-					restricted_items[restrict_based_on].add(rule.based_on_value)
-
-			for field, restricted_values in restricted_items.items():
-				values_to_exclude = restricted_values - allowed_items[field]
-				if values_to_exclude:
-					filters[scrub(field)] = ["not in", list(values_to_exclude)]
+			for field, values in get_party_item_restrictions(party_type, party).items():
+				filters[field] = ["not in", list(values)]
 
 			if filters.get("customer"):
 				del filters["customer"]
