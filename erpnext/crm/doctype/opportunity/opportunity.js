@@ -302,7 +302,8 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		}
 
 		if (this.frm.is_new() && this.frm.doc.opportunity_type === undefined) {
-			this.frm.doc.opportunity_type = "Sales";
+			// set via set_value so the translated_doctype Link stores the name, not its translation
+			this.frm.set_value("opportunity_type", "Sales");
 		}
 		this.setup_queries();
 	}

@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"customer_group\", \"label\": \"Customer Group\"}, {\"fieldname\": \"territory\", \"label\": \"Territory\"}, {\"fieldname\": \"modified\", \"label\": \"Last Updated On\"}]",
+ "creation": "2026-09-30 21:12:56.762023",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Disabled",
+ "filters": "[[\"Customer\", \"disabled\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.762023",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer-Disabled",
+ "owner": "Administrator",
+ "reference_doctype": "Customer",
+ "route_signature": "disabled=1",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

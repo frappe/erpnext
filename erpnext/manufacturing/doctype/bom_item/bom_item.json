@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2013-02-22 01:27:49",
  "doctype": "DocType",
  "document_type": "Setup",

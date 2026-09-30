@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"company_name\", \"label\": \"Organization Name\"}, {\"fieldname\": \"utm_source\", \"label\": \"Source\"}, {\"fieldname\": \"territory\", \"label\": \"Territory\"}, {\"fieldname\": \"creation\", \"label\": \"Created On\"}]",
+ "creation": "2026-09-30 21:12:56.912064",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Unassigned",
+ "filters": "[[\"Lead\", \"status\", \"in\", [\"Lead\", \"Open\"]], [\"Lead\", \"_assign\", \"is\", \"not set\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.912064",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Lead-Unassigned",
+ "owner": "Administrator",
+ "reference_doctype": "Lead",
+ "route_signature": "_assign=[\"is\",\"not set\"]&status=[\"in\",[\"Lead\",\"Open\"]]",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

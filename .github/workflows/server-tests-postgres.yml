@@ -198,3 +198,4 @@ jobs:
             --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }}
         env:
           TYPE: server
+          FRAPPE_PRELOAD_DATABASE_DRIVERS: postgres

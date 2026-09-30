@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"paid_from\", \"label\": \"Account Paid From\"}, {\"fieldname\": \"paid_to\", \"label\": \"Account Paid To\"}, {\"fieldname\": \"paid_amount\", \"label\": \"Paid Amount\"}, {\"fieldname\": \"reference_no\", \"label\": \"Cheque/Reference No\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:54:23.258287",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Transfers",
+ "filters": "[[\"Payment Entry\", \"docstatus\", \"=\", 1], [\"Payment Entry\", \"payment_type\", \"=\", \"Internal Transfer\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:54:23.258287",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Entry-Transfers",
+ "owner": "Administrator",
+ "reference_doctype": "Payment Entry",
+ "route_signature": "docstatus=1&payment_type=Internal Transfer",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

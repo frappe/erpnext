@@ -47,6 +47,7 @@
   {
    "fieldname": "batch_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Batch No",
    "no_copy": 1,
@@ -59,6 +60,7 @@
   {
    "fieldname": "item",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Item",
    "link_filters": "[\n    [\"Item\", \"has_batch_no\", \"=\", 1],\n    [\"Item\", \"is_stock_item\", \"=\", 1]\n]",
@@ -217,7 +219,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-09-23 15:28:28.772991",
+ "modified": "2026-10-01 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
