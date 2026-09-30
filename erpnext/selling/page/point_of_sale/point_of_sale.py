@@ -118,22 +118,11 @@ def search_by_term(search_term, warehouse, price_list, pos_profile, item_code=No
 
 
 def filter_result_items(result, pos_profile):
-	if not result:
-		return
-	pos_item_groups = get_item_group(frappe.get_cached_doc("POS Profile", pos_profile))
-	if not pos_item_groups:
-		return
-	if result.get("candidates"):
-		allowed_items = frappe.get_list(
-			"Item",
-			filters={
-				"name": ("in", [row["item_code"] for row in result["candidates"]]),
-				"item_group": ("in", pos_item_groups),
-			},
-			pluck="name",
-		)
-		result["candidates"] = [row for row in result["candidates"] if row["item_code"] in allowed_items]
-	if result.get("items"):
+	if result and result.get("items"):
+		pos_profile_doc = frappe.get_cached_doc("POS Profile", pos_profile)
+		pos_item_groups = get_item_group(pos_profile_doc)
+		if not pos_item_groups:
+			return
 		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
 
 
@@ -169,10 +158,10 @@ def scope_scan_result(result, pos_profile):
 	rows = [row for row in rows if row["item_code"] in allowed]
 	if not rows:
 		return {}
-	if result.get("candidates"):
-		result["candidates"] = rows
-		return result
-	return rows[0]
+	if len(rows) == 1:
+		return rows[0]
+	result["candidates"] = rows
+	return result
 
 
 def check_pos_profile_access(pos_profile: str | None) -> None:
@@ -347,16 +336,14 @@ def search_for_serial_or_batch_or_barcode_number(
 	check_pos_item_access(pos_profile, item_code)
 
 	result = scope_scan_result(scan_barcode(search_value, item_code=item_code), pos_profile)
-	if not record_type:
-		return result
-	candidates = result.get("candidates", [result])
-	matches = [row for row in candidates if row.get("record_type") == record_type]
-	if len(matches) != 1:
-		frappe.throw(_("The scanned record is no longer available. Please scan again."))
-	match = matches[0]
-	if match.get("record_type") == "Batch" and match.get("has_serial_no"):
+	if record_type:
+		matches = [row for row in result.get("candidates", [result]) if row.get("record_type") == record_type]
+		if len(matches) != 1:
+			frappe.throw(_("The scanned record is no longer available. Please scan again."))
+		result = matches[0]
+	if result.get("record_type") == "Batch" and result.get("has_serial_no"):
 		frappe.throw(_("This item requires serial numbers. Please scan a serial number."))
-	return match
+	return result
 
 
 @frappe.whitelist()
