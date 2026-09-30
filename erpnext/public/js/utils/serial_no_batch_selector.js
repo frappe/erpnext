@@ -584,8 +584,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					posting_time: this.frm.doc.posting_time,
 					scio_detail: this.item.scio_detail,
 				},
-				callback: (r) => {
+				callback: async (r) => {
 					if (r.message) {
+						await erpnext.utils.load_serial_batch_titles(this.item.item_code, r.message);
 						const table = this.dialog.fields_dict.entries;
 						table.df.data = [
 							...r.message,
@@ -802,8 +803,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						child_row: this.frm.doc.is_return ? this.item : "",
 					},
 				})
-				.then((r) => {
+				.then(async (r) => {
 					if (r.message) {
+						await erpnext.utils.load_serial_batch_titles(this.item.item_code, r.message);
 						this.set_data(r.message);
 					}
 				});

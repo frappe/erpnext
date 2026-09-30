@@ -167,6 +167,27 @@ $.extend(erpnext, {
 });
 
 $.extend(erpnext.utils, {
+	async load_serial_batch_titles(item_code, rows) {
+		await Promise.all(
+			[
+				["Serial No", "serial_no"],
+				["Batch", "batch_no"],
+			].map(async ([doctype, field]) => {
+				const names = [...new Set(rows.map((row) => row[field]))].filter(
+					(name) => name && !frappe.utils.get_link_title(doctype, name)
+				);
+				if (!names.length) return;
+				const numbers = await frappe.xcall(
+					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
+					{ item_code, doctype, names }
+				);
+				for (const [name, number] of Object.entries(numbers)) {
+					frappe.utils.add_link_title(doctype, name, number);
+				}
+			})
+		);
+	},
+
 	format_serial_batch_number(value, row, column, data, default_formatter) {
 		const reference = column.serial_batch;
 		if (!reference) {

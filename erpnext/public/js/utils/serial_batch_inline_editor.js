@@ -925,24 +925,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			...this.last_entries.map((row) => ({ ...row, ...this.pending.updates[row.name] })),
 			...this.pending.new_entries.slice(pending_offset, pending_offset + this.page_length),
 		];
-		await Promise.all(
-			[
-				["Serial No", "serial_no"],
-				["Batch", "batch_no"],
-			].map(async ([doctype, field]) => {
-				const names = [...new Set(rows.map((row) => row[field]))].filter(
-					(name) => name && !frappe.utils.get_link_title(doctype, name)
-				);
-				if (!names.length) return;
-				const numbers = await this.call(
-					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
-					{ item_code: this.row.item_code, doctype, names }
-				);
-				for (const [name, number] of Object.entries(numbers)) {
-					frappe.utils.add_link_title(doctype, name, number);
-				}
-			})
-		);
+		await erpnext.utils.load_serial_batch_titles(this.row.item_code, rows);
 	}
 
 	get_effective_count() {
