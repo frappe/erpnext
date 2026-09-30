@@ -144,3 +144,13 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 		self.assertEqual(
 			[(row.name, row.batch_no_number) for row in rows], [(corrective_jc.name, "COPQ-B-01")]
 		)
+
+	def test_serial_filter_ignores_job_cards_of_other_items(self):
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card()
+		other_item = make_item("_Test COPQ Other Serial Item", {"has_serial_no": 1}).name
+		other_serial = frappe.get_doc(
+			doctype="Serial No", item_code=other_item, serial_no="COPQ-SHARED-01", company="_Test Company"
+		).insert()
+		corrective_jc.db_set("serial_no", "COPQ-SHARED-01")
+
+		self.assertEqual(self.run_report(company="_Test Company", serial_no=other_serial.name), [])
