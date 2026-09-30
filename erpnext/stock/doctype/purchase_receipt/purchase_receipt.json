@@ -188,7 +188,6 @@
    "bold": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
    "oldfieldtype": "Link",
@@ -212,6 +211,7 @@
   {
    "fieldname": "supplier_delivery_note",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Supplier Delivery Note"
   },
   {
@@ -318,7 +318,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -1303,7 +1302,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

@@ -175,7 +175,6 @@
    "bold": 1,
    "fieldname": "party_name",
    "fieldtype": "Dynamic Link",
-   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Party",
    "oldfieldname": "customer",
@@ -283,7 +282,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -1138,7 +1136,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

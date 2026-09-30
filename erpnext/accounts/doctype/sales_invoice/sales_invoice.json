@@ -309,7 +309,6 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_global_search": 1,
    "label": "Project",
    "oldfieldname": "project_name",
    "oldfieldtype": "Link",
@@ -479,6 +478,7 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_global_search": 1,
    "label": "Customer's Purchase Order",
    "no_copy": 1,
    "print_hide": 1
@@ -526,7 +526,6 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_global_search": 1,
    "label": "Contact Person",
    "options": "Contact",
    "print_hide": 1
@@ -2366,7 +2365,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-09-25 15:17:29.168134",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
