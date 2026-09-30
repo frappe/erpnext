@@ -1,5 +1,5 @@
 {
- "columns": "[{\"fieldname\": \"employee_name\", \"label\": \"Employee Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"total_billable_hours\", \"label\": \"Total Billable Hours\"}, {\"fieldname\": \"total_billable_amount\", \"label\": \"Total Billable Amount\"}, {\"fieldname\": \"per_billed\", \"label\": \"% Amount Billed\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"total_billable_hours\", \"label\": \"Total Billable Hours\"}, {\"fieldname\": \"total_billable_amount\", \"label\": \"Total Billable Amount\"}, {\"fieldname\": \"per_billed\", \"label\": \"% Amount Billed\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
  "creation": "2026-09-30 21:12:56.955281",
  "docstatus": 0,
  "doctype": "List Filter",
@@ -9,7 +9,7 @@
  "idx": 0,
  "is_standard": 1,
  "layout_order": 2,
- "modified": "2026-09-30 21:12:56.955281",
+ "modified": "2026-10-01 05:23:02.252371",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet-To Bill",

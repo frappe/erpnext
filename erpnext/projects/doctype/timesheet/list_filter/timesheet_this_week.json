@@ -1,5 +1,5 @@
 {
- "columns": "[{\"fieldname\": \"employee_name\", \"label\": \"Employee Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"start_date\", \"label\": \"Start Date\"}, {\"fieldname\": \"total_hours\", \"label\": \"Total Working Hours\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"start_date\", \"label\": \"Start Date\"}, {\"fieldname\": \"total_hours\", \"label\": \"Total Working Hours\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
  "creation": "2026-09-30 21:12:56.958006",
  "docstatus": 0,
  "doctype": "List Filter",
@@ -9,7 +9,7 @@
  "idx": 0,
  "is_standard": 1,
  "layout_order": 3,
- "modified": "2026-09-30 21:12:56.958006",
+ "modified": "2026-10-01 05:23:02.252371",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet-This Week",
