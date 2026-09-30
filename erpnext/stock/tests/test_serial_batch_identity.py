@@ -1728,6 +1728,15 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 
 		self.assertEqual(rate, 0)
 
+	def test_item_merge_is_blocked_by_shared_serial_numbers(self):
+		from erpnext.stock.doctype.item.item import DataValidationError
+
+		self.make_number("Serial No", "Shared-001")
+		self.make_number("Serial No", "shared-001", self.other_item.name)
+
+		with self.assertRaisesRegex(DataValidationError, "both items have Serial No shared-001"):
+			frappe.rename_doc("Item", self.other_item.name, self.item.name, merge=True)
+
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
