@@ -45,14 +45,15 @@
   "more_info",
   "opportunity",
   "title",
+  "quotations_tab",
+  "quotations_section",
+  "quotations_html",
   "address_and_contact_tab",
   "billing_address",
   "billing_address_display",
   "column_break_czul",
   "shipping_address",
-  "shipping_address_display",
-  "connections_tab",
-  "supplier_quotation"
+  "shipping_address_display"
  ],
  "fields": [
   {
@@ -387,16 +388,19 @@
    "print_hide": 1
   },
   {
-   "fieldname": "connections_tab",
+   "fieldname": "quotations_tab",
    "fieldtype": "Tab Break",
-   "label": "Connections",
-   "show_dashboard": 1
+   "label": "Quotations"
   },
   {
-   "fieldname": "supplier_quotation",
-   "fieldtype": "Link",
-   "label": "Supplier Quotation",
-   "options": "Supplier Quotation"
+   "fieldname": "quotations_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "quotations_html",
+   "fieldtype": "HTML",
+   "label": "Quotations Content"
   }
  ],
  "grid_page_length": 50,
@@ -404,7 +408,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-28 16:05:49.089253",
+ "modified": "2026-09-30 14:48:34.114065",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

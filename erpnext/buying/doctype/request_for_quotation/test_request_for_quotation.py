@@ -14,6 +14,7 @@ from erpnext.buying.doctype.request_for_quotation.mapper import (
 )
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 	get_pdf,
+	get_supplier_quotations_data,
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.mapper import make_request_for_quotation as make_rfq
@@ -379,6 +380,54 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
 
 		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+
+	def test_get_supplier_quotations_data(self):
+		rfq = make_request_for_quotation()
+
+		# Before any SQ is created, result must be empty
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(data, [])
+
+		supplier_1 = rfq.suppliers[0].supplier
+		sq1 = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_1)
+		sq1.items[0].rate = 150
+		sq1.save()
+		sq1.submit()
+
+		supplier_2 = rfq.suppliers[1].supplier
+		sq2 = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_2)
+		sq2.items[0].rate = 120
+		sq2.save()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 2)
+
+		suppliers_found = [row.get("supplier") for row in data]
+		self.assertIn(supplier_1, suppliers_found)
+		self.assertIn(supplier_2, suppliers_found)
+
+		sq1_row = next(row for row in data if row.get("supplier") == supplier_1)
+		self.assertEqual(sq1_row.get("item_code"), "_Test Item")
+		self.assertEqual(sq1_row.get("rate"), 150)
+		self.assertEqual(sq1_row.get("qty"), 5)
+		self.assertEqual(sq1_row.get("supplier_quotation"), sq1.name)
+
+	def test_get_supplier_quotations_data_excludes_cancelled(self):
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.items[0].rate = 200
+		sq.save()
+		sq.submit()
+		sq.cancel()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(data, [])
+
+	def test_get_supplier_quotations_data_non_existent_rfq(self):
+		data = get_supplier_quotations_data("NON-EXISTENT-RFQ-12345")
+		self.assertEqual(data, [])
 
 
 def make_request_for_quotation(**args):
