@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.desk.query_report import get_column_as_dict, normalize_result
+from frappe.utils import cstr
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -60,6 +61,8 @@ def set_number_labels(data, columns):
 
 def get_reference_ids(row, reference):
 	value = row.get(reference["fieldname"])
-	if reference["multiple"]:
-		return get_serial_nos(value)
-	return [value] if value else []
+	if not reference["multiple"]:
+		return [value] if value else []
+	if reference["doctype"] == "Batch":
+		return [name for name in cstr(value).split("\n") if name]
+	return get_serial_nos(value)
