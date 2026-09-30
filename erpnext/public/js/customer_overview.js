@@ -23,8 +23,6 @@ const COUNT = {
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
 	days_to_pay: (n) => (n === 1 ? __("1 day to pay") : __("{0} days to pay", [n])),
-	reconcile: (n) =>
-		n === 1 ? __("Reconcile with 1 unpaid invoice") : __("Reconcile with {0} unpaid invoices", [n]),
 };
 
 frappe.ui.form.on("Customer", {
@@ -32,6 +30,9 @@ frappe.ui.form.on("Customer", {
 		if (frm.is_new() || !frm.get_field("overview_html")) return;
 		if (!frm.customer_overview) frm.customer_overview = new erpnext.CustomerOverview(frm);
 		frm.customer_overview.refresh();
+	},
+	on_tab_change(frm) {
+		frm.customer_overview?.show();
 	},
 });
 
@@ -58,12 +59,16 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	refresh() {
-		if (this.customer === this.frm.doc.name) {
-			this.load();
-			this.refresh_list();
-			return;
-		}
-		this.build();
+		this.needs_refresh = true;
+		this.show();
+	}
+
+	show() {
+		if (this.frm.get_active_tab()?.df.fieldname !== "overview_tab") return;
+		if (!this.needs_refresh) return;
+		this.needs_refresh = false;
+		if (this.customer !== this.frm.doc.name) this.build();
+		else this.load_companies();
 	}
 
 	build() {
@@ -74,11 +79,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.build_header();
 		this.build_sections();
 
-		if (this.state.company) this.load();
 		this.load_companies();
 	}
 
 	reset() {
+		this.seq.sales++;
+		this.seq.ar++;
+		this.sales = null;
+		this.ar = null;
 		this.customer = this.frm.doc.name;
 		this.state = {
 			company: this.pref("company") || frappe.defaults.get_user_default("Company"),
@@ -102,6 +110,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			__("Company"),
 			[this.state.company],
 			(value) => {
+				if (!this.companies_ready || value === this.state.company) return;
 				this.state.company = value;
 				this.set_pref("company", value);
 				this.load();
@@ -109,12 +118,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 			}
 		);
 		if (Object.keys(locals[":Company"] || {}).length === 1) this.company_field.$wrapper.parent().hide();
-		this.period_field = this.make_select(this.$controls, __("Period"), PERIODS, (value) => {
+		this.period_field = this.make_select(this.$controls, __("Sales Period"), PERIODS, (value) => {
+			if (value === this.state.period) return;
 			this.state.period = value;
 			this.set_pref("period", value);
 			this.load({ receivables: false });
 		});
 		this.period_field.set_value(this.state.period);
+		this.period_field.$wrapper.parent().toggle(!!this.accounts);
 	}
 
 	build_sections() {
@@ -136,19 +147,25 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	load_companies() {
 		const customer = this.customer;
-		frappe.xcall(OVERVIEW_METHOD + ".get_customer_companies", { customer }).then((companies) => {
-			if (customer !== this.customer) return;
+		const token = (this.company_seq = (this.company_seq || 0) + 1);
+		this.companies_ready = false;
+		return frappe.xcall(OVERVIEW_METHOD + ".get_customer_companies", { customer }).then((companies) => {
+			if (customer !== this.customer || token !== this.company_seq) return;
 			if (!companies.length) {
 				this.render_no_activity();
 				return;
 			}
+			this.$empty.hide();
+			this.$body.show();
+			this.$context.show();
+			this.$controls.show();
 			this.company_field.df.options = companies.join("\n");
 			this.company_field.refresh();
 			const known = companies.includes(this.state.company);
 			if (!known) this.state.company = companies[0];
 			this.company_field.set_value(this.state.company);
 			this.companies_ready = true;
-			if (!known) this.load();
+			this.load();
 			this.refresh_list();
 		});
 	}
@@ -172,6 +189,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	load({ receivables = true } = {}) {
+		if (!this.companies_ready || !this.state.company) return;
 		this.fetch("sales", "get_customer_overview", { period: this.state.period });
 		if (receivables && this.accounts) this.fetch("ar", "get_customer_receivables");
 	}
@@ -270,6 +288,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const sales = this.sales || { loading: true };
 		if (sales.loading) return { ...card, loading: true };
 		const p = sales.data && sales.data.position && sales.data.position.net_sales;
+		if (sales.error || sales.data?.errors?.position)
+			return { ...card, value: "—", caption: __("Could not load sales") };
 		if (!p) return { ...card, value: null };
 		return {
 			...card,
@@ -282,10 +302,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	receivable_cards() {
 		const ar = this.ar || { loading: true };
-		const labels = [__("Receivable"), __("Overdue"), __("Advances")];
+		const labels = [__("Receivable"), __("Overdue")];
 		if (ar.loading) return labels.map((label) => ({ label, loading: true }));
+		if (ar.none) return [];
+		if (ar.error)
+			return labels.map((label) => ({ label, value: "—", caption: __("Could not load receivables") }));
 		if (!ar.data) return labels.map((label) => ({ label, value: null }));
-		const { outstanding, overdue, advances } = ar.data;
+		const { outstanding, overdue } = ar.data;
 		return [
 			{
 				label: labels[0],
@@ -299,21 +322,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				delta: this.delta_opts(overdue, __("since last month")),
 				onclick: () => this.open_ar(),
 			},
-			this.advances_card(labels[2], advances, outstanding.unpaid_count),
 		];
-	}
-
-	advances_card(label, advances, unpaid_count) {
-		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ar() };
-		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
-		if (!unpaid_count) return { ...card, caption: __("Credit balance, no invoices to apply it to") };
-		if (!frappe.model.can_write("Payment Reconciliation"))
-			return { ...card, caption: __("Already deducted from Receivable") };
-		return {
-			...card,
-			caption: COUNT.reconcile(unpaid_count),
-			onclick: () => this.open_reconciliation(),
-		};
 	}
 
 	outstanding_sub(o) {
@@ -347,7 +356,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
 		});
 		const t = this.sales.data && this.sales.data.trend;
-		if (this.show_state($panel, this.sales, 220, __("Could not load sales"))) return;
+		if (this.show_state($panel, this.sales, 220, __("Could not load sales"), "trend")) return;
 		if (!t || !t.points.some((p) => flt(p.value))) {
 			this.empty_note($panel, __("No sales in this period"), 220);
 			return;
@@ -373,8 +382,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	render_receivables() {
-		this.$charts.empty().toggle(!!this.accounts);
-		if (!this.accounts) return;
+		this.$charts.empty().toggle(!!this.accounts && !this.ar?.none);
+		if (!this.accounts || this.ar?.none) return;
 		this.render_ageing();
 		this.render_credit();
 	}
@@ -400,8 +409,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 					formatted: this.short_money(b.value),
 				})),
 				format: (v) => this.short_money(v),
-				on_click: () => this.open_ar(),
-				values_on_hover: true,
 			})
 			.appendTo($('<div class="co-age-chart">').appendTo($panel));
 
@@ -421,7 +428,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const can_edit = this.frm.has_perm("write");
 		const $panel = this.panel(this.$charts, {
 			title: __("Credit Limit"),
-			subtitle: limit && __("{0} of {1} used", [this.short_money(used), this.short_money(limit)]),
+			subtitle:
+				limit &&
+				data?.credit.used != null &&
+				__("{0} of {1} used", [this.short_money(used), this.short_money(limit)]),
 			right:
 				limit &&
 				can_edit &&
@@ -433,6 +443,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 				}),
 		});
 		if (this.show_state($panel, this.ar, 280, __("Could not load receivables"))) return;
+		if (data.credit.used == null) {
+			this.empty_note($panel, __("Credit usage is unavailable with your permissions."), 180);
+			return;
+		}
 		const $body = limit ? this.credit_donut(data, limit, used) : this.credit_empty(can_edit);
 		$body.appendTo($panel);
 	}
@@ -449,7 +463,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			],
 			center: {
 				value: flt((used / limit) * 100, 1) + "%",
-				label: used > limit ? __("over limit") : __("used"),
+				label: __("used"),
 			},
 			format: (v) => this.short_money(v),
 		});
@@ -471,7 +485,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		);
 	}
 
-	show_state($panel, source, height, error_text) {
+	show_state($panel, source, height, error_text, section) {
 		if (!source || source.loading) {
 			$panel.attr("aria-busy", "true");
 			$('<div class="co-placeholder">')
@@ -480,7 +494,11 @@ erpnext.CustomerOverview = class CustomerOverview {
 				.appendTo($panel);
 			return true;
 		}
-		if (source.error) {
+		if (source.none) {
+			this.empty_note($panel, __("Not available"), height);
+			return true;
+		}
+		if (source.error || source.data?.errors?.[section]) {
 			this.empty_note($panel, error_text, height).addClass("text-ink-red-7");
 			return true;
 		}
@@ -515,13 +533,32 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	save_credit_limit(company, limit) {
 		const frm = this.frm;
+		if (frm.is_dirty()) {
+			frappe.msgprint(__("Save or discard your other changes to this customer first."));
+			return;
+		}
 		let row = (frm.doc.credit_limits || []).find((r) => r.company === company);
+		const previous = row?.credit_limit;
+		const added = !row;
 		if (!row) row = frm.add_child("credit_limits", { company });
 		row.credit_limit = limit;
 		frm.dirty();
-		frm.save().then(() => {
-			frappe.show_alert({ message: __("Credit limit updated"), indicator: "green" });
-		});
+		return frm.save(
+			"Save",
+			(response) => {
+				if (!response.exc && !frm.is_dirty())
+					frappe.show_alert({ message: __("Credit limit updated"), indicator: "green" });
+			},
+			null,
+			() => {
+				if (added) {
+					frappe.model.clear_doc(row.doctype, row.name);
+					frm.doc.credit_limits = frm.doc.credit_limits.filter((item) => item !== row);
+				} else row.credit_limit = previous;
+				frm.doc.__unsaved = 0;
+				frm.refresh();
+			}
+		);
 	}
 
 	render_pipeline() {
@@ -725,14 +762,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 			company: this.state.company,
 		};
 		frappe.set_route("query-report", "Accounts Receivable");
-	}
-	open_reconciliation() {
-		frappe.route_options = {
-			company: this.state.company,
-			party_type: "Customer",
-			party: this.frm.doc.name,
-		};
-		frappe.set_route("Form", "Payment Reconciliation");
 	}
 	open_analytics() {
 		const range = (this.sales.data && this.sales.data.period_range) || {};

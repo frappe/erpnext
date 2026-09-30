@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import getdate, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer import customer_overview
@@ -82,7 +82,10 @@ class TestCustomerOverview(ERPNextTestSuite):
 		self.assertEqual(after - before, so.base_grand_total)
 
 	def test_totals_follow_user_permissions(self):
-		si = create_sales_invoice(customer=CUSTOMER, company=COMPANY, parent_cost_center="Main - _TC")
+		customer = frappe.copy_doc(frappe.get_doc("Customer", CUSTOMER))
+		customer.customer_name = "Overview Restricted Customer"
+		customer.insert()
+		si = create_sales_invoice(customer=customer.name, company=COMPANY, parent_cost_center="Main - _TC")
 		as_of = getdate(today())
 		user = create_user("customer_overview_restricted@example.com", "Accounts User", "Sales User")
 		frappe.permissions.add_user_permission("Cost Center", "_Test Cost Center 2 - _TC", user.name)
@@ -90,13 +93,51 @@ class TestCustomerOverview(ERPNextTestSuite):
 			frappe.permissions.remove_user_permission, "Cost Center", "_Test Cost Center 2 - _TC", user.name
 		)
 
-		everyone = customer_overview.net_sales(CUSTOMER, COMPANY, as_of, as_of)
+		everyone = customer_overview.net_sales(customer.name, COMPANY, as_of, as_of)
 		with self.set_user(user.name):
-			restricted = customer_overview.net_sales(CUSTOMER, COMPANY, as_of, as_of)
-			unpaid = customer_overview.unpaid_invoices(CUSTOMER, COMPANY, as_of)
+			restricted = customer_overview.net_sales(customer.name, COMPANY, as_of, as_of)
+			unpaid = customer_overview.unpaid_invoices(customer.name, COMPANY, as_of)
 
 		self.assertEqual(everyone - restricted, si.base_net_total)
-		self.assertNotIn(
-			si.name, frappe.get_all("Sales Invoice", {"cost_center": "_Test Cost Center 2 - _TC"})
-		)
+		with self.set_user(user.name):
+			self.assertNotIn(
+				si.name, frappe.get_list("Sales Invoice", filters={"customer": customer.name}, pluck="name")
+			)
 		self.assertEqual(unpaid["count"], 0)
+
+	def test_last_twelve_months_has_twelve_calendar_buckets(self):
+		as_of = getdate("2026-09-30")
+		start, end = customer_overview.resolve_period("Last 12 Months", COMPANY, as_of)
+		self.assertEqual(start, getdate("2025-10-01"))
+		self.assertEqual(end, as_of)
+
+	def test_credit_balance_has_no_collection_days(self):
+		for outstanding in (0, -100):
+			self.assertIsNone(
+				customer_overview.collection_days(CUSTOMER, COMPANY, getdate(today()), outstanding)
+			)
+
+	def test_restricted_user_cannot_read_whole_company_credit_usage(self):
+		user = create_user("overview_credit@example.com", "Accounts User", "Sales User")
+		frappe.permissions.add_user_permission("Cost Center", "_Test Cost Center 2 - _TC", user.name)
+		with self.set_user(user.name), patch.object(customer_overview, "get_customer_outstanding") as total:
+			self.assertIsNone(customer_overview.get_customer_receivables(CUSTOMER, COMPANY)["credit"]["used"])
+			total.assert_not_called()
+
+	def test_historical_overdue_uses_report_date(self):
+		customer = frappe.copy_doc(frappe.get_doc("Customer", CUSTOMER))
+		customer.customer_name = "Overview Historical Customer"
+		customer.insert()
+		si = create_sales_invoice(
+			customer=customer.name, company=COMPANY, posting_date=add_days(today(), -60), do_not_submit=True
+		)
+		si.due_date = add_days(today(), -10)
+		for term in si.payment_schedule:
+			term.due_date = si.due_date
+		si.save().submit()
+		user = create_user("overview_history@example.com", "Accounts User", "Sales User")
+		with self.set_user(user.name):
+			before_due = customer_overview.receivables(customer.name, COMPANY, add_days(today(), -30))
+			after_due = customer_overview.receivables(customer.name, COMPANY, today())
+		self.assertEqual(before_due["overdue"], 0)
+		self.assertEqual(after_due["overdue"], si.base_grand_total)

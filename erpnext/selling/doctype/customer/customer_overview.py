@@ -69,11 +69,7 @@ def get_customer_receivables(customer: str, company: str):
 			"delta": pct_change(ar["overdue"], overdue_prev),
 			"delta_positive_is_good": False,
 		},
-		"advances": {"value": ar["advance"]},
-		"credit": {
-			"limit": flt(get_credit_limit(customer, company)),
-			"used": flt(get_customer_outstanding(customer, company)),
-		},
+		"credit": credit_position(customer, company),
 		"ageing": ageing(ar),
 	}
 
@@ -95,6 +91,21 @@ def receivables_access():
 	return accounts_access() and frappe.get_cached_doc("Report", "Accounts Receivable Summary").is_permitted()
 
 
+def credit_position(customer, company):
+	from frappe.desk.reportview import build_match_conditions
+
+	# The credit check needs whole-company exposure; a partial total would
+	# incorrectly advertise available credit to a restricted viewer.
+	unrestricted = all(
+		frappe.has_permission(doctype, "read") and not build_match_conditions(doctype)
+		for doctype in ("GL Entry", "Sales Order", "Delivery Note")
+	)
+	return {
+		"limit": flt(get_credit_limit(customer, company)),
+		"used": flt(get_customer_outstanding(customer, company)) if unrestricted else None,
+	}
+
+
 def permitted(doctype, filters, fields, **kwargs):
 	return frappe.qb.get_query(
 		doctype, filters=filters, fields=fields, ignore_permissions=False, **kwargs
@@ -114,7 +125,7 @@ def invoice_filters(customer, company, from_date, to_date):
 
 def resolve_period(period, company, as_of):
 	if period == "Last 12 Months":
-		return add_to_date(as_of, months=-12, as_string=False), as_of
+		return add_months(as_of.replace(day=1), -11), as_of
 
 	if period == "This Quarter":
 		quarter_start_month = ((as_of.month - 1) // 3) * 3 + 1
@@ -168,6 +179,9 @@ def position(customer, company, from_date, to_date, accounts):
 
 
 def collection_days(customer, company, as_of, outstanding):
+	if outstanding <= 0:
+		return None
+
 	first_invoice = frappe.get_list(
 		"Sales Invoice",
 		filters={
@@ -187,26 +201,32 @@ def collection_days(customer, company, as_of, outstanding):
 	trailing = net_sales(customer, company, add_days(as_of, -history), as_of)
 	if trailing <= 0:
 		return None
-	days = int(round(outstanding / (trailing / history)))
+	days = round(outstanding / (trailing / history))
 	return days if days <= 730 else None
 
 
 def receivables(customer, company, report_date):
-	from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
-		execute as ar_summary,
+	from erpnext.accounts.report.accounts_receivable.accounts_receivable import (
+		execute as accounts_receivable,
 	)
 
-	_columns, data = ar_summary(
+	data = accounts_receivable(
 		{
 			"company": company,
 			"report_date": report_date,
 			"party_type": "Customer",
 			"party": [customer],
 			"ageing_based_on": "Due Date",
+			"age_as_on": "Report Date",
 			"range": "30, 60, 90",
 		}
-	)
-	row = data[0] if data else {}
+	)[1]
+	# Use the report's ledger allocation, including journal entries and credits,
+	# but retain offsetting balances that the summary report omits.
+	row = {
+		key: sum(flt(d.get(key)) for d in data)
+		for key in ("outstanding", "total_due", "range1", "range2", "range3", "range4")
+	}
 	outstanding = flt(row.get("outstanding"))
 	overdue = flt(row.get("total_due"))
 	buckets = [
@@ -220,7 +240,6 @@ def receivables(customer, company, report_date):
 		"buckets": buckets,
 		"outstanding": outstanding,
 		"overdue": overdue,
-		"advance": flt(row.get("advance")),
 	}
 
 
