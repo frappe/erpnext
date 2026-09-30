@@ -1787,6 +1787,28 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 
 		self.assertEqual(batch.batch_id, "IDCASE-00002")
 
+	def test_cancelled_schedule_clears_only_its_own_amc_dates(self):
+		item = make_item("_Identity Serial Only Item", {"has_serial_no": 1}).name
+		own = self.make_number("Serial No", "Amc-Own", item)
+		other = self.make_number("Serial No", "Amc-Other", item)
+		own.db_set("amc_expiry_date", "2026-12-31")
+		other.db_set("amc_expiry_date", "2027-12-31")
+		schedule = frappe.get_doc(
+			doctype="Maintenance Schedule",
+			items=[
+				{"item_code": item, "serial_no": "Amc-Own\nAmc-Other\nAmc-Deleted", "end_date": "2026-12-31"}
+			],
+		)
+
+		with (
+			patch.object(schedule, "db_set"),
+			patch("erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.delete_events"),
+		):
+			schedule.on_cancel()
+
+		self.assertIsNone(frappe.db.get_value("Serial No", own.name, "amc_expiry_date"))
+		self.assertEqual(str(frappe.db.get_value("Serial No", other.name, "amc_expiry_date")), "2027-12-31")
+
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
