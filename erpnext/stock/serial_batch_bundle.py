@@ -1557,10 +1557,10 @@ class SerialBatchCreation:
 			"posting_date",
 		)
 
-		for _i in range(abs(cint(self.actual_qty))):
+		serial_ids = SerialBatchIdentity("Serial No").get_new_names(abs(cint(self.actual_qty)))
+		for serial_id in serial_ids:
 			current_value += 1
 			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
-			serial_id = make_autoname("hash", "Serial No")
 
 			sr_nos.append(serial_id)
 			serial_nos_details.append(

@@ -857,7 +857,8 @@ class WorkOrder(Document):
 
 		serial_nos_details = []
 		index = 0
-		for serial_no in serial_nos:
+		serial_ids = SerialBatchIdentity("Serial No").get_new_names(len(serial_nos))
+		for serial_id, serial_no in zip(serial_ids, serial_nos, strict=True):
 			index += 1
 			batch_no = None
 			if batches and self.batch_size:
@@ -868,7 +869,7 @@ class WorkOrder(Document):
 
 			serial_nos_details.append(
 				(
-					make_autoname("hash", "Serial No"),
+					serial_id,
 					serial_no,
 					now(),
 					now(),

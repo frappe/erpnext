@@ -2,6 +2,7 @@ import re
 
 import frappe
 from frappe import _
+from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Lower
 from frappe.query_builder.terms import ParameterizedValueWrapper
 from frappe.utils import escape_html
@@ -149,6 +150,12 @@ class SerialBatchIdentity:
 			)
 			.run(as_dict=True)
 		)
+
+	def get_new_names(self, count):
+		names = set()
+		while len(names) < count:
+			names.add(make_autoname("hash", self.doctype))
+		return list(names)
 
 	def get_shared_numbers(self, item_code, other_item_code, limit=10):
 		table = frappe.qb.DocType(self.doctype)
