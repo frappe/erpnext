@@ -80,7 +80,7 @@ def get_data(filters=None):
 	if condition := get_allowed_masters_condition(batch.item, "Item"):
 		query = query.where(condition)
 
-	batch_records = query.run(as_dict=True) or []
+	batch_records = query.orderby(batch.batch_id).orderby(batch.item).run(as_dict=True) or []
 
 	result = []
 	for row in batch_records:

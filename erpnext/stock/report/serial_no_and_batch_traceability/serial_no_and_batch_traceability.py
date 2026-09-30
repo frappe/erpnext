@@ -270,7 +270,8 @@ class ReportData:
 		if condition := get_allowed_masters_condition(item_field, "Item"):
 			query = query.where(condition)
 
-		rows = query.run(as_dict=True)
+		number_field = doctype.serial_no if self.doctype_name == "Serial No" else doctype.batch_id
+		rows = query.orderby(number_field).orderby(item_field).run(as_dict=True)
 		hidden_references = self.get_other_company_references(rows)
 		return [row for row in rows if (row.reference_doctype, row.reference_name) not in hidden_references]
 
