@@ -7,6 +7,7 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer import customer_overview
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -141,3 +142,22 @@ class TestCustomerOverview(ERPNextTestSuite):
 			after_due = customer_overview.receivables(customer.name, COMPANY, today())
 		self.assertEqual(before_due["overdue"], 0)
 		self.assertEqual(after_due["overdue"], si.base_grand_total)
+
+	def test_companies_include_journal_entry_receivables(self):
+		customer = frappe.copy_doc(frappe.get_doc("Customer", CUSTOMER))
+		customer.customer_name = "Overview Journal Customer"
+		customer.insert()
+		entry = make_journal_entry("Debtors - _TC", "Cash - _TC", 100, save=False)
+		entry.accounts[0].party_type = "Customer"
+		entry.accounts[0].party = customer.name
+		entry.insert().submit()
+		user = create_user("overview_journal@example.com", "Accounts User", "Sales User")
+		with self.set_user(user.name):
+			self.assertIn(COMPANY, customer_overview.get_customer_companies(customer.name))
+			self.assertEqual(
+				customer_overview.get_customer_receivables(customer.name, COMPANY)["outstanding"]["value"],
+				100,
+			)
+		frappe.permissions.add_user_permission("Cost Center", "_Test Cost Center 2 - _TC", user.name)
+		with self.set_user(user.name):
+			self.assertNotIn(COMPANY, customer_overview.get_customer_companies(customer.name))

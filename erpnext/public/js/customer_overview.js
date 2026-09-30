@@ -63,9 +63,11 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.show();
 	}
 
-	show() {
+	async show() {
 		if (this.frm.get_active_tab()?.df.fieldname !== "overview_tab") return;
 		if (!this.needs_refresh) return;
+		await frappe.require(["desk_charts.bundle.js", "desk_charts.bundle.css"]);
+		if (this.frm.get_active_tab()?.df.fieldname !== "overview_tab" || !this.needs_refresh) return;
 		this.needs_refresh = false;
 		if (this.customer !== this.frm.doc.name) this.build();
 		else this.load_companies();
@@ -459,7 +461,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				{ label: __("Overdue"), value: overdue, color: "var(--blue-600)" },
 				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
 				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--green-400)" },
-				{ label: __("Available"), value: limit - used, color: "var(--green-600)" },
+				{ label: __("Available"), value: Math.max(limit - used, 0), color: "var(--green-600)" },
 			],
 			center: {
 				value: flt((used / limit) * 100, 1) + "%",
@@ -467,7 +469,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 			},
 			format: (v) => this.short_money(v),
 		});
-		return $('<div class="co-chart">').append(donut);
+		const $chart = $('<div class="co-chart">').append(donut);
+		if (used > limit) {
+			$('<div class="text-ink-red-7">')
+				.text(__("Over credit limit by {0}", [this.money0(used - limit)]))
+				.appendTo($chart);
+		}
+		return $chart;
 	}
 
 	credit_empty(can_edit) {
@@ -522,7 +530,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 					fieldtype: "Currency",
 					label: __("Credit Limit"),
 					default: flt(this.ar.data.credit.limit),
-					description: __("Applies to {0}", [company]),
+					description: __(
+						"Applies to {0}. Set to 0 to use the Customer Group or Company credit limit, if set.",
+						[company]
+					),
 				},
 			],
 			(values) => this.save_credit_limit(company, flt(values.credit_limit)),

@@ -480,6 +480,7 @@ def get_customer_companies(customer: str):
 		("Sales Order", {"customer": customer}),
 		("Quotation", {"quotation_to": "Customer", "party_name": customer}),
 		("Payment Entry", {"party_type": "Customer", "party": customer}),
+		("GL Entry", {"party_type": "Customer", "party": customer, "is_cancelled": 0}),
 	):
 		if frappe.has_permission(doctype, "read"):
 			companies.update(
