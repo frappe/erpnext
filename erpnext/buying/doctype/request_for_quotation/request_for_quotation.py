@@ -26,14 +26,9 @@ class RequestforQuotation(BuyingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.buying.doctype.request_for_quotation_item.request_for_quotation_item import RequestforQuotationItem
+		from erpnext.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import RequestforQuotationSupplier
 		from frappe.types import DF
-
-		from erpnext.buying.doctype.request_for_quotation_item.request_for_quotation_item import (
-			RequestforQuotationItem,
-		)
-		from erpnext.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import (
-			RequestforQuotationSupplier,
-		)
 
 		amended_from: DF.Link | None
 		billing_address: DF.Link | None
@@ -519,3 +514,39 @@ def get_rfq_containing_supplier(
 		limit_start=start,
 		limit_page_length=page_len,
 	)
+	rfq_data = query.run(as_dict=1)
+
+	return rfq_data
+
+
+@frappe.whitelist()
+def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
+	"""Returns supplier quotation items linked to the RFQ"""
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
+	sq = frappe.qb.DocType("Supplier Quotation")
+
+	query = (
+		frappe.qb.from_(sq_item)
+		.inner_join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(
+			sq_item.parent.as_("supplier_quotation"),
+			sq.supplier,
+			sq_item.item_code,
+			sq_item.item_name,
+			sq_item.qty,
+			sq_item.uom,
+			sq_item.stock_uom,
+			sq_item.rate,
+			sq_item.amount,
+			sq_item.lead_time_days,
+			sq.valid_till,
+			sq.currency,
+			sq.status,
+			sq.docstatus,
+		)
+		.where((sq_item.request_for_quotation == rfq_name) & (sq.docstatus < 2))
+		.orderby(sq.transaction_date)
+	)
+
+	return query.run(as_dict=True)
