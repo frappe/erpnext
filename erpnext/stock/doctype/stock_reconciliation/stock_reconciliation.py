@@ -1437,12 +1437,24 @@ def get_items(
 				args = get_item_data(row, row.qty, row.valuation_rate)
 				res.append(args)
 		else:
-			stock_bal = get_stock_balance_for(d.item_code, d.warehouse, posting_date, posting_time)
+			stock_bal = get_stock_balance(
+				d.item_code,
+				d.warehouse,
+				posting_date,
+				posting_time,
+				with_valuation_rate=True,
+				with_serial_no=cint(d.has_serial_no),
+			)
+			qty, valuation_rate, serial_no = (
+				stock_bal[0],
+				stock_bal[1],
+				stock_bal[2] if cint(d.has_serial_no) else "",
+			)
 
-			if ignore_empty_stock and not stock_bal["qty"]:
+			if ignore_empty_stock and not stock_bal[0]:
 				continue
 
-			args = get_item_data(d, stock_bal["qty"], stock_bal["rate"], stock_bal["serial_nos"])
+			args = get_item_data(d, qty, valuation_rate, serial_no)
 
 			res.append(args)
 
