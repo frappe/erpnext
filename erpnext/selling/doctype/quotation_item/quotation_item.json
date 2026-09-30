@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2013-03-07 11:42:57",
  "doctype": "DocType",
  "document_type": "Document",
