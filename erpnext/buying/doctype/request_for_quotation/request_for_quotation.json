@@ -53,7 +53,8 @@
   "column_break_czul",
   "shipping_address",
   "shipping_address_display",
-  "connections_tab"
+  "connections_tab",
+  "supplier_quotation"
  ],
  "fields": [
   {
@@ -405,7 +406,14 @@
   {
    "fieldname": "connections_tab",
    "fieldtype": "Tab Break",
-   "label": "Connections"
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "supplier_quotation",
+   "fieldtype": "Link",
+   "label": "Supplier Quotation",
+   "options": "Supplier Quotation"
   }
  ],
  "grid_page_length": 50,
@@ -413,7 +421,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-28 13:25:16.797811",
+ "modified": "2026-09-28 16:05:49.089253",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
