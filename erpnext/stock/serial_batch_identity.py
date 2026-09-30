@@ -150,6 +150,19 @@ class SerialBatchIdentity:
 			.run(as_dict=True)
 		)
 
+	def get_shared_numbers(self, item_code, other_item_code, limit=10):
+		table = frappe.qb.DocType(self.doctype)
+		other = frappe.qb.DocType(self.doctype).as_("other")
+		return (
+			frappe.qb.from_(table)
+			.join(other)
+			.on(self._number_key(table[self.number_field]) == self._number_key(other[self.number_field]))
+			.select(table[self.number_field])
+			.where((table[self.item_field] == item_code) & (other[self.item_field] == other_item_code))
+			.limit(limit)
+			.run(pluck=True)
+		)
+
 	def _create_record(self, item_code, number, defaults):
 		values = {
 			**(defaults or {}),
