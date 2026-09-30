@@ -6,21 +6,25 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
-from frappe.query_builder import CustomFunction
-from frappe.query_builder.functions import Max
-from frappe.utils import date_diff, flt, getdate
+from frappe.query_builder import Case, CustomFunction
+from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
+from frappe.utils import date_diff, flt, nowdate
+
+import erpnext
 
 
 def execute(filters=None):
 	if not filters:
 		return [], [], None, []
 
+	filters = frappe._dict(filters)
+	filters.company = filters.get("company") or erpnext.get_default_company()
+
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-	conditions = get_conditions(filters)
-	data = get_data(conditions, filters)
-	so_elapsed_time = get_so_elapsed_time(data)
+	data = get_data(filters)
+	so_elapsed_time = {} if filters.get("group_by_item") else get_so_elapsed_time(data)
 
 	if not data:
 		return [], [], None, []
@@ -31,6 +35,9 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	if not filters.get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
 
 	if not from_date and to_date:
@@ -38,65 +45,70 @@ def validate_filters(filters):
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
 
-
-def get_conditions(filters):
-	conditions = ""
-	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " and so.transaction_date between %(from_date)s and %(to_date)s"
-
-	if filters.get("company"):
-		conditions += " and so.company = %(company)s"
-
-	if filters.get("sales_order"):
-		conditions += " and so.name in %(sales_order)s"
-
-	if filters.get("status"):
-		conditions += " and so.status in %(status)s"
-
-	if filters.get("warehouse"):
-		conditions += " and soi.warehouse = %(warehouse)s"
-
-	return conditions
+	if filters.get("group_by_so") and filters.get("group_by_item"):
+		frappe.throw(_("Group the report by Sales Order or by Item, not both."))
 
 
-def get_data(conditions, filters):
-	data = frappe.db.sql(
-		f"""
-		SELECT
-			so.transaction_date as date,
-			soi.delivery_date as delivery_date,
-			so.name as sales_order,
-			so.status, so.customer, soi.item_code,
-			DATEDIFF(CURRENT_DATE, soi.delivery_date) as delay_days,
-			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
-			soi.qty, soi.delivered_qty,
-			(soi.qty - soi.delivered_qty) AS pending_qty,
-			IFNULL(SUM(sii.qty), 0) as billed_qty,
-			soi.base_amount as amount,
-			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
-			(soi.billed_amt * IFNULL(so.conversion_rate, 1)) as billed_amount,
-			(soi.base_amount - (soi.billed_amt * IFNULL(so.conversion_rate, 1))) as pending_amount,
-			soi.warehouse as warehouse,
-			so.company, soi.name,
-			soi.description as description
-		FROM
-			`tabSales Order` so,
-			`tabSales Order Item` soi
-		LEFT JOIN `tabSales Invoice Item` sii
-			ON sii.so_detail = soi.name and sii.docstatus = 1
-		WHERE
-			soi.parent = so.name
-			and so.status not in ('Stopped', 'On Hold')
-			and so.docstatus = 1
-			{conditions}
-		GROUP BY soi.name
-		ORDER BY so.transaction_date ASC, soi.item_code ASC
-	""",
-		filters,
-		as_dict=1,
+def get_data(filters):
+	so = qb.DocType("Sales Order")
+	soi = qb.DocType("Sales Order Item")
+	sii = qb.DocType("Sales Invoice Item")
+
+	# Use the application's today (nowdate, System Settings timezone) rather than the database
+	# server's CURRENT_DATE: the two differ by a day when the DB server runs in a different timezone
+	# (e.g. UTC DB + IST app near midnight), which made delay_days non-deterministic on postgres CI.
+	# DateDiff is cross-database: DATEDIFF() on MariaDB, date subtraction on postgres; it casts the
+	# string date to a date on postgres. delivery_date is functionally dependent on the grouped
+	# soi.name primary key, so this is valid under both.
+	delay = DateDiff(nowdate(), soi.delivery_date)
+	conversion_rate = Coalesce(so.conversion_rate, 1)
+
+	query = (
+		qb.from_(so)
+		.join(soi)
+		.on(soi.parent == so.name)
+		.left_join(sii)
+		.on((sii.so_detail == soi.name) & (sii.docstatus == 1))
+		.select(
+			so.transaction_date.as_("date"),
+			soi.delivery_date.as_("delivery_date"),
+			so.name.as_("sales_order"),
+			so.status,
+			so.customer,
+			soi.item_code,
+			soi.uom,
+			delay.as_("delay_days"),
+			Case().when(so.status.isin(["Completed", "To Bill"]), 0).else_(delay).as_("delay"),
+			soi.qty,
+			soi.delivered_qty,
+			(soi.qty - soi.delivered_qty).as_("pending_qty"),
+			Coalesce(Sum(sii.qty), 0).as_("billed_qty"),
+			soi.base_amount.as_("amount"),
+			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
+			(soi.billed_amt * conversion_rate).as_("billed_amount"),
+			(soi.base_amount - (soi.billed_amt * conversion_rate)).as_("pending_amount"),
+			soi.warehouse.as_("warehouse"),
+			so.company,
+			soi.name,
+			soi.description.as_("description"),
+		)
+		.where((so.status.notin(["Stopped", "On Hold"])) & (so.docstatus == 1))
+		.where(so.company == filters.get("company"))
+		.groupby(soi.name, so.name)
+		.orderby(so.transaction_date)
+		.orderby(soi.item_code)
 	)
 
-	return data
+	if filters.get("from_date") and filters.get("to_date"):
+		query = query.where(so.transaction_date[filters.get("from_date") : filters.get("to_date")])
+	if filters.get("sales_order"):
+		query = query.where(so.name.isin(filters.get("sales_order")))
+	if filters.get("status"):
+		query = query.where(so.status.isin(filters.get("status")))
+	if filters.get("warehouse"):
+		query = query.where(soi.warehouse == filters.get("warehouse"))
+
+	return query.run(as_dict=True)
 
 
 def get_so_elapsed_time(data):
@@ -112,7 +124,17 @@ def get_so_elapsed_time(data):
 		dn = qb.DocType("Delivery Note")
 		dni = qb.DocType("Delivery Note Item")
 
-		to_seconds = CustomFunction("TO_SECONDS", ["date"])
+		# TO_SECONDS is MariaDB-only. On postgres, subtracting dates yields days, so multiply
+		# by 86400 for the equivalent second delta. so.transaction_date is neither aggregated nor
+		# in the GROUP BY, but it is selectable under postgres' strict GROUP BY because it is
+		# functionally dependent on the grouped so.name (a doctype's `name` is always the PK).
+		if frappe.db.db_type == "postgres":
+			elapsed_seconds = ((Max(dn.posting_date) - so.transaction_date) * 86400).as_("elapsed_seconds")
+		else:
+			to_seconds = CustomFunction("TO_SECONDS", ["date"])
+			elapsed_seconds = (to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_(
+				"elapsed_seconds"
+			)
 
 		query = (
 			qb.from_(so)
@@ -125,11 +147,11 @@ def get_so_elapsed_time(data):
 			.select(
 				so.name.as_("sales_order"),
 				soi.item_code.as_("so_item_code"),
-				(to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_("elapsed_seconds"),
+				elapsed_seconds,
 			)
 			.where((so.name.isin(sales_orders)) & (dn.docstatus == 1))
 			.orderby(so.name, soi.name)
-			.groupby(soi.name)
+			.groupby(soi.name, so.name)
 		)
 		dn_elapsed_time = query.run(as_dict=True)
 
@@ -140,69 +162,84 @@ def get_so_elapsed_time(data):
 	return so_elapsed_time
 
 
+AGGREGATED_FIELDS = (
+	"qty",
+	"delivered_qty",
+	"pending_qty",
+	"billed_qty",
+	"qty_to_bill",
+	"amount",
+	"delivered_qty_amount",
+	"billed_amount",
+	"pending_amount",
+)
+
+
 def prepare_data(data, so_elapsed_time, filters):
 	completed, pending = 0, 0
 
-	if filters.get("group_by_so"):
-		sales_order_map = {}
-
 	for row in data:
-		# sum data for chart
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
 
-		# prepare data for report view
 		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
-
 		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
-
 		row["time_taken_to_deliver"] = (
 			so_elapsed_time.get((row.sales_order, row.item_code))
 			if row["status"] in ("To Bill", "Completed")
 			else 0
 		)
 
-		if filters.get("group_by_so"):
-			so_name = row["sales_order"]
-
-			if so_name not in sales_order_map:
-				# create an entry
-				row_copy = copy.deepcopy(row)
-				sales_order_map[so_name] = row_copy
-			else:
-				# update existing entry
-				so_row = sales_order_map[so_name]
-				so_row["required_date"] = max(getdate(so_row["delivery_date"]), getdate(row["delivery_date"]))
-				so_row["delay"] = (
-					min(so_row["delay"], row["delay"])
-					if row["delay"] and so_row["delay"]
-					else so_row["delay"]
-				)
-
-				# sum numeric columns
-				fields = [
-					"qty",
-					"delivered_qty",
-					"pending_qty",
-					"billed_qty",
-					"qty_to_bill",
-					"amount",
-					"delivered_qty_amount",
-					"billed_amount",
-					"pending_amount",
-				]
-				for field in fields:
-					so_row[field] = flt(row[field]) + flt(so_row[field])
-
 	chart_data = prepare_chart_data(pending, completed)
 
 	if filters.get("group_by_so"):
-		data = []
-		for so in sales_order_map:
-			data.append(sales_order_map[so])
-		return data, chart_data
+		data = group_by_sales_order(data)
+	elif filters.get("group_by_item"):
+		data = group_by_item(data)
 
 	return data, chart_data
+
+
+def group_by_sales_order(data):
+	sales_order_map = {}
+
+	for row in data:
+		group = sales_order_map.get(row["sales_order"])
+		if not group:
+			sales_order_map[row["sales_order"]] = copy.deepcopy(row)
+			continue
+
+		group["delay"] = (
+			min(group["delay"], row["delay"]) if row["delay"] and group["delay"] else group["delay"]
+		)
+		add_aggregated_fields(group, row)
+
+	return list(sales_order_map.values())
+
+
+def group_by_item(data):
+	"""Group on company and UOM as well as the item.
+
+	Quantities are in the line UOM and amounts are in the company currency, so neither sums
+	across a second UOM of the same item or a second company.
+	"""
+	item_map = {}
+
+	for row in data:
+		key = (row["company"], row["item_code"], row["uom"])
+		group = item_map.get(key)
+		if not group:
+			item_map[key] = copy.deepcopy(row)
+			continue
+
+		add_aggregated_fields(group, row)
+
+	return sorted(item_map.values(), key=lambda row: (row["company"], row["item_code"], row["uom"]))
+
+
+def add_aggregated_fields(group, row):
+	for field in AGGREGATED_FIELDS:
+		group[field] = flt(group[field]) + flt(row[field])
 
 
 def prepare_chart_data(pending, completed):
@@ -216,7 +253,34 @@ def prepare_chart_data(pending, completed):
 
 
 def get_columns(filters):
-	columns = [
+	if filters.get("group_by_item"):
+		return get_grouped_by_item_columns()
+
+	columns = get_sales_order_columns()
+
+	if not filters.get("group_by_so"):
+		columns += get_item_columns()
+
+	columns += get_quantity_columns() + get_amount_columns() + get_delivery_columns()
+
+	if not filters.get("group_by_so"):
+		columns.append(get_warehouse_column())
+
+	columns.append(get_company_column())
+
+	return columns
+
+
+def get_grouped_by_item_columns():
+	columns = [get_item_code_column(), get_uom_column()]
+	columns += get_quantity_columns() + get_amount_columns()
+	columns.append(get_company_column())
+
+	return columns
+
+
+def get_sales_order_columns():
+	return [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Date", "width": 90},
 		{
 			"label": _("Sales Order"),
@@ -235,117 +299,139 @@ def get_columns(filters):
 		},
 	]
 
-	if not filters.get("group_by_so"):
-		columns.append(
-			{
-				"label": _("Item Code"),
-				"fieldname": "item_code",
-				"fieldtype": "Link",
-				"options": "Item",
-				"width": 100,
-			}
-		)
-		columns.append(
-			{"label": _("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 100}
-		)
 
-	columns.extend(
-		[
-			{
-				"label": _("Qty"),
-				"fieldname": "qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Delivered Qty"),
-				"fieldname": "delivered_qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Qty to Deliver"),
-				"fieldname": "pending_qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Billed Qty"),
-				"fieldname": "billed_qty",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Qty to Bill"),
-				"fieldname": "qty_to_bill",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Amount"),
-				"fieldname": "amount",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Billed Amount"),
-				"fieldname": "billed_amount",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Pending Amount"),
-				"fieldname": "pending_amount",
-				"fieldtype": "Currency",
-				"width": 130,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Amount Delivered"),
-				"fieldname": "delivered_qty_amount",
-				"fieldtype": "Currency",
-				"width": 100,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{"label": _("Delivery Date"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 120},
-			{"label": _("Delay (in Days)"), "fieldname": "delay", "fieldtype": "Data", "width": 100},
-			{
-				"label": _("Time Taken to Deliver"),
-				"fieldname": "time_taken_to_deliver",
-				"fieldtype": "Duration",
-				"width": 100,
-			},
-		]
-	)
-	if not filters.get("group_by_so"):
-		columns.append(
-			{
-				"label": _("Warehouse"),
-				"fieldname": "warehouse",
-				"fieldtype": "Link",
-				"options": "Warehouse",
-				"width": 100,
-			}
-		)
-	columns.append(
+def get_item_columns():
+	return [
+		get_item_code_column(),
+		{"label": _("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 100},
+	]
+
+
+def get_item_code_column():
+	return {
+		"label": _("Item Code"),
+		"fieldname": "item_code",
+		"fieldtype": "Link",
+		"options": "Item",
+		"width": 100,
+	}
+
+
+def get_uom_column():
+	return {
+		"label": _("UOM"),
+		"fieldname": "uom",
+		"fieldtype": "Link",
+		"options": "UOM",
+		"width": 100,
+	}
+
+
+def get_quantity_columns():
+	return [
 		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 100,
-		}
-	)
+			"label": _("Qty"),
+			"fieldname": "qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Delivered Qty"),
+			"fieldname": "delivered_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Qty to Deliver"),
+			"fieldname": "pending_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Billed Qty"),
+			"fieldname": "billed_qty",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Qty to Bill"),
+			"fieldname": "qty_to_bill",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+	]
 
-	return columns
+
+def get_amount_columns():
+	return [
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 110,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Billed Amount"),
+			"fieldname": "billed_amount",
+			"fieldtype": "Currency",
+			"width": 110,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Pending Amount"),
+			"fieldname": "pending_amount",
+			"fieldtype": "Currency",
+			"width": 130,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Amount Delivered"),
+			"fieldname": "delivered_qty_amount",
+			"fieldtype": "Currency",
+			"width": 100,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+	]
+
+
+def get_delivery_columns():
+	return [
+		{"label": _("Delivery Date"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 120},
+		{"label": _("Delay (in Days)"), "fieldname": "delay", "fieldtype": "Data", "width": 100},
+		{
+			"label": _("Time Taken to Deliver"),
+			"fieldname": "time_taken_to_deliver",
+			"fieldtype": "Duration",
+			"width": 100,
+		},
+	]
+
+
+def get_warehouse_column():
+	return {
+		"label": _("Warehouse"),
+		"fieldname": "warehouse",
+		"fieldtype": "Link",
+		"options": "Warehouse",
+		"width": 100,
+	}
+
+
+def get_company_column():
+	return {
+		"label": _("Company"),
+		"fieldname": "company",
+		"fieldtype": "Link",
+		"options": "Company",
+		"width": 100,
+	}

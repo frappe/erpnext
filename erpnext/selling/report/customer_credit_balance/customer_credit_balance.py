@@ -77,17 +77,18 @@ def get_columns(customer_naming_type):
 
 
 def get_details(filters):
-	sql_query = """SELECT
-						c.name, c.customer_name,
-						ccl.bypass_credit_limit_check,
-						c.is_frozen, c.disabled
-					FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
-					WHERE
-						c.name = ccl.parent
-						AND ccl.company = %(company)s"""
+	c = frappe.qb.DocType("Customer")
+	ccl = frappe.qb.DocType("Customer Credit Limit")
+	query = (
+		frappe.qb.from_(c)
+		.inner_join(ccl)
+		.on(c.name == ccl.parent)
+		.select(c.name, c.customer_name, ccl.bypass_credit_limit_check, c.is_frozen, c.disabled)
+		.where(ccl.company == filters.get("company"))
+	)
 
 	# customer filter is optional.
 	if filters.get("customer"):
-		sql_query += " AND c.name = %(customer)s"
+		query = query.where(c.name == filters.get("customer"))
 
-	return frappe.db.sql(sql_query, filters, as_dict=1)
+	return query.run(as_dict=1)

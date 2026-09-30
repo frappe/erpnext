@@ -75,6 +75,54 @@ frappe.ui.form.on("Item Group", {
 				},
 			};
 		};
+
+		frm.set_query("default_warehouse", "item_group_defaults", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: { company: row.company, is_group: 0 },
+			};
+		});
+
+		frm.set_query("default_inventory_account", "item_group_defaults", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: { company: row.company, account_type: "Stock", is_group: 0 },
+			};
+		});
+
+		frm.set_query("default_provisional_account", "item_group_defaults", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: {
+					company: row.company,
+					root_type: ["in", ["Liability", "Asset"]],
+					is_group: 0,
+				},
+			};
+		});
+
+		[
+			"purchase_expense_account",
+			"purchase_expense_contra_account",
+			"default_cogs_account",
+			"expenses_added_to_stock_account",
+			"expenses_added_to_stock_contra_account",
+		].forEach((field) => {
+			frm.fields_dict["item_group_defaults"].grid.get_field(field).get_query = function (
+				doc,
+				cdt,
+				cdn
+			) {
+				const row = locals[cdt][cdn];
+				return {
+					filters: {
+						root_type: "Expense",
+						company: row.company,
+						is_group: 0,
+					},
+				};
+			};
+		});
 	},
 
 	refresh: function (frm) {
@@ -174,10 +222,12 @@ const COMPANY_DEFAULTS_TO_VF = {
 	default_discount_account: "vf_default_discount_account",
 	default_supplier: "vf_default_supplier",
 	purchase_expense_contra_account: "vf_purchase_expense_contra_account",
+	expenses_added_to_stock_account: "vf_expenses_added_to_stock_account",
+	expenses_added_to_stock_contra_account: "vf_expenses_added_to_stock_contra_account",
 };
 
 const FIELD_DEFAULT_SOURCE = {
-	default_warehouse: "Stock Settings",
+	default_warehouse: "Company",
 	default_inventory_account: "Company",
 	buying_cost_center: "Company",
 	selling_cost_center: "Company",
@@ -192,6 +242,8 @@ const FIELD_DEFAULT_SOURCE = {
 	default_discount_account: "Company",
 	default_supplier: null,
 	purchase_expense_contra_account: "Company",
+	expenses_added_to_stock_account: "Company",
+	expenses_added_to_stock_contra_account: "Company",
 };
 
 function populate_item_group_company_defaults(frm, cdt, cdn, row) {

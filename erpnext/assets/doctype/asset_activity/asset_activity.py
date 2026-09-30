@@ -17,7 +17,7 @@ class AssetActivity(Document):
 
 		asset: DF.Link
 		date: DF.Datetime
-		subject: DF.SmallText
+		subject: DF.TextEditor
 		user: DF.Link
 	# end: auto-generated types
 

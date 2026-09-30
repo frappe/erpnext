@@ -17,6 +17,7 @@ class PurchaseTaxesandCharges(Document):
 		account_currency: DF.Link | None
 		account_head: DF.Link
 		add_deduct_tax: DF.Literal["Add", "Deduct"]
+		allocate_full_amount_to_stock_items: DF.Check
 		base_net_amount: DF.Currency
 		base_tax_amount: DF.Currency
 		base_tax_amount_after_discount_amount: DF.Currency

@@ -35,28 +35,30 @@ def get_context(context):
 def get_more_items_info(items, material_request):
 	for item in items:
 		item.customer_provided = frappe.get_value("Item", item.item_code, "is_customer_provided_item")
-		item.work_orders = frappe.db.sql(
-			"""
-			select
-				wo.name, wo.status, wo_item.consumed_qty
-			from
-				`tabWork Order Item` wo_item, `tabWork Order` wo
-			where
-				wo_item.item_code=%s
-				and wo_item.consumed_qty=0
-				and wo_item.parent=wo.name
-				and wo.status not in ('Completed', 'Cancelled', 'Stopped')
-			order by
-				wo.name asc""",
-			item.item_code,
-			as_dict=1,
+		wo = frappe.qb.DocType("Work Order")
+		wo_item = frappe.qb.DocType("Work Order Item")
+		item.work_orders = (
+			frappe.qb.from_(wo_item)
+			.inner_join(wo)
+			.on(wo_item.parent == wo.name)
+			.select(wo.name, wo.status, wo_item.consumed_qty)
+			.where(
+				(wo_item.item_code == item.item_code)
+				& (wo_item.consumed_qty == 0)
+				& (wo.status.notin(["Completed", "Cancelled", "Stopped"]))
+			)
+			.orderby(wo.name)
+			.run(as_dict=1)
 		)
 		item.delivered_qty = flt(
-			frappe.db.sql(
-				"""select sum(transfer_qty)
-						from `tabStock Entry Detail` where material_request = %s
-						and item_code = %s and docstatus = 1""",
-				(material_request, item.item_code),
-			)[0][0]
+			frappe.get_all(
+				"Stock Entry Detail",
+				filters={
+					"material_request": material_request,
+					"item_code": item.item_code,
+					"docstatus": 1,
+				},
+				fields=[{"SUM": "transfer_qty", "as": "transfer_qty"}],
+			)[0].transfer_qty
 		)
 	return items

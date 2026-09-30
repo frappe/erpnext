@@ -35,6 +35,7 @@ class StockBalanceFilter(TypedDict):
 	include_uom: str | None  # include extra info in converted UOM
 	show_stock_ageing_data: bool
 	show_variant_attributes: bool
+	show_alt_uom_balance: bool
 
 
 SLEntry = dict[str, Any]
@@ -76,6 +77,7 @@ class StockBalanceReport:
 			self.columns = self.get_columns()
 
 		self.add_additional_uom_columns()
+		self.add_alt_uom_columns()
 
 		return self.columns, self.data
 
@@ -108,6 +110,11 @@ class StockBalanceReport:
 			)
 
 	def get_entries_from_stock_closing_balance(self) -> list:
+		# The SLE query then starts from the very first entry, so loading the closing balance as
+		# opening too would count everything up to the closing date twice.
+		if self.filters.get("ignore_closing_balance"):
+			return []
+
 		stk_cl_obj = StockClosing(self.filters.company, self.from_date, self.from_date)
 		if not stk_cl_obj.last_closing_balance:
 			return []
@@ -134,7 +141,9 @@ class StockBalanceReport:
 		if not opening_entries:
 			return []
 
-		return opening_entries
+		# Batch wise rows carry no inventory dimension key either, but they share the item and
+		# warehouse group key with the item level row and would overwrite its opening.
+		return [d for d in opening_entries if not d.batch_no]
 
 	def filter_fields(self) -> list[str]:
 		fields = ["item_code", "warehouse"]
@@ -170,6 +179,7 @@ class StockBalanceReport:
 				sle.serial_and_batch_bundle,
 				sle.has_serial_no,
 				sle.voucher_detail_no,
+				sle.is_adjustment_entry,
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
@@ -179,6 +189,9 @@ class StockBalanceReport:
 			.orderby(sle.creation)
 		)
 
+		self.sle_query = self.apply_filters(query, sle, item_table)
+
+	def apply_filters(self, query, sle, item_table):
 		query = self.apply_inventory_dimensions_filters(query, sle)
 		query = self.apply_warehouse_filters(query, sle)
 		query = self.apply_items_filters(query, item_table)
@@ -187,7 +200,7 @@ class StockBalanceReport:
 		if self.filters.get("company"):
 			query = query.where(sle.company == self.filters.get("company"))
 
-		self.sle_query = query
+		return query
 
 	def prepare_item_warehouse_map_for_current_period(self):
 		self.opening_vouchers = self.get_opening_vouchers()
@@ -317,15 +330,13 @@ class StockBalanceReport:
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
 			)
 
-			if (
-				not self.filters.get("include_zero_stock_items")
-				and report_data
-				and report_data.bal_qty == 0
-				and report_data.bal_val == 0
-			):
+			if self.is_hidden_zero_stock(report_data):
 				continue
 
 			self.data.append(report_data)
+
+	def is_hidden_zero_stock(self, row) -> bool:
+		return not self.filters.get("include_zero_stock_items") and row.bal_qty == 0 and row.bal_val == 0
 
 	def get_sre_reserved_qty_details(self) -> dict:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -344,20 +355,31 @@ class StockBalanceReport:
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
-		if entry.voucher_type == "Stock Reconciliation" and (
-			not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle
+		# An adjustment entry only writes off stock value that is stranded on an item with no
+		# quantity left; it moves nothing. Its qty_after_transaction and stock_value are therefore
+		# not a statement of the balance the way a real reconciliation's are, and the write-off it
+		# carries lives solely in stock_value_difference. Treat it as the plain delta it is.
+		if (
+			entry.voucher_type == "Stock Reconciliation"
+			and not entry.is_adjustment_entry
+			and (not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle)
 		):
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0
 				qty_diff = flt(entry.actual_qty)
+				value_diff = flt(entry.stock_value_difference)
 			else:
 				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
+				value_diff = flt(entry.stock_value) - flt(qty_dict.bal_val)
 		else:
 			qty_diff = flt(entry.actual_qty)
+			value_diff = flt(entry.stock_value_difference)
 
-		value_diff = flt(entry.stock_value_difference)
+		qty_dict.val_rate = entry.valuation_rate
+		self.add_to_balance(qty_dict, entry, qty_diff, value_diff)
 
+	def add_to_balance(self, qty_dict, entry, qty_diff, value_diff):
 		if entry.posting_date < self.from_date or entry.voucher_no in self.opening_vouchers.get(
 			entry.voucher_type, []
 		):
@@ -375,12 +397,14 @@ class StockBalanceReport:
 			else:
 				qty_dict.out_val += abs(value_diff)
 
-		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
 	def initialize_data(self, group_by_key, entry):
-		self.item_warehouse_map[group_by_key] = frappe._dict(
+		self.item_warehouse_map[group_by_key] = self.get_initial_data(entry)
+
+	def get_initial_data(self, entry):
+		return frappe._dict(
 			{
 				"item_code": entry.item_code,
 				"warehouse": entry.warehouse,
@@ -604,6 +628,87 @@ class StockBalanceReport:
 
 		conversion_factors = self.get_itemwise_conversion_factor()
 		add_additional_uom_columns(self.columns, self.data, self.filters.include_uom, conversion_factors)
+
+	def add_alt_uom_columns(self) -> None:
+		"""Add an alternate UOM balance column after the Balance Qty column."""
+		if not self.filters.get("show_alt_uom_balance"):
+			return
+
+		item_alt_uom_map = self.get_item_alt_uom_map()
+		if not item_alt_uom_map:
+			return
+
+		bal_qty_idx = next(
+			(
+				i
+				for i, col in enumerate(self.columns)
+				if isinstance(col, dict) and col.get("fieldname") == "bal_qty"
+			),
+			None,
+		)
+		if bal_qty_idx is None:
+			return
+
+		# Insert in reverse so "Alt UOM" name column appears before qty column
+		self.columns.insert(
+			bal_qty_idx + 1,
+			{
+				"label": _("Balance Qty (Alt UOM)"),
+				"fieldname": "alt_uom_bal_qty",
+				"fieldtype": "Float",
+				"width": 140,
+			},
+		)
+		self.columns.insert(
+			bal_qty_idx + 1,
+			{
+				"label": _("Alt UOM"),
+				"fieldname": "alt_uom",
+				"fieldtype": "Data",
+				"width": 90,
+			},
+		)
+
+		for row in self.data:
+			alt_uoms = item_alt_uom_map.get(row.item_code, [])
+			if alt_uoms:
+				uom, factor = alt_uoms[0]["uom"], flt(alt_uoms[0]["conversion_factor"])
+				row["alt_uom"] = uom
+				row["alt_uom_bal_qty"] = flt(row.get("bal_qty", 0)) / factor if factor else 0.0
+			else:
+				row["alt_uom"] = ""
+				row["alt_uom_bal_qty"] = 0.0
+
+	def get_item_alt_uom_map(self) -> dict:
+		"""Return {item_code: [{uom, conversion_factor}, ...]} for alternate UOMs (excluding stock UOM)."""
+		item_codes = list({d["item_code"] for d in self.data})
+		if not item_codes:
+			return {}
+
+		uom_detail = frappe.qb.DocType("UOM Conversion Detail")
+		item_table = frappe.qb.DocType("Item")
+
+		rows = (
+			frappe.qb.from_(uom_detail)
+			.join(item_table)
+			.on(uom_detail.parent == item_table.name)
+			.select(uom_detail.parent, uom_detail.uom, uom_detail.conversion_factor)
+			.where(
+				(uom_detail.parenttype == "Item")
+				& (uom_detail.parent.isin(item_codes))
+				& (uom_detail.uom != item_table.stock_uom)
+			)
+			.orderby(uom_detail.parent)
+			.orderby(uom_detail.idx)
+		).run(as_dict=True)
+
+		result: dict = {}
+		for row in rows:
+			result.setdefault(row.parent, [])
+			if not result[row.parent]:  # keep only the first alternate UOM (lowest idx)
+				result[row.parent].append({"uom": row.uom, "conversion_factor": row.conversion_factor})
+
+		return result
 
 	def get_itemwise_conversion_factor(self):
 		items = []

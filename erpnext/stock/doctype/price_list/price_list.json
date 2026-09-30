@@ -7,6 +7,7 @@
  "description": "A Price List is a collection of Item Prices either Selling, Buying, or both",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/price-lists",
  "engine": "InnoDB",
  "field_order": [
   "enabled",
@@ -80,11 +81,11 @@
    "options": "Price List Country"
   }
  ],
- "icon": "fa fa-tags",
+ "icon": "tags",
  "idx": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2024-08-16 19:41:19.591111",
+ "modified": "2026-08-21 23:11:45.985667",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",
@@ -124,8 +125,41 @@
   {
    "read": 1,
    "role": "Manufacturing User"
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "currency",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

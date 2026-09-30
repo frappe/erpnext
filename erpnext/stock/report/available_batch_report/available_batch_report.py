@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, get_datetime, today
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -106,7 +108,9 @@ def get_batchwise_data_from_stock_ledger(filters):
 			Sum(table.actual_qty).as_("balance_qty"),
 		)
 		.where(table.is_cancelled == 0)
-		.groupby(table.batch_no, table.item_code, table.warehouse)
+		# batch.expiry_date comes from the Batch table; postgres requires its PK in the GROUP BY for
+		# it to be selectable. batch.name is 1:1 with the grouped batch_no, so groups are unchanged.
+		.groupby(table.batch_no, table.item_code, table.warehouse, batch.name)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)
@@ -137,7 +141,10 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 			Sum(ch_table.qty).as_("balance_qty"),
 		)
 		.where((table.is_cancelled == 0) & (table.docstatus == 1))
-		.groupby(ch_table.batch_no, table.item_code, ch_table.warehouse)
+		# Group by the same (SLE) warehouse that is selected -- the original grouped by
+		# ch_table.warehouse while selecting table.warehouse, which postgres rejects. Also group by
+		# the Batch PK so batch.expiry_date is selectable (1:1 with the grouped batch_no).
+		.groupby(ch_table.batch_no, table.item_code, table.warehouse, batch.name)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)
@@ -153,6 +160,12 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 
 
 def get_query_based_on_filters(query, batch, table, filters):
+	if filters.company:
+		query = query.where(table.company == filters.company)
+
+	if condition := get_allowed_companies_condition(table.company, "Stock Ledger Entry"):
+		query = query.where(condition)
+
 	if filters.item_code:
 		query = query.where(table.item_code == filters.item_code)
 

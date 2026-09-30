@@ -7,6 +7,7 @@
  "creation": "2026-04-06 14:10:33.384946",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/purchase-receipt",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -364,6 +365,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -1289,11 +1291,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-truck",
+ "icon": "package-check",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-28 12:38:05.907578",
+ "modified": "2026-08-21 23:11:47.160738",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1352,6 +1354,18 @@
    "read": 1,
    "role": "Stock Manager",
    "write": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

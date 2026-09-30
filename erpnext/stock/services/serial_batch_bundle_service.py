@@ -9,6 +9,8 @@ delegators for methods reached from other doctypes / ``run_method``; internal
 helpers live here only.
 """
 
+from collections import defaultdict
+
 import frappe
 from frappe import _, bold
 from frappe.utils import cstr, flt, get_link_to_form, getdate
@@ -30,25 +32,37 @@ class SerialBatchBundleService:
 		self.doc = doc
 
 	def validate_warehouse_of_sabb(self):
-		if self.doc.is_internal_transfer():
-			return
-
+		is_internal_transfer = self.doc.is_internal_transfer()
 		doc_before_save = self.doc.get_doc_before_save()
+		bundle_details = {}
 
 		for row in self.doc.items:
-			if not row.get("serial_and_batch_bundle"):
-				continue
+			for fieldname in ("serial_and_batch_bundle", "rejected_serial_and_batch_bundle"):
+				bundle = row.get(fieldname)
+				if not bundle:
+					continue
 
-			sabb_details = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				row.serial_and_batch_bundle,
-				["type_of_transaction", "warehouse", "has_serial_no"],
-				as_dict=True,
-			)
+				if bundle not in bundle_details:
+					bundle_details[bundle] = frappe.db.get_value(
+						"Serial and Batch Bundle",
+						bundle,
+						["company", "type_of_transaction", "warehouse", "has_serial_no"],
+						as_dict=True,
+					)
+
+				sabb_details = bundle_details[bundle]
+				if sabb_details and sabb_details.company != self.doc.company:
+					frappe.throw(
+						_(
+							"Row #{0}: Company {1} does not match with the company {2} in Serial and Batch Bundle {3}."
+						).format(row.idx, self.doc.company, sabb_details.company, bundle)
+					)
+
+			sabb_details = bundle_details.get(row.get("serial_and_batch_bundle"))
 			if not sabb_details:
 				continue
 
-			if sabb_details.type_of_transaction != "Outward":
+			if is_internal_transfer or sabb_details.type_of_transaction != "Outward":
 				continue
 
 			warehouse = row.get("warehouse") or row.get("s_warehouse")
@@ -176,6 +190,10 @@ class SerialBatchBundleService:
 			parent_details = self.get_parent_details_for_packed_items()
 
 		for row in self.doc.get(table_name):
+			item_code = row.get("rm_item_code") or row.get("item_code")
+			if not item_code or not self.is_serial_batch_item(item_code):
+				continue
+
 			if (
 				not via_landed_cost_voucher
 				and row.serial_and_batch_bundle
@@ -496,7 +514,7 @@ class SerialBatchBundleService:
 		if throw_error:
 			frappe.throw(
 				_(
-					"At row {0}: Serial and Batch Bundle {1} has already created. Please remove the values from the serial no or batch no fields."
+					"At row {0}: Serial and Batch Bundle {1} has already been created. Please remove the values from the serial no or batch no fields."
 				).format(row.idx, row.serial_and_batch_bundle)
 			)
 
@@ -562,7 +580,14 @@ class SerialBatchBundleService:
 					)
 
 	def make_package_for_transfer(
-		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
+		self,
+		serial_and_batch_bundle,
+		warehouse,
+		type_of_transaction=None,
+		do_not_submit=None,
+		qty=0,
+		include_bundle=None,
+		exclude_serial_nos=None,
 	):
 		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
 
@@ -576,6 +601,8 @@ class SerialBatchBundleService:
 			type_of_transaction=type_of_transaction,
 			do_not_submit=do_not_submit,
 			qty=qty,
+			include_bundle=include_bundle,
+			exclude_serial_nos=exclude_serial_nos,
 		)
 
 	def validate_reserved_batches(self):
@@ -600,66 +627,64 @@ class SerialBatchBundleService:
 		if not batches:
 			return
 
-		field_mapper = {
-			"Sales Invoice": [["Sales Order", "sales_order"]],
-			"Delivery Note": [["Sales Order", "against_sales_order"]],
-			"Stock Entry": [
-				["Work Order", "work_order"],
-				["Subcontracting Inward Order", "subcontracting_inward_order"],
-			],
+		reference_fields = {
+			"Sales Invoice": ["sales_order"],
+			"Delivery Note": ["against_sales_order"],
+			"Stock Entry": ["work_order", "subcontracting_inward_order"],
 		}.get(self.doc.doctype)
 
-		qty_field = {
-			"Sales Invoice": "qty",
-			"Delivery Note": "qty",
-			"Stock Entry": "fg_completed_qty",
-		}.get(self.doc.doctype)
-
-		reserved_batches_data = self.get_reserved_batches(batches)
 		items = self.doc.items
 		if self.doc.doctype == "Stock Entry":
 			items = [self.doc]
 
-		for item in items:
-			for field in field_mapper:
-				if not item.get(field[1]):
-					continue
+		own_vouchers = {item.get(field) for item in items for field in reference_fields if item.get(field)}
 
-				value = item.get(field[1])
-				for row in reserved_batches_data:
-					if self.doc.doctype in ["Sales Invoice", "Delivery Note"] and row.item_code != item.get(
-						"item_code"
-					):
-						continue
+		outstanding_qty = defaultdict(float)
+		reservations = defaultdict(list)
+		for row in self.get_reserved_batches(batches):
+			if row.voucher_no in own_vouchers:
+				continue
 
-					if row.voucher_no == value:
-						continue
+			key = (row.batch_no, row.warehouse)
+			outstanding = flt(row.qty) - flt(row.delivered_qty)
+			outstanding_qty[key] += outstanding
+			if outstanding > 0:
+				reservations[key].append(row)
 
-					batch_qty = get_batch_qty(
-						row.batch_no,
-						row.warehouse,
-						posting_date=self.doc.posting_date,
-						posting_time=self.doc.posting_time,
-						consider_negative_batches=True,
-					)
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		for (batch_no, warehouse), reserved_qty in outstanding_qty.items():
+			if flt(reserved_qty, precision) <= 0:
+				continue
 
-					if item.get(qty_field) < batch_qty:
-						continue
+			batch_qty = get_batch_qty(
+				batch_no,
+				warehouse,
+				posting_date=self.doc.posting_date,
+				posting_time=self.doc.posting_time,
+				consider_negative_batches=True,
+			)
 
-					frappe.throw(
-						_(
-							"The batch {0} is already reserved in {1} {2}. So, cannot proceed with the {3} {4}, which is created against the {5} {6}."
-						).format(
-							frappe.bold(row.batch_no),
-							frappe.bold(row.voucher_type),
-							frappe.bold(row.voucher_no),
-							frappe.bold(self.doc.doctype),
-							frappe.bold(self.doc.name),
-							frappe.bold(field[0]),
-							frappe.bold(value),
-						),
-						title=_("Reserved Batch Conflict"),
-					)
+			if flt(batch_qty, precision) >= flt(reserved_qty, precision):
+				continue
+
+			vouchers = ", ".join(
+				f"{frappe.bold(voucher_type)} {frappe.bold(voucher_no)}"
+				for voucher_type, voucher_no in dict.fromkeys(
+					(row.voucher_type, row.voucher_no) for row in reservations[(batch_no, warehouse)]
+				)
+			)
+			frappe.throw(
+				_(
+					"The batch {0} is reserved for {1} in the warehouse {2} and the remaining quantity is not enough to cover the reservations. So, cannot proceed with the {3} {4}."
+				).format(
+					frappe.bold(batch_no),
+					vouchers,
+					frappe.bold(warehouse),
+					frappe.bold(self.doc.doctype),
+					frappe.bold(self.doc.name),
+				),
+				title=_("Reserved Batch Conflict"),
+			)
 
 	def get_reserved_batches(self, batches):
 		doctype = frappe.qb.DocType("Stock Reservation Entry")
@@ -671,9 +696,10 @@ class SerialBatchBundleService:
 			.on(doctype.name == child_doc.parent)
 			.select(
 				child_doc.batch_no,
+				child_doc.qty,
+				child_doc.delivered_qty,
 				doctype.voucher_type,
 				doctype.voucher_no,
-				doctype.item_code,
 				doctype.warehouse,
 			)
 			.where((doctype.docstatus == 1) & (child_doc.batch_no.isin(batches)))

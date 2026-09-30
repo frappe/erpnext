@@ -32,8 +32,7 @@ class BOMUpdateTool(Document):
 def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None = None) -> "BOMUpdateLog":
 	"""Returns a BOM Update Log (that queues a job) for BOM Replacement."""
 	boms = boms or args
-	if isinstance(boms, str):
-		boms = json.loads(boms)
+	boms = frappe.parse_json(boms)
 
 	update_log = create_bom_update_log(boms=boms)
 	return update_log

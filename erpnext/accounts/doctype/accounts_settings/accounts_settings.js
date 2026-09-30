@@ -10,7 +10,7 @@ frappe.ui.form.on("Accounts Settings", {
 				},
 			};
 		});
-		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 
 		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
 	},

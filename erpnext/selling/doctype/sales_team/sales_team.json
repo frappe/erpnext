@@ -68,7 +68,7 @@
    "fetch_from": "sales_person.commission_rate",
    "fetch_if_empty": 1,
    "fieldname": "commission_rate",
-   "fieldtype": "Data",
+   "fieldtype": "Percent",
    "in_list_view": 1,
    "label": "Commission Rate",
    "read_only": 1
@@ -87,7 +87,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:38.504580",
+ "modified": "2026-06-21 12:52:33.742603",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Team",

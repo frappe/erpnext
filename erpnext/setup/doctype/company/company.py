@@ -3,6 +3,7 @@
 
 
 import json
+from collections import Counter
 from typing import Literal
 
 import frappe
@@ -13,14 +14,16 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import (
+	add_to_date,
 	cint,
 	get_first_day,
 	get_last_day,
 	get_link_to_form,
 	get_timestamp,
+	nowdate,
 	today,
 )
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -46,6 +49,7 @@ class Company(NestedSet):
 		asset_received_but_not_billed: DF.Link | None
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
+		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
 		chart_of_accounts: DF.Literal[None]
@@ -77,13 +81,16 @@ class Company(NestedSet):
 		default_inventory_account: DF.Link | None
 		default_letter_head: DF.Link | None
 		default_letter_head_report: DF.Link | None
+		default_manufacturing_variance_account: DF.Link | None
 		default_operating_cost_account: DF.Link | None
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
+		default_purchase_price_variance_account: DF.Link | None
 		default_receivable_account: DF.Link | None
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
+		default_warehouse: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		depreciation_cost_center: DF.Link | None
@@ -95,9 +102,14 @@ class Company(NestedSet):
 		enable_item_wise_inventory_account: DF.Check
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
+		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
+		exchange_gain_account: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
+		exchange_loss_account: DF.Link | None
 		existing_company: DF.Link | None
+		expenses_added_to_stock_account: DF.Link | None
+		expenses_added_to_stock_contra_account: DF.Link | None
 		fax: DF.Data | None
 		is_group: DF.Check
 		lft: DF.Int
@@ -120,6 +132,7 @@ class Company(NestedSet):
 		round_off_cost_center: DF.Link | None
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
+		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
@@ -154,11 +167,7 @@ class Company(NestedSet):
 			"Purchase Order",
 			"Supplier Quotation",
 		]:
-			if frappe.db.sql(
-				"""select name from `tab{}` where company={} and docstatus=1
-					limit 1""".format(doctype, "%s"),
-				self.name,
-			):
+			if frappe.db.exists(doctype, {"company": self.name, "docstatus": 1}):
 				exists = True
 				break
 
@@ -183,8 +192,67 @@ class Company(NestedSet):
 		self.validate_parent_company()
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
+		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
+		self.validate_sdbnb_configuration()
+
+	def validate_outstanding_sdbnb_transactions(self, account):
+		GLEntry = frappe.qb.DocType("GL Entry")
+		DeliveryNote = frappe.qb.DocType("Delivery Note")
+
+		delivery_notes = (
+			frappe.qb.from_(GLEntry)
+			.join(DeliveryNote)
+			.on((GLEntry.voucher_type == "Delivery Note") & (GLEntry.voucher_no == DeliveryNote.name))
+			.select(DeliveryNote.name)
+			.where(
+				(GLEntry.is_cancelled == 0)
+				& (GLEntry.company == self.name)
+				& (GLEntry.account == account)
+				& (DeliveryNote.per_billed < 100)
+				& (DeliveryNote.docstatus == 1)
+				& (DeliveryNote.status.isin(["To Bill", "Partially Billed"]))
+			)
+			.distinct()
+			.run(pluck=True)
+		)
+
+		if delivery_notes:
+			dn_links = ", ".join(get_link_to_form("Delivery Note", dn) for dn in delivery_notes[:10])
+
+			frappe.throw(
+				_(
+					"Stock Delivered But Not Billed Account cannot be changed or disabled since account {0} contains outstanding Delivery Notes: {1}"
+				).format(
+					bold(account),
+					dn_links,
+				)
+			)
+
+	def validate_sdbnb_configuration(self):
+		if self.get("__islocal"):
+			return
+
+		if self.enable_stock_delivered_but_not_billed and not self.stock_delivered_but_not_billed:
+			frappe.throw(_("Please select Stock Delivered But Not Billed Account"))
+
+		doc_before_save = self.get_doc_before_save()
+
+		if not (doc_before_save and doc_before_save.stock_delivered_but_not_billed):
+			return
+
+		account_changed = (
+			self.stock_delivered_but_not_billed != doc_before_save.stock_delivered_but_not_billed
+		)
+
+		feature_disabled = (
+			doc_before_save.enable_stock_delivered_but_not_billed
+			and not self.enable_stock_delivered_but_not_billed
+		)
+
+		if account_changed or feature_disabled:
+			self.validate_outstanding_sdbnb_transactions(doc_before_save.stock_delivered_but_not_billed)
 
 	def cant_change_valuation_method(self):
 		doc_before_save = self.get_doc_before_save()
@@ -196,12 +264,21 @@ class Company(NestedSet):
 		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
 			# which does not have it's own valuation method
-			sle = frappe.db.sql(
-				"""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
-					where name=sle.item_code and (valuation_method is null or valuation_method='')) and sle.company=%s limit 1
-			""",
-				self.name,
+			sle_dt = frappe.qb.DocType("Stock Ledger Entry")
+			item = frappe.qb.DocType("Item")
+			sle = (
+				frappe.qb.from_(sle_dt)
+				.select(sle_dt.name)
+				.where(
+					(sle_dt.company == self.name)
+					& sle_dt.item_code.isin(
+						frappe.qb.from_(item)
+						.select(item.name)
+						.where(item.valuation_method.isnull() | (item.valuation_method == ""))
+					)
+				)
+				.limit(1)
+				.run()
 			)
 
 			if sle:
@@ -228,6 +305,42 @@ class Company(NestedSet):
 				title=_("Cannot Change Inventory Account Setting"),
 			)
 
+	def validate_warehouses(self):
+		for fieldname in (
+			"default_warehouse",
+			"sample_retention_warehouse",
+			"default_in_transit_warehouse",
+			"default_warehouse_for_sales_return",
+			"default_wip_warehouse",
+			"default_fg_warehouse",
+			"default_scrap_warehouse",
+		):
+			warehouse = self.get(fieldname)
+			if not warehouse:
+				continue
+
+			details = frappe.db.get_value("Warehouse", warehouse, ["is_group", "company"], as_dict=True)
+			if not details:
+				continue
+
+			label = self.meta.get_translated_label(fieldname)
+
+			if details.is_group:
+				frappe.throw(
+					_(
+						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
+					).format(bold(label)),
+					title=_("Incorrect Warehouse"),
+				)
+
+			if details.company != self.name:
+				frappe.throw(
+					_("{0} {1} does not belong to company {2}").format(
+						bold(label), bold(warehouse), bold(self.name)
+					),
+					title=_("Incorrect Warehouse"),
+				)
+
 	def validate_abbr(self):
 		if not self.abbr:
 			self.abbr = "".join(c[0] for c in self.company_name.split()).upper()
@@ -237,7 +350,7 @@ class Company(NestedSet):
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
-		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
+		if frappe.db.exists("Company", {"name": ["!=", self.name], "abbr": self.abbr}):
 			frappe.throw(_("Abbreviation already used for another company"))
 
 	@frappe.whitelist()
@@ -256,9 +369,12 @@ class Company(NestedSet):
 			["Stock Delivered But Not Billed Account", "stock_delivered_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
 			["Write Off Account", "write_off_account"],
+			["Bank Charges Account", "bank_charges_account"],
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
 			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
+			["Exchange Gain Account", "exchange_gain_account"],
+			["Exchange Loss Account", "exchange_loss_account"],
 			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
 			["Round Off Account", "round_off_account"],
 			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
@@ -338,11 +454,7 @@ class Company(NestedSet):
 
 	def on_update(self):
 		NestedSet.on_update(self)
-		if not frappe.db.sql(
-			"""select name from tabAccount
-				where company=%s and docstatus<2 limit 1""",
-			self.name,
-		):
+		if not frappe.db.exists("Account", {"company": self.name, "docstatus": ["<", 2]}):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
 				sync_financial_report_templates(self.chart_of_accounts, self.existing_company)
@@ -410,10 +522,16 @@ class Company(NestedSet):
 			)
 			warehouse.flags.ignore_permissions = True
 			warehouse.flags.ignore_mandatory = True
+			warehouse.flags.ignore_inventory_account_validation = True
 			warehouse.insert()
 
 			if wh_detail["is_group"]:
 				parent_warehouse = warehouse.name
+
+		if not self.default_warehouse:
+			stores = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": self.name})
+			if stores:
+				self.db_set("default_warehouse", stores)
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -434,91 +552,92 @@ class Company(NestedSet):
 		)
 
 	def create_default_departments(self):
+		root = get_root_of("Department") or "All Departments"
 		records = [
 			# Department
 			{
 				"doctype": "Department",
-				"department_name": _("All Departments"),
+				"department_name": root,
 				"is_group": 1,
 				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+				"__condition": lambda: not frappe.db.exists("Department", root),
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 		]
@@ -673,12 +792,33 @@ class Company(NestedSet):
 
 			self.db_set("write_off_account", write_off_acct)
 
+		if not self.bank_charges_account:
+			bank_charges_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Bank Charges"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("bank_charges_account", bank_charges_acct)
+
 		if not self.exchange_gain_loss_account:
 			exchange_gain_loss_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0}
 			)
 
 			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
+
+		if not self.exchange_gain_account:
+			exchange_gain_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Gain"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_gain_account", exchange_gain_acct)
+
+		if not self.exchange_loss_account:
+			exchange_loss_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Loss"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_loss_account", exchange_loss_acct)
 
 		if not self.disposal_account:
 			disposal_acct = frappe.db.get_value(
@@ -743,11 +883,12 @@ class Company(NestedSet):
 	def after_rename(self, olddn, newdn, merge=False):
 		self.db_set("company_name", newdn)
 
-		frappe.db.sql(
-			"""update `tabDefaultValue` set defvalue=%s
-			where defkey='Company' and defvalue=%s""",
-			(newdn, olddn),
-		)
+		default_value = frappe.qb.DocType("DefaultValue")
+		(
+			frappe.qb.update(default_value)
+			.set(default_value.defvalue, newdn)
+			.where((default_value.defkey == "Company") & (default_value.defvalue == olddn))
+		).run()
 
 		clear_defaults_cache()
 
@@ -758,76 +899,79 @@ class Company(NestedSet):
 		"""
 		Trash accounts and cost centers for this company if no gl entry exists
 		"""
+		if frappe.db.get_single_value("Global Defaults", "demo_company") == self.name:
+			frappe.throw(
+				_("{0} is the site's Demo Company and cannot be deleted directly. Use {1} instead.").format(
+					bold(self.name), bold(_("Delete Demo Data"))
+				)
+			)
+
 		NestedSet.validate_if_child_exists(self)
 		frappe.utils.nestedset.update_nsm(self)
 
-		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
-		if not rec:
-			frappe.db.sql(
-				"""delete from `tabBudget Account`
-				where exists(select name from tabBudget
-					where name=`tabBudget Account`.parent and company = %s)""",
-				self.name,
-			)
+		if not frappe.db.exists("GL Entry", {"company": self.name}):
+			budgets = frappe.get_all("Budget", filters={"company": self.name}, pluck="name")
+			if budgets:
+				frappe.db.delete("Budget Account", {"parent": ["in", budgets]})
 
 			for doctype in ["Account", "Cost Center", "Budget", "Party Account"]:
-				frappe.db.sql(f"delete from `tab{doctype}` where company = %s", self.name)
+				frappe.db.delete(doctype, {"company": self.name})
 
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
-			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
+			frappe.db.delete("Warehouse", {"company": self.name})
 
 		frappe.defaults.clear_default("company", value=self.name)
 		for doctype in ["Mode of Payment Account", "Item Default"]:
-			frappe.db.sql(f"delete from `tab{doctype}` where company = %s", self.name)
+			frappe.db.delete(doctype, {"company": self.name})
 
 		# clear default accounts, warehouses from item
-		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
+		warehouses = frappe.get_all("Warehouse", filters={"company": self.name}, pluck="name")
 		if warehouses:
-			frappe.db.sql(
-				"""delete from `tabItem Reorder` where warehouse in (%s)"""
-				% ", ".join(["%s"] * len(warehouses)),
-				tuple(warehouses),
+			frappe.db.delete("Item Reorder", {"warehouse": ["in", warehouses]})
+
+		# reset default company
+		singles = frappe.qb.DocType("Singles")
+		(
+			frappe.qb.update(singles)
+			.set(singles.value, "")
+			.where(
+				(singles["doctype"] == "Global Defaults")
+				& (singles.field == "default_company")
+				& (singles.value == self.name)
 			)
+		).run()
 
 		# reset default company
-		frappe.db.sql(
-			"""update `tabSingles` set value=''
-			where doctype='Global Defaults' and field='default_company'
-			and value=%s""",
-			self.name,
-		)
-
-		# reset default company
-		frappe.db.sql(
-			"""update `tabSingles` set value=''
-			where doctype='Chart of Accounts Importer' and field='company'
-			and value=%s""",
-			self.name,
-		)
+		(
+			frappe.qb.update(singles)
+			.set(singles.value, "")
+			.where(
+				(singles["doctype"] == "Chart of Accounts Importer")
+				& (singles.field == "company")
+				& (singles.value == self.name)
+			)
+		).run()
 
 		# delete BOMs
-		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
+		boms = frappe.get_all("BOM", filters={"company": self.name}, pluck="name")
 		if boms:
-			frappe.db.sql("delete from tabBOM where company=%s", self.name)
+			frappe.db.delete("BOM", {"company": self.name})
 			for dt in ("BOM Operation", "BOM Item", "BOM Secondary Item", "BOM Explosion Item"):
-				frappe.db.sql(
-					"delete from `tab{}` where parent in ({})".format(dt, ", ".join(["%s"] * len(boms))),
-					tuple(boms),
-				)
+				frappe.db.delete(dt, {"parent": ["in", boms]})
 
-		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
-		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
-		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
-		frappe.db.sql("delete from `tabTransaction Deletion Record` where company=%s", self.name)
+		frappe.db.delete("Employee", {"company": self.name})
+		frappe.db.delete("Department", {"company": self.name})
+		frappe.db.delete("Tax Withholding Account", {"company": self.name})
+		frappe.db.delete("Transaction Deletion Record", {"company": self.name})
 
 		# delete tax templates
-		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
-		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
-		frappe.db.sql("delete from `tabItem Tax Template` where company=%s", self.name)
+		frappe.db.delete("Sales Taxes and Charges Template", {"company": self.name})
+		frappe.db.delete("Purchase Taxes and Charges Template", {"company": self.name})
+		frappe.db.delete("Item Tax Template", {"company": self.name})
 
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value("GL Entry", {"company": self.name}):
-			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
+			frappe.db.delete("Process Deferred Accounting", {"company": self.name})
 
 	def check_parent_changed(self):
 		frappe.flags.parent_company_changed = False
@@ -855,6 +999,7 @@ def install_country_fixtures(company, country):
 	except ImportError:
 		pass
 	except Exception:
+		frappe.db.rollback()
 		frappe.log_error("Unable to set country fixtures")
 		frappe.throw(
 			_("Failed to setup defaults for country {0}. Please contact support.").format(
@@ -935,26 +1080,29 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 	if parent is None or parent == "All Companies":
 		parent = ""
 
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabCompany` comp
-		where
-			ifnull(parent_company, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
+	filters = {"parent_company": parent} if parent else {"parent_company": ["is", "not set"]}
+
+	# get_list, not get_all: it applies the caller's Company permission and their Company User
+	# Permissions, so a restricted user sees only their own companies. Matches the sibling tree
+	# source in accounts/utils.py, which already uses get_list.
+	return frappe.get_list(
+		"Company",
+		filters=filters,
+		fields=["name as value", "is_group as expandable"],
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
 	args = frappe.form_dict
 	args = make_tree_args(**args)
+
+	# This is the Company tree's "add node" action; `args` comes straight from form_dict, so without
+	# this the caller chooses the doctype that gets created. insert() would still check permissions
+	# on whatever they named, but nothing else here is meant to build anything but a Company.
+	args.doctype = "Company"
 
 	if args.parent_company == "All Companies":
 		args.parent_company = None
@@ -965,55 +1113,37 @@ def add_node():
 def get_all_transactions_annual_history(company):
 	out = {}
 
-	items = frappe.db.sql(
-		"""
-		select transaction_date, count(*) as count
+	one_year_ago = add_to_date(nowdate(), years=-1)
+	date_doctypes = [
+		("Quotation", "transaction_date"),
+		("Sales Order", "transaction_date"),
+		("Delivery Note", "posting_date"),
+		("Sales Invoice", "posting_date"),
+		("Issue", "creation"),
+		("Project", "creation"),
+	]
 
-		from (
-			select name, transaction_date, company
-			from `tabQuotation`
+	from frappe.query_builder.functions import Count
 
-			UNION ALL
+	# Count per date in the DB (one grouped query per DocType) rather than streaming every
+	# transaction row into Python. A portable UNION across these mixed date columns isn't
+	# straightforward, so we aggregate each DocType and merge the per-date counts.
+	counts = Counter()
+	for doctype, date_field in date_doctypes:
+		dt = frappe.qb.DocType(doctype)
+		date_col = getattr(dt, date_field)
+		rows = (
+			frappe.qb.from_(dt)
+			.select(date_col.as_("transaction_date"), Count("*").as_("count"))
+			.where((dt.company == company) & (date_col > one_year_ago))
+			.groupby(date_col)
+			.run(as_dict=True)
+		)
+		for row in rows:
+			counts[row.transaction_date] += row.count
 
-			select name, transaction_date, company
-			from `tabSales Order`
-
-			UNION ALL
-
-			select name, posting_date as transaction_date, company
-			from `tabDelivery Note`
-
-			UNION ALL
-
-			select name, posting_date as transaction_date, company
-			from `tabSales Invoice`
-
-			UNION ALL
-
-			select name, creation as transaction_date, company
-			from `tabIssue`
-
-			UNION ALL
-
-			select name, creation as transaction_date, company
-			from `tabProject`
-		) t
-
-		where
-			company=%s
-			and
-			transaction_date > date_sub(curdate(), interval 1 year)
-
-		group by
-			transaction_date
-			""",
-		(company),
-		as_dict=True,
-	)
-
-	for d in items:
-		timestamp = get_timestamp(d["transaction_date"])
-		out.update({timestamp: d["count"]})
+	for transaction_date, count in counts.items():
+		out.update({get_timestamp(transaction_date): count})
 
 	return out
 
@@ -1043,17 +1173,36 @@ def get_default_company_address(
 	sort_key: Literal["is_shipping_address", "is_primary_address"] = "is_primary_address",
 	existing_address: str | None = None,
 ):
-	out = frappe.db.sql(
-		""" SELECT
-			addr.name, addr.{}
-		FROM
-			`tabAddress` addr, `tabDynamic Link` dl
-		WHERE
-			dl.parent = addr.name and dl.link_doctype = 'Company' and
-			dl.link_name = {} and ifnull(addr.disabled, 0) = 0
-		""".format(sort_key, "%s"),
-		(name),
-	)  # nosec
+	# `Literal` is NOT enforced by typing_validations — measured, sort_key="name" was accepted — and
+	# addr[sort_key] is a column reference, so check it here.
+	if sort_key not in ("is_shipping_address", "is_primary_address"):
+		frappe.throw(_("Invalid sort key"), frappe.PermissionError)
+
+	# Same boundary as accounts/custom/address.py::get_shipping_address: `select` denies the portal
+	# identities and costs none of the twelve transaction-writing roles, and the company scoping is
+	# what actually closes the cross-company read.
+	frappe.has_permission("Company", ptype="select", throw=True)
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Address")
+	if allowed_companies and name not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(name), frappe.PermissionError)
+
+	addr = frappe.qb.DocType("Address")
+	dl = frappe.qb.DocType("Dynamic Link")
+	out = (
+		frappe.qb.from_(addr)
+		.inner_join(dl)
+		.on(dl.parent == addr.name)
+		.select(addr.name, addr[sort_key])
+		.where(
+			(dl.link_doctype == "Company")
+			& (dl.link_name == name)
+			& ((addr.disabled == 0) | addr.disabled.isnull())
+		)
+		.run()
+	)
 
 	if existing_address:
 		if existing_address in [d[0] for d in out]:
@@ -1075,9 +1224,11 @@ def get_billing_shipping_address(
 	return {"primary_address": primary_address, "shipping_address": shipping_address}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
+	# User Permission check
+	frappe.has_permission("Company", ptype="delete", doc=company, throw=True)
 
 	from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
 		is_deletion_doc_running,
@@ -1086,6 +1237,7 @@ def create_transaction_deletion_request(company: str):
 	is_deletion_doc_running(company)
 
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
+	tdr.flags.ignore_permissions = 1
 	tdr.insert()
 
 	tdr.generate_to_delete_list()

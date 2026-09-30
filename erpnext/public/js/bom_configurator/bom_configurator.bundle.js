@@ -32,18 +32,7 @@ class BOMConfigurator {
 	}
 
 	bind_events() {
-		frappe.views.trees["BOM Configurator"].events = {
-			frm: this.frm,
-			add_item: this.add_item,
-			add_sub_assembly: this.add_sub_assembly,
-			set_query_for_workstation: this.set_query_for_workstation,
-			get_sub_assembly_modal_fields: this.get_sub_assembly_modal_fields,
-			convert_to_sub_assembly: this.convert_to_sub_assembly,
-			delete_node: this.delete_node,
-			edit_bom: this.edit_bom,
-			load_tree: this.load_tree,
-			set_default_qty: this.set_default_qty,
-		};
+		frappe.views.trees["BOM Configurator"].events = this;
 	}
 
 	tree_options() {
@@ -53,10 +42,12 @@ class BOMConfigurator {
 			doctype: "BOM Configurator",
 			page: this.page,
 			expandable: true,
+			use_row_actions: true,
 			title: __("Configure Product Assembly"),
 			breadcrumb: "Manufacturing",
 			get_tree_nodes: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_children",
 			root_label: this.frm.doc.item_code,
+			get_label: (node) => this.get_node_label(node),
 			disable_add_node: true,
 			get_tree_root: false,
 			show_expand_all: false,
@@ -66,6 +57,23 @@ class BOMConfigurator {
 		};
 	}
 
+	get_node_label(node) {
+		const item_code = this.get_item_code(node);
+		const item_name = node.data?.title || item_code;
+
+		if (item_name === item_code) {
+			return frappe.utils.escape_html(item_code);
+		}
+
+		return `${frappe.utils.escape_html(item_name)} <span class='text-muted'>(${frappe.utils.escape_html(
+			item_code
+		)})</span>`;
+	}
+
+	get_item_code(node) {
+		return node.data?.item_code || this.frm.doc.item_code;
+	}
+
 	tree_methods() {
 		let frm_obj = this;
 		let view = frappe.views.trees["BOM Configurator"];
@@ -73,7 +81,8 @@ class BOMConfigurator {
 		return {
 			onload: function (me) {
 				me.args["parent_id"] = frm_obj.frm.doc.name;
-				me.args["parent"] = frm_obj.frm.doc.item_code;
+				me.args["parent"] = frm_obj.frm.doc.name;
+				me.root_value = frm_obj.frm.doc.name;
 				me.parent = frm_obj.$wrapper.get(0);
 				me.body = frm_obj.$wrapper.get(0);
 				me.make_tree();
@@ -83,20 +92,18 @@ class BOMConfigurator {
 				const uom = node.data.uom || frm_obj.frm.doc.uom;
 				const docname = node.data.name || frm_obj.frm.doc.name;
 				let amount = node.data.amount;
-				if (node.data.value === frm_obj.frm.doc.item_code) {
+				if (node.is_root) {
 					amount = frm_obj.frm.doc.raw_material_cost;
 				}
 
 				amount = frappe.format(amount, { fieldtype: "Currency", currency: frm_obj.frm.doc.currency });
 
 				$(`
-					<div class="pill small pull-right bom-qty-pill"
+					<div class="pill small bom-qty-pill"
 						style="background-color: var(--bg-white);
 							color: var(--text-on-gray);
 							font-weight:450;
-							margin-right: 40px;
 							display: inline-flex;
-							min-width: 128px;
 							border: 1px solid var(--bg-gray);
 						">
 							<div style="padding-right:5px" data-bom-qty-docname="${docname}">${qty} ${uom}</div>
@@ -111,15 +118,17 @@ class BOMConfigurator {
 				this.frm?.doc.docstatus === 0
 					? [
 							{
-								label: __(frappe.utils.icon("edit", "sm") + " BOM"),
+								label: __("Edit BOM"),
+								icon: "pencil",
+								inline: true,
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.edit_bom(node, view);
 								},
-								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Raw Material"),
+								label: __("Add Raw Material"),
+								icon: "plus",
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_item(node, view);
@@ -127,10 +136,10 @@ class BOMConfigurator {
 								condition: function (node) {
 									return node.expandable;
 								},
-								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Sub Assembly"),
+								label: __("Add Sub Assembly"),
+								icon: "folder-tree",
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view);
@@ -138,10 +147,10 @@ class BOMConfigurator {
 								condition: function (node) {
 									return node.expandable;
 								},
-								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Phantom Item"),
+								label: __("Add Phantom Item"),
+								icon: "box",
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view, true);
@@ -149,29 +158,27 @@ class BOMConfigurator {
 								condition: function (node) {
 									return node.expandable;
 								},
-								btnClass: "hidden-xs",
 							},
 							{
-								label: __("Collapse All"),
+								label: __("Expand / Collapse All"),
+								icon: "chevrons-down-up",
+								condition: function (node) {
+									return node.is_root && node.expandable;
+								},
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
-
-									if (!node.expanded) {
-										view.tree.load_children(node, true);
-										$(node.parent[0]).find(".tree-children").show();
-										node.$toolbar.find(".expand-all-btn").html(__("Collapse All"));
-									} else {
-										node.$tree_link.trigger("click");
-										node.$toolbar.find(".expand-all-btn").html(__("Expand All"));
-									}
+									let tree = view.tree;
+									// state helper is new-frappe; fall back to the
+									// root's own flag on older frappe
+									let expanded = tree.get_expansion_state
+										? tree.get_expansion_state() === "expanded"
+										: node.expanded;
+									tree.load_children(tree.root_node, !expanded);
 								},
-								condition: function (node) {
-									return node.expandable && node.is_root;
-								},
-								btnClass: "hidden-xs expand-all-btn",
 							},
 							{
-								label: __(frappe.utils.icon("move", "sm") + " Sub Assembly"),
+								label: __("Convert to Sub Assembly"),
+								icon: "folder-tree",
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.convert_to_sub_assembly(node, view);
@@ -179,10 +186,10 @@ class BOMConfigurator {
 								condition: function (node) {
 									return !node.expandable;
 								},
-								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("move", "sm") + " Phantom Item"),
+								label: __("Convert to Phantom Item"),
+								icon: "box",
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.convert_to_sub_assembly(node, view, true);
@@ -190,10 +197,11 @@ class BOMConfigurator {
 								condition: function (node) {
 									return !node.expandable;
 								},
-								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("delete", "sm") + " Item"),
+								label: __("Delete Item"),
+								icon: "trash",
+								danger: true,
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.delete_node(node, view);
@@ -201,28 +209,25 @@ class BOMConfigurator {
 								condition: function (node) {
 									return !node.is_root;
 								},
-								btnClass: "hidden-xs",
 							},
 					  ]
 					: [
 							{
-								label: __("Expand All"),
+								label: __("Expand / Collapse All"),
+								icon: "chevrons-down-up",
+								condition: function (node) {
+									return node.is_root && node.expandable;
+								},
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
-
-									if (!node.expanded) {
-										view.tree.load_children(node, true);
-										$(node.parent[0]).find(".tree-children").show();
-										node.$toolbar.find(".expand-all-btn").html(__("Collapse All"));
-									} else {
-										node.$tree_link.trigger("click");
-										node.$toolbar.find(".expand-all-btn").html(__("Expand All"));
-									}
+									let tree = view.tree;
+									// state helper is new-frappe; fall back to the
+									// root's own flag on older frappe
+									let expanded = tree.get_expansion_state
+										? tree.get_expansion_state() === "expanded"
+										: node.expanded;
+									tree.load_children(tree.root_node, !expanded);
 								},
-								condition: function (node) {
-									return node.expandable && node.is_root;
-								},
-								btnClass: "hidden-xs expand-all-btn",
 							},
 					  ],
 		};
@@ -243,7 +248,7 @@ class BOMConfigurator {
 					method: "add_item",
 					doc: this.frm.doc,
 					args: {
-						fg_item: node.data.value,
+						fg_item: this.get_item_code(node),
 						item_code: data.item_code,
 						fg_reference_id: node.data.name || this.frm.doc.name,
 						qty: data.qty,
@@ -298,7 +303,7 @@ class BOMConfigurator {
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
 				args: {
-					fg_item: node.data.value,
+					fg_item: this.get_item_code(node),
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					bom_item: bom_item,
 					operation: node.data.operation,
@@ -417,7 +422,7 @@ class BOMConfigurator {
 		});
 
 		dialog.set_values({
-			item_code: node.data.value,
+			item_code: this.get_item_code(node),
 			qty: node.data.qty,
 		});
 
@@ -445,7 +450,7 @@ class BOMConfigurator {
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
 				args: {
-					fg_item: node.data.value,
+					fg_item: this.get_item_code(node),
 					bom_item: bom_item,
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					convert_to_sub_assembly: true,
@@ -482,7 +487,6 @@ class BOMConfigurator {
 				method: "delete_node",
 				doc: this.frm.doc,
 				args: {
-					fg_item: node.data.value,
 					doctype: node.data.doctype,
 					docname: node.data.name,
 				},

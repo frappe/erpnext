@@ -25,30 +25,35 @@ class FixedAssetService:
 		if doc.doctype != "Sales Invoice":
 			return
 
-		for d in doc.get("items"):
-			if not d.is_fixed_asset:
-				continue
+		for item in doc.get("items"):
+			if item.is_fixed_asset:
+				self._validate_fixed_asset_item(item)
 
-			if d.asset:
-				if not doc.is_return:
-					asset_status = frappe.db.get_value("Asset", d.asset, "status")
-					if doc.update_stock:
-						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
-					elif asset_status in ("Scrapped", "Cancelled", "Capitalized"):
-						frappe.throw(
-							_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(
-								d.idx, d.asset, asset_status
-							)
-						)
-					elif asset_status == "Sold" and not doc.is_return:
-						frappe.throw(_("Row #{0}: Asset {1} is already sold").format(d.idx, d.asset))
-				elif not doc.return_against:
-					frappe.throw(_("Row #{0}: Return Against is required for returning asset").format(d.idx))
-			else:
-				frappe.throw(
-					_("Row #{0}: You must select an Asset for Item {1}.").format(d.idx, d.item_code),
-					title=_("Missing Asset"),
+	def _validate_fixed_asset_item(self, item) -> None:
+		doc = self.doc
+		if not item.asset:
+			frappe.throw(
+				_("Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_code),
+				title=_("Missing Asset"),
+			)
+
+		if doc.is_return:
+			if not doc.return_against:
+				frappe.throw(_("Row #{0}: Return Against is required for returning asset").format(item.idx))
+			return
+
+		if doc.update_stock:
+			frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+
+		asset_status = frappe.db.get_value("Asset", item.asset, "status")
+		if asset_status in ("Scrapped", "Cancelled", "Capitalized"):
+			frappe.throw(
+				_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(
+					item.idx, item.asset, asset_status
 				)
+			)
+		if asset_status == "Sold":
+			frappe.throw(_("Row #{0}: Asset {1} is already sold").format(item.idx, item.asset))
 
 	def set_income_account_for_fixed_assets(self) -> None:
 		for item in self.doc.items:

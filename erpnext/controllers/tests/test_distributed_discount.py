@@ -60,6 +60,30 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertAlmostEqual(so.net_total, 1272.73, places=2)
 		self.assertEqual(so.grand_total, 1400)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_distributed_discount_amount_with_rounding_adjustment(self):
+		so = make_sales_order(do_not_save=1)
+		so.apply_discount_on = "Net Total"
+		so.discount_amount = 10
+		so.items[0].qty = 1
+		so.items[0].rate = 100
+		so.append("items", so.items[0].as_dict())
+		so.append("items", so.items[0].as_dict())
+		so.save()
+
+		calculate_taxes_and_totals(so)
+
+		# the rounding adjustment lands on the second line
+		self.assertAlmostEqual(so.items[1].net_amount, 96.66, places=2)
+		self.assertAlmostEqual(so.items[1].distributed_discount_amount, 3.34, places=2)
+
+		for item in so.items:
+			self.assertAlmostEqual(item.amount - item.distributed_discount_amount, item.net_amount, places=2)
+		self.assertAlmostEqual(
+			sum(i.distributed_discount_amount for i in so.items), so.discount_amount, places=2
+		)
+		self.assertEqual(so.net_total, 290)
+
 	def test_100_percent_discount_with_inclusive_tax(self):
 		"""Test that 100% discount with inclusive taxes results in zero net_total"""
 		so = make_sales_order(do_not_save=1)

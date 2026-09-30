@@ -154,7 +154,11 @@ class PaymentLedger:
 
 		self.columns.append(
 			dict(
-				label=_("Party Type"), fieldname="party_type", fieldtype="data", options=options, width="100"
+				label=_("Party Type"),
+				fieldname="party_type",
+				fieldtype="Link",
+				options="DocType",
+				width="100",
 			)
 		)
 		self.columns.append(
@@ -164,8 +168,8 @@ class PaymentLedger:
 			dict(
 				label=_("Voucher Type"),
 				fieldname="voucher_type",
-				fieldtype="data",
-				options=options,
+				fieldtype="Link",
+				options="DocType",
 				width="100",
 			)
 		)
@@ -182,8 +186,8 @@ class PaymentLedger:
 			dict(
 				label=_("Against Voucher Type"),
 				fieldname="against_voucher_type",
-				fieldtype="data",
-				options=options,
+				fieldtype="Link",
+				options="DocType",
 				width="100",
 			)
 		)

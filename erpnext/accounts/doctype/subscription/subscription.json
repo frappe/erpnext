@@ -3,6 +3,7 @@
  "autoname": "ACC-SUB-.YYYY.-.#####",
  "creation": "2017-07-18 17:50:43.967266",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/subscription",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -299,6 +300,7 @@
    "fieldtype": "Section Break"
   }
  ],
+ "icon": "calendar-sync",
  "index_web_pages_for_search": 1,
  "links": [
   {

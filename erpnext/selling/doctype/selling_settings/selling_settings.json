@@ -4,6 +4,7 @@
  "description": "Settings for Selling Module",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/selling-settings",
  "engine": "InnoDB",
  "field_order": [
   "customer_defaults_tab",
@@ -32,6 +33,7 @@
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
+  "skip_delivery_note_for_service_items",
   "sales_update_frequency",
   "column_break_5",
   "allow_multiple_items",
@@ -48,6 +50,10 @@
   "allow_zero_qty_in_sales_order",
   "blanket_orders_section",
   "blanket_order_allowance",
+  "proforma_invoice_section",
+  "enable_proforma_invoice",
+  "default_proforma_print_format",
+  "proforma_email_template",
   "advanced_features_tab",
   "section_break_avhb",
   "enable_tracking_sales_commissions",
@@ -112,6 +118,13 @@
    "fieldtype": "Select",
    "label": "Is Delivery Note required to create Sales Invoice?",
    "options": "No\nYes"
+  },
+  {
+   "default": "0",
+   "description": "Non-stock items will not require a Delivery Note. Sales Orders will be marked as Completed once all stock items are delivered and the order is fully billed",
+   "fieldname": "skip_delivery_note_for_service_items",
+   "fieldtype": "Check",
+   "label": "Skip Delivery Note Creation for Service Items"
   },
   {
    "default": "Daily",
@@ -342,6 +355,34 @@
    "label": "Deliver secondary Items"
   },
   {
+   "fieldname": "proforma_invoice_section",
+   "fieldtype": "Section Break",
+   "label": "Proforma Invoice"
+  },
+  {
+   "default": "0",
+   "description": "Allow issuing Proforma Invoices against a Sales Order.",
+   "fieldname": "enable_proforma_invoice",
+   "fieldtype": "Check",
+   "label": "Enable Proforma Invoice"
+  },
+  {
+   "depends_on": "enable_proforma_invoice",
+   "description": "Default print format used when generating a Proforma Invoice PDF.",
+   "fieldname": "default_proforma_print_format",
+   "fieldtype": "Link",
+   "label": "Default Proforma Print Format",
+   "options": "Print Format"
+  },
+  {
+   "depends_on": "enable_proforma_invoice",
+   "description": "Subject and message used when emailing a Proforma Invoice. The template gets the Proforma Invoice as doc, e.g. {{ doc.customer_name }}. Leave empty to send the default text.",
+   "fieldname": "proforma_email_template",
+   "fieldtype": "Link",
+   "label": "Proforma Email Template",
+   "options": "Email Template"
+  },
+  {
    "fieldname": "customer_defaults_tab",
    "fieldtype": "Tab Break",
    "label": "Customer Defaults"
@@ -407,12 +448,12 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-29 11:05:48.836362",
+ "modified": "2026-09-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

@@ -46,20 +46,18 @@ erpnext.buying = {
 
 				// no idea where me is coming from
 				if (this.frm.get_field("shipping_address")) {
-					this.frm.set_query("shipping_address", () => {
+					this.frm.set_query("shipping_address", (doc, cdt, cdn, frm) => {
 						if (this.frm.doc.customer) {
 							return {
 								query: "frappe.contacts.doctype.address.address.address_query",
 								filters: { link_doctype: "Customer", link_name: this.frm.doc.customer },
 							};
-						} else return erpnext.queries.company_address_query(this.frm.doc);
+						} else return erpnext.queries.company_address_query(doc, cdt, cdn, frm);
 					});
 				}
 
 				if (this.frm.get_field("dispatch_address")) {
-					this.frm.set_query("dispatch_address", () => {
-						return erpnext.queries.address_query(this.frm.doc);
-					});
+					this.frm.set_query("dispatch_address", erpnext.queries.address_query);
 				}
 			}
 
@@ -69,7 +67,7 @@ erpnext.buying = {
 				if (this.frm.fields_dict.buying_price_list) {
 					this.frm.set_query("buying_price_list", function () {
 						return {
-							filters: { buying: 1 },
+							filters: { buying: 1, enabled: 1 },
 						};
 					});
 				}
@@ -91,7 +89,7 @@ erpnext.buying = {
 
 				this.frm.set_query("item_code", "items", function () {
 					if (me.frm.doc.is_subcontracted) {
-						var filters = { supplier: me.frm.doc.supplier };
+						var filters = { supplier: me.frm.doc.supplier, company: me.frm.doc.company };
 						filters["is_stock_item"] = 0;
 
 						return {
@@ -101,7 +99,12 @@ erpnext.buying = {
 					} else {
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { supplier: me.frm.doc.supplier, is_purchase_item: 1, has_variants: 0 },
+							filters: {
+								supplier: me.frm.doc.supplier,
+								is_purchase_item: 1,
+								has_variants: 0,
+								company: me.frm.doc.company,
+							},
 						};
 					}
 				});
@@ -176,7 +179,11 @@ erpnext.buying = {
 
 						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+						const is_drop_ship = this.frm.doc.items.some((item) => item.delivered_by_supplier);
+						if (
+							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+							!is_drop_ship
+						) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
@@ -258,7 +265,7 @@ erpnext.buying = {
 						frappe.msgprint(
 							__("Row #{0}: {1} can not be negative for item {2}", [
 								item.idx,
-								__(frappe.meta.get_label(cdt, fieldnames[i], cdn)),
+								frappe.meta.get_translated_label(cdt, fieldnames[i], cdn),
 								item.item_code,
 							])
 						);
@@ -536,7 +543,7 @@ erpnext.buying.link_to_mrs = function (frm) {
 			var item_length = frm.doc.items.length;
 			for (let item of frm.doc.items) {
 				var qty = item.qty;
-				(r.message[0] || []).forEach(function (d) {
+				(r.message || []).forEach(function (d) {
 					if (
 						d.qty > 0 &&
 						qty > 0 &&
@@ -552,10 +559,10 @@ erpnext.buying.link_to_mrs = function (frm) {
 						item.qty = my_qty;
 
 						frappe.msgprint(
-							"Assigning " + d.mr_name + " to " + d.item_code + " (row " + item.idx + ")"
+							__("Assigning {0} to {1} (row {2})", [d.mr_name, d.item_code, item.idx])
 						);
 						if (qty > 0) {
-							frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+							frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
 							item_length++;
 

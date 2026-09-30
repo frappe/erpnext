@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 from frappe import _
 
 from erpnext.controllers.trends import get_columns, get_data
@@ -40,9 +39,15 @@ def get_chart_data(data, conditions, filters):
 	labels = [column.split(":")[0] for column in columns]
 	datapoints = [0] * len(labels)
 
+	group_by_col_idx = None
+	if filters.get("group_by"):
+		group_by_col_idx = conditions["columns"].index(conditions["grbc"][0])
+
 	for row in data:
-		# If group by filter, don't add first row of group (it's already summed)
-		if not row[start]:
+		# Skip the final grand-total row
+		if row[0] == f"'{_('Total')}'":
+			continue
+		if group_by_col_idx is not None and row[group_by_col_idx] == "":
 			continue
 		# Remove None values and compute only periodic data
 		row = [x if x else 0 for x in row[start:-2]]
@@ -59,4 +64,6 @@ def get_chart_data(data, conditions, filters):
 		"type": "line",
 		"lineOptions": {"regionFill": 1},
 		"fieldtype": "Currency",
+		"options": "currency",
+		"currency": conditions.get("company_currency"),
 	}

@@ -17,6 +17,9 @@ def get_data(
 	sort_order: str = "desc",
 ):
 	"""Return data to render the item dashboard"""
+	if not frappe.has_permission("Bin", "read"):
+		return []
+
 	filters = []
 	if item_code:
 		filters.append(["item_code", "=", item_code])
@@ -24,13 +27,19 @@ def get_data(
 		filters.append(["warehouse", "=", warehouse])
 	if item_group:
 		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
-		items = frappe.db.sql_list(
-			"""
-			select i.name from `tabItem` i
-			where exists(select name from `tabItem Group`
-				where name=i.item_group and lft >=%s and rgt<=%s)
-		""",
-			(lft, rgt),
+		item = frappe.qb.DocType("Item")
+		item_group_dt = frappe.qb.DocType("Item Group")
+		items = (
+			frappe.qb.from_(item)
+			.select(item.name)
+			.where(
+				item.item_group.isin(
+					frappe.qb.from_(item_group_dt)
+					.select(item_group_dt.name)
+					.where((item_group_dt.lft >= lft) & (item_group_dt.rgt <= rgt))
+				)
+			)
+			.run(pluck="name")
 		)
 		filters.append(["item_code", "in", items])
 	try:
@@ -38,7 +47,10 @@ def get_data(
 		if build_match_conditions("Warehouse", user=frappe.session.user):
 			filters.append(["warehouse", "in", [w.name for w in frappe.get_list("Warehouse")]])
 	except frappe.PermissionError:
-		# user does not have access on warehouse
+		# user does not have access on warehouse; build_match_conditions already queued a
+		# "Not permitted" message via frappe.throw before this was caught, drop it so the
+		# client doesn't show a spurious error for a request that's failing gracefully here
+		frappe.clear_last_message()
 		return []
 
 	items = frappe.db.get_all(
@@ -58,6 +70,11 @@ def get_data(
 			"reserved_qty": ["!=", 0],
 			"reserved_qty_for_production": ["!=", 0],
 			"reserved_qty_for_sub_contract": ["!=", 0],
+			"reserved_qty_for_production_plan": ["!=", 0],
+			"reserved_stock": ["!=", 0],
+			"ordered_qty": ["!=", 0],
+			"indented_qty": ["!=", 0],
+			"planned_qty": ["!=", 0],
 			"actual_qty": ["!=", 0],
 		},
 		filters=filters,

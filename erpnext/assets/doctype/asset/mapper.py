@@ -162,8 +162,7 @@ def make_asset_movement(
 	assets: list[dict] | str,
 	purpose: str = "Transfer",
 ):
-	if isinstance(assets, str):
-		assets = json.loads(assets)
+	assets = frappe.parse_json(assets)
 
 	if len(assets) == 0:
 		frappe.throw(_("At least one asset has to be selected."))

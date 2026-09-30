@@ -14,12 +14,12 @@ def execute(filters=None):
 	conditions = get_columns(filters, "Delivery Note")
 	data = get_data(filters, conditions)
 
-	chart_data = get_chart_data(data, filters)
+	chart_data = get_chart_data(data, conditions, filters)
 
 	return conditions["columns"], data, None, chart_data
 
 
-def get_chart_data(data, filters):
+def get_chart_data(data, conditions, filters):
 	def wrap_in_quotes(label):
 		return f"'{label}'"
 
@@ -52,4 +52,6 @@ def get_chart_data(data, filters):
 		},
 		"type": "bar",
 		"fieldtype": "Currency",
+		"options": "currency",
+		"currency": conditions.get("company_currency"),
 	}

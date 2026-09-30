@@ -101,7 +101,7 @@ class StockInternalTransferService:
 
 			if recevied_qty > flt(transferred_qty, precision):
 				frappe.throw(
-					_("For Item {0} cannot be received more than {1} qty against the {2} {3}").format(
+					_("Item {0} cannot be received in more than {1} qty against the {2} {3}").format(
 						bold(key[1]),
 						bold(flt(transferred_qty, precision)),
 						bold(parent_doctype),

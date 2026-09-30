@@ -6,6 +6,7 @@
  "creation": "2016-03-01 17:41:39.778765",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-category",
  "engine": "InnoDB",
  "field_order": [
   "asset_category_name",
@@ -72,8 +73,9 @@
    "label": "Non Depreciable Category"
   }
  ],
+ "icon": "folder",
  "links": [],
- "modified": "2025-05-13 15:33:03.791814",
+ "modified": "2026-08-21 23:11:38.710171",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Category",
@@ -116,6 +118,10 @@
    "role": "Quality Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Item Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

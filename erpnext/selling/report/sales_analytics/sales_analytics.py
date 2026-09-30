@@ -53,6 +53,7 @@ def append_report(dt, org, new):
 class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		self.entities = self.filters.get("entity") or []
 		if self.filters.doc_type == "Payment Entry" and self.filters.value_quantity == "Quantity":
 			frappe.throw(_("Only Value available for Payment Entry"))
 		self.date_field = (
@@ -102,6 +103,7 @@ class Analytics:
 		self.update_company_list_for_parent_company()
 		self.get_columns()
 		self.get_data()
+		self.filter_data_by_entities()
 		self.get_chart_data()
 
 		# Skipping total row for tree-view reports
@@ -395,6 +397,23 @@ class Analytics:
 			ignore_permissions=False,
 		).run(as_dict=True)
 
+	def filter_data_by_entities(self):
+		if not self.entities:
+			return
+
+		entities = set(self.entities)
+		selected_data = []
+		for row in self.data:
+			if row["entity"] not in entities:
+				continue
+
+			row = row.copy()
+			if "indent" in row:
+				row["indent"] = 0
+			selected_data.append(row)
+
+		self.data = selected_data
+
 	def get_rows(self):
 		self.data = []
 		self.get_periodic_data()
@@ -510,10 +529,10 @@ class Analytics:
 
 		self.depth_map = frappe._dict()
 
-		self.group_entries = frappe.db.sql(
-			f"""select name, lft, rgt , {parent} as parent
-			from `tab{self.filters.tree_type}` order by lft""",
-			as_dict=1,
+		self.group_entries = frappe.get_all(
+			self.filters.tree_type,
+			fields=["name", "lft", "rgt", f"{parent} as parent"],
+			order_by="lft",
 		)
 
 		for d in self.group_entries:
@@ -528,13 +547,24 @@ class Analytics:
 		if not frappe.db.exists("DocType", self.filters.doc_type):
 			frappe.throw(_("Invalid Document Type {0}").format(self.filters.doc_type))
 
-		self.group_entries = frappe.db.sql(
-			f""" select * from (select "Order Types" as name, 0 as lft,
-			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
-			from `tab{self.filters.doc_type}` where ifnull(order_type, '') != '') as b order by lft, name
-		""",
-			as_dict=1,
+		# frappe drops ORDER BY for distinct queries on postgres (db_query), so a SQL order_by="order_type"
+		# would be a no-op there and the leaf rows would come back unordered. Sort in python with casefold
+		# to keep the report's order-type row order deterministic, case-insensitive (matching MariaDB's
+		# collation), and identical on both engines.
+		order_types = sorted(
+			frappe.get_all(
+				self.filters.doc_type,
+				filters={"order_type": ["is", "set"]},
+				pluck="order_type",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
+
+		self.group_entries = [frappe._dict(name="Order Types", lft=0, rgt=2, parent="")]
+		self.group_entries += [
+			frappe._dict(name=order_type, lft=1, rgt=1, parent="Order Types") for order_type in order_types
+		]
 
 		for d in self.group_entries:
 			if d.parent:
@@ -544,7 +574,7 @@ class Analytics:
 
 	def get_supplier_parent_child_map(self):
 		self.parent_child_map = frappe._dict(
-			frappe.db.sql(""" select name, supplier_group from `tabSupplier`""")
+			frappe.get_all("Supplier", fields=["name", "supplier_group"], as_list=True)
 		)
 
 	def get_chart_data(self):

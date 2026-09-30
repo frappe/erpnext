@@ -145,4 +145,4 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({ frm: cur_frm }));
+frappe.ui.form.set_controller("Maintenance Visit", erpnext.maintenance.MaintenanceVisit);

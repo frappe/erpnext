@@ -5,7 +5,7 @@ frappe.ui.form.on("Period Closing Voucher", {
 	onload: function (frm) {
 		if (!frm.doc.transaction_date) frm.doc.transaction_date = frappe.datetime.obj_to_str(new Date());
 
-		frm.ignore_doctypes_on_cancel_all = ["Process Period Closing Voucher"];
+		frm.ignore_doctypes_on_cancel_all = ["Process Period Closing Voucher", "MapReduce Job"];
 	},
 
 	setup: function (frm) {
@@ -41,21 +41,17 @@ frappe.ui.form.on("Period Closing Voucher", {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus > 0) {
-			frm.add_custom_button(
-				__("Ledger"),
-				function () {
-					frappe.route_options = {
-						voucher_no: frm.doc.name,
-						from_date: frm.doc.period_start_date,
-						to_date: frm.doc.period_end_date,
-						company: frm.doc.company,
-						categorize_by: "",
-						show_cancelled_entries: frm.doc.docstatus === 2,
-					};
-					frappe.set_route("query-report", "General Ledger");
-				},
-				"fa fa-table"
-			);
+			frm.add_custom_button(__("Ledger"), function () {
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					from_date: frm.doc.period_start_date,
+					to_date: frm.doc.period_end_date,
+					company: frm.doc.company,
+					categorize_by: "",
+					show_cancelled_entries: frm.doc.docstatus === 2,
+				};
+				frappe.set_route("query-report", "General Ledger");
+			});
 		}
 	},
 });

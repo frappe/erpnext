@@ -63,8 +63,25 @@ def get_operations(doctype: str, txt: str, searchfield: str, start: int, page_le
 	if txt:
 		query_filters = {"operation": ["like", f"%{txt}%"]}
 
-	if filters.get("routing"):
-		query_filters["parent"] = filters.get("routing")
+	if routing := filters.get("routing"):
+		if not frappe.db.exists("Routing", routing):
+			return []
+
+		ptype = "select" if frappe.only_has_select_perm("Routing") else "read"
+		frappe.has_permission("Routing", ptype, doc=routing, throw=True)
+		query_filters["parent"] = routing
+		query_filters["parenttype"] = "Routing"
+	else:
+		parents = []
+		for parenttype in ("Routing", "BOM"):
+			ptype = "select" if frappe.only_has_select_perm(parenttype) else "read"
+			if frappe.has_permission(parenttype, ptype):
+				parents += frappe.get_list(parenttype, pluck="name")
+
+		if not parents:
+			return []
+
+		query_filters["parent"] = ["in", parents]
 
 	return frappe.get_all(
 		"BOM Operation",

@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, msgprint
+from frappe.query_builder.functions import Count, Date
 from frappe.utils import date_diff, flt
 
 
@@ -83,56 +84,51 @@ def get_communication_details(filters):
 		as_dict=1,
 	)
 
+	si = frappe.qb.DocType("Sales Invoice")
+	comm = frappe.qb.DocType("Communication")
+
 	for d in opportunities:
-		invoice = frappe.db.sql(
-			"""
-				SELECT
-					date(creation)
-				FROM
-					`tabSales Invoice`
-				WHERE
-					contact_email = %s AND date(creation) between %s and %s AND docstatus != 2
-				ORDER BY
-					creation
-				LIMIT 1
-			""",
-			(d.contact_email, filters.from_date, filters.to_date),
+		invoice = (
+			frappe.qb.from_(si)
+			.select(Date(si.creation))
+			.where(
+				(si.contact_email == d.contact_email)
+				& Date(si.creation).between(filters.from_date, filters.to_date)
+				& (si.docstatus != 2)
+			)
+			.orderby(si.creation)
+			.limit(1)
+			.run()
 		)
 
 		if not invoice:
 			continue
 
-		communication_count = frappe.db.sql(
-			"""
-				SELECT
-					count(*)
-				FROM
-					`tabCommunication`
-				WHERE
-					sender = %s AND date(communication_date) <= %s
-			""",
-			(d.contact_email, invoice),
+		invoice_date = invoice[0][0]
+
+		communication_count = (
+			frappe.qb.from_(comm)
+			.select(Count("*"))
+			.where((comm.sender == d.contact_email) & (Date(comm.communication_date) <= invoice_date))
+			.run()
 		)[0][0]
 
 		if not communication_count:
 			continue
 
-		first_contact = frappe.db.sql(
-			"""
-				SELECT
-					date(communication_date)
-				FROM
-					`tabCommunication`
-				WHERE
-					recipients  = %s
-				ORDER BY
-					communication_date
-				LIMIT 1
-			""",
-			(d.contact_email),
-		)[0][0]
+		first_contact = (
+			frappe.qb.from_(comm)
+			.select(Date(comm.communication_date))
+			.where((comm.recipients == d.contact_email) & comm.communication_date.isnotnull())
+			.orderby(comm.communication_date)
+			.limit(1)
+			.run()
+		)
+		first_contact = first_contact[0][0] if first_contact else None
+		if not first_contact:
+			continue
 
-		duration = flt(date_diff(invoice[0][0], first_contact))
+		duration = flt(date_diff(invoice_date, first_contact))
 
 		support_tickets = len(frappe.db.get_all("Issue", {"raised_by": d.contact_email}))
 		communication_list.append(

@@ -1,5 +1,5 @@
 import { lazy, useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { FrappeProvider } from 'frappe-react-sdk'
 import { Toaster } from '@/components/ui/sonner'
 import BankReconciliation from '@/pages/BankReconciliation'

@@ -1,0 +1,94 @@
+/* Scroll-edge fade mask for horizontal scroll containers (the bank picker strip).
+   Ported from Raven's `scroll-fade-x`; imported by index.css, since Tailwind processes
+   `@utility` in imported files the same as in the entry file.
+
+   The scroll-timeline keyframes reveal each edge's fade only when there IS content to scroll
+   in that direction - no fade on the left edge when scrolled fully left, none on the right at
+   the end. `@property` makes the fade animate smoothly rather than jumping.
+
+   Without scroll-timeline support (Firefox) there is deliberately NO fade at all: the fade
+   vars stay at their 0px initial value and the gradient stops collapse to the edges. A static
+   both-edges fallback was tried in Raven and removed - on a container with nothing to scroll
+   it dimmed the edges anyway, promising content that didn't exist. */
+
+@property --scroll-fade-l {
+  /* length-percentage, NOT length: the fade size is min(12%, …) - a percentage. A <length>
+     property rejects that value and reverts to initial-value (0px), zeroing the fade. */
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-fade-r {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scroll-fade-reveal-l {
+  from {
+    --scroll-fade-l: 0px;
+  }
+
+  to {
+    --scroll-fade-l: var(--_scroll-fade-size-l);
+  }
+}
+
+@keyframes scroll-fade-reveal-r {
+  from {
+    --scroll-fade-r: var(--_scroll-fade-size-r);
+  }
+
+  to {
+    --scroll-fade-r: 0px;
+  }
+}
+
+@utility scroll-fade-x {
+  --_scroll-fade-size-l: var(--scroll-fade-l-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10))));
+  --_scroll-fade-size-r: var(--scroll-fade-r-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10))));
+  /* Eased (smoothstep) alpha ramp, sampled finely so it reads as a smooth curve, NOT fading
+     all the way to transparent: the edge floors at 0.25 (content dims, never vanishes), ramping
+     up to a full 1 for the body. The opaque end MUST be 1 or everything would be permanently
+     dimmed. Stops collapse to the edge when the size animates to 0, so the true first/last card
+     is never dimmed at rest. Tune the floor - higher (~0.4) = subtler, lower (~0.1) = stronger. */
+  --scroll-fade-inline: linear-gradient(to right,
+      rgba(0, 0, 0, 0.25) 0,
+      rgba(0, 0, 0, 0.282) calc(var(--scroll-fade-l, 0px) * 0.125),
+      rgba(0, 0, 0, 0.367) calc(var(--scroll-fade-l, 0px) * 0.25),
+      rgba(0, 0, 0, 0.487) calc(var(--scroll-fade-l, 0px) * 0.375),
+      rgba(0, 0, 0, 0.625) calc(var(--scroll-fade-l, 0px) * 0.5),
+      rgba(0, 0, 0, 0.763) calc(var(--scroll-fade-l, 0px) * 0.625),
+      rgba(0, 0, 0, 0.883) calc(var(--scroll-fade-l, 0px) * 0.75),
+      rgba(0, 0, 0, 0.968) calc(var(--scroll-fade-l, 0px) * 0.875),
+      rgba(0, 0, 0, 1) var(--scroll-fade-l, 0px),
+      rgba(0, 0, 0, 1) calc(100% - var(--scroll-fade-r, 0px)),
+      rgba(0, 0, 0, 0.968) calc(100% - var(--scroll-fade-r, 0px) * 0.875),
+      rgba(0, 0, 0, 0.883) calc(100% - var(--scroll-fade-r, 0px) * 0.75),
+      rgba(0, 0, 0, 0.763) calc(100% - var(--scroll-fade-r, 0px) * 0.625),
+      rgba(0, 0, 0, 0.625) calc(100% - var(--scroll-fade-r, 0px) * 0.5),
+      rgba(0, 0, 0, 0.487) calc(100% - var(--scroll-fade-r, 0px) * 0.375),
+      rgba(0, 0, 0, 0.367) calc(100% - var(--scroll-fade-r, 0px) * 0.25),
+      rgba(0, 0, 0, 0.282) calc(100% - var(--scroll-fade-r, 0px) * 0.125),
+      rgba(0, 0, 0, 0.25) 100%);
+  -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+  mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  @supports (animation-timeline: scroll()) {
+    animation:
+      scroll-fade-reveal-l 1ms ease-in-out,
+      scroll-fade-reveal-r 1ms ease-in-out;
+    animation-timeline: scroll(self x), scroll(self x);
+    animation-range:
+      0 var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24)),
+      calc(100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))) 100%;
+    animation-fill-mode: both;
+  }
+}

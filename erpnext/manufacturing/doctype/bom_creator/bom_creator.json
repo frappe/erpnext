@@ -6,6 +6,7 @@
  "default_view": "List",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bom-creator",
  "engine": "InnoDB",
  "field_order": [
   "tab_2_tab",
@@ -303,7 +304,7 @@
   }
  ],
  "hide_toolbar": 1,
- "icon": "fa fa-sitemap",
+ "icon": "list-plus",
  "is_submittable": 1,
  "links": [
   {

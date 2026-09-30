@@ -28,6 +28,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.services.gl_validator import validate_opening_entry_against_pcv
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -149,6 +150,9 @@ class JournalEntry(AccountsController):
 		if not self.is_opening:
 			self.is_opening = "No"
 
+		if self.is_opening == "Yes":
+			validate_opening_entry_against_pcv(self.company)
+
 		self.clearance_date = None
 
 		self.validate_party()
@@ -176,7 +180,7 @@ class JournalEntry(AccountsController):
 
 		JournalTaxWithholding(self).on_validate()
 
-		if self.is_new() or not self.title:
+		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
 
 	def validate_advance_accounts(self):
@@ -670,12 +674,14 @@ class JournalEntry(AccountsController):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit"))
+			self.total_debit = flt(
+				self.total_debit + flt(d.debit, d.precision("debit")), self.precision("total_debit")
+			)
+			self.total_credit = flt(
+				self.total_credit + flt(d.credit, d.precision("credit")), self.precision("total_credit")
+			)
 
-		self.difference = flt(self.total_debit, self.precision("total_debit")) - flt(
-			self.total_credit, self.precision("total_credit")
-		)
+		self.difference = flt(self.total_debit - self.total_credit, self.precision("difference"))
 
 	def validate_multi_currency(self):
 		alternate_currency = []
@@ -889,7 +895,7 @@ class JournalEntry(AccountsController):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 			return
 
-		self.total_debit, self.total_credit = 0, 0
+		self.set_total_debit_credit()
 		diff = flt(self.difference, self.precision("difference"))
 		if diff:
 			self._apply_difference_to_blank_row(diff, difference_account)
@@ -1017,6 +1023,11 @@ def get_default_bank_cash_account(
 ) -> dict:
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
+	# the company is the scope being authorised, and doc= brings User Permissions to bear. `select`,
+	# not `read`: this also runs server-side from get_payment_entry, and Auditor/HR User/Desk User
+	# hold only the select row on Company
+	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
+
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
@@ -1045,6 +1056,11 @@ def get_default_bank_cash_account(
 					account = account_list[0].name
 
 	if account:
+		# `account` may be named by the caller outright, so authorise the account actually being
+		# described. get_balance_on() checks this too, but only on the branch that reads a balance,
+		# and `fetch_balance` is a caller-supplied argument.
+		frappe.has_permission("Account", doc=account, throw=True)
+
 		account_details = frappe.get_cached_value(
 			"Account", account, ["account_currency", "account_type"], as_dict=1
 		)
@@ -1074,30 +1090,40 @@ def get_against_jv(
 	if not frappe.db.has_column("Journal Entry", searchfield):
 		return []
 
-	JournalEntry = frappe.qb.DocType("Journal Entry")
-	JournalEntryAccount = frappe.qb.DocType("Journal Entry Account")
+	account = filters.get("account")
+	party = filters.get("party")
 
-	query = (
-		frappe.qb.from_(JournalEntry)
-		.join(JournalEntryAccount)
-		.on(JournalEntryAccount.parent == JournalEntry.name)
-		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.remark)
-		.where(JournalEntryAccount.account == filters.get("account"))
-		.where(JournalEntryAccount.reference_type.isnull() | (JournalEntryAccount.reference_type == ""))
-		.where(JournalEntry.docstatus == 1)
-		.where(JournalEntry[searchfield].like(f"%{txt}%"))
-		.orderby(JournalEntry.name, order=frappe.qb.desc)
-		.limit(page_len)
-		.offset(start)
+	# each names one value. A list would be read as a filter operator below and widen the search
+	# past what the caller named.
+	for value in (account, party):
+		if value and not isinstance(value, str):
+			frappe.throw(_("Invalid filter"), frappe.PermissionError)
+
+	# get_list applies the permission query conditions; the child-table filter resolves the check to `read`
+	je_filters = [
+		["docstatus", "=", 1],
+		[searchfield, "like", f"%{txt}%"],
+		["Journal Entry Account", "account", "=", account],
+		["Journal Entry Account", "reference_type", "is", "not set"],
+	]
+	je_filters.append(
+		["Journal Entry Account", "party", "=", party]
+		if party
+		else ["Journal Entry Account", "party", "is", "not set"]
 	)
 
-	party = filters.get("party")
-	if party:
-		query = query.where(JournalEntryAccount.party == party)
-	else:
-		query = query.where(JournalEntryAccount.party.isnull() | (JournalEntryAccount.party == ""))
-
-	return query.run()
+	return frappe.get_list(
+		"Journal Entry",
+		filters=je_filters,
+		fields=["name", "posting_date", "remark"],
+		order_by="name desc",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+		# one row per entry, not per matching account row. group_by rather than distinct: frappe
+		# drops ORDER BY from a distinct query on postgres, which would lose the ordering above.
+		group_by="name",
+	)
 
 
 @frappe.whitelist()

@@ -45,7 +45,7 @@ frappe.ui.form.on("POS Closing Entry", {
 
 			$("#jump_to_error").on("click", (e) => {
 				e.preventDefault();
-				frappe.utils.scroll_to(cur_frm.get_field("error_message").$wrapper, true, 30);
+				frappe.utils.scroll_to(frm.get_field("error_message").$wrapper, true, 30);
 			});
 
 			frm.add_custom_button(__("Retry"), function () {
@@ -151,7 +151,7 @@ function refresh_payments(payments, frm) {
 				mode_of_payment: p.mode_of_payment,
 				opening_amount: 0,
 				expected_amount: p.amount,
-				closing_amount: 0,
+				closing_amount: p.amount,
 			});
 		}
 	});

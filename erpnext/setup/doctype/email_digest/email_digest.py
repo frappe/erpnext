@@ -9,6 +9,8 @@ import frappe.desk.notifications
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.core.doctype.user.user import STANDARD_USERS
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, IfNull, Sum
 from frappe.utils import (
 	add_to_date,
 	flt,
@@ -85,14 +87,11 @@ class EmailDigest(Document):
 	@frappe.whitelist()
 	def get_users(self):
 		"""get list of users"""
-		user_list = frappe.db.sql(
-			"""
-			select name, enabled from tabUser
-			where name not in ({})
-			and user_type != "Website User"
-			order by enabled desc, name asc""".format(", ".join(["%s"] * len(STANDARD_USERS))),
-			STANDARD_USERS,
-			as_dict=1,
+		user_list = frappe.get_all(
+			"User",
+			filters={"name": ["not in", STANDARD_USERS], "user_type": ["!=", "Website User"]},
+			fields=["name", "enabled"],
+			order_by="enabled desc, name asc",
 		)
 
 		if self.recipient_list:
@@ -107,13 +106,7 @@ class EmailDigest(Document):
 	@frappe.whitelist()
 	def send(self):
 		# send email only to enabled users
-		valid_users = [
-			p[0]
-			for p in frappe.db.sql(
-				"""select name from `tabUser`
-			where enabled=1"""
-			)
-		]
+		valid_users = frappe.get_all("User", filters={"enabled": 1}, pluck="name")
 
 		if self.recipients:
 			for row in self.recipients:
@@ -229,12 +222,24 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		todo_list = frappe.db.sql(
-			"""select *
-			from `tabToDo` where (owner=%s or assigned_by=%s) and status='Open'
-			order by field(priority, 'High', 'Medium', 'Low') asc, date asc limit 20""",
-			(user_id, user_id),
-			as_dict=True,
+		todo = frappe.qb.DocType("ToDo")
+		# matches MySQL field(priority,'High','Medium','Low'): unknown/empty/NULL -> 0 (sorts first)
+		priority_order = (
+			Case()
+			.when(todo.priority == "High", 1)
+			.when(todo.priority == "Medium", 2)
+			.when(todo.priority == "Low", 3)
+			.else_(0)
+		)
+		todo_list = (
+			frappe.qb.from_(todo)
+			.select(todo.star)
+			.where(((todo.owner == user_id) | (todo.assigned_by == user_id)) & (todo.status == "Open"))
+			.orderby(priority_order)
+			.orderby(IfNull(todo.date, "1000-01-01"))  # NULL dates first, as MariaDB `date asc` did
+			.orderby(todo.name)
+			.limit(20)
+			.run(as_dict=True)
 		)
 
 		for t in todo_list:
@@ -247,10 +252,12 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		return frappe.db.sql(
-			"""select count(*) from `tabToDo`
-			where status='Open' and (owner=%s or assigned_by=%s)""",
-			(user_id, user_id),
+		todo = frappe.qb.DocType("ToDo")
+		return (
+			frappe.qb.from_(todo)
+			.select(Count("*"))
+			.where((todo.status == "Open") & ((todo.owner == user_id) | (todo.assigned_by == user_id)))
+			.run()
 		)[0][0]
 
 	def get_issue_list(self, user_id=None):
@@ -263,11 +270,12 @@ class EmailDigest(Document):
 		if not role_permissions.get("read"):
 			return None
 
-		issue_list = frappe.db.sql(
-			"""select *
-			from `tabIssue` where status in ("Replied","Open")
-			order by creation asc limit 10""",
-			as_dict=True,
+		issue_list = frappe.get_all(
+			"Issue",
+			filters={"status": ["in", ["Replied", "Open"]]},
+			fields=["*"],
+			order_by="creation asc",
+			limit=10,
 		)
 
 		for t in issue_list:
@@ -277,21 +285,19 @@ class EmailDigest(Document):
 
 	def get_issue_count(self):
 		"""Get count of Issue"""
-		return frappe.db.sql(
-			"""select count(*) from `tabIssue`
-			where status in ('Open','Replied') """
-		)[0][0]
+		return frappe.db.count("Issue", {"status": ["in", ["Open", "Replied"]]})
 
 	def get_project_list(self, user_id=None):
 		"""Get project list"""
 		if not user_id:
 			user_id = frappe.session.user
 
-		project_list = frappe.db.sql(
-			"""select *
-			from `tabProject` where status='Open' and project_type='External'
-			order by creation asc limit 10""",
-			as_dict=True,
+		project_list = frappe.get_all(
+			"Project",
+			filters={"status": "Open", "project_type": "External"},
+			fields=["*"],
+			order_by="creation asc",
+			limit=10,
 		)
 
 		for t in project_list:
@@ -301,10 +307,7 @@ class EmailDigest(Document):
 
 	def get_project_count(self):
 		"""Get count of Project"""
-		return frappe.db.sql(
-			"""select count(*) from `tabProject`
-			where status='Open' and project_type='External'"""
-		)[0][0]
+		return frappe.db.count("Project", {"status": "Open", "project_type": "External"})
 
 	def set_accounting_cards(self, context):
 		"""Create accounting cards if checked"""
@@ -390,7 +393,7 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"General Ledger",
-			_(self.meta.get_label("income")),
+			self.meta.get_translated_label("income"),
 			filters={
 				"from_date": self.future_from_date,
 				"to_date": self.future_to_date,
@@ -422,7 +425,7 @@ class EmailDigest(Document):
 			filters = {"currency": self.currency}
 			label = get_link_to_report(
 				"Profit and Loss Statement",
-				label=_(self.meta.get_label(root_type + "_year_to_date")),
+				label=self.meta.get_translated_label(root_type + "_year_to_date"),
 				filters=filters,
 			)
 
@@ -430,7 +433,7 @@ class EmailDigest(Document):
 			filters = {"currency": self.currency}
 			label = get_link_to_report(
 				"Profit and Loss Statement",
-				label=_(self.meta.get_label(root_type + "_year_to_date")),
+				label=self.meta.get_translated_label(root_type + "_year_to_date"),
 				filters=filters,
 			)
 
@@ -461,7 +464,7 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			"General Ledger",
-			_(self.meta.get_label("expenses_booked")),
+			self.meta.get_translated_label("expenses_booked"),
 			filters={
 				"company": self.company,
 				"from_date": self.future_from_date,
@@ -485,17 +488,25 @@ class EmailDigest(Document):
 	def get_sales_orders_to_bill(self):
 		"""Get value not billed"""
 
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
-                    count(*) from `tabSales Order`
-					where (transaction_date <= %(to_date)s) and billing_status != "Fully Billed" and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
+		so = frappe.qb.DocType("Sales Order")
+		value, count = (
+			frappe.qb.from_(so)
+			.select(
+				IfNull(Sum(so.grand_total) - Sum(so.grand_total * so.per_billed / 100), 0),
+				Count("*"),
+			)
+			.where(
+				(so.transaction_date <= self.future_to_date)
+				& (so.billing_status != "Fully Billed")
+				& (so.company == self.company)
+				& so.status.notin(["Closed", "Cancelled", "Completed"])
+			)
+			.run()
 		)[0]
 
 		label = get_link_to_report(
 			"Sales Order",
-			label=_(self.meta.get_label("sales_orders_to_bill")),
+			label=self.meta.get_translated_label("sales_orders_to_bill"),
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters={
@@ -511,17 +522,25 @@ class EmailDigest(Document):
 	def get_sales_orders_to_deliver(self):
 		"""Get value not delivered"""
 
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
-					count(*) from `tabSales Order`
-					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered" and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
+		so = frappe.qb.DocType("Sales Order")
+		value, count = (
+			frappe.qb.from_(so)
+			.select(
+				IfNull(Sum(so.grand_total) - Sum(so.grand_total * so.per_delivered / 100), 0),
+				Count("*"),
+			)
+			.where(
+				(so.transaction_date <= self.future_to_date)
+				& (so.delivery_status != "Fully Delivered")
+				& (so.company == self.company)
+				& so.status.notin(["Closed", "Cancelled", "Completed"])
+			)
+			.run()
 		)[0]
 
 		label = get_link_to_report(
 			"Sales Order",
-			label=_(self.meta.get_label("sales_orders_to_deliver")),
+			label=self.meta.get_translated_label("sales_orders_to_deliver"),
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters={
@@ -537,17 +556,25 @@ class EmailDigest(Document):
 	def get_purchase_orders_to_receive(self):
 		"""Get value not received"""
 
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total))-(sum(grand_total*per_received/100)),0),
-                    count(*) from `tabPurchase Order`
-					where (transaction_date <= %(to_date)s) and per_received < 100 and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
+		po = frappe.qb.DocType("Purchase Order")
+		value, count = (
+			frappe.qb.from_(po)
+			.select(
+				IfNull(Sum(po.grand_total) - Sum(po.grand_total * po.per_received / 100), 0),
+				Count("*"),
+			)
+			.where(
+				(po.transaction_date <= self.future_to_date)
+				& (po.per_received < 100)
+				& (po.company == self.company)
+				& po.status.notin(["Closed", "Cancelled", "Completed"])
+			)
+			.run()
 		)[0]
 
 		label = get_link_to_report(
 			"Purchase Order",
-			label=_(self.meta.get_label("purchase_orders_to_receive")),
+			label=self.meta.get_translated_label("purchase_orders_to_receive"),
 			report_type="Report Builder",
 			doctype="Purchase Order",
 			filters={
@@ -563,17 +590,25 @@ class EmailDigest(Document):
 	def get_purchase_orders_to_bill(self):
 		"""Get purchase not billed"""
 
-		value, count = frappe.db.sql(
-			"""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
-                    count(*) from `tabPurchase Order`
-					where (transaction_date <= %(to_date)s) and per_billed < 100 and company = %(company)s
-					and status not in ('Closed','Cancelled', 'Completed') """,
-			{"to_date": self.future_to_date, "company": self.company},
+		po = frappe.qb.DocType("Purchase Order")
+		value, count = (
+			frappe.qb.from_(po)
+			.select(
+				IfNull(Sum(po.grand_total) - Sum(po.grand_total * po.per_billed / 100), 0),
+				Count("*"),
+			)
+			.where(
+				(po.transaction_date <= self.future_to_date)
+				& (po.per_billed < 100)
+				& (po.company == self.company)
+				& po.status.notin(["Closed", "Cancelled", "Completed"])
+			)
+			.run()
 		)[0]
 
 		label = get_link_to_report(
 			"Purchase Order",
-			label=_(self.meta.get_label("purchase_orders_to_bill")),
+			label=self.meta.get_translated_label("purchase_orders_to_bill"),
 			report_type="Report Builder",
 			doctype="Purchase Order",
 			filters={
@@ -625,7 +660,9 @@ class EmailDigest(Document):
 					"company": self.company,
 				}
 				label = get_link_to_report(
-					"Account Balance", label=_(self.meta.get_label(fieldname)), filters=filters
+					"Account Balance",
+					label=self.meta.get_translated_label(fieldname),
+					filters=filters,
 				)
 			else:
 				filters = {
@@ -635,7 +672,9 @@ class EmailDigest(Document):
 					"company": self.company,
 				}
 				label = get_link_to_report(
-					"Account Balance", label=_(self.meta.get_label(fieldname)), filters=filters
+					"Account Balance",
+					label=self.meta.get_translated_label(fieldname),
+					filters=filters,
 				)
 
 			return {"label": label, "value": balance, "last_value": prev_balance}
@@ -643,17 +682,17 @@ class EmailDigest(Document):
 			if account_type == "Payable":
 				label = get_link_to_report(
 					"Accounts Payable",
-					label=_(self.meta.get_label(fieldname)),
+					label=self.meta.get_translated_label(fieldname),
 					filters={"report_date": self.future_to_date, "company": self.company},
 				)
 			elif account_type == "Receivable":
 				label = get_link_to_report(
 					"Accounts Receivable",
-					label=_(self.meta.get_label(fieldname)),
+					label=self.meta.get_translated_label(fieldname),
 					filters={"report_date": self.future_to_date, "company": self.company},
 				)
 			else:
-				label = _(self.meta.get_label(fieldname))
+				label = self.meta.get_translated_label(fieldname)
 
 			return {"label": label, "value": balance, "last_value": prev_balance, "count": count}
 
@@ -707,17 +746,25 @@ class EmailDigest(Document):
 		return self.get_summary_of_pending_quotations("pending_quotations")
 
 	def get_summary_of_pending(self, doc_type, fieldname, getfield):
-		value, count, billed_value, delivered_value = frappe.db.sql(
-			"""select ifnull(sum(grand_total),0), count(*),
-			ifnull(sum(grand_total*per_billed/100),0), ifnull(sum(grand_total*{}/100),0)  from `tab{}`
-			where (transaction_date <= %(to_date)s)
-			and status not in ('Closed','Cancelled', 'Completed')
-			and company = %(company)s """.format(getfield, doc_type),
-			{"to_date": self.future_to_date, "company": self.company},
+		doc = frappe.qb.DocType(doc_type)
+		value, count, billed_value, delivered_value = (
+			frappe.qb.from_(doc)
+			.select(
+				IfNull(Sum(doc.grand_total), 0),
+				Count("*"),
+				IfNull(Sum(doc.grand_total * doc.per_billed / 100), 0),
+				IfNull(Sum(doc.grand_total * doc[getfield] / 100), 0),
+			)
+			.where(
+				(doc.transaction_date <= self.future_to_date)
+				& doc.status.notin(["Closed", "Cancelled", "Completed"])
+				& (doc.company == self.company)
+			)
+			.run()
 		)[0]
 
 		return {
-			"label": self.meta.get_label(fieldname),
+			"label": self.meta.get_translated_label(fieldname),
 			"value": value,
 			"billed_value": billed_value,
 			"delivered_value": delivered_value,
@@ -725,25 +772,32 @@ class EmailDigest(Document):
 		}
 
 	def get_summary_of_pending_quotations(self, fieldname):
-		value, count = frappe.db.sql(
-			"""select ifnull(sum(grand_total),0), count(*) from `tabQuotation`
-			where (transaction_date <= %(to_date)s)
-			and company = %(company)s
-			and status not in ('Ordered','Cancelled', 'Lost') """,
-			{"to_date": self.future_to_date, "company": self.company},
+		quotation = frappe.qb.DocType("Quotation")
+		value, count = (
+			frappe.qb.from_(quotation)
+			.select(IfNull(Sum(quotation.grand_total), 0), Count("*"))
+			.where(
+				(quotation.transaction_date <= self.future_to_date)
+				& (quotation.company == self.company)
+				& quotation.status.notin(["Ordered", "Cancelled", "Lost"])
+			)
+			.run()
 		)[0]
 
-		last_value = frappe.db.sql(
-			"""select ifnull(sum(grand_total),0) from `tabQuotation`
-			where (transaction_date <= %(to_date)s)
-			and company = %(company)s
-			and status not in ('Ordered','Cancelled', 'Lost') """,
-			{"to_date": self.past_to_date, "company": self.company},
+		last_value = (
+			frappe.qb.from_(quotation)
+			.select(IfNull(Sum(quotation.grand_total), 0))
+			.where(
+				(quotation.transaction_date <= self.past_to_date)
+				& (quotation.company == self.company)
+				& quotation.status.notin(["Ordered", "Cancelled", "Lost"])
+			)
+			.run()
 		)[0][0]
 
 		label = get_link_to_report(
 			"Quotation",
-			label=_(self.meta.get_label(fieldname)),
+			label=self.meta.get_translated_label(fieldname),
 			report_type="Report Builder",
 			doctype="Quotation",
 			filters={
@@ -774,7 +828,7 @@ class EmailDigest(Document):
 
 		label = get_link_to_report(
 			doc_type,
-			label=_(self.meta.get_label(fieldname)),
+			label=self.meta.get_translated_label(fieldname),
 			report_type="Report Builder",
 			filters=filters,
 			doctype=doc_type,
@@ -898,10 +952,8 @@ class EmailDigest(Document):
 def send():
 	now_date = now_datetime().date()
 
-	for ed in frappe.db.sql(
-		"""select name from `tabEmail Digest`
-			where enabled=1 and docstatus<2""",
-		as_list=1,
+	for ed in frappe.get_all(
+		"Email Digest", filters={"enabled": 1, "docstatus": ["<", 2]}, fields=["name"], as_list=True
 	):
 		ed_obj = frappe.get_doc("Email Digest", ed[0])
 		if now_date == ed_obj.get_next_sending():
@@ -910,7 +962,9 @@ def send():
 
 @frappe.whitelist()
 def get_digest_msg(name: str):
-	return frappe.get_doc("Email Digest", name).get_msg_html()
+	email_digest = frappe.get_doc("Email Digest", name)
+	email_digest.check_permission()
+	return email_digest.get_msg_html()
 
 
 def get_incomes_expenses_for_period(account, from_date, to_date):

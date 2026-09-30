@@ -6,6 +6,11 @@ from frappe import _
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, getdate
 
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
+
 
 def execute(filters=None):
 	if not filters:
@@ -89,6 +94,9 @@ def get_item_info(filters):
 	if conditions := get_item_group_condition(filters.get("item_group"), item):
 		query = query.where(conditions)
 
+	if condition := get_allowed_masters_condition(item.name, "Item"):
+		query = query.where(condition)
+
 	return query.run(as_dict=True)
 
 
@@ -114,7 +122,7 @@ def get_consumed_items(filters):
 		)
 		.groupby(sle.item_code)
 	)
-	query = get_filtered_query(filters, sle, query)
+	query = get_filtered_query(filters, sle, query, "Stock Ledger Entry")
 
 	consumed_items = query.run(as_dict=True)
 
@@ -132,7 +140,7 @@ def get_delivered_items(filters):
 		.where((parent.name == child.parent) & (parent.docstatus == 1))
 		.groupby(child.item_code)
 	)
-	query = get_filtered_query(filters, parent, query)
+	query = get_filtered_query(filters, parent, query, "Delivery Note")
 
 	dn_items = query.run(as_dict=True)
 
@@ -145,7 +153,7 @@ def get_delivered_items(filters):
 		.where((parent.name == child.parent) & (parent.docstatus == 1) & (parent.update_stock == 1))
 		.groupby(child.item_code)
 	)
-	query = get_filtered_query(filters, parent, query)
+	query = get_filtered_query(filters, parent, query, "Sales Invoice")
 
 	si_items = query.run(as_dict=True)
 
@@ -159,10 +167,13 @@ def get_delivered_items(filters):
 	return dn_item_map
 
 
-def get_filtered_query(filters, table, query):
+def get_filtered_query(filters, table, query, doctype):
 	if filters.get("from_date") and filters.get("to_date"):
 		query = query.where(table.posting_date.between(filters["from_date"], filters["to_date"]))
 	else:
 		frappe.throw(_("From and To dates are required"))
+
+	if condition := get_allowed_companies_condition(table.company, doctype):
+		query = query.where(condition)
 
 	return query

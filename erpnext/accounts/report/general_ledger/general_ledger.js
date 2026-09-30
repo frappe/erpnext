@@ -175,7 +175,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldname: "include_dimensions",
 			label: __("Consider Accounting Dimensions"),
 			fieldtype: "Check",
-			default: 1,
+			default: frappe.boot.sysdefaults.disable_include_dimensions ? 0 : 1,
 		},
 		{
 			fieldname: "disable_opening_balance_calculation",

@@ -118,9 +118,9 @@ class ProductBundle(Document):
 
 		if len(invoice_links):
 			frappe.throw(
-				"This Product Bundle is linked with {}. You will have to cancel these documents in order to delete this Product Bundle".format(
-					", ".join(invoice_links)
-				),
+				_(
+					"This Product Bundle is linked with {0}. You will have to cancel these documents in order to delete this Product Bundle"
+				).format(", ".join(invoice_links)),
 				title=_("Not Allowed"),
 			)
 
@@ -191,7 +191,7 @@ def get_active_product_bundle(item_code: str) -> str | None:
 
 
 @frappe.whitelist()
-def make_new_version(source_name: str, target_doc: str | None = None):
+def make_new_version(source_name: str, target_doc: str | dict | Document | None = None):
 	"""Create a fresh draft bundle copied from an existing (typically submitted) one.
 
 	The copy keeps the same parent item and component rows but gets a new version
@@ -233,16 +233,14 @@ def get_new_item_code(doctype: str, txt: str, searchfield: str, start: int, page
 	searchfield = searchfield.split(",")
 	searchfield.append("name")
 
-	item = frappe.qb.DocType("Item")
-	query = (
-		frappe.qb.from_(item)
-		.select(item.name, item.item_name)
-		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0))
-		.limit(page_len)
-		.offset(start)
+	# get_list applies Item's permission conditions and User Permissions, as item_query() does
+	return frappe.get_list(
+		"Item",
+		filters=[["is_stock_item", "=", 0], ["is_fixed_asset", "=", 0]],
+		or_filters=[[fieldname, "like", f"%{txt}%"] for fieldname in searchfield] if searchfield else None,
+		fields=["name", "item_name"],
+		order_by="",  # the query this replaced had no ORDER BY; suppress the injected default
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
-
-	if searchfield:
-		query = query.where(Criterion.any([item[fieldname].like(f"%{txt}%") for fieldname in searchfield]))
-
-	return query.run()

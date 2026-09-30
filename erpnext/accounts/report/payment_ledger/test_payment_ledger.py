@@ -9,42 +9,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPaymentLedger(ERPNextTestSuite):
 	def setUp(self):
-		self.create_company()
-		self.cleanup()
-
-	def cleanup(self):
-		doctypes = []
-		doctypes.append(qb.DocType("GL Entry"))
-		doctypes.append(qb.DocType("Payment Ledger Entry"))
-		doctypes.append(qb.DocType("Sales Invoice"))
-		doctypes.append(qb.DocType("Payment Entry"))
-
-		for doctype in doctypes:
-			qb.from_(doctype).delete().where(doctype.company == self.company).run()
-
-	def create_company(self):
-		name = "Test Payment Ledger"
-		company = None
-		if frappe.db.exists("Company", name):
-			company = frappe.get_doc("Company", name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-		self.company = company.name
-		self.cost_center = company.cost_center
-		self.warehouse = "All Warehouses" + " - " + company.abbr
-		self.income_account = company.default_income_account
-		self.expense_account = company.default_expense_account
-		self.debit_to = company.default_receivable_account
+		self.company = "_Test Company"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
 
 	def test_unpaid_invoice_outstanding(self):
 		sinv = create_sales_invoice(

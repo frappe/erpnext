@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2018-05-24 07:18:08.256060",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/blanket-order",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -18,6 +19,15 @@
   "from_date",
   "to_date",
   "company",
+  "status",
+  "currency_and_price_list",
+  "currency",
+  "conversion_rate",
+  "column_break_price_list",
+  "selling_price_list",
+  "buying_price_list",
+  "price_list_currency",
+  "plc_conversion_rate",
   "section_break_12",
   "items",
   "amended_from",
@@ -97,6 +107,77 @@
    "search_index": 1
   },
   {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nClosed\nCancelled",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
+   "fieldname": "currency_and_price_list",
+   "fieldtype": "Section Break",
+   "label": "Currency and Price List"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_price_list",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Rate at which document currency is converted to company currency",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
+   "fieldname": "selling_price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.blanket_order_type == \"Purchasing\"",
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "price_list_currency",
+   "fieldtype": "Link",
+   "label": "Price List Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Rate at which Price List Currency is converted to Company Currency",
+   "fieldname": "plc_conversion_rate",
+   "fieldtype": "Float",
+   "label": "Price List Exchange Rate",
+   "precision": "9",
+   "print_hide": 1
+  },
+  {
    "fieldname": "section_break_12",
    "fieldtype": "Section Break"
   },
@@ -144,10 +225,11 @@
    "label": "Order Date"
   }
  ],
+ "icon": "file-text",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-05 15:44:21.520093",
+ "modified": "2026-09-23 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",
@@ -167,12 +249,42 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "blanket_order_type, to_date",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Green",
+   "title": "Closed"
+  }
+ ],
  "track_changes": 1
 }

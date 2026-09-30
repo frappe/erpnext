@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt
 
 from erpnext.controllers.accounts_controller import merge_taxes
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_transaction
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
@@ -21,18 +22,15 @@ from erpnext.stock.serial_batch_bundle import (
 
 def get_invoiced_qty_map(purchase_receipt: str) -> dict:
 	"""returns a map: {pr_detail: invoiced_qty}"""
-	invoiced_qty_map = {}
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	query = (
+		frappe.qb.from_(pi_item)
+		.select(pi_item.pr_detail, Sum(pi_item.qty).as_("qty"))
+		.where((pi_item.purchase_receipt == purchase_receipt) & (pi_item.docstatus == 1))
+		.groupby(pi_item.pr_detail)
+	).run(as_list=1)
 
-	for pr_detail, qty in frappe.db.sql(
-		"""select pr_detail, qty from `tabPurchase Invoice Item`
-		where purchase_receipt=%s and docstatus=1""",
-		purchase_receipt,
-	):
-		if not invoiced_qty_map.get(pr_detail):
-			invoiced_qty_map[pr_detail] = 0
-		invoiced_qty_map[pr_detail] += qty
-
-	return invoiced_qty_map
+	return frappe._dict(query) if query else frappe._dict()
 
 
 def get_returned_qty_map(purchase_receipt: str) -> dict:
@@ -59,18 +57,19 @@ def get_returned_qty_map(purchase_receipt: str) -> dict:
 
 @frappe.whitelist()
 def make_purchase_invoice(
-	source_name: str | None, target_doc: str | Document | None = None, args: dict | str | None = None
+	source_name: str | None, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	for ref, qty in get_qty_already_mapped(target_doc, "pr_detail").items():
+		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
@@ -126,7 +125,7 @@ def make_purchase_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.closed
 
 	doclist = get_mapped_doc(
 		"Purchase Receipt",
@@ -158,7 +157,7 @@ def make_purchase_invoice(
 				},
 				"postprocess": update_item,
 				"filter": lambda d: (
-					get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
+					get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] >= 0
 				),
 				"condition": select_item,
 			},
@@ -183,14 +182,14 @@ def make_purchase_return_against_rejected_warehouse(source_name: str):
 
 
 @frappe.whitelist()
-def make_purchase_return(source_name: str, target_doc: str | Document | None = None):
+def make_purchase_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.purpose = "Material Transfer"
@@ -250,5 +249,5 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_inter_company_delivery_note(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)

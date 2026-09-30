@@ -79,6 +79,11 @@ frappe.ui.form.on("BOM Operation", {
 		const d = locals[cdt][cdn];
 		frm.events.calculate_operating_cost(frm, d);
 	},
+
+	hour_rate: function (frm, cdt, cdn) {
+		const d = locals[cdt][cdn];
+		frm.events.calculate_operating_cost(frm, d);
+	},
 });
 
 frappe.tour["Routing"] = [

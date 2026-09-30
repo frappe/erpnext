@@ -192,7 +192,15 @@ def get_income_expense_data(companies, fiscal_year, filters):
 
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
 
-	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
+	net_profit_loss = get_net_profit_loss(
+		income,
+		expense,
+		companies,
+		filters.company,
+		company_currency,
+		consolidated=True,
+		accumulated_values=bool(filters.accumulated_values),
+	)
 
 	return income, expense, net_profit_loss
 
@@ -347,11 +355,10 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	filters.end_date = end_date
 
 	gl_entries_by_account = {}
-	for root in frappe.db.sql(
-		"""select lft, rgt from tabAccount
-			where root_type=%s and ifnull(parent_account, '') = ''""",
-		root_type,
-		as_dict=1,
+	for root in frappe.get_all(
+		"Account",
+		filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+		fields=["lft", "rgt"],
 	):
 		set_gl_entries_by_account(
 			start_date,
@@ -512,9 +519,11 @@ def get_companies(filters):
 def get_subsidiary_companies(company):
 	lft, rgt = frappe.get_cached_value("Company", company, ["lft", "rgt"])
 
-	return frappe.db.sql_list(
-		f"""select name from `tabCompany`
-		where lft >= {lft} and rgt <= {rgt} order by lft, rgt"""
+	return frappe.get_all(
+		"Company",
+		filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+		pluck="name",
+		order_by="lft, rgt",
 	)
 
 
@@ -581,7 +590,12 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 				total += flt(row[company])
 
 		row["has_value"] = has_value
-		row["total"] = total
+		# when accumulating into the group company, that company's column already consolidates its
+		# descendants, so summing every company column would double-count; use the group total directly.
+		if filters.get("accumulated_in_group_company"):
+			row["total"] = flt(row.get(filters.company, 0.0), 3)
+		else:
+			row["total"] = total
 
 		data.append(row)
 
@@ -604,14 +618,10 @@ def set_gl_entries_by_account(
 
 	company_lft, company_rgt = frappe.get_cached_value("Company", filters.get("company"), ["lft", "rgt"])
 
-	companies = frappe.db.sql(
-		""" select name, default_currency from `tabCompany`
-		where lft >= %(company_lft)s and rgt <= %(company_rgt)s""",
-		{
-			"company_lft": company_lft,
-			"company_rgt": company_rgt,
-		},
-		as_dict=1,
+	companies = frappe.get_all(
+		"Company",
+		filters={"lft": [">=", company_lft], "rgt": ["<=", company_rgt]},
+		fields=["name", "default_currency"],
 	)
 
 	currency_info = frappe._dict(

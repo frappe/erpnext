@@ -6,6 +6,7 @@
  "creation": "2017-10-06 12:53:34.714153",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/issue-type-and-priority",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -18,6 +19,7 @@
    "label": "Description"
   }
  ],
+ "icon": "tag",
  "links": [],
  "modified": "2024-03-27 13:09:53.242486",
  "modified_by": "Administrator",

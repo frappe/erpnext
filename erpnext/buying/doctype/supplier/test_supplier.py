@@ -202,3 +202,24 @@ class TestSupplierPortal(ERPNextTestSuite):
 			_, suppliers = get_customers_suppliers("Purchase Order", user)
 
 			self.assertIn(supplier.name, suppliers)
+
+	def test_portal_user_contact_link(self):
+		user_email = frappe.generate_hash() + "@example.com"
+		user = frappe.new_doc("User")
+		user.email = user_email
+		user.first_name = "Test Portal Contact User"
+		user.send_welcome_email = False
+		user.insert(ignore_permissions=True)
+
+		contact = frappe.new_doc("Contact")
+		contact.first_name = "Test Portal Contact User"
+		contact.add_email(user_email, is_primary=1)
+		contact.links = []
+		contact.insert(ignore_permissions=True)
+
+		supplier = create_supplier()
+		supplier.append("portal_users", {"user": user.name})
+		supplier.save()
+
+		contact.reload()
+		self.assertTrue(contact.has_link("Supplier", supplier.name))

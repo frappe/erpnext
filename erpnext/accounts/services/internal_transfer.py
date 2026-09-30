@@ -95,7 +95,9 @@ class InternalTransferService:
 		for row in self.doc.get("items"):
 			if not row.get(field):
 				frappe.throw(
-					_(f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"),
+					_("At Row {0}: The field {1} is mandatory for internal transfer").format(
+						row.idx, bold(label)
+					),
 					title=_("Internal Transfer Reference Missing"),
 				)
 
@@ -115,7 +117,7 @@ class InternalTransferService:
 		if not self.doc.get("ignore_pricing_rule") and self.is_internal_transfer():
 			self.doc.ignore_pricing_rule = 1
 			frappe.msgprint(
-				_("Disabled pricing rules since this {} is an internal transfer").format(self.doc.doctype),
+				_("Disabled pricing rules since this {0} is an internal transfer").format(self.doc.doctype),
 				alert=1,
 			)
 
@@ -131,7 +133,7 @@ class InternalTransferService:
 
 		if tax_updated:
 			frappe.msgprint(
-				_("Disabled tax included prices since this {} is an internal transfer").format(
+				_("Disabled tax included prices since this {0} is an internal transfer").format(
 					self.doc.doctype
 				),
 				alert=1,

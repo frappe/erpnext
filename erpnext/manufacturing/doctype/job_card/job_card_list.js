@@ -7,6 +7,7 @@ frappe.listview_settings["Job Card"] = {
 			Completed: "green",
 			Cancelled: "red",
 			"Material Transferred": "blue",
+			"Partially Transferred": "yellow",
 			Open: "red",
 		};
 		const status = doc.status || "Open";

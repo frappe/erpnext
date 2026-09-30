@@ -4,6 +4,8 @@
 import frappe
 from frappe import _
 
+import erpnext
+
 
 def execute(filters: dict | None = None):
 	columns = get_columns()
@@ -24,11 +26,20 @@ def get_columns() -> list[dict]:
 			"label": _("Total Landed Cost"),
 			"fieldname": "landed_cost",
 			"fieldtype": "Currency",
+			"options": "currency",
+		},
+		{
+			"label": _("Currency"),
+			"fieldname": "currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1,
 		},
 		{
 			"label": _("Purchase Voucher Type"),
 			"fieldname": "voucher_type",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 200,
 		},
 		{
@@ -49,6 +60,7 @@ def get_columns() -> list[dict]:
 
 
 def get_data(filters) -> list[list]:
+	company_currency = erpnext.get_company_currency(filters.get("company"))
 	landed_cost_vouchers = get_landed_cost_vouchers(filters) or {}
 	landed_vouchers = list(landed_cost_vouchers.keys())
 	vendor_invoices = {}
@@ -57,7 +69,6 @@ def get_data(filters) -> list[list]:
 
 	data = []
 
-	print(vendor_invoices)
 	for name, vouchers in landed_cost_vouchers.items():
 		res = {
 			"name": name,
@@ -72,6 +83,7 @@ def get_data(filters) -> list[list]:
 						"landed_cost": d.landed_cost,
 						"voucher_type": d.voucher_type,
 						"voucher_no": d.voucher_no,
+						"currency": company_currency,
 					}
 				)
 			else:
@@ -88,7 +100,6 @@ def get_data(filters) -> list[list]:
 
 		if vendor_invoice_list and len(vendor_invoice_list) > len(vouchers):
 			for row in vendor_invoice_list[last_index + 1 :]:
-				print(row)
 				data.append({"vendor_invoice": row})
 
 	return data

@@ -4,6 +4,7 @@
  "autoname": "field:title",
  "creation": "2022-01-19 01:09:28.920486",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-category",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -27,9 +28,10 @@
    "label": "Disabled"
   }
  ],
+ "icon": "badge-percent",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:51.976600",
+ "modified": "2026-08-21 23:11:50.740962",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Category",
@@ -68,9 +70,66 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Item Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

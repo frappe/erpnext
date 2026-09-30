@@ -6,6 +6,7 @@
  "description": "A logical Warehouse against which stock entries are made.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/warehouse",
  "engine": "InnoDB",
  "field_order": [
   "warehouse_detail",
@@ -282,11 +283,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-building",
+ "icon": "warehouse",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-02-05 18:17:11.035097",
+ "modified": "2026-08-21 23:11:51.906705",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -337,6 +338,34 @@
   {
    "read": 1,
    "role": "Manufacturing User"
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

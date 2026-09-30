@@ -11,7 +11,7 @@
 
 {%- macro render_discount_amount(doc) -%}
 	{%- if doc.discount_amount -%}
-	{{ render_row(_(doc.meta.get_label('discount_amount')), '- ' + doc.get_formatted("discount_amount", doc)) }}
+	{{ render_row(doc.meta.get_translated_label('discount_amount'), '- ' + doc.get_formatted("discount_amount", doc)) }}
 	{%- endif -%}
 {%- endmacro -%}
 

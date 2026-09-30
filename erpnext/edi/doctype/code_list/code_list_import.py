@@ -20,8 +20,11 @@ class CodeListSelectionMismatchError(Exception):
 	pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def import_genericode():
+	# check before save(), which only runs after the XML is fetched and parsed; denies exactly who save() would, sooner
+	frappe.has_permission("Code List", "create", throw=True)
+
 	try:
 		content, file_name = get_uploaded_genericode_file()
 
@@ -149,20 +152,27 @@ def parse_genericode_content(content: bytes):
 	return etree.fromstring(content, parser=parser)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def process_genericode_import(
 	code_list_name: str,
 	file_name: str,
 	code_column: str,
 	title_column: str | None = None,
 	description_column: str | None = None,
-	filters: str | None = None,
+	filters: str | dict | None = None,
 ):
 	from erpnext.edi.doctype.common_code.common_code import import_genericode
 
+	# Same reasoning as above: common_code.save() enforces this per document, but only after the
+	# file has been read and its XML parsed and queried.
+	frappe.has_permission("Common Code", "create", throw=True)
+	frappe.has_permission("Code List", doc=code_list_name, throw=True)
+
 	column_map = {"code": code_column, "title": title_column, "description": description_column}
 
-	return import_genericode(code_list_name, file_name, column_map, json.loads(filters) if filters else None)
+	return import_genericode(
+		code_list_name, file_name, column_map, frappe.parse_json(filters) if filters else None
+	)
 
 
 def get_genericode_columns_and_examples(root):

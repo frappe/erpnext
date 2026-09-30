@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
@@ -14,6 +15,19 @@ from erpnext.accounts.party import get_party_account
 from erpnext.setup.utils import get_exchange_rate
 
 __exchange_rates = {}
+
+
+def validate_mandatory_date_range(filters, from_field="from_date", to_field="to_date"):
+	from_date = filters.get(from_field)
+	to_date = filters.get(to_field)
+
+	if not from_date or not to_date:
+		frappe.throw(
+			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
+		)
+
+	if from_date > to_date:
+		frappe.throw(_("From Date must be before To Date"))
 
 
 def get_currency(filters):
@@ -146,7 +160,6 @@ def get_appropriate_company(filters):
 	return company
 
 
-@frappe.whitelist()
 def get_invoiced_item_gross_margin(
 	sales_invoice: str | None = None,
 	item_code: str | None = None,
@@ -296,6 +309,9 @@ def get_payment_entries(filters, args):
 			pe.mode_of_payment,
 			pe.project,
 			pe.cost_center,
+			pe.payment_type,
+			pe.source_exchange_rate,
+			pe.target_exchange_rate,
 		)
 		.where(
 			(pe.docstatus == 1)
@@ -306,6 +322,22 @@ def get_payment_entries(filters, args):
 	)
 	query = apply_common_conditions(filters, query, doctype="Payment Entry", payments=True)
 	payment_entries = query.run(as_dict=True)
+
+	if payment_entries:
+		ded = frappe.qb.DocType("Payment Entry Deduction")
+		deduction_totals = frappe._dict(
+			frappe.qb.from_(ded)
+			.select(ded.parent, Sum(ded.amount))
+			.where(ded.parent.isin([d.name for d in payment_entries]) & (ded.is_exchange_gain_loss == 0))
+			.groupby(ded.parent)
+			.run()
+		)
+		for d in payment_entries:
+			exchange_rate = (
+				d.source_exchange_rate if d.payment_type == "Receive" else d.target_exchange_rate
+			) or 1
+			d.base_grand_total = flt(d.base_grand_total) + flt(deduction_totals.get(d.name)) / exchange_rate
+
 	return payment_entries
 
 

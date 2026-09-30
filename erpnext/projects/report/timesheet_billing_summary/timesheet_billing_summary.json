@@ -1,5 +1,5 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "add_translate_data": 0,
  "columns": [],
  "creation": "2023-10-10 23:53:43.692067",
@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2026-04-20 16:55:11.807564",
+ "modified": "2026-08-20 00:55:31.635014",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet Billing Summary",

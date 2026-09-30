@@ -6,6 +6,7 @@
  "creation": "2014-11-07 16:20:30.683186",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/operation",
  "engine": "InnoDB",
  "field_order": [
   "workstation",
@@ -20,7 +21,8 @@
   "sub_operations",
   "total_operation_time",
   "section_break_4",
-  "description"
+  "description",
+  "work_instruction"
  ],
  "fields": [
   {
@@ -42,6 +44,12 @@
    "fieldtype": "Text",
    "in_preview": 1,
    "label": "Description"
+  },
+  {
+   "description": "Shown to operators on the Shop Floor. Supports rich text and embedded images for step-by-step guidance.",
+   "fieldname": "work_instruction",
+   "fieldtype": "Text Editor",
+   "label": "Work Instructions"
   },
   {
    "collapsible": 1,
@@ -103,7 +111,7 @@
    "options": "Quality Inspection Template"
   }
  ],
- "icon": "fa fa-wrench",
+ "icon": "cog",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2025-08-04 16:14:57.659318",

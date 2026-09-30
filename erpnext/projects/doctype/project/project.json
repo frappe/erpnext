@@ -6,6 +6,7 @@
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -86,7 +87,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nCompleted\nCancelled",
+   "options": "Open\nOn hold\nCompleted\nCancelled",
    "search_index": 1
   },
   {
@@ -121,7 +122,7 @@
    "in_list_view": 1,
    "label": "% Completed",
    "no_copy": 1,
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.percent_complete_method != 'Manual'"
   },
   {
    "fieldname": "column_break_5",
@@ -210,13 +211,15 @@
    "fieldname": "users",
    "fieldtype": "Table",
    "label": "Users",
-   "options": "Project User"
+   "options": "Project User",
+   "permlevel": 1
   },
   {
    "fieldname": "copied_from",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Copied From",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -477,18 +480,30 @@
    "show_dashboard": 1
   }
  ],
- "icon": "fa fa-puzzle-piece",
+ "icon": "folder-kanban",
  "idx": 29,
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-05-22 16:45:50.762759",
+ "modified": "2026-08-21 23:11:46.332012",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects Manager",
+   "share": 1,
+   "write": 1
+  },
   {
    "create": 1,
    "delete": 1,
@@ -533,6 +548,78 @@
   },
   {
    "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
+  },
+  {
+   "role": "Support Team",
    "select": 1
   }
  ],

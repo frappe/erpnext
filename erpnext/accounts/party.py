@@ -6,8 +6,9 @@ from datetime import date
 import frappe
 from frappe import _, msgprint, qb, scrub
 from frappe.contacts.doctype.address.address import get_company_address, get_default_address
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.utils import get_fetch_values
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Abs, Date, Sum
 from frappe.utils import (
 	add_days,
@@ -26,6 +27,7 @@ import erpnext
 from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
+from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 from erpnext.utilities.regional import temporary_flag
 
 try:
@@ -140,6 +142,7 @@ def _get_party_details(
 	if not ignore_permissions:
 		ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 		frappe.has_permission(party_type, ptype, party, throw=True)
+		validate_party_company(party_type, party.name, company)
 
 	currency = party.get("default_currency") or currency or get_company_currency(company)
 
@@ -155,9 +158,9 @@ def _get_party_details(
 		dispatch_address,
 		ignore_permissions=ignore_permissions,
 	)
-	set_contact_details(party_details, party, party_type)
+	set_contact_details(party_details, party, party_type, doctype)
 	set_other_values(party_details, party, party_type)
-	set_price_list(party_details, party, party_type, price_list, pos_profile)
+	set_price_list(party_details, party, party_type, price_list, pos_profile, doctype)
 
 	tax_template = set_taxes(
 		party.name,
@@ -195,6 +198,17 @@ def _get_party_details(
 		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
+
+
+def validate_party_company(party_type, party, company):
+	if not company or party_type not in ("Customer", "Supplier"):
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import (
+		validate_masters_for_company,
+	)
+
+	validate_masters_for_company(party_type, [party], company)
 
 
 def set_address_details(
@@ -346,9 +360,21 @@ def complete_contact_details(party_details):
 	party_details.update(contact_details)
 
 
-def set_contact_details(party_details, party, party_type):
+def set_contact_details(party_details, party, party_type, doctype=None):
 	party_details.contact_person = get_default_contact(party_type, party.name)
 	complete_contact_details(party_details)
+
+	# the shipping contact is picked by the user, so it has no default to fall back on;
+	# blank it instead of carrying the previous party's contact over
+	if doctype and frappe.get_meta(doctype).has_field("shipping_contact_person"):
+		party_details.update(
+			{
+				"shipping_contact_person": None,
+				"shipping_contact_display": None,
+				"shipping_contact_mobile": None,
+				"shipping_contact_email": None,
+			}
+		)
 
 
 def set_other_values(party_details, party, party_type):
@@ -370,31 +396,63 @@ def set_other_values(party_details, party, party_type):
 
 
 def get_default_price_list(party):
-	"""Return default price list for party (Document object)"""
-	if party.get("default_price_list"):
-		return party.default_price_list
+	"""Return the first enabled default price list for party (Document object)"""
+	price_list = party.get("default_price_list")
+	if is_price_list_enabled(price_list):
+		return price_list
 
-	if party.doctype == "Customer":
-		return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
+	if party.doctype != "Customer":
+		return
+
+	price_list = frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
+	if is_price_list_enabled(price_list):
+		return price_list
 
 
-def set_price_list(party_details, party, party_type, given_price_list, pos=None):
+def get_permitted_price_lists(doctype=None):
+	permissions = sorted(
+		get_user_permissions().get("Price List", []), key=lambda p: p.get("is_default"), reverse=True
+	)
+
+	# a permission applicable for another doctype doesn't restrict this transaction
+	return get_allowed_docs_for_doctype(permissions, doctype)
+
+
+def get_usable_price_list(price_lists, party_doctype):
+	transaction_side = "selling" if party_doctype == "Customer" else "buying"
+
+	for price_list in price_lists:
+		details = frappe.get_cached_value(
+			"Price List", price_list, ["enabled", transaction_side], as_dict=True
+		)
+		if details.enabled and details[transaction_side]:
+			return price_list
+
+
+def set_price_list(party_details, party, party_type, given_price_list, pos=None, doctype=None):
 	# price list
-	price_list = get_permitted_documents("Price List")
+	permitted_price_lists = get_permitted_price_lists(doctype)
 
 	# if there is only one permitted document based on user permissions, set it
-	if price_list and len(price_list) == 1:
-		price_list = price_list[0]
+	if len(permitted_price_lists) == 1:
+		price_list = get_usable_price_list(permitted_price_lists, party.doctype)
 	elif pos and party_type == "Customer":
 		customer_price_list = frappe.get_value("Customer", party.name, "default_price_list")
 
-		if customer_price_list:
+		if is_price_list_enabled(customer_price_list):
 			price_list = customer_price_list
 		else:
 			pos_price_list = frappe.get_value("POS Profile", pos, "selling_price_list")
 			price_list = pos_price_list or given_price_list
 	else:
 		price_list = get_default_price_list(party) or given_price_list
+
+		# don't set a price list the user has no permission for, the transaction can't be saved with it
+		if price_list and permitted_price_lists and price_list not in permitted_price_lists:
+			price_list = get_usable_price_list(permitted_price_lists, party.doctype)
+
+	if price_list and not is_price_list_enabled(price_list):
+		price_list = None
 
 	if price_list:
 		party_details.price_list_currency = frappe.db.get_value(
@@ -430,6 +488,17 @@ def get_party_account(
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
 	finally will return default."""
+
+	def account_perm_check(account):
+		ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+		if frappe.has_permission("Account", ptype, account):
+			return
+
+		# Using custom message to prevent data leak in case of `apply_strict_permission` is enabled.
+		frappe.throw(
+			_("User don't have permissions to select/read this account."), exc=frappe.PermissionError
+		)
+
 	if not party_type:
 		frappe.throw(_("Party Type is mandatory"))
 	if not company:
@@ -440,46 +509,51 @@ def get_party_account(
 			"default_receivable_account" if party_type == "Customer" else "default_payable_account"
 		)
 
-		return frappe.get_cached_value("Company", company, default_account_name)
-
-	account = frappe.db.get_value(
-		"Party Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
-	)
-
-	if not account and party_type in ["Customer", "Supplier"]:
-		party_group_doctype = "Customer Group" if party_type == "Customer" else "Supplier Group"
-		group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
+		account = frappe.get_cached_value("Company", company, default_account_name)
+	else:
 		account = frappe.db.get_value(
-			"Party Account",
-			{"parenttype": party_group_doctype, "parent": group, "company": company},
-			"account",
+			"Party Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
 		)
 
-	if not account and party_type in ["Customer", "Supplier"]:
-		default_account_name = (
-			"default_receivable_account" if party_type == "Customer" else "default_payable_account"
-		)
-		account = frappe.get_cached_value("Company", company, default_account_name)
+		if not account and party_type in ["Customer", "Supplier"]:
+			party_group_doctype = "Customer Group" if party_type == "Customer" else "Supplier Group"
+			group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
+			account = frappe.db.get_value(
+				"Party Account",
+				{"parenttype": party_group_doctype, "parent": group, "company": company},
+				"account",
+			)
 
-	existing_gle_currency = get_party_gle_currency(party_type, party, company)
-	if existing_gle_currency:
-		if account:
-			account_currency = frappe.get_cached_value("Account", account, "account_currency")
-		if (account and account_currency != existing_gle_currency) or not account:
-			account = get_party_gle_account(party_type, party, company)
+		if not account and party_type in ["Customer", "Supplier"]:
+			default_account_name = (
+				"default_receivable_account" if party_type == "Customer" else "default_payable_account"
+			)
+			account = frappe.get_cached_value("Company", company, default_account_name)
 
-	# get default account on the basis of party type
-	if not account:
-		account_type = frappe.get_cached_value("Party Type", party_type, "account_type")
-		default_account_name = "default_" + account_type.lower() + "_account"
-		account = frappe.get_cached_value("Company", company, default_account_name)
+		existing_gle_currency = get_party_gle_currency(party_type, party, company)
+		if existing_gle_currency:
+			if account:
+				account_currency = frappe.get_cached_value("Account", account, "account_currency")
+			if (account and account_currency != existing_gle_currency) or not account:
+				account = get_party_gle_account(party_type, party, company)
 
-	if include_advance and party_type in ["Customer", "Supplier", "Student"]:
+		# get default account on the basis of party type
+		if not account:
+			account_type = frappe.get_cached_value("Party Type", party_type, "account_type")
+			default_account_name = "default_" + account_type.lower() + "_account"
+			account = frappe.get_cached_value("Company", company, default_account_name)
+
+	if account:
+		account_perm_check(account)
+
+	if include_advance and party and party_type in ["Customer", "Supplier", "Student"]:
 		advance_account = get_party_advance_account(party_type, party, company)
+
 		if advance_account:
+			account_perm_check(advance_account)
 			return [account, advance_account]
-		else:
-			return [account]
+
+		return [account]
 
 	return account
 
@@ -543,11 +617,19 @@ def get_party_gle_currency(party_type, party, company):
 
 def get_party_gle_account(party_type, party, company):
 	def generator():
-		existing_gle_account = frappe.db.sql(
-			"""select account from `tabGL Entry`
-			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
-			limit 1""",
-			{"company": company, "party_type": party_type, "party": party},
+		gl = qb.DocType("GL Entry")
+		existing_gle_account = (
+			qb.from_(gl)
+			.select(gl.account)
+			.where(
+				(gl.docstatus == 1)
+				& (gl.company == company)
+				& (gl.party_type == party_type)
+				& (gl.party == party)
+				& (gl.is_cancelled == 0)
+			)
+			.limit(1)
+			.run()
 		)
 
 		return existing_gle_account[0][0] if existing_gle_account else None
@@ -841,11 +923,13 @@ def validate_account_party_type(self):
 
 
 def get_dashboard_info(party_type, party, loyalty_program=None):
+	doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
+	if not frappe.has_permission(doctype, "read"):
+		return None
+
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 
-	doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
-
-	companies = frappe.get_all(
+	companies = frappe.get_list(
 		doctype, filters={"docstatus": 1, party_type.lower(): party}, distinct=1, fields=["company"]
 	)
 
@@ -892,16 +976,13 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 			d.company, {"grand_total": d.grand_total, "base_grand_total": d.base_grand_total}
 		)
 
+	gle = frappe.qb.DocType("GL Entry")
 	company_wise_total_unpaid = frappe._dict(
-		frappe.db.sql(
-			"""
-		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where party_type = %s and party=%s
-		and is_cancelled = 0
-		group by company""",
-			(party_type, party),
-		)
+		frappe.qb.from_(gle)
+		.select(gle.company, Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency))
+		.where((gle.party_type == party_type) & (gle.party == party) & (gle.is_cancelled == 0))
+		.groupby(gle.company)
+		.run()
 	)
 
 	for d in companies:
@@ -929,6 +1010,15 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 		if party_type == "Supplier":
 			info["total_unpaid"] = -1 * info["total_unpaid"]
+
+		if info["total_unpaid"] < 0:
+			info["balance_label"] = (
+				"Total Advance Paid" if party_type == "Supplier" else "Total Advance Received"
+			)
+			info["balance_amount"] = abs(info["total_unpaid"])
+		else:
+			info["balance_label"] = "Total Unpaid"
+			info["balance_amount"] = info["total_unpaid"]
 
 		company_wise_info.append(info)
 

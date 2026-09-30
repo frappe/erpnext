@@ -182,10 +182,9 @@ class PromotionalScheme(Document):
 			frappe.delete_doc("Pricing Rule", doc)
 
 		frappe.msgprint(
-			_("The following invalid Pricing Rules are deleted:")
-			+ "<br><br><ul><li>"
-			+ "</li><li>".join(invalid_pricing_rule)
-			+ "</li></ul>"
+			_("The following invalid Pricing Rules are deleted:{0}").format(
+				"<br><br><ul><li>" + "</li><li>".join(invalid_pricing_rule) + "</li></ul>"
+			)
 		)
 
 	def get_invalid_pricing_rules(self):

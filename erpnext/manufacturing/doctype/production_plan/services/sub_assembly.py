@@ -82,7 +82,7 @@ class SubAssemblyService:
 			frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
 	def _warn_sufficient_sub_assembly(self):
-		label = self.meta.get_field("skip_available_sub_assembly_item").label
+		label = self.doc.meta.get_field("skip_available_sub_assembly_item").label
 		message = (
 			_(
 				"As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
@@ -159,6 +159,7 @@ class SubAssemblyService:
 	def _merge_subassembly_row(existing_row, row):
 		existing_row.qty += flt(row.qty)
 		existing_row.stock_qty += flt(row.stock_qty)
+		existing_row.required_qty += flt(row.required_qty)
 		existing_row.bom_level = max(existing_row.bom_level, row.bom_level)
 
 	def all_items_completed(self):

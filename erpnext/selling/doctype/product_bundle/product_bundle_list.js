@@ -12,6 +12,8 @@ frappe.listview_settings["Product Bundle"] = {
 		if (doc.docstatus === 1 && doc.is_active) {
 			return [__("Active"), "green", "is_active,=,1|disabled,=,0|docstatus,=,1"];
 		}
-		// inactive submitted versions keep the default "Submitted" indicator
+		if (doc.docstatus === 1 && !doc.is_active) {
+			return [__("Inactive"), "gray", "is_active,=,0|docstatus,=,1"];
+		}
 	},
 };

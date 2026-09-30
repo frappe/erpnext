@@ -251,9 +251,12 @@ def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "simplified_tax_invoice")
 	frappe.reload_doc("regional", "print_format", "tax_invoice")
 
-	frappe.db.sql(
-		""" update `tabPrint Format` set disabled = 0 where
-		name in('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice') """
+	pf = frappe.qb.DocType("Print Format")
+	(
+		frappe.qb.update(pf)
+		.set(pf.disabled, 0)
+		.where(pf.name.isin(["Simplified Tax Invoice", "Detailed Tax Invoice", "Tax Invoice"]))
+		.run()
 	)
 
 

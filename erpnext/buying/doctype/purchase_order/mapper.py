@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, get_link_to_form
 
 from erpnext.accounts.party import get_party_account
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -23,24 +24,25 @@ def set_missing_values(source, target):
 
 @frappe.whitelist()
 def make_purchase_receipt(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
+
 	def get_max_receivable_qty(source):
 		tolerance = flt(get_allowance_for(source.item_code, qty_or_amount="qty")[0])
 		return flt(source.qty) * (100 + tolerance) / 100
 
 	def update_item(obj, target, source_parent):
-		received_qty = flt(obj.received_qty)
+		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
 		qty = flt(obj.qty)
 		pending_qty = qty - received_qty
 
@@ -85,11 +87,13 @@ def make_purchase_receipt(
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: (
-					True
+					doc.name not in mapped_qty_by_item
 					if is_unit_price_row(doc)
-					else abs(doc.received_qty) < abs(get_max_receivable_qty(doc))
+					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0))
+					< abs(get_max_receivable_qty(doc))
 				)
 				and doc.delivered_by_supplier != 1
+				and not doc.closed
 				and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
@@ -103,7 +107,7 @@ def make_purchase_receipt(
 
 @frappe.whitelist()
 def make_purchase_invoice(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
@@ -123,8 +127,7 @@ def make_purchase_invoice_from_portal(purchase_order_name: str):
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
@@ -150,9 +153,13 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		)
 		return query.run(pluck="qty")[0] or 0
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+
+	def get_billed_and_mapped_qty(po_item_name):
+		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
+
 	def update_item(obj, target, source_parent):
-		billed_qty = flt(get_billed_qty(obj.name))
-		target.qty = flt(obj.qty) - billed_qty
+		target.qty = flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -195,6 +202,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				or abs(doc.billed_amt) < abs(doc.amount)
 				or doc.qty > flt(get_billed_qty(doc.name))
 			)
+			and (doc.name not in mapped_qty_by_item or doc.qty > get_billed_and_mapped_qty(doc.name))
+			and not doc.closed
 			and select_item(doc),
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
@@ -213,7 +222,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 
 @frappe.whitelist()
-def make_inter_company_sales_order(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_sales_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
@@ -222,7 +231,7 @@ def make_inter_company_sales_order(source_name: str, target_doc: str | Document 
 @frappe.whitelist()
 def make_subcontracting_order(
 	source_name: str,
-	target_doc: str | Document | None = None,
+	target_doc: str | dict | Document | None = None,
 	save: bool = False,
 	submit: bool = False,
 	notify: bool = False,
@@ -234,9 +243,11 @@ def make_subcontracting_order(
 			target_doc.save()
 
 			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+				frappe.db.savepoint("submit_subcontracting_order")
 				try:
 					target_doc.submit()
 				except Exception as e:
+					frappe.db.rollback(save_point="submit_subcontracting_order")
 					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 
 			if notify:
@@ -263,7 +274,9 @@ def is_po_fully_subcontracted(po_name: str) -> bool:
 	return not query.run(as_dict=True)
 
 
-def get_mapped_subcontracting_order(source_name: str, target_doc: str | Document | None = None) -> Document:
+def get_mapped_subcontracting_order(
+	source_name: str, target_doc: str | dict | Document | None = None
+) -> Document:
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
 
@@ -294,7 +307,7 @@ def get_mapped_subcontracting_order(source_name: str, target_doc: str | Document
 		) or frappe.get_value("Production Plan", target_doc.production_plan, "reserve_stock")
 
 	if target_doc and isinstance(target_doc, str):
-		target_doc = json.loads(target_doc)
+		target_doc = frappe.parse_json(target_doc)
 		for key in ["service_items", "items", "supplied_items"]:
 			if key in target_doc:
 				del target_doc[key]

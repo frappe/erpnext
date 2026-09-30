@@ -15,6 +15,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
 
 
 class SubcontractingOrder(SubcontractingController):
@@ -49,6 +50,7 @@ class SubcontractingOrder(SubcontractingController):
 		contact_email: DF.SmallText | None
 		contact_mobile: DF.SmallText | None
 		contact_person: DF.Link | None
+		conversion_rate: DF.Float
 		cost_center: DF.Link | None
 		distribute_additional_costs_based_on: DF.Literal["Qty", "Amount"]
 		items: DF.Table[SubcontractingOrderItem]
@@ -120,6 +122,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_service_items()
 		self.validate_supplied_items()
 		self.set_missing_values()
+		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def on_submit(self):
@@ -131,6 +134,18 @@ class SubcontractingOrder(SubcontractingController):
 		self.update_status()
 		self.update_subcontracted_quantity_in_po(cancel=True)
 
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
+
 	def validate_purchase_order_for_subcontracting(self):
 		if self.purchase_order:
 			po = frappe.get_doc("Purchase Order", self.purchase_order)
@@ -139,12 +154,14 @@ class SubcontractingOrder(SubcontractingController):
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
 
 			if po.docstatus != 1:
-				msg = f"Please submit Purchase Order {po.name} before proceeding."
-				frappe.throw(_(msg))
+				frappe.throw(_("Please submit Purchase Order {0} before proceeding.").format(po.name))
 
 			if po.per_received == 100:
-				msg = f"Cannot create more Subcontracting Orders against the Purchase Order {po.name}."
-				frappe.throw(_(msg))
+				frappe.throw(
+					_("Cannot create more Subcontracting Orders against the Purchase Order {0}.").format(
+						po.name
+					)
+				)
 		else:
 			self.service_items = self.items = self.supplied_items = None
 			frappe.throw(_("Please select a Subcontracting Purchase Order."))
@@ -172,8 +189,11 @@ class SubcontractingOrder(SubcontractingController):
 		if self.supplier_warehouse:
 			for item in self.supplied_items:
 				if self.supplier_warehouse == item.reserve_warehouse:
-					msg = f"Reserve Warehouse must be different from Supplier Warehouse for Supplied Item {item.main_item_code}."
-					frappe.throw(_(msg))
+					frappe.throw(
+						_(
+							"Reserve Warehouse must be different from Supplier Warehouse for Supplied Item {0}."
+						).format(item.main_item_code)
+					)
 
 	def set_missing_values(self):
 		self.calculate_additional_costs()
@@ -181,9 +201,24 @@ class SubcontractingOrder(SubcontractingController):
 		self.calculate_supplied_items_qty_and_amount()
 		self.calculate_items_qty_and_amount()
 
+	def set_service_item_base_amounts(self):
+		# Service items carry the Purchase Order's currency, so convert them for the costing fields.
+		conversion_rate = flt(self.conversion_rate) or 1.0
+		for item in self.get("service_items"):
+			item.base_rate = flt(item.rate * conversion_rate, item.precision("base_rate"))
+			item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
+
 	def calculate_service_costs(self):
-		for idx, item in enumerate(self.get("service_items")):
-			self.items[idx].service_cost_per_qty = item.amount / self.items[idx].qty
+		self.set_service_item_base_amounts()
+		# Match by purchase_order_item rather than list position: the service_items and items
+		# tables are not guaranteed to stay index-aligned (e.g. a skipped zero-qty service item).
+		service_amount_by_po_item = {
+			service_item.purchase_order_item: service_item.base_amount
+			for service_item in self.get("service_items")
+		}
+		for item in self.items:
+			service_amount = flt(service_amount_by_po_item.get(item.purchase_order_item))
+			item.service_cost_per_qty = service_amount / item.qty if item.qty else 0
 
 	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):
@@ -230,10 +265,22 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-				qty, subcontracted_qty, fg_item_qty, production_plan_sub_assembly_item = frappe.db.get_value(
+				(
+					qty,
+					subcontracted_qty,
+					fg_item_qty,
+					production_plan_sub_assembly_item,
+					project,
+				) = frappe.db.get_value(
 					"Purchase Order Item",
 					si.purchase_order_item,
-					["qty", "subcontracted_qty", "fg_item_qty", "production_plan_sub_assembly_item"],
+					[
+						"qty",
+						"subcontracted_qty",
+						"fg_item_qty",
+						"production_plan_sub_assembly_item",
+						"project",
+					],
 				)
 				available_qty = flt(qty) - flt(subcontracted_qty)
 
@@ -247,15 +294,6 @@ class SubcontractingOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
-
 				items.append(
 					{
 						"item_code": item.name,
@@ -265,11 +303,12 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": bom,
+						"bom": get_finished_good_bom(item),
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
 						"production_plan_sub_assembly_item": production_plan_sub_assembly_item,
+						"project": project,
 					}
 				)
 			else:
@@ -426,7 +465,7 @@ class SubcontractingOrder(SubcontractingController):
 
 
 @frappe.whitelist()
-def make_subcontracting_receipt(source_name: str, target_doc: Document | str | None = None):
+def make_subcontracting_receipt(source_name: str, target_doc: str | dict | Document | None = None):
 	items = frappe.flags.args.get("items") if frappe.flags.args else None
 	return get_mapped_subcontracting_receipt(source_name, target_doc, items=items)
 

@@ -9,6 +9,11 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
+from erpnext.controllers.item_close import validate_parent_reopen
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	get_invoiced_qty_against_po_items,
+	get_qty_based_percent_billed,
+)
 
 
 class StatusService:
@@ -18,6 +23,10 @@ class StatusService:
 	def update_status(self, status: str) -> None:
 		doc = self.doc
 		self.check_modified_date()
+
+		if status != "Closed" and doc.status == "Closed":
+			validate_parent_reopen(doc)
+
 		doc.set_status(update=True, status=status)
 		doc.update_requested_qty()
 		doc.update_ordered_qty()
@@ -25,6 +34,17 @@ class StatusService:
 		doc.update_blanket_order()
 		doc.notify_update()
 		clear_doctype_notifications(doc)
+
+	def recalculate_after_item_close(self) -> None:
+		"""Refresh progress after row flags changed.
+
+		`update_billing_percentage` runs last because it reloads the parent and
+		writes the final status from both percentages.
+		"""
+		doc = self.doc
+		self.update_receiving_percentage()
+		doc.update_ordered_qty()
+		doc.update_billing_percentage()
 
 	def check_modified_date(self) -> None:
 		doc = self.doc
@@ -39,10 +59,15 @@ class StatusService:
 	def update_receiving_percentage(self) -> None:
 		doc = self.doc
 		total_qty, received_qty = 0.0, 0.0
-		for item in doc.items:
+		for item in [item for item in doc.items if not item.closed] or doc.items:
 			received_qty += min(item.received_qty, item.qty)
 			total_qty += item.qty
-		if total_qty and received_qty:
-			doc.db_set("per_received", flt(received_qty / total_qty) * 100, update_modified=False)
-		else:
-			doc.db_set("per_received", 0, update_modified=False)
+
+		per_received = flt(received_qty / total_qty) * 100 if total_qty else 0
+		doc.db_set("per_received", per_received, update_modified=False)
+
+	def get_percent_billed_by_qty(self) -> float:
+		items = [item for item in self.doc.items if not item.closed] or self.doc.items
+		billable_qty = {item.name: flt(item.qty) for item in items}
+		invoiced_qty = get_invoiced_qty_against_po_items(list(billable_qty))
+		return get_qty_based_percent_billed(items, billable_qty, invoiced_qty)

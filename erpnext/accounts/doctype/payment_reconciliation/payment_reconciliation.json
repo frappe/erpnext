@@ -3,6 +3,7 @@
  "allow_copy": 1,
  "creation": "2014-07-09 12:04:51.681583",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-reconciliation",
  "engine": "InnoDB",
  "field_order": [
   "company",
@@ -10,6 +11,7 @@
   "column_break_4",
   "party",
   "receivable_payable_account",
+  "currency",
   "default_advance_account",
   "col_break1",
   "from_invoice_date",
@@ -35,6 +37,12 @@
   "column_break_15",
   "payment_name",
   "payments",
+  "totals_section",
+  "total_invoice_amount",
+  "column_break_totals_1",
+  "total_payment_amount",
+  "column_break_totals_2",
+  "difference_amount",
   "sec_break2",
   "allocation"
  ],
@@ -71,6 +79,15 @@
    "reqd": 1
   },
   {
+   "fetch_from": "receivable_payable_account.account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
    "description": "This filter will be applied to Journal Entry.",
    "fieldname": "bank_cash_account",
    "fieldtype": "Link",
@@ -98,6 +115,41 @@
    "fieldtype": "Table",
    "label": "Payments",
    "options": "Payment Reconciliation Payment"
+  },
+  {
+   "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "total_invoice_amount",
+   "fieldtype": "Currency",
+   "label": "Total Invoice Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_totals_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Total Payment Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_totals_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "label": "Difference Amount",
+   "options": "currency",
+   "read_only": 1
   },
   {
    "depends_on": "allocation",
@@ -235,7 +287,7 @@
   }
  ],
  "hide_toolbar": 1,
- "icon": "icon-resize-horizontal",
+ "icon": "arrow-left-right",
  "is_virtual": 1,
  "issingle": 1,
  "links": [],

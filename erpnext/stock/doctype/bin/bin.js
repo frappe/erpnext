@@ -3,17 +3,17 @@
 
 frappe.ui.form.on("Bin", {
 	refresh(frm) {
-		frm.trigger("recalculate_bin_quantity");
+		frm.trigger("recalculate_values");
 	},
 
-	recalculate_bin_quantity(frm) {
-		frm.add_custom_button(__("Recalculate Bin Qty"), () => {
+	recalculate_values(frm) {
+		frm.add_custom_button(__("Recalculate Values"), () => {
 			frappe.call({
-				method: "recalculate_qty",
+				method: "recalculate_values",
 				freeze: true,
 				doc: frm.doc,
 				callback: function (r) {
-					frappe.show_alert(__("Bin Qty Recalculated"), 2);
+					frappe.show_alert(__("Bin Values Recalculated"), 2);
 				},
 			});
 		});

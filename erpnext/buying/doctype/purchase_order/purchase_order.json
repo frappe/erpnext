@@ -7,6 +7,7 @@
  "creation": "2013-05-21 16:16:39",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/purchase-order",
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
@@ -162,6 +163,7 @@
   "mps",
   "is_internal_supplier",
   "inter_company_order_reference",
+  "remarks",
   "connections_tab"
  ],
  "fields": [
@@ -396,6 +398,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -930,6 +933,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
    "fieldname": "column_break_74",
    "fieldtype": "Column Break"
   },
@@ -1294,11 +1304,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "shopping-cart",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-28 12:34:19.659621",
+ "modified": "2026-09-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

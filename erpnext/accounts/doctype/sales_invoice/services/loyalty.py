@@ -75,8 +75,8 @@ class LoyaltyService:
 			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
 			frappe.throw(
 				_(
-					"{} can't be cancelled since the Loyalty Points earned has been redeemed. "
-					"First cancel the {} No {}"
+					"{0} cannot be cancelled since the Loyalty Points earned has been redeemed. "
+					"First cancel the {1} No {2}"
 				).format(doc.doctype, doc.doctype, invoice_list)
 			)
 		else:

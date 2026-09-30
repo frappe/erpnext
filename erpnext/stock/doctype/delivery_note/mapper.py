@@ -15,6 +15,8 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.controllers.item_close import is_bundle_of_closed_row
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 
@@ -60,27 +62,28 @@ def get_returned_qty_map(delivery_note: str) -> dict:
 
 @frappe.whitelist()
 def make_sales_invoice(
-	source_name: str, target_doc: str | Document | None = None, args: dict | str | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
 	from frappe.contacts.doctype.address.address import get_company_address
 
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	doc = frappe.get_doc("Delivery Note", source_name)
 
 	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	for ref, qty in get_qty_already_mapped(target_doc, "dn_detail").items():
+		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been Invoiced/Returned"))
+			frappe.throw(_("All these items have already been invoiced/returned"))
 
 		if args and args.get("merge_taxes"):
 			merge_taxes(source, target)
@@ -124,7 +127,7 @@ def make_sales_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.closed
 
 	doc = get_mapped_doc(
 		"Delivery Note",
@@ -132,7 +135,8 @@ def make_sales_invoice(
 		{
 			"Delivery Note": {
 				"doctype": "Sales Invoice",
-				"field_map": {"is_return": "is_return"},
+				# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+				"field_map": {"is_return": "is_return", "commission_rate": "commission_rate"},
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Delivery Note Item": {
@@ -147,7 +151,7 @@ def make_sales_invoice(
 				"postprocess": update_item,
 				"filter": lambda d: get_pending_qty(d) <= 0
 				if not doc.get("is_return")
-				else get_pending_qty(d) > 0,
+				else get_pending_qty(d) >= 0,
 				"condition": select_item,
 			},
 			"Sales Taxes and Charges": {
@@ -171,7 +175,12 @@ def make_sales_invoice(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
 
-	if not doc.is_return:
+	if doc.is_return:
+		# A credit note made from a return Delivery Note should roll back the billed
+		# amount on the linked Sales Order too, so that per_billed stays consistent with
+		# per_delivered (which the return already reset).
+		doc.update_billed_amount_in_sales_order = True
+	else:
 		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
 
 		ps = PaymentScheduleService(doc)
@@ -198,7 +207,7 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def make_delivery_trip(
-	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
@@ -230,7 +239,7 @@ def make_delivery_trip(
 
 @frappe.whitelist()
 def make_installation_note(
-	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
@@ -249,7 +258,7 @@ def make_installation_note(
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty,
+				"condition": lambda doc: doc.installed_qty < doc.qty and not doc.closed,
 			},
 		},
 		target_doc,
@@ -259,7 +268,7 @@ def make_installation_note(
 
 
 @frappe.whitelist()
-def make_packing_slip(source_name: str, target_doc: str | Document | None = None):
+def make_packing_slip(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 
@@ -288,7 +297,9 @@ def make_packing_slip(source_name: str, target_doc: str | Document | None = None
 				},
 				"postprocess": update_item,
 				"condition": lambda item: (
-					not is_product_bundle(item.item_code) and flt(item.packed_qty) < flt(item.qty)
+					not is_product_bundle(item.item_code)
+					and not item.closed
+					and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
 			"Packed Item": {
@@ -302,7 +313,9 @@ def make_packing_slip(source_name: str, target_doc: str | Document | None = None
 					"name": "pi_detail",
 				},
 				"postprocess": update_item,
-				"condition": lambda item: (flt(item.packed_qty) < flt(item.qty)),
+				"condition": lambda item: (
+					flt(item.packed_qty) < flt(item.qty) and not is_bundle_of_closed_row(item)
+				),
 			},
 		},
 		target_doc,
@@ -313,7 +326,7 @@ def make_packing_slip(source_name: str, target_doc: str | Document | None = None
 
 
 @frappe.whitelist()
-def make_shipment(source_name: str, target_doc: str | Document | None = None):
+def make_shipment(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, target):
 		user = frappe.db.get_value(
 			"User", frappe.session.user, ["email", "full_name", "phone", "mobile_no"], as_dict=1
@@ -394,14 +407,14 @@ def make_shipment(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name: str, target_doc: str | Document | None = None):
+def make_sales_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Delivery Note", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_receipt(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_purchase_receipt(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 
@@ -571,7 +584,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 					"Material_request_item": "material_request_item",
 				},
 				"field_no_map": ["warehouse"],
-				"condition": lambda item: item.received_qty < item.qty + item.returned_qty,
+				"condition": lambda item: item.received_qty < item.qty + item.returned_qty
+				and not item.closed,
 				"postprocess": update_item,
 			},
 		},

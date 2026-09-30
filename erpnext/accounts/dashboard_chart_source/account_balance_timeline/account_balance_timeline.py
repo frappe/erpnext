@@ -24,7 +24,7 @@ def get(
 	heatmap_year: str | None = None,
 ):
 	if chart_name:
-		chart = frappe.get_doc("Dashboard Chart", chart_name)
+		chart = frappe.get_doc("Dashboard Chart", chart_name, check_permission="read")
 	else:
 		chart = frappe._dict(frappe.parse_json(chart))
 	timespan = chart.timespan
@@ -45,6 +45,9 @@ def get(
 		frappe.throw(_("Company filter not set!"))
 	if not account:
 		frappe.throw(_("Account filter not set!"))
+
+	# authorise the account itself, as get_balance_on() does; doc= brings User Permissions with it
+	frappe.has_permission("Account", doc=account, throw=True)
 
 	if not to_date:
 		to_date = nowdate()

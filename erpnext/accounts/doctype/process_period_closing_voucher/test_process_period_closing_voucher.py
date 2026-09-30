@@ -48,18 +48,27 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 		ppcv.save()
 		return ppcv
 
-	def set_processing_date_status(self, date, ppcv, rpt_type, parentfield, status):
+	def set_processing_date_status(self, row_name, status):
 		frappe.db.set_value(
 			"Process Period Closing Voucher Detail",
-			{"processing_date": date, "parent": ppcv, "report_type": rpt_type, "parentfield": parentfield},
+			row_name,
 			"status",
 			status,
 		)
 
-	def get_processing_date_closing_balance(self, date, ppcv, rpt_type, parentfield):
+	def get_row_name(self, ppcv_name, rpt_type, parentfield):
+		return frappe.db.get_all(
+			"Process Period Closing Voucher Detail",
+			filters={"parent": ppcv_name, "report_type": rpt_type, "parentfield": parentfield},
+			order_by="report_type, idx",
+			pluck="name",
+			limit=1,
+		)[0]
+
+	def get_processing_date_closing_balance(self, row_name):
 		return frappe.db.get_value(
 			"Process Period Closing Voucher Detail",
-			{"processing_date": date, "parent": ppcv, "report_type": rpt_type, "parentfield": parentfield},
+			row_name,
 			"closing_balance",
 		)
 
@@ -97,11 +106,10 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 		parentfield = "normal_balances"
 		rpt_type = "Profit and Loss"
 		# status has to be set to 'Running' for logic to run
-		self.set_processing_date_status(today(), ppcv.name, rpt_type, parentfield, "Running")
-		process_individual_date(ppcv.name, today(), rpt_type, parentfield)
-		bal = frappe.parse_json(
-			self.get_processing_date_closing_balance(today(), ppcv.name, rpt_type, parentfield)
-		)
+		row_name = self.get_row_name(ppcv.name, rpt_type, parentfield)
+		self.set_processing_date_status(row_name, "Running")
+		process_individual_date(ppcv.name, row_name, today(), rpt_type, parentfield)
+		bal = frappe.parse_json(self.get_processing_date_closing_balance(row_name))
 		self.assertEqual(len(bal), 1)
 		expected_pl = {
 			"account": "Sales - _TC",
@@ -117,11 +125,10 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 
 		# Balance sheet balance
 		rpt_type = "Balance Sheet"
-		self.set_processing_date_status(today(), ppcv.name, rpt_type, parentfield, "Running")
-		process_individual_date(ppcv.name, today(), rpt_type, parentfield)
-		bal = frappe.parse_json(
-			self.get_processing_date_closing_balance(today(), ppcv.name, rpt_type, parentfield)
-		)
+		row_name = self.get_row_name(ppcv.name, rpt_type, parentfield)
+		self.set_processing_date_status(row_name, "Running")
+		process_individual_date(ppcv.name, row_name, today(), rpt_type, parentfield)
+		bal = frappe.parse_json(self.get_processing_date_closing_balance(row_name))
 		self.assertEqual(len(bal), 1)
 		expected_bs = {
 			"account": "Debtors - _TC",
@@ -138,11 +145,10 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 		# Opening balance
 		parentfield = "z_opening_balances"
 		rpt_type = "Balance Sheet"
-		self.set_processing_date_status(today(), ppcv.name, rpt_type, parentfield, "Running")
-		process_individual_date(ppcv.name, today(), rpt_type, parentfield)
-		bal = frappe.parse_json(
-			self.get_processing_date_closing_balance(today(), ppcv.name, rpt_type, parentfield)
-		)
+		row_name = self.get_row_name(ppcv.name, rpt_type, parentfield)
+		self.set_processing_date_status(row_name, "Running")
+		process_individual_date(ppcv.name, row_name, today(), rpt_type, parentfield)
+		bal = frappe.parse_json(self.get_processing_date_closing_balance(row_name))
 		self.assertEqual(len(bal), 2)
 		opening_cash = next(x for x in bal if x["account"] == "Cash - _TC")
 		expected_opening_cash = {

@@ -4,8 +4,9 @@
 """Sub-assembly resolution helpers for Production Plan."""
 
 import frappe
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Sum
 from frappe.utils import flt
+from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
@@ -167,7 +168,7 @@ def _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty
 	item = frappe.qb.DocType("Item")
 	item_default = frappe.qb.DocType("Item Default")
 	item_uom = frappe.qb.DocType("UOM Conversion Detail")
-	return (
+	rows = (
 		frappe.qb.from_(bei)
 		.join(bom)
 		.on(bom.name == bei.parent)
@@ -179,29 +180,80 @@ def _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty
 		.on((item.name == item_uom.parent) & (item_uom.uom == item.purchase_uom))
 		.select(*_sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty))
 		.where(_sub_assembly_rm_filter(bei, bom, item, bom_no, include_non_stock_items))
-		.groupby(bei.item_code, bei.stock_uom)
+		.groupby(bei.item_code, bei.stock_uom, bei.bom_no, bei.is_phantom_item)
 	).run(as_dict=True)
+
+	_apply_representative_lines(rows, bom_no)
+	return rows
+
+
+def _apply_representative_lines(rows, bom_no):
+	"""Fill description/source_warehouse from a single real BOM Item line per group.
+
+	Both describe a line, not an item. Aggregating each independently can pair one line's
+	description with another's warehouse, and Max() over text is a sort -- MariaDB folds case,
+	PostgreSQL orders by byte value, so the engines pick differently. Take the first line by idx.
+	"""
+	repeated = [row for row in rows if (row.pop("line_count", 1) or 1) > 1]
+	if not repeated:
+		return
+
+	keys = ("item_code", "stock_uom", "bom_no", "is_phantom_item")
+	representative = _representative_lines(bom_no, keys)
+
+	for row in repeated:
+		line = representative.get(tuple(row.get(key) for key in keys))
+		if line:
+			row.description = line.description
+			row.source_warehouse = line.source_warehouse
+
+
+@request_cache
+def _representative_lines(bom_no, keys):
+	"""Cached per request: sub-assembly resolution recurses and revisits the same BOM."""
+	representative = {}
+	for line in frappe.get_all(
+		"BOM Item",
+		filters={
+			"parent": bom_no,
+			"parenttype": "BOM",
+			"is_sub_assembly_item": 0,
+			"docstatus": 1,
+		},
+		fields=["item_code", "stock_uom", "bom_no", "is_phantom_item", "description", "source_warehouse"],
+		order_by="idx",
+	):
+		representative.setdefault(tuple(line.get(key) for key in keys), line)
+
+	return representative
 
 
 def _sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty):
+	# Grouped by item_code/stock_uom plus bom_no/is_phantom_item: those two MUST come from the same
+	# BOM Item row -- the consumer keys on (item_code, bom_no) and recurses on is_phantom_item, so an
+	# independent Max() per column could pair a bom_no from one line with is_phantom_item from another
+	# and recurse into the wrong sub-BOM. Grouping them keeps the pair coherent and the GROUP BY valid
+	# on postgres. The remaining columns are functionally dependent on the grouped item; Max() returns
+	# their single value on both engines.
 	return [
 		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
-		item.item_name,
-		item.name.as_("item_code"),
-		bei.description,
+		Max(item.item_name).as_("item_name"),
+		Max(item.name).as_("item_code"),
+		Max(bei.description).as_("description"),
+		Max(bei.source_warehouse).as_("source_warehouse"),
+		Count(bei.name).distinct().as_("line_count"),
 		bei.stock_uom,
 		bei.is_phantom_item,
 		bei.bom_no,
-		item.min_order_qty,
-		bei.source_warehouse,
-		item.default_material_request_type,
-		item.min_order_qty,
-		item_default.default_warehouse,
-		item.purchase_uom,
-		item_uom.conversion_factor,
-		item.safety_stock,
-		bom.item.as_("main_bom_item"),
-		bom.name.as_("main_bom"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item.default_material_request_type).as_("default_material_request_type"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item_default.default_warehouse).as_("default_warehouse"),
+		Max(item.purchase_uom).as_("purchase_uom"),
+		Max(item_uom.conversion_factor).as_("conversion_factor"),
+		Max(item.safety_stock).as_("safety_stock"),
+		Max(bom.item).as_("main_bom_item"),
+		Max(bom.name).as_("main_bom"),
 	]
 
 

@@ -30,6 +30,7 @@ frappe.ui.form.on("Timesheet", {
 			return {
 				filters: {
 					company: frm.doc.company,
+					status: "Open",
 				},
 			};
 		};
@@ -122,6 +123,7 @@ frappe.ui.form.on("Timesheet", {
 			return {
 				filters: {
 					customer: doc.customer,
+					status: "Open",
 				},
 			};
 		});
@@ -454,7 +456,7 @@ const set_employee_and_company = function (frm) {
 	const options = { user_id: frappe.session.user };
 	const fields = ["name", "company"];
 	frappe.db.get_value("Employee", options, fields).then(({ message }) => {
-		if (message) {
+		if (message.name && message.company) {
 			// there is an employee with the currently logged in user_id
 			frm.set_value("employee", message.name);
 			frm.set_value("company", message.company);

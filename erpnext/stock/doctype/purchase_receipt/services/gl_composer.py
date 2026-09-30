@@ -8,6 +8,7 @@ from frappe.utils import cint, flt
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.accounts.utils import get_account_currency
+from erpnext.stock import get_warehouse_account
 from erpnext.stock.services.base_stock_gl_composer import BaseStockGLComposer
 
 
@@ -40,6 +41,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_stock_value_difference
 
 		doc = self.doc
@@ -50,6 +54,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(doc)
 		stock_items = doc.get_stock_items()
 		warehouse_with_no_account = []
+		landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 
 		def validate_account(account_type):
 			frappe.throw(_("{0} account not found while submitting purchase receipt").format(account_type))
@@ -67,6 +72,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				remarks=remarks,
 				against_account=stock_asset_rbnb,
 				account_currency=account_currency,
+				project=item.project,
 				item=item,
 			)
 
@@ -74,6 +80,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if (
 				doc.get("is_return")
 				and item.return_qty_from_rejected_warehouse
+				and not doc.is_internal_transfer()
 				and not frappe.db.get_single_value(
 					"Buying Settings", "set_valuation_rate_for_rejected_materials"
 				)
@@ -95,11 +102,15 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 			outgoing_amount = item.base_net_amount
 			if doc.is_internal_transfer() and item.valuation_rate:
-				outgoing_amount = abs(get_stock_value_difference(doc.name, item.name, item.from_warehouse))
+				outgoing_amount = -1 * flt(
+					get_stock_value_difference(doc.name, item.name, item.from_warehouse)
+				)
 				credit_amount = outgoing_amount
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
+			if (
+				item.get("rejected_qty")
+				and not doc.is_internal_transfer()
+				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
 				credit_amount = outgoing_amount
@@ -118,6 +129,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					against_account=stock_asset_account_name,
 					debit_in_account_currency=-1 * flt(outgoing_amount, item.precision("base_net_amount")),
 					account_currency=account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -141,6 +153,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							against_account=doc.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -154,38 +167,53 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							against_account=doc.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
 			return outgoing_amount
 
 		def make_landed_cost_gl_entries(item):
-			if item.landed_cost_voucher_amount and landed_cost_entries:
-				if (item.item_code, item.name) in landed_cost_entries:
-					for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-						account_currency = get_account_currency(account)
-						credit_amount = (
-							flt(amount["base_amount"])
-							if (amount["base_amount"] or account_currency != doc.company_currency)
-							else flt(amount["amount"])
-						)
+			if not (item.landed_cost_voucher_amount and landed_cost_entries):
+				return
 
-						if not account:
-							validate_account("Landed Cost Account")
+			for entry in landed_cost_entries.get((item.item_code, item.name), []):
+				if not (entry.amount or entry.base_amount):
+					continue
 
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount,
-							remarks=remarks,
-							against_account=stock_asset_account_name,
-							credit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+				account = entry.expense_account
+				if not account:
+					validate_account("Landed Cost Account")
+
+				account_currency = get_account_currency(account)
+				credit_amount = (
+					flt(entry.base_amount)
+					if (entry.base_amount or account_currency != doc.company_currency)
+					else flt(entry.amount)
+				)
+
+				self.add_gl_entry(
+					gl_entries=gl_entries,
+					account=account,
+					cost_center=entry.dimensions.cost_center or item.cost_center,
+					debit=0.0,
+					credit=credit_amount,
+					remarks=remarks,
+					against_account=stock_asset_account_name,
+					credit_in_account_currency=flt(entry.amount),
+					account_currency=account_currency,
+					project=entry.dimensions.project or item.project,
+					item=item,
+					dimensions=get_custom_dimension_overrides(entry),
+				)
+
+		def make_expenses_added_to_stock_entries(item):
+			if not self.book_stock_expense_enabled():
+				return
+
+			amount = flt(item.landed_cost_voucher_amount, item.precision("base_net_amount"))
+			if amount and not item.is_fixed_asset:
+				self.append_expenses_added_to_stock_pair(gl_entries, item.item_code, amount, item)
 
 		def make_amount_difference_entry(item):
 			if item.amount_difference_with_purchase_invoice and stock_asset_rbnb:
@@ -214,6 +242,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					remarks=remarks,
 					against_account=stock_asset_account_name,
 					account_currency=supplier_warehouse_account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -233,20 +262,12 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if item.get("rejected_qty") and self.is_rejected_material_valued():
 				rejected_item_cost = get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
 			if divisional_loss:
-				loss_account = (
-					doc.get_company_default("default_expense_account", ignore_validation=True)
-					or stock_asset_rbnb
-				)
-
-				if doc.is_return and item.expense_account:
-					loss_account = item.expense_account
+				loss_account = self.get_divisional_loss_account(item, stock_asset_rbnb)
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", doc.company, "cost_center"
@@ -292,7 +313,6 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					if d.is_fixed_asset
 					else doc.get_company_default("stock_received_but_not_billed")
 				)
-				landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 				if d.is_fixed_asset:
 					stock_asset_account_name = d.expense_account
 					stock_value_diff = (
@@ -305,11 +325,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					supplier_warehouse_account = None
 					supplier_warehouse_account_currency = None
 					if doc.supplier_warehouse:
-						if _inv_dict := doc.get_inventory_account_dict(
-							d, inventory_account_map, "supplier_warehouse"
-						):
-							supplier_warehouse_account = _inv_dict["account"]
-							supplier_warehouse_account_currency = _inv_dict["account_currency"]
+						supplier_warehouse_account = get_warehouse_account(
+							frappe.get_cached_doc("Warehouse", doc.supplier_warehouse),
+							raise_error=bool(flt(d.rm_supp_cost)),
+						)
+						if supplier_warehouse_account:
+							supplier_warehouse_account_currency = get_account_currency(
+								supplier_warehouse_account
+							)
 
 					if (
 						flt(stock_value_diff) == flt(d.rm_supp_cost)
@@ -322,11 +345,12 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
 					outgoing_amount = make_stock_received_but_not_billed_entry(d)
 					make_landed_cost_gl_entries(d)
+					make_expenses_added_to_stock_entries(d)
 					make_amount_difference_entry(d)
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
-				not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+				not self.is_rejected_material_valued()
 				and d.rejected_warehouse
 				and d.rejected_warehouse not in warehouse_with_no_account
 			):
@@ -335,9 +359,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				doc.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if d.rejected_qty and self.is_rejected_material_valued():
 				stock_asset_rbnb = (
 					doc.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -359,9 +381,49 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				+ "\n".join(warehouse_with_no_account)
 			)
 
+	def is_rejected_material_valued(self) -> bool:
+		"""Rejected material carries stock value when Buying Settings asks for it, and always on an
+		internal transfer, where that value is credited out of the in-transit warehouse."""
+		if self.doc.is_internal_transfer():
+			return True
+
+		return bool(
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+		)
+
+	def get_divisional_loss_account(self, item, stock_asset_rbnb):
+		"""Account that absorbs the difference between the document value and the value actually
+		booked into stock. For a Standard Cost item this difference is a purchase price variance
+		(receipt rate vs standard rate), so it goes to the Purchase Price Variance account; for all
+		other items it keeps the existing behaviour (default expense account, or the item's expense
+		account on a return)."""
+		from erpnext.stock.utils import get_valuation_method
+
+		doc = self.doc
+		if item.item_code and get_valuation_method(item.item_code, doc.company) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+				get_purchase_price_variance_account,
+			)
+
+			return get_purchase_price_variance_account(item.item_code, doc.company)
+
+		loss_account = (
+			doc.get_company_default("default_expense_account", ignore_validation=True) or stock_asset_rbnb
+		)
+		if doc.is_return and item.expense_account:
+			loss_account = item.expense_account
+
+		return loss_account
+
 	def _make_tax_gl_entries(self, gl_entries: list, via_landed_cost_voucher: bool = False) -> None:
 		doc = self.doc
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in doc.get("items")])
+
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name. This is what must be credited to each tax account - a non-stock item's share
+		# of a spread-across-all-items charge is not capitalized, so it is excluded here.
+		capitalized_valuation_tax = doc.get_capitalized_valuation_tax()
+
 		valuation_tax = {}
 		for tax in doc.get("taxes"):
 			if tax.category in ("Valuation", "Valuation and Total") and flt(
@@ -373,10 +435,8 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(
-					tax.base_tax_amount_after_discount_amount
-				)
+
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if negative_expense_to_be_booked and valuation_tax:
 			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])

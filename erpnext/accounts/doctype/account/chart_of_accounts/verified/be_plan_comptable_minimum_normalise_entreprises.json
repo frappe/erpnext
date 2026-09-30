@@ -1,0 +1,1597 @@
+{
+    "country_code": "be",
+    "name": "Belgique - Plan comptable minimum normalisé (PCMN) des entreprises",
+    "tree": {
+        "CLASSE 1 : CAPITAUX PROPRES": {
+            "root_type": "Equity",
+            "Capital": {
+                "Capital souscrit": {
+                    "account_number": "100",
+                    "account_type": "Equity"
+                },
+                "Capital non appelé (-)": {
+                    "account_number": "101",
+                    "account_type": "Equity"
+                },
+                "account_number": "10",
+                "account_type": "Equity"
+            },
+            "Apport hors capital": {
+                "Apport disponible hors capital": {
+                    "Prime d'émission": {
+                        "account_number": "1100",
+                        "account_type": "Equity"
+                    },
+                    "Autres": {
+                        "account_number": "1109",
+                        "account_type": "Equity"
+                    },
+                    "account_number": "110",
+                    "account_type": "Equity"
+                },
+                "Apport indisponible hors capital": {
+                    "Prime d'émission": {
+                        "account_number": "1110",
+                        "account_type": "Equity"
+                    },
+                    "Autres": {
+                        "account_number": "1119",
+                        "account_type": "Equity"
+                    },
+                    "account_number": "111",
+                    "account_type": "Equity"
+                },
+                "account_number": "11",
+                "account_type": "Equity"
+            },
+            "Plus-values de réévaluation": {
+                "Plus-values de réévaluation sur immobilisations incorporelles": {
+                    "account_number": "120",
+                    "account_type": "Equity"
+                },
+                "Plus-values de réévaluation sur immobilisations corporelles": {
+                    "account_number": "121",
+                    "account_type": "Equity"
+                },
+                "Plus-values de réévaluation sur immobilisations financières": {
+                    "account_number": "122",
+                    "account_type": "Equity"
+                },
+                "Plus-values de réévaluation sur stocks": {
+                    "account_number": "123",
+                    "account_type": "Equity"
+                },
+                "Reprises de réductions de valeur sur placements de trésorerie": {
+                    "account_number": "124",
+                    "account_type": "Equity"
+                },
+                "account_number": "12",
+                "account_type": "Equity"
+            },
+            "Réserves": {
+                "Réserves légales": {
+                    "account_number": "130",
+                    "account_type": "Equity"
+                },
+                "Autres réserves indisponibles": {
+                    "Réserves statutairement indisponibles": {
+                        "account_number": "1311",
+                        "account_type": "Equity"
+                    },
+                    "Réserve pour actions propres": {
+                        "account_number": "1312",
+                        "account_type": "Equity"
+                    },
+                    "Soutien financier": {
+                        "account_number": "1313",
+                        "account_type": "Equity"
+                    },
+                    "Autres": {
+                        "account_number": "1319",
+                        "account_type": "Equity"
+                    },
+                    "account_number": "131",
+                    "account_type": "Equity"
+                },
+                "Réserves immunisées": {
+                    "account_number": "132",
+                    "account_type": "Equity"
+                },
+                "Réserves disponibles": {
+                    "account_number": "133",
+                    "account_type": "Equity"
+                },
+                "account_number": "13",
+                "account_type": "Equity"
+            },
+            "Bénéfice reporté ou perte reportée (-)": {
+                "account_number": "14",
+                "account_type": "Equity"
+            },
+            "Subsides en capital": {
+                "account_number": "15",
+                "account_type": "Equity"
+            }
+        },
+        "CLASSE 1 : PROVISIONS ET DETTES À PLUS D'UN AN": {
+            "root_type": "Liability",
+            "Provisions et impôts différés": {
+                "Provisions pour pensions et obligations similaires": {
+                    "account_number": "160",
+                    "account_type": "Liability"
+                },
+                "Provisions pour charges fiscales": {
+                    "account_number": "161",
+                    "account_type": "Liability"
+                },
+                "Provisions pour grosses réparations et gros entretien": {
+                    "account_number": "162",
+                    "account_type": "Liability"
+                },
+                "Provisions pour obligations environnementales": {
+                    "account_number": "163",
+                    "account_type": "Liability"
+                },
+                "Impôts différés": {
+                    "Impôts différés afférents à des subsides en capital": {
+                        "account_number": "1680",
+                        "account_type": "Liability"
+                    },
+                    "Impôts différés afférents à des plus-values réalisées sur immobilisations incorporelles": {
+                        "account_number": "1681",
+                        "account_type": "Liability"
+                    },
+                    "Impôts différés afférents à des plus-values réalisées sur immobilisations corporelles": {
+                        "account_number": "1682",
+                        "account_type": "Liability"
+                    },
+                    "Impôts différés afférents à des plus-values réalisées sur titres émis par le secteur public belge": {
+                        "account_number": "1687",
+                        "account_type": "Liability"
+                    },
+                    "Impôts différés étrangers": {
+                        "account_number": "1688",
+                        "account_type": "Liability"
+                    },
+                    "account_number": "168",
+                    "account_type": "Liability"
+                },
+                "account_number": "16",
+                "account_type": "Liability"
+            },
+            "Dettes à plus d'un an": {
+                "Emprunts subordonnés": {
+                    "Convertibles": {
+                        "account_number": "1700",
+                        "account_type": "Liability"
+                    },
+                    "Non convertibles": {
+                        "account_number": "1701",
+                        "account_type": "Liability"
+                    },
+                    "account_number": "170",
+                    "account_type": "Liability"
+                },
+                "Emprunts obligataires non subordonnés": {
+                    "Convertibles": {
+                        "account_number": "1710",
+                        "account_type": "Liability"
+                    },
+                    "Non convertibles": {
+                        "account_number": "1711",
+                        "account_type": "Liability"
+                    },
+                    "account_number": "171",
+                    "account_type": "Liability"
+                },
+                "Dettes de location-financement et assimilées": {
+                    "account_number": "172",
+                    "account_type": "Liability"
+                },
+                "Établissements de crédit": {
+                    "Dettes en compte": {
+                        "account_number": "1730",
+                        "account_type": "Liability"
+                    },
+                    "Promesses": {
+                        "account_number": "1731",
+                        "account_type": "Liability"
+                    },
+                    "Crédits d'acceptation": {
+                        "account_number": "1732",
+                        "account_type": "Liability"
+                    },
+                    "account_number": "173",
+                    "account_type": "Liability"
+                },
+                "Autres emprunts": {
+                    "account_number": "174",
+                    "account_type": "Liability"
+                },
+                "Dettes commerciales": {
+                    "Fournisseurs": {
+                        "account_number": "1750",
+                        "account_type": "Liability"
+                    },
+                    "Effets à payer": {
+                        "account_number": "1751",
+                        "account_type": "Liability"
+                    },
+                    "account_number": "175",
+                    "account_type": "Liability"
+                },
+                "Acomptes sur commandes": {
+                    "account_number": "176",
+                    "account_type": "Liability"
+                },
+                "Cautionnements reçus en numéraire": {
+                    "account_number": "178",
+                    "account_type": "Liability"
+                },
+                "Dettes diverses": {
+                    "account_number": "179",
+                    "account_type": "Liability"
+                },
+                "account_number": "17",
+                "account_type": "Liability"
+            },
+            "Acompte aux associés sur le partage de l'actif net (-)": {
+                "account_number": "19",
+                "account_type": "Liability"
+            }
+        },
+        "CLASSE 2 : FRAIS D'ÉTABLISSEMENT, ACTIFS IMMOBILISÉS ET CRÉANCES À PLUS D'UN AN": {
+            "root_type": "Asset",
+            "Frais d'établissement": {
+                "Frais de constitution, d'augmentation de capital ou d'augmentation de l'apport": {
+                    "account_number": "200",
+                    "account_type": "Fixed Asset"
+                },
+                "Frais d'émission d'emprunts": {
+                    "account_number": "201",
+                    "account_type": "Fixed Asset"
+                },
+                "Autres frais d'établissement": {
+                    "account_number": "202",
+                    "account_type": "Fixed Asset"
+                },
+                "Frais de restructuration": {
+                    "account_number": "204",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "20",
+                "account_type": "Fixed Asset"
+            },
+            "Immobilisations incorporelles": {
+                "Frais de recherche et de développement": {
+                    "account_number": "210",
+                    "account_type": "Fixed Asset"
+                },
+                "Concessions, brevets, licences, savoir-faire, marques et droits similaires": {
+                    "account_number": "211",
+                    "account_type": "Fixed Asset"
+                },
+                "Goodwill": {
+                    "account_number": "212",
+                    "account_type": "Fixed Asset"
+                },
+                "Acomptes versés": {
+                    "account_number": "213",
+                    "account_type": "Fixed Asset"
+                },
+                "Amortissements et réductions de valeur actées (-)": {
+                    "account_number": "219",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "account_number": "21",
+                "account_type": "Fixed Asset"
+            },
+            "Terrains et constructions": {
+                "Terrains": {
+                    "account_number": "220",
+                    "account_type": "Fixed Asset"
+                },
+                "Constructions": {
+                    "account_number": "221",
+                    "account_type": "Fixed Asset"
+                },
+                "Terrains bâtis": {
+                    "account_number": "222",
+                    "account_type": "Fixed Asset"
+                },
+                "Autres droits réels sur des immeubles": {
+                    "account_number": "223",
+                    "account_type": "Fixed Asset"
+                },
+                "Amortissements et réductions de valeur actées (-)": {
+                    "account_number": "229",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "account_number": "22",
+                "account_type": "Fixed Asset"
+            },
+            "Installations, machines et outillage": {
+                "account_number": "23",
+                "account_type": "Fixed Asset"
+            },
+            "Mobilier et matériel roulant": {
+                "account_number": "24",
+                "account_type": "Fixed Asset"
+            },
+            "Immobilisations détenues en location-financement et droits similaires": {
+                "Terrains et constructions": {
+                    "account_number": "250",
+                    "account_type": "Fixed Asset"
+                },
+                "Installations, machines et outillage": {
+                    "account_number": "251",
+                    "account_type": "Fixed Asset"
+                },
+                "Mobilier et matériel roulant": {
+                    "account_number": "252",
+                    "account_type": "Fixed Asset"
+                },
+                "Amortissements et réductions de valeur actées (-)": {
+                    "account_number": "259",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "account_number": "25",
+                "account_type": "Fixed Asset"
+            },
+            "Autres immobilisations corporelles": {
+                "account_number": "26",
+                "account_type": "Fixed Asset"
+            },
+            "Immobilisations corporelles en cours et acomptes versés": {
+                "account_number": "27",
+                "account_type": "Fixed Asset"
+            },
+            "Immobilisations financières": {
+                "Participations dans des entreprises liées": {
+                    "Valeur d'acquisition": {
+                        "account_number": "2800",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Montants non appelés (-)": {
+                        "account_number": "2801",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Plus-values actées": {
+                        "account_number": "2808",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2809",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "280",
+                    "account_type": "Fixed Asset"
+                },
+                "Créances sur des entreprises liées": {
+                    "Créances en compte": {
+                        "account_number": "2810",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Effets à recevoir": {
+                        "account_number": "2811",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Titres à revenu fixe": {
+                        "account_number": "2812",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Créances douteuses": {
+                        "account_number": "2817",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2819",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "281",
+                    "account_type": "Fixed Asset"
+                },
+                "Participations dans des entreprises avec lesquelles il existe un lien de participation": {
+                    "Valeur d'acquisition": {
+                        "account_number": "2820",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Montants non appelés (-)": {
+                        "account_number": "2821",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Plus-values actées": {
+                        "account_number": "2828",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2829",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "282",
+                    "account_type": "Fixed Asset"
+                },
+                "Créances sur des entreprises avec lesquelles il existe un lien de participation": {
+                    "Créances en compte": {
+                        "account_number": "2830",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Effets à recevoir": {
+                        "account_number": "2831",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Titres à revenu fixe": {
+                        "account_number": "2832",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Créances douteuses": {
+                        "account_number": "2837",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2839",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "283",
+                    "account_type": "Fixed Asset"
+                },
+                "Autres actions et parts": {
+                    "Valeur d'acquisition": {
+                        "account_number": "2840",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Montants non appelés (-)": {
+                        "account_number": "2841",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Plus-values actées": {
+                        "account_number": "2848",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2849",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "284",
+                    "account_type": "Fixed Asset"
+                },
+                "Autres créances": {
+                    "Créances en compte": {
+                        "account_number": "2850",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Effets à recevoir": {
+                        "account_number": "2851",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Titres à revenu fixe": {
+                        "account_number": "2852",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Créances douteuses": {
+                        "account_number": "2857",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2859",
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_number": "285",
+                    "account_type": "Fixed Asset"
+                },
+                "Cautionnements versés en numéraire": {
+                    "account_number": "288",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "28",
+                "account_type": "Fixed Asset"
+            },
+            "Créances à plus d'un an": {
+                "Créances commerciales": {
+                    "Clients": {
+                        "account_number": "2900"
+                    },
+                    "Effets à recevoir": {
+                        "account_number": "2901"
+                    },
+                    "Acomptes versés": {
+                        "account_number": "2906"
+                    },
+                    "Créances douteuses": {
+                        "account_number": "2907"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2909"
+                    },
+                    "account_number": "290"
+                },
+                "Autres créances": {
+                    "Créances en compte": {
+                        "account_number": "2910"
+                    },
+                    "Effets à recevoir": {
+                        "account_number": "2911"
+                    },
+                    "Créances douteuses": {
+                        "account_number": "2917"
+                    },
+                    "Réductions de valeur actées (-)": {
+                        "account_number": "2919"
+                    },
+                    "account_number": "291"
+                },
+                "account_number": "29"
+            }
+        },
+        "CLASSE 3 : STOCKS ET COMMANDES EN COURS D'EXÉCUTION": {
+            "root_type": "Asset",
+            "Matières premières": {
+                "Valeur d'acquisition": {
+                    "account_number": "300"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "309"
+                },
+                "account_number": "30"
+            },
+            "Approvisionnements et fournitures": {
+                "Valeur d'acquisition": {
+                    "account_number": "310"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "319"
+                },
+                "account_number": "31"
+            },
+            "En-cours de fabrication": {
+                "Valeur d'acquisition": {
+                    "account_number": "320"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "329"
+                },
+                "account_number": "32"
+            },
+            "Produits finis": {
+                "Valeur d'acquisition": {
+                    "account_number": "330"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "339"
+                },
+                "account_number": "33"
+            },
+            "Marchandises": {
+                "Valeur d'acquisition": {
+                    "account_number": "340",
+                    "account_type": "Stock"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "349"
+                },
+                "account_number": "34",
+                "account_type": "Stock"
+            },
+            "Immeubles destinés à la vente": {
+                "Valeur d'acquisition": {
+                    "account_number": "350"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "359"
+                },
+                "account_number": "35"
+            },
+            "Acomptes versés sur achats pour stocks": {
+                "Acomptes versés": {
+                    "account_number": "360"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "369"
+                },
+                "account_number": "36"
+            },
+            "Commandes en cours d'exécution": {
+                "Valeur d'acquisition": {
+                    "account_number": "370"
+                },
+                "Bénéfice pris en compte": {
+                    "account_number": "371"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "379"
+                },
+                "account_number": "37"
+            },
+            "Stock livré non facturé": {
+                "account_type": "Stock Delivered But Not Billed"
+            }
+        },
+        "CLASSE 4 : CRÉANCES À UN AN AU PLUS": {
+            "root_type": "Asset",
+            "Créances commerciales": {
+                "Clients": {
+                    "account_number": "400",
+                    "account_type": "Receivable"
+                },
+                "Effets à recevoir": {
+                    "account_number": "401",
+                    "account_type": "Receivable"
+                },
+                "Produits à recevoir": {
+                    "account_number": "404",
+                    "account_type": "Receivable"
+                },
+                "Acomptes versés": {
+                    "account_number": "406"
+                },
+                "Créances douteuses": {
+                    "account_number": "407",
+                    "account_type": "Receivable"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "409"
+                },
+                "account_number": "40",
+                "account_type": "Receivable"
+            },
+            "Autres créances": {
+                "Capital ou apport appelé, non versé": {
+                    "account_number": "410"
+                },
+                "TVA à récupérer": {
+                    "account_number": "411",
+                    "account_type": "Tax"
+                },
+                "Impôts et précomptes à récupérer": {
+                    "Impôts et taxes étrangers": {
+                        "account_number": "4128"
+                    },
+                    "account_number": "412"
+                },
+                "Produits à recevoir": {
+                    "account_number": "414"
+                },
+                "Créances diverses": {
+                    "account_number": "416"
+                },
+                "Créances douteuses": {
+                    "account_number": "417"
+                },
+                "Cautionnements versés en numéraire": {
+                    "account_number": "418"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "419"
+                },
+                "account_number": "41"
+            }
+        },
+        "CLASSE 4 : DETTES À UN AN AU PLUS": {
+            "root_type": "Liability",
+            "Dettes à plus d'un an échéant dans l'année (16) (même subdivision que le compte 17)": {
+                "account_number": "42"
+            },
+            "Dettes financières": {
+                "Établissements de crédit - Emprunts en compte à terme fixe": {
+                    "account_number": "430"
+                },
+                "Établissements de crédit - Promesses": {
+                    "account_number": "431"
+                },
+                "Établissements de crédit - Crédits d'acceptation": {
+                    "account_number": "432"
+                },
+                "Établissements de crédit - Dettes en compte courant": {
+                    "account_number": "433"
+                },
+                "Autres emprunts": {
+                    "account_number": "439"
+                },
+                "account_number": "43"
+            },
+            "Dettes commerciales": {
+                "Fournisseurs": {
+                    "account_number": "440",
+                    "account_type": "Payable"
+                },
+                "Effets à payer": {
+                    "account_number": "441",
+                    "account_type": "Payable"
+                },
+                "Factures à recevoir": {
+                    "account_number": "444",
+                    "account_type": "Stock Received But Not Billed"
+                },
+                "account_number": "44",
+                "account_type": "Payable"
+            },
+            "Dettes fiscales, salariales et sociales": {
+                "Dettes fiscales estimées": {
+                    "Impôts et taxes étrangers": {
+                        "account_number": "4508"
+                    },
+                    "account_number": "450"
+                },
+                "TVA à payer": {
+                    "account_number": "451",
+                    "account_type": "Tax"
+                },
+                "Impôts et taxes à payer": {
+                    "Impôts et taxes étrangers": {
+                        "account_number": "4528"
+                    },
+                    "account_number": "452"
+                },
+                "Précomptes retenus": {
+                    "account_number": "453"
+                },
+                "Office national de la Sécurité sociale": {
+                    "account_number": "454"
+                },
+                "Rémunérations": {
+                    "account_number": "455"
+                },
+                "Pécules de vacances": {
+                    "account_number": "456"
+                },
+                "Autres dettes sociales": {
+                    "account_number": "459"
+                },
+                "account_number": "45"
+            },
+            "Acomptes sur commandes": {
+                "account_number": "46"
+            },
+            "Dettes découlant de l'affectation du résultat": {
+                "Dividendes et tantièmes d'exercices antérieurs": {
+                    "account_number": "470"
+                },
+                "Dividendes de l'exercice": {
+                    "account_number": "471"
+                },
+                "Tantièmes de l'exercice": {
+                    "account_number": "472"
+                },
+                "Autres allocataires": {
+                    "account_number": "473"
+                },
+                "account_number": "47"
+            },
+            "Dettes diverses": {
+                "Obligations et coupons échus": {
+                    "account_number": "480"
+                },
+                "Cautionnements reçus en numéraire": {
+                    "account_number": "488"
+                },
+                "Autres dettes diverses": {
+                    "account_number": "489"
+                },
+                "account_number": "48"
+            },
+            "Comptes de régularisation et d'attente": {
+                "Charges à reporter": {
+                    "account_number": "490"
+                },
+                "Produits acquis": {
+                    "account_number": "491"
+                },
+                "Charges à imputer": {
+                    "account_number": "492"
+                },
+                "Produits à reporter": {
+                    "account_number": "493"
+                },
+                "Comptes d'attente": {
+                    "account_number": "499"
+                },
+                "account_number": "49"
+            }
+        },
+        "CLASSE 5 : PLACEMENTS DE TRÉSORERIE ET VALEURS DISPONIBLES": {
+            "root_type": "Asset",
+            "Actions propres": {
+                "account_number": "50"
+            },
+            "Actions, parts et placements de trésorerie autres que placements à revenu fixe": {
+                "Valeur d'acquisition": {
+                    "Actions et parts": {
+                        "account_number": "5100"
+                    },
+                    "Placements de trésorerie autres que placements à revenu fixe": {
+                        "account_number": "5101"
+                    },
+                    "account_number": "510"
+                },
+                "Montants non appelés (-)": {
+                    "Actions et parts": {
+                        "account_number": "5110"
+                    },
+                    "account_number": "511"
+                },
+                "Réductions de valeur actées (-)": {
+                    "Actions et parts": {
+                        "account_number": "5190"
+                    },
+                    "Placements de trésorerie autres que placements à revenu fixe": {
+                        "account_number": "5191"
+                    },
+                    "account_number": "519"
+                },
+                "account_number": "51"
+            },
+            "Titres à revenu fixe": {
+                "Valeur d'acquisition": {
+                    "account_number": "520"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "529"
+                },
+                "account_number": "52"
+            },
+            "Dépôts à terme": {
+                "De plus d'un an": {
+                    "account_number": "530"
+                },
+                "De plus d'un mois et à un an au plus": {
+                    "account_number": "531"
+                },
+                "D'un mois au plus": {
+                    "account_number": "532"
+                },
+                "Réductions de valeur actées (-)": {
+                    "account_number": "539"
+                },
+                "account_number": "53"
+            },
+            "Valeurs échues à l'encaissement": {
+                "account_number": "54"
+            },
+            "Établissements de crédit": {
+                "Banque": {
+                    "account_number": "5500",
+                    "account_type": "Bank"
+                },
+                "account_number": "55",
+                "account_type": "Bank"
+            },
+            "Caisses": {
+                "Caisses-timbres": {
+                    "account_number": "578",
+                    "account_type": "Cash"
+                },
+                "account_number": "57",
+                "account_type": "Cash"
+            },
+            "Virements internes": {
+                "account_number": "58",
+                "account_type": "Temporary"
+            }
+        },
+        "CLASSE 6 : CHARGES": {
+            "root_type": "Expense",
+            "Approvisionnements et marchandises": {
+                "Achats de matières premières": {
+                    "account_number": "600",
+                    "account_type": "Expense Account"
+                },
+                "Achats de fournitures": {
+                    "account_number": "601",
+                    "account_type": "Expense Account"
+                },
+                "Achats de services, travaux et études": {
+                    "account_number": "602",
+                    "account_type": "Expense Account"
+                },
+                "Sous-traitances générales": {
+                    "account_number": "603",
+                    "account_type": "Expense Account"
+                },
+                "Achats de marchandises": {
+                    "account_number": "604",
+                    "account_type": "Cost of Goods Sold"
+                },
+                "Achats d'immeubles destinés à la vente": {
+                    "account_number": "605",
+                    "account_type": "Expense Account"
+                },
+                "Remises, ristournes et rabais (-)": {
+                    "account_number": "608",
+                    "account_type": "Expense Account"
+                },
+                "Variations des stocks": {
+                    "de matières premières": {
+                        "account_number": "6090",
+                        "account_type": "Stock Adjustment"
+                    },
+                    "de fournitures": {
+                        "account_number": "6091",
+                        "account_type": "Stock Adjustment"
+                    },
+                    "de marchandises": {
+                        "account_number": "6094",
+                        "account_type": "Stock Adjustment"
+                    },
+                    "d'immeubles achetés destinés à la vente": {
+                        "account_number": "6095",
+                        "account_type": "Stock Adjustment"
+                    },
+                    "account_number": "609",
+                    "account_type": "Stock Adjustment"
+                },
+                "account_number": "60",
+                "account_type": "Expense Account"
+            },
+            "Services et biens divers": {
+                "Personnel intérimaire et personnes mises à la disposition de l'entreprise": {
+                    "account_number": "617",
+                    "account_type": "Expense Account"
+                },
+                "Rémunérations et pensions des administrateurs, gérants et associés actifs, hors contrat de travail": {
+                    "account_number": "618",
+                    "account_type": "Expense Account"
+                },
+                "Frais accessoires d'achat inclus dans la valeur des stocks": {
+                    "account_type": "Expenses Included In Valuation"
+                },
+                "account_number": "61",
+                "account_type": "Expense Account"
+            },
+            "Rémunérations, charges sociales et pensions": {
+                "Rémunérations et avantages sociaux directs": {
+                    "Administrateurs ou gérants": {
+                        "account_number": "6200",
+                        "account_type": "Expense Account"
+                    },
+                    "Personnel de direction": {
+                        "account_number": "6201",
+                        "account_type": "Expense Account"
+                    },
+                    "Employés": {
+                        "account_number": "6202",
+                        "account_type": "Expense Account"
+                    },
+                    "Ouvriers": {
+                        "account_number": "6203",
+                        "account_type": "Expense Account"
+                    },
+                    "Autres membres du personnel": {
+                        "account_number": "6204",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "620",
+                    "account_type": "Expense Account"
+                },
+                "Cotisations patronales pour assurances sociales": {
+                    "account_number": "621",
+                    "account_type": "Expense Account"
+                },
+                "Primes patronales pour assurances extra-légales": {
+                    "account_number": "622",
+                    "account_type": "Expense Account"
+                },
+                "Autres frais du personnel": {
+                    "account_number": "623",
+                    "account_type": "Expense Account"
+                },
+                "Pensions de retraite et de survie": {
+                    "Administrateurs ou gérants": {
+                        "account_number": "6240",
+                        "account_type": "Expense Account"
+                    },
+                    "Personnel": {
+                        "account_number": "6241",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "624",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "62",
+                "account_type": "Expense Account"
+            },
+            "Amortissements, réductions de valeur et provisions pour risques": {
+                "Dotations aux amortissements et aux réductions de valeur sur immobilisations": {
+                    "Dotations aux amortissements sur frais d'établissement": {
+                        "account_number": "6300",
+                        "account_type": "Depreciation"
+                    },
+                    "Dotation aux amortissements sur immobilisations incorporelles": {
+                        "account_number": "6301",
+                        "account_type": "Depreciation"
+                    },
+                    "Dotation aux amortissements sur immobilisations corporelles": {
+                        "account_number": "6302",
+                        "account_type": "Depreciation"
+                    },
+                    "Dotation aux réductions de valeur sur immobilisations incorporelles": {
+                        "account_number": "6308",
+                        "account_type": "Depreciation"
+                    },
+                    "Dotation aux réductions de valeur sur immobilisations corporelles": {
+                        "account_number": "6309",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "630",
+                    "account_type": "Depreciation"
+                },
+                "Réductions de valeur sur stocks": {
+                    "Dotations": {
+                        "account_number": "6310",
+                        "account_type": "Depreciation"
+                    },
+                    "Reprises (-)": {
+                        "account_number": "6311",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "631",
+                    "account_type": "Depreciation"
+                },
+                "Réductions de valeur sur commandes en cours d'exécution": {
+                    "Dotations": {
+                        "account_number": "6320",
+                        "account_type": "Depreciation"
+                    },
+                    "Reprises (-)": {
+                        "account_number": "6321",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "632",
+                    "account_type": "Depreciation"
+                },
+                "Réductions de valeur sur créances commerciales à plus d'un an": {
+                    "Dotations": {
+                        "account_number": "6330",
+                        "account_type": "Depreciation"
+                    },
+                    "Reprises (-)": {
+                        "account_number": "6331",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "633",
+                    "account_type": "Depreciation"
+                },
+                "Réductions de valeur sur créances à un an au plus": {
+                    "Dotations": {
+                        "account_number": "6340",
+                        "account_type": "Depreciation"
+                    },
+                    "Reprises (-)": {
+                        "account_number": "6341",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "634",
+                    "account_type": "Depreciation"
+                },
+                "Provisions pour pensions et obligations similaires": {
+                    "Dotations": {
+                        "account_number": "6350",
+                        "account_type": "Depreciation"
+                    },
+                    "Utilisations et reprises (-)": {
+                        "account_number": "6351",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "635",
+                    "account_type": "Depreciation"
+                },
+                "Provisions pour grosses réparations et gros entretien": {
+                    "Dotations": {
+                        "account_number": "6360",
+                        "account_type": "Depreciation"
+                    },
+                    "Utilisations et reprises (-)": {
+                        "account_number": "6361",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "636",
+                    "account_type": "Depreciation"
+                },
+                "Provisions pour obligations environnementales": {
+                    "Dotations": {
+                        "account_number": "6370",
+                        "account_type": "Depreciation"
+                    },
+                    "Utilisations et reprises (-)": {
+                        "account_number": "6371",
+                        "account_type": "Depreciation"
+                    },
+                    "account_number": "637",
+                    "account_type": "Depreciation"
+                },
+                "Provisions pour autres risques et charges": {
+                    "Dotations": {
+                        "account_number": "6380",
+                        "account_type": "Expense Account"
+                    },
+                    "Utilisations et reprises (-)": {
+                        "account_number": "6381",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "638",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "63",
+                "account_type": "Expense Account"
+            },
+            "Autres charges d'exploitation": {
+                "Charges fiscales d'exploitation": {
+                    "account_number": "640",
+                    "account_type": "Expense Account"
+                },
+                "Moins-values sur réalisations courantes d'immobilisations corporelles": {
+                    "account_number": "641",
+                    "account_type": "Expense Account"
+                },
+                "Moins-values sur réalisations de créances commerciales": {
+                    "account_number": "642",
+                    "account_type": "Expense Account"
+                },
+                "Charges d'exploitations diverses (643 à 648)": {
+                    "account_number": "643",
+                    "account_type": "Expense Account"
+                },
+                "Charges d'exploitation portées à l'actif au titre de frais de restructuration (-)": {
+                    "account_number": "649",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "64",
+                "account_type": "Expense Account"
+            },
+            "Charges financières": {
+                "Charges des dettes": {
+                    "Intérêts, commissions et frais afférents aux dettes": {
+                        "account_number": "6500",
+                        "account_type": "Expense Account"
+                    },
+                    "Amortissements des frais d'émission d'emprunts": {
+                        "account_number": "6501",
+                        "account_type": "Expense Account"
+                    },
+                    "Intérêts intercalaires portés à l'actif (-)": {
+                        "account_number": "6502",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "650",
+                    "account_type": "Expense Account"
+                },
+                "Réductions de valeur sur actifs circulants": {
+                    "Dotations": {
+                        "account_number": "6510",
+                        "account_type": "Expense Account"
+                    },
+                    "Reprises (-)": {
+                        "account_number": "6511",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "651",
+                    "account_type": "Expense Account"
+                },
+                "Moins-values sur réalisation d'actifs circulants": {
+                    "account_number": "652",
+                    "account_type": "Expense Account"
+                },
+                "Charges d'escompte de créances": {
+                    "account_number": "653",
+                    "account_type": "Expense Account"
+                },
+                "Différences de change": {
+                    "account_number": "654",
+                    "account_type": "Expense Account"
+                },
+                "Écarts de conversion des devises": {
+                    "account_number": "655",
+                    "account_type": "Expense Account"
+                },
+                "Provisions à caractère financier": {
+                    "Dotations": {
+                        "account_number": "6560",
+                        "account_type": "Expense Account"
+                    },
+                    "Utilisations et reprises (-)": {
+                        "account_number": "6561",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "656",
+                    "account_type": "Expense Account"
+                },
+                "Charges financières diverses (657 à 658)": {
+                    "account_number": "657",
+                    "account_type": "Expense Account"
+                },
+                "Charges financières portées à l'actif au titre de frais de restructuration (-)": {
+                    "account_number": "659",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "65",
+                "account_type": "Expense Account"
+            },
+            "Charges d'exploitation et charges financières non récurrentes": {
+                "Amortissements et réductions de valeur non récurrents (dotations)": {
+                    "sur frais d'établissement": {
+                        "account_number": "6600",
+                        "account_type": "Expense Account"
+                    },
+                    "sur immobilisations incorporelles": {
+                        "account_number": "6601",
+                        "account_type": "Expense Account"
+                    },
+                    "sur immobilisations corporelles": {
+                        "account_number": "6602",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "660",
+                    "account_type": "Expense Account"
+                },
+                "Réduction de valeur sur immobilisations financières (dotation)": {
+                    "account_number": "661",
+                    "account_type": "Expense Account"
+                },
+                "Provisions pour risques et charges non récurrents": {
+                    "Provisions pour risques et charges d'exploitation non récurrents": {
+                        "Dotations": {
+                            "account_number": "66200",
+                            "account_type": "Expense Account"
+                        },
+                        "Utilisations (-)": {
+                            "account_number": "66201",
+                            "account_type": "Expense Account"
+                        },
+                        "account_number": "6620",
+                        "account_type": "Expense Account"
+                    },
+                    "Provisions pour risques et charges financiers non récurrents": {
+                        "Dotations": {
+                            "account_number": "66210",
+                            "account_type": "Expense Account"
+                        },
+                        "Utilisations (-)": {
+                            "account_number": "66211",
+                            "account_type": "Expense Account"
+                        },
+                        "account_number": "6621",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "662",
+                    "account_type": "Expense Account"
+                },
+                "Moins-values sur réalisation d'actifs immobilisés": {
+                    "Moins-values sur réalisation d'immobilisations incorporelles et corporelles": {
+                        "account_number": "6630",
+                        "account_type": "Expense Account"
+                    },
+                    "Moins-values sur réalisation d'immobilisations financières": {
+                        "account_number": "6631",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "663",
+                    "account_type": "Expense Account"
+                },
+                "Autres charges d'exploitation non récurrentes (664 à 667)": {
+                    "account_number": "664",
+                    "account_type": "Expense Account"
+                },
+                "Autres charges financières non récurrentes": {
+                    "account_number": "668",
+                    "account_type": "Expense Account"
+                },
+                "Charges d'exploitation non récurrentes portées à l'actif au titre de frais de restructuration (-)": {
+                    "account_number": "6690",
+                    "account_type": "Expense Account"
+                },
+                "Charges financières non récurrentes portées à l'actif au titre de frais de restructuration (-)": {
+                    "account_number": "6691",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "66",
+                "account_type": "Expense Account"
+            },
+            "Impôts sur le résultat": {
+                "Impôts belges sur le résultat de l'exercice": {
+                    "Impôts et précomptes dus ou versés": {
+                        "account_number": "6700",
+                        "account_type": "Expense Account"
+                    },
+                    "Excédent de versements d'impôts et de précomptes porté à l'actif (-)": {
+                        "account_number": "6701",
+                        "account_type": "Expense Account"
+                    },
+                    "Charges fiscales estimées": {
+                        "account_number": "6702",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "670",
+                    "account_type": "Expense Account"
+                },
+                "Impôts belges sur le résultat d'exercices antérieurs": {
+                    "Suppléments d'impôts dus ou versés": {
+                        "account_number": "6710",
+                        "account_type": "Expense Account"
+                    },
+                    "Suppléments d'impôts estimés": {
+                        "account_number": "6711",
+                        "account_type": "Expense Account"
+                    },
+                    "Provisions fiscales constituées": {
+                        "account_number": "6712",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "671",
+                    "account_type": "Expense Account"
+                },
+                "Impôts étrangers sur le résultat de l'exercice": {
+                    "account_number": "672",
+                    "account_type": "Expense Account"
+                },
+                "Impôts étrangers sur le résultat d'exercices antérieurs": {
+                    "account_number": "673",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "67",
+                "account_type": "Expense Account"
+            },
+            "Transferts aux impôts différés et aux réserves immunisées": {
+                "Transferts aux impôts différés": {
+                    "account_number": "680",
+                    "account_type": "Expense Account"
+                },
+                "Transferts aux réserves immunisées": {
+                    "account_number": "689",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "68",
+                "account_type": "Expense Account"
+            },
+            "Affectations et prélèvements": {
+                "Perte reportée de l'exercice précédent": {
+                    "account_number": "690",
+                    "account_type": "Expense Account"
+                },
+                "Affectations à l'apport": {
+                    "account_number": "691",
+                    "account_type": "Expense Account"
+                },
+                "Dotation aux réserves": {
+                    "Dotation à la réserve légale": {
+                        "account_number": "6920",
+                        "account_type": "Expense Account"
+                    },
+                    "Dotation aux autres réserves": {
+                        "account_number": "6921",
+                        "account_type": "Expense Account"
+                    },
+                    "account_number": "692",
+                    "account_type": "Expense Account"
+                },
+                "Bénéfices à reporter": {
+                    "account_number": "693",
+                    "account_type": "Expense Account"
+                },
+                "Rémunération de l'apport": {
+                    "account_number": "694",
+                    "account_type": "Expense Account"
+                },
+                "Administrateurs ou gérants": {
+                    "account_number": "695",
+                    "account_type": "Expense Account"
+                },
+                "Employés": {
+                    "account_number": "696",
+                    "account_type": "Expense Account"
+                },
+                "Autres applications": {
+                    "account_number": "697",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "69",
+                "account_type": "Expense Account"
+            }
+        },
+        "CLASSE 7 : PRODUITS": {
+            "root_type": "Income",
+            "Chiffre d'affaires": {
+                "Remises, ristournes et rabais accordés (-)": {
+                    "account_number": "708",
+                    "account_type": "Income Account"
+                },
+                "account_number": "70",
+                "account_type": "Income Account"
+            },
+            "Variation des stocks et des commandes en cours d'exécution": {
+                "Des en-cours de fabrication": {
+                    "account_number": "712",
+                    "account_type": "Income Account"
+                },
+                "Des produits finis": {
+                    "account_number": "713",
+                    "account_type": "Income Account"
+                },
+                "Des immeubles construits destinés à la vente": {
+                    "account_number": "715",
+                    "account_type": "Income Account"
+                },
+                "Des commandes en cours d'exécution": {
+                    "Valeur d'acquisition": {
+                        "account_number": "7170",
+                        "account_type": "Income Account"
+                    },
+                    "Bénéfice pris en compte": {
+                        "account_number": "7171",
+                        "account_type": "Income Account"
+                    },
+                    "account_number": "717",
+                    "account_type": "Income Account"
+                },
+                "account_number": "71",
+                "account_type": "Income Account"
+            },
+            "Production immobilisée": {
+                "account_number": "72",
+                "account_type": "Income Account"
+            },
+            "Autres produits d'exploitation": {
+                "Subsides d'exploitation et montants compensatoires": {
+                    "account_number": "740",
+                    "account_type": "Income Account"
+                },
+                "Plus-values sur réalisations courantes d'immobilisations corporelles": {
+                    "account_number": "741",
+                    "account_type": "Income Account"
+                },
+                "Plus-values sur réalisation de créances commerciales": {
+                    "account_number": "742",
+                    "account_type": "Income Account"
+                },
+                "Produits d'exploitation divers (743 à 749)": {
+                    "account_number": "743",
+                    "account_type": "Income Account"
+                },
+                "account_number": "74",
+                "account_type": "Income Account"
+            },
+            "Produits financiers": {
+                "Produits des immobilisations financières": {
+                    "account_number": "750",
+                    "account_type": "Income Account"
+                },
+                "Produits des actifs circulants": {
+                    "account_number": "751",
+                    "account_type": "Income Account"
+                },
+                "Plus-values sur réalisation d'actifs circulants": {
+                    "account_number": "752",
+                    "account_type": "Income Account"
+                },
+                "Subsides en capital et en intérêts": {
+                    "account_number": "753",
+                    "account_type": "Income Account"
+                },
+                "Différences de change": {
+                    "account_number": "754",
+                    "account_type": "Income Account"
+                },
+                "Écarts de conversion des devises": {
+                    "account_number": "755",
+                    "account_type": "Income Account"
+                },
+                "Produits financiers divers (756 à 759)": {
+                    "account_number": "756",
+                    "account_type": "Income Account"
+                },
+                "account_number": "75",
+                "account_type": "Income Account"
+            },
+            "Produits d'exploitation ou financiers non récurrents": {
+                "Reprises d'amortissements et de réductions de valeur": {
+                    "sur immobilisations incorporelles": {
+                        "account_number": "7600",
+                        "account_type": "Income Account"
+                    },
+                    "sur immobilisations corporelles": {
+                        "account_number": "7601",
+                        "account_type": "Income Account"
+                    },
+                    "account_number": "760",
+                    "account_type": "Income Account"
+                },
+                "Reprises de réductions de valeur sur immobilisations financières": {
+                    "account_number": "761",
+                    "account_type": "Income Account"
+                },
+                "Reprises de provisions pour risques et charges non récurrents": {
+                    "Reprises de provisions pour risques et charges d'exploitation non récurrents": {
+                        "account_number": "7620",
+                        "account_type": "Income Account"
+                    },
+                    "Reprises de provisions pour risques et charges financiers non récurrents": {
+                        "account_number": "7621",
+                        "account_type": "Income Account"
+                    },
+                    "account_number": "762",
+                    "account_type": "Income Account"
+                },
+                "Plus-values sur réalisation d'actifs immobilisés": {
+                    "Plus-values sur réalisation d'immobilisations incorporelles et corporelles": {
+                        "account_number": "7630",
+                        "account_type": "Income Account"
+                    },
+                    "Plus-values sur réalisation d'immobilisations financières": {
+                        "account_number": "7631",
+                        "account_type": "Income Account"
+                    },
+                    "account_number": "763",
+                    "account_type": "Income Account"
+                },
+                "Autres bénéfices d'exploitation non récurrents (764 à 768)": {
+                    "account_number": "764",
+                    "account_type": "Income Account"
+                },
+                "Autres produits financiers non récurrents": {
+                    "account_number": "769",
+                    "account_type": "Income Account"
+                },
+                "account_number": "76",
+                "account_type": "Income Account"
+            },
+            "Régularisations d'impôts et reprises de provisions fiscales": {
+                "Impôts belges sur le résultat": {
+                    "Régularisation d'impôts dus ou versés": {
+                        "account_number": "7710",
+                        "account_type": "Income Account"
+                    },
+                    "Régularisation d'impôts estimés": {
+                        "account_number": "7711",
+                        "account_type": "Income Account"
+                    },
+                    "Reprises de provisions fiscales": {
+                        "account_number": "7712",
+                        "account_type": "Income Account"
+                    },
+                    "account_number": "771",
+                    "account_type": "Income Account"
+                },
+                "Impôts étrangers sur le résultat": {
+                    "account_number": "773",
+                    "account_type": "Income Account"
+                },
+                "account_number": "77",
+                "account_type": "Income Account"
+            },
+            "Prélèvements sur les réserves immunisées et les impôts différés": {
+                "Prélèvements sur les impôts différés": {
+                    "account_number": "780",
+                    "account_type": "Income Account"
+                },
+                "Prélèvement sur les réserves immunisées": {
+                    "account_number": "789",
+                    "account_type": "Income Account"
+                },
+                "account_number": "78",
+                "account_type": "Income Account"
+            },
+            "Affectations et prélèvements": {
+                "Bénéfice reporté de l'exercice précédent": {
+                    "account_number": "790",
+                    "account_type": "Income Account"
+                },
+                "Prélèvements sur l'apport": {
+                    "account_number": "791",
+                    "account_type": "Income Account"
+                },
+                "Prélèvements sur les réserves": {
+                    "account_number": "792",
+                    "account_type": "Income Account"
+                },
+                "Perte à reporter": {
+                    "account_number": "793",
+                    "account_type": "Income Account"
+                },
+                "Intervention d'associés (ou du propriétaire) dans la perte": {
+                    "account_number": "794",
+                    "account_type": "Income Account"
+                },
+                "account_number": "79",
+                "account_type": "Income Account"
+            }
+        }
+    }
+}

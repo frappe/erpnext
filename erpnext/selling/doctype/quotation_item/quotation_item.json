@@ -216,6 +216,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -625,6 +626,7 @@
    "fieldtype": "Currency",
    "label": "Blanket Order Rate",
    "no_copy": 1,
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -729,7 +731,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 19:00:00.000000",
+ "modified": "2026-08-27 10:55:37.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

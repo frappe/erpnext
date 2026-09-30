@@ -2,19 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import re
 from datetime import date
 
 import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Concat_ws, Max, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
-from erpnext.stock.serial_batch_bundle import SerialBatchBundle
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
+from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -26,6 +28,10 @@ class BackDatedStockTransaction(frappe.ValidationError):
 
 
 class InventoryDimensionNegativeStockError(frappe.ValidationError):
+	pass
+
+
+class SerialNoInventoryDimensionError(frappe.ValidationError):
 	pass
 
 
@@ -97,6 +103,7 @@ class StockLedgerEntry(Document):
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
 		self.validate_inventory_dimension_negative_stock()
+		self.validate_serial_no_inventory_dimension()
 
 	def set_posting_datetime(self):
 		from erpnext.stock.utils import get_combine_datetime
@@ -126,7 +133,7 @@ class StockLedgerEntry(Document):
 			.where(
 				(sle.item_code == self.item_code)
 				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
+				& (sle.posting_datetime <= self.posting_datetime)
 				& (sle.company == self.company)
 				& (sle.is_cancelled == 0)
 			)
@@ -171,6 +178,87 @@ class StockLedgerEntry(Document):
 
 		return inv_dimension_dict
 
+	def validate_serial_no_inventory_dimension(self):
+		if self.is_cancelled or self.actual_qty >= 0 or not self.has_serial_no:
+			return
+
+		dimensions = get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		serial_nos = get_serial_nos(self.serial_and_batch_bundle)
+		if not serial_nos and self.serial_no:
+			serial_nos = get_parsed_serial_nos(self.serial_no)
+
+		if not serial_nos:
+			return
+
+		for serial_no, values in self.get_last_inward_dimensions(serial_nos, dimensions).items():
+			mismatches = []
+			for dimension in dimensions:
+				fieldname = dimension.fieldname
+				expected_value = values.get(fieldname)
+				if expected_value != self.get(fieldname):
+					mismatches.append(
+						_('{0}: expected "{1}", got "{2}"').format(
+							dimension.dimension_name,
+							expected_value or _("Not Set"),
+							self.get(fieldname),
+						)
+					)
+
+			if mismatches:
+				frappe.throw(
+					_("Serial No {0} is not available in the selected inventory dimensions: {1}").format(
+						frappe.bold(serial_no), frappe.bold(", ".join(mismatches))
+					),
+					title=_("Incorrect Inventory Dimension"),
+					exc=SerialNoInventoryDimensionError,
+				)
+
+	def get_last_inward_dimensions(self, serial_nos, dimensions):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		serial_entry = frappe.qb.DocType("Serial and Batch Entry")
+		dimension_fields = [sle[dimension.fieldname].as_(dimension.fieldname) for dimension in dimensions]
+		escaped_serial_nos = [re.escape(serial_no) for serial_no in serial_nos]
+		legacy_serial_pattern = r"[\n,][[:space:]]*(" + "|".join(escaped_serial_nos) + r")[[:space:]]*[\n,]"
+		legacy_serial_condition = (
+			sle.serial_and_batch_bundle.isnull() | (sle.serial_and_batch_bundle == "")
+		) & Concat_ws("", "\n", sle.serial_no, "\n").regexp(legacy_serial_pattern)
+
+		rows = (
+			frappe.qb.from_(sle)
+			.left_join(serial_entry)
+			.on(serial_entry.parent == sle.serial_and_batch_bundle)
+			.select(
+				serial_entry.serial_no.as_("bundle_serial_no"),
+				sle.serial_no.as_("legacy_serial_nos"),
+				*dimension_fields,
+			)
+			.where(
+				(serial_entry.serial_no.isin(serial_nos) | legacy_serial_condition)
+				& (sle.item_code == self.item_code)
+				& (sle.actual_qty > 0)
+				& (sle.is_cancelled == 0)
+				& (sle.posting_datetime <= self.posting_datetime)
+			)
+			.orderby(sle.posting_datetime, order=frappe.qb.desc)
+			.orderby(sle.creation, order=frappe.qb.desc)
+		).run(as_dict=True)
+
+		serial_nos = set(serial_nos)
+		last_inward_dimensions = {}
+		for row in rows:
+			row_serial_nos = (
+				[row.bundle_serial_no]
+				if row.bundle_serial_no
+				else get_parsed_serial_nos(row.legacy_serial_nos)
+			)
+			for serial_no in serial_nos.intersection(row_serial_nos):
+				last_inward_dimensions.setdefault(serial_no, row)
+
+		return last_inward_dimensions
+
 	def on_submit(self):
 		self.check_stock_frozen_date()
 
@@ -195,7 +283,7 @@ class StockLedgerEntry(Document):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
+				frappe.throw(_("{0} is required").format(self.meta.get_translated_label(k)))
 
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))
@@ -234,11 +322,20 @@ class StockLedgerEntry(Document):
 			self.throw_error_message(f"Item {self.item_code} must be a stock Item")
 
 		if item_detail.has_serial_no or item_detail.has_batch_no:
-			if not self.serial_and_batch_bundle:
+			if not self.serial_and_batch_bundle and not self.is_standard_cost_revaluation():
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
 
 		if self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no:
 			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
+
+	def is_standard_cost_revaluation(self):
+		"""A Standard Cost item is revalued through a Stock Reconciliation that changes the rate only
+		(qty unchanged); it carries no serial/batch bundle, so the bundle requirement is bypassed."""
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import is_standard_cost_item
+
+		return self.voucher_type == "Stock Reconciliation" and is_standard_cost_item(
+			self.item_code, self.company
+		)
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception)
@@ -311,13 +408,17 @@ class StockLedgerEntry(Document):
 		if authorized_role:
 			authorized_users = get_users(authorized_role)
 			if authorized_users and frappe.session.user not in authorized_users:
-				last_transaction_time = frappe.db.sql(
-					"""
-					select MAX(timestamp(posting_date, posting_time)) as posting_time
-					from `tabStock Ledger Entry`
-					where docstatus = 1 and is_cancelled = 0 and item_code = %s
-					and warehouse = %s""",
-					(self.item_code, self.warehouse),
+				sle = frappe.qb.DocType("Stock Ledger Entry")
+				last_transaction_time = (
+					frappe.qb.from_(sle)
+					.select(Max(sle.posting_datetime))
+					.where(
+						(sle.docstatus == 1)
+						& (sle.is_cancelled == 0)
+						& (sle.item_code == self.item_code)
+						& (sle.warehouse == self.warehouse)
+					)
+					.run()
 				)[0][0]
 
 				cur_doc_posting_datetime = "{} {}".format(
@@ -338,7 +439,7 @@ class StockLedgerEntry(Document):
 						"You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 					).format(frappe.bold(self.item_code), frappe.bold(self.warehouse))
 
-					msg += "<br><br>" + _("Please contact any of the following users to {} this transaction.")
+					msg += "<br><br>" + _("Please contact any of the following users for this transaction.")
 					msg += "<br>" + "<br>".join(authorized_users)
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
@@ -351,3 +452,15 @@ class StockLedgerEntry(Document):
 def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["item_code", "warehouse", "posting_datetime", "creation"])
+
+	if frappe.db.db_type == "postgres":
+		# Postgres-only partial index for date-range stock reports (Stock Ledger / Stock Balance)
+		# that scan across all items: they filter `is_cancelled = 0` and sort by posting_datetime.
+		# The existing item_code-leading composite can't serve an all-items date scan. `where` is a
+		# no-op on MariaDB, so this is added only on postgres.
+		frappe.db.add_index(
+			"Stock Ledger Entry",
+			["company", "posting_datetime", "creation"],
+			index_name="sle_active_posting",
+			where="is_cancelled = 0",
+		)

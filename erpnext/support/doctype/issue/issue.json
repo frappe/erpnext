@@ -6,6 +6,7 @@
  "creation": "2013-02-01 10:36:25",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/issue",
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -390,10 +391,10 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-ticket",
+ "icon": "ticket",
  "idx": 7,
  "links": [],
- "modified": "2026-04-09 19:14:57.692236",
+ "modified": "2026-08-21 23:11:43.274229",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -417,6 +418,10 @@
   },
   {
    "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
    "select": 1
   }
  ],

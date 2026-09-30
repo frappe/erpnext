@@ -3,6 +3,7 @@
  "autoname": "PUT-.####",
  "creation": "2020-11-09 11:39:46.489501",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/putaway-rule",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -106,12 +107,14 @@
    "fieldtype": "Float",
    "label": "Conversion Factor",
    "no_copy": 1,
+   "precision": "9",
    "read_only": 1
   }
  ],
+ "icon": "archive",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-08 09:19:26.711470",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Putaway Rule",

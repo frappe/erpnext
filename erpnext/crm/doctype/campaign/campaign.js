@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Campaign", {
 	refresh: function (frm) {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(frm);
 
 		if (frm.is_new()) {
 			frm.toggle_display(
@@ -17,7 +17,7 @@ frappe.ui.form.on("Campaign", {
 					frappe.route_options = { utm_source: "Campaign", utm_campaign: frm.doc.name };
 					frappe.set_route("List", "Lead");
 				},
-				"fa fa-list",
+				null,
 				true
 			);
 		}

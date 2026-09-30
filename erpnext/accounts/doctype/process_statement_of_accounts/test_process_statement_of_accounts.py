@@ -25,10 +25,8 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 			update_modified=False,
 		)
 
-		self.create_company()
-		self.create_customer()
+		self.company = "_Test Company"
 		self.create_customer(customer_name="Other Customer")
-		self.clear_old_entries()
 		self.si = create_sales_invoice()
 		create_sales_invoice(customer="Other Customer")
 
@@ -52,6 +50,27 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		# Checks the amount for the receivable entry
 		self.assertEqual(receivable_entries[1].voucher_no, self.si.name)
 		self.assertEqual(receivable_entries[1].balance, 100)
+
+	def test_process_soa_for_gl_normalizes_account_labels(self):
+		"""GL opening/total/closing rows keep valid string account labels after normalization"""
+		process_soa = create_process_soa(name="_Test Process SOA for GL Labels")
+		statement_dict = get_statement_dict(process_soa, get_statement_dict=True)
+
+		# normalization runs on the opening, total and closing rows of a customer with entries
+		rows = statement_dict["_Test Customer"][0]
+		for idx in (0, -2, -1):
+			self.assertIsInstance(rows[idx]["account"], str)
+
+	def test_process_soa_for_gl_with_no_transactions(self):
+		"""GL statement for a period with no entries is skipped without error"""
+		process_soa = create_process_soa(
+			name="_Test Process SOA for GL No Data",
+			from_date=add_days(today(), 365),
+			to_date=add_days(today(), 395),
+			posting_date=add_days(today(), 395),
+		)
+		statement_dict = get_statement_dict(process_soa, get_statement_dict=True)
+		self.assertEqual(statement_dict, {})
 
 	def test_process_soa_for_ar(self):
 		"""Tests the utils for Statement of Accounts(Accounts Receivable)"""
@@ -115,3 +134,38 @@ def create_process_soa(**args):
 	process_soa.update(soa_dict)
 	process_soa.save()
 	return process_soa
+
+
+class TestProcessStatementOfAccountsValidation(ERPNextTestSuite):
+	"""validate() fills in default subject/body/pdf templates and enforces the
+	basic constraints. Exercised on the document directly (no email/PDF flow)."""
+
+	def make_soa(self, report="Accounts Receivable", with_customer=True, **overrides):
+		doc = frappe.new_doc("Process Statement Of Accounts")
+		doc.report = report
+		doc.company = "_Test Company"
+		if with_customer:
+			doc.append("customers", {"customer": "_Test Customer"})
+		doc.update(overrides)
+		return doc
+
+	def test_customers_are_required(self):
+		self.assertRaises(frappe.ValidationError, self.make_soa(with_customer=False).validate)
+
+	def test_general_ledger_body_uses_a_date_range(self):
+		doc = self.make_soa(report="General Ledger")
+		doc.validate()
+		self.assertIn("from {{ doc.from_date }} to {{ doc.to_date }}", doc.body)
+		# subject and pdf name are also defaulted
+		self.assertTrue(doc.subject)
+		self.assertTrue(doc.pdf_name)
+
+	def test_receivable_body_uses_the_posting_date(self):
+		doc = self.make_soa(report="Accounts Receivable")
+		doc.validate()
+		self.assertIn("until {{ doc.posting_date }}", doc.body)
+
+	def test_account_must_belong_to_company(self):
+		other = frappe.db.get_value("Account", {"company": "_Test Company 1", "is_group": 0}, "name")
+		self.assertTrue(other, "need an account in _Test Company 1")
+		self.assertRaises(frappe.ValidationError, self.make_soa(account=other).validate)

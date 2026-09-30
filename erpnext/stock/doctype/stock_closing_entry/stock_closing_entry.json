@@ -5,6 +5,7 @@
  "creation": "2024-12-07 14:07:01.356963",
  "default_view": "List",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/stock-closing-entry",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -45,14 +46,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Set automatically to the day after the previous Stock Closing Entry, or to the first stock transaction's date",
    "fieldname": "from_date",
    "fieldtype": "Date",
-   "label": "From Date"
+   "label": "From Date",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "label": "To Date",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -65,10 +70,11 @@
    "search_index": 1
   }
  ],
+ "icon": "lock",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-29 10:35:32.507988",
+ "modified": "2026-09-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Closing Entry",

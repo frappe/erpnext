@@ -4,15 +4,17 @@
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
+from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
+from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
 
 class SellingController(StockController):
@@ -43,21 +45,14 @@ class SellingController(StockController):
 				),
 			)
 
-		if (
-			self.get("company")
-			and (
-				default_selling_terms := frappe.get_value(
-					"Company", self.get("company"), "default_selling_terms"
-				)
-			)
-			and not self.get("tc_name")
-			and not self.get("terms")
-		):
-			self.tc_name = default_selling_terms
-			self.terms = frappe.get_value("Terms and Conditions", self.get("tc_name"), "terms")
+		if self.get("company") and not self.get("terms"):
+			if not self.get("tc_name"):
+				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
+			self.set_missing_terms()
 
 	def validate(self):
 		super().validate()
+		self.ensure_customer_is_not_blocked()
 		self.validate_items()
 		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
@@ -214,7 +209,7 @@ class SellingController(StockController):
 		if not (0 <= self.commission_rate <= 100.0):
 			throw(
 				"{} {}".format(
-					_(self.meta.get_label("commission_rate")),
+					self.meta.get_translated_label("commission_rate"),
 					_("must be between 0 and 100"),
 				)
 			)
@@ -253,7 +248,7 @@ class SellingController(StockController):
 
 			total += sales_person.allocated_percentage
 
-		if sales_team and total != 100.0:
+		if sales_team and flt(total, self.precision("allocated_percentage", "sales_team")) != 100.0:
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
@@ -296,7 +291,7 @@ class SellingController(StockController):
 			throw(
 				_(
 					"""Row #{0}: Selling rate for item {1} is lower than its {2}.
-					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					Selling {3} should be at least {4}.<br><br>Alternatively,
 					you can disable '{5}' in {6} to bypass
 					this validation."""
 				).format(
@@ -305,7 +300,7 @@ class SellingController(StockController):
 					bold(ref_rate_field),
 					bold("net rate"),
 					bold(rate),
-					bold(frappe.get_meta("Selling Settings").get_label("validate_selling_price")),
+					bold(frappe.get_meta("Selling Settings").get_translated_label("validate_selling_price")),
 					get_link_to_form("Selling Settings"),
 				),
 				title=_("Invalid Selling Price"),
@@ -439,22 +434,34 @@ class SellingController(StockController):
 			product_bundle_items[item_code] = item_code in items_with_product_bundle
 
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
-		delivered_via_dn = frappe.db.sql(
-			"""select sum(qty) from `tabDelivery Note Item`
-			where so_detail = %s and docstatus = 1
-			and against_sales_order = %s
-			and parent != %s""",
-			(so_detail, so, current_docname),
+		dn_item = frappe.qb.DocType("Delivery Note Item")
+		delivered_via_dn = (
+			frappe.qb.from_(dn_item)
+			.select(Sum(dn_item.qty))
+			.where(
+				(dn_item.so_detail == so_detail)
+				& (dn_item.docstatus == 1)
+				& (dn_item.against_sales_order == so)
+				& (dn_item.parent != current_docname)
+			)
+			.run()
 		)
 
-		delivered_via_si = frappe.db.sql(
-			"""select sum(si_item.qty)
-			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
-			where si_item.parent = si.name and si.update_stock = 1
-			and si_item.so_detail = %s and si.docstatus = 1
-			and si_item.sales_order = %s
-			and si.name != %s""",
-			(so_detail, so, current_docname),
+		si = frappe.qb.DocType("Sales Invoice")
+		si_item = frappe.qb.DocType("Sales Invoice Item")
+		delivered_via_si = (
+			frappe.qb.from_(si_item)
+			.inner_join(si)
+			.on(si_item.parent == si.name)
+			.select(Sum(si_item.qty))
+			.where(
+				(si.update_stock == 1)
+				& (si_item.so_detail == so_detail)
+				& (si.docstatus == 1)
+				& (si_item.sales_order == so)
+				& (si.name != current_docname)
+			)
+			.run()
 		)
 
 		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) + (
@@ -464,15 +471,19 @@ class SellingController(StockController):
 		return total_delivered_qty
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = frappe.db.sql(
-			"""select qty, warehouse from `tabSales Order Item`
-			where name = %s and docstatus = 1""",
-			so_detail,
-			as_dict=1,
+		so_item = frappe.db.get_value(
+			"Sales Order Item", {"name": so_detail, "docstatus": 1}, ["qty", "warehouse"], as_dict=True
 		)
-		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
-		so_warehouse = so_item and so_item[0]["warehouse"] or ""
+		so_qty = flt(so_item.qty) if so_item else 0.0
+		so_warehouse = (so_item.warehouse if so_item else "") or ""
 		return so_qty, so_warehouse
+
+	def ensure_customer_is_not_blocked(self):
+		if self.doctype == "Quotation":
+			return
+
+		if self.customer and is_customer_blocked(self.customer):
+			frappe.throw(_("{0} is blocked so this transaction cannot proceed").format(self.customer))
 
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
 		if self.is_return:
@@ -578,15 +589,15 @@ class SellingController(StockController):
 					reset_incoming_rate()
 
 				if (
-					not d.incoming_rate
+					(not d.incoming_rate or self.is_new())
+					and not is_standalone
 					or self.is_internal_transfer()
 					or (
 						get_valuation_method(d.item_code, self.company) == "Moving Average"
 						and self.get("is_return")
-						and not is_standalone
 					)
 				):
-					d.incoming_rate = get_incoming_rate(
+					d.incoming_rate = _get_incoming_rate(
 						{
 							"item_code": d.item_code,
 							"warehouse": d.warehouse,
@@ -859,7 +870,7 @@ class SellingController(StockController):
 
 			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
 			duplicate_items_msg += "<br><br>"
-			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+			duplicate_items_msg += _("Please enable {0} in {1} to allow same item in multiple rows").format(
 				frappe.bold(_("Allow Item to Be Added Multiple Times in a Transaction")),
 				get_link_to_form("Selling Settings", "Selling Settings"),
 			)
@@ -888,7 +899,7 @@ class SellingController(StockController):
 
 		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):
 			msg = _("Target Warehouse is set for some items but the customer is not an internal customer.")
-			msg += " " + _("This {} will be treated as material transfer.").format(_(self.doctype))
+			msg += " " + _("This {0} will be treated as material transfer.").format(_(self.doctype))
 			frappe.msgprint(msg, title="Internal Transfer", alert=True)
 
 	def validate_items(self):
@@ -901,8 +912,8 @@ class SellingController(StockController):
 		if self.get("is_return"):
 			return
 
-		sample_retention_warehouse = frappe.db.get_single_value(
-			"Stock Settings", "sample_retention_warehouse"
+		sample_retention_warehouse = frappe.get_cached_value(
+			"Company", self.company, "sample_retention_warehouse"
 		)
 		if not sample_retention_warehouse:
 			return
@@ -1142,7 +1153,7 @@ def set_default_income_account_for_item(obj):
 	    obj: Transaction document containing items table with income_account field
 	"""
 	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
-	for d in obj.get("items", default=[]):
+	for d in sorted(obj.get("items", default=[]), key=lambda row: row.item_code or ""):
 		income_account = getattr(d, "income_account", None)
 		if d.item_code and income_account and income_account != company_default:
 			set_item_default(d.item_code, obj.company, "income_account", income_account)

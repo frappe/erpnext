@@ -84,6 +84,17 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.item_row = item;
 			this.currency = this.events.get_frm().doc.currency;
 
+			if (item.has_serial_no == null || item.has_batch_no == null) {
+				const r = await frappe.db.get_value("Item", item.item_code, [
+					"has_serial_no",
+					"has_batch_no",
+				]);
+				if (r && r.message) {
+					item.has_serial_no = r.message.has_serial_no;
+					item.has_batch_no = r.message.has_batch_no;
+				}
+			}
+
 			this.current_item = item;
 
 			this.render_dom(item);

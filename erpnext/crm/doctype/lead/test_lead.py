@@ -157,6 +157,65 @@ class TestLead(ERPNextTestSuite):
 		lead.lead_owner = None
 		self.assertIsNone(lead.get_notification_email())
 
+	def test_get_lead_details(self):
+		from erpnext.crm.doctype.lead.lead import get_lead_details
+
+		lead = make_lead(
+			first_name="Detail",
+			last_name="Lead",
+			email_id="detail_lead@example.com",
+			company_name="Detail Org",
+		)
+		details = get_lead_details(lead.name, company="_Test Company")
+		self.assertEqual(details["customer_name"], "Detail Org")  # company_name preferred over lead_name
+		self.assertEqual(details["contact_email"], "detail_lead@example.com")
+
+		# no lead -> empty dict, not an error
+		self.assertEqual(get_lead_details("", company="_Test Company"), {})
+
+	def test_lead_prospect_sync_and_unlink(self):
+		lead = make_lead(
+			first_name="Link",
+			last_name="Lead",
+			email_id="link_lead@example.com",
+			company_name="Link Prospect Co",
+		)
+		lead.create_prospect(lead.company_name)
+		prospect_name = get_linked_prospect("Lead", lead.name)
+		self.assertEqual(prospect_name, "Link Prospect Co")
+
+		# editing the lead syncs into its Prospect Lead row
+		lead.mobile_no = "9999999999"
+		lead.save()
+		self.assertEqual(frappe.db.get_value("Prospect Lead", {"lead": lead.name}, "mobile_no"), "9999999999")
+
+		# deleting the only lead of a prospect removes the prospect
+		lead.delete()
+		self.assertFalse(frappe.db.exists("Prospect", prospect_name))
+
+	def test_set_lead_name_fallbacks(self):
+		# organization name is used when there is no person name
+		lead = frappe.new_doc("Lead")
+		lead.company_name = "_Test Org Lead"
+		lead.set_lead_name()
+		self.assertEqual(lead.lead_name, "_Test Org Lead")
+
+		# the email local-part is used when only an email is present
+		lead = frappe.new_doc("Lead")
+		lead.email_id = "jane.doe@example.com"
+		lead.set_lead_name()
+		self.assertEqual(lead.lead_name, "jane.doe")
+
+		# data import (ignore_mandatory) with no name/company/email must not crash
+		lead = frappe.new_doc("Lead")
+		lead.flags.ignore_mandatory = True
+		lead.set_lead_name()
+		self.assertFalse(lead.lead_name)
+
+		# otherwise a lead with no name source is rejected
+		lead = frappe.new_doc("Lead")
+		self.assertRaises(frappe.ValidationError, lead.set_lead_name)
+
 
 def create_event(subject, starts_on, reference_type, reference_name):
 	event = frappe.new_doc("Event")

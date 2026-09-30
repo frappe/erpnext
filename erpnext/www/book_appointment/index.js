@@ -234,18 +234,18 @@ async function submit() {
 			if (response.message.status == "Unverified") {
 				frappe.show_alert(__("Please check your email to confirm the appointment"));
 			} else {
-				frappe.show_alert(__("Appointment Created Successfully"));
+				frappe.show_alert(__("Appointment created successfully"));
 			}
 			setTimeout(() => {
-				let redirect_url = "/";
+				let redirect_url = "/book_appointment";
 				if (window.appointment_settings.success_redirect_url) {
-					redirect_url += window.appointment_settings.success_redirect_url;
+					redirect_url = `/${window.appointment_settings.success_redirect_url}`;
 				}
 				window.location.href = redirect_url;
 			}, 5000);
 		},
 		error: (err) => {
-			frappe.show_alert(__("Something went wrong please try again"));
+			frappe.show_alert(__("Something went wrong, please try again"));
 			button.disabled = false;
 		},
 	});

@@ -7,6 +7,7 @@
  "description": "All Sales Transactions can be tagged against multiple Sales Persons so that you can set and monitor targets.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-person",
  "engine": "InnoDB",
  "field_order": [
   "name_and_employee_id",
@@ -54,7 +55,7 @@
   },
   {
    "fieldname": "commission_rate",
-   "fieldtype": "Data",
+   "fieldtype": "Percent",
    "label": "Commission Rate",
    "print_hide": 1
   },
@@ -141,11 +142,11 @@
    "options": "Target Detail"
   }
  ],
- "icon": "icon-user",
+ "icon": "user-round",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2024-03-27 13:10:37.891377",
+ "modified": "2026-08-21 23:11:48.642478",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
@@ -177,8 +178,37 @@
    "role": "Sales Master Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "parent_sales_person",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

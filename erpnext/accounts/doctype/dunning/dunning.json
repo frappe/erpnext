@@ -5,6 +5,7 @@
  "autoname": "naming_series:",
  "creation": "2019-07-05 16:34:31.013238",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/dunning",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -398,6 +399,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "bell-ring",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-05-30 23:18:04.712528",

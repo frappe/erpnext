@@ -88,6 +88,46 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(received_item.received_qty, 5)
 		self.assertEqual(received_item.rate, 10)
 
+	def test_customer_provided_item_rate_with_return_between_receipts(self):
+		"""Weight the average rate on the on-hand balance, not gross received_qty.
+
+		Receive 10 @ 100, return 5, receive 6 @ 130:
+		    balance-weighted (correct) = (5 * 100 + 6 * 130) / 11 = 116.36
+		    gross-weighted   (wrong)   = (10 * 100 + 6 * 130) / 16 = 111.25
+		"""
+		so, scio = create_so_scio()
+		rm_item = "Basic RM"
+
+		def receive(qty, rate):
+			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			rm_in.items = [item for item in rm_in.items if item.item_code == rm_item]
+			rm_in.items[0].qty = qty
+			rm_in.items[0].transfer_qty = qty
+			rm_in.items[0].basic_rate = rate
+			rm_in.submit()
+			scio.reload()
+
+		# Receipt 1: 10 @ 100
+		receive(10, 100)
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.rate, 100)
+
+		# Return 5 to the customer
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == rm_item]
+		rm_return.items[0].qty = 5
+		rm_return.items[0].transfer_qty = 5
+		rm_return.submit()
+		scio.reload()
+
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.returned_qty, 5)
+
+		# Receipt 2: 6 @ 130 — must weight against the balance of 5, not gross 10
+		receive(6, 130)
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertAlmostEqual(received_item.rate, (5 * 100 + 6 * 130) / 11, places=2)
+
 	def test_add_extra_customer_provided_item(self):
 		so, scio = create_so_scio()
 
@@ -129,6 +169,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		self.assertEqual(
+			next(item.s_warehouse for item in manufacture.items if item.item_code == "Self RM"),
+			"Stores - _TC",
+		)
 		manufacture.save()
 		frappe.new_doc(
 			"Stock Entry Detail",
@@ -290,6 +334,61 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].delivered_qty, 2)
 		self.assertEqual(scio.items[0].returned_qty, 1)
 
+	def test_process_loss_receipt_qty_for_multi_unit_bom(self):
+		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
+		new_bom.quantity = 2
+		for item in new_bom.items:
+			item.qty = 2
+		new_bom.submit()
+		sc_bom = frappe.get_doc("Subcontracting BOM", {"finished_good": "Basic FG Item"})
+		sc_bom.finished_good_bom = new_bom.name
+		sc_bom.save()
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.save()
+		manufacture.process_loss_qty = 1
+		manufacture.items[-1].qty = 4
+		manufacture.submit()
+
+		scio.reload()
+		rm_in = scio.make_rm_stock_entry_inward()
+		for item in rm_in.get("items"):
+			self.assertEqual(item.qty, 1)
+
+	def test_manufacture_consumption_validates_against_work_order(self):
+		"""Cover the non-skip-transfer manufacture path, where consumption is validated
+		against the Work Order's transferred quantity (the Work Order branch of
+		validate_manufacture)."""
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.wip_warehouse = "Work In Progress - _TC"
+		next(
+			item for item in wo.required_items if item.item_code == "Self RM"
+		).source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture")
+		).submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+
+		scio.reload()
+		self.assertEqual(scio.items[0].produced_qty, 5)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_delivery_of_overproduced_qty": 1})
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 20}
@@ -386,7 +485,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		scio.reload()
 		si = make_sales_invoice(so.name)
-		self.assertEqual(len(si.items), 1)
+		self.assertEqual(len(si.items), 0)
 
 	def test_extra_items_reservation_transfer(self):
 		so, scio = create_so_scio()

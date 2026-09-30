@@ -39,6 +39,7 @@ class PickListItem(Document):
 		stock_qty: DF.Float
 		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None
+		transferred_qty: DF.Float
 		uom: DF.Link | None
 		use_serial_batch_fields: DF.Check
 		warehouse: DF.Link | None

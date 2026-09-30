@@ -102,6 +102,8 @@ def identify_is_group(child):
 def get_chart(chart_template: str | None, existing_company: str | None = None):
 	chart = {}
 	if existing_company:
+		frappe.has_permission("Company", doc=existing_company, throw=True)
+
 		return get_account_tree_from_existing_company(existing_company)
 
 	elif chart_template == "Standard":
@@ -137,7 +139,7 @@ def get_charts_for_country(country: str, with_standard: bool = False):
 
 	def _get_chart_name(content):
 		if content:
-			content = json.loads(content)
+			content = frappe.parse_json(content)
 			if (
 				content and content.get("disabled", "No") == "No"
 			) or frappe.local.flags.allow_unverified_charts:

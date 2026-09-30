@@ -1,6 +1,10 @@
 import frappe
 from frappe import _
+from frappe.desk.query_report import get_filtered_data
 from frappe.model.docstatus import DocStatus
+from frappe.utils import add_days, getdate
+
+VALUE_FIELDNAMES = ("hours", "billing_hours", "billing_amount")
 
 
 def execute(filters=None):
@@ -9,8 +13,14 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters, group_fieldname)
 
-	data = get_data(filters, group_fieldname)
-	return columns, data
+	data = get_data(filters)
+	data = get_filtered_data("Timesheet", columns, data, frappe.session.user)
+	report_summary = get_report_summary(data)
+
+	if group_fieldname:
+		data = group_by(data, group_fieldname)
+
+	return columns, data, None, None, report_summary, 1
 
 
 def get_columns(filters, group_fieldname=None):
@@ -39,13 +49,12 @@ def get_columns(filters, group_fieldname=None):
 		},
 	}
 	columns = []
-	if group_fieldname:
-		columns.append(group_columns.get(group_fieldname))
-		columns.extend(
-			column for column in group_columns.values() if column.get("fieldname") != group_fieldname
-		)
-	else:
-		columns.extend(group_columns.values())
+	if group_fieldname in group_columns:
+		# the grouped column labels the group rows: keep it visible even when it is filtered too
+		group_columns[group_fieldname]["hidden"] = 0
+		columns.append(group_columns.pop(group_fieldname))
+
+	columns.extend(group_columns.values())
 
 	columns.extend(
 		[
@@ -81,7 +90,7 @@ def get_columns(filters, group_fieldname=None):
 	return columns
 
 
-def get_data(filters, group_fieldname=None):
+def get_data(filters):
 	_filters = []
 	if filters.get("employee"):
 		_filters.append(("employee", "=", filters.get("employee")))
@@ -90,7 +99,7 @@ def get_data(filters, group_fieldname=None):
 	if filters.get("from_date"):
 		_filters.append(("Timesheet Detail", "from_time", ">=", filters.get("from_date")))
 	if filters.get("to_date"):
-		_filters.append(("Timesheet Detail", "to_time", "<=", filters.get("to_date")))
+		_filters.append(("Timesheet Detail", "from_time", "<", add_days(getdate(filters.get("to_date")), 1)))
 	if not filters.get("include_draft_timesheets"):
 		_filters.append(("docstatus", "=", DocStatus.submitted()))
 	else:
@@ -112,35 +121,78 @@ def get_data(filters, group_fieldname=None):
 		order_by="`tabTimesheet Detail`.from_time",
 	)
 
-	return group_by(data, group_fieldname) if group_fieldname else data
+	return data
 
 
 def group_by(data, fieldname):
-	groups = {row.get(fieldname) for row in data}
-	grouped_data = []
-	for group in sorted(groups):
-		group_row = {
-			fieldname: group,
-			"hours": sum(row.get("hours") for row in data if row.get(fieldname) == group),
-			"billing_hours": sum(row.get("billing_hours") for row in data if row.get(fieldname) == group),
-			"billing_amount": sum(row.get("billing_amount") for row in data if row.get(fieldname) == group),
-			"indent": 0,
-			"is_group": 1,
-		}
-		if fieldname == "employee":
-			group_row["employee_name"] = next(
-				row.get("employee_name") for row in data if row.get(fieldname) == group
-			)
+	groups = {}
+	for row in data:
+		groups.setdefault(get_group_value(row, fieldname), []).append(row)
 
-		grouped_data.append(group_row)
-		for row in data:
-			if row.get(fieldname) != group:
-				continue
+	grouped_data = []
+	for group in sorted(groups, key=lambda g: (g is None, g)):
+		hours = billing_hours = billing_amount = 0
+		child_rows = []
+		for row in groups[group]:
+			hours += row.get("hours") or 0
+			billing_hours += row.get("billing_hours") or 0
+			billing_amount += row.get("billing_amount") or 0
 
 			_row = row.copy()
 			_row[fieldname] = None
 			_row["indent"] = 1
 			_row["is_group"] = 0
-			grouped_data.append(_row)
+			child_rows.append(_row)
+
+		group_row = {
+			fieldname: group,
+			"hours": hours,
+			"billing_hours": billing_hours,
+			"billing_amount": billing_amount,
+			"indent": 0,
+			"is_group": 1,
+		}
+		if fieldname == "employee":
+			group_row["employee_name"] = groups[group][0].get("employee_name")
+
+		grouped_data.append(group_row)
+		grouped_data.extend(child_rows)
 
 	return grouped_data
+
+
+def get_group_value(row, fieldname):
+	value = row.get(fieldname)
+	# `date` is `Timesheet Detail.from_time`, a datetime: everything logged on a day is one group
+	return getdate(value) if fieldname == "date" and value else value
+
+
+def get_report_summary(data):
+	if not data:
+		return None
+
+	totals = dict.fromkeys(VALUE_FIELDNAMES, 0.0)
+	for row in data:
+		for value_fieldname in VALUE_FIELDNAMES:
+			totals[value_fieldname] += row.get(value_fieldname) or 0
+
+	return [
+		{
+			"value": totals["hours"],
+			"indicator": "Blue",
+			"label": _("Total Working Hours"),
+			"datatype": "Float",
+		},
+		{
+			"value": totals["billing_hours"],
+			"indicator": "Blue",
+			"label": _("Total Billing Hours"),
+			"datatype": "Float",
+		},
+		{
+			"value": totals["billing_amount"],
+			"indicator": "Green",
+			"label": _("Total Billing Amount"),
+			"datatype": "Currency",
+		},
+	]

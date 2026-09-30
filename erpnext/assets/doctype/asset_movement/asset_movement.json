@@ -4,6 +4,7 @@
  "autoname": "format:ACC-ASM-{YYYY}-{#####}",
  "creation": "2016-04-25 18:00:23.559973",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-movement",
  "engine": "InnoDB",
  "field_order": [
   "company",
@@ -95,6 +96,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "move",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

@@ -4,9 +4,11 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case, CustomFunction
-from frappe.query_builder.functions import Count, Max, Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, CurDate, DateDiff, Max, Sum
 from frappe.utils import cint
+
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
@@ -37,9 +39,6 @@ def get_sales_details(doctype):
 	customer = frappe.qb.DocType("Customer")
 	sales_doctype = frappe.qb.DocType(doctype)
 
-	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
-	current_date = CustomFunction("CURRENT_DATE", [])
-
 	if doctype == "Sales Order":
 		total_considered = Sum(
 			Case()
@@ -55,9 +54,11 @@ def get_sales_details(doctype):
 		date_col = sales_doctype.posting_date
 
 	last_order_date = Max(date_col)
-	days_since_last_order = date_diff(current_date(), last_order_date)
+	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
+	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
+	days_since_last_order = DateDiff(CurDate(), last_order_date)
 
-	return (
+	query = (
 		frappe.qb.from_(customer)
 		.inner_join(sales_doctype)
 		.on(customer.name == sales_doctype.customer)
@@ -75,20 +76,31 @@ def get_sales_details(doctype):
 		.where(sales_doctype.docstatus == 1)
 		.groupby(customer.name)
 		.orderby(days_since_last_order, order=frappe.qb.desc)
-	).run(as_list=True)
+	)
+
+	if condition := get_allowed_companies_condition(sales_doctype.company, doctype):
+		query = query.where(condition)
+
+	return query.run(as_list=True)
 
 
 def get_last_sales_amt(customer, doctype):
 	sales_doctype = frappe.qb.DocType(doctype)
 	date_col = sales_doctype.transaction_date if doctype == "Sales Order" else sales_doctype.posting_date
 
-	res = (
+	query = (
 		frappe.qb.from_(sales_doctype)
 		.select(sales_doctype.base_net_total)
 		.where((sales_doctype.customer == customer) & (sales_doctype.docstatus == 1))
 		.orderby(date_col, order=frappe.qb.desc)
+		.orderby(sales_doctype.name, order=frappe.qb.desc)
 		.limit(1)
-	).run()
+	)
+
+	if condition := get_allowed_companies_condition(sales_doctype.company, doctype):
+		query = query.where(condition)
+
+	res = query.run()
 
 	return res and res[0][0] or 0
 

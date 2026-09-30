@@ -7,6 +7,7 @@
  "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/campaign",
  "engine": "InnoDB",
  "field_order": [
   "campaign",
@@ -64,7 +65,7 @@
    "width": "300px"
   }
  ],
- "icon": "fa fa-bullhorn",
+ "icon": "megaphone",
  "idx": 1,
  "links": [],
  "modified": "2024-03-27 13:06:43.861206",

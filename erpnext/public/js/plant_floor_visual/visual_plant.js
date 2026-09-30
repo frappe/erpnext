@@ -145,6 +145,14 @@ class VisualPlantFloor {
 		});
 
 		$(template).appendTo(this.wrapper.find(".plant-floor-container"));
+
+		this.wrapper.find(".workstation-image").on("click", (e) => {
+			let workstation_name = $(e.currentTarget)
+				.closest(".workstation-wrapper")
+				.attr("data-workstation");
+			frappe.route_options = { workstation: workstation_name };
+			frappe.set_route("shop-floor");
+		});
 	}
 
 	prepare_menu() {
@@ -168,7 +176,7 @@ class VisualPlantFloor {
 				.find(".workstation-image-container")
 				.append(
 					`<div class="workstation-image-cls workstation-abbr" style="margin:6px; height:82px">${frappe.get_abbr(
-						data.name,
+						frappe.utils.escape_html(data.name),
 						2
 					)}</div>`
 				);

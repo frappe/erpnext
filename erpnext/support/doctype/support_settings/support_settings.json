@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2017-02-17 13:07:35.686409",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/support-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -157,6 +158,7 @@
  ],
  "grid_page_length": 50,
  "hide_toolbar": 0,
+ "icon": "settings",
  "issingle": 1,
  "links": [],
  "modified": "2026-03-16 16:33:45.859541",

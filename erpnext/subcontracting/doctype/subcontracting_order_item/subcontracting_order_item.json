@@ -174,6 +174,7 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -425,7 +426,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-27 23:03:36.436504",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",

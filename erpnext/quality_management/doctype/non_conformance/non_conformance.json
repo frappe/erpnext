@@ -3,6 +3,7 @@
  "autoname": "format:QA-NC-{#####}",
  "creation": "2020-10-21 14:49:50.350136",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/non-conformance",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -79,6 +80,7 @@
    "label": "Preventive Action"
   }
  ],
+ "icon": "triangle-alert",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-03-27 13:10:06.304357",

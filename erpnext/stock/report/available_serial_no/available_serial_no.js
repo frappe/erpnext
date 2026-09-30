@@ -77,4 +77,4 @@ frappe.query_reports["Available Serial No"] = {
 	},
 };
 
-erpnext.utils.add_inventory_dimensions("Balance Serial No", 10);
+erpnext.utils.add_inventory_dimensions("Available Serial No", 10);

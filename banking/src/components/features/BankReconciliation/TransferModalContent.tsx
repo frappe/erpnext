@@ -490,7 +490,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                                 <Calendar size='16px' />
                                 <span className='text-sm'>{formatDate(data.message.date, 'Do MMM YYYY')}</span>
                             </div>
-                            <span className='text-sm line-clamp-1' title={data.message.description}>{data.message.description}</span>
+                            <span className='text-p-sm line-clamp-1' title={data.message.description}>{data.message.description}</span>
                         </div>
                     </div>
                 </div>

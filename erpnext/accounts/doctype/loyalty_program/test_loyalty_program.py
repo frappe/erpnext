@@ -1,8 +1,9 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
+from unittest.mock import patch
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, getdate, today
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
@@ -195,7 +196,7 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		for d in company_wise_info:
 			self.assertTrue(d.get("loyalty_points"))
 
-	@unittest.mock.patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_details")
+	@patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_details")
 	def test_tier_selection(self, mock_get_loyalty_details):
 		# Create a new loyalty program with multiple tiers
 		loyalty_program = frappe.get_doc(
@@ -262,14 +263,12 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 
 def get_points_earned(self):
 	def get_returned_amount():
-		returned_amount = frappe.db.sql(
-			"""
-			select sum(grand_total)
-			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
-		""",
-			self.name,
-		)
+		si = frappe.qb.DocType("Sales Invoice")
+		returned_amount = (
+			frappe.qb.from_(si)
+			.select(Sum(si.grand_total))
+			.where((si.docstatus == 1) & (si.is_return == 1) & (si.return_against == self.name))
+		).run()
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 
 	lp_details = get_loyalty_program_details_with_points(

@@ -1,13 +1,21 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import frappe
-from frappe.utils import fmt_money
+from frappe.utils import flt, fmt_money
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import (
 	execute as bom_stock_analysis_report,
 )
+from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import (
+	get_bom_data,
+	get_producible_fg_items,
+)
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -78,6 +86,164 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 			set(tuple(sorted(r.items())) for r in expected_data),
 		)
 		self.assertEqual(footer.get("description"), expected_min)
+
+	def test_components_without_stock_in_selected_warehouse_remain_visible(self):
+		group = create_warehouse("_Test BOM Stock Analysis Group", {"is_group": 1})
+		warehouse = create_warehouse("_Test BOM Stock Analysis Stores", {"parent_warehouse": group})
+		stocked_item, missing_item = self.rm_items
+		create_stock_reconciliation(item_code=stocked_item, warehouse=warehouse, qty=100, rate=100)
+		self.assertFalse(frappe.db.exists("Bin", {"item_code": missing_item, "warehouse": warehouse}))
+
+		for selected_warehouse in (warehouse, group):
+			for exploded in (False, True):
+				with self.subTest(warehouse=selected_warehouse, exploded=exploded):
+					items, footer = run_report(self.boms[0].name, selected_warehouse, exploded, qty_to_make=1)
+					self.assertEqual(set(items), {stocked_item, missing_item})
+					self.assertEqual(items[stocked_item]["available_qty"], fmt_qty(100))
+					self.assertEqual(items[missing_item]["available_qty"], fmt_qty(0))
+					self.assertEqual(items[missing_item]["required_qty"], fmt_qty(10))
+					self.assertEqual(items[missing_item]["difference_qty"], fmt_qty(-10))
+					self.assertEqual(footer["description"], 0)
+
+		items, footer = run_report(self.boms[0].name, warehouse, exploded=False, qty_to_make=0)
+		self.assertEqual(set(items), {stocked_item, missing_item})
+		self.assertEqual(items[missing_item]["available_qty"], fmt_qty(0))
+		self.assertEqual(footer["description"], 0)
+
+	def _build_duplicate_component_bom(self, phantom_first):
+		"""Parent BOM that lists one `component` twice, once via a phantom sub-BOM and once via a
+		non-phantom sub-BOM. `phantom_first` controls which line is at idx 1. Returns the names of
+		(parent_bom, rm_phantom, rm_normal, component)."""
+		rm_phantom = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		rm_normal = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		component = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		# Phantom sub-BOM created first -> smaller auto-name; non-phantom second -> larger name,
+		# which is exactly what the old Max(bom_no) would (incorrectly) pick.
+		phantom_bom = make_bom(item=component, raw_materials=[rm_phantom], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+		normal_bom = make_bom(item=component, raw_materials=[rm_normal])
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		first_bom, second_bom = (
+			(phantom_bom.name, normal_bom.name) if phantom_first else (normal_bom.name, phantom_bom.name)
+		)
+		parent = make_bom(item=fg_item, raw_materials=[component], do_not_save=True)
+		parent.items[0].bom_no = first_bom
+		component_doc = frappe.get_doc("Item", component)
+		parent.append(
+			"items",
+			{
+				"item_code": component,
+				"qty": 1,
+				"uom": component_doc.stock_uom,
+				"stock_uom": component_doc.stock_uom,
+				"bom_no": second_bom,
+			},
+		)
+		parent.save()
+		parent.submit()
+		return parent.name, rm_phantom, rm_normal, component
+
+	def _assert_phantom_exploded(self, parent_bom, rm_phantom, rm_normal, component):
+		raw_data = bom_stock_analysis_report(filters={"qty_to_make": 1, "bom": parent_bom})[1]
+		items = {row.get("item") for row in raw_data if row}
+		# Phantom sub-BOM exploded -> its raw material appears; the component row is replaced.
+		self.assertIn(rm_phantom, items)
+		self.assertNotIn(component, items)
+		# The non-phantom line's sub-BOM must NOT be mis-exploded.
+		self.assertNotIn(rm_normal, items)
+
+	def test_phantom_explosion_picks_coherent_sub_bom(self):
+		"""bom_no and is_phantom_item must come from the SAME BOM Item line.
+
+		When a component is listed more than once in a BOM pointing at different sub-BOMs
+		(one phantom, one not), the report groups both lines into a single row by item_code.
+		Aggregating bom_no and is_phantom_item with independent Max() could pair the phantom
+		flag of one line with the bom_no of the other, so explode_phantom_boms recurses into
+		the wrong sub-BOM. We now take one coherent representative line, so the phantom sub-BOM
+		is the one exploded.
+		"""
+		self._assert_phantom_exploded(*self._build_duplicate_component_bom(phantom_first=True))
+
+	def test_phantom_explosion_when_phantom_line_is_not_first(self):
+		"""The phantom flag must win regardless of line order.
+
+		If the non-phantom line is listed first (idx 1) and the phantom line second, a naive
+		first-line representative would drop the phantom flag and skip the sub-BOM explosion.
+		The representative is phantom-preferring, so the phantom sub-BOM is still exploded.
+		"""
+		self._assert_phantom_exploded(*self._build_duplicate_component_bom(phantom_first=False))
+
+	def test_bom_data_is_not_multiplied_by_the_bin_join(self):
+		"""Bin joins one row per warehouse, BOM Item one per line -- neither sum may count the other.
+
+		With the component listed on two BOM lines and stocked in two warehouses, the join yields
+		four rows. Summing qty_consumed_per_unit over it counts each line once per warehouse, and
+		summing actual_qty counts each warehouse once per line.
+		"""
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10})
+		fg = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		bom = make_bom(item=fg, raw_materials=[rm.name], rm_qty=2, do_not_save=True)
+		bom.append(
+			"items",
+			{"item_code": rm.name, "qty": 3, "uom": rm.stock_uom, "stock_uom": rm.stock_uom},
+		)
+		bom.save()
+		bom.submit()
+
+		for suffix, qty in (("A", 6), ("B", 4)):
+			warehouse = create_warehouse(f"_Test BOM Stock Analysis {suffix}")
+			create_stock_reconciliation(item_code=rm.name, warehouse=warehouse, qty=qty, rate=10)
+
+		rows = [row for row in get_bom_data({"bom": bom.name}) if row.item_code == rm.name]
+		self.assertEqual(len(rows), 1)
+
+		lines = [line for line in bom.items if line.item_code == rm.name]
+		self.assertEqual(len(lines), 2)
+
+		self.assertAlmostEqual(
+			flt(rows[0].qty_per_unit),
+			sum(flt(line.qty_consumed_per_unit) for line in lines),
+			places=6,
+		)
+		self.assertAlmostEqual(flt(rows[0].actual_qty), 10.0, places=6)
+
+	def test_producible_qty_per_unit_sums_repeated_lines(self):
+		"""An item on two BOM lines shows the total per unit, the same basis as the producible qty."""
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10})
+		fg = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		bom = make_bom(item=fg, raw_materials=[rm.name], rm_qty=2, do_not_save=True)
+		bom.append(
+			"items",
+			{"item_code": rm.name, "qty": 3, "uom": rm.stock_uom, "stock_uom": rm.stock_uom},
+		)
+		bom.save()
+		bom.submit()
+
+		warehouse = create_warehouse("_Test BOM Stock Analysis Producible")
+		create_stock_reconciliation(item_code=rm.name, warehouse=warehouse, qty=10, rate=10)
+
+		rows = get_producible_fg_items({"bom": bom.name, "warehouse": warehouse})
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(flt(rows[0].qty_per_unit), 5.0)
+		self.assertEqual(flt(rows[0].producible_qty), 2.0)
+
+
+def run_report(bom, warehouse, exploded, qty_to_make):
+	"""Component rows keyed by item code, plus the footer row."""
+	filters = {
+		"bom": bom,
+		"warehouse": warehouse,
+		"show_exploded_view": exploded,
+		"qty_to_make": qty_to_make,
+	}
+	data, footer = split_data_and_footer(bom_stock_analysis_report(filters)[1])
+	return {row["item"]: row for row in data}, footer
 
 
 def split_data_and_footer(raw_data):

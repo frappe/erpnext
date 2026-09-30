@@ -2,7 +2,6 @@ import { useAtomValue } from "jotai"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
-import { Paragraph } from "@/components/ui/typography"
 import { useCallback, useMemo } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useFrappeGetCall } from "frappe-react-sdk"
@@ -19,6 +18,7 @@ import _ from "@/lib/translate"
 import { toast } from "sonner"
 import { useCopyToClipboard } from "usehooks-ts"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const BankReconciliationStatement = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -189,28 +189,30 @@ const BankReconciliationStatementView = () => {
         return data.message.result.filter((row: BankClearanceSummaryEntry) => Boolean(row.payment_entry))
     }, [data])
 
-    return <div className="space-y-4 py-2">
+    const content = _("Below is a list of all entries posted against the bank account {0} which have not been cleared till {1}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formatDate(dates.toDate)}</strong>`])
 
-        <div>
-            <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("Below is a list of all entries posted against the bank account {0} which have not been cleared till {1}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formatDate(dates.toDate)}</strong>`])
-                }} />
-            </Paragraph>
+    return <div className="flex min-h-0 flex-1 flex-col space-y-4 py-2">
+
+        <div className="shrink-0">
+            <span className="text-p-sm">
+                <MarkdownRenderer content={content} />
+            </span>
         </div>
 
         {error && <ErrorBanner error={error} />}
 
-        {data && <SummarySection data={data} />}
+        {data && <div className="shrink-0"><SummarySection data={data} /></div>}
 
         {data && data.message.result.length > 0 && (
-            <div className="space-y-2">
-                <p className="text-ink-gray-5 text-sm">{_("Bank Reconciliation Statement")}</p>
+            <div className="flex min-h-0 flex-1 flex-col space-y-2">
+                <p className="shrink-0 text-ink-gray-5 text-sm">{_("Bank Reconciliation Statement")}</p>
                 <ListView
                     data={statementRows}
                     columns={statementColumns}
                     getRowId={(row) => row.payment_entry}
-                    maxHeight="min(70vh, 640px)"
+                    className="min-h-0 flex-1"
+                    maxHeight="none"
+                    scrollAreaClassName="flex-1"
                     emptyState={_("No entries with a payment document in this list.")}
                 />
             </div>

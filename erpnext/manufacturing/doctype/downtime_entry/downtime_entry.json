@@ -4,6 +4,7 @@
  "autoname": "naming_series:",
  "creation": "2020-04-18 04:50:46.187638",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/downtime-entry",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -89,6 +90,7 @@
    "reqd": 1
   }
  ],
+ "icon": "clock-alert",
  "links": [],
  "modified": "2024-03-27 13:08:18.393488",
  "modified_by": "Administrator",

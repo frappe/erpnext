@@ -20,11 +20,11 @@
 			<hr style="margin: 15px -15px;">
 			<p>
 				{% if data.value %}
-				<a style="margin-right: 7px; margin-bottom: 7px" class="btn btn-default btn-xs" href="#Form/Work Order/{{ data.value }}">
+				<a style="margin-right: 7px; margin-bottom: 7px" class="btn btn-default btn-xs" href="#Form/Work Order/{{ frappe.utils.escape_html(data.value) }}">
 					{{ __("Open Work Order {0}", [data.value.bold()]) }}</a>
 				{% endif %}
 				{% if data.item_code %}
-				<a class="btn btn-default btn-xs" href="#Form/Item/{{ data.item_code }}">
+				<a class="btn btn-default btn-xs" href="#Form/Item/{{ frappe.utils.escape_html(data.item_code) }}">
 					{{ __("Open Item {0}", [data.item_code.bold()]) }}</a>
 				{% endif %}
 			</p>

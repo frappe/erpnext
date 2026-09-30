@@ -34,6 +34,7 @@ def complete_onboarding_steps_if_record_exists(steps):
 		if (
 			step.action == "Create Entry"
 			and step.reference_document
+			and frappe.db.exists("DocType", step.reference_document)
 			and frappe.get_all(step.reference_document, limit=1)
 		):
 			frappe.db.set_value("Onboarding Step", step.name, "is_complete", 1, update_modified=False)

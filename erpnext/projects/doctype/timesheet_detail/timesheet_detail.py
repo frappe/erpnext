@@ -105,7 +105,7 @@ class TimesheetDetail(Document):
 	def validate_dates(self):
 		"""Validate that to_time is not before from_time."""
 		if self.from_time and self.to_time and time_diff_in_hours(self.to_time, self.from_time) < 0:
-			frappe.throw(_("To Time cannot be before from date"))
+			frappe.throw(_("To Time cannot be before From Time"))
 
 	def validate_parent_project(self, parent_project: str):
 		"""Validate that project is same as Timesheet's parent project."""

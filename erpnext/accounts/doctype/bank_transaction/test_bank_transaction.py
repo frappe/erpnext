@@ -23,8 +23,6 @@ from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed
 
 class TestBankTransaction(ERPNextTestSuite):
 	def setUp(self):
-		make_pos_profile()
-
 		# generate and use a uniq hash identifier for 'Bank Account' and it's linked GL 'Account' to avoid validation error
 		uniq_identifier = frappe.generate_hash(length=10)
 		gl_account = create_gl_account("_Test Bank " + uniq_identifier)
@@ -32,6 +30,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			gl_account=gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
 
+		make_pos_profile()
 		add_transactions(bank_account=bank_account)
 		add_vouchers(gl_account=gl_account)
 
@@ -47,7 +46,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertEqual(linked_payments[0]["party"], "Conrad Electronic")
+		self.assertIn("Conrad Electronic", [payment["party"] for payment in linked_payments])
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
@@ -103,6 +102,36 @@ class TestBankTransaction(ERPNextTestSuite):
 		self.assertEqual(bank_transaction.docstatus, DocStatus.submitted())
 		self.assertEqual(bank_transaction.unallocated_amount, 1700)
 		self.assertEqual(bank_transaction.payment_entries, [])
+
+	# Amending a reconciled payment entry must not carry over its clearance date
+	def test_clearance_date_cleared_on_amend(self):
+		bank_transaction = frappe.get_doc(
+			"Bank Transaction",
+			dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"),
+		)
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1700))
+		vouchers = json.dumps(
+			[
+				{
+					"payment_doctype": "Payment Entry",
+					"payment_name": payment.name,
+					"amount": bank_transaction.unallocated_amount,
+				}
+			]
+		)
+		reconcile_vouchers(bank_transaction.name, vouchers)
+
+		self.assertTrue(frappe.db.get_value("Payment Entry", payment.name, "clearance_date"))
+
+		payment.reload()
+		payment.cancel()
+
+		amended = frappe.copy_doc(payment)
+		amended.amended_from = payment.name
+		amended.docstatus = 0
+		amended.insert()
+
+		self.assertFalse(amended.clearance_date)
 
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):

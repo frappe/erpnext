@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	if filters.from_date >= filters.to_date:
@@ -82,6 +84,10 @@ def get_subcontract_orders(filters):
 		["transaction_date", ">=", filters.from_date],
 		["docstatus", "=", 1],
 	]
+
+	order = frappe.qb.DocType("Subcontracting Order")
+	if condition := get_allowed_companies_condition(order.company, "Subcontracting Order"):
+		record_filters.append(condition)
 
 	return frappe.get_all(
 		"Subcontracting Order", filters=record_filters, fields=["name", "transaction_date", "supplier"]

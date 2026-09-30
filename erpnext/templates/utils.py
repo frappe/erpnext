@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.query_builder.functions import Lower
 from frappe.rate_limiter import rate_limit
 from frappe.utils import escape_html
 
@@ -24,13 +25,8 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 		# Meant to silently fail instead of throwing error.
 		return
 
-	lead = customer = None
-	customer = frappe.db.sql(
-		"""select distinct dl.link_name from `tabDynamic Link` dl
-		left join `tabContact` c on dl.parent=c.name where dl.link_doctype='Customer'
-		and c.email_id = %s""",
-		sender,
-	)
+	lead = None
+	customer = get_customer_from_contact_email(sender)
 
 	if not customer:
 		lead = frappe.db.get_value("Lead", dict(email_id=sender))
@@ -68,3 +64,17 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 		}
 	)
 	comm.insert(ignore_permissions=True)
+
+
+def get_customer_from_contact_email(sender: str):
+	dl = frappe.qb.DocType("Dynamic Link")
+	contact = frappe.qb.DocType("Contact")
+	return (
+		frappe.qb.from_(dl)
+		.left_join(contact)
+		.on(dl.parent == contact.name)
+		.select(dl.link_name)
+		.distinct()
+		.where((dl.link_doctype == "Customer") & (Lower(contact.email_id) == sender.lower()))
+		.run()
+	)

@@ -85,15 +85,7 @@ class SalesOrderStockReservation:
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		packed_items = []
-		if items_details:
-			for item in items_details:
-				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
-					item["qty"] = item.pop("qty_to_reserve")
-					packed_items.append(item)
-
-			for item in packed_items:
-				items_details.remove(item)
+		packed_items = self._extract_packed_item_details(items_details, from_voucher_type)
 
 		sre_count = 0
 		if items_details != []:
@@ -104,22 +96,52 @@ class SalesOrderStockReservation:
 				notify=notify,
 			)
 
-		items = []
-		if packed_items:
-			items = packed_items
-		elif not items_details:
-			items = [item for item in self.doc.packed_items if item.reserve_stock]
-
+		items = self._packed_items_to_reserve(items_details, packed_items)
 		if items:
-			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+			self._reserve_packed_items(items, sre_count, notify)
 
-			stock_reservation = StockReservation(doc=self.doc, items=items)
-			stock_reservation.table_name = "packed_items"
-			stock_reservation.qty_field = "qty"
-			is_sre_created = stock_reservation.make_stock_reservation_entries()
+	def _extract_packed_item_details(
+		self, items_details: list[dict] | None, from_voucher_type: str | None = None
+	) -> list:
+		"""Pull packed-item rows (whose Sales Order Item no longer exists) out of items_details
+		and rewrite them into the payload StockReservation reads."""
+		if not items_details:
+			return []
 
-			if notify and is_sre_created and not sre_count:
-				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
+		packed_items = [
+			item
+			for item in items_details
+			if not frappe.db.exists("Sales Order Item", item.get("sales_order_item"))
+		]
+
+		for item in packed_items:
+			items_details.remove(item)
+			item["qty"] = item.pop("qty_to_reserve")
+			item["from_voucher_type"] = from_voucher_type
+
+			picked_bundle = item.pop("serial_and_batch_bundle", None)
+			if picked_bundle:
+				item["serial_and_batch_bundles"] = [picked_bundle]
+
+		return packed_items
+
+	def _packed_items_to_reserve(self, items_details: list[dict] | None, packed_items: list) -> list:
+		if packed_items:
+			return packed_items
+		if not items_details:
+			return [item for item in self.doc.packed_items if item.reserve_stock]
+		return []
+
+	def _reserve_packed_items(self, items: list, sre_count: int, notify: bool) -> None:
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+
+		stock_reservation = StockReservation(doc=self.doc, items=items)
+		stock_reservation.table_name = "packed_items"
+		stock_reservation.qty_field = "qty"
+		is_sre_created = stock_reservation.make_stock_reservation_entries()
+
+		if notify and is_sre_created and not sre_count:
+			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
 	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items."""

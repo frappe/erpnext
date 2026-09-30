@@ -306,6 +306,31 @@ class TestAccount(ERPNextTestSuite):
 		acc.account_currency = "USD"
 		self.assertRaises(frappe.ValidationError, acc.save)
 
+	def test_stock_account_type_change_with_ledger_entries(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		stock_account = get_warehouse_account(frappe.get_doc("Warehouse", warehouse))
+
+		make_stock_entry(
+			item_code="_Test Item",
+			target=warehouse,
+			company=company,
+			qty=5,
+			basic_rate=100,
+		)
+
+		account = frappe.get_doc("Account", stock_account)
+		self.assertEqual(account.account_type, "Stock")
+
+		account.account_type = ""
+		self.assertRaises(frappe.ValidationError, account.save)
+
+		account.reload()
+		account.account_name = f"{account.account_name} Updated"
+		account.save()  # non-type change stays allowed
+
 	def test_account_balance(self):
 		from erpnext.accounts.utils import get_balance_on
 

@@ -84,7 +84,8 @@ def build_query_filters(filters: dict | None = None) -> list:
 	qb_filters = []
 	if filters:
 		if filters.account:
-			qb_filters.append(qb.Field("account").isin(filters.account))
+			accounts = filters.account if isinstance(filters.account, list | tuple) else [filters.account]
+			qb_filters.append(qb.Field("account").isin(accounts))
 
 		if filters.voucher_no:
 			qb_filters.append(qb.Field("voucher_no").eq(filters.voucher_no))

@@ -65,6 +65,40 @@ class TestQualityProcedure(ERPNextTestSuite):
 		child_qp.reload()
 		self.assertEqual(child_qp.parent_quality_procedure, None)
 
+	def test_on_trash_clears_referencing_process(self):
+		# Build a parent group with a sub-procedure. The parent's child table gets a
+		# `Quality Procedure Process` row whose `procedure` field points at the child.
+		child_qp = create_procedure(
+			{
+				"quality_procedure_name": "Test Child On Trash",
+				"is_group": 0,
+			}
+		)
+		create_procedure(
+			{
+				"quality_procedure_name": "Test Group On Trash",
+				"is_group": 1,
+				"processes": [dict(procedure=child_qp.name)],
+			}
+		)
+
+		# Sanity: a process row in the parent references the child by name.
+		referencing_rows = frappe.get_all(
+			"Quality Procedure Process",
+			filters={"procedure": child_qp.name},
+			pluck="name",
+		)
+		self.assertTrue(referencing_rows)
+
+		# Deleting the child runs on_trash() -> the converted UPDATE clears `procedure`.
+		child_qp.delete()
+
+		for row_name in referencing_rows:
+			self.assertEqual(
+				frappe.db.get_value("Quality Procedure Process", row_name, "procedure"),
+				"",
+			)
+
 	def remove_child_from_old_parent(self):
 		child_qp = create_procedure(
 			{

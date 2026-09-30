@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, flt, getdate
+from frappe.utils import cint, flt, getdate
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
 
@@ -43,23 +43,29 @@ def update_last_purchase_rate(doc, is_submit) -> None:
 				frappe.throw(_("UOM Conversion factor is required in row {0}").format(d.idx))
 
 		# update last purchsae rate
-		frappe.db.set_value("Item", d.item_code, "last_purchase_rate", flt(last_purchase_rate))
+		frappe.db.set_value(
+			"Item", d.item_code, "last_purchase_rate", flt(last_purchase_rate), update_modified=False
+		)
 
 
 def validate_for_items(doc) -> None:
-	items = []
 	for d in doc.get("items"):
 		set_stock_levels(row=d)  # update with latest quantities
 		item = validate_item_and_get_basic_data(row=d)
 		validate_stock_item_warehouse(row=d, item=item)
 		validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
 
-		items.append(cstr(d.item_code))
+	validate_duplicate_items(doc)
 
-	if (
-		items
-		and len(items) != len(set(items))
-		and not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0)
+
+def validate_duplicate_items(doc) -> None:
+	rows = [
+		(row.item_code, row.get("purchase_receipt"), row.get("purchase_order"))
+		for row in doc.get("items")
+		if row.item_code
+	]
+	if len(rows) != len(set(rows)) and not cint(
+		frappe.db.get_single_value("Buying Settings", "allow_multiple_items")
 	):
 		frappe.throw(_("Same item cannot be entered multiple times."))
 
@@ -124,12 +130,38 @@ def check_on_hold_or_closed_status(doctype, docname) -> None:
 
 
 @frappe.whitelist()
-def get_linked_material_requests(items: str):
+def get_linked_material_requests(items: str | list):
 	"""
 	Retrieve Material Requests linked to a list of items.
 	"""
 
-	items = json.loads(items)
+	try:
+		items = frappe.parse_json(items)
+	except (TypeError, ValueError):
+		frappe.throw(_("Items must be a list of Item codes"))
+
+	if isinstance(items, str):
+		items = [items]
+
+	if not isinstance(items, list | tuple) or any(not isinstance(item, str) for item in items):
+		frappe.throw(_("Items must be a list of Item codes"))
+
+	permitted_material_requests = frappe.get_list(
+		"Material Request",
+		filters=[
+			["material_request_type", "=", "Purchase"],
+			["docstatus", "=", 1],
+			["status", "!=", "Stopped"],
+			["per_ordered", "<", 99.99],
+			["Material Request Item", "item_code", "in", items],
+		],
+		pluck="name",
+		distinct=True,
+	)
+
+	if not permitted_material_requests:
+		return []
+
 	mr_list = []
 
 	mr = frappe.qb.DocType("Material Request")
@@ -146,6 +178,7 @@ def get_linked_material_requests(items: str):
 				mr_item.item_code,
 				mr_item.name.as_("mr_item"),
 			)
+			.where(mr.name.isin(permitted_material_requests))
 			.where(mr_item.item_code == item)
 			.where(mr.material_request_type == "Purchase")
 			.where(mr.per_ordered < 99.99)

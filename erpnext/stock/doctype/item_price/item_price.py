@@ -28,7 +28,7 @@ class ItemPrice(Document):
 		currency: DF.Link | None
 		customer: DF.Link | None
 		item_code: DF.Link
-		item_description: DF.Text | None
+		item_description: DF.TextEditor | None
 		item_name: DF.Data | None
 		lead_time_days: DF.Int
 		note: DF.Text | None
@@ -68,7 +68,7 @@ class ItemPrice(Document):
 
 			if not price_list_details:
 				link = frappe.utils.get_link_to_form("Price List", self.price_list)
-				frappe.throw(f"The price list {link} does not exist or is disabled")
+				frappe.throw(_("The price list {0} does not exist or is disabled").format(link))
 
 			self.buying, self.selling, self.currency = price_list_details
 

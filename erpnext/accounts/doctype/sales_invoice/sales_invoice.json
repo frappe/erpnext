@@ -4,6 +4,7 @@
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-invoice",
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
@@ -170,6 +171,10 @@
   "shipping_address_section",
   "shipping_address_name",
   "shipping_address",
+  "shipping_contact_person",
+  "shipping_contact_display",
+  "shipping_contact_mobile",
+  "shipping_contact_email",
   "shipping_addr_col_break",
   "dispatch_address_name",
   "dispatch_address",
@@ -297,7 +302,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Tax Id",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -591,6 +595,46 @@
    "read_only": 1
   },
   {
+   "fieldname": "shipping_contact_person",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.full_name",
+   "fieldname": "shipping_contact_display",
+   "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.mobile_no",
+   "fieldname": "shipping_contact_mobile",
+   "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Mobile No",
+   "options": "Phone",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.email_id",
+   "fieldname": "shipping_contact_email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "company_address",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -610,6 +654,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "depends_on": "customer",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
@@ -1747,6 +1792,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fetch_from": "sales_partner.commission_rate",
    "fetch_if_empty": 1,
    "fieldname": "commission_rate",
@@ -1754,16 +1800,19 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Commission Rate (%)",
+   "no_copy": 1,
    "oldfieldname": "commission_rate",
    "oldfieldtype": "Currency",
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "total_commission",
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Commission",
+   "no_copy": 1,
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1936,6 +1985,7 @@
    "allow_on_submit": 1,
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Discount Account",
    "options": "Account"
   },
@@ -1970,9 +2020,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -2344,7 +2396,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "receipt-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [
@@ -2354,7 +2406,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-05-28 12:15:12.486443",
+ "modified": "2026-08-14 12:43:19.480555",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

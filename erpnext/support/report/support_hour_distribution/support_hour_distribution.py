@@ -51,17 +51,7 @@ def get_data(filters):
 
 
 def get_hours_count(start_time, end_time):
-	data = (
-		frappe.db.sql(
-			""" select count(*) from `tabIssue` where creation
-		between %(start_time)s and %(end_time)s""",
-			{"start_time": start_time, "end_time": end_time},
-			as_list=1,
-		)
-		or []
-	)
-
-	return data[0][0] if len(data) > 0 else 0
+	return frappe.db.count("Issue", {"creation": ["between", [start_time, end_time]]})
 
 
 def get_columns():

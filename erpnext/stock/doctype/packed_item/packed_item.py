@@ -12,7 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
 
 
 class PackedItem(Document):
@@ -56,16 +56,7 @@ class PackedItem(Document):
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
-	def set_actual_and_projected_qty(self):
-		"Set actual and projected qty based on warehouse and item_code"
-		_bin = frappe.db.get_value(
-			"Bin",
-			{"item_code": self.item_code, "warehouse": self.warehouse},
-			["actual_qty", "projected_qty"],
-			as_dict=True,
-		)
-		self.actual_qty = _bin.actual_qty if _bin else 0
-		self.projected_qty = _bin.projected_qty if _bin else 0
+	pass
 
 
 def make_packing_list(doc):
@@ -288,15 +279,22 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
 	# TODO batch_no, actual_batch_qty, incoming_rate
 	if main_item_row.get("so_detail"):
-		pi_row.warehouse = frappe.get_value(
-			"Packed Item",
-			{
-				"parent_detail_docname": main_item_row.so_detail,
-				"parent_item": main_item_row.item_code,
-				"item_code": packing_item.item_code,
-			},
-			"warehouse",
+		warehouse, reserve_stock = (
+			frappe.get_value(
+				"Packed Item",
+				{
+					"parent_detail_docname": main_item_row.so_detail,
+					"parent_item": main_item_row.item_code,
+					"item_code": packing_item.item_code,
+				},
+				["warehouse", "reserve_stock"],
+			)
+			or None,
+			None,
 		)
+
+		if reserve_stock:
+			pi_row.warehouse = warehouse
 
 	if not pi_row.warehouse and not doc.amended_from:
 		fetch_warehouse = doc.get("is_pos") or item_data.is_stock_item or not item_data.default_warehouse
@@ -326,7 +324,8 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row):
 		},
 		["warehouse", "batch_no", "serial_no"],
 		as_dict=True,
-		order_by="qty desc",
+		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
+		order_by="qty desc, name asc",
 	)
 
 	if not pl_row:
@@ -343,7 +342,7 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 		return
 
 	item_doc = frappe.get_cached_doc("Item", pi_row.item_code)
-	ctx = ItemDetailsCtx(pi_row.as_dict().copy())
+	ctx = frappe._dict(pi_row.as_dict().copy())
 	ctx.update(
 		{
 			"company": doc.get("company"),
@@ -432,7 +431,7 @@ def on_doctype_update():
 
 
 @frappe.whitelist()
-def get_items_from_product_bundle(row: str):
+def get_items_from_product_bundle(row: str | dict):
 	"""Item details for each component of a Product Bundle.
 
 	``row.product_bundle`` selects a specific version by document name (the buying
@@ -441,7 +440,7 @@ def get_items_from_product_bundle(row: str):
 	"""
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 
-	row, items = ItemDetailsCtx(json.loads(row)), []
+	row, items = frappe._dict(frappe.parse_json(row)), []
 
 	if bundle_name := row.get("product_bundle"):
 		frappe.has_permission("Product Bundle", "read", bundle_name, throw=True)

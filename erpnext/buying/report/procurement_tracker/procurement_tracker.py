@@ -4,7 +4,10 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Min
 from frappe.utils import flt
+
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
@@ -211,6 +214,8 @@ def get_mapped_mr_details(filters):
 		.where((parent.per_ordered >= 0) & (parent.name == child.parent) & (parent.docstatus == 1))
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
+	if condition := get_allowed_companies_condition(parent.company, "Material Request"):
+		query = query.where(condition)
 
 	mr_details = query.run(as_dict=True)
 
@@ -278,6 +283,23 @@ def get_po_entries(filters):
 	parent = frappe.qb.DocType("Purchase Order")
 	child = frappe.qb.DocType("Purchase Order Item")
 
+	# one coherent representative line per (PO, material_request_item): per-column Max() over the
+	# old GROUP BY could stitch values from different PO lines into a row that never existed
+	representative_lines = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(Min(child.name))
+		.where(
+			(parent.docstatus == 1)
+			& (parent.name == child.parent)
+			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
+		)
+		.groupby(child.parent, child.material_request_item)
+	)
+	representative_lines = apply_filters_on_query(filters, parent, child, representative_lines)
+	if condition := get_allowed_companies_condition(parent.company, "Purchase Order"):
+		representative_lines = representative_lines.where(condition)
+
 	query = (
 		frappe.qb.from_(parent)
 		.from_(child)
@@ -300,13 +322,7 @@ def get_po_entries(filters):
 			parent.status,
 			parent.owner,
 		)
-		.where(
-			(parent.docstatus == 1)
-			& (parent.name == child.parent)
-			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
-		)
-		.groupby(parent.name, child.material_request_item)
+		.where((parent.name == child.parent) & (child.name.isin(representative_lines)))
 	)
-	query = apply_filters_on_query(filters, parent, child, query)
 
 	return query.run(as_dict=True)

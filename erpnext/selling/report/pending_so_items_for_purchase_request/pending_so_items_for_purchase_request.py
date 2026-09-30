@@ -4,7 +4,10 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
+
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
@@ -48,31 +51,59 @@ def get_columns():
 	return columns
 
 
+def apply_representative_lines(rows, sales_orders):
+	"""Fill item_name/description from one real Sales Order Item line per group.
+
+	Both are editable per line, so an order listing the same item twice holds several values per
+	group. Aggregating them sorts text, and MariaDB folds case while PostgreSQL orders by byte
+	value, so the engines pick differently. Take the first line by idx.
+	"""
+	representative = {}
+	if sales_orders:
+		for line in frappe.get_all(
+			"Sales Order Item",
+			filters={"parent": ("in", sales_orders), "docstatus": 1},
+			fields=["parent", "item_code", "item_name", "description"],
+			order_by="idx",
+		):
+			representative.setdefault((line.parent, line.item_code), line)
+
+	for row in rows:
+		line = representative.get((row.name, row.item_code))
+		row.item_name = line.item_name if line else None
+		row.description = line.description if line else None
+
+
 def get_data():
-	sales_order_entry = frappe.db.sql(
-		"""
-		SELECT
+	so = frappe.qb.DocType("Sales Order")
+	so_item = frappe.qb.DocType("Sales Order Item")
+	query = (
+		frappe.qb.from_(so)
+		.inner_join(so_item)
+		.on(so.name == so_item.parent)
+		.select(
 			so_item.item_code,
-			so_item.item_name,
-			so_item.description,
+			# the Sales Order columns are functionally dependent on the grouped so.name, so Max()
+			# returns their single value. item_name/description belong to the line and are editable
+			# per line, so they come from a representative line below.
 			so.name,
-			so.transaction_date,
-			so.customer,
-			so.territory,
-			sum(so_item.qty) as total_qty,
-			so.company
-		FROM `tabSales Order` so, `tabSales Order Item` so_item
-		WHERE
-			so.docstatus = 1
-			and so.name = so_item.parent
-			and so.status not in  ('Closed','Completed','Cancelled')
-		GROUP BY
-			so.name,so_item.item_code
-		""",
-		as_dict=1,
+			Max(so.transaction_date).as_("transaction_date"),
+			Max(so.customer).as_("customer"),
+			Max(so.territory).as_("territory"),
+			Sum(so_item.qty).as_("total_qty"),
+			Max(so.company).as_("company"),
+		)
+		.where((so.docstatus == 1) & so.status.notin(["Closed", "Completed", "Cancelled"]))
+		.groupby(so.name, so_item.item_code)
 	)
 
+	if condition := get_allowed_companies_condition(so.company, "Sales Order"):
+		query = query.where(condition)
+
+	sales_order_entry = query.run(as_dict=1)
+
 	sales_orders = [row.name for row in sales_order_entry]
+	apply_representative_lines(sales_order_entry, sales_orders)
 	mr_records = frappe.get_all(
 		"Material Request Item",
 		{"sales_order": ("in", sales_orders), "docstatus": 1},

@@ -3,26 +3,11 @@
 
 frappe.ui.form.on("Stock Settings", {
 	refresh: function (frm) {
-		let filters = function () {
-			return {
-				filters: {
-					is_group: 0,
-				},
-			};
-		};
-
-		frm.set_query("default_warehouse", filters);
-		frm.set_query("sample_retention_warehouse", filters);
-
-		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 		const item_display = frm.doc.item_naming_by === "Naming Series";
-		const serial_and_batch_naming_display =
-			frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
 
 		frm.set_df_property("naming_series_details", "hidden", !item_display);
 		frm.set_df_property("configure", "hidden", !item_display);
-		frm.set_df_property("naming_series_preview", "hidden", !serial_and_batch_naming_display);
-		frm.set_df_property("configure_series", "hidden", !serial_and_batch_naming_display);
 
 		if (item_display) {
 			frm.naming_controller.load_master_series("Item", "naming_series_details");
@@ -30,11 +15,7 @@ frappe.ui.form.on("Stock Settings", {
 			frm.doc.naming_series_details = "";
 		}
 
-		if (serial_and_batch_naming_display) {
-			frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
-		} else {
-			frm.doc.naming_series_preview = "";
-		}
+		toggle_serial_and_batch_naming_series(frm);
 
 		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
 	},
@@ -55,15 +36,11 @@ frappe.ui.form.on("Stock Settings", {
 	},
 
 	set_serial_and_batch_bundle_naming_based_on_naming_series(frm) {
-		const display = frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
-		frm.set_df_property("naming_series_preview", "hidden", !display);
-		frm.set_df_property("configure_series", "hidden", !display);
-		if (display) {
-			frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
-		} else {
-			frm.doc.naming_series_preview = "";
-			frm.refresh_field("naming_series_preview");
-		}
+		toggle_serial_and_batch_naming_series(frm);
+	},
+
+	enable_serial_and_batch_no_for_item(frm) {
+		toggle_serial_and_batch_naming_series(frm);
 	},
 
 	configure(frm) {
@@ -74,9 +51,13 @@ frappe.ui.form.on("Stock Settings", {
 		configure_naming_series(frm, "Serial and Batch Bundle", "naming_series_preview");
 	},
 
-	enable_serial_and_batch_no_for_item(frm) {
-		if (frm.doc.enable_serial_and_batch_no_for_item) {
-			frappe.msgprint(__("After save, please refresh the page to apply the changes."));
+	after_save(frm) {
+		// user_defaults are loaded at boot, so reload to apply the changed setting across forms
+		if (
+			cint(frappe.user_defaults?.enable_serial_and_batch_no_for_item) !==
+			cint(frm.doc.enable_serial_and_batch_no_for_item)
+		) {
+			window.location.reload();
 		}
 	},
 
@@ -90,31 +71,13 @@ frappe.ui.form.on("Stock Settings", {
 		if (!frm.doc.disable_serial_no_and_batch_selector && frm.doc.use_serial_batch_fields) {
 			frm.set_value("disable_serial_no_and_batch_selector", 1);
 			frappe.msgprint(
-				__("Serial No and Batch Selector cannot be use when Use Serial / Batch Fields is enabled.")
+				__("Serial No and Batch Selector cannot be used when Use Serial / Batch Fields is enabled.")
 			);
 		}
 	},
 
 	allow_negative_stock: function (frm) {
-		if (!frm.doc.allow_negative_stock) {
-			return;
-		}
-
-		let msg = __(
-			"Using negative stock disables FIFO/Moving average valuation when inventory is negative."
-		);
-		msg += " ";
-		msg += __("This is considered dangerous from accounting point of view.");
-		msg += "<br>";
-		msg += __("Do you still want to enable negative inventory?");
-
-		frappe.confirm(
-			msg,
-			() => {},
-			() => {
-				frm.set_value("allow_negative_stock", 0);
-			}
-		);
+		erpnext.utils.confirm_negative_stock(frm);
 	},
 	auto_insert_price_list_rate_if_missing(frm) {
 		if (!frm.doc.auto_insert_price_list_rate_if_missing) return;
@@ -143,6 +106,22 @@ frappe.ui.form.on("Stock Settings", {
 		}
 	},
 });
+
+function toggle_serial_and_batch_naming_series(frm) {
+	const display =
+		frm.doc.enable_serial_and_batch_no_for_item &&
+		frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
+
+	frm.set_df_property("naming_series_preview", "hidden", !display);
+	frm.set_df_property("configure_series", "hidden", !display);
+
+	if (display) {
+		frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
+	} else {
+		frm.doc.naming_series_preview = "";
+		frm.refresh_field("naming_series_preview");
+	}
+}
 
 function get_transactions(frm) {
 	const transactions = [

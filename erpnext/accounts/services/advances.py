@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, IfNull, Max, Sum
 from frappe.utils import flt
 
 import erpnext
@@ -150,7 +150,7 @@ def calculate_total_advance_from_ledger(doc) -> list:
 	adv = frappe.qb.DocType("Advance Payment Ledger Entry")
 	return (
 		frappe.qb.from_(adv)
-		.select(Abs(Sum(adv.amount)).as_("amount"), adv.currency.as_("account_currency"))
+		.select(Abs(Sum(adv.amount)).as_("amount"), Max(adv.currency).as_("account_currency"))
 		.where(adv.company == doc.company)
 		.where(adv.delinked == 0)
 		.where(adv.against_voucher_type == doc.doctype)
@@ -481,8 +481,18 @@ def get_common_query(
 			if condition.get("cost_center"):
 				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
 			if condition.get("accounting_dimensions"):
+				apply_strict_user_permissions = frappe.get_system_settings("apply_strict_user_permissions")
 				for field, val in condition.get("accounting_dimensions").items():
-					common_filter_conditions.append(payment_entry[field] == val)
+					if isinstance(val, list | tuple | set):
+						value_condition = payment_entry[field].isin(val)
+						if apply_strict_user_permissions:
+							common_filter_conditions.append(value_condition)
+						else:
+							common_filter_conditions.append(
+								(IfNull(payment_entry[field], "") == "") | value_condition
+							)
+					else:
+						common_filter_conditions.append(payment_entry[field] == val)
 			if condition.get("minimum_payment_amount"):
 				common_filter_conditions.append(
 					payment_entry.unallocated_amount.gte(condition["minimum_payment_amount"])

@@ -18,6 +18,7 @@ import { useMultiFileUploadProgress } from "@/hooks/useMultiFileUploadProgress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowDownRight, ArrowUpRight, Plus, Trash2 } from "lucide-react"
+import { evaluateAmountFormula } from "@/lib/amountFormula"
 import { flt, formatCurrency } from "@/lib/numbers"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -215,38 +216,13 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
                         })
                     } else {
 
-                        /**
-                         * The debit and credit amounts can also be expressions - like "transaction_amount * 0.5"
-                         * So we need to compute the value of the expression
-                         * We can use the eval function to do this. But we need to expose certain variables to the expression.
-                         * One of them is transaction_amount which is the unallocated amount of the selected transaction
-                         * @param expression - The expression to compute
-                         * @returns The computed value
-                         */
-                        const computeExpression = (expression: string) => {
-
-                            const script = `
-                                const transaction_amount = ${selectedTransaction.unallocated_amount ?? 0}
-                                ${expression};
-                            `
-
-                            let value = 0;
-
-                            try {
-                                value = window.eval(script);
-                            } catch (error: unknown) {
-                                console.error(error);
-                                value = 0;
-                            }
-
-                            return value;
-                        }
+                        const transactionAmount = selectedTransaction.unallocated_amount ?? 0
                         if (!acc?.debit && !acc?.credit) {
                             hasTotallyEmptyRowEarlier = true;
                         }
 
-                        const computedDebit = acc?.debit ? flt(computeExpression(acc.debit), 2) : 0
-                        const computedCredit = acc?.credit ? flt(computeExpression(acc.credit), 2) : 0
+                        const computedDebit = acc?.debit ? flt(evaluateAmountFormula(acc.debit, transactionAmount), 2) : 0
+                        const computedCredit = acc?.credit ? flt(evaluateAmountFormula(acc.credit, transactionAmount), 2) : 0
 
                         totalDebits = flt(totalDebits + computedDebit, 2)
                         totalCredits = flt(totalCredits + computedCredit, 2)

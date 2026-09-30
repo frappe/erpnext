@@ -74,11 +74,11 @@ erpnext.selling.InstallationNote = class InstallationNote extends frappe.ui.form
 						},
 					});
 				},
-				"fa fa-download",
+				null,
 				"btn-default"
 			);
 		}
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.selling.InstallationNote({ frm: cur_frm }));
+frappe.ui.form.set_controller("Installation Note", erpnext.selling.InstallationNote);

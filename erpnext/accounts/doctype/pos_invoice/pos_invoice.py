@@ -6,7 +6,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull, Lower, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
@@ -279,7 +279,7 @@ class POSInvoice(SalesInvoice):
 				limit=1,
 			)
 			frappe.throw(
-				_("You need to cancel POS Closing Entry {} to be able to cancel this document.").format(
+				_("You need to cancel POS Closing Entry {0} to be able to cancel this document.").format(
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
 				),
 				title=_("Not Allowed"),
@@ -498,26 +498,27 @@ class POSInvoice(SalesInvoice):
 			if d.get("qty") > 0:
 				frappe.throw(
 					_(
-						"Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
+						"Row #{0}: You cannot add positive quantities in a return invoice. Please remove item {1} to complete the return."
 					).format(d.idx, frappe.bold(d.item_code)),
 					title=_("Invalid Item"),
 				)
 			if d.get("serial_no"):
 				serial_nos = get_serial_nos(d.serial_no)
 				for sr in serial_nos:
-					serial_no_exists = frappe.db.sql(
-						"""
-						SELECT name
-						FROM `tabPOS Invoice Item`
-						WHERE
-							parent = %s
-							and (serial_no = %s
-								or serial_no like %s
-								or serial_no like %s
-								or serial_no like %s
-							)
-					""",
-						(self.return_against, sr, sr + "\n%", "%\n" + sr, "%\n" + sr + "\n%"),
+					POI = frappe.qb.DocType("POS Invoice Item")
+					s = sr.lower()
+					serial_no_exists = (
+						frappe.qb.from_(POI)
+						.select(POI.name)
+						.where(POI.parent == self.return_against)
+						.where(
+							(Lower(POI.serial_no) == s)
+							| Lower(POI.serial_no).like(f"{s}\n%")
+							| Lower(POI.serial_no).like(f"%\n{s}")
+							| Lower(POI.serial_no).like(f"%\n{s}\n%")
+						)
+						.limit(1)
+						.run()
 					)
 
 					if not serial_no_exists:
@@ -525,7 +526,7 @@ class POSInvoice(SalesInvoice):
 						bold_serial_no = frappe.bold(sr)
 						frappe.throw(
 							_(
-								"Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}"
+								"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
 							).format(d.idx, bold_serial_no, bold_return_against)
 						)
 
@@ -540,7 +541,7 @@ class POSInvoice(SalesInvoice):
 			and frappe.get_cached_value("Account", self.account_for_change_amount, "company") != self.company
 		):
 			frappe.throw(
-				_("The selected change account {} doesn't belongs to Company {}.").format(
+				_("The selected change account {0} does not belong to Company {1}.").format(
 					self.account_for_change_amount, self.company
 				)
 			)
@@ -570,12 +571,12 @@ class POSInvoice(SalesInvoice):
 			invoice_total = self.rounded_total or self.grand_total
 			total_amount_in_payments = flt(total_amount_in_payments, self.precision("grand_total"))
 			if total_amount_in_payments and total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
+				frappe.throw(_("Total payments amount can't be greater than {0}").format(-invoice_total))
 
 	def validate_company_with_pos_company(self):
 		if self.company != frappe.db.get_value("POS Profile", self.pos_profile, "company"):
 			frappe.throw(
-				_("Company {} does not match with POS Profile Company {}").format(
+				_("Company {0} does not match with POS Profile Company {1}").format(
 					self.company, frappe.db.get_value("POS Profile", self.pos_profile, "company")
 				)
 			)
@@ -662,7 +663,6 @@ class POSInvoice(SalesInvoice):
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
 		from erpnext.stock.get_item_details import (
-			ItemDetailsCtx,
 			get_pos_profile,
 			get_pos_profile_item_details_,
 		)
@@ -735,7 +735,7 @@ class POSInvoice(SalesInvoice):
 			for item in self.get("items"):
 				if item.get("item_code"):
 					profile_details = get_pos_profile_item_details_(
-						ItemDetailsCtx(item.as_dict()), profile.get("company"), profile
+						frappe._dict(item.as_dict()), profile.get("company"), profile
 					)
 					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
@@ -909,6 +909,30 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code: str | None, warehouse: str):
+	# The POS Profile is what entitles a caller to POS stock figures, and it is the only boundary
+	# that fits: `Item` read and `Bin` read both exclude Accounts Manager, `Item` select is granted
+	# to every desk user by `Desk User`, and `POS Invoice` read is granted to `All`.
+	frappe.has_permission("POS Profile", throw=True)
+
+	# and keep a company-restricted caller inside their own companies, which costs nobody who has
+	# no Company User Permission
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "POS Profile")
+	if allowed_companies:
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+	# the caller picks the warehouse when allow_warehouse_change is set, and the company check above
+	# does not narrow within a company; costs nobody who has no Warehouse User Permission
+	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
+		if allowed_warehouses and warehouse not in allowed_warehouses:
+			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
+
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
@@ -963,15 +987,9 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 
 def get_bin_qty(item_code, warehouse):
-	bin_qty = frappe.db.sql(
-		"""select actual_qty from `tabBin`
-		where item_code = %s and warehouse = %s
-		limit 1""",
-		(item_code, warehouse),
-		as_dict=1,
-	)
+	actual_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
 
-	return bin_qty[0].actual_qty or 0 if bin_qty else 0
+	return actual_qty or 0
 
 
 def get_pos_reserved_qty(item_code, warehouse):
@@ -1031,7 +1049,7 @@ def get_pos_reserved_qty_from_table(child_table, item_code, warehouse):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name: str, target_doc: Document | str | None = None):
+def make_sales_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("POS Invoice", source_name, target_doc)
@@ -1041,8 +1059,7 @@ def make_sales_return(source_name: str, target_doc: Document | str | None = None
 def make_merge_log(invoices: str | list):
 	import json
 
-	if isinstance(invoices, str):
-		invoices = json.loads(invoices)
+	invoices = frappe.parse_json(invoices)
 
 	if len(invoices) == 0:
 		frappe.throw(_("At least one invoice has to be selected."))

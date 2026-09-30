@@ -4,6 +4,7 @@
  "allow_copy": 1,
  "creation": "2017-08-29 02:22:54.947711",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/opening-invoice-creation-tool",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -88,6 +89,7 @@
   }
  ],
  "hide_toolbar": 1,
+ "icon": "file-plus",
  "issingle": 1,
  "links": [],
  "modified": "2026-05-30 23:18:48.691227",

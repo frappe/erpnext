@@ -5,11 +5,11 @@
 import os
 
 import frappe
+from frappe import N_ as _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
-from erpnext.setup.utils import identity as _
 
 from .default_success_action import get_default_success_action
 
@@ -20,6 +20,8 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	if not frappe.db.exists("Role", "Analytics"):
 		frappe.get_doc({"doctype": "Role", "role_name": "Analytics"}).insert()
+
+	create_shop_floor_roles()
 
 	set_single_defaults()
 	setup_repost_defaults()
@@ -50,6 +52,15 @@ def make_default_operations():
 			doc.insert(ignore_permissions=True)
 
 
+def create_shop_floor_roles():
+	"""Roles that drive the Shop Floor page's two experiences (manager board vs operator view)."""
+	for role_name in ("Shop Floor Manager", "Shop Floor User"):
+		if not frappe.db.exists("Role", role_name):
+			frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1}).insert(
+				ignore_permissions=True
+			)
+
+
 def set_single_defaults():
 	for dt in (
 		"Accounts Settings",
@@ -58,10 +69,8 @@ def set_single_defaults():
 		"Selling Settings",
 		"Stock Settings",
 	):
-		default_values = frappe.db.sql(
-			"""select fieldname, `default` from `tabDocField`
-			where parent=%s""",
-			dt,
+		default_values = frappe.get_all(
+			"DocField", filters={"parent": dt}, fields=["fieldname", "default"], as_list=True
 		)
 		if default_values:
 			try:
@@ -336,22 +345,28 @@ def update_pegged_currencies():
 
 
 def set_default_print_formats():
+	# For each doctype, prefer the newer builder-made "Modern with Images" format,
+	# falling back to the older "with Item Image" format if it isn't present.
 	default_map = {
-		"Sales Order": "Sales Order with Item Image",
-		"Sales Invoice": "Sales Invoice with Item Image",
-		"Delivery Note": "Delivery Note with Item Image",
-		"Purchase Order": "Purchase Order with Item Image",
-		"Purchase Invoice": "Purchase Invoice with Item Image",
-		"POS Invoice": "POS Invoice with Item Image",
-		"Quotation": "Quotation with Item Image",
-		"Request for Quotation": "Request for Quotation with Item Image",
+		"Sales Order": ["Sales Order Modern with Images", "Sales Order with Item Image"],
+		"Sales Invoice": ["Sales Invoice Modern with Images", "Sales Invoice with Item Image"],
+		"Delivery Note": ["Delivery Note Modern with Images", "Delivery Note with Item Image"],
+		"Purchase Order": ["Purchase Order Modern with Images", "Purchase Order with Item Image"],
+		"Purchase Invoice": ["Purchase Invoice Modern with Images", "Purchase Invoice with Item Image"],
+		"POS Invoice": ["POS Invoice Modern with Images", "POS Invoice with Item Image"],
+		"Quotation": ["Quotation Modern with Images", "Quotation with Item Image"],
+		"Request for Quotation": [
+			"Request for Quotation Modern with Images",
+			"Request for Quotation with Item Image",
+		],
 	}
 
-	for doctype, print_format in default_map.items():
+	for doctype, print_formats in default_map.items():
 		if frappe.get_meta(doctype).default_print_format:
 			continue
 
-		if not frappe.db.exists("Print Format", print_format):
+		print_format = next((pf for pf in print_formats if frappe.db.exists("Print Format", pf)), None)
+		if not print_format:
 			continue
 
 		frappe.make_property_setter(
@@ -408,3 +423,19 @@ DEFAULT_ROLE_PROFILES = {
 		"Purchase Manager",
 	],
 }
+
+
+def after_app_install(app_name=None):
+	if app_name == "crm":
+		from erpnext.crm.frappe_crm_api import remove_allowed_users_on_crm_install
+
+		remove_allowed_users_on_crm_install()
+
+
+def after_app_uninstall(app_name=None):
+	if app_name == "crm":
+		from erpnext.crm.frappe_crm_api import disable_frappe_crm_data_synchronization_on_crm_uninstall
+
+		disable_frappe_crm_data_synchronization_on_crm_uninstall()
+
+		frappe.db.commit()  # nosemgrep

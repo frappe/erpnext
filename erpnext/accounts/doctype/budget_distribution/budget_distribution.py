@@ -15,12 +15,12 @@ class BudgetDistribution(Document):
 		from frappe.types import DF
 
 		amount: DF.Currency
-		end_date: DF.Date | None
+		end_date: DF.Date
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
 		percent: DF.Percent
-		start_date: DF.Date | None
+		start_date: DF.Date
 	# end: auto-generated types
 
 	pass

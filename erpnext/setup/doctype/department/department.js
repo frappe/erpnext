@@ -16,7 +16,7 @@ frappe.ui.form.on("Department", {
 	},
 	validate: function (frm) {
 		if (frm.doc.name == "All Departments") {
-			frappe.throw(__("You cannot edit root node."));
+			frappe.throw(__("You cannot edit the root node."));
 		}
 	},
 });

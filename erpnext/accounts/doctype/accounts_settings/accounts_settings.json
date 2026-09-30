@@ -3,6 +3,7 @@
  "creation": "2013-06-24 15:49:57",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounts-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -22,6 +23,8 @@
   "allow_multi_currency_invoices_against_single_party_account",
   "confirm_before_resetting_posting_date",
   "preview_mode",
+  "stock_expense_section",
+  "book_stock_expense_gl_entries",
   "analytics_section",
   "enable_discounts_and_margin",
   "enable_accounting_dimensions",
@@ -76,6 +79,8 @@
   "over_billing_allowance",
   "credit_controller",
   "role_allowed_to_over_bill",
+  "enable_overdue_billing_threshold",
+  "role_allowed_to_bypass_overdue_billing",
   "column_break_11",
   "assets_tab",
   "asset_settings_section",
@@ -87,16 +92,18 @@
   "period_closing_settings_section",
   "ignore_account_closing_balance",
   "use_legacy_controller_for_pcv",
+  "pcv_job_timeout",
   "column_break_25",
   "reports_tab",
   "remarks_section",
-  "general_ledger_remarks_length",
-  "receivable_payable_remarks_length",
+  "disable_include_dimensions",
   "column_break_lvjk",
+  "general_ledger_remarks_length",
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
   "default_ageing_range",
   "column_break_ntmi",
+  "receivable_payable_remarks_length",
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
   "tab_break_dpet",
@@ -194,10 +201,12 @@
   },
   {
    "default": "1",
+   "description": "System will use the latest saved Currency Exchange rate on or before the transaction date, however old it is. <br>\nUncheck to ignore rates older than Stale Days and fetch a fresh rate from the exchange rate provider instead.",
    "fieldname": "allow_stale",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Allow Stale Exchange Rates"
+   "label": "Allow Stale Exchange Rates",
+   "show_description_on_click": 1
   },
   {
    "default": "1",
@@ -217,7 +226,8 @@
    "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Currency",
-   "label": "Over Billing Allowance (%)"
+   "label": "Over Billing Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "1",
@@ -269,6 +279,21 @@
    "fieldname": "role_allowed_to_over_bill",
    "fieldtype": "Link",
    "label": "Role Allowed to over bill ",
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this option prevents the creation of a new Sales Invoice when the customer has an overdue limit set and their outstanding overdue amount exceeds that limit.",
+   "fieldname": "enable_overdue_billing_threshold",
+   "fieldtype": "Check",
+   "label": "Prevent Sales Invoice when Customer is Overdue"
+  },
+  {
+   "depends_on": "eval:doc.enable_overdue_billing_threshold",
+   "description": "Users with this role can still submit invoices for customers who have crossed their Overdue Limit.",
+   "fieldname": "role_allowed_to_bypass_overdue_billing",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Bypass Over Billing Restriction",
    "options": "Role"
   },
   {
@@ -455,7 +480,7 @@
   {
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
-   "label": "Remarks Column Length"
+   "label": "General Ledger Report"
   },
   {
    "default": "0",
@@ -529,7 +554,7 @@
   {
    "fieldname": "accounts_receivable_payable_tuning_section",
    "fieldtype": "Section Break",
-   "label": "Accounts Receivable / Payable Tuning"
+   "label": "Accounts Receivable / Payable Report"
   },
   {
    "fieldname": "legacy_section",
@@ -611,6 +636,14 @@
    "fieldname": "use_legacy_controller_for_pcv",
    "fieldtype": "Check",
    "label": "Use legacy controller for Period Closing Voucher"
+  },
+  {
+   "default": "3600",
+   "depends_on": "eval: !doc.use_legacy_controller_for_pcv",
+   "description": "Timeout (in seconds) for each background job enqueued by Process Period Closing Voucher",
+   "fieldname": "pcv_job_timeout",
+   "fieldtype": "Int",
+   "label": "PCV Job Timeout (seconds)"
   },
   {
    "description": "Users with this role will be notified if the asset depreciation gets failed",
@@ -748,15 +781,33 @@
    "description": "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list.",
    "fieldname": "column_break_mfor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Expense Accounting"
+  },
+  {
+   "default": "0",
+   "description": "Books Purchase Expense and Expenses Added To Stock account pairs against stock value. On enabling this, the accounts become mandatory in Company or Item Defaults for Purchase Receipt, Purchase Invoice, Stock Entry, Stock Reconciliation and Landed Cost Voucher",
+   "fieldname": "book_stock_expense_gl_entries",
+   "fieldtype": "Check",
+   "label": "Book Stock Expense GL Entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_include_dimensions",
+   "fieldtype": "Check",
+   "label": "Disable \"Consider Accounting Dimension\" Filter"
   }
  ],
  "grid_page_length": 50,
- "icon": "icon-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-03 13:11:54.721495",
+ "modified": "2026-09-04 10:08:30.115003",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

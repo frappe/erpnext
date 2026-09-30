@@ -18,6 +18,36 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		self.asset_name = frappe.db.get_value("Asset", {"purchase_receipt": self.pr.name}, "name")
 		self.asset_doc = frappe.get_doc("Asset", self.asset_name)
 
+	def test_get_maintenance_log_counts_by_status(self):
+		"""get_maintenance_log uses a v16 dict aggregate field spec
+		({"COUNT": "asset_name", "as": "count"}); confirm it runs and returns correct per-status counts
+		on both engines (the whitelisted endpoint was previously untested)."""
+		from erpnext.assets.doctype.asset_maintenance.asset_maintenance import get_maintenance_log
+
+		self.asset_doc.available_for_use_date = nowdate()
+		self.asset_doc.purchase_date = nowdate()
+		self.asset_doc.save()
+
+		frappe.get_doc(
+			{
+				"doctype": "Asset Maintenance",
+				"asset_name": self.asset_name,
+				"maintenance_team": "Team Awesome",
+				"company": "_Test Company",
+				"asset_maintenance_tasks": get_maintenance_tasks(),
+			}
+		).insert()
+
+		rows = get_maintenance_log(self.asset_name)
+		# the dict aggregate spec did not crash and returned grouped rows...
+		self.assertTrue(rows)
+		self.assertTrue(all("maintenance_status" in r for r in rows))
+		# ...and the per-status counts sum to the total number of logs for this asset
+		self.assertEqual(
+			sum(r["count"] for r in rows),
+			frappe.db.count("Asset Maintenance Log", {"asset_name": self.asset_name}),
+		)
+
 	def test_create_asset_maintenance_with_log(self):
 		month_end_date = get_last_day(nowdate())
 

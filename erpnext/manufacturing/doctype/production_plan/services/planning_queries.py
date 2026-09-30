@@ -10,12 +10,20 @@ from frappe.query_builder.functions import IfNull, Sum
 from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.stock.doctype.item.item import get_uom_conv_factor
 
 
 def get_uom_conversion_factor(item_code, uom):
-	return frappe.db.get_value(
+	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+	conversion_factor = frappe.db.get_value(
 		"UOM Conversion Detail", {"parent": item_code, "uom": uom}, "conversion_factor"
 	)
+	if not conversion_factor and item.variant_of:
+		conversion_factor = frappe.db.get_value(
+			"UOM Conversion Detail", {"parent": item.variant_of, "uom": uom}, "conversion_factor"
+		)
+
+	return conversion_factor or get_uom_conv_factor(uom, item.stock_uom)
 
 
 @frappe.whitelist()
@@ -24,8 +32,7 @@ def get_bin_details(
 ):
 	frappe.has_permission("Production Plan", "read", throw=True)
 
-	if isinstance(row, str):
-		row = frappe._dict(json.loads(row))
+	row = frappe._dict(frappe.parse_json(row))
 
 	bin = frappe.qb.DocType("Bin")
 	subquery = _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse)
@@ -65,8 +72,7 @@ def _bin_qty_columns(bin):
 def get_warehouse_list(warehouses):
 	warehouse_list = []
 
-	if isinstance(warehouses, str):
-		warehouses = json.loads(warehouses)
+	warehouses = frappe.parse_json(warehouses)
 
 	for row in warehouses:
 		child_warehouses = frappe.db.get_descendants("Warehouse", row.get("warehouse"))

@@ -7,6 +7,7 @@
  "default_view": "Tree",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/customer-group",
  "engine": "InnoDB",
  "field_order": [
   "customer_group_name",
@@ -132,15 +133,15 @@
   {
    "fieldname": "credit_limits",
    "fieldtype": "Table",
-   "label": "Credit Limit",
+   "label": "Credit & Overdue Limits",
    "options": "Customer Credit Limit"
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "users",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-02 13:58:03.378607",
+ "modified": "2026-08-21 23:11:41.519748",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -207,6 +208,26 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
+  },
+  {
+   "role": "Item Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

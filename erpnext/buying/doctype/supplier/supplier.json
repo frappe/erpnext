@@ -8,10 +8,12 @@
  "description": "Supplier of Goods or Services.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
   "supplier_name",
+  "alias",
   "supplier_type",
   "gender",
   "column_break0",
@@ -53,6 +55,9 @@
   "tax_withholding_category",
   "tax_withholding_group",
   "settings_tab",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
   "invoice_settings_section",
   "is_transporter",
   "allow_purchase_invoice_creation_without_purchase_order",
@@ -356,7 +361,7 @@
   },
   {
    "default": "0",
-   "description": "Frozen suppliers block ledger entries until unfrozen. Use this to temporarily lock accounting activity without disabling the supplier.",
+   "description": "Frozen suppliers block new transactions and ledger entries until unfrozen. Only users with the role set in Company's \"Roles Allowed to Set and Edit Frozen Account Entries\" can transact.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
@@ -376,6 +381,7 @@
   {
    "fieldname": "primary_address_and_contact_detail_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
@@ -390,6 +396,7 @@
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No",
    "no_copy": 1
   },
@@ -397,12 +404,14 @@
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email ID",
    "no_copy": 1
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Primary Address Preview",
    "no_copy": 1,
    "read_only": 1
@@ -425,6 +434,29 @@
    "fieldname": "settings_tab",
    "fieldtype": "Tab Break",
    "label": "Settings"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "description": "If checked, this Supplier is only available for transactions in the companies listed below.",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "permlevel": 1
+  },
+  {
+   "depends_on": "eval:doc.restrict_to_companies",
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "options": "Company Restriction",
+   "permlevel": 1
   },
   {
    "fieldname": "contact_and_address_tab",
@@ -542,10 +574,18 @@
   {
    "fieldname": "section_break_pgad",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Alias",
+   "no_copy": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-user",
+ "icon": "truck",
  "idx": 370,
  "image_field": "image",
  "links": [
@@ -611,11 +651,41 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase Master Manager",
+   "write": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "search_fields": "supplier_group",
+ "search_fields": "supplier_group, alias",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",

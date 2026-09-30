@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
 def execute(filters=None):
@@ -75,6 +76,9 @@ def get_data(filters=None):
 	if batch_no:
 		query = query.where(batch.name == batch_no)
 
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
+
 	batch_records = query.run(as_dict=True) or []
 
 	result = []
@@ -100,12 +104,12 @@ def get_data(filters=None):
 
 
 @frappe.whitelist()
-def update_batch_qty(selected_batches: str | None = None):
+def update_batch_qty(selected_batches: str | list | None = None):
 	frappe.has_permission("Batch", "write", throw=True, ignore_share_permissions=True)
 	if not selected_batches:
 		return
 
-	selected_batches = json.loads(selected_batches)
+	selected_batches = frappe.parse_json(selected_batches)
 	for row in selected_batches:
 		batch_name = row.get("batch")
 

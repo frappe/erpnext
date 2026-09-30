@@ -5,6 +5,7 @@
  "creation": "2017-10-23 11:38:54.004355",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-repair",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -130,7 +131,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
-   "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Fully Depreciated\",\"Sold\",\"Scrapped\",\"Cancelled\"]]]",
+   "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Sold\",\"Scrapped\",\"Cancelled\"]]]",
    "options": "Asset",
    "reqd": 1
   },
@@ -267,6 +268,7 @@
    "show_dashboard": 1
   }
  ],
+ "icon": "wrench",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
@@ -275,7 +277,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2026-02-06 14:57:54.257572",
+ "modified": "2026-06-20 15:43:54.943335",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

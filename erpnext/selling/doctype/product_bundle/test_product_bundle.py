@@ -129,11 +129,40 @@ class TestProductBundle(ERPNextTestSuite):
 		self.assertTrue(rows)
 		self.assertEqual(rows[0].disabled, 1)
 		self.assertEqual(rows[0].is_active, 1)
+		self.assertEqual(rows[0].stock_quantity, rows[0].quantity)
+		self.assertEqual(rows[0].stock_uom, rows[0].uom)
 
 		_, parent_rows = execute({"item": self.parent, "section": "References"})
 		rows = [r for r in parent_rows if r.document_name == bundle.name]
 		self.assertTrue(rows)
 		self.assertEqual(rows[0].disabled, 1)
+
+	def test_item_where_used_report_hides_internal_and_empty_columns(self):
+		from erpnext.stock.report.item_where_used.item_where_used import execute
+
+		bundle = make_product_bundle(self.parent, ["_Test PB Child A"])
+
+		columns, rows = execute({"item": "_Test PB Child A", "section": "Where Used"})
+		fieldnames = [column["fieldname"] for column in columns]
+
+		self.assertIn("stock_quantity", fieldnames)
+		self.assertIn("stock_uom", fieldnames)
+		self.assertNotIn("matched_field", fieldnames)
+		self.assertNotIn("company", fieldnames)
+
+		rows = [r for r in rows if r.document_name == bundle.name]
+		self.assertTrue(rows)
+		self.assertEqual(rows[0].stock_quantity, rows[0].quantity)
+		self.assertEqual(rows[0].stock_uom, rows[0].uom)
+
+	def test_item_where_used_report_hides_false_check_columns(self):
+		from erpnext.stock.report.item_where_used.item_where_used import get_columns
+
+		columns = get_columns([frappe._dict(stock_quantity=0, is_default=0)])
+		fieldnames = [column["fieldname"] for column in columns]
+
+		self.assertIn("stock_quantity", fieldnames)
+		self.assertNotIn("is_default", fieldnames)
 
 	def test_child_cannot_be_active_bundle(self):
 		make_product_bundle(self.parent, ["_Test PB Child A"])

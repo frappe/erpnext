@@ -201,7 +201,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				frappe.msgprint({
 					title: __("Invalid Return"),
 					indicator: "orange",
-					message: __("All the items have been already returned."),
+					message: __("All the items have already been returned."),
 				});
 				return;
 			}
@@ -294,21 +294,30 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	send_email() {
 		const frm = this.events.get_frm();
+		const doc = this.doc || frm.doc;
+
+		frappe
+			.xcall("erpnext.selling.page.point_of_sale.point_of_sale.get_receipt_email_content", {
+				doctype: doc.doctype,
+				name: doc.name,
+			})
+			.then((email) => this.send_receipt_email(frm, doc, email));
+	}
+
+	send_receipt_email(frm, doc, email) {
 		const recipients = this.email_dialog.get_values().email_id;
 		const content = this.email_dialog.get_values().content;
-		const doc = this.doc || frm.doc;
-		const print_format = frm.pos_print_format;
 
 		frappe.call({
 			method: "frappe.core.doctype.communication.email.make",
 			args: {
 				recipients: recipients,
-				subject: __(frm.meta.name) + ": " + doc.name,
-				content: content ? content : __(frm.meta.name) + ": " + doc.name,
+				subject: email.subject,
+				content: content ? content : email.message,
 				doctype: doc.doctype,
 				name: doc.name,
 				send_email: 1,
-				print_format,
+				print_format: frm.pos_print_format,
 				sender_full_name: frappe.user.full_name(),
 				_lang: doc.language,
 			},

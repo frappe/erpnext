@@ -11,7 +11,7 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
@@ -64,7 +64,7 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1.0
 
@@ -86,7 +86,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | Document | No
 
 
 @frappe.whitelist()
-def make_customer(source_name: str, target_doc: str | Document | None = None):
+def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.opportunity_name = source.name
 
@@ -110,7 +110,7 @@ def make_customer(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_supplier_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	doclist = get_mapped_doc(
 		"Opportunity",
 		source_name,
@@ -124,14 +124,21 @@ def make_supplier_quotation(source_name: str, target_doc: str | Document | None 
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_opportunity_from_communication(
 	communication: str, company: str, ignore_communication_links: bool = False
 ):
 	from erpnext.crm.doctype.lead.mapper import make_lead_from_communication
 
+	# `communication` is caller supplied and nothing checked it. Communication grants read to `All`
+	# only for the owner (if_owner) and carries a has_permission hook, so doc= is what decides
+	# access; the desk button only appears on an email the caller already has open.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 
+	# make_lead_from_communication() carries its own check, but it is skipped entirely when the
+	# email already references a Lead, so this cannot rely on it.
 	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)

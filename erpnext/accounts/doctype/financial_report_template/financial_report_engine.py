@@ -3,7 +3,6 @@
 
 import ast
 import json
-import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cache, reduce
@@ -12,8 +11,9 @@ from typing import Any, Union
 import frappe
 from frappe import _
 from frappe.database.operator_map import OPERATOR_MAP
+from frappe.model import numeric_fieldtypes
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Cast_, Sum
 from frappe.utils import cstr, date_diff, flt, getdate
 from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
@@ -28,9 +28,11 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_templat
 	FinancialReportTemplate,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+	FORMULA_FUNCTIONS,
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	DependencyValidator,
+	get_valid_api_method,
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -254,16 +256,27 @@ class FinancialReportEngine:
 
 		if filters.get("presentation_currency"):
 			frappe.msgprint(
-				title=_("Unsupported Feature"),
-				msg=_("Currency filters are currently unsupported in Custom Financial Report."),
 				indicator="orange",
+				title=_("Not Supported"),
+				msg=_("Currency filters are currently unsupported in Custom Financial Report"),
 			)
 
 		# Margin view is dependent on first row being an income account. Hence not supported.
 		# Way to implement this would be using calculated rows with formulas.
 		supported_views = ("Report", "Growth")
 		if (view := filters.get("selected_view")) and view not in supported_views:
-			frappe.msgprint(_("{0} view is currently unsupported in Custom Financial Report.").format(view))
+			frappe.msgprint(
+				indicator="orange",
+				title=_("Not Supported"),
+				msg=_("{0} view is currently unsupported in Custom Financial Report").format(view),
+			)
+
+		if filters.get("group_by_dimension"):
+			frappe.msgprint(
+				indicator="orange",
+				title=_("Not Supported"),
+				msg=_("Dimension-based grouping is currently unsupported in Custom Financial Report"),
+			)
 
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
 		template_name = filters.get("report_template")
@@ -478,7 +491,10 @@ class DataCollector:
 		if company:
 			query = query.where(account.company == company)
 
-		if conditions := filter_parser.build_conditions(account_rows, account):
+		# filters are optional: no filter means all (enabled, non-group) accounts of the company.
+		# invalid filters can't reach here — build_conditions raises on them (raise_on_invalid).
+		conditions = filter_parser.build_conditions(account_rows, account, raise_on_invalid=True)
+		if conditions is not None:
 			query = query.where(conditions)
 
 		return query.run(pluck=True)
@@ -790,17 +806,20 @@ class FilterExpressionParser:
 	def __init__(self):
 		self.validator = AccountFilterValidator()
 
-	def build_conditions(self, report_rows, table):
+	def build_conditions(self, report_rows, table, raise_on_invalid=False):
 		conditions = []
 		for row in report_rows or []:
-			condition = self.build_condition(row, table)
+			condition = self.build_condition(row, table, raise_on_invalid=raise_on_invalid)
 			if condition is not None:
 				conditions.append(condition)
+
+		if not conditions:
+			return None
 
 		# ensure brackets in or condition
 		return reduce(lambda a, b: (a) | (b), conditions)
 
-	def build_condition(self, report_row, table):
+	def build_condition(self, report_row, table, raise_on_invalid=False):
 		"""
 		Build SQL condition directly from filter formula.
 
@@ -830,9 +849,11 @@ class FilterExpressionParser:
 		if not filter_formula:
 			return None
 
-		errors = self.validator.validate(report_row)
+		errors = self.validator.validate_filter(report_row)
 		if not errors.is_valid:
 			error_messages = [str(issue) for issue in errors.issues]
+			if raise_on_invalid:
+				frappe.throw("<br><br>".join(error_messages), title=_("Invalid Filter"))
 			frappe.log_error(f"Filter validation errors found:\n{'<br><br>'.join(error_messages)}")
 			return None
 
@@ -864,8 +885,15 @@ class FilterExpressionParser:
 		field = getattr(table, field_name, None)
 		operator_fn = OPERATOR_MAP.get(operator.casefold())
 
-		if "like" in operator.casefold() and "%" not in value:
-			value = f"%{value}%"
+		if "like" in operator.casefold():
+			if "%" not in value:
+				value = f"%{value}%"
+			# Postgres has no LIKE/ILIKE operator for non-text columns; MariaDB implicitly casts
+			# the numeric column to text. Cast a numeric/Check Account field to varchar so the
+			# match runs on both engines and reproduces MariaDB's result.
+			meta_field = frappe.get_meta("Account").get_field(field_name)
+			if meta_field and meta_field.fieldtype in numeric_fieldtypes:
+				field = Cast_(field, "varchar")
 
 		return operator_fn(field, value)
 
@@ -1022,10 +1050,13 @@ class FormulaFieldUpdater:
 
 @frappe.whitelist()
 def get_filtered_accounts(company: str, account_rows: str | list):
-	frappe.has_permission("Financial Report Template", ptype="read", throw=True)
+	if not company:
+		frappe.throw(_("Company is required"), title=_("Missing Company"))
 
-	if isinstance(account_rows, str):
-		account_rows = json.loads(account_rows, object_hook=frappe._dict)
+	frappe.has_permission("Financial Report Template", ptype="read", throw=True)
+	frappe.has_permission("Company", doc=company, throw=True)
+
+	account_rows = [frappe._dict(row) for row in frappe.parse_json(account_rows)]
 
 	return DataCollector.get_filtered_accounts(company, account_rows)
 
@@ -1164,10 +1195,12 @@ class RowProcessor:
 
 	def _process_api_row(self, row) -> RowData:
 		api_path = row.calculation_formula
-		# TODO
+
+		method = get_valid_api_method(api_path)
 
 		try:
-			values = frappe.call(api_path, filters=self.context.filters, periods=self.period_list, row=row)
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval
+			values = frappe.call(method, filters=self.context.filters, periods=self.period_list, row=row)
 
 			if row.reverse_sign:
 				values = [-1 * v for v in values]
@@ -1295,26 +1328,14 @@ class FormulaCalculator:
 		self.precision = get_currency_precision()
 		self.validator = CalculationFormulaValidator(set(row_data.keys()))
 
-		self.math_functions = {
-			"abs": abs,
-			"round": round,
-			"min": min,
-			"max": max,
-			"sum": sum,
-			"sqrt": math.sqrt,
-			"pow": math.pow,
-			"ceil": math.ceil,
-			"floor": math.floor,
-		}
-
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
-		formula = report_row.calculation_formula
+		formula = (report_row.calculation_formula or "").strip()
 		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
 			# TODO: Throw?
-			messages = "<br><br>".join(issue.message for issue in validation_result.issues)
+			messages = "<br><br>".join(str(issue) for issue in validation_result.issues)
 			frappe.log_error(f"Formula validation errors found:\n{messages}")
 			return [0.0] * len(self.period_list)
 
@@ -1329,7 +1350,7 @@ class FormulaCalculator:
 		# TODO: consistent error handling
 		try:
 			context = self._build_context(period_index)
-			result = frappe.safe_eval(formula, context)
+			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 			return flt(result * negation_factor, self.precision)
 
 		except ZeroDivisionError:
@@ -1350,7 +1371,7 @@ class FormulaCalculator:
 				context[code] = 0.0
 
 		# math functions
-		context.update(self.math_functions)
+		context.update(FORMULA_FUNCTIONS)
 
 		return context
 
@@ -1853,28 +1874,51 @@ class GrowthViewTransformer:
 		self.formatted_rows = context.raw_data.get("formatted_data", [])
 		self.period_list = context.period_list
 
-	def transform(self) -> None:
+	def transform(self):
 		for row_data in self.formatted_rows:
 			if row_data.get("is_blank_line"):
 				continue
 
-			transformed_values = {}
-			for i in range(len(self.period_list)):
-				current_period = self.period_list[i]["key"]
+			if row_data.get("segment_values"):
+				self._transform_segmented_row(row_data)
+			else:
+				self._transform_single_row(row_data)
 
-				current_value = row_data[current_period]
-				previous_value = row_data[self.period_list[i - 1]["key"]] if i != 0 else 0
+	def _compute_growth_values(self, source: dict) -> dict:
+		transformed = {}
 
-				if i == 0:
-					transformed_values[current_period] = current_value
-				else:
-					growth_percent = self._calculate_growth(previous_value, current_value)
-					transformed_values[current_period] = growth_percent
+		for i, period in enumerate(self.period_list):
+			current_period = period["key"]
+			current_value = source.get(current_period)
 
-			row_data.update(transformed_values)
+			if current_value in (None, ""):
+				continue
+
+			if i == 0:
+				transformed[current_period] = current_value
+			else:
+				previous_period = self.period_list[i - 1]["key"]
+				previous_value = source.get(previous_period) or 0
+				transformed[current_period] = self._calculate_growth(previous_value, current_value)
+
+		return transformed
+
+	def _transform_single_row(self, row_data: dict):
+		row_data.update(self._compute_growth_values(row_data))
+
+	def _transform_segmented_row(self, row_data: dict):
+		for seg_id, seg_data in row_data.get("segment_values", {}).items():
+			if seg_data.get("is_blank_line"):
+				continue
+
+			transformed = self._compute_growth_values(seg_data)
+			seg_data.update(transformed)
+
+			for period_key, value in transformed.items():
+				row_data[f"{seg_id}_{period_key}"] = value
 
 	def _calculate_growth(self, previous_value: float, current_value: float) -> float | None:
-		if current_value is None:
+		if current_value in (None, ""):
 			return None
 
 		if previous_value == 0 and current_value > 0:

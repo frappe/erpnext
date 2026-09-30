@@ -21,7 +21,7 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 			company="_Test Company",
 			from_date=today(),
 			to_date=add_days(today(), 30),
-			item_code="_Test Item With Serial No",
+			item_code="_Test Item with Serial No",
 		)
 
 	def test_available_serial_no(self):

@@ -7,6 +7,7 @@
  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/company-setup",
  "engine": "InnoDB",
  "field_order": [
   "details",
@@ -54,6 +55,7 @@
   "default_receivable_account",
   "default_payable_account",
   "write_off_account",
+  "bank_charges_account",
   "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
@@ -65,6 +67,8 @@
   "default_finance_book",
   "exchange_gain__loss_section",
   "exchange_gain_loss_account",
+  "exchange_gain_account",
+  "exchange_loss_account",
   "column_break_sttp",
   "unrealized_exchange_gain_loss_account",
   "round_off_section",
@@ -112,7 +116,6 @@
   "column_break_goals",
   "default_selling_terms",
   "default_sales_contact",
-  "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
   "purchase_expense_section",
@@ -120,6 +123,10 @@
   "service_expense_account",
   "column_break_ereg",
   "purchase_expense_contra_account",
+  "stock_expense_section",
+  "expenses_added_to_stock_account",
+  "column_break_gthb",
+  "expenses_added_to_stock_contra_account",
   "stock_tab",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
@@ -129,14 +136,21 @@
   "valuation_method",
   "column_break_32",
   "stock_adjustment_account",
+  "default_purchase_price_variance_account",
+  "default_manufacturing_variance_account",
   "stock_received_but_not_billed",
+  "enable_stock_delivered_but_not_billed",
   "stock_delivered_but_not_billed",
   "disable_sdbnb_in_sr",
   "default_provisional_account",
-  "default_in_transit_warehouse",
   "manufacturing_section",
   "default_operating_cost_account",
-  "column_break_9prc",
+  "warehouse_defaults_section",
+  "default_warehouse",
+  "sample_retention_warehouse",
+  "default_in_transit_warehouse",
+  "column_break_ware",
+  "default_warehouse_for_sales_return",
   "default_wip_warehouse",
   "default_fg_warehouse",
   "default_scrap_warehouse",
@@ -271,6 +285,7 @@
    "fieldname": "default_warehouse_for_sales_return",
    "fieldtype": "Link",
    "label": "Default Warehouse for Sales Return",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
@@ -351,33 +366,75 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "round_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "round_off_cost_center",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off Cost Center",
+   "no_copy": 1,
    "options": "Cost Center"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "write_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Write Off Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "bank_charges_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bank Charges Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Exchange Gain / Loss Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_gain_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Gain Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_loss_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Loss Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "unrealized_exchange_gain_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Exchange Gain/Loss Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -492,6 +549,26 @@
    "options": "Account"
   },
   {
+   "description": "Used for items valued at Standard Cost: the difference between the purchase price and the standard rate is booked here.",
+   "fieldname": "default_purchase_price_variance_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Purchase Price Variance Account",
+   "no_copy": 1,
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the Manufacture/Repack consumed cost vs standard rate difference is booked here.",
+   "fieldname": "default_manufacturing_variance_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Manufacturing Variance Account",
+   "no_copy": 1,
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
    "fieldname": "column_break_32",
    "fieldtype": "Column Break"
   },
@@ -504,15 +581,19 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Accumulated Depreciation Account",
    "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "depreciation_expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Depreciation Expense Account",
    "no_copy": 1,
    "options": "Account"
@@ -527,29 +608,39 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "disposal_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Gain/Loss Account on Asset Disposal",
    "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "depreciation_cost_center",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Asset Depreciation Cost Center",
    "no_copy": 1,
    "options": "Cost Center"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "capital_work_in_progress_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Capital Work In Progress Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "asset_received_but_not_billed",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Asset Received But Not Billed",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -678,18 +769,49 @@
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"warehouse_type\",\"=\",\"Transit\"]]",
    "options": "Warehouse"
   },
   {
+   "fieldname": "warehouse_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse Defaults"
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
+   "fieldname": "sample_retention_warehouse",
+   "fieldtype": "Link",
+   "label": "Sample Retention Warehouse",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_ware",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "default_discount_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Payment Discount Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -731,8 +853,10 @@
    "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Advance Received Account",
    "mandatory_depends_on": "book_advance_payments_as_liability",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -741,8 +865,10 @@
    "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_paid_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Advance Paid Account",
    "mandatory_depends_on": "book_advance_payments_as_liability",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -822,9 +948,12 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "round_off_for_opening",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off for Opening",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -898,6 +1027,18 @@
    "options": "Account"
   },
   {
+   "fieldname": "expenses_added_to_stock_account",
+   "fieldtype": "Link",
+   "label": "Expenses Added To Stock Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "expenses_added_to_stock_contra_account",
+   "fieldtype": "Link",
+   "label": "Expenses Added To Stock Contra Account",
+   "options": "Account"
+  },
+  {
    "default": "0",
    "description": "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse.",
    "fieldname": "enable_item_wise_inventory_account",
@@ -916,26 +1057,22 @@
    "fieldname": "default_wip_warehouse",
    "fieldtype": "Link",
    "label": " Default Work In Progress Warehouse ",
-   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
    "fieldname": "default_fg_warehouse",
    "fieldtype": "Link",
    "label": "Default Finished Goods Warehouse",
-   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
    "fieldname": "default_scrap_warehouse",
    "fieldtype": "Link",
    "label": "Default Scrap Warehouse",
-   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "column_break_9prc",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "default_sales_contact",
@@ -984,27 +1121,46 @@
   },
   {
    "default": "0",
+   "depends_on": "enable_stock_delivered_but_not_billed",
    "fieldname": "disable_sdbnb_in_sr",
    "fieldtype": "Check",
    "label": "Disable Stock Delivered But Not Billed in Sales Return",
    "no_copy": 1
   },
   {
+   "depends_on": "enable_stock_delivered_but_not_billed",
    "fieldname": "stock_delivered_but_not_billed",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Stock Delivered But Not Billed",
+   "mandatory_depends_on": "enable_stock_delivered_but_not_billed",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the value of goods delivered before invoicing will be recorded in the Stock Delivered But Not Billed account.",
+   "fieldname": "enable_stock_delivered_but_not_billed",
+   "fieldtype": "Check",
+   "label": "Enable Stock Delivered But Not Billed"
+  },
+  {
+   "fieldname": "stock_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Expense"
+  },
+  {
+   "fieldname": "column_break_gthb",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-building",
+ "icon": "building-complex",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-05-14 16:50:34.132345",
+ "modified": "2026-09-06 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -1036,6 +1192,10 @@
   {
    "read": 1,
    "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
   },
   {
    "read": 1,
@@ -1074,6 +1234,10 @@
    "report": 1,
    "role": "HR Manager",
    "write": 1
+  },
+  {
+   "role": "Desk User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

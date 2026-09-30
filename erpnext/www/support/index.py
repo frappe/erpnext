@@ -1,4 +1,5 @@
 import frappe
+from frappe.query_builder.functions import Count, Max
 
 
 def get_context(context):
@@ -30,25 +31,27 @@ def get_context(context):
 
 
 def get_favorite_articles_by_page_view():
-	return frappe.db.sql(
-		"""
-			SELECT
-				t1.name as name,
-				t1.title as title,
-				t1.content as content,
-				t1.route as route,
-				t1.category as category,
-				count(t1.route) as count
-			FROM `tabHelp Article` AS t1
-				INNER JOIN
-				`tabWeb Page View` AS t2
-			ON t1.route = t2.path
-			WHERE t1.published = 1
-			GROUP BY route
-			ORDER BY count DESC
-			LIMIT 6;
-			""",
-		as_dict=True,
+	ha = frappe.qb.DocType("Help Article")
+	wpv = frappe.qb.DocType("Web Page View")
+	return (
+		frappe.qb.from_(ha)
+		.inner_join(wpv)
+		.on(ha.route == wpv.path)
+		.select(
+			# route is the unique page URL, so there is one published article per route: Max() just
+			# returns that row's columns while keeping the GROUP BY route valid on postgres
+			Max(ha.name).as_("name"),
+			Max(ha.title).as_("title"),
+			Max(ha.content).as_("content"),
+			ha.route,
+			Max(ha.category).as_("category"),
+			Count(ha.route).as_("count"),
+		)
+		.where(ha.published == 1)
+		.groupby(ha.route)
+		.orderby(Count(ha.route), order=frappe.qb.desc)
+		.limit(6)
+		.run(as_dict=True)
 	)
 
 

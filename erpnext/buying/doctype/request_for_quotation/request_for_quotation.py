@@ -8,11 +8,11 @@ from frappe.contacts.doctype.contact.contact import get_full_name
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.query_builder import Order
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
+from erpnext.accounts.party import validate_party_frozen_disabled
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 
@@ -122,6 +122,8 @@ class RequestforQuotation(BuyingController):
 
 	def validate_supplier_list(self):
 		for d in self.suppliers:
+			validate_party_frozen_disabled(self.company, "Supplier", d.supplier)
+
 			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, "prevent_rfqs")
 			if prevent_rfqs:
 				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
@@ -324,14 +326,14 @@ class RequestforQuotation(BuyingController):
 
 		message_template = self.mfs_html if self.use_html else self.message_for_supplier
 		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
-		rendered_message = frappe.render_template(message_template, doc_args)
+		rendered_message = frappe.render_template(message_template, doc_args, restrict_globals=True)
 
 		subject_source = (
 			self.subject
 			or frappe.get_value("Email Template", self.email_template, "subject")
 			or _("Request for Quotation")
 		)
-		rendered_subject = frappe.render_template(subject_source, doc_args)
+		rendered_subject = frappe.render_template(subject_source, doc_args, restrict_globals=True)
 		if preview:
 			return {
 				"message": rendered_message,
@@ -421,7 +423,7 @@ def check_portal_enabled(reference_doctype):
 	if not frappe.db.get_value("Portal Menu Item", {"reference_doctype": reference_doctype}, "enabled"):
 		frappe.throw(
 			_(
-				"The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
+				"Access to Request for Quotation from the portal is disabled. To allow access, enable it in Portal Settings."
 			)
 		)
 
@@ -478,32 +480,34 @@ def get_supplier_tag():
 def get_rfq_containing_supplier(
 	doctype: str | None, txt: str, searchfield: str | None, start: int, page_len: int, filters: dict
 ):
-	rfq = frappe.qb.DocType("Request for Quotation")
-	rfq_supplier = frappe.qb.DocType("Request for Quotation Supplier")
+	rfq_filters = [
+		["docstatus", "=", 1],
+		["company", "=", filters.get("company")],
+	]
 
-	query = (
-		frappe.qb.from_(rfq)
-		.from_(rfq_supplier)
-		.select(rfq.name)
-		.distinct()
-		.select(rfq.transaction_date, rfq.company)
-		.where(
-			(rfq.name == rfq_supplier.parent)
-			& (rfq_supplier.supplier == filters.get("supplier"))
-			& (rfq.docstatus == 1)
-			& (rfq.company == filters.get("company"))
+	if frappe.has_permission("Request for Quotation", "read"):
+		rfq_filters.append(["Request for Quotation Supplier", "supplier", "=", filters.get("supplier")])
+	else:
+		parents = frappe.get_all(
+			"Request for Quotation Supplier",
+			filters={"supplier": filters.get("supplier"), "parenttype": "Request for Quotation"},
+			pluck="parent",
+			distinct=True,
 		)
-		.orderby(rfq.transaction_date, order=Order.asc)
-		.limit(page_len)
-		.offset(start)
-	)
+		rfq_filters.append(["name", "in", parents or [""]])
 
 	if txt:
-		query = query.where(rfq.name.like(f"%%{txt}%%"))
+		rfq_filters.append(["name", "like", f"%{txt}%"])
 
 	if filters.get("transaction_date"):
-		query = query.where(rfq.transaction_date == filters.get("transaction_date"))
+		rfq_filters.append(["transaction_date", "=", filters.get("transaction_date")])
 
-	rfq_data = query.run(as_dict=1)
-
-	return rfq_data
+	return frappe.get_list(
+		"Request for Quotation",
+		filters=rfq_filters,
+		fields=["name", "transaction_date", "company"],
+		group_by="name",
+		order_by="transaction_date asc",
+		limit_start=start,
+		limit_page_length=page_len,
+	)

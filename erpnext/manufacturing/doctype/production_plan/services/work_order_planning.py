@@ -4,12 +4,16 @@
 """Work Order / subcontract PO creation from a Production Plan (extracted from production_plan.py)."""
 
 from collections import defaultdict
+from functools import cached_property
 
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt, get_filtered_list_link, getdate, nowdate
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import set_default_warehouses
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 
 _SUB_ASSEMBLY_WO_FIELDS = [
 	"production_item",
@@ -38,21 +42,33 @@ class WorkOrderCreationService:
 		self.doc = doc
 
 	def get_production_items(self):
+		bom_warehouse_map = self.get_bom_source_warehouse_map(self.doc.po_items)
 		item_dict = {}
 		for d in self.doc.po_items:
-			item_details = self._production_item_details(d)
-			if self.doc.get_items_from == "Material Request":
-				item_details["qty"] = d.planned_qty
-				key = (d.item_code, d.material_request_item, d.warehouse, d.planned_start_date)
-				item_dict[key] = item_details
-			else:
-				key = self._production_item_key(d)
-				existing = flt(item_dict.get(key, {}).get("qty"))
-				item_details["qty"] = existing + (flt(d.planned_qty) - flt(d.ordered_qty))
-				item_dict[key] = item_details
+			item_details = self._production_item_details(d, bom_warehouse_map)
+			item_details["qty"] = self.pending_quantities["production_plan_item"][d.name]
+			# A Work Order can reference only one Production Plan row.
+			item_dict[d.name] = item_details
 		return item_dict
 
-	def _production_item_details(self, d):
+	@cached_property
+	def pending_quantities(self):
+		return ProductionPlanWorkOrderQuantities(self.doc.name).get_pending_quantities(self.doc)
+
+	def get_bom_source_warehouse_map(self, rows):
+		bom_names = {row.bom_no for row in rows if row.bom_no}
+		if not bom_names:
+			return {}
+		return dict(
+			frappe.get_all(
+				"BOM",
+				filters={"name": ["in", list(bom_names)]},
+				fields=["name", "default_source_warehouse"],
+				as_list=True,
+			)
+		)
+
+	def _production_item_details(self, d, bom_warehouse_map):
 		details = {
 			"production_item": d.item_code,
 			"use_multi_level_bom": d.include_exploded_items,
@@ -70,22 +86,16 @@ class WorkOrderCreationService:
 			"product_bundle_item": d.product_bundle_item,
 			"planned_start_date": d.planned_start_date,
 			"project": self.doc.project,
-			"source_warehouse": frappe.get_value("BOM", d.bom_no, "default_source_warehouse"),
+			"source_warehouse": bom_warehouse_map.get(d.bom_no),
 		}
 		if not details["project"] and d.sales_order:
 			details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
 		return details
 
-	def _production_item_key(self, d):
-		if not d.sales_order:
-			return (d.name, d.item_code, d.warehouse, d.planned_start_date)
-		if self.doc.combine_items:
-			return (d.item_code, d.sales_order, d.warehouse, d.planned_start_date)
-		return (d.item_code, d.sales_order, d.sales_order_item, d.warehouse, d.planned_start_date)
-
 	def make_work_order(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
 
+		self.doc.reload()
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse(self.doc.company)
@@ -112,6 +122,7 @@ class WorkOrderCreationService:
 				wo_list.append(work_order)
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
+		bom_warehouse_map = self.get_bom_source_warehouse_map(self.doc.sub_assembly_items)
 		for row in self.doc.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
 				subcontracted_po.setdefault(row.supplier, []).append(row)
@@ -119,16 +130,13 @@ class WorkOrderCreationService:
 			if row.type_of_manufacturing == "Material Request":
 				continue
 
-			work_order = self._sub_assembly_work_order(row, default_warehouses)
+			work_order = self._sub_assembly_work_order(row, default_warehouses, bom_warehouse_map)
 			if work_order:
 				wo_list.append(work_order)
 
-	def _sub_assembly_work_order(self, row, default_warehouses):
-		if flt(row.qty) <= flt(row.ordered_qty):
-			return None
-
+	def _sub_assembly_work_order(self, row, default_warehouses, bom_warehouse_map):
 		work_order_data = {
-			"source_warehouse": frappe.get_value("BOM", row.bom_no, "default_source_warehouse"),
+			"source_warehouse": bom_warehouse_map.get(row.bom_no),
 			"wip_warehouse": default_warehouses.get("wip_warehouse"),
 			"fg_warehouse": default_warehouses.get("fg_warehouse"),
 			"scrap_warehouse": default_warehouses.get("scrap_warehouse"),
@@ -144,7 +152,7 @@ class WorkOrderCreationService:
 			if row.get(field):
 				wo_data[field] = row.get(field)
 
-		wo_data["qty"] = flt(row.get("qty")) - flt(row.get("ordered_qty"))
+		wo_data["qty"] = self.pending_quantities["production_plan_sub_assembly_item"][row.name]
 		wo_data.update(
 			{
 				"use_multi_level_bom": 0,
@@ -217,8 +225,6 @@ class WorkOrderCreationService:
 	def _new_work_order(self, item):
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
-		if not wo.source_warehouse:
-			wo.source_warehouse = item.get("fg_warehouse")
 
 		wo.reserve_stock = self.doc.reserve_stock
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
@@ -226,7 +232,7 @@ class WorkOrderCreationService:
 			wo.fg_warehouse = item.get("warehouse")
 
 		wo.set_work_order_operations()
-		wo.set_required_items(reset_source_warehouse=True)
+		wo.set_required_items()
 		return wo
 
 

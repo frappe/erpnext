@@ -176,14 +176,17 @@ class BootStrapTestData:
 		self.make_item_attribute()
 		self.make_asset_maintenance_team()
 		self.make_asset_category()
+		self.update_stock_settings()
 		self.make_item()
 		self.make_product_bundle()
 		self.make_location()
 		self.make_price_list()
 		self.make_item_price()
+		self.make_currency_exchange()
 		self.make_loyalty_program()
 		self.make_shareholder()
 		self.make_sales_taxes_template()
+		self.make_purchase_taxes_template()
 		self.make_workstation()
 		self.make_operation()
 		self.make_bom()
@@ -203,7 +206,6 @@ class BootStrapTestData:
 		self.make_contact()
 		self.update_support_settings()
 		self.update_selling_settings()
-		self.update_stock_settings()
 
 		frappe.db.commit()  # nosemgrep
 
@@ -245,7 +247,6 @@ class BootStrapTestData:
 		stock_settings = frappe.get_doc("Stock Settings")
 		stock_settings.item_naming_by = "Item Code"
 		stock_settings.valuation_method = "FIFO"
-		stock_settings.default_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores")})
 		stock_settings.stock_uom = "Nos"
 		stock_settings.auto_indent = 1
 		stock_settings.auto_insert_price_list_rate_if_missing = 1
@@ -462,6 +463,7 @@ class BootStrapTestData:
 				"new_password": "Eastern_43A1W",
 				"roles": [
 					{"doctype": "Has Role", "parentfield": "roles", "role": "_Test Role"},
+					{"doctype": "Has Role", "parentfield": "roles", "role": "Accounts User"},
 					{"doctype": "Has Role", "parentfield": "roles", "role": "System Manager"},
 				],
 			},
@@ -2342,6 +2344,29 @@ class BootStrapTestData:
 		]
 		self.make_records(["title", "company"], records)
 
+	def make_purchase_taxes_template(self):
+		records = [
+			{
+				"company": "_Test Company",
+				"doctype": "Purchase Taxes and Charges Template",
+				"title": "_Test Purchase Taxes and Charges Template",
+				"taxes": [
+					{
+						"account_head": "_Test Account VAT - _TC",
+						"add_deduct_tax": "Add",
+						"category": "Total",
+						"charge_type": "On Net Total",
+						"cost_center": "Main - _TC",
+						"description": "VAT",
+						"doctype": "Purchase Taxes and Charges",
+						"parentfield": "taxes",
+						"rate": 6,
+					}
+				],
+			}
+		]
+		self.make_records(["title", "company"], records)
+
 	def make_asset_category(self):
 		records = [
 			{
@@ -2532,6 +2557,38 @@ class BootStrapTestData:
 		]
 		self.make_records(["item_code", "price_list", "price_list_rate"], records)
 
+	def make_currency_exchange(self):
+		"""Seed current-dated USD<->INR rates so foreign-currency documents
+		transacted on ``today()`` resolve an exchange rate deterministically.
+
+		Without this, ``get_exchange_rate`` finds no in-window Currency Exchange
+		record and falls back to an external API that is unreachable in CI,
+		returning ``0`` and breaking tests that create USD documents. The rates
+		mirror the latest values in the Currency Exchange ``test_records`` so
+		cost calculations stay unchanged regardless of which record is picked.
+		"""
+		records = [
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 62.9,
+				"for_buying": 1,
+				"for_selling": 1,
+			},
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "INR",
+				"to_currency": "USD",
+				"exchange_rate": 0.0167,
+				"for_buying": 1,
+				"for_selling": 1,
+			},
+		]
+		self.make_records(["from_currency", "to_currency", "date", "for_buying", "for_selling"], records)
+
 	def make_operation(self):
 		records = [
 			{"doctype": "Operation", "name": "_Test Operation 1", "workstation": "_Test Workstation 1"}
@@ -2544,7 +2601,7 @@ class BootStrapTestData:
 				"doctype": "Workstation",
 				"name": "_Test Workstation 1",
 				"workstation_name": "_Test Workstation 1",
-				"warehouse": "_Test warehouse - _TC",
+				"warehouse": "_Test Warehouse - _TC",
 				"hour_rate_labour": 25,
 				"hour_rate_electricity": 25,
 				"hour_rate_consumable": 25,
@@ -2748,68 +2805,68 @@ class BootStrapTestData:
 				}
 			).insert(ignore_permissions=True)
 
-			if not frappe.db.exists("DocType", "Store"):
-				frappe.get_doc(
-					{
-						"doctype": "DocType",
-						"name": "Store",
-						"module": "Stock",
-						"custom": 1,
-						"naming_rule": "By fieldname",
-						"autoname": "field:store_name",
-						"fields": [{"label": "Store Name", "fieldname": "store_name", "fieldtype": "Data"}],
-						"permissions": [
-							{
-								"role": "System Manager",
-								"permlevel": 0,
-								"read": 1,
-								"write": 1,
-								"create": 1,
-								"delete": 1,
-							}
-						],
-					}
-				).insert(ignore_permissions=True)
+		if not frappe.db.exists("DocType", "Store"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Store",
+					"module": "Stock",
+					"custom": 1,
+					"naming_rule": "By fieldname",
+					"autoname": "field:store_name",
+					"fields": [{"label": "Store Name", "fieldname": "store_name", "fieldtype": "Data"}],
+					"permissions": [
+						{
+							"role": "System Manager",
+							"permlevel": 0,
+							"read": 1,
+							"write": 1,
+							"create": 1,
+							"delete": 1,
+						}
+					],
+				}
+			).insert(ignore_permissions=True)
 
-			if not frappe.db.exists("DocType", "Order Assignment"):
-				frappe.get_doc(
-					{
-						"doctype": "DocType",
-						"name": "Order Assignment",
-						"module": "Buying",
-						"custom": 1,
-						"autoname": "field:po",
-						"fields": [
-							{
-								"label": "PO",
-								"fieldname": "po",
-								"fieldtype": "Link",
-								"options": "Purchase Order",
-							},
-							{
-								"label": "Supplier",
-								"fieldname": "supplier",
-								"fieldtype": "Data",
-								"fetch_from": "po.supplier",
-							},
-						],
-						"permissions": [
-							{
-								"create": 1,
-								"delete": 1,
-								"email": 1,
-								"export": 1,
-								"print": 1,
-								"read": 1,
-								"report": 1,
-								"role": "System Manager",
-								"share": 1,
-								"write": 1,
-							},
-							{"read": 1, "role": "Supplier"},
-						],
-					}
-				).insert(ignore_if_duplicate=True)
+		if not frappe.db.exists("DocType", "Order Assignment"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Order Assignment",
+					"module": "Buying",
+					"custom": 1,
+					"autoname": "field:po",
+					"fields": [
+						{
+							"label": "PO",
+							"fieldname": "po",
+							"fieldtype": "Link",
+							"options": "Purchase Order",
+						},
+						{
+							"label": "Supplier",
+							"fieldname": "supplier",
+							"fieldtype": "Data",
+							"fetch_from": "po.supplier",
+						},
+					],
+					"permissions": [
+						{
+							"create": 1,
+							"delete": 1,
+							"email": 1,
+							"export": 1,
+							"print": 1,
+							"read": 1,
+							"report": 1,
+							"role": "System Manager",
+							"share": 1,
+							"write": 1,
+						},
+						{"read": 1, "role": "Supplier"},
+					],
+				}
+			).insert(ignore_if_duplicate=True)
 
 	def make_address(self):
 		records = [
@@ -3050,3 +3107,16 @@ def change_settings(doctype, settings_dict=None, /, **settings) -> None:
 	for key, value in previous_settings.items():
 		setattr(settings, key, value)
 	settings.save(ignore_permissions=True)
+
+
+def make_email_template(subject: str, response: str) -> str:
+	"""Insert a test Email Template and return its name."""
+	template = frappe.get_doc(
+		{
+			"doctype": "Email Template",
+			"name": "_Test Email Template",
+			"subject": subject,
+			"response": response,
+		}
+	).insert()
+	return template.name

@@ -53,6 +53,10 @@ erpnext.PointOfSale.ItemSelector = class {
 	async load_items_data() {
 		await this.item_ready_group;
 
+		// drop memoized search results so stock qty reflects the latest ledger
+		this.search_index = {};
+		this.cache_epoch = (this.cache_epoch || 0) + 1;
+
 		this.start_item_loading_animation();
 
 		if (!this.price_list) {
@@ -279,14 +283,14 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.search_field.$wrapper.find(".control-input").append(
 			`<span class="link-btn">
 				<a class="btn-open no-decoration" title="${__("Clear")}">
-					${frappe.utils.icon("close", "sm")}
+					${frappe.utils.icon("x", "sm")}
 				</a>
 			</span>`
 		);
 
 		this.item_group_field.$wrapper.find(".link-btn").append(
 			`<a class="btn-clear" tabindex="-1" style="display: inline-block;" title="${__("Clear Link")}">
-				${frappe.utils.icon("close", "xs", "es-icon")}
+				${frappe.utils.icon("x", "xs")}
 			</a>`
 		);
 
@@ -455,11 +459,14 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
+		const epoch = this.cache_epoch;
 		this.get_items({ search_term })
 			.then(({ message }) => {
 				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
-				if (search_term && !barcode) {
+				// skip caching if a reload happened while this search was in flight (stale stock qty)
+				if (search_term && !barcode && epoch === this.cache_epoch) {
+					this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
 					this.search_index[selling_price_list][search_term] = items;
 				}
 				this.items = items;

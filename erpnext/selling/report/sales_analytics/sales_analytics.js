@@ -2,6 +2,18 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Sales Analytics"] = {
+	// "All" reports on every doctype at once and forces the tree to Customer
+	entity_tree_type() {
+		const doc_type = frappe.query_report.get_filter_value("doc_type");
+		return doc_type === "All" ? "Customer" : frappe.query_report.get_filter_value("tree_type");
+	},
+	reset_entity_filter() {
+		const entity_filter = frappe.query_report.get_filter("entity");
+		if (!entity_filter) return;
+		entity_filter.df.label = __(this.entity_tree_type());
+		entity_filter.set_value([]);
+		entity_filter.refresh();
+	},
 	filters: [
 		{
 			fieldname: "tree_type",
@@ -18,6 +30,21 @@ frappe.query_reports["Sales Analytics"] = {
 			],
 			default: "Customer",
 			reqd: 1,
+			on_change: function () {
+				frappe.query_reports["Sales Analytics"].reset_entity_filter();
+				frappe.query_report.refresh();
+			},
+		},
+		{
+			fieldname: "entity",
+			label: __("Entity"),
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				const tree_type = frappe.query_reports["Sales Analytics"].entity_tree_type();
+				if (!tree_type || tree_type === "Order Type") return [];
+				return frappe.db.get_link_options(tree_type, txt);
+			},
+			depends_on: "eval:doc.tree_type != 'Order Type'",
 		},
 		{
 			fieldname: "doc_type",
@@ -34,6 +61,10 @@ frappe.query_reports["Sales Analytics"] = {
 			],
 			default: "Sales Invoice",
 			reqd: 1,
+			on_change: function () {
+				frappe.query_reports["Sales Analytics"].reset_entity_filter();
+				frappe.query_report.refresh();
+			},
 		},
 		{
 			fieldname: "value_quantity",

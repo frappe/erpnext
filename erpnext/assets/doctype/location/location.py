@@ -215,21 +215,16 @@ def get_children(doctype: str, parent: str | None = None, location: str | None =
 	if parent is None or parent == "All Locations":
 		parent = ""
 
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabLocation` comp
-		where
-			ifnull(parent_location, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
+	filters = {"parent_location": parent} if parent else {"parent_location": ["is", "not set"]}
+
+	return frappe.get_all(
+		"Location",
+		filters=filters,
+		fields=["name as value", "is_group as expandable"],
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 

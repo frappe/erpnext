@@ -21,13 +21,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPOSClosingEntry(ERPNextTestSuite):
 	def setUp(self):
-		init_user_and_profile()
+		self.test_user, self.pos_profile = init_user_and_profile()
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 
 	def test_pos_closing_entry(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -59,8 +58,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		Test if POS Closing Entry is created without item code
 		"""
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -79,10 +77,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
-		test_item_qty = get_test_item_qty(pos_profile)
+		test_item_qty = get_test_item_qty(self.pos_profile)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -104,13 +101,11 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pcv_doc.flags.in_test = True
 		pcv_doc.submit()
 
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-		test_item_qty_after_sales = get_test_item_qty(pos_profile)
+		test_item_qty_after_sales = get_test_item_qty(self.pos_profile)
 		self.assertEqual(test_item_qty_after_sales, test_item_qty - 1)
 
 	def test_cancelling_of_pos_closing_entry(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -169,9 +164,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pos_profile.insert()
 		self.assertTrue(frappe.db.exists("POS Profile", pos_profile.name))
 
-		test_user = init_user_and_profile(do_not_create_pos_profile=1)
-
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(pos_profile, self.test_user.name)
 		pos_inv1 = create_pos_invoice(rate=350, do_not_submit=1, pos_profile=pos_profile.name)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.save()
@@ -195,9 +188,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 	def test_merging_into_sales_invoice_for_batched_item(self):
 		frappe.flags.print_message = False
-		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
-			init_user_and_profile,
-		)
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 		item_doc = make_item(
@@ -220,8 +210,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		)
 		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
 
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv = create_pos_invoice(
 			item_code=item_code,
@@ -291,18 +280,17 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "Sales Invoice"})
 	def test_closing_entries_with_sales_invoice(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_si = create_sales_invoice(
-			qty=10, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+			qty=10, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=1
 		)
 		pos_si.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
 		pos_si.save()
 		pos_si.submit()
 
 		pos_si2 = create_sales_invoice(
-			qty=5, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=11
+			qty=5, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=11
 		)
 		pos_si2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
 		pos_si2.save()
@@ -332,12 +320,10 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
-		test_user, pos_profile = init_user_and_profile()
-
 		with self.change_settings("POS Settings", {"invoice_type": "Sales Invoice"}):
-			opening_entry1 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry1 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_si1, pos_si2 = create_multiple_sales_invoices(pos_profile)
+			pos_si1, pos_si2 = create_multiple_sales_invoices(self.pos_profile)
 
 			pos_inv = create_pos_invoice(rate=100, do_not_save=1)
 			pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
@@ -357,13 +343,13 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertEqual(pos_si2.pos_closing_entry, pcv_doc1.name)
 
 		with self.change_settings("POS Settings", {"invoice_type": "POS Invoice"}):
-			opening_entry2 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry2 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_inv1, pos_inv2 = create_multiple_pos_invoices(pos_profile)
+			pos_inv1, pos_inv2 = create_multiple_pos_invoices(self.pos_profile)
 
 			# Trying to create Sales Invoice when invoice_type is set to POS Invoice.
 			pos_si3 = create_sales_invoice(
-				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+				qty=1, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=1
 			)
 			pos_si3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_si3.save)
@@ -394,16 +380,14 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 
-		test_user, pos_profile = init_user_and_profile()
-
 		with self.change_settings("POS Settings", {"invoice_type": "POS Invoice"}):
-			opening_entry1 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry1 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_inv1, pos_inv2 = create_multiple_pos_invoices(pos_profile)
+			pos_inv1, pos_inv2 = create_multiple_pos_invoices(self.pos_profile)
 
 			# Trying to create Sales Invoice when invoice_type is set to POS Invoice.
 			pos_sinv = create_sales_invoice(
-				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+				qty=1, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=1
 			)
 			pos_sinv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_sinv.save)
@@ -421,9 +405,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertEqual(pcv_doc1.grand_total, 300)
 
 		with self.change_settings("POS Settings", {"invoice_type": "Sales Invoice"}):
-			opening_entry2 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry2 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_si1, pos_si2 = create_multiple_sales_invoices(pos_profile)
+			pos_si1, pos_si2 = create_multiple_sales_invoices(self.pos_profile)
 
 			pos_inv3 = create_pos_invoice(rate=100, do_not_save=1)
 			pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})

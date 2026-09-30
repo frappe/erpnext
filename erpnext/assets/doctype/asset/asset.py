@@ -132,6 +132,10 @@ class Asset(AccountsController):
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
 
+		if self.calculate_depreciation:
+			# Is Fully Depreciated is only applicable to manually entered existing assets
+			self.is_fully_depreciated = 0
+
 	def before_save(self):
 		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
 		self.status = self.get_status()
@@ -327,7 +331,7 @@ class Asset(AccountsController):
 			reference_doc = frappe.get_doc(reference_doc, reference_name)
 			if reference_doc.get("company") != self.company:
 				frappe.throw(
-					_("Company of asset {0} and purchase document {1} doesn't matches.").format(
+					_("Company of asset {0} and purchase document {1} does not match.").format(
 						self.name, reference_doc.get("name")
 					)
 				)
@@ -355,7 +359,7 @@ class Asset(AccountsController):
 			)
 			if cost_center_company != self.company:
 				frappe.throw(
-					_("Cost Center {} doesn't belong to Company {}").format(
+					_("Cost Center {0} does not belong to Company {1}").format(
 						frappe.bold(self.cost_center), frappe.bold(self.company)
 					),
 					title=_("Invalid Cost Center"),
@@ -363,7 +367,7 @@ class Asset(AccountsController):
 			if cost_center_is_group:
 				frappe.throw(
 					_(
-						"Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
+						"Cost Center {0} is a group cost center and group cost centers cannot be used in transactions"
 					).format(frappe.bold(self.cost_center)),
 					title=_("Invalid Cost Center"),
 				)
@@ -372,7 +376,7 @@ class Asset(AccountsController):
 			if not frappe.get_cached_value("Company", self.company, "depreciation_cost_center"):
 				frappe.throw(
 					_(
-						"Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
+						"Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {0}"
 					).format(frappe.bold(self.company)),
 					title=_("Missing Cost Center"),
 				)
@@ -410,7 +414,7 @@ class Asset(AccountsController):
 		for d in self.finance_books:
 			if d.finance_book in finance_books:
 				frappe.throw(
-					_("Row #{}: Please use a different Finance Book.").format(d.idx),
+					_("Row #{0}: Please use a different Finance Book.").format(d.idx),
 					title=_("Duplicate Finance Book"),
 				)
 			else:
@@ -418,7 +422,9 @@ class Asset(AccountsController):
 
 			if not d.finance_book:
 				frappe.throw(
-					_("Row #{}: Finance Book should not be empty since you're using multiple.").format(d.idx),
+					_("Row #{0}: Finance Book should not be empty since you're using multiple.").format(
+						d.idx
+					),
 					title=_("Missing Finance Book"),
 				)
 
@@ -735,12 +741,16 @@ class Asset(AccountsController):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
 	def cancel_movement_entries(self):
-		movements = frappe.db.sql(
-			"""SELECT asm.name, asm.docstatus
-			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
-			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""",
-			self.name,
-			as_dict=1,
+		# filter the parent Asset Movement's docstatus (as the original SQL did), not the child row's
+		asm = frappe.qb.DocType("Asset Movement")
+		asm_item = frappe.qb.DocType("Asset Movement Item")
+		movements = (
+			frappe.qb.from_(asm_item)
+			.inner_join(asm)
+			.on(asm_item.parent == asm.name)
+			.select(asm.name)
+			.where((asm_item.asset == self.name) & (asm.docstatus == 1))
+			.run(as_dict=True)
 		)
 
 		for movement in movements:
@@ -860,15 +870,18 @@ class Asset(AccountsController):
 		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
 		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
 
-		query = """SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s"""
 		if asset_bought_with_invoice:
 			# with invoice purchase either expense or cwip has been booked
-			expense_booked = frappe.db.sql(query, (purchase_document, fixed_asset_account), as_dict=1)
+			expense_booked = frappe.db.exists(
+				"GL Entry", {"voucher_no": purchase_document, "account": fixed_asset_account}
+			)
 			if expense_booked:
 				# if expense is already booked from invoice then do not make gl entries regardless of cwip enabled/disabled
 				return False
 
-			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+			cwip_booked = frappe.db.exists(
+				"GL Entry", {"voucher_no": purchase_document, "account": cwip_account}
+			)
 			if cwip_booked:
 				# if cwip is booked from invoice then make gl entries regardless of cwip enabled/disabled
 				return True
@@ -878,10 +891,11 @@ class Asset(AccountsController):
 				# if cwip account isn't available do not make gl entries
 				return False
 
-			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
 			# if cwip is not booked from receipt then do not make gl entries
 			# if cwip is booked from receipt then make gl entries
-			return cwip_booked
+			return bool(
+				frappe.db.exists("GL Entry", {"voucher_no": purchase_document, "account": cwip_account})
+			)
 
 	def get_purchase_document(self):
 		asset_bought_with_invoice = self.purchase_invoice and frappe.db.get_value(
@@ -987,8 +1001,7 @@ class Asset(AccountsController):
 
 	@frappe.whitelist()
 	def get_depreciation_rate(self, args: str | dict | Document, on_validate: bool = False):
-		if isinstance(args, str):
-			args = json.loads(args)
+		args = frappe.parse_json(args)
 
 		rate_field_precision = frappe.get_single_value("System Settings", "float_precision") or 2
 
@@ -1074,11 +1087,15 @@ def make_post_gl_entry():
 
 	for asset_category in asset_categories:
 		if cint(asset_category.enable_cwip_accounting):
-			assets = frappe.db.sql_list(
-				""" select name from `tabAsset`
-				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
-				and available_for_use_date = %s and docstatus = 1""",
-				(asset_category.name, nowdate()),
+			assets = frappe.get_all(
+				"Asset",
+				filters={
+					"asset_category": asset_category.name,
+					"booked_fixed_asset": 0,
+					"available_for_use_date": nowdate(),
+					"docstatus": 1,
+				},
+				pluck="name",
 			)
 
 			for asset in assets:
@@ -1154,15 +1171,36 @@ def get_asset_value_after_depreciation(
 	asset_name: str,
 	finance_book: str | None = None,
 ):
+	# one of the three calling forms is the boundary; Asset itself excludes the roles holding Asset Value Adjustment write
+	if not any(
+		frappe.has_permission(dt, "write")
+		for dt in ("Asset Value Adjustment", "Asset Capitalization", "Asset Repair")
+	):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
 	asset = frappe.get_doc("Asset", asset_name)
+
+	_check_asset_company(asset.company)
+
 	if not asset.calculate_depreciation:
 		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 
 
+def _check_asset_company(company: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Asset")
+	if allowed_companies and company and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def has_active_capitalization(asset: str):
+	frappe.has_permission("Asset", doc=asset, throw=True)
+
 	active_capitalizations = frappe.db.count(
 		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
 	)
@@ -1175,18 +1213,32 @@ def get_values_from_purchase_doc(
 	item_code: str,
 	doctype: str,
 ):
+	# `doctype` is caller-supplied and reaches frappe.get_doc() as the doctype itself, so without
+	# this list any document with an `items` table could be read for its valuation rates. The two
+	# values below are the only ones this function handles — see the branches further down.
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# The caller is filling in an Asset (asset.js:794), and the Asset form is the boundary: Quality
+	# Manager writes Assets but holds read on neither Purchase Receipt nor Purchase Invoice, so the
+	# purchase document cannot be it.
+	frappe.has_permission("Asset", "write", throw=True)
+
 	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+
+	_check_asset_company(purchase_doc.company)
+
 	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
 
 	if not matching_items:
-		frappe.throw(_(f"Selected {doctype} does not contain the Item Code {item_code}"))
+		frappe.throw(_("Selected {0} does not contain the Item Code {1}").format(doctype, item_code))
 
 	first_item = matching_items[0]
 
 	return {
 		"company": purchase_doc.company,
 		"purchase_date": purchase_doc.get("posting_date"),
-		"net_purchase_amount": flt(first_item.base_net_amount),
+		"net_purchase_amount": flt(first_item.valuation_rate) * flt(first_item.qty),
 		"asset_quantity": first_item.qty,
 		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
 		"asset_location": first_item.get("asset_location"),

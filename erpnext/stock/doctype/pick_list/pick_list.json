@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pick-list",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -80,7 +81,8 @@
    "fieldname": "work_order",
    "fieldtype": "Link",
    "label": "Work Order",
-   "options": "Work Order"
+   "options": "Work Order",
+   "search_index": 1
   },
   {
    "fieldname": "locations",
@@ -190,7 +192,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nOpen\nPartly Delivered\nCompleted\nCancelled",
+   "options": "Draft\nOpen\nPartly Delivered\nPartially Transferred\nCompleted\nCancelled",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1,
@@ -276,9 +278,10 @@
    "show_dashboard": 1
   }
  ],
+ "icon": "list-checks",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 18:14:18.361039",
+ "modified": "2026-08-07 10:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

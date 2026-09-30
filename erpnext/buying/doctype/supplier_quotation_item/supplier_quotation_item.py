@@ -44,6 +44,7 @@ class SupplierQuotationItem(Document):
 		material_request_item: DF.Data | None
 		net_amount: DF.Currency
 		net_rate: DF.Currency
+		ordered_qty: DF.Float
 		page_break: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data

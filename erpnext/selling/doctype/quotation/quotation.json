@@ -6,6 +6,7 @@
  "creation": "2026-01-29 21:18:32.391385",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quotation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -17,11 +18,14 @@
   "column_break_7",
   "transaction_date",
   "valid_till",
+  "is_active",
   "column_break1",
   "order_type",
   "company",
   "has_unit_price_items",
   "amended_from",
+  "revision_of",
+  "is_latest_revision",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -214,6 +218,27 @@
    "width": "150px"
   },
   {
+   "fieldname": "revision_of",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Revision Of",
+   "no_copy": 1,
+   "options": "Quotation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_latest_revision",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Latest Revision",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -244,6 +269,16 @@
    "fieldname": "valid_till",
    "fieldtype": "Date",
    "label": "Valid Till"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:doc.status==\"Lost\""
   },
   {
    "default": "Sales",
@@ -343,6 +378,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -1140,11 +1176,11 @@
    "print_hide": 1
   }
  ],
- "icon": "fa fa-shopping-cart",
+ "icon": "file-text",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-30 17:40:02.667637",
+ "modified": "2026-09-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

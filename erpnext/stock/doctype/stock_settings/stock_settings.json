@@ -3,6 +3,7 @@
  "creation": "2013-06-24 16:37:54",
  "description": "Default settings for your stock-related transactions",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-settings",
  "engine": "InnoDB",
  "field_order": [
   "defaults_tab",
@@ -23,9 +24,6 @@
   "allow_to_edit_stock_uom_qty_for_purchase",
   "allow_to_edit_stock_uom_qty_for_stock_entry",
   "allow_uom_with_conversion_rate_defined_in_item",
-  "warehouse_defaults_section",
-  "default_warehouse",
-  "sample_retention_warehouse",
   "stock_validations_tab",
   "negative_stock_section",
   "allow_negative_stock",
@@ -47,6 +45,7 @@
   "pick_serial_and_batch_based_on",
   "allow_existing_serial_no",
   "use_serial_batch_fields",
+  "use_inline_serial_batch_editor",
   "disable_serial_no_and_batch_selector",
   "section_break_gnhq",
   "allow_negative_stock_for_batch",
@@ -113,19 +112,6 @@
    "options": "UOM"
   },
   {
-   "fieldname": "default_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
-   "fieldname": "sample_retention_warehouse",
-   "fieldtype": "Link",
-   "label": "Sample Retention Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -134,13 +120,14 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Default Valuation Method",
-   "options": "FIFO\nMoving Average\nLIFO"
+   "options": "FIFO\nMoving Average\nLIFO\nStandard Cost"
   },
   {
    "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
-   "label": "Over Delivery/Receipt Allowance (%)"
+   "label": "Over Delivery/Receipt Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "Stop",
@@ -291,7 +278,8 @@
    "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
    "fieldname": "mr_qty_allowance",
    "fieldtype": "Float",
-   "label": "Over Transfer Allowance (%)"
+   "label": "Over Transfer Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -360,15 +348,16 @@
   },
   {
    "default": "FIFO",
-   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "fieldname": "pick_serial_and_batch_based_on",
    "fieldtype": "Select",
    "label": "Pick Serial / Batch Based On",
-   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "mandatory_depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "options": "FIFO\nLIFO\nExpiry"
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
    "fieldtype": "Check",
    "label": "Auto create Serial and Batch Bundle for outward"
@@ -429,6 +418,7 @@
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
@@ -452,7 +442,8 @@
    "description": "The percentage you are allowed to pick more items in the pick list than the ordered quantity.",
    "fieldname": "over_picking_allowance",
    "fieldtype": "Percent",
-   "label": "Over Picking Allowance (%)"
+   "label": "Over Picking Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "1",
@@ -469,6 +460,7 @@
   },
   {
    "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
@@ -525,11 +517,6 @@
    "fieldname": "enable_serial_and_batch_no_for_item",
    "fieldtype": "Check",
    "label": "Activate Serial / Batch No for Item"
-  },
-  {
-   "fieldname": "warehouse_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Warehouse Defaults"
   },
   {
    "fieldname": "internal_transfer_rules_section",
@@ -595,14 +582,22 @@
   {
    "fieldname": "section_break_kcvr",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:!doc.use_serial_batch_fields",
+   "description": "Show an inline editable table for serial numbers / batches on the item row instead of the dialog",
+   "fieldname": "use_inline_serial_batch_editor",
+   "fieldtype": "Check",
+   "label": "Use Inline Serial / Batch Editor"
   }
  ],
- "icon": "icon-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-13 12:38:02.202183",
+ "modified": "2026-09-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

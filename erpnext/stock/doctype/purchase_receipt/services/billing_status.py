@@ -61,16 +61,26 @@ def update_billed_amount_based_on_po(po_details: list, update_modified: bool = T
 				billed_amt_against_pr = flt(flt(billed_amt_against_po) * flt(pr_item.qty)) / flt(
 					billed_qty_against_po
 				)
+
+				# Deduct the amount and qty consumed by this PR so that the next PR
+				# against the same PO Item does not get billed for the same amount again.
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = (
+					billed_amt_against_po - billed_amt_against_pr
+				)
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_qty"] = (
+					billed_qty_against_po - pr_item.qty
+				)
 			else:
 				pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
-				if pending_to_bill <= billed_amt_against_po:
-					billed_amt_against_pr += pending_to_bill
-					billed_amt_against_po -= pending_to_bill
-				else:
-					billed_amt_against_pr += billed_amt_against_po
-					billed_amt_against_po = 0
+				consumed_amt_against_po = min(pending_to_bill, billed_amt_against_po)
+				billed_amt_against_pr += consumed_amt_against_po
 
-				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = billed_amt_against_po
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = (
+					billed_amt_against_po - consumed_amt_against_po
+				)
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_qty"] = billed_qty_against_po * (
+					1 - consumed_amt_against_po / billed_amt_against_po
+				)
 
 		if pr_item.billed_amt != billed_amt_against_pr:
 			# update existing doc if possible
@@ -105,6 +115,7 @@ def get_purchase_receipts_against_po_details(po_details: list) -> list[dict]:
 		.select(
 			purchase_receipt_item.name,
 			purchase_receipt_item.qty,
+			purchase_receipt_item.rejected_qty,
 			purchase_receipt_item.parent,
 			purchase_receipt_item.amount,
 			purchase_receipt_item.billed_amt,
@@ -117,6 +128,7 @@ def get_purchase_receipts_against_po_details(po_details: list) -> list[dict]:
 		)
 		.orderby(CombineDatetime(purchase_receipt.posting_date, purchase_receipt.posting_time))
 		.orderby(purchase_receipt.name)
+		.orderby(purchase_receipt_item.idx)
 	)
 
 	return query.run(as_dict=True)
@@ -170,30 +182,64 @@ def get_billed_amount_against_po(po_items: list) -> dict:
 
 
 def update_billing_percentage(
-	pr_doc, update_modified: bool = True, adjust_incoming_rate: bool = False
+	pr_doc,
+	update_modified: bool = True,
+	adjust_incoming_rate: bool = False,
+	billing_data: frappe._dict | None = None,
+	is_refresh: bool = False,
 ) -> None:
-	# Update Billing % based on pending accepted qty
+	"""`billing_data` from get_receipt_billing_data lets receipts on one order line share one fetch.
+	A refresh leaves the receipt alone when its billing % did not move."""
 	buying_settings = frappe.get_single("Buying Settings")
+	bill_for_rejected = buying_settings.bill_for_rejected_quantity_in_purchase_invoice
+	items = [item for item in pr_doc.items if not item.closed] or pr_doc.items
+
+	if buying_settings.set_landed_cost_based_on_purchase_invoice_rate:
+		if billing_data is None:
+			billing_data = get_receipt_billing_data(pr_doc.items, bill_for_rejected)
+		percent_billed = get_percent_billed_by_qty(pr_doc, items, bill_for_rejected, billing_data)
+	else:
+		percent_billed = get_percent_billed_by_amount(pr_doc, items, bill_for_rejected)
+
+	precision = pr_doc.precision("per_billed")
+	if not is_refresh or flt(percent_billed, precision) != flt(pr_doc.per_billed, precision):
+		pr_doc.db_set("per_billed", percent_billed)
+		if update_modified:
+			pr_doc.set_status(update=True)
+			pr_doc.notify_update()
+
+	if adjust_incoming_rate and set_amount_difference_with_purchase_invoice(items, billing_data.invoiced):
+		adjust_incoming_rate_for_pr(pr_doc)
+
+
+def get_receipt_billing_data(pr_items: list, bill_for_rejected: bool) -> frappe._dict:
+	"""Invoice split and returned qty for a set of receipt rows, fetched once for all of them."""
+	return frappe._dict(
+		invoiced=get_invoiced_qty_and_amount(pr_items, bill_for_rejected),
+		returned_qty=get_item_wise_returned_qty([item.name for item in pr_items]),
+	)
+
+
+def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -> float:
 	over_billing_allowance, role_allowed_to_over_bill = frappe.get_single_value(
 		"Accounts Settings", ["over_billing_allowance", "role_allowed_to_over_bill"]
 	)
 
-	total_amount, total_billed_amount, pi_landed_cost_amount = 0, 0, 0
-	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
-	billed_qty_amt = frappe._dict()
+	total_amount, total_billed_amount = 0, 0
+	item_wise_returned_qty = get_item_wise_returned_qty([item.name for item in pr_doc.items])
 
-	if adjust_incoming_rate:
-		billed_qty_amt = get_billed_qty_amount_against_purchase_receipt(pr_doc)
-		billed_qty_amt_based_on_po = get_billed_qty_amount_against_purchase_order(pr_doc)
-
-	for item in pr_doc.items:
+	for item in items:
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
 		returned_amount = flt(returned_qty) * flt(item.rate)
 		pending_amount = flt(item.amount) - returned_amount
-		if buying_settings.bill_for_rejected_quantity_in_purchase_invoice:
-			pending_amount = flt(item.amount)
 
-		total_billable_amount = abs(flt(item.amount))
+		# When rejected qty is billable, its value is part of the billable base too
+		rejected_amount = 0.0
+		if bill_for_rejected:
+			rejected_amount = flt(item.rejected_qty * item.rate, item.precision("amount"))
+			pending_amount = flt(item.amount) + rejected_amount
+
+		total_billable_amount = abs(flt(item.amount) + rejected_amount)
 		if pending_amount > 0:
 			total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
 
@@ -203,60 +249,9 @@ def update_billing_percentage(
 		if pr_doc.get("is_return") and not total_amount and total_billed_amount:
 			total_amount = total_billed_amount
 
-		amount = item.amount
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			amount += flt(item.rejected_qty * item.rate, item.precision("amount"))
+		amount = flt(item.amount) + rejected_amount
 
-		if adjust_incoming_rate:
-			adjusted_amt = 0.0
-
-			if (
-				item.billed_amt is not None
-				and item.amount is not None
-				and (
-					billed_qty_amt.get(item.name) or billed_qty_amt_based_on_po.get(item.purchase_order_item)
-				)
-			):
-				qty = None
-				if billed_qty_amt.get(item.name):
-					qty = billed_qty_amt.get(item.name).get("qty")
-
-				if not qty and billed_qty_amt_based_on_po.get(item.purchase_order_item):
-					if item.qty < billed_qty_amt_based_on_po.get(item.purchase_order_item)["qty"]:
-						qty = item.qty
-					else:
-						qty = billed_qty_amt_based_on_po.get(item.purchase_order_item)["qty"]
-
-					billed_qty_amt_based_on_po[item.purchase_order_item]["qty"] -= qty
-
-				billed_amt = item.billed_amt
-				if billed_qty_amt.get(item.name):
-					billed_amt = flt(billed_qty_amt.get(item.name).get("amount"))
-				elif billed_qty_amt_based_on_po.get(item.purchase_order_item):
-					total_billed_qty = (
-						billed_qty_amt_based_on_po.get(item.purchase_order_item).get("qty") + qty
-					)
-
-					if total_billed_qty:
-						billed_amt = flt(
-							flt(billed_qty_amt_based_on_po.get(item.purchase_order_item).get("amount"))
-							* (qty / total_billed_qty)
-						)
-					else:
-						billed_amt = 0.0
-
-					# Reduce billed amount based on PO for next iterations
-					billed_qty_amt_based_on_po[item.purchase_order_item]["amount"] -= billed_amt
-
-				if qty:
-					adjusted_amt = (
-						flt(billed_amt / qty) - (flt(item.rate) * flt(pr_doc.conversion_rate))
-					) * item.qty
-
-			adjusted_amt = flt(adjusted_amt, item.precision("amount"))
-			pi_landed_cost_amount += adjusted_amt
-			item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
-		elif amount and item.billed_amt > amount:
+		if amount and item.billed_amt > amount:
 			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
 			if (
 				per_over_billed > over_billing_allowance
@@ -268,22 +263,250 @@ def update_billing_percentage(
 					)
 				)
 
-	if pi_landed_cost_amount < 0:
-		total_billed_amount += abs(pi_landed_cost_amount)
-
-	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
-	pr_doc.db_set("per_billed", percent_billed)
-
-	if update_modified:
-		pr_doc.set_status(update=True)
-		pr_doc.notify_update()
-
-	if adjust_incoming_rate:
-		adjust_incoming_rate_for_pr(pr_doc)
+	return round(100 * (total_billed_amount / (total_amount or 1)), 6)
 
 
-def get_billed_qty_amount_against_purchase_receipt(pr_doc) -> dict:
-	pr_names = [d.name for d in pr_doc.items]
+def is_billed_by_qty() -> bool:
+	"""Invoice-rate landed cost leaves qty as the only stable measure of billing."""
+	return bool(
+		frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate")
+	)
+
+
+def get_percent_billed_by_qty(
+	pr_doc, items: list, bill_for_rejected: bool, billing_data: frappe._dict
+) -> float:
+	billable_qty = get_billable_qty_by_row(items, billing_data.returned_qty, bill_for_rejected)
+	return get_qty_based_percent_billed(items, billable_qty, get_invoiced_qty(pr_doc, billing_data.invoiced))
+
+
+def get_qty_based_percent_billed(items: list, billable_qty: dict, invoiced_qty: dict) -> float:
+	"""Share of each row's billable qty that is invoiced, weighted by the row's value, or by qty when no row has one."""
+	weigh_by_value = any(flt(item.rate) for item in items)
+
+	total_weight, billed_weight = 0.0, 0.0
+	for item in items:
+		qty = flt(billable_qty.get(item.name))
+		if not qty:
+			continue
+
+		weight = abs(qty * flt(item.rate)) if weigh_by_value else abs(qty)
+		total_weight += weight
+		billed_weight += weight * min(flt(invoiced_qty.get(item.name)) / qty, 1)
+
+	return round(100 * (billed_weight / (total_weight or 1)), 6)
+
+
+def get_billable_qty_by_row(items: list, returned_qty: dict, bill_for_rejected: bool) -> dict:
+	"""Qty left to bill per row; a receipt returned in full is measured against what it received."""
+	billable_qty = {
+		item.name: get_billable_qty(item, returned_qty.get(item.name), bill_for_rejected) for item in items
+	}
+	if any(qty > 0 for qty in billable_qty.values()):
+		return billable_qty
+
+	return {item.name: flt(item.qty) for item in items}
+
+
+def get_billable_qty(item, returned_qty: float | None, bill_for_rejected: bool) -> float:
+	if bill_for_rejected:
+		return flt(item.qty) + flt(item.rejected_qty)
+
+	return flt(item.qty) - flt(returned_qty)
+
+
+def get_invoiced_qty(pr_doc, invoiced: dict) -> dict:
+	invoiced_qty = {name: row.qty for name, row in invoiced.items()}
+
+	for item in pr_doc.items:
+		if item.purchase_invoice_item:
+			invoiced_qty[item.name] = flt(item.qty)
+
+	return invoiced_qty
+
+
+def get_invoiced_qty_and_amount(pr_items: list, bill_for_rejected: bool) -> dict:
+	"""Invoiced qty and base amount per Purchase Receipt Item, direct and through the Purchase Order."""
+	billed = get_billed_qty_amount_against_purchase_receipt([item.name for item in pr_items])
+	invoiced = {
+		pr_detail: frappe._dict(qty=flt(row["qty"]), amount=flt(row["amount"]))
+		for pr_detail, row in billed.items()
+	}
+
+	po_details = list({item.purchase_order_item for item in pr_items if item.purchase_order_item})
+	po_invoice_share = get_po_invoice_share(po_details, bill_for_rejected) if po_details else {}
+
+	for item in pr_items:
+		share = po_invoice_share.get(item.name)
+		if not share or item.purchase_invoice_item:
+			continue
+
+		row = invoiced.setdefault(item.name, frappe._dict(qty=0.0, amount=0.0))
+		row.qty += share.qty
+		row.amount += share.amount
+
+	return invoiced
+
+
+def get_po_invoice_share(po_details: list, bill_for_rejected: bool) -> dict:
+	"""Split invoices made against the Purchase Order over its receipts, oldest invoice to oldest receipt."""
+	po_invoices = get_po_invoices(po_details)
+
+	pr_items = get_purchase_receipts_against_po_details(po_details)
+	pr_item_names = [pr_item.name for pr_item in pr_items]
+	billed_against_pr = get_billed_qty_amount_against_purchase_receipt(pr_item_names)
+	returned_qty = get_item_wise_returned_qty(pr_item_names)
+
+	share = {}
+	for pr_item in pr_items:
+		direct_qty = flt(billed_against_pr.get(pr_item.name, {}).get("qty"))
+		billable_qty = get_billable_qty(pr_item, returned_qty.get(pr_item.name), bill_for_rejected)
+		invoices = po_invoices.get(pr_item.purchase_order_item, [])
+		share[pr_item.name] = take_from_invoices(invoices, billable_qty - direct_qty)
+
+	return share
+
+
+def take_from_invoices(invoices: list, pending_qty: float) -> frappe._dict:
+	"""Take qty from the oldest invoices first, each at its own rate."""
+	taken = frappe._dict(qty=0.0, amount=0.0)
+	for invoice in invoices:
+		qty = min(invoice.qty, pending_qty - taken.qty)
+		if qty <= 0:
+			continue
+
+		amount = invoice.amount * qty / invoice.qty
+		invoice.qty -= qty
+		invoice.amount -= amount
+		taken.qty += qty
+		taken.amount += amount
+
+	return taken
+
+
+def get_po_invoices(po_details: list) -> dict:
+	"""Net qty and base amount of each invoice row made against the Purchase Order, oldest first.
+	Debit note rows net against the row they return; notes that do not update receipt billing are left out."""
+	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	rows = (
+		frappe.qb.from_(purchase_invoice_item)
+		.inner_join(purchase_invoice)
+		.on(purchase_invoice_item.parent == purchase_invoice.name)
+		.select(
+			purchase_invoice_item.name,
+			purchase_invoice_item.po_detail,
+			purchase_invoice_item.qty,
+			purchase_invoice_item.base_net_amount,
+			purchase_invoice_item.purchase_invoice_item,
+			purchase_invoice.is_return,
+		)
+		.where(
+			(purchase_invoice_item.po_detail.isin(po_details))
+			& ((purchase_invoice_item.pr_detail.isnull()) | (purchase_invoice_item.pr_detail == ""))
+			& (purchase_invoice.docstatus == 1)
+			& (purchase_invoice.update_stock == 0)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_receipt == 1)
+			)
+		)
+		.orderby(CombineDatetime(purchase_invoice.posting_date, purchase_invoice.posting_time))
+		.orderby(purchase_invoice.name)
+		.orderby(purchase_invoice_item.idx)
+	).run(as_dict=True)
+
+	po_invoices = {}
+	for row in rows:
+		invoice_row = row.purchase_invoice_item if row.is_return else row.name
+		invoices = po_invoices.setdefault(row.po_detail, {})
+		invoice = invoices.setdefault(invoice_row, frappe._dict(qty=0.0, amount=0.0))
+		invoice.qty += flt(row.qty)
+		invoice.amount += flt(row.base_net_amount)
+
+	return {
+		po_detail: get_open_invoices(list(invoices.values())) for po_detail, invoices in po_invoices.items()
+	}
+
+
+def get_open_invoices(invoices: list) -> list:
+	"""Debit notes without an invoice row of their own take qty back from the newest rows first, at their own rate."""
+	open_invoices = [invoice for invoice in invoices if invoice.qty > 0]
+	qty_to_take_back = -sum(invoice.qty for invoice in invoices if invoice.qty < 0)
+	amount_to_take_back = -sum(invoice.amount for invoice in invoices if invoice.qty < 0)
+
+	for invoice in reversed(open_invoices):
+		qty = min(invoice.qty, qty_to_take_back)
+		if qty <= 0:
+			break
+
+		amount = amount_to_take_back * qty / qty_to_take_back
+		invoice.qty -= qty
+		invoice.amount -= amount
+		qty_to_take_back -= qty
+		amount_to_take_back -= amount
+
+	return keep_value_of_emptied_invoices(invoices)
+
+
+def keep_value_of_emptied_invoices(invoices: list) -> list:
+	"""A row returned in full at another rate leaves value behind; the newest remaining row keeps it."""
+	remaining = [invoice for invoice in invoices if invoice.qty > 0]
+	leftover = sum(invoice.amount for invoice in invoices if invoice.qty == 0)
+	if remaining and leftover:
+		remaining[-1].amount += leftover
+
+	return remaining
+
+
+def get_invoiced_qty_against_po_items(po_items: list) -> dict:
+	"""Invoiced qty per Purchase Order Item, leaving out returns that do not touch the order."""
+	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(purchase_invoice_item)
+		.inner_join(purchase_invoice)
+		.on(purchase_invoice_item.parent == purchase_invoice.name)
+		.select(purchase_invoice_item.po_detail, fn.Sum(purchase_invoice_item.qty))
+		.where(
+			(purchase_invoice_item.po_detail.isin(po_items))
+			& (purchase_invoice.docstatus == 1)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_order == 1)
+			)
+		)
+		.groupby(purchase_invoice_item.po_detail)
+	)
+
+	return frappe._dict(query.run())
+
+
+def set_amount_difference_with_purchase_invoice(items: list, invoiced: dict) -> bool:
+	"""Store each row's gap to its invoiced value; returns True when any row moved."""
+	has_changed = False
+	for item in items:
+		adjusted_amt = 0.0
+		row = invoiced.get(item.name)
+		if row and row.qty:
+			adjusted_amt = flt(row.amount / row.qty) * flt(item.qty) - flt(item.base_net_amount)
+
+		adjusted_amt = flt(adjusted_amt, item.precision("amount"))
+		if adjusted_amt == flt(item.amount_difference_with_purchase_invoice, item.precision("amount")):
+			continue
+
+		item.db_set("amount_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
+		has_changed = True
+
+	return has_changed
+
+
+def get_billed_qty_amount_against_purchase_receipt(pr_names: list) -> dict:
+	if not pr_names:
+		return frappe._dict()
+
 	parent_table = frappe.qb.DocType("Purchase Invoice")
 	table = frappe.qb.DocType("Purchase Invoice Item")
 	query = (
@@ -295,7 +518,11 @@ def get_billed_qty_amount_against_purchase_receipt(pr_doc) -> dict:
 			fn.Sum(table.base_net_amount).as_("amount"),
 			fn.Sum(table.qty).as_("qty"),
 		)
-		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
+		.where(
+			(table.pr_detail.isin(pr_names))
+			& (table.docstatus == 1)
+			& ((parent_table.is_return == 0) | (parent_table.update_billed_amount_in_purchase_receipt == 1))
+		)
 		.groupby(table.pr_detail)
 	)
 	invoice_data = query.run(as_dict=1)
@@ -315,49 +542,6 @@ def get_billed_qty_amount_against_purchase_receipt(pr_doc) -> dict:
 	return billed_qty_amt
 
 
-def get_billed_qty_amount_against_purchase_order(pr_doc) -> dict:
-	po_names = list(
-		set(
-			[
-				d.purchase_order_item
-				for d in pr_doc.items
-				if d.purchase_order_item and not d.purchase_invoice_item
-			]
-		)
-	)
-
-	invoice_data_po_based = frappe._dict()
-	if po_names:
-		parent_table = frappe.qb.DocType("Purchase Invoice")
-		table = frappe.qb.DocType("Purchase Invoice Item")
-
-		query = (
-			frappe.qb.from_(parent_table)
-			.inner_join(table)
-			.on(parent_table.name == table.parent)
-			.select(
-				table.po_detail,
-				fn.Sum(table.qty).as_("qty"),
-				fn.Sum(table.base_net_amount).as_("amount"),
-			)
-			.where((table.po_detail.isin(po_names)) & (table.docstatus == 1) & (table.pr_detail.isnull()))
-			.groupby(table.po_detail)
-		)
-
-		invoice_data = query.run(as_dict=1)
-		if not invoice_data:
-			return frappe._dict()
-
-		for row in invoice_data:
-			if row.po_detail not in invoice_data_po_based:
-				invoice_data_po_based[row.po_detail] = {"amount": 0, "qty": 0}
-
-			invoice_data_po_based[row.po_detail]["amount"] += flt(row.amount)
-			invoice_data_po_based[row.po_detail]["qty"] += flt(row.qty)
-
-	return invoice_data_po_based
-
-
 def adjust_incoming_rate_for_pr(doc) -> None:
 	doc.update_valuation_rate(reset_outgoing_rate=False)
 
@@ -370,9 +554,7 @@ def adjust_incoming_rate_for_pr(doc) -> None:
 	doc.repost_future_sle_and_gle(force=True)
 
 
-def get_item_wise_returned_qty(pr_doc) -> dict:
-	items = [d.name for d in pr_doc.items]
-
+def get_item_wise_returned_qty(items: list) -> dict:
 	return frappe._dict(
 		frappe.get_all(
 			"Purchase Receipt",

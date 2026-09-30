@@ -5,6 +5,9 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
 
+from erpnext.accounts.report.utils import validate_mandatory_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 class TaxWithholdingDetailsReport:
 	party_types = ("Customer", "Supplier")
@@ -25,11 +28,7 @@ class TaxWithholdingDetailsReport:
 		return self.get_columns(), self.get_data()
 
 	def validate_filters(self):
-		if not self.filters.from_date or not self.filters.to_date:
-			frappe.throw(_("From Date and To Date are required"))
-
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
+		validate_mandatory_date_range(self.filters)
 
 	def get_data(self):
 		self.entries = self.get_entries_query().run(as_dict=True)
@@ -90,6 +89,8 @@ class TaxWithholdingDetailsReport:
 			query = query.where(twe.party_type == self.filters.party_type)
 		if self.filters.party:
 			query = query.where(twe.party == self.filters.party)
+		if condition := get_allowed_companies_condition(twe.company, "Tax Withholding Entry"):
+			query = query.where(condition)
 
 		return query
 
@@ -258,7 +259,8 @@ class TaxWithholdingDetailsReport:
 			{
 				"label": _("Transaction Type"),
 				"fieldname": "transaction_type",
-				"fieldtype": "Data",
+				"fieldtype": "Link",
+				"options": "DocType",
 				"width": 130,
 			},
 			{

@@ -3,6 +3,7 @@
  "autoname": "format:SLA-{document_type}-{service_level}",
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/service-level-agreement",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -191,6 +192,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "signature",
  "links": [],
  "modified": "2024-03-27 13:10:39.518860",
  "modified_by": "Administrator",

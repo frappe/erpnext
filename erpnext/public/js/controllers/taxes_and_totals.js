@@ -3,6 +3,11 @@
 
 const NOT_APPLICABLE_TAX = "N/A";
 
+// Per-charge_type base resolvers, mirror of the `erpnext_taxable_base_resolvers`
+// server hook. A localization registers `fn(calc, item, tax)` returning the per-item
+// base, so the client preview matches the server for custom charge types.
+erpnext.taxable_base_resolvers = erpnext.taxable_base_resolvers || {};
+
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
@@ -10,29 +15,30 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	apply_pricing_rule_on_item(item) {
 		let effective_item_rate = item.price_list_rate;
-		let item_rate = item.rate;
 		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = item.blanket_order_rate;
 		}
+
+		let rate_with_margin;
 		if (item.margin_type == "Percentage") {
-			item.rate_with_margin =
-				flt(effective_item_rate) + flt(effective_item_rate) * (flt(item.margin_rate_or_amount) / 100);
+			rate_with_margin = effective_item_rate * (1 + item.margin_rate_or_amount / 100);
 		} else {
-			item.rate_with_margin = flt(effective_item_rate) + flt(item.margin_rate_or_amount);
+			rate_with_margin = effective_item_rate + item.margin_rate_or_amount;
 		}
-		item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
+		item.rate_with_margin = flt(rate_with_margin, precision("rate_with_margin", item));
 
-		item_rate = flt(item.rate_with_margin, precision("rate", item));
-
-		if (item.discount_percentage && !item.discount_amount) {
-			item.discount_amount = (flt(item.rate_with_margin) * flt(item.discount_percentage)) / 100;
-		}
-
-		if (item.discount_amount > 0) {
-			item_rate = flt(item.rate_with_margin - item.discount_amount, precision("rate", item));
-			item.discount_percentage = (100 * flt(item.discount_amount)) / flt(item.rate_with_margin);
+		if (item.discount_percentage) {
+			item.discount_amount = flt(
+				(item.rate_with_margin * item.discount_percentage) / 100,
+				precision("discount_amount", item)
+			);
 		}
 
+		let item_rate = item.rate_with_margin;
+		if (item.discount_amount) {
+			item_rate = item.rate_with_margin - item.discount_amount;
+		}
+		item_rate = flt(item_rate, precision("rate", item));
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
 	}
 
@@ -114,9 +120,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	validate_conversion_rate() {
 		this.frm.doc.conversion_rate = flt(
 			this.frm.doc.conversion_rate,
-			cur_frm ? precision("conversion_rate") : 9
+			frappe.meta.get_field_precision(this.frm.get_docfield("conversion_rate"), this.frm.doc)
 		);
-		var conversion_rate_label = frappe.meta.get_label(
+		var conversion_rate_label = frappe.meta.get_translated_label(
 			this.frm.doc.doctype,
 			"conversion_rate",
 			this.frm.doc.name
@@ -137,16 +143,52 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
+	get_item_fields_to_round() {
+		const [item] = this.frm.doc.items || [];
+		if (!item) {
+			return [];
+		}
+
+		const do_not_round_fields = ["conversion_factor"];
+		return frappe.meta
+			.get_fieldnames(item.doctype, item.parent, {
+				fieldtype: ["in", ["Currency", "Float"]],
+			})
+			.filter((fieldname) => !do_not_round_fields.includes(fieldname));
+	}
+
+	get_billed_qty(item) {
+		const settings = frappe.boot.sysdefaults || {};
+		const is_internal_transfer =
+			this.frm.doc.is_internal_supplier && this.frm.doc.represents_company === this.frm.doc.company;
+		const bills_rejected_quantity =
+			this.frm.doc.doctype === "Purchase Invoice" &&
+			this.frm.doc.update_stock &&
+			!is_internal_transfer &&
+			cint(settings.set_valuation_rate_for_rejected_materials) &&
+			cint(settings.bill_for_rejected_quantity_in_purchase_invoice);
+
+		if (!flt(item.rejected_qty) || !bills_rejected_quantity) {
+			return flt(item.qty);
+		}
+
+		return flt(item.qty) + flt(item.rejected_qty);
+	}
+
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
+			const fields_to_round = this.get_item_fields_to_round();
 			for (const item of this.frm.doc.items || []) {
-				frappe.model.round_floats_in(item);
+				frappe.model.round_floats_in(item, fields_to_round);
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
 				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
-					item.net_amount = item.amount = flt(item.rate * item.qty, precision("amount", item));
+					item.net_amount = item.amount = flt(
+						item.rate * me.get_billed_qty(item),
+						precision("amount", item)
+					);
 				} else {
 					// allow for '0' qty on Credit/Debit notes
 					let qty = flt(item.qty);
@@ -262,32 +304,32 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		$.each(this.frm.doc.items || [], function (n, item) {
 			item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
-			var cumulated_tax_fraction = 0.0;
-			var total_inclusive_tax_amount_per_qty = 0;
+			var total_tax_slope = 0.0;
+			var total_tax_intercept = 0;
 			$.each(me.frm.doc["taxes"] || [], function (i, tax) {
-				var current_tax_fraction = me.get_current_tax_fraction(tax, item_tax_map);
-				tax.tax_fraction_for_current_item = current_tax_fraction[0];
-				var inclusive_tax_amount_per_qty = current_tax_fraction[1];
+				var tax_contribution = me.get_current_tax_fraction(tax, item_tax_map, item);
+				tax.tax_fraction_for_current_item = tax_contribution[0];
+				var tax_intercept_per_qty = tax_contribution[1];
+				tax.inclusive_amount_per_qty = tax_intercept_per_qty;
 
 				if (i == 0) {
 					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item;
+					tax.grand_total_amount_per_qty = tax_intercept_per_qty;
 				} else {
+					var prev = me.frm.doc["taxes"][i - 1];
 					tax.grand_total_fraction_for_current_item =
-						me.frm.doc["taxes"][i - 1].grand_total_fraction_for_current_item +
-						tax.tax_fraction_for_current_item;
+						prev.grand_total_fraction_for_current_item + tax.tax_fraction_for_current_item;
+					tax.grand_total_amount_per_qty =
+						flt(prev.grand_total_amount_per_qty) + tax_intercept_per_qty;
 				}
 
-				cumulated_tax_fraction += tax.tax_fraction_for_current_item;
-				total_inclusive_tax_amount_per_qty += inclusive_tax_amount_per_qty * flt(item.qty);
+				total_tax_slope += tax.tax_fraction_for_current_item;
+				total_tax_intercept += tax_intercept_per_qty * flt(item.qty);
 			});
 
-			if (
-				!me.discount_amount_applied &&
-				item.qty &&
-				(total_inclusive_tax_amount_per_qty || cumulated_tax_fraction)
-			) {
-				var amount = flt(item.amount) - total_inclusive_tax_amount_per_qty;
-				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction);
+			if (!me.discount_amount_applied && item.qty && (total_tax_intercept || total_tax_slope)) {
+				var amount = flt(item.amount) - total_tax_intercept;
+				item._unrounded_net_amount = amount / (1 + total_tax_slope);
 				item.net_amount = flt(item._unrounded_net_amount, precision("net_amount", item));
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
@@ -296,39 +338,53 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		});
 	}
 
-	get_current_tax_fraction(tax, item_tax_map) {
-		// Get tax fraction for calculating tax exclusive amount
-		// from tax inclusive amount
-		var current_tax_fraction = 0.0;
-		var inclusive_tax_amount_per_qty = 0;
+	get_current_tax_fraction(tax, item_tax_map, item) {
+		// tax = slope * net + intercept.
+		// Returns [slope, intercept_per_qty]
+		var tax_slope = 0.0;
+		var tax_intercept = 0;
 
 		if (cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
 
 			if (tax_rate === NOT_APPLICABLE_TAX) {
-				return [current_tax_fraction, inclusive_tax_amount_per_qty];
+				return [tax_slope, tax_intercept];
 			}
 
 			if (tax.charge_type == "On Net Total") {
-				current_tax_fraction = tax_rate / 100.0;
+				tax_slope = tax_rate / 100.0;
 			} else if (tax.charge_type == "On Previous Row Amount") {
-				current_tax_fraction =
-					(tax_rate / 100.0) *
-					this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_fraction_for_current_item;
+				const row = this.frm.doc["taxes"][cint(tax.row_id) - 1];
+				tax_slope = (tax_rate / 100.0) * row.tax_fraction_for_current_item;
+				tax_intercept = (tax_rate / 100.0) * flt(row.inclusive_amount_per_qty);
 			} else if (tax.charge_type == "On Previous Row Total") {
-				current_tax_fraction =
-					(tax_rate / 100.0) *
-					this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
+				const row = this.frm.doc["taxes"][cint(tax.row_id) - 1];
+				tax_slope = (tax_rate / 100.0) * row.grand_total_fraction_for_current_item;
+				tax_intercept = (tax_rate / 100.0) * flt(row.grand_total_amount_per_qty);
 			} else if (tax.charge_type == "On Item Quantity") {
-				inclusive_tax_amount_per_qty = flt(tax_rate);
+				tax_intercept = flt(tax_rate);
+			} else {
+				// Custom charge_type: the rate applies to a resolved (fixed) base,
+				// e.g. a tax on MRP included in the printed price.
+				const qty = flt(item.qty) || 1;
+				const base = this.get_item_taxable_base(item, tax);
+				tax_intercept = ((tax_rate / 100.0) * base) / qty;
 			}
 		}
 
 		if (tax.add_deduct_tax && tax.add_deduct_tax == "Deduct") {
-			current_tax_fraction *= -1;
-			inclusive_tax_amount_per_qty *= -1;
+			tax_slope *= -1;
+			tax_intercept *= -1;
 		}
-		return [current_tax_fraction, inclusive_tax_amount_per_qty];
+		return [tax_slope, tax_intercept];
+	}
+
+	get_item_taxable_base(item, tax) {
+		// Mirror of the server get_item_taxable_base: a custom charge_type's resolver
+		// overrides the base value; otherwise the net amount.
+		const resolver = erpnext.taxable_base_resolvers[tax.charge_type];
+		if (resolver) return flt(resolver(this, item, tax));
+		return flt(item.net_amount);
 	}
 
 	_get_tax_rate(tax, item_tax_map) {
@@ -590,6 +646,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		} else if (tax.charge_type == "On Item Quantity") {
 			// don't sum current net amount due to the field being a currency field
 			current_tax_amount = tax_rate * item.qty;
+		} else {
+			// Custom charge_type: rate applies to the resolver-provided base.
+			var resolved_base = this.get_item_taxable_base(item, tax);
+			current_net_amount = resolved_base;
+			current_tax_amount = (tax_rate / 100.0) * resolved_base;
 		}
 
 		return [current_net_amount, current_tax_amount];
@@ -951,14 +1012,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (["Sales Invoice", "POS Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
 			let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 			let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
+			let total_amount_to_pay;
 
 			if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
-				var total_amount_to_pay = flt(
+				total_amount_to_pay = flt(
 					grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
 					precision("grand_total")
 				);
 			} else {
-				var total_amount_to_pay = flt(
+				total_amount_to_pay = flt(
 					flt(base_grand_total, precision("base_grand_total")) -
 						this.frm.doc.total_advance -
 						this.frm.doc.base_write_off_amount,
@@ -1003,14 +1065,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	async set_total_amount_to_default_mop() {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
+		let total_amount_to_pay;
 
 		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
-			var total_amount_to_pay = flt(
+			total_amount_to_pay = flt(
 				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
 				precision("grand_total")
 			);
 		} else {
-			var total_amount_to_pay = flt(
+			total_amount_to_pay = flt(
 				flt(base_grand_total, precision("base_grand_total")) -
 					this.frm.doc.total_advance -
 					this.frm.doc.base_write_off_amount,

@@ -121,6 +121,12 @@ def get_columns(filters):
 			"width": "100",
 		},
 		{
+			"label": _("Hour Rate"),
+			"fieldtype": "Currency",
+			"fieldname": "hour_rate",
+			"width": "120",
+		},
+		{
 			"label": _("Operating Cost"),
 			"fieldtype": "Currency",
 			"fieldname": "operating_cost",

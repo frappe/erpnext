@@ -4,15 +4,19 @@
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, getdate
+from frappe.utils import flt, formatdate, getdate, today
 
+from erpnext import get_company_currency
+from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.controllers.item_close import clear_closed_rows_on_amend, validate_parent_reopen
+from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 
-class BlanketOrder(Document):
+class BlanketOrder(StatusUpdater):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -25,7 +29,10 @@ class BlanketOrder(Document):
 
 		amended_from: DF.Link | None
 		blanket_order_type: DF.Literal["", "Selling", "Purchasing"]
+		buying_price_list: DF.Link | None
 		company: DF.Link
+		conversion_rate: DF.Float
+		currency: DF.Link
 		customer: DF.Link | None
 		customer_name: DF.Data | None
 		from_date: DF.Date
@@ -33,6 +40,10 @@ class BlanketOrder(Document):
 		naming_series: DF.Literal["MFG-BLR-.YYYY.-"]
 		order_date: DF.Date | None
 		order_no: DF.Data | None
+		plc_conversion_rate: DF.Float
+		price_list_currency: DF.Link | None
+		selling_price_list: DF.Link | None
+		status: DF.Literal["Draft", "Submitted", "Closed", "Cancelled"]
 		supplier: DF.Link | None
 		supplier_name: DF.Data | None
 		tc_name: DF.Link | None
@@ -40,15 +51,92 @@ class BlanketOrder(Document):
 		to_date: DF.Date
 	# end: auto-generated types
 
+	def before_validate(self):
+		self.set_currency()
+		self.set_conversion_rate()
+		blanket_order_pricing.set_price_list(self)
+
 	def validate(self):
 		self.validate_dates()
 		self.validate_duplicate_items()
 		self.validate_item_qty()
 		self.set_party_item_code()
+		self.set_base_rates()
+		clear_closed_rows_on_amend(self)
+
+	def on_submit(self):
+		self.set_status(update=True)
+
+	def on_cancel(self):
+		self.set_status(update=True)
+
+	def update_status(self, status: str) -> None:
+		if status != "Closed" and self.status == "Closed":
+			validate_parent_reopen(self)
+
+		self.set_status(update=True, status=status)
+		self.notify_update()
+
+	def is_item_closable(self, item) -> bool:
+		return flt(item.ordered_qty) < flt(item.qty)
+
+	def validate_can_be_ordered(self, order_date) -> None:
+		self.validate_is_open()
+		self.validate_not_expired(order_date)
+
+	def validate_is_open(self) -> None:
+		if self.status == "Closed":
+			frappe.throw(
+				_("Blanket Order {0} is closed").format(frappe.bold(self.name)), frappe.InvalidStatusError
+			)
+
+	def validate_items_are_open(self, item_codes: list[str]) -> None:
+		for row in self.items:
+			if row.closed and row.item_code in item_codes:
+				frappe.throw(
+					_("Item {0} is closed in Blanket Order {1}").format(
+						frappe.bold(row.item_code), frappe.bold(self.name)
+					),
+					frappe.InvalidStatusError,
+				)
+
+	def set_currency(self):
+		if self.currency:
+			return
+
+		config = blanket_order_pricing.get_order_type_config(self.blanket_order_type)
+		party_type = config["party_type"]
+		party = self.get(config["party_field"])
+		party_currency = frappe.get_cached_value(party_type, party, "default_currency") if party else None
+		self.currency = party_currency or get_company_currency(self.company)
+
+	def set_conversion_rate(self):
+		company_currency = get_company_currency(self.company)
+		if self.currency == company_currency:
+			self.conversion_rate = 1.0
+		elif not self.conversion_rate:
+			self.conversion_rate = blanket_order_pricing.get_exchange_rate_to_company(self, self.currency)
+
+		validate_conversion_rate(
+			self.currency,
+			self.conversion_rate,
+			self.meta.get_translated_label("conversion_rate"),
+			self.company,
+		)
+		self.conversion_rate = flt(self.conversion_rate, self.precision("conversion_rate"))
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
+
+	def validate_not_expired(self, order_date) -> None:
+		if getdate(order_date) > getdate(self.to_date):
+			frappe.throw(
+				_("Blanket Order {0} expired on {1}").format(
+					frappe.bold(self.name), formatdate(self.to_date)
+				),
+				title=_("Blanket Order Expired"),
+			)
 
 	def set_party_item_code(self):
 		item_ref = {}
@@ -120,12 +208,40 @@ class BlanketOrder(Document):
 
 	def validate_item_qty(self):
 		for d in self.items:
-			if flt(d.qty) < 0:
-				frappe.throw(_("Row {0}: Quantity cannot be negative.").format(d.idx))
+			if flt(d.qty) <= 0:
+				frappe.throw(_("Row {0}: Quantity must be greater than zero.").format(d.idx))
+
+	def set_base_rates(self):
+		blanket_order_pricing.set_base_rates(self)
+
+
+@frappe.whitelist()
+def apply_price_list(
+	doc: str | dict,
+	item_name: str | None = None,
+	reset_party_values: bool = False,
+	reset_plc_conversion_rate: bool = False,
+	reset_conversion_rate: bool = False,
+):
+	return blanket_order_pricing.apply_price_list(
+		doc=doc,
+		item_name=item_name,
+		reset_party_values=reset_party_values,
+		reset_plc_conversion_rate=reset_plc_conversion_rate,
+		reset_conversion_rate=reset_conversion_rate,
+	)
+
+
+@frappe.whitelist(methods=["POST"])
+def update_status(status: str, name: str):
+	blanket_order = frappe.get_doc("Blanket Order", name, check_permission="submit")
+	blanket_order.update_status(status)
 
 
 @frappe.whitelist()
 def make_order(source_name: str):
+	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
+	blanket_order.validate_can_be_ordered(today())
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -136,25 +252,31 @@ def make_order(source_name: str):
 	def update_item(source, target, source_parent):
 		target_qty = source.get("qty") - source.get("ordered_qty")
 		target.qty = target_qty if flt(target_qty) >= 0 else 0
-		target.rate = source.get("rate")
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")
 			target.description = item.get("description")
 			target.uom = item.get("stock_uom")
 			target.against_blanket_order = 1
-			target.blanket_order = source_name
 
 	target_doc = get_mapped_doc(
 		"Blanket Order",
 		source_name,
 		{
-			"Blanket Order": {"doctype": doctype, "postprocess": update_doc},
+			"Blanket Order": {
+				"doctype": doctype,
+				"field_no_map": ["naming_series"],
+				"postprocess": update_doc,
+			},
 			"Blanket Order Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"rate": "blanket_order_rate", "parent": "blanket_order"},
+				"field_map": {
+					"rate": "blanket_order_rate",
+					"parent": "blanket_order",
+				},
 				"postprocess": update_item,
-				"condition": lambda item: not (flt(item.qty)) or (flt(item.qty) - flt(item.ordered_qty)) > 0,
+				"condition": lambda item: not item.closed
+				and (not flt(item.qty) or (flt(item.qty) - flt(item.ordered_qty)) > 0),
 			},
 		},
 	)
@@ -170,7 +292,7 @@ def validate_against_blanket_order(order_doc):
 		order_data = {}
 
 		for item in order_doc.get("items"):
-			if item.against_blanket_order and item.blanket_order:
+			if item.blanket_order:
 				if item.blanket_order in order_data:
 					if item.item_code in order_data[item.blanket_order]:
 						order_data[item.blanket_order][item.item_code] += item.qty
@@ -186,8 +308,10 @@ def validate_against_blanket_order(order_doc):
 					"blanket_order_allowance",
 				)
 			)
-			for bo_name, item_data in order_data.items():
-				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+			for bo_name, item_data in sorted(order_data.items()):
+				bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
+				bo_doc.validate_can_be_ordered(order_doc.transaction_date)
+				bo_doc.validate_items_are_open(list(item_data))
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
