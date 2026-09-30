@@ -108,6 +108,27 @@ class TestSerialBatchServices(ERPNextTestSuite):
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_serial_nos_from_schedule(self.item.name, schedule.name)
 
+	def test_schedule_serial_picker_works_for_maintenance_users(self):
+		schedule = self.make_schedule(serial_no="Service-001")
+		schedule.docstatus = 1
+		schedule.db_insert()
+		schedule.set_parent_in_children()
+		schedule.items[0].db_insert()
+		user = frappe.get_doc(
+			doctype="User",
+			email="identity-maintenance-user@example.com",
+			first_name="Maintenance",
+			send_welcome_email=0,
+			roles=[{"role": "Maintenance User"}],
+		).insert()
+
+		with self.set_user(user.name):
+			rows = get_serial_no_query(
+				"Serial No", "", "name", 0, 20, {"item_code": self.item.name, "schedule": schedule.name}
+			)
+
+		self.assertEqual([row[0] for row in rows], [self.serial.name])
+
 	def test_schedule_validates_delivery_date_from_stock_entries(self):
 		make_stock_entry(
 			item_code=self.item.name,
