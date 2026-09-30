@@ -29,6 +29,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.services.gl_validator import validate_opening_entry_against_pcv
+from erpnext.accounts.services.taxes import validate_account_head
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -155,6 +156,7 @@ class JournalEntry(AccountsController):
 
 		self.clearance_date = None
 
+		self.validate_account_company()
 		self.validate_party()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
@@ -182,6 +184,14 @@ class JournalEntry(AccountsController):
 
 		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
+
+	def validate_account_company(self):
+		"""Catch an account/Company mismatch on save, before GL Entry has to reject it on submit."""
+		if not self.company:
+			return
+		for d in self.get("accounts"):
+			if d.account:
+				validate_account_head(d.idx, d.account, self.company, _("Journal Entry"))
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
