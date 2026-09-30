@@ -27,10 +27,14 @@ def get_name_from_hash(item_code):
 	temp = None
 	while not temp:
 		temp = frappe.generate_hash()[:7].upper()
-		if frappe.db.exists("Batch", {"item": item_code, "batch_id": temp}):
+		if batch_id_exists(item_code, temp):
 			temp = None
 
 	return temp
+
+
+def batch_id_exists(item_code, batch_id):
+	return bool(SerialBatchIdentity("Batch").get_records(item_code, [batch_id], ["name"]))
 
 
 def batch_uses_naming_series():
@@ -142,7 +146,7 @@ class Batch(Document):
 				self.batch_id = get_name_from_hash(self.item)
 
 			# User might have manually created a batch with next number
-			if frappe.db.exists("Batch", {"item": self.item, "batch_id": self.batch_id}):
+			if batch_id_exists(self.item, self.batch_id):
 				self.batch_id = None
 
 	def onload(self):
