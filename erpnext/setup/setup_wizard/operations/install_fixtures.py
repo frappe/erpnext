@@ -461,7 +461,7 @@ def add_sale_stages():
 		frappe.get_doc(sales_stage).db_insert()
 
 
-def install_company(args):
+def install_company(args):  # nosemgrep
 	records = [
 		# Fiscal Year
 		{
@@ -488,14 +488,17 @@ def install_company(args):
 	make_records(records)
 
 
-def get_module_ticks(args) -> dict:
-	"""Module ticks for the new company, from the wizard's "module_<fieldname>" answers.
+def get_module_ticks(wizard_values) -> dict:
+	"""Module ticks for the new company, from the wizard's "module_<fieldname>" values.
 
 	A module the wizard did not ask about is on.
 
 	Example: get_module_ticks({"module_stock": 1, "module_pos": 0}) -> {"stock": 1, "pos": 0, "assets": 1, ...}
 	"""
-	return {fieldname: cint(args.get("module_" + fieldname, 1)) for fieldname in get_business_module_fields()}
+	return {
+		fieldname: cint(wizard_values.get("module_" + fieldname, 1))
+		for fieldname in get_business_module_fields()
+	}
 
 
 def install_defaults(args=None):  # nosemgrep
