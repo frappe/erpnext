@@ -1795,6 +1795,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	apply_pricing_rule(item, calculate_taxes_and_totals) {
+		if (this.frm.doc.doctype === "Request for Quotation") {
+			return;
+		}
+
 		var me = this;
 		var args = this._get_args(item);
 		if (!(args.items && args.items.length)) {
@@ -2020,8 +2024,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// We need to reset plc_conversion_rate sometimes because the call to
 		// `erpnext.stock.get_item_details.apply_price_list` is sensitive to its value
 
-
-		if (this.frm.doc.doctype === "Material Request") {
+		if (["Material Request", "Request for Quotation"].includes(this.frm.doc.doctype)) {
 			return;
 		}
 
