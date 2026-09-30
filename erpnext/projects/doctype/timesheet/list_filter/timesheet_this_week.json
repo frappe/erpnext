@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"employee_name\", \"label\": \"Employee Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"start_date\", \"label\": \"Start Date\"}, {\"fieldname\": \"total_hours\", \"label\": \"Total Working Hours\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.958006",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "This Week",
+ "filters": "[[\"Timesheet\", \"start_date\", \"Timespan\", \"this week\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.958006",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Timesheet-This Week",
+ "owner": "Administrator",
+ "reference_doctype": "Timesheet",
+ "route_signature": "start_date=[\"Timespan\",\"this week\"]",
+ "sort_field": "start_date",
+ "sort_order": "desc"
+}
