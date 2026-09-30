@@ -9,7 +9,6 @@ from erpnext.controllers.selling_controller import get_delivered_serial_batch_fo
 from erpnext.controllers.subcontracting_controller import add_items_in_ste
 from erpnext.manufacturing.doctype.work_order.mapper import get_serial_nos_for_job_card
 from erpnext.selling.page.point_of_sale.point_of_sale import (
-	filter_result_items,
 	get_serials_by_batch,
 	search_by_term,
 	search_for_serial_or_batch_or_barcode_number,
@@ -1384,8 +1383,8 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		profile.append("item_groups", {"item_group": self.item.item_group})
 		profile.save()
 		result = search_for_serial_or_batch_or_barcode_number("POS-Scan", profile.name)
-		filter_result_items(result, profile.name)
-		self.assertEqual([row["item_code"] for row in result["candidates"]], [self.item.name])
+		self.assertNotIn("candidates", result)
+		self.assertEqual(result["item_code"], self.item.name)
 
 	def test_pos_groups_physical_serials_by_their_items_batches(self):
 		first_batch = self.make_number("Batch", "POS-Batch-1")
