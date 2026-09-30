@@ -347,6 +347,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_purpose_for_stock_entry()
 		sbb.clean_serial_nos()
 		self.remove_fg_completed_qty()
+		if self.docstatus == 1:
+			StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
+
 		sbb.validate_serialized_batch()
 		self.calculate_rate_and_amount()
 		validate_putaway_capacity(self)
@@ -358,8 +361,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.fg_completed_qty = 0.0
 
 	def before_submit(self):
-		StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
-
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):
 			self.purpose_cls(self).before_submit()
 
