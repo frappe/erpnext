@@ -63,6 +63,17 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				self.assertEqual(numbers, [" second-002 ", "FIRST-001", "Second-002"])
 				self.assertEqual(first.reload().get(SerialBatchIdentity(doctype).number_field), "First-001")
 
+	def test_numbers_are_trimmed_on_save_and_lookup(self):
+		for doctype in ("Serial No", "Batch"):
+			with self.subTest(doctype=doctype):
+				identity = SerialBatchIdentity(doctype)
+				record = self.make_number(doctype, " Padded-001 ")
+				self.assertEqual(record.get(identity.number_field), "Padded-001")
+				self.assertEqual(
+					[row.name for row in identity.get_records(self.item.name, [" padded-001 "], ["name"])],
+					[record.name],
+				)
+
 	def test_label_lookup_preserves_order_repetitions_and_spelling(self):
 		for doctype in ("Serial No", "Batch"):
 			with self.subTest(doctype=doctype):
