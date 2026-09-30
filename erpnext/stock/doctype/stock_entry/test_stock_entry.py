@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from unittest.mock import patch
+
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
@@ -27,6 +29,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
 from erpnext.stock.doctype.stock_entry.stock_entry import (
 	DuplicateEntryForWorkOrderError,
 	FinishedGoodError,
@@ -73,6 +76,143 @@ class TestStockEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
 		frappe.local.flags.dont_execute_stock_reposts = False
+
+	def test_reserved_batch_allocation_preserves_requested_qty(self):
+		cases = (
+			([5], 1, {"B1": 2, "B2": 10}, [("B1", 2), ("B2", 3)]),
+			([5], 1, {"B1": 10, "B2": 2}, [("B1", 5)]),
+			([5], 1, {"B1": 2, "B2": 1}, [("B1", 2), ("B2", 1), (None, 2)]),
+			([5], 1, {"B1": 0}, [(None, 5)]),
+			([3, 3], 1, {"B1": 4, "B2": 10}, [("B1", 3), ("B1", 1), ("B2", 2)]),
+			([5], 2, {"B1": 2, "B2": 10}, [("B1", 2), ("B2", 8)]),
+			([5], 0, {"B1": 2, "B2": 10}, [("B1", 2), ("B2", 3)]),
+			([0.8], 1, {"B1": 0.1, "B2": 0.7}, [("B1", 0.1), ("B2", 0.7)]),
+			([0.3, 0.7], 1, {"B1": 0.1 + 0.2, "B2": 1}, [("B1", 0.3), ("B2", 0.7)]),
+		)
+		for quantities, conversion_factor, batches, expected in cases:
+			with self.subTest(quantities=quantities, conversion_factor=conversion_factor, batches=batches):
+				entry = frappe.get_doc(
+					{
+						"doctype": "Stock Entry",
+						"purpose": "Material Issue",
+						"items": [
+							{
+								"item_code": "_Test Item",
+								"s_warehouse": "_Test Warehouse - _TC",
+								"qty": qty,
+								"conversion_factor": conversion_factor,
+								"transfer_qty": qty * (conversion_factor or 1),
+							}
+							for qty in quantities
+						],
+					}
+				)
+				reservations = {
+					("_Test Item", "_Test Warehouse - _TC"): frappe._dict(batch_no=batches.copy())
+				}
+				with patch.object(
+					StockEntrySABB, "get_available_reserved_materials", return_value=reservations
+				):
+					entry.set_serial_batch_from_reserved_entry()
+
+				self.assertEqual([(row.batch_no, row.transfer_qty) for row in entry.items], expected)
+				self.assertAlmostEqual(sum(row.qty for row in entry.items), sum(quantities))
+				for row in entry.items:
+					if row.batch_no:
+						self.assertTrue(row.use_serial_batch_fields)
+
+	def test_reserved_batch_split_uses_stock_uom_when_needed(self):
+		for factor, batch_qty, whole_number in ((3, 2, 0), (2, 1, 1)):
+			with self.subTest(conversion_factor=factor, whole_number=whole_number):
+				uom = frappe.get_doc(
+					{
+						"doctype": "UOM",
+						"uom_name": f"_Test Allocation UOM {whole_number}",
+						"must_be_whole_number": whole_number,
+					}
+				).insert()
+				entry = frappe.get_doc({"doctype": "Stock Entry"})
+				row = entry.append(
+					"items", {"qty": 2, "conversion_factor": factor, "uom": uom.name, "stock_uom": "Nos"}
+				)
+				new_rows = []
+				with patch.object(row, "precision", return_value=3):
+					StockEntrySABB(entry)._apply_batch_reservation_to_item(
+						row, frappe._dict(batch_no={"B1": batch_qty}), new_rows
+					)
+				for allocated in [row, *new_rows]:
+					self.assertEqual(allocated.uom, "Nos")
+					self.assertEqual(allocated.conversion_factor, 1)
+					allocated.set_transfer_qty()
+				self.assertEqual(row.transfer_qty, batch_qty)
+				self.assertEqual(sum(d.transfer_qty for d in [row, *new_rows]), 2 * factor)
+
+	def test_reserved_batch_allocation_stock_movement(self):
+		item = make_item(
+			"_Test Reserved Batch Allocation",
+			{"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1},
+		)
+		warehouse = "_Test Warehouse - _TC"
+		batches = {}
+		for qty in (2, 10):
+			receipt = make_stock_entry(item_code=item.name, qty=qty, to_warehouse=warehouse, basic_rate=100)
+			batches[get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)] = qty
+
+		entry = make_stock_entry(item_code=item.name, qty=5, from_warehouse=warehouse, do_not_save=True)
+		reservations = {(item.name, warehouse): frappe._dict(batch_no=batches)}
+		with patch.object(StockEntrySABB, "get_available_reserved_materials", return_value=reservations):
+			entry.set_serial_batch_from_reserved_entry()
+		entry.insert()
+		entry.submit()
+		entry.reload()
+
+		self.assertEqual([row.qty for row in entry.items], [2, 3])
+		self.assertEqual(
+			[get_batch_from_bundle(row.serial_and_batch_bundle) for row in entry.items], list(batches)
+		)
+		self.assertEqual(sum(row.transfer_qty for row in entry.items), 5)
+		movement = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Stock Entry", "voucher_no": entry.name, "is_cancelled": 0},
+			pluck="actual_qty",
+		)
+		self.assertEqual(sum(movement), -5)
+
+	def test_reserved_serial_allocation_uses_stock_qty_without_duplicates(self):
+		for quantities, factor, expected in (
+			([2, 2], 1, ["S1\nS2", "S3\nS4"]),
+			([2], 2, ["S1\nS2\nS3\nS4"]),
+		):
+			with self.subTest(quantities=quantities, conversion_factor=factor):
+				entry = frappe.get_doc(
+					{
+						"doctype": "Stock Entry",
+						"purpose": "Material Issue",
+						"items": [
+							{"item_code": "_Test Item", "qty": qty, "conversion_factor": factor}
+							for qty in quantities
+						],
+					}
+				)
+				reservations = {("_Test Item", None): frappe._dict(serial_no=["S1", "S2", "S3", "S4"])}
+				with patch.object(
+					StockEntrySABB, "get_available_reserved_materials", return_value=reservations
+				):
+					entry.set_serial_batch_from_reserved_entry()
+				self.assertEqual([row.serial_no for row in entry.items], expected)
+
+	def test_reserved_serial_shortage_preserves_unassigned_qty(self):
+		entry = frappe.get_doc({"doctype": "Stock Entry"})
+		row = entry.append("items", {"qty": 5, "conversion_factor": 1})
+		new_rows = []
+		StockEntrySABB(entry)._apply_batch_reservation_to_item(
+			row, frappe._dict(serial_no=["S1", "S2", "S3"]), new_rows
+		)
+		self.assertEqual((row.qty, row.serial_no), (3, "S1\nS2\nS3"))
+		self.assertEqual(len(new_rows), 1)
+		self.assertEqual(new_rows[0].qty, 2)
+		self.assertFalse(new_rows[0].serial_no)
+		self.assertTrue(new_rows[0].use_serial_batch_fields)
 
 	def test_subcontracting_inward_warehouse_direction(self):
 		source_warehouse = "_Test Warehouse - _TC"

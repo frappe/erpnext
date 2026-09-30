@@ -2,6 +2,7 @@
 # See license.txt
 
 from random import randint
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, flt, today
@@ -14,6 +15,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	_get_stock_reservation_entries_for_voucher,
 	cancel_stock_reservation_entries,
+	get_reserved_materials,
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
@@ -22,6 +24,25 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockReservationEntry(ERPNextTestSuite):
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_get_reserved_materials_excludes_delivered_batch_qty(self):
+		item = make_batch_item()
+		create_material_receipt({item.name: item}, self.warehouse, qty=10)
+		order = make_sales_order(item_code=item.name, warehouse=self.warehouse, qty=10, rate=100)
+		order.create_stock_reservation_entries()
+		self.assertEqual(sum(row.qty for row in get_reserved_materials(order.name)), 10)
+
+		delivery = make_delivery_note(order.name, kwargs={"for_reserved_stock": True})
+		delivery.items[0].qty = 7
+		delivery.save()
+		delivery.submit()
+		self.assertEqual(sum(row.qty for row in get_reserved_materials(order.name)), 3)
+
+		delivery.cancel()
+		self.assertEqual(sum(row.qty for row in get_reserved_materials(order.name)), 10)
+
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
 		self._sr_item = None
@@ -1166,6 +1187,22 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		)
 		doc.update(overrides)
 		return doc
+
+	def test_batch_transfer_is_shared_between_reservations_in_same_warehouse(self):
+		reservations = [self.make_sre(warehouse=warehouse) for warehouse in ("WH1", "WH1", "WH2")]
+		for doc in reservations:
+			doc.append("sb_entries", {"batch_no": "B1", "qty": 3})
+		transfers = {
+			("_Test Item", "WH1"): frappe._dict(serial_nos=[], batch_nos={"B1": 4}),
+			("_Test Item", "WH2"): frappe._dict(serial_nos=[], batch_nos={"B1": 1}),
+		}
+		with patch.object(type(reservations[0].sb_entries[0]), "db_update"):
+			for doc in reservations:
+				doc.consume_serial_batch_for_material_transfer(transfers)
+			self.assertEqual([doc.matched_serial_batch_qty for doc in reservations], [3, 1, 1])
+			for doc in reservations:
+				doc.consume_serial_batch_for_material_transfer({})
+			self.assertEqual([doc.matched_serial_batch_qty for doc in reservations], [0, 0, 0])
 
 	def test_all_mandatory_fields_are_required(self):
 		self.make_sre().validate_mandatory()  # everything set -> passes

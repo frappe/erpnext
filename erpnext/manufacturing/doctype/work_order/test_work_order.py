@@ -36,12 +36,66 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.stock_entry.stock_entry import OperationsNotCompleteError
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestWorkOrder(ERPNextTestSuite):
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_partial_transfers_preserve_reserved_batches(self):
+		warehouse = "Stores - _TC"
+		item = make_item(
+			"Test Partial Transfer Batch RM",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PTBR-.#####",
+			},
+		)
+		finished = make_item("Test Partial Transfer Batch FG", {"is_stock_item": 1})
+		make_bom(item=finished.name, source_warehouse=warehouse, raw_materials=[item.name])
+		batches = []
+		for qty in (2, 10):
+			receipt = test_stock_entry.make_stock_entry(
+				item_code=item.name, qty=qty, target=warehouse, basic_rate=100
+			)
+			batches.append(get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle))
+		work_order = make_wo_order_test_record(
+			item=finished.name, qty=12, reserve_stock=1, source_warehouse=warehouse
+		)
+		transfers = []
+		for qty, expected in ((5, [(batches[0], 2), (batches[1], 3)]), (7, [(batches[1], 7)])):
+			entry = frappe.get_doc(
+				make_stock_entry(work_order.name, "Material Transfer for Manufacture", qty)
+			)
+			self.assertEqual([(row.batch_no, row.qty) for row in entry.items], expected)
+			entry.submit()
+			self.assertEqual(
+				[
+					(get_batch_from_bundle(row.serial_and_batch_bundle), row.transfer_qty)
+					for row in entry.items
+				],
+				expected,
+			)
+			transfers.append(entry)
+		self.assertFalse(
+			[row for row in get_reserved_materials(work_order.name) if row.warehouse == warehouse]
+		)
+		transfers[0].cancel()
+		self.assertEqual(
+			[
+				(row.batch_no, row.qty)
+				for row in get_reserved_materials(work_order.name)
+				if row.warehouse == warehouse
+			],
+			[(batches[0], 2), (batches[1], 3)],
+		)
+
 	def setUp(self):
 		self.warehouse = "_Test Warehouse 2 - _TC"
 		self.item = "_Test Item"
