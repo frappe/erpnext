@@ -81,6 +81,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 	refresh() {
 		this.frm.disable_save();
+		this.set_party_from_route();
 
 		this.frm.set_df_property("invoices", "cannot_delete_rows", true);
 		this.frm.set_df_property("payments", "cannot_delete_rows", true);
@@ -149,6 +150,14 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 		}
 	}
+	set_party_from_route() {
+		const { company, party_type, party } = frappe.route_options || {};
+		if (!party) return;
+		frappe.route_options = null;
+		this.frm.set_value({ company, party_type, party }).then(() => {
+			if (this.frm.doc.receivable_payable_account) this.frm.trigger("get_unreconciled_entries");
+		});
+	}
 	set_query_for_dimension_filters() {
 		frappe.call({
 			method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.get_queries_for_dimension_filters",
@@ -183,7 +192,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.trigger("clear_child_tables");
 
 		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
-			frappe.call({
+			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
 					company: this.frm.doc.company,

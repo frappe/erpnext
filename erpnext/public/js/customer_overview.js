@@ -23,6 +23,8 @@ const COUNT = {
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
 	days_to_pay: (n) => (n === 1 ? __("1 day to pay") : __("{0} days to pay", [n])),
+	reconcile: (n) =>
+		n === 1 ? __("Reconcile with 1 unpaid invoice") : __("Reconcile with {0} unpaid invoices", [n]),
 };
 
 frappe.ui.form.on("Customer", {
@@ -106,6 +108,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				this.refresh_list();
 			}
 		);
+		if (Object.keys(locals[":Company"] || {}).length === 1) this.company_field.$wrapper.parent().hide();
 		this.period_field = this.make_select(this.$controls, __("Period"), PERIODS, (value) => {
 			this.state.period = value;
 			this.set_pref("period", value);
@@ -296,15 +299,21 @@ erpnext.CustomerOverview = class CustomerOverview {
 				delta: this.delta_opts(overdue, __("since last month")),
 				onclick: () => this.open_ar(),
 			},
-			{
-				label: labels[2],
-				value: this.money0(advances.value),
-				caption: flt(advances.value)
-					? __("Already deducted from Receivable")
-					: __("No unapplied payments"),
-				onclick: () => this.open_ar(),
-			},
+			this.advances_card(labels[2], advances, outstanding.unpaid_count),
 		];
+	}
+
+	advances_card(label, advances, unpaid_count) {
+		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ar() };
+		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
+		if (!unpaid_count) return { ...card, caption: __("Credit balance, no invoices to apply it to") };
+		if (!frappe.model.can_write("Payment Reconciliation"))
+			return { ...card, caption: __("Already deducted from Receivable") };
+		return {
+			...card,
+			caption: COUNT.reconcile(unpaid_count),
+			onclick: () => this.open_reconciliation(),
+		};
 	}
 
 	outstanding_sub(o) {
@@ -717,6 +726,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 			company: this.state.company,
 		};
 		frappe.set_route("query-report", "Accounts Receivable");
+	}
+	open_reconciliation() {
+		frappe.route_options = {
+			company: this.state.company,
+			party_type: "Customer",
+			party: this.frm.doc.name,
+		};
+		frappe.set_route("Form", "Payment Reconciliation");
 	}
 	open_analytics() {
 		const range = (this.sales.data && this.sales.data.period_range) || {};
