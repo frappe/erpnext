@@ -117,19 +117,18 @@ class SerialBatchIdentity:
 		)
 
 	def get_number_map(self, names, *, item_code=None):
-		if not names:
-			return {}
-		filters = {"name": ("in", list(set(names)))}
-		if item_code is not None:
-			filters[self.item_field] = item_code
-		return dict(
-			frappe.get_all(
-				self.doctype,
-				filters=filters,
-				fields=["name", self.number_field],
-				as_list=True,
+		names = list(set(names or []))
+		numbers = {}
+		for start in range(0, len(names), MATCH_CHUNK_SIZE):
+			filters = {"name": ("in", names[start : start + MATCH_CHUNK_SIZE])}
+			if item_code is not None:
+				filters[self.item_field] = item_code
+			numbers.update(
+				frappe.get_all(
+					self.doctype, filters=filters, fields=["name", self.number_field], as_list=True
+				)
 			)
-		)
+		return numbers
 
 	def get_records(self, item_code, numbers, fields, *, ignore_permissions=True):
 		if not numbers:

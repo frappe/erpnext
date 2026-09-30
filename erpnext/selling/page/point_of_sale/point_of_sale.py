@@ -140,16 +140,19 @@ def filter_result_items(result, pos_profile):
 def check_pos_item_access(pos_profile: str, item_code: str | None) -> None:
 	"""Entitle a POS endpoint that takes an Item from the caller, which get_items scopes for itself."""
 	check_pos_profile_access(pos_profile)
+	if not item_code:
+		return
 	item_groups = get_item_groups(pos_profile)
-	if item_code and item_groups:
-		if frappe.db.get_value("Item", item_code, "item_group") not in item_groups:
-			frappe.throw(_("The selected Item is not available on this POS Profile"), frappe.PermissionError)
+	if item_groups and frappe.db.get_value("Item", item_code, "item_group") not in item_groups:
+		frappe.throw(_("The selected Item is not available on this POS Profile"), frappe.PermissionError)
 
 
 def scope_scan_result(result, pos_profile):
 	"""Narrow a scan to the Items the profile sells, the way get_items narrows its own results."""
+	if not result:
+		return result
 	item_groups = get_item_groups(pos_profile)
-	if not result or not item_groups:
+	if not item_groups:
 		return result
 
 	rows = result.get("candidates") or ([result] if result.get("item_code") else [])
