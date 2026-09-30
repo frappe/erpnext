@@ -356,7 +356,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.trend_chart = new frappe.Chart($('<div class="co-chart">').appendTo($panel)[0], {
 			type: "line",
 			height: 220,
-			colors: ["blue"],
+			colors: [getComputedStyle(document.documentElement).getPropertyValue("--blue-600").trim()],
 			data: {
 				labels: t.points.map((p) => p.label),
 				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
@@ -400,7 +400,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 					formatted: this.short_money(b.value),
 				})),
 				format: (v) => this.short_money(v),
-				color: "blue",
 				on_click: () => this.open_ar(),
 				values_on_hover: true,
 			})
@@ -443,10 +442,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
 		const donut = frappe.ui.donut({
 			segments: [
-				{ label: __("Overdue"), value: overdue, color: "var(--blue-700)" },
+				{ label: __("Overdue"), value: overdue, color: "var(--blue-600)" },
 				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
-				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--blue-300)" },
-				{ label: __("Available"), value: limit - used, color: "var(--green-500)" },
+				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--green-400)" },
+				{ label: __("Available"), value: limit - used, color: "var(--green-600)" },
 			],
 			center: {
 				value: flt((used / limit) * 100, 1) + "%",
