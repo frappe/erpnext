@@ -1768,6 +1768,17 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with self.assertRaisesRegex(DataValidationError, "both items have Serial No shared-001"):
 			frappe.rename_doc("Item", self.other_item.name, self.item.name, merge=True)
 
+	def test_batch_series_skips_a_number_taken_in_another_case(self):
+		item = make_item(
+			"_Identity Series Batch Item",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "IDCASE-.#####"},
+		).name
+		frappe.get_doc(doctype="Batch", item=item, batch_id="idcase-00001").insert()
+
+		batch = frappe.get_doc(doctype="Batch", item=item).insert()
+
+		self.assertEqual(batch.batch_id, "IDCASE-00002")
+
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
