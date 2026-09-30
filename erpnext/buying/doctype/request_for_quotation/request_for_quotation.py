@@ -26,9 +26,14 @@ class RequestforQuotation(BuyingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.buying.doctype.request_for_quotation_item.request_for_quotation_item import RequestforQuotationItem
-		from erpnext.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import RequestforQuotationSupplier
 		from frappe.types import DF
+
+		from erpnext.buying.doctype.request_for_quotation_item.request_for_quotation_item import (
+			RequestforQuotationItem,
+		)
+		from erpnext.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import (
+			RequestforQuotationSupplier,
+		)
 
 		amended_from: DF.Link | None
 		billing_address: DF.Link | None
@@ -529,10 +534,14 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 		pluck="name",
 	)
 
-	rfq_doc = frappe.get_cached_doc("Request for Quotation", rfq_name) if frappe.db.exists("Request for Quotation", rfq_name) else None
+	rfq_doc = (
+		frappe.get_cached_doc("Request for Quotation", rfq_name)
+		if frappe.db.exists("Request for Quotation", rfq_name)
+		else None
+	)
 	linked_sq = getattr(rfq_doc, "supplier_quotation", None) if rfq_doc else None
 
-	conditions = (sq_item.request_for_quotation == rfq_name)
+	conditions = sq_item.request_for_quotation == rfq_name
 	if rfq_item_names:
 		conditions = conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
 	if linked_sq:
