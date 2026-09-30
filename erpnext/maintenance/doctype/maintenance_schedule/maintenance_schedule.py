@@ -501,6 +501,10 @@ class MaintenanceSchedule(TransactionBase):
 @frappe.whitelist()
 def get_serial_nos_from_schedule(item_code: str, schedule: str):
 	frappe.has_permission("Maintenance Schedule", "read", doc=schedule, throw=True)
+	return get_schedule_serial_ids(item_code, schedule)
+
+
+def get_schedule_serial_ids(item_code, schedule):
 	serial_ids = []
 	for row in frappe.get_all(
 		"Maintenance Schedule Item",
@@ -518,7 +522,7 @@ def get_serial_no_query(doctype: str, txt: str, searchfield: str, start: int, pa
 		return []
 	query_filters = {"item_code": filters["item_code"]}
 	if filters.get("schedule"):
-		serial_ids = get_serial_nos_from_schedule(filters["item_code"], filters["schedule"])
+		serial_ids = get_schedule_serial_ids(filters["item_code"], filters["schedule"])
 		if serial_ids:
 			query_filters["name"] = ("in", serial_ids)
 	return frappe.get_list(
