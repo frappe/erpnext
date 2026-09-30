@@ -16,6 +16,7 @@ from pypika import functions as fn
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	CONSUMPTION_PURPOSES,
 	WorkOrderStockReservation,
 	get_consumed_qty,
 	get_row_wise_serial_batch,
@@ -369,6 +370,9 @@ class RequiredItemsService:
 		if self.doc.skip_transfer and not self.doc.from_wip_warehouse:
 			wip_warehouse = None
 
+		row_wise_serial_batch = (
+			get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES) if self.doc.reserve_stock else {}
+		)
 		for item in self.doc.required_items:
 			consumed_qty = get_consumed_qty(self.doc.name, item.item_code) + item.returned_qty
 			item.db_set("consumed_qty", flt(consumed_qty), update_modified=False)
@@ -378,7 +382,7 @@ class RequiredItemsService:
 
 			warehouse = wip_warehouse or item.source_warehouse
 			WorkOrderStockReservation(self.doc).update_consumed_qty_in_stock_reservation(
-				item, consumed_qty, warehouse
+				item, consumed_qty, warehouse, row_wise_serial_batch
 			)
 
 	def remove_additional_items(self, stock_entry):

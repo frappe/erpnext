@@ -717,18 +717,22 @@ class StockReservationEntry(Document):
 		return flt(reserved_qty[0][0])
 
 	def consume_serial_batch_for_material_transfer(self, row_wise_serial_batch):
+		"""Consume a shared item/warehouse pool in place; reuse it for one recomputation."""
+		data = row_wise_serial_batch.get((self.item_code, self.warehouse))
+		if data and not isinstance(data.serial_nos, set):
+			data.serial_nos = set(data.serial_nos)
 		for entry in self.sb_entries:
 			entry.delivered_qty = 0
-
-		for entry in self.sb_entries:
-			for row in row_wise_serial_batch:
-				data = row_wise_serial_batch[row]
-
-				if entry.serial_no in data.serial_nos:
-					entry.delivered_qty = flt(1)
-
-				elif entry.batch_no in data.batch_nos:
-					entry.delivered_qty = flt(data.batch_nos[entry.batch_no])
+			if data:
+				if entry.serial_no:
+					if entry.serial_no in data.serial_nos:
+						entry.delivered_qty = 1
+						data.serial_nos.remove(entry.serial_no)
+				elif entry.batch_no:
+					qty = flt(data.batch_nos.get(entry.batch_no))
+					entry.delivered_qty = min(flt(entry.qty), qty)
+					# Share the remaining transfer quantity across reservations for this batch.
+					data.batch_nos[entry.batch_no] = flt(qty - entry.delivered_qty, entry.precision("qty"))
 
 			entry.db_update()
 
@@ -2030,12 +2034,10 @@ def get_reserved_materials(voucher_no):
 		.select(
 			serial_batch_doc.serial_no,
 			serial_batch_doc.batch_no,
-			serial_batch_doc.qty,
+			(serial_batch_doc.qty - serial_batch_doc.delivered_qty).as_("qty"),
 			doctype.item_code,
 			doctype.warehouse,
 			doctype.name,
-			doctype.transferred_qty,
-			doctype.consumed_qty,
 		)
 		.where(
 			(doctype.docstatus == 1)

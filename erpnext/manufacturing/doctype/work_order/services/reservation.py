@@ -110,7 +110,7 @@ class WorkOrderStockReservation:
 				"docstatus": 1,
 			},
 			pluck="name",
-			order_by="creation",
+			order_by="creation asc, name asc",
 		)
 		for name in names:
 			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
@@ -148,7 +148,14 @@ class WorkOrderStockReservation:
 		doc.update_reserved_stock_in_bin()
 		doc.update_reserved_qty_in_voucher()
 
-	def update_consumed_qty_in_stock_reservation(self, item, consumed_qty, wip_warehouse):
+	def update_consumed_qty_in_stock_reservation(
+		self, item, consumed_qty, wip_warehouse, row_wise_serial_batch=None
+	):
+		"""Update consumption, consuming the pool in place.
+
+		Callers looping over required items must share one pool for the entire recomputation.
+		Omitting the pool is supported for a standalone item update.
+		"""
 		filters = {
 			"voucher_no": self.doc.name,
 			"item_code": item.item_code,
@@ -159,8 +166,11 @@ class WorkOrderStockReservation:
 		if not self.doc.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
 
-		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES)
-		names = frappe.get_all("Stock Reservation Entry", filters=filters, pluck="name", order_by="creation")
+		if row_wise_serial_batch is None:
+			row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES)
+		names = frappe.get_all(
+			"Stock Reservation Entry", filters=filters, pluck="name", order_by="creation asc, name asc"
+		)
 		for name in names:
 			consumed_qty = self._apply_consumed_qty(name, consumed_qty, row_wise_serial_batch)
 
