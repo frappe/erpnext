@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -127,6 +127,7 @@ class Batch(Document):
 	def before_naming(self):
 		"""Generate the physical batch number separately from the document ID."""
 
+		self.batch_id = cstr(self.batch_id).strip()
 		if self.batch_id:
 			return
 

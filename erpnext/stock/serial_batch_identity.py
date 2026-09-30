@@ -145,7 +145,7 @@ class SerialBatchIdentity:
 			)
 			.where(
 				self._number_key(table[self.number_field]).isin(
-					[self._number_key(number) for number in numbers]
+					[self._number_key(number.strip()) for number in numbers]
 				)
 			)
 			.run(as_dict=True)

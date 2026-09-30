@@ -69,6 +69,9 @@ class SerialNo(StockController):
 		SerialBatchIdentity("Serial No").raise_duplicate(error, self.item_code, self.serial_no)
 		super().show_unique_validation_message(error)
 
+	def before_naming(self):
+		self.serial_no = cstr(self.serial_no).strip()
+
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
 			frappe.throw(
