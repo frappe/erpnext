@@ -106,13 +106,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		});
 	}
 
-	scan_api_call(input, callback) {
+	scan_api_call(input, callback, item_code) {
 		return frappe
 			.call({
 				method: this.scan_api,
 				args: {
 					search_value: input,
-					item_code: this.item_code || this.frm.doc.item_code,
+					item_code: item_code || this.item_code || this.frm.doc.item_code,
 					ctx: {
 						set_warehouse: this.frm.doc.set_warehouse,
 						company: this.frm.doc.company,
@@ -302,11 +302,15 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					}
 
 					if (e.target.value) {
-						this.scan_api_call(e.target.value, (r) => {
-							if (r.message) {
-								this.update_dialog_values(item_code, r);
-							}
-						});
+						this.scan_api_call(
+							e.target.value,
+							(r) => {
+								if (r.message) {
+									this.update_dialog_values(item_code, r);
+								}
+							},
+							item_code
+						);
 					}
 				},
 			},

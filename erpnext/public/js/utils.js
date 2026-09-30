@@ -1455,7 +1455,13 @@ function attach_selector_button(inner_text, append_loction, context, grid_row) {
 $.extend(erpnext.stock.utils, {
 	set_item_details_using_barcode(frm, child_row, callback) {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
-		barcode_scanner.scan_api_call(child_row.barcode, callback);
+		barcode_scanner.scan_api_call(child_row.barcode, async (r) => {
+			if (r.message?.candidates) {
+				r.message = await erpnext.utils.BarcodeScanner.select_scan_match(r.message.candidates);
+				if (!r.message) return;
+			}
+			return callback(r);
+		});
 	},
 
 	get_serial_range(range_string, separator) {
