@@ -1,24 +1,58 @@
 <!-- Dual-tone module icons for the desk dock and sidebar headers. Each symbol animates while its dock
-     tile is hovered, through the icon-motion custom properties the tile sets (see dock.scss). -->
+     tile is hovered, through the icon-motion custom properties the tile sets (see dock.scss).
+
+     This sprite is inserted into the page, so the style block below is a document stylesheet: it can
+     style the tiles that hold an icon as well as the shapes inside one. -->
 
 <svg id="erpnext-module-symbols" aria-hidden="true" style="display: none;" class="icon" xmlns="http://www.w3.org/2000/svg">
 	<style>
-		/* The smoke waits for its tile: the dock sets --icon-motion while an item is hovered. */
+		/* Tones. A symbol fills from --duotone-light and --duotone-dark. Only custom properties reach
+		   inside a use element, so the surface holding the icon sets them, and a symbol's own
+		   fallbacks are the resting tones it wears anywhere else.
+
+		   Hover is motion alone: a hovered dock tile keeps the resting tones. The active tile moves
+		   both tones one token darker (lighter, in the dark theme), the way Frappe Books marks its
+		   active icon. Books' own pair is two tokens on, which read as too heavy on the desk. A
+		   paler resting pair (ink-gray-2 / ink-gray-4) was tried and dropped: the roof all but
+		   vanished against the tray.
+
+		   The sidebar header never animates, so its hover changes nothing, with one exception. In the
+		   dark theme the header's hover fill is within a few levels of the resting light tone, and
+		   the roof would vanish into it, so there the light tone moves up one token.
+
+		   Every value is a frappe-ui ink token (https://ui.frappe.io/docs/foundations/colors), the
+		   set meant for text and icons. A token already changes with the theme, but the ink scale is
+		   not the same shape in both, so where one name does not land on the right grey in each,
+		   light-dark() picks a token per theme.
+		     rest           light: ink-gray-3 / ink-gray-5     dark: ink-gray-3 / ink-gray-6
+		     dock hover     as rest
+		     header hover   light: as rest                     dark: ink-gray-4 / ink-gray-6
+		     active         light: ink-gray-4 / ink-gray-6     dark: ink-gray-4 / ink-gray-7 */
+		.shell-header:hover .header-logo,
+		.shell-header.hover .header-logo {
+			--duotone-light: light-dark(var(--ink-gray-3), var(--ink-gray-4));
+		}
+		.dock-item--duotone.active {
+			--duotone-light: var(--ink-gray-4);
+			--duotone-dark: light-dark(var(--ink-gray-6), var(--ink-gray-7));
+		}
+		/* The smoke waits for its tile: the dock sets --icon-motion while an item is hovered. Puffs
+		   leave the stack, swell and drift off. */
 		.factory-smoke {
 			opacity: var(--icon-motion-opacity, 0);
-			transition: opacity 0.2s ease;
+			transition: opacity 0.25s ease;
 		}
 		.factory-smoke circle {
 			transform-box: fill-box;
 			transform-origin: center;
 			opacity: 0;
-			animation: factory-smoke 1.8s ease-out infinite;
+			animation: factory-smoke 2.1s ease-out infinite;
 			animation-play-state: var(--icon-motion, paused);
 		}
 		@keyframes factory-smoke {
-			0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
-			20% { opacity: 1; }
-			100% { transform: translate(2px, -7px) scale(1.8); opacity: 0; }
+			0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+			15% { opacity: 1; }
+			100% { transform: translate(2.6px, -6.5px) scale(1.9); opacity: 0; }
 		}
 		/* The display shows its number at rest, and types it in, digit by digit, while hovered. */
 		.calculator-digits {
@@ -210,15 +244,18 @@
 			.knife-saw { transition: none; }
 		}
 	</style>
+	<!-- Optically balanced rather than box-centred: the roof is the light tone and the chimney is thin, so
+	     the dark wall is what the eye weighs. The ground line is at 19.75, which sits the building on a
+	     14px label's descender line in the 28px sidebar mark and centres the mass in a dock tile. -->
 	<symbol viewBox="0 0 24 24" id="icon-factory-duotone" stroke="none" style="overflow: visible">
-		<g class="factory-smoke" style="fill: light-dark(#C2C2C2, #6A6A6A)">
-			<circle cx="4.5" cy="2.2" r="1.7" style="animation-delay: 0s" />
-			<circle cx="4.5" cy="2.2" r="1.7" style="animation-delay: 0.6s" />
-			<circle cx="4.5" cy="2.2" r="1.7" style="animation-delay: 1.2s" />
+		<g class="factory-smoke" style="fill: var(--duotone-light, var(--ink-gray-3))">
+			<circle cx="5.5" cy="1.7" r="1.5" style="animation-delay: 0s" />
+			<circle cx="5.5" cy="1.7" r="1.5" style="animation-delay: 0.7s" />
+			<circle cx="5.5" cy="1.7" r="1.5" style="animation-delay: 1.4s" />
 		</g>
-		<rect x="3" y="3" width="3" height="8.5" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
-		<path d="M7 11.5L12 7.5V11.5Z M12.6 11.5L17.3 7.5V11.5Z M17.9 11.5L22 7.5V11.5Z" style="fill: light-dark(#C2C2C2, #6A6A6A)" />
-		<path fill-rule="evenodd" d="M2 12.5H22V21H2Z M5 15h3v3H5Z M10.5 15h3v3h-3Z M16 15h3v3h-3Z" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
+		<rect x="3.5" y="2" width="4" height="8.75" style="fill: var(--duotone-dark, light-dark(var(--ink-gray-5), var(--ink-gray-6)))" />
+		<path d="M3.5 10.75L9.67 6.25V10.75Z M9.67 10.75L15.83 6.25V10.75Z M15.83 10.75L22 6.25V10.75Z" style="fill: var(--duotone-light, var(--ink-gray-3))" />
+		<path fill-rule="evenodd" d="M2 10.75H22V18.75Q22 19.75 21 19.75H3Q2 19.75 2 18.75Z M10.4 14.6H13.6V19.75H10.4Z M5 12.9H7.4V14.9H5Z M16.6 12.9H19V14.9H16.6Z" style="fill: var(--duotone-dark, light-dark(var(--ink-gray-5), var(--ink-gray-6)))" />
 	</symbol>
 	<symbol viewBox="0 0 24 24" id="icon-calculator-duotone" stroke="none">
 		<rect x="5" y="2" width="14" height="20" rx="2" style="fill: light-dark(#7C7C7C, #B8B8B8)" />
