@@ -16,6 +16,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -958,7 +959,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			rate=100,
 			posting_date=add_days(nowdate(), -5),
 		)
-		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_numbers_from_bundle(pr.items[0].serial_and_batch_bundle)
 
 		# Reconcile the serial nos to 5 @ 500 => difference 2500 - 500 = 2000
 		reco = create_stock_reconciliation(

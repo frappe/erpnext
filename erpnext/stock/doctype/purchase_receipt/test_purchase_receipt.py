@@ -6366,12 +6366,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).name
 
 		pr1 = make_purchase_receipt(item_code=sn_item_code, qty=5, rate=100, use_serial_batch_fields=1)
-		pr1_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		pr1_serial_nos = get_serial_numbers_from_bundle(pr1.items[0].serial_and_batch_bundle)
 
 		serial_no_pr = make_purchase_receipt(
 			item_code=sn_item_code, qty=5, rate=100, use_serial_batch_fields=1
 		)
-		serial_no_pr_serial_nos = get_serial_nos_from_bundle(serial_no_pr.items[0].serial_and_batch_bundle)
+		serial_no_pr_serial_nos = get_serial_numbers_from_bundle(
+			serial_no_pr.items[0].serial_and_batch_bundle
+		)
 
 		sn_return = make_purchase_return(serial_no_pr.name)
 		sn_return.items[0].qty = -1
