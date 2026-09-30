@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"material_request_type\", \"label\": \"Purpose\"}, {\"fieldname\": \"transaction_date\", \"label\": \"Transaction Date\"}, {\"fieldname\": \"schedule_date\", \"label\": \"Required By\"}, {\"fieldname\": \"owner\", \"label\": \"Created By\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.814897",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Material Request\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.814897",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Material Request-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Material Request",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}
