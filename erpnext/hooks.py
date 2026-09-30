@@ -83,6 +83,17 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 
+# Business modules a company can switch off. Names match the Module Def names.
+# The fieldname is the Check field on Company. See frappe/utils/business_modules.py.
+business_modules = [
+	{"module": "Stock", "fieldname": "stock"},
+	{"module": "Manufacturing", "fieldname": "manufacturing"},
+	{"module": "Subcontracting", "fieldname": "subcontracting"},
+	{"module": "Assets", "fieldname": "assets"},
+	{"module": "Projects", "fieldname": "projects"},
+	{"module": "POS", "fieldname": "pos"},
+]
+
 after_install = "erpnext.setup.install.after_install"
 
 after_app_install = "erpnext.setup.install.after_app_install"

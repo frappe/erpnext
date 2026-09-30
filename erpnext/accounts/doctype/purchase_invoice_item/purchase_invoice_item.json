@@ -521,7 +521,8 @@
    "label": "Project",
    "options": "Project",
    "print_hide": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Projects"
   },
   {
    "allow_on_submit": 1,
@@ -658,7 +659,8 @@
    "fieldtype": "Check",
    "label": "Include Exploded Items",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Subcontracting"
   },
   {
    "fieldname": "col_break6",
@@ -705,7 +707,8 @@
    "options": "Purchase Receipt",
    "print_hide": 1,
    "read_only": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Stock"
   },
   {
    "allow_on_submit": 1,
@@ -758,7 +761,8 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "section_break_82",
@@ -931,7 +935,8 @@
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
    "options": "Asset",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Assets"
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 && doc.docstatus === 0",
@@ -1033,7 +1038,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-09-30 17:24:02.960975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

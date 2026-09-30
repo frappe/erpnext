@@ -47,6 +47,7 @@ class Company(NestedSet):
 		accumulated_depreciation_account: DF.Link | None
 		allow_account_creation_against_child_company: DF.Check
 		asset_received_but_not_billed: DF.Link | None
+		assets: DF.Check
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
 		bank_charges_account: DF.Link | None
@@ -113,11 +114,14 @@ class Company(NestedSet):
 		fax: DF.Data | None
 		is_group: DF.Check
 		lft: DF.Int
+		manufacturing: DF.Check
 		monthly_sales_target: DF.Currency
 		old_parent: DF.Data | None
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+		pos: DF.Check
+		projects: DF.Check
 		purchase_expense_account: DF.Link | None
 		purchase_expense_contra_account: DF.Link | None
 		reconcile_on_advance_payment_date: DF.Check
@@ -135,9 +139,11 @@ class Company(NestedSet):
 		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
+		stock: DF.Check
 		stock_adjustment_account: DF.Link | None
 		stock_delivered_but_not_billed: DF.Link | None
 		stock_received_but_not_billed: DF.Link | None
+		subcontracting: DF.Check
 		submit_err_jv: DF.Check
 		tax_id: DF.Data | None
 		total_monthly_sales: DF.Currency
@@ -180,6 +186,7 @@ class Company(NestedSet):
 			self.update_default_account = True
 
 		self.validate_abbr()
+		self.validate_business_modules()
 		self.validate_default_accounts()
 		self.validate_currency()
 		self.validate_advance_account_currency()
@@ -340,6 +347,13 @@ class Company(NestedSet):
 					),
 					title=_("Incorrect Warehouse"),
 				)
+
+	def validate_business_modules(self):
+		"""Manufacturing needs Stock. Subcontracting needs Manufacturing."""
+		if not self.stock:
+			self.manufacturing = 0
+		if not self.manufacturing:
+			self.subcontracting = 0
 
 	def validate_abbr(self):
 		if not self.abbr:

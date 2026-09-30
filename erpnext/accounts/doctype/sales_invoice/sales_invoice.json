@@ -316,7 +316,8 @@
    "oldfieldtype": "Link",
    "options": "Project",
    "print_hide": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Projects"
   },
   {
    "default": "0",
@@ -769,7 +770,8 @@
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
    "print_hide": 1,
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "scan_barcode",
@@ -852,7 +854,8 @@
    "hide_seconds": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Projects"
   },
   {
    "default": "0",
@@ -863,7 +866,8 @@
    "label": "Total Billing Amount",
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Projects"
   },
   {
    "fieldname": "section_break_30",
@@ -1918,7 +1922,8 @@
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
    "label": "Is Consolidated",
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "POS"
   },
   {
    "default": "0",
@@ -2017,7 +2022,8 @@
    "fieldtype": "Float",
    "label": "Total Billing Hours",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Projects"
   },
   {
    "depends_on": "eval:doc.sales_partner",
@@ -2159,7 +2165,8 @@
    "depends_on": "eval: doc.is_return",
    "fieldname": "update_billed_amount_in_delivery_note",
    "fieldtype": "Check",
-   "label": "Update Billed Amount in Delivery Note"
+   "label": "Update Billed Amount in Delivery Note",
+   "show_for_module": "Stock"
   },
   {
    "default": "0",
@@ -2253,7 +2260,8 @@
    "fieldname": "last_scanned_warehouse",
    "fieldtype": "Data",
    "is_virtual": 1,
-   "label": "Last Scanned Warehouse"
+   "label": "Last Scanned Warehouse",
+   "show_for_module": "Stock"
   },
   {
    "default": "0",
@@ -2406,7 +2414,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-08-14 12:43:19.480555",
+ "modified": "2026-09-30 17:24:02.960975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

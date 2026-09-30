@@ -601,6 +601,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			frappe.meta.get_docfield("Sales Invoice", "update_stock")?.hidden
 		);
 		this.frm.set_df_property("update_stock", "hidden", hide_update_stock || hidden_by_customization);
+		// the line above can show Update Stock again, so hide module fields again
+		erpnext.utils.hide_business_module_fields(this.frm, this.frm.doc.company);
 	}
 
 	items_on_form_rendered() {
@@ -1206,6 +1208,11 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
+	},
+
+	company: function (frm) {
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
 	},
 });
 

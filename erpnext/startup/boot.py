@@ -66,6 +66,7 @@ def boot_session(bootinfo):
 				"country",
 				"exchange_gain_loss_account",
 				"bank_charges_account",
+				*get_business_module_fields(),
 			],
 			limit_page_length=0,  # intentionally unbounded: all companies are needed for boot
 		)
@@ -123,3 +124,11 @@ def bootinfo(bootinfo):
 		if employee:
 			bootinfo["user"]["employee"] = employee
 			frappe.session.data.employee = employee
+
+
+def get_business_module_fields() -> list[str]:
+	"""Company Check fields of all registered business modules. Example: ["stock", "pos"]"""
+	from frappe.utils.business_modules import get_business_modules
+
+	company_meta = frappe.get_meta("Company")
+	return [m["fieldname"] for m in get_business_modules() if company_meta.has_field(m["fieldname"])]

@@ -23,6 +23,14 @@
   "date_of_establishment",
   "parent_company",
   "reporting_currency",
+  "modules_used_section",
+  "stock",
+  "manufacturing",
+  "subcontracting",
+  "modules_used_column",
+  "assets",
+  "projects",
+  "pos",
   "section_break_soma",
   "default_letter_head",
   "column_break_zqmp",
@@ -1112,6 +1120,54 @@
    "options": "Letter Head"
   },
   {
+   "description": "Tick the modules this company uses.",
+   "fieldname": "modules_used_section",
+   "fieldtype": "Section Break",
+   "label": "Modules Used"
+  },
+  {
+   "default": "0",
+   "fieldname": "stock",
+   "fieldtype": "Check",
+   "label": "Stock"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.stock",
+   "fieldname": "manufacturing",
+   "fieldtype": "Check",
+   "label": "Manufacturing"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.manufacturing",
+   "fieldname": "subcontracting",
+   "fieldtype": "Check",
+   "label": "Subcontracting"
+  },
+  {
+   "fieldname": "modules_used_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "assets",
+   "fieldtype": "Check",
+   "label": "Assets"
+  },
+  {
+   "default": "0",
+   "fieldname": "projects",
+   "fieldtype": "Check",
+   "label": "Projects"
+  },
+  {
+   "default": "0",
+   "fieldname": "pos",
+   "fieldtype": "Check",
+   "label": "POS"
+  },
+  {
    "fieldname": "section_break_soma",
    "fieldtype": "Section Break"
   },
@@ -1160,7 +1216,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-09-06 12:00:00.000000",
+ "modified": "2026-09-30 17:52:56.517974",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
