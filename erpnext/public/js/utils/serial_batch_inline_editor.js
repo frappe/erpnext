@@ -905,7 +905,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			this.last_entries = [];
 		}
 
-		this.refresh_view();
+		await this.refresh_view();
 		this.reconcile_row_qty();
 	}
 
