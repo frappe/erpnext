@@ -1508,6 +1508,7 @@ def get_bom_items_as_dict(
 				bom_item.idx,
 				item.item_name,
 				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(qty)s as stock_qty,
 				item.image,
 				bom.project,
 				item.stock_uom,
@@ -1584,11 +1585,12 @@ def get_bom_items_as_dict(
 		if item.operation:
 			key = (item.item_code, item.operation)
 
+		stock_qty = item.pop("stock_qty")
 		if item.get("is_phantom_item"):
 			data = get_bom_items_as_dict(
 				item.get("bom_no"),
 				company,
-				qty=item.get("qty"),
+				qty=stock_qty,
 				fetch_exploded=fetch_exploded,
 				fetch_secondary_items=fetch_secondary_items,
 				include_non_stock_items=include_non_stock_items,

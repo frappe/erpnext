@@ -813,6 +813,31 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			flt(total_difference, reco.precision("difference_amount")),
 		)
 
+	def test_recreate_stock_ledgers(self):
+		reco = create_stock_reconciliation(
+			item_code=self.make_item().name, warehouse="_Test Warehouse - _TC", qty=10, rate=100
+		)
+
+		frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Transaction",
+				"voucher_type": reco.doctype,
+				"voucher_no": reco.name,
+				"posting_date": reco.posting_date,
+				"posting_time": reco.posting_time,
+				"company": reco.company,
+				"recreate_stock_ledgers": 1,
+			}
+		).submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": reco.doctype, "voucher_no": reco.name, "is_cancelled": 0},
+			fields=["qty_after_transaction", "valuation_rate"],
+		)
+		self.assertEqual(sles, [{"qty_after_transaction": 10, "valuation_rate": 100}])
+
 	def test_difference_amount_synced_with_gl_after_repost_non_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 

@@ -148,10 +148,20 @@ class StockSettings(Document):
 			doc_before_save.enable_serial_and_batch_no_for_item
 			and not self.enable_serial_and_batch_no_for_item
 		):
-			if frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+			if frappe.db.exists("Serial and Batch Bundle", {"docstatus": 1}):
 				frappe.throw(
 					_(
 						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
+					)
+				)
+
+			# settings hidden by this flag still apply to items that track serial / batch
+			if frappe.db.exists("Item", {"has_serial_no": 1}) or frappe.db.exists(
+				"Item", {"has_batch_no": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot disable Serial and Batch No for Item, as there are items with serial / batch enabled."
 					)
 				)
 

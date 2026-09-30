@@ -362,15 +362,16 @@
   },
   {
    "default": "FIFO",
-   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "fieldname": "pick_serial_and_batch_based_on",
    "fieldtype": "Select",
    "label": "Pick Serial / Batch Based On",
-   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "mandatory_depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "options": "FIFO\nLIFO\nExpiry"
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
    "fieldtype": "Check",
    "label": "Auto create Serial and Batch Bundle for outward"
@@ -431,6 +432,7 @@
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
@@ -472,6 +474,7 @@
   },
   {
    "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
@@ -605,7 +608,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-01 23:35:02.896836",
+ "modified": "2026-09-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

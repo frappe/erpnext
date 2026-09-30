@@ -8,7 +8,7 @@ from frappe import _
 from frappe.core.doctype.prepared_report.prepared_report import create_json_gz_file
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_date_str, get_link_to_form, nowtime, parse_json
+from frappe.utils import add_days, flt, get_date_str, get_link_to_form, getdate, nowtime, parse_json
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import request_cache
 
@@ -70,7 +70,7 @@ class StockClosingEntry(Document):
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
 		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
-		to_date: DF.Date | None
+		to_date: DF.Date
 	# end: auto-generated types
 
 	def on_discard(self):
@@ -91,7 +91,45 @@ class StockClosingEntry(Document):
 			self.db_set("status", self.status)
 
 	def validate(self):
+		self.set_from_date()
 		self.validate_duplicate()
+
+	def set_from_date(self):
+		"""Closing balances are chained, so a closing always starts the day after the previous one
+		ends, or from the first stock ledger entry when it is the company's first closing."""
+
+		if not self.to_date:
+			frappe.throw(_("To Date is mandatory"))
+
+		previous = frappe.db.get_value(
+			"Stock Closing Entry",
+			{"company": self.company, "docstatus": 1, "name": ("!=", self.name)},
+			["name", "to_date"],
+			order_by="to_date desc",
+			as_dict=True,
+		)
+
+		if previous:
+			if getdate(previous.to_date) >= getdate(self.to_date):
+				frappe.throw(
+					_("To Date must be after {0}, the To Date of the last Stock Closing Entry {1}").format(
+						frappe.bold(frappe.format(previous.to_date, "Date")),
+						get_link_to_form("Stock Closing Entry", previous.name),
+					)
+				)
+
+			self.from_date = add_days(previous.to_date, 1)
+			return
+
+		first_posting_date = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"company": self.company, "is_cancelled": 0, "docstatus": 1},
+			[{"MIN": "posting_date"}],
+		)
+
+		self.from_date = first_posting_date or self.to_date
+		if getdate(self.from_date) > getdate(self.to_date):
+			self.from_date = self.to_date
 
 	def validate_duplicate(self):
 		table = frappe.qb.DocType("Stock Closing Entry")
@@ -127,10 +165,36 @@ class StockClosingEntry(Document):
 		self.set_status(save=True)
 		self.enqueue_job()
 
+	def before_cancel(self):
+		self.validate_later_closing_entry()
+
 	def on_cancel(self):
 		self.validate_closed_period_lock()
 		self.set_status(save=True)
 		self.remove_stock_closing()
+
+	def validate_later_closing_entry(self):
+		# A later closing is built on top of this one's balance, so cancelling this one would leave
+		# the later balance resting on figures that no longer exist.
+		later_entry = frappe.db.get_value(
+			"Stock Closing Entry",
+			{
+				"company": self.company,
+				"docstatus": 1,
+				"to_date": (">", self.to_date),
+				"name": ("!=", self.name),
+			},
+			"name",
+			order_by="to_date desc",
+		)
+
+		if later_entry:
+			frappe.throw(
+				_(
+					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
 
 	def validate_closed_period_lock(self):
 		pcv = frappe.db.get_value(
@@ -246,7 +310,7 @@ class StockClosing:
 						closing_stock[key].actual_qty += actual_qty
 						closing_stock[key].stock_value_difference += value_difference
 
-						if not row.actual_qty and row.qty_after_transaction:
+						if not row.actual_qty and row.qty_after_transaction is not None:
 							closing_stock[key].actual_qty = row.qty_after_transaction
 
 						fifo_queue = closing_stock[key].fifo_queue
@@ -340,7 +404,7 @@ class StockClosing:
 		sl_entries = []
 		if self.last_closing_balance:
 			self.from_date = add_days(self.last_closing_balance.to_date, 1)
-			sl_entries += self.get_entries(
+			closing_balances = self.get_entries(
 				"Stock Closing Balance",
 				fields=[
 					"name",
@@ -350,6 +414,7 @@ class StockClosing:
 					"posting_time",
 					"posting_datetime",
 					"batch_no",
+					"inventory_dimension_key",
 					"actual_qty",
 					"valuation_rate",
 					"stock_value",
@@ -360,6 +425,11 @@ class StockClosing:
 					"stock_closing_entry": self.last_closing_balance.name,
 				},
 			)
+
+			for row in closing_balances:
+				row.from_closing_balance = True
+
+			sl_entries += closing_balances
 
 		if not self.last_closing_balance:
 			self.from_date = "1900-01-01"
@@ -432,7 +502,12 @@ class StockClosing:
 		entries = frappe.get_all(
 			"Stock Closing Entry",
 			fields=["name", "to_date"],
-			filters={"company": self.company, "to_date": ["<", self.from_date], "docstatus": 1},
+			filters={
+				"company": self.company,
+				"to_date": ["<", self.from_date],
+				"docstatus": 1,
+				"status": "Completed",
+			},
 			order_by="to_date desc, creation desc",
 			limit=1,
 		)
@@ -440,6 +515,19 @@ class StockClosing:
 		return entries[0] if entries else frappe._dict()
 
 	def get_keys(self, row):
+		# A carried forward balance is already a total for exactly one key. Spreading a batch or
+		# inventory dimension row onto the item and warehouse key as well would add it on top of
+		# the item and warehouse row that already includes it.
+		if row.from_closing_balance:
+			if row.inventory_dimension_key:
+				fields = tuple(json.loads(row.inventory_dimension_key))
+			elif row.batch_no:
+				fields = ("item_code", "warehouse", "batch_no")
+			else:
+				fields = ("item_code", "warehouse")
+
+			return [{fields: tuple(row.get(field) for field in fields)}]
+
 		keys = []
 
 		keys.append({("item_code", "warehouse"): (row.item_code, row.warehouse)})

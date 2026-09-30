@@ -1048,6 +1048,8 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
+		elif self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
+			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
@@ -1070,7 +1072,7 @@ class update_entries_after:
 				if sle.get(dimension.get("fieldname")):
 					has_dimensions = True
 
-		if sle.serial_and_batch_bundle and not self.skip_serial_batch_valuation:
+		if self.has_bundle_valuation(sle):
 			self.calculate_valuation_for_serial_batch_bundle(sle)
 		elif sle.serial_no and not self.skip_serial_batch_valuation and not self.args.get("sle_id"):
 			# Only run in reposting
@@ -1265,7 +1267,13 @@ class update_entries_after:
 		):
 			self.wh_data.stock_queue = json.loads(stock_queue[0]) if stock_queue else []
 
-		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
+		amount = doc.total_amount
+		if self.is_inward_transfer_leg(sle):
+			outward_value = self.get_outward_leg_value(sle)
+			if outward_value is not None:
+				amount = outward_value
+
+		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
 		# total_qty. A valuation repost must never rewrite physical quantities; if the bundle's child
 		# rows were edited after submission, doc.total_qty would silently corrupt qty_after_transaction
@@ -1402,6 +1410,38 @@ class update_entries_after:
 			# Serial No Wise Valuation is off, but the entry still carries its serial nos' rate and has
 			# no recalculate_rate flag to re-derive it. Value it at the rate running just before it.
 			sle.outgoing_rate = flt(self.wh_data.valuation_rate)
+
+	def has_bundle_valuation(self, sle):
+		return bool(sle.serial_and_batch_bundle and not self.skip_serial_batch_valuation)
+
+	def is_inward_transfer_leg(self, sle):
+		return bool(sle.voucher_type == "Stock Entry" and sle.recalculate_rate and flt(sle.actual_qty) > 0)
+
+	def get_incoming_rate_from_outward_leg(self, sle):
+		outward_value = self.get_outward_leg_value(sle)
+		if outward_value is None:
+			return sle.incoming_rate
+
+		return outward_value / flt(sle.actual_qty)
+
+	def get_outward_leg_value(self, sle):
+		"""Value that left the source warehouse for this transfer row, plus the row's additional cost."""
+		outward_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no,
+				"voucher_detail_no": sle.voucher_detail_no,
+				"actual_qty": ("<", 0),
+				"is_cancelled": 0,
+			},
+			"stock_value_difference",
+		)
+		if outward_value is None:
+			return None
+
+		additional_cost = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "additional_cost")
+		return abs(flt(outward_value)) + flt(additional_cost)
 
 	def has_stale_serial_no_wise_outgoing_rate(self, sle):
 		return bool(
@@ -2014,14 +2054,16 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
 	voucher_condition = ""
+	datetime_condition = f"posting_datetime {operator} %(posting_datetime)s"
 	if exclude_current_voucher:
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	elif args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
-		creation = args.get("creation")
-		operator = "<="
-		voucher_condition = f"and creation < '{creation}'"
+	elif operator == "<" and args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
+		# creation only breaks ties at the same posting_datetime. Applying it to earlier rows too
+		# would skip a backdated SLE that a concurrent submit created just after this one.
+		datetime_condition = """posting_datetime < %(posting_datetime)s
+				or (posting_datetime = %(posting_datetime)s and creation < %(creation)s)"""
 
 	sle = frappe.db.sql(  # nosemgrep
 		f"""
@@ -2032,7 +2074,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and is_cancelled = 0
 			{voucher_condition}
 			and (
-				posting_datetime {operator} %(posting_datetime)s
+				{datetime_condition}
 			)
 		order by posting_datetime desc, creation desc
 		limit 1
@@ -2041,6 +2083,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			"item_code": args.get("item_code"),
 			"warehouse": args.get("warehouse"),
 			"posting_datetime": args.get("posting_datetime"),
+			"creation": args.get("creation"),
 		},
 		as_dict=1,
 	)

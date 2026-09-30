@@ -47,6 +47,27 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(receivable_entries[1].voucher_no, self.si.name)
 		self.assertEqual(receivable_entries[1].balance, 100)
 
+	def test_process_soa_for_gl_normalizes_account_labels(self):
+		"""GL opening/total/closing rows keep valid string account labels after normalization"""
+		process_soa = create_process_soa(name="_Test Process SOA for GL Labels")
+		statement_dict = get_statement_dict(process_soa, get_statement_dict=True)
+
+		# normalization runs on the opening, total and closing rows of a customer with entries
+		rows = statement_dict["_Test Customer"][0]
+		for idx in (0, -2, -1):
+			self.assertIsInstance(rows[idx]["account"], str)
+
+	def test_process_soa_for_gl_with_no_transactions(self):
+		"""GL statement for a period with no entries is skipped without error"""
+		process_soa = create_process_soa(
+			name="_Test Process SOA for GL No Data",
+			from_date=add_days(today(), 365),
+			to_date=add_days(today(), 395),
+			posting_date=add_days(today(), 395),
+		)
+		statement_dict = get_statement_dict(process_soa, get_statement_dict=True)
+		self.assertEqual(statement_dict, {})
+
 	def test_process_soa_for_ar(self):
 		"""Tests the utils for Statement of Accounts(Accounts Receivable)"""
 		process_soa = create_process_soa(name="_Test Process SOA for AR", report="Accounts Receivable")

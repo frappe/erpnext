@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-20 09:36+0000\n"
-"PO-Revision-Date: 2026-09-21 04:08\n"
+"PO-Revision-Date: 2026-09-28 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -12093,7 +12093,7 @@ msgstr "Završena količina ne može biti veća od {0}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:392
 msgid "Completed Quantity cannot be negative"
-msgstr ""
+msgstr "Završena količina ne može biti negativna"
 
 #: erpnext/projects/report/project_summary/project_summary.py:136
 #: erpnext/public/js/templates/crm_activities.html:64
@@ -12112,7 +12112,7 @@ msgstr "Obrađeni Radni Nalozi"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1666
 msgid "Completed quantity cannot be negative."
-msgstr ""
+msgstr "Završena količina ne može biti negativna."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:255
 msgid "Completed, Pending and Process Loss quantities must add up to this."
@@ -12120,7 +12120,7 @@ msgstr "Količine Završenih, Na Čekanju i Gubitaka u Procesu moraju se zbrajat
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:201
 msgid "Completed, Process Loss or Pending Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Završena, Gubitak Procesa ili Očekivana Količina je obavezna za Karticu Posla {0}, pokreni i dovrši karticu posla prije podnošenja."
 
 #: erpnext/projects/report/project_summary/project_summary.py:73
 msgid "Completion"
@@ -13573,7 +13573,7 @@ msgstr "Izradi Gotove Proizvode"
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:68
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:99
 msgid "Create GL Reposting Entries"
-msgstr ""
+msgstr "Izradi Unose Ponovnog Knjiženja Knjigovodstvenog Registra"
 
 #. Label of the is_grouped_asset (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -17516,7 +17516,7 @@ msgstr "Onemogućeni Bankovni Račun"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:853
 msgid "Disabled Item {0} cannot be used in BOMs."
-msgstr ""
+msgstr "Onemogućeni artikal {0} ne može se koristiti u Sastavnicama."
 
 #: erpnext/controllers/accounts_controller.py:426
 msgid "Disabled Price List"
@@ -21995,7 +21995,7 @@ msgstr "Od Referentnog Datuma"
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:120
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:1122
 msgid "From Reference Date cannot be greater than To Reference Date"
-msgstr ""
+msgstr "Referentni Datum Od ne može biti kasnije od Referentnog Datuma Do "
 
 #. Label of the from_shareholder (Link) field in DocType 'Share Transfer'
 #: erpnext/accounts/doctype/share_transfer/share_transfer.json
@@ -22288,11 +22288,11 @@ msgstr "Status Obrade Unosa u Knjigovodstveni Registar"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:69
 msgid "GL Reposting Entries"
-msgstr ""
+msgstr "Ponovno knjiženje unosa Knjigovodstvenog Registra"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:352
 msgid "GL reposting entries created: {0}"
-msgstr ""
+msgstr "Knjigovodstveni Registar Ponovnog kniženja izrađeni: {0}"
 
 #. Label of the gl_reposting_index (Int) field in DocType 'Repost Item
 #. Valuation'
@@ -22302,7 +22302,7 @@ msgstr "Knjigovodstveni Registar Indeks ponovnog knjiženja"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:115
 msgid "GL reposting is not allowed against the voucher type {0}."
-msgstr ""
+msgstr "Ponovno knjiženje Knjigovodstvenog Registra nije dozvoljeno za verifikat tipa {0}."
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -24917,7 +24917,7 @@ msgstr "Uključi Vraćene Fakture (Zasebno)"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.js:186
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:144
 msgid "Include Revaluation Journals"
-msgstr ""
+msgstr "Uključi Žurnale Revalorizacije"
 
 #. Label of the include_safety_stock (Check) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
@@ -25921,7 +25921,7 @@ msgstr "Nevažeći Serijski i Šaržni Paket"
 
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule.py:69
 msgid "Invalid Shipping Account"
-msgstr ""
+msgstr "Nevažeći Račun Dostave"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1398
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1420
@@ -25938,7 +25938,7 @@ msgstr "Nevažeće Otpremljenje"
 
 #: erpnext/stock/doctype/item/item.py:1177
 msgid "Invalid Valuation Method"
-msgstr ""
+msgstr "Nevažeća Metoda Vrednovanja"
 
 #: erpnext/controllers/item_variant.py:255
 msgid "Invalid Value"
@@ -32985,7 +32985,7 @@ msgstr "Nema više podređenih na Desnoj strani"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:354
 msgid "No new GL reposting entries were created for the selected rows."
-msgstr ""
+msgstr "Za odabrane redove nisu izrašeni novi unosi ponovnog knjiženja Knjigovodstvenog registra."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:608
 msgid "No of Deliveries"
@@ -33923,7 +33923,7 @@ msgstr "Prikaži samo Artikle iz ovih Grupa Artikala"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:83
 msgid "Only the accounting ledgers (General Ledger and Payment Ledger) will be reposted, and only for the selected rows posted on or after the From Date. Selected rows posted before it are ignored. Stock Ledger Entries and item valuation rates are left untouched."
-msgstr ""
+msgstr "Samo Knjigovodstveni Registri (Knjigovodstveni Registar i Registrar Plaćanja) bit će ponovo postavljene, i to samo za odabrane redove evidentirane na ili nakon datuma Od Datuma. Odabrani redovi evidentirani prije tog datuma se zanemaruju. Unosi u registar zaliha i stope vrednovanja artikala ostaju nepromijenjeni."
 
 #. Description of the 'Customer' (Link) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -38893,7 +38893,7 @@ msgstr "Odaberi samo jedan red da kreirate Unos Ponovnog Knjiženja"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:293
 msgid "Please select rows to create GL Reposting Entries"
-msgstr ""
+msgstr "Odaberi redove da izradi unose za ponovno knjiženje Knjigovodstvenog Registra"
 
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:107
 msgid "Please select rows to create Reposting Entries"
@@ -38901,7 +38901,7 @@ msgstr "Odaberi redove da kreirate unose za ponovno knjiženje"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:111
 msgid "Please select rows to create {0}"
-msgstr ""
+msgstr "Odaberi redove za izradu {0}"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:98
 msgid "Please select the Company"
@@ -38921,7 +38921,7 @@ msgstr "Odaberi Klijenta."
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:296
 msgid "Please select the date to repost the accounting ledgers from"
-msgstr ""
+msgstr "Odaberi datum za ponovno knjiženje Knigovodstvenog Registra"
 
 #: erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py:43
 #: erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:58
@@ -44923,7 +44923,7 @@ msgstr "Datoteke Podataka Ponovnog Knjiženja"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:55
 msgid "Reposting Entries"
-msgstr ""
+msgstr "Unosi Ponovnog Knjiženja"
 
 #. Label of the reposting_info_section (Section Break) field in DocType 'Repost
 #. Item Valuation'
@@ -49924,7 +49924,7 @@ msgstr "Istek Roka Garancije Serijskog Broja"
 
 #: erpnext/stock/doctype/item/item.py:1148
 msgid "Serial No Wise Valuation cannot be enabled for Item {0} because Serial Nos already exist for it. Valuation for those Serial Nos was not tracked, so enabling it now would value outward entries incorrectly."
-msgstr ""
+msgstr "Procjena serijskog broja na osnovu vrijednosti ne može se omogućiti za artikal {0} jer za nju već postoje serijski brojevi. Procjena za te serijske brojeve nije praćena, tako da bi omogućavanje sada pogrešno vrednovalo ulazne unose."
 
 #. Label of the serial_no_and_batch_section (Section Break) field in DocType
 #. 'Pick List Item'
@@ -50043,7 +50043,7 @@ msgstr "Serijski Brojevi / Šarže"
 
 #: erpnext/stock/doctype/item/item.py:1151
 msgid "Serial Nos Exist"
-msgstr ""
+msgstr "Serijski Brojevi Postoje"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2084
 msgid "Serial Nos are created successfully"
@@ -50213,7 +50213,7 @@ msgstr "Serijski brojevi nedostupni za artikal {0} u skladištu {1}. Pokušaj pr
 #. Description of the 'Valuation Method' (Select) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Serialized items are valued at Moving Average once stock transactions exist and Serial No Wise Valuation is disabled."
-msgstr ""
+msgstr "Serijalizirarni artikli se vrednuju po MA kada postoje transakcije zaliha i kada je vrednovanje prema serijskom broju onemogućeno."
 
 #. Label of the series_for_depreciation_entry (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -50997,7 +50997,7 @@ msgstr "Račun Pošiljke"
 
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule.py:66
 msgid "Shipping Account {0} does not belong to Company {1}"
-msgstr ""
+msgstr "Račun Dostave {0} ne pripada {1}"
 
 #. Option for the 'Determine Address Tax Category from' (Select) field in
 #. DocType 'Accounts Settings'
@@ -59910,7 +59910,7 @@ msgstr "Koristi Serijske Brojeve / Šaržna Polja"
 #. Label of the use_serial_no_wise_valuation (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Use Serial No Wise Valuation"
-msgstr ""
+msgstr "Koristi Vrednovanje po Serijskom Broju"
 
 #: banking/src/components/features/BankReconciliation/TransferModalContent.tsx:518
 msgid "Use Suggestion"
@@ -60304,7 +60304,7 @@ msgstr "Metoda Vrijednovanja"
 
 #: erpnext/stock/doctype/item/item.py:1174
 msgid "Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO or LIFO."
-msgstr ""
+msgstr "Metoda Vrednovanja za artikal {0} mora biti MA jer je vrednovanje po serijskom broju onemogućeno. Omogućite vrednovanje po serijskom broju da biste koristili FIFO ili LIFO."
 
 #. Label of the valuation_rate (Currency) field in DocType 'Purchase Invoice
 #. Item'
@@ -60479,7 +60479,7 @@ msgstr "Vrijednost kao na"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Value every outward movement at each Serial No's own incoming rate. If unchecked, the item is valued at Moving Average once stock transactions exist. Cannot be enabled once Serial Nos exist for this item."
-msgstr ""
+msgstr "Procijeni svako vanjsko kretanje po ulaznoj stopi svakog serijskog broja. Ako nije označeno, stavka se procjenjuje po pokretnom prosjeku kada postoje transakcije zaliha. Ne može se omogućiti kada za ovu stavku postoje serijski brojevi."
 
 #: erpnext/controllers/item_variant.py:125
 msgid "Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4}"

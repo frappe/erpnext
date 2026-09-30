@@ -4,6 +4,7 @@
 
 import json
 from collections import defaultdict
+from functools import cached_property
 
 import frappe
 from frappe import _, bold
@@ -292,6 +293,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
+		self.validate_work_order_status_for_return()
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
@@ -1084,6 +1086,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 				self.check_duplicate_entry_for_work_order()
 		elif self.purpose != "Material Transfer":
 			self.work_order = None
+
+	def validate_work_order_status_for_return(self):
+		if not (self.is_return and self.pro_doc) or self.pro_doc.status in ("Completed", "Closed"):
+			return
+
+		frappe.throw(
+			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
+				get_link_to_form("Work Order", self.work_order)
+			),
+			title=_("Work Order Not Finished"),
+		)
 
 	def validate_source_stock_entry(self):
 		if not self.get("source_stock_entry"):
@@ -2584,10 +2597,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 					pro_doc.remove_additional_items(self)
 
 				pro_doc.run_method("update_work_order_qty")
-				if self.purpose == "Manufacture":
-					pro_doc.run_method("update_planned_qty")
 
 			pro_doc.run_method("update_status")
+			if self.fg_completed_qty and self.purpose == "Manufacture":
+				pro_doc.run_method("update_planned_qty")
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
 
@@ -2657,6 +2670,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return True
 
 		return False
+
+	def before_sl_preview(self):
+		self.release_work_order_reservation_for_preview()
+
+	def before_gl_preview(self):
+		self.release_work_order_reservation_for_preview()
+
+	def release_work_order_reservation_for_preview(self):
+		"""Releases the Work Order's own reservation as submit does, inside the rolled-back preview."""
+		if not self.is_stock_reserve_for_work_order():
+			return
+
+		self.db_set("docstatus", 1, update_modified=False)
+		frappe.get_doc("Work Order", self.work_order).update_required_items()
 
 	def update_wo_reservation_for_subcontracting(self):
 		# A "Send to Subcontractor" entry never keeps its `work_order` (validate clears it for this
@@ -3689,9 +3716,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			row.stock_qty -= flt(used_secondary_items.get(key))
 			row.stock_qty = (row.stock_qty) * flt(self.fg_completed_qty) / flt(pending_qty)
 
-			if used_secondary_items.get(key):
-				used_secondary_items[key] -= row.stock_qty
-
 			if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
 				row.stock_qty = frappe.utils.ceil(row.stock_qty)
 
@@ -3705,7 +3729,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		StockEntry = frappe.qb.DocType("Stock Entry")
 		StockEntryDetail = frappe.qb.DocType("Stock Entry Detail")
-		data = (
+		query = (
 			frappe.qb.from_(StockEntry)
 			.inner_join(StockEntryDetail)
 			.on(StockEntryDetail.parent == StockEntry.name)
@@ -3725,9 +3749,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 				& (StockEntry.docstatus == 1)
 				& (StockEntry.purpose.isin(["Repack", "Manufacture"]))
 			)
-		).run(as_dict=1)
+		)
+		if self.job_card:
+			query = query.where(StockEntry.job_card == self.job_card)
 
-		for row in data:
+		for row in query.run(as_dict=1):
 			used_secondary_items[get_secondary_item_key(row)] += row.qty
 
 		return used_secondary_items
@@ -3797,7 +3823,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if row.batch_details:
 				row.batches_to_be_consume = defaultdict(float)
-				batches = row.batch_details
+				batches = self.get_batches_to_consume(row, qty)
 				self.update_batches_to_be_consume(batches, row, qty)
 
 			elif row.serial_nos:
@@ -3806,6 +3832,46 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if flt(qty, precision) != 0.0:
 				self.update_item_in_stock_entry_detail(row, item, qty)
+
+	def get_batches_to_consume(self, row, qty):
+		"""Batch qty not reserved by other vouchers when it covers the qty, else the transferred batches."""
+		if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+			return row.batch_details
+
+		unreserved_qty = self.get_unreserved_batch_qty(row)
+		batches = {
+			batch_no: min(batch_qty, unreserved_qty[batch_no])
+			for batch_no, batch_qty in row.batch_details.items()
+			if batch_qty > 0 and batch_no in unreserved_qty
+		}
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		if flt(sum(batches.values()), precision) >= flt(qty, precision):
+			return batches
+
+		return row.batch_details
+
+	def get_unreserved_batch_qty(self, row):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+
+		batches = get_auto_batch_nos(
+			frappe._dict(
+				item_code=row.item_details.item_code,
+				warehouse=row.item_details.warehouse,
+				batch_no=list(row.batch_details),
+				posting_date=self.posting_date,
+				posting_time=self.posting_time,
+				ignore_voucher_nos=self.work_order_reservations,
+			)
+		)
+		return {batch.batch_no: batch.qty for batch in batches}
+
+	@cached_property
+	def work_order_reservations(self):
+		return frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": "Work Order", "voucher_no": self.work_order, "docstatus": 1},
+			pluck="name",
+		)
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
@@ -4803,7 +4869,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 	available_materials = {}
 	for row in data:
 		key = (row.item_code, row.warehouse)
-		if row.purpose != "Material Transfer for Manufacture":
+		if row.purpose != "Material Transfer for Manufacture" or row.is_return:
 			key = (row.item_code, row.s_warehouse)
 
 		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
@@ -4819,7 +4885,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 
 		item_data = available_materials[key]
 
-		if row.purpose == "Material Transfer for Manufacture" or (
+		if (row.purpose == "Material Transfer for Manufacture" and not row.is_return) or (
 			stock_entry_doc and stock_entry_doc.purpose == "Disassemble" and row.purpose == "Manufacture"
 		):
 			item_data.qty += row.qty
@@ -4887,6 +4953,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 			stock_entry_detail.batch_no,
 			stock_entry_detail.serial_no,
 			stock_entry.purpose,
+			stock_entry.is_return,
 			stock_entry.name,
 		)
 		.where(
@@ -4931,7 +4998,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=voucher_nos)
 		for row in data:
 			key = (row.item_code, row.warehouse, row.name)
-			if row.purpose != "Material Transfer for Manufacture":
+			if row.purpose != "Material Transfer for Manufacture" or row.is_return:
 				key = (row.item_code, row.s_warehouse, row.name)
 
 			if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":

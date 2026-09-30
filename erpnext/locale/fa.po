@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-20 09:36+0000\n"
-"PO-Revision-Date: 2026-09-21 04:08\n"
+"PO-Revision-Date: 2026-09-28 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7336,7 +7336,7 @@ msgstr "ایجاد BOM در نوبت قرار گرفته است، لطفاً و�
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:432
 msgid "Backdated Stock Entry"
-msgstr ""
+msgstr "ثبت موجودی برای تاریخ گذشته"
 
 #. Label of the backflush_from_wip_warehouse (Check) field in DocType 'BOM
 #. Operation'
@@ -8887,7 +8887,7 @@ msgstr "جعبه"
 #: erpnext/setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 #: erpnext/workspace_sidebar/organization.json
 msgid "Branch"
-msgstr "شاخه"
+msgstr ""
 
 #. Label of the branch_code (Data) field in DocType 'Bank Account'
 #. Label of the branch_code (Data) field in DocType 'Bank Guarantee'
@@ -12012,7 +12012,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:392
 msgid "Completed Quantity cannot be negative"
-msgstr ""
+msgstr "مقدار تکمیل‌شده نمی‌تواند منفی باشد"
 
 #: erpnext/projects/report/project_summary/project_summary.py:136
 #: erpnext/public/js/templates/crm_activities.html:64
@@ -12031,7 +12031,7 @@ msgstr "دستور کارهای تکمیل شده"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1666
 msgid "Completed quantity cannot be negative."
-msgstr ""
+msgstr "مقدار تکمیل‌شده نمی‌تواند منفی باشد."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:255
 msgid "Completed, Pending and Process Loss quantities must add up to this."
@@ -19761,7 +19761,7 @@ msgstr "مثال: شماره سریال {0} در {1} رزرو شده است."
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exception Budget Approver Role"
-msgstr "نقش تصویب کننده بودجه استثنایی"
+msgstr "نقش تأییدکننده بودجه استثنا"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1075
 msgid "Excess Disassembly"
@@ -30175,7 +30175,7 @@ msgstr "بخش اجباری"
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Manual"
-msgstr "دستی"
+msgstr ""
 
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection'
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection
@@ -39008,7 +39008,7 @@ msgstr "لطفاً شناسه مالیاتی و کد مالی شرکت {0} را 
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.py:322
 msgid "Please set company on the Document before requesting for invoices."
-msgstr ""
+msgstr "لطفا قبل از درخواست فاکتور، نام شرکت را در سند ذکر کنید."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2481
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
@@ -39925,7 +39925,7 @@ msgstr "لیست قیمت باید برای خرید یا فروش قابل اج
 
 #: erpnext/controllers/accounts_controller.py:425
 msgid "Price List {0} is disabled"
-msgstr ""
+msgstr "لیست قیمت {0} غیرفعال است"
 
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order_pricing.py:69
 #: erpnext/stock/doctype/price_list/price_list.py:84

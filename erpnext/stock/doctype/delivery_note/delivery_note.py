@@ -476,6 +476,7 @@ class DeliveryNote(SellingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
+		self.validate_produced_serial_nos_against_reservation()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 

@@ -110,6 +110,11 @@ class StockBalanceReport:
 			)
 
 	def get_entries_from_stock_closing_balance(self) -> list:
+		# The SLE query then starts from the very first entry, so loading the closing balance as
+		# opening too would count everything up to the closing date twice.
+		if self.filters.get("ignore_closing_balance"):
+			return []
+
 		stk_cl_obj = StockClosing(self.filters.company, self.from_date, self.from_date)
 		if not stk_cl_obj.last_closing_balance:
 			return []
@@ -136,7 +141,9 @@ class StockBalanceReport:
 		if not opening_entries:
 			return []
 
-		return opening_entries
+		# Batch wise rows carry no inventory dimension key either, but they share the item and
+		# warehouse group key with the item level row and would overwrite its opening.
+		return [d for d in opening_entries if not d.batch_no]
 
 	def filter_fields(self) -> list[str]:
 		fields = ["item_code", "warehouse"]

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-20 09:36+0000\n"
-"PO-Revision-Date: 2026-09-21 04:08\n"
+"PO-Revision-Date: 2026-09-28 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Indonesian\n"
 "MIME-Version: 1.0\n"
@@ -8960,7 +8960,7 @@ msgstr ""
 #: erpnext/setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 #: erpnext/workspace_sidebar/organization.json
 msgid "Branch"
-msgstr "Cabang"
+msgstr ""
 
 #. Label of the branch_code (Data) field in DocType 'Bank Account'
 #. Label of the branch_code (Data) field in DocType 'Bank Guarantee'
@@ -30247,7 +30247,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Manual"
-msgstr ""
+msgstr "Manual"
 
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection'
 #. Label of the manual_inspection (Check) field in DocType 'Quality Inspection
