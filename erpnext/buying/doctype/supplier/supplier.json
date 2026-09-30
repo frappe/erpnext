@@ -153,7 +153,7 @@
   },
   {
    "depends_on": "is_internal_supplier",
-   "description": "The Company that this Supplier actually is (e.g. a sister, parent, or subsidiary company) -- used to link inter-company transactions between them",
+   "description": "Select the related company that this Supplier represents for inter-company transactions.",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -555,7 +555,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-26 12:25:14.559499",
+ "modified": "2026-09-30 12:25:43.461745",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
