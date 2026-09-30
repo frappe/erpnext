@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Max
 from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
@@ -319,6 +320,24 @@ class MaintenanceSchedule(TransactionBase):
 	def on_update(self):
 		self.db_set("status", "Draft")
 
+	def get_serial_nos_with_row_amc_date(self, item):
+		"""Serials still carrying the AMC date this row set on submit; deleted numbers are skipped."""
+		if item.serial_and_batch_bundle:
+			serial_nos = get_serial_batch_list_from_item(item)[0]
+		else:
+			records = SerialBatchIdentity("Serial No").get_records(
+				item.item_code, get_serial_nos(item.serial_no), ["name"]
+			)
+			serial_nos = [record.name for record in records]
+
+		if not serial_nos or not item.end_date:
+			return []
+		return frappe.get_all(
+			"Serial No",
+			filters={"name": ("in", serial_nos), "amc_expiry_date": item.end_date},
+			pluck="name",
+		)
+
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
 			serial_no_doc = frappe.get_doc("Serial No", serial_no)
@@ -441,7 +460,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def on_cancel(self):
 		for d in self.get("items"):
-			serial_nos = get_serial_batch_list_from_item(d)[0]
+			serial_nos = self.get_serial_nos_with_row_amc_date(d)
 			if serial_nos:
 				self.update_amc_date(serial_nos)
 
