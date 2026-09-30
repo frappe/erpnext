@@ -1055,6 +1055,37 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				self.assertEqual(available.qty, 1)
 				self.assertEqual(bundled_row.serial_no, "Ignored-Text")
 
+	def test_available_materials_count_shared_bundle_serials_once(self):
+		first = self.make_number("Serial No", "Shared-Bundle-001")
+		second = self.make_number("Serial No", "Shared-Bundle-002")
+		warehouse = "_Test Warehouse - _TC"
+		rows = [
+			frappe._dict(
+				name="Transfer",
+				item_code=self.item.name,
+				warehouse=warehouse,
+				qty=1,
+				purpose="Material Transfer for Manufacture",
+				serial_no=number,
+			)
+			for number in ("Shared-Bundle-001", "Shared-Bundle-002")
+		]
+		bundle_data = {(self.item.name, warehouse, "Transfer"): {"serial_nos": [first.name, second.name]}}
+		with (
+			patch(
+				"erpnext.stock.doctype.stock_entry.services.disassemble._run_stock_entry_query",
+				return_value=rows,
+			),
+			patch(
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_voucher_wise_serial_batch_from_bundle",
+				return_value=bundle_data,
+			),
+		):
+			available = get_available_materials("_Identity Work Order")[(self.item.name, warehouse)]
+
+		self.assertEqual(available.serial_nos, [first.name, second.name])
+		self.assertEqual(available.qty, 2)
+
 	def test_available_materials_list_serials_in_number_order(self):
 		first_by_id = self.make_number("Serial No", "Available-B")
 		first_by_number = self.make_number("Serial No", "Available-C")
