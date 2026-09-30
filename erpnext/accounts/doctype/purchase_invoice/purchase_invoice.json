@@ -444,7 +444,8 @@
    "depends_on": "eval: doc.is_return",
    "fieldname": "update_billed_amount_in_purchase_receipt",
    "fieldtype": "Check",
-   "label": "Update Billed Amount in Purchase Receipt"
+   "label": "Update Billed Amount in Purchase Receipt",
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "section_addresses",
@@ -583,7 +584,8 @@
    "fieldtype": "Link",
    "label": "Set Accepted Warehouse",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Stock"
   },
   {
    "depends_on": "update_stock",
@@ -593,7 +595,8 @@
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "col_break_warehouse",
@@ -605,7 +608,8 @@
    "fieldtype": "Check",
    "label": "Is Subcontracted",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Subcontracting"
   },
   {
    "fieldname": "items_section",
@@ -622,7 +626,8 @@
    "fieldtype": "Check",
    "label": "Update Stock",
    "print_hide": 1,
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "scan_barcode",
@@ -666,7 +671,8 @@
    "fieldtype": "Table",
    "label": "Supplied Items",
    "no_copy": 1,
-   "options": "Purchase Receipt Item Supplied"
+   "options": "Purchase Receipt Item Supplied",
+   "show_for_module": "Subcontracting"
   },
   {
    "fieldname": "section_break_26",
@@ -1382,7 +1388,8 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "show_for_module": "Projects"
   },
   {
    "allow_on_submit": 1,
@@ -1414,6 +1421,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
+   "show_for_module": "Stock",
    "width": "50px"
   },
   {
@@ -1426,6 +1434,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
+   "show_for_module": "Subcontracting",
    "width": "50px"
   },
   {
@@ -1610,7 +1619,8 @@
    "fieldname": "last_scanned_warehouse",
    "fieldtype": "Data",
    "is_virtual": 1,
-   "label": "Last Scanned Warehouse"
+   "label": "Last Scanned Warehouse",
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "claimed_landed_cost_amount",
@@ -1697,7 +1707,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:46.733125",
+ "modified": "2026-09-30 15:53:03.761309",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -633,6 +633,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	refresh: function (frm) {
 		frm.events.add_custom_buttons(frm);
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
 	},
 
 	mode_of_payment: function (frm) {
@@ -736,6 +737,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	company: function (frm) {
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 		frm.clear_table("tax_withholding_entries");
 

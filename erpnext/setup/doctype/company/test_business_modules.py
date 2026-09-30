@@ -80,3 +80,75 @@ class TestCompanyBusinessModules(ERPNextTestSuite):
 		)
 		for fieldname in FIELDNAMES:
 			self.assertIn(fieldname, company)
+
+
+class TestShowForModuleTags(ERPNextTestSuite):
+	"""Fields tagged with a business module in ERPNext doctypes."""
+
+	def get_tagged_fields(self):
+		return frappe.get_all(
+			"DocField",
+			filters={"show_for_module": ["is", "set"]},
+			fields=["parent", "fieldname", "show_for_module", "reqd", "mandatory_depends_on"],
+		)
+
+	def test_tags_use_registered_modules_and_never_sit_on_mandatory_fields(self):
+		registered = [m["module"] for m in get_business_modules()]
+		for field in self.get_tagged_fields():
+			where = f"{field.parent}.{field.fieldname}"
+			self.assertIn(field.show_for_module, registered, where)
+			self.assertFalse(field.reqd, where)
+			self.assertFalse(field.mandatory_depends_on, where)
+
+	def test_purchase_invoice_fields_are_tagged(self):
+		invoice = frappe.get_meta("Purchase Invoice")
+		item = frappe.get_meta("Purchase Invoice Item")
+
+		self.assertEqual(invoice.get_field("update_stock").show_for_module, "Stock")
+		self.assertEqual(invoice.get_field("supplied_items").show_for_module, "Subcontracting")
+		self.assertEqual(invoice.get_field("project").show_for_module, "Projects")
+		self.assertEqual(item.get_field("warehouse").show_for_module, "Stock")
+		self.assertEqual(item.get_field("wip_composite_asset").show_for_module, "Assets")
+
+		# Not tagged on purpose. ERPNext asks for the location when it creates an asset
+		# from a fixed asset item, and items are shared across companies.
+		for fieldname in ("asset_location", "asset_category"):
+			self.assertFalse(item.get_field(fieldname).show_for_module, fieldname)
+
+		# fields every company needs are never tagged
+		for fieldname in ("supplier", "posting_date", "items", "grand_total"):
+			self.assertFalse(invoice.get_field(fieldname).show_for_module, fieldname)
+		for fieldname in ("item_code", "qty", "rate", "amount"):
+			self.assertFalse(item.get_field(fieldname).show_for_module, fieldname)
+
+	def test_sales_invoice_fields_are_tagged(self):
+		invoice = frappe.get_meta("Sales Invoice")
+		item = frappe.get_meta("Sales Invoice Item")
+
+		self.assertEqual(invoice.get_field("update_stock").show_for_module, "Stock")
+		self.assertEqual(invoice.get_field("timesheets").show_for_module, "Projects")
+		self.assertEqual(invoice.get_field("is_consolidated").show_for_module, "POS")
+		self.assertEqual(item.get_field("warehouse").show_for_module, "Stock")
+		self.assertEqual(item.get_field("pos_invoice").show_for_module, "POS")
+
+		# "Include Payment (POS)" is also used without the POS screen, so it stays.
+		for fieldname in ("customer", "is_pos", "payments", "pos_profile"):
+			self.assertFalse(invoice.get_field(fieldname).show_for_module, fieldname)
+		# Selling a fixed asset item needs the asset, and items are shared across companies.
+		for fieldname in ("item_code", "qty", "rate", "asset"):
+			self.assertFalse(item.get_field(fieldname).show_for_module, fieldname)
+
+	def test_sales_order_fields_are_tagged(self):
+		order = frappe.get_meta("Sales Order")
+		item = frappe.get_meta("Sales Order Item")
+
+		self.assertEqual(order.get_field("reserve_stock").show_for_module, "Stock")
+		self.assertEqual(order.get_field("is_subcontracted").show_for_module, "Subcontracting")
+		self.assertEqual(item.get_field("bom_no").show_for_module, "Manufacturing")
+		self.assertEqual(item.get_field("projected_qty").show_for_module, "Stock")
+
+		# Not tagged on purpose. A Sales Order needs a warehouse for every stock item,
+		# and items are shared across companies.
+		self.assertFalse(order.get_field("set_warehouse").show_for_module)
+		for fieldname in ("item_code", "qty", "rate", "warehouse"):
+			self.assertFalse(item.get_field(fieldname).show_for_module, fieldname)

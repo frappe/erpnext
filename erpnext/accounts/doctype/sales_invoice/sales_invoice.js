@@ -1206,6 +1206,11 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
+	},
+
+	company: function (frm) {
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
 	},
 });
 

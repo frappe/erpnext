@@ -74,7 +74,12 @@ frappe.ui.form.on("Sales Order", {
 		});
 	},
 
+	company: function (frm) {
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
+	},
+
 	refresh: function (frm) {
+		erpnext.utils.hide_business_module_fields(frm, frm.doc.company);
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"add_schedule",
 			"hidden",

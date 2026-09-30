@@ -684,6 +684,7 @@
    "print_hide": 1,
    "print_width": "70px",
    "read_only": 1,
+   "show_for_module": "Stock",
    "width": "70px"
   },
   {
@@ -695,6 +696,7 @@
    "print_hide": 1,
    "print_width": "70px",
    "read_only": 1,
+   "show_for_module": "Stock",
    "width": "70px"
   },
   {
@@ -723,7 +725,8 @@
    "label": "Work Order Qty",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Manufacturing"
   },
   {
    "depends_on": "returned_qty",
@@ -846,7 +849,8 @@
    "label": "BOM No",
    "no_copy": 1,
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Manufacturing"
   },
   {
    "fieldname": "manufacturing_section_section",
@@ -878,7 +882,8 @@
    "label": "Picked Qty (in Stock UOM)",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "inter_transfer_reference_section",
@@ -932,7 +937,8 @@
    "fieldtype": "Check",
    "label": "Reserve Stock",
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "show_for_module": "Stock"
   },
   {
    "default": "0",
@@ -944,7 +950,8 @@
    "non_negative": 1,
    "print_hide": 1,
    "read_only": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "production_plan_qty",
@@ -952,7 +959,8 @@
    "label": "Production Plan Qty",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Manufacturing"
   },
   {
    "default": "0",
@@ -978,7 +986,8 @@
    "label": "Qty (Company)",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "column_break_jpky",
@@ -1017,7 +1026,8 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project",
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Projects"
   },
   {
    "fieldname": "sales_order_schedule_section",
@@ -1039,7 +1049,8 @@
    "no_copy": 1,
    "non_negative": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Subcontracting"
   },
   {
    "depends_on": "eval:parent.is_subcontracted",
@@ -1070,7 +1081,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-21 10:12:00.000000",
+ "modified": "2026-09-30 16:12:14.246673",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

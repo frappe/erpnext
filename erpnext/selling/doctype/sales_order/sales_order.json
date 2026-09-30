@@ -1175,7 +1175,8 @@
    "oldfieldname": "project",
    "oldfieldtype": "Link",
    "options": "Project",
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Projects"
   },
   {
    "fieldname": "party_account_currency",
@@ -1533,7 +1534,8 @@
    "fieldtype": "Percent",
    "label": "% Picked",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Stock"
   },
   {
    "collapsible": 1,
@@ -1638,7 +1640,8 @@
    "label": "Reserve Stock",
    "no_copy": 1,
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "advance_payment_status",
@@ -1721,14 +1724,16 @@
    "fieldname": "last_scanned_warehouse",
    "fieldtype": "Data",
    "is_virtual": 1,
-   "label": "Last Scanned Warehouse"
+   "label": "Last Scanned Warehouse",
+   "show_for_module": "Stock"
   },
   {
    "default": "0",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
    "label": "Is Subcontracted",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Subcontracting"
   },
   {
    "fieldname": "item_wise_tax_details",
@@ -1826,7 +1831,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-26 12:00:00.000000",
+ "modified": "2026-09-30 16:12:14.246673",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
