@@ -52,6 +52,7 @@ class RequestforQuotation(BuyingController):
 		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
 		subject: DF.Data
+		supplier_quotation: DF.Link | None
 		suppliers: DF.Table[RequestforQuotationSupplier]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
