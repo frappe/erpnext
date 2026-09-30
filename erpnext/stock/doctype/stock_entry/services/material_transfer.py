@@ -473,7 +473,7 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 		for row in self.doc.items:
 			material_request, material_request_item = self.get_material_request(row)
 			if not material_request:
-				return
+				continue
 
 			mreq_item = frappe.db.get_value(
 				"Material Request Item",
