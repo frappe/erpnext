@@ -396,8 +396,7 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 	mapping: {raw material Serial and Batch Entry name: target}, where target is
 	{"fg_field": "fg_serial_no" / "fg_batch_no", "value": ...}, or just the value when it is unambiguous
 	"""
-	# the mapping is an update after submit, which needs submit permission
-	doc = get_stock_entry_for_fg_mapping(stock_entry, "submit")
+	doc = get_stock_entry_for_fg_mapping(stock_entry, "write")
 	mapping = frappe.parse_json(mapping) or {}
 
 	fg_targets = {(row.fg_field, row.value) for row in get_fg_values(doc.name)}
@@ -423,6 +422,55 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 			.set(sabe.fg_batch_no, fg_value if fg_field == "fg_batch_no" else None)
 			.where(sabe.name.isin(entry_names))
 		).run()
+
+
+def set_fg_mapping_on_submit(doc):
+	"""Check the draft mapping and map the remaining raw materials to finished goods, in order.
+
+	Serialized raw materials are spread evenly across the finished goods. A batch raw material is only
+	mapped when there is a single finished good, otherwise it stays linked to all of them.
+	"""
+	if doc.purpose not in ("Manufacture", "Repack"):
+		return
+
+	fg_targets = [(row.fg_field, row.value) for row in get_fg_values(doc.name)]
+	raw_materials = get_raw_material_entries(doc.name)
+	if not fg_targets or not raw_materials:
+		return
+
+	rows_by_item = defaultdict(list)
+	for row in raw_materials:
+		target = ("fg_serial_no", row.fg_serial_no) if row.fg_serial_no else ("fg_batch_no", row.fg_batch_no)
+		if target[1] and target not in fg_targets:
+			frappe.throw(
+				_("Raw material {0} is mapped to {1}, which is not a finished good of this entry").format(
+					frappe.bold(row.serial_no or row.batch_no), frappe.bold(target[1])
+				)
+			)
+
+		row.fg_target = target if target[1] else None
+		rows_by_item[row.item_code].append(row)
+
+	entries_by_fg_target = defaultdict(list)
+	for rows in rows_by_item.values():
+		per_fg = -(-len(rows) // len(fg_targets))
+		mapped_count = defaultdict(int)
+		for row in rows:
+			if row.fg_target:
+				mapped_count[row.fg_target] += 1
+
+		for row in rows:
+			if row.fg_target or (len(fg_targets) > 1 and not row.serial_no):
+				continue
+
+			target = next((t for t in fg_targets if mapped_count[t] < per_fg), None)
+			if target:
+				mapped_count[target] += 1
+				entries_by_fg_target[target].append(row.name)
+
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+	for (fg_field, fg_value), entry_names in entries_by_fg_target.items():
+		(frappe.qb.update(sabe).set(sabe[fg_field], fg_value).where(sabe.name.isin(entry_names))).run()
 
 
 def get_fg_target(target, fg_targets, stock_entry):
@@ -460,8 +508,9 @@ def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
 	if doc.purpose not in ("Manufacture", "Repack"):
 		frappe.throw(_("Finished good mapping is only allowed for Manufacture and Repack entries"))
 
-	if doc.docstatus != 1:
-		frappe.throw(_("Finished good mapping is only allowed for submitted entries"))
+	# mapped on draft, then fixed on submit
+	if doc.docstatus != 0:
+		frappe.throw(_("Finished good mapping can only be changed while the entry is in draft"))
 
 	return doc
 

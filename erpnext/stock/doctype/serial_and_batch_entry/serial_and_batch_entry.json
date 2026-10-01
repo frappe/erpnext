@@ -12,6 +12,10 @@
   "qty",
   "warehouse",
   "delivered_qty",
+  "finished_good_section",
+  "fg_serial_no",
+  "column_break_fg",
+  "fg_batch_no",
   "section_break_6",
   "incoming_rate",
   "column_break_8",
@@ -27,9 +31,7 @@
   "column_break_eykr",
   "posting_datetime",
   "type_of_transaction",
-  "voucher_detail_no",
-  "fg_serial_no",
-  "fg_batch_no"
+  "voucher_detail_no"
  ],
  "fields": [
   {
@@ -201,7 +203,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "depends_on": "fg_serial_no",
    "description": "Finished good serial no this raw material was consumed into (Manufacture / Repack)",
    "fieldname": "fg_serial_no",
@@ -209,10 +210,10 @@
    "label": "Finished Good Serial No",
    "no_copy": 1,
    "options": "Serial No",
-   "read_only": 1
+   "read_only": 1,
+   "show_description_on_click": 1
   },
   {
-   "allow_on_submit": 1,
    "depends_on": "fg_batch_no",
    "description": "Finished good batch this raw material was consumed into (Manufacture / Repack)",
    "fieldname": "fg_batch_no",
@@ -220,7 +221,18 @@
    "label": "Finished Good Batch No",
    "no_copy": 1,
    "options": "Batch",
-   "read_only": 1
+   "read_only": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "eval:doc.fg_serial_no || doc.fg_batch_no",
+   "fieldname": "finished_good_section",
+   "fieldtype": "Section Break",
+   "label": "Finished Good"
+  },
+  {
+   "fieldname": "column_break_fg",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,

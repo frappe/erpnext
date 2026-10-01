@@ -253,7 +253,8 @@ $.extend(erpnext.utils, {
 	},
 
 	view_serial_batch_nos: function (frm) {
-		if (!frm.doc?.items) {
+		// the Serial and Batch Summary report only lists submitted bundles
+		if (!frm.doc?.items || frm.doc.docstatus !== 1) {
 			return;
 		}
 
