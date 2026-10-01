@@ -244,7 +244,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 12:00:00.000000",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
@@ -395,6 +395,10 @@
   },
   {
    "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
    "select": 1
   }
  ],
