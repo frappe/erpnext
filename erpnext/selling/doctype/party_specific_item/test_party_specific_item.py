@@ -30,7 +30,7 @@ def create_supplier(supplier_name):
 	).insert()
 
 
-def create_item(item_code):
+def create_item(item_code, item_group="Products"):
 	if frappe.db.exists("Item", item_code):
 		return frappe.get_doc("Item", item_code)
 
@@ -40,7 +40,7 @@ def create_item(item_code):
 			"item_code": item_code,
 			"item_name": item_code,
 			"description": item_code,
-			"item_group": "Products",
+			"item_group": item_group,
 			"is_purchase_item": 1,
 		}
 	).insert()
@@ -123,6 +123,61 @@ class TestPartySpecificItem(ERPNextTestSuite):
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
 		self.assertTrue(item in flatten(items))
+
+	def test_rules_on_different_bases_share_an_item(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = create_item("_Test Party Specific Brand Item").name
+		frappe.db.set_value("Item", item, "brand", "_Test Brand")
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Brand",
+			based_on_value="_Test Brand",
+		)
+		create_party_specific_item(
+			party_type="Customer", party="_Test Customer 1", restrict_based_on="Item", based_on_value=item
+		)
+
+		for customer, allowed in (
+			("_Test Customer", True),
+			("_Test Customer 1", True),
+			("_Test Customer 2", False),
+		):
+			with self.subTest(customer=customer):
+				self.assertEqual(item in search_items(item, {"customer": customer}), allowed)
+
+		make_sales_order(customer="_Test Customer 1", item_code=item, do_not_submit=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+			make_sales_order(customer="_Test Customer 2", item_code=item, do_not_submit=True)
+
+	def test_item_group_rule_covers_sub_groups(self):
+		parent_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Party Specific Parent Group",
+				"parent_item_group": "All Item Groups",
+				"is_group": 1,
+			}
+		).insert()
+		sub_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Party Specific Sub Group",
+				"parent_item_group": parent_group.name,
+			}
+		).insert()
+		item = create_item("_Test Party Specific Sub Group Item", sub_group.name).name
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item Group",
+			based_on_value=parent_group.name,
+		)
+
+		for customer, allowed in (("_Test Customer", True), ("_Test Customer 2", False)):
+			with self.subTest(customer=customer):
+				self.assertEqual(item in search_items(item, {"customer": customer}), allowed)
 
 	def test_customer_change_revalidates_items_on_save_and_submit(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -216,6 +271,14 @@ class TestPartySpecificItem(ERPNextTestSuite):
 				standalone_note.return_against = None
 				with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for"):
 					standalone_note.insert()
+
+
+def search_items(txt, filters):
+	return flatten(
+		item_query(
+			doctype="Item", txt=txt, searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
+		)
+	)
 
 
 def flatten(lst):
