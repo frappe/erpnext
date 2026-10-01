@@ -3,7 +3,7 @@
  "creation": "2026-08-16 00:00:00.000000",
  "docstatus": 0,
  "doctype": "Sidebar",
- "header_icon": "store",
+ "header_icon": "storefront-duotone",
  "idx": 0,
  "items": [
   {
@@ -943,7 +943,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-09-29 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
