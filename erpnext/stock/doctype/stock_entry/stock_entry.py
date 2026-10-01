@@ -5237,3 +5237,118 @@ def set_previous_operation_serial_batch(parent_doc, row):
 	if bundle and bundle.get("name"):
 		row.serial_and_batch_bundle = bundle.name
 		row.use_serial_batch_fields = 0
+
+
+@frappe.whitelist()
+def get_fg_mapping(stock_entry: str):
+	doc = get_stock_entry_for_fg_mapping(stock_entry, "read")
+	fg_field, fg_values = get_fg_values(doc.name)
+
+	return {
+		"fg_field": fg_field,
+		"fg_values": fg_values,
+		"raw_materials": get_raw_material_entries(doc.name),
+	}
+
+
+@frappe.whitelist()
+def set_fg_mapping(stock_entry: str, mapping: str | dict):
+	"""Link raw material serial / batch entries to the finished good serial / batch they went into.
+
+	mapping: {raw material Serial and Batch Entry name: finished good serial no / batch no}
+	"""
+	doc = get_stock_entry_for_fg_mapping(stock_entry, "write")
+	mapping = frappe.parse_json(mapping) or {}
+
+	fg_field, fg_values = get_fg_values(doc.name)
+	if not fg_field:
+		frappe.throw(_("{0} has no serial / batch tracked finished good").format(doc.name))
+
+	fg_values = set(fg_values)
+	raw_material_entries = {row.name for row in get_raw_material_entries(doc.name)}
+
+	entries_by_fg_value = defaultdict(list)
+	for entry_name, fg_value in mapping.items():
+		if entry_name not in raw_material_entries:
+			frappe.throw(
+				_("Row {0} is not a raw material serial / batch entry of {1}").format(entry_name, doc.name)
+			)
+
+		if fg_value and fg_value not in fg_values:
+			frappe.throw(
+				_("{0} is not a finished good serial / batch produced by {1}").format(
+					frappe.bold(fg_value), doc.name
+				)
+			)
+
+		entries_by_fg_value[fg_value or None].append(entry_name)
+
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+	for fg_value, entry_names in entries_by_fg_value.items():
+		(frappe.qb.update(sabe).set(sabe[fg_field], fg_value).where(sabe.name.isin(entry_names))).run()
+
+
+def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
+	doc = frappe.get_doc("Stock Entry", stock_entry)
+	doc.check_permission(permission_type)
+
+	if doc.purpose not in ("Manufacture", "Repack"):
+		frappe.throw(_("Finished good mapping is only allowed for Manufacture and Repack entries"))
+
+	if doc.docstatus != 1:
+		frappe.throw(_("Finished good mapping is only allowed for submitted entries"))
+
+	return doc
+
+
+def get_fg_values(stock_entry):
+	"""Finished good serial nos, or batch nos when the finished good is not serialized."""
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+
+	fg_entries = (
+		frappe.qb.from_(sed)
+		.inner_join(sabe)
+		.on(sed.serial_and_batch_bundle == sabe.parent)
+		.select(sabe.serial_no, sabe.batch_no)
+		.where((sed.parent == stock_entry) & (sed.is_finished_item == 1) & (sed.t_warehouse.isnotnull()))
+		.orderby(sed.idx)
+		.orderby(sabe.idx)
+	).run(as_dict=True)
+
+	if serial_nos := [row.serial_no for row in fg_entries if row.serial_no]:
+		return "fg_serial_no", serial_nos
+
+	if batch_nos := list(dict.fromkeys(row.batch_no for row in fg_entries if row.batch_no)):
+		return "fg_batch_no", batch_nos
+
+	return None, []
+
+
+def get_raw_material_entries(stock_entry):
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+
+	return (
+		frappe.qb.from_(sed)
+		.inner_join(sabe)
+		.on(sed.serial_and_batch_bundle == sabe.parent)
+		.select(
+			sabe.name,
+			sed.item_code,
+			sed.item_name,
+			sabe.serial_no,
+			sabe.batch_no,
+			sabe.qty,
+			sabe.fg_serial_no,
+			sabe.fg_batch_no,
+		)
+		.where(
+			(sed.parent == stock_entry)
+			& (sed.is_finished_item == 0)
+			& (sed.s_warehouse.isnotnull())
+			& (sed.t_warehouse.isnull())
+		)
+		.orderby(sed.idx)
+		.orderby(sabe.idx)
+	).run(as_dict=True)
