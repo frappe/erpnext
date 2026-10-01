@@ -129,6 +129,9 @@ class ReportData:
 	def prepare_source_data(self, data):
 		source_data = frappe._dict({})
 		for row in data:
+			if row.serial_no:
+				self.set_inward_reference_for_item(row, row.item_code)
+
 			key = (row.item_code, row.reference_name)
 
 			value = row.serial_no or row.batch_no
@@ -160,6 +163,7 @@ class ReportData:
 			.where(
 				(sabb.voucher_type == row.reference_doctype)
 				& (sabb.voucher_no == row.reference_name)
+				& (sabb.item_code == row.item_code)
 				& (sabb.is_cancelled == 0)
 				& (sabb_entry.docstatus == 1)
 			)
@@ -193,6 +197,8 @@ class ReportData:
 						inward_data = self.get_sabb_entries(value, "Inward")
 						if inward_data:
 							details = inward_data[-1]
+					elif material.serial_no:
+						self.set_inward_reference_for_item(details, material.item_code)
 
 					if details:
 						details.update(self.get_data_from_sabb(details))
@@ -213,6 +219,29 @@ class ReportData:
 					)
 
 		return sabb_data
+
+	def set_inward_reference_for_item(self, row, item_code):
+		"""Trace a serial no from the entry that brought it in under `item_code`.
+
+		A Repack or Manufacture entry can move a serial no to another item. The Serial No
+		still references the entry that created it, under the old item.
+		"""
+		inward_entries = self.get_sabb_entries(row.serial_no, "Inward")
+		if all(entry.item_code == item_code for entry in inward_entries):
+			return
+
+		first_inward_entry = next((entry for entry in inward_entries if entry.item_code == item_code), None)
+		if not first_inward_entry:
+			return
+
+		row.update(
+			{
+				"item_code": item_code,
+				"item_name": first_inward_entry.item_name,
+				"reference_doctype": first_inward_entry.reference_doctype,
+				"reference_name": first_inward_entry.reference_name,
+			}
+		)
 
 	def get_serial_no_batches(self, name=None):
 		batches = self.filters.get("batches", [])
