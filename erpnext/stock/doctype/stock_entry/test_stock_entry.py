@@ -21,6 +21,9 @@ from erpnext.stock.doctype.material_request.test_material_request import (
 	get_in_transit_warehouse,
 	make_material_request,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	SerialNoExistsInFutureTransactionError,
+)
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
@@ -632,6 +635,102 @@ class TestStockEntry(FrappeTestCase):
 		self.assertRaises(FinishedGoodError, repack.validate_finished_goods)
 
 		repack.delete()  # teardown
+
+	def test_repack_moves_serial_no_to_finished_good(self):
+		"""A Repack can produce the finished good with the serial no of a consumed raw material."""
+		raw_item = make_item(
+			"_Test Repack Serial Raw Item",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TRSRI-.#####", "brand": None},
+		).name
+		fg_item = make_item(
+			"_Test Repack Serial FG Item",
+			{"is_stock_item": 1, "has_serial_no": 1, "item_group": "All Item Groups", "brand": "_Test Brand"},
+		).name
+		source = "_Test Warehouse - _TC"
+		target = "_Test Warehouse 1 - _TC"
+
+		receipt = make_stock_entry(item_code=raw_item, target=source, qty=1, basic_rate=100)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+
+		repack = make_stock_entry(
+			item_code=raw_item,
+			source=source,
+			qty=1,
+			purpose="Repack",
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"t_warehouse": target,
+				"qty": 1,
+				"conversion_factor": 1.0,
+				"serial_no": serial_no,
+				"use_serial_batch_fields": 1,
+			},
+		)
+		repack.save()
+		repack.submit()
+
+		serial = frappe.get_doc("Serial No", serial_no)
+		self.assertEqual(serial.item_code, fg_item)
+		self.assertEqual(serial.item_name, fg_item)
+		self.assertEqual(serial.item_group, "All Item Groups")
+		self.assertEqual(serial.brand, "_Test Brand")
+		self.assertEqual(serial.warehouse, target)
+		self.assertEqual(serial.status, "Active")
+		self.assertEqual(repack.items[1].valuation_rate, 100)
+
+		issue = make_stock_entry(
+			item_code=fg_item,
+			source=target,
+			qty=1,
+			purpose="Material Issue",
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+		)
+		self.assertEqual(issue.items[0].valuation_rate, 100)
+
+		# The serial no has moved on, so the Repack must not be cancelled
+		repack.reload()
+		frappe.db.savepoint("before_repack_cancel")
+		self.assertRaises(SerialNoExistsInFutureTransactionError, repack.cancel)
+		frappe.db.rollback(save_point="before_repack_cancel")
+
+		issue.cancel()
+		repack.reload()
+		repack.cancel()
+
+		serial.reload()
+		self.assertEqual(serial.item_code, raw_item)
+		self.assertEqual(serial.item_name, raw_item)
+		self.assertEqual(serial.item_group, "Products")
+		self.assertFalse(serial.brand)
+		self.assertEqual(serial.warehouse, source)
+		self.assertEqual(serial.status, "Active")
+
+	def test_serial_no_of_another_item_needs_consumption_in_same_repack(self):
+		raw_item = make_item(
+			"_Test Repack Serial Raw Item",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TRSRI-.#####"},
+		).name
+		fg_item = make_item("_Test Repack Serial FG Item", {"is_stock_item": 1, "has_serial_no": 1}).name
+
+		receipt = make_stock_entry(item_code=raw_item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			make_stock_entry(
+				item_code=fg_item,
+				target="_Test Warehouse - _TC",
+				qty=1,
+				basic_rate=100,
+				serial_no=serial_no,
+				use_serial_batch_fields=1,
+			)
 
 	def test_repack_no_change_in_valuation(self):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
