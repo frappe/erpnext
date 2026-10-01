@@ -16,6 +16,7 @@ add_to_apps_screen = [
 		"logo": "/assets/erpnext/images/erpnext-logo.svg",
 		"title": app_title,
 		"route": app_home,
+		"setup_wizard_text": "Let's give your business a home.",
 		"has_permission": "erpnext.check_app_permission",
 		"sequence_id": 1,
 	}
