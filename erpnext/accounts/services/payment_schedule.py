@@ -204,7 +204,13 @@ class PaymentScheduleService:
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.payment_amount * doc.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
 				payment_schedule["outstanding"] = schedule.payment_amount
+
+			payment_schedule["base_outstanding"] = payment_schedule["base_payment_amount"]
 
 			doc.append("payment_schedule", payment_schedule)
 
