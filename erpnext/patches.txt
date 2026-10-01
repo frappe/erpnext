@@ -513,3 +513,4 @@ erpnext.patches.v16_0.add_voucher_index_to_repost_item_valuation
 erpnext.patches.v16_0.mirror_select_perms_to_custom_docperm
 erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost
 erpnext.patches.v16_0.disable_add_total_row_in_trends_reports
+erpnext.patches.v16_0.enable_auto_map_raw_materials_to_finished_goods
