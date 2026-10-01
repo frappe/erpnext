@@ -1,6 +1,5 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-import json
 from itertools import groupby
 
 import frappe
@@ -68,7 +67,7 @@ class OpportunitySummaryBySalesStage:
 		self.data = []
 
 		based_on = {
-			"Opportunity Owner": "_assign",
+			"Opportunity Owner": "opportunity_owner",
 			"Source": "utm_source",
 			"Opportunity Type": "opportunity_type",
 		}[self.filters.get("based_on")]
@@ -147,36 +146,18 @@ class OpportunitySummaryBySalesStage:
 			data_based_on = {"Number": "count", "Amount": "amount"}[self.filters.get("data_based_on")]
 
 			based_on = {
-				"Opportunity Owner": "_assign",
+				"Opportunity Owner": "opportunity_owner",
 				"Source": "utm_source",
 				"Opportunity Type": "opportunity_type",
 			}[self.filters.get("based_on")]
 
-			if self.filters.get("based_on") == "Opportunity Owner":
-				value = d.get(based_on)
-				if not value or value in ["[]", "null", "Not Assigned"]:
-					assignments = ["Not Assigned"]
-				else:
-					try:
-						assignments = json.loads(value)
-					except json.JSONDecodeError:
-						assignments = ["Not Assigned"]
+			value = d.get(based_on)
+			if self.filters.get("based_on") == "Opportunity Owner" and not value:
+				value = "Not Assigned"
 
-				sales_stage = d.get("sales_stage")
-				count = d.get(data_based_on)
-
-				if assignments:
-					if len(assignments) > 1:
-						for assigned_to in assignments:
-							self.set_formatted_data_based_on_sales_stage(assigned_to, sales_stage, count)
-					else:
-						assigned_to = assignments[0]
-						self.set_formatted_data_based_on_sales_stage(assigned_to, sales_stage, count)
-			else:
-				value = d.get(based_on)
-				sales_stage = d.get("sales_stage")
-				count = d.get(data_based_on)
-				self.set_formatted_data_based_on_sales_stage(value, sales_stage, count)
+			sales_stage = d.get("sales_stage")
+			count = d.get(data_based_on)
+			self.set_formatted_data_based_on_sales_stage(value, sales_stage, count)
 
 	def set_formatted_data_based_on_sales_stage(self, based_on, sales_stage, count):
 		self.formatted_data.setdefault(based_on, frappe._dict()).setdefault(sales_stage, 0)
