@@ -54,6 +54,8 @@ class TestIncorrectSerialNoValuation(ERPNextTestSuite):
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data[-1].get("qty"), 0)
 		self.assertEqual(data[-1].get("valuation_rate"), 0)
+		self.assertEqual(data[-1].serial_no_number, "Balance")
+		self.assertFalse(data[-1].serial_no)
 
 	def test_mismatched_in_out_valuation_is_flagged(self):
 		# fresh serial item so only this test's serial movements are considered
@@ -79,3 +81,10 @@ class TestIncorrectSerialNoValuation(ERPNextTestSuite):
 
 		flagged_serials = {row.get("serial_no") for row in data if isinstance(row, dict)}
 		self.assertIn(serial_no, flagged_serials)
+		serial_number = frappe.db.get_value("Serial No", serial_no, "serial_no")
+		for row in data:
+			if row.serial_no:
+				self.assertEqual(row.serial_no_number, serial_number)
+		totals = [row for row in data if row.total_label]
+		self.assertEqual([row.serial_no_number for row in totals], ["Total", "Balance"])
+		self.assertTrue(all(not row.serial_no for row in totals))

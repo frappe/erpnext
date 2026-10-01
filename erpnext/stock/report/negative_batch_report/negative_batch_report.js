@@ -2,6 +2,8 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Negative Batch Report"] = {
+	export_hidden_cols: true,
+	formatter: erpnext.utils.format_serial_batch_number,
 	filters: [
 		{
 			fieldname: "company",

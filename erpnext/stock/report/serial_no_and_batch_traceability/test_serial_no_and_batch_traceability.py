@@ -50,6 +50,9 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 
 		receipt_row = traced[receipt.name]
 		self.assertEqual(receipt_row["serial_no"], serial_no)
+		self.assertEqual(
+			receipt_row["serial_no_number"], frappe.db.get_value("Serial No", serial_no, "serial_no")
+		)
 		self.assertEqual(receipt_row["item_code"], SERIAL_ITEM)
 		self.assertEqual(receipt_row["reference_doctype"], "Stock Entry")
 		self.assertEqual(receipt_row["warehouse"], "Stores - _TC")
@@ -71,7 +74,8 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		delivery_note = create_delivery_note(
 			item_code=SERIAL_ITEM,
 			qty=1,
-			serial_no=[serial_no],
+			serial_no=frappe.db.get_value("Serial No", serial_no, "serial_no"),
+			use_serial_batch_fields=1,
 			warehouse="Stores - _TC",
 			customer="_Test Customer",
 			posting_date="2026-06-03",
@@ -93,6 +97,9 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		forward_row = traced[delivery_note.name]
 		self.assertEqual(forward_row["reference_doctype"], "Delivery Note")
 		self.assertEqual(forward_row["serial_no"], serial_no)
+		self.assertEqual(
+			forward_row["serial_no_number"], frappe.db.get_value("Serial No", serial_no, "serial_no")
+		)
 		self.assertEqual(forward_row["direction"], "Forward")
 		self.assertEqual(forward_row["customer"], delivery_note.customer)
 		self.assertLess(forward_row["qty"], 0)

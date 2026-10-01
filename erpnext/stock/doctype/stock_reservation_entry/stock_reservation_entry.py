@@ -11,6 +11,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import cint, flt, get_datetime, now_datetime, nowdate, nowtime, parse_json
 
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime, get_or_make_bin, get_stock_balance
 
 
@@ -398,6 +399,8 @@ class StockReservationEntry(Document):
 
 			qty_to_be_reserved = 0
 			selected_batch_nos, selected_serial_nos = [], []
+			serial_label = SerialBatchIdentity("Serial No").get_label
+			batch_label = SerialBatchIdentity("Batch").get_label
 			for entry in self.sb_entries:
 				entry.warehouse = self.warehouse
 
@@ -414,9 +417,9 @@ class StockReservationEntry(Document):
 							"Row #{0}: Serial No {1} for Item {2} is not available in {3} {4} or might be reserved in another {5}."
 						).format(
 							entry.idx,
-							frappe.bold(entry.serial_no),
+							frappe.bold(serial_label(entry.serial_no)),
 							frappe.bold(self.item_code),
-							_("Batch {0} and Warehouse").format(frappe.bold(entry.batch_no))
+							_("Batch {0} and Warehouse").format(frappe.bold(batch_label(entry.batch_no)))
 							if self.has_batch_no
 							else _("Warehouse"),
 							frappe.bold(self.warehouse),
@@ -427,7 +430,7 @@ class StockReservationEntry(Document):
 
 					if entry.serial_no in selected_serial_nos:
 						msg = _("Row #{0}: Serial No {1} is already selected.").format(
-							entry.idx, frappe.bold(entry.serial_no)
+							entry.idx, frappe.bold(serial_label(entry.serial_no))
 						)
 						frappe.throw(msg)
 					else:
@@ -437,7 +440,9 @@ class StockReservationEntry(Document):
 					if cint(frappe.db.get_value("Batch", entry.batch_no, "disabled")):
 						msg = _(
 							"Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
-						).format(entry.idx, frappe.bold(self.item_code), frappe.bold(entry.batch_no))
+						).format(
+							entry.idx, frappe.bold(self.item_code), frappe.bold(batch_label(entry.batch_no))
+						)
 						frappe.throw(msg)
 
 					available_qty_to_reserve = get_available_qty_to_reserve(
@@ -450,7 +455,7 @@ class StockReservationEntry(Document):
 						).format(
 							entry.idx,
 							frappe.bold(self.item_code),
-							frappe.bold(entry.batch_no),
+							frappe.bold(batch_label(entry.batch_no)),
 							frappe.bold(self.warehouse),
 						)
 						frappe.throw(msg)
@@ -467,14 +472,14 @@ class StockReservationEntry(Document):
 								entry.idx,
 								frappe.bold(available_qty_to_reserve),
 								frappe.bold(self.item_code),
-								frappe.bold(entry.batch_no),
+								frappe.bold(batch_label(entry.batch_no)),
 								frappe.bold(self.warehouse),
 							)
 							frappe.throw(msg)
 
 					if entry.batch_no in selected_batch_nos:
 						msg = _("Row #{0}: Batch No {1} is already selected.").format(
-							entry.idx, frappe.bold(entry.batch_no)
+							entry.idx, frappe.bold(batch_label(entry.batch_no))
 						)
 						frappe.throw(msg)
 					else:
@@ -2022,13 +2027,17 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 def get_reserved_materials(voucher_no):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
 	serial_batch_doc = frappe.qb.DocType("Serial and Batch Entry")
+	serial_no = frappe.qb.DocType("Serial No")
 
 	query = (
 		frappe.qb.from_(doctype)
 		.inner_join(serial_batch_doc)
 		.on(doctype.name == serial_batch_doc.parent)
+		.left_join(serial_no)
+		.on((serial_no.name == serial_batch_doc.serial_no) & (serial_no.item_code == doctype.item_code))
 		.select(
 			serial_batch_doc.serial_no,
+			serial_no.serial_no.as_("serial_number"),
 			serial_batch_doc.batch_no,
 			serial_batch_doc.qty,
 			doctype.item_code,

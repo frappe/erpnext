@@ -11,6 +11,7 @@ from erpnext.stock.report.stock_ledger.stock_ledger import (
 	get_opening_balance,
 	get_stock_ledger_entries,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 
@@ -21,13 +22,13 @@ def execute(filters=None):
 	sl_entries = get_stock_ledger_entries(filters, items)
 
 	if not sl_entries:
-		return columns, []
+		return prepare_serial_batch_report(columns, [], serial_fields=("serial_no", "balance_serial_no"))
 
 	item_details = get_item_details(items, sl_entries, False)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 	data = process_stock_ledger_entries(sl_entries, item_details, opening_row, precision)
-	return columns, data
+	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no", "balance_serial_no"))
 
 
 def process_stock_ledger_entries(sl_entries, item_details, opening_row, precision):
@@ -39,9 +40,6 @@ def process_stock_ledger_entries(sl_entries, item_details, opening_row, precisio
 	available_serial_nos = {}
 	if sabb_list := [sle.serial_and_batch_bundle for sle in sl_entries if sle.serial_and_batch_bundle]:
 		available_serial_nos = get_serial_nos_from_sle_list(sabb_list)
-
-	if not available_serial_nos:
-		return [], []
 
 	for sle in sl_entries:
 		update_stock_ledger_entry(sle, item_details, precision)
@@ -67,12 +65,12 @@ def update_available_serial_nos(available_serial_nos, sle):
 	serial_nos = (
 		get_serial_nos(sle.serial_no)
 		if sle.serial_no
-		else available_serial_nos.get(sle.serial_and_batch_bundle)
+		else available_serial_nos.get(sle.serial_and_batch_bundle, [])
 	)
 	key = (sle.item_code, sle.warehouse)
 	sle.serial_no = "\n".join(serial_nos) if serial_nos else ""
 	if key not in available_serial_nos:
-		available_serial_nos.setdefault(key, serial_nos)
+		available_serial_nos[key] = serial_nos.copy()
 		sle.balance_serial_no = "\n".join(serial_nos) if serial_nos else ""
 		return
 

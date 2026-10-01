@@ -479,7 +479,7 @@ frappe.ui.form.on("Job Card", {
 				reference_name: frm.doc.name,
 				item_code: frm.doc.production_item,
 				item_name: frm.doc.item_name,
-				item_serial_no: frm.doc.serial_no,
+				item_serial_no: frm.doc.serial_no ? frm.doc.serial_no.split("\n")[0] : null,
 				batch_no: frm.doc.batch_no,
 				quality_inspection_template: frm.doc.quality_inspection_template,
 			};

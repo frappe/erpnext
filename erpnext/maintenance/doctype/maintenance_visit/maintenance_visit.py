@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import format_date, get_datetime
+from frappe.utils import escape_html, format_date, get_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -48,8 +48,17 @@ class MaintenanceVisit(TransactionBase):
 
 	def validate_serial_no(self):
 		for d in self.get("purposes"):
-			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
-				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
+			if not d.serial_no:
+				continue
+			serial = frappe.db.get_value("Serial No", d.serial_no, ["serial_no", "item_code"], as_dict=True)
+			if not serial:
+				frappe.throw(_("Row #{0}: Selected Serial No no longer exists.").format(d.idx))
+			if serial.item_code != d.item_code:
+				frappe.throw(
+					_("Serial No {0} does not belong to Item {1}").format(
+						escape_html(serial.serial_no), escape_html(d.item_code)
+					)
+				)
 
 	def validate_purpose_table(self):
 		if not self.purposes:

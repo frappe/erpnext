@@ -13,6 +13,7 @@ from frappe.utils import (
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
@@ -91,12 +92,20 @@ class StockEntryDetail(Document):
 
 		disabled = frappe.db.get_value("Batch", self.batch_no, "disabled")
 		if disabled:
-			frappe.throw(_("Batch {0} of Item {1} is disabled.").format(self.batch_no, self.item_code))
+			frappe.throw(
+				_("Batch {0} of Item {1} is disabled.").format(
+					SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+				)
+			)
 			return
 
 		expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
 		if expiry_date and getdate(self.parent_doc.posting_date) > getdate(expiry_date):
-			frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
+			frappe.throw(
+				_("Batch {0} of Item {1} has expired.").format(
+					SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+				)
+			)
 
 	def validate_and_update_item_details(self, item_details, company, purpose):
 		if flt(self.qty) and flt(self.qty) < 0:

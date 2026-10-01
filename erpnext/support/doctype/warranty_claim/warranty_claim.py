@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, session
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import escape_html, now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -51,6 +51,7 @@ class WarrantyClaim(TransactionBase):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_serial_no()
 		if session["user"] != "Guest" and not self.customer:
 			frappe.throw(_("Customer is required"))
 
@@ -60,6 +61,17 @@ class WarrantyClaim(TransactionBase):
 			and frappe.db.get_value("Warranty Claim", self.name, "status") != "Closed"
 		):
 			self.resolution_date = now_datetime()
+
+	def validate_serial_no(self):
+		if not self.serial_no or not self.item_code:
+			return
+		serial = frappe.db.get_value("Serial No", self.serial_no, ["serial_no", "item_code"], as_dict=True)
+		if serial and serial.item_code != self.item_code:
+			frappe.throw(
+				_("Serial No {0} does not belong to Item {1}").format(
+					escape_html(serial.serial_no), escape_html(self.item_code)
+				)
+			)
 
 	def on_cancel(self):
 		mv = frappe.qb.DocType("Maintenance Visit")
