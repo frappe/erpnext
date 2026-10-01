@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from itertools import batched
 from operator import itemgetter
 
 import frappe
@@ -33,6 +34,7 @@ MOVEMENT_FIELDS = (
 	"out_val",
 	"bal_val",
 )
+BATCH_SIZE = 1000
 SEGMENT_DETAILS = ("company", "item_group", "stock_uom", "item_name", "valuation_rate")
 
 LEDGER_SQL = """
@@ -186,19 +188,24 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		)
 
 	def register_items(self, conditions, params):
-		"""Items with ledger rows under the report's other filters that the live item filters allow,
-		with the details the live ledger query joins in."""
-		sql = f'SELECT DISTINCT sle.item_code FROM "tabStock Ledger Entry" sle WHERE {conditions}'
-		codes = [code for (code,) in self.conn.execute(sql, params).fetchall()]
-		rows = []
-		if codes:
-			item = frappe.qb.DocType("Item")
-			query = frappe.qb.from_(item).select(*(item[field] for field in ITEM_COLUMNS))
-			rows = self.apply_items_filters(query.where(item.name.isin(codes)), item).run(as_dict=True)
+		"""Items the live item filters allow, with the details the live ledger query joins in. Without
+		an item filter, only items with ledger rows under the report's other filters are fetched."""
+		item = frappe.qb.DocType("Item")
+		query = frappe.qb.from_(item).select(*(item[field] for field in ITEM_COLUMNS))
+		if any(self.filters.get(field) for field in ("item_code", "item_group", "brand")):
+			rows = self.apply_items_filters(query, item).run(as_dict=True)
+		else:
+			rows = []
+			for codes in batched(self.get_ledger_item_codes(conditions, params), BATCH_SIZE):
+				rows += query.where(item.name.isin(codes)).run(as_dict=True)
 
 		self.conn.register(
 			"snapshot_items", pa.Table.from_pylist(rows, schema=pa.schema(ITEM_COLUMNS.items()))
 		)
+
+	def get_ledger_item_codes(self, conditions, params):
+		sql = f'SELECT DISTINCT sle.item_code FROM "tabStock Ledger Entry" sle WHERE {conditions}'
+		return [code for (code,) in self.conn.execute(sql, params).fetchall()]
 
 	def get_conditions(self):
 		conditions = ["sle.docstatus < 2", "sle.is_cancelled = 0", "sle.posting_date <= $to_date"]
