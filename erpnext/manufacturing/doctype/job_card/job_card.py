@@ -47,6 +47,9 @@ from .mapper import (
 	make_stock_entry,
 )
 
+# Work Order statuses under which its Job Cards can no longer be changed
+CLOSED_WORK_ORDER_STATUSES = ("Closed", "Stopped")
+
 
 class OverlapError(frappe.ValidationError):
 	pass
@@ -1439,6 +1442,8 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		if self.is_paused:
+			frappe.throw(_("Job Card {0} is already paused.").format(bold(self.name)))
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1451,6 +1456,8 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		if not self.is_paused:
+			frappe.throw(_("Job Card {0} is not paused.").format(bold(self.name)))
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1623,7 +1630,7 @@ class JobCard(Document):
 		if self.work_order:
 			status = frappe.get_value("Work Order", self.work_order, "status")
 
-			if status in ["Closed", "Stopped"]:
+			if status in CLOSED_WORK_ORDER_STATUSES:
 				return True
 
 		return False

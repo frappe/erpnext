@@ -1576,7 +1576,13 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			job_card_tab: {
 				html_field: "job_card_list_html",
 				doctype: "Job Card",
-				fields: ["name", "status", "docstatus", "operation", "workstation", "for_quantity"],
+				list_overrides: {
+					get_page: (args) => erpnext.work_order.get_job_card_page(this.frm, args),
+					after_render() {
+						erpnext.work_order.bind_job_card_timer_actions(this);
+						erpnext.work_order.start_job_card_ticker(this);
+					},
+				},
 				columns: [
 					{
 						label: __("Job Card"),
@@ -1596,6 +1602,16 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 							];
 							return frappe.ui.badge.html({ label, theme: color });
 						},
+					},
+					{
+						label: __("Time"),
+						width: "1%",
+						render: (row) => erpnext.work_order.job_card_time_html(row),
+					},
+					{
+						label: "",
+						width: "1%",
+						render: (row) => erpnext.work_order.job_card_actions_html(row),
 					},
 				],
 			},
@@ -1677,6 +1693,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			.require("embedded_list.bundle.js")
 			.then(() => {
 				this._loaded = true;
+				this.stop_timers();
 				this.lists = {};
 				this.load_active_tab();
 			})
@@ -1707,6 +1724,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			empty_state_action: can_add ? cfg.empty_state_action : undefined,
 			empty_description: cfg.empty_description,
 			empty_message: cfg.empty_message || __("No {0} linked to this Work Order.", [__(cfg.doctype)]),
+			...cfg.list_overrides,
 		};
 		const ListClass = erpnext.work_order.get_embedded_list_class();
 		const list = new ListClass(opts);
@@ -1730,4 +1748,210 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			this.build(fieldname);
 		}
 	}
+
+	// Lists are rebuilt on every form refresh; stop the old ones' timers so they don't leak.
+	stop_timers() {
+		Object.values(this.lists).forEach((list) => clearInterval(list.timer_interval));
+	}
+};
+
+// EmbeddedList `get_page` contract: the server pages, searches and works out the timers.
+erpnext.work_order.get_job_card_page = function (frm, { start, page_length, txt }) {
+	return frappe
+		.xcall("erpnext.manufacturing.doctype.job_card.timer.get_work_order_job_cards", {
+			work_order: frm.doc.name,
+			start,
+			page_length,
+			txt,
+		})
+		.then(erpnext.work_order.stamp_fetched_at);
+};
+
+// The columns the server's search matches (SEARCH_FIELDS in job_card/timer.py).
+erpnext.work_order.JOB_CARD_SEARCH_FIELDS = ["name", "operation", "workstation", "status"];
+
+erpnext.work_order.job_card_matches_search = function (row, txt) {
+	const term = txt.toLowerCase();
+	return erpnext.work_order.JOB_CARD_SEARCH_FIELDS.some((field) =>
+		String(row[field] ?? "")
+			.toLowerCase()
+			.includes(term)
+	);
+};
+
+// elapsed_seconds is as of the server's clock; running timers count on from the fetch time.
+erpnext.work_order.stamp_fetched_at = function (rows) {
+	const fetched_at = Date.now();
+	rows.forEach((row) => (row.fetched_at = fetched_at));
+	return rows;
+};
+
+// Start and Resume never apply together, so they share the play icon.
+erpnext.work_order.JOB_CARD_TIMER_ACTIONS = {
+	start: { icon: "play", label: __("Start") },
+	resume: { icon: "play", label: __("Resume") },
+	pause: { icon: "pause", label: __("Pause") },
+	// Completing needs the quantity dialog, so this opens the Job Card form; it keeps
+	// its text since it leaves the list, unlike the in-place icon-only timer buttons.
+	complete: {
+		icon: "check",
+		label: __("Complete"),
+		title: __("Complete in Job Card"),
+		show_label: true,
+	},
+};
+
+// A running job can be paused or completed, the same pair the Job Card form offers.
+erpnext.work_order.get_job_card_row_actions = function (row) {
+	if (!row.timer_action) return [];
+	return row.timer_action === "pause" ? ["pause", "complete"] : [row.timer_action];
+};
+
+erpnext.work_order.job_card_time_html = function (row) {
+	return `<span class="job-card-timer${row.is_running ? "" : " text-muted"}"
+		style="font-variant-numeric: tabular-nums;"
+		data-job-card="${frappe.utils.escape_html(row.name)}">${erpnext.work_order.format_job_card_elapsed(
+		row
+	)}</span>`;
+};
+
+// The row's timer buttons, shown on row hover.
+erpnext.work_order.job_card_actions_html = function (row) {
+	const name = frappe.utils.escape_html(row.name);
+	const buttons = erpnext.work_order
+		.get_job_card_row_actions(row)
+		.map((action_name) => {
+			const action = erpnext.work_order.JOB_CARD_TIMER_ACTIONS[action_name];
+			return frappe.ui.button.html({
+				label: action.show_label ? action.label : "",
+				icon: action.icon,
+				size: "xs",
+				title: action.title || action.label,
+				attrs: { "data-timer-action": action_name, "data-job-card": name },
+			});
+		})
+		.join("");
+
+	return `<span class="embedded-list-hover-reveal" style="display: inline-flex; gap: var(--padding-xs);">${buttons}</span>`;
+};
+
+erpnext.work_order.format_job_card_elapsed = function (row) {
+	// Matches the server's elapsed time, which counts every open log up to now.
+	const live_seconds = (row.open_log_count * (Date.now() - row.fetched_at)) / 1000;
+	const total = Math.floor(row.elapsed_seconds + live_seconds);
+	const pad = (n) => String(n).padStart(2, "0");
+	return `${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
+};
+
+// Wires the timer buttons; runs after every full render of the list.
+erpnext.work_order.bind_job_card_timer_actions = function (list) {
+	// Namespaced and unbound first so re-renders don't stack handlers.
+	list.$wrapper.off("click.job_card_timer").on("click.job_card_timer", "[data-timer-action]", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const $button = $(e.currentTarget);
+		const row = list.data.find((r) => r.name === $button.attr("data-job-card"));
+		row && erpnext.work_order.run_job_card_timer_action(list, row, $button.attr("data-timer-action"));
+	});
+};
+
+erpnext.work_order.run_job_card_timer_action = function (list, row, action) {
+	const now = frappe.datetime.now_datetime();
+	if (action === "complete") {
+		return frappe.set_route("Form", "Job Card", row.name);
+	}
+	if (action === "start") {
+		return erpnext.work_order.start_job_card(list, row);
+	}
+	if (action === "pause") {
+		return erpnext.work_order.update_job_card(list, row.name, "pause_job", { end_time: now });
+	}
+	return erpnext.work_order.update_job_card(list, row.name, "resume_job", { start_time: now });
+};
+
+// One interval per list updates every timer with an open log. It reads the list's current
+// rows on each tick, so rows added by Load More, a re-render or a row swap tick without re-arming.
+erpnext.work_order.start_job_card_ticker = function (list) {
+	if (list.timer_interval) return;
+
+	list.timer_interval = setInterval(() => {
+		list.data.forEach((row) => {
+			if (!row.open_log_count) return;
+			list.$wrapper
+				.find(`.job-card-timer[data-job-card="${CSS.escape(row.name)}"]`)
+				.text(erpnext.work_order.format_job_card_elapsed(row));
+		});
+	}, 1000);
+};
+
+erpnext.work_order.start_job_card = function (list, row) {
+	const start = (employees) =>
+		erpnext.work_order.update_job_card(list, row.name, "start_timer", {
+			start_time: frappe.datetime.now_datetime(),
+			employees,
+		});
+
+	if (row.employees.length) {
+		return start(row.employees.map((employee) => ({ employee })));
+	}
+
+	// Same prompt as the Job Card form; the start time is taken on submit so picking
+	// the operator is not counted as worked time.
+	frappe.prompt(
+		{
+			fieldtype: "Table MultiSelect",
+			label: __("Select Employees"),
+			options: "Job Card Time Log",
+			fieldname: "employees",
+			reqd: 1,
+			filters: { status: "Active" },
+		},
+		(values) => start(values.employees),
+		__("Assign Job to Employee")
+	);
+};
+
+// Runs the timer action, then re-renders only that Job Card's row instead of the whole form.
+erpnext.work_order.update_job_card = function (list, job_card, method, args) {
+	return frappe
+		.xcall("erpnext.manufacturing.doctype.workstation.workstation.update_job_card", {
+			job_card,
+			method,
+			...args,
+		})
+		.then(() =>
+			frappe.xcall("erpnext.manufacturing.doctype.job_card.timer.get_job_card_timer", { job_card })
+		)
+		.then((row) => erpnext.work_order.replace_job_card_row(list, row));
+};
+
+erpnext.work_order.replace_job_card_row = function (list, row) {
+	erpnext.work_order.stamp_fetched_at([row]);
+	const index = list.data.findIndex((r) => r.name === row.name);
+	if (index === -1) return;
+
+	// An action can change the status, so the row may stop matching an active search.
+	const txt = list.search_term();
+	if (txt && !erpnext.work_order.job_card_matches_search(row, txt)) {
+		erpnext.work_order.remove_job_card_row(list, index);
+		return;
+	}
+
+	list.data[index] = row;
+	list._all_data[index] = row;
+	list.$wrapper.find(`tr[data-row-idx="${index}"]`).replaceWith(list.build_row_html(row, index));
+};
+
+// Re-renders the loaded rows without the removed one; render() shows one page, so the
+// rest of what was loaded with Load More is rendered back too.
+erpnext.work_order.remove_job_card_row = function (list, index) {
+	list.data.splice(index, 1);
+	list._all_data.splice(index, 1);
+
+	list.render();
+	while (list.rendered_count < list.data.length) {
+		list.render_more();
+	}
+	list.after_render();
+	list.toggle_result_area();
 };
