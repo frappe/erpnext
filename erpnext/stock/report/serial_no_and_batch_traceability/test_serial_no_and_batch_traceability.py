@@ -7,6 +7,7 @@ from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delive
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.services.serial_batch import (
 	get_fg_mapping,
+	get_fg_target,
 	set_fg_mapping,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -321,4 +322,27 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		self.assertEqual(
 			[(row["item_code"], row["batch_no"], row["qty"]) for row in fg_rows],
 			[(batch_fg_item, batch_no, 1)],
+		)
+
+	def test_fg_target_with_shared_serial_and_batch_name(self):
+		"""A serial no and a batch no with the same name are kept apart."""
+		fg_targets = {("fg_serial_no", "FG-001"), ("fg_batch_no", "FG-001"), ("fg_batch_no", "B-1")}
+
+		self.assertEqual(get_fg_target("B-1", fg_targets, "SE"), ("fg_batch_no", "B-1"))
+		self.assertEqual(
+			get_fg_target({"fg_field": "fg_batch_no", "value": "FG-001"}, fg_targets, "SE"),
+			("fg_batch_no", "FG-001"),
+		)
+		self.assertEqual(
+			get_fg_target({"fg_field": "fg_serial_no", "value": "FG-001"}, fg_targets, "SE"),
+			("fg_serial_no", "FG-001"),
+		)
+		self.assertEqual(get_fg_target(None, fg_targets, "SE"), (None, None))
+		self.assertRaises(frappe.ValidationError, get_fg_target, "FG-001", fg_targets, "SE")
+		self.assertRaises(
+			frappe.ValidationError,
+			get_fg_target,
+			{"fg_field": "fg_serial_no", "value": "B-1"},
+			fg_targets,
+			"SE",
 		)

@@ -393,46 +393,64 @@ def get_fg_mapping(stock_entry: str):
 def set_fg_mapping(stock_entry: str, mapping: str | dict):
 	"""Link raw material serial / batch entries to the finished good serial / batch they went into.
 
-	mapping: {raw material Serial and Batch Entry name: finished good serial no / batch no}
+	mapping: {raw material Serial and Batch Entry name: target}, where target is
+	{"fg_field": "fg_serial_no" / "fg_batch_no", "value": ...}, or just the value when it is unambiguous
 	"""
 	# the mapping is an update after submit, which needs submit permission
 	doc = get_stock_entry_for_fg_mapping(stock_entry, "submit")
 	mapping = frappe.parse_json(mapping) or {}
 
-	fg_fields = {}
-	for row in get_fg_values(doc.name):
-		fg_fields.setdefault(row.value, row.fg_field)
-
-	if not fg_fields:
+	fg_targets = {(row.fg_field, row.value) for row in get_fg_values(doc.name)}
+	if not fg_targets:
 		frappe.throw(_("{0} has no serial / batch tracked finished good").format(doc.name))
 
 	raw_material_entries = {row.name for row in get_raw_material_entries(doc.name)}
 
-	entries_by_fg_value = defaultdict(list)
-	for entry_name, fg_value in mapping.items():
+	entries_by_fg_target = defaultdict(list)
+	for entry_name, target in mapping.items():
 		if entry_name not in raw_material_entries:
 			frappe.throw(
 				_("Row {0} is not a raw material serial / batch entry of {1}").format(entry_name, doc.name)
 			)
 
-		if fg_value and fg_value not in fg_fields:
-			frappe.throw(
-				_("{0} is not a finished good serial / batch produced by {1}").format(
-					frappe.bold(fg_value), doc.name
-				)
-			)
-
-		entries_by_fg_value[fg_value or None].append(entry_name)
+		entries_by_fg_target[get_fg_target(target, fg_targets, doc.name)].append(entry_name)
 
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
-	for fg_value, entry_names in entries_by_fg_value.items():
-		fg_field = fg_fields.get(fg_value)
+	for (fg_field, fg_value), entry_names in entries_by_fg_target.items():
 		(
 			frappe.qb.update(sabe)
 			.set(sabe.fg_serial_no, fg_value if fg_field == "fg_serial_no" else None)
 			.set(sabe.fg_batch_no, fg_value if fg_field == "fg_batch_no" else None)
 			.where(sabe.name.isin(entry_names))
 		).run()
+
+
+def get_fg_target(target, fg_targets, stock_entry):
+	"""Resolve a mapping target to (fg_field, value); (None, None) clears the mapping."""
+	if isinstance(target, dict):
+		fg_field, value = target.get("fg_field"), target.get("value")
+	else:
+		fg_field, value = None, target
+
+	if not value:
+		return None, None
+
+	matches = [(field, val) for field, val in fg_targets if val == value and fg_field in (None, field)]
+	if not matches:
+		frappe.throw(
+			_("{0} is not a finished good serial / batch produced by {1}").format(
+				frappe.bold(value), stock_entry
+			)
+		)
+
+	if len(matches) > 1:
+		frappe.throw(
+			_("{0} is both a finished good serial no and batch no in {1}, please specify which one").format(
+				frappe.bold(value), stock_entry
+			)
+		)
+
+	return matches[0]
 
 
 def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
@@ -474,8 +492,11 @@ def get_fg_values(stock_entry):
 		else:
 			value, fg_field = row.batch_no, "fg_batch_no"
 
-		if value and value not in fg_values:
-			fg_values[value] = frappe._dict(value=value, fg_field=fg_field, item_code=row.item_code)
+		# a serial no and a batch no can share a name, so keep them apart
+		if value and (fg_field, value) not in fg_values:
+			fg_values[(fg_field, value)] = frappe._dict(
+				value=value, fg_field=fg_field, item_code=row.item_code
+			)
 
 	return list(fg_values.values())
 
