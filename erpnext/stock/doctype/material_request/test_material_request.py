@@ -95,6 +95,32 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(se.doctype, "Stock Entry")
 		self.assertEqual(len(se.get("items")), len(mr.get("items")))
 
+	def test_stock_entry_validates_material_request_after_unlinked_row(self):
+		mr = make_material_request(material_request_type="Material Transfer")
+		se = make_stock_entry(mr.name)
+		se.items[0].material_request = None
+		se.items[0].material_request_item = None
+		se.items[0].s_warehouse = "_Test Warehouse 1 - _TC"
+		linked_row = se.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"qty": 1,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+				"t_warehouse": mr.items[0].warehouse,
+				"material_request": mr.name,
+				"material_request_item": mr.items[0].name,
+			},
+		)
+
+		with self.assertRaisesRegex(
+			frappe.MappingMismatchError, "Item for row 2 does not match Material Request"
+		):
+			se.save()
+
+		linked_row.item_code = mr.items[0].item_code
+		se.save()
+
 	def test_partial_make_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as _make_stock_entry
 
