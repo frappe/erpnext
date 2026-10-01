@@ -240,6 +240,7 @@ class Item(Document):
 		self.clear_retain_sample()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_default_uoms()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
 		self.validate_item_defaults()
@@ -1061,6 +1062,20 @@ class Item(Document):
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
 				if value:
 					d.conversion_factor = value
+
+	def validate_default_uoms(self):
+		if not frappe.db.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+			return
+
+		valid_uoms = {row.uom for row in self.uoms if flt(row.conversion_factor) > 0}
+		valid_uoms.add(self.stock_uom)
+		for fieldname in ("sales_uom", "purchase_uom"):
+			if self.get(fieldname) and self.get(fieldname) not in valid_uoms:
+				frappe.throw(
+					_(
+						"{0} must be the Stock UOM or a UOM with a positive Conversion Factor in the UOMs table."
+					).format(_(self.meta.get_label(fieldname)))
+				)
 
 	def validate_attributes(self):
 		if not (self.has_variants or self.variant_of):

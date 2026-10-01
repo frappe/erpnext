@@ -635,6 +635,22 @@ $.extend(erpnext.item, {
 	},
 
 	setup_queries: function (frm) {
+		frappe.db
+			.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item")
+			.then((restrict_uoms) => {
+				for (const fieldname of ["sales_uom", "purchase_uom"]) {
+					frm.set_query(fieldname, () => {
+						if (!restrict_uoms) return {};
+
+						const uoms = (frm.doc.uoms || [])
+							.filter((row) => flt(row.conversion_factor) > 0)
+							.map((row) => row.uom);
+						if (frm.doc.stock_uom) uoms.push(frm.doc.stock_uom);
+						return { filters: { name: ["in", uoms] } };
+					});
+				}
+			});
+
 		frm.fields_dict["item_defaults"].grid.get_field("expense_account").get_query = function (
 			doc,
 			cdt,

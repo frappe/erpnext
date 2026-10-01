@@ -20,7 +20,7 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import nowdate, today, unique
+from frappe.utils import flt, nowdate, today, unique
 from pypika import Order
 
 import erpnext
@@ -1320,23 +1320,35 @@ def get_filtered_child_rows(
 def get_item_uom_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	if frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
 		item_code = filters.get("item_code")
-		if not item_code or not frappe.get_list("Item", filters=[["name", "=", item_code]], pluck="name"):
+		if not item_code:
 			return []
 
-		query_filters = {"parent": item_code, "parenttype": "Item"}
+		items = frappe.get_list(
+			"Item", filters=[["name", "=", item_code]], fields=["name", "variant_of", "stock_uom"]
+		)
+		if not items:
+			return []
+
+		item = items[0]
+		parents = [item.name]
+		if item.variant_of and item.stock_uom == frappe.get_cached_value(
+			"Item", item.variant_of, "stock_uom"
+		):
+			parents.append(item.variant_of)
+		query_filters = {"parent": ["in", parents], "parenttype": "Item"}
 
 		if txt:
 			query_filters["uom"] = ["like", f"%{txt}%"]
 
-		return frappe.get_all(
+		conversions = frappe.get_all(
 			"UOM Conversion Detail",
 			filters=query_filters,
-			fields=["uom", "conversion_factor"],
-			limit_start=start,
-			limit_page_length=page_len,
+			fields=["parent", "uom", "conversion_factor"],
 			order_by="idx",
-			as_list=1,
 		)
+		factors = {row.uom: row.conversion_factor for row in conversions if row.parent == item.variant_of}
+		factors.update({row.uom: row.conversion_factor for row in conversions if row.parent == item.name})
+		return [[uom, factor] for uom, factor in factors.items() if flt(factor) > 0][start : start + page_len]
 
 	return frappe.get_list(
 		"UOM",

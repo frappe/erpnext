@@ -62,10 +62,80 @@ class StockController(AccountsController):
 		StockInternalTransferService(self).validate_internal_transfer()
 		validate_putaway_capacity(self)
 		self.reset_conversion_factor()
+		self.validate_item_uoms()
 
 	def on_update(self):
 		super().on_update()
 		self.check_zero_rate()
+
+	def validate_item_uoms(self):
+		"""Restrict UOM availability without overriding transaction-specific conversion factors."""
+		if self.doctype not in (
+			"Quotation",
+			"Sales Order",
+			"Delivery Note",
+			"Sales Invoice",
+			"POS Invoice",
+			"Request for Quotation",
+			"Supplier Quotation",
+			"Purchase Order",
+			"Purchase Receipt",
+			"Purchase Invoice",
+		):
+			return
+
+		if not frappe.db.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+			return
+
+		item_codes = {row.item_code for row in self.items if row.item_code}
+		if not item_codes:
+			return
+
+		items = {
+			item.name: item
+			for item in frappe.get_all(
+				"Item", filters={"name": ["in", item_codes]}, fields=["name", "variant_of", "stock_uom"]
+			)
+		}
+		template_codes = {item.variant_of for item in items.values() if item.variant_of}
+		template_uoms = {}
+		if template_codes:
+			template_uoms = dict(
+				frappe.get_all(
+					"Item",
+					filters={"name": ["in", template_codes]},
+					fields=["name", "stock_uom"],
+					as_list=True,
+				)
+			)
+		item_codes.update(template_codes)
+		conversion_factors = {
+			(row.parent, row.uom): flt(row.conversion_factor)
+			for row in frappe.get_all(
+				"UOM Conversion Detail",
+				filters={
+					"parenttype": "Item",
+					"parent": ["in", item_codes],
+				},
+				fields=["parent", "uom", "conversion_factor"],
+			)
+		}
+		for row in self.items:
+			if not row.item_code:
+				continue
+			item = items[row.item_code]
+			if row.uom == item.stock_uom:
+				continue
+			factor = conversion_factors.get((row.item_code, row.uom))
+			# Template factors are relative to the template's Stock UOM.
+			if factor is None and item.stock_uom == template_uoms.get(item.variant_of):
+				factor = conversion_factors.get((item.variant_of, row.uom))
+			if flt(factor) <= 0:
+				frappe.throw(
+					_("Row {0}: UOM {1} must have a positive Conversion Factor in Item {2}.").format(
+						row.idx, frappe.bold(row.uom), frappe.bold(row.item_code)
+					)
+				)
 
 	def reset_conversion_factor(self):
 		for row in self.get("items"):

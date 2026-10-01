@@ -135,6 +135,7 @@ class ChildItemUpdater:
 	) -> None:
 		parent = self.parent
 		parent.reload()
+		parent.validate_item_uoms()
 		parent.flags.ignore_validate_update_after_submit = True
 		parent.set_qty_as_per_stock_uom()
 		parent.calculate_taxes_and_totals()
