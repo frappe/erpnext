@@ -110,6 +110,12 @@
 		margin-top: var(--margin-sm);
 	}
 
+	.co-loading .co-chart,
+	.co-loading .co-note {
+		opacity: 0.4;
+		transition: opacity 150ms ease-in-out;
+	}
+
 	.co-placeholder {
 		margin-top: var(--margin-md);
 	}

@@ -370,41 +370,84 @@ erpnext.CustomerOverview = class CustomerOverview {
 	destroy_trend() {
 		if (this.trend_chart) this.trend_chart.destroy();
 		this.trend_chart = null;
+		this.trend_target = null;
+		this.$trend_notes = null;
 	}
 
 	render_trend() {
+		this.$trend.toggle(!!this.accounts);
+		if (!this.accounts) {
+			this.destroy_trend();
+			this.$trend.empty();
+			return;
+		}
+
+		if (this.trend_chart && this.sales && this.sales.loading) {
+			this.$trend.addClass("co-loading").attr("aria-busy", "true");
+			return;
+		}
+		this.$trend.removeClass("co-loading").removeAttr("aria-busy");
+
+		const t = this.sales.data && this.sales.data.trend;
+		const data = t &&
+			t.points.some((p) => flt(p.value)) && {
+				labels: t.points.map((p) => p.label),
+				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
+			};
+
+		if (this.trend_chart && data) {
+			this.trend_target = data;
+			this.trend_chart.update(data);
+			this.trend_notes(t);
+			return;
+		}
+
 		this.destroy_trend();
-		this.$trend.empty().toggle(!!this.accounts);
-		if (!this.accounts) return;
+		this.$trend.empty();
 		const $panel = this.panel(this.$trend, {
 			title: __("Monthly Sales Trend"),
 			subtitle: __("Monthly, net of returns"),
 			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
 		});
-		const t = this.sales.data && this.sales.data.trend;
 		if (this.show_state($panel, this.sales, 220, __("Could not load sales"), "trend")) return;
-		if (!t || !t.points.some((p) => flt(p.value))) {
+		if (!data) {
 			this.empty_note($panel, __("No sales in this period"), 220);
 			return;
 		}
 
-		this.trend_chart = new frappe.Chart($('<div class="co-chart">').appendTo($panel)[0], {
+		this.trend_target = data;
+		this.trend_chart = this.draw_trend($('<div class="co-chart">').appendTo($panel)[0], data);
+		this.$trend_notes = $('<div class="co-note">').appendTo($panel);
+		this.trend_notes(t);
+	}
+
+	draw_trend(el, data) {
+		const chart = new frappe.Chart(el, {
 			type: "line",
 			height: 220,
 			colors: [getComputedStyle(document.documentElement).getPropertyValue("--blue-600").trim()],
 			data: {
-				labels: t.points.map((p) => p.label),
-				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
+				labels: data.labels,
+				datasets: data.datasets.map((d) => ({ name: d.name, values: d.values.map(() => 0) })),
 			},
 			lineOptions: { regionFill: 1, hideDots: 1 },
 			axisOptions: { xIsSeries: 1, shortenYAxisNumbers: 1 },
 			tooltipOptions: { formatTooltipY: (v) => this.money(v) },
+			animate: 1,
+			disableEntryAnimation: 1,
 		});
+		requestAnimationFrame(() => {
+			if (this.trend_chart === chart) chart.update(this.trend_target);
+		});
+		return chart;
+	}
 
+	trend_notes(t) {
+		if (!this.$trend_notes) return;
 		const notes = [];
 		if (t.average) notes.push(__("Avg {0}", [this.money0(t.average)]));
 		if (t.has_mtd) notes.push(__("{0} is month to date", [t.points[t.points.length - 1].label]));
-		if (notes.length) $('<div class="co-note">').text(notes.join(" · ")).appendTo($panel);
+		this.$trend_notes.text(notes.join(" · ")).toggle(!!notes.length);
 	}
 
 	render_receivables() {
