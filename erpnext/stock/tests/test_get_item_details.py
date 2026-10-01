@@ -314,6 +314,29 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
+	def test_apply_price_list_without_company_and_conversion_rate(self):
+		"""When opening a transaction before Company is selected (e.g. New Quotation),
+		apply_price_list is called with price_list while company is None and plc_conversion_rate is unset.
+		It must not raise FrappeTypeError on get_exchange_rate and must return fallback plc_conversion_rate = 1.
+		"""
+		from frappe.utils import nowdate
+
+		from erpnext.stock.get_item_details import apply_price_list
+
+		ctx = frappe._dict(
+			doctype="Quotation",
+			price_list="_Test Price List",
+			company=None,
+			plc_conversion_rate="",
+			transaction_date=nowdate(),
+			items=[],
+		)
+
+		result = apply_price_list(ctx)
+		self.assertIn("parent", result)
+		self.assertEqual(result["parent"]["plc_conversion_rate"], 1)
+		self.assertTrue(result["parent"]["price_list_currency"])
+
 	def test_maintain_same_rate_keeps_source_discount_on_refetch(self):
 		"""A mapped source row with a discount has rate != price_list_rate. Re-fetch must
 		return the source's rate and discount, not just the pre-discount price, or the
