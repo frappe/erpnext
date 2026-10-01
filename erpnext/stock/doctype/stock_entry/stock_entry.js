@@ -434,6 +434,12 @@ frappe.ui.form.on("Stock Entry", {
 					__("Create")
 				);
 			}
+
+			if (["Manufacture", "Repack"].includes(frm.doc.purpose)) {
+				frm.add_custom_button(__("Map Raw Materials to Finished Goods"), () =>
+					frm.trigger("map_raw_materials_to_finished_goods")
+				);
+			}
 		}
 
 		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
@@ -635,6 +641,140 @@ frappe.ui.form.on("Stock Entry", {
 			frm.toggle_display("weight_per_piece", cint(r.batch_split));
 			frm.toggle_reqd("weight_per_piece", cint(r.batch_split));
 		});
+	},
+
+	async map_raw_materials_to_finished_goods(frm) {
+		const method = "erpnext.stock.doctype.stock_entry.services.serial_batch";
+		const { fg_field, fg_values, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
+			stock_entry: frm.doc.name,
+		});
+
+		if (!fg_values.length || !raw_materials.length) {
+			frappe.msgprint(
+				__(
+					"Mapping needs a serial / batch tracked finished good and serial / batch tracked raw materials."
+				)
+			);
+			return;
+		}
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Map Raw Materials to Finished Goods"),
+			size: "extra-large",
+			fields: [
+				{
+					fieldtype: "HTML",
+					options: `<p class="text-muted">${__(
+						"Pick the finished good serial / batch each raw material went into. The Serial No and Batch Traceability report uses this mapping."
+					)}</p>`,
+				},
+				{
+					fieldtype: "Table",
+					fieldname: "raw_materials",
+					label: __("Raw Materials"),
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: true,
+					data: raw_materials.map((row) => ({
+						...row,
+						entry: row.name,
+						qty: Math.abs(row.qty),
+						fg_value: row[fg_field],
+					})),
+					fields: [
+						{ fieldtype: "Data", fieldname: "entry", hidden: 1 },
+						{
+							fieldtype: "Link",
+							fieldname: "item_code",
+							options: "Item",
+							label: __("Item Code"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "serial_no",
+							options: "Serial No",
+							label: __("Serial No"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "batch_no",
+							options: "Batch",
+							label: __("Batch No"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Float",
+							fieldname: "qty",
+							label: __("Qty"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Select",
+							fieldname: "fg_value",
+							options: ["", ...fg_values].join("\n"),
+							label:
+								fg_field === "fg_serial_no"
+									? __("Finished Good Serial No")
+									: __("Finished Good Batch No"),
+							in_list_view: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Save"),
+			primary_action: async (values) => {
+				const mapping = {};
+				(values.raw_materials || []).forEach((row) => {
+					mapping[row.entry] = row.fg_value || "";
+				});
+
+				await frappe.xcall(`${method}.set_fg_mapping`, {
+					stock_entry: frm.doc.name,
+					mapping: mapping,
+				});
+
+				dialog.hide();
+				frappe.show_alert({ message: __("Mapping saved"), indicator: "green" });
+			},
+			secondary_action_label: __("Auto Assign"),
+			secondary_action: () => {
+				const grid = dialog.fields_dict.raw_materials.grid;
+
+				// a single finished good serial / batch takes every raw material
+				if (fg_values.length === 1) {
+					grid.df.data.forEach((row) => (row.fg_value = fg_values[0]));
+					grid.refresh();
+					return;
+				}
+
+				const rows_by_item = {};
+				grid.df.data.forEach((row) => {
+					if (row.serial_no) {
+						(rows_by_item[row.item_code] ||= []).push(row);
+					}
+				});
+
+				// split each item's serial nos evenly across the finished goods, in order
+				Object.values(rows_by_item).forEach((rows) => {
+					if (rows.length % fg_values.length) return;
+
+					const per_fg = rows.length / fg_values.length;
+					rows.forEach((row, idx) => {
+						row.fg_value = fg_values[Math.floor(idx / per_fg)];
+					});
+				});
+
+				grid.refresh();
+			},
+		});
+
+		dialog.show();
 	},
 
 	toggle_warehouse_fields(frm) {

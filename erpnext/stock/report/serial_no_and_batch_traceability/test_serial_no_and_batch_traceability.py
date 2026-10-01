@@ -4,6 +4,11 @@
 import frappe
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.services.serial_batch import (
+	get_fg_mapping,
+	set_fg_mapping,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.serial_no_and_batch_traceability.serial_no_and_batch_traceability import (
 	execute,
@@ -103,3 +108,154 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		self.assertEqual(forward_row["direction"], "Forward")
 		self.assertEqual(forward_row["customer"], delivery_note.customer)
 		self.assertLess(forward_row["qty"], 0)
+
+	def make_repack_with_serialized_items(self, fg_properties=None):
+		rm_item = make_item(
+			"_Test Traceability RM Serial Item",
+			{"has_serial_no": 1, "serial_no_series": "TRC-RM-.#####", "is_stock_item": 1},
+		).name
+
+		fg_item_code = "_Test Traceability FG Serial Item"
+		if fg_properties:
+			fg_item_code = "_Test Traceability FG Batch Item"
+
+		fg_item = make_item(
+			fg_item_code,
+			fg_properties or {"has_serial_no": 1, "serial_no_series": "TRC-FG-.#####", "is_stock_item": 1},
+		).name
+
+		make_stock_entry(
+			item_code=rm_item, to_warehouse="Stores - _TC", qty=3, rate=100, company="_Test Company"
+		)
+
+		repack = make_stock_entry(
+			item_code=rm_item,
+			from_warehouse="Stores - _TC",
+			qty=3,
+			purpose="Repack",
+			company="_Test Company",
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"qty": 3,
+				"t_warehouse": "Finished Goods - _TC",
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+			},
+		)
+		repack.save()
+		repack.submit()
+
+		mapping = get_fg_mapping(repack.name)
+		return repack, fg_item, mapping["fg_values"], mapping["raw_materials"]
+
+	def get_rm_serials_by_fg_serial(self, fg_item, fg_serial_nos):
+		rows = self.run_report(item_code=fg_item, serial_nos=fg_serial_nos, traceability_direction="Backward")
+
+		rm_serials_by_fg = {}
+		current_fg = None
+		for row in rows:
+			if row.get("indent") == 0:
+				current_fg = row.get("serial_no")
+				rm_serials_by_fg.setdefault(current_fg, set())
+			elif row.get("indent") == 1 and row.get("serial_no"):
+				rm_serials_by_fg[current_fg].add(row["serial_no"])
+
+		return rm_serials_by_fg
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_unmapped_fg_serial_shows_all_raw_material_serials(self):
+		"""Without a mapping every FG serial traces back to the full pool of RM serials."""
+		_repack, fg_item, fg_serial_nos, raw_materials = self.make_repack_with_serialized_items()
+		rm_serial_nos = {row.serial_no for row in raw_materials}
+
+		self.assertEqual(len(fg_serial_nos), 3)
+		self.assertEqual(len(rm_serial_nos), 3)
+
+		rm_serials_by_fg = self.get_rm_serials_by_fg_serial(fg_item, fg_serial_nos)
+		for fg_serial_no in fg_serial_nos:
+			self.assertEqual(rm_serials_by_fg[fg_serial_no], rm_serial_nos)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_mapped_fg_serial_shows_only_its_raw_material_serial(self):
+		"""With a mapping each FG serial traces back to only its own RM serial, both directions."""
+		repack, fg_item, fg_serial_nos, raw_materials = self.make_repack_with_serialized_items()
+
+		expected = dict(zip(fg_serial_nos, [row.serial_no for row in raw_materials], strict=True))
+		set_fg_mapping(
+			repack.name,
+			{row.name: fg_serial_no for row, fg_serial_no in zip(raw_materials, fg_serial_nos, strict=True)},
+		)
+
+		rm_serials_by_fg = self.get_rm_serials_by_fg_serial(fg_item, fg_serial_nos)
+		for fg_serial_no, rm_serial_no in expected.items():
+			self.assertEqual(rm_serials_by_fg[fg_serial_no], {rm_serial_no})
+
+		fg_serial_no, rm_serial_no = next(iter(expected.items()))
+		rows = self.run_report(
+			item_code=raw_materials[0].item_code,
+			serial_nos=[rm_serial_no],
+			traceability_direction="Forward",
+		)
+		fg_rows = [row for row in rows if row.get("item_code") == fg_item]
+		self.assertEqual([row["serial_no"] for row in fg_rows], [fg_serial_no])
+		self.assertEqual(fg_rows[0]["qty"], 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_fg_serial_mapping_validations(self):
+		repack, _fg_item, _fg_serial_nos, raw_materials = self.make_repack_with_serialized_items()
+
+		self.assertRaises(
+			frappe.ValidationError,
+			set_fg_mapping,
+			repack.name,
+			{raw_materials[0].name: raw_materials[1].serial_no},
+		)
+		self.assertRaises(frappe.ValidationError, set_fg_mapping, repack.name, {"not-a-row": ""})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_mapped_fg_batch_shows_its_raw_material_serials(self):
+		"""Raw materials mapped to a finished good batch trace to that batch, both directions."""
+		repack, fg_item, fg_batch_nos, raw_materials = self.make_repack_with_serialized_items(
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRC-FGB-.#####",
+				"is_stock_item": 1,
+			}
+		)
+		self.assertEqual(get_fg_mapping(repack.name)["fg_field"], "fg_batch_no")
+		self.assertEqual(len(fg_batch_nos), 1)
+
+		fg_batch_no = fg_batch_nos[0]
+		set_fg_mapping(repack.name, {row.name: fg_batch_no for row in raw_materials})
+		self.assertEqual(
+			{row.fg_batch_no for row in get_fg_mapping(repack.name)["raw_materials"]}, {fg_batch_no}
+		)
+
+		rows = self.run_report(item_code=fg_item, batches=[fg_batch_no], traceability_direction="Backward")
+		self.assertEqual(
+			{row["serial_no"] for row in rows if row.get("indent") == 1 and row.get("serial_no")},
+			{row.serial_no for row in raw_materials},
+		)
+
+		rows = self.run_report(
+			item_code=raw_materials[0].item_code,
+			serial_nos=[raw_materials[0].serial_no],
+			traceability_direction="Forward",
+		)
+		fg_rows = [row for row in rows if row.get("item_code") == fg_item]
+		self.assertEqual([row["batch_no"] for row in fg_rows], [fg_batch_no])
+		self.assertEqual(fg_rows[0]["qty"], 3)

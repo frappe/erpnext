@@ -193,10 +193,17 @@ class ReportData:
 
 		materials = self.get_materials(sabb_data)
 		for material in materials:
+			# raw material mapped to a different finished good serial / batch of the same entry
+			if material.fg_serial_no and material.fg_serial_no != sabb_data.serial_no:
+				continue
+
+			if material.fg_batch_no and material.fg_batch_no != sabb_data.batch_no:
+				continue
+
 			# Recursive: batch has sub-components
 			if material.serial_no or material.batch_no:
-				key = (material.item_code, material.reference_name, material.name)
 				value = material.serial_no or material.batch_no
+				key = (material.item_code, material.reference_name, material.name, value)
 
 				if key not in sabb_data.raw_materials:
 					details = self.get_serial_no_batches(value)
@@ -349,6 +356,8 @@ class ReportData:
 				sabb_entry.batch_no,
 				sabb_entry.serial_no,
 				sabb_entry.qty.as_("quantity"),
+				sabb_entry.fg_serial_no,
+				sabb_entry.fg_batch_no,
 			)
 			.where(
 				(stock_entry.docstatus == 1)
@@ -399,6 +408,8 @@ class ReportData:
 				SABB.item_name,
 				SABB.posting_datetime,
 				SABB.warehouse,
+				SABE.fg_serial_no,
+				SABE.fg_batch_no,
 			)
 			.where(
 				(SABB.is_cancelled == 0)
@@ -424,9 +435,24 @@ class ReportData:
 				return
 
 			key = (fg_item.item_code, row.reference_name)
+			if fg_value := row.fg_serial_no or row.fg_batch_no:
+				key = (fg_item.item_code, row.reference_name, fg_value)
 
 			if key not in batch_details:
 				serial_no, batch_no = self.get_serial_batch_no(fg_item.serial_and_batch_bundle)
+				if row.fg_serial_no:
+					serial_no, batch_no = row.fg_serial_no, None
+					fg_item.qty = 1
+				elif row.fg_batch_no:
+					serial_no, batch_no = None, row.fg_batch_no
+					fg_item.qty = sum(
+						frappe.get_all(
+							"Serial and Batch Entry",
+							filters={"parent": fg_item.serial_and_batch_bundle, "batch_no": row.fg_batch_no},
+							pluck="qty",
+						)
+					)
+
 				fg_item.update(
 					{
 						"work_order": ste.work_order,
