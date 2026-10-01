@@ -113,9 +113,10 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 	"""Stock Balance with the ordinary movements between two balance resets summed in DuckDB.
 
 	Resets and tiny negative amounts are replayed row by row with the live report's methods, which
-	also serve everything that is not the ledger. A segment's sum joins the running balance in one
-	addition instead of row by row, so a total that lands exactly on half of the last shown digit
-	can, rarely, round the other way from the live report.
+	also serve everything that is not the ledger. Each segment's sum joins the running balance in one
+	addition, while the live report adds row by row and accumulates float error. On large balances
+	with many movements the last shown digits can therefore differ, the snapshot being nearer the
+	exact total.
 	"""
 
 	def __init__(self, filters, conn, synced_at):
