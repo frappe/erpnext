@@ -92,14 +92,18 @@ def receivables_access():
 	return accounts_access() and frappe.get_cached_doc("Report", "Accounts Receivable Summary").is_permitted()
 
 
-def credit_position(customer, company):
+def _unrestricted_read(doctype):
 	from frappe.desk.reportview import build_match_conditions
 
+	readable = frappe.has_permission(doctype, "read")
+	return readable and not build_match_conditions(doctype)
+
+
+def credit_position(customer, company):
 	# The credit check needs whole-company exposure; a partial total would
 	# incorrectly advertise available credit to a restricted viewer.
 	unrestricted = all(
-		frappe.has_permission(doctype, "read") and not build_match_conditions(doctype)
-		for doctype in ("GL Entry", "Sales Order", "Delivery Note")
+		_unrestricted_read(doctype) for doctype in ("GL Entry", "Sales Order", "Delivery Note")
 	)
 	return {
 		"limit": flt(get_credit_limit(customer, company)),
@@ -424,47 +428,48 @@ def get_customer_transactions(customer: str, company: str, doc_type: str = "All"
 	return rows[:limit]
 
 
-TXN_SPECS = {
-	"Sales Invoice": {
-		"party_field": "customer",
-		"extra": {},
-		"fields": [
-			"name",
-			"posting_date as date",
-			"status",
-			"base_grand_total as amount",
-			"outstanding_amount as outstanding",
-			"party_account_currency",
-			"conversion_rate",
-			"is_return",
-		],
-		"order_by": "posting_date desc, creation desc",
-		"row": lambda r, currency: {
-			"status": "Return" if r.is_return else r.status,
-			"amount": flt(r.amount),
-			"outstanding": flt(r.outstanding)
-			* (1 if r.party_account_currency == currency else flt(r.conversion_rate)),
+def _txn_specs():
+	return {
+		"Sales Invoice": {
+			"party_field": "customer",
+			"extra": {},
+			"fields": [
+				"name",
+				"posting_date as date",
+				"status",
+				"base_grand_total as amount",
+				"outstanding_amount as outstanding",
+				"party_account_currency",
+				"conversion_rate",
+				"is_return",
+			],
+			"order_by": "posting_date desc, creation desc",
+			"row": lambda r, currency: {
+				"status": "Return" if r.is_return else r.status,
+				"amount": flt(r.amount),
+				"outstanding": flt(r.outstanding)
+				* (1 if r.party_account_currency == currency else flt(r.conversion_rate)),
+			},
 		},
-	},
-	"Sales Order": {
-		"party_field": "customer",
-		"extra": {},
-		"fields": ["name", "transaction_date as date", "status", "base_grand_total as amount"],
-		"order_by": "transaction_date desc, creation desc",
-		"row": lambda r, currency: {"status": r.status, "amount": flt(r.amount), "outstanding": None},
-	},
-	"Payment Entry": {
-		"party_field": "party",
-		"extra": {"party_type": "Customer"},
-		"fields": ["name", "posting_date as date", "base_paid_amount as amount"],
-		"order_by": "posting_date desc, creation desc",
-		"row": lambda r, currency: {"status": "Submitted", "amount": flt(r.amount), "outstanding": None},
-	},
-}
+		"Sales Order": {
+			"party_field": "customer",
+			"extra": {},
+			"fields": ["name", "transaction_date as date", "status", "base_grand_total as amount"],
+			"order_by": "transaction_date desc, creation desc",
+			"row": lambda r, currency: {"status": r.status, "amount": flt(r.amount), "outstanding": None},
+		},
+		"Payment Entry": {
+			"party_field": "party",
+			"extra": {"party_type": "Customer"},
+			"fields": ["name", "posting_date as date", "base_paid_amount as amount"],
+			"order_by": "posting_date desc, creation desc",
+			"row": lambda r, currency: {"status": "Submitted", "amount": flt(r.amount), "outstanding": None},
+		},
+	}
 
 
 def _fetch_rows(doctype, customer, company, limit):
-	spec = TXN_SPECS[doctype]
+	spec = _txn_specs()[doctype]
 	filters = {"docstatus": 1, "company": company, spec["party_field"]: customer, **spec["extra"]}
 	currency = frappe.get_cached_value("Company", company, "default_currency")
 	rows = []
