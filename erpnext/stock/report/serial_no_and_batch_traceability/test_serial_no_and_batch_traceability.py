@@ -46,9 +46,27 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			],
 		)
 
-	def make_repack(self, from_item, to_item):
+	def test_backward_trace_of_serial_no_moved_at_same_posting_time(self):
+		"""Entries with the same posting time follow the ledger order."""
+		same_time = {"posting_date": self.receipt.posting_date, "posting_time": self.receipt.posting_time}
+		first_repack = self.make_repack(self.raw_item, self.fg_item, **same_time)
+		second_repack = self.make_repack(self.fg_item, self.raw_item, **same_time)
+		third_repack = self.make_repack(self.raw_item, self.fg_item, **same_time)
+
+		self.assertEqual(
+			self.get_backward_trace(),
+			[
+				(self.fg_item, third_repack.name, 0),
+				(self.raw_item, second_repack.name, 1),
+				(self.fg_item, first_repack.name, 2),
+				(self.raw_item, self.receipt.name, 3),
+			],
+		)
+
+	def make_repack(self, from_item, to_item, **kwargs):
 		"""Repack the serial no from one item to another, in the same warehouse."""
 		repack = make_stock_entry(
+			**kwargs,
 			item_code=from_item,
 			source="_Test Warehouse - _TC",
 			qty=1,

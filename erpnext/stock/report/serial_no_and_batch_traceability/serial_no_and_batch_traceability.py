@@ -159,6 +159,7 @@ class ReportData:
 				sabb_entry.qty,
 				sabb_entry.warehouse,
 				sabb_entry.posting_datetime,
+				sabb.creation,
 			)
 			.where(
 				(sabb.voucher_type == row.reference_doctype)
@@ -229,12 +230,8 @@ class ReportData:
 		"""
 		moves = self.get_moves_to_item(row.serial_no, item_code)
 		if consumed_in:
-			moves = [
-				move
-				for move in moves
-				if move.posting_datetime <= consumed_in.posting_datetime
-				and move.reference_name != consumed_in.reference_name
-			]
+			consumed_at = (consumed_in.posting_datetime, consumed_in.creation)
+			moves = [move for move in moves if (move.posting_datetime, move.creation) < consumed_at]
 
 		if moves:
 			latest_move = moves[-1]
@@ -407,6 +404,7 @@ class ReportData:
 				SABB.item_code,
 				SABB.item_name,
 				SABB.posting_datetime,
+				SABB.creation,
 				SABB.warehouse,
 			)
 			.where(
@@ -415,6 +413,7 @@ class ReportData:
 				& (SABB.type_of_transaction == type_of_transaction)
 			)
 			.orderby(SABB.posting_datetime)
+			.orderby(SABB.creation)
 		)
 
 		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
