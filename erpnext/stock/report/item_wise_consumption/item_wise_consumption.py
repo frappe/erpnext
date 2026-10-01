@@ -89,7 +89,13 @@ def get_consumed_details(filters):
 			sle.voucher_no,
 			sle.voucher_type,
 		)
-		.where((sle.is_cancelled == 0) & (sle.item_code == item.name) & (sle.actual_qty < 0))
+		# the stock an Adjustment Entry counts out comes back in, it is not consumed
+		.where(
+			(sle.is_cancelled == 0)
+			& (sle.item_code == item.name)
+			& (sle.actual_qty < 0)
+			& (sle.is_adjustment_entry == 0)
+		)
 	)
 
 	if filters.get("from_date") and filters.get("to_date"):
