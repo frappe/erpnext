@@ -393,10 +393,13 @@ class TestChequeBook(ERPNextTestSuite):
 		)
 
 	def test_cheque_book_is_required_when_account_has_books(self):
-		pe = create_payment_entry(paid_from=BANK_LEDGER)
-		pe.mode_of_payment = "Cheque"
-		pe.reference_no = "ANY"
-		self.assertRaises(frappe.ValidationError, pe.save)
+		for status in ("Submitted", "Finished", "Disabled"):
+			with self.subTest(status=status):
+				self.book.db_set("status", status)
+				pe = create_payment_entry(paid_from=BANK_LEDGER)
+				pe.mode_of_payment = "Cheque"
+				pe.reference_no = "ANY"
+				self.assertRaises(frappe.ValidationError, pe.save)
 
 	def test_non_cheque_payments_are_not_checked(self):
 		pe = create_payment_entry(paid_from=BANK_LEDGER)
