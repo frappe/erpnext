@@ -36,6 +36,7 @@ from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
 	SerialNoValuation,
 	get_batches_from_bundle,
+	get_consumed_serial_no_items,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -228,9 +229,16 @@ class SerialandBatchBundle(Document):
 			filters={"serial_no": ("in", serial_nos), "docstatus": 1, "qty": ("<", 0)},
 			fields=["serial_no", "parent"],
 		)
+		reused_serial_nos = self.get_reused_serial_nos(serial_nos)
 
 		note = "<br><br> <b>Note</b>:<br>"
 		for row in data:
+			if (
+				row.serial_no in reused_serial_nos
+				and frappe.db.get_value("Serial and Batch Bundle", row.parent, "voucher_no")
+				== self.voucher_no
+			):
+				continue
 			frappe.throw(
 				_(
 					"You cannot process the serial number {0} as it has already been used in the SABB {1}. {2} If you want to inward the same serial number multiple times, then enable 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
@@ -1401,14 +1409,39 @@ class SerialandBatchBundle(Document):
 		incorrect_serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"name": ("in", serial_nos), "item_code": ("!=", self.item_code)},
-			pluck="serial_no",
+			fields=["name", "serial_no"],
 		)
+		reused_serial_nos = self.get_reused_serial_nos(serial_nos)
+		incorrect_serial_nos = [
+			row.serial_no for row in incorrect_serial_nos if row.name not in reused_serial_nos
+		]
 
 		if incorrect_serial_nos:
 			incorrect_serial_nos = escape_html(", ".join(incorrect_serial_nos))
 			self.throw_error_message(
 				f"Serial Nos {bold(incorrect_serial_nos)} does not belong to Item {bold(self.item_code)}"
 			)
+
+	def get_reused_serial_nos(self, serial_nos):
+		if self.voucher_type != "Stock Entry" or self.type_of_transaction != "Inward" or not self.voucher_no:
+			return set()
+
+		if frappe.get_cached_value("Stock Entry", self.voucher_no, "purpose") not in (
+			"Manufacture",
+			"Repack",
+		):
+			return set()
+
+		stock_entry = frappe.get_cached_doc("Stock Entry", self.voucher_no)
+		if not any(
+			row.is_finished_item
+			and row.item_code == self.item_code
+			and (not self.voucher_detail_no or row.name == self.voucher_detail_no)
+			for row in stock_entry.items
+		):
+			return set()
+
+		return set(serial_nos) & get_consumed_serial_no_items(stock_entry).keys()
 
 	def validate_incorrect_batch_nos(self, batch_nos):
 		incorrect_batch_nos = frappe.get_all(

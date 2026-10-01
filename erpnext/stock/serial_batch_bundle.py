@@ -539,6 +539,17 @@ class SerialBatchBundle:
 			.set(sn_table.customer, customer)
 			.where(sn_table.name.isin(serial_nos))
 		)
+		if (
+			sle.voucher_type == "Stock Entry"
+			and sle.actual_qty > 0
+			and frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose") in ("Manufacture", "Repack")
+		):
+			if (
+				sle.is_cancelled
+				or set(serial_nos)
+				& get_consumed_serial_no_items(frappe.get_cached_doc("Stock Entry", sle.voucher_no)).keys()
+			):
+				query = query.set(sn_table.item_code, sle.item_code)
 
 		if status == "Delivered":
 			warranty_period = frappe.get_cached_value("Item", sle.item_code, "warranty_period")
@@ -619,6 +630,26 @@ def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 	serial_nos = frappe.get_all("Serial and Batch Entry", filters=filters, order_by="idx", pluck="serial_no")
 
 	return serial_nos
+
+
+def get_consumed_serial_no_items(stock_entry):
+	"""Map serial numbers consumed by a Stock Entry to their source items."""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as parse_serial_nos
+
+	source_items = {}
+	for row in stock_entry.items:
+		if not row.s_warehouse:
+			continue
+
+		serial_nos = get_serial_nos(row.serial_and_batch_bundle)
+		if not serial_nos and row.serial_no:
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.item_code, parse_serial_nos(row.serial_no), ignore_permissions=True
+			)
+
+		source_items.update({serial_no: row.item_code for serial_no in serial_nos})
+
+	return source_items
 
 
 def get_batches_from_bundle(serial_and_batch_bundle, batches=None):

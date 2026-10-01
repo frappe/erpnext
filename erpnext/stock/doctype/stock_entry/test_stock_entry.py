@@ -3707,6 +3707,137 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(se.purpose, "Repack")
 		self.assertRaises(frappe.ValidationError, se.submit)
 
+	def test_retain_consumed_serial_no_on_manufacture_and_repack(self):
+		warehouse = "_Test Warehouse - _TC"
+		for purpose in ("Manufacture", "Repack"):
+			with self.subTest(purpose=purpose):
+				suffix = frappe.generate_hash(length=8)
+				raw = make_item(f"Notebook-{suffix}", {"is_stock_item": 1, "has_serial_no": 1})
+				case = make_item(f"Case-{suffix}", {"is_stock_item": 1})
+				finished = make_item(f"Notebook-with-Case-{suffix}", {"is_stock_item": 1, "has_serial_no": 1})
+				serial_no = f"SN-{suffix}"
+				make_stock_entry(
+					item_code=raw.name,
+					target=warehouse,
+					qty=1,
+					basic_rate=100,
+					serial_no=serial_no,
+					use_serial_batch_fields=1,
+				)
+				serial_name = frappe.db.get_value(
+					"Serial No", {"serial_no": serial_no, "item_code": raw.name}, "name"
+				)
+				make_stock_entry(item_code=case.name, target=warehouse, qty=1, basic_rate=10)
+
+				entry = frappe.new_doc("Stock Entry")
+				entry.company = "_Test Company"
+				entry.purpose = purpose
+				entry.set_stock_entry_type()
+				if purpose == "Manufacture":
+					entry.fg_completed_qty = 1
+				source_serial = {"serial_no": serial_no, "use_serial_batch_fields": 1}
+				if purpose == "Manufacture":
+					source_bundle = make_serial_batch_bundle(
+						frappe._dict(
+							item_code=raw.name,
+							warehouse=warehouse,
+							qty=-1,
+							voucher_type="Stock Entry",
+							serial_nos=[serial_name],
+							do_not_submit=True,
+						)
+					)
+					source_serial = {"serial_and_batch_bundle": source_bundle.name}
+				entry.append(
+					"items",
+					stock_entry_row(raw.name, 1, s_warehouse=warehouse, **source_serial),
+				)
+				entry.append("items", stock_entry_row(case.name, 1, s_warehouse=warehouse))
+				entry.append(
+					"items",
+					stock_entry_row(
+						finished.name,
+						1,
+						t_warehouse=warehouse,
+						is_finished_item=1,
+						**(
+							{"serial_no": serial_no, "use_serial_batch_fields": 1}
+							if purpose == "Repack"
+							else {}
+						),
+					),
+				)
+				entry.insert()
+				if purpose == "Manufacture":
+					finished_bundle = make_serial_batch_bundle(
+						frappe._dict(
+							item_code=finished.name,
+							warehouse=warehouse,
+							qty=1,
+							voucher_type="Stock Entry",
+							voucher_no=entry.name,
+							serial_nos=[serial_name],
+							do_not_submit=True,
+						)
+					)
+					entry.items[-1].serial_and_batch_bundle = finished_bundle.name
+					entry.save()
+				entry.submit()
+				self.assertEqual(
+					frappe.db.get_value("Serial No", serial_name, ["item_code", "warehouse"]),
+					(finished.name, warehouse),
+				)
+				self.assertEqual(frappe.db.count("Serial No", {"serial_no": serial_no}), 1)
+
+				entry.reload()
+				frappe.clear_document_cache("Stock Entry", entry.name)
+				entry.cancel()
+				self.assertEqual(
+					frappe.db.get_value("Serial No", serial_name, ["item_code", "warehouse"]),
+					(raw.name, warehouse),
+				)
+
+				if purpose == "Repack":
+					other_serial = f"OTHER-{suffix}"
+					make_stock_entry(
+						item_code=raw.name,
+						target=warehouse,
+						qty=1,
+						basic_rate=100,
+						serial_no=other_serial,
+						use_serial_batch_fields=1,
+					)
+					bad_entry = frappe.new_doc("Stock Entry")
+					bad_entry.company = "_Test Company"
+					bad_entry.purpose = "Repack"
+					bad_entry.set_stock_entry_type()
+					bad_entry.append(
+						"items",
+						stock_entry_row(
+							raw.name,
+							1,
+							s_warehouse=warehouse,
+							serial_no=serial_no,
+							use_serial_batch_fields=1,
+						),
+					)
+					bad_entry.append(
+						"items",
+						stock_entry_row(
+							finished.name,
+							1,
+							t_warehouse=warehouse,
+							is_finished_item=1,
+							serial_no=other_serial,
+							use_serial_batch_fields=1,
+						),
+					)
+					bad_entry.insert()
+					self.assertRaises(frappe.ValidationError, bad_entry.submit)
+					self.assertFalse(
+						frappe.db.exists("Serial No", {"item_code": finished.name, "serial_no": other_serial})
+					)
+
 	def test_transferred_qty_in_material_transfer(self):
 		item_code = "_Test Item"
 		source_warehouse = "_Test Warehouse - _TC"

@@ -25,6 +25,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_bundle import get_consumed_serial_no_items
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -474,13 +475,62 @@ class SerialBatchBundleService:
 
 		resolved_details = bundle_details.copy()
 		if bundle_details.get("serial_nos"):
-			resolved_details["serial_nos"] = SerialBatchIdentity("Serial No").resolve(
-				bundle_details["item_code"],
-				bundle_details["serial_nos"],
-				create=bundle_details.get("type_of_transaction") == "Inward",
-				defaults={"company": self.doc.company, "batch_no": bundle_details.get("batch_no")},
-				ignore_permissions=self.doc.flags.ignore_permissions,
+			consumed = {}
+			is_transfer = (
+				self.doc.doctype == "Stock Entry"
+				and self.doc.purpose in ("Manufacture", "Repack")
+				and row.is_finished_item
+				and bundle_details.get("type_of_transaction") == "Inward"
 			)
+			if is_transfer:
+				source_items = get_consumed_serial_no_items(self.doc)
+				for serial in frappe.get_all(
+					"Serial No",
+					filters={"name": ("in", list(source_items))},
+					fields=["name", "serial_no"],
+				):
+					key = serial.serial_no.casefold()
+					if key in consumed:
+						frappe.throw(
+							_("Serial No {0} is consumed by multiple raw materials").format(serial.serial_no)
+						)
+					consumed[key] = serial.name
+
+			unmatched = [
+				number for number in bundle_details["serial_nos"] if number.casefold() not in consumed
+			]
+			if is_transfer:
+				identity = SerialBatchIdentity("Serial No")
+				for serial in identity.get_records(
+					bundle_details["item_code"],
+					bundle_details["serial_nos"],
+					["serial_no"],
+				):
+					if serial.serial_no.casefold() in consumed:
+						frappe.throw(
+							_("Serial No {0} already exists for Item {1}").format(
+								escape_html(serial.serial_no), escape_html(bundle_details["item_code"])
+							)
+						)
+				for serial in identity.get_records(None, unmatched, ["serial_no", "item_code"]):
+					if serial.item_code != bundle_details["item_code"]:
+						frappe.throw(
+							_("Serial No {0} does not belong to Item {1}").format(
+								escape_html(serial.serial_no), escape_html(bundle_details["item_code"])
+							)
+						)
+			resolved = iter(
+				SerialBatchIdentity("Serial No").resolve(
+					bundle_details["item_code"],
+					unmatched,
+					create=bundle_details.get("type_of_transaction") == "Inward",
+					defaults={"company": self.doc.company, "batch_no": bundle_details.get("batch_no")},
+					ignore_permissions=self.doc.flags.ignore_permissions,
+				)
+			)
+			resolved_details["serial_nos"] = [
+				consumed.get(number.casefold()) or next(resolved) for number in bundle_details["serial_nos"]
+			]
 		sn_doc = SerialBatchCreation(resolved_details).make_serial_and_batch_bundle()
 
 		field = "serial_and_batch_bundle"
