@@ -648,7 +648,17 @@ frappe.ui.form.on("Stock Entry", {
 		const { fg_values: fg_rows, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
 			stock_entry: frm.doc.name,
 		});
-		const fg_values = fg_rows.map((row) => row.value);
+		// label each finished good serial / batch; a serial no and a batch no can share a name
+		const type_label = (fg_field) => (fg_field === "fg_serial_no" ? __("Serial No") : __("Batch No"));
+		const is_shared = (value) => fg_rows.filter((row) => row.value === value).length > 1;
+		const get_label = (fg_field, value) =>
+			is_shared(value) ? `${value} (${type_label(fg_field)})` : value;
+
+		const targets = {};
+		fg_rows.forEach((row) => {
+			targets[get_label(row.fg_field, row.value)] = { fg_field: row.fg_field, value: row.value };
+		});
+		const fg_values = Object.keys(targets);
 
 		if (!fg_values.length || !raw_materials.length) {
 			frappe.msgprint(
@@ -680,7 +690,11 @@ frappe.ui.form.on("Stock Entry", {
 						...row,
 						entry: row.name,
 						qty: Math.abs(row.qty),
-						fg_value: row.fg_serial_no || row.fg_batch_no,
+						fg_value: row.fg_serial_no
+							? get_label("fg_serial_no", row.fg_serial_no)
+							: row.fg_batch_no
+							? get_label("fg_batch_no", row.fg_batch_no)
+							: "",
 					})),
 					fields: [
 						{ fieldtype: "Data", fieldname: "entry", hidden: 1 },
@@ -729,7 +743,7 @@ frappe.ui.form.on("Stock Entry", {
 			primary_action: async (values) => {
 				const mapping = {};
 				(values.raw_materials || []).forEach((row) => {
-					mapping[row.entry] = row.fg_value || "";
+					mapping[row.entry] = targets[row.fg_value] || null;
 				});
 
 				await frappe.xcall(`${method}.set_fg_mapping`, {
