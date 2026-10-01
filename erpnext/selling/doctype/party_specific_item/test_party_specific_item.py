@@ -124,6 +124,42 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		)
 		self.assertIn(item, flatten(items))
 
+	def test_rules_on_different_bases_share_an_item(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = create_item("_Test Party Specific Brand Item").name
+		frappe.db.set_value("Item", item, "brand", "_Test Brand")
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Brand",
+			based_on_value="_Test Brand",
+		)
+		create_party_specific_item(
+			party_type="Customer", party="_Test Customer 1", restrict_based_on="Item", based_on_value=item
+		)
+
+		for customer, allowed in (
+			("_Test Customer", True),
+			("_Test Customer 1", True),
+			("_Test Customer 2", False),
+		):
+			with self.subTest(customer=customer):
+				items = item_query(
+					doctype="Item",
+					txt=item,
+					searchfield="name",
+					start=0,
+					page_len=20,
+					filters={"customer": customer},
+					as_dict=False,
+				)
+				self.assertEqual(item in flatten(items), allowed)
+
+		make_sales_order(customer="_Test Customer 1", item_code=item, do_not_submit=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+			make_sales_order(customer="_Test Customer 2", item_code=item, do_not_submit=True)
+
 	def test_customer_change_revalidates_items_on_save_and_submit(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
