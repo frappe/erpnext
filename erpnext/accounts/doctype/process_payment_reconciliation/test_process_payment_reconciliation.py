@@ -58,16 +58,16 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(pr.company, COMPANY)
 		self.assertEqual(pr.party, "_Test Customer")
 		self.assertEqual(pr.receivable_payable_account, "Debtors - _TC")
-		self.assertEqual(str(pr.from_invoice_date), "2026-01-01")
+		# old invoice date fields still feed the new single date range
+		self.assertEqual(str(pr.from_date), "2026-01-01")
+		self.assertEqual(str(pr.to_date), "2026-06-30")
 		# the tool run is capped so a single process can't fetch unbounded rows
-		self.assertEqual(pr.invoice_limit, 1000)
-		self.assertEqual(pr.payment_limit, 1000)
+		self.assertEqual(pr.fetch_limit, 1000)
 
-	def test_get_pr_instance_copies_bank_cash_and_cost_center(self):
-		doc = self.make_ppr(bank_cash_account="Cash - _TC")
+	def test_get_pr_instance_copies_cost_center(self):
+		doc = self.make_ppr()
 		doc.cost_center = "_Test Cost Center - _TC"
 		doc.insert()
 
 		pr = get_pr_instance(doc.name)
-		self.assertEqual(pr.bank_cash_account, "Cash - _TC")
 		self.assertEqual(pr.cost_center, "_Test Cost Center - _TC")

@@ -522,14 +522,14 @@ def reconcile_against_document(
 	# To optimize making GL Entry for PE or JV with multiple references
 	reconciled_entries = {}
 	for row in args:
-		if not reconciled_entries.get((row.voucher_type, row.voucher_no)):
-			reconciled_entries[(row.voucher_type, row.voucher_no)] = []
+		if not reconciled_entries.get((row.writable_voucher_type, row.writable_voucher_no)):
+			reconciled_entries[(row.writable_voucher_type, row.writable_voucher_no)] = []
 
-		reconciled_entries[(row.voucher_type, row.voucher_no)].append(row)
+		reconciled_entries[(row.writable_voucher_type, row.writable_voucher_no)].append(row)
 	for key, entries in reconciled_entries.items():
-		voucher_type, voucher_no = key
+		writable_voucher_type, writable_voucher_no = key
 
-		doc = frappe.get_doc(voucher_type, voucher_no)
+		doc = frappe.get_doc(writable_voucher_type, writable_voucher_no)
 		frappe.flags.ignore_party_validation = True
 
 		reposting_rows = []
@@ -539,7 +539,7 @@ def reconcile_against_document(
 
 			dimensions_dict = _build_dimensions_dict_for_exc_gain_loss(entry, active_dimensions)
 
-			if voucher_type == "Journal Entry":
+			if writable_voucher_type == "Journal Entry":
 				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
 				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
 				# amount and account in args
@@ -561,12 +561,12 @@ def reconcile_against_document(
 
 		doc.save(ignore_permissions=True)
 
-		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
+		if writable_voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			for row in reposting_rows:
 				doc.make_advance_gl_entries(entry=row)
 		else:
-			_delete_pl_entries(voucher_type, voucher_no)
-			_delete_adv_pl_entries(voucher_type, voucher_no)
+			_delete_pl_entries(writable_voucher_type, writable_voucher_no)
+			_delete_adv_pl_entries(writable_voucher_type, writable_voucher_no)
 			gl_map = doc.build_gl_map()
 			# Make sure there is no overallocation
 			from erpnext.accounts.general_ledger import process_debit_credit_difference
@@ -577,8 +577,8 @@ def reconcile_against_document(
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
 			update_voucher_outstanding(
-				entry.against_voucher_type,
-				entry.against_voucher,
+				entry.non_writable_voucher_type,
+				entry.non_writable_voucher_no,
 				entry.account,
 				entry.party_type,
 				entry.party,
@@ -596,7 +596,7 @@ def check_if_advance_entry_modified(args):
 		args.update({"unreconciled_amount": args.get("unadjusted_amount")})
 
 	ret = None
-	if args.voucher_type == "Journal Entry":
+	if args.writable_voucher_type == "Journal Entry":
 		journal_entry = frappe.qb.DocType("Journal Entry")
 		journal_acc = frappe.qb.DocType("Journal Entry Account")
 
@@ -613,8 +613,8 @@ def check_if_advance_entry_modified(args):
 					(journal_acc.reference_type.isnull())
 					| (journal_acc.reference_type.isin(["", "Sales Order", "Purchase Order"]))
 				)
-				& (journal_entry.name == args.get("voucher_no"))
-				& (journal_acc.name == args.get("voucher_detail_no"))
+				& (journal_entry.name == args.get("writable_voucher_no"))
+				& (journal_acc.name == args.get("writable_voucher_detail_no"))
 				& (journal_entry.docstatus == 1)
 			)
 		)
@@ -628,17 +628,17 @@ def check_if_advance_entry_modified(args):
 		q = (
 			frappe.qb.from_(payment_entry)
 			.select(payment_entry.name)
-			.where(payment_entry.name == args.get("voucher_no"))
+			.where(payment_entry.name == args.get("writable_voucher_no"))
 			.where(payment_entry.docstatus == 1)
 			.where(payment_entry.party_type == args.get("party_type"))
 			.where(payment_entry.party == args.get("party"))
 		)
 
-		if args.voucher_detail_no:
+		if args.writable_voucher_detail_no:
 			q = (
 				q.inner_join(payment_ref)
 				.on(payment_entry.name == payment_ref.parent)
-				.where(payment_ref.name == args.get("voucher_detail_no"))
+				.where(payment_ref.name == args.get("writable_voucher_detail_no"))
 				.where(
 					payment_ref.reference_doctype.isin(
 						("", "Sales Order", "Purchase Order", "Employee Advance")
@@ -670,7 +670,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	"""
 	Updates against document, if partial amount splits into rows
 	"""
-	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
+	jv_detail = journal_entry.get("accounts", {"name": d["writable_voucher_detail_no"]})[0]
 
 	rev_dr_or_cr = (
 		"debit_in_account_currency"
@@ -680,14 +680,12 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	if jv_detail.get(rev_dr_or_cr):
 		d["dr_or_cr"] = rev_dr_or_cr
 		d["allocated_amount"] = d["allocated_amount"] * -1
-		d["unadjusted_amount"] = d["unadjusted_amount"] * -1
 
 	insert_position = -1
-	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
-		# adjust the unreconciled balance
-		amount_in_account_currency = flt(d["unadjusted_amount"]) - flt(d["allocated_amount"])
-		amount_in_company_currency = amount_in_account_currency * flt(jv_detail.exchange_rate)
-		jv_detail.set(d["dr_or_cr"], amount_in_account_currency)
+	remaining_amount = flt(jv_detail.get(d["dr_or_cr"])) - flt(d["allocated_amount"])
+	if remaining_amount != 0:
+		amount_in_company_currency = remaining_amount * flt(jv_detail.exchange_rate)
+		jv_detail.set(d["dr_or_cr"], remaining_amount)
 		jv_detail.set(
 			"debit" if d["dr_or_cr"] == "debit_in_account_currency" else "credit",
 			amount_in_company_currency,
@@ -719,8 +717,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	)
 	new_row.set("credit" if d["dr_or_cr"] == "debit_in_account_currency" else "debit", 0)
 
-	new_row.set("reference_type", d["against_voucher_type"])
-	new_row.set("reference_name", d["against_voucher"])
+	new_row.set("reference_type", d["non_writable_voucher_type"])
+	new_row.set("reference_name", d["non_writable_voucher_no"])
 
 	new_row.against_account = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
@@ -744,8 +742,8 @@ def update_reference_in_payment_entry(
 	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False, dimensions_dict=None
 ):
 	reference_details = {
-		"reference_doctype": d.against_voucher_type,
-		"reference_name": d.against_voucher,
+		"reference_doctype": d.non_writable_voucher_type,
+		"reference_name": d.non_writable_voucher_no,
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
@@ -762,12 +760,15 @@ def update_reference_in_payment_entry(
 	# Update Reconciliation effect date in reference
 	if payment_entry.book_advance_payments_in_separate_party_account:
 		reconcile_on = get_reconciliation_effect_date(
-			d.against_voucher_type, d.against_voucher, payment_entry.company, payment_entry.posting_date
+			d.non_writable_voucher_type,
+			d.non_writable_voucher_no,
+			payment_entry.company,
+			payment_entry.posting_date,
 		)
 		reference_details.update({"reconcile_effect_on": reconcile_on})
 
-	if d.voucher_detail_no:
-		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
+	if d.writable_voucher_detail_no:
+		existing_row = payment_entry.get("references", {"name": d["writable_voucher_detail_no"]})[0]
 
 		if d.allocated_amount <= existing_row.allocated_amount:
 			existing_row.allocated_amount -= d.allocated_amount
@@ -795,16 +796,16 @@ def update_reference_in_payment_entry(
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
 		reference_exchange_details = frappe._dict()
-		if d.against_voucher_type == "Journal Entry" and d.exchange_rate:
+		if d.non_writable_voucher_type == "Journal Entry" and d.exchange_rate:
 			reference_exchange_details.update(
 				{
-					"reference_doctype": d.against_voucher_type,
-					"reference_name": d.against_voucher,
+					"reference_doctype": d.non_writable_voucher_type,
+					"reference_name": d.non_writable_voucher_no,
 					"exchange_rate": d.exchange_rate,
 				}
 			)
 		payment_entry.set_missing_ref_details(
-			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
+			update_ref_details_only_for=[(d.non_writable_voucher_type, d.non_writable_voucher_no)],
 			reference_exchange_details=reference_exchange_details,
 		)
 	payment_entry.set_amounts()
@@ -851,8 +852,8 @@ def cancel_exchange_gain_loss_journal(
 	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
 	"""
 	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
-		gain_loss_journals = get_linked_exchange_gain_loss_journal(
-			referenced_dt=parent_doc.doctype, referenced_dn=parent_doc.name, je_docstatus=1
+		gain_loss_journals = get_linked_system_journals(
+			parent_doc.doctype, parent_doc.name, "Exchange Gain Or Loss", docstatus=1
 		)
 		for doc in gain_loss_journals:
 			gain_loss_je = frappe.get_doc("Journal Entry", doc)
@@ -869,56 +870,125 @@ def cancel_exchange_gain_loss_journal(
 				gain_loss_je.cancel()
 
 
-def delete_exchange_gain_loss_journal(
-	parent_doc: dict | object, referenced_dt: str | None = None, referenced_dn: str | None = None
+CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE = "Reconciliation Journal"
+
+
+def _unwind_cross_account_bridge(bridge: str) -> None:
+	"""Cancel a cross-account bridge JE. Its on_cancel cascades to the linked FX JE
+	and unlinks all referencing vouchers (always, regardless of Accounts Settings).
+	"""
+	bridge_doc = frappe.get_doc("Journal Entry", bridge)
+	bridge_doc.flags.ignore_links = True
+	bridge_doc.cancel()
+
+
+def unwind_reconciliation(
+	ref_doc: object,
+	payment_name: str | None = None,
+	referenced_dt: str | None = None,
+	referenced_dn: str | None = None,
+	unlink: bool = True,
+	cancel_common_party: bool = False,
 ) -> None:
+	"""The shared "undo a reconciliation" path for `ref_doc`, used by both the
+	Unreconcile tool (`on_submit`, per allocation, scoped by `payment_name`) and
+	document cancellation (`on_cancel`, whole-document). Runs, in order:
+
+	  1. unwind any cross-account bridge JE linking the doc (see below),
+	  2. cancel its linked Exchange Gain/Loss journal,
+	  3. cancel a linked common-party journal (document cancel only, `cancel_common_party`),
+	  4. unlink the payment references (`unlink`).
+
+	Order matters: steps 2-3 locate their journals through the JEA references that
+	step 4 strips, so the cancellations must run before the unlink. (`on_submit`'s
+	unlink is scoped by `payment_name` to a single pair, so it never touches those
+	journals regardless of order.)
+
+	Bridge unwind (step 1) — cancel the cross-account bridge JE(s) linked to the doc,
+	whole, since each is a real GL transfer (its on_cancel cascade reopens both
+	vouchers and cancels the linked FX JE). A bridge can sit on any side of the
+	relationship, so all directions are resolved in one query:
+	  - it references the doc            → JEA(reference == ref) → parent
+	  - the doc / payment IS the bridge   → `ref_no` / `payment_name`
+	  - the doc references it             → JEA(parent == ref_no) → reference_name (JE),
+	                                        or Payment Entry Reference(parent == ref_no) (PE)
+	`payment_name` scopes the first direction to a single pair (unreconcile); omit it
+	to act on every linked bridge (document cancel). The `docstatus == 1` filter stops
+	the bridge's own on_cancel cascade from re-entering.
 	"""
-	Delete Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
-	"""
-	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
-		gain_loss_journals = get_linked_exchange_gain_loss_journal(
-			referenced_dt=parent_doc.doctype, referenced_dn=parent_doc.name, je_docstatus=2
+	ref_type, ref_no = ref_doc.doctype, ref_doc.name
+
+	je = qb.DocType("Journal Entry")
+	jea = qb.DocType("Journal Entry Account")
+	per = qb.DocType("Payment Entry Reference")
+
+	referencing = get_linked_system_journals(ref_type, ref_no, CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE, docstatus=1)
+	if payment_name:
+		referencing = [b for b in referencing if b == payment_name]
+
+	self_names = [ref_no, payment_name] if payment_name else [ref_no]
+
+	# Resolve "the doc IS the bridge" (self_names) and "the doc references the bridge" in
+	# one pass: the reference is recorded on JEA rows when the writable voucher is a JE,
+	# and on Payment Entry Reference rows when it is a PE — left-join both so cancelling
+	# either kind of writable-side voucher resolves the bridge it points at.
+	bridges = (
+		qb.from_(je)
+		.left_join(jea)
+		.on(
+			(jea.parent == ref_no) & (jea.reference_type == "Journal Entry") & (jea.reference_name == je.name)
 		)
-		for doc in gain_loss_journals:
-			gain_loss_je = frappe.get_doc("Journal Entry", doc)
-			if referenced_dt and referenced_dn:
-				references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
-				if (
-					len(references) == 2
-					and (referenced_dt, referenced_dn) in references
-					and (parent_doc.doctype, parent_doc.name) in references
-				):
-					# only delete JE generated against parent_doc and referenced_dn
-					gain_loss_je.delete()
-			else:
-				gain_loss_je.delete()
+		.left_join(per)
+		.on(
+			(per.parent == ref_no)
+			& (per.reference_doctype == "Journal Entry")
+			& (per.reference_name == je.name)
+		)
+		.select(je.name)
+		.distinct()
+		.where(
+			(je.voucher_type == CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
+			& (je.docstatus == 1)
+			& (je.name.isin(self_names) | jea.name.isnotnull() | per.name.isnotnull())
+		)
+		.run(pluck=True)
+	)
+	for bridge in set(bridges) | set(referencing):
+		_unwind_cross_account_bridge(bridge)
+
+	cancel_exchange_gain_loss_journal(ref_doc, referenced_dt, referenced_dn)
+	if cancel_common_party:
+		cancel_common_party_journal(ref_doc)
+	if unlink:
+		unlink_ref_doc_from_payment_entries(ref_doc, payment_name)
 
 
-def get_linked_exchange_gain_loss_journal(referenced_dt: str, referenced_dn: str, je_docstatus: int) -> list:
+def get_linked_system_journals(
+	referenced_dt: str, referenced_dn: str, voucher_type: str | list, docstatus: int = 1
+) -> list:
+	"""System-generated Journal Entries whose JEA references (`referenced_dt`,
+	`referenced_dn`), at `docstatus`. `voucher_type` may be a single type or a list
+	(e.g. exchange-gain/loss + cross-account-bridge resolved in one batched query).
 	"""
-	Get all the linked exchange gain/loss journal entries for a given document.
-	"""
-	gain_loss_journals = []
-	if journals := frappe.db.get_all(
-		"Journal Entry Account",
-		{
-			"reference_type": referenced_dt,
-			"reference_name": referenced_dn,
-			"docstatus": je_docstatus,
-		},
-		pluck="parent",
-	):
-		gain_loss_journals = frappe.db.get_all(
-			"Journal Entry",
-			{
-				"name": ["in", journals],
-				"voucher_type": "Exchange Gain Or Loss",
-				"is_system_generated": 1,
-				"docstatus": je_docstatus,
-			},
-			pluck="name",
+	je = qb.DocType("Journal Entry")
+	jea = qb.DocType("Journal Entry Account")
+	vt = voucher_type if isinstance(voucher_type, list | tuple | set) else [voucher_type]
+	return (
+		qb.from_(je)
+		.inner_join(jea)
+		.on(jea.parent == je.name)
+		.select(je.name)
+		.distinct()
+		.where(
+			(jea.reference_type == referenced_dt)
+			& (jea.reference_name == referenced_dn)
+			& (jea.docstatus == docstatus)
+			& (je.voucher_type.isin(vt))
+			& (je.is_system_generated == 1)
+			& (je.docstatus == docstatus)
 		)
-	return gain_loss_journals
+		.run(pluck=True)
+	)
 
 
 def cancel_common_party_journal(self):
@@ -2295,12 +2365,14 @@ class QueryPaymentLedger:
 		self.min_outstanding = None
 		self.max_outstanding = None
 		self.limit = self.voucher_no = None
+		self.exclude_zero_outstanding = False
 
 	def reset(self):
 		# clear filters
 		self.vouchers.clear()
 		self.common_filter.clear()
 		self.min_outstanding = self.max_outstanding = self.limit = None
+		self.exclude_zero_outstanding = False
 
 		# clear result
 		self.voucher_outstandings.clear()
@@ -2398,6 +2470,7 @@ class QueryPaymentLedger:
 			qb.from_(ple)
 			.select(
 				ple.account,
+				Max(ple.account_type).as_("account_type"),
 				ple.voucher_type,
 				ple.voucher_no,
 				ple.party_type,
@@ -2426,6 +2499,7 @@ class QueryPaymentLedger:
 			.on(representative_ple.name == grouped_voucher_amount.representative)
 			.select(
 				grouped_voucher_amount.account,
+				grouped_voucher_amount.account_type,
 				grouped_voucher_amount.voucher_type,
 				grouped_voucher_amount.voucher_no,
 				grouped_voucher_amount.party_type,
@@ -2477,6 +2551,7 @@ class QueryPaymentLedger:
 			)
 			.select(
 				Table("vouchers").account,
+				Table("vouchers").account_type,
 				Table("vouchers").voucher_type,
 				Table("vouchers").voucher_no,
 				Table("vouchers").party_type,
@@ -2517,6 +2592,14 @@ class QueryPaymentLedger:
 				)
 			)
 
+		elif self.exclude_zero_outstanding:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.having(
+					(qb.Field("outstanding_in_account_currency").notnull())
+					& (qb.Field("outstanding_in_account_currency") != 0)
+				)
+			)
+
 		if self.limit:
 			self.cte_query_voucher_amount_and_outstanding = (
 				self.cte_query_voucher_amount_and_outstanding.limit(self.limit)
@@ -2537,6 +2620,7 @@ class QueryPaymentLedger:
 		accounting_dimensions=None,
 		limit=None,
 		voucher_no=None,
+		exclude_zero_outstanding=False,
 	):
 		"""
 		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
@@ -2547,6 +2631,7 @@ class QueryPaymentLedger:
 		max_outstanding - filter on maximum total  outstanding amount
 		get_invoices - only fetch vouchers(ledger entries with +ve outstanding)
 		get_payments - only fetch payments(ledger entries with -ve outstanding)
+		exclude_zero_outstanding - drop rows where outstanding settled to zero
 		"""
 
 		self.reset()
@@ -2560,6 +2645,7 @@ class QueryPaymentLedger:
 		self.get_invoices = get_invoices
 		self.limit = limit
 		self.voucher_no = voucher_no
+		self.exclude_zero_outstanding = exclude_zero_outstanding
 		self.query_for_outstanding()
 
 		return self.voucher_outstandings

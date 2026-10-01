@@ -13,37 +13,30 @@
   "receivable_payable_account",
   "currency",
   "default_advance_account",
-  "col_break1",
-  "from_invoice_date",
-  "from_payment_date",
-  "minimum_invoice_amount",
-  "minimum_payment_amount",
-  "column_break_11",
-  "to_invoice_date",
-  "to_payment_date",
-  "maximum_invoice_amount",
-  "maximum_payment_amount",
-  "column_break_13",
-  "invoice_limit",
-  "payment_limit",
-  "bank_cash_account",
+  "filters_section",
+  "from_date",
+  "min_amount",
+  "column_break_filters_1",
+  "to_date",
+  "max_amount",
+  "column_break_filters_2",
+  "fetch_limit",
+  "currency_filter",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
   "project",
-  "sec_break1",
-  "invoice_name",
-  "invoices",
-  "column_break_15",
-  "payment_name",
-  "payments",
+  "entries_section",
+  "to_receive",
+  "column_break_entries",
+  "to_pay",
   "totals_section",
   "total_invoice_amount",
   "column_break_totals_1",
   "total_payment_amount",
   "column_break_totals_2",
   "difference_amount",
-  "sec_break2",
+  "allocation_section",
   "allocation"
  ],
  "fields": [
@@ -51,6 +44,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -58,25 +52,31 @@
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Party Type",
    "options": "DocType",
    "reqd": 1
   },
   {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "eval:doc.party_type",
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
    "label": "Party",
    "options": "party_type",
    "reqd": 1
   },
   {
    "depends_on": "eval:doc.company && doc.party",
+   "description": "Leave blank to reconcile across all party accounts.",
    "fieldname": "receivable_payable_account",
    "fieldtype": "Link",
    "label": "Receivable / Payable Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fetch_from": "receivable_payable_account.account_currency",
@@ -88,36 +88,112 @@
    "read_only": 1
   },
   {
-   "description": "This filter will be applied to Journal Entry.",
-   "fieldname": "bank_cash_account",
+   "depends_on": "eval:doc.party",
+   "description": "Leave blank to fetch from all party advance accounts.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
+   "fieldname": "default_advance_account",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Bank / Cash Account",
+   "label": "Default Advance Account",
    "options": "Account"
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.invoices.length == 0",
-   "depends_on": "eval:doc.receivable_payable_account",
-   "fieldname": "col_break1",
+   "collapsible_depends_on": "eval: doc.to_receive.length == 0 && doc.to_pay.length == 0",
+   "depends_on": "eval:doc.party",
+   "fieldname": "filters_section",
    "fieldtype": "Section Break",
    "label": "Filters"
   },
   {
-   "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
-   "description": "If you need to reconcile particular transactions against each other, then please select accordingly. If not, all the transactions will be allocated in FIFO order.",
-   "fieldname": "sec_break1",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "min_amount",
+   "fieldtype": "Currency",
+   "label": "Minimum Amount"
+  },
+  {
+   "fieldname": "column_break_filters_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "max_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Amount"
+  },
+  {
+   "fieldname": "column_break_filters_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "50",
+   "description": "Maximum entries to fetch per table. Zero means no cap.",
+   "fieldname": "fetch_limit",
+   "fieldtype": "Int",
+   "label": "Fetch Limit"
+  },
+  {
+   "description": "Restrict both tables to one currency.",
+   "fieldname": "currency_filter",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.to_receive.length == 0 && doc.to_pay.length == 0",
+   "depends_on": "eval:doc.party",
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "depends_on": "eval:(doc.to_receive).length || (doc.to_pay).length",
+   "fieldname": "entries_section",
    "fieldtype": "Section Break",
    "label": "Unreconciled Entries"
   },
   {
-   "fieldname": "payments",
+   "fieldname": "to_receive",
    "fieldtype": "Table",
-   "label": "Payments",
-   "options": "Payment Reconciliation Payment"
+   "label": "To Receive",
+   "options": "Payment Reconciliation Entry"
   },
   {
-   "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
+   "fieldname": "column_break_entries",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_pay",
+   "fieldtype": "Table",
+   "label": "To Pay",
+   "options": "Payment Reconciliation Entry"
+  },
+  {
+   "depends_on": "eval:(doc.to_receive).length || (doc.to_pay).length",
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
    "label": "Totals"
@@ -153,137 +229,15 @@
   },
   {
    "depends_on": "allocation",
-   "fieldname": "sec_break2",
+   "fieldname": "allocation_section",
    "fieldtype": "Section Break",
    "label": "Allocated Entries"
-  },
-  {
-   "fieldname": "invoices",
-   "fieldtype": "Table",
-   "label": "Invoices",
-   "options": "Payment Reconciliation Invoice"
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "allocation",
    "fieldtype": "Table",
    "label": "Allocation",
    "options": "Payment Reconciliation Allocation"
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "from_invoice_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "From Invoice Date"
-  },
-  {
-   "fieldname": "to_invoice_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "To Invoice Date"
-  },
-  {
-   "fieldname": "minimum_invoice_amount",
-   "fieldtype": "Currency",
-   "label": "Minimum Invoice Amount"
-  },
-  {
-   "default": "50",
-   "description": "System will fetch all the entries if limit value is zero.",
-   "fieldname": "invoice_limit",
-   "fieldtype": "Int",
-   "label": "Invoice Limit"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "from_payment_date",
-   "fieldtype": "Date",
-   "label": "From Payment Date"
-  },
-  {
-   "fieldname": "to_payment_date",
-   "fieldtype": "Date",
-   "label": "To Payment Date"
-  },
-  {
-   "fieldname": "minimum_payment_amount",
-   "fieldtype": "Currency",
-   "label": "Minimum Payment Amount"
-  },
-  {
-   "fieldname": "maximum_payment_amount",
-   "fieldtype": "Currency",
-   "label": "Maximum Payment Amount"
-  },
-  {
-   "default": "50",
-   "description": "System will fetch all the entries if limit value is zero.",
-   "fieldname": "payment_limit",
-   "fieldtype": "Int",
-   "label": "Payment Limit"
-  },
-  {
-   "fieldname": "maximum_invoice_amount",
-   "fieldtype": "Currency",
-   "label": "Maximum Invoice Amount"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
-  },
-  {
-   "depends_on": "eval:doc.party",
-   "description": "Only 'Payment Entries' made against this advance account are supported.",
-   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
-   "fieldname": "default_advance_account",
-   "fieldtype": "Link",
-   "label": "Default Advance Account",
-   "mandatory_depends_on": "doc.party_type",
-   "options": "Account"
-  },
-  {
-   "fieldname": "invoice_name",
-   "fieldtype": "Data",
-   "label": "Filter on Invoice"
-  },
-  {
-   "fieldname": "payment_name",
-   "fieldtype": "Data",
-   "label": "Filter on Payment"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.invoices.length == 0",
-   "depends_on": "eval:doc.receivable_payable_account",
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions Filter"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -291,7 +245,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-23 12:38:29.557315",
+ "modified": "2026-09-29 16:45:10.195746",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
@@ -314,6 +268,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
