@@ -246,7 +246,8 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		return [row for row in rows if row.get("reference_name") == repack.name and row["indent"] == 0]
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
 	def test_auto_mapping_on_submit(self):
 		"""Auto created bundles: each finished good serial gets one raw material serial, in order."""
@@ -293,6 +294,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			[(row["serial_no"], row["qty"]) for row in fg_rows], [(expected[rm_serial_nos[0]], 1)]
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 1})
 	def test_partly_mapped_draft_is_completed_on_submit(self):
 		"""Raw materials left unmapped on draft are mapped to the remaining finished goods on submit."""
 		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
@@ -339,7 +341,8 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
 	def test_auto_mapping_to_fg_batch(self):
 		"""A single finished good batch takes every raw material, both directions."""
@@ -362,7 +365,8 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		self.assertEqual([(row["batch_no"], row["qty"]) for row in fg_rows], [(fg_batch_no, 3)])
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
 	def test_auto_mapping_across_serial_and_batch_finished_goods(self):
 		"""A Repack making a serialized and a batch tracked item maps across both, to the right item."""
@@ -393,7 +397,8 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
 	def test_batch_raw_material_stays_with_every_finished_good(self):
 		"""A batch used across several finished good serials is not auto mapped to just one of them."""
