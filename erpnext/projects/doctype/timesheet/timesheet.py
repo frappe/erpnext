@@ -8,8 +8,17 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Date
-from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours, time_diff_in_seconds
+from frappe.utils import (
+	add_to_date,
+	cstr,
+	flt,
+	get_datetime,
+	getdate,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
 
+from erpnext import _refuse
 from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 
@@ -289,7 +298,7 @@ class Timesheet(Document):
 	def update_cost(self):
 		for data in self.time_logs:
 			if data.activity_type or data.is_billable:
-				rate = get_activity_cost(self.employee, data.activity_type)
+				rate = _get_activity_cost(self.employee, data.activity_type)
 				hours = data.billing_hours or 0
 				costing_hours = data.hours or 0
 				if rate:
@@ -520,6 +529,25 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None, currency=None):
+	if not frappe.has_permission("Timesheet", "read"):
+		_refuse()
+	activity_type = cstr(activity_type)
+	if not activity_type:
+		_refuse()
+	if not frappe.has_permission("Activity Type", "select", doc=activity_type) and not frappe.has_permission(
+		"Activity Type", "read", doc=activity_type
+	):
+		_refuse()
+	if employee:
+		employee = cstr(employee)
+		if not frappe.has_permission("Employee", "select", doc=employee) and not frappe.has_permission(
+			"Employee", "read", doc=employee
+		):
+			_refuse()
+	return _get_activity_cost(employee, activity_type, currency)
+
+
+def _get_activity_cost(employee=None, activity_type=None, currency=None):
 	base_currency = frappe.defaults.get_global_default("currency")
 	rate = frappe.db.get_values(
 		"Activity Cost",

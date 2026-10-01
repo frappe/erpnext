@@ -5,13 +5,29 @@ import datetime
 import unittest
 
 import frappe
-from frappe.tests.utils import change_settings
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
+from erpnext.projects.doctype.timesheet.timesheet import (
+	OverlapError,
+	get_activity_cost,
+	make_sales_invoice,
+)
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_not_found,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	insert_test_record,
+	make_company_fenced_user,
+	make_fenced_user,
+	malformed_names,
+)
 
 
 class TestTimesheet(unittest.TestCase):
@@ -302,3 +318,91 @@ def update_activity_type(activity_type):
 	activity_type.billing_rate = 50.0
 	activity_type.costing_rate = 20.0
 	activity_type.save(ignore_permissions=True)
+
+
+class TestActivityCostPermissions(FrappeTestCase):
+	def setUp(self):
+		self.employee_a = make_employee("activity-cost-a@example.com", company="_Test Company")
+		self.employee_b = make_employee("activity-cost-b@example.com", company=OTHER_COMPANY)
+		for employee, rate in ((self.employee_a, 111), (self.employee_b, 999)):
+			frappe.get_doc(
+				{
+					"doctype": "Activity Cost",
+					"employee": employee,
+					"activity_type": "Planning",
+					"costing_rate": rate,
+					"billing_rate": rate * 2,
+				}
+			).insert()
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def cost_kwargs(self, name):
+		return {"employee": name, "activity_type": "Planning"}
+
+	def activity_kwargs(self, name):
+		return {"employee": self.employee_a, "activity_type": name}
+
+	def make_activity_fenced_user(self):
+		insert_test_record(
+			"Activity Type",
+			{
+				"name": "_Test Hidden Activity",
+				"activity_type": "_Test Hidden Activity",
+				"costing_rate": 7,
+				"billing_rate": 14,
+			},
+		)
+		return make_fenced_user(
+			"activity-cost-activity@example.com", ["Projects User"], [("Activity Type", "Planning")]
+		)
+
+	def test_get_activity_cost_refuses_an_activity_type_outside_the_fence_for_an_employee(self):
+		fenced = self.make_activity_fenced_user()
+		with as_user(fenced):
+			assert_refused(self, get_activity_cost, **self.activity_kwargs("_Test Hidden Activity"))
+			rate = get_activity_cost(**self.activity_kwargs("Planning"))
+		self.assertEqual(rate["costing_rate"], 111)
+
+	def test_get_activity_cost_finds_no_malformed_activity_type_for_an_employee(self):
+		fenced = self.make_activity_fenced_user()
+		with as_user(fenced):
+			for name in malformed_names():
+				assert_not_found(self, get_activity_cost, **self.activity_kwargs(name))
+			assert_refused(self, get_activity_cost, **self.activity_kwargs(""))
+
+	def test_get_activity_cost_refuses_an_employee_outside_the_company_fence(self):
+		fenced = make_company_fenced_user(
+			"activity-cost-fenced@example.com", ["Projects User"], "_Test Company"
+		)
+		with as_user(fenced):
+			assert_refused_for_names(
+				self, get_activity_cost, self.cost_kwargs, [self.employee_b], caller_supplied=True
+			)
+			assert_refused_without(
+				self,
+				["linked to", "'_Test Company 1'"],
+				get_activity_cost,
+				**self.cost_kwargs(self.employee_b),
+			)
+			rate = get_activity_cost(**self.cost_kwargs(self.employee_a))
+		self.assertEqual(rate["costing_rate"], 111)
+
+	def test_get_activity_cost_refuses_an_employee_outside_the_employee_fence(self):
+		fenced = make_fenced_user(
+			"activity-cost-employee@example.com", ["Projects User"], [("Employee", self.employee_a)]
+		)
+		with as_user(fenced):
+			assert_refused(self, get_activity_cost, **self.cost_kwargs(self.employee_b))
+
+	def test_get_activity_cost_requires_timesheet_read(self):
+		user = make_fenced_user("activity-cost-no-timesheet@example.com", ["Stock Manager"])
+		with as_user(user):
+			assert_refused(self, get_activity_cost, **self.cost_kwargs(self.employee_a))
+
+	def test_get_activity_cost_allows_an_unfenced_projects_user(self):
+		user = make_fenced_user("activity-cost-open@example.com", ["Projects User"])
+		with as_user(user):
+			rate = get_activity_cost(**self.cost_kwargs(self.employee_b))
+		self.assertEqual(rate["billing_rate"], 1998)
