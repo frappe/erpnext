@@ -136,6 +136,7 @@ class PurchaseOrder(BuyingController):
 			"To Receive and Bill",
 			"To Bill",
 			"To Receive",
+			"To Pay",
 			"Completed",
 			"Cancelled",
 			"Closed",
