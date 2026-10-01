@@ -222,16 +222,16 @@ def receivables(customer, company, report_date):
 			"range": "30, 60, 90",
 		}
 	)[1]
-	# Use the report's ledger allocation, including journal entries and credits,
-	# but retain offsetting balances that the summary report omits.
+	owed = [d for d in data if flt(d.get("outstanding")) > 0]
 	row = {
-		key: sum(flt(d.get(key)) for d in data)
+		key: sum(flt(d.get(key)) for d in owed)
 		for key in ("outstanding", "total_due", "range1", "range2", "range3", "range4")
 	}
-	outstanding = flt(row.get("outstanding"))
+	outstanding = sum(flt(d.get("outstanding")) for d in data)
 	overdue = flt(row.get("total_due"))
+	not_due = flt(row.get("outstanding")) - overdue
 	buckets = [
-		{"key": "not_due", "label": _("Not due"), "value": outstanding - overdue, "overdue": False},
+		{"key": "not_due", "label": _("Not due"), "value": not_due, "overdue": False},
 		{"key": "b1", "label": _("0–30 days"), "value": flt(row.get("range1")), "overdue": True},
 		{"key": "b2", "label": _("31–60 days"), "value": flt(row.get("range2")), "overdue": True},
 		{"key": "b3", "label": _("61–90 days"), "value": flt(row.get("range3")), "overdue": True},

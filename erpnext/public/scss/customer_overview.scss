@@ -1,5 +1,5 @@
 .customer-overview {
-	.co-hsub,
+	.co-period,
 	.co-subtitle,
 	.co-note,
 	.co-empty {
@@ -21,6 +21,10 @@
 		font-size: var(--text-base);
 		font-weight: var(--weight-regular);
 		color: var(--ink-gray-8);
+	}
+
+	.co-section > .co-head .co-title {
+		font-weight: var(--weight-semibold);
 	}
 
 	.co-subtitle {
@@ -65,31 +69,20 @@
 	.co-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-end;
+		align-items: center;
 		flex-wrap: wrap;
-		gap: var(--margin-md);
-		margin-bottom: var(--margin-xl);
-	}
-
-	.co-header-left {
-		min-width: 0;
-	}
-
-	.co-htitle {
-		font-size: var(--text-xl);
-		font-weight: var(--weight-semibold);
-		color: var(--ink-gray-8);
-	}
-
-	.co-hsub {
-		margin-top: 2px;
-		font-size: var(--text-sm);
+		gap: var(--margin-sm);
+		margin-bottom: var(--margin-lg);
 	}
 
 	.co-header-controls {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--margin-sm);
+	}
+
+	.co-period {
+		font-size: var(--text-sm);
 	}
 
 	.co-filter {
@@ -119,6 +112,10 @@
 
 	.co-placeholder {
 		margin-top: var(--margin-md);
+	}
+
+	.co-error {
+		color: var(--ink-red-7);
 	}
 
 	.co-empty {

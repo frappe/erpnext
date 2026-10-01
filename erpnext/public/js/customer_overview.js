@@ -24,6 +24,8 @@ const COUNT = {
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
 	reconcile: (n) =>
 		n === 1 ? __("Reconcile with 1 unpaid invoice") : __("Reconcile with {0} unpaid invoices", [n]),
+	unapplied: (n) =>
+		n === 1 ? __("Not applied to 1 unpaid invoice") : __("Not applied to {0} unpaid invoices", [n]),
 	days_to_pay: (n) => (n === 1 ? __("1 day to pay") : __("{0} days to pay", [n])),
 };
 
@@ -103,11 +105,9 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	build_header() {
-		const $header = $('<div class="co-header">').appendTo(this.$root);
-		const $left = $('<div class="co-header-left">').appendTo($header);
-		$('<div class="co-htitle">').text(__("Overview")).appendTo($left);
-		this.$context = $('<div class="co-hsub">').appendTo($left);
-		this.$controls = $('<div class="co-header-controls">').appendTo($header);
+		this.$header = $('<div class="co-header">').appendTo(this.$root);
+		this.$controls = $('<div class="co-header-controls">').appendTo(this.$header);
+		this.$period = $('<div class="co-period">').toggle(!!this.accounts).appendTo(this.$header);
 
 		this.company_field = this.make_select(
 			this.$controls,
@@ -121,7 +121,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 				this.refresh_list();
 			}
 		);
-		if (Object.keys(locals[":Company"] || {}).length === 1) this.company_field.$wrapper.parent().hide();
+		const single_company = Object.keys(locals[":Company"] || {}).length === 1;
+		if (single_company) this.company_field.$wrapper.parent().hide();
 		this.period_field = this.make_select(this.$controls, __("Sales Period"), PERIODS, (value) => {
 			if (value === this.state.period) return;
 			this.state.period = value;
@@ -130,6 +131,8 @@ erpnext.CustomerOverview = class CustomerOverview {
 		});
 		this.period_field.set_value(this.state.period);
 		this.period_field.$wrapper.parent().toggle(!!this.accounts);
+		this.has_controls = !single_company || this.accounts;
+		this.$header.toggle(this.has_controls);
 	}
 
 	build_sections() {
@@ -161,8 +164,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			}
 			this.$empty.hide();
 			this.$body.show();
-			this.$context.show();
-			this.$controls.show();
+			this.$header.toggle(this.has_controls);
 			this.company_field.df.options = companies.join("\n");
 			this.company_field.refresh();
 			const known = companies.includes(this.state.company);
@@ -221,7 +223,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	render(key) {
 		this.render_position();
 		if (key === "sales") {
-			this.render_context();
+			this.$period.text(this.period_text());
 			this.render_trend();
 			this.render_pipeline();
 		} else {
@@ -231,8 +233,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	render_no_activity() {
 		this.$body.hide();
-		this.$context.hide();
-		this.$controls.hide();
+		this.$header.hide();
 		const actions = ["Quotation", "Sales Order"]
 			.filter((doctype) => frappe.model.can_create(doctype))
 			.map((doctype) => ({
@@ -269,13 +270,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 		return (n < 0 ? "-" : "") + window.get_currency_symbol(this.currency) + (short || "0");
 	}
 
-	render_context() {
-		const range = this.sales.data && this.sales.data.period_range;
-		if (!range) return;
+	period_text() {
+		const range = this.sales && this.sales.data && this.sales.data.period_range;
+		if (!range) return "";
 		const from = moment(range.from_date);
 		const to = moment(range.to_date);
 		const from_fmt = from.year() === to.year() ? "D MMM" : "D MMM YYYY";
-		this.$context.text(from.format(from_fmt) + " – " + to.format("D MMM YYYY"));
+		return from.format(from_fmt) + " – " + to.format("D MMM YYYY");
 	}
 
 	render_position() {
@@ -342,7 +343,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
 		if (!unpaid_count) return { ...card, caption: __("Credit balance, no invoices to apply it to") };
 		if (!frappe.model.can_write("Payment Reconciliation"))
-			return { ...card, caption: __("Already deducted from Receivable") };
+			return { ...card, caption: COUNT.unapplied(unpaid_count) };
 		return {
 			...card,
 			caption: COUNT.reconcile(unpaid_count),
@@ -416,7 +417,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	render_ageing() {
 		const $panel = this.panel(this.$charts, {
 			title: __("Receivables Ageing"),
-			subtitle: __("Outstanding by due date, net of credit notes and advances"),
+			subtitle: __("Unpaid invoices by due date"),
 			right: this.report_link(__("Accounts Receivable"), () => this.open_ar()),
 		});
 		if (this.show_state($panel, this.ar, 180, __("Could not load receivables"))) return;
@@ -530,7 +531,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return true;
 		}
 		if (source.error || source.data?.errors?.[section]) {
-			this.empty_note($panel, error_text, height).addClass("text-ink-red-7");
+			this.empty_note($panel, error_text, height).addClass("co-error");
 			return true;
 		}
 		return false;
@@ -546,13 +547,14 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return;
 		}
 		const company = this.state.company;
+		const row = (this.frm.doc.credit_limits || []).find((r) => r.company === company);
 		frappe.prompt(
 			[
 				{
 					fieldname: "credit_limit",
 					fieldtype: "Currency",
 					label: __("Credit Limit"),
-					default: flt(this.ar.data.credit.limit),
+					default: flt(row?.credit_limit),
 					description: __(
 						"Applies to {0}. Set to 0 to use the Customer Group or Company credit limit, if set.",
 						[company]
@@ -606,7 +608,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const pl = (this.sales.data && this.sales.data.pipeline) || {};
 		const specs = this.pipeline_specs(pl).filter((s) => s.data);
 		if (!specs.length) {
-			this.empty_note(this.$pipeline, __("Could not load sales"), 0).addClass("text-ink-red-7");
+			this.empty_note(this.$pipeline, __("Could not load sales"), 0).addClass("co-error");
 			return;
 		}
 
