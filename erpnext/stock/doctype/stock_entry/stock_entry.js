@@ -336,20 +336,24 @@ frappe.ui.form.on("Stock Entry", {
 			const has_alternative = frm.doc.items.find((i) => i.allow_alternative_item === 1);
 
 			if (frm.doc.docstatus == 0 && has_alternative) {
-				frm.add_custom_button(__("Alternate Item"), () => {
-					erpnext.utils.select_alternate_items({
-						frm: frm,
-						child_docname: "items",
-						warehouse_field: "s_warehouse",
-						child_doctype: "Stock Entry Detail",
-						original_item_field: "original_item",
-						condition: (d) => {
-							if (d.s_warehouse && d.allow_alternative_item) {
-								return true;
-							}
-						},
-					});
-				});
+				frm.add_custom_button(
+					__("Alternate Item"),
+					() => {
+						erpnext.utils.select_alternate_items({
+							frm: frm,
+							child_docname: "items",
+							warehouse_field: "s_warehouse",
+							child_doctype: "Stock Entry Detail",
+							original_item_field: "original_item",
+							condition: (d) => {
+								if (d.s_warehouse && d.allow_alternative_item) {
+									return true;
+								}
+							},
+						});
+					},
+					__("Actions")
+				);
 			}
 		}
 
@@ -434,12 +438,15 @@ frappe.ui.form.on("Stock Entry", {
 					__("Create")
 				);
 			}
+		}
 
-			if (["Manufacture", "Repack"].includes(frm.doc.purpose)) {
-				frm.add_custom_button(__("Map Raw Materials to Finished Goods"), () =>
-					frm.trigger("map_raw_materials_to_finished_goods")
-				);
-			}
+		// mapped on draft; whatever is left is mapped automatically on submit
+		if (frm.doc.docstatus === 0 && !frm.is_new() && ["Manufacture", "Repack"].includes(frm.doc.purpose)) {
+			frm.add_custom_button(
+				__("Map Raw Materials to Finished Goods"),
+				() => frm.trigger("map_raw_materials_to_finished_goods"),
+				__("Actions")
+			);
 		}
 
 		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
@@ -644,6 +651,10 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	async map_raw_materials_to_finished_goods(frm) {
+		if (frm.is_dirty()) {
+			await frm.save();
+		}
+
 		const method = "erpnext.stock.doctype.stock_entry.services.serial_batch";
 		const { fg_values: fg_rows, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
 			stock_entry: frm.doc.name,
@@ -663,7 +674,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (!fg_values.length || !raw_materials.length) {
 			frappe.msgprint(
 				__(
-					"Mapping needs a serial / batch tracked finished good and serial / batch tracked raw materials."
+					"Link the Serial and Batch Bundles of the raw materials and finished goods first. If you skip this, they are mapped automatically on submit."
 				)
 			);
 			return;

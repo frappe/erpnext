@@ -435,7 +435,7 @@ class ReportData:
 			if not fg_item:
 				return
 
-			mapped_fg_entries = self.get_mapped_fg_entries(row.reference_name)
+			mapped_fg_entries = self.get_mapped_fg_entries(row.reference_name, row.item_code)
 			fg_value = row.fg_serial_no or row.fg_batch_no
 			if fg_value:
 				# the finished good row that produced the mapped serial / batch
@@ -504,10 +504,10 @@ class ReportData:
 			as_dict=True,
 		)
 
-	def get_mapped_fg_entries(self, stock_entry):
-		"""Finished good serial / batch entries of the stock entry that raw materials are mapped to."""
-		if stock_entry in self.mapped_fg_entries:
-			return self.mapped_fg_entries[stock_entry]
+	def get_mapped_fg_entries(self, stock_entry, item_code):
+		"""Finished good serial / batch entries of the stock entry that this raw material item is mapped to."""
+		if (stock_entry, item_code) in self.mapped_fg_entries:
+			return self.mapped_fg_entries[(stock_entry, item_code)]
 
 		sed = frappe.qb.DocType("Stock Entry Detail")
 		sabe = frappe.qb.DocType("Serial and Batch Entry")
@@ -520,6 +520,7 @@ class ReportData:
 			.distinct()
 			.where(
 				(sed.parent == stock_entry)
+				& (sed.item_code == item_code)
 				& (sed.is_finished_item == 0)
 				& (sabe.fg_serial_no.isnotnull() | sabe.fg_batch_no.isnotnull())
 			)
@@ -545,18 +546,23 @@ class ReportData:
 				or (not entry.serial_no and entry.batch_no in batch_nos)
 			]
 
-		self.mapped_fg_entries[stock_entry] = mapped_entries
+		self.mapped_fg_entries[(stock_entry, item_code)] = mapped_entries
 		return mapped_entries
 
 	def get_serial_batch_no(self, serial_and_batch_bundle):
-		sabb_details = frappe.db.get_value(
+		sabb_details = frappe.get_all(
 			"Serial and Batch Entry",
-			{"parent": serial_and_batch_bundle},
-			["batch_no", "serial_no"],
-			as_dict=True,
+			filters={"parent": serial_and_batch_bundle},
+			fields=["batch_no", "serial_no"],
 		)
 
-		return (sabb_details.serial_no, sabb_details.batch_no) if sabb_details else (None, None)
+		# a bundle with several serial / batch nos can't be pinned to one of them
+		serial_nos = {row.serial_no for row in sabb_details}
+		batch_nos = {row.batch_no for row in sabb_details}
+		return (
+			serial_nos.pop() if len(serial_nos) == 1 else None,
+			batch_nos.pop() if len(batch_nos) == 1 else None,
+		)
 
 	def get_columns(self, has_serial_no=None, has_batch_no=None):
 		columns = [
