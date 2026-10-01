@@ -163,8 +163,8 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 	def load_ledger(self):
 		"""Copy the ledger rows the live query reads into a temporary table, with the flags the
 		report needs: whether a row counts as opening, and whether it is replayed row by row."""
-		self.register_items()
 		conditions, params = self.get_conditions()
+		self.register_items(conditions, params)
 		grouped = ", ".join(f'sle."{field}"' for field in self.get_grouped_dimensions())
 		sql = LEDGER_SQL.format(
 			dimensions="".join(f', sle."{field}"' for field in self.inventory_dimensions),
@@ -184,11 +184,17 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 			},
 		)
 
-	def register_items(self):
-		"""Items the live item filters allow, with the details the live ledger query joins in."""
-		item = frappe.qb.DocType("Item")
-		query = frappe.qb.from_(item).select(*(item[field] for field in ITEM_COLUMNS))
-		rows = self.apply_items_filters(query, item).run(as_dict=True)
+	def register_items(self, conditions, params):
+		"""Items with ledger rows under the report's other filters that the live item filters allow,
+		with the details the live ledger query joins in."""
+		sql = f'SELECT DISTINCT sle.item_code FROM "tabStock Ledger Entry" sle WHERE {conditions}'
+		codes = [code for (code,) in self.conn.execute(sql, params).fetchall()]
+		rows = []
+		if codes:
+			item = frappe.qb.DocType("Item")
+			query = frappe.qb.from_(item).select(*(item[field] for field in ITEM_COLUMNS))
+			rows = self.apply_items_filters(query.where(item.name.isin(codes)), item).run(as_dict=True)
+
 		self.conn.register(
 			"snapshot_items", pa.Table.from_pylist(rows, schema=pa.schema(ITEM_COLUMNS.items()))
 		)
