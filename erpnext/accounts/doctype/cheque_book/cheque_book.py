@@ -221,6 +221,7 @@ def get_next_cheque_book_no(bank_account: str) -> str:
 	Cancelled books count too, because the cheque book no is part of the name.
 	"""
 	frappe.has_permission("Cheque Book", throw=True)
+	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)
 	numbers = [
 		no
 		for no in frappe.get_all(
