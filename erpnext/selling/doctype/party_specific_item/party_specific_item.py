@@ -77,7 +77,20 @@ def get_rules_condition(rules):
 	if values["Item"]:
 		conditions.append(item.name.isin(values["Item"]))
 	if values["Item Group"]:
-		conditions.append(item.item_group.isin(values["Item Group"]))
+		conditions.append(item.item_group.isin(get_item_group_subtree_query(values["Item Group"])))
 	if values["Brand"]:
 		conditions.append(IfNull(item.brand, "").isin(values["Brand"]))
 	return Criterion.any(conditions)
+
+
+def get_item_group_subtree_query(item_groups):
+	"""Return a query for the item groups and all their sub-groups."""
+	group = frappe.qb.DocType("Item Group")
+	parent = frappe.qb.DocType("Item Group").as_("parent_group")
+	return (
+		frappe.qb.from_(group)
+		.join(parent)
+		.on((group.lft >= parent.lft) & (group.rgt <= parent.rgt))
+		.select(group.name)
+		.where(parent.name.isin(item_groups))
+	)
