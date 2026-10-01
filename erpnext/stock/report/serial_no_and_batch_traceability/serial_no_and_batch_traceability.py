@@ -36,6 +36,7 @@ class ReportData:
 	def __init__(self, filters):
 		self.filters = filters
 		self.doctype_name = self.get_doctype()
+		self.mapped_fg_entries = {}
 
 	def validate_filters(self):
 		if not self.filters.item_code and not self.filters.batches and not self.filters.serial_nos:
@@ -388,23 +389,33 @@ class ReportData:
 			if not fg_item:
 				return
 
-			key = (fg_item.item_code, row.reference_name)
-			if fg_value := row.fg_serial_no or row.fg_batch_no:
-				key = (fg_item.item_code, row.reference_name, fg_value)
+			mapped_fg_entries = self.get_mapped_fg_entries(row.reference_name)
+			fg_value = row.fg_serial_no or row.fg_batch_no
+			if fg_value:
+				# the finished good row that produced the mapped serial / batch
+				fg_entries = [
+					entry
+					for entry in mapped_fg_entries
+					if (row.fg_serial_no and entry.serial_no == row.fg_serial_no)
+					or (row.fg_batch_no and entry.batch_no == row.fg_batch_no)
+				]
+				if fg_entries:
+					fg_item = self.get_finished_item_from_stock_entry(
+						row.reference_name, fg_entries[0].detail_name
+					)
+
+			key = (fg_item.item_code, row.reference_name, fg_value)
 
 			if key not in batch_details:
 				serial_no, batch_no = self.get_serial_batch_no(fg_item.serial_and_batch_bundle)
-				if row.fg_serial_no:
-					serial_no, batch_no = row.fg_serial_no, None
-					fg_item.qty = 1
-				elif row.fg_batch_no:
-					serial_no, batch_no = None, row.fg_batch_no
-					fg_item.qty = sum(
-						frappe.get_all(
-							"Serial and Batch Entry",
-							filters={"parent": fg_item.serial_and_batch_bundle, "batch_no": row.fg_batch_no},
-							pluck="qty",
-						)
+				if fg_value:
+					serial_no, batch_no = row.fg_serial_no, row.fg_batch_no
+					fg_item.qty = sum(abs(entry.qty) for entry in fg_entries) or fg_item.qty
+				elif mapped_fg_entries:
+					# unmapped raw materials of a partly mapped entry: only the unmapped production
+					serial_no, batch_no = None, None
+					fg_item.qty -= sum(
+						abs(entry.qty) for entry in mapped_fg_entries if entry.detail_name == fg_item.name
 					)
 
 				fg_item.update(
@@ -426,11 +437,16 @@ class ReportData:
 					(row.item_code, row.reference_name, row.serial_no, row.batch_no)
 				] = row
 
-	def get_finished_item_from_stock_entry(self, reference_name):
+	def get_finished_item_from_stock_entry(self, reference_name, detail_name=None):
+		filters = {"parent": reference_name, "is_finished_item": 1}
+		if detail_name:
+			filters["name"] = detail_name
+
 		return frappe.db.get_value(
 			"Stock Entry Detail",
-			{"parent": reference_name, "is_finished_item": 1},
+			filters,
 			[
+				"name",
 				"item_code",
 				"item_name",
 				"serial_and_batch_bundle",
@@ -441,6 +457,50 @@ class ReportData:
 			],
 			as_dict=True,
 		)
+
+	def get_mapped_fg_entries(self, stock_entry):
+		"""Finished good serial / batch entries of the stock entry that raw materials are mapped to."""
+		if stock_entry in self.mapped_fg_entries:
+			return self.mapped_fg_entries[stock_entry]
+
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		sabe = frappe.qb.DocType("Serial and Batch Entry")
+
+		mapped_values = (
+			frappe.qb.from_(sed)
+			.inner_join(sabe)
+			.on(sed.serial_and_batch_bundle == sabe.parent)
+			.select(sabe.fg_serial_no, sabe.fg_batch_no)
+			.distinct()
+			.where(
+				(sed.parent == stock_entry)
+				& (sed.is_finished_item == 0)
+				& (sabe.fg_serial_no.isnotnull() | sabe.fg_batch_no.isnotnull())
+			)
+		).run(as_dict=True)
+
+		mapped_entries = []
+		if mapped_values:
+			serial_nos = {row.fg_serial_no for row in mapped_values if row.fg_serial_no}
+			batch_nos = {row.fg_batch_no for row in mapped_values if row.fg_batch_no}
+
+			fg_entries = (
+				frappe.qb.from_(sed)
+				.inner_join(sabe)
+				.on(sed.serial_and_batch_bundle == sabe.parent)
+				.select(sed.name.as_("detail_name"), sabe.serial_no, sabe.batch_no, sabe.qty)
+				.where((sed.parent == stock_entry) & (sed.is_finished_item == 1))
+			).run(as_dict=True)
+
+			mapped_entries = [
+				entry
+				for entry in fg_entries
+				if (entry.serial_no and entry.serial_no in serial_nos)
+				or (not entry.serial_no and entry.batch_no in batch_nos)
+			]
+
+		self.mapped_fg_entries[stock_entry] = mapped_entries
+		return mapped_entries
 
 	def get_serial_batch_no(self, serial_and_batch_bundle):
 		sabb_details = frappe.db.get_value(

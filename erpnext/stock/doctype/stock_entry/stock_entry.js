@@ -651,9 +651,10 @@ frappe.ui.form.on("Stock Entry", {
 
 	async map_raw_materials_to_finished_goods(frm) {
 		const method = "erpnext.stock.doctype.stock_entry.stock_entry";
-		const { fg_field, fg_values, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
+		const { fg_values: fg_rows, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
 			stock_entry: frm.doc.name,
 		});
+		const fg_values = fg_rows.map((row) => row.value);
 
 		if (!fg_values.length || !raw_materials.length) {
 			frappe.msgprint(
@@ -685,7 +686,7 @@ frappe.ui.form.on("Stock Entry", {
 						...row,
 						entry: row.name,
 						qty: Math.abs(row.qty),
-						fg_value: row[fg_field],
+						fg_value: row.fg_serial_no || row.fg_batch_no,
 					})),
 					fields: [
 						{ fieldtype: "Data", fieldname: "entry", hidden: 1 },
@@ -724,10 +725,7 @@ frappe.ui.form.on("Stock Entry", {
 							fieldtype: "Select",
 							fieldname: "fg_value",
 							options: ["", ...fg_values].join("\n"),
-							label:
-								fg_field === "fg_serial_no"
-									? __("Finished Good Serial No")
-									: __("Finished Good Batch No"),
+							label: __("Finished Good Serial / Batch No"),
 							in_list_view: 1,
 						},
 					],

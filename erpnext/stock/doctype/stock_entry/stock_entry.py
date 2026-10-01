@@ -5242,11 +5242,9 @@ def set_previous_operation_serial_batch(parent_doc, row):
 @frappe.whitelist()
 def get_fg_mapping(stock_entry: str):
 	doc = get_stock_entry_for_fg_mapping(stock_entry, "read")
-	fg_field, fg_values = get_fg_values(doc.name)
 
 	return {
-		"fg_field": fg_field,
-		"fg_values": fg_values,
+		"fg_values": get_fg_values(doc.name),
 		"raw_materials": get_raw_material_entries(doc.name),
 	}
 
@@ -5257,14 +5255,17 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 
 	mapping: {raw material Serial and Batch Entry name: finished good serial no / batch no}
 	"""
-	doc = get_stock_entry_for_fg_mapping(stock_entry, "write")
+	# the mapping is an update after submit, which needs submit permission
+	doc = get_stock_entry_for_fg_mapping(stock_entry, "submit")
 	mapping = frappe.parse_json(mapping) or {}
 
-	fg_field, fg_values = get_fg_values(doc.name)
-	if not fg_field:
+	fg_fields = {}
+	for row in get_fg_values(doc.name):
+		fg_fields.setdefault(row.value, row.fg_field)
+
+	if not fg_fields:
 		frappe.throw(_("{0} has no serial / batch tracked finished good").format(doc.name))
 
-	fg_values = set(fg_values)
 	raw_material_entries = {row.name for row in get_raw_material_entries(doc.name)}
 
 	entries_by_fg_value = defaultdict(list)
@@ -5274,7 +5275,7 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 				_("Row {0} is not a raw material serial / batch entry of {1}").format(entry_name, doc.name)
 			)
 
-		if fg_value and fg_value not in fg_values:
+		if fg_value and fg_value not in fg_fields:
 			frappe.throw(
 				_("{0} is not a finished good serial / batch produced by {1}").format(
 					frappe.bold(fg_value), doc.name
@@ -5285,7 +5286,13 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
 	for fg_value, entry_names in entries_by_fg_value.items():
-		(frappe.qb.update(sabe).set(sabe[fg_field], fg_value).where(sabe.name.isin(entry_names))).run()
+		fg_field = fg_fields.get(fg_value)
+		(
+			frappe.qb.update(sabe)
+			.set(sabe.fg_serial_no, fg_value if fg_field == "fg_serial_no" else None)
+			.set(sabe.fg_batch_no, fg_value if fg_field == "fg_batch_no" else None)
+			.where(sabe.name.isin(entry_names))
+		).run()
 
 
 def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
@@ -5302,7 +5309,7 @@ def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
 
 
 def get_fg_values(stock_entry):
-	"""Finished good serial nos, or batch nos when the finished good is not serialized."""
+	"""Serial nos of serialized finished goods and batch nos of the other batch tracked finished goods."""
 	sed = frappe.qb.DocType("Stock Entry Detail")
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -5310,19 +5317,27 @@ def get_fg_values(stock_entry):
 		frappe.qb.from_(sed)
 		.inner_join(sabe)
 		.on(sed.serial_and_batch_bundle == sabe.parent)
-		.select(sabe.serial_no, sabe.batch_no)
-		.where((sed.parent == stock_entry) & (sed.is_finished_item == 1) & (sed.t_warehouse.isnotnull()))
+		.select(sed.name.as_("detail_name"), sed.item_code, sabe.serial_no, sabe.batch_no)
+		.where(
+			(sed.parent == stock_entry) & (sed.is_finished_item == 1) & (Coalesce(sed.t_warehouse, "") != "")
+		)
 		.orderby(sed.idx)
 		.orderby(sabe.idx)
 	).run(as_dict=True)
 
-	if serial_nos := [row.serial_no for row in fg_entries if row.serial_no]:
-		return "fg_serial_no", serial_nos
+	serialized_rows = {row.detail_name for row in fg_entries if row.serial_no}
 
-	if batch_nos := list(dict.fromkeys(row.batch_no for row in fg_entries if row.batch_no)):
-		return "fg_batch_no", batch_nos
+	fg_values = {}
+	for row in fg_entries:
+		if row.detail_name in serialized_rows:
+			value, fg_field = row.serial_no, "fg_serial_no"
+		else:
+			value, fg_field = row.batch_no, "fg_batch_no"
 
-	return None, []
+		if value and value not in fg_values:
+			fg_values[value] = frappe._dict(value=value, fg_field=fg_field, item_code=row.item_code)
+
+	return list(fg_values.values())
 
 
 def get_raw_material_entries(stock_entry):
@@ -5346,8 +5361,8 @@ def get_raw_material_entries(stock_entry):
 		.where(
 			(sed.parent == stock_entry)
 			& (sed.is_finished_item == 0)
-			& (sed.s_warehouse.isnotnull())
-			& (sed.t_warehouse.isnull())
+			& (Coalesce(sed.s_warehouse, "") != "")
+			& (Coalesce(sed.t_warehouse, "") == "")
 		)
 		.orderby(sed.idx)
 		.orderby(sabe.idx)
