@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt, get_link_to_form
 
@@ -113,45 +114,68 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 		if not stock_entries:
 			return
 
+		if self.doc.docstatus == 1:
+			self.validate_transferred_qtys(stock_entries, child_list)
+
 		self._bulk_update_transferred_qty(stock_entries, child_list)
 		self._update_per_transferred_field()
 
-	def _get_item_transferred_qty(self, item):
+	def _collect_transferred_qtys(self):
+		items = [item for item in self.doc.items if item.against_stock_entry and item.ste_detail]
+		if not items:
+			return {}, []
+
+		references = [(item.against_stock_entry, item.ste_detail) for item in items]
+		transferred_qtys = self.get_transferred_qtys(references)
+		stock_entries = {
+			reference: transferred_qtys.get(
+				tuple(self.get_transfer_reference_key(value) for value in reference), 0.0
+			)
+			for reference in references
+		}
+		return stock_entries, [item.ste_detail for item in items]
+
+	def validate_transferred_qtys(self, stock_entries, child_list):
+		requested_qtys = self.get_requested_qtys(child_list)
+		for item in self.doc.items:
+			reference = (item.against_stock_entry, item.ste_detail)
+			detail = self.get_transfer_reference_key(item.ste_detail)
+			if reference in stock_entries and stock_entries[reference] > requested_qtys[detail]:
+				frappe.throw(
+					_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
+						item.idx
+					)
+				)
+
+	def get_transferred_qtys(self, references):
 		sed = frappe.qb.DocType("Stock Entry Detail")
 		result = (
 			frappe.qb.from_(sed)
-			.select(Sum(sed.transfer_qty).as_("qty"))
-			.where(
-				(sed.against_stock_entry == item.against_stock_entry)
-				& (sed.ste_detail == item.ste_detail)
-				& (sed.docstatus == 1)
-			)
+			.select(sed.against_stock_entry, sed.ste_detail, Sum(sed.transfer_qty).as_("qty"))
+			.where(Tuple(sed.against_stock_entry, sed.ste_detail).isin(references) & (sed.docstatus == 1))
+			.groupby(sed.against_stock_entry, sed.ste_detail)
 		).run(as_dict=True)
-		return result[0].qty if result and result[0].qty else 0.0
+		return {
+			(
+				self.get_transfer_reference_key(row.against_stock_entry),
+				self.get_transfer_reference_key(row.ste_detail),
+			): row.qty or 0.0
+			for row in result
+		}
 
-	def _validate_item_transferred_qty(self, item, transferred_qty):
-		if item.docstatus != 1:
-			return
+	def get_requested_qtys(self, child_list):
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		return {
+			self.get_transfer_reference_key(name): qty
+			for name, qty in frappe.qb.from_(sed)
+			.select(sed.name, sed.transfer_qty)
+			.where(sed.name.isin(child_list))
+			.run()
+		}
 
-		transfer_qty = frappe.get_value("Stock Entry Detail", item.ste_detail, "transfer_qty")
-		if transferred_qty > transfer_qty:
-			frappe.throw(
-				_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
-					item.idx
-				)
-			)
-
-	def _collect_transferred_qtys(self):
-		stock_entries, child_list = {}, []
-		for item in self.doc.items:
-			if not (item.against_stock_entry and item.ste_detail):
-				continue
-
-			transferred_qty = self._get_item_transferred_qty(item)
-			self._validate_item_transferred_qty(item, transferred_qty)
-			child_list.append(item.ste_detail)
-			stock_entries[(item.against_stock_entry, item.ste_detail)] = transferred_qty
-		return stock_entries, child_list
+	def get_transfer_reference_key(self, value):
+		# ste_detail is a Data field, so link validation does not normalize its case.
+		return value.casefold() if value and frappe.db.db_type == "mariadb" else value
 
 	def _bulk_update_transferred_qty(self, stock_entries, child_list):
 		sed = frappe.qb.DocType("Stock Entry Detail")
