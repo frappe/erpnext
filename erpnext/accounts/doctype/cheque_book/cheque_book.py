@@ -290,7 +290,7 @@ def validate_cheque(payment_entry):
 		doc.reference_date = doc.reference_date or doc.posting_date
 
 	if not doc.cheque_book:
-		if frappe.db.exists("Cheque Book", {"account": doc.paid_from, "docstatus": 1, "status": "Submitted"}):
+		if frappe.db.exists("Cheque Book", {"account": doc.paid_from, "docstatus": 1}):
 			frappe.throw(_("Please select a Cheque Book"))
 		return
 
