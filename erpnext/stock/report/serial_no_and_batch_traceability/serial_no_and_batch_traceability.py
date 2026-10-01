@@ -198,7 +198,7 @@ class ReportData:
 						if inward_data:
 							details = inward_data[-1]
 					elif material.serial_no:
-						self.set_inward_reference_for_item(details, material.item_code)
+						self.set_inward_reference_for_item(details, material.item_code, consumed_in=sabb_data)
 
 					if details:
 						details.update(self.get_data_from_sabb(details))
@@ -220,28 +220,51 @@ class ReportData:
 
 		return sabb_data
 
-	def set_inward_reference_for_item(self, row, item_code):
-		"""Trace a serial no from the entry that brought it in under `item_code`.
+	def set_inward_reference_for_item(self, row, item_code, consumed_in=None):
+		"""Trace a serial no from the entry that moved it to `item_code`.
 
 		A Repack or Manufacture entry can move a serial no to another item. The Serial No
-		still references the entry that created it, under the old item.
+		still references the entry that created it, under the first item. For a consumed
+		serial no, `consumed_in` is the entry that consumed it, so only earlier moves count.
 		"""
-		inward_entries = self.get_sabb_entries(row.serial_no, "Inward")
-		if all(entry.item_code == item_code for entry in inward_entries):
-			return
+		moves = self.get_moves_to_item(row.serial_no, item_code)
+		if consumed_in:
+			moves = [
+				move
+				for move in moves
+				if move.posting_datetime <= consumed_in.posting_datetime
+				and move.reference_name != consumed_in.reference_name
+			]
 
-		first_inward_entry = next((entry for entry in inward_entries if entry.item_code == item_code), None)
-		if not first_inward_entry:
-			return
+		if moves:
+			latest_move = moves[-1]
+			row.update(
+				{
+					"item_name": latest_move.item_name,
+					"reference_doctype": latest_move.reference_doctype,
+					"reference_name": latest_move.reference_name,
+				}
+			)
+		elif row.item_code != item_code:
+			# No earlier move: `item_code` created the serial no, so its reference is correct
+			row.item_name = frappe.get_cached_value("Item", item_code, "item_name")
 
-		row.update(
-			{
-				"item_code": item_code,
-				"item_name": first_inward_entry.item_name,
-				"reference_doctype": first_inward_entry.reference_doctype,
-				"reference_name": first_inward_entry.reference_name,
-			}
-		)
+		row.item_code = item_code
+
+	def get_moves_to_item(self, serial_no, item_code):
+		"""Return the inward entries under `item_code` that consume the serial no under another item."""
+		consumed_under_other_item = {
+			(entry.reference_doctype, entry.reference_name)
+			for entry in self.get_sabb_entries(serial_no, "Outward")
+			if entry.item_code != item_code
+		}
+
+		return [
+			entry
+			for entry in self.get_sabb_entries(serial_no, "Inward")
+			if entry.item_code == item_code
+			and (entry.reference_doctype, entry.reference_name) in consumed_under_other_item
+		]
 
 	def get_serial_no_batches(self, name=None):
 		batches = self.filters.get("batches", [])
