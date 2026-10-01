@@ -322,6 +322,8 @@ frappe.ui.form.on("Timesheet Detail", {
 		if (frm.doc.parent_project) {
 			frappe.model.set_value(cdt, cdn, "project", frm.doc.parent_project);
 		}
+
+		calculate_time_and_amount(frm);
 	},
 
 	hours: function (frm, cdt, cdn) {
