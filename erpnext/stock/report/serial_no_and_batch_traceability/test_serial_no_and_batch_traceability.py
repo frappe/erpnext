@@ -304,10 +304,10 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		fg_serial_nos = self.new_fg_serial_nos(fg_item)
 		repack = self.make_repack([(rm_item, 3, rm_serial_nos)], [(fg_item, 3, fg_serial_nos)], submit=False)
 
-		first_entry = next(
-			row for row in get_fg_mapping(repack.name)["raw_materials"] if row.serial_no == rm_serial_nos[0]
-		)
-		set_fg_mapping(repack.name, {first_entry.name: fg_serial_nos[2]})
+		# the bundle row order is what the mapping on submit follows
+		raw_materials = get_fg_mapping(repack.name)["raw_materials"]
+		rm_serial_nos = [row.serial_no for row in raw_materials]
+		set_fg_mapping(repack.name, {raw_materials[0].name: fg_serial_nos[2]})
 
 		repack.reload()
 		repack.submit()
@@ -329,10 +329,10 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		fg_serial_nos = self.new_fg_serial_nos(fg_item)
 		repack = self.make_repack([(rm_item, 3, rm_serial_nos)], [(fg_item, 3, fg_serial_nos)], submit=False)
 
-		first_entry = next(
-			row for row in get_fg_mapping(repack.name)["raw_materials"] if row.serial_no == rm_serial_nos[0]
-		)
-		set_fg_mapping(repack.name, {first_entry.name: fg_serial_nos[2]})
+		# the bundle row order is what the mapping on submit follows
+		raw_materials = get_fg_mapping(repack.name)["raw_materials"]
+		rm_serial_nos = [row.serial_no for row in raw_materials]
+		set_fg_mapping(repack.name, {raw_materials[0].name: fg_serial_nos[2]})
 
 		repack.reload()
 		repack.submit()
