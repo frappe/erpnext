@@ -665,16 +665,26 @@ frappe.ui.form.on("Stock Entry", {
 		const { fg_values: fg_rows, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
 			stock_entry: frm.doc.name,
 		});
-		// label each finished good serial / batch; a serial no and a batch no can share a name
+		// one unique label per finished good serial / batch; a serial no and a batch no can share a name
 		const type_label = (fg_field) => (fg_field === "fg_serial_no" ? __("Serial No") : __("Batch No"));
-		const is_shared = (value) => fg_rows.filter((row) => row.value === value).length > 1;
-		const get_label = (fg_field, value) =>
-			is_shared(value) ? `${value} (${type_label(fg_field)})` : value;
-
+		const is_taken = (label) => label in targets || fg_rows.some((row) => row.value === label);
 		const targets = {};
+		const labels = {};
 		fg_rows.forEach((row) => {
-			targets[get_label(row.fg_field, row.value)] = { fg_field: row.fg_field, value: row.value };
+			const shared = fg_rows.some((other) => other !== row && other.value === row.value);
+			let label = row.value;
+			if (shared || label in targets) {
+				// a suffixed label must not match another label or another finished good's real name
+				label = `${row.value} (${type_label(row.fg_field)})`;
+				for (let n = 2; is_taken(label); n++) {
+					label = `${row.value} (${type_label(row.fg_field)} ${n})`;
+				}
+			}
+
+			targets[label] = { fg_field: row.fg_field, value: row.value };
+			labels[`${row.fg_field}:${row.value}`] = label;
 		});
+		const get_label = (fg_field, value) => labels[`${fg_field}:${value}`] || "";
 		const fg_values = Object.keys(targets);
 
 		if (!fg_values.length || !raw_materials.length) {
