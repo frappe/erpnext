@@ -188,16 +188,14 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		)
 
 	def register_items(self, conditions, params):
-		"""Items the live item filters allow, with the details the live ledger query joins in. Without
-		an item filter, only items with ledger rows under the report's other filters are fetched."""
+		"""Items with ledger rows under the report's filters that the live item filters allow, with
+		the details the live ledger query joins in."""
 		item = frappe.qb.DocType("Item")
 		query = frappe.qb.from_(item).select(*(item[field] for field in ITEM_COLUMNS))
-		if any(self.filters.get(field) for field in ("item_code", "item_group", "brand")):
-			rows = self.apply_items_filters(query, item).run(as_dict=True)
-		else:
-			rows = []
-			for codes in batched(self.get_ledger_item_codes(conditions, params), BATCH_SIZE):
-				rows += query.where(item.name.isin(codes)).run(as_dict=True)
+		query = self.apply_items_filters(query, item)
+		rows = []
+		for codes in batched(self.get_ledger_item_codes(conditions, params), BATCH_SIZE):
+			rows += query.where(item.name.isin(codes)).run(as_dict=True)
 
 		self.conn.register(
 			"snapshot_items", pa.Table.from_pylist(rows, schema=pa.schema(ITEM_COLUMNS.items()))
@@ -205,6 +203,9 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 
 	def get_ledger_item_codes(self, conditions, params):
 		sql = f'SELECT DISTINCT sle.item_code FROM "tabStock Ledger Entry" sle WHERE {conditions}'
+		if item_codes := self.filters.get("item_code"):
+			sql += " AND list_contains($item_codes::VARCHAR[], sle.item_code)"
+			params = {**params, "item_codes": list(item_codes)}
 		return [code for (code,) in self.conn.execute(sql, params).fetchall()]
 
 	def get_conditions(self):
