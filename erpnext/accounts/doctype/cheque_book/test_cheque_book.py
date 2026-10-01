@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.cheque_book.cheque_book import (
 	cancel_cheque_payment,
 	get_next_cheque,
 	get_next_cheque_book_no,
+	get_occupied_cheque_nos,
 	is_cheque_payment,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -201,6 +202,13 @@ class TestChequeBook(ERPNextTestSuite):
 
 		cancelled.delete()
 		self.assertEqual(get_next_cheque(BANK_LEDGER, self.book.name, include_free=True)["free"], 4)
+
+	def test_occupied_cheques_can_be_limited_from_cursor(self):
+		self.make_cheque_payment("000101")
+		cancel_cheque(self.book.name, "000102")
+		self.make_cheque_payment("000103")
+
+		self.assertEqual(get_occupied_cheque_nos(self.book, from_no="000102"), {102, 103})
 
 	def test_next_cheque_is_suggested_and_marked_used_on_submit(self):
 		pe = self.make_cheque_payment()
