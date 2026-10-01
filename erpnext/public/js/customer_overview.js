@@ -370,6 +370,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	destroy_trend() {
 		if (this.trend_chart) this.trend_chart.destroy();
 		this.trend_chart = null;
+		this.trend_target = null;
 		this.$trend_notes = null;
 	}
 
@@ -381,7 +382,11 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return;
 		}
 
-		if (this.trend_chart && this.sales && this.sales.loading) return;
+		if (this.trend_chart && this.sales && this.sales.loading) {
+			this.$trend.addClass("co-loading").attr("aria-busy", "true");
+			return;
+		}
+		this.$trend.removeClass("co-loading").removeAttr("aria-busy");
 
 		const t = this.sales.data && this.sales.data.trend;
 		const data = t &&
@@ -391,6 +396,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			};
 
 		if (this.trend_chart && data) {
+			this.trend_target = data;
 			this.trend_chart.update(data);
 			this.trend_notes(t);
 			return;
@@ -409,6 +415,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return;
 		}
 
+		this.trend_target = data;
 		this.trend_chart = this.draw_trend($('<div class="co-chart">').appendTo($panel)[0], data);
 		this.$trend_notes = $('<div class="co-note">').appendTo($panel);
 		this.trend_notes(t);
@@ -430,7 +437,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			disableEntryAnimation: 1,
 		});
 		requestAnimationFrame(() => {
-			if (this.trend_chart === chart) chart.update(data);
+			if (this.trend_chart === chart) chart.update(this.trend_target);
 		});
 		return chart;
 	}
