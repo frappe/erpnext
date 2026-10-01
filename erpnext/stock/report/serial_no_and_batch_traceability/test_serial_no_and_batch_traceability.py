@@ -151,7 +151,6 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			"Serial and Batch Entry",
 			{"parent": receipt.items[0].serial_and_batch_bundle},
 			pluck="serial_no",
-			order_by="serial_no",
 		)
 
 	def make_repack(self, raw_materials, finished_goods, submit=True):
@@ -200,17 +199,6 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 
 	def make_bundle(self, item_code, warehouse, qty, serial_nos):
 		"""A bundle the user creates first and links to the draft entry."""
-		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
-				frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"serial_no": serial_no,
-						"item_code": item_code,
-						"company": "_Test Company",
-					}
-				).insert()
-
 		return make_serial_batch_bundle(
 			{
 				"item_code": item_code,
@@ -224,8 +212,21 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			}
 		).name
 
-	def new_fg_serial_nos(self, qty=3):
-		return [f"TRC-FGM-{frappe.generate_hash(length=8).upper()}" for _ in range(qty)]
+	def new_fg_serial_nos(self, item_code, qty=3):
+		"""Serial nos the user creates for the finished goods; the site's naming decides their names."""
+		return [
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": f"TRC-FGM-{frappe.generate_hash(length=8).upper()}",
+					"item_code": item_code,
+					"company": "_Test Company",
+				}
+			)
+			.insert()
+			.name
+			for _ in range(qty)
+		]
 
 	def get_rm_serials_by_fg_serial(self, fg_item, fg_serial_nos):
 		rows = self.run_report(item_code=fg_item, serial_nos=fg_serial_nos, traceability_direction="Backward")
@@ -257,18 +258,19 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 
 		fg_serial_nos = [row.value for row in get_fg_values(repack.name)]
 		raw_materials = get_raw_material_entries(repack.name)
-		self.assertEqual([row.serial_no for row in raw_materials], rm_serial_nos)
+		self.assertEqual({row.serial_no for row in raw_materials}, set(rm_serial_nos))
+		# in the order the raw material serial nos were picked
 		self.assertEqual([row.fg_serial_no for row in raw_materials], fg_serial_nos)
 
 		rm_serials_by_fg = self.get_rm_serials_by_fg_serial(fg_item, fg_serial_nos)
-		for rm_serial_no, fg_serial_no in zip(rm_serial_nos, fg_serial_nos, strict=True):
-			self.assertEqual(rm_serials_by_fg[fg_serial_no], {rm_serial_no})
+		for row in raw_materials:
+			self.assertEqual(rm_serials_by_fg[row.fg_serial_no], {row.serial_no})
 
 	def test_draft_mapping_is_kept_on_submit(self):
 		"""User created bundles are mapped on draft; the mapping is kept and locked on submit."""
 		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
 		rm_serial_nos = self.receive(rm_item)
-		fg_serial_nos = self.new_fg_serial_nos()
+		fg_serial_nos = self.new_fg_serial_nos(fg_item)
 		repack = self.make_repack([(rm_item, 3, rm_serial_nos)], [(fg_item, 3, fg_serial_nos)], submit=False)
 
 		mapping = get_fg_mapping(repack.name)
@@ -299,7 +301,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		"""Raw materials left unmapped on draft are mapped to the remaining finished goods on submit."""
 		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
 		rm_serial_nos = self.receive(rm_item)
-		fg_serial_nos = self.new_fg_serial_nos()
+		fg_serial_nos = self.new_fg_serial_nos(fg_item)
 		repack = self.make_repack([(rm_item, 3, rm_serial_nos)], [(fg_item, 3, fg_serial_nos)], submit=False)
 
 		first_entry = next(
@@ -324,7 +326,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		"""With auto mapping off, the draft mapping is kept and the rest is left unmapped."""
 		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
 		rm_serial_nos = self.receive(rm_item)
-		fg_serial_nos = self.new_fg_serial_nos()
+		fg_serial_nos = self.new_fg_serial_nos(fg_item)
 		repack = self.make_repack([(rm_item, 3, rm_serial_nos)], [(fg_item, 3, fg_serial_nos)], submit=False)
 
 		first_entry = next(
@@ -372,7 +374,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		"""A Repack making a serialized and a batch tracked item maps across both, to the right item."""
 		rm_item = self.make_rm_item()
 		serial_fg_item, batch_fg_item = self.make_fg_item(), self.make_fg_item(batch=True)
-		rm_serial_nos = self.receive(rm_item)
+		self.receive(rm_item)
 		repack = self.make_repack([(rm_item, 3, None)], [(serial_fg_item, 2, None), (batch_fg_item, 1, None)])
 
 		fg_values = get_fg_values(repack.name)
@@ -385,12 +387,14 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			],
 		)
 
+		raw_materials = get_raw_material_entries(repack.name)
 		self.assertEqual(
-			[row.fg_serial_no or row.fg_batch_no for row in get_raw_material_entries(repack.name)],
+			[row.fg_serial_no or row.fg_batch_no for row in raw_materials],
 			[row.value for row in fg_values],
 		)
 
-		fg_rows = self.get_forward_fg_rows(rm_item, repack, serial_nos=[rm_serial_nos[2]])
+		# the last picked raw material went into the batch tracked finished good
+		fg_rows = self.get_forward_fg_rows(rm_item, repack, serial_nos=[raw_materials[2].serial_no])
 		self.assertEqual(
 			[(row["item_code"], row["batch_no"], row["qty"]) for row in fg_rows],
 			[(batch_fg_item, fg_values[2].value, 1)],
@@ -432,7 +436,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
 		rm_serial_nos = self.receive(rm_item)
 		repack = self.make_repack(
-			[(rm_item, 3, rm_serial_nos)], [(fg_item, 3, self.new_fg_serial_nos())], submit=False
+			[(rm_item, 3, rm_serial_nos)], [(fg_item, 3, self.new_fg_serial_nos(fg_item))], submit=False
 		)
 		raw_materials = get_fg_mapping(repack.name)["raw_materials"]
 
