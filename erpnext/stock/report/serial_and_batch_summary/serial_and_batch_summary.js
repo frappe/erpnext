@@ -32,8 +32,12 @@ frappe.query_reports["Serial and Batch Summary"] = {
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return frappe.db.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "voucher_type",

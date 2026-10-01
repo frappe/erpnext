@@ -36,6 +36,15 @@ def get_data(filters):
 
 		filters_data.append(["against_voucher", "in", assets])
 
+	if filters.get("cost_center"):
+		cost_centers = filters.get("cost_center")
+		if isinstance(cost_centers, str) and cost_centers.startswith("["):
+			cost_centers = frappe.parse_json(cost_centers)
+		if isinstance(cost_centers, list):
+			filters_data.append(["cost_center", "in", cost_centers])
+		else:
+			filters_data.append(["cost_center", "=", cost_centers])
+
 	company_fb = frappe.get_cached_value("Company", filters.get("company"), "default_finance_book")
 
 	if filters.get("include_default_book_assets") and company_fb:
