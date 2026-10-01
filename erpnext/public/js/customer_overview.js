@@ -441,7 +441,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 		$('<div class="co-note">')
 			.text(
 				flt(a.overdue) > 0
-					? __("Overdue {0} · {1}% of outstanding", [this.money0(a.overdue), flt(a.overdue_pct, 1)])
+					? __("Overdue {0} · {1}% of unpaid invoices", [
+							this.money0(a.overdue),
+							flt(a.overdue_pct, 1),
+					  ])
 					: __("Nothing overdue")
 			)
 			.appendTo($panel);
