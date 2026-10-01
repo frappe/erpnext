@@ -108,6 +108,7 @@
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Organization Name",
@@ -118,6 +119,7 @@
   {
    "fieldname": "email_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Email",
    "oldfieldname": "email_id",
    "oldfieldtype": "Data",
@@ -214,6 +216,7 @@
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Mobile No",
    "oldfieldname": "mobile_no",
    "oldfieldtype": "Data",
@@ -544,7 +547,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2026-08-21 23:11:43.771048",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

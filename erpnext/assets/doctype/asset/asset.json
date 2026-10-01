@@ -58,7 +58,7 @@
   "other_info_tab",
   "accounting_dimensions_section",
   "cost_center",
-  "column_break_rjyw",
+  "dimension_col_break",
   "asset_owner_section",
   "asset_owner",
   "column_break_yeds",
@@ -100,6 +100,7 @@
    "fetch_if_empty": 1,
    "fieldname": "asset_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Asset Name",
    "reqd": 1
@@ -107,6 +108,7 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
@@ -117,7 +119,6 @@
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Asset Category",
@@ -549,7 +550,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_rjyw",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -629,7 +630,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2026-08-21 23:11:38.364997",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

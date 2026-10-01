@@ -43,7 +43,7 @@
   "total_repair_cost",
   "accounting_dimensions_section",
   "cost_center",
-  "column_break_14",
+  "dimension_col_break",
   "project",
   "connection_tab"
  ],
@@ -174,7 +174,7 @@
    "options": "Project"
   },
   {
-   "fieldname": "column_break_14",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -277,7 +277,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2026-06-20 15:43:54.943335",
+ "modified": "2026-09-30 13:13:52.023971",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

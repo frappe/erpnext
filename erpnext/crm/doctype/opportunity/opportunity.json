@@ -304,12 +304,14 @@
   {
    "fieldname": "contact_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Contact Email",
    "options": "Email"
   },
   {
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Contact Mobile",
    "options": "Phone"
   },
@@ -653,7 +655,7 @@
  "icon": "user-star",
  "idx": 195,
  "links": [],
- "modified": "2026-02-10 14:36:01.387984",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

@@ -5,6 +5,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.accounts.party import (
 	get_party_account_currency,
@@ -13,6 +14,7 @@ from erpnext.accounts.party import (
 )
 from erpnext.accounts.utils import get_account_currency
 from erpnext.exceptions import InvalidCurrency
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_item_restrictions
 
 
 class PartyValidator:
@@ -24,6 +26,7 @@ class PartyValidator:
 	def validate(self) -> None:
 		"""Run all party-related validations in order."""
 		self.validate_party()
+		self.validate_party_specific_items()
 		self.validate_party_accounts()
 		self.validate_currency()
 		self.validate_party_account_currency()
@@ -55,6 +58,56 @@ class PartyValidator:
 	def validate_party(self) -> None:
 		party_type, party = self.get_party()
 		validate_party_frozen_disabled(self.doc.company, party_type, party)
+
+	def validate_party_specific_items(self) -> None:
+		party_type, party = self.get_party()
+		if self.doc.get("quotation_to") == "Customer":
+			party = self.doc.party_name
+		if not party:
+			return
+
+		restrictions = get_party_item_restrictions(party_type, party)
+		rows = self.get_rows_for_item_restrictions() if restrictions else []
+		if not rows:
+			return
+
+		restricted_items = frappe.get_all(
+			"Item",
+			filters={"name": ("in", list({row.item_code for row in rows}))},
+			or_filters={field: ("in", list(values)) for field, values in restrictions.items()},
+			pluck="name",
+		)
+		for row in rows:
+			if row.item_code in restricted_items:
+				frappe.throw(
+					_("Row {0}: Item {1} is not allowed for {2} {3}.").format(
+						row.idx, frappe.bold(row.item_code), _(party_type), frappe.bold(party)
+					),
+					title=_("Item Restricted for Party"),
+				)
+
+	def get_rows_for_item_restrictions(self) -> list:
+		"""Skip return rows that reverse a submitted row of the original document."""
+		rows = [row for row in self.doc.get("items") if row.item_code]
+		if not (self.doc.get("is_return") and self.doc.get("return_against")):
+			return rows
+
+		reference_field = (
+			"dn_detail" if self.doc.doctype == "Delivery Note" else frappe.scrub(self.doc.doctype) + "_item"
+		)
+		original_items = dict(
+			frappe.get_all(
+				f"{self.doc.doctype} Item",
+				filters={"parent": self.doc.return_against, "docstatus": 1},
+				fields=["name", "item_code"],
+				as_list=True,
+			)
+		)
+		return [
+			row
+			for row in rows
+			if flt(row.qty) > 0 or original_items.get(row.get(reference_field)) != row.item_code
+		]
 
 	def validate_party_accounts(self) -> None:
 		if self.doc.doctype not in ("Sales Invoice", "Purchase Invoice"):

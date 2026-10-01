@@ -215,6 +215,7 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Tax ID"
   },
   {
@@ -241,11 +242,13 @@
   },
   {
    "depends_on": "is_internal_customer",
+   "description": "Select the related company that this Customer represents for inter-company transactions.",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
+   "show_description_on_click": 1,
    "unique": 1
   },
   {
@@ -333,6 +336,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
    "hidden": 1,
+   "in_global_search": 1,
    "label": "Mobile No",
    "no_copy": 1,
    "options": "Mobile"
@@ -342,6 +346,7 @@
    "fieldname": "email_id",
    "fieldtype": "Read Only",
    "hidden": 1,
+   "in_global_search": 1,
    "label": "Email Id",
    "no_copy": 1,
    "options": "Email"
@@ -754,7 +759,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-23 11:29:53.410448",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

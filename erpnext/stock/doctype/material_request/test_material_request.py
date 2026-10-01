@@ -41,6 +41,48 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 		self.assertEqual(mr.items[0].qty, 1)
 
+	def test_production_plan_qty_with_repeated_references(self):
+		from unittest.mock import patch
+
+		plan_items = [
+			frappe._dict(name="plan-item-1", available_qty=10),
+			frappe._dict(name="plan-item-2", available_qty=10),
+			frappe._dict(name="plan-item-3", available_qty=0.3),
+		]
+		cases = [
+			("above availability", [("plan-item-1", 6), ("plan-item-1", 6)], True),
+			("equal to availability", [("plan-item-1", 6), ("plan-item-1", 4)], False),
+			("below availability", [("plan-item-1", 3), ("plan-item-1", 4)], False),
+			("separate plan items", [("plan-item-1", 6), ("plan-item-2", 6)], False),
+			("unlinked item", [("plan-item-1", 6), (None, 6)], False),
+			("single row above availability", [("plan-item-1", 11)], True),
+			("negative row before excess", [("plan-item-1", -2), ("plan-item-1", 11)], True),
+			("negative row after excess", [("plan-item-1", 11), ("plan-item-1", -2)], True),
+			("fractional quantities", [("plan-item-3", 0.1), ("plan-item-3", 0.2)], False),
+		]
+		for label, quantities, should_raise in cases:
+			with self.subTest(label=label):
+				mr = frappe.new_doc("Material Request")
+				for plan_item, qty in quantities:
+					mr.append(
+						"items",
+						{
+							"item_code": "_Test Item",
+							"material_request_plan_item": plan_item,
+							"qty": qty,
+							"conversion_factor": 2,
+							"stock_qty": qty * 2,
+						},
+					)
+
+				with patch("frappe.qb.from_") as query:
+					query.return_value.select.return_value.where.return_value.run.return_value = plan_items
+					if should_raise:
+						with self.assertRaises(frappe.ValidationError):
+							mr.validate_pp_qty()
+					else:
+						mr.validate_pp_qty()
+
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
 
@@ -121,6 +163,24 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		# Test 2 - MR items ordered qty should be updated based on PO items qty when submitted
 		self.assertEqual(mr.items[0].ordered_qty, 54)
+
+		po.cancel()
+		partial_po = make_purchase_order(mr.name)
+		partial_po.supplier = "_Test Supplier"
+		partial_po.items = [partial_po.items[0]]
+		partial_po.items[0].schedule_date = today()
+		partial_po.items[0].fg_item_qty = 18
+		partial_po.items[0].qty = 9
+		partial_po.submit()
+		mr.reload()
+		self.assertEqual(mr.items[0].ordered_qty, 18)
+
+		remaining_po = make_purchase_order(mr.name)
+		self.assertEqual(remaining_po.items[0].fg_item_qty, 36)
+		self.assertEqual(remaining_po.items[0].qty, 18)
+		self.assertEqual(remaining_po.items[0].stock_qty, 54)
+		self.assertEqual(remaining_po.items[0].uom, "Test UOM")
+		self.assertEqual(remaining_po.items[0].conversion_factor, 3)
 
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
@@ -1341,6 +1401,8 @@ class TestMaterialRequest(ERPNextTestSuite):
 		column that is not in the select list; PostgreSQL rejects that, so the
 		picker has to group and order by an aggregate instead.
 		"""
+		from frappe.core.doctype.user.test_user import test_user
+
 		from erpnext.stock.doctype.material_request.material_request import (
 			get_material_requests_based_on_supplier,
 		)
@@ -1371,6 +1433,81 @@ class TestMaterialRequest(ERPNextTestSuite):
 		returned = {row["name"] for row in result}
 		self.assertIn(mr1.name, returned)
 		self.assertIn(mr2.name, returned)
+
+		with test_user(first_name="mr-supplier-picker", roles=["Purchase Manager"]) as user:
+			with self.set_user(user.name):
+				self.assertFalse(frappe.has_permission("Item", "read"))
+				result = get_material_requests_based_on_supplier(
+					doctype="Material Request",
+					txt="",
+					searchfield="name",
+					start=0,
+					page_len=20,
+					filters={"supplier": "_Test Supplier", "company": "_Test Company"},
+				)
+				returned = {row["name"] for row in result}
+				self.assertIn(mr1.name, returned)
+				self.assertIn(mr2.name, returned)
+
+	def test_default_supplier_item_permissions(self):
+		from frappe.core.doctype.user.test_user import test_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.material_request.mapper import get_items_based_on_default_supplier
+
+		allowed_item = create_item_with_default_supplier("_Test MR Allowed Supplier Item", "_Test Supplier")
+		restricted_item = create_item_with_default_supplier(
+			"_Test MR Restricted Supplier Item", "_Test Supplier"
+		)
+		for role in ("Purchase User", "Purchase Manager"):
+			with (
+				self.subTest(role=role),
+				test_user(first_name=f"mr-{frappe.scrub(role)}", roles=[role]) as user,
+			):
+				with self.set_user(user.name):
+					self.assertTrue(frappe.has_permission("Item", "select"))
+					self.assertEqual(frappe.has_permission("Item", "read"), role == "Purchase User")
+					items = get_items_based_on_default_supplier("_Test Supplier")
+					self.assertIn(allowed_item, items)
+					self.assertIn(restricted_item, items)
+
+				add_user_permission("Item", allowed_item, user.name)
+				with self.set_user(user.name):
+					self.assertEqual(get_items_based_on_default_supplier("_Test Supplier"), [allowed_item])
+					self.assertEqual(get_items_based_on_default_supplier("_Test Supplier 1"), [])
+
+	def test_default_supplier_items_deny_missing_access(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.stock.doctype.material_request.mapper import get_items_based_on_default_supplier
+
+		with test_user(first_name="mr-no-item-access", roles=[], user_type="Website User") as user:
+			for username in (user.name, "Guest"):
+				with self.subTest(user=username), self.set_user(username):
+					self.assertFalse(frappe.has_permission("Item", "select"))
+					self.assertRaises(
+						frappe.PermissionError, get_items_based_on_default_supplier, "_Test Supplier"
+					)
+
+	def test_default_supplier_items_preserve_order_and_duplicates(self):
+		from erpnext.stock.doctype.material_request.mapper import get_items_based_on_default_supplier
+
+		self.load_test_records("Company")
+		item_code = create_item_with_default_supplier("_Test MR Supplier Z", "_Test Supplier")
+		item = frappe.get_doc("Item", item_code)
+		item.append("item_defaults", {"company": "_Test Company 1", "default_supplier": "_Test Supplier"})
+		item.save()
+		other_item = create_item_with_default_supplier("_Test MR Supplier A", "_Test Supplier")
+		for index, row in enumerate(
+			[*item.item_defaults, frappe.get_doc("Item", other_item).item_defaults[0]]
+		):
+			frappe.db.set_value("Item Default", row.name, "creation", f"2020-01-0{index + 1} 00:00:00")
+
+		expected = frappe.get_all(
+			"Item Default", {"default_supplier": "_Test Supplier", "parenttype": "Item"}, pluck="parent"
+		)
+		self.assertEqual(expected.count(item_code), 2)
+		self.assertEqual(get_items_based_on_default_supplier("_Test Supplier"), expected)
 
 	def test_get_item_default_suppliers(self):
 		from erpnext.stock.doctype.material_request.mapper import get_item_default_suppliers

@@ -68,7 +68,7 @@
   "address_display",
   "accounting_dimensions_section",
   "project",
-  "column_break_wgvc",
+  "dimension_col_break",
   "cost_center",
   "other_info_tab",
   "printing_settings",
@@ -765,7 +765,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_wgvc",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -785,7 +785,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-26 16:44:19.045190",
+ "modified": "2026-09-30 13:11:01.498358",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

@@ -46,7 +46,7 @@ def update_item(obj, target, source_parent):
 		target.schedule_date = None
 
 	if target.fg_item:
-		target.fg_item_qty = obj.stock_qty
+		target.fg_item_qty = target.stock_qty
 		if sc_bom := get_subcontracting_boms_for_finished_goods(target.fg_item):
 			target.item_code = sc_bom.service_item
 			target.uom = sc_bom.service_item_uom
@@ -291,14 +291,18 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 
 @frappe.whitelist()
 def get_items_based_on_default_supplier(supplier: str):
-	supplier_items = [
-		d.parent
-		for d in frappe.db.get_all(
-			"Item Default", {"default_supplier": supplier, "parenttype": "Item"}, "parent"
-		)
-	]
+	frappe.has_permission("Item", "select", throw=True)
+	# Child rows are only candidates; return names allowed by the parent Item permissions.
+	supplier_items = frappe.get_all(
+		"Item Default", {"default_supplier": supplier, "parenttype": "Item"}, pluck="parent"
+	)
+	if not supplier_items:
+		return []
 
-	return supplier_items
+	permitted_items = set(
+		frappe.get_list("Item", filters={"name": ["in", supplier_items]}, pluck="name", limit=0)
+	)
+	return [item for item in supplier_items if item in permitted_items]
 
 
 @frappe.whitelist()

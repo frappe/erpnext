@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"per_delivered\", \"label\": \"% Delivered\"}, {\"fieldname\": \"company\", \"label\": \"Company\"}]",
+ "creation": "2026-09-30 21:12:57.014033",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "For Delivery",
+ "filters": "[[\"Pick List\", \"purpose\", \"=\", \"Delivery\"], [\"Pick List\", \"status\", \"in\", [\"Open\", \"Partly Delivered\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:57.014033",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Pick List-For Delivery",
+ "owner": "Administrator",
+ "reference_doctype": "Pick List",
+ "route_signature": "purpose=Delivery&status=[\"in\",[\"Open\",\"Partly Delivered\"]]",
+ "sort_field": "creation",
+ "sort_order": "asc"
+}

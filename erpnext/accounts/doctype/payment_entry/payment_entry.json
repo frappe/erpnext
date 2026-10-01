@@ -228,7 +228,6 @@
    "depends_on": "eval:(in_list([\"Internal Transfer\", \"Pay\"], doc.payment_type) || doc.party)",
    "fieldname": "paid_from",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Account Paid From",
    "options": "Account",
@@ -253,7 +252,6 @@
    "depends_on": "eval:(in_list([\"Internal Transfer\", \"Receive\"], doc.payment_type) || doc.party)",
    "fieldname": "paid_to",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Account Paid To",
    "options": "Account",
@@ -417,6 +415,7 @@
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Cheque/Reference No",
    "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
@@ -797,7 +796,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-05-15 13:31:01.166010",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

@@ -15,7 +15,7 @@ frappe.listview_settings["Period Closing Voucher"] = {
 			Completed: [__("Period Closed"), "green"],
 			Failed: [__("Period Closing Failed"), "red"],
 		};
-		if (doc.docstatus != 0) {
+		if (doc.docstatus == 1) {
 			return [
 				gle_processing_status[doc.gle_processing_status][0],
 				gle_processing_status[doc.gle_processing_status][1],
