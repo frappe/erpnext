@@ -324,6 +324,27 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			},
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 0})
+	def test_draft_mapping_kept_when_auto_mapping_is_disabled(self):
+		"""With auto mapping off, the draft mapping is kept and the rest is left unmapped."""
+		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
+		rm_serial_nos = self.receive(rm_item)
+		fg_serial_nos = self.new_fg_serial_nos()
+		repack = self.make_repack([(rm_item, 3, rm_serial_nos)], [(fg_item, 3, fg_serial_nos)], submit=False)
+
+		first_entry = next(
+			row for row in get_fg_mapping(repack.name)["raw_materials"] if row.serial_no == rm_serial_nos[0]
+		)
+		set_fg_mapping(repack.name, {first_entry.name: fg_serial_nos[2]})
+
+		repack.reload()
+		repack.submit()
+
+		self.assertEqual(
+			{row.serial_no: row.fg_serial_no for row in get_raw_material_entries(repack.name)},
+			{rm_serial_nos[0]: fg_serial_nos[2], rm_serial_nos[1]: None, rm_serial_nos[2]: None},
+		)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
 	)
@@ -425,6 +446,16 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			{raw_materials[0].name: raw_materials[1].serial_no},
 		)
 		self.assertRaises(frappe.ValidationError, set_fg_mapping, repack.name, {"not-a-row": ""})
+
+		# the mapping must be a dictionary, also when sent as JSON
+		self.assertRaises(
+			frappe.ValidationError, set_fg_mapping, repack.name, frappe.as_json([raw_materials[0].name])
+		)
+
+		# a bundle that belongs to another voucher can't be changed through this entry
+		bundle = frappe.db.get_value("Serial and Batch Entry", raw_materials[0].name, "parent")
+		frappe.db.set_value("Serial and Batch Bundle", bundle, "voucher_no", "MAT-STE-OTHER")
+		self.assertRaises(frappe.ValidationError, set_fg_mapping, repack.name, {raw_materials[0].name: None})
 
 	def test_fg_target_with_shared_serial_and_batch_name(self):
 		"""A serial no and a batch no with the same name are kept apart."""

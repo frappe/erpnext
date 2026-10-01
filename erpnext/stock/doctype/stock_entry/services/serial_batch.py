@@ -3,7 +3,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import cint, cstr, flt, nowdate
+from frappe.utils import cint, cstr, escape_html, flt, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_or_batch_items
@@ -398,18 +398,23 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 	"""
 	doc = get_stock_entry_for_fg_mapping(stock_entry, "write")
 	mapping = frappe.parse_json(mapping) or {}
+	if not isinstance(mapping, dict):
+		frappe.throw(_("Mapping must be a dictionary of raw material entries to finished goods"))
 
 	fg_targets = {(row.fg_field, row.value) for row in get_fg_values(doc.name)}
 	if not fg_targets:
 		frappe.throw(_("{0} has no serial / batch tracked finished good").format(doc.name))
 
-	raw_material_entries = {row.name for row in get_raw_material_entries(doc.name)}
+	# only draft bundle rows that belong to this entry can be changed
+	raw_material_entries = {row.name for row in get_raw_material_entries(doc.name, draft_only=True)}
 
 	entries_by_fg_target = defaultdict(list)
 	for entry_name, target in mapping.items():
 		if entry_name not in raw_material_entries:
 			frappe.throw(
-				_("Row {0} is not a raw material serial / batch entry of {1}").format(entry_name, doc.name)
+				_("Row {0} is not a raw material serial / batch entry of {1}").format(
+					frappe.bold(escape_html(cstr(entry_name))), doc.name
+				)
 			)
 
 		entries_by_fg_target[get_fg_target(target, fg_targets, doc.name)].append(entry_name)
@@ -428,7 +433,8 @@ def set_fg_mapping_on_submit(doc):
 	"""Check the draft mapping and map the remaining raw materials to finished goods, in order.
 
 	Serialized raw materials are spread evenly across the finished goods. A batch raw material is only
-	mapped when there is a single finished good, otherwise it stays linked to all of them.
+	mapped when there is a single finished good, otherwise it stays linked to all of them. The order based
+	mapping can be turned off in Stock Settings; the mapping entered in draft is always kept.
 	"""
 	if doc.purpose not in ("Manufacture", "Repack"):
 		return
@@ -450,6 +456,9 @@ def set_fg_mapping_on_submit(doc):
 
 		row.fg_target = target if target[1] else None
 		rows_by_item[row.item_code].append(row)
+
+	if not frappe.get_single_value("Stock Settings", "auto_map_raw_materials_to_finished_goods"):
+		return
 
 	entries_by_fg_target = defaultdict(list)
 	for rows in rows_by_item.values():
@@ -487,14 +496,14 @@ def get_fg_target(target, fg_targets, stock_entry):
 	if not matches:
 		frappe.throw(
 			_("{0} is not a finished good serial / batch produced by {1}").format(
-				frappe.bold(value), stock_entry
+				frappe.bold(escape_html(cstr(value))), stock_entry
 			)
 		)
 
 	if len(matches) > 1:
 		frappe.throw(
 			_("{0} is both a finished good serial no and batch no in {1}, please specify which one").format(
-				frappe.bold(value), stock_entry
+				frappe.bold(escape_html(cstr(value))), stock_entry
 			)
 		)
 
@@ -518,15 +527,21 @@ def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
 def get_fg_values(stock_entry):
 	"""Serial nos of serialized finished goods and batch nos of the other batch tracked finished goods."""
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	sabb = frappe.qb.DocType("Serial and Batch Bundle")
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
 
 	fg_entries = (
 		frappe.qb.from_(sed)
+		.inner_join(sabb)
+		.on(sed.serial_and_batch_bundle == sabb.name)
 		.inner_join(sabe)
-		.on(sed.serial_and_batch_bundle == sabe.parent)
+		.on(sabb.name == sabe.parent)
 		.select(sed.name.as_("detail_name"), sed.item_code, sabe.serial_no, sabe.batch_no)
 		.where(
-			(sed.parent == stock_entry) & (sed.is_finished_item == 1) & (Coalesce(sed.t_warehouse, "") != "")
+			(sed.parent == stock_entry)
+			& (sed.is_finished_item == 1)
+			& (Coalesce(sed.t_warehouse, "") != "")
+			& get_own_bundle_condition(sabb, stock_entry)
 		)
 		.orderby(sed.idx)
 		.orderby(sabe.idx)
@@ -550,14 +565,17 @@ def get_fg_values(stock_entry):
 	return list(fg_values.values())
 
 
-def get_raw_material_entries(stock_entry):
+def get_raw_material_entries(stock_entry, draft_only=False):
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	sabb = frappe.qb.DocType("Serial and Batch Bundle")
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
 
-	return (
+	query = (
 		frappe.qb.from_(sed)
+		.inner_join(sabb)
+		.on(sed.serial_and_batch_bundle == sabb.name)
 		.inner_join(sabe)
-		.on(sed.serial_and_batch_bundle == sabe.parent)
+		.on(sabb.name == sabe.parent)
 		.select(
 			sabe.name,
 			sed.item_code,
@@ -573,7 +591,18 @@ def get_raw_material_entries(stock_entry):
 			& (sed.is_finished_item == 0)
 			& (Coalesce(sed.s_warehouse, "") != "")
 			& (Coalesce(sed.t_warehouse, "") == "")
+			& get_own_bundle_condition(sabb, stock_entry)
 		)
 		.orderby(sed.idx)
 		.orderby(sabe.idx)
-	).run(as_dict=True)
+	)
+
+	if draft_only:
+		query = query.where((sabb.docstatus == 0) & (sabe.docstatus == 0))
+
+	return query.run(as_dict=True)
+
+
+def get_own_bundle_condition(sabb, stock_entry):
+	"""Bundles of this stock entry; a draft bundle is linked to its voucher only when the voucher is saved."""
+	return (sabb.voucher_type == "Stock Entry") & (Coalesce(sabb.voucher_no, "").isin(["", stock_entry]))
