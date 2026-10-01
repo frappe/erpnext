@@ -25,7 +25,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_item_restrictions
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import _get_item_tax_template
@@ -291,13 +291,13 @@ def item_query(
 
 	filters = frappe.parse_json(filters)
 	company = filters.pop("company", None) if isinstance(filters, dict) else None
+	restricted_items_condition = None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
-			for field, values in get_party_item_restrictions(party_type, party).items():
-				filters[field] = ["not in", list(values)]
+			restricted_items_condition = get_restricted_items_condition(party_type, party)
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -415,6 +415,9 @@ def item_query(
 
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))
+
+	if restricted_items_condition is not None:
+		query = query.where(~restricted_items_condition)
 
 	return query.run(as_dict=as_dict)
 
