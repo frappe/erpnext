@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.utils import (
 	cint,
+	cstr,
 	flt,
 	get_datetime,
 	get_last_day,
@@ -1198,6 +1199,14 @@ def make_asset_movement(assets, purpose=None):
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
 	for asset in assets:
+		name = cstr(asset.get("name"))
+		asset["name"] = name
+		if not name:
+			erpnext._refuse()
+		if not frappe.has_permission("Asset", "select", doc=name) and not frappe.has_permission(
+			"Asset", "read", doc=name
+		):
+			erpnext._refuse()
 		asset = frappe.get_doc("Asset", asset.get("name"))
 		asset_movement.company = asset.get("company")
 		asset_movement.append(
