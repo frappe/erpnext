@@ -180,8 +180,10 @@ class ChequeBook(Document):
 		next_no = self.next_cheque_no
 		if cheque_no == next_no:
 			next_no = self.next_no_after(cheque_no)
-			while self.is_in_range(next_no) and self.is_used(next_no):
-				next_no = self.next_no_after(next_no)
+			if self.is_in_range(next_no):
+				occupied = get_occupied_cheque_nos(self, from_no=next_no, for_update=True)
+				while self.is_in_range(next_no) and int(next_no) in occupied:
+					next_no = self.next_no_after(next_no)
 
 		values = {}
 		if next_no != self.next_cheque_no:
@@ -194,24 +196,33 @@ class ChequeBook(Document):
 			self.db_set(values)
 
 
-def count_free_cheques(book, for_update=False):
+def get_occupied_cheque_nos(book, from_no=None, for_update=False):
+	issued_filters = {"cheque_book": book.name, "docstatus": 1}
+	cancelled_filters = {"cheque_book": book.name}
+	if from_no:
+		issued_filters["reference_no"] = (">=", from_no)
+		cancelled_filters["cheque_no"] = (">=", from_no)
+
 	issued = frappe.db.get_values(
 		"Payment Entry",
-		{"cheque_book": book.name, "docstatus": 1},
+		issued_filters,
 		"reference_no",
 		pluck=True,
 		for_update=for_update,
 	)
 	cancelled = frappe.db.get_values(
 		"Cancelled Cheque",
-		{"cheque_book": book.name},
+		cancelled_filters,
 		"cheque_no",
 		pluck=True,
 		for_update=for_update,
 	)
 	start, end = int(book.cheque_start_no), int(book.cheque_end_no)
-	occupied = {int(no) for no in issued + cancelled if no and no.isdigit() and start <= int(no) <= end}
-	return book.no_of_cheques - len(occupied)
+	return {int(no) for no in issued + cancelled if no and no.isdigit() and start <= int(no) <= end}
+
+
+def count_free_cheques(book, for_update=False):
+	return book.no_of_cheques - len(get_occupied_cheque_nos(book, for_update=for_update))
 
 
 @frappe.whitelist()
