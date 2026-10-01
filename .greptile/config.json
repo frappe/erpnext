@@ -14,7 +14,7 @@
         },
         {
             "id": "postgres-compatibility",
-            "rule": "ERPNext runs on MariaDB and PostgreSQL from one codebase. Check that every new or changed query works on PostgreSQL. The change must not alter the values, row count or row order that MariaDB returns.",
+            "rule": "ERPNext runs on MariaDB and PostgreSQL from one codebase. Check that every new or changed query works on PostgreSQL. The change must not alter the values, row count or row order that MariaDB returns. Replacing an arbitrary result with a deterministic one is allowed if the row count stays the same.",
             "scope": [
                 "**/*.py",
                 "**/*.sql",
