@@ -321,6 +321,7 @@ def _make_journal_entry_for_depreciation(
 		"cost_center": depreciation_cost_center,
 	}
 
+<<<<<<< HEAD
 	for dimension in accounting_dimensions:
 		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_bs"):
 			credit_entry.update(
@@ -354,6 +355,19 @@ def _make_journal_entry_for_depreciation(
 		row = asset.get("finance_books")[idx - 1]
 		row.value_after_depreciation -= depr_schedule.depreciation_amount
 		row.db_update()
+=======
+	for dimension in dimensions:
+		value = asset.get(dimension["fieldname"])
+		# Dimension defaults and mandatory flags are set per company; only the asset's company applies
+		is_asset_company = dimension.get("company") == asset.company
+
+		if value or (is_asset_company and dimension.get("mandatory_for_bs")):
+			credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+		if value or (is_asset_company and dimension.get("mandatory_for_pl")):
+			debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+	return credit_entry, debit_entry
+>>>>>>> 9cee191 (fix(assets): scope accounting dimension defaults to the asset's company)
 
 
 def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation_expense_account):
