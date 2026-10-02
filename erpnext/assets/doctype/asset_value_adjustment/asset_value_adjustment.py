@@ -160,6 +160,10 @@ class AssetValueAdjustment(Document):
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
 		for dimension in accounting_dimensions:
+			# Dimension defaults and mandatory flags are set per company
+			if dimension.get("company") != self.company:
+				continue
+
 			dimension_value = self.get(dimension["fieldname"]) or dimension.get("default_dimension")
 			if dimension.get("mandatory_for_bs"):
 				credit_entry.update({dimension["fieldname"]: dimension_value})

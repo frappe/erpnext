@@ -281,15 +281,15 @@ def get_credit_and_debit_entry(
 	}
 
 	for dimension in dimensions:
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_bs"):
-			credit_entry[dimension["fieldname"]] = asset.get(dimension["fieldname"]) or dimension.get(
-				"default_dimension"
-			)
+		value = asset.get(dimension["fieldname"])
+		# Dimension defaults and mandatory flags are set per company; only the asset's company applies
+		is_asset_company = dimension.get("company") == asset.company
 
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_pl"):
-			debit_entry[dimension["fieldname"]] = asset.get(dimension["fieldname"]) or dimension.get(
-				"default_dimension"
-			)
+		if value or (is_asset_company and dimension.get("mandatory_for_bs")):
+			credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+		if value or (is_asset_company and dimension.get("mandatory_for_pl")):
+			debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 	return credit_entry, debit_entry
 
 
