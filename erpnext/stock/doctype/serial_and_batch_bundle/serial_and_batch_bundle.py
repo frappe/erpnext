@@ -31,7 +31,6 @@ from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
 	SerialNoValuation,
 	get_batches_from_bundle,
-	get_serial_nos_batch,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.valuation import FIFOValuation
@@ -242,8 +241,14 @@ class SerialandBatchBundle(Document):
 			if not has_no_batch:
 				return
 
-			# A serial no of another item (consumed in a Repack) must not bring its batch along
-			serial_no_batch = get_serial_nos_batch(serial_nos, self.item_code)
+			serial_no_batch = frappe._dict(
+				frappe.get_all(
+					"Serial No",
+					filters={"name": ("in", serial_nos)},
+					fields=["name", "batch_no"],
+					as_list=True,
+				)
+			)
 
 			for row in self.entries:
 				if not row.batch_no:
@@ -1288,7 +1293,7 @@ class SerialandBatchBundle(Document):
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
 
-			if row.batch_no:
+			if row.batch_no and not row.serial_no:
 				batch_nos.append(row.batch_no)
 
 			if row.serial_no and row.batch_no and self.type_of_transaction == "Outward":
@@ -1297,8 +1302,7 @@ class SerialandBatchBundle(Document):
 		if serial_nos:
 			self.validate_incorrect_serial_nos(serial_nos)
 
-		# Also for serial nos: a serial no can move to another item in a Repack, its batch cannot
-		if batch_nos:
+		elif batch_nos:
 			self.validate_incorrect_batch_nos(batch_nos)
 
 		if serial_batches:
@@ -1330,10 +1334,18 @@ class SerialandBatchBundle(Document):
 
 		if incorrect_serial_nos:
 			consumed_serial_nos = self.get_serial_nos_consumed_in_same_entry()
+			moved_serial_nos = consumed_serial_nos.intersection(map(tuple, incorrect_serial_nos))
+			for item_code, serial_no in moved_serial_nos:
+				# A batch belongs to one item, so a serial no with batches cannot move to another item
+				if self.has_batch_no or frappe.get_cached_value("Item", item_code, "has_batch_no"):
+					self.throw_error_message(
+						f"Serial No {bold(serial_no)} cannot move from Item {bold(item_code)} to Item {bold(self.item_code)}, because one of them has batches"
+					)
+
 			incorrect_serial_nos = [
 				serial_no
 				for item_code, serial_no in incorrect_serial_nos
-				if (item_code, serial_no) not in consumed_serial_nos
+				if (item_code, serial_no) not in moved_serial_nos
 			]
 
 		if incorrect_serial_nos:

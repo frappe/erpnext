@@ -504,7 +504,7 @@ class SerialBatchBundle:
 		item = frappe.get_cached_value(
 			"Item",
 			sle.item_code,
-			["item_name", "description", "item_group", "brand", "has_batch_no"],
+			["item_name", "description", "item_group", "brand"],
 			as_dict=1,
 		)
 
@@ -518,9 +518,6 @@ class SerialBatchBundle:
 			.set(sn_table.brand, item.brand)
 			.where(sn_table.name.isin(serial_nos) & (sn_table.item_code != sle.item_code))
 		)
-
-		if not item.has_batch_no:
-			query = query.set(sn_table.batch_no, None)
 
 		query.run()
 
@@ -1377,8 +1374,7 @@ class SerialBatchCreation:
 		if self.get("serial_nos"):
 			serial_no_wise_batch = frappe._dict({})
 			if self.has_batch_no:
-				# A serial no of another item (consumed in a Repack) must not bring its batch along
-				serial_no_wise_batch = get_serial_nos_batch(self.serial_nos, self.item_code)
+				serial_no_wise_batch = get_serial_nos_batch(self.serial_nos)
 
 			qty = -1 if self.type_of_transaction == "Outward" else 1
 			for serial_no in self.serial_nos:
@@ -1523,16 +1519,12 @@ def get_serial_or_batch_items(items):
 	return serial_or_batch_items
 
 
-def get_serial_nos_batch(serial_nos, item_code=None):
-	filters = {"name": ("in", serial_nos)}
-	if item_code:
-		filters["item_code"] = item_code
-
+def get_serial_nos_batch(serial_nos):
 	return frappe._dict(
 		frappe.get_all(
 			"Serial No",
 			fields=["name", "batch_no"],
-			filters=filters,
+			filters={"name": ("in", serial_nos)},
 			as_list=1,
 		)
 	)
