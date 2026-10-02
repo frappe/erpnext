@@ -543,7 +543,127 @@ class TestGetItemDetail(ERPNextTestSuite):
 		pr.insert()
 		pr.submit()
 
+<<<<<<< HEAD
 		# the batch_no branch force-writes the fetched rate during mapping
 		pi = make_purchase_invoice(pr.name)
 		self.assertEqual(pi.items[0].rate, 28)
 		self.assertEqual(pi.items[1].rate, 275)  # used to collapse onto the first row (28)
+=======
+	def test_batch_no_set_only_when_first_batch_covers_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock([2, 3, 14])
+		first_batch_row = [{"batch_no": batches[0], "qty": 2, "stock_qty": 2}]
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(self.get_picked_batch_no(item_code, 2), batches[0])
+			self.assertEqual(self.get_picked_batch_no(item_code, 3, items=first_batch_row), batches[1])
+			self.assertIsNone(self.get_picked_batch_no(item_code, 5))
+			self.assertIsNone(self.get_picked_batch_no(item_code, 20))
+
+			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
+			dn.reload()
+			entries = frappe.get_all(
+				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, ["batch_no", "qty"]
+			)
+			self.assertEqual({d.batch_no: d.qty for d in entries}, {batches[0]: -2, batches[1]: -3})
+
+	def test_serial_nos_picked_across_batches_when_no_batch_covers_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_numbers_from_bundle,
+		)
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 3], has_serial_no=1, serial_no_series="FBQ-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			details = self.get_item_details_for_row(item_code, 5)
+			self.assertIsNone(details.get("batch_no"))
+			serial_nos = details.serial_no.split("\n")
+			self.assertEqual(len(serial_nos), 5)
+
+			dn = create_delivery_note(
+				item_code=item_code, qty=5, use_serial_batch_fields=1, serial_no=details.serial_no
+			)
+			dn.reload()
+			self.assertEqual(
+				get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
+			)
+
+	def test_same_document_rows_reduce_batch_by_stock_qty(self):
+		item_code, batches = self.make_batched_item_with_stock(
+			[10], uoms=[{"uom": "Box", "conversion_factor": 5}]
+		)
+		box_row = [{"batch_no": batches[0], "uom": "Box", "qty": 1, "stock_qty": 5}]
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
+			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
+
+	def test_price_not_uom_dependent_is_applied_to_item_rows(self):
+		"""An Item Price saved for the stock UOM is scaled to the row UOM unless the Price List
+		is marked Price Not UOM Dependent."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"stock_uom": "_Test UOM",
+				"uoms": [
+					{"uom": "_Test UOM", "conversion_factor": 1},
+					{"uom": "_Test UOM 1", "conversion_factor": 10},
+				],
+			}
+		).name
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test UOM Price List",
+				"currency": "INR",
+				"selling": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": price_list.name,
+				"price_list_rate": 100,
+			}
+		).insert()
+
+		ctx = frappe._dict(
+			{
+				"item_code": item_code,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"price_list": price_list.name,
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"doctype": "Sales Order",
+				"uom": "_Test UOM 1",
+				"conversion_factor": 10,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		for not_uom_dependent, expected_rate in ((0, 1000), (1, 100)):
+			with self.subTest(price_not_uom_dependent=not_uom_dependent):
+				price_list.price_not_uom_dependent = not_uom_dependent
+				price_list.save()
+				details = get_item_details(ctx.copy())
+				self.assertEqual(details.price_list_rate, expected_rate)
+>>>>>>> ea10434 (fix(stock): honour Price Not UOM Dependent in transactions)
