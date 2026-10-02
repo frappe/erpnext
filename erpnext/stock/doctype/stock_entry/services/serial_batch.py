@@ -407,8 +407,12 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 
 	# only bundle rows that belong to this entry can be changed: draft rows before submit, and after submit
 	# only the rows left unmapped, as auto created bundles get their raw material rows on submit
+	# rows are locked after submit, so a mapping saved meanwhile by someone else is seen and reported
 	is_submitted = doc.docstatus == 1
-	raw_materials = {row.name: row for row in get_raw_material_entries(doc.name, draft_only=not is_submitted)}
+	raw_materials = {
+		row.name: row
+		for row in get_raw_material_entries(doc.name, draft_only=not is_submitted, for_update=is_submitted)
+	}
 
 	entries_by_fg_target = defaultdict(list)
 	for entry_name, target in mapping.items():
@@ -587,7 +591,7 @@ def get_fg_values(stock_entry):
 	return list(fg_values.values())
 
 
-def get_raw_material_entries(stock_entry, draft_only=False):
+def get_raw_material_entries(stock_entry, draft_only=False, for_update=False):
 	sed = frappe.qb.DocType("Stock Entry Detail")
 	sabb = frappe.qb.DocType("Serial and Batch Bundle")
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
@@ -621,6 +625,9 @@ def get_raw_material_entries(stock_entry, draft_only=False):
 
 	if draft_only:
 		query = query.where((sabb.docstatus == 0) & (sabe.docstatus == 0))
+
+	if for_update:
+		query = query.for_update()
 
 	return query.run(as_dict=True)
 
