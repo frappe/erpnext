@@ -129,9 +129,6 @@ class ReportData:
 	def prepare_source_data(self, data):
 		source_data = frappe._dict({})
 		for row in data:
-			if row.serial_no:
-				self.set_inward_reference_for_item(row, row.item_code)
-
 			key = (row.item_code, row.reference_name)
 
 			value = row.serial_no or row.batch_no
@@ -159,12 +156,10 @@ class ReportData:
 				sabb_entry.qty,
 				sabb_entry.warehouse,
 				sabb_entry.posting_datetime,
-				sabb.creation,
 			)
 			.where(
 				(sabb.voucher_type == row.reference_doctype)
 				& (sabb.voucher_no == row.reference_name)
-				& (sabb.item_code == row.item_code)
 				& (sabb.is_cancelled == 0)
 				& (sabb_entry.docstatus == 1)
 			)
@@ -198,8 +193,6 @@ class ReportData:
 						inward_data = self.get_sabb_entries(value, "Inward")
 						if inward_data:
 							details = inward_data[-1]
-					elif material.serial_no:
-						self.set_inward_reference_for_item(details, material.item_code, consumed_in=sabb_data)
 
 					if details:
 						details.update(self.get_data_from_sabb(details))
@@ -220,48 +213,6 @@ class ReportData:
 					)
 
 		return sabb_data
-
-	def set_inward_reference_for_item(self, row, item_code, consumed_in=None):
-		"""Trace a serial no from the entry that moved it to `item_code`.
-
-		A Repack or Manufacture entry can move a serial no to another item. The Serial No
-		still references the entry that created it, under the first item. For a consumed
-		serial no, `consumed_in` is the entry that consumed it, so only earlier moves count.
-		"""
-		moves = self.get_moves_to_item(row.serial_no, item_code)
-		if consumed_in:
-			consumed_at = (consumed_in.posting_datetime, consumed_in.creation)
-			moves = [move for move in moves if (move.posting_datetime, move.creation) < consumed_at]
-
-		if moves:
-			latest_move = moves[-1]
-			row.update(
-				{
-					"item_name": latest_move.item_name,
-					"reference_doctype": latest_move.reference_doctype,
-					"reference_name": latest_move.reference_name,
-				}
-			)
-		elif row.item_code != item_code:
-			# No earlier move: `item_code` created the serial no, so its reference is correct
-			row.item_name = frappe.get_cached_value("Item", item_code, "item_name")
-
-		row.item_code = item_code
-
-	def get_moves_to_item(self, serial_no, item_code):
-		"""Return the inward entries under `item_code` that consume the serial no under another item."""
-		consumed_under_other_item = {
-			(entry.reference_doctype, entry.reference_name)
-			for entry in self.get_sabb_entries(serial_no, "Outward")
-			if entry.item_code != item_code
-		}
-
-		return [
-			entry
-			for entry in self.get_sabb_entries(serial_no, "Inward")
-			if entry.item_code == item_code
-			and (entry.reference_doctype, entry.reference_name) in consumed_under_other_item
-		]
 
 	def get_serial_no_batches(self, name=None):
 		batches = self.filters.get("batches", [])
@@ -404,7 +355,6 @@ class ReportData:
 				SABB.item_code,
 				SABB.item_name,
 				SABB.posting_datetime,
-				SABB.creation,
 				SABB.warehouse,
 			)
 			.where(
@@ -413,7 +363,6 @@ class ReportData:
 				& (SABB.type_of_transaction == type_of_transaction)
 			)
 			.orderby(SABB.posting_datetime)
-			.orderby(SABB.creation)
 		)
 
 		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
