@@ -292,13 +292,38 @@ def get_payments(invoices):
 	if not len(invoices):
 		return []
 
-	invoices_name = [d.name for d in invoices]
+	rows_by_invoice = get_payment_rows_by_invoice(invoices)
+	for invoice in invoices:
+		if not flt(invoice.change_amount):
+			continue
 
+		rows = rows_by_invoice.get((invoice.doctype, invoice.name), [])
+		if row := get_change_payment_row(rows, invoice.account_for_change_amount):
+			row.amount = flt(row.amount) - flt(invoice.change_amount)
+
+	amount_by_mode = {}
+	for rows in rows_by_invoice.values():
+		for row in rows:
+			amount_by_mode[row.mode_of_payment] = amount_by_mode.get(row.mode_of_payment, 0) + flt(row.amount)
+
+	return [frappe._dict(mode_of_payment=mode, amount=amount) for mode, amount in amount_by_mode.items()]
+
+
+def get_payment_rows_by_invoice(invoices):
 	SalesInvoicePayment = DocType("Sales Invoice Payment")
-	query = (
+	rows = (
 		frappe.qb.from_(SalesInvoicePayment)
+		.select(
+			SalesInvoicePayment.parenttype,
+			SalesInvoicePayment.parent,
+			SalesInvoicePayment.mode_of_payment,
+			SalesInvoicePayment.account,
+			SalesInvoicePayment.type,
+			SalesInvoicePayment.amount,
+		)
 		.where(
 			(SalesInvoicePayment.parenttype.isin(["Sales Invoice", "POS Invoice"]))
+<<<<<<< HEAD
 			& (SalesInvoicePayment.parent.isin(invoices_name))
 		)
 		.groupby(SalesInvoicePayment.mode_of_payment)
@@ -306,20 +331,30 @@ def get_payments(invoices):
 			SalesInvoicePayment.mode_of_payment,
 			SalesInvoicePayment.account,
 			fn.Sum(SalesInvoicePayment.amount).as_("amount"),
+=======
+			& (SalesInvoicePayment.parent.isin([d.name for d in invoices]))
+>>>>>>> 83904a6 (fix(accounts): take POS change off one payment row per invoice (#59514))
 		)
+		.orderby(SalesInvoicePayment.idx)
+		.run(as_dict=True)
 	)
-	data = query.run(as_dict=1)
 
-	change_amount_by_account = {}
-	for d in invoices:
-		change_amount_by_account.setdefault(d.account_for_change_amount, 0)
-		change_amount_by_account[d.account_for_change_amount] += flt(d.change_amount)
+	rows_by_invoice = {}
+	for row in rows:
+		rows_by_invoice.setdefault((row.parenttype, row.parent), []).append(row)
 
-	for d in data:
-		if change_amount_by_account.get(d.account):
-			d.amount -= flt(change_amount_by_account.get(d.account))
+	return rows_by_invoice
 
-	return data
+
+def get_change_payment_row(rows, change_account):
+	"""The row the change was paid from: a Cash row on the change account, any row on the change
+	account, then any Cash row."""
+	change_account_rows = [row for row in rows if row.account == change_account]
+	return (
+		next((row for row in change_account_rows if row.type == "Cash"), None)
+		or next(iter(change_account_rows), None)
+		or next((row for row in rows if row.type == "Cash"), None)
+	)
 
 
 def get_taxes(invoices):
