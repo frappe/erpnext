@@ -732,6 +732,47 @@ class TestStockEntry(ERPNextTestSuite):
 				use_serial_batch_fields=1,
 			)
 
+	def test_consumed_serial_no_cannot_go_to_two_finished_goods(self):
+		raw_item = make_item(
+			"_Test Repack Serial Raw Item",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TRSRI-.#####"},
+		).name
+		fg_items = [
+			make_item(item_code, {"is_stock_item": 1, "has_serial_no": 1}).name
+			for item_code in ("_Test Repack Serial FG Item", "_Test Repack Serial FG Item 2")
+		]
+
+		receipt = make_stock_entry(item_code=raw_item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+
+		repack = make_stock_entry(
+			item_code=raw_item,
+			source="_Test Warehouse - _TC",
+			qty=1,
+			purpose="Repack",
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		for fg_item in fg_items:
+			repack.append(
+				"items",
+				{
+					"item_code": fg_item,
+					"t_warehouse": "_Test Warehouse 1 - _TC",
+					"qty": 1,
+					"conversion_factor": 1.0,
+					"serial_no": serial_no,
+					"use_serial_batch_fields": 1,
+					"set_basic_rate_manually": 1,
+					"basic_rate": 50,
+				},
+			)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			repack.save()
+			repack.submit()
+
 	def test_repack_no_change_in_valuation(self):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(
