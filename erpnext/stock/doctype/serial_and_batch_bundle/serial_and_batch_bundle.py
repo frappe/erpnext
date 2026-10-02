@@ -1334,7 +1334,11 @@ class SerialandBatchBundle(Document):
 
 		if incorrect_serial_nos:
 			consumed_serial_nos = self.get_serial_nos_consumed_in_same_entry()
-			moved_serial_nos = consumed_serial_nos.intersection(map(tuple, incorrect_serial_nos))
+			moved_serial_nos = {
+				(item_code, serial_no)
+				for item_code, serial_no in incorrect_serial_nos
+				if (item_code, serial_no) in consumed_serial_nos
+			}
 			for item_code, serial_no in moved_serial_nos:
 				# A batch belongs to one item, so a serial no with batches cannot move to another item
 				if self.has_batch_no or frappe.get_cached_value("Item", item_code, "has_batch_no"):
