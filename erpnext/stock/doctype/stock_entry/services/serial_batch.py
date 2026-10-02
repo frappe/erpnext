@@ -555,6 +555,8 @@ def get_fg_values(stock_entry):
 	sed = frappe.qb.DocType("Stock Entry Detail")
 	sabb = frappe.qb.DocType("Serial and Batch Bundle")
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
+	serial_no = frappe.qb.DocType("Serial No")
+	batch = frappe.qb.DocType("Batch")
 
 	fg_entries = (
 		frappe.qb.from_(sed)
@@ -562,7 +564,18 @@ def get_fg_values(stock_entry):
 		.on(sed.serial_and_batch_bundle == sabb.name)
 		.inner_join(sabe)
 		.on(sabb.name == sabe.parent)
-		.select(sed.name.as_("detail_name"), sed.item_code, sabe.serial_no, sabe.batch_no)
+		.left_join(serial_no)
+		.on(sabe.serial_no == serial_no.name)
+		.left_join(batch)
+		.on(sabe.batch_no == batch.name)
+		.select(
+			sed.name.as_("detail_name"),
+			sed.item_code,
+			sabe.serial_no,
+			sabe.batch_no,
+			serial_no.serial_no.as_("serial_no_label"),
+			batch.batch_id.as_("batch_no_label"),
+		)
 		.where(
 			(sed.parent == stock_entry)
 			& (sed.is_finished_item == 1)
@@ -578,14 +591,15 @@ def get_fg_values(stock_entry):
 	fg_values = {}
 	for row in fg_entries:
 		if row.detail_name in serialized_rows:
-			value, fg_field = row.serial_no, "fg_serial_no"
+			value, label, fg_field = row.serial_no, row.serial_no_label, "fg_serial_no"
 		else:
-			value, fg_field = row.batch_no, "fg_batch_no"
+			value, label, fg_field = row.batch_no, row.batch_no_label, "fg_batch_no"
 
 		# a serial no and a batch no can share a name, so keep them apart
+		# the label is the physical serial / batch number, the name can be a hash
 		if value and (fg_field, value) not in fg_values:
 			fg_values[(fg_field, value)] = frappe._dict(
-				value=value, fg_field=fg_field, item_code=row.item_code
+				value=value, label=label or value, fg_field=fg_field, item_code=row.item_code
 			)
 
 	return list(fg_values.values())
