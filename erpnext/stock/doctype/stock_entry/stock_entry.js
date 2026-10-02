@@ -459,8 +459,8 @@ frappe.ui.form.on("Stock Entry", {
 			}
 		}
 
-		// mapped on draft; whatever is left is mapped automatically on submit
-		if (frm.doc.docstatus === 0 && !frm.is_new() && ["Manufacture", "Repack"].includes(frm.doc.purpose)) {
+		// mapped on draft; after submit, only the raw materials left unmapped can be mapped
+		if (frm.doc.docstatus < 2 && !frm.is_new() && ["Manufacture", "Repack"].includes(frm.doc.purpose)) {
 			frm.add_custom_button(
 				__("Map Raw Materials to Finished Goods"),
 				() => frm.trigger("map_raw_materials_to_finished_goods"),
@@ -657,14 +657,20 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	async map_raw_materials_to_finished_goods(frm) {
-		if (frm.is_dirty()) {
+		const is_submitted = frm.doc.docstatus === 1;
+		if (!is_submitted && frm.is_dirty()) {
 			await frm.save();
 		}
 
 		const method = "erpnext.stock.doctype.stock_entry.stock_entry";
-		const { fg_values: fg_rows, raw_materials } = await frappe.xcall(`${method}.get_fg_mapping`, {
+		const mapping = await frappe.xcall(`${method}.get_fg_mapping`, {
 			stock_entry: frm.doc.name,
 		});
+		const fg_rows = mapping.fg_values;
+		// the mapping is fixed on submit, so only the raw materials left unmapped can still be mapped
+		const raw_materials = is_submitted
+			? mapping.raw_materials.filter((row) => !row.fg_serial_no && !row.fg_batch_no)
+			: mapping.raw_materials;
 		// one unique label per finished good serial / batch; a serial no and a batch no can share a name
 		const type_label = (fg_field) => (fg_field === "fg_serial_no" ? __("Serial No") : __("Batch No"));
 		const is_taken = (label) => label in targets || fg_rows.some((row) => row.value === label);
@@ -687,11 +693,18 @@ frappe.ui.form.on("Stock Entry", {
 		const get_label = (fg_field, value) => labels[`${fg_field}:${value}`] || "";
 		const fg_values = Object.keys(targets);
 
+		if (is_submitted && fg_values.length && mapping.raw_materials.length && !raw_materials.length) {
+			frappe.msgprint(__("All raw materials are already mapped to finished goods"));
+			return;
+		}
+
 		if (!fg_values.length || !raw_materials.length) {
 			frappe.msgprint(
-				__(
-					"Link the Serial and Batch Bundles of the raw materials and finished goods first. If you skip this, they are mapped automatically on submit."
-				)
+				is_submitted
+					? __("There are no serial / batch tracked raw materials or finished goods to map")
+					: __(
+							"Link the Serial and Batch Bundles of the raw materials and finished goods first. If you skip this, they are mapped automatically on submit."
+					  )
 			);
 			return;
 		}

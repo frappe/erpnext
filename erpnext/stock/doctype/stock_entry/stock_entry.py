@@ -5268,28 +5268,50 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 	if not fg_targets:
 		frappe.throw(_("{0} has no serial / batch tracked finished good").format(doc.name))
 
-	# only draft bundle rows that belong to this entry can be changed
-	raw_material_entries = {row.name for row in get_raw_material_entries(doc.name, draft_only=True)}
+	# only bundle rows that belong to this entry can be changed: draft rows before submit, and after submit
+	# only the rows left unmapped, as auto created bundles get their raw material rows on submit
+	is_submitted = doc.docstatus == 1
+	raw_materials = {row.name: row for row in get_raw_material_entries(doc.name, draft_only=not is_submitted)}
 
 	entries_by_fg_target = defaultdict(list)
 	for entry_name, target in mapping.items():
-		if entry_name not in raw_material_entries:
+		row = raw_materials.get(entry_name)
+		if not row:
 			frappe.throw(
 				_("Row {0} is not a raw material serial / batch entry of {1}").format(
 					frappe.bold(escape_html(cstr(entry_name))), doc.name
 				)
 			)
 
-		entries_by_fg_target[get_fg_target(target, fg_targets, doc.name)].append(entry_name)
+		fg_target = get_fg_target(target, fg_targets, doc.name)
+		if is_submitted:
+			if row.fg_serial_no or row.fg_batch_no:
+				frappe.throw(
+					_(
+						"Raw material {0} is already mapped and can't be changed after {1} is submitted"
+					).format(frappe.bold(row.serial_no or row.batch_no), doc.name)
+				)
+
+			if not fg_target[1]:
+				continue
+
+		entries_by_fg_target[fg_target].append(entry_name)
 
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
 	for (fg_field, fg_value), entry_names in entries_by_fg_target.items():
-		(
+		query = (
 			frappe.qb.update(sabe)
 			.set(sabe.fg_serial_no, fg_value if fg_field == "fg_serial_no" else None)
 			.set(sabe.fg_batch_no, fg_value if fg_field == "fg_batch_no" else None)
 			.where(sabe.name.isin(entry_names))
-		).run()
+		)
+
+		if is_submitted:
+			query = query.where(
+				(Coalesce(sabe.fg_serial_no, "") == "") & (Coalesce(sabe.fg_batch_no, "") == "")
+			)
+
+		query.run()
 
 
 def set_fg_mapping_on_submit(doc):
@@ -5380,9 +5402,9 @@ def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
 	if doc.purpose not in ("Manufacture", "Repack"):
 		frappe.throw(_("Finished good mapping is only allowed for Manufacture and Repack entries"))
 
-	# mapped on draft, then fixed on submit
-	if doc.docstatus != 0:
-		frappe.throw(_("Finished good mapping can only be changed while the entry is in draft"))
+	# mapped on draft, then fixed on submit; raw materials left unmapped can still be mapped after submit
+	if doc.docstatus == 2:
+		frappe.throw(_("Finished good mapping can't be changed for a cancelled entry"))
 
 	return doc
 

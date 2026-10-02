@@ -344,6 +344,49 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 0},
+	)
+	def test_unmapped_raw_materials_can_be_mapped_after_submit(self):
+		"""Auto created bundles get their raw material rows on submit, so the rows left unmapped can be mapped then."""
+		rm_item, fg_item = self.make_rm_item(), self.make_fg_item()
+		self.receive(rm_item)
+		repack = self.make_repack([(rm_item, 3, None)], [(fg_item, 3, None)])
+
+		mapping = get_fg_mapping(repack.name)
+		fg_serial_nos = [row.value for row in mapping["fg_values"]]
+		raw_materials = mapping["raw_materials"]
+		self.assertEqual([row.fg_serial_no for row in raw_materials], [None, None, None])
+
+		set_fg_mapping(repack.name, {raw_materials[0].name: fg_serial_nos[2]})
+		set_fg_mapping(
+			repack.name,
+			{raw_materials[1].name: fg_serial_nos[0], raw_materials[2].name: fg_serial_nos[1]},
+		)
+
+		expected = {
+			raw_materials[0].serial_no: fg_serial_nos[2],
+			raw_materials[1].serial_no: fg_serial_nos[0],
+			raw_materials[2].serial_no: fg_serial_nos[1],
+		}
+		self.assertEqual(
+			{row.serial_no: row.fg_serial_no for row in get_raw_material_entries(repack.name)}, expected
+		)
+
+		# a mapped raw material is fixed once the entry is submitted
+		self.assertRaises(
+			frappe.ValidationError, set_fg_mapping, repack.name, {raw_materials[0].name: fg_serial_nos[0]}
+		)
+		self.assertRaises(frappe.ValidationError, set_fg_mapping, repack.name, {raw_materials[0].name: None})
+
+		rm_serials_by_fg = self.get_rm_serials_by_fg_serial(fg_item, fg_serial_nos)
+		for rm_serial_no, fg_serial_no in expected.items():
+			self.assertEqual(rm_serials_by_fg[fg_serial_no], {rm_serial_no})
+
+		repack.cancel()
+		self.assertRaises(frappe.ValidationError, get_fg_mapping, repack.name)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
 	def test_auto_mapping_to_fg_batch(self):
