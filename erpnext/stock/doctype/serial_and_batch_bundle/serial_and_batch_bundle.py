@@ -1288,7 +1288,7 @@ class SerialandBatchBundle(Document):
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
 
-			if row.batch_no and not row.serial_no:
+			if row.batch_no:
 				batch_nos.append(row.batch_no)
 
 			if row.serial_no and row.batch_no and self.type_of_transaction == "Outward":
@@ -1297,7 +1297,8 @@ class SerialandBatchBundle(Document):
 		if serial_nos:
 			self.validate_incorrect_serial_nos(serial_nos)
 
-		elif batch_nos:
+		# Also for serial nos: a serial no can move to another item in a Repack, its batch cannot
+		if batch_nos:
 			self.validate_incorrect_batch_nos(batch_nos)
 
 		if serial_batches:
