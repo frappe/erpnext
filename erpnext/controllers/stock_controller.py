@@ -368,10 +368,11 @@ class StockController(AccountsController):
 
 		for d in self.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
+				# A serial no of another item (consumed in a Repack) gets the batch of this row
 				serial_nos = frappe.get_all(
 					"Serial No",
 					fields=["batch_no", "name", "warehouse"],
-					filters={"name": ("in", get_serial_nos(d.serial_no))},
+					filters={"name": ("in", get_serial_nos(d.serial_no)), "item_code": d.item_code},
 				)
 
 				for row in serial_nos:
