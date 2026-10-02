@@ -1353,18 +1353,24 @@ class SerialandBatchBundle(Document):
 		if purpose not in ("Manufacture", "Repack"):
 			return set()
 
-		outward_bundles = frappe.get_all(
+		other_bundles = frappe.get_all(
 			"Serial and Batch Bundle",
 			filters={
 				"voucher_type": "Stock Entry",
 				"voucher_no": self.voucher_no,
-				"type_of_transaction": "Outward",
+				"name": ("!=", self.name),
 				"docstatus": ("<", 2),
 			},
-			pluck="name",
+			fields=["name", "type_of_transaction"],
 		)
+		outward_bundles = [d.name for d in other_bundles if d.type_of_transaction == "Outward"]
+		inward_bundles = [d.name for d in other_bundles if d.type_of_transaction == "Inward"]
 
-		return set(get_serial_nos_from_bundle(outward_bundles))
+		consumed_serial_nos = set(get_serial_nos_from_bundle(outward_bundles))
+		# One consumed unit can only become one finished good
+		taken_serial_nos = set(get_serial_nos_from_bundle(inward_bundles))
+
+		return consumed_serial_nos - taken_serial_nos
 
 	def validate_incorrect_batch_nos(self, batch_nos):
 		incorrect_batch_nos = frappe.get_all(
