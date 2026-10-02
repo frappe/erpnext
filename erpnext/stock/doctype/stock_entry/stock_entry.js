@@ -703,7 +703,7 @@ frappe.ui.form.on("Stock Entry", {
 				is_submitted
 					? __("There are no serial / batch tracked raw materials or finished goods to map")
 					: __(
-							"Link the Serial and Batch Bundles of the raw materials and finished goods first. If you skip this, they are mapped automatically on submit."
+							"Link the Serial and Batch Bundles of the raw materials and finished goods first. Serial / batch nos picked on submit can be mapped after the entry is submitted."
 					  )
 			);
 			return;

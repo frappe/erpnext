@@ -5401,6 +5401,10 @@ def get_fg_target(target, fg_targets, stock_entry):
 
 def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
 	doc = frappe.get_doc("Stock Entry", stock_entry)
+	# changing a submitted entry needs submit permission, as for any update after submit
+	if permission_type == "write" and doc.docstatus == 1:
+		permission_type = "submit"
+
 	doc.check_permission(permission_type)
 
 	if doc.purpose not in ("Manufacture", "Repack"):
