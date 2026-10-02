@@ -877,6 +877,81 @@ class TestStockEntry(ERPNextTestSuite):
 			frappe.db.get_value("Serial No", serial_no, ["item_code", "batch_no"]), (raw_item, raw_batch)
 		)
 
+	def test_batch_of_raw_material_not_allowed_for_serial_no_of_finished_good(self):
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+
+		raw_item = make_item(
+			"_Test Repack Serial Batch Raw Item",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TRSBR-.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRSBRB-.#####",
+			},
+		).name
+		fg_item = make_item(
+			"_Test Repack Serial Batch FG Item",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRSBFB-.#####",
+			},
+		).name
+
+		receipt = make_stock_entry(item_code=raw_item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+		raw_batch = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		repack = make_stock_entry(
+			item_code=raw_item,
+			source="_Test Warehouse - _TC",
+			qty=1,
+			purpose="Repack",
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+				"qty": 1,
+				"conversion_factor": 1.0,
+				"serial_no": serial_no,
+				"batch_no": raw_batch,
+				"use_serial_batch_fields": 1,
+			},
+		)
+		repack.save()
+
+		# The finished good cannot get the batch of the raw material
+		frappe.db.savepoint("before_repack_submit")
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item", repack.submit)
+		frappe.db.rollback(save_point="before_repack_submit")
+
+		repack.reload()
+		repack.items[1].batch_no = make_new_batch(item_code=fg_item, batch_id="TRSBFB-REPACK").name
+		repack.save()
+		repack.submit()
+
+		# A serial no moved before batches were checked can still have the batch of the raw material
+		frappe.db.set_value("Serial No", serial_no, "batch_no", raw_batch)
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			make_stock_entry(
+				item_code=fg_item,
+				source="_Test Warehouse 1 - _TC",
+				qty=1,
+				purpose="Material Issue",
+				serial_no=serial_no,
+				batch_no=raw_batch,
+				use_serial_batch_fields=1,
+			)
+
 	def test_removed_consumption_row_does_not_allow_serial_no(self):
 		raw_item = make_item(
 			"_Test Repack Serial Raw Item",
