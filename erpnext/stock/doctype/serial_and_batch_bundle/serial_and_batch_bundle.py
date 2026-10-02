@@ -1349,14 +1349,49 @@ class SerialandBatchBundle(Document):
 		incorrect_serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"name": ("in", serial_nos), "item_code": ("!=", self.item_code)},
-			fields=["name"],
+			pluck="name",
 		)
 
+		consumed_serial_nos = self.get_serial_nos_consumed_in_same_entry()
+		incorrect_serial_nos = [sn for sn in incorrect_serial_nos if sn not in consumed_serial_nos]
+
 		if incorrect_serial_nos:
-			incorrect_serial_nos = ", ".join([d.name for d in incorrect_serial_nos])
+			incorrect_serial_nos = ", ".join(incorrect_serial_nos)
 			self.throw_error_message(
 				f"Serial Nos {bold(incorrect_serial_nos)} does not belong to Item {bold(self.item_code)}"
 			)
+
+	def get_serial_nos_consumed_in_same_entry(self):
+		"""Return the serial nos that the same Repack or Manufacture entry consumes.
+
+		The finished good can keep the serial no of a consumed raw material, because it is
+		the same physical unit. The Serial No then moves to the finished good on submit.
+		"""
+		if self.type_of_transaction != "Inward" or self.voucher_type != "Stock Entry" or not self.voucher_no:
+			return set()
+
+		purpose = frappe.get_cached_value("Stock Entry", self.voucher_no, "purpose")
+		if purpose not in ("Manufacture", "Repack"):
+			return set()
+
+		other_bundles = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={
+				"voucher_type": "Stock Entry",
+				"voucher_no": self.voucher_no,
+				"name": ("!=", self.name),
+				"docstatus": ("<", 2),
+			},
+			fields=["name", "type_of_transaction"],
+		)
+		outward_bundles = [d.name for d in other_bundles if d.type_of_transaction == "Outward"]
+		inward_bundles = [d.name for d in other_bundles if d.type_of_transaction == "Inward"]
+
+		consumed_serial_nos = set(get_serial_nos_from_bundle(outward_bundles))
+		# One consumed unit can only become one finished good
+		taken_serial_nos = set(get_serial_nos_from_bundle(inward_bundles))
+
+		return consumed_serial_nos - taken_serial_nos
 
 	def validate_incorrect_batch_nos(self, batch_nos):
 		incorrect_batch_nos = frappe.get_all(
