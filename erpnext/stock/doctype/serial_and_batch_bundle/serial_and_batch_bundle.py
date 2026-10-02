@@ -31,6 +31,7 @@ from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
 	SerialNoValuation,
 	get_batches_from_bundle,
+	get_serial_nos_batch,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.valuation import FIFOValuation
@@ -241,14 +242,8 @@ class SerialandBatchBundle(Document):
 			if not has_no_batch:
 				return
 
-			serial_no_batch = frappe._dict(
-				frappe.get_all(
-					"Serial No",
-					filters={"name": ("in", serial_nos)},
-					fields=["name", "batch_no"],
-					as_list=True,
-				)
-			)
+			# A serial no of another item (consumed in a Repack) must not bring its batch along
+			serial_no_batch = get_serial_nos_batch(serial_nos, self.item_code)
 
 			for row in self.entries:
 				if not row.batch_no:
@@ -1353,22 +1348,27 @@ class SerialandBatchBundle(Document):
 		if purpose not in ("Manufacture", "Repack"):
 			return set()
 
-		other_bundles = frappe.get_all(
-			"Serial and Batch Bundle",
-			filters={
-				"voucher_type": "Stock Entry",
-				"voucher_no": self.voucher_no,
-				"name": ("!=", self.name),
-				"docstatus": ("<", 2),
-			},
-			fields=["name", "type_of_transaction"],
-		)
-		outward_bundles = [d.name for d in other_bundles if d.type_of_transaction == "Outward"]
-		inward_bundles = [d.name for d in other_bundles if d.type_of_transaction == "Inward"]
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		consumed_serial_nos = set(get_serial_nos_from_bundle(outward_bundles))
-		# One consumed unit can only become one finished good
-		taken_serial_nos = set(get_serial_nos_from_bundle(inward_bundles))
+		# Read the current rows, not the bundles: a bundle can be left over from a removed
+		# row, or not exist yet because bundles are made row by row on submit.
+		rows = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": self.voucher_no},
+			fields=["name", "s_warehouse", "serial_no", "serial_and_batch_bundle"],
+		)
+
+		consumed_serial_nos = set()
+		taken_serial_nos = set()
+		for row in rows:
+			row_serial_nos = set(get_serial_nos(row.serial_no))
+			row_serial_nos |= set(get_serial_nos_from_bundle(row.serial_and_batch_bundle))
+
+			if row.s_warehouse:
+				consumed_serial_nos |= row_serial_nos
+			elif row.name != self.voucher_detail_no:
+				# One consumed unit can only become one finished good
+				taken_serial_nos |= row_serial_nos
 
 		return consumed_serial_nos - taken_serial_nos
 
