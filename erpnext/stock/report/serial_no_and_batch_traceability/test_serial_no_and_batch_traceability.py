@@ -282,6 +282,11 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 
 		mapping = get_fg_mapping(repack.name)
 		self.assertEqual([row.value for row in mapping["fg_values"]], fg_serial_nos)
+		# shown by the physical serial no, which differs from the name when serial nos are hash named
+		self.assertEqual(
+			[row.label for row in mapping["fg_values"]],
+			[frappe.db.get_value("Serial No", name, "serial_no") for name in fg_serial_nos],
+		)
 
 		# map in reverse order, so it differs from what the auto mapping would do
 		expected = dict(zip(rm_serial_nos, reversed(fg_serial_nos), strict=True))
@@ -405,6 +410,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		fg_values = get_fg_values(repack.name)
 		self.assertEqual([row.fg_field for row in fg_values], ["fg_batch_no"])
 		fg_batch_no = fg_values[0].value
+		self.assertEqual(fg_values[0].label, frappe.db.get_value("Batch", fg_batch_no, "batch_id"))
 		self.assertEqual({row.fg_batch_no for row in get_raw_material_entries(repack.name)}, {fg_batch_no})
 
 		rows = self.run_report(item_code=fg_item, batches=[fg_batch_no], traceability_direction="Backward")

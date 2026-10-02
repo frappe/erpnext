@@ -665,19 +665,20 @@ frappe.ui.form.on("Stock Entry", {
 		const raw_materials = is_submitted
 			? mapping.raw_materials.filter((row) => !row.fg_serial_no && !row.fg_batch_no)
 			: mapping.raw_materials;
-		// one unique label per finished good serial / batch; a serial no and a batch no can share a name
+		// one unique label per finished good serial / batch, shown by its physical number as the name can
+		// be a hash; a serial no and a batch no, or serial nos of different items, can share a number
 		const type_label = (fg_field) => (fg_field === "fg_serial_no" ? __("Serial No") : __("Batch No"));
-		const is_taken = (label) => label in targets || fg_rows.some((row) => row.value === label);
+		const is_taken = (label) => label in targets || fg_rows.some((row) => row.label === label);
 		const targets = {};
 		const labels = {};
 		fg_rows.forEach((row) => {
-			const shared = fg_rows.some((other) => other !== row && other.value === row.value);
-			let label = row.value;
+			const shared = fg_rows.some((other) => other !== row && other.label === row.label);
+			let label = row.label;
 			if (shared || label in targets) {
-				// a suffixed label must not match another label or another finished good's real name
-				label = `${row.value} (${type_label(row.fg_field)})`;
+				// a suffixed label must not match another label or another finished good's physical number
+				label = `${row.label} (${type_label(row.fg_field)})`;
 				for (let n = 2; is_taken(label); n++) {
-					label = `${row.value} (${type_label(row.fg_field)} ${n})`;
+					label = `${row.label} (${type_label(row.fg_field)} ${n})`;
 				}
 			}
 
