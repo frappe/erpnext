@@ -1730,6 +1730,34 @@ def get_uom_conversions(item_codes: set) -> defaultdict[str, list]:
 	return conversions
 
 
+def validate_item_uoms(rows: list) -> None:
+	if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+		return
+
+	rows = [row for row in rows if row.item_code and row.uom and row.uom != row.stock_uom]
+	if not rows:
+		return
+
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ["in", list({row.item_code for row in rows})]},
+		fields=["name", "stock_uom", "variant_of"],
+	)
+	allowed_uoms = get_allowed_uoms(items)
+	for row in rows:
+		if row.uom not in allowed_uoms.get(row.item_code, {}):
+			frappe.throw(
+				_(
+					"Row #{0}: UOM {1} has no conversion factor in Item {2}. Add it to the Item's UOMs table, or disable {3} in Stock Settings."
+				).format(
+					row.idx,
+					bold(row.uom),
+					bold(row.item_code),
+					bold(_("Allow UOM with conversion rate defined in Item")),
+				)
+			)
+
+
 @frappe.whitelist()
 def get_item_attribute(parent: str, attribute_value: str = ""):
 	"""Used for providing auto-completions in child table."""
