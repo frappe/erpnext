@@ -49,7 +49,7 @@ from erpnext.manufacturing.doctype.production_plan.services.work_order_planning 
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-from erpnext.stock.utils import get_or_make_bin
+from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -155,6 +155,8 @@ class ProductionPlan(Document):
 		self.validate_sales_orders()
 		self.validate_material_request_type()
 		self.validate_raw_material_group_warehouse()
+		if self.for_warehouse:
+			validate_warehouse_company(self.for_warehouse, self.company)
 		self.enable_auto_reserve_stock()
 
 	def validate_raw_material_group_warehouse(self):
