@@ -12,7 +12,7 @@
  "doctype": "Module Onboarding",
  "idx": 4,
  "is_complete": 0,
- "modified": "2026-10-04 01:44:23.637922",
+ "modified": "2026-10-04 03:10:04.115901",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Onboarding",
@@ -27,16 +27,8 @@
    "step": "Review Taxes"
   },
   {
-   "is_optional": 1,
+   "is_optional": 0,
    "step": "Add Bank Account"
-  },
-  {
-   "is_optional": 0,
-   "step": "Create Accounting Sales Invoice"
-  },
-  {
-   "is_optional": 0,
-   "step": "Create Accounting Payment Entry"
   },
   {
    "is_optional": 1,
@@ -63,5 +55,5 @@
    "step": "View Balance Sheet"
   }
  ],
- "title": "See your money in your books"
+ "title": "Get your books ready"
 }
