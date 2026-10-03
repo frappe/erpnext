@@ -6,7 +6,7 @@
    "label": "Stock Value by Item Group"
   }
  ],
- "content": "[{\"id\": \"0d4b2a0f05\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Stock Value by Item Group\", \"col\": 12}}, {\"id\": \"606b616c6c\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Stock Value\", \"col\": 4}}, {\"id\": \"e1c9621c31\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Warehouses\", \"col\": 4}}, {\"id\": \"ac7a22cfdd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Active Items\", \"col\": 4}}]",
+ "content": "[{\"id\": \"9daa4db8f8\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Stock Onboarding\", \"col\": 12}}, {\"id\": \"0d4b2a0f05\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Stock Value by Item Group\", \"col\": 12}}, {\"id\": \"606b616c6c\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Stock Value\", \"col\": 4}}, {\"id\": \"e1c9621c31\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Warehouses\", \"col\": 4}}, {\"id\": \"ac7a22cfdd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Active Items\", \"col\": 4}}]",
  "creation": "2020-03-02 15:43:10.096528",
  "custom_blocks": [],
  "docstatus": 0,
@@ -18,7 +18,7 @@
  "is_hidden": 0,
  "label": "Stock",
  "links": [],
- "modified": "2026-08-26 18:34:03.000000",
+ "modified": "2026-10-04 00:49:55.033823",
  "modified_by": "Administrator",
  "module": "Stock",
  "module_onboarding": "Stock Onboarding",

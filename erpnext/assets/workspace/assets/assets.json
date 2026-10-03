@@ -6,7 +6,7 @@
    "label": "Asset Value Analytics"
   }
  ],
- "content": "[{\"id\": \"91d49bd2aa\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Value Analytics\", \"col\": 12}}, {\"id\": \"6e2f5c71fd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Assets\", \"col\": 4}}, {\"id\": \"812fb9cc2a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Asset Value\", \"col\": 4}}, {\"id\": \"f8f0df5c57\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"New Assets (This Year)\", \"col\": 4}}]",
+ "content": "[{\"id\": \"5e2cd99893\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Asset Onboarding\", \"col\": 12}}, {\"id\": \"91d49bd2aa\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Value Analytics\", \"col\": 12}}, {\"id\": \"6e2f5c71fd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Assets\", \"col\": 4}}, {\"id\": \"812fb9cc2a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Asset Value\", \"col\": 4}}, {\"id\": \"f8f0df5c57\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"New Assets (This Year)\", \"col\": 4}}]",
  "creation": "2020-03-02 15:43:27.634865",
  "custom_blocks": [],
  "docstatus": 0,
@@ -18,7 +18,7 @@
  "is_hidden": 0,
  "label": "Assets",
  "links": [],
- "modified": "2026-08-26 18:34:03.000000",
+ "modified": "2026-10-04 00:49:55.033823",
  "modified_by": "Administrator",
  "module": "Assets",
  "module_onboarding": "Asset Onboarding",

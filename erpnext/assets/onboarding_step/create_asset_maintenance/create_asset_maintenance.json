@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Asset Maintenance",
+ "creation": "2026-10-04 01:52:52.539131",
+ "description": "Servicing, inspections and calibration, with reminders to the team doing it. See [Asset Maintenance](https://docs.frappe.io/erpnext/user/manual/en/asset-maintenance).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:52:52.539131",
+ "modified_by": "Administrator",
+ "name": "Create Asset Maintenance",
+ "owner": "Administrator",
+ "reference_document": "Asset Maintenance",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Schedule its upkeep",
+ "validate_action": 1
+}

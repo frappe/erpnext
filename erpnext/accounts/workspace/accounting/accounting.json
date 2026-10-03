@@ -6,7 +6,7 @@
    "label": "Profit and Loss"
   }
  ],
- "content": "[{\"id\": \"a17de17773\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Profit and Loss\", \"col\": 12}}, {\"id\": \"9a0e234f25\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Outgoing Bills\", \"col\": 4}}, {\"id\": \"58b384d2dd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Bills\", \"col\": 4}}, {\"id\": \"575d11919a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Payment\", \"col\": 4}}]",
+ "content": "[{\"id\": \"0dd9453224\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accounting Onboarding\", \"col\": 12}}, {\"id\": \"a17de17773\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Profit and Loss\", \"col\": 12}}, {\"id\": \"9a0e234f25\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Outgoing Bills\", \"col\": 4}}, {\"id\": \"58b384d2dd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Bills\", \"col\": 4}}, {\"id\": \"575d11919a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Payment\", \"col\": 4}}]",
  "creation": "2026-07-14 12:00:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -20,7 +20,7 @@
  "label": "Accounting",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-08-26 18:34:03.000000",
+ "modified": "2026-10-04 00:49:55.033823",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",

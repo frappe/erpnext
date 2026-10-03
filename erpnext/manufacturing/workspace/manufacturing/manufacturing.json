@@ -6,7 +6,7 @@
    "label": "Work Order Analysis"
   }
  ],
- "content": "[{\"id\": \"13b8fcbb95\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Work Order Analysis\", \"col\": 12}}, {\"id\": \"5213f36c4a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Work Orders\", \"col\": 4}}, {\"id\": \"95ca4e04c1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"WIP Work Orders\", \"col\": 4}}, {\"id\": \"2dc98dbd6f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Monthly Completed Work Order\", \"col\": 4}}]",
+ "content": "[{\"id\": \"edd70d2aa1\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Manufacturing Onboarding\", \"col\": 12}}, {\"id\": \"13b8fcbb95\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Work Order Analysis\", \"col\": 12}}, {\"id\": \"5213f36c4a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Work Orders\", \"col\": 4}}, {\"id\": \"95ca4e04c1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"WIP Work Orders\", \"col\": 4}}, {\"id\": \"2dc98dbd6f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Monthly Completed Work Order\", \"col\": 4}}]",
  "creation": "2020-03-02 17:11:37.032604",
  "custom_blocks": [],
  "docstatus": 0,
@@ -18,7 +18,7 @@
  "is_hidden": 0,
  "label": "Manufacturing",
  "links": [],
- "modified": "2026-09-21 18:34:03.000000",
+ "modified": "2026-10-04 00:49:55.033823",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",

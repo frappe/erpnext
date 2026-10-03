@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Quality Procedure",
+ "creation": "2026-10-04 01:54:23.335887",
+ "description": "The steps your team follows, so it is done the same way every time. See [Quality Management](https://docs.frappe.io/erpnext/user/manual/en/quality-management).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:54:23.335887",
+ "modified_by": "Administrator",
+ "name": "Create Quality Procedure",
+ "owner": "Administrator",
+ "reference_document": "Quality Procedure",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Write down how the work is done",
+ "validate_action": 1
+}
