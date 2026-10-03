@@ -261,18 +261,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		erpnext.accounts.dimensions.update_dimension(me.frm, me.frm.doctype);
 	}
 
-	stock_items_add(doc, cdt, cdn) {
-		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "stock_items");
-	}
-
-	asset_items_add(doc, cdt, cdn) {
-		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "asset_items");
-	}
-
-	serivce_items_add(doc, cdt, cdn) {
-		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "service_items");
-	}
-
 	get_target_item_details() {
 		var me = this;
 

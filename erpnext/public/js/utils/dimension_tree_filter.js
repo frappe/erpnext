@@ -1,6 +1,9 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.accounts.dimensions = {
+	bound_events: new Set(),
+	tax_doctypes: ["Sales Taxes and Charges", "Purchase Taxes and Charges", "Advance Taxes and Charges"],
+
 	setup_dimension_filters(frm, doctype) {
 		this.accounting_dimensions = [];
 		this.default_dimensions = {};
@@ -15,9 +18,8 @@ erpnext.accounts.dimensions = {
 				with_cost_center_and_project: true,
 			},
 			callback: function (r) {
-				me.accounting_dimensions = r.message[0];
-				// Ignoring "Project" as it is already handled specifically in Sales Order and Delivery Note
-				me.accounting_dimensions = me.accounting_dimensions.filter((x) => {
+				me.setup_header_copy(frm, r.message[0]);
+				me.accounting_dimensions = r.message[0].filter((x) => {
 					return x.document_type != "Project";
 				});
 				me.default_dimensions = r.message[1];
@@ -108,12 +110,56 @@ erpnext.accounts.dimensions = {
 		});
 	},
 
-	copy_dimension_from_first_row(frm, cdt, cdn, fieldname) {
-		if (frappe.meta.has_field(frm.doctype, fieldname) && this.accounting_dimensions) {
-			this.accounting_dimensions.forEach((dimension) => {
-				let row = frappe.get_doc(cdt, cdn);
-				frm.script_manager.copy_from_first_row(fieldname, row, [dimension["fieldname"]]);
+	setup_header_copy(frm, dimensions) {
+		const fieldnames = dimensions.map((dimension) => dimension.fieldname);
+
+		this.get_tables_with_dimensions(frm.doctype, fieldnames).forEach((table) => {
+			this.on_once(table.options, `${table.fieldname}_add`, (frm, cdt, cdn) => {
+				this.set_dimensions_in_new_row(frm, frappe.get_doc(cdt, cdn), fieldnames);
 			});
-		}
+		});
+
+		fieldnames
+			.filter((fieldname) => frappe.meta.has_field(frm.doctype, fieldname))
+			.forEach((fieldname) => {
+				this.on_once(frm.doctype, fieldname, (frm) => this.copy_header_to_rows(frm, fieldname));
+			});
+	},
+
+	on_once(doctype, event, handler) {
+		const key = `${doctype}:${event}`;
+		if (this.bound_events.has(key)) return;
+
+		this.bound_events.add(key);
+		frappe.ui.form.on(doctype, event, handler);
+	},
+
+	get_tables_with_dimensions(doctype, fieldnames) {
+		return frappe.meta
+			.get_docfields(doctype)
+			.filter(
+				(df) =>
+					df.fieldtype === "Table" &&
+					!this.tax_doctypes.includes(df.options) &&
+					fieldnames.some((fieldname) => frappe.meta.has_field(df.options, fieldname))
+			);
+	},
+
+	set_dimensions_in_new_row(frm, row, fieldnames) {
+		const first_row = frm.doc[row.parentfield][0];
+		fieldnames
+			.filter((fieldname) => frappe.meta.has_field(row.doctype, fieldname))
+			.forEach((fieldname) => {
+				const value = frm.doc[fieldname] || (first_row !== row && first_row[fieldname]);
+				if (value) frappe.model.set_value(row.doctype, row.name, fieldname, value);
+			});
+	},
+
+	copy_header_to_rows(frm, fieldname) {
+		this.get_tables_with_dimensions(frm.doctype, [fieldname]).forEach((table) => {
+			(frm.doc[table.fieldname] || []).forEach((row) => {
+				frappe.model.set_value(row.doctype, row.name, fieldname, frm.doc[fieldname]);
+			});
+		});
 	},
 };
