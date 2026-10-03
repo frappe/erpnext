@@ -15,6 +15,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		frm.custom_make_buttons = {
 			"Purchase Receipt": "Purchase Receipt",
 		};
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	on_submit(frm) {
