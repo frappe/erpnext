@@ -136,7 +136,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 	erpnext.selling.SellingController
 ) {
 	setup(doc) {
-		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 		this.frm.make_methods = {
@@ -370,15 +369,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_shipment",
 			frm: this.frm,
 		});
-	}
-
-	items_add(doc, cdt, cdn) {
-		const row = frappe.get_doc(cdt, cdn);
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			this.frm.script_manager.copy_from_first_row("items", row, ["project"]);
-		}
 	}
 
 	make_sales_invoice() {
