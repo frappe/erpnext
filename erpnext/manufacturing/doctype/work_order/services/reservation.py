@@ -742,9 +742,9 @@ def _serial_batch_entries(stock_entries):
 def _accumulate_serial_batch(row_wise_serial_batch, entry):
 	key = (entry.item_code, entry.warehouse)
 	details = row_wise_serial_batch.setdefault(
-		key, frappe._dict({"serial_nos": [], "batch_nos": defaultdict(float)})
+		key, frappe._dict({"serial_nos": set(), "batch_nos": defaultdict(float)})
 	)
 	if entry.serial_no:
-		details.serial_nos.append(entry.serial_no)
+		details.serial_nos.add(entry.serial_no)
 	if entry.batch_no:
 		details.batch_nos[entry.batch_no] += abs(entry.qty)
