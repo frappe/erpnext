@@ -23,6 +23,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.utils import InvalidWarehouseCompany
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -2326,6 +2327,16 @@ class TestProductionPlan(ERPNextTestSuite):
 				skip_getting_mr_items=1,
 			)
 			self.assertRaises(frappe.ValidationError, plan.save)
+
+	def test_for_warehouse_of_another_company_is_rejected(self):
+		plan = create_production_plan(
+			item_code=self._setup_group_rm_warehouse().fg_item,
+			planned_qty=10,
+			for_warehouse="_Test Warehouse 2 - _TC1",
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
 
 	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
 		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
