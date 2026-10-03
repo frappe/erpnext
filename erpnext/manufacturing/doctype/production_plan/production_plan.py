@@ -536,26 +536,3 @@ class ProductionPlan(Document):
 
 	def all_items_completed(self):
 		return SubAssemblyService(self).all_items_completed()
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_child_warehouses(
-	doctype: str | None, txt: str, searchfield: str | None, start: int, page_len: int, filters: dict
-):
-	"Leaf warehouses under the given group warehouse, for the For Warehouse link query."
-	bounds = frappe.db.get_value("Warehouse", filters.get("group_warehouse"), ["lft", "rgt"], as_dict=True)
-	if not bounds:
-		return []
-
-	wh = frappe.qb.DocType("Warehouse")
-	query = (
-		frappe.qb.from_(wh)
-		.select(wh.name)
-		.where((wh.is_group == 0) & (wh.lft >= bounds.lft) & (wh.rgt <= bounds.rgt))
-	)
-	if filters.get("company"):
-		query = query.where(wh.company == filters.get("company"))
-	if txt:
-		query = query.where(wh[searchfield].like(f"%{txt}%"))
-	return query.limit(page_len).offset(start).run()
