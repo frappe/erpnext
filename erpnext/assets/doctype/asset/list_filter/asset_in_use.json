@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"asset_name\", \"label\": \"Asset Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"asset_category\", \"label\": \"Asset Category\"}, {\"fieldname\": \"location\", \"label\": \"Location\"}, {\"fieldname\": \"custodian\", \"label\": \"Custodian\"}, {\"fieldname\": \"net_purchase_amount\", \"label\": \"Net Purchase Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.961756",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "In Use",
+ "filters": "[[\"Asset\", \"status\", \"in\", [\"Submitted\", \"Partially Depreciated\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.961756",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset-In Use",
+ "owner": "Administrator",
+ "reference_doctype": "Asset",
+ "route_signature": "status=[\"in\",[\"Submitted\",\"Partially Depreciated\"]]",
+ "sort_field": "asset_name",
+ "sort_order": "asc"
+}

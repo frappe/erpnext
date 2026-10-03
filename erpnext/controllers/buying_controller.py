@@ -18,7 +18,7 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
 	is_rejected_material_valued,
 )
-from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
+from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
@@ -28,6 +28,7 @@ from erpnext.stock.get_item_details import (
 	get_conversion_factor,
 	get_item_defaults,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_incoming_rate, is_serial_no_wise_valuation_disabled
 
 
@@ -62,6 +63,8 @@ class BuyingController(SubcontractingController):
 
 		if self.doctype == "Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
+			if not self.update_stock:
+				validate_duplicate_items(self)
 
 		if self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock):
 			self.validate_purchase_return()
@@ -308,7 +311,9 @@ class BuyingController(SubcontractingController):
 				pluck="serial_no",
 			)
 
-		return get_serial_nos(row.get("rejected_serial_no"))
+		return SerialBatchIdentity("Serial No").resolve(
+			row.item_code, get_serial_nos(row.get("rejected_serial_no")), ignore_permissions=True
+		)
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:

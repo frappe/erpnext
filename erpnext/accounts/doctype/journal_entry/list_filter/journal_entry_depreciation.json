@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"total_debit\", \"label\": \"Total Debit\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.574020",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Depreciation",
+ "filters": "[[\"Journal Entry\", \"docstatus\", \"=\", 1], [\"Journal Entry\", \"voucher_type\", \"=\", \"Depreciation Entry\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.574020",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Journal Entry-Depreciation",
+ "owner": "Administrator",
+ "reference_doctype": "Journal Entry",
+ "route_signature": "docstatus=1&voucher_type=Depreciation Entry",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

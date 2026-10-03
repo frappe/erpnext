@@ -3,6 +3,8 @@
 /* eslint-disable */
 
 frappe.query_reports["Serial and Batch Summary"] = {
+	export_hidden_cols: true,
+	formatter: erpnext.utils.format_serial_batch_number,
 	filters: [
 		{
 			fieldname: "company",

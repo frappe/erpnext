@@ -6,7 +6,7 @@ import json
 from collections import OrderedDict, defaultdict
 
 import frappe
-from frappe import _, qb, scrub
+from frappe import _, qb
 from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import (
@@ -25,6 +25,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import _get_item_tax_template
@@ -290,48 +291,13 @@ def item_query(
 
 	filters = frappe.parse_json(filters)
 	company = filters.pop("company", None) if isinstance(filters, dict) else None
+	restricted_items_condition = None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
-			group = "Customer Group" if filters.get("customer") else "Supplier Group"
-			item_rules_list = frappe.get_all(
-				"Party Specific Item",
-				filters={"party_type": party_type},
-				fields=["party", "restrict_based_on", "based_on_value"],
-			)
-
-			party_group_rules_list = frappe.get_all(
-				"Party Specific Item",
-				filters={"party_type": group},
-				fields=["party as party_group", "restrict_based_on", "based_on_value"],
-			)
-			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
-
-			restricted_items = defaultdict(set)
-			allowed_items = defaultdict(set)
-
-			for rule in item_rules_list:
-				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
-
-				if rule.party == party:
-					allowed_items[restrict_based_on].add(rule.based_on_value)
-				else:
-					restricted_items[restrict_based_on].add(rule.based_on_value)
-
-			for rule in party_group_rules_list:
-				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
-
-				if current_party_group == rule.party_group:
-					allowed_items[restrict_based_on].add(rule.based_on_value)
-				else:
-					restricted_items[restrict_based_on].add(rule.based_on_value)
-
-			for field, restricted_values in restricted_items.items():
-				values_to_exclude = restricted_values - allowed_items[field]
-				if values_to_exclude:
-					filters[scrub(field)] = ["not in", list(values_to_exclude)]
+			restricted_items_condition = get_restricted_items_condition(party_type, party)
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -449,6 +415,9 @@ def item_query(
 
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))
+
+	if restricted_items_condition is not None:
+		query = query.where(~restricted_items_condition)
 
 	return query.run(as_dict=as_dict)
 
@@ -634,7 +603,7 @@ def get_delivery_notes_to_be_billed(
 def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	doctype = "Batch"
 	meta = frappe.get_meta(doctype, cached=True)
-	searchfields = meta.get_search_fields()
+	searchfields = [field for field in meta.get_search_fields() if field not in ("name", "batch_id")]
 	page_len = 300
 
 	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
@@ -645,26 +614,38 @@ def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	if filters.get("is_inward"):
 		filtered_batches.extend(get_empty_batches(filters, start, page_len, filtered_batches, txt))
 
-	return filtered_batches
+	if not filtered_batches:
+		return []
+	numbers = dict(
+		frappe.get_all(
+			"Batch",
+			filters={"name": ("in", [row[0] for row in filtered_batches]), "item": filters.get("item_code")},
+			fields=["name", "batch_id"],
+			as_list=True,
+		)
+	)
+	return [(name, numbers[name], *details) for name, *details in filtered_batches if name in numbers]
 
 
 def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None):
+	batch = frappe.qb.DocType("Batch")
 	query_filter = {"item": filters.get("item_code"), "disabled": 0}
-	if txt:
-		query_filter["name"] = ("like", f"%{txt}%")
 
 	exclude_batches = [batch[0] for batch in filtered_batches] if filtered_batches else []
 	if exclude_batches:
 		query_filter["name"] = ("not in", exclude_batches)
 
-	return frappe.get_all(
+	query = frappe.qb.get_query(
 		"Batch",
 		fields=["name", "batch_qty"],
 		filters=query_filter,
-		limit_start=start,
-		limit_page_length=page_len,
-		as_list=1,
+		order_by="creation desc",
+		offset=start,
+		limit=page_len,
 	)
+	if txt:
+		query = query.where(batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
+	return query.run(as_list=True)
 
 
 def get_filterd_batches(data):
@@ -706,6 +687,8 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		)
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse, batch_table.name)
 		.having(Sum(stock_ledger_entry.actual_qty) != 0)
+		.orderby(batch_table.batch_id)
+		.orderby(stock_ledger_entry.warehouse)
 		.offset(start)
 		.limit(page_len)
 	)
@@ -736,7 +719,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		query = query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
+		txt_condition = batch_table.batch_id.like(f"%{txt}%")
 		for field in [*searchfields, "name"]:
 			txt_condition |= batch_table[field].like(f"%{txt}%")
 
@@ -770,6 +753,8 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		)
 		.groupby(bundle.batch_no, bundle.warehouse, batch_table.name)
 		.having(Sum(bundle.qty) != 0)
+		.orderby(batch_table.batch_id)
+		.orderby(bundle.warehouse)
 		.offset(start)
 		.limit(page_len)
 	)
@@ -802,7 +787,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		bundle_query = bundle_query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
+		txt_condition = batch_table.batch_id.like(f"%{txt}%")
 		for field in [*searchfields, "name"]:
 			txt_condition |= batch_table[field].like(f"%{txt}%")
 
@@ -1074,22 +1059,17 @@ def get_doctype_wise_filters(filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	# get_list applies the select check and the caller's record-level conditions together
-	batch_filters = [["disabled", "=", 0], ["name", "like", f"%{txt}%"]]
+	batch = frappe.qb.DocType("Batch")
+	query = frappe.qb.get_query("Batch", fields=["name", "batch_id", "item"], ignore_permissions=False).where(
+		(batch.disabled == 0)
+		& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
+		& (batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
+	)
 
 	if filters and filters.get("item"):
-		batch_filters.append(["item", "=", filters.get("item")])
+		query = query.where(batch.item == filters.get("item"))
 
-	return frappe.get_list(
-		"Batch",
-		filters=batch_filters,
-		or_filters=[["expiry_date", "is", "not set"], ["expiry_date", ">=", today()]],
-		fields=["batch_id"],
-		order_by="batch_id",
-		limit_start=start,
-		limit_page_length=page_len,
-		as_list=True,
-	)
+	return query.orderby(batch.batch_id, batch.name).limit(page_len).offset(start).run()
 
 
 @frappe.whitelist()

@@ -208,10 +208,10 @@ def get_statement_dict(doc, get_statement_dict=False):
 		if doc.report == "General Ledger":
 			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
 			col, res = get_soa(filters)
-			for x in [0, -2, -1]:
-				res[x]["account"] = res[x]["account"].replace("'", "")
 			if len(res) == 3:
 				continue
+			for x in [0, -2, -1]:
+				res[x]["account"] = (res[x]["account"] or "").replace("'", "")
 		else:
 			filters.update(get_ar_filters(doc, entry))
 			ar_res = get_ar_soa(filters)

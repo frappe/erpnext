@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cstr, flt, now, nowdate, nowtime
 
@@ -162,34 +163,21 @@ def get_indented_qty(item_code, warehouse):
 		& (mr.docstatus == 1)
 	)
 
-	inward_qty = (
+	pending_qty = mr_item.stock_qty - mr_item.ordered_qty
+	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
+	quantities = (
 		frappe.qb.from_(mr_item)
 		.inner_join(mr)
 		.on(mr_item.parent == mr.name)
-		.select(Sum(mr_item.stock_qty - mr_item.ordered_qty))
-		.where(
-			base_conditions
-			& mr.material_request_type.isin(
-				["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
-			)
+		.select(
+			Sum(Case().when(mr.material_request_type.isin(inward_types), pending_qty).else_(0)),
+			Sum(Case().when(mr.material_request_type == "Material Issue", pending_qty).else_(0)),
 		)
+		.where(base_conditions)
 		.run()
 	)
-	inward_qty = flt(inward_qty[0][0]) if inward_qty else 0
 
-	outward_qty = (
-		frappe.qb.from_(mr_item)
-		.inner_join(mr)
-		.on(mr_item.parent == mr.name)
-		.select(Sum(mr_item.stock_qty - mr_item.ordered_qty))
-		.where(base_conditions & (mr.material_request_type == "Material Issue"))
-		.run()
-	)
-	outward_qty = flt(outward_qty[0][0]) if outward_qty else 0
-
-	requested_qty = inward_qty - outward_qty
-
-	return requested_qty
+	return flt(quantities[0][0]) - flt(quantities[0][1]) if quantities else 0
 
 
 def get_ordered_qty(item_code, warehouse):

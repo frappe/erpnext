@@ -5,7 +5,7 @@ import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.stock_qty_vs_batch_qty.stock_qty_vs_batch_qty import execute
+from erpnext.stock.report.stock_qty_vs_batch_qty.stock_qty_vs_batch_qty import execute, update_batch_qty
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -62,6 +62,11 @@ class TestStockQtyVsBatchQty(ERPNextTestSuite):
 
 		row = rows[0]
 		self.assertEqual(row["batch"], batch_no)
+		self.assertEqual(row["batch_number"], frappe.db.get_value("Batch", batch_no, "batch_id"))
 		self.assertEqual(row["batch_qty"], 7)
 		self.assertEqual(row["stock_qty"], 10)
 		self.assertEqual(row["difference"], 3)
+
+		update_batch_qty([row])
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
+		self.assertEqual(self.run_report(item=item, batch=batch_no), [])

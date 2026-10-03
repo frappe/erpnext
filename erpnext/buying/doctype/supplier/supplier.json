@@ -125,6 +125,7 @@
    "description": "Supplier's tax identification number (e.g. PAN, VAT, GST)",
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Tax ID"
   },
   {
@@ -158,11 +159,13 @@
   },
   {
    "depends_on": "is_internal_supplier",
+   "description": "Select the related company that this Supplier represents for inter-company transactions.",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "image",
@@ -395,6 +398,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
    "hidden": 1,
+   "in_global_search": 1,
    "label": "Mobile No",
    "no_copy": 1
   },
@@ -403,6 +407,7 @@
    "fieldname": "email_id",
    "fieldtype": "Read Only",
    "hidden": 1,
+   "in_global_search": 1,
    "label": "Email ID",
    "no_copy": 1
   },
@@ -593,7 +598,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-08-21 23:11:49.780507",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

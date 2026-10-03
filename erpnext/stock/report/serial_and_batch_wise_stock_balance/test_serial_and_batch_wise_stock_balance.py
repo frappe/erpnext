@@ -36,7 +36,8 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		if batch_no:
 			filters["batch_no"] = batch_no
 
-		return "\n".join(sorted(frappe.get_all("Serial No", filters=filters, pluck="name")))
+		serial_nos = frappe.get_all("Serial No", filters=filters, fields=["serial_no", "name"], as_list=True)
+		return "\n".join(name for _number, name in sorted(serial_nos))
 
 	def test_batch_rows_under_item_row(self):
 		rows = self.run_report(
@@ -89,12 +90,37 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		for row in rows[1:]:
 			self.assertEqual(row.serial_no, self.get_serial_nos_in_warehouse(row.item_code, row.batch_no))
 
+	def test_visible_columns_carry_physical_numbers(self):
+		rows = self.run_report(
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBW-N-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "SBW-NS-.#####",
+			},
+			[{"qty": 2, **RECEIVE}],
+		)
+
+		batch_row = rows[1]
+		self.assertEqual(
+			batch_row.batch_no_number, frappe.db.get_value("Batch", batch_row.batch_no, "batch_id")
+		)
+		self.assertEqual(
+			batch_row.serial_no_number.split("\n"),
+			[
+				frappe.db.get_value("Serial No", serial_id, "serial_no")
+				for serial_id in batch_row.serial_no.split("\n")
+			],
+		)
+
 	def test_batch_rows_carry_item_row_dimensions(self):
 		report = SerialAndBatchWiseStockBalanceReport(
 			_dict(company="_Test Company", from_date=today(), to_date=today(), show_dimension_wise_stock=1)
 		)
 		report.inventory_dimensions = ["project"]
 		report.serial_map = {}
+		report.batch_numbers = {}
 		report.batch_map = {
 			("SBW Item", WAREHOUSE, "SBW Project"): {"SBW Batch": _dict(bal_qty=5, bal_val=500)}
 		}

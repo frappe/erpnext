@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "field:batch_id",
+ "autoname": "hash",
  "creation": "2013-03-05 14:50:38",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -45,20 +45,22 @@
    "report_hide": 1
   },
   {
-   "depends_on": "eval:doc.__islocal",
    "fieldname": "batch_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
-   "label": "Batch ID",
+   "label": "Batch No",
    "no_copy": 1,
    "oldfieldname": "batch_id",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "unique": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "item",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Item",
    "link_filters": "[\n    [\"Item\", \"has_batch_no\", \"=\", 1],\n    [\"Item\", \"is_stock_item\", \"=\", 1]\n]",
@@ -66,7 +68,8 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "read_only_depends_on": "eval:!doc.__islocal",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "image",
@@ -216,11 +219,11 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-09-23 15:28:28.772991",
+ "modified": "2026-10-01 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
@@ -309,5 +312,7 @@
  "sort_order": "DESC",
  "states": [],
  "title_field": "batch_id",
- "track_changes": 1
+ "track_changes": 1,
+ "show_title_field_in_link": 1,
+ "search_fields": "item"
 }

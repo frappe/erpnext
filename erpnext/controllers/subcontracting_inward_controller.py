@@ -3,7 +3,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Case
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import escape_html, flt, get_link_to_form
 
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 
@@ -432,7 +432,14 @@ class SubcontractingInwardController:
 							"Row #{0}: Serial No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Serial No(s)."
 						).format(
 							item.idx,
-							", ".join([get_link_to_form("Serial No", sn) for sn in incorrect_serial_nos]),
+							", ".join(
+								get_link_to_form(
+									"Serial No",
+									sn,
+									escape_html(frappe.get_cached_value("Serial No", sn, "serial_no")),
+								)
+								for sn in incorrect_serial_nos
+							),
 						)
 					)
 				if batch_list and (
@@ -443,7 +450,12 @@ class SubcontractingInwardController:
 							"Row #{0}: Batch No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
 						).format(
 							item.idx,
-							", ".join([get_link_to_form("Batch No", bn) for bn in incorrect_batch_nos]),
+							", ".join(
+								get_link_to_form(
+									"Batch", bn, escape_html(frappe.get_cached_value("Batch", bn, "batch_id"))
+								)
+								for bn in incorrect_batch_nos
+							),
 						)
 					)
 

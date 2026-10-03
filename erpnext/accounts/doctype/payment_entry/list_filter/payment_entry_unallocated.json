@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"payment_type\", \"label\": \"Payment Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"party\", \"label\": \"Party\"}, {\"fieldname\": \"paid_amount\", \"label\": \"Paid Amount\"}, {\"fieldname\": \"unallocated_amount\", \"label\": \"Unallocated Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.563409",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Unallocated",
+ "filters": "[[\"Payment Entry\", \"docstatus\", \"=\", 1], [\"Payment Entry\", \"unallocated_amount\", \">\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 5,
+ "modified": "2026-09-30 21:54:23.260265",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Entry-Unallocated",
+ "owner": "Administrator",
+ "reference_doctype": "Payment Entry",
+ "route_signature": "docstatus=1&unallocated_amount=[\">\",0]",
+ "sort_field": "posting_date",
+ "sort_order": "asc"
+}
