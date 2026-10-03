@@ -2288,6 +2288,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, plan.save)
 
+	def test_group_warehouse_itself_or_of_another_company_is_rejected(self):
+		data = self._setup_group_rm_warehouse()
+
+		for for_warehouse, group_warehouse in (
+			(data.group_warehouse, data.group_warehouse),
+			(None, "All Warehouses - _TC1"),
+		):
+			plan = create_production_plan(
+				item_code=data.fg_item,
+				planned_qty=10,
+				for_warehouse=for_warehouse,
+				raw_material_group_warehouse=group_warehouse,
+				do_not_save=1,
+				skip_getting_mr_items=1,
+			)
+			self.assertRaises(frappe.ValidationError, plan.save)
+
 	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
 		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
 		data = self._setup_group_rm_warehouse()
