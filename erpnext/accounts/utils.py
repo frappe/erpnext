@@ -807,7 +807,37 @@ def update_reference_in_payment_entry(
 			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
 			reference_exchange_details=reference_exchange_details,
 		)
+	# Reconciliation matches net against gross outstanding and does not pass
+	# outstanding_amount. The invoice path does, and has already capped.
+	if d.get("outstanding_amount") is None:
+		from erpnext.accounts.doctype.payment_entry.payment_entry import (
+			ADVANCE_GROSS_REFERENCE_TYPES,
+			get_reference_details,
+		)
+
+		if (
+			payment_entry.book_advance_payments_in_separate_party_account
+			and row.reference_doctype in ADVANCE_GROSS_REFERENCE_TYPES
+		):
+			precision = row.precision("allocated_amount")
+			outstanding = flt(row.outstanding_amount, precision)
+			# Multi-currency reconciliation skips the reference details update.
+			if not outstanding:
+				outstanding = flt(
+					get_reference_details(
+						row.reference_doctype,
+						row.reference_name,
+						payment_entry.party_account_currency,
+						payment_entry.party_type,
+						payment_entry.party,
+					).outstanding_amount,
+					precision,
+				)
+			gross = flt(flt(row.allocated_amount) * payment_entry.get_gross_net_ratio(), precision)
+			if outstanding > 0 and gross > outstanding:
+				row.allocated_amount = flt(row.allocated_amount * outstanding / gross, precision)
 	payment_entry.set_amounts()
+	payment_entry.set_allocated_gross_amount()
 
 	payment_entry.make_exchange_gain_loss_journal(
 		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
@@ -1124,6 +1154,7 @@ def remove_ref_doc_link_from_pe(
 	(
 		qb.update(per)
 		.set(per.allocated_amount, 0)
+		.set(per.allocated_gross_amount, 0)
 		.set(per.modified, now())
 		.set(per.modified_by, frappe.session.user)
 		.where(per.name.isin(row_names))
@@ -1141,6 +1172,18 @@ def remove_ref_doc_link_from_pe(
 			[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
 
 			pe_doc.clear_unallocated_reference_document_rows()
+
+			# Redistribute advance tax across the surviving references
+			pe_doc.set_allocated_gross_amount()
+			for ref in pe_doc.references:
+				frappe.db.set_value(
+					"Payment Entry Reference",
+					ref.name,
+					"allocated_gross_amount",
+					ref.allocated_gross_amount,
+					update_modified=False,
+				)
+
 			pe_doc.validate_payment_type_with_outstanding()
 		except Exception:
 			msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
@@ -1153,6 +1196,7 @@ def remove_ref_doc_link_from_pe(
 			.set(pay.total_allocated_amount, pe_doc.total_allocated_amount)
 			.set(pay.base_total_allocated_amount, pe_doc.base_total_allocated_amount)
 			.set(pay.unallocated_amount, pe_doc.unallocated_amount)
+			.set(pay.unallocated_gross_amount, pe_doc.unallocated_gross_amount)
 			.set(pay.modified, now())
 			.set(pay.modified_by, frappe.session.user)
 			.where(pay.name == pe)
