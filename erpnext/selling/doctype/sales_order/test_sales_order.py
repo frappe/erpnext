@@ -1107,19 +1107,31 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 
 	def test_unconfigured_uom_rejected_when_uoms_are_restricted(self):
-		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		item = make_item(
+			uoms=[{"uom": "Box", "conversion_factor": 12}, {"uom": "Kg", "conversion_factor": 0}]
+		)
 
 		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
-			self.assertRaises(
-				frappe.ValidationError, make_sales_order, item_code=item.name, uom="Pair", do_not_submit=True
-			)
+			for uom in ("Pair", "Kg"):
+				self.assertRaises(
+					frappe.ValidationError, make_sales_order, item_code=item.name, uom=uom, do_not_submit=True
+				)
 			make_sales_order(item_code=item.name, uom="Box", do_not_submit=True)
 
 	def test_update_items_rejects_unconfigured_uom(self):
 		item = make_item()
 		so = make_sales_order(item_code=item.name, qty=2)
 		trans_items = json.dumps(
-			[{"docname": so.items[0].name, "item_code": item.name, "qty": 2, "rate": 100, "uom": "Box"}]
+			[
+				{
+					"docname": so.items[0].name,
+					"item_code": item.name,
+					"qty": 2,
+					"rate": 100,
+					"uom": "Box",
+					"stock_uom": "Box",
+				}
+			]
 		)
 
 		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
