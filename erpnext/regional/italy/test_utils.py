@@ -8,6 +8,7 @@ import frappe
 from erpnext.regional.italy.utils import (
 	append_row_as_charges,
 	get_conditions,
+	get_e_invoice_attachments,
 	get_unamended_name,
 	update_summary_details,
 )
@@ -84,3 +85,19 @@ class TestItalyUtils(ERPNextTestSuite):
 			name="ACC-SINV-2026-00001", naming_series="ACC-SINV-.YYYY.-", amended_from=None
 		)
 		self.assertEqual(get_unamended_name(original), "ACC-SINV-2026-00001")
+
+	def test_get_e_invoice_attachments_finds_existing_xml(self):
+		# the existing XML must be found, otherwise `replace=True` adds a second one
+		invoice = frappe._dict(name="_Test Italy E-Invoice 0001", company_tax_id="01234567890")
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "IT01234567890_00001.xml",
+				"attached_to_doctype": "Sales Invoice",
+				"attached_to_name": invoice.name,
+				"content": "<FatturaElettronica/>",
+				"is_private": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertEqual([attachment.name for attachment in get_e_invoice_attachments(invoice)], [file.name])
