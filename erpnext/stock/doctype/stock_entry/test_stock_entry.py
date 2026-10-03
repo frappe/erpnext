@@ -4471,6 +4471,19 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(se.items[2].qty, 4.5)
 		self.assertEqual(se.items[2].amount, 5)
 
+	def test_header_accounting_dimension_fills_blank_items(self):
+		se = make_receipt_with_locations("Test Location", [None, "Test Location 2"])
+
+		self.assertEqual([row.location for row in se.items], ["Test Location", "Test Location 2"])
+
+	def test_header_accounting_dimension_change_updates_items_holding_old_value(self):
+		se = make_receipt_with_locations("Test Location", [None, "Test Location 2"])
+
+		se.location = "Block 1"
+		se.save()
+
+		self.assertEqual([row.location for row in se.items], ["Block 1", "Test Location 2"])
+
 
 class TestStockEntryCoverage(ERPNextTestSuite):
 	"""Tests for functions previously lacking dedicated coverage."""
@@ -5158,6 +5171,21 @@ def get_qty_after_transaction(**args):
 		}
 	)
 	return flt(last_sle.get("qty_after_transaction"))
+
+
+def make_receipt_with_locations(header_location, row_locations):
+	se = frappe.new_doc("Stock Entry")
+	se.purpose = se.stock_entry_type = "Material Receipt"
+	se.company = "_Test Company"
+	se.location = header_location
+	for location in row_locations:
+		se.append(
+			"items",
+			stock_entry_row(
+				"_Test Item", 1, t_warehouse="_Test Warehouse - _TC", basic_rate=100, location=location
+			),
+		)
+	return se.insert()
 
 
 def get_multiple_items():
