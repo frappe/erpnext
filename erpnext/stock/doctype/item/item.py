@@ -1704,7 +1704,7 @@ def get_allowed_uoms(items: list) -> dict[str, dict[str, float]]:
 		own = item.uoms if isinstance(item, Document) else conversions[item.name]
 		inherited = [row for row in conversions[item.variant_of] if row.stock_uom == item.stock_uom]
 		allowed_uoms[item.name] = {item.stock_uom: 1.0} | {
-			row.uom: row.conversion_factor for row in inherited + own
+			row.uom: row.conversion_factor for row in inherited + own if flt(row.conversion_factor) > 0
 		}
 
 	return allowed_uoms
@@ -1734,7 +1734,7 @@ def validate_item_uoms(rows: list) -> None:
 	if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
 		return
 
-	rows = [row for row in rows if row.item_code and row.uom and row.uom != row.stock_uom]
+	rows = [row for row in rows if row.item_code and row.uom]
 	if not rows:
 		return
 
