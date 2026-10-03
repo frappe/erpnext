@@ -2,6 +2,7 @@ frappe.provide("erpnext.accounts");
 
 erpnext.accounts.dimensions = {
 	bound_events: new Set(),
+	tax_doctypes: ["Sales Taxes and Charges", "Purchase Taxes and Charges", "Advance Taxes and Charges"],
 
 	setup_dimension_filters(frm, doctype) {
 		this.accounting_dimensions = [];
@@ -139,6 +140,7 @@ erpnext.accounts.dimensions = {
 			.filter(
 				(df) =>
 					df.fieldtype === "Table" &&
+					!this.tax_doctypes.includes(df.options) &&
 					fieldnames.some((fieldname) => frappe.meta.has_field(df.options, fieldname))
 			);
 	},
@@ -148,7 +150,9 @@ erpnext.accounts.dimensions = {
 		fieldnames
 			.filter((fieldname) => frappe.meta.has_field(row.doctype, fieldname))
 			.forEach((fieldname) => {
-				const value = frm.doc[fieldname] || (first_row !== row && first_row[fieldname]);
+				const value = frappe.meta.has_field(frm.doctype, fieldname)
+					? frm.doc[fieldname]
+					: first_row !== row && first_row[fieldname];
 				if (value) frappe.model.set_value(row.doctype, row.name, fieldname, value);
 			});
 	},
