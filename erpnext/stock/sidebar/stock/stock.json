@@ -244,7 +244,7 @@
    "collapsible": 1,
    "hidden": 0,
    "indent": 0,
-   "is_default_module": 0,
+   "is_default_module": 1,
    "keep_closed": 0,
    "label": "Item Group",
    "link_to": "Item Group",
@@ -854,7 +854,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-09-29 17:00:00.000000",
+ "modified": "2026-10-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
