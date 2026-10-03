@@ -2384,12 +2384,15 @@ class TestProductionPlan(ERPNextTestSuite):
 			do_not_save=1,
 			skip_getting_mr_items=1,
 		)
-		mr_items = get_items_for_material_requests(
-			plan.as_dict(), warehouses=[{"warehouse": data.group_warehouse}]
-		)
+		for get_parent_warehouse_data in (None, True):
+			mr_items = get_items_for_material_requests(
+				plan.as_dict(),
+				warehouses=[{"warehouse": data.group_warehouse}],
+				get_parent_warehouse_data=get_parent_warehouse_data,
+			)
 
-		quantities = {row.get("material_request_type"): flt(row.get("quantity")) for row in mr_items}
-		self.assertEqual(quantities, {"Material Transfer": 4, "Purchase": 3})
+			quantities = {row.get("material_request_type"): flt(row.get("quantity")) for row in mr_items}
+			self.assertEqual(quantities, {"Material Transfer": 4, "Purchase": 3})
 
 	def test_for_warehouse_must_be_child_of_group(self):
 		"A For Warehouse outside the chosen group warehouse is rejected on save."
