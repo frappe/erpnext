@@ -1505,9 +1505,10 @@ def get_material_request_items(
 	target_warehouse,
 	bin_dict,
 	consumed_qty,
+	shortage_bin,
 ):
 	required_qty = _required_qty_for_mr(
-		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+		row, ignore_existing_ordered_qty, warehouse, shortage_bin, consumed_qty, include_safety_stock
 	)
 
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
@@ -1986,6 +1987,7 @@ def get_items_for_material_requests(
 	# scope to its child warehouses; material is still received into for_warehouse.
 	target_warehouse = doc.get("for_warehouse")
 	scope_warehouse = doc.get("raw_material_group_warehouse") or target_warehouse
+	is_transfer = bool((ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses)
 
 	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
@@ -1995,7 +1997,14 @@ def get_items_for_material_requests(
 			target_warehouse = target_warehouse or fallback
 			# get_bin_details scopes to the warehouse's descendants, returning one row per
 			# child warehouse; sum them so a group warehouse reflects combined child stock.
-			bin_dict = _aggregate_bin_details(get_bin_details(details, doc.company, scope_warehouse))
+			bins = get_bin_details(details, doc.company, scope_warehouse)
+			bin_dict = _aggregate_bin_details(bins)
+			shortage_warehouse, shortage_bin = scope_warehouse, bin_dict
+			if is_transfer and scope_warehouse != target_warehouse:
+				shortage_warehouse = target_warehouse
+				shortage_bin = _aggregate_bin_details(
+					row for row in bins if row.warehouse == target_warehouse
+				)
 
 			if details.qty > 0:
 				items = get_material_request_items(
@@ -2005,15 +2014,16 @@ def get_items_for_material_requests(
 					company,
 					ignore_existing_ordered_qty,
 					include_safety_stock,
-					scope_warehouse,
+					shortage_warehouse,
 					target_warehouse,
 					bin_dict,
 					consumed_qty,
+					shortage_bin,
 				)
 				if items:
 					mr_items.append(items)
 
-	if (ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses:
+	if is_transfer:
 		new_mr_items = []
 		locations_by_item = _get_transfer_locations(mr_items, warehouses, company)
 		for item in mr_items:
