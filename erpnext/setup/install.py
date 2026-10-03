@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
 import os
 
 import frappe
@@ -40,6 +41,7 @@ def after_install():
 	set_default_print_formats()
 	create_letter_head()
 	toggle_hidden_fields()
+	grant_address_read_to_accounts_manager()
 	frappe.db.commit()
 
 
@@ -432,6 +434,59 @@ DEFAULT_ROLE_PROFILES = {
 		"Purchase Manager",
 	],
 }
+
+
+def grant_address_read_to_accounts_manager():
+	from frappe.permissions import add_permission, get_all_perms, update_permission_property
+
+	if not frappe.db.exists("Role", "Accounts Manager"):
+		return
+
+	has_rule = False
+	for perm in get_all_perms("Accounts Manager"):
+		if perm.parent == "Address":
+			has_rule = True
+	if has_rule or "Accounts Manager" in get_changed_roles("Address"):
+		print("Address / Accounts Manager: kept, this site already rules on this pair")
+		return
+
+	add_permission("Address", "Accounts Manager", 0, "read")
+	update_permission_property("Address", "Accounts Manager", 0, "export", 0)
+	frappe.clear_cache(doctype="Address")
+	print("Address / Accounts Manager: added read")
+
+
+def get_changed_roles(doctype: str, statuses: tuple = ("Updated", "Removed")) -> set:
+	if not frappe.db.exists("DocType", "Permission Log"):
+		return set()
+
+	logs = frappe.get_all(
+		"Permission Log",
+		filters={
+			"for_doctype": "DocType",
+			"for_document": doctype,
+			"reference_type": "Custom DocPerm",
+			"status": ["in", list(statuses)],
+		},
+		fields=["changes", "reference"],
+	)
+	roles = set()
+	for log in logs:
+		try:
+			changes = json.loads(log.changes) or {}
+		except (TypeError, ValueError):
+			changes = {}
+		logged = set()
+		for side in ("from", "to"):
+			role = (changes.get(side) or {}).get("role")
+			if role:
+				logged.add(role)
+		if not logged:
+			role = frappe.db.get_value("Custom DocPerm", log.reference, "role")
+			if role:
+				logged.add(role)
+		roles.update(logged)
+	return roles
 
 
 def after_app_install(app_name=None):
