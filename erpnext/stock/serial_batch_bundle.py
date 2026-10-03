@@ -504,7 +504,7 @@ class SerialBatchBundle:
 		item = frappe.get_cached_value(
 			"Item",
 			sle.item_code,
-			["item_name", "description", "item_group", "brand", "has_batch_no"],
+			["item_name", "description", "item_group", "brand"],
 			as_dict=1,
 		)
 
@@ -518,9 +518,6 @@ class SerialBatchBundle:
 			.set(sn_table.brand, item.brand)
 			.where(sn_table.name.isin(serial_nos) & (sn_table.item_code != sle.item_code))
 		)
-
-		if not item.has_batch_no:
-			query = query.set(sn_table.batch_no, None)
 
 		query.run()
 
