@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -20,6 +21,7 @@ from frappe.utils.data import add_to_date
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
+	make_asset_movement,
 	make_sales_invoice,
 	split_asset,
 	update_maintenance_status,
@@ -40,6 +42,14 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 
 class AssetSetup(unittest.TestCase):
@@ -1950,3 +1960,43 @@ def set_depreciation_settings_in_company(company=None):
 
 def enable_cwip_accounting(asset_category, enable=1):
 	frappe.db.set_value("Asset Category", asset_category, "enable_cwip_accounting", enable)
+
+
+class TestAssetMovementPermissions(FrappeTestCase):
+	def setUp(self):
+		self.asset = create_asset(asset_name="UP Asset", location="Test Location").name
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def movement_kwargs(self, name):
+		return {"assets": frappe.as_json([{"name": name}])}
+
+	def test_make_asset_movement_refuses_an_asset_outside_the_company_fence(self):
+		fenced = make_company_fenced_user(
+			"asset-move-fenced@example.com", ["Accounts Manager"], OTHER_COMPANY
+		)
+		with as_user(fenced):
+			assert_refused_for_names(
+				self, make_asset_movement, self.movement_kwargs, [self.asset], caller_supplied=True
+			)
+			assert_refused_without(
+				self,
+				["linked to", "'_Test Company'"],
+				make_asset_movement,
+				**self.movement_kwargs(self.asset),
+			)
+
+	def test_make_asset_movement_allows_a_user_inside_the_company_fence(self):
+		fenced = make_company_fenced_user(
+			"asset-move-in-fence@example.com", ["Accounts Manager"], "_Test Company"
+		)
+		with as_user(fenced):
+			movement = make_asset_movement(**self.movement_kwargs(self.asset))
+		self.assertEqual(movement["assets"][0]["source_location"], "Test Location")
+
+	def test_make_asset_movement_allows_an_unfenced_accounts_manager(self):
+		user = make_fenced_user("asset-move-open@example.com", ["Accounts Manager"])
+		with as_user(user):
+			movement = make_asset_movement(**self.movement_kwargs(self.asset))
+		self.assertEqual(movement["assets"][0]["asset"], self.asset)

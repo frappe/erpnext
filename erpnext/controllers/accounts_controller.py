@@ -16,6 +16,7 @@ from frappe.utils import (
 	add_months,
 	cint,
 	comma_and,
+	cstr,
 	flt,
 	fmt_money,
 	formatdate,
@@ -2715,7 +2716,7 @@ class AccountsController(TransactionBase):
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					self.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -3723,6 +3724,19 @@ def update_invoice_status():
 def get_payment_terms(
 	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
 ):
+	if terms_template:
+		terms_template = cstr(terms_template)
+		if not terms_template or not frappe.has_permission(
+			"Payment Terms Template", "read", doc=terms_template
+		):
+			erpnext._refuse()
+
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+def _get_payment_terms(
+	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+):
 	if not terms_template:
 		return
 
@@ -3742,7 +3756,15 @@ def get_payment_term_details(
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		if not term:
+			erpnext._refuse()
+		if not frappe.has_permission("Payment Term", "select", doc=term) and not frappe.has_permission(
+			"Payment Term", "read", doc=term
+		):
+			erpnext._refuse()
 		term = frappe.get_doc("Payment Term", term)
+	elif not hasattr(term, "payment_term"):
+		erpnext._refuse()
 	else:
 		term_details.payment_term = term.payment_term
 

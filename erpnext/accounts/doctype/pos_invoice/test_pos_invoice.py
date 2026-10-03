@@ -6,11 +6,16 @@ import unittest
 
 import frappe
 from frappe import _
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import PartialPaymentValidationError, make_sales_return
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import (
+	PartialPaymentValidationError,
+	make_merge_log,
+	make_sales_return,
+)
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
@@ -21,6 +26,16 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	insert_test_record,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 
 class TestPOSInvoice(unittest.TestCase):
@@ -1198,3 +1213,54 @@ def create_pos_invoice(**args):
 		pos_inv.payment_schedule = []
 
 	return pos_inv
+
+
+class TestPOSInvoiceMergeLogPermissions(FrappeTestCase):
+	def setUp(self):
+		self.invoice_a = self.insert_invoice("_Test Customer")
+		self.invoice_b = self.insert_invoice("_Test Customer 1")
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def insert_invoice(self, customer):
+		return insert_test_record(
+			"POS Invoice",
+			{
+				"company": "_Test Company",
+				"customer": customer,
+				"posting_date": frappe.utils.nowdate(),
+				"grand_total": 100,
+				"docstatus": 1,
+			},
+		)
+
+	def merge_log_kwargs(self, name):
+		return {"invoices": frappe.as_json([{"name": name}])}
+
+	def test_make_merge_log_refuses_an_invoice_outside_the_customer_fence(self):
+		fenced = make_fenced_user(
+			"pos-merge-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer")]
+		)
+		with as_user(fenced):
+			assert_refused_for_names(
+				self, make_merge_log, self.merge_log_kwargs, [self.invoice_b], caller_supplied=True
+			)
+			merge_log = make_merge_log(**self.merge_log_kwargs(self.invoice_a))
+		self.assertEqual(merge_log["pos_invoices"][0]["customer"], "_Test Customer")
+
+	def test_make_merge_log_refuses_an_invoice_outside_the_company_fence(self):
+		fenced = make_company_fenced_user("pos-merge-company@example.com", ["Sales User"], OTHER_COMPANY)
+		with as_user(fenced):
+			assert_refused_without(
+				self,
+				["linked to", "'_Test Company'"],
+				make_merge_log,
+				**self.merge_log_kwargs(self.invoice_a),
+			)
+
+	def test_make_merge_log_allows_an_unfenced_sales_user(self):
+		user = make_fenced_user("pos-merge-open@example.com", ["Sales User"])
+		with as_user(user):
+			merge_log = make_merge_log(**self.merge_log_kwargs(self.invoice_b))
+		self.assertEqual(merge_log["pos_invoices"][0]["grand_total"], 100)
