@@ -115,7 +115,7 @@ frappe.ui.form.on("Production Plan", {
 
 	raw_material_group_warehouse(frm) {
 		// For Warehouse must sit inside the chosen group, so drop a stale selection
-		if (frm.doc.for_warehouse) {
+		if (frm.doc.raw_material_group_warehouse && frm.doc.for_warehouse) {
 			frm.set_value("for_warehouse", null);
 		}
 	},
