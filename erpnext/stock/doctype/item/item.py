@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold
@@ -242,6 +243,7 @@ class Item(Document):
 		self.clear_retain_sample()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_default_uoms()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
 		self.validate_item_defaults()
@@ -1076,6 +1078,24 @@ class Item(Document):
 				if value:
 					d.conversion_factor = value
 
+	def validate_default_uoms(self):
+		if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+			return
+
+		allowed_uoms = get_allowed_uoms([self])[self.name]
+		for fieldname in ("sales_uom", "purchase_uom"):
+			uom = self.get(fieldname)
+			if uom and uom not in allowed_uoms:
+				frappe.throw(
+					_(
+						"{0} {1} has no conversion factor in this Item. Add it to the UOMs table, or disable {2} in Stock Settings."
+					).format(
+						_(self.meta.get_label(fieldname)),
+						bold(uom),
+						bold(_("Allow UOM with conversion rate defined in Item")),
+					)
+				)
+
 	def validate_attributes(self):
 		if not (self.has_variants or self.variant_of):
 			return
@@ -1672,6 +1692,70 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 
 	if shared_target_match:
 		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+
+def get_allowed_uoms(items: list) -> dict[str, dict[str, float]]:
+	"""Map items to the UOMs Stock Settings allows them, with conversion factors: the stock UOM, the
+	template's UOM conversions when both share a stock UOM, and the item's own. An Item document's own
+	conversions come from its unsaved rows."""
+	conversions = get_uom_conversions({item.name for item in items} | {item.variant_of for item in items})
+	allowed_uoms = {}
+	for item in items:
+		own = item.uoms if isinstance(item, Document) else conversions[item.name]
+		inherited = [row for row in conversions[item.variant_of] if row.stock_uom == item.stock_uom]
+		allowed_uoms[item.name] = {item.stock_uom: 1.0} | {
+			row.uom: row.conversion_factor for row in inherited + own if flt(row.conversion_factor) > 0
+		}
+
+	return allowed_uoms
+
+
+def get_uom_conversions(item_codes: set) -> defaultdict[str, list]:
+	item = frappe.qb.DocType("Item")
+	detail = frappe.qb.DocType("UOM Conversion Detail")
+	rows = (
+		frappe.qb.from_(detail)
+		.join(item)
+		.on(item.name == detail.parent)
+		.select(detail.parent, detail.uom, detail.conversion_factor, item.stock_uom)
+		.where((detail.parenttype == "Item") & detail.parent.isin(list(item_codes - {None})))
+		.orderby(detail.idx)
+		.run(as_dict=True)
+	)
+
+	conversions = defaultdict(list)
+	for row in rows:
+		conversions[row.parent].append(row)
+
+	return conversions
+
+
+def validate_item_uoms(rows: list) -> None:
+	if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+		return
+
+	rows = [row for row in rows if row.item_code and row.uom]
+	if not rows:
+		return
+
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ["in", list({row.item_code for row in rows})]},
+		fields=["name", "stock_uom", "variant_of"],
+	)
+	allowed_uoms = get_allowed_uoms(items)
+	for row in rows:
+		if row.uom not in allowed_uoms.get(row.item_code, {}):
+			frappe.throw(
+				_(
+					"Row #{0}: UOM {1} has no conversion factor in Item {2}. Add it to the Item's UOMs table, or disable {3} in Stock Settings."
+				).format(
+					row.idx,
+					bold(row.uom),
+					bold(row.item_code),
+					bold(_("Allow UOM with conversion rate defined in Item")),
+				)
+			)
 
 
 @frappe.whitelist()
