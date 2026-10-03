@@ -7,6 +7,8 @@ function get_filter_value(filter_name) {
 
 erpnext.financial_statements = {
 	filters: get_filters(),
+	// reports extending this object must take a fresh list, the one above is shared by all of them
+	get_filters: get_filters,
 	baseData: null,
 
 	get_pdf_format: function (report, custom_format) {
