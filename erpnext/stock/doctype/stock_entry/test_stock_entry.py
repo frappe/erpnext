@@ -3760,6 +3760,67 @@ class TestStockEntry(ERPNextTestSuite):
 		material_request.reload()
 		self.assertEqual(material_request.transfer_status, "Completed")
 
+	def test_transferred_qty_with_multiple_references_and_cancellation(self):
+		item_code = "_Test Item"
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		transit_warehouse = get_in_transit_warehouse("_Test Company")
+		make_stock_entry(item_code=item_code, target=source_warehouse, qty=20, rate=100)
+		sources = [
+			make_stock_entry(
+				item_code=item_code,
+				source=source_warehouse,
+				target=transit_warehouse,
+				qty=10,
+				add_to_transit=1,
+			)
+			for source_number in range(2)
+		]
+
+		partial = make_stock_in_entry(sources[0].name)
+		other = make_stock_in_entry(sources[1].name)
+		partial.append("items", other.items[0].as_dict())
+		for row in partial.items:
+			row.qty = 2
+			row.t_warehouse = target_warehouse
+			if frappe.db.db_type == "mariadb":
+				# Data fields retain their case even though MariaDB matches case-insensitively.
+				row.ste_detail = row.ste_detail.upper()
+		partial.save().submit()
+
+		remaining = make_stock_in_entry(sources[0].name)
+		other = make_stock_in_entry(sources[1].name)
+		remaining.append("items", other.items[0].as_dict())
+		for row in remaining.items:
+			row.qty = 9
+			row.t_warehouse = target_warehouse
+		remaining.save()
+		frappe.db.savepoint("excess_transfer")
+		with self.assertRaises(frappe.ValidationError):
+			remaining.submit()
+		frappe.db.rollback(save_point="excess_transfer")
+
+		remaining.reload()
+		for row in remaining.items:
+			row.qty = 3
+		remaining.save().submit()
+		for source in sources:
+			source.reload()
+			self.assertEqual(source.items[0].transferred_qty, 5)
+			self.assertEqual(source.per_transferred, 50)
+
+		remaining.cancel()
+		for source in sources:
+			source.reload()
+			self.assertEqual(source.items[0].transferred_qty, 2)
+			self.assertEqual(source.per_transferred, 20)
+
+		partial.cancel()
+		for source in sources:
+			source.reload()
+			self.assertEqual(source.items[0].transferred_qty, 0)
+			self.assertEqual(source.per_transferred, 0)
+
 	def test_manufacture_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
