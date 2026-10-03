@@ -494,19 +494,6 @@ erpnext.sales_common = {
 			}
 
 			project(doc, cdt, cdn) {
-				const item = frappe.get_doc(cdt, cdn);
-				if (cdt !== doc.doctype && item.project) {
-					$.each(this.frm.doc["items"] || [], function (i, other_item) {
-						if (!other_item.project) {
-							frappe.model.set_value(
-								other_item.doctype,
-								other_item.name,
-								"project",
-								item.project
-							);
-						}
-					});
-				}
 				let me = this;
 				if (["Delivery Note", "Sales Invoice", "Sales Order"].includes(this.frm.doc.doctype)) {
 					if (this.frm.doc.project) {

@@ -294,18 +294,6 @@ erpnext.buying = {
 				}
 			}
 
-			project(doc, cdt, cdn) {
-				var item = frappe.get_doc(cdt, cdn);
-				if (cdt !== doc.doctype && item.project) {
-					$.each(this.frm.doc["items"] || [], function (i, other_item) {
-						if (!other_item.project) {
-							other_item.project = item.project;
-							refresh_field("project", other_item.name, other_item.parentfield);
-						}
-					});
-				}
-			}
-
 			rejected_warehouse(doc, cdt) {
 				// trigger autofill_warehouse only if parent rejected_warehouse field is triggered
 				if (["Purchase Invoice", "Purchase Receipt"].includes(cdt)) {

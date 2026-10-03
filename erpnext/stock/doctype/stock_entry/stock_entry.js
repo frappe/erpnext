@@ -1312,10 +1312,6 @@ frappe.ui.form.on("Stock Entry Detail", {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
 	},
 
-	cost_center(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
-	},
-
 	sample_quantity(frm, cdt, cdn) {
 		validate_sample_quantity(frm, cdt, cdn);
 	},
