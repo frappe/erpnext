@@ -1838,11 +1838,7 @@ def get_items_for_material_requests(
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))
 
-		if (
-			doc.get("for_warehouse")
-			and not get_parent_warehouse_data
-			and doc.get("for_warehouse") in warehouses
-		):
+		if doc.get("for_warehouse") in warehouses:
 			warehouses.remove(doc.get("for_warehouse"))
 
 	doc["mr_items"] = []
