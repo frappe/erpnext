@@ -152,21 +152,27 @@ class ProductionPlan(Document):
 			return
 
 		group = frappe.db.get_value(
-			"Warehouse", self.raw_material_group_warehouse, ["lft", "rgt", "is_group"], as_dict=True
+			"Warehouse",
+			{"name": self.raw_material_group_warehouse, "is_group": 1, "company": self.company},
+			["lft", "rgt"],
+			as_dict=True,
 		)
-		if not group.is_group:
+		if not group:
 			frappe.throw(
-				_("{0} must be a group warehouse.").format(frappe.bold(_("Raw Material Group Warehouse")))
+				_("{0} must be a group warehouse of company {1}.").format(
+					frappe.bold(_("Raw Material Group Warehouse")), frappe.bold(self.company)
+				)
 			)
 
-		if self.for_warehouse:
-			child = frappe.db.get_value("Warehouse", self.for_warehouse, ["lft", "rgt"], as_dict=True)
-			if not (group.lft <= child.lft and child.rgt <= group.rgt):
-				frappe.throw(
-					_("For Warehouse {0} must be a child of the group warehouse {1}.").format(
-						frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
-					)
+		if self.for_warehouse and not frappe.db.exists(
+			"Warehouse",
+			{"name": self.for_warehouse, "is_group": 0, "lft": (">", group.lft), "rgt": ("<", group.rgt)},
+		):
+			frappe.throw(
+				_("For Warehouse {0} must be a non-group warehouse under {1}.").format(
+					frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
 				)
+			)
 
 	def enable_auto_reserve_stock(self):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
