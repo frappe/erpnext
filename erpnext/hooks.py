@@ -22,14 +22,7 @@ add_to_apps_screen = [
 	}
 ]
 
-# Modules that are a folder of code and nothing else. Their doctypes, reports and controllers stay
-# where they are; what they no longer own is navigation, which now sits in the sidebar named beside
-# each. Left in the dock, each would carry an entry of its own for two to four records. See
-# `frappe.utils.modules.get_code_only_modules`.
-#
-# The value names the modules that inherited that navigation, so a Call Log or a Code List resolves
-# to a sidebar the user can actually navigate to instead of dead-ending in a module the dock never
-# shows.
+# Modules that are only accessible via code and not via the UI. These modules are not shown in the sidebar or in the modules list.
 code_only_modules = {
 	"Telephony": ["ERPNext Integrations"],
 	# Its one doctype, Communication Medium, describes how a call reaches someone, so it sits in
@@ -37,6 +30,21 @@ code_only_modules = {
 	"Communication": ["ERPNext Integrations"],
 	"EDI": ["Utilities"],
 	"Bulk Transaction": ["Utilities"],
+	# Its masters are already linked from the sidebars that use them. Accounts leads because it
+	# links Company, and it is the home for the org-level records no other sidebar lists
+	# (Party Type, Authorization Rule, Transaction Deletion Record). Stock comes before Selling so
+	# that Item Group goes to Stock, and Selling comes before CRM so that Customer Group, Territory
+	# and Sales Person go to Selling.
+	"Setup": ["Accounts", "Stock", "Selling", "Buying", "CRM"],
+	# Subcontracting is sending work out to be manufactured, so its orders and receipts live in the
+	# Manufacturing sidebar.
+	"Subcontracting": ["Manufacturing"],
+	# Its records are country-specific tax settings and returns, so they sit with the rest of the
+	# tax setup and reports in Accounts.
+	"Regional": ["Accounts"],
+	# Maintenance schedules and visits are after-sales upkeep of what was sold, so they live in a
+	# Maintenance section of the Quality sidebar.
+	"Maintenance": ["Quality Management"],
 }
 
 develop_version = "17.x.x-develop"

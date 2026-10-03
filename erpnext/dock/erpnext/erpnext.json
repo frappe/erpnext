@@ -104,22 +104,6 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "wrench",
-   "link_to": "Maintenance",
-   "link_type": "Sidebar",
-   "title": "Maintenance"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
-   "icon": "globe",
-   "link_to": "Regional",
-   "link_type": "Sidebar",
-   "title": "Regional"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
    "icon": "plug-duotone",
    "link_to": "ERPNext Integrations",
    "link_type": "Sidebar",
@@ -132,17 +116,9 @@
    "link_to": "Quality",
    "link_type": "Sidebar",
    "title": "Quality"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
-   "icon": "factory",
-   "link_to": "Subcontracting",
-   "link_type": "Sidebar",
-   "title": "Subcontracting"
   }
  ],
- "modified": "2026-09-29 17:00:00.000000",
+ "modified": "2026-10-03 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",
