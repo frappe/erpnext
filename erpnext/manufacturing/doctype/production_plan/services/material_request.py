@@ -154,7 +154,7 @@ def get_items_for_material_requests(
 	doc = _normalize_mr_doc(doc)
 	_authorize_mr_request(doc, warehouses)
 	_validate_group_warehouse_target(doc)
-	warehouses = _filter_warehouses(doc, warehouses, get_parent_warehouse_data)
+	warehouses = _filter_warehouses(doc, warehouses)
 	doc["mr_items"] = []
 
 	po_items = _collect_po_items(doc)
@@ -241,14 +241,13 @@ def _validate_group_warehouse_target(doc):
 		)
 
 
-def _filter_warehouses(doc, warehouses, get_parent_warehouse_data):
+def _filter_warehouses(doc, warehouses):
 	if not warehouses:
 		return warehouses
 
 	warehouses = list(set(get_warehouse_list(warehouses)))
-	for_warehouse = doc.get("for_warehouse")
-	if for_warehouse and not get_parent_warehouse_data and for_warehouse in warehouses:
-		warehouses.remove(for_warehouse)
+	if doc.get("for_warehouse") in warehouses:
+		warehouses.remove(doc.get("for_warehouse"))
 	return warehouses
 
 
