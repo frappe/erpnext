@@ -18,6 +18,7 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
@@ -284,6 +285,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for item in self.items:
 				if not item.project:
 					item.project = self.project
+
+		self.set_accounting_dimensions_in_items()
+
+	def set_accounting_dimensions_in_items(self):
+		"""Fill blank rows, and rows still holding the previous header value, from the header."""
+		doc_before_save = self.get_doc_before_save()
+		for dimension in get_accounting_dimensions():
+			previous_value = doc_before_save.get(dimension) if doc_before_save else None
+			for row in self.items:
+				if not row.get(dimension) or row.get(dimension) == previous_value:
+					row.set(dimension, self.get(dimension))
 
 	def set_default_cost_center(self):
 		for row in self.items:
