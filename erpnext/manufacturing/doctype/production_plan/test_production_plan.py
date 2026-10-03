@@ -2274,6 +2274,25 @@ class TestProductionPlan(ERPNextTestSuite):
 			# a group warehouse must never be a Material Request target
 			self.assertNotEqual(row.get("warehouse"), data.group_warehouse)
 
+	def test_group_transfer_buys_shortage_of_for_warehouse(self):
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			for_warehouse=data.for_wh,
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		mr_items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": data.group_warehouse}]
+		)
+
+		quantities = {row.get("material_request_type"): flt(row.get("quantity")) for row in mr_items}
+		self.assertEqual(quantities, {"Material Transfer": 4, "Purchase": 3})
+
 	def test_for_warehouse_must_be_child_of_group(self):
 		"A For Warehouse outside the chosen group warehouse is rejected on save."
 		data = self._setup_group_rm_warehouse()
