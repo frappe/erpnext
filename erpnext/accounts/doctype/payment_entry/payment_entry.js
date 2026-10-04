@@ -46,6 +46,20 @@ frappe.ui.form.on("Payment Entry", {
 	setup: function (frm) {
 		frm.cscript.tax_table = "Advance Taxes and Charges";
 
+		// in setup, so it applies to saved entries too and not only after Party Type is changed
+		frm.set_query("party", function (doc) {
+			if (doc.party_type == "Employee") {
+				return {
+					query: "erpnext.controllers.queries.employee_query",
+					filters: { company: doc.company },
+				};
+			} else if (["Customer", "Supplier"].includes(doc.party_type)) {
+				return erpnext.queries.party(doc);
+			} else if (doc.party_type == "Shareholder") {
+				return { filters: { company: doc.company } };
+			}
+		});
+
 		frm.set_query("paid_from", function (doc) {
 			frm.events.validate_company(frm);
 
@@ -478,22 +492,6 @@ frappe.ui.form.on("Payment Entry", {
 			frm.set_value("party_type", "");
 			frappe.throw(__("Party can only be one of {0}", [party_types.join(", ")]));
 		}
-
-		frm.set_query("party", function () {
-			if (frm.doc.party_type == "Employee") {
-				return {
-					query: "erpnext.controllers.queries.employee_query",
-				};
-			} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
-				return erpnext.queries.party(frm.doc);
-			} else if (frm.doc.party_type == "Shareholder") {
-				return {
-					filters: {
-						company: frm.doc.company,
-					},
-				};
-			}
-		});
 
 		if (frm.doc.party) {
 			$.each(
