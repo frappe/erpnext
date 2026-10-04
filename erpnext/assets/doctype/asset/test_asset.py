@@ -932,6 +932,23 @@ class TestAsset(AssetSetup):
 		with as_user(system_manager):
 			self.assertEqual(make_asset_movement([{"name": asset.name}])["assets"][0]["asset"], asset.name)
 
+	def test_get_values_from_purchase_doc_needs_read_on_the_purchase_doc(self):
+		from erpnext.assets.doctype.asset.asset import get_values_from_purchase_doc
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
+		pi = make_purchase_invoice(item_code="Macbook Pro", qty=1, rate=100000.0)
+
+		quality_manager = make_fenced_user("asset-qm@example.com", ["Quality Manager"])
+		accounts_user = make_fenced_user("asset-au@example.com", ["Accounts User"])
+		for doctype, name in (("Purchase Receipt", pr.name), ("Purchase Invoice", pi.name)):
+			with as_user(quality_manager):
+				with self.assertRaises(frappe.PermissionError):
+					get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			with as_user(accounts_user):
+				values = get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			self.assertEqual(values["company"], "_Test Company")
+			self.assertEqual(values["asset_quantity"], 1)
+
 
 class TestDepreciationMethods(AssetSetup):
 	def setUp(self):

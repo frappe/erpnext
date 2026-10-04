@@ -1219,12 +1219,11 @@ def get_values_from_purchase_doc(
 	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
 		frappe.throw(_("Invalid document type"), frappe.PermissionError)
 
-	# The caller is filling in an Asset (asset.js:794), and the Asset form is the boundary: Quality
-	# Manager writes Assets but holds read on neither Purchase Receipt nor Purchase Invoice, so the
-	# purchase document cannot be it.
+	# The caller is filling in an Asset, and the values come from the purchase document, so both
+	# Asset write and read on that document are needed.
 	frappe.has_permission("Asset", "write", throw=True)
 
-	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+	purchase_doc = frappe.get_doc(doctype, purchase_doc_name, check_permission="read")
 
 	_check_asset_company(purchase_doc.company)
 
