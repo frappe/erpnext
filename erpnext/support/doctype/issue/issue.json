@@ -6,6 +6,7 @@
  "creation": "2013-02-01 10:36:25",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/issue",
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -145,7 +146,6 @@
    "bold": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_global_search": 1,
    "label": "Description",
    "oldfieldname": "problem_description",
    "oldfieldtype": "Text"
@@ -390,10 +390,10 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-ticket",
+ "icon": "ticket",
  "idx": 7,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -428,6 +428,7 @@
  "row_format": "Dynamic",
  "search_fields": "status,customer,subject,raised_by",
  "sender_field": "raised_by",
+ "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

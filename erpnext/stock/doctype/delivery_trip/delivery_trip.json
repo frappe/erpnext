@@ -4,6 +4,7 @@
  "creation": "2017-10-16 16:45:48.293335",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/delivery-trip",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -186,6 +187,7 @@
    "read_only": 1
   }
  ],
+ "icon": "route",
  "is_submittable": 1,
  "links": [],
  "modified": "2024-03-27 13:06:50.643296",

@@ -5,6 +5,7 @@
  "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/repost-item-valuation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -269,6 +270,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "refresh-cw",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

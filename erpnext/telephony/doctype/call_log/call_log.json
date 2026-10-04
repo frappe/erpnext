@@ -161,6 +161,7 @@
    "read_only": 1
   }
  ],
+ "icon": "phone",
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],

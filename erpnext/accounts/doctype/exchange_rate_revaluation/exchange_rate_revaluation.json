@@ -4,6 +4,7 @@
  "autoname": "ACC-ERR-.YYYY.-.#####",
  "creation": "2018-04-13 18:25:55.943587",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/exchange-rate-revaluation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -107,6 +108,7 @@
    "precision": "9"
   }
  ],
+ "icon": "arrow-right-left",
  "is_submittable": 1,
  "links": [],
  "modified": "2024-03-27 13:09:42.951164",

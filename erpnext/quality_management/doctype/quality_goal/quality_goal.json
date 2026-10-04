@@ -3,6 +3,7 @@
  "autoname": "field:goal",
  "creation": "2018-10-02 12:17:41.727541",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_goal",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -68,6 +69,7 @@
    "unique": 1
   }
  ],
+ "icon": "target",
  "index_web_pages_for_search": 1,
  "links": [
   {

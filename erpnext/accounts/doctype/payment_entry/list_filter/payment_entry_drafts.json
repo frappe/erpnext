@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"payment_type\", \"label\": \"Payment Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"party\", \"label\": \"Party\"}, {\"fieldname\": \"paid_amount\", \"label\": \"Paid Amount\"}, {\"fieldname\": \"mode_of_payment\", \"label\": \"Mode of Payment\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.558371",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Payment Entry\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.558371",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Entry-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Payment Entry",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

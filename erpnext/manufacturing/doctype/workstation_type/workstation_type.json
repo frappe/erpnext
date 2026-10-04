@@ -7,6 +7,7 @@
  "default_view": "List",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/workstation_type",
  "engine": "InnoDB",
  "field_order": [
   "workstation_type",
@@ -68,7 +69,7 @@
    "options": "Workstation Cost"
   }
  ],
- "icon": "icon-wrench",
+ "icon": "tag",
  "links": [],
  "modified": "2025-08-19 12:06:56.683558",
  "modified_by": "Administrator",

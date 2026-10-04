@@ -7,6 +7,7 @@
  "default_view": "Tree",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier-group",
  "engine": "InnoDB",
  "field_order": [
   "supplier_group_name",
@@ -105,7 +106,7 @@
    "report_hide": 1
   }
  ],
- "icon": "fa fa-flag",
+ "icon": "users",
  "idx": 1,
  "is_tree": 1,
  "links": [],

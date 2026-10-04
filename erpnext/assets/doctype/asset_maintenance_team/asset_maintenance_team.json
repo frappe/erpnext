@@ -3,6 +3,7 @@
  "autoname": "field:maintenance_team_name",
  "creation": "2017-10-20 11:43:47.712616",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-maintenance-team",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -59,6 +60,7 @@
    "reqd": 1
   }
  ],
+ "icon": "user-group",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

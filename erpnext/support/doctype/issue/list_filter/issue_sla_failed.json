@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"sla_resolution_by\", \"label\": \"Resolution By\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.981719",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "SLA Failed",
+ "filters": "[[\"Issue\", \"status\", \"in\", [\"Open\", \"Replied\", \"On Hold\"]], [\"Issue\", \"agreement_status\", \"=\", \"Failed\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.981719",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Issue-SLA Failed",
+ "owner": "Administrator",
+ "reference_doctype": "Issue",
+ "route_signature": "agreement_status=Failed&status=[\"in\",[\"Open\",\"Replied\",\"On Hold\"]]",
+ "sort_field": "sla_resolution_by",
+ "sort_order": "asc"
+}

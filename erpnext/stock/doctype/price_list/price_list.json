@@ -7,6 +7,7 @@
  "description": "A Price List is a collection of Item Prices either Selling, Buying, or both",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/price-lists",
  "engine": "InnoDB",
  "field_order": [
   "enabled",
@@ -80,7 +81,7 @@
    "options": "Price List Country"
   }
  ],
- "icon": "fa fa-tags",
+ "icon": "tags",
  "idx": 1,
  "links": [],
  "max_attachments": 1,

@@ -6,6 +6,7 @@
  "creation": "2022-01-25 10:29:58.717206",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/journal-entry",
  "engine": "InnoDB",
  "field_order": [
   "entry_type_and_date",
@@ -661,7 +662,7 @@
    "label": "Custom Remark"
   }
  ],
- "icon": "fa fa-file-text",
+ "icon": "notebook-pen",
  "idx": 176,
  "is_submittable": 1,
  "links": [
@@ -673,7 +674,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-04-08 14:19:30.870894",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -720,6 +721,7 @@
  ],
  "row_format": "Dynamic",
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
+ "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

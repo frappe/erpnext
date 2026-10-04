@@ -7,6 +7,7 @@
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -257,8 +258,6 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.__islocal&&doc.is_stock_item && !doc.has_serial_no && !doc.has_batch_no)",
-   "description": "Used to create an opening Stock Entry with the Valuation Rate when the item is saved",
    "fieldname": "opening_stock",
    "fieldtype": "Float",
    "hidden": 1,
@@ -1101,7 +1100,7 @@
    "label": "Item Prices"
   }
  ],
- "icon": "fa fa-tag",
+ "icon": "package",
  "idx": 2,
  "image_field": "image",
  "links": [],

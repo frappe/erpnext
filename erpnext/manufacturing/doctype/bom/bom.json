@@ -4,6 +4,7 @@
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/bill-of-materials",
  "engine": "InnoDB",
  "field_order": [
   "production_item_tab",
@@ -106,6 +107,7 @@
    "description": "The final item that will be produced using this BOM.",
    "fieldname": "item",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item to Manufacture",
@@ -756,12 +758,12 @@
    "show_description_on_click": 1
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "list-tree",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

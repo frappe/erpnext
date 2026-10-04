@@ -7,6 +7,7 @@
  "creation": "2022-02-21 11:54:09.632218",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/employee",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -363,7 +364,6 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Designation",
    "oldfieldname": "designation",
@@ -440,6 +440,7 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Mobile",
    "options": "Phone"
   },
@@ -460,6 +461,7 @@
    "description": "Provide Email Address registered in company",
    "fieldname": "company_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Company Email",
    "oldfieldname": "company_email",
    "oldfieldtype": "Data",
@@ -468,6 +470,7 @@
   {
    "fieldname": "personal_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Personal Email",
    "options": "Email"
   },
@@ -829,12 +832,12 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "user",
  "idx": 24,
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

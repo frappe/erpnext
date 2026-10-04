@@ -1897,11 +1897,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.set_currency_labels(["totals_section"], this.frm.doc.currency);
 		this.frm.set_currency_labels(["base_totals_section"], company_currency);
 
-		this.frm.set_currency_labels(
-			["outstanding_amount", "total_advance"],
-			this.frm.doc.party_account_currency
-		);
-
 		this.frm.set_df_property(
 			"conversion_rate",
 			"description",

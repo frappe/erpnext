@@ -6,6 +6,7 @@
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -72,6 +73,7 @@
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Project Name",
    "oldfieldtype": "Data",
    "reqd": 1,
@@ -479,12 +481,12 @@
    "show_dashboard": 1
   }
  ],
- "icon": "fa fa-puzzle-piece",
+ "icon": "folder-kanban",
  "idx": 29,
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

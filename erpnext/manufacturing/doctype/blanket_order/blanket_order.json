@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2018-05-24 07:18:08.256060",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/blanket-order",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -212,6 +213,7 @@
    "label": "Order Date"
   }
  ],
+ "icon": "file-text",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

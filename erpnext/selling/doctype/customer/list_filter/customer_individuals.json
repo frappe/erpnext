@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"customer_group\", \"label\": \"Customer Group\"}, {\"fieldname\": \"territory\", \"label\": \"Territory\"}, {\"fieldname\": \"mobile_no\", \"label\": \"Mobile No\"}, {\"fieldname\": \"email_id\", \"label\": \"Email Id\"}]",
+ "creation": "2026-09-30 21:12:56.758957",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Individuals",
+ "filters": "[[\"Customer\", \"disabled\", \"=\", 0], [\"Customer\", \"customer_type\", \"=\", \"Individual\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.758957",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer-Individuals",
+ "owner": "Administrator",
+ "reference_doctype": "Customer",
+ "route_signature": "customer_type=Individual&disabled=0",
+ "sort_field": "customer_name",
+ "sort_order": "asc"
+}

@@ -9,7 +9,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -21,7 +21,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "chart",
+   "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
    "label": "Dashboard",
@@ -45,7 +45,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "sell",
+   "icon": "store",
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Order",
@@ -180,7 +180,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "stock",
+   "icon": "package",
    "indent": 1,
    "keep_closed": 1,
    "label": "Items & Pricing",
@@ -698,7 +698,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-04-28 14:38:37.179705",
+ "modified": "2026-07-03 14:38:37.179705",
  "modified_by": "Administrator",
  "module": "Selling",
  "module_onboarding": "Selling Onboarding",

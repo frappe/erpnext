@@ -5,6 +5,7 @@
  "autoname": "ACC-INV-DISC-.YYYY.-.#####",
  "creation": "2019-03-07 12:01:56.296952",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/invoice_discounting",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -169,6 +170,7 @@
    "read_only": 1
   }
  ],
+ "icon": "ticket-percent",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-09-09 17:04:59.512294",

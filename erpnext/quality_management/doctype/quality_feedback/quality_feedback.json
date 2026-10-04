@@ -3,6 +3,7 @@
  "autoname": "format:QA-FB-{#####}",
  "creation": "2019-05-26 21:23:05.308379",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality-feedback",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -54,6 +55,7 @@
    "reqd": 1
   }
  ],
+ "icon": "message-square-text",
  "links": [
   {
    "group": "Actions",

@@ -7,6 +7,7 @@
  "creation": "2022-02-08 13:14:41.083327",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/lead",
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -107,6 +108,7 @@
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Organization Name",
@@ -117,6 +119,7 @@
   {
    "fieldname": "email_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Email",
    "oldfieldname": "email_id",
    "oldfieldtype": "Data",
@@ -213,6 +216,7 @@
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Mobile No",
    "oldfieldname": "mobile_no",
    "oldfieldtype": "Data",
@@ -539,11 +543,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-user",
+ "icon": "user-plus",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

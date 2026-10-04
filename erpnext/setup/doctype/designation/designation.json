@@ -6,6 +6,7 @@
  "creation": "2013-01-10 16:34:13",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/designation",
  "engine": "InnoDB",
  "field_order": [
   "designation_name",
@@ -28,7 +29,7 @@
    "label": "Description"
   }
  ],
- "icon": "fa fa-bookmark",
+ "icon": "id-card",
  "idx": 1,
  "links": [],
  "modified": "2026-04-14 18:19:34.405635",

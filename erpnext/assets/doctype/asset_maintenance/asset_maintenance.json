@@ -3,6 +3,7 @@
  "autoname": "field:asset_name",
  "creation": "2017-10-19 16:50:22.879545",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-maintenance",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -102,6 +103,7 @@
    "reqd": 1
   }
  ],
+ "icon": "wrench",
  "links": [],
  "modified": "2024-03-27 13:06:34.491299",
  "modified_by": "Administrator",

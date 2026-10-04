@@ -3,6 +3,7 @@
  "autoname": "format:QA-ACT-{#####}",
  "creation": "2018-10-02 11:40:43.666100",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_action",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -89,6 +90,7 @@
    "options": "Quality Feedback"
   }
  ],
+ "icon": "check-check",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-03-27 13:10:27.562854",
