@@ -215,7 +215,11 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
+<<<<<<< HEAD
  "modified": "2026-09-16 11:42:07.000000",
+=======
+ "modified": "2026-09-23 15:28:28.772991",
+>>>>>>> bc6e5e2 (fix: permission checks for serial / batch creation using scanning (#59325))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -232,6 +236,7 @@
    "read": 1,
    "report": 1,
    "role": "Item Manager",
+   "select": 1,
    "share": 1,
    "write": 1
   },
@@ -286,6 +291,19 @@
   {
    "role": "Sales User",
    "select": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "select": 1,
+   "share": 1,
+   "write": 1
   }
  ],
  "quick_entry": 1,
