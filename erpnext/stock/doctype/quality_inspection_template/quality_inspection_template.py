@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -23,7 +24,10 @@ class QualityInspectionTemplate(Document):
 		quality_inspection_template_name: DF.Data
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		parameters = [row.specification for row in self.item_quality_inspection_parameter]
+		if len(parameters) != len(set(parameters)):
+			frappe.throw(_("Quality Inspection Parameters must be unique"))
 
 
 def get_template_details(template):
