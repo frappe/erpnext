@@ -42,7 +42,7 @@ skip_namespaces = [
 ]
 
 [tool.bench.frappe-dependencies]
-frappe = ">=16.21.0,<17.0.0"
+frappe = ">=16.50.0,<17.0.0"
 
 [tool.bench.assets]
 build_dir = "./banking"
