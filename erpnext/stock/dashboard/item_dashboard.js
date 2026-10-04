@@ -330,8 +330,14 @@ erpnext.stock.with_warehouse_company = function (warehouse, callback) {
 			return;
 		}
 
-		frappe.db.get_value("Warehouse", warehouse, "company").then((r) => {
-			callback(r.message?.company);
+		// best-effort: users without Warehouse read access still get the Stock Entry
+		// with the default company instead of being blocked
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: { doctype: "Warehouse", filters: warehouse, fieldname: "company" },
+			silent: true,
+			callback: (r) => callback(r.message?.company),
+			error: () => callback(null),
 		});
 	});
 };
