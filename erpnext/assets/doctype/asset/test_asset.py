@@ -37,6 +37,12 @@ from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -902,6 +908,29 @@ class TestAsset(AssetSetup):
 						"depreciation_expense_account": asset_category_account.depreciation_expense_account,
 					},
 				)
+
+	def test_make_asset_movement_fences_each_asset(self):
+		from erpnext.assets.doctype.asset.mapper import make_asset_movement
+
+		asset = create_asset(item_code="Macbook Pro", company="_Test Company")
+
+		def movement_kwargs(name):
+			return {"assets": [{"name": name}]}
+
+		outside = make_company_fenced_user(
+			"asset-fenced@example.com", ["Accounts Manager"], "_Test Company 1"
+		)
+		with as_user(outside):
+			assert_refused_for_names(
+				self, make_asset_movement, movement_kwargs, [asset.name], caller_supplied=True
+			)
+		inside = make_company_fenced_user("asset-fenced@example.com", ["Accounts Manager"], "_Test Company")
+		with as_user(inside):
+			movement = make_asset_movement([{"name": asset.name}])
+		self.assertEqual(movement["assets"][0]["asset"], asset.name)
+		system_manager = make_fenced_user("asset-sm@example.com", ["System Manager"])
+		with as_user(system_manager):
+			self.assertEqual(make_asset_movement([{"name": asset.name}])["assets"][0]["asset"], asset.name)
 
 
 class TestDepreciationMethods(AssetSetup):

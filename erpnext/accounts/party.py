@@ -823,7 +823,7 @@ def set_taxes(
 	shipping_address: str | None = None,
 	use_for_shopping_cart: int | None = None,
 ):
-	from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details, get_tax_template
+	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_rule_party_details, get_tax_template
 
 	args = {frappe.scrub(party_type): party, "company": company}
 
@@ -838,12 +838,12 @@ def set_taxes(
 
 	if billing_address or shipping_address:
 		args.update(
-			get_party_details(
+			get_tax_rule_party_details(
 				party, party_type, {"billing_address": billing_address, "shipping_address": shipping_address}
 			)
 		)
 	else:
-		args.update(get_party_details(party, party_type))
+		args.update(get_tax_rule_party_details(party, party_type))
 
 	if party_type in ("Customer", "Lead", "Prospect", "CRM Deal"):
 		args.update({"tax_type": "Sales"})
