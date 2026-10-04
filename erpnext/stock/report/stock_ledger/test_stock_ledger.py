@@ -16,6 +16,42 @@ SERIAL_ITEM = "_Test Serialized Item With Series"
 
 
 class TestStockLedgerReport(ERPNextTestSuite):
+	def test_multiple_brand_filter(self):
+		brands = [f"_Test Stock Ledger Brand {frappe.generate_hash(length=8)}" for _ in range(2)]
+		items = []
+
+		for brand in brands:
+			frappe.get_doc({"doctype": "Brand", "brand": brand}).insert()
+			item = make_item(properties={"brand": brand}).name
+			make_stock_entry(item_code=item, to_warehouse=WH, qty=1, rate=100, posting_date="2026-06-01")
+			items.append(item)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date="2026-01-01",
+			to_date="2026-12-31",
+			brand=brands,
+			warehouse=[WH],
+		)
+		rows = execute(filters)[1]
+
+		self.assertCountEqual([row.item_code for row in rows], items)
+
+	def test_brand_filter_without_items(self):
+		brand = f"_Test Stock Ledger Brand {frappe.generate_hash(length=8)}"
+		frappe.get_doc({"doctype": "Brand", "brand": brand}).insert()
+		make_stock_entry(item_code="_Test Item", to_warehouse=WH, qty=1, rate=100, posting_date="2026-06-01")
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date="2026-01-01",
+			to_date="2026-12-31",
+			brand=[brand],
+			warehouse=[WH],
+		)
+
+		self.assertEqual(execute(filters)[1], [])
+
 	def make_batch_item(self):
 		return make_item(
 			properties={
