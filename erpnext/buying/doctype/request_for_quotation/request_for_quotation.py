@@ -57,6 +57,7 @@ class RequestforQuotation(BuyingController):
 		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
 		subject: DF.Data
+		supplier_quotation: DF.Link | None
 		suppliers: DF.Table[RequestforQuotationSupplier]
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
@@ -511,3 +512,55 @@ def get_rfq_containing_supplier(
 		limit_start=start,
 		limit_page_length=page_len,
 	)
+
+
+@frappe.whitelist()
+def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
+	"""Returns supplier quotation items linked to the RFQ"""
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
+	sq = frappe.qb.DocType("Supplier Quotation")
+
+	rfq_item_names = frappe.get_all(
+		"Request for Quotation Item",
+		filters={"parent": rfq_name},
+		pluck="name",
+	)
+
+	rfq_doc = (
+		frappe.get_cached_doc("Request for Quotation", rfq_name)
+		if frappe.db.exists("Request for Quotation", rfq_name)
+		else None
+	)
+	linked_sq = getattr(rfq_doc, "supplier_quotation", None) if rfq_doc else None
+
+	conditions = sq_item.request_for_quotation == rfq_name
+	if rfq_item_names:
+		conditions = conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
+	if linked_sq:
+		conditions = conditions | (sq.name == linked_sq)
+
+	query = (
+		frappe.qb.from_(sq_item)
+		.inner_join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(
+			sq_item.parent.as_("supplier_quotation"),
+			sq.supplier,
+			sq_item.item_code,
+			sq_item.item_name,
+			sq_item.qty,
+			sq_item.uom,
+			sq_item.stock_uom,
+			sq_item.rate,
+			sq_item.amount,
+			sq_item.lead_time_days,
+			sq.valid_till,
+			sq.currency,
+			sq.status,
+			sq.docstatus,
+		)
+		.where(conditions & (sq.docstatus < 2))
+		.orderby(sq.transaction_date)
+	)
+
+	return query.run(as_dict=True)
