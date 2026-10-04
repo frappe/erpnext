@@ -493,12 +493,16 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
+			precision = d.precision("allocated_amount")
+			allocated_amount = flt(d.allocated_amount, precision)
+			outstanding_amount = flt(latest.outstanding_amount, precision)
+
 			if (
 				d.payment_term
 				and (
-					(flt(d.allocated_amount)) > 0
+					allocated_amount > 0
 					and latest.payment_term_outstanding
-					and (flt(d.allocated_amount) > flt(latest.payment_term_outstanding))
+					and (allocated_amount > flt(latest.payment_term_outstanding, precision))
 				)
 				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
@@ -507,10 +511,6 @@ class PaymentEntry(AccountsController):
 						"Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
 					).format(d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term)
 				)
-
-			precision = d.precision("allocated_amount")
-			allocated_amount = flt(d.allocated_amount, precision)
-			outstanding_amount = flt(latest.outstanding_amount, precision)
 
 			if allocated_amount > 0 and allocated_amount > outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
