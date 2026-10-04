@@ -5337,7 +5337,6 @@ def set_fg_mapping_on_submit(doc):
 
 	# a finished good batch of 3 takes three times the raw material serials of a single finished good serial
 	fg_qty = {(row.fg_field, row.value): row.qty or 1 for row in fg_values}
-	total_fg_qty = sum(fg_qty.values())
 
 	rows_by_item = defaultdict(list)
 	for row in raw_materials:
@@ -5357,9 +5356,7 @@ def set_fg_mapping_on_submit(doc):
 
 	entries_by_fg_target = defaultdict(list)
 	for rows in rows_by_item.values():
-		per_fg = {
-			target: math.ceil(flt(len(rows) * fg_qty[target] / total_fg_qty, 6)) for target in fg_targets
-		}
+		per_fg = get_fg_quotas(len(rows), fg_targets, fg_qty)
 		mapped_count = defaultdict(int)
 		for row in rows:
 			if row.fg_target:
@@ -5377,6 +5374,23 @@ def set_fg_mapping_on_submit(doc):
 	sabe = frappe.qb.DocType("Serial and Batch Entry")
 	for (fg_field, fg_value), entry_names in entries_by_fg_target.items():
 		(frappe.qb.update(sabe).set(sabe[fg_field], fg_value).where(sabe.name.isin(entry_names))).run()
+
+
+def get_fg_quotas(count, fg_targets, fg_qty):
+	"""Split count raw materials across the finished goods by their qty, so the quotas add up to count.
+
+	Each finished good gets its whole share, and what is left goes to the largest remainders, the first
+	finished good winning a tie.
+	"""
+	total_qty = sum(fg_qty[target] for target in fg_targets)
+	shares = {target: flt(count * fg_qty[target] / total_qty, 6) for target in fg_targets}
+	quotas = {target: math.floor(share) for target, share in shares.items()}
+
+	by_remainder = sorted(fg_targets, key=lambda target: shares[target] - quotas[target], reverse=True)
+	for target in by_remainder[: count - sum(quotas.values())]:
+		quotas[target] += 1
+
+	return quotas
 
 
 def get_fg_target(target, fg_targets, stock_entry):

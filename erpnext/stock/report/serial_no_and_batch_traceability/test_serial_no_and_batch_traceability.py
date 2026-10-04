@@ -11,6 +11,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import (
 	get_fg_mapping,
+	get_fg_quotas,
 	get_fg_target,
 	get_fg_values,
 	get_raw_material_entries,
@@ -448,22 +449,42 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
 	def test_auto_mapping_follows_finished_good_qty(self):
-		"""A finished good batch of 3 takes three raw material serials, a single finished good serial one."""
-		rm_item = self.make_rm_item()
-		serial_fg_item, batch_fg_item = self.make_fg_item(), self.make_fg_item(batch=True)
-		self.receive(rm_item, qty=4)
-		repack = self.make_repack([(rm_item, 4, None)], [(serial_fg_item, 1, None), (batch_fg_item, 3, None)])
+		"""A finished good batch of 3 takes three times the raw material serials of a single finished good serial."""
+		# 5 raw material serials split 1.25 / 3.75, so the leftover one goes to the batch, not the serial
+		for rm_qty, expected_counts in ((4, (1, 3)), (5, (1, 4))):
+			with self.subTest(rm_qty=rm_qty):
+				rm_item = self.make_rm_item()
+				serial_fg_item, batch_fg_item = self.make_fg_item(), self.make_fg_item(batch=True)
+				self.receive(rm_item, qty=rm_qty)
+				repack = self.make_repack(
+					[(rm_item, rm_qty, None)], [(serial_fg_item, 1, None), (batch_fg_item, 3, None)]
+				)
 
-		fg_values = get_fg_values(repack.name)
-		self.assertEqual(
-			[(row.fg_field, row.qty) for row in fg_values], [("fg_serial_no", 1), ("fg_batch_no", 3)]
-		)
+				fg_values = get_fg_values(repack.name)
+				self.assertEqual(
+					[(row.fg_field, row.qty) for row in fg_values], [("fg_serial_no", 1), ("fg_batch_no", 3)]
+				)
 
-		raw_materials = get_raw_material_entries(repack.name)
-		self.assertEqual(
-			[row.fg_serial_no or row.fg_batch_no for row in raw_materials],
-			[fg_values[0].value] + [fg_values[1].value] * 3,
-		)
+				raw_materials = get_raw_material_entries(repack.name)
+				self.assertEqual(
+					[row.fg_serial_no or row.fg_batch_no for row in raw_materials],
+					[fg_values[0].value] * expected_counts[0] + [fg_values[1].value] * expected_counts[1],
+				)
+
+	def test_fg_quotas(self):
+		targets = ["a", "b", "c"]
+		for count, fg_qty, expected in (
+			(5, {"a": 1, "b": 3}, {"a": 1, "b": 4}),
+			(4, {"a": 1, "b": 3}, {"a": 1, "b": 3}),
+			(5, {"a": 1, "b": 1, "c": 1}, {"a": 2, "b": 2, "c": 1}),
+			(2, {"a": 1, "b": 1, "c": 1}, {"a": 1, "b": 1, "c": 0}),
+			(3, {"a": 2.5, "b": 0.5}, {"a": 3, "b": 0}),
+		):
+			fg_targets = [target for target in targets if target in fg_qty]
+			with self.subTest(count=count, fg_qty=fg_qty):
+				quotas = get_fg_quotas(count, fg_targets, fg_qty)
+				self.assertEqual(quotas, expected)
+				self.assertEqual(sum(quotas.values()), count)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
