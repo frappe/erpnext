@@ -20,6 +20,18 @@ GRANTS = {
 	"Serial and Batch Bundle": {
 		"Sales User": ("select",),
 	},
+	"Sales Taxes and Charges Template": {
+		"Accounts User": ("select",),
+		"Sales Manager": ("select",),
+		"Stock User": ("select",),
+		"Purchase Manager": ("select",),
+		"Purchase User": ("select",),
+		"Manufacturing Manager": ("select",),
+		"Manufacturing User": ("select",),
+	},
+	"Purchase Taxes and Charges Template": {
+		"Stock User": ("select",),
+	},
 }
 
 PREVIOUS_SHIPPED_RULES = {

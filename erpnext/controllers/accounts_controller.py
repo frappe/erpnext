@@ -1338,7 +1338,7 @@ class AccountsController(TransactionBase):
 			if not tax_master_doctype:
 				tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-			self.extend("taxes", get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
+			self.extend("taxes", _get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
 
 	def append_taxes_from_item_tax_template(self):
 		if not frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template"):
@@ -3288,6 +3288,13 @@ def validate_tax_master(master_doctype):
 
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
+	default = _get_default_taxes_and_charges(master_doctype, tax_template, company)
+	if default and default.get("taxes_and_charges"):
+		erpnext.require_permission(master_doctype, default["taxes_and_charges"], "select")
+	return default
+
+
+def _get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
 	if not company:
 		return {}
 
@@ -3302,12 +3309,18 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 
 	return {
 		"taxes_and_charges": default_tax,
-		"taxes": get_taxes_and_charges(master_doctype, default_tax),
+		"taxes": _get_taxes_and_charges(master_doctype, default_tax),
 	}
 
 
 @frappe.whitelist()
 def get_taxes_and_charges(master_doctype, master_name):
+	if master_name:
+		erpnext.require_permission(master_doctype, master_name, "select")
+	return _get_taxes_and_charges(master_doctype, master_name)
+
+
+def _get_taxes_and_charges(master_doctype, master_name):
 	if not master_name:
 		return
 
