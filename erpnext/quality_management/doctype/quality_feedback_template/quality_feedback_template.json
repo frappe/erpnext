@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:template",
  "creation": "2019-05-26 21:17:24.283061",
+ "description": "The questions to ask when collecting quality feedback.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality-feedback-template",
  "editable_grid": 1,

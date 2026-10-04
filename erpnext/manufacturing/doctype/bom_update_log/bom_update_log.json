@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "BOM-UPDT-LOG-.#####",
  "creation": "2022-03-16 14:23:35.210155",
- "description": "BOM Update Tool Log with job status maintained",
+ "description": "The progress of a BOM replacement or cost update.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

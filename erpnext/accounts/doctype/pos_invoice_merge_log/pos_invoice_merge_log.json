@@ -1,6 +1,7 @@
 {
  "actions": [],
  "creation": "2020-01-28 11:56:33.945372",
+ "description": "Shows which POS invoices were merged into a sales invoice.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

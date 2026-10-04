@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "SHIPMENT-.#####",
  "creation": "2020-07-09 10:58:52.508703",
+ "description": "A parcel you send through a carrier.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/shipment",
  "editable_grid": 1,

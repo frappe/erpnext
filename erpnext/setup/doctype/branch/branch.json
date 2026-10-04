@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:branch",
  "creation": "2013-01-10 16:34:13",
+ "description": "A branch of your company.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/branch",

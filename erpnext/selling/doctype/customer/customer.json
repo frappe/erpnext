@@ -5,7 +5,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2026-07-14 12:46:50.256889",
- "description": "Buyer of Goods and Services.",
+ "description": "A company or person you sell goods or services to.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/customer",
@@ -211,6 +211,7 @@
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Customer Group",
@@ -223,6 +224,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Territory",
@@ -235,12 +237,14 @@
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Tax ID"
   },
   {
    "description": "Controls which tax template is auto-applied when this customer is selected on a transaction.",
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -282,6 +286,7 @@
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Billing Currency",
    "no_copy": 1,
@@ -293,6 +298,7 @@
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Price List",
    "link_filters": "[[\"Price List\", \"selling\", \"=\", 1]]",
    "options": "Price List",
@@ -410,6 +416,7 @@
    "description": "Defines when payment is due (e.g. Net 30, 50% advance). Applied automatically on invoices for this customer.",
    "fieldname": "payment_terms",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Payment Terms Template",
    "options": "Payment Terms Template",
    "show_description_on_click": 1

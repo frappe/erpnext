@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:group_name",
  "creation": "2021-02-04 18:44:12.223295",
+ "description": "A grouping of inspection parameters.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

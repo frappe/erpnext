@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2025-03-24 12:50:26.464612",
+ "description": "An order to make items for a customer from materials they send.",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",

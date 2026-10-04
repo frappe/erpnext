@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:QA-ACT-{#####}",
  "creation": "2018-10-02 11:40:43.666100",
+ "description": "What you did to fix or prevent a quality problem.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_action",
  "editable_grid": 1,

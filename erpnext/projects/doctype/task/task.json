@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "TASK-.YYYY.-.#####",
  "creation": "2013-01-29 19:25:50",
+ "description": "A piece of work to be done, often part of a project.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tasks",
@@ -77,6 +78,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Project",
@@ -116,6 +118,7 @@
    "bold": 1,
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
@@ -127,6 +130,7 @@
   {
    "fieldname": "priority",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Priority",
@@ -160,6 +164,7 @@
    "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Datetime",
+   "in_import_template": 1,
    "label": "Expected Start Date",
    "oldfieldname": "exp_start_date",
    "oldfieldtype": "Date"
@@ -168,6 +173,7 @@
    "default": "0",
    "fieldname": "expected_time",
    "fieldtype": "Float",
+   "in_import_template": 1,
    "label": "Expected Time (in hours)",
    "oldfieldname": "exp_total_hrs",
    "oldfieldtype": "Data"
@@ -186,6 +192,7 @@
    "bold": 1,
    "fieldname": "exp_end_date",
    "fieldtype": "Datetime",
+   "in_import_template": 1,
    "label": "Expected End Date",
    "oldfieldname": "exp_end_date",
    "oldfieldtype": "Date",
@@ -213,6 +220,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
+   "in_import_template": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
