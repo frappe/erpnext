@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2018-04-13 18:42:06.431683",
+ "description": "Rates and thresholds for tax withheld on payments, like TDS.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-withholding-category",
  "editable_grid": 1,

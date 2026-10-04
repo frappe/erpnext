@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:criteria_name",
  "creation": "2017-05-29 01:32:43.064891",
+ "description": "Something a supplier is scored on, like on-time delivery.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

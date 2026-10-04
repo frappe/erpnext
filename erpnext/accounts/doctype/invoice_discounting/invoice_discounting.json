@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "ACC-INV-DISC-.YYYY.-.#####",
  "creation": "2019-03-07 12:01:56.296952",
+ "description": "Raise money against unpaid sales invoices.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/invoice_discounting",
  "editable_grid": 1,

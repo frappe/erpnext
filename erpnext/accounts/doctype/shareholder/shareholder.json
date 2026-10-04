@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-12-25 16:50:53.878430",
+ "description": "A person or company that owns shares in your company.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/shareholder",
  "editable_grid": 1,

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "hash",
  "creation": "2023-08-11 17:22:12.907518",
+ "description": "The serial numbers and batches moved in a transaction.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/serial-and-batch-bundle",
  "editable_grid": 1,

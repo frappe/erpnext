@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:QA-REV-{#####}",
  "creation": "2018-10-02 11:45:16.301955",
+ "description": "A periodic check of how a quality goal is going.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_review",
  "editable_grid": 1,

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:QA-NC-{#####}",
  "creation": "2020-10-21 14:49:50.350136",
+ "description": "Something that did not meet your quality standard.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/non-conformance",
  "editable_grid": 1,

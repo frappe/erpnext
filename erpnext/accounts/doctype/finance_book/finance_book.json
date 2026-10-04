@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "field:finance_book_name",
  "creation": "2018-04-13 17:42:43.252224",
+ "description": "A separate set of books, for example to depreciate assets under another rule.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/finance-book",
