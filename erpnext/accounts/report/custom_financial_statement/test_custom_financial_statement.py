@@ -4,6 +4,9 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.report.custom_financial_statement.custom_financial_statement import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -88,6 +91,37 @@ class TestCustomFinancialStatement(ERPNextTestSuite):
 		# the account-data row picks up the posted expense; the calculated row doubles it
 		self.assertEqual(flt(rows["Test Expense"][period_key]), 2000.0)
 		self.assertEqual(flt(rows["Expense Doubled"][period_key]), 4000.0)
+
+	def test_blank_cost_center_filter(self):
+		blank_je = make_journal_entry(
+			self.expense_account,
+			self.cash_account,
+			700,
+			posting_date="2024-06-15",
+			company=self.company,
+			submit=True,
+		)
+		make_journal_entry(
+			self.expense_account,
+			self.cash_account,
+			300,
+			posting_date="2024-06-15",
+			company=self.company,
+			submit=True,
+		)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": blank_je.name},
+			{"cost_center": None},
+		)
+
+		template = self._make_template()
+		filters = self._filters(template.template_name)
+		filters.cost_center = [BLANK_ACCOUNTING_DIMENSION]
+		rows = {row.get("account_name"): row for row in execute(filters)[1]}
+		period_key = rows["Test Expense"].get("_segment_info", {}).get("period_keys", [])[0]
+
+		self.assertEqual(flt(rows["Test Expense"][period_key]), 700.0)
 
 	def test_no_template_returns_nothing(self):
 		"""Without a report_template the report short-circuits and returns None."""

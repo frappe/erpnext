@@ -4,6 +4,9 @@
 import frappe
 from frappe.utils import getdate, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.report.cash_flow.cash_flow import execute
 from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
 from erpnext.accounts.utils import get_fiscal_year
@@ -111,3 +114,42 @@ class TestCashFlow(ERPNextTestSuite):
 		self.assertEqual(after.get(key_for(cc1), 0) - before.get(key_for(cc1), 0), 400)
 		self.assertEqual(after.get(key_for(cc2), 0) - before.get(key_for(cc2), 0), 200)
 		self.assertEqual(after.get("total", 0) - before.get("total", 0), 600)
+
+	def test_group_by_blank_dimension(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		filters = frappe._dict(
+			company=self.company,
+			period_start_date=getdate(),
+			period_end_date=getdate(),
+			filter_based_on="Date Range",
+			periodicity="Yearly",
+			accumulated_values=False,
+			group_by_dimension="Cost Center",
+			cost_center=[BLANK_ACCOUNTING_DIMENSION],
+		)
+
+		period_list = build_period_list(filters)
+		self.assertEqual(
+			{period.dimension_value for period in period_list},
+			{BLANK_ACCOUNTING_DIMENSION},
+		)
+		blank_period_key = period_list[0].key
+
+		def net_change_row():
+			return next(row for row in execute(filters)[1] if row.get("section") == "'Net Change in Cash'")
+
+		before = net_change_row()
+		journal_entry = make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 350, posting_date=today(), submit=True
+		)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": journal_entry.name},
+			"cost_center",
+			None,
+		)
+		after = net_change_row()
+
+		self.assertEqual(after.get(blank_period_key, 0) - before.get(blank_period_key, 0), 350)
+		self.assertEqual(after.get("total", 0) - before.get("total", 0), 350)
