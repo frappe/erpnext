@@ -24,18 +24,16 @@ add_to_apps_screen = [
 
 # Modules that are only accessible via code and not via the UI. These modules are not shown in the sidebar or in the modules list.
 code_only_modules = {
-	"Telephony": ["ERPNext Integrations"],
+	# Integrations and Utilities are a handful of settings and tools each, so they sit in the Setup
+	# sidebar with the rest of the configuration rather than taking two places in the dock.
+	"ERPNext Integrations": ["Setup"],
+	"Utilities": ["Setup"],
+	"Telephony": ["Setup"],
 	# Its one doctype, Communication Medium, describes how a call reaches someone, so it sits in
-	# the Telephony section beside the call settings rather than in a shell of its own.
-	"Communication": ["ERPNext Integrations"],
-	"EDI": ["Utilities"],
-	"Bulk Transaction": ["Utilities"],
-	# Its masters are already linked from the sidebars that use them. Accounts leads because it
-	# links Company, and it is the home for the org-level records no other sidebar lists
-	# (Party Type, Authorization Rule, Transaction Deletion Record). Stock comes before Selling so
-	# that Item Group goes to Stock, and Selling comes before CRM so that Customer Group, Territory
-	# and Sales Person go to Selling.
-	"Setup": ["Accounts", "Stock", "Selling", "Buying", "CRM"],
+	# the Integrations section beside the call settings rather than in a shell of its own.
+	"Communication": ["Setup"],
+	"EDI": ["Setup"],
+	"Bulk Transaction": ["Setup"],
 	# Subcontracting is sending work out to be manufactured, so its orders and receipts live in the
 	# Manufacturing sidebar.
 	"Subcontracting": ["Manufacturing"],
