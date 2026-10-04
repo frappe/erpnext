@@ -451,9 +451,10 @@ class PaymentReconciliation(Document):
 				)
 
 				# Added If clause to handle return Adhoc payments for account type holders ("Payable")
-				if party_account_defaults.get("account_type") in ("Payable") and invoice.get(
-					"invoice_type"
-				) in ["Payment Entry", "Journal Entry"]:
+				if (
+					party_account_defaults.get("account_type") in ("Payable")
+					and invoice.get("invoice_type") == "Payment Entry"
+				):
 					difference_amount = allocated_amount_in_inv_rate - allocated_amount_in_ref_rate
 				else:
 					difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
