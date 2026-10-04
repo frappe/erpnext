@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:goal",
  "creation": "2018-10-02 12:17:41.727541",
+ "description": "Something you measure and improve on a schedule, like on-time delivery.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_goal",
  "editable_grid": 1,

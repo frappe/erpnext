@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-23 16:58:44.424309",
+ "description": "A record of maintenance done on an asset.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-maintenance-log",

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:QA-FB-{#####}",
  "creation": "2019-05-26 21:23:05.308379",
+ "description": "Feedback on your quality from a customer or employee.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality-feedback",
  "editable_grid": 1,

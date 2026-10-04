@@ -378,6 +378,7 @@
    "depends_on": "eval: doc.type != \"\"",
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Rate",
    "oldfieldname": "export_rate",

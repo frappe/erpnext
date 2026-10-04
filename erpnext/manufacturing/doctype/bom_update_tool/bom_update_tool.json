@@ -2,7 +2,7 @@
  "actions": [],
  "allow_copy": 1,
  "creation": "2012-12-06 12:10:10",
- "description": "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM.\nIt also updates latest price in all the BOMs.",
+ "description": "Replace a BOM everywhere it is used, or update the cost of all BOMs.",
  "doctype": "DocType",
  "document_type": "Other",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bom-update-tool",

@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "CC-ALLOC-.#####",
  "creation": "2022-01-13 20:07:29.871109",
+ "description": "Splits one cost center's amounts across others by percentage.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/cost_center_allocation",
  "editable_grid": 1,

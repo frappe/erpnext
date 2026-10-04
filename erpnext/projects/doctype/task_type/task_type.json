@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "Prompt",
  "creation": "2019-04-19 15:04:05.317138",
+ "description": "A grouping of tasks, like bug or feature.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

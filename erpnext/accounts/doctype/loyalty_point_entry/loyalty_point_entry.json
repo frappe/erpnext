@@ -1,6 +1,7 @@
 {
  "actions": [],
  "creation": "2018-01-23 05:40:18.117583",
+ "description": "Points a customer earned or spent under a loyalty program.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

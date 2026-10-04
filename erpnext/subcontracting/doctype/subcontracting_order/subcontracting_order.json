@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-04-01 22:39:17.662819",
+ "description": "An order for a subcontractor to make items from your materials.",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",

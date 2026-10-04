@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "hash",
  "creation": "2013-03-05 14:50:38",
+ "description": "A group of units of an item made or received together.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/batch",
@@ -89,6 +90,7 @@
    "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Manufacturing Date"
   },
   {
@@ -98,6 +100,7 @@
   {
    "fieldname": "expiry_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
    "oldfieldtype": "Date"

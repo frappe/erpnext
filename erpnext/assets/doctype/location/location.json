@@ -5,6 +5,7 @@
  "autoname": "field:location_name",
  "creation": "2018-05-07 12:49:22.595974",
  "default_view": "Tree",
+ "description": "A place where your assets are kept.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -41,6 +42,7 @@
    "fieldname": "parent_location",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Parent Location",
    "options": "Location",
    "search_index": 1
@@ -61,6 +63,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Group"
   },

@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-08-12 17:20:16.012501",
+ "description": "How much you expect to sell, to plan production.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

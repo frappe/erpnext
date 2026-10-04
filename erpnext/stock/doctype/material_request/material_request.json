@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 14:48:38",
+ "description": "A request to buy, transfer or make items.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/material-request",
@@ -101,6 +102,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Required By"
   },
@@ -283,6 +285,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
   },

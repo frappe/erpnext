@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:quality_procedure_name",
  "creation": "2018-10-06 00:06:29.756804",
+ "description": "The steps of a process you follow to keep quality in check.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_procedure",
  "editable_grid": 1,

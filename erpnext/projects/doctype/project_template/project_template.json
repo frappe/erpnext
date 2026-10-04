@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2019-02-18 17:23:11.708371",
+ "description": "A set of tasks to start new projects from.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project-template",
  "editable_grid": 1,

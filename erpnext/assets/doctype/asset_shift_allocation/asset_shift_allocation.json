@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2023-11-24 15:07:44.652133",
+ "description": "Changes how many shifts an asset works, which changes its depreciation.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-shift-allocation",
  "engine": "InnoDB",
