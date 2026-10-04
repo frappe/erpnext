@@ -14,7 +14,8 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
-from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.accounts.services.taxes import _get_taxes_and_charges
+from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
@@ -455,7 +456,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 			master_doctype = "Sales Taxes and Charges Template"
 
 		if not target.get("taxes") and target.get("taxes_and_charges"):
-			for tax in get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
+			for tax in _get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
 				target.append("taxes", tax)
 
 		if not target.get("items"):

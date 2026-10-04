@@ -13,7 +13,7 @@ from erpnext.setup.utils import get_exchange_rate
 @frappe.whitelist()
 def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
-		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+		from erpnext.accounts.services.taxes import _get_default_taxes_and_charges
 
 		quotation = frappe.get_doc(target)
 
@@ -29,7 +29,7 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 		quotation.conversion_rate = exchange_rate
 
 		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
+		taxes = _get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
 		if taxes.get("taxes"):
 			quotation.update(taxes)
 
