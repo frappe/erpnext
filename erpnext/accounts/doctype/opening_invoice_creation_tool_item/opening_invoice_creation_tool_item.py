@@ -16,8 +16,10 @@ class OpeningInvoiceCreationToolItem(Document):
 
 		cost_center: DF.Link | None
 		due_date: DF.Date | None
+		exception: DF.Text | None
 		invoice_number: DF.Data | None
 		item_name: DF.Data | None
+		messages: DF.Code | None
 		outstanding_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
@@ -28,6 +30,9 @@ class OpeningInvoiceCreationToolItem(Document):
 		posting_date: DF.Date | None
 		project: DF.Link | None
 		qty: DF.Data | None
+		reference_name: DF.DynamicLink | None
+		reference_type: DF.Link | None
+		result_status: DF.Literal["Pending", "Success", "Failed"]
 		supplier_invoice_date: DF.Date | None
 		temporary_opening_account: DF.Link | None
 	# end: auto-generated types
