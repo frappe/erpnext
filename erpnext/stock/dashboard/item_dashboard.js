@@ -67,8 +67,11 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		}
 
 		function open_stock_entry(item, warehouse, entry_type, stock_uom) {
-			frappe.model.with_doctype("Stock Entry", function () {
+			erpnext.stock.with_warehouse_company(warehouse, function (company) {
 				var doc = frappe.model.get_new_doc("Stock Entry");
+				if (company) {
+					doc.company = company;
+				}
 				if (entry_type) {
 					doc.stock_entry_type = entry_type;
 				}
@@ -296,8 +299,12 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 			return;
 		}
 
-		frappe.model.with_doctype("Stock Entry", function () {
+		let warehouse = dialog.get_value("source") || dialog.get_value("target");
+		erpnext.stock.with_warehouse_company(warehouse, (company) => {
 			let doc = frappe.model.get_new_doc("Stock Entry");
+			if (company) {
+				doc.company = company;
+			}
 			doc.from_warehouse = dialog.get_value("source");
 			doc.to_warehouse = dialog.get_value("target");
 			doc.stock_entry_type = doc.from_warehouse ? "Material Transfer" : "Material Receipt";
@@ -312,6 +319,19 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 			row.transfer_qty = dialog.get_value("qty");
 			row.basic_rate = dialog.get_value("rate");
 			frappe.set_route("Form", doc.doctype, doc.name);
+		});
+	});
+};
+
+erpnext.stock.with_warehouse_company = function (warehouse, callback) {
+	frappe.model.with_doctype("Stock Entry", function () {
+		if (!warehouse) {
+			callback(null);
+			return;
+		}
+
+		frappe.db.get_value("Warehouse", warehouse, "company").then((r) => {
+			callback(r.message?.company);
 		});
 	});
 };
