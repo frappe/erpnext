@@ -20,6 +20,11 @@ from erpnext.manufacturing.doctype.job_card.mapper import (
 from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
+from erpnext.manufacturing.doctype.job_card.timer import (
+	JobCardTimer,
+	get_job_card_timer,
+	get_work_order_job_cards,
+)
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	WorkOrder,
@@ -245,6 +250,79 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		doc.is_paused = 1
 		self.assertRaises(frappe.ValidationError, doc.submit)
+
+	def test_work_order_job_card_timers(self):
+		"Elapsed time and the Start / Pause / Resume action follow the Job Card through its timer cycle."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
+
+		def timer_row():
+			rows = get_work_order_job_cards(self.work_order.name)
+			return next(row for row in rows if row["name"] == job_card.name)
+
+		row = timer_row()
+		self.assertEqual(
+			(row["timer_action"], row["is_running"], row["elapsed_seconds"]), ("start", False, 0)
+		)
+
+		job_card.start_timer(start_time=add_to_date(now(), hours=-1), employees=employee)
+		row = timer_row()
+		self.assertEqual((row["timer_action"], row["is_running"]), ("pause", True))
+		self.assertAlmostEqual(row["elapsed_seconds"], 3600, delta=60)
+		self.assertEqual(row["employees"], [employee])
+
+		job_card.reload()
+		job_card.pause_job(end_time=now())
+		row = timer_row()
+		self.assertEqual((row["timer_action"], row["is_running"]), ("resume", False))
+		self.assertAlmostEqual(row["elapsed_seconds"], 3600, delta=60)
+		self.assertRaises(frappe.ValidationError, job_card.pause_job, end_time=now())
+
+		job_card.reload()
+		job_card.resume_job(start_time=now())
+		self.assertEqual(get_job_card_timer(job_card.name)["timer_action"], "pause")
+		self.assertRaises(frappe.ValidationError, job_card.resume_job, start_time=now())
+
+	def test_no_timer_action_when_work_order_closed_or_stopped(self):
+		"A draft Job Card offers no Start / Resume once its Work Order rejects Job Card changes."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		self.assertEqual(get_job_card_timer(job_card.name)["timer_action"], "start")
+
+		for status in ("Closed", "Stopped"):
+			frappe.db.set_value("Work Order", self.work_order.name, "status", status)
+			self.assertIsNone(get_job_card_timer(job_card.name)["timer_action"], status)
+			self.assertRaises(frappe.ValidationError, job_card.save)
+
+	def test_job_card_timer_action_edge_cases(self):
+		def timer(**overrides):
+			job_card = frappe._dict(
+				docstatus=0,
+				status="Open",
+				for_quantity=2,
+				total_completed_qty=0,
+				has_time_logs=False,
+				logged_minutes=0,
+				open_log_starts=[],
+				employees=[],
+			)
+			job_card.update(overrides)
+			return JobCardTimer(job_card)
+
+		closed_cycle = {"has_time_logs": True, "logged_minutes": 60}
+
+		self.assertIsNone(timer(has_pending_transfer=True).get_action())
+		self.assertEqual(timer(has_pending_transfer=True, skip_material_transfer=1).get_action(), "start")
+		self.assertIsNone(timer(docstatus=1).get_action())
+		self.assertIsNone(timer(status="Completed").get_action())
+		self.assertIsNone(timer(work_order_status="Closed").get_action())
+		self.assertIsNone(timer(work_order_status="Stopped").get_action())
+		self.assertIsNone(timer(total_completed_qty=2).get_action())
+		# a closed cycle with pending qty starts again; one without stays on pause
+		self.assertEqual(timer(**closed_cycle, pending_qty=1).get_action(), "start")
+		self.assertEqual(timer(**closed_cycle).get_action(), "pause")
+		self.assertEqual(timer(**closed_cycle).get_elapsed_seconds(), 3600)
+		running_on_hold = timer(has_time_logs=True, open_log_starts=[now()], status="On Hold")
+		self.assertFalse(running_on_hold.is_running())
 
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
