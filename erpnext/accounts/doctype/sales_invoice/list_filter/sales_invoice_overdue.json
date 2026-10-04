@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"due_date\", \"label\": \"Payment Due Date\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"territory\", \"label\": \"Territory\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.541238",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Overdue",
+ "filters": "[[\"Sales Invoice\", \"status\", \"in\", [\"Overdue\", \"Overdue and Discounted\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.541238",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Invoice-Overdue",
+ "owner": "Administrator",
+ "reference_doctype": "Sales Invoice",
+ "route_signature": "status=[\"in\",[\"Overdue\",\"Overdue and Discounted\"]]",
+ "sort_field": "due_date",
+ "sort_order": "asc"
+}

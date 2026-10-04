@@ -2,7 +2,9 @@
  "actions": [],
  "autoname": "field:loyalty_program_name",
  "creation": "2018-01-23 06:23:05.731431",
+ "description": "Rewards customers with points they can spend on later purchases.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/loyalty-program",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -153,6 +155,7 @@
     "options": "Project"
   }
  ],
+ "icon": "gift",
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",

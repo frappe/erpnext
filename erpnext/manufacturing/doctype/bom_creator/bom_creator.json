@@ -4,8 +4,10 @@
  "autoname": "prompt",
  "creation": "2023-07-18 14:56:34.477800",
  "default_view": "List",
+ "description": "Build a multi-level BOM in one place.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bom-creator",
  "engine": "InnoDB",
  "field_order": [
   "tab_2_tab",
@@ -303,7 +305,7 @@
   }
  ],
  "hide_toolbar": 1,
- "icon": "fa fa-sitemap",
+ "icon": "list-plus",
  "is_submittable": 1,
  "links": [
   {

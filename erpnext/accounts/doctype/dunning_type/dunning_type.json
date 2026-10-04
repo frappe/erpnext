@@ -2,6 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "creation": "2019-12-04 04:59:08.003664",
+ "description": "The wording and fee for a kind of payment reminder.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -100,6 +101,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "bell",
  "links": [
   {
    "link_doctype": "Dunning",

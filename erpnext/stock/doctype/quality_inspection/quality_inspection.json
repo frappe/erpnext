@@ -2,8 +2,10 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2013-04-30 13:13:03",
+ "description": "Checks an item against its quality parameters.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality-inspection",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -273,7 +275,7 @@
    "options": "Letter Head"
   }
  ],
- "icon": "fa fa-search",
+ "icon": "clipboard-check",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,

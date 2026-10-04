@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2020-01-24 15:29:29.933693",
+ "description": "A sale made at the point of sale.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -1634,7 +1635,7 @@
    "print_hide": 1
   }
  ],
- "icon": "fa fa-file-text",
+ "icon": "receipt-text",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-09-29 14:00:00.000000",

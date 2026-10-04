@@ -4,8 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:holiday_list_name",
  "creation": "2013-01-10 16:34:14",
+ "description": "The holidays and weekly offs of a company or employee.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/holiday-list",
  "engine": "InnoDB",
  "field_order": [
   "holiday_list_name",
@@ -151,7 +153,7 @@
    "label": "Is Half Day"
   }
  ],
- "icon": "fa fa-calendar",
+ "icon": "calendar-off",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

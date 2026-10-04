@@ -4,7 +4,9 @@
  "autoname": "field:floor_name",
  "creation": "2023-10-06 15:06:07.976066",
  "default_view": "List",
+ "description": "A view of your workstations and what each is doing.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/plant-floor",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -72,6 +74,7 @@
   }
  ],
  "hide_toolbar": 1,
+ "icon": "layout-grid",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

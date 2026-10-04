@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "Prompt",
  "creation": "2020-11-19 10:37:20.734245",
+ "description": "Who answers incoming calls, and when.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -54,6 +55,7 @@
    "reqd": 1
   }
  ],
+ "icon": "phone-incoming",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-03-27 13:09:50.947071",

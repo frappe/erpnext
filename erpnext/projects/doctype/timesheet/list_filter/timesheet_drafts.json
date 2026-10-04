@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"start_date\", \"label\": \"Start Date\"}, {\"fieldname\": \"end_date\", \"label\": \"End Date\"}, {\"fieldname\": \"total_hours\", \"label\": \"Total Working Hours\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.952594",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Timesheet\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-10-01 05:23:02.252371",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Timesheet-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Timesheet",
+ "route_signature": "docstatus=0",
+ "sort_field": "start_date",
+ "sort_order": "desc"
+}

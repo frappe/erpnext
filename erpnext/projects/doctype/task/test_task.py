@@ -158,6 +158,16 @@ class TestTask(ERPNextTestSuite):
 		task.save()
 		self.assertEqual(getdate(task.exp_end_date), getdate(add_days(nowdate(), 5)))
 
+	def test_completing_sets_completed_on(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		task = create_task("_Test Complete Without Date")
+		user = create_user("test_task_completer@example.com", "Projects User")
+		with self.set_user(user.name):
+			frappe.set_value("Task", task.name, "status", "Completed")
+
+		self.assertEqual(frappe.db.get_value("Task", task.name, "completed_on"), getdate())
+
 
 def create_task(
 	subject,

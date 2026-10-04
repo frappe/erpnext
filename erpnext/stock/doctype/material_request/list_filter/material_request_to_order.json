@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"schedule_date\", \"label\": \"Required By\"}, {\"fieldname\": \"per_ordered\", \"label\": \"% Ordered\"}, {\"fieldname\": \"set_warehouse\", \"label\": \"Set Target Warehouse\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.821431",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Order",
+ "filters": "[[\"Material Request\", \"material_request_type\", \"=\", \"Purchase\"], [\"Material Request\", \"status\", \"in\", [\"Pending\", \"Partially Ordered\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.821431",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Material Request-To Order",
+ "owner": "Administrator",
+ "reference_doctype": "Material Request",
+ "route_signature": "material_request_type=Purchase&status=[\"in\",[\"Pending\",\"Partially Ordered\"]]",
+ "sort_field": "schedule_date",
+ "sort_order": "asc"
+}

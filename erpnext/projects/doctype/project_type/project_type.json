@@ -3,7 +3,9 @@
  "allow_rename": 1,
  "autoname": "field:project_type",
  "creation": "2017-07-18 13:32:46.031115",
+ "description": "A grouping of projects, like internal or external.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project-type",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -25,6 +27,7 @@
    "label": "Description"
   }
  ],
+ "icon": "tag",
  "links": [],
  "modified": "2024-08-16 19:24:29.480229",
  "modified_by": "Administrator",

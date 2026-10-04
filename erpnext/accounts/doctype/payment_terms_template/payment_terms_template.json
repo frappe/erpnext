@@ -4,7 +4,9 @@
  "allow_rename": 1,
  "autoname": "field:template_name",
  "creation": "2017-08-10 15:34:28.058054",
+ "description": "A set of payment terms to apply to invoices and orders.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-terms-template",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -34,6 +36,7 @@
    "label": "Allocate Payment Based On Payment Terms"
   }
  ],
+ "icon": "calendar-clock",
  "links": [],
  "modified": "2026-09-24 14:00:00.000000",
  "modified_by": "Administrator",

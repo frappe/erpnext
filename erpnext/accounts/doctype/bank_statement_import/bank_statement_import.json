@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:Bank Statement Import on {creation}",
  "creation": "2019-08-04 14:16:08.318714",
+ "description": "Bring in a bank statement to match its lines against your books.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -224,6 +225,7 @@
   }
  ],
  "hide_toolbar": 1,
+ "icon": "file-down",
  "links": [],
  "modified": "2026-05-30 20:51:10.353723",
  "modified_by": "Administrator",
