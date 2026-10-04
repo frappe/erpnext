@@ -180,3 +180,8 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_buying")
 		self.assertNotEqual(exchange_rate, 65)
 		self.assertEqual(flt(exchange_rate, 3), 62.9)
+
+	def test_get_exchange_rate_empty_currencies(self, mock_get):
+		self.assertIsNone(get_exchange_rate(None, None))
+		self.assertIsNone(get_exchange_rate("USD", None))
+		self.assertIsNone(get_exchange_rate(None, "INR"))

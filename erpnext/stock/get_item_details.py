@@ -1819,11 +1819,14 @@ def get_price_list_currency_and_exchange_rate(ctx: frappe._dict):
 	if (not plc_conversion_rate) or (
 		price_list_currency and ctx.price_list_currency and price_list_currency != ctx.price_list_currency
 	):
-		# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
-		plc_conversion_rate = (
-			get_exchange_rate(price_list_currency, company_currency, ctx.transaction_date, ctx.exchange_rate)
-			or plc_conversion_rate
-		)
+		if price_list_currency and company_currency:
+			# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
+			plc_conversion_rate = (
+				get_exchange_rate(
+					price_list_currency, company_currency, ctx.transaction_date, ctx.exchange_rate
+				)
+				or plc_conversion_rate
+			)
 
 	return frappe._dict(
 		{
