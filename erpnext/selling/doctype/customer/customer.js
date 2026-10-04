@@ -216,9 +216,6 @@ frappe.ui.form.on("Customer", {
 					__("Actions")
 				);
 			}
-
-			// indicator
-			erpnext.utils.set_party_dashboard_indicators(frm);
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
