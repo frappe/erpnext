@@ -336,20 +336,24 @@ frappe.ui.form.on("Stock Entry", {
 			const has_alternative = frm.doc.items.find((i) => i.allow_alternative_item === 1);
 
 			if (frm.doc.docstatus == 0 && has_alternative) {
-				frm.add_custom_button(__("Alternate Item"), () => {
-					erpnext.utils.select_alternate_items({
-						frm: frm,
-						child_docname: "items",
-						warehouse_field: "s_warehouse",
-						child_doctype: "Stock Entry Detail",
-						original_item_field: "original_item",
-						condition: (d) => {
-							if (d.s_warehouse && d.allow_alternative_item) {
-								return true;
-							}
-						},
-					});
-				});
+				frm.add_custom_button(
+					__("Alternate Item"),
+					() => {
+						erpnext.utils.select_alternate_items({
+							frm: frm,
+							child_docname: "items",
+							warehouse_field: "s_warehouse",
+							child_doctype: "Stock Entry Detail",
+							original_item_field: "original_item",
+							condition: (d) => {
+								if (d.s_warehouse && d.allow_alternative_item) {
+									return true;
+								}
+							},
+						});
+					},
+					__("Actions")
+				);
 			}
 		}
 
@@ -434,6 +438,15 @@ frappe.ui.form.on("Stock Entry", {
 					__("Create")
 				);
 			}
+		}
+
+		// mapped on draft; after submit, only the raw materials left unmapped can be mapped
+		if (frm.doc.docstatus < 2 && !frm.is_new() && ["Manufacture", "Repack"].includes(frm.doc.purpose)) {
+			frm.add_custom_button(
+				__("Map Raw Materials to Finished Goods"),
+				() => frm.trigger("map_raw_materials_to_finished_goods"),
+				__("Actions")
+			);
 		}
 
 		if (frm.doc.docstatus === 0 && !frm.doc.subcontracting_inward_order) {
@@ -635,6 +648,180 @@ frappe.ui.form.on("Stock Entry", {
 			frm.toggle_display("weight_per_piece", cint(r.batch_split));
 			frm.toggle_reqd("weight_per_piece", cint(r.batch_split));
 		});
+	},
+
+	async map_raw_materials_to_finished_goods(frm) {
+		const is_submitted = frm.doc.docstatus === 1;
+		if (!is_submitted && frm.is_dirty()) {
+			await frm.save();
+		}
+
+		const method = "erpnext.stock.doctype.stock_entry.services.serial_batch";
+		const mapping = await frappe.xcall(`${method}.get_fg_mapping`, {
+			stock_entry: frm.doc.name,
+		});
+		const fg_rows = mapping.fg_values;
+		// the mapping is fixed on submit, so only the raw materials left unmapped can still be mapped
+		const raw_materials = is_submitted
+			? mapping.raw_materials.filter((row) => !row.fg_serial_no && !row.fg_batch_no)
+			: mapping.raw_materials;
+		// one unique label per finished good serial / batch, shown by its physical number as the name can
+		// be a hash; a serial no and a batch no, or serial nos of different items, can share a number
+		const type_label = (fg_field) => (fg_field === "fg_serial_no" ? __("Serial No") : __("Batch No"));
+		const is_taken = (label) => label in targets || fg_rows.some((row) => row.label === label);
+		const targets = {};
+		const labels = {};
+		fg_rows.forEach((row) => {
+			const shared = fg_rows.some((other) => other !== row && other.label === row.label);
+			let label = row.label;
+			if (shared || label in targets) {
+				// a suffixed label must not match another label or another finished good's physical number
+				label = `${row.label} (${type_label(row.fg_field)})`;
+				for (let n = 2; is_taken(label); n++) {
+					label = `${row.label} (${type_label(row.fg_field)} ${n})`;
+				}
+			}
+
+			targets[label] = { fg_field: row.fg_field, value: row.value };
+			labels[`${row.fg_field}:${row.value}`] = label;
+		});
+		const get_label = (fg_field, value) => labels[`${fg_field}:${value}`] || "";
+		const fg_values = Object.keys(targets);
+
+		if (is_submitted && fg_values.length && mapping.raw_materials.length && !raw_materials.length) {
+			frappe.msgprint(__("All raw materials are already mapped to finished goods"));
+			return;
+		}
+
+		if (!fg_values.length || !raw_materials.length) {
+			frappe.msgprint(
+				is_submitted
+					? __("There are no serial / batch tracked raw materials or finished goods to map")
+					: __(
+							"Link the Serial and Batch Bundles of the raw materials and finished goods first. If you skip this, they are mapped automatically on submit."
+					  )
+			);
+			return;
+		}
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Map Raw Materials to Finished Goods"),
+			size: "extra-large",
+			fields: [
+				{
+					fieldtype: "HTML",
+					options: `<p class="text-muted">${__(
+						"Pick the finished good serial / batch each raw material went into. The Serial No and Batch Traceability report uses this mapping."
+					)}</p>`,
+				},
+				{
+					fieldtype: "Table",
+					fieldname: "raw_materials",
+					label: __("Raw Materials"),
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: true,
+					data: raw_materials.map((row) => ({
+						...row,
+						entry: row.name,
+						qty: Math.abs(row.qty),
+						fg_value: row.fg_serial_no
+							? get_label("fg_serial_no", row.fg_serial_no)
+							: row.fg_batch_no
+							? get_label("fg_batch_no", row.fg_batch_no)
+							: "",
+					})),
+					fields: [
+						{ fieldtype: "Data", fieldname: "entry", hidden: 1 },
+						{
+							fieldtype: "Link",
+							fieldname: "item_code",
+							options: "Item",
+							label: __("Item Code"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "serial_no",
+							options: "Serial No",
+							label: __("Serial No"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "batch_no",
+							options: "Batch",
+							label: __("Batch No"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Float",
+							fieldname: "qty",
+							label: __("Qty"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Select",
+							fieldname: "fg_value",
+							options: ["", ...fg_values].join("\n"),
+							label: __("Finished Good Serial / Batch No"),
+							in_list_view: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Save"),
+			primary_action: async (values) => {
+				const mapping = {};
+				(values.raw_materials || []).forEach((row) => {
+					mapping[row.entry] = targets[row.fg_value] || null;
+				});
+
+				await frappe.xcall(`${method}.set_fg_mapping`, {
+					stock_entry: frm.doc.name,
+					mapping: mapping,
+				});
+
+				dialog.hide();
+				frappe.show_alert({ message: __("Mapping saved"), indicator: "green" });
+			},
+			secondary_action_label: __("Auto Assign"),
+			secondary_action: () => {
+				const grid = dialog.fields_dict.raw_materials.grid;
+
+				// a single finished good serial / batch takes every raw material
+				if (fg_values.length === 1) {
+					grid.df.data.forEach((row) => (row.fg_value = fg_values[0]));
+					grid.refresh();
+					return;
+				}
+
+				const rows_by_item = {};
+				grid.df.data.forEach((row) => {
+					if (row.serial_no) {
+						(rows_by_item[row.item_code] ||= []).push(row);
+					}
+				});
+
+				// split each item's serial nos evenly across the finished goods, in order
+				Object.values(rows_by_item).forEach((rows) => {
+					if (rows.length % fg_values.length) return;
+
+					const per_fg = rows.length / fg_values.length;
+					rows.forEach((row, idx) => {
+						row.fg_value = fg_values[Math.floor(idx / per_fg)];
+					});
+				});
+
+				grid.refresh();
+			},
+		});
+
+		dialog.show();
 	},
 
 	toggle_warehouse_fields(frm) {

@@ -54,7 +54,7 @@ from .services.material_transfer import (
 	MaterialTransferForManufactureStockEntry,
 	MaterialTransferStockEntry,
 )
-from .services.serial_batch import StockEntrySABB
+from .services.serial_batch import StockEntrySABB, set_fg_mapping_on_submit
 from .services.subcontracting import SendToSubcontractorStockEntry
 
 
@@ -374,6 +374,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# before the negative-stock guard runs in update_stock_ledger().
 		self.update_wo_reservation_for_subcontracting()
 		self.update_stock_ledger()
+		# finished good serial / batch nos exist only after the stock ledger is posted
+		set_fg_mapping_on_submit(self)
 		self.make_stock_reserve_for_wip_and_fg()
 		self.reserve_stock_for_subcontracting()
 		self.update_subcontracting_order_status()

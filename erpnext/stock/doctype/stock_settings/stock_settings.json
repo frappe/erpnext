@@ -55,6 +55,7 @@
   "auto_bundle_section",
   "auto_create_serial_and_batch_bundle_for_outward",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
+  "auto_map_raw_materials_to_finished_goods",
   "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "naming_series_preview",
   "configure_series",
@@ -590,6 +591,15 @@
    "fieldname": "use_inline_serial_batch_editor",
    "fieldtype": "Check",
    "label": "Use Inline Serial / Batch Editor"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
+   "description": "On submit of a Manufacture / Repack entry, map the raw material serial / batch nos that were not mapped in draft to the finished goods, in order",
+   "fieldname": "auto_map_raw_materials_to_finished_goods",
+   "fieldtype": "Check",
+   "label": "Auto Map Raw Materials to Finished Goods",
+   "show_description_on_click": 1
   }
  ],
  "icon": "settings",
@@ -597,7 +607,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-28 12:00:00.000000",
+ "modified": "2026-10-01 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
