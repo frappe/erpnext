@@ -21,6 +21,7 @@ from frappe.utils.data import add_to_date
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
+	get_values_from_purchase_doc,
 	make_asset_movement,
 	make_sales_invoice,
 	split_asset,
@@ -2000,3 +2001,40 @@ class TestAssetMovementPermissions(FrappeTestCase):
 		with as_user(user):
 			movement = make_asset_movement(**self.movement_kwargs(self.asset))
 		self.assertEqual(movement["assets"][0]["asset"], self.asset)
+
+
+class TestAssetPurchaseDocPermissions(FrappeTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		create_asset_data()
+
+	def setUp(self):
+		self.pr = make_purchase_receipt(
+			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
+		)
+		self.pi = make_invoice(self.pr.name)
+		self.pi.submit()
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def purchase_docs(self):
+		return (("Purchase Receipt", self.pr.name), ("Purchase Invoice", self.pi.name))
+
+	def test_purchase_doc_values_need_read_on_the_purchase_doc(self):
+		user = make_fenced_user("asset-purchase-doc-qm@example.com", ["Quality Manager"])
+		for doctype, name in self.purchase_docs():
+			with as_user(user), self.assertRaises(frappe.PermissionError):
+				get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			frappe.flags.pop("disable_traceback", None)
+			frappe.clear_messages()
+
+	def test_purchase_doc_values_for_an_accounts_user(self):
+		user = make_fenced_user("asset-purchase-doc-au@example.com", ["Accounts User"])
+		for doctype, name in self.purchase_docs():
+			expected = get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			with as_user(user):
+				values = get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			self.assertEqual(values, expected)
+			self.assertEqual(values["gross_purchase_amount"], 100000.0)
