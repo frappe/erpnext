@@ -19,6 +19,7 @@ from frappe.utils.data import add_to_date
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
+	make_asset_movement,
 	make_sales_invoice,
 	split_asset,
 	update_maintenance_status,
@@ -36,6 +37,12 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -815,6 +822,57 @@ class TestAsset(AssetSetup):
 		)
 
 		frappe.db.set_value("Item", asset_item, "is_grouped_asset", 0)
+
+	def test_make_asset_movement_respects_location_user_permission(self):
+		inside = create_asset(asset_name="Asset Inside Location Fence", location="Test Location")
+		outside = create_asset(asset_name="Asset Outside Location Fence", location="Test Location 2")
+		fenced_user = make_fenced_user(
+			"asset_movement_fenced@example.com", ["Accounts User"], [("Location", "Test Location")]
+		)
+		unfenced_user = make_fenced_user("asset_movement_unfenced@example.com", ["Stock Manager"])
+
+		hidden = [outside.location, outside.asset_name]
+
+		with as_user(fenced_user):
+			assert_refused_without(self, hidden, make_asset_movement, [{"name": outside.name}], "Transfer")
+			assert_refused_without(
+				self,
+				hidden,
+				make_asset_movement,
+				[{"name": inside.name}, {"name": outside.name}],
+				"Transfer",
+			)
+			movement = make_asset_movement([{"name": inside.name}], "Transfer")
+
+		self.assertEqual(movement["assets"][0]["asset"], inside.name)
+		self.assertEqual(movement["assets"][0]["source_location"], "Test Location")
+
+		with as_user(unfenced_user):
+			movement = make_asset_movement([{"name": outside.name}], "Transfer")
+
+		self.assertEqual(movement["assets"][0]["asset"], outside.name)
+		self.assertEqual(movement["assets"][0]["source_location"], "Test Location 2")
+
+	def test_make_asset_movement_refuses_forbidden_missing_and_malformed_names(self):
+		inside = create_asset(asset_name="Asset Inside Location Fence", location="Test Location")
+		outside = create_asset(asset_name="Asset Outside Location Fence", location="Test Location 2")
+		fenced_user = make_fenced_user(
+			"asset_movement_fenced@example.com", ["Accounts User"], [("Location", "Test Location")]
+		)
+
+		def build_kwargs(name):
+			return {"assets": [{"name": name}], "purpose": "Transfer"}
+
+		with as_user(fenced_user):
+			assert_refused_without(
+				self,
+				[outside.location, outside.asset_name],
+				make_asset_movement,
+				**build_kwargs(outside.name),
+			)
+			assert_refused_for_names(
+				self, make_asset_movement, build_kwargs, [[inside.name, outside.name]], caller_supplied=True
+			)
 
 
 class TestDepreciationMethods(AssetSetup):

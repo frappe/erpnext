@@ -9,7 +9,7 @@ from frappe import _
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log, make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import PartialPaymentValidationError
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -21,6 +21,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	MISSING_NAME,
+	as_user,
+	assert_not_found,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1009,6 +1018,39 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
 
 		frappe.set_user("test@example.com")
+
+	def test_make_merge_log_respects_customer_user_permission(self):
+		inside = create_pos_invoice(pos_profile=self.pos_profile.name, do_not_submit=1)
+		outside = create_pos_invoice(
+			customer="_Test Customer 1", pos_profile=self.pos_profile.name, do_not_submit=1
+		)
+		user = make_fenced_user("pos-merge-log-user@example.com", ["Sales User"])
+
+		with as_user(user):
+			merge_log = make_merge_log([{"name": outside.name}])
+		self.assertEqual(merge_log.get("customer"), "_Test Customer 1")
+
+		make_fenced_user(user, ["Sales User"], [("Customer", "_Test Customer")])
+		with as_user(user):
+			merge_log = make_merge_log([{"name": inside.name}])
+			self.assertEqual(merge_log.get("customer"), "_Test Customer")
+			self.assertEqual(merge_log.get("pos_invoices")[0].get("pos_invoice"), inside.name)
+
+			assert_refused_without(self, ["_Test Customer 1"], make_merge_log, [{"name": outside.name}])
+			assert_not_found(self, make_merge_log, [{"name": [outside.name]}])
+			for name in ("", None):
+				assert_refused(self, make_merge_log, [{"name": name}])
+			for name in (0, False):
+				assert_not_found(self, make_merge_log, [{"name": name}])
+			assert_refused_without(
+				self, ["_Test Customer 1"], make_merge_log, [{"name": inside.name}, {"name": outside.name}]
+			)
+			assert_not_found(self, make_merge_log, [{"name": inside.name}, {"name": MISSING_NAME}])
+
+			def build_kwargs(name):
+				return {"invoices": [{"name": name}]}
+
+			assert_refused_for_names(self, make_merge_log, build_kwargs, [], caller_supplied=True)
 
 
 def create_pos_invoice(**args):

@@ -12,12 +12,24 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_available_batches_qty,
 	get_qty_based_available_batches,
+	get_serial_batch_ledgers,
 	get_type_of_transaction,
 	make_batch_nos,
 	make_serial_nos,
 	parse_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused,
+	assert_refused_without,
+	assert_type_gated,
+	insert_test_record,
+	make_company_fenced_user,
+	make_fenced_user,
+	malformed_names,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -2510,3 +2522,226 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 			self.assertEqual(flt(sle.stock_value_difference, 2), flt(sle.actual_qty * outgoing_rate, 2))
 
 		self.assertEqual(flt(sl_entries[-1].stock_value, 2), flt(balance_value, 2))
+
+
+UP_STOCK_USER = "test_sbb_up_stock_user@example.com"
+UP_BATCH_ITEM = "_Test SBB UP Batch Item"
+UP_BATCH_IN = "_Test SBB UP Batch 1"
+UP_BATCH_OUT = "_Test SBB UP Batch 2"
+UP_COMPANY = "_Test Company"
+UP_WAREHOUSE = "Stores - _TC"
+UP_OTHER_WAREHOUSE = "Stores - _TC3"
+
+
+class TestSerialandBatchBundleUserPermissions(ERPNextTestSuite):
+	def setUp(self):
+		make_item(UP_BATCH_ITEM, {"is_stock_item": 1, "has_batch_no": 1, "stock_uom": "Nos"})
+		for batch_no in (UP_BATCH_IN, UP_BATCH_OUT):
+			if not frappe.db.exists("Batch", batch_no):
+				frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": UP_BATCH_ITEM}).insert(
+					ignore_permissions=True
+				)
+
+	def make_draft_bundle(self, company, warehouse, batches):
+		bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": company,
+				"item_code": UP_BATCH_ITEM,
+				"warehouse": warehouse,
+				"type_of_transaction": "Inward",
+				"voucher_type": "Purchase Receipt",
+			}
+		)
+		for batch_no in batches:
+			bundle.append(
+				"entries", {"batch_no": batch_no, "qty": 2, "warehouse": warehouse, "incoming_rate": 10}
+			)
+		bundle.flags.ignore_validate = True
+		bundle.insert(ignore_permissions=True)
+		return bundle.name
+
+	def make_child_row(self, bundle):
+		return {
+			"doctype": "Purchase Receipt Item",
+			"parenttype": "Purchase Receipt",
+			"name": "_Test SBB UP Row",
+			"item_code": UP_BATCH_ITEM,
+			"warehouse": UP_WAREHOUSE,
+			"serial_and_batch_bundle": bundle,
+		}
+
+	def add_ledgers(self, bundle):
+		parent = {"doctype": "Purchase Receipt", "company": UP_COMPANY, "posting_date": today()}
+		entries = [{"batch_no": UP_BATCH_OUT, "qty": 3}]
+		return add_serial_batch_ledgers(entries, self.make_child_row(bundle), parent, UP_WAREHOUSE)
+
+	def make_receipt_row(self, company, warehouse, bundle):
+		receipt = insert_test_record(
+			"Purchase Receipt",
+			{"company": company, "supplier": "_Test Supplier", "posting_date": today(), "docstatus": 0},
+		)
+		row = insert_test_record(
+			"Purchase Receipt Item",
+			{
+				"parent": receipt,
+				"parenttype": "Purchase Receipt",
+				"parentfield": "items",
+				"idx": 1,
+				"item_code": UP_BATCH_ITEM,
+				"warehouse": warehouse,
+				"serial_and_batch_bundle": bundle,
+			},
+		)
+		return receipt, row
+
+	def add_ledgers_from_row(self, row, claimed_bundle=None):
+		parent = {"doctype": "Purchase Receipt", "company": UP_COMPANY, "posting_date": today()}
+		entries = [{"batch_no": UP_BATCH_OUT, "qty": 3}]
+		child_row = self.make_child_row(claimed_bundle)
+		child_row["name"] = row
+		return add_serial_batch_ledgers(entries, child_row, parent, UP_WAREHOUSE, do_not_save=True)
+
+	def get_entries(self, bundle):
+		entries = []
+		for row in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": bundle},
+			fields=["batch_no", "qty", "warehouse"],
+			order_by="idx",
+		):
+			entries.append((row.batch_no, row.qty, row.warehouse))
+		return entries
+
+	def get_ledger_batches(self, name):
+		batches = []
+		for ledger in get_serial_batch_ledgers(name=name):
+			batches.append(ledger.batch_no)
+		return batches
+
+	def test_get_serial_batch_ledgers_hides_entries_outside_batch_fence(self):
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		outside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_OUT])
+		mixed = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN, UP_BATCH_OUT])
+		user = make_fenced_user(UP_STOCK_USER, ["Stock User"], [("Batch", UP_BATCH_IN)])
+
+		with as_user(user):
+			self.assertEqual(get_serial_batch_ledgers(name=outside), [])
+			self.assertEqual(self.get_ledger_batches(inside), [UP_BATCH_IN])
+			self.assertEqual(self.get_ledger_batches(mixed), [UP_BATCH_IN])
+			self.assertNotIn(UP_BATCH_OUT, frappe.as_json(get_serial_batch_ledgers(name=mixed)))
+			self.assertNotIn(UP_BATCH_OUT, frappe.as_json(get_serial_batch_ledgers(name=[outside, mixed])))
+
+	def test_get_serial_batch_ledgers_skips_bundles_outside_company_fence(self):
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		outside = self.make_draft_bundle(OTHER_COMPANY, UP_OTHER_WAREHOUSE, [UP_BATCH_OUT])
+		user = make_company_fenced_user(UP_STOCK_USER, ["Stock User"], UP_COMPANY)
+
+		with as_user(user):
+			self.assertEqual(get_serial_batch_ledgers(name=outside), [])
+			ledgers = get_serial_batch_ledgers(name=[inside, outside])
+			self.assertEqual(len(ledgers), 1)
+			self.assertEqual(ledgers[0].name, inside)
+			for name in malformed_names():
+				if isinstance(name, dict):
+					assert_type_gated(self, get_serial_batch_ledgers, name=name)
+				else:
+					self.assertEqual(get_serial_batch_ledgers(name=name), [])
+
+	def test_get_serial_batch_ledgers_unfenced_stock_user_sees_every_entry(self):
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		outside = self.make_draft_bundle(OTHER_COMPANY, UP_OTHER_WAREHOUSE, [UP_BATCH_OUT])
+		user = make_fenced_user(UP_STOCK_USER, ["Stock User"], [("Batch", UP_BATCH_IN)])
+		with as_user(user):
+			self.assertEqual(get_serial_batch_ledgers(name=outside), [])
+
+		make_fenced_user(UP_STOCK_USER, ["Stock User"])
+		with as_user(user):
+			self.assertEqual(self.get_ledger_batches(inside), [UP_BATCH_IN])
+			self.assertEqual(self.get_ledger_batches(outside), [UP_BATCH_OUT])
+
+	def test_add_serial_batch_ledgers_refuses_bundle_outside_company_fence(self):
+		outside = self.make_draft_bundle(OTHER_COMPANY, UP_OTHER_WAREHOUSE, [UP_BATCH_IN])
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		before = self.get_entries(outside)
+		user = make_company_fenced_user(UP_STOCK_USER, ["Stock User"], UP_COMPANY)
+
+		with as_user(user):
+			assert_refused_without(self, [OTHER_COMPANY, UP_OTHER_WAREHOUSE], self.add_ledgers, outside)
+		self.assertEqual(self.get_entries(outside), before)
+
+		with as_user(user):
+			self.add_ledgers(inside)
+		self.assertEqual(self.get_entries(inside), [(UP_BATCH_OUT, 3, UP_WAREHOUSE)])
+
+	def get_bundle_state(self):
+		state = {}
+		for bundle in frappe.get_all("Serial and Batch Bundle", fields=["name", "modified", "company"]):
+			state[bundle.name] = (bundle.modified, bundle.company, self.get_entries(bundle.name))
+		return state
+
+	def test_add_serial_batch_ledgers_non_string_bundle_never_touches_an_existing_bundle(self):
+		outside = self.make_draft_bundle(OTHER_COMPANY, UP_OTHER_WAREHOUSE, [UP_BATCH_IN])
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		user = make_company_fenced_user(UP_STOCK_USER, ["Stock User"], UP_COMPANY)
+		bundles = [{"company": OTHER_COMPANY}, {"name": outside}, [outside], [inside]]
+		for name in malformed_names():
+			if not isinstance(name, str):
+				bundles.append(name)
+
+		for bundle in bundles:
+			before = self.get_bundle_state()
+			self.assertIn(outside, before)
+			self.assertIn(inside, before)
+			with as_user(user):
+				created = self.add_ledgers(bundle)
+			after = self.get_bundle_state()
+			self.assertNotIn(created.name, before)
+			self.assertEqual(created.company, UP_COMPANY)
+			self.assertEqual(self.get_entries(created.name), [(UP_BATCH_OUT, 3, UP_WAREHOUSE)])
+			del after[created.name]
+			self.assertEqual(after, before)
+
+	def test_add_serial_batch_ledgers_filter_bundle_name_rewrites_nothing_as_administrator(self):
+		outside = self.make_draft_bundle(OTHER_COMPANY, UP_OTHER_WAREHOUSE, [UP_BATCH_IN])
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		control = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		user = make_company_fenced_user(UP_STOCK_USER, ["Stock User"], UP_COMPANY)
+
+		with as_user(user):
+			self.assertEqual(self.add_ledgers(control).name, control)
+		self.assertEqual(self.get_entries(control), [(UP_BATCH_OUT, 3, UP_WAREHOUSE)])
+
+		for current_user in ("Administrator", user):
+			for bundle in ({"company": OTHER_COMPANY}, {"name": ["like", "%"]}):
+				before = self.get_bundle_state()
+				self.assertIn(outside, before)
+				self.assertIn(inside, before)
+				with as_user(current_user):
+					created = self.add_ledgers(bundle)
+				after = self.get_bundle_state()
+				self.assertNotIn(created.name, before)
+				del after[created.name]
+				self.assertEqual(after, before)
+
+	def test_add_serial_batch_ledgers_do_not_save_refuses_the_stored_row_and_bundle(self):
+		outside = self.make_draft_bundle(OTHER_COMPANY, UP_OTHER_WAREHOUSE, [UP_BATCH_IN])
+		inside = self.make_draft_bundle(UP_COMPANY, UP_WAREHOUSE, [UP_BATCH_IN])
+		other_receipt, other_row = self.make_receipt_row(OTHER_COMPANY, UP_OTHER_WAREHOUSE, inside)
+		receipt, row_with_outside = self.make_receipt_row(UP_COMPANY, UP_WAREHOUSE, outside)
+		receipt, row_with_inside = self.make_receipt_row(UP_COMPANY, UP_WAREHOUSE, inside)
+		before = self.get_entries(outside)
+		user = make_company_fenced_user(UP_STOCK_USER, ["Stock User"], UP_COMPANY)
+
+		with as_user(user):
+			assert_refused_without(self, [other_receipt], self.add_ledgers_from_row, other_row, inside)
+			assert_refused_without(self, [outside], self.add_ledgers_from_row, row_with_outside, inside)
+			for name in malformed_names():
+				assert_refused(self, self.add_ledgers_from_row, name, inside)
+		self.assertEqual(self.get_entries(outside), before)
+		self.assertEqual(self.get_entries(inside), [(UP_BATCH_IN, 2, UP_WAREHOUSE)])
+
+		with as_user(user):
+			self.add_ledgers_from_row(row_with_inside, outside)
+		self.assertEqual(self.get_entries(inside), [(UP_BATCH_OUT, 3, UP_WAREHOUSE)])
+		self.assertEqual(self.get_entries(outside), before)

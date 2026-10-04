@@ -8,13 +8,17 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
+from frappe.utils import cstr
 from frappe.utils.data import comma_and
 
+from erpnext import _refuse
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
+
+SUPPORTED_VOUCHER_TYPES = ["Payment Entry", "Journal Entry"]
 
 
 class UnreconcilePayment(Document):
@@ -38,7 +42,7 @@ class UnreconcilePayment(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		self.supported_types = ["Payment Entry", "Journal Entry"]
+		self.supported_types = SUPPORTED_VOUCHER_TYPES
 		if self.voucher_type not in self.supported_types:
 			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
 
@@ -196,9 +200,19 @@ def get_linked_advances(company, docname):
 
 
 @frappe.whitelist()
-def create_unreconcile_doc_for_selection(selections=None):
+def create_unreconcile_doc_for_selection(selections: str | list | None = None):
 	if selections:
-		selections = json.loads(selections)
+		if isinstance(selections, str):
+			selections = json.loads(selections)
+		for row in selections:
+			if row.get("voucher_type") not in SUPPORTED_VOUCHER_TYPES:
+				frappe.throw(_("Only {0} are supported").format(comma_and(SUPPORTED_VOUCHER_TYPES)))
+			row["voucher_no"] = cstr(row.get("voucher_no"))
+			if not row["voucher_no"] or not frappe.has_permission(
+				row.get("voucher_type"), "write", doc=row["voucher_no"]
+			):
+				_refuse()
+
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payment")

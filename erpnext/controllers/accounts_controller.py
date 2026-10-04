@@ -6,8 +6,9 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe import _, bold, qb, throw
+from frappe import _, _dict, bold, qb, throw
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.document import Document
 from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
@@ -17,6 +18,7 @@ from frappe.utils import (
 	add_months,
 	cint,
 	comma_and,
+	cstr,
 	flt,
 	fmt_money,
 	formatdate,
@@ -29,6 +31,7 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext import _refuse
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimensions,
@@ -2768,7 +2771,7 @@ class AccountsController(TransactionBase):
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					self.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -3786,6 +3789,23 @@ def update_invoice_status():
 
 @frappe.whitelist()
 def get_payment_terms(
+	terms_template: str | None,
+	posting_date: str | None = None,
+	grand_total: float | int | str | None = None,
+	base_grand_total: float | int | str | None = None,
+	bill_date: str | None = None,
+):
+	if not terms_template:
+		return
+
+	terms_template = cstr(terms_template)
+	if not frappe.has_permission("Payment Terms Template", "read", doc=terms_template):
+		_refuse()
+
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+def _get_payment_terms(
 	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
 ):
 	if not terms_template:
@@ -3803,11 +3823,19 @@ def get_payment_terms(
 
 @frappe.whitelist()
 def get_payment_term_details(
-	term, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+	term: str | _dict | Document,
+	posting_date: str | None = None,
+	grand_total: float | int | str | None = None,
+	base_grand_total: float | int | str | None = None,
+	bill_date: str | None = None,
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		if not term or not frappe.has_permission("Payment Term", "select", doc=term):
+			_refuse()
 		term = frappe.get_doc("Payment Term", term)
+	elif not hasattr(term, "payment_term"):
+		_refuse()
 	else:
 		term_details.payment_term = term.payment_term
 

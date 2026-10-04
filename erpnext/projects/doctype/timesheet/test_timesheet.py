@@ -11,10 +11,20 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import (
 	OverlapError,
+	get_activity_cost,
 	get_projectwise_timesheet_data,
 	make_sales_invoice,
 )
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -325,6 +335,136 @@ class TestTimesheet(ERPNextTestSuite):
 		timesheet.load_from_db()
 		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice2.name)
 		self.assertEqual(timesheet.status, "Billed")
+
+	def make_costed_employee(self, first_name, company, costing_rate, billing_rate):
+		employee = frappe.get_doc(
+			{
+				"doctype": "Employee",
+				"first_name": first_name,
+				"company": company,
+				"gender": "Male",
+				"date_of_birth": "1990-01-01",
+				"date_of_joining": "2020-01-01",
+				"status": "Active",
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"activity_type": "Planning",
+				"employee": employee.name,
+				"costing_rate": costing_rate,
+				"billing_rate": billing_rate,
+			}
+		).insert(ignore_permissions=True)
+		return employee.name
+
+	def make_company_fenced_projects_user(self):
+		return make_company_fenced_user(
+			"activity_cost_fenced@example.com", ["Projects User"], "_Test Company"
+		)
+
+	def assert_rates(self, rate, costing_rate, billing_rate):
+		self.assertEqual(rate.costing_rate, costing_rate)
+		self.assertEqual(rate.billing_rate, billing_rate)
+
+	def test_get_activity_cost_respects_company_user_permission(self):
+		inside = self.make_costed_employee("Activity Cost Inside", "_Test Company", 11, 21)
+		outside = self.make_costed_employee("Activity Cost Outside", OTHER_COMPANY, 91, 92)
+		fenced_user = self.make_company_fenced_projects_user()
+		unfenced_user = make_fenced_user("activity_cost_unfenced@example.com", ["Projects User"])
+
+		with as_user(fenced_user):
+			assert_refused_without(
+				self,
+				[OTHER_COMPANY, "Activity Cost Outside"],
+				get_activity_cost,
+				employee=outside,
+				activity_type="Planning",
+			)
+			rate = get_activity_cost(employee=inside, activity_type="Planning")
+
+		self.assert_rates(rate, 11, 21)
+
+		with as_user(unfenced_user):
+			rate = get_activity_cost(employee=outside, activity_type="Planning")
+
+		self.assert_rates(rate, 91, 92)
+
+	def test_get_activity_cost_respects_activity_type_user_permission(self):
+		frappe.db.set_value("Activity Type", "Planning", {"costing_rate": 13, "billing_rate": 23})
+		frappe.db.set_value("Activity Type", "Execution", {"costing_rate": 14, "billing_rate": 24})
+		user = make_fenced_user(
+			"activity_cost_type_fenced@example.com", ["Projects User"], [("Activity Type", "Planning")]
+		)
+
+		with as_user(user):
+			assert_refused(self, get_activity_cost, activity_type="Execution")
+			rate = get_activity_cost(activity_type="Planning")
+
+		self.assert_rates(rate, 13, 23)
+
+	def test_get_activity_cost_with_employee_refuses_activity_type_outside_user_permission(self):
+		frappe.db.set_value("Activity Type", "Execution", {"costing_rate": 14, "billing_rate": 24})
+		inside = self.make_costed_employee("Activity Cost Inside", "_Test Company", 11, 21)
+		user = make_fenced_user(
+			"activity_cost_type_fenced@example.com", ["Projects User"], [("Activity Type", "Planning")]
+		)
+
+		with as_user(user):
+			assert_refused(self, get_activity_cost, employee=inside, activity_type="Execution")
+			rate = get_activity_cost(employee=inside, activity_type="Planning")
+
+		self.assert_rates(rate, 11, 21)
+
+	def test_get_activity_cost_with_employee_refuses_forbidden_missing_and_malformed_activity_types(self):
+		frappe.db.set_value("Activity Type", "Execution", {"costing_rate": 14, "billing_rate": 24})
+		inside = self.make_costed_employee("Activity Cost Inside", "_Test Company", 11, 21)
+		user = make_fenced_user(
+			"activity_cost_type_fenced@example.com", ["Projects User"], [("Activity Type", "Planning")]
+		)
+
+		def with_employee(name):
+			return {"employee": inside, "activity_type": name}
+
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				get_activity_cost,
+				with_employee,
+				["Execution"],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			assert_refused(self, get_activity_cost, employee=inside)
+
+	def test_get_activity_cost_refuses_forbidden_missing_and_malformed_names(self):
+		inside = self.make_costed_employee("Activity Cost Inside", "_Test Company", 11, 21)
+		outside = self.make_costed_employee("Activity Cost Outside", OTHER_COMPANY, 91, 92)
+		user = self.make_company_fenced_projects_user()
+
+		def as_employee(name):
+			return {"employee": name, "activity_type": "Planning"}
+
+		def as_activity_type(name):
+			return {"activity_type": name}
+
+		with as_user(user):
+			assert_refused_without(
+				self, [OTHER_COMPANY, "Activity Cost Outside"], get_activity_cost, **as_employee(outside)
+			)
+			assert_refused_for_names(
+				self,
+				get_activity_cost,
+				as_employee,
+				[[inside, outside]],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			assert_refused_for_names(
+				self, get_activity_cost, as_activity_type, [], type_gated=True, caller_supplied=True
+			)
+			assert_refused(self, get_activity_cost)
 
 
 def make_timesheet(
