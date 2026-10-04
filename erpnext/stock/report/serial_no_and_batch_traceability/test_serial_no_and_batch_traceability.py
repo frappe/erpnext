@@ -447,6 +447,28 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		"Stock Settings",
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
 	)
+	def test_auto_mapping_follows_finished_good_qty(self):
+		"""A finished good batch of 3 takes three raw material serials, a single finished good serial one."""
+		rm_item = self.make_rm_item()
+		serial_fg_item, batch_fg_item = self.make_fg_item(), self.make_fg_item(batch=True)
+		self.receive(rm_item, qty=4)
+		repack = self.make_repack([(rm_item, 4, None)], [(serial_fg_item, 1, None), (batch_fg_item, 3, None)])
+
+		fg_values = get_fg_values(repack.name)
+		self.assertEqual(
+			[(row.fg_field, row.qty) for row in fg_values], [("fg_serial_no", 1), ("fg_batch_no", 3)]
+		)
+
+		raw_materials = get_raw_material_entries(repack.name)
+		self.assertEqual(
+			[row.fg_serial_no or row.fg_batch_no for row in raw_materials],
+			[fg_values[0].value] + [fg_values[1].value] * 3,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "auto_map_raw_materials_to_finished_goods": 1},
+	)
 	def test_batch_raw_material_stays_with_every_finished_good(self):
 		"""A batch used across several finished good serials is not auto mapped to just one of them."""
 		rm_item, batch_rm_item, fg_item = (

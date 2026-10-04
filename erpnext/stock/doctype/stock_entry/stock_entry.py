@@ -3,6 +3,7 @@
 
 
 import json
+import math
 from collections import defaultdict
 from functools import cached_property
 
@@ -5321,17 +5322,22 @@ def set_fg_mapping(stock_entry: str, mapping: str | dict):
 def set_fg_mapping_on_submit(doc):
 	"""Check the draft mapping and map the remaining raw materials to finished goods, in order.
 
-	Serialized raw materials are spread evenly across the finished goods. A batch raw material is only
-	mapped when there is a single finished good, otherwise it stays linked to all of them. The order based
-	mapping can be turned off in Stock Settings; the mapping entered in draft is always kept.
+	Serialized raw materials are spread across the finished goods in proportion to their qty. A batch raw
+	material is only mapped when there is a single finished good, otherwise it stays linked to all of them.
+	The order based mapping can be turned off in Stock Settings; the mapping entered in draft is always kept.
 	"""
 	if doc.purpose not in ("Manufacture", "Repack"):
 		return
 
-	fg_targets = [(row.fg_field, row.value) for row in get_fg_values(doc.name)]
+	fg_values = get_fg_values(doc.name)
+	fg_targets = [(row.fg_field, row.value) for row in fg_values]
 	raw_materials = get_raw_material_entries(doc.name)
 	if not fg_targets or not raw_materials:
 		return
+
+	# a finished good batch of 3 takes three times the raw material serials of a single finished good serial
+	fg_qty = {(row.fg_field, row.value): row.qty or 1 for row in fg_values}
+	total_fg_qty = sum(fg_qty.values())
 
 	rows_by_item = defaultdict(list)
 	for row in raw_materials:
@@ -5351,7 +5357,9 @@ def set_fg_mapping_on_submit(doc):
 
 	entries_by_fg_target = defaultdict(list)
 	for rows in rows_by_item.values():
-		per_fg = -(-len(rows) // len(fg_targets))
+		per_fg = {
+			target: math.ceil(flt(len(rows) * fg_qty[target] / total_fg_qty, 6)) for target in fg_targets
+		}
 		mapped_count = defaultdict(int)
 		for row in rows:
 			if row.fg_target:
@@ -5361,7 +5369,7 @@ def set_fg_mapping_on_submit(doc):
 			if row.fg_target or (len(fg_targets) > 1 and not row.serial_no):
 				continue
 
-			target = next((t for t in fg_targets if mapped_count[t] < per_fg), None)
+			target = next((t for t in fg_targets if mapped_count[t] < per_fg[t]), None)
 			if target:
 				mapped_count[target] += 1
 				entries_by_fg_target[target].append(row.name)
@@ -5428,7 +5436,7 @@ def get_fg_values(stock_entry):
 		.on(sed.serial_and_batch_bundle == sabb.name)
 		.inner_join(sabe)
 		.on(sabb.name == sabe.parent)
-		.select(sed.name.as_("detail_name"), sed.item_code, sabe.serial_no, sabe.batch_no)
+		.select(sed.name.as_("detail_name"), sed.item_code, sabe.serial_no, sabe.batch_no, sabe.qty)
 		.where(
 			(sed.parent == stock_entry)
 			& (sed.is_finished_item == 1)
@@ -5449,10 +5457,15 @@ def get_fg_values(stock_entry):
 			value, fg_field = row.batch_no, "fg_batch_no"
 
 		# a serial no and a batch no can share a name, so keep them apart
-		if value and (fg_field, value) not in fg_values:
+		if not value:
+			continue
+
+		if (fg_field, value) not in fg_values:
 			fg_values[(fg_field, value)] = frappe._dict(
-				value=value, fg_field=fg_field, item_code=row.item_code
+				value=value, fg_field=fg_field, item_code=row.item_code, qty=0.0
 			)
+
+		fg_values[(fg_field, value)].qty += abs(flt(row.qty))
 
 	return list(fg_values.values())
 
