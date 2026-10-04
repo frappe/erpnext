@@ -15,6 +15,12 @@ from erpnext.projects.doctype.timesheet.timesheet import (
 	make_sales_invoice,
 )
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -471,6 +477,73 @@ class TestTimesheet(ERPNextTestSuite):
 		timesheet.employee = second
 		timesheet.save()
 		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", second, "employee_name"))
+
+	def test_get_activity_cost_requires_timesheet_access_and_the_employee(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		inside_employee = make_employee("activity-in@example.com", company="_Test Company")
+		outside_employee = make_employee("activity-out@example.com", company="_Test Company")
+
+		def activity_kwargs(name):
+			return {"employee": name, "activity_type": "_Test Activity Type"}
+
+		user = make_fenced_user(
+			"activity-fenced@example.com", ["Projects User"], [("Employee", inside_employee)]
+		)
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				get_activity_cost,
+				activity_kwargs,
+				[outside_employee],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			self.assertIn("billing_rate", get_activity_cost(inside_employee, "_Test Activity Type"))
+		stock_manager = make_fenced_user("activity-stock@example.com", ["Stock Manager"])
+		with as_user(stock_manager):
+			assert_refused(self, get_activity_cost, inside_employee, "_Test Activity Type")
+
+	def test_get_activity_cost_checks_the_activity_type_on_the_employee_path(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		employee = make_employee("activity-type-in@example.com", company="_Test Company")
+		hidden = (
+			frappe.db.exists("Activity Type", "UP Hidden Activity")
+			or frappe.get_doc(
+				{"doctype": "Activity Type", "activity_type": "UP Hidden Activity", "billing_rate": 999}
+			)
+			.insert()
+			.name
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"employee": employee,
+				"activity_type": "_Test Activity Type",
+				"billing_rate": 150,
+				"costing_rate": 90,
+			}
+		).insert()
+
+		def activity_kwargs(name):
+			return {"employee": employee, "activity_type": name}
+
+		user = make_fenced_user(
+			"activity-type-fenced@example.com",
+			["Projects User"],
+			[("Employee", employee), ("Activity Type", "_Test Activity Type")],
+		)
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				get_activity_cost,
+				activity_kwargs,
+				[hidden],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			self.assertEqual(get_activity_cost(employee, "_Test Activity Type")["billing_rate"], 150)
 
 
 def make_timesheet(

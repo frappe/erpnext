@@ -19,6 +19,15 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	assert_refused_without,
+	assert_type_gated,
+	make_company_fenced_user,
+	make_fenced_user,
+	malformed_names,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -2348,6 +2357,167 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		item.reload()
 		self.assertEqual(item.use_serial_no_wise_valuation, 1)
+
+	def test_get_serial_batch_ledgers_fences_each_entry_batch(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_serial_batch_ledgers,
+		)
+
+		item = make_item(
+			"UP Fenced Batch Item",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "UPFB-.#####",
+				"is_stock_item": 1,
+			},
+		).name
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		bundle = se.items[0].serial_and_batch_bundle
+		batch = frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "batch_no")
+		other = (
+			frappe.get_doc({"doctype": "Batch", "batch_id": "UPFB-OTHER-0001", "item": item}).insert().name
+		)
+		outside = make_fenced_user("sabb-fenced@example.com", ["Stock User"], [("Batch", other)])
+		with as_user(outside):
+			self.assertEqual(get_serial_batch_ledgers(name=bundle), [])
+		company_outside = make_company_fenced_user(
+			"sabb-fenced@example.com", ["Stock User"], "_Test Company 1"
+		)
+		with as_user(company_outside):
+			self.assertEqual(get_serial_batch_ledgers(name=bundle), [])
+			for name in malformed_names():
+				if isinstance(name, dict):
+					assert_type_gated(self, get_serial_batch_ledgers, name=name)
+				else:
+					self.assertEqual(get_serial_batch_ledgers(name=name), [])
+		inside = make_fenced_user("sabb-fenced@example.com", ["Stock User"], [("Batch", batch)])
+		with as_user(inside):
+			rows = get_serial_batch_ledgers(name=bundle)
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].batch_no, batch)
+		unfenced = make_fenced_user("sabb-unfenced@example.com", ["Stock User"])
+		with as_user(unfenced):
+			self.assertEqual(len(get_serial_batch_ledgers(name=bundle)), 1)
+
+	def test_add_serial_batch_ledgers_checks_write_on_an_existing_bundle(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			"UP Fenced Serial Item",
+			{"has_serial_no": 1, "serial_no_series": "UPFS-.#####", "is_stock_item": 1},
+		).name
+		pr = make_purchase_receipt(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=100, do_not_submit=True
+		)
+		serial_no = (
+			frappe.db.get_value("Serial No", {"item_code": item, "serial_no": "UPFS-00001"})
+			or frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": "UPFS-00001",
+					"item_code": item,
+					"company": "_Test Company",
+				}
+			)
+			.insert()
+			.name
+		)
+		entries = [frappe._dict({"serial_no": serial_no, "qty": 1})]
+		item_row = pr.items[0]
+		item_row.type_of_transaction = "Inward"
+		item_row.is_rejected = 0
+		bundle = add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC")
+		item_row.serial_and_batch_bundle = bundle.name
+		outside = make_company_fenced_user("sabb-writer@example.com", ["Stock User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused(self, add_serial_batch_ledgers, entries, item_row, pr, "_Test Warehouse - _TC")
+		frappe.db.set_value("Purchase Receipt Item", item_row.name, "serial_and_batch_bundle", bundle.name)
+		with as_user(outside):
+			assert_refused_without(
+				self,
+				[bundle.name, pr.name],
+				add_serial_batch_ledgers,
+				entries,
+				item_row,
+				pr,
+				"_Test Warehouse - _TC",
+				do_not_save=True,
+			)
+		unfenced = make_fenced_user("sabb-unfenced@example.com", ["Stock User"])
+		with as_user(unfenced):
+			bundle_modified = frappe.db.get_value("Serial and Batch Bundle", bundle.name, "modified")
+			for name in malformed_names():
+				if isinstance(name, str):
+					continue
+				item_row.serial_and_batch_bundle = name
+				created = add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC")
+				self.assertNotEqual(created.name, bundle.name)
+			self.assertEqual(
+				frappe.db.get_value("Serial and Batch Bundle", bundle.name, "modified"), bundle_modified
+			)
+		item_row.serial_and_batch_bundle = bundle.name
+		inside = make_company_fenced_user("sabb-writer@example.com", ["Stock User"], "_Test Company")
+		with as_user(inside):
+			self.assertEqual(
+				add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC").name, bundle.name
+			)
+
+	def test_add_serial_batch_ledgers_never_resolves_a_filter_to_an_existing_bundle(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			"UP Filter Serial Item",
+			{"has_serial_no": 1, "serial_no_series": "UPFF-.#####", "is_stock_item": 1},
+		).name
+		pr = make_purchase_receipt(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=100, do_not_submit=True
+		)
+		serial_nos = []
+		for number in ("UPFF-00001", "UPFF-00002"):
+			serial_nos.append(
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"serial_no": number,
+						"item_code": item,
+						"company": "_Test Company",
+					}
+				)
+				.insert()
+				.name
+			)
+		item_row = pr.items[0]
+		item_row.type_of_transaction = "Inward"
+		item_row.is_rejected = 0
+		bundle = add_serial_batch_ledgers(
+			[frappe._dict({"serial_no": serial_nos[0], "qty": 1})], item_row, pr, "_Test Warehouse - _TC"
+		).name
+		item_row.serial_and_batch_bundle = bundle
+		add_serial_batch_ledgers(
+			[frappe._dict({"serial_no": serial_nos[1], "qty": 1})], item_row, pr, "_Test Warehouse - _TC"
+		)
+		entries = frappe.get_all("Serial and Batch Entry", filters={"parent": bundle}, pluck="serial_no")
+		self.assertEqual(entries, [serial_nos[1]])
+		modified = frappe.db.get_value("Serial and Batch Bundle", bundle, "modified")
+		outside = make_company_fenced_user("sabb-filter@example.com", ["Stock User"], "_Test Company 1")
+		for user in (outside, "Administrator"):
+			item_row.serial_and_batch_bundle = {"name": bundle}
+			with as_user(user):
+				try:
+					add_serial_batch_ledgers(
+						[frappe._dict({"serial_no": serial_nos[0], "qty": 1})],
+						item_row,
+						pr,
+						"_Test Warehouse - _TC",
+					)
+				except (frappe.ValidationError, frappe.PermissionError):
+					pass
+			self.assertEqual(
+				frappe.get_all("Serial and Batch Entry", filters={"parent": bundle}, pluck="serial_no"),
+				[serial_nos[1]],
+			)
+			self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle, "modified"), modified)
 
 
 def get_batch_from_bundle(bundle):

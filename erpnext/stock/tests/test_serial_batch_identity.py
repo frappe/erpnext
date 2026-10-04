@@ -1560,7 +1560,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with (
 			patch("frappe.get_all", return_value=[row]),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers",
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle._get_serial_batch_ledgers",
 				return_value=[frappe._dict(serial_no=serial.name)],
 			),
 			patch(

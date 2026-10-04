@@ -8,9 +8,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Concat, Date, Round
-from frappe.utils import flt, get_datetime, getdate
+from frappe.utils import cstr, flt, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
 
+from erpnext import _refuse
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -505,6 +506,21 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def get_activity_cost(
+	employee: str | None = None, activity_type: str | None = None, currency: str | None = None
+):
+	if not frappe.has_permission("Timesheet", "read"):
+		_refuse()
+	activity_type = cstr(activity_type)
+	if not activity_type or not frappe.has_permission("Activity Type", "select", doc=activity_type):
+		_refuse()
+	if employee:
+		employee = cstr(employee)
+		if not frappe.has_permission("Employee", "select", doc=employee):
+			_refuse()
+	return _get_activity_cost(employee, activity_type, currency)
+
+
+def _get_activity_cost(
 	employee: str | None = None, activity_type: str | None = None, currency: str | None = None
 ):
 	base_currency = frappe.defaults.get_global_default("currency")

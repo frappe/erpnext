@@ -19,6 +19,13 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_not_found,
+	assert_refused,
+	assert_refused_for_names,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1005,6 +1012,37 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
 
 		frappe.set_user("test@example.com")
+
+	def test_make_merge_log_refuses_empty_and_malformed_names(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
+
+		with as_user(make_fenced_user("pos-names@example.com", ["Sales User"])):
+			for value in ("", None):
+				assert_refused(self, make_merge_log, [{"name": value}])
+			for value in (0, False, {"name": ["like", "%"]}, ["like", "%"]):
+				assert_not_found(self, make_merge_log, [{"name": value}])
+
+	def test_make_merge_log_fences_each_invoice(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
+
+		invoice = create_pos_invoice(rate=100, do_not_submit=1)
+		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		invoice.save()
+
+		def merge_log_kwargs(name):
+			return {"invoices": [{"name": name}]}
+
+		outside = make_fenced_user(
+			"pos-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer 1")]
+		)
+		with as_user(outside):
+			assert_refused_for_names(
+				self, make_merge_log, merge_log_kwargs, [invoice.name], caller_supplied=True
+			)
+		inside = make_fenced_user("pos-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer")])
+		with as_user(inside):
+			merge_log = make_merge_log([{"name": invoice.name}])
+		self.assertEqual(merge_log["pos_invoices"][0]["pos_invoice"], invoice.name)
 
 
 def create_pos_invoice(**args):
