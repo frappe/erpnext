@@ -68,6 +68,16 @@ class TestIRS1099(ERPNextTestSuite):
 
 		self.assertEqual(get_total_payments(supplier), 550)
 
+	def test_total_payments_in_company_currency(self):
+		supplier = make_1099_supplier(currency="EUR", payable_account=make_eur_payable_account())
+		pi = make_us_purchase_invoice(supplier, currency="EUR", conversion_rate=1.1, qty=10, rate=100)
+		payment = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank EUR - _TC1")
+		payment.source_exchange_rate = payment.target_exchange_rate = 1.1
+		payment.reference_no, payment.reference_date = "_Test Payment", nowdate()
+		payment.submit()
+
+		self.assertEqual(get_total_payments(supplier), 1100)
+
 	def test_company_permission(self):
 		frappe.permissions.add_user_permission("Company", "_Test Company", "test2@example.com")
 		frappe.get_doc("User", "test2@example.com").add_roles("Accounts Manager")
@@ -76,23 +86,40 @@ class TestIRS1099(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_total_payments, "_Test Supplier")
 
 
-def make_1099_supplier() -> str:
+def make_1099_supplier(currency: str = "USD", payable_account: str | None = None) -> str:
 	supplier = frappe.get_doc(
 		{
 			"doctype": "Supplier",
 			"supplier_name": "_Test 1099 Supplier " + frappe.generate_hash(length=6),
 			"supplier_group": "_Test Supplier Group",
+			"default_currency": currency,
 			"irs_1099": 1,
 		}
-	).insert()
-	return supplier.name
+	)
+	if payable_account:
+		supplier.append("accounts", {"company": US_COMPANY, "account": payable_account})
+	return supplier.insert().name
 
 
-def make_us_purchase_invoice(supplier: str, **args):
+def make_eur_payable_account() -> str:
+	account = frappe.get_doc(
+		{
+			"doctype": "Account",
+			"account_name": "_Test Payable EUR " + frappe.generate_hash(length=6),
+			"company": US_COMPANY,
+			"parent_account": "Accounts Payable - _TC1",
+			"account_type": "Payable",
+			"account_currency": "EUR",
+		}
+	)
+	return account.insert().name
+
+
+def make_us_purchase_invoice(supplier: str, currency: str = "USD", **args):
 	return make_purchase_invoice(
 		company=US_COMPANY,
 		supplier=supplier,
-		currency="USD",
+		currency=currency,
 		item="_Test Non Stock Item",
 		warehouse="Stores - _TC1",
 		cost_center="Main - _TC1",

@@ -43,7 +43,7 @@ def execute(filters=None):
 			s.supplier_group.as_("supplier_group"),
 			gl.party.as_("supplier"),
 			s.tax_id.as_("tax_id"),
-			Sum(gl.debit_in_account_currency - gl.credit_in_account_currency).as_("payments"),
+			Sum(gl.debit - gl.credit).as_("payments"),
 		)
 		.where(
 			(s.irs_1099 == 1)
