@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
+from frappe.utils import add_days, add_months, flt, get_first_day, now_datetime, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -74,6 +74,23 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair.save()
 		asset_status = frappe.db.get_value("Asset", asset_repair.asset, "status")
 		self.assertEqual(asset_status, initial_status)
+
+	def test_repair_events_are_logged_without_capitalization(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(asset=asset)
+		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = now_datetime()
+		asset_repair.cost_center = frappe.db.get_value("Company", asset.company, "cost_center")
+		asset_repair.save()
+		asset_repair.submit()
+		asset_repair.cancel()
+
+		subjects = frappe.get_all(
+			"Asset Activity", {"asset": asset.name}, pluck="subject", order_by="creation"
+		)
+		self.assertIn("Asset back in service after Asset Repair", subjects[-3])
+		self.assertIn("submission", subjects[-2])
+		self.assertIn("cancellation", subjects[-1])
 
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
