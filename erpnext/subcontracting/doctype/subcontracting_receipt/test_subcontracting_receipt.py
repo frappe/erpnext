@@ -2638,6 +2638,45 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertRaises(BOMQuantityError, scr.submit)
 
+	def test_bom_required_qty_validation_over_all_rows(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("Material Transferred for Subcontract")
+		frappe.db.set_single_value("Buying Settings", "validate_consumed_qty", 1)
+
+		item_code = "_Test Subcontracted Split Rows FG Item"
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_subcontracted_item(item_code=item_code, raw_materials=[rm_item])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": item_code,
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.to_warehouse = "_Test Warehouse 1 - _TC"
+		ste.save()
+		ste.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = scr.items[0].received_qty = 6
+		scr.append(
+			"items", {**scr.items[0].as_dict(), "name": None, "idx": None, "qty": 4, "received_qty": 4}
+		)
+		scr.save()
+
+		scr.supplied_items = [row for row in scr.supplied_items if row.reference_name == scr.items[0].name]
+		scr.save()
+
+		self.assertRaises(BOMQuantityError, scr.submit)
+
 	def test_transfer_based_backflush_consumes_material_for_rejected_qty(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 

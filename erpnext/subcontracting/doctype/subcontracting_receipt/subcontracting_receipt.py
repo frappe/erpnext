@@ -742,37 +742,45 @@ class SubcontractingReceipt(SubcontractingController):
 			return
 
 		rm_consumed_dict = self.get_rm_wise_consumed_qty()
+		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")
+
+		for rm_item_code, required in self.get_rm_wise_required_qty().items():
+			consumed_qty = rm_consumed_dict.get(rm_item_code, 0)
+			diff = flt(consumed_qty, precision) - flt(required.qty, precision)
+
+			if diff < 0:
+				msg = _(
+					"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
+				).format(
+					frappe.bold(abs(diff)),
+					frappe.bold(required.stock_uom),
+					frappe.bold(rm_item_code),
+				)
+
+				frappe.throw(
+					msg,
+					exc=BOMQuantityError,
+				)
+
+	def get_rm_wise_required_qty(self):
+		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped."""
+		rm_dict = {}
 
 		for row in self.items:
-			precision = row.precision("qty")
-
-			# if allow alternative item, ignore the validation as per BOM required qty
-			is_allow_alternative_item = frappe.db.get_value("BOM", row.bom, "allow_alternative_item")
-			if is_allow_alternative_item:
+			if frappe.db.get_value("BOM", row.bom, "allow_alternative_item"):
 				continue
 
 			for bom_item in self._get_materials_from_bom(
 				row.item_code, row.bom, row.get("include_exploded_items")
 			):
-				required_qty = flt(
-					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, precision
+				required = rm_dict.setdefault(
+					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
 				)
-				consumed_qty = rm_consumed_dict.get(bom_item.rm_item_code, 0)
-				diff = flt(consumed_qty, precision) - flt(required_qty, precision)
+				required.qty += flt(
+					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, row.precision("qty")
+				)
 
-				if diff < 0:
-					msg = _(
-						"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
-					).format(
-						frappe.bold(abs(diff)),
-						frappe.bold(bom_item.stock_uom),
-						frappe.bold(bom_item.rm_item_code),
-					)
-
-					frappe.throw(
-						msg,
-						exc=BOMQuantityError,
-					)
+		return rm_dict
 
 	def get_rm_wise_consumed_qty(self):
 		rm_dict = defaultdict(float)
