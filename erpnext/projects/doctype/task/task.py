@@ -126,7 +126,7 @@ class Task(NestedSet):
 			"Project", self.project, ["expected_start_date", "expected_end_date"]
 		)
 
-		for fieldname in ("exp_start_date", "exp_end_date", "act_start_date", "act_end_date"):
+		for fieldname in ("exp_start_date", "exp_end_date"):
 			task_date = self.get(fieldname)
 			if not task_date:
 				continue

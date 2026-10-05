@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
@@ -108,6 +110,22 @@ class TestTask(ERPNextTestSuite):
 			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
 			getdate(add_days(nowdate(), 1)),
 		)
+
+	def test_actual_dates_outside_project_dates(self):
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+		frappe.db.set_value(
+			"Project",
+			project,
+			{"expected_start_date": add_days(nowdate(), -10), "expected_end_date": add_days(nowdate(), 5)},
+		)
+		task = create_task("_Test Task Late Work", nowdate(), add_days(nowdate(), 3))
+		task.act_start_date = task.act_end_date = add_days(nowdate(), 8)
+
+		with patch.object(frappe, "in_test", False):
+			task.validate_parent_project_dates()
+
+			task.exp_end_date = add_days(nowdate(), 8)
+			self.assertRaises(frappe.exceptions.InvalidDates, task.validate_parent_project_dates)
 
 	def test_close_assignment(self):
 		if not frappe.db.exists("Task", "Test Close Assignment"):
