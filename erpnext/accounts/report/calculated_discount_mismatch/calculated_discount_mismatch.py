@@ -154,7 +154,10 @@ def get_data():
 
 
 def get_transactions_with_discount_percentage(doctype):
-	transactions = frappe.get_all(
+	if not frappe.has_permission(doctype):
+		return []
+
+	transactions = frappe.get_list(
 		doctype,
 		fields=[
 			"name",

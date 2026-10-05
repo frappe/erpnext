@@ -85,6 +85,27 @@ class TestCalculatedDiscountMismatch(ERPNextTestSuite):
 
 		self.assertIsInstance(result["result"], list)
 
+	def test_unreadable_transactions_are_hidden(self):
+		invoice = self.create_discounted_invoice()
+		frappe.db.set_value("Sales Invoice", invoice.name, "discount_amount", 250.0)
+		self.record_discount_change(
+			invoice.name, self.format_discount(invoice, 100.0), self.format_discount(invoice, 250.0)
+		)
+		user = self.make_user("test_discount_mismatch_restricted@example.com", ["Accounts User"])
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			row = self.run_report(invoice.name)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIsNone(row)
+
+	def format_discount(self, invoice: "frappe.Document", amount: float) -> str:
+		discount_field = frappe.get_meta("Sales Invoice").get_field("discount_amount")
+		return format_value(amount, df=discount_field, currency=invoice.currency)
+
 	def make_user(self, email: str, roles: list[str]) -> str:
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
