@@ -98,7 +98,7 @@ def get_invoice_entries(doctype, filters, group_by_field):
 			.select(sip.mode_of_payment, paid_amount.as_("paid_amount"))
 			.where(IfNull(paid_amount, 0) != 0)
 		)
-	elif group_by_field:
+	else:
 		query = query.select((p.base_paid_amount - p.base_change_amount).as_("paid_amount"))
 
 	return query.run(as_dict=1)

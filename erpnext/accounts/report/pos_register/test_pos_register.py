@@ -35,7 +35,8 @@ class TestPOSRegister(ERPNextTestSuite):
 
 		rows = self.run_report(group_by="")
 		self.assertEqual(
-			[(row.invoice_type, row.pos_invoice) for row in rows], [("Sales Invoice", invoice.name)]
+			[(row.invoice_type, row.pos_invoice, row.paid_amount) for row in rows],
+			[("Sales Invoice", invoice.name, 1000)],
 		)
 
 	def test_payment_method_grouping_counts_each_grand_total_once(self):
