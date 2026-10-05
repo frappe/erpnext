@@ -115,7 +115,7 @@ def get_data(filters):
 			"`tabTimesheet Detail`.project",
 			"`tabTimesheet Detail`.hours",
 			"`tabTimesheet Detail`.billing_hours",
-			"`tabTimesheet Detail`.billing_amount",
+			"`tabTimesheet Detail`.base_billing_amount as billing_amount",
 		],
 		filters=_filters,
 		order_by="`tabTimesheet Detail`.from_time",
