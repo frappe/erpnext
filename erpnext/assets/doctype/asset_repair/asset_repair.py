@@ -67,8 +67,6 @@ class AssetRepair(AccountsController):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 		self.validate_asset()
 		self.validate_dates()
-		self.update_status()
-
 		if self.get("stock_items"):
 			self.set_stock_items_cost()
 		self.calculate_total_repair_cost()
@@ -84,6 +82,9 @@ class AssetRepair(AccountsController):
 						get_link_to_form("Purchase Invoice", self.purchase_invoice)
 					)
 				)
+
+	def on_update(self):
+		self.update_status()
 
 	def validate_asset(self):
 		if self.asset_doc.status in ("Sold", "Scrapped", "Capitalized"):
