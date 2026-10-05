@@ -1,7 +1,8 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -25,4 +26,16 @@ class AssetMaintenanceTeam(Document):
 		maintenance_team_name: DF.Data
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		self.validate_unique_members()
+
+	def validate_unique_members(self):
+		members = set()
+		for row in self.maintenance_team_members:
+			if row.team_member in members:
+				frappe.throw(
+					_("Row #{0}: {1} is already a member of this team.").format(
+						row.idx, frappe.bold(row.team_member)
+					)
+				)
+			members.add(row.team_member)
