@@ -145,6 +145,14 @@ class TestContract(ERPNextTestSuite):
 		contract.cancel()
 		self.assertEqual(frappe.db.get_value("Contract", contract.name, "status"), "Cancelled")
 
+	def test_party_full_name_follows_the_party(self):
+		self.contract_doc.insert()
+		self.contract_doc.party_name = "_Test Customer 1"
+		self.contract_doc.save()
+
+		customer_name = frappe.db.get_value("Customer", "_Test Customer 1", "customer_name")
+		self.assertEqual(self.contract_doc.party_full_name, customer_name)
+
 	def make_signed_contract(self, **fields):
 		sign(self.contract_doc)
 		self.contract_doc.update(

@@ -54,7 +54,11 @@ class Contract(Document):
 		self.update_fulfilment_status()
 
 	def set_missing_values(self):
-		if not self.party_full_name:
+		if (
+			not self.party_full_name
+			or self.has_value_changed("party_name")
+			or self.has_value_changed("party_type")
+		):
 			field = self.party_type.lower() + "_name"
 			if res := frappe.db.get_value(self.party_type, self.party_name, field):
 				self.party_full_name = res
