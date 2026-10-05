@@ -14,6 +14,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -1132,6 +1133,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 
 @frappe.whitelist()
 def make_subcontracting_inward_order(source_name: str, target_doc: str | dict | Document | None = None):
+	check_on_hold_or_closed_status("Sales Order", source_name)
 	if not is_so_fully_subcontracted(source_name):
 		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:
@@ -1143,7 +1145,7 @@ def is_so_fully_subcontracted(so_name: str) -> bool:
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name)
-		.where((table.parent == so_name) & (table.qty != table.subcontracted_qty))
+		.where((table.parent == so_name) & (table.stock_qty > table.subcontracted_qty))
 	)
 	return not query.run(as_dict=True)
 
@@ -1190,7 +1192,7 @@ def get_mapped_subcontracting_inward_order(
 					"name": "sales_order_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: item.qty != item.subcontracted_qty and not item.closed,
+				"condition": lambda item: item.stock_qty > item.subcontracted_qty and not item.closed,
 			},
 		},
 		target_doc,

@@ -697,9 +697,10 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			WorkOrderStockReservation(self).update_stock_reservation()
 
-		self.update_subcontracting_inward_order_received_items()
+		self.update_subcontracting_inward_order_received_items(release=True)
 
 	def set_qty_change(self):
+		"""Excess received qty to move into this Work Order's reservation on submit."""
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			self.qty_change = frappe._dict()
 
@@ -720,13 +721,12 @@ class WorkOrder(Document):
 
 				if (
 					wo_item
-					and (d.work_order_qty + (wo_item.required_qty if self._action == "submit" else 0))
-					== d.bom_qty
+					and d.work_order_qty + wo_item.required_qty == d.bom_qty
 					and d.received_qty > d.bom_qty
 				):
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
-	def update_subcontracting_inward_order_received_items(self):
+	def update_subcontracting_inward_order_received_items(self, release=False):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			scio_rm_data = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
@@ -738,8 +738,10 @@ class WorkOrder(Document):
 				fields=["name", "rm_item_code"],
 			)
 
-			required_qty = {
-				wo_item.item_code: wo_item.required_qty
+			qty_change = {
+				wo_item.item_code: wo_item.consumed_qty - wo_item.required_qty
+				if release
+				else wo_item.required_qty
 				for wo_item in self.get("required_items")
 				if wo_item.item_code in [d.rm_item_code for d in scio_rm_data]
 			}
@@ -749,12 +751,7 @@ class WorkOrder(Document):
 			for item in scio_rm_data:
 				case_expr = case_expr.when(
 					table.rm_item_code == item.rm_item_code,
-					table.work_order_qty
-					+ (
-						required_qty[item.rm_item_code]
-						if self._action == "submit"
-						else -required_qty[item.rm_item_code]
-					),
+					table.work_order_qty + qty_change[item.rm_item_code],
 				)
 
 			frappe.qb.update(table).set(table.work_order_qty, case_expr).where(
@@ -1200,6 +1197,9 @@ def close_work_order(work_order: str, status: str):
 
 	# doctype level above, record level here — see stop_unstop()
 	work_order = frappe.get_doc("Work Order", work_order, check_permission="write")
+	if work_order.status == "Closed":
+		frappe.throw(_("Work Order {0} is already Closed").format(work_order.name))
+
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",
