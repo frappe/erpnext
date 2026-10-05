@@ -69,7 +69,12 @@ class AssetMaintenance(Document):
 		asset_maintenance_logs = frappe.get_all(
 			"Asset Maintenance Log",
 			fields=["name"],
-			filters={"asset_maintenance": self.name, "task": ("not in", tasks_names)},
+			filters={
+				"asset_maintenance": self.name,
+				"task": ("not in", tasks_names),
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+			},
 		)
 		if asset_maintenance_logs:
 			for asset_maintenance_log in asset_maintenance_logs:
