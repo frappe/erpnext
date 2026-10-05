@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.custom import MonthName
-from frappe.utils import add_months, flt, formatdate
+from frappe.utils import add_months, cstr, flt, formatdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.utils import get_fiscal_year
@@ -149,6 +149,9 @@ def get_actual_transactions(dimension_name, filters):
 		.groupby(gle.name, budget[budget_against])
 		.orderby(gle.fiscal_year)
 	)
+
+	company_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+	query = query.where(gle.finance_book.isin(["", cstr(company_finance_book)]) | gle.finance_book.isnull())
 
 	if filters.get("budget_against") == "Cost Center" and dimension_name:
 		cost_centers = get_cost_center_with_children([dimension_name])
