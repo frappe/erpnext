@@ -157,16 +157,14 @@ class ManufactureEntry:
 				self.stock_entry.append("items", _dict)
 
 	def get_production_share(self):
-		"""Fraction of the job card's production this entry accounts for; raw materials are
-		generated proportionally so several partial entries never consume more than required."""
-		for_quantity, pending_qty = frappe.db.get_value(
-			"Job Card", self.job_card, ["for_quantity", "pending_qty"]
-		)
-		qty_to_produce = flt(for_quantity) - flt(pending_qty)
-		if not qty_to_produce:
+		"""Fraction of the job card's for_quantity this entry accounts for; raw materials are
+		generated proportionally so several partial entries never consume more than required.
+		The job card's required qty covers its pending qty too, so the pending qty stays in the base."""
+		for_quantity = flt(frappe.db.get_value("Job Card", self.job_card, "for_quantity"))
+		if not for_quantity:
 			return 1
 
-		return min(flt(self.for_quantity) / qty_to_produce, 1)
+		return min(flt(self.for_quantity) / for_quantity, 1)
 
 	def parse_available_serial_batches(self, item_dict, available_serial_batches):
 		key = (item_dict.item_code, item_dict.from_warehouse)
