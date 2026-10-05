@@ -18,3 +18,11 @@ class TestTaskType(ERPNextTestSuite):
 		task.task_weight = 5
 		task.save()
 		self.assertEqual(task.task_weight, 5)
+
+	def test_negative_weight_is_refused(self):
+		task_type = frappe.get_doc({"doctype": "Task Type", "name": "_Test Negative Task Type", "weight": -2})
+		self.assertRaises(frappe.NonNegativeError, task_type.insert)
+
+		task = create_task("_Test Negative Weight Task", save=False)
+		task.task_weight = -2
+		self.assertRaises(frappe.NonNegativeError, task.insert)
