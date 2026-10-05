@@ -23,6 +23,7 @@ from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_varia
 	get_sq_total_number,
 	get_total_cost_of_shipments,
 	get_total_days_late,
+	get_total_workdays,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -107,6 +108,10 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 		self.assertEqual(get_rfq_total_number(scorecard), 1)
 		self.assertEqual(get_sq_total_number(scorecard), 1)
 		self.assertEqual(get_rfq_response_days(scorecard), 4)
+
+	def test_total_workdays_include_both_ends(self):
+		scorecard = frappe._dict(start_date="2026-09-01", end_date="2026-09-30")
+		self.assertEqual(get_total_workdays(scorecard), 30)
 
 	def test_split_on_time_receipts_count_as_one_shipment(self):
 		# A PO line fully received on time across two partial receipts is one on-time shipment
