@@ -273,6 +273,15 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 
 		self.assertEqual(s_id, pending.name)
 
+	def test_visits_cannot_exceed_days_in_range(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			make_maintenance_schedule,
+			periodicity="Random",
+			end_date=add_days(today(), 4),
+			no_of_visits=10,
+		)
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
@@ -303,8 +312,9 @@ def make_maintenance_schedule(**args):
 		{
 			"item_code": args.get("item_code") or "_Test Item",
 			"start_date": args.get("start_date") or today(),
-			"periodicity": "Weekly",
-			"no_of_visits": 4,
+			"end_date": args.get("end_date"),
+			"periodicity": args.get("periodicity") or "Weekly",
+			"no_of_visits": args.get("no_of_visits") or 4,
 			"serial_no": args.get("serial_no"),
 			"sales_person": "Sales Team",
 			"sales_order": args.get("sales_order"),
