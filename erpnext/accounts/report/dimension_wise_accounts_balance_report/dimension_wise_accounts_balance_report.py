@@ -105,6 +105,7 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 		and posting_date >= %(from_date)s
 		and posting_date <= %(to_date)s
 		and is_cancelled = 0
+		and ifnull(finance_book, '') in (%(finance_book)s, '')
 		order by account, posting_date""".format(
 			dimension=frappe.scrub(filters.get("dimension")), condition=condition
 		),
