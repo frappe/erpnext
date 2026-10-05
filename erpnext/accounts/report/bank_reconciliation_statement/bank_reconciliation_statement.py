@@ -306,9 +306,11 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	pe_amount = (
 		frappe.qb.from_(pe)
 		.select(
-			Sum(Case().when(pe.paid_from == filters.account, pe.paid_amount).else_(pe.received_amount)).as_(
-				"amount"
-			),
+			Sum(
+				Case()
+				.when(pe.paid_to == filters.account, pe.received_amount_after_tax)
+				.else_(-pe.paid_amount_after_tax)
+			).as_("amount"),
 		)
 		.where(
 			((pe.paid_from == filters.account) | (pe.paid_to == filters.account))
@@ -325,7 +327,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	pi_amount = (
 		frappe.qb.from_(pi)
 		.select(
-			Sum(pi.paid_amount).as_("amount"),
+			Sum(-pi.paid_amount).as_("amount"),
 		)
 		.where(
 			(pi.docstatus == 1)
