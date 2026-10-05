@@ -73,7 +73,12 @@ def get_lead_opp_count(leads):
 
 def get_quotation_ordered_count(leads):
 	return frappe.db.count(
-		"Quotation", {"status": "Ordered", "quotation_to": "Lead", "party_name": ["in", leads]}
+		"Quotation",
+		{
+			"status": ["in", ["Ordered", "Partially Ordered"]],
+			"quotation_to": "Lead",
+			"party_name": ["in", leads],
+		},
 	)
 
 
@@ -87,11 +92,7 @@ def get_order_amount(leads):
 			so_item.prevdoc_docname.isin(
 				frappe.qb.from_(quotation)
 				.select(quotation.name)
-				.where(
-					(quotation.status == "Ordered")
-					& (quotation.quotation_to == "Lead")
-					& quotation.party_name.isin(leads)
-				)
+				.where((quotation.quotation_to == "Lead") & quotation.party_name.isin(leads))
 			)
 		)
 		.run()
