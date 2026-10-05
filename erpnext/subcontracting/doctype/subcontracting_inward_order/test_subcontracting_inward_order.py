@@ -783,6 +783,20 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.received_items[0].work_order_qty = 5
 		self.assertRaises(frappe.UpdateAfterSubmitError, scio.save)
 
+	def test_inward_order_from_closed_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.insert()
+
+		update_status("Closed", so.name)
+
+		self.assertRaises(frappe.ValidationError, make_subcontracting_inward_order, so.name)
+		self.assertRaises(frappe.ValidationError, scio.submit)
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()

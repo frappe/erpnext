@@ -65,6 +65,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def validate(self):
 		super().validate()
+		check_on_hold_or_closed_status("Sales Order", self.sales_order)
 		self.set_is_customer_provided_item()
 		self.validate_customer_provided_items()
 		self.validate_customer_warehouse()
