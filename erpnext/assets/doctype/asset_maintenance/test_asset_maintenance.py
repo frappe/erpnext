@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, get_last_day, nowdate
+from frappe.utils import add_days, add_months, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -15,6 +15,10 @@ class TestAssetMaintenance(unittest.TestCase):
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		create_maintenance_team()
+		purchase_receipt = make_purchase_receipt(
+			item_code="Photocopier", qty=1, rate=100000.0, location="Test Location"
+		)
+		self.asset_name = frappe.db.get_value("Asset", {"purchase_receipt": purchase_receipt.name}, "name")
 
 	def test_create_asset_maintenance(self):
 		pr = make_purchase_receipt(item_code="Photocopier", qty=1, rate=100000.0, location="Test Location")
@@ -52,8 +56,10 @@ class TestAssetMaintenance(unittest.TestCase):
 			}
 		).insert()
 
-		next_due_date = calculate_next_due_date(nowdate(), "Monthly")
-		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
+		next_due_date = calculate_next_due_date("Monthly", nowdate())
+		self.assertEqual(
+			getdate(asset_maintenance.asset_maintenance_tasks[0].next_due_date), getdate(next_due_date)
+		)
 
 		asset_maintenance_log = frappe.get_doc(
 			"Asset Maintenance Log",
@@ -63,8 +69,39 @@ class TestAssetMaintenance(unittest.TestCase):
 		asset_maintenance_log.submit()
 
 		asset_maintenance.reload()
-		next_due_date = calculate_next_due_date(asset_maintenance_log.completion_date, "Monthly")
-		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
+		next_due_date = calculate_next_due_date("Monthly", nowdate())
+		self.assertEqual(
+			getdate(asset_maintenance.asset_maintenance_tasks[0].next_due_date), getdate(next_due_date)
+		)
+
+	def test_next_due_date_within_end_date(self):
+		self.assertEqual(
+			getdate(calculate_next_due_date("Monthly", "2026-10-01", "2027-12-31")), getdate("2026-11-01")
+		)
+		self.assertEqual(
+			getdate(calculate_next_due_date("Monthly", "2026-10-01", "2027-12-31", "2026-10-03")),
+			getdate("2026-11-03"),
+		)
+		self.assertEqual(calculate_next_due_date("Monthly", "2026-10-01", "2026-10-15"), "")
+
+		tasks = get_maintenance_tasks()
+		tasks[0]["end_date"] = add_days(nowdate(), 365)
+		asset_maintenance = self.make_asset_maintenance(tasks)
+
+		self.assertEqual(
+			getdate(asset_maintenance.asset_maintenance_tasks[0].next_due_date), add_months(getdate(), 1)
+		)
+
+	def make_asset_maintenance(self, tasks: list[dict] | None = None):
+		return frappe.get_doc(
+			{
+				"doctype": "Asset Maintenance",
+				"asset_name": self.asset_name,
+				"maintenance_team": "Team Awesome",
+				"company": "_Test Company",
+				"asset_maintenance_tasks": tasks or get_maintenance_tasks(),
+			}
+		).insert()
 
 
 def create_asset_data():
