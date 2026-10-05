@@ -390,7 +390,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 			for rm_item in source.received_items:
 				qty = rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty
-				if not qty:
+				if not rm_item.is_customer_provided_item or qty <= 0:
 					continue
 
 				target.append(
