@@ -733,7 +733,7 @@ class StockReservationEntry(Document):
 					entry.delivered_qty = flt(1)
 					data.serial_nos.remove(entry.serial_no)
 
-				elif entry.batch_no in data.batch_nos:
+				elif not entry.serial_no and entry.batch_no in data.batch_nos:
 					entry.delivered_qty = min(flt(entry.qty), data.batch_nos[entry.batch_no])
 					data.batch_nos[entry.batch_no] -= entry.delivered_qty
 

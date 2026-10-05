@@ -1081,6 +1081,7 @@ class SubcontractingInwardController:
 							child_table.name.as_("sbe_name"),
 							child_table.batch_no,
 							child_table.qty,
+							child_table.delivered_qty,
 						)
 						.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
 					)
@@ -1107,7 +1108,10 @@ class SubcontractingInwardController:
 								)
 							)
 
-							qty = min(row.qty, sabe_qty)
+							open_qty = (
+								row.qty - row.delivered_qty if self._action == "submit" else row.delivered_qty
+							)
+							qty = min(open_qty, sabe_qty - consumed_qty[row.batch_no])
 							sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
 							sbe_doc.db_set(
 								"delivered_qty",
