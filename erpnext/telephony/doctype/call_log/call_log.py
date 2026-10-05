@@ -208,6 +208,9 @@ def link_existing_conversations(doc, state):
 
 def get_linked_call_logs(doctype, docname):
 	# content will be shown in timeline
+	if not frappe.has_permission("Call Log", "read"):
+		return []
+
 	logs = frappe.get_all(
 		"Dynamic Link",
 		fields=["parent"],
@@ -218,7 +221,11 @@ def get_linked_call_logs(doctype, docname):
 
 	logs = {log.parent for log in logs}
 
-	logs = frappe.get_all("Call Log", fields=["*"], filters={"name": ["in", logs]})
+	logs = frappe.get_list(
+		"Call Log",
+		fields=["name", "type", "from", "to", "duration", "summary", "recording_url", "creation"],
+		filters={"name": ["in", logs]},
+	)
 
 	timeline_contents = []
 	for log in logs:

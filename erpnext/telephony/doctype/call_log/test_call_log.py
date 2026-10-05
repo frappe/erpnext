@@ -9,6 +9,7 @@ import frappe
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.telephony.doctype.call_log.call_log import (
 	add_call_summary_and_call_type,
+	get_linked_call_logs,
 	link_existing_conversations,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -133,3 +134,24 @@ class TestCallLog(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(frappe.db.get_value("Call Log", call_log, "type_of_call"), "_Test Call Type")
+
+	def test_timeline_shows_only_permitted_call_logs(self):
+		self.assertEqual(len(get_linked_call_logs("Contact", self.contact.name)), 1)
+
+		user = "test_call_log_sales_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sales",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Sales User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		try:
+			self.assertEqual(get_linked_call_logs("Contact", self.contact.name), [])
+		finally:
+			frappe.set_user("Administrator")
