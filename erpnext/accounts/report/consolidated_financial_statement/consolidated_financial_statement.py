@@ -417,7 +417,7 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters
 						or (filters.get("accumulated_in_group_company"))
 						and entry.company in companies.get(company)
 					):
-						parent_company_currency = erpnext.get_company_currency(d.company)
+						parent_company_currency = erpnext.get_company_currency(company)
 						child_company_currency = erpnext.get_company_currency(entry.company)
 
 						debit, credit = flt(entry.debit), flt(entry.credit)

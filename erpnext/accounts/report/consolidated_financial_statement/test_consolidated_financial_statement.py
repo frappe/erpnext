@@ -7,11 +7,13 @@ from frappe.utils import flt, today
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
 	execute,
 )
+from erpnext.accounts.report.utils import convert
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
 PARENT_COMPANY = "Parent Group Company India"
 CHILD_COMPANY = "Child Company India"
+FOREIGN_CHILD_COMPANY = "Child Company US"
 
 
 class TestConsolidatedFinancialStatement(ERPNextTestSuite):
@@ -37,14 +39,14 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		filters.update(extra)
 		return execute(filters)[1]
 
-	def post_journal_entry(self, debit_account, credit_account, amount):
+	def post_journal_entry(self, debit_account, credit_account, amount, company=CHILD_COMPANY, **party):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = today()
-		je.company = CHILD_COMPANY
+		je.company = company
 		je.set(
 			"accounts",
 			[
-				{"account": debit_account, "debit_in_account_currency": amount},
+				{"account": debit_account, "debit_in_account_currency": amount, **party},
 				{"account": credit_account, "credit_in_account_currency": amount},
 			],
 		)
@@ -127,3 +129,25 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		cash_row = self.get_row(data, "Cash")
 		self.assertIsNotNone(cash_row, "Cash asset row missing from consolidated Balance Sheet")
 		self.assertGreaterEqual(flt(cash_row.get(CHILD_COMPANY)), amount)
+
+	def test_child_only_account_of_foreign_child_is_converted(self):
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "_Test Consolidated Consulting",
+				"parent_account": "Direct Income - CCU",
+				"company": FOREIGN_CHILD_COMPANY,
+			}
+		)
+		account.flags.ignore_root_company_validation = True
+		account.insert()
+		self.post_journal_entry("Cash - CCU", account.name, 100, company=FOREIGN_CHILD_COMPANY)
+
+		data = self.run_report(report="Profit and Loss Statement", accumulated_in_group_company=1)
+
+		row = self.get_row(data, "_Test Consolidated Consulting")
+		year_end_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_end_date")
+		self.assertEqual(flt(row.get(FOREIGN_CHILD_COMPANY)), 100)
+		self.assertAlmostEqual(
+			flt(row.get(PARENT_COMPANY)), flt(convert(100, "INR", "USD", year_end_date), 3)
+		)
