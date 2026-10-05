@@ -4,6 +4,9 @@ from frappe.model.document import Document
 from frappe.utils import cstr, now, today
 from pypika import functions
 
+# pre-sales statuses an event today moves to Open; others (Converted, Lost, ...) are kept
+STATUSES_REOPENED_BY_EVENT = {"Lead": ("Lead", "Replied", "Interested"), "Opportunity": ("Replied",)}
+
 
 def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 	if doc.is_disabled:
@@ -266,7 +269,12 @@ def open_leads_opportunities_based_on_todays_event():
 	data = query.run(as_dict=True)
 
 	for d in data:
-		frappe.db.set_value(d.reference_doctype, d.reference_docname, "status", "Open")
+		frappe.db.set_value(
+			d.reference_doctype,
+			{"name": d.reference_docname, "status": ("in", STATUSES_REOPENED_BY_EVENT[d.reference_doctype])},
+			"status",
+			"Open",
+		)
 
 
 class CRMNote(Document):

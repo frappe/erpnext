@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import random_string, today
 
 from erpnext.crm.doctype.lead.mapper import make_opportunity
-from erpnext.crm.utils import get_linked_prospect
+from erpnext.crm.utils import get_linked_prospect, open_leads_opportunities_based_on_todays_event
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -150,6 +150,19 @@ class TestLead(ERPNextTestSuite):
 		second.save()
 		second.delete()
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Open")
+
+	def test_todays_event_reopens_only_pre_sales_leads(self):
+		statuses = ("Replied", "Converted", "Do Not Contact")
+		leads = [make_lead() for _ in statuses]
+		for lead, status in zip(leads, statuses, strict=True):
+			lead.db_set("status", status)
+			create_event("Follow up", today(), "Lead", lead.name)
+
+		open_leads_opportunities_based_on_todays_event()
+		self.assertEqual(
+			[frappe.db.get_value("Lead", lead.name, "status") for lead in leads],
+			["Open", "Converted", "Do Not Contact"],
+		)
 
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
