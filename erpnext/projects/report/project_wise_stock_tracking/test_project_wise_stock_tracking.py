@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import flt, random_string, today
 
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.report.project_wise_stock_tracking.project_wise_stock_tracking import execute
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -70,6 +71,13 @@ class TestProjectWiseStockTracking(ERPNextTestSuite):
 		)
 
 		self.assertEqual(self.get_report_row(project)[3], 200)
+
+	def test_purchased_cost_includes_update_stock_invoices(self):
+		project = self.make_project()
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_invoice(item_code=item_code, qty=2, rate=100, update_stock=1, project=project)
+
+		self.assertEqual(self.get_report_row(project)[1], 200)
 
 	def make_project(self):
 		return (
