@@ -73,7 +73,8 @@ def get_appointment_slots(date: str, timezone: str):
 	for timeslot in timeslots:
 		converted_timeslot = convert_to_guest_timezone(timezone, timeslot)
 		# Check if holiday
-		if _is_holiday(converted_timeslot.date(), holiday_list):
+		# holidays are business dates: check the slot's system-time date
+		if _is_holiday(timeslot.date(), holiday_list):
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
 			continue
 		# Check availability
@@ -172,10 +173,8 @@ def is_slot_available(timeslot, booked_times, settings):
 
 
 def _is_holiday(date, holiday_list):
-	for holiday in holiday_list.holidays:
-		if holiday.holiday_date == date:
-			return True
-	return False
+	# half-day holidays still take appointments, as the server allows them
+	return any(h.holiday_date == date and not h.is_half_day for h in holiday_list.holidays)
 
 
 def _get_records(start_time, end_time, settings):

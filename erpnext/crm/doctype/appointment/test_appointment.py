@@ -329,6 +329,32 @@ class TestAppointment(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "beginning of an available slot"):
 			self._create_portal_appointment("portal_visitor_off_grid@example.com", time="10:15:00")
 
+	def test_portal_checks_holidays_on_the_business_date(self):
+		from zoneinfo import ZoneInfo
+
+		from frappe.utils.data import get_system_timezone
+
+		holiday, half_day = getdate(add_to_date(getdate(), days=3)), getdate(add_to_date(getdate(), days=5))
+		self._configure_booking_settings(
+			holiday_dates=[
+				{"holiday_date": holiday, "description": "Holiday"},
+				{"holiday_date": half_day, "description": "Half Day", "is_half_day": 1},
+			]
+		)
+		system_tz = get_system_timezone()
+		guest_tz = "Etc/GMT+12" if system_tz != "Etc/GMT+12" else "Etc/GMT-12"
+		with self.set_user("Guest"):
+			slots = get_appointment_slots(str(holiday), guest_tz) + get_appointment_slots(
+				str(add_to_date(holiday, days=1)), guest_tz
+			)
+			half_day_slots = get_appointment_slots(str(half_day), system_tz)
+
+		for slot in slots:
+			on_holiday = slot["time"].astimezone(ZoneInfo(system_tz)).date() == holiday
+			self.assertEqual(slot["availability"], not on_holiday)
+		self.assertTrue(half_day_slots)
+		self.assertTrue(all(slot["availability"] for slot in half_day_slots))
+
 	def test_expired_unverified_appointments_are_closed(self):
 		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
 		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)
