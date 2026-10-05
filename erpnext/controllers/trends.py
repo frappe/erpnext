@@ -90,8 +90,9 @@ def get_data(filters, conditions):
 		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
 			posting_date = "t1." + filters.period_based_on
 
-	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
-		cond = " and " + conditions["based_on_select"][:-1] + " IS Not NULL"
+	if filters.get("based_on") == "Project":
+		project_field = conditions["group_by"].split(",")[0]
+		cond = f" and ifnull({project_field}, '') != ''"
 
 	if not filters.get("include_closed_orders"):
 		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
@@ -102,6 +103,9 @@ def get_data(filters, conditions):
 
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
+	)
+	cond += get_permitted_transactions_condition(
+		filters, conditions["trans"], posting_date, year_start_date, year_end_date
 	)
 
 	if filters.get("group_by"):
@@ -247,6 +251,23 @@ def get_data(filters, conditions):
 		data.append(total_row)
 
 	return data
+
+
+def get_permitted_transactions_condition(
+	filters: dict, trans: str, posting_date: str, year_start_date: str, year_end_date: str
+) -> str:
+	"""Limit rows to transactions the user may read, so totals and non-party rows respect permissions."""
+	permitted = frappe.qb.get_query(
+		trans,
+		fields=["name"],
+		filters={
+			"company": filters.get("company"),
+			"docstatus": 1,
+			posting_date.removeprefix("t1."): ["between", [year_start_date, year_end_date]],
+		},
+		ignore_permissions=False,
+	)
+	return " and t1.name in ({})".format(permitted.get_sql().replace("%", "%%"))
 
 
 def calculate_total_row(data, columns, company_currency=None):
