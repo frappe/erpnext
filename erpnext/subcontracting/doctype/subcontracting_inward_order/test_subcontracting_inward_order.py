@@ -689,6 +689,39 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
 		self.assertEqual(reserved_qty.get(receipts[1].items[0].scio_detail), 3)
 
+	def test_self_rm_billed_qty_across_rows(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so, scio = create_delivered_so_scio()
+		with self.change_settings("Selling Settings", allow_multiple_items=1):
+			si = make_sales_invoice(so.name)
+			si.items = [item for item in si.items if item.scio_detail]
+			si.append("items", si.items[0].as_dict(no_default_fields=True))
+			si.items[0].qty = 3
+			si.items[1].qty = 3
+			self.assertRaises(frappe.ValidationError, si.submit)
+
+			si.items[1].qty = 2
+			si.submit()
+
+		scio.reload()
+		self.assertEqual(scio.received_items[-1].billed_qty, 5)
+
+
+def create_delivered_so_scio():
+	so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
+	scio.reload()
+	frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
+	scio.reload()
+	return so, scio
+
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	item_list = [{"item_code": service_item, "qty": 5, "fg_item": fg_item, "fg_item_qty": 5}]
