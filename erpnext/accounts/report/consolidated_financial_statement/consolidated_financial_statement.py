@@ -103,6 +103,9 @@ def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
 		unclosed["total"] = opening_balance.get(company)
 		data.append(unclosed)
 
+	set_group_company_total(provisional_profit_loss, filters)
+	set_group_company_total(total_credit, filters)
+
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
 	if total_credit:
@@ -193,6 +196,7 @@ def get_income_expense_data(companies, fiscal_year, filters):
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
 
 	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
+	set_group_company_total(net_profit_loss, filters)
 
 	return income, expense, net_profit_loss
 
@@ -581,16 +585,18 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 				total += flt(row[company])
 
 		row["has_value"] = has_value
-		# when accumulating into the group company, that company's column already consolidates its
-		# descendants, so summing every company column would double-count; use the group total directly.
-		if filters.get("accumulated_in_group_company"):
-			row["total"] = flt(row.get(filters.company, 0.0), 3)
-		else:
-			row["total"] = total
+		row["total"] = total
+		set_group_company_total(row, filters)
 
 		data.append(row)
 
 	return data
+
+
+def set_group_company_total(row, filters):
+	"""The group company column already includes its subsidiaries; summing every column double-counts."""
+	if row and filters.get("accumulated_in_group_company"):
+		row["total"] = flt(row.get(filters.company, 0.0), 3)
 
 
 def set_gl_entries_by_account(
