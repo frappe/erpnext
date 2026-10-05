@@ -450,6 +450,7 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate(self):
 		self.validate_warehouse()
+		self.validate_same_source_target_warehouse()
 		self.validate_material_request()
 
 	def get_material_request(self, item_row):
