@@ -425,7 +425,8 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.update_status("Stopped")
 		self.assertRaises(frappe.InvalidStatusError, po.submit)
 		po.db_set("docstatus", 1)
-		self.assertRaises(frappe.InvalidStatusError, po.cancel)
+		po.cancel()
+		self.assertEqual(po.docstatus, 2)
 
 		# resubmit and check for per complete
 		mr.load_from_db()

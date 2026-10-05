@@ -910,7 +910,6 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(ordered_qty + 10, new_ordered_qty)
 
 	def test_requested_qty_for_subcontracting_order(self):
-		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
 		requested_qty = frappe.db.get_value(
@@ -937,17 +936,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(requested_qty + 10, new_requested_qty)
 
-		po = make_purchase_order(mr.name)
-		po.is_subcontracted = 1
-		po.supplier = "_Test Supplier"
-		po.items[0].fg_item = "Subcontracted Item SA8"
-		po.items[0].fg_item_qty = 10
-		po.items[0].item_code = "Subcontracted Service Item 8"
-		po.items[0].item_name = "Subcontracted Service Item 8"
-		po.items[0].qty = 10
-		po.supplier_warehouse = "_Test Warehouse 1 - _TC"
-		po.save()
-		po.submit()
+		po = make_subcontracted_purchase_order_from_material_request(mr.name)
 
 		self.assertTrue(po.items[0].material_request)
 		self.assertTrue(po.items[0].material_request_item)
@@ -964,6 +953,23 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		new_requested_qty = flt(new_requested_qty)
 
 		self.assertEqual(requested_qty, new_requested_qty)
+
+	def test_stopped_material_request_blocks_only_new_subcontracting_orders(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		mr = make_material_request(
+			item_code="Subcontracted Item SA8", material_request_type="Purchase", qty=10
+		)
+		po = make_subcontracted_purchase_order_from_material_request(mr.name)
+		sco = create_subcontracting_order(po_name=po.name, do_not_save=1)
+		sco.items[0].qty = 4
+		sco.insert()
+		sco.submit()
+		frappe.get_doc("Material Request", mr.name).update_status("Stopped")
+
+		update_subcontracting_order_status(sco.name, "Closed")
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
+		self.assertRaises(frappe.InvalidStatusError, create_subcontracting_order, po_name=po.name)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
 	def test_subcontracting_order_rm_required_items_for_precision(self):
@@ -1269,6 +1275,24 @@ def create_subcontracting_order(**args):
 			sco.submit()
 
 	return sco
+
+
+def make_subcontracted_purchase_order_from_material_request(material_request):
+	from erpnext.stock.doctype.material_request.mapper import make_purchase_order
+
+	po = make_purchase_order(material_request)
+	po.is_subcontracted = 1
+	po.supplier = "_Test Supplier"
+	po.items[0].fg_item = "Subcontracted Item SA8"
+	po.items[0].fg_item_qty = 10
+	po.items[0].item_code = "Subcontracted Service Item 8"
+	po.items[0].item_name = "Subcontracted Service Item 8"
+	po.items[0].qty = 10
+	po.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	po.save()
+	po.submit()
+
+	return po
 
 
 def make_subcontracted_variant():

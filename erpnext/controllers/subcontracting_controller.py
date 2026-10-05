@@ -1325,7 +1325,7 @@ class SubcontractingController(StockController):
 			if mr and mr_item_rows:
 				mr_obj = frappe.get_doc("Material Request", mr)
 
-				if mr_obj.status in ["Stopped", "Cancelled"]:
+				if mr_obj.status in ["Stopped", "Cancelled"] and self.get("_action") == "submit":
 					frappe.throw(
 						_("Material Request {0} is cancelled or stopped").format(mr),
 						frappe.InvalidStatusError,
