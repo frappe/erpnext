@@ -310,10 +310,9 @@ def get_assets_for_grouped_by_category(filters):
 			asset.asset_category == filters.get("asset_category")
 		)
 
+	from_gl_entries_query = from_gl_entries_query.where(get_finance_book_condition(gl_entry, filters))
 	if assets_with_finance_book is not None:
-		from_gl_entries_query = from_gl_entries_query.where(
-			IfNull(gl_entry.finance_book, "") == filters.get("finance_book")
-		).where(asset.name.isin(assets_with_finance_book))
+		from_gl_entries_query = from_gl_entries_query.where(asset.name.isin(assets_with_finance_book))
 		from_opening_depreciation_query = from_opening_depreciation_query.where(
 			asset.name.isin(assets_with_finance_book)
 		)
@@ -347,6 +346,16 @@ def get_assets_for_grouped_by_category(filters):
 		)
 
 	return list(combined.values())
+
+
+def get_finance_book_condition(gl_entry, filters):
+	"""GL rows of the selected finance book, or of no book and the company's default book when none is selected."""
+	finance_book = IfNull(gl_entry.finance_book, "")
+	if filters.get("finance_book"):
+		return finance_book == filters.finance_book
+
+	default_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+	return finance_book.isin(["", default_finance_book or ""])
 
 
 def get_asset_value_adjustment_map_by_category(filters):
@@ -691,10 +700,9 @@ def get_assets_for_grouped_by_asset(filters):
 			asset.name == filters.get("asset")
 		)
 
+	from_gl_entries_query = from_gl_entries_query.where(get_finance_book_condition(gl_entry, filters))
 	if assets_with_finance_book is not None:
-		from_gl_entries_query = from_gl_entries_query.where(
-			IfNull(gl_entry.finance_book, "") == filters.get("finance_book")
-		).where(asset.name.isin(assets_with_finance_book))
+		from_gl_entries_query = from_gl_entries_query.where(asset.name.isin(assets_with_finance_book))
 		from_opening_depreciation_query = from_opening_depreciation_query.where(
 			asset.name.isin(assets_with_finance_book)
 		)
