@@ -578,6 +578,47 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(expense, 1100)
 
+	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].process_loss_qty = 2
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-8)
+
+		self.assertEqual(scr_return.items[0].process_loss_qty, 0)
+		self.assertEqual(scr_return.items[0].received_qty, -8)
+
+	def test_supplied_items_follow_changed_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 5
+		scr.save()
+
+		self.assertEqual(scr.items[0].received_qty, 5)
+		self.assertEqual(
+			sum(row.consumed_qty for row in scr.supplied_items), sum(row["qty"] for row in rm_items) / 2
+		)
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
