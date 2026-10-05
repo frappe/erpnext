@@ -175,6 +175,42 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.credit, 0)
 		self.assertEqual(first_row.balance, -500)
 
+	def test_ledger_view_needs_access_to_the_supplier(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		create_payment_entry(
+			company="_Test Company",
+			party_type="Supplier",
+			party="_Test Supplier",
+			payment_type="Pay",
+			paid_from="Cash - _TC",
+			paid_to="Creditors - _TC",
+			paid_amount=100,
+			save=1,
+			submit=1,
+		)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": "test@example.com",
+				"allow": "Supplier",
+				"for_value": "_Test Supplier 1",
+			}
+		).insert()
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier="_Test Supplier",
+		)
+
+		frappe.set_user("test@example.com")
+		try:
+			self.assertRaises(frappe.PermissionError, execute, filters)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_supplier_group_filter_uses_supplier_master(self):
 		# invoices created before the supplier_group field existed have it blank
 		pi = make_purchase_invoice()
