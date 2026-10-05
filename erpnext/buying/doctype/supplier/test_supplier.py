@@ -103,6 +103,28 @@ class TestSupplier(ERPNextTestSuite):
 
 		po.save()
 
+	def test_disabled_internal_supplier_does_not_block_new_one(self):
+		def make_internal_supplier():
+			supplier = frappe.new_doc("Supplier")
+			supplier.update(
+				{
+					"supplier_name": frappe.generate_hash(),
+					"supplier_group": "Services",
+					"is_internal_supplier": 1,
+					"represents_company": "_Test Company 7",
+					"companies": [{"company": "_Test Company 7"}],
+				}
+			)
+			return supplier.insert()
+
+		old_supplier = make_internal_supplier()
+		self.assertRaises(frappe.ValidationError, make_internal_supplier)
+
+		old_supplier.disabled = 1
+		old_supplier.save()
+		make_internal_supplier()
+		old_supplier.save()
+
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType
 		supplier = frappe.get_doc("Supplier", "_Test Supplier with Country")

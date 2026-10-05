@@ -182,11 +182,15 @@ class Supplier(TransactionBase):
 		if not self.is_internal_supplier:
 			self.represents_company = ""
 
+		if self.disabled:
+			return
+
 		internal_supplier = frappe.db.get_value(
 			"Supplier",
 			{
 				"is_internal_supplier": 1,
 				"represents_company": self.represents_company,
+				"disabled": 0,
 				"name": ("!=", self.name),
 			},
 			"name",
