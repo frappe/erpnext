@@ -24,6 +24,7 @@ def get_columns(filters):
 			"label": _("Subcontract Order"),
 			"fieldtype": "Link",
 			"fieldname": "subcontract_order",
+			"options": "Subcontracting Order",
 			"width": 200,
 		},
 		{"label": _("Date"), "fieldtype": "Date", "fieldname": "date", "width": 150},
