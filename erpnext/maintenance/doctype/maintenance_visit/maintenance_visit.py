@@ -64,44 +64,30 @@ class MaintenanceVisit(TransactionBase):
 		if not self.purposes:
 			frappe.throw(_("Add Items in the Purpose Table"), title=_("Purposes Required"))
 
+	def get_schedule_details(self):
+		if self.maintenance_schedule_detail:
+			return [self.maintenance_schedule_detail]
+		return [
+			purpose.maintenance_schedule_detail
+			for purpose in self.purposes
+			if purpose.maintenance_schedule_detail
+		]
+
 	def validate_maintenance_date(self):
-		if self.maintenance_type == "Scheduled":
-			if self.maintenance_schedule_detail:
-				item_ref = frappe.db.get_value(
-					"Maintenance Schedule Detail", self.maintenance_schedule_detail, "item_reference"
+		for detail in self.get_schedule_details():
+			item_ref = frappe.db.get_value("Maintenance Schedule Detail", detail, "item_reference")
+			if item_ref:
+				start_date, end_date = frappe.db.get_value(
+					"Maintenance Schedule Item", item_ref, ["start_date", "end_date"]
 				)
-				if item_ref:
-					start_date, end_date = frappe.db.get_value(
-						"Maintenance Schedule Item", item_ref, ["start_date", "end_date"]
+				if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(
+					self.mntc_date
+				) > get_datetime(end_date):
+					frappe.throw(
+						_("Date must be between {0} and {1}").format(
+							format_date(start_date), format_date(end_date)
+						)
 					)
-					if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(
-						self.mntc_date
-					) > get_datetime(end_date):
-						frappe.throw(
-							_("Date must be between {0} and {1}").format(
-								format_date(start_date), format_date(end_date)
-							)
-						)
-			else:
-				for purpose in self.purposes:
-					if purpose.maintenance_schedule_detail:
-						item_ref = frappe.db.get_value(
-							"Maintenance Schedule Detail",
-							purpose.maintenance_schedule_detail,
-							"item_reference",
-						)
-						if item_ref:
-							start_date, end_date = frappe.db.get_value(
-								"Maintenance Schedule Item", item_ref, ["start_date", "end_date"]
-							)
-							if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(
-								self.mntc_date
-							) > get_datetime(end_date):
-								frappe.throw(
-									_("Date must be between {0} and {1}").format(
-										format_date(start_date), format_date(end_date)
-									)
-								)
 
 	def validate(self):
 		self.validate_serial_no()
