@@ -1620,6 +1620,32 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 2)
 		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 100)
 
+	@change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1, "maintain_same_rate": 0})
+	def test_purchase_invoice_mapper_skips_billed_qty(self):
+		unit_price_po = create_purchase_order(qty=0)
+		pi = make_pi_from_po(unit_price_po.name)
+		pi.items[0].qty = 5
+		pi.submit()
+		self.assertEqual(make_pi_from_po(unit_price_po.name).items[0].qty, 0)
+
+		po = create_purchase_order(qty=10, rate=100, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 10,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.items = pi.items[:1]
+		pi.items[0].rate = 90
+		pi.submit()
+		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
