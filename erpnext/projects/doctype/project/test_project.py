@@ -478,6 +478,17 @@ class TestProject(ERPNextTestSuite):
 			self.assertEqual(project.percent_complete, 100)
 			self.assertEqual(project.status, "Completed")
 
+	def test_completed_status_is_refused_until_tasks_are_done(self):
+		project, tasks = self._project_with_tasks("Task Progress", 1)
+		project.status = "Completed"
+		self.assertRaises(frappe.ValidationError, project.save)
+
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.reload()
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
