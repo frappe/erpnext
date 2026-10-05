@@ -327,6 +327,12 @@ class TestTask(ERPNextTestSuite):
 		task.save()
 		self.assertEqual(task.progress, 60)
 
+	def test_negative_progress(self):
+		task = create_task("_Test Task Negative Progress", save=False)
+		task.progress = -50
+
+		self.assertRaises(frappe.ValidationError, task.save)
+
 
 def create_task(
 	subject,
