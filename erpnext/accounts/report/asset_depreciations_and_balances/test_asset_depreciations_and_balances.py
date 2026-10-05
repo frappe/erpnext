@@ -7,7 +7,11 @@ from frappe.utils import add_days, today
 from erpnext.accounts.report.asset_depreciations_and_balances.asset_depreciations_and_balances import (
 	execute,
 )
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
+)
 from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_difference_account,
@@ -107,6 +111,24 @@ class TestAssetDepreciationsAndBalancesReport(ERPNextTestSuite):
 
 		row = get_asset_row(asset.name, "2020-01-01", "2021-06-30", finance_book="Test Finance Book 2")
 		self.assertEqual(row.value_as_on_to_date, 110000)
+
+	def test_depreciation_reversed_before_from_date_is_netted_in_opening(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-01-01",
+			depreciation_start_date="2020-12-31",
+			total_number_of_depreciations=10,
+			submit=1,
+		)
+		post_depreciation_entries(date="2021-01-01")
+		scrap_asset(asset.name, "2021-06-30")
+		restore_asset(asset.name)
+
+		row = get_asset_row(asset.name, add_days(today(), 1), add_days(today(), 30))
+
+		self.assertEqual(row.accumulated_depreciation_as_on_from_date, 10000)
+		self.assertEqual(row.depreciation_eliminated_via_reversal, 0)
+		self.assertEqual(row.accumulated_depreciation_as_on_to_date, 10000)
 
 
 def get_asset_row(asset: str, from_date: str, to_date: str, **filters) -> frappe._dict:
