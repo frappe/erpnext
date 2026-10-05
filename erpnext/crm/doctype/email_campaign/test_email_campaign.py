@@ -65,6 +65,16 @@ class TestEmailCampaign(ERPNextTestSuite):
 		self.assertEqual(mail["reference_name"], email_campaign.name)
 		self.assertTrue(mail["unsubscribe_message"])
 
+	def test_unsubscribed_lead_gets_no_campaign_mail(self):
+		lead = self.make_lead()
+		self.make_lead_email_campaign(lead, schedules=[0])
+		lead.db_set("unsubscribed", 1)
+
+		self.assertEqual(self.send_campaign_mails(lead.email_id), [])
+		self.assertRaisesRegex(
+			frappe.ValidationError, "unsubscribed", self.make_lead_email_campaign, lead, schedules=[0]
+		)
+
 	def test_start_date_cannot_be_in_the_past(self):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
 		self.assertRaises(frappe.ValidationError, doc.set_date)

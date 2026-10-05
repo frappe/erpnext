@@ -58,16 +58,29 @@ class EmailCampaign(Document):
 		self.end_date = add_days(getdate(self.start_date), max(send_after_days))
 
 	def validate_lead(self):
-		lead_email_id = frappe.db.get_value("Lead", self.recipient, "email_id")
-		if not lead_email_id:
-			lead_name = frappe.db.get_value("Lead", self.recipient, "lead_name")
-			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
+		lead = frappe.db.get_value(
+			"Lead", self.recipient, ["email_id", "lead_name", "unsubscribed"], as_dict=True
+		)
+		if not lead.email_id:
+			frappe.throw(_("Please set an email id for the Lead {0}").format(lead.lead_name))
+		self.validate_not_unsubscribed(lead)
 
 	def validate_contact(self):
-		contact = frappe.db.get_value("Contact", self.recipient, ["email_id", "full_name"], as_dict=True)
+		contact = frappe.db.get_value(
+			"Contact", self.recipient, ["email_id", "full_name", "unsubscribed"], as_dict=True
+		)
 		if contact and not contact.email_id:
 			frappe.throw(
 				_("Please set a primary email ID for the Contact {0}").format(frappe.bold(contact.full_name))
+			)
+		self.validate_not_unsubscribed(contact)
+
+	def validate_not_unsubscribed(self, recipient: dict | None):
+		if self.is_new() and recipient and recipient.unsubscribed:
+			frappe.throw(
+				_("{0} {1} has unsubscribed from emails").format(
+					_(self.email_campaign_for), frappe.bold(self.recipient)
+				)
 			)
 
 	def validate_email_campaign_already_exists(self):
@@ -157,11 +170,17 @@ def send_mail(entry, email_campaign):
 			pluck="email",
 		)
 	else:
-		email_id = frappe.db.get_value(campaign_for, recipient, "email_id")
+		email_id, unsubscribed = frappe.db.get_value(campaign_for, recipient, ["email_id", "unsubscribed"])
 		if not email_id:
 			frappe.log_error(
 				title=_("Email Campaign Error"),
 				message=_("No email found for {0} {1}").format(campaign_for, recipient),
+			)
+			return
+		if unsubscribed:
+			frappe.log_error(
+				title=_("Email Campaign Error"),
+				message=_("{0} {1} has unsubscribed from emails").format(campaign_for, recipient),
 			)
 			return
 		recipient_list = [email_id]
