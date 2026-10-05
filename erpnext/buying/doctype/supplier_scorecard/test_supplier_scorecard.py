@@ -5,7 +5,10 @@
 import frappe
 from frappe.utils import add_days, nowdate
 
-from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_all_scorecards
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
+	make_all_scorecards,
+	refresh_scorecards,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -29,6 +32,25 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		frappe.db.set_value("Supplier Scorecard Criteria", "_Test SC Make All", "formula", "10")
 		self.assertGreater(make_all_scorecards(doc.name), 0)
 		self.assertEqual(frappe.db.get_value("Supplier Scorecard", doc.name, "status"), "Very Poor")
+
+	def test_refresh_continues_after_a_failing_scorecard(self):
+		scorecards = []
+		for supplier_name in ("_Test Supplier SC Refresh Broken", "_Test Supplier SC Refresh Healthy"):
+			doc = make_scorecard_for(supplier_name)
+			doc.insert()
+			scorecards.append(doc.name)
+		broken, healthy = scorecards
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": ["in", scorecards]})
+		frappe.db.set_value("Supplier Scorecard", broken, "weighting_function", "{total_score} +")
+		refresh_scorecards()
+
+		self.assertTrue(frappe.db.exists("Supplier Scorecard Period", {"scorecard": healthy}))
+		self.assertTrue(
+			frappe.db.exists(
+				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}
+			)
+		)
 
 
 def make_supplier_scorecard():
