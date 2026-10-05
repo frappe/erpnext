@@ -600,6 +600,34 @@ class TestQualityInspection(ERPNextTestSuite):
 		# name matches but production_item != item_code, so the row is left untouched.
 		self.assertFalse(frappe.db.get_value("Job Card", jc, "quality_inspection"))
 
+	def test_job_card_qi_keeps_manually_rejected_reading(self):
+		create_quality_inspection_parameter("Finish")
+		parameter = {"specification": "Finish", "numeric": 0, "value": "OK"}
+		if not frappe.db.exists("Quality Inspection Template", "_Test QI Template Finish"):
+			frappe.get_doc(
+				{
+					"doctype": "Quality Inspection Template",
+					"quality_inspection_template_name": "_Test QI Template Finish",
+					"item_quality_inspection_parameter": [parameter],
+				}
+			).insert()
+		item = create_item("_Test Item QI Finish")
+		item.db_set("quality_inspection_template", "_Test QI Template Finish")
+
+		qa = create_quality_inspection(
+			item_code=item.name,
+			inspection_type="In Process",
+			reference_type="Job Card",
+			reference_name=make_minimal_job_card(production_item=item.name),
+			readings=[
+				dict(parameter, reading_value="Scratched", manual_inspection=1, status="Rejected"),
+			],
+			do_not_submit=True,
+		)
+
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
 
 def make_minimal_job_card(production_item):
 	"""db_insert a minimal submitted Job Card row carrying only the columns the
