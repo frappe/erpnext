@@ -449,10 +449,9 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 	def condition(doc):
 		if s_id:
 			return doc.name == s_id
-		elif item_name:
-			return doc.item_name == item_name
-
-		return True
+		if item_name and doc.item_name != item_name:
+			return False
+		return doc.completion_status == "Pending"
 
 	def update_status_and_detail(source, target, parent):
 		target.maintenance_type = "Scheduled"
