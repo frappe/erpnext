@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.deprecation_dumpster import deprecated
 
 
 @frappe.whitelist()
@@ -78,6 +79,12 @@ def make_purchase_order(
 
 
 @frappe.whitelist()
+@deprecated(
+	f"{__name__}.make_purchase_invoice",
+	"2026-10-05",
+	"v18",
+	"Make the Purchase Invoice from the Purchase Order.",
+)
 def make_purchase_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	doc = get_mapped_doc(
 		"Supplier Quotation",
