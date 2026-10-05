@@ -448,6 +448,19 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		self.assertEqual(sum(d.depreciation_amount for d in schedule if not d.journal_entry), 700)
 		self.assertEqual(schedule[-1].accumulated_depreciation_amount, 1100)
 
+	def test_wdv_requires_rate_or_salvage_value(self):
+		args = {
+			"depreciation_method": "Written Down Value",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 5,
+			"depreciation_start_date": "2023-12-31",
+			"submit": 0,
+		}
+		self.assertRaises(frappe.ValidationError, create_monthly_asset, **args)
+
+		asset = create_monthly_asset(**args, expected_value_after_useful_life=100)
+		self.assertLess(asset.finance_books[0].rate_of_depreciation, 100)
+
 	def test_manual_schedule_rows_are_validated(self):
 		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
 
