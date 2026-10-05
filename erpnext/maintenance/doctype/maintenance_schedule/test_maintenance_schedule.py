@@ -12,6 +12,7 @@ from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule impor
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -168,6 +169,21 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		self.assertEqual(len(ms.schedules), 1)
 		ms.save()
 		self.assertEqual(len(ms.schedules), 2)
+
+	def test_maintenance_roles_can_make_visits_from_schedule(self):
+		ms = make_maintenance_schedule()
+		ms.submit()
+
+		for index, role in enumerate(("Maintenance User", "Maintenance Manager")):
+			user = make_fenced_user(f"schedule-visit-{index}@example.com", [role])
+			with as_user(user):
+				visit = make_maintenance_visit(source_name=ms.name, s_id=ms.schedules[index].name)
+				visit.completion_status = "Partially Completed"
+				visit.purposes[0].work_done = "Serviced"
+				visit.insert()
+				visit.submit()
+
+			self.assertEqual(visit.docstatus, 1)
 
 
 def make_serial_item_with_serial(self, item_code):
