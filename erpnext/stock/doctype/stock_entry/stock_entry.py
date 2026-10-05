@@ -10,7 +10,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Max, Sum
+from frappe.query_builder.functions import Coalesce, Max, NullIf, Sum
 from frappe.utils import (
 	cint,
 	comma_or,
@@ -1905,17 +1905,14 @@ class StockEntry(StockController):
 					.where(
 						(se.purpose == "Send to Subcontractor")
 						& (se.docstatus == 1)
-						& (se_detail.item_code == se_item.item_code)
+						& (Coalesce(NullIf(se_detail.original_item, ""), se_detail.item_code) == item_code)
 						& (
 							(
 								(se.purchase_order == self.purchase_order)
 								& (se_detail.po_detail == se_item.po_detail)
 							)
 							if self.subcontract_data.order_doctype == "Purchase Order"
-							else (
-								(se.subcontracting_order == self.subcontracting_order)
-								& (se_detail.sco_rm_detail == se_item.sco_rm_detail)
-							)
+							else (se.subcontracting_order == self.subcontracting_order)
 						)
 					)
 				).run()[0][0] or 0
@@ -1931,8 +1928,10 @@ class StockEntry(StockController):
 							(se.purpose == "Material Transfer")
 							& (se.docstatus == 1)
 							& (se.is_return == 1)
-							& (se_detail.item_code == se_item.item_code)
-							& (se_detail.sco_rm_detail == se_item.sco_rm_detail)
+							& (
+								Coalesce(NullIf(se_detail.original_item, ""), se_detail.item_code)
+								== item_code
+							)
 							& (se.subcontracting_order == self.subcontracting_order)
 						)
 					).run()[0][0] or 0
