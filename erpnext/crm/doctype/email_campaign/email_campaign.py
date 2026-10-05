@@ -101,6 +101,9 @@ class EmailCampaign(Document):
 			)
 
 	def update_status(self):
+		if self.status == "Unsubscribed":
+			return
+
 		start_date = getdate(self.start_date)
 		end_date = getdate(self.end_date)
 		today_date = getdate(today())
