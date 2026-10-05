@@ -208,6 +208,38 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			)
 		)
 
+	def test_lookups_need_read_permission(self):
+		from erpnext.assets.doctype.asset_maintenance.asset_maintenance import (
+			get_maintenance_log,
+			get_team_members,
+		)
+
+		self.make_asset_maintenance()
+		self.assertEqual(
+			list(get_team_members("User", "thal", "name", 0, 20, {"maintenance_team": "Team Awesome"})),
+			[("thalia@abc.com",)],
+		)
+
+		user = "test_asset_maintenance_outsider@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Outsider",
+					"roles": [{"role": "Sales User"}],
+				}
+			).insert()
+
+		frappe.set_user(user)
+		try:
+			with self.assertRaises(frappe.PermissionError):
+				get_team_members("User", "", "name", 0, 20, {"maintenance_team": "Team Awesome"})
+			with self.assertRaises(frappe.PermissionError):
+				get_maintenance_log(self.asset_name)
+		finally:
+			frappe.set_user("Administrator")
+
 	def submit_asset(self):
 		self.asset_doc.update(
 			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}

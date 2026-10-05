@@ -208,16 +208,19 @@ def get_team_members(
 	page_len: int,
 	filters: dict[str, Any],
 ) -> list[tuple[str]]:
-	return frappe.db.get_values(
+	team = filters.get("maintenance_team")
+	frappe.has_permission("Asset Maintenance Team", "read", team, throw=True)
+	return frappe.get_all(
 		"Maintenance Team Member",
-		{"parent": filters.get("maintenance_team")},
-		"team_member",
+		filters={"parent": team, "parenttype": "Asset Maintenance Team", "team_member": ("like", f"%{txt}%")},
+		fields=["team_member"],
+		as_list=True,
 	)
 
 
 @frappe.whitelist()
 def get_maintenance_log(asset_name: str):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Asset Maintenance Log",
 		filters={"asset_name": asset_name},
 		fields=["maintenance_status", {"COUNT": "asset_name", "as": "count"}, "asset_name"],
