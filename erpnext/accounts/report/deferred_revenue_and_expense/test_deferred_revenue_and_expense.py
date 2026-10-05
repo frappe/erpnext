@@ -1,6 +1,6 @@
 import frappe
 from frappe import qb
-from frappe.utils import add_days, add_months, getdate, nowdate
+from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -383,6 +383,17 @@ class TestDeferredRevenueAndExpense(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertIn(allowed.name, names)
 		self.assertNotIn(restricted.name, names)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Days"})
+	def test_forecast_includes_first_service_day(self):
+		si = self.make_deferred_sales_invoice("2021-04-01", "2022-03-31", 36500)
+
+		row = next(
+			row for row in self.get_report_rows("2021-04-01", "2022-03-31") if row.get("name") == si.name
+		)
+
+		self.assertEqual(row["apr_2021"], 3000)
+		self.assertEqual(flt(sum(v for k, v in row.items() if k.endswith(("_2021", "_2022"))), 2), 36500)
 
 	def make_deferred_sales_invoice(self, service_start_date, service_end_date, rate, customer=None):
 		si = create_sales_invoice(

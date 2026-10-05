@@ -38,7 +38,7 @@ class Deferred_Item:
 		self.gle_entries = []
 		# holds period wise total for item
 		self.period_total = []
-		self.last_entry_date = self.service_start_date
+		self.last_entry_date = None
 
 		if gle_entries:
 			self.gle_entries = gle_entries
@@ -149,14 +149,14 @@ class Deferred_Item:
 		"""
 		simulate future posting by creating dummy gl entries. starts from the last posting date.
 		"""
-		if (
-			self.service_start_date != self.service_end_date
-			and add_days(self.last_entry_date, 1) < self.service_end_date
-		):
+		forecast_start_date = (
+			add_days(self.last_entry_date, 1) if self.last_entry_date else self.service_start_date
+		)
+		if self.service_start_date != self.service_end_date and forecast_start_date < self.service_end_date:
 			self.estimate_for_period_list = get_period_list(
 				self.filters.from_fiscal_year,
 				self.filters.to_fiscal_year,
-				add_days(self.last_entry_date, 1),
+				forecast_start_date,
 				self.service_end_date,
 				"Date Range",
 				"Monthly",
