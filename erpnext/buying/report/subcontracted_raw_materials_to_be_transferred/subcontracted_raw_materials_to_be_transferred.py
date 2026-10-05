@@ -73,6 +73,7 @@ def get_order_items_to_supply(filters):
 		[filters.order_type, "transaction_date", "<=", filters.to_date],
 		[filters.order_type, "transaction_date", ">=", filters.from_date],
 		[filters.order_type, "docstatus", "=", 1],
+		[filters.order_type, "status", "!=", "Closed"],
 	]
 
 	if filters.order_type == "Purchase Order":

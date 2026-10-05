@@ -5,6 +5,10 @@
 
 import frappe
 
+from erpnext.buying.report.subcontracted_item_to_be_received.test_subcontracted_item_to_be_received import (
+	get_report_filters,
+	make_subcontracting_order,
+)
 from erpnext.buying.report.subcontracted_raw_materials_to_be_transferred.subcontracted_raw_materials_to_be_transferred import (
 	execute,
 )
@@ -70,6 +74,13 @@ class TestSubcontractedItemToBeTransferred(ERPNextTestSuite):
 		self.assertEqual(sco_data[1]["rm_item_code"], "_Test Item Home Desktop 100")
 		self.assertEqual(sco_data[1]["p_qty"], 19)
 		self.assertEqual(sco_data[1]["transferred_qty"], 1)
+
+	def test_closed_order_is_not_listed(self):
+		sco = make_subcontracting_order()
+		sco.update_status("Closed")
+
+		data = execute(get_report_filters(sco))[1]
+		self.assertNotIn(sco.name, {row["subcontract_order"] for row in data})
 
 
 def transfer_subcontracted_raw_materials(sco):
