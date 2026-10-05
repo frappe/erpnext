@@ -65,8 +65,20 @@ class Contract(Document):
 		self.db_set("status", "Cancelled")
 
 	def before_update_after_submit(self):
+		self.validate_fulfilment_terms_unchanged()
 		self.update_contract_status()
 		self.update_fulfilment_status()
+
+	def validate_fulfilment_terms_unchanged(self):
+		"""Rows can be ticked after submit, not added or removed."""
+		previous = self.get_doc_before_save()
+		if previous and {row.name for row in previous.fulfilment_terms} != {
+			row.name for row in self.fulfilment_terms
+		}:
+			frappe.throw(
+				_("Fulfilment terms cannot be added or removed after submission."),
+				frappe.UpdateAfterSubmitError,
+			)
 
 	def validate_dates(self):
 		if self.end_date and self.end_date < self.start_date:
