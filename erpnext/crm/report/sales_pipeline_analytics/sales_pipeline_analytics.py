@@ -244,15 +244,16 @@ class SalesPipelineAnalytics:
 	def get_periods(self) -> list[dict]:
 		periods = []
 		months_per_period = 1 if self.filters.get("range") == "Monthly" else 3
-		current_date = getdate(self.filters.get("from_date"))
-		if self.filters.get("range") == "Quarterly":
-			current_date = date(current_date.year, (current_date.month - 1) // 3 * 3 + 1, 1)
+		current_date = self.get_period_start(getdate(self.filters.get("from_date")), months_per_period)
 
-		while current_date < getdate(self.filters.get("to_date")):
+		while current_date <= getdate(self.filters.get("to_date")):
 			periods.append(self.get_period(current_date))
 			current_date = current_date + relativedelta(months=months_per_period)
 
 		return periods
+
+	def get_period_start(self, day: date, months_per_period: int) -> date:
+		return date(day.year, (day.month - 1) // months_per_period * months_per_period + 1, 1)
 
 	def get_period(self, period_start: date) -> dict:
 		if self.filters.get("range") == "Monthly":

@@ -215,6 +215,14 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 		self.assertEqual(rows[0]["q1_2025"], 500)
 		self.assertEqual(rows[0]["q1_2026"], 1300)
 
+	def test_last_month_shown_when_to_date_is_earlier_in_its_month(self):
+		stage = make_sales_stage()
+		make_stage_opportunity(stage, 300, "2026-02-05")
+
+		columns, data = execute(stage_filters(from_date="2026-01-15", to_date="2026-02-10"))[:2]
+
+		self.assertIn("february_2026", [column["fieldname"] for column in columns])
+
 
 def make_sales_stage() -> str:
 	stage = "_Test Pipeline Stage " + frappe.generate_hash(length=5)
@@ -242,14 +250,17 @@ def make_stage_opportunity(stage: str, amount: float, expected_closing: str, **f
 
 
 def stage_rows(stage: str, **filters) -> list[dict]:
-	filters = {
+	return [row for row in execute(stage_filters(**filters))[1] if row["sales_stage"] == stage]
+
+
+def stage_filters(**filters) -> dict:
+	return {
 		"pipeline_by": "Sales Stage",
 		"range": "Monthly",
 		"based_on": "Number",
 		"company": "Best Test",
 		**filters,
 	}
-	return [row for row in execute(filters)[1] if row["sales_stage"] == stage]
 
 
 def create_opportunity():
