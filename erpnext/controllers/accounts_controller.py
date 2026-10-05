@@ -4562,6 +4562,9 @@ def update_child_qty_rate(
 		parent.update_prevdoc_status("submit")
 		parent.update_delivery_status()
 
+	elif parent_doctype == "Supplier Quotation":
+		parent.update_rfq_supplier_status(parent.docstatus.is_submitted())
+
 	parent.reload()
 	validate_workflow_conditions(parent)
 
