@@ -197,9 +197,10 @@ def get_children(doctype: str, parent: str | None = None, location: str | None =
 	if parent is None or parent == "All Locations":
 		parent = ""
 
+	frappe.has_permission("Location", throw=True)
 	filters = {"parent_location": parent} if parent else {"parent_location": ["is", "not set"]}
 
-	return frappe.get_all(
+	return frappe.get_list(
 		"Location",
 		filters=filters,
 		fields=["name as value", "is_group as expandable"],

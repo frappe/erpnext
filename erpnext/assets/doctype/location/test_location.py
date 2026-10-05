@@ -4,6 +4,7 @@ import json
 
 import frappe
 
+from erpnext.assets.doctype.location.location import get_children
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -59,6 +60,16 @@ class TestLocation(ERPNextTestSuite):
 
 		location = make_location("Edge Coordinates", latitude=-90, longitude=180)
 		self.assertEqual((location.latitude, location.longitude), (-90, 180))
+
+	def test_get_children_needs_location_permission(self):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "location-website-user@example.com", "first_name": "Website"}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, get_children, "Location")
+
+		self.assertTrue(get_children("Location"))
 
 
 def make_location(location_name: str, **args):
