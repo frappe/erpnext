@@ -4351,12 +4351,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
-				if status == "Completed":
+				request_status = status
+				if request_status == "Completed":
 					qty = get_transferred_qty(material_request)
 					if qty.get("transfer_qty") > qty.get("transferred_qty"):
-						status = "In Transit"
+						request_status = "In Transit"
 
-				frappe.db.set_value("Material Request", material_request, "transfer_status", status)
+				frappe.db.set_value("Material Request", material_request, "transfer_status", request_status)
 
 	def set_serial_no_batch_for_finished_good(self):
 		if not (
