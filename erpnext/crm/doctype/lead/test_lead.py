@@ -131,6 +131,26 @@ class TestLead(ERPNextTestSuite):
 			frappe.db.get_value("ToDo", {"reference_type": "Opportunity", "reference_name": opportunity.name})
 		)
 
+	def test_lead_status_follows_its_opportunity(self):
+		lost_reason = "_Test Lead Lost Reason"
+		if not frappe.db.exists("Opportunity Lost Reason", lost_reason):
+			frappe.get_doc({"doctype": "Opportunity Lost Reason", "lost_reason": lost_reason}).insert()
+
+		lead = make_lead()
+		opportunity = make_opportunity(lead.name)
+		opportunity.company = "_Test Company"
+		opportunity.save()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Opportunity")
+
+		opportunity.declare_enquiry_lost([{"lost_reason": lost_reason}], [])
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Open")
+
+		second = make_opportunity(lead.name)
+		second.company = "_Test Company"
+		second.save()
+		second.delete()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Open")
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",

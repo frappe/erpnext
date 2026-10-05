@@ -22,6 +22,7 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
+		["Open", "eval:self.status in ('Opportunity', 'Quotation', 'Lost Quotation', 'Converted')"],
 		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
 		["Quotation", "has_quotation"],
