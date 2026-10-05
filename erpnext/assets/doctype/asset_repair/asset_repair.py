@@ -70,12 +70,14 @@ class AssetRepair(AccountsController):
 		self.validate_asset()
 		self.validate_dates()
 		self.validate_purchase_invoices()
-		self.update_status()
 		self.calculate_consumed_items_cost()
 		self.calculate_repair_cost()
 		self.calculate_total_repair_cost()
 		self.check_repair_status()
 		self.set_downtime()
+
+	def on_update(self):
+		self.update_status()
 
 	def validate_asset(self):
 		if self.asset_doc.status in ("Sold", "Scrapped"):

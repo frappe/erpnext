@@ -443,6 +443,18 @@ class TestAssetRepair(ERPNextTestSuite):
 		posting_date = frappe.db.get_value("Stock Entry", {"asset_repair": asset_repair.name}, "posting_date")
 		self.assertEqual(str(posting_date), add_days(nowdate(), -3))
 
+	def test_asset_stays_out_of_order_while_a_repair_is_pending(self):
+		asset = create_asset(submit=1)
+		create_asset_repair(asset=asset)
+		completed_repair = create_asset_repair(asset=asset)
+		completed_repair.update({"repair_status": "Completed", "completion_date": nowdate()})
+		completed_repair.save()
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+		asset.reload()
+		asset.set_status()
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations + (
