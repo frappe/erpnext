@@ -4225,6 +4225,60 @@ class TestStockEntry(ERPNextTestSuite):
 		se.save()
 		se.submit()
 
+	def test_bom_rows_in_non_stock_uom_are_converted_once(self):
+		box = [{"uom": "Box", "conversion_factor": 12}]
+		rm_item = make_item("_Test BOM Box Raw Material", {"is_stock_item": 1, "uoms": box}).name
+		secondary_item = make_item("_Test BOM Box Secondary Item", {"is_stock_item": 1, "uoms": box}).name
+		fg_item = make_item("_Test BOM Box Finished Good", {"is_stock_item": 1}).name
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"quantity": 1,
+				"items": [
+					{"item_code": rm_item, "qty": 1, "uom": "Box", "conversion_factor": 12, "rate": 10}
+				],
+				"secondary_items": [
+					{
+						"item_code": secondary_item,
+						"qty": 1,
+						"uom": "Box",
+						"conversion_factor": 12,
+						"secondary_item_type": "Scrap",
+					}
+				],
+			}
+		)
+		bom.insert()
+		bom.submit()
+
+		for purpose in ("Manufacture", "Repack", "Material Issue", "Disassemble"):
+			with self.subTest(purpose=purpose):
+				se = frappe.get_doc(
+					{
+						"doctype": "Stock Entry",
+						"company": "_Test Company",
+						"purpose": purpose,
+						"posting_date": nowdate(),
+						"posting_time": nowtime(),
+						"from_bom": 1,
+						"bom_no": bom.name,
+						"use_multi_level_bom": 0,
+						"fg_completed_qty": 2,
+						"from_warehouse": "_Test Warehouse - _TC",
+						"to_warehouse": "_Test Warehouse - _TC",
+					}
+				)
+				se.set_stock_entry_type()
+				se.get_items()
+				se.insert()
+
+				bom_rows = [row for row in se.items if row.item_code != fg_item]
+				self.assertTrue(bom_rows)
+				for row in bom_rows:
+					self.assertEqual(row.transfer_qty, 24)
+
 	def test_disassemble_blocks_finished_good_qty_tampering(self):
 		# A disassembly consuming N finished goods must consume exactly N (in stock UOM).
 		# Switching the finished-good row to a larger UOM with a tiny conversion_factor previously
