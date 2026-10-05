@@ -401,6 +401,17 @@ class TestProject(FrappeTestCase):
 				hourly_reminder()
 			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
 
+	def test_twice_daily_reminder_waits_for_the_second_time(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="09:00:00", second_email="17:00:00"
+		)
+		for time, updates in (("10:00:00", 1), ("11:00:00", 1), ("17:30:00", 2)):
+			with self.freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				twice_daily_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
