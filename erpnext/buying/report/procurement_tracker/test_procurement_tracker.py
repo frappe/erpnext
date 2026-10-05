@@ -133,3 +133,11 @@ class TestProcurementTracker(ERPNextTestSuite):
 		)
 
 		self.assertNotIn(mr.name, {row.get("material_request_no") for row in self.run_report()})
+
+	def test_quantity_is_shown_in_its_order_unit(self):
+		po = create_purchase_order(do_not_submit=True)
+		po.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 10})
+		po.submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual((row["quantity"], row["unit_of_measurement"]), (10, "_Test UOM 1"))
