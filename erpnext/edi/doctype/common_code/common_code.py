@@ -69,14 +69,14 @@ class CommonCode(Document):
 		code_column = column_map["code"]
 		description_column = column_map.get("description")
 
-		self.common_code = xml_element.find(f"./Value[@ColumnRef='{code_column}']/SimpleValue").text
+		self.common_code = get_simple_value(xml_element, code_column).text
 
 		if title_column:
-			simple_value_title = xml_element.find(f"./Value[@ColumnRef='{title_column}']/SimpleValue")
+			simple_value_title = get_simple_value(xml_element, title_column)
 			self.title = simple_value_title.text if simple_value_title is not None else self.common_code
 
 		if description_column:
-			simple_value_descr = xml_element.find(f"./Value[@ColumnRef='{description_column}']/SimpleValue")
+			simple_value_descr = get_simple_value(xml_element, description_column)
 			self.description = simple_value_descr.text if simple_value_descr is not None else None
 
 		self.additional_data = etree.tostring(xml_element, encoding="unicode", pretty_print=True)
@@ -92,16 +92,7 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	file_doc.check_permission("read")
 	root = parse_genericode_content(file_doc.get_content(encodings=()))
 
-	# Construct the XPath expression
-	xpath_expr = ".//SimpleCodeList/Row"
-	filter_conditions = [
-		f"Value[@ColumnRef='{column_ref}']/SimpleValue='{value}'"
-		for column_ref, value in (filters or {}).items()
-	]
-	if filter_conditions:
-		xpath_expr += "[" + " and ".join(filter_conditions) + "]"
-
-	elements = root.xpath(xpath_expr)
+	elements = get_filtered_rows(root, filters or {})
 	total_elements = len(elements)
 	for i, xml_element in enumerate(elements, start=1):
 		common_code: CommonCode = frappe.new_doc("Common Code")
@@ -111,6 +102,22 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 		frappe.publish_progress(i / total_elements * 100, title=_("Importing Common Codes"))
 
 	return total_elements
+
+
+def get_filtered_rows(root: "etree.Element", filters: dict) -> list:
+	"""Return the rows matching every column = value filter, passed as XPath variables."""
+	conditions, variables = [], {}
+	for i, (column_ref, value) in enumerate(filters.items()):
+		conditions.append(f"Value[@ColumnRef=$column{i}]/SimpleValue=$value{i}")
+		variables.update({f"column{i}": column_ref, f"value{i}": value})
+
+	predicate = "[" + " and ".join(conditions) + "]" if conditions else ""
+	return root.xpath(f".//SimpleCodeList/Row{predicate}", **variables)
+
+
+def get_simple_value(xml_element: "etree.Element", column_ref: str) -> "etree.Element | None":
+	values = xml_element.xpath("./Value[@ColumnRef=$column]/SimpleValue", column=column_ref)
+	return values[0] if values else None
 
 
 def on_doctype_update():

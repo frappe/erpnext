@@ -1,4 +1,5 @@
 import json
+from html import unescape
 from urllib.parse import urlsplit
 
 import frappe
@@ -168,11 +169,17 @@ def process_genericode_import(
 	frappe.has_permission("Common Code", "create", throw=True)
 	frappe.has_permission("Code List", doc=code_list_name, throw=True)
 
-	column_map = {"code": code_column, "title": title_column, "description": description_column}
+	# the dialog gets column ids and values HTML-escaped, match them against the raw file
+	column_map = {
+		"code": unescape(code_column),
+		"title": unescape(title_column) if title_column else None,
+		"description": unescape(description_column) if description_column else None,
+	}
+	filters = {
+		unescape(column): unescape(str(value)) for column, value in frappe.parse_json(filters or {}).items()
+	}
 
-	return import_genericode(
-		code_list_name, file_name, column_map, frappe.parse_json(filters) if filters else None
-	)
+	return import_genericode(code_list_name, file_name, column_map, filters)
 
 
 def get_genericode_columns_and_examples(root):

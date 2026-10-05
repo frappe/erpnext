@@ -148,6 +148,27 @@ class TestCodeListImport(ERPNextTestSuite):
 
 			self.assert_import_response(import_result)
 
+	def test_process_genericode_import_filters_on_values_with_special_characters(self):
+		content = SAMPLE_GENERICODE.replace(b"Group 1", b"R&amp;D").replace(
+			b"Group 2", "Côte d'Ivoire".encode()
+		)
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		def import_with(category: str) -> int:
+			return code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+				filters={"category": category},
+			)
+
+		offered = sorted(import_result["filterable_columns"]["category"])
+		self.assertEqual(offered, ["Côte d&apos;Ivoire", "R&amp;D"])
+		self.assertEqual([import_with(value) for value in offered], [1, 2])
+		self.assertEqual(import_with("Côte d'Ivoire"), 1)
+
 	@staticmethod
 	@contextmanager
 	def upload_context(
