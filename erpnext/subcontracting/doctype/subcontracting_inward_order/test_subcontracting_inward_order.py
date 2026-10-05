@@ -707,6 +707,18 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual(scio.received_items[-1].billed_qty, 5)
 
+	def test_credit_note_reduces_self_rm_billed_qty(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so, scio = create_delivered_so_scio()
+		si = make_sales_invoice(so.name)
+		si.submit()
+		make_return_doc("Sales Invoice", si.name).submit()
+
+		scio.reload()
+		self.assertEqual(scio.received_items[-1].billed_qty, 0)
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()

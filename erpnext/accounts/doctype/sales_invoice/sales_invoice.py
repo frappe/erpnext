@@ -1156,9 +1156,6 @@ class SalesInvoice(SellingController):
 			project.db_update()
 
 	def update_billed_qty_in_scio(self):
-		if self.is_return:
-			return
-
 		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 		sign = 1 if self._action == "submit" else -1
 		data = {name: sign * qty for name, qty in self.get_scio_self_rm_stock_qty().items()}
