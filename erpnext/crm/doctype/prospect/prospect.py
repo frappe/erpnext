@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
@@ -43,6 +44,22 @@ class Prospect(CRMNote):
 
 	def onload(self):
 		load_address_and_contact(self)
+
+	def validate(self):
+		self.validate_leads()
+
+	def validate_leads(self):
+		leads = [row.lead for row in self.leads]
+		for lead in set(leads):
+			if leads.count(lead) > 1:
+				frappe.throw(_("Lead {0} is added more than once").format(frappe.bold(lead)))
+
+			if other := frappe.db.get_value(
+				"Prospect Lead", {"lead": lead, "parent": ["!=", self.name]}, "parent"
+			):
+				frappe.throw(
+					_("Lead {0} is already in Prospect {1}").format(frappe.bold(lead), frappe.bold(other))
+				)
 
 	def on_update(self):
 		self.link_with_lead_contact_and_address()

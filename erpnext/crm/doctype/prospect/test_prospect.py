@@ -61,6 +61,15 @@ class TestProspect(ERPNextTestSuite):
 		prospect.reload()
 		self.assertEqual(prospect.leads, [])
 
+	def test_lead_can_be_in_one_prospect_only_once(self):
+		lead = make_lead()
+		prospect = make_prospect(company="_Test Company")
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		self.assertRaises(frappe.ValidationError, add_lead_to_prospect, lead.name, prospect.name)
+		other = make_prospect(company="_Test Company")
+		self.assertRaises(frappe.ValidationError, add_lead_to_prospect, lead.name, other.name)
+
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
 		prospect = frappe.new_doc("Prospect")
