@@ -93,6 +93,22 @@ class TestTask(ERPNextTestSuite):
 			getdate(frappe.db.get_value("Task", parent.name, "exp_start_date")), getdate(nowdate())
 		)
 
+	def test_reschedule_dependent_task_from_actual_end_date(self):
+		prerequisite = create_task("_Test Task Actual End", save=False)
+		prerequisite.exp_start_date = prerequisite.exp_end_date = None
+		prerequisite.save()
+		dependent = create_task(
+			"_Test Task After Actual End", add_days(nowdate(), -5), add_days(nowdate(), -3), prerequisite.name
+		)
+
+		prerequisite.act_end_date = nowdate()
+		prerequisite.save()
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 1)),
+		)
+
 	def test_close_assignment(self):
 		if not frappe.db.exists("Task", "Test Close Assignment"):
 			task = frappe.new_doc("Task")

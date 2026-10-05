@@ -10,7 +10,7 @@ from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import add_days, add_to_date, date_diff, flt, get_link_to_form, getdate, today
+from frappe.utils import add_days, add_to_date, date_diff, flt, get_datetime, get_link_to_form, getdate, today
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
@@ -318,7 +318,7 @@ class Task(NestedSet):
 			if (
 				task.exp_start_date
 				and task.exp_end_date
-				and task.exp_start_date < end_date
+				and task.exp_start_date < get_datetime(end_date)
 				and task.status == "Open"
 			):
 				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
