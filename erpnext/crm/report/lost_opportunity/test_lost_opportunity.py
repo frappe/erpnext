@@ -27,6 +27,14 @@ class TestLostOpportunity(ERPNextTestSuite):
 		data = run_report(territory="All Territories")
 		self.assertIn(opportunity.name, [row.name for row in data])
 
+	def test_lost_reason_filter_keeps_every_reason(self):
+		opportunity = make_lost_opportunity(["_Test Lost Reason A", "_Test Lost Reason B"])
+
+		row = next(
+			row for row in run_report(lost_reason="_Test Lost Reason A") if row.name == opportunity.name
+		)
+		self.assertCountEqual(row.lost_reason.split(", "), ["_Test Lost Reason A", "_Test Lost Reason B"])
+
 
 def make_lost_opportunity(lost_reasons: list, **fields):
 	from erpnext.crm.doctype.opportunity.test_opportunity import _ensure_master, make_opportunity

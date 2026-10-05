@@ -118,6 +118,15 @@ def get_conditions(filters, query):
 		query = query.where(Opportunity.party_name == filters.get("party_name"))
 
 	if filters.get("lost_reason"):
-		query = query.where(OpportunityLostReasonDetail.lost_reason == filters.get("lost_reason"))
+		query = query.where(
+			Opportunity.name.isin(
+				frappe.qb.from_(OpportunityLostReasonDetail)
+				.select(OpportunityLostReasonDetail.parent)
+				.where(
+					(OpportunityLostReasonDetail.parenttype == "Opportunity")
+					& (OpportunityLostReasonDetail.lost_reason == filters.get("lost_reason"))
+				)
+			)
+		)
 
 	return query
