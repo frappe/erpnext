@@ -61,6 +61,9 @@ def get_pos_entries(filters, group_by_field):
 
 
 def get_invoice_entries(doctype, filters, group_by_field):
+	if not frappe.has_permission(doctype, "select"):
+		return []
+
 	p = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(p)
@@ -76,6 +79,7 @@ def get_invoice_entries(doctype, filters, group_by_field):
 			p.base_grand_total.as_("grand_total"),
 		)
 		.where(p.docstatus == 1)
+		.where(p.name.isin(frappe.qb.get_query(doctype, fields=["name"], ignore_permissions=False)))
 	)
 
 	if doctype == "Sales Invoice":

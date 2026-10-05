@@ -7,6 +7,7 @@ from frappe.utils import add_days, today
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.pos_register.pos_register import execute
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_ACCOUNTS = {"Cash": "Cash - _TC", "_Test POS Register Card": "_Test Bank - _TC"}
@@ -61,6 +62,20 @@ class TestPOSRegister(ERPNextTestSuite):
 			row = self.run_report(group_by=group_by)[0]
 			self.assertEqual((row.grand_total, row.paid_amount), (500, 500))
 
+	def test_subtotals_include_only_permitted_invoices(self):
+		self.make_pos_sales_invoice({"Cash": 1000})
+		self.make_pos_sales_invoice(
+			{"Cash": 7000}, rate=7000, customer=make_customer("_Test POS Register Customer")
+		)
+		user = make_user_restricted_to_customer("_Test Customer")
+
+		frappe.set_user(user)
+		try:
+			rows = self.run_report(group_by="POS Profile", pos_profile=None)
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual([row.get("grand_total") for row in rows if row], [1000, 1000])
+
 	def make_pos_sales_invoice(self, payments, rate=1000, **args):
 		si = create_sales_invoice(rate=rate, do_not_save=True, **args)
 		si.update({"is_pos": 1, "pos_profile": self.pos_profile, "account_for_change_amount": "Cash - _TC"})
@@ -98,3 +113,18 @@ def make_card_mode_of_payment():
 				"accounts": [{"company": "_Test Company", "default_account": "_Test Bank - _TC"}],
 			}
 		).insert()
+
+
+def make_user_restricted_to_customer(customer):
+	user = "test_pos_register@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "POS Register",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Customer", customer, user)
+	return user
