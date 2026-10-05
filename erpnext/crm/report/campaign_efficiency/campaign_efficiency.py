@@ -39,7 +39,7 @@ def get_lead_data(filters, based_on):
 		# date(creation) <= to_date, i.e. anything created before the next day
 		lead_filters.append(["creation", "<", add_days(filters.to_date, 1)])
 
-	lead_details = frappe.get_all("Lead", filters=lead_filters, fields=[based_on_field, "name"])
+	lead_details = frappe.get_list("Lead", filters=lead_filters, fields=[based_on_field, "name"])
 
 	lead_map = frappe._dict()
 	for d in lead_details:
