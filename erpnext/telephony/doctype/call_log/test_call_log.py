@@ -186,3 +186,7 @@ class TestCallLog(ERPNextTestSuite):
 			frappe.db.get_value("Call Log", call_log.name, ["call_received_by", "employee_user_id"]),
 			(second_agent, "test_call_agent_b@example.com"),
 		)
+
+	def test_summary_can_be_saved_without_call_type(self):
+		add_call_summary_and_call_type(self.linked_log, "No type chosen", None)
+		self.assertEqual(frappe.db.get_value("Call Log", self.linked_log, "summary"), "No type chosen")
