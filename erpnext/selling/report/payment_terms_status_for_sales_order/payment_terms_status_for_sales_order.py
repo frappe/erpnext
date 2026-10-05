@@ -241,7 +241,12 @@ def get_so_with_invoices(filters):
 				Sum(sii.base_net_amount).as_("order_net_amount"),
 				Max(si.base_grand_total).as_("invoice_grand_total"),
 			)
-			.where((sii.sales_order.isin([x.name for x in sorders])) & (si.docstatus == 1))
+			.where(
+				sii.parent.isin(
+					qb.from_(sii).select(sii.parent).where(sii.sales_order.isin([x.name for x in sorders]))
+				)
+				& (si.docstatus == 1)
+			)
 			.groupby(sii.parent, sii.sales_order)
 		)
 		invoices = query_inv.run(as_dict=True)
