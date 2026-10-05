@@ -47,6 +47,16 @@ class TestLead(ERPNextTestSuite):
 		make_customer(lead.name).insert()
 		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
 
+	def test_customer_from_lead_without_contact_gets_one(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 0)
+		lead = make_lead()
+		customer = make_customer(lead.name).insert()
+
+		contact = frappe.db.get_value("Customer", customer.name, "customer_primary_contact")
+		self.assertEqual(frappe.db.get_value("Contact", contact, "email_id"), lead.email_id)
+
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
 

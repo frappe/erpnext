@@ -324,7 +324,7 @@ class Customer(TransactionBase):
 			)
 
 	def create_primary_contact(self):
-		if not self.customer_primary_contact and not self.lead_name:
+		if not self.customer_primary_contact and not self.lead_has_contact():
 			if self.mobile_no or self.email_id or self.first_name or self.last_name:
 				contact = make_contact(self)
 				self.db_set("customer_primary_contact", contact.name)
@@ -332,6 +332,15 @@ class Customer(TransactionBase):
 				self.db_set("email_id", self.email_id)
 		elif self.customer_primary_contact:
 			frappe.set_value("Contact", self.customer_primary_contact, "is_primary_contact", 1)  # ensure
+
+	def lead_has_contact(self) -> bool:
+		"""The lead's contacts are linked to the customer instead of making a new one."""
+		return bool(
+			self.lead_name
+			and frappe.db.exists(
+				"Dynamic Link", {"parenttype": "Contact", "link_doctype": "Lead", "link_name": self.lead_name}
+			)
+		)
 
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display
