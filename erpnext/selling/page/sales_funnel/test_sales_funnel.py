@@ -124,3 +124,55 @@ class TestSalesFunnel(ERPNextTestSuite):
 		after_converted = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Converted")
 		self.assertEqual(after_converted - baseline_converted, 1)
 		self.assertGreaterEqual(after_converted, 1)
+
+	def roles_that_read(self, *doctypes):
+		roles = set()
+		for doctype in doctypes:
+			perms = frappe.get_all(
+				"Custom DocPerm", filters={"parent": doctype, "read": 1, "permlevel": 0}, pluck="role"
+			) or frappe.get_all(
+				"DocPerm", filters={"parent": doctype, "read": 1, "permlevel": 0}, pluck="role"
+			)
+			roles.update(perms)
+		return roles
+
+	def test_funnel_counts_respect_user_permissions(self):
+		company = "_Test Company"
+		from_date, to_date = today(), add_days(today(), 1)
+		territories = frappe.get_all("Territory", filters={"is_group": 0}, pluck="name", limit=2)
+
+		lead = self.make_lead(company)
+		lead.db_set("territory", territories[1])
+
+		roles = self.roles_that_read("Lead", "Opportunity", "Quotation", "Customer", "Company")
+		email = f"funnel-perm-{random_string(6)}@example.com"
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": "Funnel Perm",
+				"send_welcome_email": 0,
+				"roles": [{"role": role} for role in roles],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": email,
+				"allow": "Territory",
+				"for_value": territories[0],
+				"apply_to_all_doctypes": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		admin_leads = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Active Leads")
+		frappe.set_user(email)
+		try:
+			self.assertEqual(frappe.get_list("Lead", filters={"name": lead.name}, pluck="name"), [])
+			restricted_leads = self.get_stage_value(
+				get_funnel_data(from_date, to_date, company), "Active Leads"
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertGreater(admin_leads, restricted_leads)
