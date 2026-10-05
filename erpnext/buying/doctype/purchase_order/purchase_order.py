@@ -197,9 +197,6 @@ class PurchaseOrder(BuyingController):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
-		if self.is_subcontracted:
-			self.status_updater[0]["source_field"] = "fg_item_qty"
-
 	def validate(self):
 		super().validate()
 
@@ -470,6 +467,12 @@ class PurchaseOrder(BuyingController):
 				_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True,
 			)
+
+	def update_prevdoc_status(self):
+		if self.is_subcontracted:
+			self.status_updater[0]["source_field"] = "fg_item_qty"
+
+		super().update_prevdoc_status()
 
 	def update_status(self, status):
 		self.check_modified_date()
