@@ -9,7 +9,11 @@ from frappe.utils import add_days, now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
-from erpnext.crm.doctype.opportunity.opportunity import make_quotation, set_multiple_status
+from erpnext.crm.doctype.opportunity.opportunity import (
+	auto_close_opportunity,
+	make_quotation,
+	set_multiple_status,
+)
 from erpnext.crm.utils import get_linked_communication_list
 from erpnext.exceptions import PartyDisabled
 from erpnext.selling.doctype.quotation.quotation import set_expired_status
@@ -130,6 +134,30 @@ class TestOpportunity(unittest.TestCase):
 		submit_quotation(quoted)
 		self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([quoted.name]), "Lost")
 		self.assertEqual(frappe.db.get_value("Opportunity", quoted.name, "status"), "Quotation")
+
+	def test_auto_close_replied_opportunity(self):
+		days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
+
+		stale = make_opportunity(with_items=0)
+		fresh = make_opportunity(with_items=0)
+		for opp in (stale, fresh):
+			frappe.db.set_value("Opportunity", opp.name, "status", "Replied", update_modified=False)
+		# age only the stale opportunity past the threshold
+		frappe.db.set_value(
+			"Opportunity",
+			stale.name,
+			"modified",
+			add_days(now_datetime(), -(days + 1)),
+			update_modified=False,
+		)
+
+		# a party that fails validation since must not stop the job
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
+		self.addCleanup(frappe.db.set_value, "Customer", "_Test Customer", "disabled", 0)
+		auto_close_opportunity()
+
+		self.assertEqual(frappe.db.get_value("Opportunity", stale.name, "status"), "Closed")
+		self.assertEqual(frappe.db.get_value("Opportunity", fresh.name, "status"), "Replied")
 
 
 def _ensure_master(doctype, fieldname, value):
