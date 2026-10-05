@@ -292,6 +292,12 @@ class TestIssue(TestSetUp):
 
 		self.assertEqual((issue.contact, issue.customer), (contact.name, "_Test Customer"))
 
+	def test_set_status_validates_the_status(self):
+		from erpnext.support.doctype.issue.issue import set_status
+
+		issue = make_issue(index=1)
+		self.assertRaises(frappe.ValidationError, set_status, issue.name, "Banana")
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
