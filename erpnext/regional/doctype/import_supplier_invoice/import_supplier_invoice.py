@@ -15,6 +15,7 @@ from frappe.utils.data import format_datetime
 from frappe.utils.file_manager import save_file
 
 import erpnext
+from erpnext.regional.italy import mode_of_payment_codes
 
 
 class ImportSupplierInvoice(Document):
@@ -240,10 +241,7 @@ def get_taxes_from_file(file_content, tax_account):
 
 def get_payment_terms_from_file(file_content):
 	terms = []
-	# Get mode of payment dict from setup
-	mop_options = frappe.get_meta("Mode of Payment").fields[4].options
-	mop_str = re.sub("\n", ",", mop_options)
-	mop_dict = dict(item.split("-") for item in mop_str.split(","))
+	mop_dict = dict(code.split("-", 1) for code in mode_of_payment_codes)
 	# read file for payment information
 	for line in file_content.find_all("DettaglioPagamento"):
 		mop_code = line.ModalitaPagamento.text + "-" + mop_dict.get(line.ModalitaPagamento.text)
