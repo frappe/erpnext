@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Date, GroupConcat
+from frappe.utils.nestedset import get_descendants_of
 
 Opportunity = DocType("Opportunity")
 OpportunityLostReasonDetail = DocType("Opportunity Lost Reason Detail")
@@ -107,7 +108,8 @@ def get_data(filters):
 
 def get_conditions(filters, query):
 	if filters.get("territory"):
-		query = query.where(Opportunity.territory == filters.get("territory"))
+		territories = [filters.get("territory"), *get_descendants_of("Territory", filters.get("territory"))]
+		query = query.where(Opportunity.territory.isin(territories))
 
 	if filters.get("opportunity_from"):
 		query = query.where(Opportunity.opportunity_from == filters.get("opportunity_from"))
