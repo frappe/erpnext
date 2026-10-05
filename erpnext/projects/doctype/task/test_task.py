@@ -6,7 +6,11 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.projects.doctype.task.task import CircularReferenceError, ParentIsGroupError
+from erpnext.projects.doctype.task.task import (
+	CircularReferenceError,
+	ParentIsGroupError,
+	set_tasks_as_overdue,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -192,11 +196,16 @@ class TestTask(ERPNextTestSuite):
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
 
-		from erpnext.projects.doctype.task.task import set_tasks_as_overdue
-
 		set_tasks_as_overdue()
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
+
+	def test_task_due_today_is_not_overdue(self):
+		task = create_task("_Test Task Due Today", add_days(nowdate(), -2), nowdate())
+
+		set_tasks_as_overdue()
+
+		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Open")
 
 	def test_parent_task_must_be_group(self):
 		parent_task = create_task(
