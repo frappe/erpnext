@@ -388,6 +388,16 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			date="2023-02-15",
 		)
 
+	def test_negative_new_asset_value_is_refused(self):
+		asset = create_asset_for_value_adjustment()
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=-50000,
+			date="2023-01-15",
+		)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)

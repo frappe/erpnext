@@ -47,6 +47,7 @@ class AssetValueAdjustment(Document):
 	def validate(self):
 		self.validate_asset_not_disposed()
 		self.validate_date()
+		self.validate_new_asset_value()
 		self.set_current_asset_value()
 		self.set_difference_amount()
 
@@ -80,6 +81,10 @@ class AssetValueAdjustment(Document):
 				).format(formatdate(last_depreciation_date)),
 				title=_("Incorrect Date"),
 			)
+
+	def validate_new_asset_value(self):
+		if flt(self.new_asset_value) < 0:
+			frappe.throw(_("New Asset Value cannot be negative"))
 
 	def set_difference_amount(self):
 		self.difference_amount = flt(self.new_asset_value - self.current_asset_value)
