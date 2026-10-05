@@ -627,12 +627,25 @@ class Asset(AccountsController):
 			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 		self.validate_depreciation_start_date(row)
 		self.validate_total_number_of_depreciations_and_frequency(row)
+		self.validate_written_down_value_rate(row)
 
 		if self.asset_type != "Existing Asset":
 			self.opening_accumulated_depreciation = 0
 			self.opening_number_of_booked_depreciations = 0
 		else:
 			self.validate_opening_depreciation_values(row)
+
+	def validate_written_down_value_rate(self, row):
+		if (
+			row.depreciation_method == "Written Down Value"
+			and not flt(row.rate_of_depreciation)
+			and not flt(row.expected_value_after_useful_life)
+		):
+			frappe.throw(
+				_(
+					"Row #{0}: Set a Rate of Depreciation or an Expected Value After Useful Life for the Written Down Value method"
+				).format(row.idx)
+			)
 
 	def validate_opening_depreciation_values(self, row):
 		row.expected_value_after_useful_life = flt(
