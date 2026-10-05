@@ -474,14 +474,16 @@ class Quotation(SellingController):
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications
 
-		if not (
-			self.opportunity
-			and frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments")
-		):
+		if self.opportunity:
+			source = ("Opportunity", self.opportunity)
+		elif self.quotation_to == "Lead" and self.party_name:
+			source = ("Lead", self.party_name)
+		else:
 			return
 
-		copy_comments("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
-		link_communications("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
+		if frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			copy_comments(*source, self, self.flags.ignore_permissions)
+			link_communications(*source, self, self.flags.ignore_permissions)
 
 	def print_other_charges(self, docname):
 		print_lst = []

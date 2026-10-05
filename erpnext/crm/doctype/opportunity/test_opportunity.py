@@ -110,6 +110,34 @@ class TestOpportunity(ERPNextTestSuite):
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 
+	@ERPNextTestSuite.change_settings("CRM Settings", {"carry_forward_communication_and_comments": 1})
+	def test_carry_forward_from_prospect_and_lead_to_quotation(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_prospect
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation as make_quotation_for_lead
+
+		prospect = make_prospect(company="_Test Company")
+		prospect.add_comment("Comment", text="Prospect Comment")
+		opportunity = frappe.get_doc(
+			{
+				"doctype": "Opportunity",
+				"company": "_Test Company",
+				"opportunity_from": "Prospect",
+				"party_name": prospect.name,
+				"transaction_date": today(),
+			}
+		).insert()
+
+		lead = make_lead()
+		lead.add_comment("Comment", text="Lead Comment")
+		quotation = make_quotation_for_lead(party_name=lead.name, do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.insert()
+
+		for doc in (opportunity, quotation):
+			self.assertEqual(
+				frappe.db.count("Comment", {"reference_doctype": doc.doctype, "reference_name": doc.name}), 1
+			)
+
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
 		opp = frappe.new_doc("Opportunity")
