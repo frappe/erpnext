@@ -116,3 +116,34 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 		labels, after = self.run_report(based_on="Customer", group_by="Item")
 		self.assertIn("Item", labels)
 		self.assertEqual(self._cell(after, "Item", "_Test Item", "Total(Amt)", labels) - before_amt, 600)
+
+	def test_restricted_user_sees_only_permitted_sales(self):
+		create_sales_invoice(
+			customer="_Test Customer", item="_Test Item", qty=2, rate=100, posting_date=POSTING_DATE
+		)
+		create_sales_invoice(
+			customer="_Test Customer 1", item="_Test Item", qty=5, rate=900, posting_date=POSTING_DATE
+		)
+		user = "test_sales_trends_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Trends",
+					"roles": [{"role": "Accounts User"}],
+				}
+			).insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer", user)
+
+		frappe.set_user(user)
+		try:
+			labels, by_customer = self.run_report(based_on="Customer")
+			labels_by_item, by_item = self.run_report()
+		finally:
+			frappe.set_user("Administrator")
+
+		permitted_amount = self._cell(by_customer, "Customer", "_Test Customer", "Total(Amt)", labels)
+		total_index = labels.index("Total(Amt)")
+		self.assertEqual(by_customer[-1][total_index], permitted_amount)
+		self.assertEqual(by_item[-1][labels_by_item.index("Total(Amt)")], permitted_amount)
