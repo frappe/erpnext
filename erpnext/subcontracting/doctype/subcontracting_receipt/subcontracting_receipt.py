@@ -126,6 +126,7 @@ class SubcontractingReceipt(SubcontractingController):
 		super().before_validate()
 		self.validate_items_qty()
 		self.set_items_bom()
+		self.set_items_received_qty()
 		self.set_items_cost_center()
 
 		if self.company:
@@ -315,6 +316,12 @@ class SubcontractingReceipt(SubcontractingController):
 						{"name": item.subcontracting_order_item, "parent": item.subcontracting_order},
 						"bom",
 					)
+
+	def set_items_received_qty(self):
+		"""Set before the supplied items are built from it."""
+		for item in self.items:
+			if item.bom:
+				item.received_qty = self.get_qty_for_costing(item)
 
 	def set_items_cost_center(self):
 		if self.company:

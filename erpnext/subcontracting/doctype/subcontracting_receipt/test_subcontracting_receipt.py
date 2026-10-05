@@ -294,6 +294,27 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
+	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].process_loss_qty = 2
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-8)
+
+		self.assertEqual(scr_return.items[0].process_loss_qty, 0)
+		self.assertEqual(scr_return.items[0].received_qty, -8)
+
 	def test_batch_return_value_matches_receipt(self):
 		fg_item = make_item(
 			properties={
@@ -2637,6 +2658,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.save()
 
 		self.assertRaises(BOMQuantityError, scr.submit)
+
+	def test_supplied_items_follow_changed_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 5
+		scr.save()
+
+		self.assertEqual(scr.items[0].received_qty, 5)
+		self.assertEqual(
+			sum(row.consumed_qty for row in scr.supplied_items), sum(row["qty"] for row in rm_items) / 2
+		)
 
 	def test_bom_required_qty_validation_over_all_rows(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
