@@ -5,6 +5,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -25,8 +26,8 @@ def build_voucher_dict(row: dict) -> dict:
 			"payment_entry": row.get("name"),
 			"posting_date": row.get("posting_date"),
 			"clearance_date": row.get("clearance_date"),
-			"debit": row.get("debit"),
-			"credit": row.get("credit"),
+			"debit": flt(row.get("debit")),
+			"credit": flt(row.get("credit")),
 		}
 	)
 
@@ -79,7 +80,30 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		.run(as_dict=1)
 	)
 
-	return journals + payments
+	return journals + payments + get_paid_purchase_invoices(filters)
+
+
+def get_paid_purchase_invoices(filters) -> list[dict]:
+	pi = qb.DocType("Purchase Invoice")
+	return (
+		qb.from_(pi)
+		.select(
+			ConstantColumn("Purchase Invoice").as_("doctype"),
+			pi.name,
+			ConstantColumn(0).as_("debit"),
+			pi.paid_amount.as_("credit"),
+			pi.posting_date,
+			pi.clearance_date,
+		)
+		.where(
+			pi.docstatus.eq(1)
+			& pi.is_paid.eq(1)
+			& pi.cash_bank_account.eq(filters.account)
+			& pi.posting_date.gt(filters.report_date)
+			& pi.clearance_date.lte(filters.report_date)
+		)
+		.run(as_dict=1)
+	)
 
 
 def get_columns():
