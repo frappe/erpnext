@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import get_datetime, getdate, nowdate
 
 
 class Contract(Document):
@@ -49,6 +49,7 @@ class Contract(Document):
 	def validate(self):
 		self.set_missing_values()
 		self.validate_dates()
+		self.validate_signature()
 		self.update_contract_status()
 		self.update_fulfilment_status()
 
@@ -65,9 +66,28 @@ class Contract(Document):
 		self.db_set("status", "Cancelled")
 
 	def before_update_after_submit(self):
+		self.validate_signature()
+		self.validate_signature_unchanged()
 		self.validate_fulfilment_terms_unchanged()
 		self.update_contract_status()
 		self.update_fulfilment_status()
+
+	def validate_signature(self):
+		if self.is_signed and not (self.signee and self.signed_on):
+			frappe.throw(_("Signee and Signed On are required for a signed contract."))
+
+	def validate_signature_unchanged(self):
+		"""A submitted contract can be signed later, but not unsigned or re-signed: amend it instead."""
+		previous = self.get_doc_before_save()
+		if not (previous and previous.is_signed):
+			return
+
+		signature = (self.is_signed, self.signee, get_datetime(self.signed_on))
+		if signature != (previous.is_signed, previous.signee, get_datetime(previous.signed_on)):
+			frappe.throw(
+				_("The signature of a signed contract cannot be changed. Amend the contract instead."),
+				frappe.UpdateAfterSubmitError,
+			)
 
 	def validate_fulfilment_terms_unchanged(self):
 		"""Rows can be ticked after submit, not added or removed."""

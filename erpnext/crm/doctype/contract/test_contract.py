@@ -25,7 +25,7 @@ class TestContract(ERPNextTestSuite):
 		self.assertEqual(self.contract_doc.status, "Unsigned")
 
 	def test_active_signed_contract_status(self):
-		self.contract_doc.is_signed = True
+		sign(self.contract_doc)
 		self.contract_doc.start_date = add_days(nowdate(), -1)
 		self.contract_doc.end_date = add_days(nowdate(), 1)
 		self.contract_doc.insert()
@@ -33,7 +33,7 @@ class TestContract(ERPNextTestSuite):
 		self.assertEqual(self.contract_doc.status, "Active")
 
 	def test_past_inactive_signed_contract_status(self):
-		self.contract_doc.is_signed = True
+		sign(self.contract_doc)
 		self.contract_doc.start_date = add_days(nowdate(), -2)
 		self.contract_doc.end_date = add_days(nowdate(), -1)
 		self.contract_doc.insert()
@@ -41,7 +41,7 @@ class TestContract(ERPNextTestSuite):
 		self.assertEqual(self.contract_doc.status, "Inactive")
 
 	def test_future_inactive_signed_contract_status(self):
-		self.contract_doc.is_signed = True
+		sign(self.contract_doc)
 		self.contract_doc.start_date = add_days(nowdate(), 1)
 		self.contract_doc.end_date = add_days(nowdate(), 2)
 		self.contract_doc.insert()
@@ -49,7 +49,7 @@ class TestContract(ERPNextTestSuite):
 		self.assertEqual(self.contract_doc.status, "Inactive")
 
 	def test_open_ended_contract_starting_later_is_inactive(self):
-		self.contract_doc.is_signed = True
+		sign(self.contract_doc)
 		self.contract_doc.start_date = add_days(nowdate(), 30)
 		self.contract_doc.insert()
 
@@ -128,12 +128,19 @@ class TestContract(ERPNextTestSuite):
 		contract.save()
 		self.assertEqual(contract.fulfilment_status, "Fulfilled")
 
+	def test_signature_is_required_and_kept_after_submit(self):
+		self.contract_doc.is_signed = 1
+		self.assertRaises(frappe.ValidationError, self.contract_doc.insert)
+
+		contract = self.make_signed_contract()
+		contract.is_signed = 0
+		contract.signee = "Someone else"
+		self.assertRaises(frappe.UpdateAfterSubmitError, contract.save)
+
 	def make_signed_contract(self, **fields):
+		sign(self.contract_doc)
 		self.contract_doc.update(
 			{
-				"is_signed": 1,
-				"signee": "Test Signee",
-				"signed_on": frappe.utils.now_datetime(),
 				"start_date": nowdate(),
 				"requires_fulfilment": 1,
 				**fields,
@@ -143,6 +150,10 @@ class TestContract(ERPNextTestSuite):
 		self.contract_doc.insert()
 		self.contract_doc.submit()
 		return self.contract_doc
+
+
+def sign(contract):
+	contract.update({"is_signed": 1, "signee": "Test Signee", "signed_on": frappe.utils.now_datetime()})
 
 
 def get_contract():
