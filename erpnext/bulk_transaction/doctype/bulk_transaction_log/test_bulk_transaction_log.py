@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import nowtime, random_string
 
+from erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log import BulkTransactionLog
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -74,3 +75,27 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 			"target date has no rows; rows on another date must not leak in",
 		)
 		self.assertRaises(frappe.DoesNotExistError, self._make_log_doc(target_date).load_from_db)
+
+	def test_list_pages_through_dates_with_status_counts(self):
+		dates = ["2099-01-03", "2099-01-02", "2099-01-01"]
+		for date in dates:
+			self._insert_detail(date, "Success")
+		self._insert_detail(dates[0], "Failed")
+
+		first_page = get_list(start=0, page_length=2)
+		second_page = get_list(start=2, page_length=2)
+
+		self.assertEqual([str(log.date) for log in first_page], dates[:2])
+		self.assertEqual(str(second_page[0].date), dates[2])
+		self.assertEqual(
+			(first_page[0].log_entries, first_page[0].succeeded, first_page[0].failed), (2, 1, 1)
+		)
+
+		count = BulkTransactionLog.get_count(frappe._dict(filters=[]))
+		self.assertEqual(
+			count, len(frappe.get_all("Bulk Transaction Log Detail", pluck="date", distinct=True))
+		)
+
+
+def get_list(**args) -> list:
+	return BulkTransactionLog.get_list(frappe._dict(filters=[], **args))
