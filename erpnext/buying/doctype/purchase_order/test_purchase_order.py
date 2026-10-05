@@ -968,7 +968,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_po_for_blocked_supplier_payments_with_today_date(self):
+	def test_po_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.release_date = nowdate()
@@ -977,13 +977,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		po = create_purchase_order()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Order",
-			dn=po.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Order", dn=po.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()

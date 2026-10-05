@@ -105,7 +105,7 @@ class Supplier(TransactionBase):
 		return bool(
 			self.on_hold
 			and self.hold_type in ("All", hold_type)
-			and (not self.release_date or getdate(nowdate()) <= getdate(self.release_date))
+			and (not self.release_date or getdate(nowdate()) < getdate(self.release_date))
 		)
 
 	def load_dashboard_info(self):
