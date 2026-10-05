@@ -10,7 +10,7 @@ import frappe
 from bs4 import BeautifulSoup as bs
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_datetime_str, today
+from frappe.utils import flt, get_datetime_str, getdate, today
 from frappe.utils.data import format_datetime
 
 import erpnext
@@ -126,6 +126,7 @@ class ImportSupplierInvoice(Document):
 
 		supplier_name = create_supplier(self.supplier_group, supp_dict)
 		create_address(supplier_name, supp_dict)
+		validate_invoice_not_imported(supplier_name, invoices_args)
 		return create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
@@ -300,7 +301,7 @@ def create_supplier(supplier_group, args):
 	if existing_supplier_name:
 		filters = [
 			["Dynamic Link", "link_doctype", "=", "Supplier"],
-			["Dynamic Link", "link_name", "=", args.existing_supplier_name],
+			["Dynamic Link", "link_name", "=", existing_supplier_name],
 			["Dynamic Link", "parenttype", "=", "Contact"],
 		]
 
@@ -367,6 +368,24 @@ def create_address(supplier_name, args):
 		return new_address_doc.name
 	else:
 		return None
+
+
+def validate_invoice_not_imported(supplier_name: str, args: dict) -> None:
+	existing_invoice = frappe.db.exists(
+		"Purchase Invoice",
+		{
+			"supplier": supplier_name,
+			"bill_no": args["bill_no"],
+			"bill_date": getdate(args["bill_date"]),
+			"docstatus": ["!=", 2],
+		},
+	)
+	if existing_invoice:
+		frappe.throw(
+			_("Supplier Invoice {0} is already imported in Purchase Invoice {1}").format(
+				args["bill_no"], existing_invoice
+			)
+		)
 
 
 def create_purchase_invoice(supplier_name, file_name, args, name):
