@@ -134,6 +134,45 @@ class TestTask(ERPNextTestSuite):
 			getdate(frappe.db.get_value("Task", parent.name, "exp_start_date")), getdate(nowdate())
 		)
 
+	def test_reschedule_started_dependent_tasks(self):
+		prerequisite = create_task("_Test Task Before Started Tasks", nowdate(), add_days(nowdate(), 2))
+		working = create_task(
+			"_Test Working Dependent", add_days(nowdate(), 1), add_days(nowdate(), 3), prerequisite.name
+		)
+		overdue = create_task(
+			"_Test Overdue Dependent", add_days(nowdate(), -3), add_days(nowdate(), -1), prerequisite.name
+		)
+		working.db_set("status", "Working")
+		overdue.db_set("status", "Overdue")
+
+		prerequisite.save()
+
+		for task in (working, overdue):
+			self.assertEqual(
+				getdate(frappe.db.get_value("Task", task.name, "exp_start_date")),
+				getdate(add_days(nowdate(), 3)),
+			)
+
+	def test_reschedule_past_parent_end_date_warns(self):
+		parent = create_task("_Test Group Ending Soon", nowdate(), add_days(nowdate(), 10), is_group=1)
+		prerequisite = create_task("_Test Task Before Grouped Task", nowdate(), add_days(nowdate(), 2))
+		dependent = create_task(
+			"_Test Grouped Dependent",
+			add_days(nowdate(), 3),
+			add_days(nowdate(), 5),
+			prerequisite.name,
+			parent_task=parent.name,
+		)
+
+		prerequisite.exp_end_date = add_days(nowdate(), 8)
+		prerequisite.save()
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", dependent.name, "exp_end_date")),
+			getdate(add_days(nowdate(), 11)),
+		)
+		self.assertIn(dependent.name, frappe.get_message_log()[-1]["message"])
+
 	def test_reschedule_dependent_task_from_actual_end_date(self):
 		prerequisite = create_task("_Test Task Actual End", save=False)
 		prerequisite.exp_start_date = prerequisite.exp_end_date = None
