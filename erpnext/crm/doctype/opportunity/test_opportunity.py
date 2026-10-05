@@ -135,6 +135,26 @@ class TestOpportunity(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([quoted.name]), "Lost")
 		self.assertEqual(frappe.db.get_value("Opportunity", quoted.name, "status"), "Quotation")
 
+	def test_form_hides_contacts_of_a_customer_the_user_cannot_read(self):
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Opportunity Hidden Buyer",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert()
+		opp = make_opportunity(with_items=0)
+		user = make_sales_user("_test_opportunity_sales_user@example.com")
+		user_permission = frappe.get_doc(
+			{"doctype": "User Permission", "user": user, "allow": "Customer", "for_value": "_Test Customer 1"}
+		).insert()
+		self.addCleanup(user_permission.delete)
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+		opp.run_method("onload")
+		self.assertNotIn(contact.name, [c.name for c in opp.get("__onload").contact_list])
+
 	def test_auto_close_replied_opportunity(self):
 		days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
 
@@ -173,6 +193,16 @@ def submit_quotation(opportunity, **args):
 	quotation.run_method("set_missing_values")
 	quotation.run_method("calculate_taxes_and_totals")
 	return quotation.submit()
+
+
+def make_sales_user(email):
+	if not frappe.db.exists("User", email):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": "Sales", "send_welcome_email": 0}
+		)
+		user.append("roles", {"role": "Sales User"})
+		user.insert()
+	return email
 
 
 def make_opportunity_from_lead():
