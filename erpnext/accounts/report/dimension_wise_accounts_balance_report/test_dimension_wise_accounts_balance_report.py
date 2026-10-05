@@ -111,6 +111,21 @@ class TestDimensionWiseAccountsBalance(ERPNextTestSuite):
 		self.assertEqual(balance(), 0)
 		self.assertEqual(balance(finance_book=finance_book), 500)
 
+	def test_period_closing_entries_are_excluded(self):
+		cost_center = self._make_cost_center("Test Dimension Closing CC")
+		make_journal_entry(self.expense_account, self.cash_account, 700, cost_center=cost_center, submit=True)
+		closing = make_journal_entry(
+			self.cash_account, self.expense_account, 700, cost_center=cost_center, submit=True
+		)
+		# stands in for the closing voucher's reversal of the year's P&L
+		frappe.db.set_value(
+			"GL Entry", {"voucher_no": closing.name}, "voucher_type", "Period Closing Voucher"
+		)
+
+		data = execute(self._filters())[1]
+		row = next(row for row in data if row["account"] == self.expense_account)
+		self.assertEqual(row[frappe.scrub(cost_center)], 700)
+
 	def test_requires_fiscal_year(self):
 		filters = self._filters()
 		filters.pop("fiscal_year")

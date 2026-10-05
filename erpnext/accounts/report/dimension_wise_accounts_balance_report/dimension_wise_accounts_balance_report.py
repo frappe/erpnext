@@ -113,7 +113,7 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 	gl_entry = frappe.qb.DocType("GL Entry")
 	query = query.where(
 		gl_entry.finance_book.isin([cstr(filters.get("finance_book")), ""]) | gl_entry.finance_book.isnull()
-	)
+	).where(gl_entry.voucher_type != "Period Closing Voucher")
 
 	for entry in query.run(as_dict=True):
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
