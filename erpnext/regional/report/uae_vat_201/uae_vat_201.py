@@ -14,6 +14,9 @@ def execute(filters=None):
 	validate_company_region(filters)
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)
+	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+	for row in data:
+		row["currency"] = currency
 	return columns, data
 
 
@@ -41,12 +44,14 @@ def get_columns():
 			"fieldname": "amount",
 			"label": _("Amount (AED)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 125,
 		},
 		{
 			"fieldname": "vat_amount",
 			"label": _("VAT Amount (AED)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 	]
@@ -62,7 +67,7 @@ def get_data(filters=None):
 
 def append_vat_on_sales(data, filters):
 	"""Appends Sales and All Other Outputs."""
-	append_data(data, "", _("VAT on Sales and All Other Outputs"), "", "")
+	append_data(data, "", _("VAT on Sales and All Other Outputs"), None, None)
 
 	emirates, amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
 
@@ -70,23 +75,23 @@ def append_vat_on_sales(data, filters):
 		data,
 		"2",
 		_("Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme"),
-		frappe.format((-1) * get_tourist_tax_return_total(filters), "Currency"),
-		frappe.format((-1) * get_tourist_tax_return_tax(filters), "Currency"),
+		(-1) * get_tourist_tax_return_total(filters),
+		(-1) * get_tourist_tax_return_tax(filters),
 	)
 
 	append_data(
 		data,
 		"3",
 		_("Supplies subject to the reverse charge provision"),
-		frappe.format(get_reverse_charge_total(filters), "Currency"),
-		frappe.format(get_reverse_charge_tax(filters), "Currency"),
+		get_reverse_charge_total(filters),
+		get_reverse_charge_tax(filters),
 	)
 
-	append_data(data, "4", _("Zero Rated"), frappe.format(get_zero_rated_total(filters), "Currency"), "-")
+	append_data(data, "4", _("Zero Rated"), get_zero_rated_total(filters), None)
 
-	append_data(data, "5", _("Exempt Supplies"), frappe.format(get_exempt_total(filters), "Currency"), "-")
+	append_data(data, "5", _("Exempt Supplies"), get_exempt_total(filters), None)
 
-	append_data(data, "", "", "", "")
+	append_data(data, "", "", None, None)
 
 	return emirates, amounts_by_emirate
 
@@ -99,10 +104,8 @@ def standard_rated_expenses_emiratewise(data, filters):
 	for emirate, amount, vat in total_emiratewise:
 		amounts_by_emirate[emirate] = {
 			"legend": emirate,
-			"raw_amount": amount,
-			"raw_vat_amount": vat,
-			"amount": frappe.format(amount, "Currency"),
-			"vat_amount": frappe.format(vat, "Currency"),
+			"amount": amount,
+			"vat_amount": vat,
 		}
 	amounts_by_emirate = append_emiratewise_expenses(data, emirates, amounts_by_emirate)
 	return emirates, amounts_by_emirate
@@ -120,8 +123,8 @@ def append_emiratewise_expenses(data, emirates, amounts_by_emirate):
 				data,
 				_("1{0}").format(chr(no)),
 				_("Standard rated supplies in {0}").format(emirate),
-				frappe.format(0, "Currency"),
-				frappe.format(0, "Currency"),
+				0,
+				0,
 			)
 	append_supplies_without_emirate(data, emirates, amounts_by_emirate)
 	return amounts_by_emirate
@@ -136,27 +139,27 @@ def append_supplies_without_emirate(data, emirates, amounts_by_emirate):
 		data,
 		"1",
 		_("Standard rated supplies with no VAT Emirate"),
-		frappe.format(sum(row["raw_amount"] for row in rows), "Currency"),
-		frappe.format(sum(row["raw_vat_amount"] for row in rows), "Currency"),
+		sum(row["amount"] for row in rows),
+		sum(row["vat_amount"] for row in rows),
 	)
 
 
 def append_vat_on_expenses(data, filters):
 	"""Appends Expenses and All Other Inputs."""
-	append_data(data, "", _("VAT on Expenses and All Other Inputs"), "", "")
+	append_data(data, "", _("VAT on Expenses and All Other Inputs"), None, None)
 	append_data(
 		data,
 		"9",
 		_("Standard Rated Expenses"),
-		frappe.format(get_standard_rated_expenses_total(filters), "Currency"),
-		frappe.format(get_standard_rated_expenses_tax(filters), "Currency"),
+		get_standard_rated_expenses_total(filters),
+		get_standard_rated_expenses_tax(filters),
 	)
 	append_data(
 		data,
 		"10",
 		_("Supplies subject to the reverse charge provision"),
-		frappe.format(get_reverse_charge_recoverable_total(filters), "Currency"),
-		frappe.format(get_reverse_charge_recoverable_tax(filters), "Currency"),
+		get_reverse_charge_recoverable_total(filters),
+		get_reverse_charge_recoverable_tax(filters),
 	)
 
 

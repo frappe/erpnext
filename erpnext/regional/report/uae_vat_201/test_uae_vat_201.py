@@ -257,8 +257,7 @@ class TestUaeVat201(ERPNextTestSuite):
 			{"company": "_Test Company UAE VAT", "from_date": nowdate(), "to_date": nowdate()}
 		)
 		row = next(row for row in data if row["legend"] == "Standard rated supplies with no VAT Emirate")
-		self.assertEqual(row["amount"], frappe.format(400, "Currency"))
-		self.assertEqual(row["vat_amount"], frappe.format(20, "Currency"))
+		self.assertEqual((row["amount"], row["vat_amount"], row["currency"]), (400, 20, "AED"))
 
 	def test_uae_vat_201_standard_rated_expenses_exclude_lines_without_vat(self):
 		pi = make_uae_purchase_invoice(qty=10, rate=100)
