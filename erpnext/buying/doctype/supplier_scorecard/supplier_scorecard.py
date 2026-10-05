@@ -191,7 +191,16 @@ def refresh_scorecards():
 		as_dict=1,
 	)
 	for sc in scorecards:
-		make_all_scorecards(sc.name)
+		frappe.db.savepoint("refresh_scorecard")
+		try:
+			make_all_scorecards(sc.name)
+		except Exception:
+			frappe.db.rollback(save_point="refresh_scorecard")
+			frappe.log_error(
+				_("Supplier Scorecard refresh failed"),
+				reference_doctype="Supplier Scorecard",
+				reference_name=sc.name,
+			)
 
 
 @frappe.whitelist()
