@@ -208,8 +208,15 @@ class Opportunity(TransactionBase, CRMNote):
 			self.conversion_rate = 1.0
 			return
 
-		if not self.conversion_rate or self.conversion_rate == 1.0:
+		if not self.conversion_rate or self.conversion_rate == 1.0 or self.is_currency_changed_alone():
 			self.conversion_rate = get_exchange_rate(self.currency, company_currency, self.transaction_date)
+
+	def is_currency_changed_alone(self) -> bool:
+		return (
+			not self.is_new()
+			and self.has_value_changed("currency")
+			and not self.has_value_changed("conversion_rate")
+		)
 
 	def calculate_totals(self):
 		total = base_total = 0
@@ -222,6 +229,7 @@ class Opportunity(TransactionBase, CRMNote):
 
 		self.total = flt(total)
 		self.base_total = flt(base_total)
+		self.base_opportunity_amount = flt(self.opportunity_amount) * flt(self.conversion_rate)
 
 	def update_prospect(self):
 		prospect_name = None

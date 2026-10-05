@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, now_datetime, random_string, today
 
@@ -120,6 +122,19 @@ class TestOpportunity(ERPNextTestSuite):
 	def test_opportunity_item(self):
 		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
 		self.assertEqual(opportunity_doc.total, 2200)
+
+	def test_foreign_currency_amounts(self):
+		rates = {"USD": 83.0, "EUR": 90.0}
+		with patch(
+			"erpnext.crm.doctype.opportunity.opportunity.get_exchange_rate",
+			side_effect=lambda from_currency, *args, **kwargs: rates[from_currency],
+		):
+			opp = make_opportunity(with_items=0, currency="USD", opportunity_amount=1000)
+			self.assertEqual((opp.conversion_rate, opp.base_opportunity_amount), (83.0, 83000.0))
+
+			opp.currency = "EUR"
+			opp.save()
+			self.assertEqual((opp.conversion_rate, opp.base_opportunity_amount), (90.0, 90000.0))
 
 	def test_disabled_customer_not_allowed(self):
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
@@ -370,6 +385,8 @@ def make_opportunity(**args):
 			"opportunity_type": "Sales",
 			"conversion_rate": 1.0,
 			"transaction_date": today(),
+			"currency": args.currency,
+			"opportunity_amount": args.opportunity_amount,
 		}
 	)
 
