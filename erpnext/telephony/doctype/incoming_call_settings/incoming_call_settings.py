@@ -46,9 +46,9 @@ class IncomingCallSettings(Document):
 			to_time = self.time_to_seconds(record.to_time)
 			if from_time >= to_time:
 				errors.append(
-					_("Call Schedule Row {0}: To time slot should always be ahead of From time slot.").format(
-						record.idx
-					)
+					_(
+						"Call Schedule Row {0}: To time slot should always be ahead of From time slot. Split overnight slots by day."
+					).format(record.idx)
 				)
 
 		if errors:

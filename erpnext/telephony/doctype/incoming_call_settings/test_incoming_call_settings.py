@@ -25,6 +25,12 @@ class TestIncomingCallSettings(ERPNextTestSuite):
 			frappe.db.get_value("Incoming Call Settings", settings.name, "greeting_message"), "Hello"
 		)
 
+	def test_schedule_times_in_other_formats_and_overnight_slots(self):
+		make_settings([("09:00", "17:00", self.agent_group), ("17:00:00.000000", "21:00", self.agent_group)])
+
+		with self.assertRaisesRegex(frappe.ValidationError, "overnight"):
+			make_settings([("22:00:00", "06:00:00", self.agent_group)])
+
 
 def make_settings(slots: list[tuple[str, str, str]]):
 	return frappe.get_doc(
