@@ -192,14 +192,10 @@ def link_existing_conversations(doc, state):
 				)
 				.run(pluck=True)
 			)
-			if logs:
-				for log in logs:
-					call_log = frappe.get_doc("Call Log", log)
-					call_log.add_link(link_type=doc.doctype, link_name=doc.name)
-					call_log.save(ignore_permissions=True)
-
-				if not frappe.in_test:
-					frappe.db.commit()
+			for log in logs:
+				call_log = frappe.get_doc("Call Log", log)
+				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
+				call_log.save(ignore_permissions=True)
 	except Exception:
 		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))

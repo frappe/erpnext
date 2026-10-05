@@ -3,6 +3,7 @@
 
 import random
 import string
+from unittest.mock import patch
 
 import frappe
 
@@ -86,6 +87,13 @@ class TestCallLog(ERPNextTestSuite):
 			[self.contact.name],
 			"Previously-unlinked log matching the number must gain the Contact link",
 		)
+
+	def test_linking_does_not_commit(self):
+		with patch.object(frappe, "in_test", False), patch.object(frappe.db, "commit") as commit:
+			self._run_linker()
+
+		commit.assert_not_called()
+		self.assertEqual(self._contact_links_of(self.unlinked_log), [self.contact.name])
 
 	def test_already_linked_log_is_not_relinked(self):
 		"""The HAVING SUM(CASE ...) == 0 must EXCLUDE the already-linked log from the returned set,
