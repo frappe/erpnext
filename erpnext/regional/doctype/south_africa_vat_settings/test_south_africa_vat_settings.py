@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.regional.south_africa.setup import add_permissions
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company SA VAT"
@@ -43,6 +44,17 @@ class TestSouthAfricaVATSettings(ERPNextTestSuite):
 		settings.vat_accounts = []
 		settings.append("vat_accounts", {"account": get_account(other_company.name)})
 		self.assertRaises(frappe.ValidationError, settings.save)
+
+	def test_regional_setup_does_not_share_the_settings_with_all_users(self):
+		frappe.db.delete("Custom DocPerm", {"parent": "South Africa VAT Settings"})
+		add_permissions()
+		self.addCleanup(frappe.clear_cache, doctype="South Africa VAT Settings")
+
+		roles = frappe.get_all(
+			"Custom DocPerm", filters={"parent": "South Africa VAT Settings"}, pluck="role"
+		)
+		self.assertIn("Accounts User", roles)
+		self.assertNotIn("All", roles)
 
 
 def make_settings(accounts: list):
