@@ -95,7 +95,9 @@ class Issue(Document):
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
 
 			if not self.contact and not self.customer:
-				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
+				self.contact = frappe.db.get_value(
+					"Contact Email", {"email_id": email_id, "parenttype": "Contact"}, "parent"
+				)
 
 				if self.contact:
 					contact = frappe.get_doc("Contact", self.contact)

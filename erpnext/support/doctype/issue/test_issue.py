@@ -279,6 +279,19 @@ class TestIssue(TestSetUp):
 		self.assertFalse(split.sla_resolution_date)
 		self.assertFalse(split.resolution_time)
 
+	def test_issue_from_secondary_email_of_contact_gets_customer(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Secondary Email"})
+		contact.append("email_ids", {"email_id": "primary@secondary-email.example", "is_primary": 1})
+		contact.append("email_ids", {"email_id": "second@secondary-email.example"})
+		contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		contact.insert(ignore_permissions=True)
+
+		issue = frappe.get_doc(
+			{"doctype": "Issue", "subject": "From secondary", "raised_by": "second@secondary-email.example"}
+		).insert(ignore_permissions=True)
+
+		self.assertEqual((issue.contact, issue.customer), (contact.name, "_Test Customer"))
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
