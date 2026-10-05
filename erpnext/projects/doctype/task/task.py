@@ -157,6 +157,8 @@ class Task(NestedSet):
 			self.status = "Template"
 		if self.status == "Template" and not self.is_template:
 			self.status = "Open"
+		if self.status == "Overdue" and not self.is_overdue:
+			self.status = "Working" if self.actual_time else "Open"
 		if self.status != self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):

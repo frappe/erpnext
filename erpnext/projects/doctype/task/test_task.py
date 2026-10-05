@@ -200,6 +200,16 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
+	def test_overdue_cleared_when_end_date_moves_out(self):
+		task = create_task("_Test Task Overdue Moved Out", add_days(nowdate(), -10), add_days(nowdate(), -5))
+		set_tasks_as_overdue()
+
+		task.reload()
+		task.exp_end_date = add_days(nowdate(), 10)
+		task.save()
+
+		self.assertEqual(task.status, "Open")
+
 	def test_task_due_today_is_not_overdue(self):
 		task = create_task("_Test Task Due Today", add_days(nowdate(), -2), nowdate())
 
