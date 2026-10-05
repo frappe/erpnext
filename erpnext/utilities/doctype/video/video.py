@@ -145,7 +145,7 @@ def batch_update_youtube_data():
 				"dislike_count": cint(video_stats.get("dislikeCount")),
 				"comment_count": cint(video_stats.get("commentCount")),
 			}
-			frappe.db.set_value("Video", video_id, stats)
+			frappe.db.set_value("Video", {"youtube_video_id": video_id}, stats)
 
 	video_list = frappe.get_all("Video", fields=["youtube_video_id"])
 	if len(video_list) > 50:
