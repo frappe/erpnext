@@ -424,6 +424,14 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		sq.save()
 		self.assertEqual(sq.items[0].qty, 1)
 
+	def test_supplier_quotation_zero_qty_cannot_be_forced_by_the_client(self):
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq.items[0].qty = 0
+		sq.has_unit_price_items = 1
+
+		with self.assertRaises(InvalidQtyError):
+			sq.save()
+
 	def test_supplier_quotation_zero_qty(self):
 		"""
 		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
