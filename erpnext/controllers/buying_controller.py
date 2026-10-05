@@ -27,6 +27,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate
@@ -50,6 +51,7 @@ class BuyingController(SubcontractingController):
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
 		self.validate_items()
+		validate_item_uoms(self.get("items"))
 		self.set_received_qty()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
