@@ -1420,8 +1420,9 @@ def update_existing_asset(asset, remaining_qty, new_asset):
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
 		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(asset, row)
+		new_asset_depr_schedule_doc.opening_accumulated_depreciation = opening_accumulated_depreciation
 
-		accumulated_depreciation = 0
+		accumulated_depreciation = opening_accumulated_depreciation
 
 		for term in new_asset_depr_schedule_doc.get("depreciation_schedule"):
 			depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
@@ -1485,7 +1486,7 @@ def create_new_asset_after_split(asset, split_qty):
 
 		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(new_asset, row)
 
-		accumulated_depreciation = 0
+		accumulated_depreciation = flt(new_asset_depr_schedule_doc.opening_accumulated_depreciation)
 
 		for term in new_asset_depr_schedule_doc.get("depreciation_schedule"):
 			depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)

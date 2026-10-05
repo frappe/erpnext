@@ -999,6 +999,39 @@ class TestAsset(AssetSetup):
 		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=2, rate=60000)
 		self.assertRaises(frappe.ValidationError, split_asset, asset.name, 1)
 
+	def test_split_keeps_opening_accumulated_depreciation_in_schedule(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			asset_quantity=10,
+			available_for_use_date="2023-01-01",
+			purchase_date="2023-01-01",
+			expected_value_after_useful_life=0,
+			total_number_of_depreciations=6,
+			opening_number_of_booked_depreciations=1,
+			frequency_of_depreciation=12,
+			depreciation_start_date="2024-03-31",
+			opening_accumulated_depreciation=493.15,
+			gross_purchase_amount=12000,
+			purchase_amount=12000,
+			submit=1,
+		)
+		post_depreciation_entries(date="2024-03-31")
+
+		new_asset = split_asset(asset.name, 2)
+		asset.load_from_db()
+
+		for split_part in (asset, new_asset):
+			schedule = get_asset_depr_schedule_doc(split_part.name, "Active")
+			self.assertEqual(
+				schedule.opening_accumulated_depreciation, split_part.opening_accumulated_depreciation
+			)
+			first_row = schedule.depreciation_schedule[0]
+			self.assertAlmostEqual(
+				first_row.accumulated_depreciation_amount,
+				split_part.opening_accumulated_depreciation + first_row.depreciation_amount,
+				places=2,
+			)
+
 	def test_asset_sale_validations(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
