@@ -7,6 +7,9 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_pr_from_po
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.doctype.supplier_scorecard_variable import (
+	supplier_scorecard_variable as variable_functions,
+)
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 	get_on_time_shipments,
@@ -32,6 +35,14 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 
 		for d in test_bad_variables:
 			self.assertRaises(VariablePathNotFound, frappe.get_doc(d).insert)
+
+	def test_standard_variables_compute(self):
+		scorecard = scorecard_for(create_scorecard_supplier())
+		paths = frappe.get_all("Supplier Scorecard Variable", filters={"is_custom": 0}, pluck="path")
+		self.assertTrue(paths)
+		for path in paths:
+			with self.subTest(path=path):
+				self.assertGreaterEqual(getattr(variable_functions, path)(scorecard), 0)
 
 	def test_total_cost_of_shipments_counts_only_in_period(self):
 		supplier = create_scorecard_supplier()
