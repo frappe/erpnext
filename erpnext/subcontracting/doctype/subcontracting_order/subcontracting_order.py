@@ -15,7 +15,10 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
-from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+	get_applicable_bom_items,
+	get_finished_good_bom,
+)
 
 
 class SubcontractingOrder(SubcontractingController):
@@ -271,6 +274,7 @@ class SubcontractingOrder(SubcontractingController):
 					fg_item_qty,
 					production_plan_sub_assembly_item,
 					project,
+					bom,
 				) = frappe.db.get_value(
 					"Purchase Order Item",
 					si.purchase_order_item,
@@ -280,6 +284,7 @@ class SubcontractingOrder(SubcontractingController):
 						"fg_item_qty",
 						"production_plan_sub_assembly_item",
 						"project",
+						"bom",
 					],
 				)
 				available_qty = flt(qty) - flt(subcontracted_qty)
@@ -303,7 +308,7 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": get_finished_good_bom(item),
+						"bom": get_finished_good_bom_for_row(item, bom),
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
@@ -462,6 +467,15 @@ class SubcontractingOrder(SubcontractingController):
 		cancel_stock_reservation_entries(
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
+
+
+def get_finished_good_bom_for_row(item: Document, purchase_order_bom: str | None) -> str | None:
+	"""The Purchase Order row's BOM when it belongs to the finished good, else the finished good's BOM."""
+	bom_item = purchase_order_bom and frappe.db.get_value("BOM", purchase_order_bom, "item")
+	if bom_item in get_applicable_bom_items(item.name):
+		return purchase_order_bom
+
+	return get_finished_good_bom(item)
 
 
 @frappe.whitelist()

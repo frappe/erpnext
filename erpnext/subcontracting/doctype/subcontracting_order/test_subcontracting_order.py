@@ -258,6 +258,33 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, sco.insert)
 
+	def test_purchase_order_row_bom_is_carried_over(self):
+		bom = make_bom(
+			item="Subcontracted Item SA7",
+			raw_materials=["Subcontracted SRM Item 1"],
+			rm_qty=2,
+			do_not_save=True,
+		)
+		bom.is_default = 0
+		bom.insert()
+		bom.submit()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+				"bom": bom.name,
+			},
+		]
+
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+
+		self.assertEqual(sco.items[0].bom, bom.name)
+		self.assertEqual(sco.supplied_items[0].required_qty, 20)
+
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
