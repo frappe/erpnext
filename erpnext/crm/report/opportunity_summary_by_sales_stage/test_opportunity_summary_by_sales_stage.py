@@ -1,6 +1,7 @@
 import unittest
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import today
 
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
@@ -80,6 +81,13 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 
 		self.assertEqual(expected_data, report[1])
 
+	def test_sales_user_can_run_the_report(self):
+		user = create_user("sales_stage_report_user@example.com", "Sales User")
+		filters = {"based_on": "Opportunity Owner", "data_based_on": "Number", "company": "Best Test"}
+		columns = execute_as(user.name, filters)[0]
+
+		self.assertIn("Prospecting", [column["fieldname"] for column in columns])
+
 	def test_amount_uses_opportunity_conversion_rate(self):
 		opportunity_type = make_opportunity_type()
 		frappe.get_doc(
@@ -136,6 +144,14 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 		self.assertEqual(type_row(opportunity_type)[NO_SALES_STAGE], 1)
 		amounts = type_row(opportunity_type, data_based_on="Amount")
 		self.assertEqual((amounts["Not Set"], amounts[NO_SALES_STAGE]), (1000, 500))
+
+
+def execute_as(user: str, filters: dict):
+	frappe.set_user(user)
+	try:
+		return execute(filters)
+	finally:
+		frappe.set_user("Administrator")
 
 
 def make_opportunity_type() -> str:
