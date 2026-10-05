@@ -778,6 +778,11 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		for name in scio_names:
 			self.assertEqual(frappe.db.get_value("Subcontracting Inward Order", name, "status"), "Closed")
 
+	def test_work_order_qty_not_editable_after_submit(self):
+		so, scio = create_so_scio()
+		scio.received_items[0].work_order_qty = 5
+		self.assertRaises(frappe.UpdateAfterSubmitError, scio.save)
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()
