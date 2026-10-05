@@ -211,6 +211,15 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(sco.items[0].bom, template_bom.name)
 		self.assertEqual([d.rm_item_code for d in sco.supplied_items], ["Subcontracted Template RM Item"])
 
+	def test_draft_bom_is_refused(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		draft_bom = make_bom(
+			item=sco.items[0].item_code, raw_materials=["Subcontracted SRM Item 1"], do_not_submit=True
+		)
+		sco.items[0].bom = draft_bom.name
+
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)

@@ -203,11 +203,13 @@ class SubcontractingController(StockController):
 					item.amount = item.qty * item.rate
 
 				if item.bom:
-					is_active, bom_item = frappe.get_value("BOM", item.bom, ["is_active", "item"])
+					is_active, bom_item, docstatus = frappe.get_value(
+						"BOM", item.bom, ["is_active", "item", "docstatus"]
+					)
 
-					if not is_active:
+					if not is_active or docstatus != 1:
 						frappe.throw(
-							_("Row {0}: Please select an active BOM for Item {1}.").format(
+							_("Row {0}: Please select an active and submitted BOM for Item {1}.").format(
 								item.idx, item.item_name
 							)
 						)
