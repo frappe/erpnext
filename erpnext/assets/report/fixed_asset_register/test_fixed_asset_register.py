@@ -200,3 +200,27 @@ class TestFixedAssetRegister(AssetSetup):
 			consumed_asset.name, {row["asset_id"] for row in self.run_report(status="In Location")}
 		)
 		self.assertIn(consumed_asset.name, {row["asset_id"] for row in self.run_report(status="Disposed")})
+
+	def test_group_by_shows_only_permitted_assets(self):
+		permitted_asset = create_asset(item_code="Macbook Pro", net_purchase_amount=100000, submit=True)
+		create_asset(item_code="Macbook Pro", net_purchase_amount=50000, submit=True)
+
+		user = "test_fixed_asset_register_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Asset Register",
+					"roles": [{"role": "Accounts User"}],
+				}
+			).insert()
+		frappe.permissions.add_user_permission("Asset", permitted_asset.name, user)
+
+		frappe.set_user(user)
+		try:
+			rows = self.run_report(group_by="Asset Category")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([row["net_purchase_amount"] for row in rows], [100000])

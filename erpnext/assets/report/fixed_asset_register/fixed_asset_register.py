@@ -77,7 +77,7 @@ def get_data(filters):
 		"purchase_invoice",
 		"opening_accumulated_depreciation",
 	]
-	assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
+	assets_record = frappe.get_list("Asset", filters=conditions, fields=fields)
 
 	for asset in assets_record:
 		if assets_linked_to_fb and asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
@@ -359,7 +359,7 @@ def get_group_by_data(
 		"opening_accumulated_depreciation",
 		"calculate_depreciation",
 	]
-	assets = frappe.db.get_all("Asset", filters=conditions, fields=fields)
+	assets = frappe.get_list("Asset", filters=conditions, fields=fields)
 
 	data = []
 
