@@ -23,6 +23,7 @@ def execute(filters=None):
 		dimensions = filters.get("budget_against_filter")
 	else:
 		dimensions = get_cost_centers(filters)
+	dimensions = get_permitted_dimensions(filters.get("budget_against"), dimensions)
 
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
 	cam_map = get_dimension_account_month_map(filters)
@@ -179,6 +180,14 @@ def get_cost_centers(filters):
 					`tab{tab}`
 			""".format(tab=filters.get("budget_against"))
 		)  # nosec
+
+
+def get_permitted_dimensions(budget_against: str, dimensions: list) -> list:
+	"""Keep only the dimensions the user may read, in their original order."""
+	if not dimensions:
+		return []
+	permitted = set(frappe.get_list(budget_against, filters={"name": ["in", dimensions]}, pluck="name"))
+	return [dimension for dimension in dimensions if dimension in permitted]
 
 
 # Get dimension & target details

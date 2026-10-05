@@ -12,6 +12,7 @@ from erpnext.accounts.utils import get_fiscal_year
 
 ACCOUNT = "_Test Account Cost for Goods Sold - _TC"
 COST_CENTER = "_Test Cost Center - _TC"
+COST_CENTER_2 = "_Test Cost Center 2 - _TC"
 
 test_dependencies = ["Monthly Distribution"]
 
@@ -63,6 +64,35 @@ class TestBudgetVarianceReport(FrappeTestCase):
 		journal_entry.submit()
 
 		self.assertEqual(self.get_actual(self.run_report(), COST_CENTER), actual)
+
+	def test_chart_covers_only_permitted_cost_centers(self):
+		make_large_budget(COST_CENTER)
+		make_large_budget(COST_CENTER_2)
+		user = make_user_restricted_to_cost_center(COST_CENTER)
+
+		frappe.set_user(user)
+		try:
+			_columns, data, _message, chart = execute(self.get_filters())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual({row[0] for row in data}, {COST_CENTER})
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [data[0][2]])
+
+
+def make_user_restricted_to_cost_center(cost_center):
+	user = "test_budget_variance@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Budget Variance",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Cost Center", cost_center, user)
+	return user
 
 
 def make_finance_book():
