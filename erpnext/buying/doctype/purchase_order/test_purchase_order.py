@@ -1963,21 +1963,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		)
 
 	def test_internal_sales_order_links_back_to_purchase_order(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		prepare_data_for_internal_transfer()
-		create_cost_center(
-			cost_center_name="_Test Cost Center for perpetual inventory Account",
-			company="_Test Company with perpetual inventory",
-		)
-		po = create_purchase_order(
-			company="_Test Company with perpetual inventory",
-			supplier="_Test Internal Supplier 2",
-			warehouse="Stores - TCP1",
-			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
-			qty=2,
-			rate=1,
-		)
+		po = make_internal_purchase_order()
 
 		so = make_inter_company_sales_order(po.name)
 		so.items[0].delivery_date = today()
@@ -1985,6 +1971,22 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(
 			frappe.db.get_value("Purchase Order", po.name, "inter_company_order_reference"), so.name
+		)
+
+	def test_internal_sales_order_maps_only_open_unordered_rows_of_submitted_po(self):
+		draft_po = make_internal_purchase_order(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, make_inter_company_sales_order, draft_po.name)
+
+		closed_po = make_internal_purchase_order()
+		closed_po.items[0].db_set("closed", 1)
+		self.assertRaises(frappe.ValidationError, make_inter_company_sales_order, closed_po.name)
+
+		po = make_internal_purchase_order()
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		so.submit()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "fully ordered", make_inter_company_sales_order, po.name
 		)
 
 
@@ -2062,6 +2064,25 @@ def prepare_data_for_internal_transfer():
 			).insert()
 
 		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
+
+
+def make_internal_purchase_order(**args):
+	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+	prepare_data_for_internal_transfer()
+	create_cost_center(
+		cost_center_name="_Test Cost Center for perpetual inventory Account",
+		company="_Test Company with perpetual inventory",
+	)
+	return create_purchase_order(
+		company="_Test Company with perpetual inventory",
+		supplier="_Test Internal Supplier 2",
+		warehouse="Stores - TCP1",
+		from_warehouse="_Test Internal Warehouse New 1 - TCP1",
+		qty=2,
+		rate=1,
+		**args,
+	)
 
 
 def make_pr_against_po(po, received_qty=0):
