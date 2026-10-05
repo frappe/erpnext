@@ -193,15 +193,24 @@ class Analytics:
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
+	@property
+	def document_filters(self):
+		filters = {
+			"docstatus": 1,
+			"company": ["in", self.filters.company],
+			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		}
+
+		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+			filters["is_opening"] = "No"
+
+		return filters
+
 	def _get_permitted_parent_names(self):
 		return frappe.qb.get_query(
 			table=self.filters.doc_type,
 			fields=["name"],
-			filters={
-				"docstatus": 1,
-				"company": ["in", self.filters.company],
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+			filters=self.document_filters,
 			ignore_permissions=False,
 		).run(pluck="name")
 
@@ -256,19 +265,10 @@ class Analytics:
 				entity_name = "party_name as entity_name"
 				value_field = "base_paid_amount as value_field"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
-
-		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
-			filters.update({"is_opening": "No"})
-
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
 			fields=[entity, entity_name, value_field, self.date_field],
-			filters=filters,
+			filters=self.document_filters,
 			ignore_permissions=False,
 		).run(as_dict=True)
 
@@ -323,19 +323,10 @@ class Analytics:
 		else:
 			entity_field = "territory as entity"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
-
-		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
-			filters.update({"is_opening": "No"})
-
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
 			fields=[entity_field, value_field, self.date_field],
-			filters=filters,
+			filters=self.document_filters,
 			ignore_permissions=False,
 		).run(as_dict=True)
 		self.get_groups()
@@ -380,15 +371,7 @@ class Analytics:
 
 		entity = "project as entity"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			"project": ["!=", ""],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
-
-		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
-			filters.update({"is_opening": "No"})
+		filters = {**self.document_filters, "project": ["!=", ""]}
 
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
