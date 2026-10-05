@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_engine 
 )
 from erpnext.accounts.report.financial_statements import (
 	build_period_list,
+	get_appropriate_currency,
 	get_columns,
 	get_cost_centers_with_children,
 	get_data,
@@ -80,7 +81,7 @@ def execute(filters=None):
 
 	data = []
 	summary_data = {}
-	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	currency = get_appropriate_currency(filters.company, filters)
 
 	for cash_flow_section in cash_flow_sections:
 		section_data = []
@@ -90,7 +91,7 @@ def execute(filters=None):
 				"parent_section": None,
 				"indent": 0.0,
 				"section": cash_flow_section["section_header"],
-				"currency": company_currency,
+				"currency": currency,
 			}
 		)
 
@@ -127,7 +128,7 @@ def execute(filters=None):
 					"indent": 1,
 					"accounts": accounts,
 					"parent_section": cash_flow_section["section_header"],
-					"currency": company_currency,
+					"currency": currency,
 				}
 			)
 			data.append(row_data)
@@ -138,7 +139,7 @@ def execute(filters=None):
 			section_data,
 			cash_flow_section["section_footer"],
 			period_list,
-			company_currency,
+			currency,
 			summary_data,
 			filters,
 		)
@@ -148,14 +149,14 @@ def execute(filters=None):
 		data,
 		_("Net Change in Cash"),
 		period_list,
-		company_currency,
+		currency,
 		summary_data,
 		filters,
 		add_blank_row=False,
 	)
 
 	if filters.show_opening_and_closing_balance and not is_dimension_grouped(period_list):
-		show_opening_and_closing_balance(data, period_list, company_currency, net_change_in_cash, filters)
+		show_opening_and_closing_balance(data, period_list, currency, net_change_in_cash, filters)
 	elif filters.show_opening_and_closing_balance:
 		filters.show_opening_and_closing_balance = False
 
@@ -173,9 +174,9 @@ def execute(filters=None):
 		True,
 	)
 
-	chart = get_chart_data(period_list, data, company_currency)
+	chart = get_chart_data(period_list, data, currency)
 
-	report_summary = get_report_summary(summary_data, company_currency)
+	report_summary = get_report_summary(summary_data, currency)
 
 	return columns, data, None, chart, report_summary
 
