@@ -896,6 +896,13 @@ def get_disposal_account_and_cost_center(company):
 def get_value_after_depreciation_on_disposal_date(
 	asset: str, disposal_date: DateTimeLikeObject, finance_book: str | None = None
 ):
+	frappe.has_permission("Asset", "read", asset, throw=True)
+	return calculate_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book)
+
+
+def calculate_value_after_depreciation_on_disposal_date(
+	asset: str, disposal_date: DateTimeLikeObject, finance_book: str | None = None
+) -> float:
 	asset_doc = frappe.get_doc("Asset", asset)
 
 	if asset_doc.available_for_use_date > getdate(disposal_date):

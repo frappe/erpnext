@@ -1044,6 +1044,19 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.opening_accumulated_depreciation, 0)
 		self.assertEqual(asset.value_after_depreciation, 100000)
 
+	def test_asset_mappers_need_asset_read_permission(self):
+		from erpnext.assets.doctype.asset.asset import make_journal_entry
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		asset = create_asset(submit=1)
+		stock_user = make_fenced_user("asset-stock-user@example.com", ["Stock User"])
+		with as_user(stock_user):
+			for method, args in (
+				(get_value_after_depreciation_on_disposal_date, (asset.name, nowdate())),
+				(make_journal_entry, (asset.name,)),
+			):
+				self.assertRaises(frappe.PermissionError, method, *args)
+
 	def test_asset_sale_validations(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 

@@ -1193,6 +1193,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 
 @frappe.whitelist()
 def make_journal_entry(asset_name):
+	frappe.has_permission("Asset", "read", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 	(
 		fixed_asset_account,
