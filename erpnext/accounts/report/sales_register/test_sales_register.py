@@ -328,7 +328,7 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		self.assertDictEqual(result_output, expected_result)
 
 	def test_ledger_view_matches_party_gl(self):
-		self.create_sales_invoice(rate=100)
+		invoice = self.create_sales_invoice(rate=99.6)
 		receipt = self.make_customer_payment("Receive", 60)
 		refund = self.make_customer_payment("Pay", 10)
 		bank_entry = self.make_party_journal("Bank Entry", credit=20)
@@ -336,6 +336,7 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
 		expected = {
+			invoice.name: (invoice.base_rounded_total, 0),
 			receipt.name: (0, 60),
 			refund.name: (10, 0),
 			bank_entry.name: (0, 20),

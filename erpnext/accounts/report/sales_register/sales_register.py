@@ -159,7 +159,7 @@ def _execute(filters, additional_table_columns=None):
 		if inv.doctype == "Sales Invoice":
 			row.update(
 				{
-					"debit": inv.base_grand_total,
+					"debit": inv.base_rounded_total or inv.base_grand_total,
 					# credits the invoice itself posts to the receivable (mirrors its GL)
 					"credit": get_in_invoice_receivable_credit(inv),
 					"outstanding_amount": flt(
