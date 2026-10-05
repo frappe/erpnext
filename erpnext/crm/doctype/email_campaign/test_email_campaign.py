@@ -9,6 +9,8 @@ from frappe.utils import add_days, getdate, today
 from erpnext.crm.doctype.email_campaign.email_campaign import send_email_to_leads_or_contacts
 from erpnext.tests.utils import ERPNextTestSuite
 
+EMAIL_CAMPAIGN_MODULE = "erpnext.crm.doctype.email_campaign.email_campaign"
+
 
 class TestEmailCampaign(ERPNextTestSuite):
 	"""Email Campaign derives its window from the linked Campaign schedule and
@@ -51,8 +53,11 @@ class TestEmailCampaign(ERPNextTestSuite):
 		doc.recipient = lead.name
 		return doc.insert()
 
-	def send_campaign_mails(self, recipient_email):
-		with patch("frappe.sendmail") as sendmail:
+	def send_campaign_mails(self, recipient_email, on_date=None):
+		with (
+			patch("frappe.sendmail") as sendmail,
+			patch(f"{EMAIL_CAMPAIGN_MODULE}.today", return_value=on_date or today()),
+		):
 			send_email_to_leads_or_contacts()
 		return [c.kwargs for c in sendmail.call_args_list if recipient_email in c.kwargs["recipients"]]
 
@@ -92,6 +97,14 @@ class TestEmailCampaign(ERPNextTestSuite):
 		email_campaign.save()
 		self.assertEqual(email_campaign.status, "Unsubscribed")
 		self.assertEqual(self.send_campaign_mails(lead.email_id), [])
+
+	def test_campaign_scheduled_ahead_sends_its_first_mail_on_the_start_day(self):
+		lead = self.make_lead()
+		tomorrow = add_days(today(), 1)
+		email_campaign = self.make_lead_email_campaign(lead, schedules=[0, 2], start_date=tomorrow)
+		self.assertEqual(email_campaign.status, "Scheduled")
+
+		self.assertEqual(len(self.send_campaign_mails(lead.email_id, on_date=tomorrow)), 1)
 
 	def test_start_date_cannot_be_in_the_past(self):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
