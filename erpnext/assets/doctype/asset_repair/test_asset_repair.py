@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
+from frappe.utils import add_days, add_months, flt, get_first_day, now_datetime, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -395,7 +395,7 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair.update(
 			{
 				"repair_status": "Completed",
-				"completion_date": nowdate(),
+				"completion_date": now_datetime(),
 				"capitalize_repair_cost": 1,
 				"cost_center": "Main - _TC",
 			}
@@ -415,6 +415,33 @@ class TestAssetRepair(ERPNextTestSuite):
 
 		asset_repair.cancel()
 		self.assertEqual(stock_entry.db_get("docstatus"), 2)
+
+	def test_stock_entry_is_posted_on_the_completion_date(self):
+		asset_repair = create_asset_repair(stock_consumption=1, failure_date=add_days(nowdate(), -5))
+		frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Receipt",
+				"company": asset_repair.company,
+				"set_posting_time": 1,
+				"posting_date": add_days(nowdate(), -5),
+				"items": [
+					{
+						"t_warehouse": asset_repair.stock_items[0].warehouse,
+						"item_code": asset_repair.stock_items[0].item_code,
+						"qty": 1,
+						"basic_rate": 100,
+					}
+				],
+			}
+		).submit()
+
+		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = add_days(nowdate(), -3)
+		asset_repair.submit()
+
+		posting_date = frappe.db.get_value("Stock Entry", {"asset_repair": asset_repair.name}, "posting_date")
+		self.assertEqual(str(posting_date), add_days(nowdate(), -3))
 
 
 def num_of_depreciations(asset):

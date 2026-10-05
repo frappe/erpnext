@@ -5,7 +5,15 @@ import frappe
 from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
-from frappe.utils import DateTimeLikeObject, cint, flt, get_link_to_form, getdate, time_diff_in_hours
+from frappe.utils import (
+	DateTimeLikeObject,
+	cint,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	time_diff_in_hours,
+)
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -281,6 +289,9 @@ class AssetRepair(AccountsController):
 				"stock_entry_type": "Material Issue",
 				"company": self.company,
 				"asset_repair": self.name,
+				"set_posting_time": 1,
+				"posting_date": get_datetime(self.completion_date).date(),
+				"posting_time": get_datetime(self.completion_date).time(),
 			}
 		)
 
