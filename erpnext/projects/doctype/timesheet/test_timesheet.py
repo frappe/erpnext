@@ -94,6 +94,29 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 200)
 		self.assertEqual(timesheet.base_total_billable_amount, 200)
 
+	def test_amounts_follow_the_rates_without_an_activity_type(self):
+		from_time = now_datetime()
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"time_logs": [
+					{
+						"from_time": from_time,
+						"to_time": add_to_date(from_time, hours=2),
+						"is_billable": 1,
+						"billing_rate": 100,
+						"billing_amount": 50000,
+						"costing_rate": 10,
+						"costing_amount": 1,
+					}
+				],
+			}
+		).insert()
+
+		self.assertEqual(timesheet.total_billable_amount, 200)
+		self.assertEqual(timesheet.total_costing_amount, 20)
+
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)

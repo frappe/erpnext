@@ -72,25 +72,15 @@ class TimesheetDetail(Document):
 			self.billing_hours = self.hours
 
 	def update_cost(self, employee: str, currency: str | None = None, exchange_rate: float = 1.0):
-		"""Update costing and billing rates based on activity type."""
+		"""Fill missing rates from the activity cost, then amounts from the rates."""
 		from erpnext.projects.doctype.timesheet.timesheet import _get_activity_cost
 
-		if not self.is_billable and not self.activity_type:
-			return
+		rate = _get_activity_cost(employee, self.activity_type, currency) if self.activity_type else {}
+		self.billing_rate = flt(self.billing_rate) or flt(rate.get("billing_rate"))
+		self.costing_rate = flt(self.costing_rate) or flt(rate.get("costing_rate"))
 
-		rate = _get_activity_cost(employee, self.activity_type, currency)
-		if not rate:
-			return
-
-		self.billing_rate = (
-			flt(rate.get("billing_rate")) if flt(self.billing_rate) == 0 else self.billing_rate
-		)
-		self.costing_rate = (
-			flt(rate.get("costing_rate")) if flt(self.costing_rate) == 0 else self.costing_rate
-		)
-
-		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
-		self.costing_amount = self.costing_rate * (self.hours or 0)
+		self.billing_amount = self.billing_rate * flt(self.billing_hours)
+		self.costing_amount = self.costing_rate * flt(self.hours)
 
 		exchange_rate = flt(exchange_rate) or 1.0
 		self.base_billing_rate = flt(self.billing_rate * exchange_rate, self.precision("base_billing_rate"))
