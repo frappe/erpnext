@@ -57,6 +57,28 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		self.assertEqual(row["order_count"], 1)
 		self.assertEqual(row["order_value"], sales_order.base_net_total)
 
+	def test_activity_after_conversion_is_counted(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		campaign = make_campaign("_Test Campaign Eff Converted")
+		lead = make_campaign_lead(campaign, company_name="_Test Campaign Eff Converted Customer")
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.territory = "_Test Territory"
+		customer.insert()
+
+		quotation = make_lead_quotation(lead.name)
+		quotation.quotation_to = "Customer"
+		quotation.party_name = customer.name
+		quotation.save()
+		quotation.submit()
+		make_sales_order_for(quotation.name)
+
+		row = campaign_row(campaign)
+		self.assertEqual(row["quot_count"], 1)
+		self.assertEqual(row["order_count"], 1)
+		self.assertEqual(row["order_value"], 1000)
+
 
 def make_campaign(campaign: str) -> str:
 	if not frappe.db.exists("UTM Campaign", campaign):
