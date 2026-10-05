@@ -640,11 +640,9 @@ class SalesOrder(SellingController):
 		)
 
 		if self.is_subcontracted:
-			scio = frappe.get_cached_value(
-				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}, "name"
-			)
-
-			if scio:
+			for scio in frappe.get_all(
+				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}, pluck="name"
+			):
 				update_scio_status(scio, "Closed" if self.status == "Closed" else None)
 
 	def update_reserved_qty(self, so_item_rows=None):
