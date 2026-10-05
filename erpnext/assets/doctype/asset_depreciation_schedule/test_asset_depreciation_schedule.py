@@ -3,8 +3,10 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	_make_depreciation_entry,
 	post_depreciation_entries,
@@ -446,21 +448,66 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		self.assertEqual(sum(d.depreciation_amount for d in schedule if not d.journal_entry), 700)
 		self.assertEqual(schedule[-1].accumulated_depreciation_amount, 1100)
 
+	def test_manual_schedule_rows_are_validated(self):
+		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
+
+		def edit_schedule(second_row_amount, third_row_amount):
+			schedule = get_asset_depr_schedule_doc(asset.name, "Draft")
+			schedule.depreciation_schedule[1].depreciation_amount = second_row_amount
+			schedule.depreciation_schedule[2].depreciation_amount = third_row_amount
+			schedule.save()
+			return schedule
+
+		self.assertRaises(frappe.ValidationError, edit_schedule, -100, 300)
+		self.assertRaises(frappe.ValidationError, edit_schedule, 150, 100)
+
+		schedule = edit_schedule(150, 50)
+		self.assertEqual(
+			[row.accumulated_depreciation_amount for row in schedule.depreciation_schedule[:3]],
+			[100, 250, 300],
+		)
+
+	def test_manual_schedule_is_validated_on_submit(self):
+		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
+		schedule = get_asset_depr_schedule_doc(asset.name, "Draft")
+		schedule.depreciation_schedule[1].db_set("depreciation_amount", 500)
+
+		asset.reload()
+		self.assertRaises(frappe.ValidationError, asset.submit)
+
+		schedule.depreciation_schedule[1].db_set("depreciation_amount", 100)
+		asset.reload()
+		asset.submit()
+
+		post_depreciation_entries(getdate("2023-03-31"))
+		create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=500, posting_date=getdate("2023-05-15")
+		)
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
+	def test_manual_asset_split_with_rounded_rows(self):
+		asset = create_monthly_asset(depreciation_method="Manual", asset_quantity=3)
+
+		new_asset = split_asset(asset.name, 1)
+
+		schedule = get_depr_schedule(new_asset.name, "Active")
+		self.assertEqual(flt(schedule[0].depreciation_amount, 2), 33.33)
+
 
 def create_monthly_asset(**args):
-	return create_asset(
-		item_code="Macbook Pro",
-		gross_purchase_amount=1200,
-		purchase_amount=1200,
-		calculate_depreciation=1,
-		depreciation_method="Straight Line",
-		available_for_use_date="2023-01-01",
-		depreciation_start_date="2023-01-31",
-		frequency_of_depreciation=1,
-		total_number_of_depreciations=12,
-		submit=1,
-		**args,
-	)
+	defaults = {
+		"item_code": "Macbook Pro",
+		"gross_purchase_amount": 1200,
+		"purchase_amount": 1200,
+		"calculate_depreciation": 1,
+		"depreciation_method": "Straight Line",
+		"available_for_use_date": "2023-01-01",
+		"depreciation_start_date": "2023-01-31",
+		"frequency_of_depreciation": 1,
+		"total_number_of_depreciations": 12,
+		"submit": 1,
+	}
+	return create_asset(**{**defaults, **args})
 
 
 def cancel_depreciation_entry(asset_name: str, schedule_date: str):

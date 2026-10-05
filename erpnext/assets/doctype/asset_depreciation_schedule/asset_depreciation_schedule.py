@@ -68,6 +68,7 @@ class AssetDepreciationSchedule(Document):
 
 	def validate(self):
 		self.validate_another_asset_depr_schedule_does_not_exist()
+		self.validate_manual_schedule()
 
 	def validate_another_asset_depr_schedule_does_not_exist(self):
 		finance_book_filter = ["finance_book", "is", "not set"]
@@ -96,6 +97,60 @@ class AssetDepreciationSchedule(Document):
 						asset_depr_schedule, self.asset
 					)
 				)
+
+	def validate_manual_schedule(self):
+		# rows of a schedule built from the asset are checked; rescheduled rows are system computed
+		if self.depreciation_method != "Manual" or not self.finance_book_id or self.flags.is_rescheduled:
+			return
+
+		available_for_use_date = frappe.db.get_value("Asset", self.asset, "available_for_use_date")
+		for row in self.get("depreciation_schedule"):
+			self.validate_manual_row(row, available_for_use_date)
+
+		self.validate_manual_total()
+		self.set_manual_accumulated_depreciation()
+
+	def validate_manual_row(self, row, available_for_use_date):
+		if flt(row.depreciation_amount) <= 0:
+			frappe.throw(_("Row #{0}: Depreciation Amount must be greater than zero").format(row.idx))
+
+		if getdate(row.schedule_date) < getdate(available_for_use_date):
+			frappe.throw(
+				_("Row #{0}: Schedule Date cannot be before the Available-for-use Date {1}").format(
+					row.idx, frappe.format(available_for_use_date, "Date")
+				)
+			)
+
+	def validate_manual_total(self):
+		precision = self.precision("gross_purchase_amount")
+		pending_amount = sum(
+			flt(row.depreciation_amount) for row in self.depreciation_schedule if not row.journal_entry
+		)
+		booked_amount = sum(
+			flt(row.depreciation_amount) for row in self.depreciation_schedule if row.journal_entry
+		)
+		depreciable_amount = (
+			flt(self.gross_purchase_amount)
+			- flt(self.opening_accumulated_depreciation)
+			- booked_amount
+			- flt(self.expected_value_after_useful_life)
+		)
+
+		if flt(pending_amount, precision) != flt(depreciable_amount, precision):
+			frappe.throw(
+				_("Total Depreciation Amount {0} must be equal to the depreciable value {1}").format(
+					frappe.bold(frappe.format(pending_amount, "Currency")),
+					frappe.bold(frappe.format(depreciable_amount, "Currency")),
+				)
+			)
+
+	def set_manual_accumulated_depreciation(self):
+		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
+		for row in self.get("depreciation_schedule"):
+			accumulated_depreciation += flt(row.depreciation_amount)
+			row.accumulated_depreciation_amount = flt(
+				accumulated_depreciation, row.precision("accumulated_depreciation_amount")
+			)
 
 	def on_submit(self):
 		self.validate_asset()
@@ -1191,6 +1246,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 		)
 
 		new_asset_depr_schedule_doc.notes = notes
+		new_asset_depr_schedule_doc.flags.is_rescheduled = True
 
 		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
 		current_asset_depr_schedule_doc.cancel()

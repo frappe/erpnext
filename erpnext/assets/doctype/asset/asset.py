@@ -1449,6 +1449,7 @@ def update_existing_asset(asset, remaining_qty, new_asset):
 			"This schedule was created when Asset {0} was updated after being split into new Asset {1}."
 		).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset.name))
 		new_asset_depr_schedule_doc.notes = notes
+		new_asset_depr_schedule_doc.flags.is_rescheduled = True
 
 		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
 		current_asset_depr_schedule_doc.cancel()
@@ -1513,6 +1514,7 @@ def create_new_asset_after_split(asset, split_qty):
 			get_link_to_form(new_asset.doctype, new_asset.name), get_link_to_form(asset.doctype, asset.name)
 		)
 		new_asset_depr_schedule_doc.notes = notes
+		new_asset_depr_schedule_doc.flags.is_rescheduled = True
 
 		new_asset_depr_schedule_doc.submit()
 
