@@ -124,7 +124,7 @@ class FixedAssetService:
 				note = _("Asset sold") if not doc.is_return else _("Return invoice of asset cancelled")
 				asset_status = "Sold"
 
-			frappe.db.set_value("Asset", d.asset, "disposal_date", disposal_date)
+			asset.db_set("disposal_date", disposal_date)
 			add_asset_activity(asset.name, note)
 			asset.set_status(asset_status)
 

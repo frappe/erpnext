@@ -971,6 +971,21 @@ class TestAsset(AssetSetup):
 				),
 			)
 
+	def test_sold_status_survives_status_recompute(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_monthly_depreciating_asset()
+		post_depreciation_entries(date="2025-08-31")
+		create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=50000, posting_date="2025-09-15"
+		)
+
+		self.assertRaises(frappe.ValidationError, restore_asset, asset.name)
+
+		first_depreciation_entry = get_depr_schedule(asset.name, "Active")[0].journal_entry
+		frappe.get_doc("Journal Entry", first_depreciation_entry).cancel()
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
 
 class TestDepreciationMethods(AssetSetup):
 	def setUp(self):
@@ -2145,6 +2160,19 @@ def create_asset(**args):
 		asset.submit()
 
 	return asset
+
+
+def create_monthly_depreciating_asset(**args):
+	return create_asset(
+		calculate_depreciation=1,
+		purchase_date="2025-04-01",
+		available_for_use_date="2025-04-01",
+		depreciation_start_date="2025-04-30",
+		total_number_of_depreciations=12,
+		frequency_of_depreciation=1,
+		submit=1,
+		**args,
+	)
 
 
 def create_asset_category(enable_cwip=1):

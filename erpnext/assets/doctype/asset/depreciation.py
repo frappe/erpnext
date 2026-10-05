@@ -473,6 +473,9 @@ def create_journal_entry_for_scrap(asset, scrap_date):
 def restore_asset(asset_name: str):
 	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.journal_entry_for_scrap:
+		frappe.throw(_("Asset {0} cannot be restored, as it is not scrapped").format(asset_name))
+
 	reverse_depreciation_entry_made_on_disposal(asset)
 	reset_depreciation_schedule(asset, get_note_for_restore(asset))
 	cancel_journal_entry_for_scrap(asset)

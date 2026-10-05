@@ -794,6 +794,8 @@ class Asset(AccountsController):
 
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
+			elif self.is_sold():
+				status = "Sold"
 			else:
 				expected_value_after_useful_life = 0
 				value_after_depreciation = self.value_after_depreciation
@@ -814,6 +816,22 @@ class Asset(AccountsController):
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
+
+	def is_sold(self) -> bool:
+		if not self.disposal_date:
+			return False
+
+		return bool(
+			frappe.get_all(
+				"Sales Invoice",
+				filters=[
+					["Sales Invoice Item", "asset", "=", self.name],
+					["docstatus", "=", 1],
+					["is_return", "=", 0],
+				],
+				limit=1,
+			)
+		)
 
 	def get_value_after_depreciation(self, finance_book=None):
 		if not self.calculate_depreciation:
