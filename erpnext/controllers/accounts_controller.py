@@ -4199,6 +4199,14 @@ def update_child_qty_rate(
 				title=_("Insufficient Permissions"),
 			)
 
+	def validate_parent_status(doc):
+		if doc.doctype == "Purchase Order" and doc.status in ("Closed", "On Hold", "Delivered"):
+			frappe.throw(
+				_("Cannot update items of Purchase Order {0} because it is {1}.").format(
+					doc.name, _(doc.status)
+				)
+			)
+
 	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
@@ -4344,6 +4352,7 @@ def update_child_qty_rate(
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
 	check_doc_permissions(parent, "write")
+	validate_parent_status(parent)
 
 	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
