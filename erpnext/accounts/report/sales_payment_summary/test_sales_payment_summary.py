@@ -220,6 +220,25 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		row = run_report(customer)[0]
 		self.assertEqual((row[3], row[5]), (20000, 20000))
 
+	def test_sales_and_taxes_are_in_company_currency(self):
+		si = create_sales_invoice_record(customer="_Test Customer USD")
+		si.update({"currency": "USD", "conversion_rate": 50, "debit_to": "_Test Receivable USD - _TC"})
+		si.items[0].rate = 100
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": "Service Tax",
+				"rate": 10,
+			},
+		)
+		si.insert()
+		si.submit()
+
+		row = run_report(si.customer)[0]
+		self.assertEqual((row[3], row[4]), (5000, 500))
+
 
 def run_report(customer, **filters):
 	filters = frappe._dict(

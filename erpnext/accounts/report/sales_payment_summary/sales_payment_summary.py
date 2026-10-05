@@ -169,8 +169,8 @@ def get_invoice_totals():
 			si.owner,
 			si.creation,
 			Sum(si.base_total).as_("base_total"),
-			Sum(si.net_total).as_("net_total"),
-			Sum(si.total_taxes_and_charges).as_("total_taxes"),
+			Sum(si.base_net_total).as_("net_total"),
+			Sum(si.base_total_taxes_and_charges).as_("total_taxes"),
 			Sum(si.base_paid_amount).as_("paid_amount"),
 			Sum(si.outstanding_amount).as_("outstanding_amount"),
 		)
@@ -271,8 +271,8 @@ def get_sales_invoice_data(filters):
 		.select(
 			a.posting_date,
 			a.owner,
-			Sum(a.net_total).as_("net_total"),
-			Sum(a.total_taxes_and_charges).as_("total_taxes"),
+			Sum(a.base_net_total).as_("net_total"),
+			Sum(a.base_total_taxes_and_charges).as_("total_taxes"),
 			Sum(a.base_paid_amount).as_("paid_amount"),
 			Sum(a.outstanding_amount).as_("outstanding_amount"),
 		)
