@@ -6,6 +6,12 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import add_days, today
 
 # test_records = frappe.get_test_records('Maintenance Visit')
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	make_maintenance_visit as make_visit_from_schedule,
+)
+from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+	make_maintenance_schedule,
+)
 
 
 class TestMaintenanceVisit(FrappeTestCase):
@@ -48,6 +54,21 @@ class TestMaintenanceVisit(FrappeTestCase):
 			visit.submit()
 		return visit
 
+	def make_schedule_visit(
+		self, schedule, detail, completion_status="Fully Completed", submit=True, **fields
+	):
+		visit = make_visit_from_schedule(schedule.name, s_id=detail)
+		visit.completion_status = completion_status
+		visit.mntc_date = today()
+		visit.update(fields)
+		for purpose in visit.purposes:
+			purpose.service_person = self.sales_person.name
+			purpose.work_done = "Serviced"
+		visit.insert(ignore_permissions=True)
+		if submit:
+			visit.submit()
+		return visit
+
 	def test_sales_order_visit_cancel_not_blocked_by_later_visit(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
@@ -58,6 +79,20 @@ class TestMaintenanceVisit(FrappeTestCase):
 		earlier.cancel()
 
 		self.assertEqual(frappe.db.get_value("Maintenance Visit", earlier.name, "docstatus"), 2)
+
+	def test_unscheduled_visit_for_schedule_row_checks_contract_dates(self):
+		schedule = make_maintenance_schedule()
+		schedule.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Date must be between",
+			self.make_schedule_visit,
+			schedule,
+			schedule.schedules[0].name,
+			maintenance_type="Unscheduled",
+			mntc_date=add_days(schedule.items[0].end_date, 30),
+		)
 
 
 def make_maintenance_visit():
