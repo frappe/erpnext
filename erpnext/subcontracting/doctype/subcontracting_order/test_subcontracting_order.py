@@ -156,6 +156,15 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "status"), "On Hold")
 		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
 
+	def test_quantity_is_checked_against_the_purchase_order(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].update({"subcontracting_conversion_factor": 0.1, "qty": 100})
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
+		sco = create_subcontracting_order(po_name=sco.purchase_order, do_not_save=1)
+		sco.append("items", sco.items[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
 	def test_project_is_carried_over_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name
 		po = make_subcontracted_purchase_order(project)

@@ -118,6 +118,7 @@ class SubcontractingOrder(SubcontractingController):
 
 	def before_validate(self):
 		super().before_validate()
+		self.set_subcontracting_conversion_factor()
 
 	def validate(self):
 		super().validate()
@@ -145,10 +146,20 @@ class SubcontractingOrder(SubcontractingController):
 					"ref_dn_field": "purchase_order_item",
 					"compare_fields": [["project", "="]],
 					"is_child_table": True,
-					"allow_duplicate_prev_row_id": True,
 				},
 			}
 		)
+
+	def set_subcontracting_conversion_factor(self):
+		po_items = frappe.get_all(
+			"Purchase Order Item",
+			filters={"parent": self.purchase_order},
+			fields=["name", "qty", "fg_item_qty"],
+		)
+		conversion_factors = {d.name: flt(d.qty) / flt(d.fg_item_qty) for d in po_items if flt(d.fg_item_qty)}
+		for item in self.items:
+			if item.purchase_order_item in conversion_factors:
+				item.subcontracting_conversion_factor = conversion_factors[item.purchase_order_item]
 
 	def validate_purchase_order_for_subcontracting(self):
 		if self.purchase_order:
