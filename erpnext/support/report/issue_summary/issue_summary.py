@@ -119,7 +119,7 @@ class IssueSummary:
 			"Assigned To": "_assign",
 		}
 
-		self.entries = frappe.db.get_all(
+		self.entries = frappe.get_list(
 			"Issue",
 			fields=[
 				self.field_map.get(self.filters.based_on),
