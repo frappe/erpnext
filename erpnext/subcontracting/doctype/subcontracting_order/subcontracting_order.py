@@ -295,7 +295,7 @@ class SubcontractingOrder(SubcontractingController):
 					total_required_qty = total_supplied_qty = 0
 					for item in self.supplied_items:
 						total_required_qty += item.required_qty
-						total_supplied_qty += flt(item.supplied_qty)
+						total_supplied_qty += flt(item.total_supplied_qty)
 					if total_supplied_qty:
 						status = "Partial Material Transferred"
 						if total_supplied_qty >= total_required_qty:
