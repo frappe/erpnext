@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -38,24 +40,15 @@ def make_purchase_receipt(
 	if source_doc.is_return:
 		return
 
-	po_sr_item_dict = {}
-	po_name = None
+	po_sr_items = defaultdict(list)
 	for item in source_doc.items:
-		if not item.purchase_order:
-			continue
+		if item.purchase_order:
+			po_sr_items[item.purchase_order_item].append(item)
 
-		if not po_name:
-			po_name = item.purchase_order
-
-		po_sr_item_dict[item.purchase_order_item] = {
-			"qty": flt(item.qty),
-			"rejected_qty": flt(item.rejected_qty),
-			"warehouse": item.warehouse,
-			"rejected_warehouse": item.rejected_warehouse,
-			"subcontracting_receipt_item": item.name,
-		}
-
-	if not po_name:
+	purchase_orders = list(
+		dict.fromkeys(item.purchase_order for item in source_doc.items if item.purchase_order)
+	)
+	if not purchase_orders:
 		frappe.throw(
 			_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
 				source_doc.name
@@ -63,16 +56,18 @@ def make_purchase_receipt(
 		)
 
 	def update_item(obj, target, source_parent):
-		sr_item_details = po_sr_item_dict.get(obj.name)
+		sr_items = po_sr_items[obj.name]
 		ratio = flt(obj.qty) / flt(obj.fg_item_qty)
 
 		target.update(
 			{
-				"qty": ratio * sr_item_details["qty"],
-				"rejected_qty": ratio * sr_item_details["rejected_qty"],
-				"warehouse": sr_item_details["warehouse"],
-				"rejected_warehouse": sr_item_details["rejected_warehouse"],
-				"subcontracting_receipt_item": sr_item_details["subcontracting_receipt_item"],
+				"qty": ratio * sum(flt(item.qty) for item in sr_items),
+				"rejected_qty": ratio * sum(flt(item.rejected_qty) for item in sr_items),
+				"warehouse": sr_items[0].warehouse,
+				"rejected_warehouse": next(
+					(item.rejected_warehouse for item in sr_items if item.rejected_warehouse), None
+				),
+				"subcontracting_receipt_item": sr_items[0].name,
 			}
 		)
 
@@ -89,36 +84,39 @@ def make_purchase_receipt(
 			}
 		)
 
-	target_doc = get_mapped_doc(
-		"Purchase Order",
-		po_name,
-		{
-			"Purchase Order": {
-				"doctype": "Purchase Receipt",
-				"field_map": {"supplier_warehouse": "supplier_warehouse"},
-				"validation": {
-					"docstatus": ["=", 1],
+	target_doc = None
+	for po_name in purchase_orders:
+		target_doc = get_mapped_doc(
+			"Purchase Order",
+			po_name,
+			{
+				"Purchase Order": {
+					"doctype": "Purchase Receipt",
+					"field_map": {"supplier_warehouse": "supplier_warehouse"},
+					"validation": {
+						"docstatus": ["=", 1],
+					},
+				},
+				"Purchase Order Item": {
+					"doctype": "Purchase Receipt Item",
+					"field_map": {
+						"name": "purchase_order_item",
+						"parent": "purchase_order",
+						"bom": "bom",
+					},
+					"postprocess": update_item,
+					"condition": lambda doc: doc.name in po_sr_items,
+				},
+				"Purchase Taxes and Charges": {
+					"doctype": "Purchase Taxes and Charges",
+					"reset_value": True,
+					# for POs created in earlier version with tax_withholding_row
+					"condition": lambda doc: not doc.is_tax_withholding_account,
 				},
 			},
-			"Purchase Order Item": {
-				"doctype": "Purchase Receipt Item",
-				"field_map": {
-					"name": "purchase_order_item",
-					"parent": "purchase_order",
-					"bom": "bom",
-				},
-				"postprocess": update_item,
-				"condition": lambda doc: doc.name in po_sr_item_dict,
-			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-				"reset_value": True,
-				# for POs created in earlier version with tax_withholding_row
-				"condition": lambda doc: not doc.is_tax_withholding_account,
-			},
-		},
-		postprocess=post_process,
-	)
+			target_doc,
+			postprocess=post_process,
+		)
 
 	if not target_doc.get("items"):
 		add_po_items_to_pr(source_doc, target_doc)
