@@ -407,6 +407,15 @@ class TestAssetRepair(ERPNextTestSuite):
 		self.assertEqual(asset_repair.total_repair_cost, 200)
 		self.assertEqual(asset.additional_asset_cost, 200)
 
+	def test_stock_entry_is_cancelled_only_with_its_repair(self):
+		asset_repair = create_asset_repair(stock_consumption=1, submit=1)
+		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name})
+
+		self.assertRaises(frappe.ValidationError, stock_entry.cancel)
+
+		asset_repair.cancel()
+		self.assertEqual(stock_entry.db_get("docstatus"), 2)
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations + (

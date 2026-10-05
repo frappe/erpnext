@@ -221,6 +221,8 @@ class AssetRepair(AccountsController):
 				doc.cancel()
 
 	def on_cancel(self):  # nosemgrep
+		self.cancel_stock_entry()
+
 		if self.get("capitalize_repair_cost"):
 			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 			self.asset_doc = frappe.get_lazy_doc("Asset", self.asset)
@@ -233,6 +235,11 @@ class AssetRepair(AccountsController):
 			self.add_asset_activity()
 
 		self.cancel_sabb()
+
+	def cancel_stock_entry(self):
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
+		if stock_entry:
+			frappe.get_doc("Stock Entry", stock_entry).cancel()
 
 	def after_delete(self):
 		frappe.get_lazy_doc("Asset", self.asset).set_status()
