@@ -109,6 +109,13 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 		self.assertNotIn(pi.name, names)
 		self.assertNotIn(debit_note.name, names)
 
+	def test_service_rows_are_not_listed(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Non Stock Item", qty=1, rate=300, update_stock=0
+		)
+
+		self.assertEqual(self.get_rows_for(self.run_report(), pi.name), [])
+
 	def receive(self, invoice: str, posting_date: str, qty: float | None = None) -> None:
 		receipt = make_purchase_receipt(invoice)
 		if qty:
