@@ -178,8 +178,9 @@ def get_pipeline_data(from_date: str, to_date: str, company: str):
 		]
 
 		summary = {}
-		for sales_stage, rows in groupby(cp_opportunities, lambda o: o["sales_stage"]):
-			summary[sales_stage] = sum(flt(r["compound_amount"]) for r in rows)
+		for opportunity in cp_opportunities:
+			sales_stage = opportunity["sales_stage"]
+			summary[sales_stage] = summary.get(sales_stage, 0) + flt(opportunity["compound_amount"])
 
 		result = {
 			"labels": list(summary.keys()),

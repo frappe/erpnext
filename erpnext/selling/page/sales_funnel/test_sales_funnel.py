@@ -6,7 +6,7 @@ from frappe.utils import add_days, random_string, today
 
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.selling.doctype.quotation.test_quotation import make_quotation
-from erpnext.selling.page.sales_funnel.sales_funnel import get_funnel_data
+from erpnext.selling.page.sales_funnel.sales_funnel import get_funnel_data, get_pipeline_data
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -16,6 +16,31 @@ class TestSalesFunnel(ERPNextTestSuite):
 			if stage["title"] == title:
 				return stage["value"]
 		self.fail(f"Stage {title!r} not found in funnel data: {data}")
+
+	def get_pipeline_stage_value(self, data, sales_stage):
+		if data == "empty":
+			return 0
+		values = data["datasets"][0]["values"]
+		for label, value in zip(data["labels"], values, strict=False):
+			if label == sales_stage:
+				return value
+		return 0
+
+	def make_staged_opportunity(self, company, sales_stage, amount):
+		return frappe.get_doc(
+			{
+				"doctype": "Opportunity",
+				"company": company,
+				"opportunity_from": "Customer",
+				"party_name": "_Test Customer",
+				"opportunity_type": "Sales",
+				"conversion_rate": 1.0,
+				"transaction_date": today(),
+				"sales_stage": sales_stage,
+				"opportunity_amount": amount,
+				"base_opportunity_amount": amount,
+			}
+		).insert(ignore_permissions=True)
 
 	def make_lead(self, company):
 		# The funnel filters Lead on `company`, which the shared crm make_lead()
@@ -128,3 +153,18 @@ class TestSalesFunnel(ERPNextTestSuite):
 		company = "_Test Company"
 		data = get_funnel_data(today(), today(), company)
 		self.assertTrue(any(stage["title"] == "Active Leads" for stage in data))
+
+	def test_pipeline_sums_repeated_stage(self):
+		company = "_Test Company"
+		from_date, to_date = today(), add_days(today(), 1)
+
+		baseline = self.get_pipeline_stage_value(
+			get_pipeline_data(from_date, to_date, company), "Prospecting"
+		)
+
+		self.make_staged_opportunity(company, "Prospecting", 1000)
+		self.make_staged_opportunity(company, "Qualification", 2000)
+		self.make_staged_opportunity(company, "Prospecting", 3000)
+
+		after = self.get_pipeline_stage_value(get_pipeline_data(from_date, to_date, company), "Prospecting")
+		self.assertEqual(after - baseline, 4000)
