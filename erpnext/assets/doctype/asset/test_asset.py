@@ -1032,6 +1032,18 @@ class TestAsset(AssetSetup):
 				places=2,
 			)
 
+	def test_opening_accumulated_depreciation_without_depreciation(self):
+		asset = create_asset(opening_accumulated_depreciation=150000, do_not_save=1)
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
+		asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
+		asset.opening_accumulated_depreciation = 30000
+		asset.save()
+
+		self.assertEqual(asset.opening_accumulated_depreciation, 0)
+		self.assertEqual(asset.value_after_depreciation, 100000)
+
 	def test_asset_sale_validations(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 

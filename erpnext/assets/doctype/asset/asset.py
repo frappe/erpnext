@@ -128,6 +128,7 @@ class Asset(AccountsController):
 		self.validate_linked_purchase_docs()
 		self.set_purchase_doc_row_item()
 		self.validate_asset_values()
+		self.validate_opening_accumulated_depreciation()
 		self.validate_asset_and_reference()
 		self.validate_item()
 		self.validate_cost_center()
@@ -443,6 +444,19 @@ class Asset(AccountsController):
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
+
+	def validate_opening_accumulated_depreciation(self):
+		if not self.is_existing_asset:
+			self.opening_accumulated_depreciation = 0
+			self.opening_number_of_booked_depreciations = 0
+		elif not self.calculate_depreciation and flt(self.opening_accumulated_depreciation) > flt(
+			self.gross_purchase_amount
+		):
+			frappe.throw(
+				_("Opening Accumulated Depreciation must be less than or equal to {0}").format(
+					self.gross_purchase_amount
+				)
+			)
 
 	def validate_linked_purchase_docs(self):
 		for doctype_field, doctype_name in [
