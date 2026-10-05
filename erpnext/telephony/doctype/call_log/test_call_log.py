@@ -9,7 +9,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
-from erpnext.telephony.doctype.call_log.call_log import add_call_summary_and_call_type
+from erpnext.telephony.doctype.call_log.call_log import (
+	add_call_summary_and_call_type,
+	get_linked_call_logs,
+)
 
 
 class TestCallLog(FrappeTestCase):
@@ -63,3 +66,33 @@ class TestCallLog(FrappeTestCase):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(frappe.db.get_value("Call Log", call_log, "type_of_call"), "_Test Call Type")
+
+	def test_timeline_shows_only_permitted_call_logs(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": f"_Test Caller {self.number}"})
+		contact.insert(ignore_permissions=True)
+		self._make_call_log(
+			to=f"+91{self.number}",
+			type="Incoming",
+			links=[{"link_doctype": "Contact", "link_name": contact.name}],
+		)
+		timeline = get_linked_call_logs("Contact", contact.name)
+		self.assertEqual(len(timeline), 1)
+		self.assertEqual(timeline[0]["template_data"]["to"], f"+91{self.number}")
+
+		user = "test_call_log_sales_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sales",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Sales User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		try:
+			self.assertEqual(get_linked_call_logs("Contact", contact.name), [])
+		finally:
+			frappe.set_user("Administrator")
