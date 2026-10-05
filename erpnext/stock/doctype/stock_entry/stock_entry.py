@@ -4572,8 +4572,9 @@ def make_stock_in_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def get_work_order_details(work_order, company):
+def get_work_order_details(work_order: str, company: str):
 	work_order = frappe.get_doc("Work Order", work_order)
+	work_order.check_permission("read")
 	pending_qty_to_produce = flt(work_order.qty) - flt(work_order.produced_qty)
 
 	return {

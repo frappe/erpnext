@@ -12,7 +12,7 @@ from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.permissions import get_user_permissions
-from frappe.query_builder.functions import Concat_ws, Sum
+from frappe.query_builder.functions import Abs, Concat_ws, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -1419,6 +1419,80 @@ class SerialandBatchBundle(Document):
 						f"Batch Nos {bold(', '.join(batches))} are not part of the original document."
 					)
 
+	def validate_returned_batch_qty(self):
+		reference_field = {"Delivery Note": "dn_detail", "Sales Invoice": "sales_invoice_item"}.get(
+			self.voucher_type
+		)
+		if (
+			self.type_of_transaction != "Inward"
+			or not reference_field
+			or not self.has_batch_no
+			or self.has_serial_no
+		):
+			return
+
+		child_doctype = self.voucher_type + " Item"
+		original_row = frappe.db.get_value(child_doctype, self.voucher_detail_no, reference_field)
+		available = original_row and self.get_batch_qty_left_to_return(
+			child_doctype, reference_field, original_row
+		)
+		if not available:
+			return
+
+		precision = self.precision("total_qty")
+		for row in self.entries:
+			remaining = flt(available.get(row.batch_no), precision)
+			if row.batch_no and flt(abs(row.qty), precision) > remaining:
+				self.throw_error_message(
+					_(
+						"Row #{0}: Cannot return {1} of Batch {2}, only {3} was delivered and not returned yet."
+					).format(
+						row.idx,
+						abs(row.qty),
+						bold(row.batch_no),
+						max(remaining, 0),
+					)
+				)
+
+	def get_batch_qty_left_to_return(self, child_doctype, reference_field, original_row):
+		original = frappe.db.get_value(
+			child_doctype, original_row, ["serial_and_batch_bundle", "batch_no", "stock_qty"], as_dict=True
+		)
+		if not original:
+			return {}
+
+		delivered = get_batches_from_bundle(original.serial_and_batch_bundle) or {
+			original.batch_no: original.stock_qty
+		}
+		available = {batch_no: abs(flt(qty)) for batch_no, qty in delivered.items() if batch_no}
+		if not available:
+			return available
+
+		for batch_no, qty in self.get_returned_batch_qty(child_doctype, reference_field, original_row):
+			available[batch_no] = flt(available.get(batch_no)) - flt(qty)
+		return available
+
+	def get_returned_batch_qty(self, child_doctype, reference_field, original_row):
+		child = frappe.qb.DocType(child_doctype)
+		parent = frappe.qb.DocType(self.voucher_type)
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		return (
+			frappe.qb.from_(entry)
+			.join(child)
+			.on(entry.parent == child.serial_and_batch_bundle)
+			.join(parent)
+			.on(child.parent == parent.name)
+			.select(entry.batch_no, Sum(Abs(entry.qty)))
+			.where(
+				(child[reference_field] == original_row)
+				& (child.name != self.voucher_detail_no)
+				& (entry.docstatus == 1)
+				& (parent.docstatus == 1)
+				& (parent.is_return == 1)
+			)
+			.groupby(entry.batch_no)
+		).run()
+
 	def get_orignal_document_data(self):
 		fields = ["serial_and_batch_bundle", "stock_qty"]
 		if self.has_serial_no:
@@ -1547,6 +1621,7 @@ class SerialandBatchBundle(Document):
 	def before_submit(self):
 		self.validate_serial_and_batch_data()
 		self.validate_serial_and_batch_no_for_returned()
+		self.validate_returned_batch_qty()
 		self.set_child_details()
 		self.set_source_document_no()
 
@@ -2055,6 +2130,8 @@ def make_serial_nos(item_code, serial_nos):
 	if not serial_nos:
 		return
 
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
+
 	serial_nos_details = []
 	user = frappe.session.user
 	for serial_no in serial_nos:
@@ -2104,6 +2181,8 @@ def make_batch_nos(item_code, batch_nos):
 	batch_nos = list(set(batch_nos) - set(existing_batches))
 	if not batch_nos:
 		return
+
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	batch_nos_details = []
 	user = frappe.session.user
@@ -3679,12 +3758,14 @@ def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, ba
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exists").format(serial_no))
 
+		frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 		make_serial_no(serial_no, item_code)
 
 	if batch_no and not frappe.db.exists("Batch", batch_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 
+		frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 		make_batch_no(batch_no, item_code)
 
 
