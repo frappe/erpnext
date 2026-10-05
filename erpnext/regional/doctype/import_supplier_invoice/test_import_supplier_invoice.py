@@ -59,6 +59,7 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 				"1.xml": make_invoice_xml("ISI-NO-TAX", service, tax=None),
 				"2.xml": make_invoice_xml("ISI-MP99", service, tax="2.20", payments=[("MP99", "12.20")]),
 				"3.xml": make_invoice_xml("ISI-XX", service, country="XX"),
+				"IT01234567890_0001.xml.p7m": b"signed",
 			}
 		)
 
@@ -66,6 +67,7 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertEqual(self.get_invoice("ISI-NO-TAX").grand_total, 10)
 		self.assertEqual(self.get_invoice("ISI-MP99").grand_total, 12.20)
 		self.assertFalse(frappe.db.exists("Purchase Invoice", {"bill_no": "ISI-XX"}))
+		self.assertEqual((doc.file_count, doc.purchase_invoices_count), (4, 2))
 
 	def test_credit_notes_are_imported_as_returns(self):
 		negative = [make_line("Return one", "-50.00", "-50.00"), make_line("Return two", "-30.00", "-30.00")]

@@ -82,9 +82,22 @@ class ImportSupplierInvoice(Document):
 
 		with zipfile.ZipFile(zip_file.get_full_path()) as zf:
 			for file_name in zf.namelist():
+				if file_name.lower().endswith(".p7m"):
+					self.log_signed_file(file_name)
+					continue
+
 				content = get_file_content(file_name, zf)
 				file_content = bs(content, "xml")
 				self.prepare_data_for_import(file_content, file_name, content)
+
+	def log_signed_file(self, file_name: str) -> None:
+		self.file_count += 1
+		frappe.log_error(
+			title=_("Unable to import a signed file"),
+			message=_("Signed file {0} is not supported, import the XML file instead").format(file_name),
+			reference_doctype=self.doctype,
+			reference_name=self.name,
+		)
 
 	def prepare_data_for_import(self, file_content, file_name, encoded_content):
 		for line in file_content.find_all("DatiGeneraliDocumento"):
