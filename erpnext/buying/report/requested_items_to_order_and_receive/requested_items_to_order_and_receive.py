@@ -235,18 +235,18 @@ def get_columns(filters):
 					"fieldtype": "Data",
 					"width": 100,
 				},
+				{
+					"label": _("Qty"),
+					"fieldname": "qty",
+					"fieldtype": "Float",
+					"width": 140,
+					"convertible": "qty",
+				},
 			]
 		)
 
 	columns.extend(
 		[
-			{
-				"label": _("Qty"),
-				"fieldname": "qty",
-				"fieldtype": "Float",
-				"width": 140,
-				"convertible": "qty",
-			},
 			{
 				"label": _("Qty in Stock UOM"),
 				"fieldname": "stock_qty",
