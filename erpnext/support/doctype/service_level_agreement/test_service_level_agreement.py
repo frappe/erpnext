@@ -187,6 +187,16 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 				json.loads(field["link_filters"]) if field.get("link_filters") else None,
 			)
 
+	def test_sla_fields_leave_standard_fields_alone(self):
+		sla = frappe.new_doc("Service Level Agreement")
+		sla.document_type = "Task"
+		priority_field = [
+			field for field in get_service_level_agreement_fields("Task") if field["fieldname"] == "priority"
+		]
+
+		sla.create_custom_fields(frappe.get_meta("Task"), priority_field)
+		self.assertEqual(frappe.get_meta("Task").get_field("priority").fieldtype, "Select")
+
 	def test_reset_field_properties_does_not_clobber_other_doctypes_field(self):
 		"""Two doctypes each get their own "service_level_agreement" custom field
 		(same fieldname, different owning doctype). Updating the field on one of

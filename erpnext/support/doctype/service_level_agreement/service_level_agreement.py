@@ -308,7 +308,9 @@ class ServiceLevelAgreement(Document):
 				).insert(ignore_permissions=True)
 			else:
 				existing_field = meta.get_field(field.get("fieldname"))
-				self.reset_field_properties(existing_field, "Custom Field", field)
+				# standard fields of the doctype (e.g. priority on Task) are left as they are
+				if existing_field.get("is_custom_field"):
+					self.reset_field_properties(existing_field, "Custom Field", field)
 
 	def reset_field_properties(self, field, field_dt, sla_field):
 		field = frappe.get_doc(field_dt, field.name)
