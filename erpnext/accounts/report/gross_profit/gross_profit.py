@@ -830,15 +830,24 @@ class GrossProfitGenerator:
 
 	def get_buying_amount_from_product_bundle(self, row, product_bundle):
 		buying_amount = 0.0
+		billed_share = self.get_billed_share_of_bundle(row)
 		for packed_item in product_bundle:
 			if packed_item.get("parent_detail_docname") == row.item_row:
 				packed_item_row = row.copy()
 				packed_item_row.warehouse = packed_item.warehouse
-				packed_item_row.qty = packed_item.total_qty * -1
+				packed_item_row.qty = packed_item.total_qty * -1 * billed_share
 				packed_item_row.serial_and_batch_bundle = packed_item.serial_and_batch_bundle
 				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
 
 		return flt(buying_amount, self.currency_precision)
+
+	def get_billed_share_of_bundle(self, row):
+		"""Share of the delivered bundle qty billed by this invoice row; packed item qty is the delivered qty."""
+		if not row.dn_detail:
+			return 1
+
+		delivered_qty = flt(frappe.db.get_value("Delivery Note Item", row.dn_detail, "stock_qty"))
+		return flt(row.qty) / delivered_qty if delivered_qty else 1
 
 	def calculate_buying_amount_from_sle(self, row, my_sle, parenttype, parent, item_row, item_code):
 		for i, sle in enumerate(my_sle):

@@ -5,6 +5,7 @@ from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
@@ -1225,3 +1226,34 @@ class TestGrossProfit(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(data[-1][7], 500)
+
+	def test_bundle_delivery_note_billed_in_parts(self):
+		bundle = self.make_stocked_bundle()
+		dnote = self.create_delivery_note(item=bundle, qty=4, rate=500)
+
+		for _ in range(2):
+			sinv = make_sales_invoice(dnote.name)
+			sinv.items[0].qty = 2
+			sinv.save().submit()
+			self.assertEqual(self.get_invoice_buying_amount(sinv.name), 260)
+
+	def make_stocked_bundle(self):
+		"""Bundle of one unit each of two components valued at 100 and 30."""
+		components = []
+		for rate in (100, 30):
+			item = create_item(f"_Test Gross Profit Bundle Component {rate}").name
+			make_stock_entry(
+				company=self.company, item_code=item, target=self.warehouse, qty=20, basic_rate=rate
+			)
+			components.append(item)
+
+		bundle = create_item("_Test Gross Profit Bundle", is_stock_item=0).name
+		make_product_bundle(bundle, components)
+		return bundle
+
+	def get_invoice_buying_amount(self, sales_invoice):
+		filters = dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), sales_invoice=sales_invoice
+		)
+		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		return data[-1].buying_amount
