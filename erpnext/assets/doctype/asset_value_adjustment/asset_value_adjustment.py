@@ -60,7 +60,7 @@ class AssetValueAdjustment(Document):
 		self.difference_amount = flt(self.new_asset_value - self.current_asset_value)
 
 	def set_current_asset_value(self):
-		if not self.current_asset_value and self.asset:
+		if self.asset:
 			self.current_asset_value = get_asset_value_after_depreciation(self.asset, self.finance_book)
 
 	def on_submit(self):

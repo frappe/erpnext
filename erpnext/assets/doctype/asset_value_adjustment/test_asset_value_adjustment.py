@@ -335,6 +335,19 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
 		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 2000.0)
 
+	def test_current_asset_value_is_recomputed_on_submit(self):
+		asset = create_asset_for_value_adjustment()
+		adjustment = make_asset_value_adjustment(
+			asset=asset.name, current_asset_value=10000, new_asset_value=100000, date="2023-08-21"
+		)
+		self.assertEqual(adjustment.current_asset_value, 120000)
+
+		post_depreciation_entries(getdate("2023-01-31"))
+		adjustment.submit()
+
+		self.assertEqual(adjustment.current_asset_value, 110000)
+		self.assertEqual(get_asset_value_after_depreciation(asset.name), 100000)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)
@@ -367,3 +380,23 @@ def make_difference_account(**args):
 		return acc.name
 	else:
 		return account
+
+
+def create_asset_for_value_adjustment(**finance_book):
+	pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+	asset = frappe.get_doc("Asset", frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name"))
+	asset.calculate_depreciation = 1
+	asset.available_for_use_date = "2023-01-01"
+	asset.purchase_date = "2023-01-01"
+	asset.append(
+		"finance_books",
+		{
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 12,
+			"frequency_of_depreciation": 1,
+			"depreciation_start_date": "2023-01-31",
+			**finance_book,
+		},
+	)
+	asset.submit()
+	return asset
