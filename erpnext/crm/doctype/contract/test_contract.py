@@ -137,6 +137,11 @@ class TestContract(ERPNextTestSuite):
 		contract.signee = "Someone else"
 		self.assertRaises(frappe.UpdateAfterSubmitError, contract.save)
 
+	def test_cancelled_contract_status(self):
+		contract = self.make_signed_contract()
+		contract.cancel()
+		self.assertEqual(frappe.db.get_value("Contract", contract.name, "status"), "Cancelled")
+
 	def make_signed_contract(self, **fields):
 		sign(self.contract_doc)
 		self.contract_doc.update(

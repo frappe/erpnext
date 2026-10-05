@@ -65,6 +65,9 @@ class Contract(Document):
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
+	def on_cancel(self):
+		self.db_set("status", "Cancelled")
+
 	def before_update_after_submit(self):
 		self.validate_signature()
 		self.validate_signature_unchanged()
