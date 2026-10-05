@@ -158,7 +158,8 @@ def get_items(filters):
 	filters_dict = {"disabled": 0, "is_stock_item": 1}
 
 	if filters.get("item_group"):
-		filters_dict.update({"item_group": filters["item_group"]})
+		item_groups = [filters["item_group"], *get_descendants_of("Item Group", filters["item_group"])]
+		filters_dict.update({"item_group": ["in", item_groups]})
 
 	if filters.get("item"):
 		filters_dict.update({"name": filters["item"]})

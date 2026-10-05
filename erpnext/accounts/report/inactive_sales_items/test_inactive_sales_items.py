@@ -42,3 +42,10 @@ class TestInactiveSalesItems(ERPNextTestSuite):
 
 	def run_report(self, **filters) -> list[dict]:
 		return execute(frappe._dict(based_on="Sales Invoice", days=30, **filters))[1]
+
+	def test_item_group_includes_child_groups(self):
+		item = make_item("_Test Inactive Sales Item Group", {"item_group": "_Test Item Group"}).name
+
+		data = self.run_report(item_group="All Item Groups")
+
+		self.assertIn(item, [row["item"] for row in data])
