@@ -217,8 +217,7 @@ class AssetValueAdjustment(Document):
 
 	def get_adjusted_salvage_value_amount(self, row, difference_amount):
 		if row.expected_value_after_useful_life:
-			salvage_value_adjustment = (difference_amount * row.salvage_value_percentage) / 100
-			return flt(salvage_value_adjustment if self.docstatus == 1 else -1 * salvage_value_adjustment)
+			return flt((difference_amount * row.salvage_value_percentage) / 100)
 
 	def get_adjustment_note(self):
 		if self.docstatus == 1:

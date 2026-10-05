@@ -363,6 +363,19 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			date="2023-10-15",
 		)
 
+	def test_cancel_restores_the_salvage_value(self):
+		asset = create_asset_for_value_adjustment(
+			expected_value_after_useful_life=12000, salvage_value_percentage=10
+		)
+		adjustment = make_asset_value_adjustment(asset=asset.name, new_asset_value=150000, date="2023-01-15")
+		adjustment.submit()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 15000)
+
+		adjustment.cancel()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 12000)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)
