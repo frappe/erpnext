@@ -1,15 +1,14 @@
 # Copyright (c) 2018, Frappe and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from ..quality_goal.test_quality_goal import get_quality_goal
-from .quality_review import review
+from .quality_review import create_review, review
 
 
-class TestQualityReview(unittest.TestCase):
+class TestQualityReview(FrappeTestCase):
 	def test_review_creation(self):
 		quality_goal = get_quality_goal()
 		review()
@@ -20,3 +19,11 @@ class TestQualityReview(unittest.TestCase):
 		quality_review.delete()
 
 		quality_goal.delete()
+
+	def test_scheduled_review_is_open(self):
+		quality_goal = get_quality_goal("Test Scheduled Review")
+		create_review(quality_goal.name)
+
+		quality_review = frappe.get_doc("Quality Review", {"goal": quality_goal.name})
+		self.assertEqual(quality_review.status, "Open")
+		self.assertEqual(quality_review.reviews[0].status, "Open")
