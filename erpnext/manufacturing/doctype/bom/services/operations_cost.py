@@ -194,7 +194,7 @@ def _get_operation_cost_and_qty(stock_entry, work_order, operation):
 
 	consumed = get_consumed_operating_cost(work_order.name, stock_entry.bom_no, operation.name)
 	remaining_cost = flt(operation.actual_operating_cost) - sum(flt(row.consumed_cost) for row in consumed)
-	remaining_qty = flt(operation.completed_qty) - sum(flt(row.consumed_qty) for row in consumed)
+	remaining_qty = flt(operation.completed_qty) - max((flt(row.consumed_qty) for row in consumed), default=0)
 	if remaining_qty <= 0:
 		return 0, 0
 
