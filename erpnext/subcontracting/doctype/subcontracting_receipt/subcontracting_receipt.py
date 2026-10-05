@@ -876,6 +876,8 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 	if source_doc.is_return:
 		return
 
+	validate_no_purchase_receipt_made(source_doc)
+
 	po_sr_items = defaultdict(list)
 	for item in source_doc.items:
 		if item.purchase_order:
@@ -977,6 +979,32 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 			)
 
 	return target_doc
+
+
+def validate_no_purchase_receipt_made(scr_doc):
+	if scr_doc.docstatus != 1:
+		frappe.throw(
+			_("Submit Subcontracting Receipt {0} before making a Purchase Receipt").format(scr_doc.name)
+		)
+
+	validate_single_purchase_receipt(scr_doc.name)
+
+
+def validate_single_purchase_receipt(subcontracting_receipt, purchase_receipt=None):
+	if existing := frappe.db.get_value(
+		"Purchase Receipt",
+		{
+			"subcontracting_receipt": subcontracting_receipt,
+			"is_return": 0,
+			"docstatus": ("<", 2),
+			"name": ("!=", purchase_receipt or ""),
+		},
+	):
+		frappe.throw(
+			_("Purchase Receipt {0} is already made against Subcontracting Receipt {1}").format(
+				get_link_to_form("Purchase Receipt", existing), subcontracting_receipt
+			)
+		)
 
 
 def add_po_items_to_pr(scr_doc, target_doc):

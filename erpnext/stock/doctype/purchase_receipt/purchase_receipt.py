@@ -25,6 +25,9 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
 )
+from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+	validate_single_purchase_receipt,
+)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -270,6 +273,9 @@ class PurchaseReceipt(BuyingController):
 		self.validate_provisional_expense_account()
 
 		self.check_on_hold_or_closed_status()
+
+		if self.subcontracting_receipt and not self.is_return:
+			validate_single_purchase_receipt(self.subcontracting_receipt, self.name)
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
