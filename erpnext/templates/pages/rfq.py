@@ -28,8 +28,12 @@ def get_supplier():
 	doctype = frappe.form_dict.doctype
 	parties_doctype = "Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
 	customers, suppliers = get_customers_suppliers(parties_doctype, frappe.session.user)
+	if not suppliers:
+		return ""
 
-	return suppliers[0] if suppliers else ""
+	return next(
+		(supplier for supplier in suppliers if check_supplier_has_docname_access(supplier)), suppliers[0]
+	)
 
 
 def check_supplier_has_docname_access(supplier):
