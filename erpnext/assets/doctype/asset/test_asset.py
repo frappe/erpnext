@@ -1043,6 +1043,14 @@ class TestAsset(AssetSetup):
 			):
 				self.assertRaises(frappe.PermissionError, method, *args)
 
+	def test_scrap_asset_needs_journal_entry_permission(self):
+		asset = create_asset(submit=1)
+		quality_manager = make_fenced_user("asset-qm@example.com", ["Quality Manager"])
+		with as_user(quality_manager):
+			self.assertRaises(frappe.PermissionError, scrap_asset, asset.name)
+
+		self.assertFalse(frappe.db.get_value("Asset", asset.name, "journal_entry_for_scrap"))
+
 	def test_cwip_asset_is_capitalised_after_a_missed_daily_run(self):
 		from erpnext.assets.doctype.asset.asset import make_post_gl_entry
 
