@@ -171,6 +171,23 @@ class TestLead(ERPNextTestSuite):
 			["Open", "Converted", "Do Not Contact"],
 		)
 
+	def test_sales_manager_deletes_a_lead_created_by_another_user(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 1)
+		sales_user = make_user("_test_lead_sales_user@example.com", "Sales User")
+		sales_manager = make_user("_test_lead_sales_manager@example.com", "Sales Manager")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(sales_user)
+		lead = make_lead()
+		contact = frappe.db.get_value(
+			"Dynamic Link", {"link_doctype": "Lead", "link_name": lead.name}, "parent"
+		)
+		self.assertTrue(contact)
+
+		frappe.set_user(sales_manager)
+		frappe.delete_doc("Lead", lead.name)
+		self.assertFalse(frappe.db.exists("Contact", contact))
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",
@@ -281,6 +298,16 @@ def create_todo(description, reference_type, reference_name):
 	todo.reference_name = reference_name
 	todo.insert()
 	return todo
+
+
+def make_user(email, role):
+	if not frappe.db.exists("User", email):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": role, "send_welcome_email": 0}
+		)
+		user.append("roles", {"role": role})
+		user.insert(ignore_permissions=True)
+	return email
 
 
 def make_lead(**args):
