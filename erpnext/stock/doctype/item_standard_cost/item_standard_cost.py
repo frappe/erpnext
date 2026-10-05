@@ -394,11 +394,11 @@ def get_standard_cost_items(
 		get_restriction_criterion,
 	)
 
+	allowed_companies = get_allowed_companies(frappe.session.user, "Item Standard Cost")
 	company = (filters or {}).get("company")
 	if company:
 		# `company` is caller supplied and selects whose default valuation method is applied, so a
 		# caller restricted to particular companies must not ask about the others
-		allowed_companies = get_allowed_companies(frappe.session.user, "Item Standard Cost")
 		if allowed_companies and company not in allowed_companies:
 			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
 
@@ -426,7 +426,7 @@ def get_standard_cost_items(
 		.offset(start)
 	)
 
-	companies = [company] if company else get_allowed_companies(frappe.session.user, "Item")
+	companies = [company] if company else allowed_companies
 	if companies:
 		query = query.where(get_restriction_criterion("Item", companies))
 
