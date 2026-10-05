@@ -8,9 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
-	data = []
-
-	data = frappe.db.get_all(
+	data = frappe.get_list(
 		"Project",
 		filters=filters,
 		fields=[
@@ -25,19 +23,30 @@ def execute(filters=None):
 		order_by="expected_end_date",
 	)
 
-	for project in data:
-		project["total_tasks"] = frappe.db.count("Task", filters={"project": project.name})
-		project["completed_tasks"] = frappe.db.count(
-			"Task", filters={"project": project.name, "status": "Completed"}
-		)
-		project["overdue_tasks"] = frappe.db.count(
-			"Task", filters={"project": project.name, "status": "Overdue"}
-		)
+	set_task_counts(data)
 
 	chart = get_chart_data(data)
 	report_summary = get_report_summary(data)
 
 	return columns, data, None, chart, report_summary
+
+
+def set_task_counts(projects):
+	if not projects:
+		return
+
+	task_counts = frappe.get_list(
+		"Task",
+		filters={"project": ["in", [project.name for project in projects]]},
+		fields=["project", "status", {"COUNT": "*", "as": "count"}],
+		group_by="project, status",
+	)
+
+	for project in projects:
+		counts = {row.status: row.count for row in task_counts if row.project == project.name}
+		project["total_tasks"] = sum(counts.values())
+		project["completed_tasks"] = counts.get("Completed", 0)
+		project["overdue_tasks"] = counts.get("Overdue", 0)
 
 
 def get_columns():
