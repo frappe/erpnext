@@ -91,7 +91,12 @@ def update_asset_maintenance_log_status():
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_maintenance_tasks(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	asset_maintenance_tasks = frappe.db.get_values(
-		"Asset Maintenance Task", {"parent": filters.get("asset_maintenance")}, "maintenance_task"
+	asset_maintenance = filters.get("asset_maintenance")
+	frappe.has_permission("Asset Maintenance", "read", asset_maintenance, throw=True)
+	return frappe.get_all(
+		"Asset Maintenance Task",
+		filters={"parent": asset_maintenance, "parenttype": "Asset Maintenance"},
+		or_filters={"name": ("like", f"%{txt}%"), "maintenance_task": ("like", f"%{txt}%")},
+		fields=["name", "maintenance_task"],
+		as_list=True,
 	)
-	return asset_maintenance_tasks
