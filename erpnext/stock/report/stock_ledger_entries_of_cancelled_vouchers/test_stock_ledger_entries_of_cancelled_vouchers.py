@@ -95,3 +95,41 @@ class TestStockLedgerEntriesOfCancelledVouchers(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Bin", {"item_code": item, "warehouse": warehouse}, "actual_qty"), 13
 		)
+
+	def test_fix_requires_stock_manager(self):
+		frappe.set_user("Guest")
+		try:
+			self.assertRaises(frappe.PermissionError, fix_uncancelled_entries, [])
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_fix_checks_voucher_permission(self):
+		from frappe.permissions import add_user_permission
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		entry = make_stock_entry(
+			item_code=item, qty=5, rate=100, to_warehouse="Stores - _TC", posting_date="2026-06-01"
+		)
+		entry.cancel()
+
+		user = "sle-cancelled-voucher@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "SLE", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+
+		frappe.get_doc("User", user).add_roles("Stock Manager")
+		add_user_permission("Company", "_Test Company 1", user)
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				fix_uncancelled_entries,
+				[{"voucher_type": "Stock Entry", "voucher_no": entry.name}],
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_company_is_mandatory(self):
+		self.assertRaises(frappe.ValidationError, execute, frappe._dict())
