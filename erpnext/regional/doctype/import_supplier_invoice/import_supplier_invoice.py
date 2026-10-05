@@ -123,49 +123,37 @@ class ImportSupplierInvoice(Document):
 			file_doc.insert(ignore_permissions=True)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
-		qty = 1
-		rate, tax_rate = [0, 0]
-		uom = self.default_uom
-
-		# read file for item information
 		for line in file_content.find_all("DettaglioLinee"):
 			if line.find("PrezzoUnitario") and line.find("PrezzoTotale"):
-				rate = flt(line.PrezzoUnitario.text) or 0
-				line_total = flt(line.PrezzoTotale.text) or 0
+				self.append_item(line, invoices_args)
 
-				if rate and flt(line_total) / rate != 1.0 and line.find("Quantita"):
-					qty = flt(line.Quantita.text) or 0
-					if line.find("UnitaMisura"):
-						uom = create_uom(line.UnitaMisura.text)
+	def append_item(self, line, invoices_args):
+		rate = flt(line.PrezzoUnitario.text)
+		line_total = flt(line.PrezzoTotale.text)
+		qty = flt(line.Quantita.text) if line.find("Quantita") else 1
+		uom = create_uom(line.UnitaMisura.text) if line.find("UnitaMisura") else self.default_uom
 
-				if rate < 0 and line_total < 0:
-					qty *= -1
-					invoices_args["return_invoice"] = 1
+		if rate < 0 and line_total < 0:
+			qty = -abs(qty)
+			invoices_args["return_invoice"] = 1
 
-				if line.find("AliquotaIVA"):
-					tax_rate = flt(line.AliquotaIVA.text)
+		line_str = re.sub("[^A-Za-z0-9]+", "-", line.Descrizione.text)
+		invoices_args["items"].append(
+			{
+				"item_code": self.item_code,
+				"item_name": line_str[0:140],
+				"description": line_str,
+				"qty": qty,
+				"uom": uom,
+				"rate": abs(rate),
+				"conversion_factor": 1.0,
+				"tax_rate": flt(line.AliquotaIVA.text) if line.find("AliquotaIVA") else 0,
+			}
+		)
 
-				line_str = re.sub("[^A-Za-z0-9]+", "-", line.Descrizione.text)
-				item_name = line_str[0:140]
-
-				invoices_args["items"].append(
-					{
-						"item_code": self.item_code,
-						"item_name": item_name,
-						"description": line_str,
-						"qty": qty,
-						"uom": uom,
-						"rate": abs(rate),
-						"conversion_factor": 1.0,
-						"tax_rate": tax_rate,
-					}
-				)
-
-				for disc_line in line.find_all("ScontoMaggiorazione"):
-					if disc_line.find("Percentuale"):
-						invoices_args["total_discount"] += flt(
-							(flt(disc_line.Percentuale.text) / 100) * (rate * qty)
-						)
+		for disc_line in line.find_all("ScontoMaggiorazione"):
+			if disc_line.find("Percentuale"):
+				invoices_args["total_discount"] += flt((flt(disc_line.Percentuale.text) / 100) * (rate * qty))
 
 	@frappe.whitelist()
 	def process_file_data(self):

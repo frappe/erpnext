@@ -1,6 +1,9 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import io
+import zipfile
+
 import frappe
 from bs4 import BeautifulSoup
 
@@ -36,6 +39,55 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		)
 		terms = get_payment_terms_from_file(BeautifulSoup(xml, "xml"))
 		self.assertEqual(terms[0]["mode_of_payment_code"], "MP05-Bonifico")
+
+	def test_each_line_has_its_own_qty_and_uom(self):
+		lines = [
+			make_line("Bolts", "10.00", "50.00", qty="5.00", uom="_Test ISI KG"),
+			make_line("Service", "20.00", "20.00"),
+		]
+		self.import_files({"a.xml": make_invoice_xml("ISI-LINES", lines, tax="15.40")})
+
+		invoice = self.get_invoice("ISI-LINES")
+		self.assertEqual([(row.qty, row.uom) for row in invoice.items], [(5, "_Test ISI KG"), (1, "Nos")])
+		self.assertEqual((invoice.net_total, invoice.grand_total), (70, 85.40))
+
+	def import_files(self, files: dict[str, str | bytes]):
+		doc = frappe.get_doc(
+			{
+				"doctype": "Import Supplier Invoice",
+				"company": "_Test Company",
+				"item_code": "_Test Non Stock Item",
+				"supplier_group": "_Test Supplier Group",
+				"tax_account": "_Test Account VAT - _TC",
+				"invoice_series": "ACC-PINV-.YYYY.-",
+				"default_buying_price_list": "Standard Buying",
+			}
+		).insert()
+		doc.zip_file = make_zip_attachment(doc, files).file_url
+		doc.save()
+		doc.import_xml_data()
+		return doc
+
+	def get_invoice(self, bill_no: str):
+		return frappe.get_doc("Purchase Invoice", {"bill_no": bill_no})
+
+
+def make_zip_attachment(doc, files: dict[str, str | bytes]):
+	buffer = io.BytesIO()
+	with zipfile.ZipFile(buffer, "w") as zip_file:
+		for name, content in files.items():
+			zip_file.writestr(name, content)
+
+	return frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": f"{frappe.generate_hash(length=8)}.zip",
+			"content": buffer.getvalue(),
+			"attached_to_doctype": doc.doctype,
+			"attached_to_name": doc.name,
+			"is_private": 1,
+		}
+	).insert()
 
 
 def make_line(
