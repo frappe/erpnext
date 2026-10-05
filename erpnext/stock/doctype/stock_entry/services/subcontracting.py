@@ -157,7 +157,7 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 		filters = {
 			"parent": self.doc.get(self.doc.subcontract_data.order_field),
 			"docstatus": 1,
-			"rm_item_code": child_row.item_code,
+			"rm_item_code": child_row.original_item or child_row.item_code,
 			"main_item_code": child_row.subcontracted_item,
 		}
 

@@ -32,6 +32,7 @@ from erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost import 
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 	update_subcontracting_order_status,
@@ -508,6 +509,45 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(
 			bin_after_cancel_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract
 		)
+
+	def test_reserved_qty_for_subcontracting_ignores_other_orders_transfers(self):
+		get_subcontracting_order()
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse 2 - _TC"
+		sco.insert()
+		sco.submit()
+
+		stock_bin = get_bin("Subcontracted SRM Item 1", "_Test Warehouse - _TC")
+		stock_bin.update_reserved_qty_for_sub_contracting()
+		reserved_qty_before_transfer = stock_bin.reserved_qty_for_sub_contract
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		stock_bin.update_reserved_qty_for_sub_contracting()
+
+		self.assertEqual(stock_bin.reserved_qty_for_sub_contract, reserved_qty_before_transfer)
+
+	def test_alternative_item_transfer_without_supplied_row_releases_reserved_qty(self):
+		sco = get_subcontracting_order()
+		row = sco.supplied_items[0]
+		alternative = make_item("_Test SCO Alternative RM", {"is_stock_item": 1, "valuation_rate": 10}).name
+		set_alternative_item(row.rm_item_code, alternative)
+		make_stock_entry(
+			item_code=alternative, target=row.reserve_warehouse, qty=row.required_qty, basic_rate=10
+		)
+
+		transfer = make_supplied_item_transfer(sco, row, link=False)
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": row.rm_item_code, "allow_alternative_item": 1}
+		)
+		transfer.insert()
+		transfer.submit()
+
+		self.assertEqual(frappe.db.get_value(row.doctype, row.name, "total_supplied_qty"), row.required_qty)
+		self.assertEqual(get_bin(row.rm_item_code, row.reserve_warehouse).reserved_qty_for_sub_contract, 0)
 
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
@@ -1227,6 +1267,26 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value("Subcontracting Receipt Item", scr.items[0].name, "service_cost_per_qty"),
 			500 * 80,
 		)
+
+
+def set_alternative_item(item_code, alternative_item_code):
+	frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+	frappe.get_doc(
+		doctype="Item Alternative", item_code=item_code, alternative_item_code=alternative_item_code
+	).insert()
+
+
+def make_supplied_item_transfer(sco, row, link=True):
+	rm_item = {
+		"item_code": row.main_item_code,
+		"rm_item_code": row.rm_item_code,
+		"qty": row.required_qty,
+		"warehouse": row.reserve_warehouse,
+		"stock_uom": row.stock_uom,
+	}
+	if link:
+		rm_item["name"] = row.name
+	return frappe.get_doc(make_rm_stock_entry(sco.name, [rm_item]))
 
 
 def make_foreign_currency_subcontracting_order():
