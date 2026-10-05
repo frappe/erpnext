@@ -174,6 +174,36 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 			mntc_date=add_days(schedule.items[0].end_date, 30),
 		)
 
+	def test_visit_customer_must_match_schedule(self):
+		schedule = make_maintenance_schedule()
+		schedule.submit()
+
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_schedule_visit,
+			schedule,
+			schedule.schedules[0].name,
+			customer="_Test Customer 1",
+		)
+
+	def test_visit_rows_must_belong_to_its_submitted_schedule(self):
+		schedule = make_maintenance_schedule()
+		schedule.submit()
+		other = make_maintenance_schedule()
+		other.submit()
+
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_schedule_visit,
+			other,
+			other.schedules[0].name,
+			maintenance_schedule=schedule.name,
+		)
+
+		visit = self.make_schedule_visit(schedule, schedule.schedules[0].name, submit=False)
+		schedule.cancel()
+		self.assertRaises(frappe.ValidationError, visit.submit)
+
 
 def make_maintenance_visit():
 	mv = frappe.new_doc("Maintenance Visit")

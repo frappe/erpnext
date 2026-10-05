@@ -89,8 +89,52 @@ class MaintenanceVisit(TransactionBase):
 						)
 					)
 
+	def validate_schedule_details(self):
+		details = self.get_schedule_details()
+		if details:
+			self.validate_schedule_customer()
+			self.validate_schedule_rows(details)
+
+	def validate_schedule_customer(self):
+		schedule = frappe.db.get_value(
+			"Maintenance Schedule", self.maintenance_schedule, ["customer", "docstatus"], as_dict=True
+		)
+		if not schedule or schedule.docstatus != 1:
+			frappe.throw(_("Select a submitted Maintenance Schedule for the scheduled visits"))
+		if schedule.customer != self.customer:
+			frappe.throw(
+				_("Customer {0} does not match the customer of Maintenance Schedule {1}").format(
+					frappe.bold(self.customer), frappe.bold(self.maintenance_schedule)
+				)
+			)
+
+	def validate_schedule_rows(self, details):
+		items = dict(
+			frappe.get_all(
+				"Maintenance Schedule Detail",
+				filters={"name": ("in", details), "parent": self.maintenance_schedule},
+				fields=["name", "item_code"],
+				as_list=True,
+			)
+		)
+		if missing := [detail for detail in details if detail not in items]:
+			frappe.throw(
+				_("Schedule rows {0} do not belong to Maintenance Schedule {1}").format(
+					escape_html(", ".join(missing)), frappe.bold(self.maintenance_schedule)
+				)
+			)
+		for purpose in self.purposes:
+			row_item = items.get(purpose.maintenance_schedule_detail)
+			if row_item and row_item != purpose.item_code:
+				frappe.throw(
+					_("Row #{0}: Item {1} does not match the item of its schedule row").format(
+						purpose.idx, frappe.bold(escape_html(purpose.item_code))
+					)
+				)
+
 	def validate(self):
 		self.validate_serial_no()
+		self.validate_schedule_details()
 		self.validate_maintenance_date()
 		self.validate_purpose_table()
 
