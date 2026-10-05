@@ -1,3 +1,6 @@
+import frappe
+from frappe.utils import today
+
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
 	execute,
 )
@@ -59,3 +62,48 @@ class TestOpportunitySummaryBySalesStage(ERPNextTestSuite):
 		expected_data = [{"opportunity_type": "Sales", "Prospecting": 1}]
 
 		self.assertEqual(expected_data, report[1])
+
+	def test_amount_uses_opportunity_conversion_rate(self):
+		opportunity_type = make_opportunity_type()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 90,
+			}
+		).insert(ignore_if_duplicate=True)
+		make_typed_opportunity(opportunity_type, 1000)
+		make_typed_opportunity(opportunity_type, 100, currency="USD", conversion_rate=80)
+
+		self.assertEqual(type_row(opportunity_type, data_based_on="Amount")["Prospecting"], 9000)
+
+
+def make_opportunity_type() -> str:
+	opportunity_type = "_Test Summary Type " + frappe.generate_hash(length=5)
+	frappe.get_doc({"doctype": "Opportunity Type", "__newname": opportunity_type}).insert()
+	return opportunity_type
+
+
+def make_typed_opportunity(opportunity_type: str, amount: float, **fields):
+	doc = frappe.new_doc("Opportunity")
+	doc.update(
+		{
+			"opportunity_from": "Customer",
+			"party_name": "_Test Customer",
+			"opportunity_type": opportunity_type,
+			"company": "Best Test",
+			"currency": "INR",
+			"conversion_rate": 1,
+			"opportunity_amount": amount,
+			"sales_stage": "Prospecting",
+			**fields,
+		}
+	)
+	return doc.insert()
+
+
+def type_row(opportunity_type: str, **filters) -> dict:
+	filters = {"based_on": "Opportunity Type", "data_based_on": "Number", "company": "Best Test", **filters}
+	return next(row for row in execute(filters)[1] if row["opportunity_type"] == opportunity_type)

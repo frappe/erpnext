@@ -7,8 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.setup.utils import get_exchange_rate
-
 
 def execute(filters=None):
 	return OpportunitySummaryBySalesStage(filters).run()
@@ -96,7 +94,7 @@ class OpportunitySummaryBySalesStage:
 			self.query_result = frappe.db.get_list(
 				"Opportunity",
 				filters=self.get_conditions(),
-				fields=["sales_stage", based_on, data_based_on, "currency"],
+				fields=["sales_stage", based_on, data_based_on, "conversion_rate"],
 			)
 
 			self.convert_to_base_currency()
@@ -218,24 +216,6 @@ class OpportunitySummaryBySalesStage:
 		datasets.append({"name": options, "values": values})
 		self.chart = {"data": {"labels": self.sales_stage_list, "datasets": datasets}, "type": "line"}
 
-	def get_exchange_rate(self, from_currency, to_currency):
-		cacheobj = frappe.cache()
-		if cacheobj and cacheobj.get(from_currency):
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-		else:
-			value = get_exchange_rate(from_currency, to_currency)
-			cacheobj.set(from_currency, value)
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-	def get_default_currency(self):
-		company = self.filters.get("company")
-		return frappe.db.get_value("Company", company, "default_currency")
-
 	def convert_to_base_currency(self):
-		default_currency = self.get_default_currency()
 		for data in self.query_result:
-			if data.get("currency") and data.get("currency") != default_currency:
-				opportunity_currency = data.get("currency")
-				exchange_rate = self.get_exchange_rate(opportunity_currency, default_currency)
-				data["amount"] = data["amount"] * exchange_rate
+			data["amount"] = flt(data["amount"]) * (flt(data["conversion_rate"]) or 1)
