@@ -184,7 +184,14 @@ class AssetRepair(AccountsController):
 				),
 			)
 		else:
+			previous_status = self.asset_doc.status
 			self.asset_doc.set_status()
+			if previous_status == "Out of Order" and self.asset_doc.status != "Out of Order":
+				self.add_asset_activity(
+					_("Asset back in service after Asset Repair {0}").format(
+						get_link_to_form("Asset Repair", self.name)
+					),
+				)
 
 	def calculate_consumed_items_cost(self):
 		consumed_items_cost = 0.0
@@ -208,9 +215,10 @@ class AssetRepair(AccountsController):
 
 			depreciation_note = self.get_depreciation_note()
 			reschedule_depreciation(self.asset_doc, depreciation_note)
-			self.add_asset_activity()
 
 			self.make_gl_entries()
+
+		self.add_asset_activity()
 
 	def cancel_sabb(self):
 		for row in self.stock_items:
@@ -229,8 +237,8 @@ class AssetRepair(AccountsController):
 
 			depreciation_note = self.get_depreciation_note()
 			reschedule_depreciation(self.asset_doc, depreciation_note)
-			self.add_asset_activity()
 
+		self.add_asset_activity()
 		self.cancel_sabb()
 
 	def after_delete(self):
