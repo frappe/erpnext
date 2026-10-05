@@ -1000,6 +1000,7 @@ def is_po_fully_subcontracted(po_name):
 def get_mapped_subcontracting_order(source_name, target_doc=None):
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
+		source_rows = {row.name: row for row in source_doc.items}
 
 		if target_doc.set_warehouse:
 			for item in target_doc.items:
@@ -1009,8 +1010,8 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 				for item in target_doc.items:
 					item.warehouse = source_doc.set_warehouse
 			else:
-				for idx, item in enumerate(target_doc.items):
-					item.warehouse = source_doc.items[idx].warehouse
+				for item in target_doc.items:
+					item.warehouse = source_rows[item.purchase_order_item].warehouse
 
 	if target_doc and isinstance(target_doc, str):
 		target_doc = json.loads(target_doc)
