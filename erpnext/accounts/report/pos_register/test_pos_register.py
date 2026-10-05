@@ -4,11 +4,18 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.pos_register.pos_register import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
+PAYMENT_ACCOUNTS = {"Cash": "Cash - _TC", "Credit Card": "_Test Bank - _TC"}
+
 
 class TestPOSRegister(ERPNextTestSuite):
+	def setUp(self):
+		self.pos_profile = make_pos_profile().name
+
 	def test_report_executes(self):
 		# Smoke-guards the raw-SQL -> query-builder port: the report's POS Invoice query must
 		# compile and run on both MariaDB and postgres (it returns columns + a row list either way).
@@ -18,3 +25,39 @@ class TestPOSRegister(ERPNextTestSuite):
 		)
 		self.assertTrue(columns)
 		self.assertIsInstance(data, list)
+
+	def test_sales_invoices_made_at_the_pos_are_listed(self):
+		invoice = self.make_pos_sales_invoice({"Cash": 1000})
+		consolidated = self.make_pos_sales_invoice({"Cash": 1000})
+		frappe.db.set_value("Sales Invoice", consolidated.name, "is_consolidated", 1)
+
+		rows = self.run_report(group_by="")
+		self.assertEqual(
+			[(row.invoice_type, row.pos_invoice) for row in rows], [("Sales Invoice", invoice.name)]
+		)
+
+	def make_pos_sales_invoice(self, payments, rate=1000, **args):
+		si = create_sales_invoice(rate=rate, do_not_save=True, **args)
+		si.update({"is_pos": 1, "pos_profile": self.pos_profile, "account_for_change_amount": "Cash - _TC"})
+		for mode_of_payment, amount in payments.items():
+			si.append(
+				"payments",
+				{
+					"mode_of_payment": mode_of_payment,
+					"account": PAYMENT_ACCOUNTS[mode_of_payment],
+					"amount": amount,
+				},
+			)
+		si.insert()
+		si.submit()
+		return si
+
+	def run_report(self, **filters):
+		filters = {
+			"company": "_Test Company",
+			"from_date": today(),
+			"to_date": today(),
+			"pos_profile": self.pos_profile,
+			**filters,
+		}
+		return execute(frappe._dict(filters))[1]
