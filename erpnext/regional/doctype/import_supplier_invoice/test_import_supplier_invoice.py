@@ -11,6 +11,7 @@ from erpnext.regional.doctype.import_supplier_invoice.import_supplier_invoice im
 	get_country,
 	get_payment_terms_from_file,
 )
+from erpnext.regional.italy.setup import add_permissions
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -126,6 +127,23 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		supplier = self.get_invoice("ISI-NAMESAKE").supplier
 		self.assertNotEqual(supplier, "_Test ISI Namesake")
 		self.assertEqual(frappe.db.get_value("Supplier", supplier, "tax_id"), "IT01234567890")
+
+	def test_accounts_user_can_import_a_file_from_a_new_supplier(self):
+		add_permissions()
+		self.addCleanup(frappe.clear_cache, doctype="Import Supplier Invoice")
+		frappe.clear_cache(doctype="Import Supplier Invoice")
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "isi-accounts-user@example.com", "first_name": "ISI"}
+		).insert()
+		user.add_roles("Accounts User")
+
+		lines = [make_line("Bolts", "10.00", "50.00", qty="5.00", uom="_Test ISI Box")]
+		xml = make_invoice_xml("ISI-ACC-USER", lines, supplier="_Test ISI New Seller", vat_code="11111111111")
+		with self.set_user(user.name):
+			doc = self.import_files({"a.xml": xml})
+
+		self.assertEqual(doc.status, "File Import Completed")
+		self.assertEqual(self.get_invoice("ISI-ACC-USER").supplier, "_Test ISI New Seller")
 
 	def import_files(self, files: dict[str, str | bytes]):
 		doc = frappe.get_doc(
