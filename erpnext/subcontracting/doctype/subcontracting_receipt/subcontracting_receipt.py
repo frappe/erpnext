@@ -523,9 +523,8 @@ class SubcontractingReceipt(SubcontractingController):
 		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
 
 	def get_percentage_secondary_rate(self, fg_row, cost_allocation_per, qty, own_cost):
-		lcv_cost_per_qty = (
-			flt(fg_row.landed_cost_voucher_amount) / flt(fg_row.qty) if flt(fg_row.qty) else 0.0
-		)
+		received_qty = flt(fg_row.received_qty) or flt(fg_row.qty)
+		lcv_cost_per_qty = flt(fg_row.landed_cost_voucher_amount) / received_qty if received_qty else 0.0
 		fg_item_cost = (
 			flt(fg_row.rm_cost_per_qty)
 			+ flt(fg_row.additional_cost_per_qty)
@@ -626,14 +625,16 @@ class SubcontractingReceipt(SubcontractingController):
 						rm_cost_map.pop(item.name)
 
 					if item.name in secondary_items_cost_map:
-						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / item.qty
+						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / (
+							item.received_qty or item.qty
+						)
 						secondary_items_cost_map.pop(item.name)
 					else:
 						item.secondary_items_cost_per_qty = 0
 
 				lcv_cost_per_qty = 0.0
 				if item.landed_cost_voucher_amount:
-					lcv_cost_per_qty = item.landed_cost_voucher_amount / item.qty
+					lcv_cost_per_qty = item.landed_cost_voucher_amount / (item.received_qty or item.qty)
 
 				item.rate = (
 					flt(item.rm_cost_per_qty)
@@ -644,7 +645,7 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 			if item.bom:
-				item.received_qty = flt(item.qty) + flt(item.rejected_qty) + flt(item.process_loss_qty)
+				item.received_qty = self.get_qty_for_costing(item)
 				item.amount = (
 					flt(item.received_qty)
 					* flt(item.rate)
@@ -898,7 +899,7 @@ class SubcontractingReceipt(SubcontractingController):
 							gl_entries=gl_entries,
 							account=item.expense_account,
 							cost_center=self.cost_center or self.get_company_default("cost_center"),
-							debit=item.qty * item.additional_cost_per_qty,
+							debit=flt(item.received_qty) * item.additional_cost_per_qty,
 							credit=0.0,
 							remarks=remarks,
 							against_account=None,
