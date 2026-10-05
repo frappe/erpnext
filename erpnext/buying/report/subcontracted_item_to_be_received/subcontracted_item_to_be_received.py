@@ -9,7 +9,7 @@ from erpnext.stock.doctype.company_restriction.company_restriction import get_al
 
 
 def execute(filters=None):
-	if filters.from_date >= filters.to_date:
+	if filters.from_date > filters.to_date:
 		frappe.msgprint(_("To Date must be greater than From Date"))
 
 	data = []
