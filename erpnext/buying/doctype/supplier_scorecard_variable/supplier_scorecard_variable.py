@@ -416,7 +416,7 @@ def get_rfq_total_number(scorecard):
 		.on(rfq_item.parent == rfq.name)
 		.join(rfq_sup)
 		.on(rfq_sup.parent == rfq.name)
-		.select(Count(rfq.name))
+		.select(Count(rfq.name).distinct())
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
 		.where(rfq_item.docstatus == 1)
@@ -466,7 +466,7 @@ def get_sq_total_number(scorecard):
 		.on(sq_item.request_for_quotation_item == rfq_item.name)
 		.join(sq)
 		.on(sq_item.parent == sq.name)
-		.select(Count(sq.name))
+		.select(Count(sq.name).distinct())
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(sq.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
@@ -516,7 +516,7 @@ def get_rfq_response_days(scorecard):
 	sq = frappe.qb.DocType("Supplier Quotation")
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
-	query = (
+	responses = (
 		frappe.qb.from_(rfq)
 		.join(rfq_item)
 		.on(rfq_item.parent == rfq.name)
@@ -526,13 +526,12 @@ def get_rfq_response_days(scorecard):
 		.on(sq_item.request_for_quotation_item == rfq_item.name)
 		.join(sq)
 		.on(sq_item.parent == sq.name)
-		.select(Sum(DateDiff(sq.transaction_date, rfq.transaction_date)))
+		.select(rfq.name, sq.name, DateDiff(sq.transaction_date, rfq.transaction_date))
+		.distinct()
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(sq.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
 		.where(rfq_item.docstatus == 1)
 		.where(sq_item.docstatus == 1)
-	)
-
-	result = query.run()
-	return frappe.utils.cint(result[0][0]) if result else 0
+	).run()
+	return sum(frappe.utils.cint(days) for _rfq, _sq, days in responses)

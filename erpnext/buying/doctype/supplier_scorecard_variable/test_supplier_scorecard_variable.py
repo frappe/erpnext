@@ -7,6 +7,10 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_pr_from_po
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.doctype.request_for_quotation.mapper import make_supplier_quotation_from_rfq
+from erpnext.buying.doctype.request_for_quotation.test_request_for_quotation import (
+	make_request_for_quotation,
+)
 from erpnext.buying.doctype.supplier_scorecard_variable import (
 	supplier_scorecard_variable as variable_functions,
 )
@@ -14,6 +18,9 @@ from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_varia
 	VariablePathNotFound,
 	get_item_workdays,
 	get_on_time_shipments,
+	get_rfq_response_days,
+	get_rfq_total_number,
+	get_sq_total_number,
 	get_total_cost_of_shipments,
 	get_total_days_late,
 )
@@ -82,6 +89,24 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 		scorecard = scorecard_for(supplier)
 		self.assertEqual(get_total_days_late(scorecard), 0)
 		self.assertEqual(get_item_workdays(scorecard), 0)
+
+	def test_rfq_and_quotation_counted_once_per_document(self):
+		supplier = create_scorecard_supplier()
+		rfq = make_request_for_quotation(supplier_data=[{"supplier": supplier}], do_not_save=True)
+		rfq.transaction_date = add_days(nowdate(), -4)
+		for item_code in ("_Test Item 2", "_Test Item Home Desktop 100"):
+			rfq.append("items", {**rfq.items[0].as_dict(no_default_fields=True), "item_code": item_code})
+		rfq.insert()
+		rfq.submit()
+		quotation = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		quotation.transaction_date = nowdate()
+		quotation.insert()
+		quotation.submit()
+
+		scorecard = scorecard_for(supplier)
+		self.assertEqual(get_rfq_total_number(scorecard), 1)
+		self.assertEqual(get_sq_total_number(scorecard), 1)
+		self.assertEqual(get_rfq_response_days(scorecard), 4)
 
 	def test_split_on_time_receipts_count_as_one_shipment(self):
 		# A PO line fully received on time across two partial receipts is one on-time shipment
