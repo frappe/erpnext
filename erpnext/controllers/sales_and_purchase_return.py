@@ -226,6 +226,8 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if column in ("stock_qty", "qty") and not args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get(column)
 			current_stock_qty = args.get(column)
+			if column == "stock_qty":
+				current_stock_qty = flt(args.get("qty")) * flt(args.get("conversion_factor") or 1)
 		elif args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
 			current_stock_qty = (
@@ -241,9 +243,9 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		label = column.replace("_", " ").title()
 
 		if reference_qty:
-			if flt(args.get(column)) > 0:
+			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and args.get(column) >= 0:
+			elif returned_qty >= reference_qty and flt(current_stock_qty) >= 0:
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)

@@ -26,6 +26,19 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(return_dn.is_return, 1)
 		self.assertEqual(return_dn.items[0].qty, -5)
 
+	def test_return_qty_is_checked_when_only_qty_changes(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		dn = create_delivery_note(qty=5)
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = -50
+
+		self.assertRaises(frappe.ValidationError, return_dn.insert)
+
 	def test_purchase_invoice_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
