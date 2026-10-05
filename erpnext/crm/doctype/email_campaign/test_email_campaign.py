@@ -75,6 +75,24 @@ class TestEmailCampaign(ERPNextTestSuite):
 			frappe.ValidationError, "unsubscribed", self.make_lead_email_campaign, lead, schedules=[0]
 		)
 
+	def test_saving_an_unsubscribed_campaign_keeps_it_unsubscribed(self):
+		lead = self.make_lead()
+		email_campaign = self.make_lead_email_campaign(lead, schedules=[0])
+		frappe.get_doc(
+			{
+				"doctype": "Email Unsubscribe",
+				"email": lead.email_id,
+				"reference_doctype": "Email Campaign",
+				"reference_name": email_campaign.name,
+			}
+		).insert()
+
+		email_campaign.reload()
+		email_campaign.sender = "Administrator"
+		email_campaign.save()
+		self.assertEqual(email_campaign.status, "Unsubscribed")
+		self.assertEqual(self.send_campaign_mails(lead.email_id), [])
+
 	def test_start_date_cannot_be_in_the_past(self):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
 		self.assertRaises(frappe.ValidationError, doc.set_date)
