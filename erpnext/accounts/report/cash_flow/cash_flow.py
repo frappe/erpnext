@@ -256,6 +256,9 @@ def get_account_type_based_gl_data(company, filters=None):
 		)
 	)
 
+	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		query = query.where(gl.is_opening != "Yes")
+
 	# finance book
 	if filters.include_default_book_entries:
 		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")

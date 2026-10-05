@@ -111,3 +111,15 @@ class TestCashFlow(ERPNextTestSuite):
 		self.assertEqual(after.get(key_for(cc1), 0) - before.get(key_for(cc1), 0), 400)
 		self.assertEqual(after.get(key_for(cc2), 0) - before.get(key_for(cc2), 0), 200)
 		self.assertEqual(after.get("total", 0) - before.get("total", 0), 600)
+
+	def test_opening_entries_are_not_cash_flows(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		before = self.net_change_in_cash()
+		opening_entry = make_journal_entry(
+			"Office Equipment - _TC", "Temporary Opening - _TC", 800, posting_date=today(), save=False
+		)
+		opening_entry.is_opening = "Yes"
+		opening_entry.submit()
+
+		self.assertEqual(self.net_change_in_cash() - before, 0)
