@@ -89,13 +89,13 @@ def get_communication_details(filters):
 	for d in opportunities:
 		invoice = (
 			frappe.qb.from_(si)
-			.select(Date(si.creation))
+			.select(si.posting_date)
 			.where(
 				(si.contact_email == d.contact_email)
-				& Date(si.creation).between(filters.from_date, filters.to_date)
-				& (si.docstatus != 2)
+				& si.posting_date.between(filters.from_date, filters.to_date)
+				& (si.docstatus == 1)
 			)
-			.orderby(si.creation)
+			.orderby(si.posting_date)
 			.limit(1)
 			.run()
 		)
