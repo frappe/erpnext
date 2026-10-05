@@ -15,6 +15,8 @@ from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period 
 	make_supplier_scorecard,
 )
 
+STANDING_FLAGS = ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos")
+
 
 class SupplierScorecard(Document):
 	# begin: auto-generated types
@@ -58,6 +60,9 @@ class SupplierScorecard(Document):
 	def on_update(self):
 		if create_scorecard_periods(self) > 0:
 			self.save()
+
+	def on_trash(self):
+		frappe.db.set_value("Supplier", self.supplier, dict.fromkeys(STANDING_FLAGS, 0))
 
 	def validate_standings(self):
 		# Check that there are no overlapping scores and check that there are no missing scores
@@ -140,7 +145,7 @@ class SupplierScorecard(Document):
 				self.employee_link = standing.employee_link
 
 				# Update supplier standing info
-				for fieldname in ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos"):
+				for fieldname in STANDING_FLAGS:
 					self.set(fieldname, standing.get(fieldname))
 					frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
 
