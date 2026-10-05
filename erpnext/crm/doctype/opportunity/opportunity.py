@@ -10,7 +10,7 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import flt, get_fullname
+from frappe.utils import comma_or, flt, get_fullname
 from pypika.terms import Criterion
 
 from erpnext.accounts.party import validate_party_frozen_disabled
@@ -23,6 +23,8 @@ from erpnext.crm.utils import (
 )
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
+
+PARTY_DOCTYPES = ("Lead", "Customer", "Prospect")
 
 
 class Opportunity(TransactionBase, CRMNote):
@@ -123,6 +125,7 @@ class Opportunity(TransactionBase, CRMNote):
 	def validate(self):
 		self.set_opportunity_type()
 		self.make_new_lead_if_required()
+		self.validate_opportunity_from()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
@@ -142,6 +145,12 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def on_trash(self):
 		frappe.db.delete("Prospect Opportunity", {"opportunity": self.name})
+
+	def validate_opportunity_from(self):
+		if self.opportunity_from not in PARTY_DOCTYPES:
+			frappe.throw(
+				_("Opportunity From must be one of {0}").format(comma_or([_(d) for d in PARTY_DOCTYPES]))
+			)
 
 	def validate_qty(self):
 		for item in self.items:

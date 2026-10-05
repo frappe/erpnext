@@ -129,6 +129,18 @@ class TestOpportunity(ERPNextTestSuite):
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
 		make_opportunity(with_items=0)
 
+	def test_opportunity_from_must_be_a_party_doctype(self):
+		opp = frappe.get_doc(
+			{
+				"doctype": "Opportunity",
+				"company": "_Test Company",
+				"opportunity_from": "Supplier",
+				"party_name": "_Test Supplier",
+				"transaction_date": today(),
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Opportunity From", opp.insert)
+
 	def test_disabled_lead_not_blocked(self):
 		# Lead.disabled isn't enforced anywhere else (e.g. the Lead picker query only
 		# excludes Converted leads), so it shouldn't block Opportunity creation either.
