@@ -1126,6 +1126,40 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)[:3]:
 			self.assertEqual(status, "Delivered")
 
+	def test_closing_releases_stock_reservations(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
+
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.reserve_stock = 1
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		sco.submit()
+		self.assertTrue(has_reserved_stock(sco.doctype, sco.name))
+
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		self.assertFalse(has_reserved_stock(sco.doctype, sco.name))
+
+	def test_closing_keeps_reservations_of_transferred_material(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.reserve_stock = 1
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items[:1], itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": sco.doctype, "voucher_no": sco.name},
+			fields=["transferred_qty", "docstatus"],
+		)
+		self.assertTrue([row for row in reservations if row.transferred_qty])
+		for row in reservations:
+			self.assertEqual(row.docstatus, 1 if row.transferred_qty else 2)
+
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
 			{

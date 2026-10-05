@@ -11,6 +11,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
 )
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
@@ -358,6 +359,9 @@ class SubcontractingOrder(SubcontractingController):
 		if status and self.status != status:
 			self.db_set("status", status, update_modified=update_modified)
 
+		if status == "Closed":
+			self.release_stock_reservations()
+
 		self.update_requested_qty()
 		if update_bin:
 			self.update_ordered_qty_for_subcontracting()
@@ -457,6 +461,17 @@ class SubcontractingOrder(SubcontractingController):
 				return True
 
 		return False
+
+	def release_stock_reservations(self):
+		sre_list = [
+			sre.name
+			for sre in get_stock_reservation_entries_for_voucher(
+				self.doctype, self.name, fields=["name", "transferred_qty"], ignore_status=True
+			)
+			if not flt(sre.transferred_qty)
+		]
+		if sre_list:
+			self.cancel_stock_reservation_entries(sre_list, notify=False)
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True):
