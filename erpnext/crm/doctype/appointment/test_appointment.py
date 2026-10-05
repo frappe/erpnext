@@ -399,6 +399,16 @@ class TestAppointment(ERPNextTestSuite):
 				contact={"name": "Portal Visitor", "email": "invalid_tz@example.com"},
 			)
 
+	def test_booking_verified_after_its_time_stays_unverified(self):
+		appointment = self._create_portal_appointment("portal_visitor_late@example.com")
+		frappe.db.set_value(
+			"Appointment", appointment.name, "scheduled_time", add_to_date(now_datetime(), minutes=-10)
+		)
+		appointment.reload()
+
+		self.assertFalse(self._request_verification(appointment).success)
+		self.assertEqual(get_status(appointment.name), "Unverified")
+
 	def test_expired_unverified_appointments_are_closed(self):
 		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
 		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)

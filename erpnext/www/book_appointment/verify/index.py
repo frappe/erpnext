@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, now_datetime
+from frappe.utils import add_to_date, get_datetime, now_datetime
 from frappe.utils.data import sha256_hash
 
 from erpnext.crm.doctype.appointment.appointment import get_verification_link_expiry
@@ -36,6 +36,11 @@ def get_context(context):
 	if now_datetime() > add_to_date(appointment.creation, minutes=get_verification_link_expiry()):
 		context.success = False
 		context.message = _("Verification link has expired.")
+		return context
+
+	if get_datetime(appointment.scheduled_time) < now_datetime():
+		context.success = False
+		context.message = _("The appointment time has passed. Please book the appointment again.")
 		return context
 
 	try:
