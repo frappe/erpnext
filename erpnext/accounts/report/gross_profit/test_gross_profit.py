@@ -676,6 +676,18 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[7], 0.0)  # gross profit
 		self.assertEqual(total[8], 0.0)  # gross profit %
 
+	def test_sales_person_total_counts_shared_invoice_once(self):
+		sinv = self.create_sales_invoice(qty=10, rate=100, do_not_save=True)
+		for sales_person in ("_Test Sales Person", "_Test Sales Person 1"):
+			sinv.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 50})
+		sinv.submit()
+
+		filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), sales_invoice=sinv.name)
+		_, data = execute(frappe._dict(filters, group_by="Sales Person"))
+
+		self.assertEqual(data[-1][5], 1000)
+		self.assertEqual(data[-1][6], 1000)
+
 	def test_drop_ship(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 

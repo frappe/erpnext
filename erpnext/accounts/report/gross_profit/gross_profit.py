@@ -259,6 +259,12 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 		data.append(row)
 
+	# an invoice shared by several sales persons is repeated under each of them
+	if filters.group_by == "Sales Person":
+		amounts = gross_profit_data.invoice_item_amounts.values()
+		total_base_amount = sum(flt(amount.base_amount) for amount in amounts)
+		total_buying_amount = sum(flt(amount.buying_amount) for amount in amounts)
+
 	total_gross_profit = flt(
 		total_base_amount + abs(total_buying_amount)
 		if total_buying_amount < 0
@@ -529,6 +535,7 @@ class GrossProfitGenerator:
 	def process(self):
 		self.grouped = {}
 		self.grouped_data = []
+		self.invoice_item_amounts = {}
 
 		self.currency_precision = cint(frappe.db.get_default("currency_precision")) or 3
 		self.float_precision = cint(frappe.db.get_default("float_precision")) or 2
@@ -631,6 +638,9 @@ class GrossProfitGenerator:
 
 			# add to grouped
 			self.grouped.setdefault(row.get(scrub(self.filters.group_by)), []).append(row)
+			self.invoice_item_amounts[row.item_row] = frappe._dict(
+				base_amount=row.base_amount, buying_amount=row.buying_amount
+			)
 
 		if self.grouped:
 			self.get_average_rate_based_on_group_by()
