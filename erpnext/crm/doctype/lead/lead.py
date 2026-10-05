@@ -122,6 +122,11 @@ class Lead(SellingController, CRMNote):
 	def on_update(self):
 		self.update_prospect()
 
+	def set_status(self, update=False, status=None, update_modified=True):
+		super().set_status(update=update, status=status, update_modified=update_modified)
+		if update:
+			self.update_prospect()
+
 	def on_trash(self):
 		frappe.db.set_value("Issue", {"lead": self.name}, "lead", None)
 		delete_contact_and_address(self.doctype, self.name)

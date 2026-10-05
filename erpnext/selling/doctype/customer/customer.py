@@ -336,7 +336,7 @@ class Customer(TransactionBase):
 		"""If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity"""
 		if self.lead_name:
-			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
+			frappe.get_doc("Lead", self.lead_name).set_status(update=True)
 
 	def link_address_and_contact(self):
 		linked_documents = {

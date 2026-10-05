@@ -83,6 +83,29 @@ class TestProspect(ERPNextTestSuite):
 		other = make_prospect(company="_Test Company")
 		self.assertRaises(frappe.ValidationError, add_lead_to_prospect, lead.name, other.name)
 
+	def test_lead_rows_follow_the_lead_status(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		lead = make_lead()
+		prospect = make_prospect(company="_Test Company")
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		frappe.get_doc(
+			{
+				"doctype": "Quotation",
+				"quotation_to": "Lead",
+				"party_name": lead.name,
+				"company": "_Test Company",
+				"items": [{"item_code": "_Test Item", "qty": 1, "rate": 100}],
+			}
+		).insert().submit()
+		self.assertEqual(lead_row_status(lead.name), "Quotation")
+
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.insert()
+		self.assertEqual(lead_row_status(lead.name), "Converted")
+
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
 		prospect = frappe.new_doc("Prospect")
@@ -91,6 +114,10 @@ class TestProspect(ERPNextTestSuite):
 
 		prospect.prospect_owner = None
 		self.assertIsNone(prospect.get_notification_email())
+
+
+def lead_row_status(lead: str) -> str:
+	return frappe.db.get_value("Prospect Lead", {"lead": lead}, "status")
 
 
 def make_prospect(**args):
