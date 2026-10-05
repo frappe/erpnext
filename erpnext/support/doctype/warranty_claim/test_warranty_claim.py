@@ -142,3 +142,16 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		claim.status = "Closed"
 		claim.save()
 		self.assertEqual(getdate(claim.resolution_date), getdate())
+
+	def test_warranty_status_is_taken_on_the_complaint_date(self):
+		claim = self.make_warranty_claim()
+		claim.complaint_date = "2025-12-15"
+		claim.warranty_expiry_date = "2026-01-31"
+		claim.warranty_amc_status = "Out of Warranty"
+		claim.save()
+		self.assertEqual(claim.warranty_amc_status, "Under Warranty")
+
+		claim.complaint_date = "2026-02-15"
+		claim.amc_expiry_date = "2026-12-31"
+		claim.save()
+		self.assertEqual(claim.warranty_amc_status, "Under AMC")

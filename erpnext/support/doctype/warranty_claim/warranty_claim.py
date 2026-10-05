@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, session
 from frappe.model.document import Document
-from frappe.utils import escape_html, now_datetime
+from frappe.utils import escape_html, getdate, now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -58,6 +58,7 @@ class WarrantyClaim(TransactionBase):
 			frappe.throw(_("Customer is required"))
 
 		self.set_resolution()
+		self.set_warranty_amc_status()
 
 	def set_resolution(self):
 		previous_status = frappe.db.get_value("Warranty Claim", self.name, "status")
@@ -66,6 +67,22 @@ class WarrantyClaim(TransactionBase):
 		elif self.status != "Closed" and previous_status == "Closed":
 			self.resolution_date = None
 			self.resolved_by = None
+
+	def set_warranty_amc_status(self):
+		"""Warranty / AMC status on the complaint date, ranked as on Serial No."""
+		if not (self.warranty_expiry_date or self.amc_expiry_date):
+			return
+
+		complaint_date = getdate(self.complaint_date)
+		warranty_expiry = self.warranty_expiry_date and getdate(self.warranty_expiry_date)
+		amc_expiry = self.amc_expiry_date and getdate(self.amc_expiry_date)
+
+		if warranty_expiry and warranty_expiry >= complaint_date:
+			self.warranty_amc_status = "Under Warranty"
+		elif amc_expiry:
+			self.warranty_amc_status = "Under AMC" if amc_expiry >= complaint_date else "Out of AMC"
+		else:
+			self.warranty_amc_status = "Out of Warranty"
 
 	def validate_serial_no(self):
 		if not self.serial_no or not self.item_code:
