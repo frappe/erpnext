@@ -24,6 +24,7 @@ def execute(filters=None):
 			dimensions = get_cost_center_with_children(dimensions)
 	else:
 		dimensions = get_budget_dimensions(filters)
+	dimensions = get_permitted_dimensions(filters.get("budget_against"), dimensions)
 	if not dimensions:
 		return columns, [], None, None
 
@@ -401,6 +402,14 @@ def get_budget_dimensions(filters):
 		return query.run(pluck="name")
 	else:
 		return frappe.qb.from_(dimension).select(dimension.name).run(pluck="name")
+
+
+def get_permitted_dimensions(budget_against: str, dimensions: list) -> list:
+	"""Keep only the dimensions the user may read, in their original order."""
+	if not dimensions:
+		return []
+	permitted = set(frappe.get_list(budget_against, filters={"name": ["in", dimensions]}, pluck="name"))
+	return [dimension for dimension in dimensions if dimension in permitted]
 
 
 def validate_budget_dimensions(filters):
