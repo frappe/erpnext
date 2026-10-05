@@ -241,6 +241,7 @@ def get_columns(filters):
 					"fieldtype": "Float",
 					"width": 140,
 					"convertible": "qty",
+					"disable_total": True,
 				},
 			]
 		)
