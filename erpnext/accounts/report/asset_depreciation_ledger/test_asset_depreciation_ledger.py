@@ -11,6 +11,9 @@ from erpnext.assets.doctype.asset.depreciation import (
 	scrap_asset,
 )
 from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
+from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+	make_asset_value_adjustment,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -66,6 +69,21 @@ class TestAssetDepreciationLedger(ERPNextTestSuite):
 		self.assertEqual(rows[-1].depreciation_amount, -depreciation_until_scrap)
 		self.assertEqual(rows[-1].accumulated_depreciation_amount, 10000)
 		self.assertEqual(rows[-1].value_after_depreciation, 90000)
+
+	def test_value_after_depreciation_includes_revaluation(self):
+		asset = create_depreciating_asset()
+		post_depreciation_entries(date="2021-01-01")
+		make_asset_value_adjustment(
+			asset=asset.name, date="2021-01-15", current_asset_value=90000, new_asset_value=100000
+		).submit()
+		post_depreciation_entries(date="2022-01-01")
+
+		rows = get_asset_rows(asset.name, "2020-01-01", "2021-12-31")
+
+		self.assertEqual(rows[0].value_after_depreciation, 90000)
+		self.assertAlmostEqual(
+			rows[-1].value_after_depreciation, 110000 - rows[-1].accumulated_depreciation_amount, places=2
+		)
 
 
 def create_depreciating_asset(**args) -> frappe._dict:

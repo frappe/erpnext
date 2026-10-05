@@ -58,6 +58,7 @@ def get_data(filters):
 	depreciation_before_from_date = get_depreciation_before_from_date(
 		filters_data, or_filters_data, filters.get("from_date")
 	)
+	cost_adjustments = get_cost_adjustments(filters, or_filters_data, assets_details)
 
 	for d in gl_entries:
 		asset_data = assets_details.get(d.against_voucher)
@@ -78,7 +79,11 @@ def get_data(filters):
 					"depreciation_amount": d.depreciation_amount,
 					"depreciation_date": d.posting_date,
 					"value_after_depreciation": (
-						flt(row.net_purchase_amount) - flt(row.accumulated_depreciation_amount)
+						flt(row.net_purchase_amount)
+						+ get_cost_adjustment_till(
+							cost_adjustments.get(d.against_voucher, []), d.posting_date
+						)
+						- flt(row.accumulated_depreciation_amount)
 					),
 					"depreciation_entry": d.voucher_no,
 				}
@@ -128,6 +133,40 @@ def get_depreciation_before_from_date(filters_data, or_filters_data, from_date) 
 	return {d.against_voucher: flt(d.depreciation_amount) for d in gl_entries}
 
 
+def get_cost_adjustments(filters, or_filters_data, assets_details) -> dict:
+	"""Revaluations and capitalised repairs posted to the fixed asset account of each asset before its disposal."""
+	fixed_asset_accounts = frappe.get_all("Account", filters={"account_type": "Fixed Asset"}, pluck="name")
+	gl_entries = frappe.get_all(
+		"GL Entry",
+		filters=[
+			["company", "=", filters.get("company")],
+			["posting_date", "<=", filters.get("to_date")],
+			["against_voucher_type", "=", "Asset"],
+			["against_voucher", "in", list(assets_details)],
+			["account", "in", fixed_asset_accounts],
+			["is_cancelled", "=", 0],
+		],
+		or_filters=or_filters_data,
+		fields=[
+			"against_voucher",
+			"posting_date",
+			{"SUB": ["debit_in_account_currency", "credit_in_account_currency"], "as": "amount"},
+		],
+	)
+
+	cost_adjustments = {}
+	for d in gl_entries:
+		disposal_date = assets_details[d.against_voucher].disposal_date
+		if not disposal_date or d.posting_date < disposal_date:
+			cost_adjustments.setdefault(d.against_voucher, []).append(d)
+
+	return cost_adjustments
+
+
+def get_cost_adjustment_till(cost_adjustments: list, date) -> float:
+	return sum(flt(d.amount) for d in cost_adjustments if d.posting_date <= date)
+
+
 def get_assets_details(assets):
 	assets_details = {}
 
@@ -141,6 +180,7 @@ def get_assets_details(assets):
 		"depreciation_method",
 		"purchase_date",
 		"cost_center",
+		"disposal_date",
 	]
 
 	for d in frappe.get_all("Asset", fields=fields, filters={"name": ("in", assets)}):
