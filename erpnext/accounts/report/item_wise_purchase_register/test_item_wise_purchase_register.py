@@ -58,3 +58,33 @@ class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		report_output = {k: v for k, v in report[1][0].items() if k in expected_result}
 		self.assertDictEqual(report_output, expected_result)
+
+	def test_total_includes_other_charges(self):
+		pi = make_purchase_invoice(
+			item=self.item, company=self.company, supplier=self.supplier, rate=100, qty=1, do_not_save=1
+		)
+		for account, charge_type, rate, tax_amount in (
+			("_Test Account VAT - _TC", "On Net Total", 18, 0),
+			("_Test Account Shipping Charges - _TC", "Actual", 0, 10),
+		):
+			pi.append(
+				"taxes",
+				{
+					"category": "Total",
+					"add_deduct_tax": "Add",
+					"charge_type": charge_type,
+					"account_head": account,
+					"cost_center": "_Test Cost Center - _TC",
+					"description": account,
+					"rate": rate,
+					"tax_amount": tax_amount,
+				},
+			)
+		pi.submit()
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		self.assertEqual(row["total_tax"], 18)
+		self.assertEqual(row["total_other_charges"], 10)
+		self.assertEqual(row["total"], pi.base_grand_total)
