@@ -623,6 +623,10 @@ class ReceivablePayableReport:
 			invoiced = d.payment_amount
 			paid_amount = d.paid_amount
 
+		if self.filters.report_date < getdate(nowdate()):
+			# the schedule's paid amounts are as of today, so spread only what was paid up to the report date
+			paid_amount = 0.0
+
 		row.payment_terms.append(
 			term.update(
 				{

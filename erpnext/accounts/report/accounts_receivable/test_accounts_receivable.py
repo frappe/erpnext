@@ -1327,6 +1327,42 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		rows = execute(filters)[1]
 		self.assertEqual([row.outstanding for row in rows], [2000.0, 2000.0])
 
+	def test_payment_terms_as_of_a_date_before_a_term_payment(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.controllers.accounts_controller import get_payment_terms
+
+		si = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			posting_date=add_days(today(), -40),
+			rate=1000,
+			do_not_save=1,
+		)
+		create_payment_terms_template()
+		si.payment_terms_template = "Test Receivable Template"
+		for term in get_payment_terms(si.payment_terms_template, si.posting_date, 1000, 1000):
+			si.append("payment_schedule", term)
+		si.insert().submit()
+		pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash)
+		pe.posting_date = add_days(today(), -5)
+		pe.references = pe.references[:1]
+		pe.paid_amount = pe.received_amount = pe.references[0].allocated_amount
+		pe.save().submit()
+
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"report_date": add_days(today(), -20),
+				"range": "30, 60, 90, 120",
+				"based_on_payment_terms": 1,
+				"party_type": "Customer",
+				"party": [self.customer],
+			}
+		)
+		rows = [row for row in execute(filters)[1] if row.voucher_no == si.name]
+		expected = [schedule.payment_amount for schedule in si.payment_schedule]
+		self.assertEqual([row.outstanding for row in rows], expected)
+
 	def test_accounts_receivable_output_for_minor_outstanding(self):
 		"""
 		AR/AP should report miniscule outstanding of 0.01. Or else there will be slight difference with General Ledger/Trial Balance
