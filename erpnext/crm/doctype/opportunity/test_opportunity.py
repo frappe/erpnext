@@ -216,6 +216,8 @@ class TestOpportunity(ERPNextTestSuite):
 			update_modified=False,
 		)
 
+		# a party that fails validation since must not stop the job
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
 		auto_close_opportunity()
 
 		self.assertEqual(frappe.db.get_value("Opportunity", stale.name, "status"), "Closed")

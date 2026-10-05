@@ -452,9 +452,5 @@ def auto_close_opportunity():
 		)
 	).run(pluck=True)
 
-	for opportunity in opportunities:
-		doc = frappe.get_doc("Opportunity", opportunity)
-		doc.status = "Closed"
-		doc.flags.ignore_permissions = True
-		doc.flags.ignore_mandatory = True
-		doc.save()
+	if opportunities:
+		frappe.db.set_value("Opportunity", {"name": ("in", opportunities)}, "status", "Closed")
