@@ -2,6 +2,7 @@ from unittest import TestCase
 
 import frappe
 from frappe.tests.utils import change_settings
+from frappe.utils import nowdate
 
 import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -54,11 +55,18 @@ class TestUaeVat201(TestCase):
 		)
 
 	def test_company_permission(self):
-		frappe.permissions.add_user_permission("Company", "_Test Company", "test2@example.com")
-		frappe.get_doc("User", "test2@example.com").add_roles("Accounts User")
+		user = "test2@example.com"
+		frappe.permissions.add_user_permission("Company", "_Test Company", user)
+		self.addCleanup(frappe.db.delete, "User Permission", {"user": user, "allow": "Company"})
+		if "Accounts User" not in frappe.get_roles(user):
+			frappe.get_doc("User", user).add_roles("Accounts User")
+			self.addCleanup(frappe.get_doc("User", user).remove_roles, "Accounts User")
 
-		with self.set_user("test2@example.com"):
+		frappe.set_user(user)
+		try:
 			self.assertRaises(frappe.PermissionError, execute, {"company": "_Test Company UAE VAT"})
+		finally:
+			frappe.set_user("Administrator")
 		self.assertRaises(frappe.ValidationError, execute, {})
 
 	def test_uae_vat_201_report(self):
@@ -255,6 +263,16 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 40)
 		self.assertEqual(get_tourist_tax_return_total(filters), 0)
 		self.assertEqual(get_tourist_tax_return_tax(filters), 0)
+
+	def test_uae_vat_201_supplies_without_emirate(self):
+		make_uae_sales_invoice(None, qty=10, rate=40).submit()
+
+		_columns, data = execute(
+			{"company": "_Test Company UAE VAT", "from_date": nowdate(), "to_date": nowdate()}
+		)
+		row = next(row for row in data if row["legend"] == "Standard rated supplies with no VAT Emirate")
+		self.assertEqual(row["amount"], frappe.format(400, "Currency"))
+		self.assertEqual(row["vat_amount"], frappe.format(20, "Currency"))
 
 
 def make_company(company_name, abbr):
