@@ -251,6 +251,14 @@ class TestTimesheet(ERPNextTestSuite):
 		second_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
 		self.assertRaises(frappe.ValidationError, second_invoice.save)
 
+	def test_invoice_from_timesheet_carries_the_project_of_its_logs(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, project=project)
+
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		self.assertEqual(sales_invoice.project, project)
+
 	def test_zero_rate_log_can_be_invoiced_after_the_priced_logs(self):
 		update_activity_type("_Test Activity Type")
 		from_time = now_datetime()
