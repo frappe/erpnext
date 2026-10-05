@@ -1622,6 +1622,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		return_entry.company = work_order.company
 		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_entry.save)
 
+	def test_return_entry_uses_work_order_company(self):
+		"""Return Components must take the company from the Work Order, not the user default."""
+		previous_default = frappe.defaults.get_user_default("company")
+		self.addCleanup(self._set_default_company, previous_default)
+		self._set_default_company("_Test Company 1")
+
+		work_order = self._make_shared_alternative_transfer()
+		self.assertEqual(work_order.company, "_Test Company")
+
+		return_entry = make_stock_return_entry(work_order.name)
+		self.assertEqual(return_entry.company, work_order.company)
+
+	@staticmethod
+	def _set_default_company(company):
+		frappe.defaults.set_user_default("company", company)
+		# new_doc caches a per doctype template, drop it so the changed default applies
+		frappe.local.new_doc_templates.clear()
+
 	def test_return_attribution_when_item_doubles_as_alternative(self):
 		"""An item transferred for itself and as an alternative must return per requirement."""
 		work_order = self._make_shared_alternative_transfer()
