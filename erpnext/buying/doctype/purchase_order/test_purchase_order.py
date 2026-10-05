@@ -1449,6 +1449,38 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)
 
+	def test_update_child_uom_after_receipt_is_refused(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		purchase_order = create_purchase_order(item_code=item.item_code, qty=10, do_not_save=True)
+		purchase_order.items[0].uom = "Box"
+		purchase_order.items[0].conversion_factor = 12
+		purchase_order.save()
+		purchase_order.submit()
+		create_pr_against_po(purchase_order.name, 5)
+
+		row = purchase_order.items[0]
+		trans_items = json.dumps(
+			[
+				{
+					"item_code": row.item_code,
+					"rate": 100,
+					"qty": 120,
+					"uom": item.stock_uom,
+					"conversion_factor": 1,
+					"docname": row.name,
+				}
+			]
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot change the UOM or conversion factor",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_items,
+			purchase_order.name,
+		)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
