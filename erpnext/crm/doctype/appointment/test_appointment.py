@@ -171,6 +171,20 @@ class TestAppointment(ERPNextTestSuite):
 	def test_lead_linked(self):
 		self.assertTrue(self.test_appointment.party)
 
+	def test_customer_found_through_its_contact_email(self):
+		email = "appointment_contact_customer@example.com"
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Appointment Contact",
+				"email_ids": [{"email_id": email, "is_primary": 1}],
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+
+		appointment = create_test_appointment(customer_email=email, scheduled_time=slot_on(2, 16))
+		self.assertEqual((appointment.appointment_with, appointment.party), ("Customer", "_Test Customer"))
+
 	def test_desk_created_appointment_skips_email_verification(self):
 		"""Appointments created from the desk (created_through_portal unset) must be
 		linked and confirmed immediately - no verification email should be sent."""

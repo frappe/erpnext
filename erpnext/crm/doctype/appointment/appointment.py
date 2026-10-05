@@ -278,6 +278,23 @@ class Appointment(Document):
 
 	def find_party_by_email(self, doctype):
 		party = frappe.get_all(doctype, filters={"email_id": self.customer_email}, limit=1, pluck="name")
+		return party[0] if party else self.find_party_by_contact_email(doctype)
+
+	def find_party_by_contact_email(self, doctype: str) -> str | None:
+		contacts = frappe.get_all(
+			"Contact Email",
+			filters={"email_id": self.customer_email, "parenttype": "Contact"},
+			pluck="parent",
+		)
+		if not contacts:
+			return None
+
+		party = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": "Contact", "parent": ("in", contacts), "link_doctype": doctype},
+			pluck="link_name",
+			limit=1,
+		)
 		return party[0] if party else None
 
 	def create_lead_and_link(self):
