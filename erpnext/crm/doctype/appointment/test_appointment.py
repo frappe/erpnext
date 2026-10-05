@@ -385,6 +385,20 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertFalse(availability["11:30"])
 		self.assertTrue(availability["12:00"])
 
+	def test_invalid_guest_time_zone_or_date_is_refused(self):
+		self._configure_booking_settings()
+		with self.set_user("Guest"):
+			self.assertRaises(frappe.ValidationError, get_appointment_slots, "2026-01-05", "Mars/Base")
+			self.assertRaises(frappe.ValidationError, get_appointment_slots, "2026-13-40", "UTC")
+			self.assertRaises(
+				frappe.ValidationError,
+				create_appointment,
+				date="2026-01-05",
+				time="10:00:00",
+				tz="Mars/Base",
+				contact={"name": "Portal Visitor", "email": "invalid_tz@example.com"},
+			)
+
 	def test_expired_unverified_appointments_are_closed(self):
 		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
 		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)
