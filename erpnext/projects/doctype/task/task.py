@@ -303,7 +303,7 @@ class Task(NestedSet):
 
 		dependent_parents = frappe.get_all(
 			"Task Depends On",
-			filters={"task": self.name, "project": self.project},
+			filters={"task": self.name, "parent": ["!=", self.parent_task or ""]},
 			pluck="parent",
 		)
 		if not dependent_parents:
