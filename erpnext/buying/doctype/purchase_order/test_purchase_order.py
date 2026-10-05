@@ -657,6 +657,15 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_same_item_from_different_material_requests(self):
+		po = make_purchase_order(make_material_request(qty=5).name)
+		po = make_purchase_order(make_material_request(qty=5).name, target_doc=po)
+		po.supplier = "_Test Supplier"
+		po.insert()
+
+		self.assertEqual(len({row.material_request for row in po.items}), 2)
+
 	def test_update_qty(self):
 		po = create_purchase_order()
 
