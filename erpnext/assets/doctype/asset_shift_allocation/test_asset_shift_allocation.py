@@ -111,6 +111,23 @@ class TestAssetShiftAllocation(ERPNextTestSuite):
 		post_depreciation_entries(date="2023-01-31")
 		self.assertRaisesRegex(frappe.ValidationError, "depreciation has been posted", allocation.cancel)
 
+	def test_submit_uses_entries_posted_after_save(self):
+		asset = create_shift_based_asset()
+		allocation = make_shift_allocation(asset.name, {0: "Triple"})
+		post_depreciation_entries(date="2023-01-31")
+		self.assertRaisesRegex(frappe.ValidationError, "Shift cannot be changed", allocation.submit)
+
+		allocation = make_shift_allocation(asset.name, {2: "Triple"})
+		post_depreciation_entries(date="2023-02-28")
+		allocation.submit()
+
+		schedule = get_active_schedule(asset.name)
+		self.assertTrue(schedule[0][3] and schedule[1][3])
+		self.assertEqual(
+			[row[1:3] for row in schedule[:3]], [(10000.0, "Single")] * 2 + [(20000.0, "Triple")]
+		)
+		self.assertEqual(len(schedule), 11)
+
 
 def create_shift_based_asset():
 	return create_asset(
