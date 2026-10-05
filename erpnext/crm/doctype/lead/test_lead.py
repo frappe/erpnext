@@ -207,6 +207,17 @@ class TestLead(ERPNextTestSuite):
 		contact.save()
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
 
+	def test_do_not_contact_is_kept_on_a_lead_with_an_opportunity(self):
+		lead = make_lead()
+		opportunity = make_opportunity(lead.name)
+		opportunity.company = "_Test Company"
+		opportunity.save()
+
+		lead.reload()
+		lead.status = "Do Not Contact"
+		lead.save()
+		self.assertEqual(lead.status, "Do Not Contact")
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",
