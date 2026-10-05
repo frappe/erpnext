@@ -7,6 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_tax_id_for_party
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -32,8 +33,14 @@ class LowerDeductionCertificate(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.set_pan_from_supplier()
 		self.validate_dates()
 		self.validate_supplier_against_tax_category()
+
+	def set_pan_from_supplier(self):
+		"""Certificates are matched to invoices by the supplier's tax id, so keep the PAN in line with it."""
+		if tax_id := get_tax_id_for_party("Supplier", self.supplier):
+			self.pan_no = tax_id
 
 	def validate_dates(self):
 		if getdate(self.valid_upto) < getdate(self.valid_from):

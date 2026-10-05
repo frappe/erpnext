@@ -46,3 +46,19 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 		# a valid_from before the fiscal year start is rejected
 		before_fy = self.make_ldc(add_days(fy_start, -1), fy_end, fiscal_year=fy_name)
 		self.assertRaises(frappe.ValidationError, before_fy.validate_dates)
+
+	def test_pan_follows_the_supplier(self):
+		supplier = frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": "_Test LDC PAN Supplier",
+				"supplier_group": "_Test Supplier Group",
+				"tax_id": "AAAPA1234A",
+			}
+		).insert()
+
+		fy_name, fy_start, fy_end = get_fiscal_year(today())
+		doc = self.make_ldc(fy_start, fy_end, fiscal_year=fy_name)
+		doc.update({"company": "_Test Company", "supplier": supplier.name, "pan_no": "BBBPB1234B"})
+		doc.validate()
+		self.assertEqual(doc.pan_no, "AAAPA1234A")
