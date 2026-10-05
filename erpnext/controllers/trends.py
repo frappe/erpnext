@@ -79,16 +79,7 @@ def get_data(filters, conditions):
 	inc, cond = "", ""
 	query_details = conditions["based_on_select"] + conditions["period_wise_select"]
 
-	posting_date = "t1.transaction_date"
-	if conditions.get("trans") in [
-		"Sales Invoice",
-		"Purchase Invoice",
-		"Purchase Receipt",
-		"Delivery Note",
-	]:
-		posting_date = "t1.posting_date"
-		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
-			posting_date = "t1." + filters.period_based_on
+	posting_date = get_period_date_field(filters, conditions.get("trans"))
 
 	if filters.get("based_on") == "Project":
 		cond = " and " + conditions["based_on_select"].split(",")[0] + " != ''"
@@ -284,12 +275,7 @@ def period_wise_columns_query(filters, trans):
 	pwc = []
 	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
 
-	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
-		trans_date = "posting_date"
-		if filters.period_based_on and trans in ["Purchase Invoice", "Sales Invoice"]:
-			trans_date = filters.period_based_on
-	else:
-		trans_date = "transaction_date"
+	trans_date = get_period_date_field(filters, trans)
 
 	if filters.get("period") != "Yearly":
 		for dt in bet_dates:
@@ -304,6 +290,15 @@ def period_wise_columns_query(filters, trans):
 
 	query_details += "SUM(t2.stock_qty), SUM(t2.base_net_amount)"
 	return pwc, query_details
+
+
+def get_period_date_field(filters: dict, trans: str) -> str:
+	"""Date expression the periods are based on; Billing Date falls back to the posting date when empty."""
+	if trans not in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
+		return "t1.transaction_date"
+	if filters.period_based_on == "bill_date" and trans in ["Purchase Invoice", "Sales Invoice"]:
+		return "ifnull(t1.bill_date, t1.posting_date)"
+	return "t1.posting_date"
 
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -325,8 +320,8 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.stock_qty ELSE NULL END),
-					SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.base_net_amount ELSE NULL END),
+	query_details += """SUM(CASE WHEN {trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.stock_qty ELSE NULL END),
+					SUM(CASE WHEN {trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.base_net_amount ELSE NULL END),
 				""".format(
 		trans_date=trans_date,
 		sd=bet_dates[0],
