@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 	get_scorecard_date,
 	make_all_scorecards,
@@ -126,6 +127,25 @@ class TestSupplierScorecard(ERPNextTestSuite):
 			)
 		)
 
+	def test_deleting_scorecard_clears_supplier_flags(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Delete")
+		self.assertEqual(frappe.db.get_value("Supplier", doc.supplier, "prevent_pos"), 1)
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		doc.delete()
+
+		flags = frappe.db.get_value(
+			"Supplier", doc.supplier, ["prevent_pos", "prevent_rfqs", "warn_pos", "warn_rfqs"]
+		)
+		self.assertFalse(any(flags))
+
+	def test_renamed_supplier_keeps_scorecard_block(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Rename")
+		renamed = frappe.rename_doc("Supplier", doc.supplier, "_Test Supplier SC Renamed")
+
+		po = create_purchase_order(supplier=renamed, do_not_save=True)
+		self.assertRaises(frappe.ValidationError, po.validate_supplier)
+
 	def test_dashboard_endpoint_returns_connection_count_and_heatmap(self):
 		supplier = create_test_supplier("_Test Supplier SC Dashboard")
 		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
@@ -162,6 +182,16 @@ def make_supplier_scorecard():
 			my_criteria = frappe.get_doc(d)
 			my_criteria.insert()
 	return my_doc
+
+
+def make_very_poor_scorecard(supplier_name):
+	supplier = create_test_supplier(supplier_name)
+	frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+	doc = make_supplier_scorecard()
+	frappe.db.set_value("Supplier Scorecard Criteria", "Delivery", "formula", "10")
+	doc.supplier = supplier
+	doc.insert()
+	return doc
 
 
 def create_test_supplier(supplier_name):
