@@ -84,6 +84,7 @@ def get_data(accounts, filters, based_on):
 		fieldname,
 		gl_entries_by_account,
 		ignore_closing_entries=not flt(filters.get("with_period_closing_entry")),
+		finance_books=get_finance_books(filters),
 	)
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
@@ -214,7 +215,13 @@ def get_columns(filters):
 
 
 def set_gl_entries_by_account(
-	company, from_date, to_date, based_on, gl_entries_by_account, ignore_closing_entries=False
+	company,
+	from_date,
+	to_date,
+	based_on,
+	gl_entries_by_account,
+	ignore_closing_entries=False,
+	finance_books=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl = qb.DocType("GL Entry")
@@ -234,6 +241,8 @@ def set_gl_entries_by_account(
 
 	if ignore_closing_entries:
 		conditions.append(gl.voucher_type.ne("Period Closing Voucher"))
+
+	conditions.append(gl.finance_book.isin(["", *(finance_books or [])]) | gl.finance_book.isnull())
 
 	if match_conditions := build_match_conditions("GL Entry"):
 		conditions.append(Bracket(LiteralValue(match_conditions)))
@@ -258,3 +267,18 @@ def set_gl_entries_by_account(
 		gl_entries_by_account.setdefault(entry.based_on, []).append(entry)
 
 	return gl_entries_by_account
+
+
+def get_finance_books(filters) -> list[str]:
+	"""Finance books whose entries are included besides those without a book."""
+	finance_books = [cstr(filters.get("finance_book"))]
+	if filters.get("include_default_book_entries"):
+		company_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+		if (
+			filters.get("finance_book")
+			and company_finance_book
+			and filters.finance_book != company_finance_book
+		):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+		finance_books.append(cstr(company_finance_book))
+	return finance_books
