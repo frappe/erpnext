@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Field, Table
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import getdate
 from pypika import Order
@@ -134,7 +134,9 @@ def get_entries_for_bank_clearance_summary(filters):
 			pi.bill_no.as_("cheque_no"),
 			pi.clearance_date,
 			pi.supplier.as_("against_account"),
-			(pi.paid_amount * -1).as_("amount"),
+			(get_amount_in_bank_currency(filters.account, pi, pi.paid_amount, pi.base_paid_amount) * -1).as_(
+				"amount"
+			),
 		)
 		.where(
 			(pi.docstatus == 1)
@@ -166,7 +168,7 @@ def get_pos_entries(filters: dict) -> list:
 			ConstantColumn(None).as_("cheque_no"),
 			si_payment.clearance_date,
 			si.customer.as_("against_account"),
-			si_payment.amount,
+			get_amount_in_bank_currency(filters.account, si, si_payment.amount, si_payment.base_amount),
 		)
 		.where(
 			(si_payment.account == filters.account)
@@ -177,3 +179,9 @@ def get_pos_entries(filters: dict) -> list:
 		.orderby(si.posting_date, order=Order.desc)
 		.orderby(si.name, order=Order.desc)
 	).run(as_list=True)
+
+
+def get_amount_in_bank_currency(bank_account: str, invoice: Table, amount: Field, base_amount: Field) -> Case:
+	"""Invoice amount as posted to the bank: the base amount unless the bank is in the invoice currency."""
+	bank_currency = frappe.get_cached_value("Account", bank_account, "account_currency")
+	return Case().when(invoice.currency == bank_currency, amount).else_(base_amount)

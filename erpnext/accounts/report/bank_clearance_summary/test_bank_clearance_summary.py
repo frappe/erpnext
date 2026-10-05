@@ -5,6 +5,7 @@ import frappe
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.bank_clearance_summary.bank_clearance_summary import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -91,6 +92,23 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 		self.assertIsNotNone(row, "POS invoice payment not listed in Bank Clearance Summary")
 		self.assertEqual(row[0], "Sales Invoice")
 		self.assertEqual(row[6], 300)
+
+	def test_foreign_currency_paid_invoice_in_bank_currency(self):
+		invoice = make_purchase_invoice(
+			rate=100,
+			qty=1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=80,
+			is_paid=1,
+			cash_bank_account=BANK_ACCOUNT,
+			do_not_save=True,
+		)
+		invoice.insert()
+		invoice.paid_amount = invoice.grand_total
+		invoice.submit()
+
+		self.assertEqual(self.find_row(self.run_report(), invoice.name)[6], -8000)
 
 	def make_taxed_payment_entry(self, payment_type: str, amount: float, tax: dict, **party):
 		bank_field = "paid_to" if payment_type == "Receive" else "paid_from"
