@@ -63,7 +63,7 @@ class TestProjectUpdate(ERPNextTestSuite):
 
 		# The full reminder flow runs without error (Project / Project Update / Holiday / Project
 		# User lookups all execute). sendmail is mocked so no SMTP account is required.
-		with patch("frappe.sendmail"):
+		with patch("frappe.sendmail"), self.assertWarns(PendingDeprecationWarning):
 			daily_reminder()
 
 	def test_replies_are_collected_once(self):
