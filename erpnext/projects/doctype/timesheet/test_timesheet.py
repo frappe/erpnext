@@ -97,6 +97,28 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(ts.per_billed, 100)
 		self.assertEqual(ts.time_logs[0].sales_invoice, sales_invoice.name)
 
+	def test_invoice_row_without_time_log_bills_the_unbilled_logs(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		sales_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
+		sales_invoice.submit()
+		timesheet.reload()
+		self.assertEqual(sales_invoice.timesheets[0].timesheet_detail, timesheet.time_logs[0].name)
+		self.assertEqual(sales_invoice.total_billing_amount, 100)
+		self.assertEqual(timesheet.status, "Billed")
+
+		second_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
+		self.assertRaises(frappe.ValidationError, second_invoice.save)
+
+	def _invoice_with_timesheet_row(self, time_sheet, timesheet_detail, with_amounts=True):
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		row = {"time_sheet": time_sheet, "timesheet_detail": timesheet_detail}
+		if with_amounts:
+			row.update({"billing_hours": 2, "billing_amount": 100})
+		sales_invoice.append("timesheets", row)
+		return sales_invoice
+
 	def test_timesheet_time_overlap(self):
 		emp = make_employee("test_employee_6@salary.com")
 
