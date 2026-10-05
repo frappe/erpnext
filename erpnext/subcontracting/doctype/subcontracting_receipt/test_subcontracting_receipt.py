@@ -1579,6 +1579,42 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		# ValidationError should not be raised as `Inspection Required before Purchase` is disabled
 		scr2.submit()
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_to_make_quality_inspection_after_purchase_or_delivery": 1}
+	)
+	def test_quality_inspection_allowed_after_subcontracting_receipt(self):
+		set_backflush_based_on("BOM")
+		fg_item = "Subcontracted Item SA1"
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		frappe.db.set_value("Item", fg_item, "inspection_required_before_purchase", 1)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		self.assertEqual(scr.docstatus, 1)
+		self.assertFalse(scr.items[0].quality_inspection)
+
+		scr.run_method("onload")
+		self.assertTrue(scr.get_onload().get("allow_to_make_qc_after_submission"))
+
 	def test_secondary_items_for_subcontracting_receipt(self):
 		set_backflush_based_on("BOM")
 
