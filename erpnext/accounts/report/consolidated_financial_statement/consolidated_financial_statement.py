@@ -100,7 +100,8 @@ def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
 					opening_balance.get(company)
 				)
 
-		unclosed["total"] = opening_balance.get(company)
+		unclosed["total"] = sum(opening_balance.values())
+		set_group_company_total(unclosed, filters)
 		data.append(unclosed)
 
 	set_group_company_total(provisional_profit_loss, filters)
