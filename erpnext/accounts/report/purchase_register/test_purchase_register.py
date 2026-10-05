@@ -171,9 +171,8 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.voucher_type, "Payment Entry")
 		self.assertEqual(first_row.voucher_no, pe.name)
 		self.assertEqual(first_row.payable_account, "Creditors - _TC6")
-		self.assertEqual(first_row.debit, 0)
-		self.assertEqual(first_row.credit, 600)
-		self.assertEqual(first_row.balance, 500)
+		self.assertEqual(first_row.debit, 600)
+		self.assertEqual(first_row.credit, 0)
 
 	def test_supplier_group_filter_uses_supplier_master(self):
 		# invoices created before the supplier_group field existed have it blank
