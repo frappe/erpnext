@@ -48,8 +48,10 @@ class AssetValueAdjustment(Document):
 		self.validate_asset_not_disposed()
 		self.validate_date()
 		self.validate_new_asset_value()
+		self.validate_finance_book()
 		self.set_current_asset_value()
 		self.set_difference_amount()
+		self.validate_difference_amount()
 
 	def before_cancel(self):
 		self.validate_asset_not_disposed()
@@ -85,6 +87,24 @@ class AssetValueAdjustment(Document):
 	def validate_new_asset_value(self):
 		if flt(self.new_asset_value) < 0:
 			frappe.throw(_("New Asset Value cannot be negative"))
+
+	def validate_finance_book(self):
+		if not self.finance_book or not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
+			return
+
+		if not frappe.db.exists(
+			"Asset Finance Book",
+			{"parent": self.asset, "parenttype": "Asset", "finance_book": self.finance_book},
+		):
+			frappe.throw(
+				_("Finance Book {0} is not set on Asset {1}").format(
+					frappe.bold(self.finance_book), get_link_to_form("Asset", self.asset)
+				)
+			)
+
+	def validate_difference_amount(self):
+		if not self.difference_amount:
+			frappe.throw(_("New Asset Value is the same as the current asset value"))
 
 	def set_difference_amount(self):
 		self.difference_amount = flt(self.new_asset_value - self.current_asset_value)
