@@ -63,6 +63,7 @@ class SubcontractingController(StockController):
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
+			rejected_return_rows = self.get_rejected_return_rows()
 			for row in self.supplied_items:
 				kwargs = frappe._dict(
 					{
@@ -82,7 +83,7 @@ class SubcontractingController(StockController):
 					}
 				)
 
-				rate = _get_incoming_rate(kwargs)
+				rate = 0.0 if row.reference_name in rejected_return_rows else _get_incoming_rate(kwargs)
 				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
@@ -91,6 +92,25 @@ class SubcontractingController(StockController):
 
 		if rate_changed:
 			self.calculate_items_qty_and_amount()
+
+	def get_rejected_return_rows(self):
+		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
+		if not self.is_return:
+			return set()
+
+		rejected_warehouses = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against},
+				fields=["name", "rejected_warehouse"],
+				as_list=True,
+			)
+		)
+		return {
+			row.name
+			for row in self.items
+			if row.warehouse and row.warehouse == rejected_warehouses.get(row.subcontracting_receipt_item)
+		}
 
 	def validate_rejected_warehouse(self):
 		for item in self.get("items"):

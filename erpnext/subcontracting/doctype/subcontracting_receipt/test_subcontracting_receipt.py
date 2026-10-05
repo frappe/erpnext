@@ -452,7 +452,48 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_rejected_return_brings_back_raw_materials_at_zero_value(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse=create_warehouse(
+				"_Test SCR Rejected Return WIP", {"parent_warehouse": "All Warehouses - TCP1"}, company
+			),
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.save()
+		scr.submit()
+
+		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		scr_return.save()
+		scr_return.reload()
+		scr_return.submit()
+
+		returned_values = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
+			pluck="stock_value_difference",
+		)
+		self.assertTrue(returned_values)
+		self.assertEqual(sum(returned_values), 0)
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
