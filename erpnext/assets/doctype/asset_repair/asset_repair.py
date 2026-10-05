@@ -255,6 +255,8 @@ class AssetRepair(AccountsController):
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation += self.repair_cost
+		elif self.capitalize_repair_cost:
+			self.asset_doc.value_after_depreciation += total_value_of_stock_consumed + flt(self.repair_cost)
 
 	def decrease_asset_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
@@ -265,6 +267,8 @@ class AssetRepair(AccountsController):
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation -= self.repair_cost
+		elif self.capitalize_repair_cost:
+			self.asset_doc.value_after_depreciation -= total_value_of_stock_consumed + flt(self.repair_cost)
 
 	def get_total_value_of_stock_consumed(self):
 		total_value_of_stock_consumed = 0
