@@ -147,6 +147,33 @@ def get_entries_for_bank_clearance_summary(filters):
 		.orderby(pi.name, order=Order.desc)
 	).run(as_list=True)
 
-	entries = journal_entries + payment_entries + purchase_invoices
+	entries = journal_entries + payment_entries + purchase_invoices + get_pos_entries(filters)
 
 	return entries
+
+
+def get_pos_entries(filters: dict) -> list:
+	si = frappe.qb.DocType("Sales Invoice")
+	si_payment = frappe.qb.DocType("Sales Invoice Payment")
+	return (
+		frappe.qb.from_(si_payment)
+		.inner_join(si)
+		.on(si_payment.parent == si.name)
+		.select(
+			ConstantColumn("Sales Invoice").as_("payment_document"),
+			si.name.as_("payment_entry"),
+			si.posting_date,
+			ConstantColumn(None).as_("cheque_no"),
+			si_payment.clearance_date,
+			si.customer.as_("against_account"),
+			si_payment.amount,
+		)
+		.where(
+			(si_payment.account == filters.account)
+			& (si.docstatus == 1)
+			& (si.posting_date >= filters.from_date)
+			& (si.posting_date <= filters.to_date)
+		)
+		.orderby(si.posting_date, order=Order.desc)
+		.orderby(si.name, order=Order.desc)
+	).run(as_list=True)

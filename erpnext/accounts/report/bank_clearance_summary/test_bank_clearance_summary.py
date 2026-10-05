@@ -5,6 +5,7 @@ import frappe
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.bank_clearance_summary.bank_clearance_summary import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -79,6 +80,18 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 		self.assertEqual(self.find_row(data, receipt.name)[6], 900)
 		self.assertEqual(self.find_row(data, payment.name)[6], -1180)
 
+	def test_pos_invoice_payment_into_bank(self):
+		invoice = create_sales_invoice(rate=300, do_not_save=True)
+		invoice.is_pos = 1
+		invoice.append("payments", {"mode_of_payment": self.make_mode_of_payment(), "amount": 300})
+		invoice.insert()
+		invoice.submit()
+
+		row = self.find_row(self.run_report(), invoice.name)
+		self.assertIsNotNone(row, "POS invoice payment not listed in Bank Clearance Summary")
+		self.assertEqual(row[0], "Sales Invoice")
+		self.assertEqual(row[6], 300)
+
 	def make_taxed_payment_entry(self, payment_type: str, amount: float, tax: dict, **party):
 		bank_field = "paid_to" if payment_type == "Receive" else "paid_from"
 		party[bank_field] = BANK_ACCOUNT
@@ -96,3 +109,14 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 		payment_entry.save()
 		payment_entry.submit()
 		return payment_entry
+
+	def make_mode_of_payment(self) -> str:
+		mode_of_payment = frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "_Test Bank Clearance Transfer",
+				"type": "Bank",
+				"accounts": [{"company": "_Test Company", "default_account": BANK_ACCOUNT}],
+			}
+		)
+		return mode_of_payment.insert(ignore_if_duplicate=True).name
