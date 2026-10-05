@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import getdate
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
@@ -171,3 +171,23 @@ valid_scorecard = [
 		"weighting_function": "{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )",
 	}
 ]
+
+
+def create_test_supplier(supplier_name):
+	if not frappe.db.exists("Supplier", supplier_name):
+		frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": supplier_name,
+				"supplier_group": "_Test Supplier Group",
+			}
+		).insert()
+	return supplier_name
+
+
+def make_scorecard_for(supplier_name, days_since_creation=75):
+	supplier = create_test_supplier(supplier_name)
+	frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -days_since_creation))
+	doc = make_supplier_scorecard()
+	doc.supplier = doc.name = supplier
+	return doc
