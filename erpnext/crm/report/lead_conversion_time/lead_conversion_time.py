@@ -77,11 +77,10 @@ def get_columns():
 def get_communication_details(filters):
 	communication_count = None
 	communication_list = []
-	opportunities = frappe.db.get_values(
+	opportunities = frappe.get_list(
 		"Opportunity",
-		{"opportunity_from": "Lead"},
-		["name", "customer_name", "contact_email"],
-		as_dict=1,
+		filters={"opportunity_from": "Lead"},
+		fields=["name", "customer_name", "contact_email"],
 	)
 
 	si = frappe.qb.DocType("Sales Invoice")

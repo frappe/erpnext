@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.desk.query_report import run
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -57,3 +59,11 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		self.assertIsNotNone(row, "lead's converted-customer row missing")
 		# duration must be measured from the earliest REAL contact (22 days), not the NULL-dated one
 		self.assertEqual(row[2], 22.0)
+
+	def test_sales_user_can_run_the_report(self):
+		frappe.reload_doc("crm", "report", "lead_conversion_time", force=True)
+		user = create_user("lead_conversion_sales_user@example.com", "Sales User")
+		filters = {"from_date": add_days(nowdate(), -30), "to_date": nowdate()}
+
+		with self.set_user(user.name):
+			self.assertIn("result", run("Lead Conversion Time", filters=filters))
