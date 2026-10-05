@@ -12,6 +12,7 @@ from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.telephony.doctype.call_log.call_log import (
 	add_call_summary_and_call_type,
 	get_linked_call_logs,
+	link_existing_conversations,
 )
 
 
@@ -115,4 +116,30 @@ class TestCallLog(FrappeTestCase):
 		self.assertEqual(
 			frappe.db.get_value("Call Log", call_log.name, ["call_received_by", "employee_user_id"]),
 			(second_agent, "test_call_agent_b@example.com"),
+		)
+
+	def test_linking_does_not_commit(self):
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Caller {self.number}",
+				"phone_nos": [{"phone": self.number, "is_primary_phone": 1}],
+			}
+		)
+		contact.flags.ignore_auto_link_call_log = True
+		contact.insert(ignore_permissions=True)
+		call_log = self._make_call_log(**{"from": f"0{self.number}", "type": "Outgoing"})
+
+		contact.flags.ignore_auto_link_call_log = False
+		with patch.object(frappe.db, "commit") as commit:
+			link_existing_conversations(contact, "Open")
+
+		commit.assert_not_called()
+		self.assertIn(
+			contact.name,
+			frappe.get_all(
+				"Dynamic Link",
+				filters={"parenttype": "Call Log", "parent": call_log, "link_doctype": "Contact"},
+				pluck="link_name",
+			),
 		)

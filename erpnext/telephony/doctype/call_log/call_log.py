@@ -176,6 +176,8 @@ def link_existing_conversations(doc, state):
 		return
 	if doc.doctype != "Contact":
 		return
+
+	frappe.db.savepoint("link_call_logs")
 	try:
 		numbers = [d.phone for d in doc.phone_nos]
 
@@ -200,13 +202,12 @@ def link_existing_conversations(doc, state):
 				""",
 				dict(phone_number=f"%{number}", docname=doc.name, doctype=doc.doctype),
 			)
-			if logs:
-				for log in logs:
-					call_log = frappe.get_doc("Call Log", log)
-					call_log.add_link(link_type=doc.doctype, link_name=doc.name)
-					call_log.save(ignore_permissions=True)
-				frappe.db.commit()
+			for log in logs:
+				call_log = frappe.get_doc("Call Log", log)
+				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
+				call_log.save(ignore_permissions=True)
 	except Exception:
+		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))
 
 
