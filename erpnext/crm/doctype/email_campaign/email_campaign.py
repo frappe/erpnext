@@ -1,6 +1,7 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from datetime import date
 
 import frappe
 from frappe import _
@@ -46,16 +47,23 @@ class EmailCampaign(Document):
 		if getdate(self.start_date) < getdate(today()):
 			frappe.throw(_("Start Date cannot be before the current date"))
 
-		# set the end date as start date + max(send after days) in campaign schedule
-		campaign = frappe.get_cached_doc("Campaign", self.campaign_name)
-		send_after_days = [entry.send_after_days for entry in campaign.get("campaign_schedules")]
-
-		if not send_after_days:
+		self.end_date = self.get_end_date()
+		if not self.end_date:
 			frappe.throw(
 				_("Please set up the Campaign Schedule in the Campaign {0}").format(self.campaign_name)
 			)
 
-		self.end_date = add_days(getdate(self.start_date), max(send_after_days))
+	def get_end_date(self) -> date | None:
+		"""Return start date + the longest send after days in the Campaign's current schedule."""
+		campaign = frappe.get_cached_doc("Campaign", self.campaign_name)
+		send_after_days = [entry.send_after_days for entry in campaign.get("campaign_schedules")]
+		if send_after_days:
+			return add_days(getdate(self.start_date), max(send_after_days))
+
+	def refresh_end_date(self):
+		end_date = self.get_end_date()
+		if end_date and end_date != getdate(self.end_date):
+			self.db_set("end_date", end_date, update_modified=False)
 
 	def validate_lead(self):
 		lead = frappe.db.get_value(
@@ -277,4 +285,5 @@ def set_email_campaign_status():
 
 	for name in email_campaigns:
 		email_campaign = frappe.get_doc("Email Campaign", name)
+		email_campaign.refresh_end_date()
 		email_campaign.update_status()

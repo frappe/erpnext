@@ -6,7 +6,10 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, getdate, today
 
-from erpnext.crm.doctype.email_campaign.email_campaign import send_email_to_leads_or_contacts
+from erpnext.crm.doctype.email_campaign.email_campaign import (
+	send_email_to_leads_or_contacts,
+	set_email_campaign_status,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 EMAIL_CAMPAIGN_MODULE = "erpnext.crm.doctype.email_campaign.email_campaign"
@@ -105,6 +108,22 @@ class TestEmailCampaign(ERPNextTestSuite):
 		self.assertEqual(email_campaign.status, "Scheduled")
 
 		self.assertEqual(len(self.send_campaign_mails(lead.email_id, on_date=tomorrow)), 1)
+
+	def test_step_added_to_the_campaign_later_is_sent(self):
+		lead = self.make_lead()
+		email_campaign = self.make_lead_email_campaign(lead, schedules=[0, 2])
+		campaign = frappe.get_doc("Campaign", email_campaign.campaign_name)
+		campaign.append(
+			"campaign_schedules", {"send_after_days": 5, "email_template": self.make_email_template()}
+		)
+		campaign.save()
+
+		with patch(f"{EMAIL_CAMPAIGN_MODULE}.today", return_value=add_days(today(), 3)):
+			set_email_campaign_status()
+		email_campaign.reload()
+		self.assertEqual(email_campaign.status, "In Progress")
+		self.assertEqual(getdate(email_campaign.end_date), add_days(getdate(today()), 5))
+		self.assertEqual(len(self.send_campaign_mails(lead.email_id, on_date=add_days(today(), 5))), 1)
 
 	def test_start_date_cannot_be_in_the_past(self):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
