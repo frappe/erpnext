@@ -8,6 +8,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 	make_all_scorecards,
@@ -82,6 +83,35 @@ class TestSupplierScorecard(FrappeTestCase):
 				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}
 			)
 		)
+
+	def test_deleting_scorecard_keeps_flags_of_another_scorecard(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Delete Old")
+		renamed = frappe.rename_doc("Supplier", doc.supplier, "_Test Supplier SC Delete New")
+		make_very_poor_scorecard(renamed)
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		frappe.delete_doc("Supplier Scorecard", doc.name)
+
+		self.assertEqual(frappe.db.get_value("Supplier", renamed, "prevent_pos"), 1)
+
+	def test_deleting_scorecard_clears_supplier_flags(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Delete")
+		self.assertEqual(frappe.db.get_value("Supplier", doc.supplier, "prevent_pos"), 1)
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		doc.delete()
+
+		flags = frappe.db.get_value(
+			"Supplier", doc.supplier, ["prevent_pos", "prevent_rfqs", "warn_pos", "warn_rfqs"]
+		)
+		self.assertFalse(any(flags))
+
+	def test_renamed_supplier_keeps_scorecard_block(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Rename")
+		renamed = frappe.rename_doc("Supplier", doc.supplier, "_Test Supplier SC Renamed")
+
+		po = create_purchase_order(supplier=renamed, do_not_save=True)
+		self.assertRaises(frappe.ValidationError, po.validate_supplier)
 
 
 def make_supplier_scorecard():
@@ -239,3 +269,10 @@ def make_test_criteria(criteria_name, formula):
 		).insert()
 	frappe.db.set_value("Supplier Scorecard Criteria", criteria_name, "formula", formula)
 	return criteria_name
+
+
+def make_very_poor_scorecard(supplier_name):
+	doc = make_scorecard_for(supplier_name)
+	doc.criteria[0].criteria_name = make_test_criteria("_Test SC Very Poor", "10")
+	doc.insert()
+	return doc
