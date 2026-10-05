@@ -8,6 +8,7 @@ import copy
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, getdate
 
 from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import (
 	execute,
@@ -72,6 +73,39 @@ class TestSubcontractedItemToBeReceived(FrappeTestCase):
 		self.assertEqual(data[0]["received_qty"], 5)
 		self.assertEqual(data[0]["subcontract_order"], sco.name)
 		self.assertEqual(data[0]["supplier"], sco.supplier)
+
+	def test_closed_order_is_not_listed(self):
+		sco = make_subcontracting_order()
+		sco.update_status("Closed")
+
+		data = execute(get_report_filters(sco))[1]
+		self.assertNotIn(sco.name, {row["subcontract_order"] for row in data})
+
+
+def make_subcontracting_order():
+	make_service_item("Subcontracted Service Item 1")
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 10,
+			"rate": 500,
+			"fg_item": "_Test FG Item",
+			"fg_item_qty": 10,
+		},
+	]
+	return get_subcontracting_order(service_items=service_items, supplier_warehouse="_Test Warehouse 1 - _TC")
+
+
+def get_report_filters(sco):
+	return frappe._dict(
+		{
+			"order_type": "Subcontracting Order",
+			"supplier": sco.supplier,
+			"from_date": getdate(sco.transaction_date),
+			"to_date": add_days(sco.transaction_date, 1),
+		}
+	)
 
 
 def make_subcontracting_receipt_against_sco(sco, quantity=5):
