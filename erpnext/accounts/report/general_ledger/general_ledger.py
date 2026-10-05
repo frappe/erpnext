@@ -485,7 +485,7 @@ def get_group_by_fields(group_by: str | None) -> tuple[str, ...]:
 	elif group_by in ["Categorize by Voucher (Consolidated)", "Categorize by Account"]:
 		return ("account",)
 	else:
-		return ("voucher_no",)
+		return ("voucher_type", "voucher_no")
 
 
 def get_group_by_value(gle: dict, group_by_fields: tuple[str, ...]) -> tuple:

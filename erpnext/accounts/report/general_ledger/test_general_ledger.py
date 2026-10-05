@@ -495,3 +495,22 @@ class TestGeneralLedger(ERPNextTestSuite):
 
 		self.assertEqual(labelled["'Opening'"]["debit"], 100)
 		self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 100)
+
+	def test_categorize_by_voucher_separates_voucher_types(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		shared_name = "_Test GL Shared Voucher Name"
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 300, save=False)
+		jv.insert(set_name=shared_name)
+		jv.submit()
+		si = create_sales_invoice(company=self.company, rate=1000, do_not_save=True)
+		si.insert(set_name=shared_name)
+		si.submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=today(), to_date=today(), categorize_by="Categorize by Voucher"
+		)
+		total_debits = [r["debit"] for r in execute(filters)[1] if r.get("account") == "'Total'"]
+
+		self.assertEqual(sorted(total_debits[:-1]), [300, 1000])
