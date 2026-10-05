@@ -797,6 +797,30 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_subcontracting_inward_order, so.name)
 		self.assertRaises(frappe.ValidationError, scio.submit)
 
+	def test_delivery_mapper_qty(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
+		scio.reload()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.items[0].qty = 3
+		delivery.submit()
+
+		scio.reload()
+		with self.change_settings("Selling Settings", allow_delivery_of_overproduced_qty=1):
+			delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		self.assertEqual(delivery.items[0].qty, 2)
+		delivery.submit()
+
+		scio.reload()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		self.assertFalse([item for item in delivery.items if item.is_finished_item])
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()

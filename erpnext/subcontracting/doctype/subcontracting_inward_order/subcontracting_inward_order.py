@@ -460,25 +460,24 @@ class SubcontractingInwardOrder(SubcontractingController):
 			allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
 			for fg_item in source.items:
 				qty = (
-					fg_item.produced_qty
-					if allow_over
-					else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
-				)
+					fg_item.produced_qty if allow_over else min(fg_item.qty, fg_item.produced_qty)
+				) - fg_item.delivered_qty
 				if qty < 0:
 					continue
 
 				scio_details.append(fg_item.name)
-				target.append(
-					"items",
-					{
-						"qty": qty,
-						"item_code": fg_item.item_code,
-						"s_warehouse": fg_item.delivery_warehouse,
-						"stock_uom": fg_item.stock_uom,
-						"scio_detail": fg_item.name,
-						"is_finished_item": 1,
-					},
-				)
+				if qty > 0:
+					target.append(
+						"items",
+						{
+							"qty": qty,
+							"item_code": fg_item.item_code,
+							"s_warehouse": fg_item.delivery_warehouse,
+							"stock_uom": fg_item.stock_uom,
+							"scio_detail": fg_item.name,
+							"is_finished_item": 1,
+						},
+					)
 
 			if (
 				frappe.get_single_value("Selling Settings", "deliver_secondary_items")
@@ -535,7 +534,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 			for fg_item in source.items:
 				qty = fg_item.delivered_qty - fg_item.returned_qty
-				if qty < 0:
+				if qty <= 0:
 					continue
 
 				target.append(
