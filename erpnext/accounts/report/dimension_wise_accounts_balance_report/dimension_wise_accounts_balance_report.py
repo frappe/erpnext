@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 import erpnext
 from erpnext.accounts.report.financial_statements import (
@@ -109,6 +109,10 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 			"account_currency",
 		],
 		order_by="account, posting_date",
+	)
+	gl_entry = frappe.qb.DocType("GL Entry")
+	query = query.where(
+		gl_entry.finance_book.isin([cstr(filters.get("finance_book")), ""]) | gl_entry.finance_book.isnull()
 	)
 
 	for entry in query.run(as_dict=True):

@@ -94,6 +94,23 @@ class TestDimensionWiseAccountsBalance(ERPNextTestSuite):
 		rows = {row["account"]: row for row in data}
 		self.assertEqual(rows[self.expense_account]["total"], 400)
 
+	def test_finance_book_filter(self):
+		cost_center = self._make_cost_center("Test Dimension Finance Book CC")
+		finance_book = make_finance_book("_Test Dimension Finance Book")
+		jv = make_journal_entry(
+			self.expense_account, self.cash_account, 500, cost_center=cost_center, save=False
+		)
+		jv.finance_book = finance_book
+		jv.submit()
+		column = frappe.scrub(cost_center)
+
+		def balance(**filters):
+			data = execute(self._filters(**filters))[1]
+			return next((row[column] for row in data if row["account"] == self.expense_account), 0)
+
+		self.assertEqual(balance(), 0)
+		self.assertEqual(balance(finance_book=finance_book), 500)
+
 	def test_requires_fiscal_year(self):
 		filters = self._filters()
 		filters.pop("fiscal_year")
@@ -113,3 +130,9 @@ def make_user_restricted_to_cost_center(cost_center):
 		).insert()
 	frappe.permissions.add_user_permission("Cost Center", cost_center, user)
 	return user
+
+
+def make_finance_book(name):
+	if not frappe.db.exists("Finance Book", name):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": name}).insert()
+	return name
