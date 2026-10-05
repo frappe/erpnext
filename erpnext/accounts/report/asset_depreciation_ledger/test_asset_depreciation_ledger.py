@@ -2,9 +2,14 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import today
 
 from erpnext.accounts.report.asset_depreciation_ledger.asset_depreciation_ledger import execute
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
+)
 from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -48,6 +53,30 @@ class TestAssetDepreciationLedger(ERPNextTestSuite):
 		):
 			rows = get_asset_rows(asset.name, "2021-01-01", "2021-12-31", finance_book=finance_book)
 			self.assertEqual(rows[-1].accumulated_depreciation_amount, accumulated_depreciation)
+
+	def test_reversal_is_deducted_from_accumulated_depreciation(self):
+		asset = create_depreciating_asset()
+		post_depreciation_entries(date="2021-01-01")
+		scrap_asset(asset.name, "2021-06-30")
+		restore_asset(asset.name)
+
+		rows = get_asset_rows(asset.name, "2020-01-01", today())
+		depreciation_until_scrap = rows[1].depreciation_amount
+
+		self.assertEqual(rows[-1].depreciation_amount, -depreciation_until_scrap)
+		self.assertEqual(rows[-1].accumulated_depreciation_amount, 10000)
+		self.assertEqual(rows[-1].value_after_depreciation, 90000)
+
+
+def create_depreciating_asset(**args) -> frappe._dict:
+	return create_asset(
+		calculate_depreciation=1,
+		available_for_use_date="2020-01-01",
+		depreciation_start_date="2020-12-31",
+		total_number_of_depreciations=10,
+		submit=1,
+		**args,
+	)
 
 
 def get_asset_rows(asset: str, from_date: str, to_date: str, **filters) -> list[frappe._dict]:

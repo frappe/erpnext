@@ -41,7 +41,12 @@ def get_data(filters):
 		"GL Entry",
 		filters=filters_data,
 		or_filters=or_filters_data,
-		fields=["against_voucher", "debit_in_account_currency as debit", "voucher_no", "posting_date"],
+		fields=[
+			"against_voucher",
+			{"SUB": ["debit_in_account_currency", "credit_in_account_currency"], "as": "depreciation_amount"},
+			"voucher_no",
+			"posting_date",
+		],
 		order_by="against_voucher, posting_date",
 	)
 
@@ -62,13 +67,15 @@ def get_data(filters):
 					asset_data.opening_accumulated_depreciation
 				) + depreciation_before_from_date.get(d.against_voucher, 0)
 
-			asset_data.accumulated_depreciation_amount += d.debit
-			asset_data.opening_accumulated_depreciation = asset_data.accumulated_depreciation_amount - d.debit
+			asset_data.accumulated_depreciation_amount += d.depreciation_amount
+			asset_data.opening_accumulated_depreciation = (
+				asset_data.accumulated_depreciation_amount - d.depreciation_amount
+			)
 
 			row = frappe._dict(asset_data)
 			row.update(
 				{
-					"depreciation_amount": d.debit,
+					"depreciation_amount": d.depreciation_amount,
 					"depreciation_date": d.posting_date,
 					"value_after_depreciation": (
 						flt(row.net_purchase_amount) - flt(row.accumulated_depreciation_amount)
@@ -109,10 +116,16 @@ def get_depreciation_before_from_date(filters_data, or_filters_data, from_date) 
 		"GL Entry",
 		filters=filters_data,
 		or_filters=or_filters_data,
-		fields=["against_voucher", {"SUM": "debit_in_account_currency", "as": "debit"}],
+		fields=[
+			"against_voucher",
+			{
+				"SUM": [{"SUB": ["debit_in_account_currency", "credit_in_account_currency"]}],
+				"as": "depreciation_amount",
+			},
+		],
 		group_by="against_voucher",
 	)
-	return {d.against_voucher: flt(d.debit) for d in gl_entries}
+	return {d.against_voucher: flt(d.depreciation_amount) for d in gl_entries}
 
 
 def get_assets_details(assets):
