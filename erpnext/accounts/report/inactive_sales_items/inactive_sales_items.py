@@ -133,6 +133,9 @@ def get_sales_details(filters):
 		.orderby(days_since_last_order)
 	)
 
+	if filters["based_on"] == "Sales Invoice":
+		query = query.where(parent.is_return == 0)
+
 	if condition := get_allowed_companies_condition(parent.company, filters["based_on"]):
 		query = query.where(condition)
 
