@@ -551,6 +551,7 @@ def get_asset_details_for_grouped_by_category(filters):
 		.where(asset.company == filters.company)
 		.where(asset.purchase_date <= filters.to_date)
 		.where(asset.name.notin(capitalized_before_from_date))
+		.where(asset.name.isin(frappe.qb.get_query("Asset", fields=["name"], ignore_permissions=False)))
 		.groupby(asset.name)
 	)
 

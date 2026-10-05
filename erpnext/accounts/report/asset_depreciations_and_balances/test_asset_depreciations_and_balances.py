@@ -71,6 +71,34 @@ class TestAssetDepreciationsAndBalancesReport(ERPNextTestSuite):
 		row = get_asset_row(asset.name, "2020-01-01", "2021-06-30", finance_book="Test Finance Book 2")
 		self.assertEqual(row.accumulated_depreciation_as_on_to_date, 50000)
 
+	def test_group_by_asset_shows_only_permitted_assets(self):
+		permitted_asset = create_asset(submit=1)
+		other_asset = create_asset(submit=1)
+
+		user = "test_asset_balances_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Asset Balances",
+					"roles": [{"role": "Accounts User"}],
+				}
+			).insert()
+		frappe.permissions.add_user_permission("Asset", permitted_asset.name, user)
+
+		filters = frappe._dict(
+			company="_Test Company", from_date="2015-01-01", to_date=today(), group_by="Asset"
+		)
+		frappe.set_user(user)
+		try:
+			assets = {row.name for row in execute(filters)[1]}
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIn(permitted_asset.name, assets)
+		self.assertNotIn(other_asset.name, assets)
+
 
 def get_asset_row(asset: str, from_date: str, to_date: str, **filters) -> frappe._dict:
 	filters = frappe._dict(
