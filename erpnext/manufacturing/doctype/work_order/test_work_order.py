@@ -4705,6 +4705,18 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_transfer_takes_untransferred_qty_of_reserved_batches(self):
+		wo, batches = make_batch_reserved_work_order("Test Partly Transferred Batch RM", [10, 2])
+
+		for qty, expected in ((5, [(batches[0], 5)]), (7, [(batches[0], 5), (batches[1], 2)])):
+			transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", qty))
+			self.assertEqual([(row.batch_no, row.qty) for row in transfer.items], expected)
+			transfer.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{
 			"enable_stock_reservation": 1,
 			"allow_partial_reservation": 1,

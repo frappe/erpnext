@@ -2041,7 +2041,7 @@ def get_reserved_materials(voucher_no):
 			serial_batch_doc.serial_no,
 			serial_no.serial_no.as_("serial_number"),
 			serial_batch_doc.batch_no,
-			serial_batch_doc.qty,
+			(serial_batch_doc.qty - serial_batch_doc.delivered_qty).as_("qty"),
 			doctype.item_code,
 			doctype.warehouse,
 			doctype.name,
