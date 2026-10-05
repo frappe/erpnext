@@ -536,6 +536,12 @@ def set_expired_status():
 			and so_item.parent = so.name
 			and so_item.prevdoc_docname = `tabQuotation`.name"""
 
+	expired_quotations = frappe.db.sql(
+		f"""SELECT name FROM `tabQuotation` WHERE {cond} and not exists({so_against_quo})""",
+		(nowdate()),
+		pluck=True,
+	)
+
 	# if not exists any SO, set status as Expired
 	frappe.db.multisql(
 		{
@@ -544,6 +550,9 @@ def set_expired_status():
 		},
 		(nowdate()),
 	)
+
+	for name in expired_quotations:
+		frappe.get_doc("Quotation", name).update_opportunity("Open")
 
 
 @frappe.whitelist()
