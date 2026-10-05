@@ -26,6 +26,9 @@ class SalesPipelineAnalytics:
 		if not self.filters.to_date:
 			frappe.throw(_("To Date is mandatory"))
 
+		if self.filters.based_on == "Amount" and not self.filters.company:
+			frappe.throw(_("Company is mandatory when Based On is Amount"))
+
 	def run(self):
 		self.validate_filters()
 		self.get_columns()
