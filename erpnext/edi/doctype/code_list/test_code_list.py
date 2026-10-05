@@ -87,3 +87,12 @@ class TestCodeList(ERPNextTestSuite):
 		old_version = frappe.get_doc("Code List", OLD_VERSION)
 		old_version.default_common_code = new_version_code
 		self.assertRaises(frappe.ValidationError, old_version.save)
+
+	def test_bulk_delete_removes_the_codes_of_the_list(self):
+		frappe.flags.in_bulk_delete = True
+		self.addCleanup(frappe.flags.pop, "in_bulk_delete", None)
+
+		frappe.delete_doc("Code List", NEW_VERSION)
+
+		self.assertFalse(frappe.db.exists("Code List", NEW_VERSION))
+		self.assertFalse(frappe.db.exists("Common Code", {"code_list": NEW_VERSION}))

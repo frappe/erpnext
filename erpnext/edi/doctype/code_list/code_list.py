@@ -47,8 +47,7 @@ class CodeList(Document):
 			)
 
 	def on_trash(self):
-		if not frappe.flags.in_bulk_delete:
-			self.__delete_linked_docs()
+		self.__delete_linked_docs()
 
 	def __delete_linked_docs(self):
 		self.db_set("default_common_code", None)
