@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
 from erpnext.assets.doctype.asset.depreciation import (
+	_make_depreciation_entry,
 	post_depreciation_entries,
 )
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
@@ -412,3 +413,49 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		self.assertEqual(get_asset_depreciation_schedule(asset.name, "Active").asset, asset.name)
 		with self.set_user("Guest"):
 			self.assertRaises(frappe.PermissionError, get_asset_depreciation_schedule, asset.name, "Active")
+
+	def test_index_range_does_not_repost_booked_or_future_rows(self):
+		asset = create_monthly_asset()
+		schedule_name = get_asset_depr_schedule_doc(asset.name, "Active").name
+		_make_depreciation_entry(schedule_name, "2023-05-31")
+		cancel_depreciation_entry(asset.name, "2023-02-28")
+
+		# indexes as passed by the scheduler for the unbooked due rows (Feb to Jun)
+		_make_depreciation_entry(schedule_name, "2023-06-30", 1, 6)
+		_make_depreciation_entry(schedule_name, "2023-06-30", 1, 12)
+
+		self.assertEqual(get_depreciation_entry_count(asset.name), 6)
+		self.assertEqual(get_finance_book_value(asset.name), 600)
+
+
+def create_monthly_asset(**args):
+	return create_asset(
+		item_code="Macbook Pro",
+		gross_purchase_amount=1200,
+		purchase_amount=1200,
+		calculate_depreciation=1,
+		depreciation_method="Straight Line",
+		available_for_use_date="2023-01-01",
+		depreciation_start_date="2023-01-31",
+		frequency_of_depreciation=1,
+		total_number_of_depreciations=12,
+		submit=1,
+		**args,
+	)
+
+
+def cancel_depreciation_entry(asset_name: str, schedule_date: str):
+	schedule = get_asset_depr_schedule_doc(asset_name, "Active")
+	row = next(d for d in schedule.depreciation_schedule if cstr(d.schedule_date) == schedule_date)
+	frappe.get_doc("Journal Entry", row.journal_entry).cancel()
+
+
+def get_depreciation_entry_count(asset_name: str) -> int:
+	return frappe.db.count(
+		"Journal Entry Account",
+		{"reference_type": "Asset", "reference_name": asset_name, "docstatus": 1, "debit": [">", 0]},
+	)
+
+
+def get_finance_book_value(asset_name: str) -> float:
+	return frappe.db.get_value("Asset Finance Book", {"parent": asset_name}, "value_after_depreciation")

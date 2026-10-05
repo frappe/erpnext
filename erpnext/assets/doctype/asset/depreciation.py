@@ -258,8 +258,6 @@ def _make_depreciation_entry(
 				asset,
 				date,
 				d,
-				sch_start_idx,
-				sch_end_idx,
 				depreciation_cost_center,
 				depreciation_series,
 				credit_account,
@@ -283,17 +281,13 @@ def _make_journal_entry_for_depreciation(
 	asset,
 	date,
 	depr_schedule,
-	sch_start_idx,
-	sch_end_idx,
 	depreciation_cost_center,
 	depreciation_series,
 	credit_account,
 	debit_account,
 	accounting_dimensions,
 ):
-	if not (sch_start_idx and sch_end_idx) and not (
-		not depr_schedule.journal_entry and getdate(depr_schedule.schedule_date) <= getdate(date)
-	):
+	if depr_schedule.journal_entry or getdate(depr_schedule.schedule_date) > getdate(date):
 		return
 
 	je = frappe.new_doc("Journal Entry")
