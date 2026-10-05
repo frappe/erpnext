@@ -43,6 +43,14 @@ class TestUaeVat201(ERPNextTestSuite):
 			{"company": "_Test Company"},
 		)
 
+	def test_company_permission(self):
+		frappe.permissions.add_user_permission("Company", "_Test Company", "test2@example.com")
+		frappe.get_doc("User", "test2@example.com").add_roles("Accounts User")
+
+		with self.set_user("test2@example.com"):
+			self.assertRaises(frappe.PermissionError, execute, {"company": "_Test Company UAE VAT"})
+		self.assertRaises(frappe.ValidationError, execute, {})
+
 	def test_uae_vat_201_report(self):
 		make_sales_invoices()
 		create_purchase_invoices()

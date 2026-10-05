@@ -10,10 +10,17 @@ from erpnext import get_region
 
 
 def execute(filters=None):
+	validate_company(filters)
 	validate_company_region(filters)
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)
 	return columns, data
+
+
+def validate_company(filters):
+	if not filters.get("company"):
+		frappe.throw(_("Company is required"), title=_("Missing Company"))
+	frappe.has_permission("Company", doc=filters.get("company"), throw=True)
 
 
 def validate_company_region(filters):
