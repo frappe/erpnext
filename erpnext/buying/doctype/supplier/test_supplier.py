@@ -125,6 +125,26 @@ class TestSupplier(ERPNextTestSuite):
 		make_internal_supplier()
 		old_supplier.save()
 
+	def test_primary_contact_must_be_linked_to_supplier(self):
+		other_supplier = create_supplier()
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": frappe.generate_hash(),
+				"links": [{"link_doctype": "Supplier", "link_name": other_supplier.name}],
+			}
+		).insert()
+
+		supplier = create_supplier()
+		supplier.supplier_primary_contact = contact.name
+		self.assertRaises(frappe.ValidationError, supplier.save)
+
+		contact.append("links", {"link_doctype": "Supplier", "link_name": supplier.name})
+		contact.save()
+		supplier.reload()
+		supplier.supplier_primary_contact = contact.name
+		supplier.save()
+
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType
 		supplier = frappe.get_doc("Supplier", "_Test Supplier with Country")

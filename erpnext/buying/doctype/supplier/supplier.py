@@ -160,8 +160,33 @@ class Supplier(TransactionBase):
 
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
+		self.validate_primary_contact_and_address()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+
+	def validate_primary_contact_and_address(self):
+		for fieldname, link_doctype in (
+			("supplier_primary_contact", "Contact"),
+			("supplier_primary_address", "Address"),
+		):
+			name = self.get(fieldname)
+			if not name or not self.has_value_changed(fieldname):
+				continue
+
+			if not frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": link_doctype,
+					"parent": name,
+					"link_doctype": "Supplier",
+					"link_name": self.name,
+				},
+			):
+				frappe.throw(
+					_("{0} {1} is not linked to Supplier {2}").format(
+						_(link_doctype), frappe.bold(name), frappe.bold(self.name)
+					)
+				)
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
