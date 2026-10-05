@@ -252,6 +252,32 @@ class TestShareBalanceReport(ERPNextTestSuite):
 
 		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
 
+	def test_issue_updated_after_transfer_out_keeps_the_holding(self):
+		issue = create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-01",
+		)
+		create_share_transfer(
+			transfer_type="Transfer",
+			from_shareholder=self.shareholder,
+			to_shareholder=get_shareholder("Thor", COMPANY),
+			share_type=self.share_type,
+			from_no=1,
+			to_no=40,
+			no_of_shares=40,
+			rate=10,
+			date="2026-06-10",
+		)
+		issue.db_set("remarks", "Updated after submit")
+
+		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
+
 	def get_row(self, date, shareholder=None):
 		filters = frappe._dict(
 			{"date": date, "company": COMPANY, "shareholder": shareholder or self.shareholder}
