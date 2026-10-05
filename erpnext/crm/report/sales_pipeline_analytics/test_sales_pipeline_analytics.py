@@ -32,7 +32,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"opportunity_owner": "Not Assigned", "August": 1}]
+		expected_data = [{"opportunity_owner": "Not Assigned", "august_2021": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -49,7 +49,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"sales_stage": "Prospecting", "August": 1}]
+		expected_data = [{"sales_stage": "Prospecting", "august_2021": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -67,7 +67,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"opportunity_owner": "Not Assigned", "August": 150000}]
+		expected_data = [{"opportunity_owner": "Not Assigned", "august_2021": 150000}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -84,7 +84,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"sales_stage": "Prospecting", "August": 150000}]
+		expected_data = [{"sales_stage": "Prospecting", "august_2021": 150000}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -102,7 +102,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"opportunity_owner": "Not Assigned", "Q3": 1}]
+		expected_data = [{"opportunity_owner": "Not Assigned", "q3_2021": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -119,7 +119,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"sales_stage": "Prospecting", "Q3": 1}]
+		expected_data = [{"sales_stage": "Prospecting", "q3_2021": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -137,7 +137,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"opportunity_owner": "Not Assigned", "Q3": 150000}]
+		expected_data = [{"opportunity_owner": "Not Assigned", "q3_2021": 150000}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -154,7 +154,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"sales_stage": "Prospecting", "Q3": 150000}]
+		expected_data = [{"sales_stage": "Prospecting", "q3_2021": 150000}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -173,7 +173,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [{"opportunity_owner": "Not Assigned", "August": 1}]
+		expected_data = [{"opportunity_owner": "Not Assigned", "august_2021": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
@@ -193,7 +193,7 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		rows = stage_rows(stage, based_on="Amount", from_date="2026-01-01", to_date="2026-01-31")
 
-		self.assertEqual(rows[0]["January"], 9000)
+		self.assertEqual(rows[0]["january_2026"], 9000)
 
 		# amounts of companies with different currencies can't be added together
 		with self.assertRaises(frappe.ValidationError):
@@ -206,8 +206,14 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 		make_stage_opportunity(stage, 300, "2026-02-05")
 
 		rows = stage_rows(stage, from_date="2025-01-01", to_date="2026-02-28")
+		self.assertEqual(rows[0]["january_2025"], 1)
+		self.assertEqual(rows[0]["january_2026"], 1)
 
-		self.assertTrue(rows)
+		rows = stage_rows(
+			stage, based_on="Amount", range="Quarterly", from_date="2025-01-01", to_date="2026-03-31"
+		)
+		self.assertEqual(rows[0]["q1_2025"], 500)
+		self.assertEqual(rows[0]["q1_2026"], 1300)
 
 
 def make_sales_stage() -> str:
