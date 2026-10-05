@@ -80,6 +80,18 @@ class TestSupplierScorecardPeriod(ERPNextTestSuite):
 		# 80 * 0.25 + 40 * 0.75 = 50
 		self.assertEqual(period.total_score, 50)
 
+	def test_period_score_is_normalised_by_max_score(self):
+		period = make_period(
+			criteria=[
+				{"criteria_name": "C1", "formula": "10", "max_score": 10, "weight": 50},
+				{"criteria_name": "C2", "formula": "50", "max_score": 200, "weight": 50},
+			]
+		)
+		period.calculate_criteria()
+		period.calculate_score()
+
+		self.assertEqual(period.total_score, 62.5)
+
 	def test_criteria_weights_must_total_100(self):
 		period = make_period(
 			criteria=[{"criteria_name": "C1", "formula": "100", "max_score": 100, "weight": 60}]

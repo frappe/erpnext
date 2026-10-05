@@ -101,7 +101,8 @@ class SupplierScorecardPeriod(Document):
 	def calculate_score(self):
 		myscore = 0
 		for crit in self.criteria:
-			myscore += crit.score * crit.weight / 100.0
+			if crit.max_score:
+				myscore += crit.score * crit.weight / crit.max_score
 		self.total_score = myscore
 
 	def calculate_weighted_score(self, weighing_function):
