@@ -38,6 +38,24 @@ class TestLeadDetailsReport(ERPNextTestSuite):
 		names = [row.name for row in get_data(make_filters(territory="All Territories"))]
 		self.assertIn(lead.name, names)
 
+	def test_lead_with_two_addresses_is_listed_once(self):
+		lead = make_lead()
+		for city in ("Mysuru", "Hubballi"):
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": city,
+					"address_line1": "1 Main Road",
+					"city": city,
+					"country": "India",
+					"is_primary_address": city == "Hubballi",
+					"links": [{"link_doctype": "Lead", "link_name": lead.name}],
+				}
+			).insert()
+
+		rows = [row for row in get_data(make_filters()) if row.name == lead.name]
+		self.assertEqual([row.city for row in rows], ["Hubballi"])
+
 
 def make_lead(**fields):
 	return frappe.get_doc(

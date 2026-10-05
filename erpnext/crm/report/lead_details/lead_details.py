@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Concat_ws, Date, NullIf
 from frappe.utils.nestedset import get_descendants_of
 
@@ -75,14 +76,11 @@ def get_columns():
 def get_data(filters):
 	lead = frappe.qb.DocType("Lead")
 	address = frappe.qb.DocType("Address")
-	dynamic_link = frappe.qb.DocType("Dynamic Link")
 
 	query = (
 		frappe.qb.from_(lead)
-		.left_join(dynamic_link)
-		.on((lead.name == dynamic_link.link_name) & (dynamic_link.parenttype == "Address"))
 		.left_join(address)
-		.on(address.name == dynamic_link.parent)
+		.on(address.name == get_first_address(lead))
 		.select(
 			lead.name,
 			lead.lead_name,
@@ -116,3 +114,23 @@ def get_data(filters):
 		query = query.where(lead.status == filters.get("status"))
 
 	return query.run(as_dict=1)
+
+
+def get_first_address(lead):
+	"""Sub-query for the lead's primary address, or else its oldest one."""
+	address = frappe.qb.DocType("Address").as_("lead_address")
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	return (
+		frappe.qb.from_(dynamic_link)
+		.join(address)
+		.on(address.name == dynamic_link.parent)
+		.select(address.name)
+		.where(
+			(dynamic_link.parenttype == "Address")
+			& (dynamic_link.link_doctype == "Lead")
+			& (dynamic_link.link_name == lead.name)
+		)
+		.orderby(address.is_primary_address, order=Order.desc)
+		.orderby(address.creation)
+		.limit(1)
+	)
