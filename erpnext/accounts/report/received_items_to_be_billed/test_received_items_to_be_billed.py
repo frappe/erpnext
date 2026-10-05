@@ -121,6 +121,15 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 		self.assertIsNone(self.get_row(data, pr.name))
 		self.assertEqual(self.get_row(data, returned_pr.name).pending_amount, 600)
 
+	def test_return_in_a_bigger_uom_deducts_its_own_amount(self):
+		pr = make_purchase_receipt(
+			qty=2, rate=1000, uom="_Test UOM 1", conversion_factor=10, posting_date="2026-06-01"
+		)
+		make_receipt_return(pr.name, qty=-1, posting_date="2026-06-02")
+
+		row = self.get_row(self.run_report(), pr.name)
+		self.assertEqual((row.returned_amount, row.pending_amount), (1000, 1000))
+
 
 def make_receipt_return(purchase_receipt, qty, posting_date):
 	return_pr = make_purchase_return(purchase_receipt)

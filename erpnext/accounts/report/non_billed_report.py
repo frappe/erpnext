@@ -45,7 +45,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 	billed_amount = (child_doctype.billed_amt - IfNull(later_billed.amount, 0)) * IfNull(
 		doctype.conversion_rate, 1
 	)
-	returned_amount = child_doctype.base_rate * IfNull(returned.qty, 0)
+	returned_amount = child_doctype.base_rate * IfNull(returned.qty, 0) / child_doctype.conversion_factor
 
 	query = (
 		frappe.qb.from_(doctype)
