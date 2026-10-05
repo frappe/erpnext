@@ -211,6 +211,21 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
+	def test_hold_time_when_closed_issue_is_reopened_as_replied(self):
+		issue = make_issue(get_datetime("2019-03-04 11:00"), index=1)
+
+		for status, time in (("Closed", "12:00"), ("Replied", "13:00"), ("Open", "14:00")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+			if status == "Replied":
+				self.assertEqual(issue.agreement_status, "Resolution Due")
+				self.assertFalse(issue.sla_resolution_date)
+
+		self.assertEqual(issue.total_hold_time, 7200)
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

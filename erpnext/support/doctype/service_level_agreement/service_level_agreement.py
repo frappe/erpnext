@@ -609,6 +609,7 @@ def handle_status_change(doc, apply_sla_for_resolution):
 	if is_fulfilled_status(prev_status) and is_hold_status(doc.status):
 		# Issue was closed -> Calculate Total Hold Time from resolution_date
 		calculate_hold_hours()
+		reset_resolution_metrics(doc)
 		# Issue is on hold -> Set on_hold_since
 		doc.on_hold_since = now_time
 		reset_expected_response_and_resolution(doc)
