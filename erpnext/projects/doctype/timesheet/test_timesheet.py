@@ -2,7 +2,7 @@
 # See license.txt
 
 import datetime
-import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -30,7 +30,7 @@ from erpnext.tests.permission_test_utils import (
 )
 
 
-class TestTimesheet(unittest.TestCase):
+class TestTimesheet(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Timesheet")
 
@@ -292,6 +292,44 @@ class TestTimesheet(unittest.TestCase):
 		timesheet.load_from_db()
 		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice2.name)
 		self.assertEqual(timesheet.status, "Billed")
+
+	def test_employee_activity_cost_is_converted_to_the_timesheet_currency(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		emp = make_employee("test_employee_currency@example.com", company="_Test Company")
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"employee": emp,
+				"activity_type": "_Test Activity Type",
+				"billing_rate": 1000,
+				"costing_rate": 600,
+			}
+		).insert()
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"currency": "EUR",
+				"exchange_rate": 2,
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"is_billable": 1,
+						"from_time": now_datetime(),
+						"hours": 2,
+					}
+				],
+			}
+		)
+
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0.5):
+			self.assertEqual(get_activity_cost(emp, "_Test Activity Type", "EUR")["billing_rate"], 500)
+			timesheet.insert()
+
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 500)
+		self.assertEqual(timesheet.time_logs[0].costing_rate, 300)
 
 
 def make_timesheet(
