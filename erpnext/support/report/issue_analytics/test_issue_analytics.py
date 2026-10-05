@@ -133,6 +133,42 @@ class TestIssueAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(self.get_total("2026-05-15", "2026-12-31", "Quarterly"), 3)
 
+	def test_issue_count_respects_user_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		create_customer("__Test Customer 1", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2026-05-20"), "__Test Customer", 1)
+		make_issue(getdate("2026-05-21"), "__Test Customer 1", 2)
+
+		user = "test_issue_analytics_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Support",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Support Team"}],
+				}
+			).insert(ignore_permissions=True)
+		add_user_permission("Customer", "__Test Customer", user)
+
+		filters = {
+			"company": "_Test Company",
+			"based_on": "Issue Type",
+			"from_date": "2026-05-01",
+			"to_date": "2026-05-31",
+			"range": "Monthly",
+		}
+		frappe.set_user(user)
+		try:
+			rows = execute(filters)[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(sum(row["total"] for row in rows), 1)
+
 	def get_total(self, from_date, to_date, period_range):
 		filters = {
 			"company": "_Test Company",
