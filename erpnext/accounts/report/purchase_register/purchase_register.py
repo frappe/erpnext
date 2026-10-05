@@ -150,7 +150,7 @@ def _execute(filters=None, additional_table_columns=None):
 					"debit": get_in_invoice_payable_debit(inv),
 					"credit": inv.base_grand_total,
 					"outstanding_amount": flt(
-						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+						get_outstanding_in_company_currency(inv, company_currency), outstanding_precision
 					),
 				}
 			)
@@ -167,6 +167,14 @@ def _execute(filters=None, additional_table_columns=None):
 			res[row].update({"balance": running_balance})
 
 	return columns, res, None, None, None, include_payments
+
+
+def get_outstanding_in_company_currency(inv, company_currency):
+	"""Outstanding is in the party account currency."""
+	if inv.party_account_currency == company_currency:
+		return flt(inv.outstanding_amount)
+
+	return flt(inv.outstanding_amount) * (inv.conversion_rate or 1)
 
 
 def get_in_invoice_payable_debit(inv):
@@ -437,6 +445,7 @@ def get_invoices(filters, additional_query_columns):
 			pi.outstanding_amount,
 			pi.mode_of_payment,
 			pi.conversion_rate,
+			pi.party_account_currency,
 			pi.is_paid,
 			pi.base_paid_amount,
 			pi.base_write_off_amount,

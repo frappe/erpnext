@@ -142,17 +142,24 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		foreign_invoice.db_set("currency", "USD")
 		foreign_invoice.db_set("conversion_rate", 80)
 		foreign_invoice.db_set("credit_to", usd_creditors.name)
+		foreign_invoice.db_set("party_account_currency", "USD")
 		foreign_invoice.db_set("outstanding_amount", 100.236)
 		local_invoice = make_purchase_invoice()
 		local_invoice.db_set("currency", "INR")
 		local_invoice.db_set("conversion_rate", 1)
 		local_invoice.db_set("outstanding_amount", 200.456)
+		# foreign currency invoice on a company currency payable: outstanding is already in INR
+		foreign_invoice_on_local_payable = make_purchase_invoice()
+		foreign_invoice_on_local_payable.db_set("currency", "USD")
+		foreign_invoice_on_local_payable.db_set("conversion_rate", 80)
+		foreign_invoice_on_local_payable.db_set("outstanding_amount", 800)
 		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
 		outstanding_precision = 2
 
 		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
 		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
 		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
+		self.assertEqual(data_by_name.get(foreign_invoice_on_local_payable.name), 800)
 
 	def test_purchase_register_ledger_view(self):
 		filters = frappe._dict(
