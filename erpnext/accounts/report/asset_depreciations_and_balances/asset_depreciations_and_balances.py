@@ -171,18 +171,19 @@ def get_assets_for_grouped_by_category(filters):
 			   sum(results.depreciation_amount_during_the_period) as depreciation_amount_during_the_period
 		from (SELECT a.asset_category,
 				   ifnull(sum(case when gle.posting_date < %(from_date)s and (ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s) then
-								   gle.debit
+								   gle.debit - gle.credit
 							  else
 								   0
 							  end), 0) as accumulated_depreciation_as_on_from_date,
-				   ifnull(sum(case when gle.posting_date <= %(to_date)s and ifnull(a.disposal_date, 0) = 0 then
+				   ifnull(sum(case when gle.posting_date >= %(from_date)s and gle.posting_date <= %(to_date)s
+										and (ifnull(a.disposal_date, 0) = 0 or gle.posting_date <= a.disposal_date) then
 								   gle.credit
 							  else
 								   0
 							  end), 0) as depreciation_eliminated_via_reversal,
 				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0 and a.disposal_date >= %(from_date)s
 										and a.disposal_date <= %(to_date)s and gle.posting_date <= a.disposal_date then
-								   gle.debit
+								   gle.debit - gle.credit
 							  else
 								   0
 							  end), 0) as depreciation_eliminated_during_the_period,
@@ -463,18 +464,19 @@ def get_assets_for_grouped_by_asset(filters):
 			   sum(results.depreciation_amount_during_the_period) as depreciation_amount_during_the_period
 		from (SELECT a.name as name,
 				   ifnull(sum(case when gle.posting_date < %(from_date)s and (ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s) then
-								   gle.debit
+								   gle.debit - gle.credit
 							  else
 								   0
 							  end), 0) as accumulated_depreciation_as_on_from_date,
-				   ifnull(sum(case when gle.posting_date <= %(to_date)s and ifnull(a.disposal_date, 0) = 0 then
+				   ifnull(sum(case when gle.posting_date >= %(from_date)s and gle.posting_date <= %(to_date)s
+										and (ifnull(a.disposal_date, 0) = 0 or gle.posting_date <= a.disposal_date) then
 								   gle.credit
 							  else
 								   0
 							  end), 0) as depreciation_eliminated_via_reversal,
 				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0 and a.disposal_date >= %(from_date)s
 										and a.disposal_date <= %(to_date)s and gle.posting_date <= a.disposal_date then
-								   gle.debit
+								   gle.debit - gle.credit
 							  else
 								   0
 							  end), 0) as depreciation_eliminated_during_the_period,
