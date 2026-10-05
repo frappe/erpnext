@@ -812,11 +812,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
-<<<<<<< HEAD
  "modified": "2026-09-30 23:24:44.044604",
-=======
- "modified": "2026-09-17 12:00:00.000000",
->>>>>>> 68f6f8612e (feat(accounts): add cheque management)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
