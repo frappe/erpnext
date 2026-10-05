@@ -290,7 +290,11 @@ def get_opening_balance(
 		else:
 			if not ignore_is_opening:
 				opening_balance = opening_balance.where(
-					(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
+					(closing_balance.posting_date < filters.from_date)
+					| (
+						(closing_balance.is_opening == "Yes")
+						& (closing_balance.posting_date <= filters.to_date)
+					)
 				)
 			else:
 				opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)

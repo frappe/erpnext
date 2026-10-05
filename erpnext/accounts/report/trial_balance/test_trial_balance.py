@@ -315,6 +315,23 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_opening_entry_after_to_date_is_not_in_opening(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.accounts.utils import get_fiscal_year
+
+		fiscal_year, year_start, year_end = get_fiscal_year(today(), company="_Test Company")
+		debit_account, credit_account = self.make_accounts_and_entry(100, year_start)
+		opening_entry = make_journal_entry(
+			debit_account, credit_account, 5000, posting_date=year_end, save=False
+		)
+		opening_entry.is_opening = "Yes"
+		opening_entry.submit()
+
+		rows, _ = self.rows_by_account(
+			fiscal_year=fiscal_year, from_date=add_days(year_start, 5), to_date=add_days(year_start, 10)
+		)
+		self.assertEqual(rows[debit_account]["opening_debit"], 100)
+
 	def close_fiscal_year_2021_for_pcv_company(self):
 		"""Post a 400 balance to Cash - TPC in FY 2021 and close it with a PCV. Returns the surplus account."""
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
