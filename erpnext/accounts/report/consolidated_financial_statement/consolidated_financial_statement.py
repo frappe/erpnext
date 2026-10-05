@@ -289,6 +289,7 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 		own_amounts = data.copy()
 		for company in companies:
 			data[company] = get_accumulated_amount(company, companies[company], own_amounts, filters)
+		data["total"] = data[filters.company]
 
 	return data
 
