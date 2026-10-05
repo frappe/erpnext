@@ -175,3 +175,17 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		self.assertEqual(
 			flt(section_total.get(PARENT_COMPANY)), sum(flt(row.get(PARENT_COMPANY)) for row in section_rows)
 		)
+
+	def test_accumulated_cash_flow_rows_include_subsidiaries(self):
+		self.post_journal_entry("Office Equipment - CCI", "Cash - CCI", 3000)
+
+		own_row = self.get_row(
+			self.run_report(report="Cash Flow", accumulated_in_group_company=0), "Net Change in Fixed Asset"
+		)
+		accumulated_row = self.get_row(
+			self.run_report(report="Cash Flow", accumulated_in_group_company=1), "Net Change in Fixed Asset"
+		)
+		self.assertEqual(flt(own_row[CHILD_COMPANY]), -3000)
+		self.assertEqual(
+			flt(accumulated_row[PARENT_COMPANY]), flt(own_row[PARENT_COMPANY]) + flt(own_row[CHILD_COMPANY])
+		)
