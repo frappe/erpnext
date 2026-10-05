@@ -24,18 +24,20 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		lead = frappe.get_doc({"doctype": "Lead", "lead_name": customer_name, "email_id": email}).insert(
 			ignore_permissions=True
 		)
-		frappe.get_doc(
-			{
-				"doctype": "Opportunity",
-				"opportunity_from": "Lead",
-				"party_name": lead.name,
-				"company": "_Test Company",
-				"currency": "INR",
-				"conversion_rate": 1,
-				"contact_email": email,
-				"customer_name": customer_name,
-			}
-		).insert(ignore_permissions=True)
+		# two opportunities of one lead make one row
+		for _opportunity in range(2):
+			frappe.get_doc(
+				{
+					"doctype": "Opportunity",
+					"opportunity_from": "Lead",
+					"party_name": lead.name,
+					"company": "_Test Company",
+					"currency": "INR",
+					"conversion_rate": 1,
+					"contact_email": email,
+					"customer_name": customer_name,
+				}
+			).insert(ignore_permissions=True)
 
 		si = create_sales_invoice(do_not_save=1)
 		si.contact_email = email
@@ -66,8 +68,9 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		self.assertFalse([r for r in execute(filters)[1] if r[0] == customer_name], "draft invoice counted")
 
 		si.submit()
-		row = next((r for r in execute(filters)[1] if r[0] == customer_name), None)
-		self.assertIsNotNone(row, "lead's converted-customer row missing")
+		rows = [r for r in execute(filters)[1] if r[0] == customer_name]
+		self.assertEqual(len(rows), 1)
+		row = rows[0]
 		# from the earliest REAL contact (22 days ago, not the NULL-dated one) to the posting date
 		self.assertEqual(row[2], 20.0)
 

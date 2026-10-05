@@ -77,11 +77,7 @@ def get_columns():
 def get_communication_details(filters):
 	communication_count = None
 	communication_list = []
-	opportunities = frappe.get_list(
-		"Opportunity",
-		filters={"opportunity_from": "Lead"},
-		fields=["name", "customer_name", "contact_email"],
-	)
+	opportunities = get_first_opportunity_of_each_lead()
 
 	si = frappe.qb.DocType("Sales Invoice")
 	comm = frappe.qb.DocType("Communication")
@@ -139,3 +135,16 @@ def get_communication_details(filters):
 			}
 		)
 	return communication_list
+
+
+def get_first_opportunity_of_each_lead() -> list[dict]:
+	opportunities = {}
+	for opportunity in frappe.get_list(
+		"Opportunity",
+		filters={"opportunity_from": "Lead"},
+		fields=["party_name", "customer_name", "contact_email"],
+		order_by="creation",
+	):
+		opportunities.setdefault(opportunity.party_name, opportunity)
+
+	return list(opportunities.values())
