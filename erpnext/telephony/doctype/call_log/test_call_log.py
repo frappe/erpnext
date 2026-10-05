@@ -155,3 +155,23 @@ class TestCallLog(ERPNextTestSuite):
 			self.assertEqual(get_linked_call_logs("Contact", self.contact.name), [])
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_transferred_call_is_stored_with_the_new_agent(self):
+		first_agent = make_employee(
+			"test_call_agent_a@example.com", company="_Test Company", cell_number=f"+91{self.number}1"
+		)
+		second_agent = make_employee(
+			"test_call_agent_b@example.com", company="_Test Company", cell_number=f"+91{self.number}2"
+		)
+		call_log = frappe.get_doc(
+			"Call Log", self._make_call_log(to=f"+91{self.number}1", type="Incoming", status="Ringing")
+		)
+		self.assertEqual(call_log.call_received_by, first_agent)
+
+		call_log.to = f"+91{self.number}2"
+		call_log.save(ignore_permissions=True)
+
+		self.assertEqual(
+			frappe.db.get_value("Call Log", call_log.name, ["call_received_by", "employee_user_id"]),
+			(second_agent, "test_call_agent_b@example.com"),
+		)

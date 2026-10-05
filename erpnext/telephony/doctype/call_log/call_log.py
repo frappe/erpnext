@@ -48,6 +48,8 @@ class CallLog(Document):
 
 	def validate(self):
 		deduplicate_dynamic_links(self)
+		if not self.is_new() and self.is_incoming_call() and self.has_value_changed("to"):
+			self.update_received_by()
 
 	def before_insert(self):
 		"""Add lead(third party person) links to the document."""
@@ -78,9 +80,6 @@ class CallLog(Document):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
 			return
-
-		if self.is_incoming_call() and self.has_value_changed("to"):
-			self.update_received_by()
 
 		if _is_call_missed(doc_before_save, self):
 			frappe.publish_realtime(f"call_{self.id}_missed", self)
