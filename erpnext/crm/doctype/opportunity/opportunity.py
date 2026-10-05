@@ -95,28 +95,19 @@ class Opportunity(TransactionBase, CRMNote):
 	# end: auto-generated types
 
 	def onload(self):
-		ref_doc = frappe.get_doc(self.opportunity_from, self.party_name)
-
-		load_address_and_contact(ref_doc)
 		load_address_and_contact(self)
+		if self.party_name and frappe.has_permission(self.opportunity_from, "read", self.party_name):
+			self.add_party_address_and_contact()
 
-		ref_doc_contact_list = ref_doc.get("__onload").get("contact_list")
-		opportunity_doc_contact_list = [
-			contact
-			for contact in self.get("__onload").get("contact_list")
-			if contact not in ref_doc_contact_list
-		]
-		ref_doc_contact_list.extend(opportunity_doc_contact_list)
-		ref_doc.set_onload("contact_list", ref_doc_contact_list)
+	def add_party_address_and_contact(self):
+		"""Show the party's contacts and addresses first, followed by the ones linked to this Opportunity."""
+		party = frappe.get_doc(self.opportunity_from, self.party_name)
+		load_address_and_contact(party)
 
-		ref_doc_addr_list = ref_doc.get("__onload").get("addr_list")
-		opportunity_doc_addr_list = [
-			addr for addr in self.get("__onload").get("addr_list") if addr not in ref_doc_addr_list
-		]
-		ref_doc_addr_list.extend(opportunity_doc_addr_list)
-		ref_doc.set_onload("addr_list", ref_doc_addr_list)
-
-		self.set("__onload", ref_doc.get("__onload"))
+		for key in ("contact_list", "addr_list"):
+			party_list = party.get("__onload").get(key)
+			party_list.extend(entry for entry in self.get("__onload").get(key) if entry not in party_list)
+			self.set_onload(key, party_list)
 
 	def after_insert(self):
 		if self.opportunity_from == "Lead":
