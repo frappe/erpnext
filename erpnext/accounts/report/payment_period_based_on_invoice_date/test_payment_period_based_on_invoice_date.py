@@ -112,6 +112,25 @@ class TestPaymentPeriodBasedOnInvoiceDate(ERPNextTestSuite):
 		self.assertEqual(row["range3"], 0)
 		self.assertEqual(row["range4"], 1000)  # 90 Above captures the full amount
 
+	def test_only_payments_are_listed(self):
+		invoice = create_sales_invoice(customer="_Test Customer", rate=1000, posting_date="2026-06-01")
+		create_sales_invoice(customer="_Test Customer", rate=500, posting_date="2026-06-05")
+		create_sales_invoice(
+			customer="_Test Customer",
+			qty=-1,
+			rate=100,
+			is_return=1,
+			return_against=invoice.name,
+			posting_date="2026-06-10",
+		)
+		payment = self.pay_invoice(invoice, "2026-06-20")
+
+		_columns, data = self.run_report(party="_Test Customer")
+
+		self.assertEqual(
+			[(row["payment_entry"], row["amount"]) for row in data], [(payment.name, payment.paid_amount)]
+		)
+
 	def test_columns_expose_expected_age_buckets(self):
 		columns, _data = self.run_report()
 		labels_by_fieldname = {c["fieldname"]: c["label"] for c in columns}

@@ -5,7 +5,6 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Abs
 from frappe.utils import getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
@@ -145,6 +144,7 @@ def get_conditions(filters):
 	conditions = []
 
 	conditions.append(ple.delinked.eq(0))
+	conditions.append(ple.voucher_type.isin(["Payment Entry", "Journal Entry"]))
 	if filters.payment_type == _("Outgoing"):
 		conditions.append(ple.party_type.eq("Supplier"))
 		conditions.append(ple.against_voucher_type.eq("Purchase Invoice"))
@@ -179,7 +179,8 @@ def get_entries(filters):
 			ple.party_type,
 			ple.party,
 			ple.posting_date,
-			Abs(ple.amount).as_("amount"),
+			# a payment reduces the invoice's outstanding, a refund adds to it
+			(ple.amount * -1).as_("amount"),
 			ple.remarks,
 			ple.against_voucher_no,
 		)
