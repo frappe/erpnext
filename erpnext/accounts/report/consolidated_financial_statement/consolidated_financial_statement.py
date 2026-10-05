@@ -295,8 +295,8 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 
 
 def get_accumulated_amount(company, subsidiaries, own_amounts, filters):
-	"""The company's amount plus its subsidiaries', converted as calculate_values converts GL entries."""
-	report_currency = erpnext.get_company_currency(filters.company)
+	"""The company's amount plus its subsidiaries', converted to the company's currency."""
+	company_currency = erpnext.get_company_currency(company)
 
 	accumulated_amount = 0
 	for subsidiary in subsidiaries:
@@ -306,9 +306,9 @@ def get_accumulated_amount(company, subsidiaries, own_amounts, filters):
 			amount
 			and subsidiary != company
 			and not filters.get("presentation_currency")
-			and subsidiary_currency != report_currency
+			and subsidiary_currency != company_currency
 		):
-			amount = convert(amount, report_currency, subsidiary_currency, filters.end_date)
+			amount = convert(amount, company_currency, subsidiary_currency, filters.end_date)
 
 		accumulated_amount += amount
 
@@ -442,7 +442,7 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters
 						or (filters.get("accumulated_in_group_company"))
 						and entry.company in companies.get(company)
 					):
-						parent_company_currency = erpnext.get_company_currency(d.company)
+						parent_company_currency = erpnext.get_company_currency(company)
 						child_company_currency = erpnext.get_company_currency(entry.company)
 
 						debit, credit = flt(entry.debit), flt(entry.credit)
