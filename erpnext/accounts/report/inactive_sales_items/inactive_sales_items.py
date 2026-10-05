@@ -126,7 +126,19 @@ def get_sales_details(filters):
 		)
 		.where(parent.docstatus == 1)
 		.orderby(days_since_last_order)
+<<<<<<< HEAD
 	).run(as_dict=True)
+=======
+	)
+
+	if filters["based_on"] == "Sales Invoice":
+		query = query.where(parent.is_return == 0)
+
+	if condition := get_allowed_companies_condition(parent.company, filters["based_on"]):
+		query = query.where(condition)
+
+	sales_data = query.run(as_dict=True)
+>>>>>>> 45b2078 (fix(inactive-sales-items): ignore credit notes when finding the last order)
 
 	for d in sales_data:
 		item_details_map.setdefault(d.item_code, []).append(d)

@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.inactive_sales_items.inactive_sales_items import execute
@@ -49,3 +49,12 @@ class TestInactiveSalesItems(ERPNextTestSuite):
 		data = self.run_report(item_group="All Item Groups")
 
 		self.assertIn(item, [row["item"] for row in data])
+
+	def test_credit_note_is_not_an_order(self):
+		item = make_item("_Test Inactive Sales Item Return").name
+		invoice = create_sales_invoice(item=item, qty=2, rate=100, posting_date=add_days(today(), -100))
+		create_sales_invoice(item=item, qty=-1, rate=100, is_return=1, return_against=invoice.name)
+
+		row = next(row for row in self.run_report(item=item) if row.get("last_order_date"))
+
+		self.assertEqual(row["last_order_date"], getdate(invoice.posting_date))
