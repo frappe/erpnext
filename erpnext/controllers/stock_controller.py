@@ -1663,6 +1663,7 @@ class StockController(AccountsController):
 					"Purchase Invoice",
 					"Sales Invoice",
 					"Delivery Note",
+					"Subcontracting Receipt",
 				] and frappe.get_single_value(
 					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
 				):
