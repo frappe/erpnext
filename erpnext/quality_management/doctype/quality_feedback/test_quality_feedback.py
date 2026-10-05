@@ -1,12 +1,11 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestQualityFeedback(unittest.TestCase):
+class TestQualityFeedback(FrappeTestCase):
 	def test_quality_feedback(self):
 		template = frappe.get_doc(
 			dict(
@@ -29,3 +28,32 @@ class TestQualityFeedback(unittest.TestCase):
 
 		feedback.delete()
 		template.delete()
+
+	def test_parameters_follow_template(self):
+		first = make_template("Test Follow Template", ["Quality", "Delivery"])
+		second = make_template("Test Follow Template 2", ["Packaging"])
+
+		made_up = frappe.get_doc(
+			doctype="Quality Feedback",
+			template=first.name,
+			parameters=[dict(parameter="Made up", rating="5")],
+		)
+		self.assertRaises(frappe.ValidationError, made_up.insert)
+
+		feedback = frappe.get_doc(doctype="Quality Feedback", template=first.name).insert()
+		feedback.template = second.name
+		self.assertRaises(frappe.ValidationError, feedback.save)
+
+		feedback.reload()
+		feedback.template = second.name
+		feedback.set_parameters()
+		feedback.save()
+		self.assertEqual([d.parameter for d in feedback.parameters], ["Packaging"])
+
+
+def make_template(name, parameters):
+	return frappe.get_doc(
+		doctype="Quality Feedback Template",
+		template=name,
+		parameters=[dict(parameter=parameter) for parameter in parameters],
+	).insert()
