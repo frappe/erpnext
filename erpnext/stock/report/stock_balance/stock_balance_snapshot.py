@@ -35,59 +35,75 @@ MOVEMENT_FIELDS = (
 	"bal_val",
 )
 BATCH_SIZE = 1000
-SEGMENT_DETAILS = ("company", "item_group", "stock_uom", "item_name", "valuation_rate")
+SEGMENT_DETAILS = ("company", "valuation_rate")
 
 LEDGER_SQL = """
 	CREATE TEMP TABLE ledger AS
-	SELECT sle.item_code, sle.warehouse, sle.company, sle.posting_date, sle.voucher_type, sle.voucher_no,
-		sle.voucher_detail_no, sle.batch_no, sle.serial_no, sle.serial_and_batch_bundle,
-		sle.is_adjustment_entry, sle.actual_qty::DOUBLE AS actual_qty,
-		sle.stock_value_difference::DOUBLE AS stock_value_difference,
+	SELECT * EXCLUDE (posting_datetime, creation),
+		row_number() OVER (ORDER BY posting_datetime, creation) AS row_no
+	FROM (
+		SELECT sle.item_code, sle.warehouse, sle.company, sle.actual_qty::DOUBLE AS actual_qty,
+			sle.stock_value_difference::DOUBLE AS stock_value_difference,
+			sle.valuation_rate::DOUBLE AS valuation_rate{dimensions},
+			{dimension_key} AS dimension_key, sle.posting_datetime, sle.creation,
+			sle.posting_date < $from_date
+				OR (sle.voucher_type = 'Stock Entry' AND list_contains($opening_entries::VARCHAR[], sle.voucher_no))
+				OR (
+					sle.voucher_type = 'Stock Reconciliation'
+					AND list_contains($opening_reconciliations::VARCHAR[], sle.voucher_no)
+				) AS is_opening,
+			sle.voucher_type = 'Stock Reconciliation'
+				OR (sle.actual_qty < 0 AND abs(sle.actual_qty) < $unit)
+				OR (sle.stock_value_difference < 0 AND abs(sle.stock_value_difference) < $unit) AS replay,
+			CASE WHEN replay THEN sle.name END AS name
+		FROM "tabStock Ledger Entry" sle
+		JOIN snapshot_items item ON item.name = sle.item_code
+		WHERE {conditions}
+	)
+"""
+
+REPLAY_SQL = """
+	CREATE TEMP TABLE replay AS
+	SELECT ledger.* EXCLUDE (name), sle.posting_date, sle.voucher_type, sle.voucher_no, sle.voucher_detail_no,
+		sle.batch_no, sle.serial_no, sle.serial_and_batch_bundle, sle.is_adjustment_entry,
 		sle.qty_after_transaction::DOUBLE AS qty_after_transaction, sle.stock_value::DOUBLE AS stock_value,
-		sle.valuation_rate::DOUBLE AS valuation_rate, item.item_group, item.stock_uom, item.item_name,
-		item.has_serial_no{dimensions},
-		{dimension_key} AS dimension_key,
-		row_number() OVER (ORDER BY sle.posting_datetime, sle.creation) AS row_no,
-		sle.posting_date < $from_date
-			OR (sle.voucher_type = 'Stock Entry' AND list_contains($opening_entries::VARCHAR[], sle.voucher_no))
-			OR (
-				sle.voucher_type = 'Stock Reconciliation'
-				AND list_contains($opening_reconciliations::VARCHAR[], sle.voucher_no)
-			) AS is_opening,
-		sle.voucher_type = 'Stock Reconciliation'
-			OR (sle.actual_qty < 0 AND abs(sle.actual_qty) < $unit)
-			OR (sle.stock_value_difference < 0 AND abs(sle.stock_value_difference) < $unit) AS replay
-	FROM "tabStock Ledger Entry" sle
-	JOIN snapshot_items item ON item.name = sle.item_code
-	WHERE {conditions}
+		item.item_group, item.stock_uom, item.item_name, item.has_serial_no
+	FROM ledger
+	JOIN "tabStock Ledger Entry" sle ON sle.item_code = ledger.item_code AND sle.name = ledger.name
+	JOIN snapshot_items item ON item.name = ledger.item_code
+	WHERE ledger.replay
 """
 
 SERIAL_RECONCILIATIONS_SQL = """
 	SELECT voucher_detail_no
-	FROM ledger
+	FROM replay
 	WHERE voucher_type = 'Stock Reconciliation' AND has_serial_no = 1
 	GROUP BY voucher_detail_no
 	HAVING count(*) = 1
 """
 
-REPLAY_ROWS_SQL = "SELECT * FROM ledger WHERE replay"
+REPLAY_ROWS_SQL = "SELECT * FROM replay"
 
 SEGMENTS_SQL = """
-	SELECT item_code, warehouse, FALSE AS replay, min(row_no) AS row_no, {details},
-		sum(CASE WHEN is_opening THEN actual_qty ELSE 0 END) AS opening_qty,
-		sum(CASE WHEN NOT is_opening AND actual_qty >= 0 THEN actual_qty ELSE 0 END) AS in_qty,
-		sum(CASE WHEN NOT is_opening AND actual_qty < 0 THEN -actual_qty ELSE 0 END) AS out_qty,
-		sum(actual_qty) AS bal_qty,
-		sum(CASE WHEN is_opening THEN stock_value_difference ELSE 0 END) AS opening_val,
-		sum(CASE WHEN NOT is_opening AND stock_value_difference >= 0 THEN stock_value_difference ELSE 0 END) AS in_val,
-		sum(CASE WHEN NOT is_opening AND stock_value_difference < 0 THEN -stock_value_difference ELSE 0 END) AS out_val,
-		sum(stock_value_difference) AS bal_val
+	SELECT segment.*, item.item_group, item.stock_uom, item.item_name
 	FROM (
-		SELECT *, count_if(replay) OVER (PARTITION BY item_code, warehouse, dimension_key ORDER BY row_no) AS segment
-		FROM ledger
-	)
-	WHERE NOT replay
-	GROUP BY item_code, warehouse, dimension_key, segment
+		SELECT item_code, warehouse, FALSE AS replay, min(row_no) AS row_no, {details},
+			sum(CASE WHEN is_opening THEN actual_qty ELSE 0 END) AS opening_qty,
+			sum(CASE WHEN NOT is_opening AND actual_qty >= 0 THEN actual_qty ELSE 0 END) AS in_qty,
+			sum(CASE WHEN NOT is_opening AND actual_qty < 0 THEN -actual_qty ELSE 0 END) AS out_qty,
+			sum(actual_qty) AS bal_qty,
+			sum(CASE WHEN is_opening THEN stock_value_difference ELSE 0 END) AS opening_val,
+			sum(CASE WHEN NOT is_opening AND stock_value_difference >= 0 THEN stock_value_difference ELSE 0 END) AS in_val,
+			sum(CASE WHEN NOT is_opening AND stock_value_difference < 0 THEN -stock_value_difference ELSE 0 END) AS out_val,
+			sum(stock_value_difference) AS bal_val
+		FROM (
+			SELECT *, count_if(replay) OVER (PARTITION BY item_code, warehouse, dimension_key ORDER BY row_no) AS segment
+			FROM ledger
+		)
+		WHERE NOT replay
+		GROUP BY item_code, warehouse, dimension_key, segment
+	) segment
+	JOIN snapshot_items item ON item.name = segment.item_code
 """
 
 
@@ -165,7 +181,10 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 
 	def load_ledger(self):
 		"""Copy the ledger rows the live query reads into a temporary table, with the flags the
-		report needs: whether a row counts as opening, and whether it is replayed row by row."""
+		report needs: whether a row counts as opening, and whether it is replayed row by row.
+
+		Only the columns the segment sums need are kept for every row. The few replayed rows get
+		the remaining columns of the live query in a second table."""
 		conditions, params = self.get_conditions()
 		self.register_items(conditions, params)
 		grouped = ", ".join(f'sle."{field}"' for field in self.get_grouped_dimensions())
@@ -186,6 +205,7 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 				"opening_reconciliations": self.opening_vouchers["Stock Reconciliation"],
 			},
 		)
+		self.conn.execute(REPLAY_SQL)
 
 	def register_items(self, conditions, params):
 		"""Items with ledger rows under the report's filters that the live item filters allow, with
