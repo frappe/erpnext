@@ -113,11 +113,10 @@ class Task(NestedSet):
 			return
 
 		if getdate(self.exp_end_date) > getdate(parent_exp_end_date):
-			frappe.throw(
+			self.report_date_conflict(
 				_(
 					"Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-				).format(format_date(parent_exp_end_date)),
-				frappe.exceptions.InvalidDates,
+				).format(format_date(parent_exp_end_date))
 			)
 
 	def validate_parent_project_dates(self):
@@ -135,24 +134,34 @@ class Task(NestedSet):
 			task_date = getdate(task_date)
 
 			if project_end_date and date_diff(getdate(project_end_date), task_date) < 0:
-				frappe.throw(
+				self.report_date_conflict(
 					_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
 						get_link_to_form("Task", self.name),
 						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
-					),
-					frappe.exceptions.InvalidDates,
+					)
 				)
 
 			if project_start_date and date_diff(task_date, getdate(project_start_date)) < 0:
-				frappe.throw(
+				self.report_date_conflict(
 					_("{0}'s {1} cannot be before {2}'s Expected Start Date.").format(
 						get_link_to_form("Task", self.name),
 						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
-					),
-					frappe.exceptions.InvalidDates,
+					)
 				)
+
+	def report_date_conflict(self, message: str):
+		if not self.flags.rescheduled:
+			frappe.throw(message, frappe.exceptions.InvalidDates)
+
+		frappe.msgprint(
+			_("{0} was moved after the task it depends on. {1}").format(
+				get_link_to_form("Task", self.name), message
+			),
+			title=_("Schedule Conflict"),
+			indicator="orange",
+		)
 
 	def validate_status(self):
 		if self.is_template and self.status != "Template":
@@ -353,12 +362,13 @@ class Task(NestedSet):
 				task.exp_start_date
 				and task.exp_end_date
 				and task.exp_start_date < get_datetime(end_date)
-				and task.status == "Open"
+				and task.status in ("Open", "Working", "Overdue")
 			):
 				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
 				task.exp_start_date = add_days(end_date, 1)
 				task.exp_end_date = add_days(task.exp_start_date, task_duration)
 				task.flags.ignore_recursion_check = True
+				task.flags.rescheduled = True
 				task.save()
 
 	def has_webform_permission(self):
