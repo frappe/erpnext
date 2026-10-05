@@ -248,6 +248,17 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(rows[0]["january_2026"], 1)
 
+	def test_lost_and_closed_left_out_unless_picked(self):
+		stage = make_sales_stage()
+		make_stage_opportunity(stage, 100, "2026-01-20")
+		for status in ("Lost", "Closed"):
+			opportunity = make_stage_opportunity(stage, 100, "2026-01-20")
+			frappe.db.set_value("Opportunity", opportunity.name, "status", status)
+		dates = {"from_date": "2026-01-01", "to_date": "2026-01-31"}
+
+		self.assertEqual(stage_rows(stage, **dates)[0]["january_2026"], 1)
+		self.assertEqual(stage_rows(stage, status="Lost", **dates)[0]["january_2026"], 1)
+
 
 def make_sales_stage() -> str:
 	stage = "_Test Pipeline Stage " + frappe.generate_hash(length=5)

@@ -160,6 +160,8 @@ class SalesPipelineAnalytics:
 
 		if self.filters.get("status"):
 			conditions.append({"status": self.filters.get("status")})
+		else:
+			conditions.append(["status", "not in", ["Lost", "Closed"]])
 
 		if self.filters.get("company"):
 			conditions.append({"company": self.filters.get("company")})
