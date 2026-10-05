@@ -67,6 +67,7 @@ def get_item_workdays(scorecard):
 		.on(PO_Item.parent == PO.name)
 		.select(Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty)))
 		.where(PO.supplier == scorecard.supplier)
+		.where(PO.docstatus == 1)
 		.where(PO_Item.received_qty < PO_Item.qty)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])  # Équivalent du BETWEEN
 	)
@@ -170,6 +171,7 @@ def get_total_days_late(scorecard):
 			Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty - PO_Item.received_qty))
 		)
 		.where(PO.supplier == scorecard.supplier)
+		.where(PO.docstatus == 1)
 		.where(PO_Item.received_qty < PO_Item.qty)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 	)

@@ -12,6 +12,7 @@ from erpnext.buying.doctype.supplier_scorecard_variable import (
 )
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
+	get_item_workdays,
 	get_on_time_shipments,
 	get_total_cost_of_shipments,
 	get_total_days_late,
@@ -72,6 +73,16 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 		self.assertEqual(get_on_time_shipments(scorecard), 1)
 		self.assertEqual(get_total_days_late(scorecard), 50)  # 5 days late * 10 qty
 
+	def test_draft_and_cancelled_orders_are_not_late(self):
+		supplier = create_scorecard_supplier()
+		ordered_on = add_days(nowdate(), -10)
+		create_scorecard_po(supplier, add_days(nowdate(), -5), ordered_on).cancel()
+		create_scorecard_po(supplier, add_days(nowdate(), -5), ordered_on, submit=False)
+
+		scorecard = scorecard_for(supplier)
+		self.assertEqual(get_total_days_late(scorecard), 0)
+		self.assertEqual(get_item_workdays(scorecard), 0)
+
 	def test_split_on_time_receipts_count_as_one_shipment(self):
 		# A PO line fully received on time across two partial receipts is one on-time shipment
 		supplier = create_scorecard_supplier()
@@ -99,7 +110,7 @@ def create_scorecard_supplier(supplier_name="_Test Supplier Scorecard"):
 	return supplier_name
 
 
-def create_scorecard_po(supplier, schedule_date, transaction_date=None, qty=10, rate=100):
+def create_scorecard_po(supplier, schedule_date, transaction_date=None, qty=10, rate=100, submit=True):
 	po = create_purchase_order(
 		supplier=supplier, transaction_date=transaction_date, qty=qty, rate=rate, do_not_save=True
 	)
@@ -107,7 +118,8 @@ def create_scorecard_po(supplier, schedule_date, transaction_date=None, qty=10, 
 	po.items[0].schedule_date = schedule_date
 	po.set_missing_values()
 	po.insert()
-	po.submit()
+	if submit:
+		po.submit()
 	return po
 
 
