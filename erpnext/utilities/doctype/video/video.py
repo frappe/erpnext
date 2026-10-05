@@ -143,6 +143,8 @@ def parse_youtube_video_id(url: str) -> str | None:
 
 @frappe.whitelist()
 def batch_update_youtube_data():
+	frappe.has_permission("Video Settings", "write", throw=True)
+
 	def get_youtube_statistics(video_ids):
 		api_key = frappe.db.get_single_value("Video Settings", "api_key")
 		api = Api(api_key=api_key)

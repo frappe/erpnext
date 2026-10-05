@@ -82,6 +82,19 @@ class TestVideo(ERPNextTestSuite):
 		self.assertEqual(video.youtube_video_id, "9bZkp7q1z0E")
 		self.assertEqual(video.view_count, 7)
 
+	def test_batch_update_needs_video_settings_permission(self):
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test-video-website-user@example.com",
+				"first_name": "Test Video",
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_if_duplicate=True)
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, batch_update_youtube_data)
+
 
 def make_video(title: str, url: str, provider: str = "YouTube"):
 	return frappe.get_doc(
