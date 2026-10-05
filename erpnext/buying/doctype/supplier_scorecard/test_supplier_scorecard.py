@@ -83,6 +83,16 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		self.assertEqual(get_scorecard_date("Per Month", start), getdate("2024-01-31"))
 		self.assertEqual(get_scorecard_date("Per Year", start), getdate("2024-12-31"))
 
+	def test_period_ending_today_is_not_created(self):
+		supplier = create_test_supplier("_Test Supplier SC Ends Today")
+		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -6))
+		doc = make_supplier_scorecard()
+		doc.supplier = supplier
+		doc.period = "Per Week"
+		doc.insert()
+
+		self.assertFalse(frappe.db.exists("Supplier Scorecard Period", {"scorecard": doc.name}))
+
 	def test_weekly_periods_continue_after_an_existing_period(self):
 		supplier = create_test_supplier("_Test Supplier SC Legacy Week")
 		doc = make_supplier_scorecard()

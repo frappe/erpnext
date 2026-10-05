@@ -213,7 +213,7 @@ def create_scorecard_periods(sc):
 	first_start_date = todays
 	last_end_date = todays
 
-	while (start_date < todays) and (end_date <= todays):
+	while end_date < todays:
 		overlapping_end = get_overlapping_period_end(sc.name, start_date, end_date)
 		if overlapping_end:
 			start_date = getdate(add_days(overlapping_end, 1))
