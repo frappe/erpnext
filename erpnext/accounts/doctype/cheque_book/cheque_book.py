@@ -235,7 +235,7 @@ def get_next_cheque_book_no(bank_account: str) -> str:
 	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)
 	numbers = [
 		no
-		for no in frappe.get_all(
+		for no in frappe.get_list(
 			"Cheque Book", filters={"bank_account": bank_account}, pluck="cheque_book_no"
 		)
 		if no.isdigit()
