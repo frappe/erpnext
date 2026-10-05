@@ -375,7 +375,11 @@ class TestItem(ERPNextTestSuite):
 			self.assertEqual(value, purchase_item_details.get(key))
 
 	def test_set_item_default_refreshes_cached_item(self):
-		item = make_item(properties={"item_defaults": [{"company": "_Test Company"}]})
+		item = make_item(
+			properties={
+				"item_defaults": [{"default_warehouse": "_Test Warehouse - _TC", "company": "_Test Company"}]
+			}
+		)
 
 		set_item_default(item.name, "_Test Company", "income_account", "_Test Account Sales - _TC")
 
