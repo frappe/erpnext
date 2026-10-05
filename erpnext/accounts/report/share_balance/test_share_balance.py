@@ -171,6 +171,62 @@ class TestShareBalanceReport(ERPNextTestSuite):
 		self.assertEqual(self.get_row(date="2026-06-05")[2], 100)  # only the first issue
 		self.assertEqual(self.get_row(date="2026-06-15")[2], 200)  # both issues
 
+	def test_company_shareholder_holds_issued_shares_until_bought_back(self):
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-01",
+		)
+		create_share_transfer(
+			transfer_type="Purchase",
+			from_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=40,
+			no_of_shares=40,
+			rate=15,
+			date="2026-06-10",
+		)
+		company_shareholder = frappe.db.get_value("Shareholder", {"company": COMPANY, "is_company": 1})
+
+		row = self.get_row(date="2026-06-05", shareholder=company_shareholder)
+		self.assertEqual(row[2:], [100, 10, 1000])
+
+		row = self.get_row(date="2026-06-15", shareholder=company_shareholder)
+		self.assertEqual(row[2:], [60, 10, 600])
+
+	def test_shares_transferred_out_keep_their_received_rate(self):
+		other_holder = get_shareholder("Thor", COMPANY)
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-01",
+		)
+		create_share_transfer(
+			transfer_type="Transfer",
+			from_shareholder=self.shareholder,
+			to_shareholder=other_holder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=40,
+			no_of_shares=40,
+			rate=15,
+			date="2026-06-10",
+		)
+
+		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
+		self.assertEqual(self.get_row(date="2026-06-15", shareholder=other_holder)[2:], [40, 15, 600])
+
 	def get_row(self, date, shareholder=None):
 		filters = frappe._dict(
 			{"date": date, "company": COMPANY, "shareholder": shareholder or self.shareholder}
