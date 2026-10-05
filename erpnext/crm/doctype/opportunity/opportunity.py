@@ -432,6 +432,9 @@ class Opportunity(TransactionBase, CRMNote):
 
 @frappe.whitelist()
 def get_item_details(item_code: str):
+	if frappe.db.exists("Item", item_code):
+		frappe.has_permission("Item", "read", item_code, throw=True)
+
 	item = frappe.db.get_value(
 		"Item",
 		item_code,

@@ -268,6 +268,10 @@ class TestOpportunity(ERPNextTestSuite):
 		# an unknown item returns blank fields rather than erroring
 		self.assertEqual(get_item_details("_Non Existent Item XYZ")["item_name"], "")
 
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user("Guest")
+		self.assertRaises(frappe.PermissionError, get_item_details, "_Test Item")
+
 	def test_auto_close_replied_opportunity(self):
 		days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
 
