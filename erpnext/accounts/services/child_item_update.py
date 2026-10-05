@@ -48,6 +48,7 @@ class ChildItemUpdater:
 		any_conversion_factor_changed = False
 
 		self._check_permissions("write")
+		self._validate_parent_status()
 		self._validate_changed_uoms(data)
 
 		if self.parent_doctype == "Quotation":
@@ -258,6 +259,18 @@ class ChildItemUpdater:
 					get_link_to_form("Workflow", workflow)
 				),
 				title=_("Insufficient Permissions"),
+			)
+
+	def _validate_parent_status(self) -> None:
+		if self.parent_doctype == "Purchase Order" and self.parent.status in (
+			"Closed",
+			"On Hold",
+			"Delivered",
+		):
+			frappe.throw(
+				_("Cannot update items of Purchase Order {0} because it is {1}.").format(
+					self.parent.name, _(self.parent.status)
+				)
 			)
 
 	def _validate_changed_uoms(self, data: list) -> None:

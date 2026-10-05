@@ -2103,6 +2103,20 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi.submit()
 		self.assertFalse(make_pi_from_po(po.name).items)
 
+	def test_update_items_refused_on_closed_and_on_hold_po(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
+
+		for status in ("Closed", "On Hold"):
+			po = create_purchase_order(qty=10)
+			update_status(status, po.name)
+			trans_items = json.dumps(
+				[{"item_code": po.items[0].item_code, "rate": 120, "qty": 25, "docname": po.items[0].name}]
+			)
+
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Purchase Order", trans_items, po.name
+			)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
