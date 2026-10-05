@@ -31,6 +31,13 @@ class TestSupplierScorecard(ERPNextTestSuite):
 			d.weight = 0
 		self.assertRaises(frappe.ValidationError, my_doc.insert)
 
+	def test_criteria_weights_allow_float_rounding(self):
+		doc = make_supplier_scorecard()
+		doc.criteria = []
+		for weight in (10.1, 66.6, 23.3):
+			doc.append("criteria", {"criteria_name": "Delivery", "weight": weight})
+		doc.validate_criteria_weights()
+
 	def test_overlapping_standings_are_rejected(self):
 		doc = make_supplier_scorecard()
 		# "Poor" (30-50) stretched to 60 now overlaps "Average" (50-80)

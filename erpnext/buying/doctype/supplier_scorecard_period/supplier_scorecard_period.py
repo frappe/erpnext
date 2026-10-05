@@ -7,7 +7,7 @@ import frappe
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import formatdate
+from frappe.utils import flt, formatdate
 
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
 from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
@@ -66,7 +66,7 @@ class SupplierScorecardPeriod(Document):
 		for c in self.criteria:
 			weight += c.weight
 
-		if weight != 100:
+		if flt(weight, 2) != 100:
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_variables(self):

@@ -8,7 +8,7 @@ from datetime import timedelta
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import add_days, add_years, get_last_day, getdate, nowdate
+from frappe.utils import add_days, add_years, flt, get_last_day, getdate, nowdate
 
 from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
 	get_overlapping_period_end,
@@ -93,7 +93,7 @@ class SupplierScorecard(Document):
 		for c in self.criteria:
 			weight += c.weight
 
-		if weight != 100:
+		if flt(weight, 2) != 100:
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_total_score(self):
