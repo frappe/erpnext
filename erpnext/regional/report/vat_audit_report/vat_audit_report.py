@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce, NullIf
-from frappe.utils import formatdate, get_link_to_form
+from frappe.utils import flt, formatdate, get_link_to_form
 
 from erpnext import get_region
 
@@ -120,7 +120,12 @@ class VATAuditReport:
 		tax_doctype = frappe.qb.DocType(self.tax_doctype)
 		self.tax_details = (
 			frappe.qb.from_(tax_doctype)
-			.select(tax_doctype.parent, tax_doctype.account_head, tax_doctype.item_wise_tax_detail)
+			.select(
+				tax_doctype.parent,
+				tax_doctype.account_head,
+				tax_doctype.charge_type,
+				tax_doctype.item_wise_tax_detail,
+			)
 			.where(tax_doctype.parenttype == doctype)
 			.where(tax_doctype.docstatus == 1)
 			.where(tax_doctype.parent.isin(list(self.invoices.keys())))
@@ -143,6 +148,9 @@ class VATAuditReport:
 
 			for item, taxes in item_wise_tax_detail.items():
 				is_zero_rated = parent_items.get(item, {}).get("is_zero_rated")
+				if tax_detail.charge_type == "Actual":
+					# Actual rows store a rate of 0, so derive it from the tax and taxable amounts
+					taxes = [get_actual_tax_rate(taxes[1], parent_items.get(item, {}).get("net_amount")), taxes[1]]
 				# to skip items with non-zero tax rate in multiple rows
 				if taxes[0] == 0 and not is_zero_rated:
 					continue
@@ -273,3 +281,10 @@ class VATAuditReport:
 			{"fieldname": "tax_amount", "label": "Tax Amount", "fieldtype": "Currency", "width": 130},
 			{"fieldname": "gross_amount", "label": "Gross Amount", "fieldtype": "Currency", "width": 130},
 		]
+
+
+def get_actual_tax_rate(tax_amount: float, taxable_amount: float) -> float:
+	"""Rate of an Actual tax amount on its taxable amount."""
+	if not taxable_amount:
+		return 0
+	return flt(flt(tax_amount) / flt(taxable_amount) * 100, 2)
