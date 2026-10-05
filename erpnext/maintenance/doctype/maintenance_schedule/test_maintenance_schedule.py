@@ -39,6 +39,7 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		self.assertEqual(i.end_date, expected_end_date)
 
 		i.no_of_visits = 2
+		i.end_date = None
 		ms.save()
 		expected_end_date = add_days(i.start_date, i.no_of_visits * 7)
 		self.assertEqual(i.end_date, expected_end_date)
@@ -143,6 +144,7 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		ms.items[0].serial_no = "TEST001"
 		ms.items[0].sales_person = "_Test Sales Person"
 		ms.items[0].no_of_visits = 2
+		ms.items[0].end_date = None
 		self.assertTrue(ms.validate_items_table_change())
 		ms.save()
 		self.assertEqual(ms.schedules[0].serial_no, "TEST001")
@@ -301,6 +303,23 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		self.assertEqual(
 			[getdate(row.scheduled_date) for row in ms.schedules], [getdate(add_days(today(), 2))] * 2
 		)
+
+	def test_typed_end_date_must_fit_visits(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"need an End Date",
+			make_maintenance_schedule,
+			end_date=add_days(today(), 364),
+		)
+
+		ms = make_maintenance_schedule(end_date=add_days(today(), 364), no_of_visits=52)
+		self.assertEqual(getdate(ms.items[0].end_date), getdate(add_days(today(), 364)))
+
+	def test_calendar_quarter_fits_one_quarterly_visit(self):
+		ms = make_maintenance_schedule(
+			start_date="2027-01-01", end_date="2027-03-31", periodicity="Quarterly", no_of_visits=1
+		)
+		self.assertEqual(getdate(ms.items[0].end_date), getdate("2027-03-31"))
 
 
 def make_serial_item_with_serial(self, item_code):

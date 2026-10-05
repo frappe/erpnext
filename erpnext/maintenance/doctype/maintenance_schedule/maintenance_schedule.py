@@ -81,30 +81,23 @@ class MaintenanceSchedule(TransactionBase):
 		days_in_period = {"Weekly": 7, "Monthly": 30, "Quarterly": 91, "Half Yearly": 182, "Yearly": 365}
 		for item in self.items:
 			if item.periodicity and item.periodicity != "Random" and item.start_date:
+				days = days_in_period[item.periodicity]
 				if not item.end_date:
-					if item.no_of_visits:
-						item.end_date = add_days(
-							item.start_date, item.no_of_visits * days_in_period[item.periodicity]
+					item.end_date = add_days(item.start_date, (item.no_of_visits or 1) * days)
+
+				no_of_visits = round((date_diff(item.end_date, item.start_date) + 1) / days)
+				if not item.no_of_visits:
+					item.no_of_visits = no_of_visits
+				elif item.no_of_visits != no_of_visits:
+					throw(
+						_(
+							"Row {0}: {1} {2} visits need an End Date of {3}. Change the End Date or the Number of Visits."
+						).format(
+							item.idx,
+							item.no_of_visits,
+							_(item.periodicity),
+							formatdate(add_days(item.start_date, item.no_of_visits * days)),
 						)
-					else:
-						item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-
-				diff = date_diff(item.end_date, item.start_date) + 1
-				no_of_visits = cint(diff / days_in_period[item.periodicity])
-
-				if not item.no_of_visits or item.no_of_visits == 0:
-					item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-					diff = date_diff(item.end_date, item.start_date) + 1
-					item.no_of_visits = cint(diff / days_in_period[item.periodicity])
-
-				elif item.no_of_visits > no_of_visits:
-					item.end_date = add_days(
-						item.start_date, item.no_of_visits * days_in_period[item.periodicity]
-					)
-
-				elif item.no_of_visits < no_of_visits:
-					item.end_date = add_days(
-						item.start_date, item.no_of_visits * days_in_period[item.periodicity]
 					)
 
 	def on_submit(self):
