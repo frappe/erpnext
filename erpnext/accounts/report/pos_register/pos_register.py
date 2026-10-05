@@ -54,7 +54,10 @@ def get_pos_entries(filters, group_by_field):
 	entries = get_invoice_entries("POS Invoice", filters, group_by_field)
 	entries += get_invoice_entries("Sales Invoice", filters, group_by_field)
 	sort_field = group_by_field or "posting_date"
-	return sorted(entries, key=lambda d: (d.posting_date, cstr(d.get(sort_field))))
+	entries.sort(key=lambda d: (d.posting_date, cstr(d.get(sort_field))))
+	if group_by_field == "mode_of_payment":
+		show_grand_total_once(entries)
+	return entries
 
 
 def get_invoice_entries(doctype, filters, group_by_field):
@@ -95,6 +98,16 @@ def get_invoice_entries(doctype, filters, group_by_field):
 		query = query.select((p.base_paid_amount - p.change_amount).as_("paid_amount"))
 
 	return query.run(as_dict=1)
+
+
+def show_grand_total_once(entries):
+	"""An invoice has a row per payment; keep its grand total on the first so group totals add up."""
+	seen = set()
+	for entry in entries:
+		invoice = (entry.invoice_type, entry.pos_invoice)
+		if invoice in seen:
+			entry.grand_total = 0
+		seen.add(invoice)
 
 
 def concat_mode_of_payments(pos_entries):
