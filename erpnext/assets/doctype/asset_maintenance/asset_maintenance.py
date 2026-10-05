@@ -37,6 +37,13 @@ class AssetMaintenance(Document):
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
+			if not task.next_due_date and task.periodicity:
+				task.next_due_date = (
+					calculate_next_due_date(
+						task.periodicity, task.start_date, task.end_date, task.last_completion_date
+					)
+					or None
+				)
 			if getdate(task.next_due_date) < getdate(nowdate()):
 				task.maintenance_status = "Overdue"
 			if not task.assign_to and self.docstatus == 0:
@@ -123,9 +130,9 @@ def calculate_next_due_date(
 	if periodicity == "3 Yearly":
 		next_due_date = add_years(start_date, 3)
 	if end_date and (
-		(start_date and start_date >= end_date)
-		or (last_completion_date and last_completion_date >= end_date)
-		or next_due_date
+		(start_date and getdate(start_date) >= getdate(end_date))
+		or (last_completion_date and getdate(last_completion_date) >= getdate(end_date))
+		or (next_due_date and getdate(next_due_date) > getdate(end_date))
 	):
 		next_due_date = ""
 	return next_due_date
