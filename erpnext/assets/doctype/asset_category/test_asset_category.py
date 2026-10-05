@@ -136,3 +136,21 @@ class TestAssetCategory(ERPNextTestSuite):
 			row for row in asset_category.accounts if row.company_name == asset.company
 		).fixed_asset_account = "Furniture and Fixtures - _TC"
 		asset_category.save()
+
+	def test_account_company_group_and_disabled_are_checked(self):
+		frappe.db.set_value("Account", "Fixed Assets - _TC", "account_type", "Fixed Asset")
+		frappe.db.set_value("Account", "Software - _TC", "disabled", 1)
+		for account, error in (
+			("_Test Fixed Asset - TCP1", "does not belong to company"),
+			("Fixed Assets - _TC", "is a group account"),
+			("Software - _TC", "is disabled"),
+		):
+			asset_category = frappe.get_doc(
+				{
+					"doctype": "Asset Category",
+					"asset_category_name": "Account Checks",
+					"accounts": [{"company_name": "_Test Company", "fixed_asset_account": account}],
+				}
+			)
+			asset_category.flags.ignore_mandatory = True
+			self.assertRaisesRegex(frappe.ValidationError, error, asset_category.insert)

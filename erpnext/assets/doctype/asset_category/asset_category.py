@@ -99,6 +99,25 @@ class AssetCategory(Document):
 							),
 							title=_("Invalid Account"),
 						)
+					self.validate_account_details(d, selected_account)
+
+	def validate_account_details(self, row, account: str):
+		company, is_group, disabled = frappe.db.get_value(
+			"Account", account, ["company", "is_group", "disabled"]
+		)
+		if company != row.company_name:
+			error = _("Row #{0}: Account {1} does not belong to company {2}.")
+		elif is_group:
+			error = _("Row #{0}: Account {1} is a group account.")
+		elif disabled:
+			error = _("Row #{0}: Account {1} is disabled.")
+		else:
+			return
+
+		frappe.throw(
+			error.format(row.idx, frappe.bold(account), frappe.bold(row.company_name)),
+			title=_("Invalid Account"),
+		)
 
 	def validate_accounts(self):
 		self.validate_duplicate_rows()
