@@ -67,6 +67,51 @@ def make_stock_entry(
 
 
 @frappe.whitelist()
+def make_stock_entry(
+	item_code: str,
+	source_warehouse: str | None = None,
+	target_warehouse: str | None = None,
+	stock_entry_type: str | None = None,
+	qty: float | None = None,
+	rate: float | None = None,
+):
+	"""Return an unsaved Stock Entry for the item, with company taken from the warehouse"""
+	stock_entry = frappe.new_doc("Stock Entry")
+	if warehouse := source_warehouse or target_warehouse:
+		stock_entry.company = frappe.get_cached_value("Warehouse", warehouse, "company")
+
+	stock_entry.stock_entry_type = stock_entry_type or (
+		"Material Transfer" if source_warehouse else "Material Receipt"
+	)
+	stock_entry.purpose = frappe.get_cached_value("Stock Entry Type", stock_entry.stock_entry_type, "purpose")
+	stock_entry.from_warehouse = source_warehouse
+	stock_entry.to_warehouse = target_warehouse
+
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	stock_entry.append(
+		"items",
+		{
+			"item_code": item_code,
+			"s_warehouse": source_warehouse,
+			"t_warehouse": target_warehouse,
+			"qty": flt(qty),
+			"transfer_qty": flt(qty),
+			"basic_rate": flt(rate),
+			"uom": stock_uom,
+			"stock_uom": stock_uom,
+			"conversion_factor": 1,
+		},
+	)
+
+	# checked against the doc so user permissions on company, warehouses and item apply;
+	# generic message so values of restricted records are not leaked
+	if not frappe.has_permission("Stock Entry", "create", doc=stock_entry):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	return stock_entry
+
+
+@frappe.whitelist()
 def get_data(
 	item_code=None, warehouse=None, item_group=None, start=0, sort_by="actual_qty", sort_order="desc"
 ):
