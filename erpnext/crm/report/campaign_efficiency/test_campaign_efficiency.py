@@ -45,7 +45,7 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		self.assertEqual(row["quot_count"], 0)
 		self.assertEqual(row["order_count"], 0)
 
-	def test_cancelled_orders_left_out(self):
+	def test_cancelled_and_draft_documents_left_out(self):
 		campaign = "_Test Campaign Eff Orders"
 		if not frappe.db.exists("UTM Campaign", campaign):
 			frappe.get_doc({"doctype": "UTM Campaign", "__newname": campaign}).insert()
@@ -58,8 +58,13 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		cancelled = make_lead_sales_order(quotation.name)
 		cancelled.cancel()
 		make_lead_sales_order(quotation.name)
+		make_lead_quotation(lead.name)
+		cancelled_quotation = make_lead_quotation(lead.name)
+		cancelled_quotation.submit()
+		cancelled_quotation.cancel()
 
 		row = campaign_row(campaign)
+		self.assertEqual(row["quot_count"], 1)
 		self.assertEqual(row["order_count"], 1)
 		self.assertEqual(row["order_value"], 1000)
 
