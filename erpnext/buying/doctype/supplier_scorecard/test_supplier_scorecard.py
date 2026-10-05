@@ -147,6 +147,13 @@ class TestSupplierScorecard(FrappeTestCase):
 		for previous, current in pairwise(periods):
 			self.assertEqual(current.start_date, add_days(previous.end_date, 1))
 
+	def test_period_ending_today_is_not_created(self):
+		doc = make_scorecard_for("_Test Supplier SC Ends Today", days_since_creation=6)
+		doc.period = "Per Week"
+		doc.insert()
+
+		self.assertFalse(frappe.db.exists("Supplier Scorecard Period", {"scorecard": doc.name}))
+
 
 def make_supplier_scorecard():
 	my_doc = frappe.get_doc(valid_scorecard[0])
