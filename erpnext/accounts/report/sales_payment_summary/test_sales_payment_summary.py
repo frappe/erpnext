@@ -269,6 +269,21 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		row = run_report(si.customer, is_pos=1)[0]
 		self.assertEqual((row[3], row[5]), (500000, 500000))
 
+	def test_rows_are_limited_to_permitted_invoices(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		other_customer = make_customer("_Test Sales Payment Summary Other Customer")
+		make_pos_invoice(customer, paid=10000)
+		make_pos_invoice(other_customer, paid=10000)
+		user = make_restricted_user(customer)
+
+		for is_pos in (0, 1):
+			frappe.set_user(user)
+			try:
+				row = run_report(None, is_pos=is_pos)[0]
+			finally:
+				frappe.set_user("Administrator")
+			self.assertEqual((row[3], row[5]), (10000, 10000))
+
 
 def run_report(customer, **filters):
 	filters = frappe._dict(
@@ -326,6 +341,21 @@ def make_journal_entry_receipt(si, posting_date):
 	)
 	je.insert()
 	je.submit()
+
+
+def make_restricted_user(customer):
+	user = "test_sales_payment_summary@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Sales Payment Summary",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Customer", customer, user)
+	return user
 
 
 def get_filters():

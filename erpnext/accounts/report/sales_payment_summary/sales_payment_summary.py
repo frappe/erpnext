@@ -170,6 +170,7 @@ def get_invoice_totals():
 			Sum(si.base_paid_amount - si.base_change_amount).as_("paid_amount"),
 			Sum(si.outstanding_amount).as_("outstanding_amount"),
 		)
+		.where(si.name.isin(get_permitted_invoices()))
 		.groupby(si.name)
 	)
 
@@ -273,6 +274,7 @@ def get_sales_invoice_data(filters):
 			Sum(a.outstanding_amount).as_("outstanding_amount"),
 		)
 		.where(a.docstatus == 1)
+		.where(a.name.isin(get_permitted_invoices()))
 		.groupby(a.owner, a.posting_date)
 	)
 	query = apply_conditions(query, a, filters)
@@ -336,7 +338,9 @@ def get_mode_of_payments(filters):
 
 def get_invoices(filters):
 	a = frappe.qb.DocType("Sales Invoice")
-	query = frappe.qb.from_(a).select(a.name).where(a.docstatus == 1)
+	query = (
+		frappe.qb.from_(a).select(a.name).where(a.docstatus == 1).where(a.name.isin(get_permitted_invoices()))
+	)
 	query = apply_conditions(query, a, filters)
 	return query.run(as_dict=True)
 
@@ -458,3 +462,8 @@ def get_mode_of_payment_details(filters):
 			)
 
 	return mode_of_payment_details
+
+
+def get_permitted_invoices():
+	"""Sales Invoices the session user may read, as a subquery."""
+	return frappe.qb.get_query("Sales Invoice", fields=["name"], ignore_permissions=False)
