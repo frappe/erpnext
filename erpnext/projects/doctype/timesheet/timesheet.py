@@ -457,6 +457,7 @@ def make_sales_invoice(
 ):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc("Timesheet", source_name)
+	timesheet.check_permission("read")
 
 	if not timesheet.total_billable_hours:
 		frappe.throw(_("Invoice can't be made for zero billing hour"))
