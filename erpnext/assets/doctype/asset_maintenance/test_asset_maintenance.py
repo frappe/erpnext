@@ -141,6 +141,25 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		log.submit()
 		self.assertEqual(frappe.db.get_value("Asset", self.asset_name, "status"), "Submitted")
 
+	def test_removing_a_task_keeps_its_completed_logs(self):
+		asset_maintenance = self.make_asset_maintenance()
+		removed_task = asset_maintenance.asset_maintenance_tasks[1].name
+		completed_log = frappe.get_last_doc("Asset Maintenance Log", {"task": removed_task})
+		completed_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		completed_log.submit()
+
+		asset_maintenance.reload()
+		asset_maintenance.asset_maintenance_tasks.pop()
+		asset_maintenance.save()
+
+		statuses = dict(
+			frappe.get_all(
+				"Asset Maintenance Log", {"task": removed_task}, ["name", "maintenance_status"], as_list=True
+			)
+		)
+		self.assertEqual(statuses.pop(completed_log.name), "Completed")
+		self.assertEqual(set(statuses.values()), {"Cancelled"})
+
 	def submit_asset(self):
 		self.asset_doc.update(
 			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}
