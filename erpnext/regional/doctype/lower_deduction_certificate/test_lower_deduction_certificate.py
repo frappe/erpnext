@@ -21,6 +21,15 @@ class TestLowerDeductionCertificate(FrappeTestCase):
 		doc.fiscal_year = fiscal_year
 		return doc
 
+	def test_rate_and_limit_must_be_in_range(self):
+		for rate, limit in ((-5, 50000), (100, 50000), (150, 50000), (1, 0), (1, -50000)):
+			doc = frappe.new_doc("Lower Deduction Certificate", rate=rate, certificate_limit=limit)
+			self.assertRaises(frappe.ValidationError, doc.validate_rate_and_limit)
+
+		frappe.new_doc(
+			"Lower Deduction Certificate", rate=0, certificate_limit=50000
+		).validate_rate_and_limit()
+
 	def test_pan_follows_the_supplier(self):
 		make_pan_no_field()
 		supplier = frappe.get_doc(
