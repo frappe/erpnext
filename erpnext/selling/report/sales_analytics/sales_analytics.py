@@ -5,7 +5,6 @@
 import frappe
 from frappe import _, scrub
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, add_to_date, flt, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -206,6 +205,13 @@ class Analytics:
 
 		return filters
 
+	@property
+	def value_field(self):
+		if self.filters["value_quantity"] == "Value":
+			return "base_net_total as value_field"
+
+		return "items.stock_qty as value_field"
+
 	def _get_permitted_parent_names(self):
 		return frappe.qb.get_query(
 			table=self.filters.doc_type,
@@ -215,37 +221,18 @@ class Analytics:
 		).run(pluck="name")
 
 	def get_sales_transactions_based_on_order_type(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total"
-		else:
-			value_field = "total_qty"
-
-		permitted_names = self._get_permitted_parent_names()
-		if not permitted_names:
-			self.entries = []
-			self.get_teams()
-			return
-
-		doctype = DocType(self.filters.doc_type)
-
-		self.entries = (
-			frappe.qb.from_(doctype)
-			.select(
-				doctype.order_type.as_("entity"),
-				doctype[self.date_field],
-				doctype[value_field].as_("value_field"),
-			)
-			.where((doctype.name.isin(permitted_names)) & (IfNull(doctype.order_type, "") != ""))
-			.orderby(doctype.order_type)
+		self.entries = frappe.qb.get_query(
+			table=self.filters.doc_type,
+			fields=["order_type as entity", self.value_field, self.date_field],
+			filters={**self.document_filters, "order_type": ["is", "set"]},
+			order_by="order_type asc",
+			ignore_permissions=False,
 		).run(as_dict=True)
 
 		self.get_teams()
 
 	def get_sales_transactions_based_on_customers_or_suppliers(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
+		value_field = self.value_field
 
 		if self.filters.tree_type == "Customer":
 			entity_name = "customer_name as entity_name"
@@ -310,11 +297,6 @@ class Analytics:
 			self.entity_names.setdefault(d.entity, d.entity_name)
 
 	def get_sales_transactions_based_on_customer_or_territory_group(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
-
 		if self.filters.tree_type == "Customer Group":
 			entity_field = "customer_group as entity"
 		elif self.filters.tree_type == "Supplier Group":
@@ -325,7 +307,7 @@ class Analytics:
 
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
-			fields=[entity_field, value_field, self.date_field],
+			fields=[entity_field, self.value_field, self.date_field],
 			filters=self.document_filters,
 			ignore_permissions=False,
 		).run(as_dict=True)
@@ -335,7 +317,7 @@ class Analytics:
 		if self.filters["value_quantity"] == "Value":
 			value_field = "base_net_amount"
 		else:
-			value_field = "qty"
+			value_field = "stock_qty"
 
 		permitted_names = self._get_permitted_parent_names()
 		if not permitted_names:
@@ -361,11 +343,7 @@ class Analytics:
 		self.get_groups()
 
 	def get_sales_transactions_based_on_project(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
-
+		value_field = self.value_field
 		if self.filters.doc_type == "Payment Entry":
 			value_field = "base_received_amount as value_field"
 
