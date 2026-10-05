@@ -3,11 +3,12 @@
 
 
 import datetime
+from itertools import pairwise
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, getdate
+from frappe.utils import cint, getdate, to_timedelta
 
 
 class AppointmentBookingSettings(Document):
@@ -68,6 +69,21 @@ class AppointmentBookingSettings(Document):
 			to_time = datetime.datetime.strptime(f"1970-01-01 {record.to_time}", format_string)
 			self.validate_from_and_to_time(from_time, to_time, record)
 			self.duration_is_divisible(from_time, to_time)
+
+		self.validate_no_overlapping_slots()
+
+	def validate_no_overlapping_slots(self):
+		slots = sorted(
+			self.availability_of_slots, key=lambda slot: (slot.day_of_week, to_timedelta(slot.from_time))
+		)
+		for previous, current in pairwise(slots):
+			same_day = previous.day_of_week == current.day_of_week
+			if same_day and to_timedelta(current.from_time) < to_timedelta(previous.to_time):
+				frappe.throw(
+					_("Availability slots for {0} cannot overlap: rows {1} and {2}").format(
+						_(current.day_of_week), previous.idx, current.idx
+					)
+				)
 
 	def validate_from_and_to_time(self, from_time, to_time, record):
 		if from_time > to_time:

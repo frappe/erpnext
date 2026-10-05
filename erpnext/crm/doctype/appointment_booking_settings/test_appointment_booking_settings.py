@@ -129,3 +129,18 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		for duration in (0, -60):
 			settings.appointment_duration = duration
 			self.assert_invalid(settings)
+
+	def test_overlapping_slots_for_a_day_are_refused(self):
+		settings = self.get_valid_scheduling_settings()
+		settings.append(
+			"availability_of_slots",
+			{"day_of_week": "Monday", "from_time": "16:00:00", "to_time": "18:00:00"},
+		)
+		self.assert_invalid(settings)
+
+		settings.availability_of_slots[-1].update({"from_time": "17:00:00", "to_time": "18:00:00"})
+		settings.append(
+			"availability_of_slots",
+			{"day_of_week": "Tuesday", "from_time": "09:00:00", "to_time": "17:00:00"},
+		)
+		settings.save()
