@@ -2,9 +2,16 @@
 # See license.txt
 import unittest
 
+import frappe
+
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestQualityAction(ERPNextTestSuite):
-	# quality action has no code
-	pass
+	def test_action_without_resolutions_is_open(self):
+		action = frappe.get_doc(doctype="Quality Action", corrective_preventive="Corrective").insert()
+		self.assertEqual(action.status, "Open")
+
+		action.append("resolutions", dict(problem="Late delivery", status="Completed"))
+		action.save()
+		self.assertEqual(action.status, "Completed")
