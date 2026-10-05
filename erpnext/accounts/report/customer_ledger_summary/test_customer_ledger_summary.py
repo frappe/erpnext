@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -409,3 +409,21 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)[1]
 
 		self.assertEqual([(row.party, row.invoiced_amount) for row in report], [(self.customer, 2000.0)])
+
+	def test_refund_of_credit_note_from_before_the_period_is_a_negative_payment(self):
+		earlier = add_days(today(), -10)
+		si = self.create_sales_invoice(do_not_submit=True)
+		si.update({"posting_date": earlier, "set_posting_time": 1})
+		si.save().submit()
+		credit_note = self.create_credit_note(si.name, do_not_submit=True)
+		credit_note.update({"posting_date": earlier, "set_posting_time": 1})
+		credit_note.items[0].qty = -3
+		credit_note.save().submit()
+		get_payment_entry("Sales Invoice", credit_note.name, bank_account=self.cash).insert().submit()
+
+		row = execute({"company": self.company, "from_date": today(), "to_date": today()})[1][0]
+
+		self.assertEqual(
+			(row.opening_balance, row.invoiced_amount, row.paid_amount, row.closing_balance),
+			(700.0, 0.0, -300.0, 1000.0),
+		)

@@ -415,12 +415,13 @@ class PartyLedgerSummaryReport:
 			{
 				"is_return": 1,
 				"docstatus": 1,
-				"posting_date": ["between", [self.filters.from_date, self.filters.to_date]],
+				# refunds in the period can be against returns posted before it
+				"posting_date": ["<=", self.filters.to_date],
 				f"{scrub(self.filters.party_type)}": ["in", self.parties],
 			},
 		)
 
-		self.return_invoices = frappe.get_all(doctype, filters=filters, pluck="name")
+		self.return_invoices = set(frappe.get_all(doctype, filters=filters, pluck="name"))
 
 	def get_party_adjustment_amounts(self):
 		account_type = "Expense Account" if self.filters.party_type == "Customer" else "Income Account"
