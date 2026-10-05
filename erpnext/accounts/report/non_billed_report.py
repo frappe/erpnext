@@ -16,7 +16,8 @@ BILLING_LINKS = {
 		invoice="Purchase Invoice",
 		invoice_link="pr_detail",
 		return_link="purchase_receipt_item",
-		returned_qty="received_stock_qty",
+		returned_qty="stock_qty",
+		rejected_return_flag="return_qty_from_rejected_warehouse",
 	),
 }
 
@@ -106,10 +107,10 @@ def get_billed_after(links, as_on_date):
 
 
 def get_returned_as_on(doctype, child_tab, links, as_on_date):
-	"""Qty returned per row by returns posted on or before the date."""
+	"""Accepted qty returned per row by returns posted on or before the date."""
 	parent = frappe.qb.DocType(doctype)
 	child = frappe.qb.DocType(child_tab)
-	return (
+	query = (
 		frappe.qb.from_(child)
 		.inner_join(parent)
 		.on(parent.name == child.parent)
@@ -117,7 +118,10 @@ def get_returned_as_on(doctype, child_tab, links, as_on_date):
 		.where((parent.docstatus == 1) & (parent.is_return == 1) & (parent.posting_date <= as_on_date))
 		.where(child[links.return_link].isnotnull())
 		.groupby(child[links.return_link])
-	).as_("returned")
+	)
+	if links.rejected_return_flag:
+		query = query.where(child[links.rejected_return_flag] == 0)
+	return query.as_("returned")
 
 
 def get_project_field(doctype, child_doctype, party):
