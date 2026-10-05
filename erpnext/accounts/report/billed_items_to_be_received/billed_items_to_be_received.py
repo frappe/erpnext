@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 
 
 def execute(filters=None):
@@ -14,37 +15,63 @@ def execute(filters=None):
 
 
 def get_data(report_filters):
-	filters = get_report_filters(report_filters)
-	fields = get_report_fields()
+	as_on_date = report_filters.get("posting_date")
+	invoice = frappe.qb.DocType("Purchase Invoice")
+	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	received = get_received_as_on(as_on_date)
+	received_qty = IfNull(received.qty, 0)
 
-	return frappe.get_all("Purchase Invoice", fields=fields, filters=filters)
-
-
-def get_report_filters(report_filters):
-	filters = [
-		["Purchase Invoice", "company", "=", report_filters.get("company")],
-		["Purchase Invoice", "posting_date", "<=", report_filters.get("posting_date")],
-		["Purchase Invoice", "docstatus", "=", 1],
-		["Purchase Invoice", "per_received", "<", 100],
-		["Purchase Invoice", "update_stock", "=", 0],
-		["Purchase Invoice", "is_opening", "!=", "Yes"],
-	]
+	query = (
+		frappe.qb.from_(invoice)
+		.join(invoice_item)
+		.on(invoice_item.parent == invoice.name)
+		.left_join(received)
+		.on(received.detail == invoice_item.name)
+		.select(
+			invoice.name,
+			invoice.supplier,
+			invoice.company,
+			invoice.posting_date,
+			invoice.currency,
+			invoice_item.item_code,
+			invoice_item.item_name,
+			invoice_item.uom,
+			invoice_item.qty,
+			received_qty.as_("received_qty"),
+			invoice_item.rate,
+			invoice_item.amount,
+		)
+		.where(
+			(invoice.company == report_filters.get("company"))
+			& (invoice.posting_date <= as_on_date)
+			& (invoice.docstatus == 1)
+			& (invoice.update_stock == 0)
+			& (invoice.is_opening != "Yes")
+			& (invoice_item.qty > received_qty)
+		)
+		.orderby(invoice.posting_date)
+		.orderby(invoice_item.idx)
+	)
 
 	if report_filters.get("purchase_invoice"):
-		filters.append(["Purchase Invoice", "name", "=", report_filters.get("purchase_invoice")])
+		query = query.where(invoice.name == report_filters.get("purchase_invoice"))
 
-	return filters
+	return query.run(as_dict=True)
 
 
-def get_report_fields():
-	fields = []
-	for p_field in ["name", "supplier", "company", "posting_date", "currency"]:
-		fields.append(f"`tabPurchase Invoice`.`{p_field}`")
-
-	for c_field in ["item_code", "item_name", "uom", "qty", "received_qty", "rate", "amount"]:
-		fields.append(f"`tabPurchase Invoice Item`.`{c_field}`")
-
-	return fields
+def get_received_as_on(as_on_date):
+	"""Qty received per invoice row by receipts posted on or before the date."""
+	receipt = frappe.qb.DocType("Purchase Receipt")
+	receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+	return (
+		frappe.qb.from_(receipt_item)
+		.join(receipt)
+		.on(receipt.name == receipt_item.parent)
+		.select(receipt_item.purchase_invoice_item.as_("detail"), Sum(receipt_item.received_qty).as_("qty"))
+		.where((receipt.docstatus == 1) & (receipt.posting_date <= as_on_date))
+		.where(receipt_item.purchase_invoice_item.isnotnull())
+		.groupby(receipt_item.purchase_invoice_item)
+	).as_("received")
 
 
 def get_columns():
