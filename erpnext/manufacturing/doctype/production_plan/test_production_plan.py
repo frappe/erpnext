@@ -23,6 +23,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.utils import InvalidWarehouseCompany
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -2274,6 +2275,28 @@ class TestProductionPlan(ERPNextTestSuite):
 			# a group warehouse must never be a Material Request target
 			self.assertNotEqual(row.get("warehouse"), data.group_warehouse)
 
+	def test_group_transfer_buys_shortage_of_for_warehouse(self):
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			for_warehouse=data.for_wh,
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		for get_parent_warehouse_data in (None, True):
+			mr_items = get_items_for_material_requests(
+				plan.as_dict(),
+				warehouses=[{"warehouse": data.group_warehouse}],
+				get_parent_warehouse_data=get_parent_warehouse_data,
+			)
+
+			quantities = {row.get("material_request_type"): flt(row.get("quantity")) for row in mr_items}
+			self.assertEqual(quantities, {"Material Transfer": 4, "Purchase": 3})
+
 	def test_for_warehouse_must_be_child_of_group(self):
 		"A For Warehouse outside the chosen group warehouse is rejected on save."
 		data = self._setup_group_rm_warehouse()
@@ -2287,6 +2310,33 @@ class TestProductionPlan(ERPNextTestSuite):
 			skip_getting_mr_items=1,
 		)
 		self.assertRaises(frappe.ValidationError, plan.save)
+
+	def test_group_warehouse_itself_or_of_another_company_is_rejected(self):
+		data = self._setup_group_rm_warehouse()
+
+		for for_warehouse, group_warehouse in (
+			(data.group_warehouse, data.group_warehouse),
+			(None, "All Warehouses - _TC1"),
+		):
+			plan = create_production_plan(
+				item_code=data.fg_item,
+				planned_qty=10,
+				for_warehouse=for_warehouse,
+				raw_material_group_warehouse=group_warehouse,
+				do_not_save=1,
+				skip_getting_mr_items=1,
+			)
+			self.assertRaises(frappe.ValidationError, plan.save)
+
+	def test_for_warehouse_of_another_company_is_rejected(self):
+		plan = create_production_plan(
+			item_code=self._setup_group_rm_warehouse().fg_item,
+			planned_qty=10,
+			for_warehouse="_Test Warehouse 2 - _TC1",
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
 
 	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
 		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
