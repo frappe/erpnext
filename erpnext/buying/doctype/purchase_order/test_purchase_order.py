@@ -1962,6 +1962,31 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			frappe.db.get_value("Material Request Item", material_request.items[0].name, "ordered_qty"), 5
 		)
 
+	def test_internal_sales_order_links_back_to_purchase_order(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+		prepare_data_for_internal_transfer()
+		create_cost_center(
+			cost_center_name="_Test Cost Center for perpetual inventory Account",
+			company="_Test Company with perpetual inventory",
+		)
+		po = create_purchase_order(
+			company="_Test Company with perpetual inventory",
+			supplier="_Test Internal Supplier 2",
+			warehouse="Stores - TCP1",
+			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
+			qty=2,
+			rate=1,
+		)
+
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Purchase Order", po.name, "inter_company_order_reference"), so.name
+		)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
