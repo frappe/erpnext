@@ -118,6 +118,17 @@ class TestContract(FrappeTestCase):
 			update_status_for_contracts()
 		self.assertEqual(frappe.db.get_value("Contract", contract.name, "fulfilment_status"), "Lapsed")
 
+	def test_fulfilment_terms_cannot_be_replaced_after_submit(self):
+		contract = self.make_signed_contract()
+		contract.fulfilment_terms = []
+		contract.append("fulfilment_terms", {"requirement": "Nothing", "fulfilled": 1})
+		self.assertRaises(frappe.UpdateAfterSubmitError, contract.save)
+
+		contract.reload()
+		contract.fulfilment_terms[0].fulfilled = 1
+		contract.save()
+		self.assertEqual(contract.fulfilment_status, "Fulfilled")
+
 	def make_signed_contract(self, **fields):
 		self.contract_doc.update(
 			{
