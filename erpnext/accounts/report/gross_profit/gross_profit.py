@@ -1024,7 +1024,7 @@ class GrossProfitGenerator:
 
 	def get_average_buying_rate(self, row, item_code):
 		args = row
-		key = (item_code, row.warehouse)
+		key = (item_code, row.warehouse, row.posting_date, row.posting_time, row.serial_and_batch_bundle)
 		if key not in self.average_buying_rate:
 			args.update(
 				{
