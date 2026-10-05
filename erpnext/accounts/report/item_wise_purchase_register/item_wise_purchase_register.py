@@ -89,6 +89,7 @@ def _execute(filters=None, additional_table_columns=None):
 		}
 
 		total_tax = 0
+		total_other_charges = 0
 		row.update(default_taxes.copy())
 
 		for tax in tax_columns:
@@ -99,10 +100,18 @@ def _execute(filters=None, additional_table_columns=None):
 					f"{tax}_amount": item_tax.get("tax_amount", 0),
 				}
 			)
-			total_tax += flt(item_tax.get("tax_amount"))
+			if item_tax.get("is_other_charges"):
+				total_other_charges += flt(item_tax.get("tax_amount"))
+			else:
+				total_tax += flt(item_tax.get("tax_amount"))
 
 		row.update(
-			{"total_tax": total_tax, "total": d.base_net_amount + total_tax, "currency": company_currency}
+			{
+				"total_tax": total_tax,
+				"total_other_charges": total_other_charges,
+				"total": d.base_net_amount + total_tax + total_other_charges,
+				"currency": company_currency,
+			}
 		)
 
 		if filters.get("group_by"):
