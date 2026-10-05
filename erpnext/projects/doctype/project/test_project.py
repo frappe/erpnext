@@ -407,6 +407,58 @@ class TestProject(ERPNextTestSuite):
 		copied_tasks = frappe.get_all("Task", filters={"project": new_project})
 		self.assertEqual(len(copied_tasks), len(tasks))
 
+	def test_create_duplicate_project_links_tasks_to_their_copies(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 0)
+		group = frappe.get_doc(doctype="Task", subject="Phase 1", project=source.name, is_group=1).insert()
+		design = frappe.get_doc(
+			doctype="Task", subject="Design", project=source.name, parent_task=group.name
+		).insert()
+		build = frappe.get_doc(
+			doctype="Task",
+			subject="Build",
+			project=source.name,
+			parent_task=group.name,
+			depends_on=[{"task": design.name}],
+		).insert()
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
+
+		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
+		copied_tasks = frappe.get_all(
+			"Task", filters={"project": copy}, fields=["name", "parent_task", "depends_on_tasks"]
+		)
+		links = {
+			link
+			for task in copied_tasks
+			for link in [task.parent_task, *(task.depends_on_tasks or "").split(",")]
+			if link
+		}
+		self.assertEqual(len(copied_tasks), 3)
+		self.assertFalse(links & {group.name, design.name, build.name})
+		self.assertEqual(
+			set(frappe.get_all("Task Depends On", filters={"parent": group.name}, pluck="task")),
+			{design.name, build.name},
+		)
+
+	def test_create_duplicate_project_detaches_parents_outside_the_project(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 0)
+		other, _ = self._project_with_tasks("Task Completion", 0)
+		outside_group = frappe.get_doc(
+			doctype="Task", subject="Other phase", project=other.name, is_group=1
+		).insert()
+		frappe.get_doc(
+			doctype="Task", subject="Moved", project=source.name, parent_task=outside_group.name
+		).insert()
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
+
+		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
+		self.assertEqual(frappe.get_all("Task", filters={"project": copy}, pluck="parent_task"), [None])
+
 	def test_create_duplicate_project_rejects_same_name(self):
 		from erpnext.projects.doctype.project.project import create_duplicate_project
 

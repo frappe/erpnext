@@ -669,11 +669,14 @@ def create_duplicate_project(prev_doc: str | dict, project_name: str):
 
 	prev_doc = frappe.parse_json(prev_doc)
 
-	# prev_doc is caller-supplied, but the tasks below are read from the db by name
-	if source_name := prev_doc.get("name"):
-		frappe.has_permission("Project", "read", source_name, throw=True)
+	source_name = prev_doc.get("name")
+	if not source_name:
+		frappe.throw(_("Save the Project before duplicating it"))
 
-	if project_name == prev_doc.get("name"):
+	# prev_doc is caller-supplied, but the tasks below are read from the db by name
+	frappe.has_permission("Project", "read", source_name, throw=True)
+
+	if project_name == source_name:
 		frappe.throw(_("Use a name that is different from previous project name"))
 
 	# change the copied doc name to new project name
@@ -683,17 +686,35 @@ def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	project.project_name = project_name
 	project.insert()
 
-	# fetch all the task linked with the old project
-	task_list = frappe.get_all("Task", filters={"project": prev_doc.get("name")}, fields=["name"])
-
-	# Create duplicate task for all the task
-	for task in task_list:
-		task = frappe.get_doc("Task", task)
-		new_task = frappe.copy_doc(task)
-		new_task.project = project.name
-		new_task.insert()
+	copy_tasks(source_name, project.name)
 
 	project.db_set("project_template", prev_doc.get("project_template"))
+
+
+def copy_tasks(source_project: str, target_project: str):
+	"""Copy the tasks of a project, pointing parent tasks and dependencies at the copies."""
+	source_tasks = [
+		frappe.get_doc("Task", name)
+		for name in frappe.get_all("Task", filters={"project": source_project}, order_by="lft", pluck="name")
+	]
+
+	copied_names = {}
+	for source_task in source_tasks:
+		task = frappe.copy_doc(source_task)
+		task.project = target_project
+		task.parent_task = copied_names.get(task.parent_task)
+		task.set("depends_on", [])
+		copied_names[source_task.name] = task.insert().name
+
+	for source_task in source_tasks:
+		if not source_task.depends_on:
+			continue
+
+		task = frappe.get_doc("Task", copied_names[source_task.name])
+		task.set(
+			"depends_on", [{"task": copied_names.get(row.task, row.task)} for row in source_task.depends_on]
+		)
+		task.save()
 
 
 def get_projects_for_collect_progress(frequency, fields):
