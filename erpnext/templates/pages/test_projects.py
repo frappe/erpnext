@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.projects.doctype.project.project import get_project_list
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.templates.pages.projects import validate_and_get_project_user
 from erpnext.tests.utils import ERPNextTestSuite
@@ -70,3 +71,32 @@ class TestProjectsPage(ERPNextTestSuite):
 			project_user = validate_and_get_project_user(project.name)
 
 		self.assertIsNone(project_user)
+
+	def test_allows_customer_portal_user_for_own_customer_projects(self):
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		own = make_project({"project_name": f"_Test Portal Own {frappe.generate_hash(length=6)}"})
+		own.db_set("customer", "_Test Customer")
+		other = make_project({"project_name": f"_Test Portal Other {frappe.generate_hash(length=6)}"})
+		other.db_set("customer", "_Test Customer 1")
+
+		with self.set_user(portal_user):
+			self.assertIsNone(validate_and_get_project_user(own.name))
+			self.assertRaises(frappe.PermissionError, validate_and_get_project_user, other.name)
+
+	def test_project_list_loads_for_member_without_customer_role(self):
+		member = self._create_user(f"member_{frappe.generate_hash(length=6)}@example.com")
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Portal List {frappe.generate_hash(length=6)}",
+			company="_Test Company",
+		)
+		project.append("users", {"user": member, "welcome_email_sent": 1})
+		project.insert()
+
+		with self.set_user(member):
+			projects = get_project_list("Project", None, None, 0)
+
+		self.assertEqual([row.name for row in projects], [project.name])
