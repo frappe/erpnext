@@ -475,3 +475,23 @@ class TestGeneralLedger(ERPNextTestSuite):
 
 		self.assertEqual(total["debit"], 8000)
 		self.assertEqual(total["presentation_currency"], "INR")
+
+	def test_opening_entries_after_to_date_are_excluded(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		account, offset = "_Test Bank - _TC", "_Test Cash - _TC"
+		make_journal_entry(account, offset, 100, posting_date=add_days(today(), -60), submit=True)
+		late_opening = make_journal_entry(
+			account, offset, 5000, posting_date=add_days(today(), 15), save=False
+		)
+		late_opening.is_opening = "Yes"
+		late_opening.submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=add_days(today(), -30), to_date=today(), account=[account]
+		)
+		labelled = {row.get("account"): row for row in execute(filters)[1]}
+
+		self.assertEqual(labelled["'Opening'"]["debit"], 100)
+		self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 100)

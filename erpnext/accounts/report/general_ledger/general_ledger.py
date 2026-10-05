@@ -306,10 +306,7 @@ def get_conditions(filters):
 		else:
 			conditions.append("posting_date >=%(from_date)s")
 
-	if not ignore_is_opening:
-		conditions.append("(posting_date <=%(to_date)s or is_opening = 'Yes')")
-	else:
-		conditions.append("posting_date <=%(to_date)s")
+	conditions.append("posting_date <=%(to_date)s")
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
@@ -1070,10 +1067,7 @@ def _build_gl_conditions_duckdb(filters):
 			conditions.append("posting_date >= ?")
 		params.append(filters.from_date)
 
-	if not ignore_is_opening:
-		conditions.append("(posting_date <= ? OR is_opening = 'Yes')")
-	else:
-		conditions.append("posting_date <= ?")
+	conditions.append("posting_date <= ?")
 	params.append(filters.to_date)
 
 	if filters.get("project"):
