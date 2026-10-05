@@ -42,7 +42,8 @@ class AssetShiftAllocation(Document):
 
 	def validate(self):
 		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
-		if self.get("depreciation_schedule") and self.docstatus == 0:
+		if self.get("depreciation_schedule"):
+			self.set_booked_journal_entries()
 			self.validate_invalid_shift_change()
 			self.update_depr_schedule()
 
@@ -54,6 +55,15 @@ class AssetShiftAllocation(Document):
 
 	def on_cancel(self):
 		self.restore_previous_depr_schedule()
+
+	def set_booked_journal_entries(self):
+		"""Take booked entries from the active schedule, as depreciation may be posted after the allocation was saved."""
+		journal_entries = {
+			getdate(row.schedule_date): row.journal_entry
+			for row in self.asset_depr_schedule_doc.depreciation_schedule
+		}
+		for row in self.depreciation_schedule:
+			row.journal_entry = journal_entries.get(getdate(row.schedule_date))
 
 	def validate_invalid_shift_change(self):
 		for i, sch in enumerate(self.depreciation_schedule):
