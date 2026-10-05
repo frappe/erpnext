@@ -3,11 +3,10 @@
 
 
 import frappe
-from frappe import _, scrub
+from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
-from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import get_currency_precision, get_party_types_from_account_type
@@ -38,22 +37,6 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		self.get_party_total(args)
 
-		party = None
-		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
-				party = self.filters.get(scrub(party_type))
-
-		party_advance_amount = (
-			get_partywise_advanced_payment_amount(
-				self.party_type,
-				self.filters.report_date,
-				self.filters.show_future_payments,
-				self.filters.company,
-				party=party,
-			)
-			or {}
-		)
-
 		if self.filters.show_gl_balance:
 			gl_balance_map = self.get_gl_balance()
 
@@ -76,7 +59,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			row.update(party_dict)
 
 			# Advance against party
-			row.advance = party_advance_amount.get(party, 0)
+			row.advance = self.party_advance.get(party, 0)
 
 			# In AR/AP, advance shown in paid columns,
 			# but in summary report advance shown in separate column
@@ -93,6 +76,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_party_total(self, args):
 		self.party_total = frappe._dict()
+		self.party_advance = frappe._dict()
+		invoice_doctypes = frappe.get_hooks("invoice_doctypes")
 
 		for d in self.receivables:
 			self.init_party_total(d)
@@ -101,6 +86,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			for k in list(self.party_total[d.party]):
 				if isinstance(self.party_total[d.party][k], float):
 					self.party_total[d.party][k] += d.get(k) or 0.0
+
+			# unallocated payments are the rows of non invoice vouchers
+			if d.voucher_type not in invoice_doctypes:
+				self.party_advance[d.party] = self.party_advance.get(d.party, 0.0) + flt(d.paid)
 
 			# set territory, customer_group, sales person etc
 			self.set_party_details(d)
