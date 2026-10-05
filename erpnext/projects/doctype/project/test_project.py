@@ -299,6 +299,33 @@ class TestProject(FrappeTestCase):
 		self.assertEqual(project.percent_complete, 75)
 		self.assertEqual(project.status, "On hold")
 
+	def test_set_project_status_completes_tasks_in_dependency_order(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Progress", 2)
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+
+		set_project_status(project.name, "Completed")
+
+		self.assertEqual(frappe.db.get_value("Project", project.name, "status"), "Completed")
+		for task in tasks:
+			self.assertEqual(frappe.db.get_value("Task", task, ["status", "progress"]), ("Completed", 100))
+
+	def test_set_project_status_by_projects_manager(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 1)
+		user = create_user("projects-manager-only@example.com", "Projects Manager")
+
+		with self.set_user(user.name):
+			set_project_status(project.name, "Cancelled")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[0], "status"), "Cancelled")
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
