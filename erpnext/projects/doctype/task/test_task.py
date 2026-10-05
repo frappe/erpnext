@@ -41,6 +41,23 @@ class TestTask(ERPNextTestSuite):
 		self.assertEqual(task.total_costing_amount, 3200)
 		self.assertEqual(task.total_billing_amount, 8000)
 
+	def test_move_task_to_another_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		old_project = make_project({"project_name": "_Test Project Task Moved Out"})
+		new_project = make_project({"project_name": "_Test Project Task Moved In"})
+		completed_task = create_task("_Test Task Completed In Old Project", save=False)
+		completed_task.update({"project": old_project.name, "status": "Completed"})
+		completed_task.save()
+		moved_task = create_task("_Test Task Moved", save=False)
+		moved_task.project = old_project.name
+		moved_task.save()
+
+		moved_task.project = new_project.name
+		moved_task.save()
+
+		self.assertEqual(frappe.db.get_value("Project", old_project.name, "percent_complete"), 100)
+
 	def test_circular_reference(self):
 		task1 = create_task("_Test Task 1", add_days(nowdate(), -15), add_days(nowdate(), -10))
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
