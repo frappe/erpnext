@@ -363,10 +363,31 @@ class TestDeferredRevenueAndExpense(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertIn(si.name, [row.get("name") for row in data])
 
-	def make_deferred_sales_invoice(self, service_start_date, service_end_date, rate):
+	def test_customer_user_permission(self):
+		allowed = self.make_deferred_sales_invoice("2021-04-01", "2022-03-31", 1200)
+		restricted = self.make_deferred_sales_invoice(
+			"2021-04-01", "2022-03-31", 1200, customer="_Test Customer 1"
+		)
+		user = "test_deferred_report_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				doctype="User", email=user, first_name="Deferred", roles=[{"role": "Accounts User"}]
+			).insert()
+		frappe.permissions.add_user_permission("Customer", self.customer, user)
+
+		frappe.set_user(user)
+		try:
+			names = [row.get("name") for row in self.get_report_rows("2021-04-01", "2022-03-31")]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIn(allowed.name, names)
+		self.assertNotIn(restricted.name, names)
+
+	def make_deferred_sales_invoice(self, service_start_date, service_end_date, rate, customer=None):
 		si = create_sales_invoice(
 			company=self.company,
-			customer=self.customer,
+			customer=customer or self.customer,
 			debit_to=self.debit_to,
 			posting_date=service_start_date,
 			cost_center=self.cost_center,

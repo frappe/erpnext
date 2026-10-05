@@ -3,9 +3,11 @@
 
 import frappe
 from frappe import _, qb
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import functions
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, getdate, rounded
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.accounts.utils import get_fiscal_year
@@ -308,13 +310,15 @@ class Deferred_Revenue_and_Expense_Report:
 		posted = ConstantColumn("posted").as_("posted")
 
 		if self.filters.type == "Revenue":
-			inv = qb.DocType("Sales Invoice")
+			invoice_doctype = "Sales Invoice"
+			inv = qb.DocType(invoice_doctype)
 			inv_item = qb.DocType("Sales Invoice Item")
 			deferred_flag_field = inv_item["enable_deferred_revenue"]
 			deferred_account_field = inv_item["deferred_revenue_account"]
 
 		elif self.filters.type == "Expense":
-			inv = qb.DocType("Purchase Invoice")
+			invoice_doctype = "Purchase Invoice"
+			inv = qb.DocType(invoice_doctype)
 			inv_item = qb.DocType("Purchase Invoice Item")
 			deferred_flag_field = inv_item["enable_deferred_expense"]
 			deferred_account_field = inv_item["deferred_expense_account"]
@@ -363,6 +367,9 @@ class Deferred_Revenue_and_Expense_Report:
 			.groupby(inv.name, inv_item.name, gle.posting_date)
 			.orderby(gle.posting_date)
 		)
+		if match_conditions := build_match_conditions(invoice_doctype):
+			query = query.where(Bracket(LiteralValue(match_conditions)))
+
 		self.invoices = query.run(as_dict=True)
 
 		uniq_invoice = set([x.doc for x in self.invoices])
