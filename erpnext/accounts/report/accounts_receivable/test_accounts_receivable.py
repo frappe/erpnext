@@ -1277,6 +1277,56 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
 		)
 
+	def test_payment_terms_with_advance_on_foreign_currency(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		customer = frappe.get_doc(
+			{"doctype": "Customer", "customer_name": "Advance USD Customer", "default_currency": "USD"}
+		).insert()
+		self.customer = customer.name
+		advance = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debtors_usd,
+			paid_to=self.cash,
+			paid_amount=50,
+		)
+		advance.source_exchange_rate = 80
+		advance.received_amount = 4000
+		advance.save().submit()
+
+		si = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debtors_usd,
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+			do_not_save=1,
+		)
+		for due_in_days in (0, 30):
+			si.append(
+				"payment_schedule",
+				dict(due_date=add_days(today(), due_in_days), invoice_portion=50.00, payment_amount=50),
+			)
+		si.allocate_advances_automatically = 1
+		si.save().submit()
+
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"report_date": today(),
+				"range": "30, 60, 90, 120",
+				"based_on_payment_terms": 1,
+				"party_type": "Customer",
+				"party": [self.customer],
+			}
+		)
+		rows = execute(filters)[1]
+		self.assertEqual([row.outstanding for row in rows], [2000.0, 2000.0])
+
 	def test_accounts_receivable_output_for_minor_outstanding(self):
 		"""
 		AR/AP should report miniscule outstanding of 0.01. Or else there will be slight difference with General Ledger/Trial Balance

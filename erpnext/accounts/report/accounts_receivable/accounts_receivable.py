@@ -579,11 +579,11 @@ class ReceivablePayableReport:
 		if not payment_terms_details:
 			return
 
+		company_currency = frappe.get_value("Company", self.filters.get("company"), "default_currency")
+
 		# Advance allocated during invoicing is not considered in payment terms
 		# Deduct that from paid amount pre allocation
-		row.paid -= flt(payment_terms_details[0].total_advance)
-
-		company_currency = frappe.get_value("Company", self.filters.get("company"), "default_currency")
+		row.paid -= self.get_advance_in_report_currency(payment_terms_details[0], company_currency)
 
 		# If single payment terms, no need to split the row
 		if len(payment_terms_details) == 1 and payment_terms_details[0].payment_term:
@@ -593,6 +593,18 @@ class ReceivablePayableReport:
 		for d in payment_terms_details:
 			term = frappe._dict(original_row)
 			self.append_payment_term(row, d, term, company_currency)
+
+	def get_advance_in_report_currency(self, invoice, company_currency):
+		"""The invoice's total advance is in the party account currency."""
+		advance = flt(invoice.total_advance)
+		if (
+			self.filters.get("in_party_currency")
+			or self.filters.get("party_account")
+			or invoice.party_account_currency == company_currency
+		):
+			return advance
+
+		return advance * flt(invoice.conversion_rate)
 
 	def append_payment_term(self, row, d, term, company_currency):
 		invoiced = d.base_payment_amount
