@@ -101,3 +101,36 @@ class TestGeneralAndPaymentLedger(ERPNextTestSuite, AccountsTestMixin):
 		)
 		columns, data = execute(filters=filters)
 		self.assertEqual([], data)
+
+	def test_rows_limited_to_permitted_parties(self):
+		for customer in ("_Test Customer", "_Test Customer 1"):
+			sinv = create_sales_invoice(
+				company=self.company,
+				customer=customer,
+				debit_to=self.debit_to,
+				expense_account=self.expense_account,
+				cost_center=self.cost_center,
+				income_account=self.income_account,
+				warehouse=self.warehouse,
+			)
+			frappe.db.set_value(
+				"Payment Ledger Entry",
+				{"voucher_no": sinv.name, "delinked": 0},
+				"amount",
+				sinv.grand_total - 1,
+			)
+
+		user = "test_gl_pl_comparison@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "GLPL", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer", user)
+
+		frappe.set_user(user)
+		try:
+			data = execute(filters=frappe._dict({"company": self.company}))[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([row.party for row in data], ["_Test Customer"])

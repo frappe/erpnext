@@ -167,6 +167,25 @@ class General_Payment_Ledger_Comparison:
 				(x[0], x[1], x[2], x[3], x[4], x[5]), frappe._dict({"gl_balance": 0.0})
 			).update(frappe._dict({"pl_balance": x[6]}))
 
+	def remove_restricted_parties(self):
+		permitted = self.get_permitted_parties()
+		self.diff = frappe._dict(
+			{key: val for key, val in self.diff.items() if (key[4], key[5]) in permitted}
+		)
+
+	def get_permitted_parties(self) -> set[tuple[str, str]]:
+		parties_by_type = {}
+		for key in self.diff:
+			parties_by_type.setdefault(key[4], set()).add(key[5])
+
+		permitted = set()
+		for party_type, parties in parties_by_type.items():
+			if not party_type or not frappe.has_permission(party_type, "read"):
+				continue
+			names = frappe.get_list(party_type, filters={"name": ["in", list(parties)]}, pluck="name")
+			permitted.update((party_type, name) for name in names)
+		return permitted
+
 	def generate_data(self):
 		self.data = []
 		for key, val in self.diff.items():
@@ -273,6 +292,7 @@ class General_Payment_Ledger_Comparison:
 		self.get_gle()
 		self.get_ple()
 		self.compare()
+		self.remove_restricted_parties()
 		self.generate_data()
 		self.get_columns()
 
