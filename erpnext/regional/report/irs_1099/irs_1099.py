@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, nowdate
 from frappe.utils.data import fmt_money
 from frappe.utils.jinja import render_template
@@ -29,38 +30,48 @@ def execute(filters=None):
 		return [], []
 
 	columns = get_columns()
-	conditions = ""
-	if filters.supplier_group:
-		conditions += "AND s.supplier_group = %s" % frappe.db.escape(filters.get("supplier_group"))
 
-	data = frappe.db.sql(
-		f"""
-		SELECT
-			s.supplier_group as "supplier_group",
-			gl.party AS "supplier",
-			s.tax_id as "tax_id",
-			SUM(gl.debit_in_account_currency) AS "payments"
-		FROM
-			`tabGL Entry` gl
-				INNER JOIN `tabSupplier` s
-		WHERE
-			s.name = gl.party
-				AND s.irs_1099 = 1
-				AND gl.fiscal_year = %(fiscal_year)s
-				AND gl.party_type = 'Supplier'
-				AND gl.company = %(company)s
-				{conditions}
-
-		GROUP BY
-			gl.party
-
-		ORDER BY
-			gl.party DESC""",
-		{"fiscal_year": filters.fiscal_year, "company": filters.company},
-		as_dict=True,
+	gl = frappe.qb.DocType("GL Entry")
+	s = frappe.qb.DocType("Supplier")
+	query = (
+		frappe.qb.from_(gl)
+		.inner_join(s)
+		.on(s.name == gl.party)
+		.select(
+			s.supplier_group.as_("supplier_group"),
+			gl.party.as_("supplier"),
+			s.tax_id.as_("tax_id"),
+			Sum(gl.debit_in_account_currency - gl.credit_in_account_currency).as_("payments"),
+		)
+		.where(
+			(s.irs_1099 == 1)
+			& (gl.fiscal_year == filters.fiscal_year)
+			& (gl.party_type == "Supplier")
+			& (gl.company == filters.company)
+			& (gl.is_cancelled == 0)
+			& is_payment_voucher(gl)
+		)
+		.groupby(gl.party, s.supplier_group, s.tax_id)
+		.orderby(gl.party, order=frappe.qb.desc)
 	)
 
+	if filters.supplier_group:
+		query = query.where(s.supplier_group == filters.supplier_group)
+
+	data = query.run(as_dict=True)
+
 	return columns, data
+
+
+def is_payment_voucher(gl):
+	"""Payment Entries and Journal Entries through a bank or cash account, so invoices and debit notes are left out."""
+	account = frappe.qb.DocType("Journal Entry Account")
+	bank_or_cash_journals = (
+		frappe.qb.from_(account).select(account.parent).where(account.account_type.isin(["Bank", "Cash"]))
+	)
+	return (gl.voucher_type == "Payment Entry") | (
+		(gl.voucher_type == "Journal Entry") & gl.voucher_no.isin(bank_or_cash_journals)
+	)
 
 
 def get_columns():
