@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_days, nowdate
 
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_all_scorecards
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -18,6 +19,16 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		for d in my_doc.criteria:
 			d.weight = 0
 		self.assertRaises(frappe.ValidationError, my_doc.insert)
+
+	def test_make_all_scorecards_refreshes_standing(self):
+		doc = make_scorecard_for("_Test Supplier SC Make All")
+		doc.criteria[0].criteria_name = make_test_criteria("_Test SC Make All", "100")
+		doc.insert()
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		frappe.db.set_value("Supplier Scorecard Criteria", "_Test SC Make All", "formula", "10")
+		self.assertGreater(make_all_scorecards(doc.name), 0)
+		self.assertEqual(frappe.db.get_value("Supplier Scorecard", doc.name, "status"), "Very Poor")
 
 
 def make_supplier_scorecard():
@@ -140,3 +151,18 @@ def make_scorecard_for(supplier_name, days_since_creation=75):
 	doc = make_supplier_scorecard()
 	doc.supplier = doc.name = supplier
 	return doc
+
+
+def make_test_criteria(criteria_name, formula):
+	if not frappe.db.exists("Supplier Scorecard Criteria", criteria_name):
+		frappe.get_doc(
+			{
+				"doctype": "Supplier Scorecard Criteria",
+				"criteria_name": criteria_name,
+				"max_score": 100,
+				"weight": 100,
+				"formula": formula,
+			}
+		).insert()
+	frappe.db.set_value("Supplier Scorecard Criteria", criteria_name, "formula", formula)
+	return criteria_name
