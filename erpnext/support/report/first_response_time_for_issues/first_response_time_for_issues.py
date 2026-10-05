@@ -27,10 +27,19 @@ def execute(filters=None):
 			Date(issue.creation).as_("creation_date"),
 			Avg(first_response_time).as_("avg_response_time"),
 		)
-		.where(Date(issue.creation).between(filters.from_date, filters.to_date) & (first_response_time > 0))
+		.where(
+			Date(issue.creation).between(filters.from_date, filters.to_date)
+			& (first_response_time > 0)
+			& issue.name.isin(get_permitted_issues(filters))
+		)
 		.groupby(Date(issue.creation))
 		.orderby(Date(issue.creation), order=frappe.qb.desc)
 		.run()
 	)
 
 	return columns, data
+
+
+def get_permitted_issues(filters: frappe._dict):
+	company_filter = {"company": filters.company} if filters.get("company") else {}
+	return frappe.qb.get_query("Issue", fields=["name"], filters=company_filter, ignore_permissions=False)
