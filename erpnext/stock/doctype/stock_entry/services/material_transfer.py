@@ -517,7 +517,7 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 			if mr not in material_requests and self.doc.outgoing_stock_entry and parent_se:
 				mr = frappe.get_value("Stock Entry Detail", item.ste_detail, "material_request")
 			if mr and mr not in material_requests:
-				status = self._update_mr_transfer_status(mr, status, material_requests)
+				self._update_mr_transfer_status(mr, status, material_requests)
 
 	def _update_mr_transfer_status(self, material_request, status, material_requests):
 		material_requests.append(material_request)
@@ -526,7 +526,6 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 			if qty.get("transfer_qty") > qty.get("transferred_qty"):
 				status = "In Transit"
 		frappe.db.set_value("Material Request", material_request, "transfer_status", status)
-		return status
 
 
 def _resolve_transfer_qty(desire_to_transfer, pending_to_issue, can_transfer):
