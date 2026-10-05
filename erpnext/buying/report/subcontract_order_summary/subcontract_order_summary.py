@@ -108,7 +108,7 @@ def get_subcontracted_data(order_details, data):
 		res = details.order_item
 		for index, row in enumerate(details.supplied_items):
 			if index != 0:
-				res = {}
+				res = {"order_id": details.order_item.order_id}
 
 			res.update(row)
 			data.append(res)
