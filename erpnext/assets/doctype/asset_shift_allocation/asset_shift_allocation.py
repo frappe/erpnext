@@ -7,8 +7,10 @@ from frappe.model.document import Document
 from frappe.utils import (
 	add_months,
 	cint,
+	flt,
 	get_last_day,
 	get_link_to_form,
+	getdate,
 	is_last_day_of_the_month,
 )
 
@@ -49,6 +51,9 @@ class AssetShiftAllocation(Document):
 
 	def on_submit(self):
 		self.create_new_asset_depr_schedule()
+
+	def on_cancel(self):
+		self.restore_previous_depr_schedule()
 
 	def validate_invalid_shift_change(self):
 		for i, sch in enumerate(self.depreciation_schedule):
@@ -211,11 +216,7 @@ class AssetShiftAllocation(Document):
 		)
 
 		new_asset_depr_schedule_doc.notes = notes
-
-		self.asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
-		self.asset_depr_schedule_doc.cancel()
-
-		new_asset_depr_schedule_doc.submit()
+		replace_active_depr_schedule(self.asset_depr_schedule_doc, new_asset_depr_schedule_doc)
 
 		add_asset_activity(
 			self.asset,
@@ -223,3 +224,49 @@ class AssetShiftAllocation(Document):
 				get_link_to_form(self.doctype, self.name)
 			),
 		)
+
+	def restore_previous_depr_schedule(self):
+		active_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
+		if get_schedule_rows(active_schedule_doc.depreciation_schedule) != get_schedule_rows(
+			self.depreciation_schedule
+		):
+			frappe.throw(
+				_(
+					"Cannot cancel since the asset's depreciation schedule has changed or depreciation has been posted after this allocation was submitted"
+				)
+			)
+
+		previous_schedule = frappe.db.get_value(
+			"Asset Depreciation Schedule",
+			{
+				"asset": self.asset,
+				"finance_book": self.finance_book or ["is", "not set"],
+				"docstatus": 2,
+			},
+			order_by="modified desc",
+		)
+		restored_schedule_doc = frappe.copy_doc(
+			frappe.get_doc("Asset Depreciation Schedule", previous_schedule)
+		)
+		restored_schedule_doc.notes = _(
+			"This schedule was restored when Asset Shift Allocation {0} was cancelled."
+		).format(get_link_to_form(self.doctype, self.name))
+		replace_active_depr_schedule(active_schedule_doc, restored_schedule_doc)
+
+
+def replace_active_depr_schedule(active_schedule_doc: Document, new_schedule_doc: Document) -> None:
+	active_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+	active_schedule_doc.cancel()
+	new_schedule_doc.submit()
+
+
+def get_schedule_rows(schedule: list) -> list[tuple]:
+	return [
+		(
+			getdate(row.schedule_date),
+			flt(row.depreciation_amount, 2),
+			row.shift,
+			row.journal_entry or None,
+		)
+		for row in schedule
+	]
