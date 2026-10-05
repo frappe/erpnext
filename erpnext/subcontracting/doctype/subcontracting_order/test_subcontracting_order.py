@@ -128,6 +128,33 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		update_subcontracting_order_status(sco.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
 
+	def test_closing_purchase_order_closes_all_its_subcontracting_orders(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].qty = 4
+		sco.insert()
+		sco.submit()
+		create_subcontracting_order(po_name=sco.purchase_order)
+
+		frappe.get_doc("Purchase Order", sco.purchase_order).update_status("Closed")
+
+		self.assertEqual(
+			frappe.get_all("Subcontracting Order", {"purchase_order": sco.purchase_order}, pluck="status"),
+			["Closed", "Closed"],
+		)
+
+	def test_holding_purchase_order_keeps_a_closed_subcontracting_order_closed(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].qty = 4
+		sco.insert()
+		sco.submit()
+		create_subcontracting_order(po_name=sco.purchase_order)
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		frappe.get_doc("Purchase Order", sco.purchase_order).update_status("On Hold")
+
+		self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "status"), "On Hold")
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
+
 	def test_project_is_carried_over_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name
 		po = make_subcontracted_purchase_order(project)
