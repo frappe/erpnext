@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import formatdate, get_link_to_form
+from frappe.utils import flt, formatdate, get_link_to_form
 
 from erpnext import get_region
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_details_query
@@ -123,6 +123,8 @@ class VATAuditReport:
 			parent = row.parent
 			item = row.item_row
 			is_zero_rated = self.invoice_items.get(item)
+			if row.charge_type == "Actual" and row.taxable_amount:
+				row.rate = flt(row.amount / row.taxable_amount * 100, 2)
 			if row.rate == 0 and not is_zero_rated:
 				continue
 
