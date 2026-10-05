@@ -101,6 +101,15 @@ class TestInvalidLedgerEntries(ERPNextTestSuite):
 		self.assertIn(invoice.name, flagged)
 		self.assertNotIn(payment.name, flagged)
 
+	def test_gl_entries_of_deleted_voucher_flagged(self):
+		"""Active GL rows whose voucher no longer exists are flagged."""
+		jv = self.make_submitted_jv()
+		frappe.db.delete("Journal Entry Account", {"parent": jv.name})
+		frappe.db.delete("Journal Entry", {"name": jv.name})
+
+		flagged = {(row.voucher_type, row.voucher_no) for row in self.run_report()}
+		self.assertIn(("Journal Entry", jv.name), flagged)
+
 	def test_voucher_no_filter_scopes_scan(self):
 		"""The voucher_no filter must restrict the scan to that voucher only."""
 		orphan = self.make_submitted_jv()
