@@ -115,3 +115,23 @@ class TestTrialBalanceForParty(ERPNextTestSuite):
 			"closing_credit",
 		):
 			self.assertEqual(totals[column], sum(row[column] for row in party_rows))
+
+	def test_totals_cover_only_permitted_parties(self):
+		create_sales_invoice(customer="_Test Customer 1", qty=1, rate=10000, posting_date="2026-06-01")
+		create_sales_invoice(customer="_Test Customer 2", qty=1, rate=6000, posting_date="2026-06-01")
+
+		user = "test_tbp_party_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual({row["party"] for row in data[:-1]}, {"_Test Customer 1"})
+		self.assertEqual(data[-1]["debit"], 10000)

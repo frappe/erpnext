@@ -37,7 +37,7 @@ def get_data(filters, show_party_name):
 	if condition := get_allowed_masters_condition(party_type.name, filters.get("party_type")):
 		party_filters.append(condition)
 
-	parties = frappe.get_all(
+	parties = frappe.get_list(
 		filters.get("party_type"),
 		fields=["name", party_name_field],
 		filters=party_filters,
