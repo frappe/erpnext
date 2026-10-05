@@ -153,6 +153,22 @@ class TestContract(ERPNextTestSuite):
 		customer_name = frappe.db.get_value("Customer", "_Test Customer 1", "customer_name")
 		self.assertEqual(self.contract_doc.party_full_name, customer_name)
 
+	def test_linked_document_must_belong_to_the_party(self):
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": "_Test Contract Project",
+				"customer": "_Test Customer 1",
+				"company": "_Test Company",
+			}
+		).insert()
+		self.contract_doc.document_type = "Project"
+		self.contract_doc.document_name = project.name
+		self.assertRaises(frappe.ValidationError, self.contract_doc.insert)
+
+		self.contract_doc.party_name = "_Test Customer 1"
+		self.contract_doc.insert()
+
 	def make_signed_contract(self, **fields):
 		sign(self.contract_doc)
 		self.contract_doc.update(

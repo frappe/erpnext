@@ -50,6 +50,7 @@ class Contract(Document):
 		self.set_missing_values()
 		self.validate_dates()
 		self.validate_signature()
+		self.validate_document_party()
 		self.update_contract_status()
 		self.update_fulfilment_status()
 
@@ -78,6 +79,33 @@ class Contract(Document):
 		self.validate_fulfilment_terms_unchanged()
 		self.update_contract_status()
 		self.update_fulfilment_status()
+
+	def validate_document_party(self):
+		if not (self.document_type and self.document_name) or self.party_type == "Employee":
+			return
+
+		party = self.get_document_party()
+		if party and party != self.party_name:
+			frappe.throw(
+				_("{0} {1} is for {2} {3}, not {4}").format(
+					_(self.document_type),
+					frappe.bold(self.document_name),
+					_(self.party_type),
+					frappe.bold(party),
+					frappe.bold(self.party_name),
+				)
+			)
+
+	def get_document_party(self) -> str | None:
+		if self.document_type == "Quotation":
+			quotation_to, party = frappe.db.get_value(
+				"Quotation", self.document_name, ["quotation_to", "party_name"]
+			)
+			return party if quotation_to == self.party_type else None
+
+		field = frappe.scrub(self.party_type)
+		if frappe.get_meta(self.document_type).has_field(field):
+			return frappe.db.get_value(self.document_type, self.document_name, field)
 
 	def validate_signature(self):
 		if self.is_signed and not (self.signee and self.signed_on):
