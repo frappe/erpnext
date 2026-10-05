@@ -7,7 +7,7 @@ import datetime
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import cint, getdate
 
 
 class AppointmentBookingSettings(Document):
@@ -40,8 +40,13 @@ class AppointmentBookingSettings(Document):
 
 	def validate(self):
 		self.number_of_agents = len(self.agent_list)
+		self.validate_appointment_duration()
 		self.validate_appointment_scheduling()
 		self.validate_portal_booking()
+
+	def validate_appointment_duration(self):
+		if cint(self.appointment_duration) <= 0:
+			frappe.throw(_("Appointment Duration must be greater than 0 minutes."))
 
 	def validate_appointment_scheduling(self):
 		if not self.enable_scheduling:
