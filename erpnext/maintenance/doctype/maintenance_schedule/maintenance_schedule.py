@@ -522,6 +522,7 @@ def get_serial_no_query(doctype: str, txt: str, searchfield: str, start: int, pa
 		return []
 	query_filters = {"item_code": filters["item_code"]}
 	if filters.get("schedule"):
+		frappe.has_permission("Maintenance Schedule", "read", doc=filters["schedule"], throw=True)
 		serial_ids = get_schedule_serial_ids(filters["item_code"], filters["schedule"])
 		if serial_ids:
 			query_filters["name"] = ("in", serial_ids)

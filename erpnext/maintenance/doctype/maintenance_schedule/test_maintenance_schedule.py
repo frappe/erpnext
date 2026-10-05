@@ -6,6 +6,7 @@ from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	get_serial_no_query,
 	get_serial_nos_from_schedule,
 	make_maintenance_visit,
 )
@@ -182,6 +183,22 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 				visit.submit()
 
 			self.assertEqual(visit.docstatus, 1)
+
+	def test_serial_no_query_needs_schedule_read(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		filters = {"item_code": item_code, "schedule": ms.name}
+		sales_user = make_fenced_user("schedule-serial-sales@example.com", ["Sales User"])
+		maintenance_user = make_fenced_user("schedule-serial-maintenance@example.com", ["Maintenance User"])
+
+		with as_user(sales_user):
+			self.assertRaises(
+				frappe.PermissionError, get_serial_no_query, "Serial No", "", "name", 0, 20, filters
+			)
+		with as_user(maintenance_user):
+			serial_nos = get_serial_no_query("Serial No", "", "name", 0, 20, filters)
+		self.assertEqual([row[1] for row in serial_nos], ["TEST001"])
 
 	def test_validate_schedule_date_skips_holiday(self):
 		# validate_schedule_date_for_holiday_list reads the holiday list via the converted
