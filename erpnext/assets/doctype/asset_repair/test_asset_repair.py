@@ -471,6 +471,27 @@ class TestAssetRepair(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, asset_repair.submit)
 
+	def test_daily_status_update_finds_pending_repair_by_asset(self):
+		from erpnext.assets.doctype.asset.asset import update_maintenance_status
+
+		asset = create_asset(maintenance_required=1, submit=1)
+		create_asset_repair(asset=asset)
+		frappe.get_doc(
+			{
+				"doctype": "Asset Maintenance Task",
+				"parent": asset.name,
+				"parenttype": "Asset Maintenance",
+				"parentfield": "asset_maintenance_tasks",
+				"maintenance_task": "Inspection",
+				"next_due_date": nowdate(),
+			}
+		).db_insert()
+
+		update_maintenance_status()
+
+		self.assertNotEqual(asset.asset_name, asset.name)
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations + (
