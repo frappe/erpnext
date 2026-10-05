@@ -247,6 +247,14 @@ class TestTask(FrappeTestCase):
 		task.save()
 		self.assertEqual(task.progress, 60)
 
+	def test_open_task_under_completed_parent(self):
+		parent = create_task("_Test Completed Parent", is_group=1)
+		parent.status = "Completed"
+		parent.save()
+		child = create_task("_Test Open Child Of Completed Parent", parent_task=parent.name, save=False)
+
+		self.assertRaises(frappe.ValidationError, child.save)
+
 
 def create_task(
 	subject,
