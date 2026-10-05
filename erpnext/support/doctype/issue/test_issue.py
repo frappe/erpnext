@@ -7,7 +7,9 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import flt, get_datetime
 
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import (
+	create_service_level_agreement,
 	create_service_level_agreements_for_issues,
+	get_service_level_agreement,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -80,6 +82,30 @@ class TestIssue(TestSetUp):
 		issue.save()
 
 		self.assertEqual(issue.agreement_status, "Fulfilled")
+
+	def test_most_specific_sla_is_applied(self):
+		create_service_level_agreement(
+			default_service_level_agreement=0,
+			holiday_list="__Test Holiday List",
+			entity_type=None,
+			entity=None,
+			response_time=14400,
+			resolution_time=21600,
+			service_level="__Test Generic SLA",
+		)
+		customer_sla = get_service_level_agreement(entity_type="Customer", entity="_Test Customer")
+		group_sla = get_service_level_agreement(
+			entity_type="Customer Group", entity="_Test SLA Customer Group"
+		)
+
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+		self.assertEqual(issue.service_level_agreement, customer_sla.name)
+
+		# the customer's SLA no longer applies once the customer changes
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		issue.customer = "__Test Customer"
+		issue.save()
+		self.assertEqual(issue.service_level_agreement, group_sla.name)
 
 	def test_hold_time_on_replied(self):
 		creation = get_datetime("2020-03-04 4:00")
