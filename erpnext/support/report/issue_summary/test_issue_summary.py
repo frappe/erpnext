@@ -87,6 +87,22 @@ class TestIssueSummary(ERPNextTestSuite):
 			row = get_report_row("Issue Type", "issue_type", issue_type)
 		self.assertEqual(row["total_issues"], 1)
 
+	def test_sla_statuses_count_only_issues_with_an_sla(self):
+		priority = "__Test Issue Summary Priority"
+		if not frappe.db.exists("Issue Priority", priority):
+			frappe.get_doc({"doctype": "Issue Priority", "name": priority}).insert()
+		make_issue(
+			"__Test Issue Summary Without SLA",
+			priority=priority,
+			status="Closed",
+			service_level_agreement=None,
+			agreement_status="First Response Due",
+		)
+
+		row = get_report_row("Issue Priority", "priority", priority)
+		self.assertEqual(row["closed"], 1)
+		self.assertEqual(row["first_response_due"], 0)
+
 
 def make_issue(subject: str, **values) -> str:
 	"""Insert an open Issue opened today and set `values` on it directly."""

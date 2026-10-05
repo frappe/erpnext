@@ -132,6 +132,7 @@ class IssueSummary:
 				"user_resolution_time",
 				"resolution_time",
 				"agreement_status",
+				"service_level_agreement",
 			],
 			filters=filters,
 		)
@@ -184,20 +185,20 @@ class IssueSummary:
 
 		for d in self.entries:
 			status = d.status
-			agreement_status = scrub(d.agreement_status)
+			# Issues without an SLA keep the default "First Response Due" status
+			agreement_status = scrub(d.agreement_status) if d.service_level_agreement else None
 
 			if self.filters.based_on == "Assigned To":
 				if d._assign:
 					for entry in json.loads(d._assign):
 						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(status, 0.0)
 						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(
-							agreement_status, 0.0
-						)
-						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(
 							"total_issues", 0.0
 						)
 						self.issue_summary_data[entry][status] += 1
-						self.issue_summary_data[entry][agreement_status] += 1
+						if agreement_status:
+							self.issue_summary_data[entry].setdefault(agreement_status, 0.0)
+							self.issue_summary_data[entry][agreement_status] += 1
 						self.issue_summary_data[entry]["total_issues"] += 1
 
 			else:
@@ -207,10 +208,11 @@ class IssueSummary:
 					value = _("Not Specified")
 
 				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(status, 0.0)
-				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(agreement_status, 0.0)
 				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault("total_issues", 0.0)
 				self.issue_summary_data[value][status] += 1
-				self.issue_summary_data[value][agreement_status] += 1
+				if agreement_status:
+					self.issue_summary_data[value].setdefault(agreement_status, 0.0)
+					self.issue_summary_data[value][agreement_status] += 1
 				self.issue_summary_data[value]["total_issues"] += 1
 
 		self.get_metrics_data()
