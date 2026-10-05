@@ -71,10 +71,22 @@ class Timesheet(Document):
 		self.validate_dates()
 		self.calculate_hours()
 		self.validate_time_logs()
+		self.validate_tasks_not_cancelled()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
+
+	def validate_tasks_not_cancelled(self):
+		tasks = [log.task for log in self.time_logs if log.task]
+		if not tasks:
+			return
+
+		cancelled_tasks = frappe.get_all(
+			"Task", filters={"name": ["in", tasks], "status": "Cancelled"}, pluck="name"
+		)
+		if cancelled_tasks:
+			frappe.throw(_("Cannot log time against cancelled Tasks: {0}").format(", ".join(cancelled_tasks)))
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")

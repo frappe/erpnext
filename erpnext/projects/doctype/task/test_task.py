@@ -58,6 +58,24 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Project", old_project.name, "percent_complete"), 100)
 
+	def test_timesheet_on_cancelled_task(self):
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		task = create_task("_Test Cancelled Task With Timesheet")
+		task.status = "Cancelled"
+		task.save()
+		employee = make_employee("test_task_cancelled_timesheet@example.com", company="_Test Company")
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_timesheet,
+			employee,
+			simulate=True,
+			project=task.project,
+			task=task.name,
+		)
+
 	def test_circular_reference(self):
 		task1 = create_task("_Test Task 1", add_days(nowdate(), -15), add_days(nowdate(), -10))
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
