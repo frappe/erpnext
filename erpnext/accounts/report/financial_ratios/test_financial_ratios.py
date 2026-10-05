@@ -5,8 +5,14 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from erpnext.accounts.report.financial_ratios.financial_ratios import get_gl_data
+from erpnext.accounts.report.financial_ratios.financial_ratios import (
+	execute,
+	get_gl_data,
+)
 from erpnext.accounts.report.financial_statements import get_period_list
+
+test_dependencies = ["Supplier"]
+
 
 class TestFinancialRatios(FrappeTestCase):
 	def setUp(self):
@@ -21,6 +27,15 @@ class TestFinancialRatios(FrappeTestCase):
 
 	def set_account_type(self, account_name, account_type):
 		frappe.db.set_value("Account", f"{account_name} - {self.abbr}", "account_type", account_type)
+
+	def test_creditor_turnover_is_positive(self):
+		self.set_account_type("Direct Expenses", "Direct Expense")
+		self.make_journal_entry("Cost of Goods Sold", "Creditors", 200, supplier="_Test Supplier")
+
+		columns, data = execute(self.get_report_filters())
+		ratio_row = next(row for row in data if row.get("ratio") == "Creditor Turnover Ratio")
+
+		self.assertGreater(ratio_row[columns[1]["fieldname"]], 0)
 
 	def test_income_is_for_the_selected_year_only(self):
 		filters = self.get_report_filters()
