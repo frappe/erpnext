@@ -98,7 +98,13 @@ function get_filters() {
 				let budget_against = frappe.query_report.get_filter_value("budget_against");
 				if (!budget_against) return;
 
+<<<<<<< HEAD
 				return frappe.db.get_link_options(budget_against, txt);
+=======
+				const filters = budget_against !== "Branch" && company ? { company: company } : {};
+
+				return erpnext.utils.get_link_options(budget_against, txt, filters);
+>>>>>>> 34c0472 (fix: bound link option results in report filters)
 			},
 		},
 		{
