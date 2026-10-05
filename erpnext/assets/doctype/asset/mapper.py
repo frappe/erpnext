@@ -118,6 +118,7 @@ def create_asset_value_adjustment(
 
 @frappe.whitelist()
 def make_journal_entry(asset_name: str):
+	frappe.has_permission("Asset", "read", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 	(
 		fixed_asset_account,
@@ -172,7 +173,7 @@ def make_asset_movement(
 	asset_movement.purpose = purpose
 	for asset in assets:
 		asset["name"] = cstr(asset.get("name"))
-		if not asset["name"] or not frappe.has_permission("Asset", "select", doc=asset["name"]):
+		if not asset["name"] or not frappe.has_permission("Asset", "read", doc=asset["name"]):
 			_refuse()
 
 		asset = frappe.get_doc("Asset", asset.get("name"))

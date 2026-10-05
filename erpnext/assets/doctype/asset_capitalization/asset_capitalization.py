@@ -12,7 +12,7 @@ from frappe.utils import cint, flt, get_link_to_form
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import (
-	get_value_after_depreciation_on_disposal_date,
+	calculate_value_after_depreciation_on_disposal_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
 )
@@ -346,7 +346,7 @@ class AssetCapitalization(StockController):
 				d.current_asset_value = flt(
 					get_asset_value_after_depreciation(d.asset, finance_book=finance_book)
 				)
-				d.asset_value = get_value_after_depreciation_on_disposal_date(
+				d.asset_value = calculate_value_after_depreciation_on_disposal_date(
 					d.asset, self.posting_date, finance_book=finance_book
 				)
 
@@ -680,7 +680,7 @@ def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
 		out.current_asset_value = flt(
 			get_asset_value_after_depreciation(ctx.asset, finance_book=ctx.finance_book)
 		)
-		out.asset_value = get_value_after_depreciation_on_disposal_date(
+		out.asset_value = calculate_value_after_depreciation_on_disposal_date(
 			ctx.asset, ctx.posting_date, finance_book=ctx.finance_book
 		)
 	else:
