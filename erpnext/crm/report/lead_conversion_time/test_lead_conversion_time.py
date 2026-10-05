@@ -44,8 +44,14 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		si.save()
 
 		# count query filters on `sender`; first_contact filters on `recipients` -> set both
+		# recipients usually carry a display name and other addresses
 		real = frappe.get_doc(
-			{"doctype": "Communication", "subject": "real", "sender": email, "recipients": email}
+			{
+				"doctype": "Communication",
+				"subject": "real",
+				"sender": email,
+				"recipients": f"Lead Conv <{email}>, someone@example.com",
+			}
 		).insert(ignore_permissions=True)
 		frappe.db.set_value(
 			"Communication", real.name, "communication_date", add_days(nowdate(), -22), update_modified=False
