@@ -62,6 +62,16 @@ class TestOpportunity(ERPNextTestSuite):
 		opp.set_status(update=True)
 		self.assertEqual(opp.status, "Open")
 
+	def test_quotation_found_after_items_are_added_to_opportunity(self):
+		opp = make_opportunity(with_items=0)
+		submit_quotation(opp)
+		opp.reload()
+		opp.append("items", {"item_code": "_Test Item", "qty": 1, "rate": 100, "uom": "_Test UOM"})
+		opp.save()
+
+		self.assertTrue(opp.has_active_quotation())
+		self.assertRaises(frappe.ValidationError, opp.declare_enquiry_lost, [], [])
+
 	def test_make_new_lead_if_required(self):
 		opp_doc = make_opportunity_from_lead("_Test Company")
 

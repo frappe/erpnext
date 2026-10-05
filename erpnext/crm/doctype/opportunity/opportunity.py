@@ -11,6 +11,7 @@ from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
 from frappe.utils import flt, get_fullname
+from pypika.terms import Criterion
 
 from erpnext.accounts.party import validate_party_frozen_disabled
 from erpnext.crm.utils import (
@@ -295,61 +296,36 @@ class Opportunity(TransactionBase, CRMNote):
 		else:
 			frappe.throw(_("Cannot declare as Lost because an active Quotation exists."))
 
-	def has_active_quotation(self):
-		if not self.get("items", []):
-			return frappe.get_all(
-				"Quotation",
-				{
-					"opportunity": self.name,
-					"status": ("not in", ["Lost", "Cancelled", "Expired"]),
-					"docstatus": 1,
-					"is_active": 1,
-				},
-				"name",
-			)
-		else:
-			q = frappe.qb.DocType("Quotation")
-			qi = frappe.qb.DocType("Quotation Item")
-			return (
-				frappe.qb.from_(q)
-				.inner_join(qi)
-				.on(q.name == qi.parent)
-				.select(q.name)
-				.where(
-					(q.docstatus == 1)
-					& (q.is_active == 1)
-					& (qi.prevdoc_docname == self.name)
-					& q.status.notin(["Lost", "Cancelled", "Expired"])
-				)
-				.run()
-			)
+	def has_active_quotation(self) -> list[str]:
+		quotation = frappe.qb.DocType("Quotation")
+		return self.get_linked_quotations(
+			(quotation.docstatus == 1)
+			& (quotation.is_active == 1)
+			& quotation.status.notin(["Lost", "Cancelled", "Expired"])
+		)
 
-	def has_ordered_quotation(self):
-		if not self.get("items", []):
-			return frappe.get_all(
-				"Quotation",
-				{
-					"opportunity": self.name,
-					"status": ("in", ["Ordered", "Partially Ordered"]),
-					"docstatus": 1,
-				},
-				"name",
+	def has_ordered_quotation(self) -> list[str]:
+		quotation = frappe.qb.DocType("Quotation")
+		return self.get_linked_quotations(
+			(quotation.docstatus == 1) & quotation.status.isin(["Ordered", "Partially Ordered"])
+		)
+
+	def get_linked_quotations(self, condition: Criterion) -> list[str]:
+		"""Quotations made from this Opportunity, linked in the header or in the items."""
+		quotation = frappe.qb.DocType("Quotation")
+		quotation_item = frappe.qb.DocType("Quotation Item")
+		return (
+			frappe.qb.from_(quotation)
+			.left_join(quotation_item)
+			.on(quotation_item.parent == quotation.name)
+			.select(quotation.name)
+			.distinct()
+			.where(
+				condition
+				& ((quotation.opportunity == self.name) | (quotation_item.prevdoc_docname == self.name))
 			)
-		else:
-			q = frappe.qb.DocType("Quotation")
-			qi = frappe.qb.DocType("Quotation Item")
-			return (
-				frappe.qb.from_(q)
-				.inner_join(qi)
-				.on(q.name == qi.parent)
-				.select(q.name)
-				.where(
-					(q.docstatus == 1)
-					& (qi.prevdoc_docname == self.name)
-					& (q.status.isin(["Ordered", "Partially Ordered"]))
-				)
-				.run()
-			)
+			.run(pluck=True)
+		)
 
 	def has_lost_quotation(self):
 		lost_quotation = frappe.get_all(
