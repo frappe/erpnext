@@ -152,6 +152,25 @@ class TestTask(ERPNextTestSuite):
 		self.assertEqual(todo.allocated_to, "test@example.com")
 		self.assertEqual(todo.status, "Closed")
 
+	def test_complete_assigned_task_without_task_read_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.desk.form import assign_to
+
+		task = create_task("_Test Assigned Task Completed By Timesheet")
+		assign_to.add({"doctype": task.doctype, "name": task.name, "assign_to": ["test@example.com"]})
+		user = create_user("test_task_timesheet_user@example.com", "HR User")
+
+		with self.set_user(user.name):
+			task.status = "Completed"
+			task.save(ignore_permissions=True)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"ToDo", {"reference_type": task.doctype, "reference_name": task.name}, "status"
+			),
+			"Closed",
+		)
+
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
 
