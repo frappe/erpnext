@@ -13,9 +13,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestCommunicationMedium(ERPNextTestSuite):
 	def setUp(self):
 		self.day_group = make_employee_group("_Test Medium Day Group", "medium-day@example.com")
-		self.fallback_group = make_employee_group(
-			"_Test Medium Fallback Group", "medium-fallback@example.com"
-		)
+		self.fallback_group = make_employee_group("_Test Medium Fallback Group", "medium-fallback@example.com")
 
 	def test_disabled_medium_shows_no_popup(self):
 		medium = make_medium([make_slot("09:00:00", "18:00:00", self.day_group)], self.fallback_group)
@@ -29,6 +27,10 @@ class TestCommunicationMedium(ERPNextTestSuite):
 		medium = make_medium([make_slot("09:00:00", "18:00:00", self.day_group)], self.fallback_group)
 
 		self.assertEqual(popup_users_at(medium, "20:30:00"), {"medium-fallback@example.com"})
+
+	def test_reversed_timeslot_is_refused(self):
+		with self.assertRaises(frappe.ValidationError):
+			make_medium([make_slot("22:00:00", "06:00:00", self.day_group)])
 
 
 def make_employee_group(name: str, user: str) -> str:
