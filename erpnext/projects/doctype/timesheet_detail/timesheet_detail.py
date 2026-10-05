@@ -75,6 +75,7 @@ class TimesheetDetail(Document):
 		"""Fill missing rates from the activity cost, then amounts from the rates."""
 		from erpnext.projects.doctype.timesheet.timesheet import _get_activity_cost
 
+		self.update_billing_hours()
 		rate = _get_activity_cost(employee, self.activity_type, currency) if self.activity_type else {}
 		self.billing_rate = flt(self.billing_rate) or flt(rate.get("billing_rate"))
 		self.costing_rate = flt(self.costing_rate) or flt(rate.get("costing_rate"))
@@ -93,7 +94,9 @@ class TimesheetDetail(Document):
 		)
 
 	def validate_dates(self):
-		"""Validate that to_time is not before from_time."""
+		"""Validate that hours are not negative and to_time is not before from_time."""
+		if flt(self.hours) < 0:
+			frappe.throw(_("Row {0}: Hours value must be greater than zero.").format(self.idx))
 		if self.from_time and self.to_time and time_diff_in_hours(self.to_time, self.from_time) < 0:
 			frappe.throw(_("To Time cannot be before From Time"))
 

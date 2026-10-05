@@ -365,6 +365,26 @@ class TestTimesheet(ERPNextTestSuite):
 		to_time = timesheet.time_logs[0].to_time
 		self.assertEqual(to_time, add_to_date(from_time, hours=2, as_datetime=True))
 
+	def test_logs_entered_with_hours(self):
+		update_activity_type("_Test Activity Type")
+		time_log = {
+			"activity_type": "_Test Activity Type",
+			"is_billable": 1,
+			"from_time": now_datetime(),
+			"hours": 2,
+		}
+
+		timesheet = frappe.get_doc(
+			{"doctype": "Timesheet", "company": "_Test Company", "time_logs": [time_log]}
+		).insert()
+		self.assertEqual(timesheet.total_billable_amount, 100)
+
+		time_log.update({"from_time": add_to_date(now_datetime(), hours=5), "hours": -3})
+		timesheet = frappe.get_doc(
+			{"doctype": "Timesheet", "company": "_Test Company", "time_logs": [time_log]}
+		)
+		self.assertRaises(frappe.ValidationError, timesheet.insert)
+
 	def test_per_billed_hours(self):
 		"""If amounts are 0, per_billed should be calculated based on hours."""
 		ts = frappe.new_doc("Timesheet")
