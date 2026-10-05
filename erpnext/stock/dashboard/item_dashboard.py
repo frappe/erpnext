@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.desk.reportview import build_match_conditions
 from frappe.utils import cint, escape_html, flt
 
@@ -17,8 +18,6 @@ def make_stock_entry(
 	rate: float | None = None,
 ):
 	"""Return an unsaved Stock Entry for the item, with company taken from the warehouse"""
-	frappe.has_permission("Stock Entry", "create", throw=True)
-
 	stock_entry = frappe.new_doc("Stock Entry")
 	if warehouse := source_warehouse or target_warehouse:
 		stock_entry.company = frappe.get_cached_value("Warehouse", warehouse, "company")
@@ -45,6 +44,11 @@ def make_stock_entry(
 			"conversion_factor": 1,
 		},
 	)
+
+	# checked against the doc so user permissions on company, warehouses and item apply;
+	# generic message so values of restricted records are not leaked
+	if not frappe.has_permission("Stock Entry", "create", doc=stock_entry):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	return stock_entry
 
