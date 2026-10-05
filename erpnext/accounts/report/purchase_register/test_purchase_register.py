@@ -218,6 +218,30 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_internal_transfer_invoice_columns(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		unrealized_account = create_account(
+			account_name="_Test Unrealized Profit",
+			parent_account="Current Liabilities - _TC6",
+			company="_Test Company 6",
+		)
+		pi = make_purchase_invoice()
+		pi.db_set(
+			{
+				"is_internal_supplier": 1,
+				"represents_company": pi.company,
+				"unrealized_profit_loss_account": unrealized_account,
+			}
+		)
+
+		filters = frappe._dict(company=pi.company, from_date=add_months(today(), -1), to_date=today())
+		columns, data, *_ = execute(filters)
+		row = next(row for row in data if row.get("voucher_no") == pi.name)
+
+		self.assertEqual(row[frappe.scrub("Stock Received But Not Billed - _TC6")], 0)
+		self.assertIn(frappe.scrub(unrealized_account + "_unrealized"), [col["fieldname"] for col in columns])
+
 	def test_supplier_group_filter_uses_supplier_master(self):
 		# invoices created before the supplier_group field existed have it blank
 		pi = make_purchase_invoice()

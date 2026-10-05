@@ -377,6 +377,7 @@ def get_account_columns(invoice_list, include_payments):
 					"docstatus": 1,
 					"name": ["in", [inv.name for inv in invoice_list]],
 					"unrealized_profit_loss_account": ["is", "set"],
+					"is_internal_supplier": 1,
 				},
 				pluck="unrealized_profit_loss_account",
 				distinct=True,
@@ -411,7 +412,7 @@ def get_account_columns(invoice_list, include_payments):
 		unrealized_profit_loss_account_columns.append(
 			{
 				"label": account,
-				"fieldname": frappe.scrub(account),
+				"fieldname": frappe.scrub(account + "_unrealized"),
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120,
@@ -446,6 +447,9 @@ def get_invoices(filters, additional_query_columns):
 			pi.mode_of_payment,
 			pi.conversion_rate,
 			pi.party_account_currency,
+			pi.is_internal_supplier,
+			pi.represents_company,
+			pi.company,
 			pi.is_paid,
 			pi.base_paid_amount,
 			pi.base_write_off_amount,
