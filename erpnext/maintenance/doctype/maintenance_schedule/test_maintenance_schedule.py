@@ -218,6 +218,20 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 			frappe.db.get_value("Serial No", serial.name, "amc_expiry_date"), getdate(first.items[0].end_date)
 		)
 
+	def test_visit_from_schedule_maps_only_pending_rows(self):
+		ms = make_maintenance_schedule()
+		ms.submit()
+		frappe.db.set_value(
+			"Maintenance Schedule Detail", ms.schedules[0].name, "completion_status", "Fully Completed"
+		)
+
+		visit = make_maintenance_visit(source_name=ms.name)
+
+		self.assertEqual(
+			[purpose.maintenance_schedule_detail for purpose in visit.purposes],
+			[row.name for row in ms.schedules[1:]],
+		)
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
