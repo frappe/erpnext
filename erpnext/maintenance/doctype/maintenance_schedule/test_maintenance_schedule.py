@@ -169,7 +169,7 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		ms.save()
 		self.assertEqual(len(ms.schedules), 2)
 
-	def test_visit_from_schedule_maps_only_pending_rows(self):
+	def test_visit_from_schedule_skips_completed_rows(self):
 		ms = make_maintenance_schedule()
 		ms.submit()
 		frappe.db.set_value(
