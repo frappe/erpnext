@@ -272,8 +272,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	gl_filters = frappe._dict(filters, account_type=account_type)
-	gl_filters.start_date = fiscal_year.year_start_date
-	gl_filters.end_date = fiscal_year.year_end_date
+	gl_filters.start_date, gl_filters.end_date = get_period_dates(fiscal_year, filters)
 
 	own_amounts = {company: get_company_account_type_amount(company, gl_filters) for company in companies}
 	data = {company: get_column_amount(company, companies, own_amounts, gl_filters) for company in companies}
@@ -284,6 +283,13 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 		data["total"] = sum(own_amounts.values())
 
 	return data
+
+
+def get_period_dates(fiscal_year, filters):
+	if filters.filter_based_on == "Date Range":
+		return filters.period_start_date, filters.period_end_date
+
+	return fiscal_year.year_start_date, fiscal_year.year_end_date
 
 
 def get_company_account_type_amount(company, filters):

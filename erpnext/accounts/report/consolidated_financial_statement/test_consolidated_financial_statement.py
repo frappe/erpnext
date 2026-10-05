@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
 	execute,
@@ -189,3 +189,18 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 
 		for company in (PARENT_COMPANY, CHILD_COMPANY, FOREIGN_CHILD_COMPANY):
 			self.assertAlmostEqual(self.get_change(before, after, "Net Change in Cash", company), 0, 2)
+
+	def test_cash_flow_working_capital_follows_date_range(self):
+		year_end_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_end_date")
+		filters = {
+			"report": "Cash Flow",
+			"filter_based_on": "Date Range",
+			"period_start_date": add_days(today(), 1),
+			"period_end_date": year_end_date,
+		}
+		before = self.run_report(**filters)
+		self.post_credit_sales()
+		after = self.run_report(**filters)
+
+		change = self.get_change(before, after, "Net Change in Accounts Receivable", CHILD_COMPANY)
+		self.assertEqual(change, 0)
