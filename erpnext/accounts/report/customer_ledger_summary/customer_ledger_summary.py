@@ -488,7 +488,7 @@ def get_children(doctype, value):
 	all_children = []
 
 	for d in value:
-		all_children += get_descendants_of(doctype, value)
+		all_children += get_descendants_of(doctype, d)
 		all_children.append(d)
 
 	return list(set(all_children))
