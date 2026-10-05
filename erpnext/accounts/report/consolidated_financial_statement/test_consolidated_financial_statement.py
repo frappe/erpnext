@@ -180,3 +180,12 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 	def get_change(self, before, after, account_name, company=PARENT_COMPANY):
 		before_row = self.get_row(before, account_name) or {}
 		return flt(self.get_row(after, account_name).get(company)) - flt(before_row.get(company))
+
+	def test_cash_flow_converts_working_capital_to_presentation_currency(self):
+		filters = {"report": "Cash Flow", "presentation_currency": "USD"}
+		before = self.run_report(**filters)
+		self.post_credit_sales()
+		after = self.run_report(**filters)
+
+		for company in (PARENT_COMPANY, CHILD_COMPANY, FOREIGN_CHILD_COMPANY):
+			self.assertAlmostEqual(self.get_change(before, after, "Net Change in Cash", company), 0, 2)
