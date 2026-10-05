@@ -284,7 +284,34 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 		data.setdefault(company, amount)
 
 	data["total"] = total
+
+	if filters.get("accumulated_in_group_company"):
+		own_amounts = data.copy()
+		for company in companies:
+			data[company] = get_accumulated_amount(company, companies[company], own_amounts, filters)
+
 	return data
+
+
+def get_accumulated_amount(company, subsidiaries, own_amounts, filters):
+	"""The company's amount plus its subsidiaries', converted as calculate_values converts GL entries."""
+	report_currency = erpnext.get_company_currency(filters.company)
+
+	accumulated_amount = 0
+	for subsidiary in subsidiaries:
+		amount = own_amounts[subsidiary]
+		subsidiary_currency = erpnext.get_company_currency(subsidiary)
+		if (
+			amount
+			and subsidiary != company
+			and not filters.get("presentation_currency")
+			and subsidiary_currency != report_currency
+		):
+			amount = convert(amount, report_currency, subsidiary_currency, filters.end_date)
+
+		accumulated_amount += amount
+
+	return accumulated_amount
 
 
 def get_company_columns(companies, filters):
