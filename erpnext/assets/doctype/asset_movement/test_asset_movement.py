@@ -162,6 +162,20 @@ class TestAssetMovement(ERPNextTestSuite):
 
 		self.assertEqual(get_location_and_custodian(asset.name), ("Test Location", employee))
 
+	def test_movement_of_disposed_asset_is_refused(self):
+		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
+		asset = create_asset(location="Test Location", submit=1)
+		asset.db_set("status", "Scrapped")
+
+		for purpose, row in (
+			("Issue", {"to_employee": employee}),
+			("Receipt", {"target_location": "Test Location 2"}),
+		):
+			movement = create_asset_movement(
+				purpose=purpose, company=asset.company, assets=[{"asset": asset.name, **row}], do_not_save=1
+			)
+			self.assertRaisesRegex(frappe.ValidationError, "cannot be moved", movement.insert)
+
 	def test_movement_transaction_date(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.save().submit()

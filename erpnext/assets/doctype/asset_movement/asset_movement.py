@@ -41,9 +41,9 @@ class AssetMovement(Document):
 			self.validate_transaction_date(d)
 
 	def validate_asset(self, d):
-		status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])
-		if self.purpose == "Transfer" and status in ("Draft", "Scrapped", "Sold"):
-			frappe.throw(_("{0} asset cannot be transferred").format(status))
+		status, company, docstatus = frappe.db.get_value("Asset", d.asset, ["status", "company", "docstatus"])
+		if docstatus != 1 or status in ("Scrapped", "Sold", "Capitalized"):
+			frappe.throw(_("Asset {0} is {1} and cannot be moved").format(d.asset, _(status)))
 
 		if company != self.company:
 			frappe.throw(_("Asset {0} does not belong to company {1}").format(d.asset, self.company))
