@@ -127,3 +127,21 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertEqual(grand_total_row[first_tax_amount_field], 5.0)
 		self.assertEqual(grand_total_row[second_tax_amount_field], 2.0)
+
+	def test_percent_of_grand_total_follows_filters(self):
+		self.create_sales_invoice()
+		self.customer = "_Test Customer 1"
+		self.create_sales_invoice()
+
+		data = self.get_grouped_data(customer="_Test Customer 1")
+
+		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 100)
+
+	def get_grouped_data(self, **filters):
+		filters = frappe._dict(
+			from_date=today(), to_date=today(), company=self.company, group_by="Customer", **filters
+		)
+		return execute(filters)[1]
+
+	def get_grand_total_row(self, data):
+		return next(row for row in data if row.get("bold") and row.get("item_code") == "Total")
