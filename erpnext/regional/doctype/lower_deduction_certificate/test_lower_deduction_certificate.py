@@ -78,3 +78,51 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 		)
 		doc.validate()
 		self.assertEqual(doc.pan_no, "AAAPA1234A")
+
+	def test_used_certificate_cannot_be_changed_or_deleted(self):
+		certificate = make_certificate()
+		frappe.get_doc(
+			{
+				"doctype": "Tax Withholding Entry",
+				"parent": "_Test Purchase Invoice",
+				"parenttype": "Purchase Invoice",
+				"parentfield": "tax_withholding_entries",
+				"lower_deduction_certificate": certificate.name,
+				"docstatus": 1,
+			}
+		).db_insert()
+
+		certificate.rate = 0
+		self.assertRaises(frappe.ValidationError, certificate.save)
+		certificate.reload()
+		certificate.certificate_limit = 200000
+		certificate.save()
+		self.assertRaises(frappe.ValidationError, frappe.delete_doc, certificate.doctype, certificate.name)
+
+
+def make_certificate():
+	category = frappe.get_doc(
+		{
+			"doctype": "Tax Withholding Category",
+			"name": "_Test LDC Category",
+			"category_name": "_Test LDC Category",
+		}
+	).insert(ignore_mandatory=True)
+	supplier = frappe.get_doc(
+		{"doctype": "Supplier", "supplier_name": "_Test LDC Used Supplier", "tax_id": "CCCPC1234C"}
+	).insert()
+	fy_name, fy_start, fy_end = get_fiscal_year(today(), company="_Test Company")
+	return frappe.get_doc(
+		{
+			"doctype": "Lower Deduction Certificate",
+			"certificate_no": "_TEST-LDC-USED",
+			"company": "_Test Company",
+			"supplier": supplier.name,
+			"tax_withholding_category": category.name,
+			"fiscal_year": fy_name,
+			"valid_from": fy_start,
+			"valid_upto": fy_end,
+			"rate": 1,
+			"certificate_limit": 100000,
+		}
+	).insert()
