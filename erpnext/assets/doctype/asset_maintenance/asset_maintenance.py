@@ -34,6 +34,10 @@ class AssetMaintenance(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_asset()
+		team_members = frappe.get_all(
+			"Maintenance Team Member", filters={"parent": self.maintenance_team}, pluck="team_member"
+		)
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
@@ -44,10 +48,27 @@ class AssetMaintenance(Document):
 					)
 					or None
 				)
-			if getdate(task.next_due_date) < getdate(nowdate()):
-				task.maintenance_status = "Overdue"
+			if task.next_due_date and getdate(task.next_due_date) < getdate(task.start_date):
+				throw(_("Row #{0}: Next Due Date cannot be before the Start Date").format(task.idx))
+			self.set_task_status(task)
 			if not task.assign_to and self.docstatus == 0:
 				throw(_("Row #{}: Please assign task to a member.").format(task.idx))
+			if task.assign_to and task.assign_to not in team_members:
+				throw(
+					_("Row #{0}: {1} is not a member of the maintenance team {2}").format(
+						task.idx, task.assign_to, self.maintenance_team
+					)
+				)
+
+	def validate_asset(self):
+		if frappe.db.get_value("Asset", self.asset_name, "docstatus") != 1:
+			throw(_("Asset {0} must be submitted").format(self.asset_name))
+
+	def set_task_status(self, task):
+		if getdate(task.next_due_date) < getdate(nowdate()):
+			task.maintenance_status = "Overdue"
+		elif task.maintenance_status == "Overdue":
+			task.maintenance_status = "Planned"
 
 	def on_update(self):
 		for task in self.get("asset_maintenance_tasks"):
