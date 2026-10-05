@@ -87,3 +87,25 @@ class TestDeliveredItemsToBeBilled(ERPNextTestSuite):
 
 		rows = self.run_report(delivery_note=dn.name, posting_date="2026-06-30")
 		self.assertEqual(rows, [])
+
+	def test_delivery_note_billed_in_full_at_a_lower_rate_drops_out(self):
+		self.stock_up_item()
+		dn = create_delivery_note(
+			item_code="_Test Item",
+			warehouse="Stores - _TC",
+			qty=10,
+			rate=100,
+			customer="_Test Customer",
+			posting_date="2026-06-01",
+		)
+		si = make_sales_invoice(dn.name)
+		si.posting_date = "2026-06-05"
+		si.set_posting_time = 1
+		si.items[0].rate = 80
+		si.insert()
+		si.submit()
+
+		self.assertEqual(
+			self.run_report(delivery_note=dn.name, posting_date="2026-06-03")[0].pending_amount, 1000
+		)
+		self.assertEqual(self.run_report(delivery_note=dn.name), [])
