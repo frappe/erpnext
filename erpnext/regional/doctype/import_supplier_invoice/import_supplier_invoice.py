@@ -226,7 +226,7 @@ def get_supplier_details(file_content):
 		if line.find("Provincia"):
 			supplier_info["province"] = line.Sede.Provincia.text
 
-		supplier_info["pin_code"] = line.Sede.CAP.text
+		supplier_info["pincode"] = line.Sede.CAP.text
 		supplier_info["country"] = get_country(line.Sede.Nazione.text)
 
 		return supplier_info

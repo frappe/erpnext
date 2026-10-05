@@ -98,7 +98,7 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertEqual([row.amount for row in invoice.items], [110, 90])
 		self.assertEqual((invoice.net_total, invoice.grand_total), (200, 244))
 
-	def test_reimporting_a_file_does_not_duplicate_the_invoice_or_contact(self):
+	def test_reimporting_a_file_does_not_duplicate_the_supplier_masters(self):
 		lines = [make_line("Service", "10.00", "10.00")]
 		xml = make_invoice_xml("ISI-AGAIN", lines)
 		self.import_files({"a.xml": xml})
@@ -109,6 +109,12 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		supplier = self.get_invoice("ISI-AGAIN").supplier
 		contact_links = {"link_doctype": "Supplier", "link_name": supplier, "parenttype": "Contact"}
 		self.assertEqual(frappe.db.count("Dynamic Link", contact_links), 1)
+		address = frappe.db.get_value(
+			"Dynamic Link",
+			{"link_doctype": "Supplier", "link_name": supplier, "parenttype": "Address"},
+			"parent",
+		)
+		self.assertEqual(frappe.db.get_value("Address", address, "pincode"), "00185")
 
 	def test_seller_is_matched_by_vat_number_not_by_name(self):
 		frappe.get_doc(
