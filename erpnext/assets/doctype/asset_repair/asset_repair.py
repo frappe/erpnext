@@ -91,6 +91,9 @@ class AssetRepair(AccountsController):
 			self.increase_in_asset_life = 0
 
 	def validate_dates(self):
+		if self.repair_status == "Completed" and not self.completion_date:
+			frappe.throw(_("Completion Date is mandatory for a completed Asset Repair"))
+
 		if self.completion_date and (getdate(self.failure_date) > getdate(self.completion_date)):
 			frappe.throw(
 				_("Completion Date can not be before Failure Date. Please adjust the dates accordingly.")

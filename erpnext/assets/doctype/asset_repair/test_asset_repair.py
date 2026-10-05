@@ -71,6 +71,7 @@ class TestAssetRepair(ERPNextTestSuite):
 			self.assertEqual(asset.status, "Out of Order")
 
 		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = nowdate()
 		asset_repair.save()
 		asset_status = frappe.db.get_value("Asset", asset_repair.asset, "status")
 		self.assertEqual(asset_status, initial_status)
@@ -155,6 +156,7 @@ class TestAssetRepair(ERPNextTestSuite):
 		)
 
 		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = nowdate()
 		self.assertRaises(frappe.ValidationError, asset_repair.submit)
 
 	def test_no_increase_in_asset_value_when_not_capitalized(self):
@@ -491,6 +493,12 @@ class TestAssetRepair(ERPNextTestSuite):
 
 		self.assertNotEqual(asset.asset_name, asset.name)
 		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+	def test_completed_repair_requires_completion_date(self):
+		asset_repair = create_asset_repair()
+		asset_repair.repair_status = "Completed"
+
+		self.assertRaises(frappe.ValidationError, asset_repair.save)
 
 
 def num_of_depreciations(asset):
