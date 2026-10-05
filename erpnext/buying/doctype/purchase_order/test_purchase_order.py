@@ -2016,6 +2016,19 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			[("Subcontracted Item SA2", "_Test Warehouse 2 - _TC")],
 		)
 
+	def test_subcontracting_order_skips_closed_rows_and_closed_pos(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
+
+		po = create_two_row_subcontracted_po()
+		po.items[1].db_set("closed", 1)
+
+		sco = make_subcontracting_order(po.name)
+		self.assertEqual([row.item_code for row in sco.items], ["Subcontracted Item SA1"])
+
+		update_status("Closed", po.name)
+		self.assertRaises(frappe.ValidationError, sco.save)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
