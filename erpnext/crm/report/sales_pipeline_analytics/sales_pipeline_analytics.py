@@ -10,8 +10,6 @@ from frappe import _
 from frappe.query_builder.custom import Month, MonthName, Quarter
 from frappe.utils import cint, flt, getdate
 
-from erpnext.setup.utils import get_exchange_rate
-
 
 def execute(filters=None):
 	return SalesPipelineAnalytics(filters).run()
@@ -136,7 +134,7 @@ class SalesPipelineAnalytics:
 				pipeline_field.as_(self.pipeline_by),
 				opp.opportunity_amount.as_("amount"),
 				self.duration,
-				opp.currency,
+				opp.conversion_rate,
 			).run(as_dict=True)
 
 			self.convert_to_base_currency()
@@ -302,25 +300,6 @@ class SalesPipelineAnalytics:
 
 			self.data.append(row)
 
-	def get_default_currency(self):
-		company = self.filters.get("company")
-		return frappe.db.get_value("Company", company, ["default_currency"])
-
-	def get_currency_rate(self, from_currency, to_currency):
-		cacheobj = frappe.cache()
-
-		if cacheobj.get(from_currency):
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-		else:
-			value = get_exchange_rate(from_currency, to_currency)
-			cacheobj.set(from_currency, value)
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
 	def convert_to_base_currency(self):
-		default_currency = self.get_default_currency()
 		for data in self.query_result:
-			if data.get("currency") != default_currency:
-				opportunity_currency = data.get("currency")
-				value = self.get_currency_rate(opportunity_currency, default_currency)
-				data["amount"] = data["amount"] * value
+			data["amount"] = flt(data["amount"]) * (flt(data["conversion_rate"]) or 1)

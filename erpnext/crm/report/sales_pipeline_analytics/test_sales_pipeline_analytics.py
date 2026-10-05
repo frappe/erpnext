@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import today
 
 from erpnext.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -175,6 +176,60 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 		expected_data = [{"opportunity_owner": "Not Assigned", "August": 1}]
 
 		self.assertEqual(expected_data, report[1])
+
+	def test_amount_uses_opportunity_conversion_rate(self):
+		stage = make_sales_stage()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 90,
+			}
+		).insert(ignore_if_duplicate=True)
+		make_stage_opportunity(stage, 1000, "2026-01-20")
+		make_stage_opportunity(stage, 100, "2026-01-25", currency="USD", conversion_rate=80)
+
+		rows = stage_rows(stage, based_on="Amount", from_date="2026-01-01", to_date="2026-01-31")
+
+		self.assertEqual(rows[0]["January"], 9000)
+
+
+def make_sales_stage() -> str:
+	stage = "_Test Pipeline Stage " + frappe.generate_hash(length=5)
+	frappe.get_doc({"doctype": "Sales Stage", "stage_name": stage}).insert()
+	return stage
+
+
+def make_stage_opportunity(stage: str, amount: float, expected_closing: str, **fields):
+	doc = frappe.new_doc("Opportunity")
+	doc.update(
+		{
+			"opportunity_from": "Customer",
+			"party_name": "_Test Customer",
+			"company": "Best Test",
+			"currency": "INR",
+			"conversion_rate": 1,
+			"opportunity_amount": amount,
+			"transaction_date": "2025-12-01",
+			"expected_closing": expected_closing,
+			"sales_stage": stage,
+			**fields,
+		}
+	)
+	return doc.insert()
+
+
+def stage_rows(stage: str, **filters) -> list[dict]:
+	filters = {
+		"pipeline_by": "Sales Stage",
+		"range": "Monthly",
+		"based_on": "Number",
+		"company": "Best Test",
+		**filters,
+	}
+	return [row for row in execute(filters)[1] if row["sales_stage"] == stage]
 
 
 def create_opportunity():
