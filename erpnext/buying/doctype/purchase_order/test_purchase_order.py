@@ -2004,7 +2004,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	def test_subcontracting_order_takes_warehouse_from_its_own_po_row(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 
-		po = create_two_row_subcontracted_po()
+		po = create_subcontracted_po()
 		sco = make_subcontracting_order(po.name)
 		sco.items.pop(1)
 		sco.save()
@@ -2020,13 +2020,41 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
-		po = create_two_row_subcontracted_po()
+		po = create_subcontracted_po()
 		po.items[1].db_set("closed", 1)
 
 		sco = make_subcontracting_order(po.name)
 		self.assertEqual([row.item_code for row in sco.items], ["Subcontracted Item SA1"])
 
 		update_status("Closed", po.name)
+		self.assertRaises(frappe.ValidationError, sco.save)
+
+	def test_subcontracting_order_qty_is_limited_in_po_uom(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+		from erpnext.controllers.tests.test_subcontracting_controller import make_service_items
+
+		make_service_items()
+		service_item = frappe.get_doc("Item", "Subcontracted Service Item 1")
+		service_item.append("uoms", {"uom": "Box", "conversion_factor": 12})
+		service_item.save()
+
+		po = create_subcontracted_po(
+			[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"uom": "Box",
+					"conversion_factor": 12,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		sco = make_subcontracting_order(po.name)
+		sco.items[0].qty = 100
+
 		self.assertRaises(frappe.ValidationError, sco.save)
 
 
@@ -2077,7 +2105,7 @@ def create_po_for_sc_testing():
 	)
 
 
-def create_two_row_subcontracted_po(**args):
+def create_subcontracted_po(rm_items=None, **args):
 	from erpnext.controllers.tests.test_subcontracting_controller import (
 		make_bom_for_subcontracted_items,
 		make_raw_materials,
@@ -2091,7 +2119,8 @@ def create_two_row_subcontracted_po(**args):
 	make_bom_for_subcontracted_items()
 
 	return create_purchase_order(
-		rm_items=[
+		rm_items=rm_items
+		or [
 			{
 				"warehouse": "_Test Warehouse - _TC",
 				"item_code": "Subcontracted Service Item 1",

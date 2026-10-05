@@ -25,6 +25,24 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		)
 		return super().setUp()
 
+	def test_service_item_in_a_larger_uom_can_be_fully_subcontracted(self):
+		item_list = [
+			{
+				"item_code": "Service Item 1",
+				"qty": 1,
+				"uom": "Box",
+				"conversion_factor": 12,
+				"fg_item": "Basic FG Item",
+				"fg_item_qty": 12,
+			}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.submit()
+
+		self.assertEqual(scio.items[0].qty, 12)
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 

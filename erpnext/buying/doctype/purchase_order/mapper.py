@@ -269,7 +269,7 @@ def is_po_fully_subcontracted(po_name: str) -> bool:
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name)
-		.where((table.parent == po_name) & (table.qty != table.subcontracted_qty) & (table.closed == 0))
+		.where((table.parent == po_name) & (table.qty > table.subcontracted_qty) & (table.closed == 0))
 	)
 	return not query.run(as_dict=True)
 
@@ -334,7 +334,7 @@ def get_mapped_subcontracting_order(
 					"material_request_item": "material_request_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: not item.closed and item.qty != item.subcontracted_qty,
+				"condition": lambda item: not item.closed and item.qty > item.subcontracted_qty,
 			},
 		},
 		target_doc,
