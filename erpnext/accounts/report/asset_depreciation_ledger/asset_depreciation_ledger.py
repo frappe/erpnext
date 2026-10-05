@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import DocType
 from frappe.utils import cstr, flt
 
 
@@ -36,22 +35,7 @@ def get_data(filters):
 
 		filters_data.append(["against_voucher", "in", assets])
 
-	company_fb = frappe.get_cached_value("Company", filters.get("company"), "default_finance_book")
-
-	if filters.get("include_default_book_assets") and company_fb:
-		if filters.get("finance_book") and cstr(filters.get("finance_book")) != cstr(company_fb):
-			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Assets'"))
-		else:
-			finance_book = company_fb
-	elif filters.get("finance_book"):
-		finance_book = filters.get("finance_book")
-	else:
-		finance_book = None
-
-	if finance_book:
-		or_filters_data = [["finance_book", "in", ["", finance_book]], ["finance_book", "is", "not set"]]
-	else:
-		or_filters_data = [["finance_book", "in", [""]], ["finance_book", "is", "not set"]]
+	or_filters_data = get_finance_book_filters(filters)
 
 	gl_entries = frappe.get_all(
 		"GL Entry",
@@ -66,30 +50,19 @@ def get_data(filters):
 
 	assets = [d.against_voucher for d in gl_entries]
 	assets_details = get_assets_details(assets)
+	depreciation_before_from_date = get_depreciation_before_from_date(
+		filters_data, or_filters_data, filters.get("from_date")
+	)
 
 	for d in gl_entries:
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
-			if not asset_data.get("accumulated_depreciation_amount"):
-				AssetDepreciationSchedule = DocType("Asset Depreciation Schedule")
-				DepreciationSchedule = DocType("Depreciation Schedule")
-				query = (
-					frappe.qb.from_(DepreciationSchedule)
-					.join(AssetDepreciationSchedule)
-					.on(DepreciationSchedule.parent == AssetDepreciationSchedule.name)
-					.select(DepreciationSchedule.accumulated_depreciation_amount)
-					.where(
-						(AssetDepreciationSchedule.asset == d.against_voucher)
-						& (DepreciationSchedule.parenttype == "Asset Depreciation Schedule")
-						& (DepreciationSchedule.schedule_date == d.posting_date)
-					)
-				).run(as_dict=True)
-				asset_data.accumulated_depreciation_amount = (
-					query[0]["accumulated_depreciation_amount"] if query else 0
-				)
+			if asset_data.get("accumulated_depreciation_amount") is None:
+				asset_data.accumulated_depreciation_amount = flt(
+					asset_data.opening_accumulated_depreciation
+				) + depreciation_before_from_date.get(d.against_voucher, 0)
 
-			else:
-				asset_data.accumulated_depreciation_amount += d.debit
+			asset_data.accumulated_depreciation_amount += d.debit
 			asset_data.opening_accumulated_depreciation = asset_data.accumulated_depreciation_amount - d.debit
 
 			row = frappe._dict(asset_data)
@@ -107,6 +80,39 @@ def get_data(filters):
 			data.append(row)
 
 	return data
+
+
+def get_finance_book_filters(filters):
+	company_fb = frappe.get_cached_value("Company", filters.get("company"), "default_finance_book")
+
+	if filters.get("include_default_book_assets") and company_fb:
+		if filters.get("finance_book") and cstr(filters.get("finance_book")) != cstr(company_fb):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Assets'"))
+		else:
+			finance_book = company_fb
+	elif filters.get("finance_book"):
+		finance_book = filters.get("finance_book")
+	else:
+		finance_book = None
+
+	if finance_book:
+		return [["finance_book", "in", ["", finance_book]], ["finance_book", "is", "not set"]]
+
+	return [["finance_book", "in", [""]], ["finance_book", "is", "not set"]]
+
+
+def get_depreciation_before_from_date(filters_data, or_filters_data, from_date) -> dict:
+	"""Net depreciation booked per asset before the From Date, for the selected finance book."""
+	filters_data = [f for f in filters_data if f[0] != "posting_date"]
+	filters_data.append(["posting_date", "<", from_date])
+	gl_entries = frappe.get_all(
+		"GL Entry",
+		filters=filters_data,
+		or_filters=or_filters_data,
+		fields=["against_voucher", {"SUM": "debit_in_account_currency", "as": "debit"}],
+		group_by="against_voucher",
+	)
+	return {d.against_voucher: flt(d.debit) for d in gl_entries}
 
 
 def get_assets_details(assets):
