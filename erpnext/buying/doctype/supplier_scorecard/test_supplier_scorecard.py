@@ -17,6 +17,7 @@ from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 	make_supplier_scorecard as make_scorecard_period,
 )
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard_dashboard import get_data
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -192,6 +193,40 @@ class TestSupplierScorecard(ERPNextTestSuite):
 
 		po = create_purchase_order(supplier=renamed, do_not_save=True)
 		self.assertRaises(frappe.ValidationError, po.validate_supplier)
+
+	def test_standing_change_notifies_supplier_and_employee(self):
+		frappe.get_doc(
+			{
+				"doctype": "Email Account",
+				"enable_outgoing": 1,
+				"default_outgoing": 1,
+				"awaiting_password": 1,
+				"auth_method": "Basic",
+				"password": "test",
+				"smtp_server": "localhost",
+				"email_id": "scorecard.outgoing@example.com",
+			}
+		).insert()
+		employee = make_employee("scorecard.employee@example.com", company="_Test Company")
+		supplier = create_test_supplier("_Test Supplier SC Notify")
+		frappe.db.set_value(
+			"Supplier",
+			supplier,
+			{"creation": add_days(nowdate(), -75), "email_id": "scorecard.supplier@example.com"},
+		)
+		doc = make_supplier_scorecard()
+		frappe.db.set_value("Supplier Scorecard Criteria", "Delivery", "formula", "10")
+		doc.supplier = supplier
+		doc.standings[0].update({"notify_supplier": 1, "notify_employee": 1, "employee_link": employee})
+		doc.insert()
+		doc.save()
+
+		self.assertEqual(doc.employee, employee)
+		queues = frappe.get_all("Email Queue", {"reference_name": doc.name}, pluck="name")
+		recipients = frappe.get_all("Email Queue Recipient", {"parent": ["in", queues]}, pluck="recipient")
+		self.assertCountEqual(
+			recipients, ["scorecard.employee@example.com", "scorecard.supplier@example.com"]
+		)
 
 	def test_dashboard_endpoint_returns_connection_count_and_heatmap(self):
 		supplier = create_test_supplier("_Test Supplier SC Dashboard")

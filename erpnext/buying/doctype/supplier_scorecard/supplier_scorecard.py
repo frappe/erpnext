@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, throw
+from frappe.email.doctype.email_account.email_account import EmailAccount
 from frappe.model.document import Document
 from frappe.utils import add_days, add_years, flt, get_last_day, getdate, nowdate
 
@@ -14,6 +15,7 @@ from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period 
 	get_overlapping_period_end,
 	make_supplier_scorecard,
 )
+from erpnext.setup.doctype.employee.employee import get_employee_emails
 
 STANDING_FLAGS = ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos")
 
@@ -61,6 +63,7 @@ class SupplierScorecard(Document):
 		# Guard against recursion: the save() below re-enters on_update().
 		if self.flags.in_rescore:
 			return
+		previous_status = (self.get_doc_before_save() or frappe._dict()).status
 		if create_scorecard_periods(self) > 0:
 			# New periods were created; re-save to refresh score and standings.
 			self.flags.in_rescore = True
@@ -68,6 +71,28 @@ class SupplierScorecard(Document):
 				self.save()
 			finally:
 				self.flags.in_rescore = False
+		if self.status != previous_status:
+			self.notify_standing()
+
+	def notify_standing(self):
+		recipients = self.get_standing_recipients()
+		if not recipients or not EmailAccount.find_outgoing(match_by_doctype=self.doctype):
+			return
+		frappe.sendmail(
+			recipients=recipients,
+			subject=_("Supplier Scorecard standing of {0}: {1}").format(self.supplier, self.status),
+			message=_("The Supplier Scorecard standing of {0} is now {1}.").format(
+				self.supplier, self.status
+			),
+			reference_doctype=self.doctype,
+			reference_name=self.name,
+		)
+
+	def get_standing_recipients(self):
+		recipients = get_employee_emails([self.employee]) if self.notify_employee else []
+		if self.notify_supplier:
+			recipients.append(frappe.db.get_value("Supplier", self.supplier, "email_id"))
+		return [recipient for recipient in recipients if recipient]
 
 	def on_trash(self):
 		frappe.db.set_value("Supplier", self.supplier, dict.fromkeys(STANDING_FLAGS, 0))
@@ -145,7 +170,7 @@ class SupplierScorecard(Document):
 		self.indicator_color = standing.standing_color
 		self.notify_supplier = standing.notify_supplier
 		self.notify_employee = standing.notify_employee
-		self.employee_link = standing.employee_link
+		self.employee = standing.employee_link
 
 		for fieldname in STANDING_FLAGS:
 			self.set(fieldname, standing.get(fieldname))
