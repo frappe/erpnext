@@ -603,6 +603,34 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.run_method("onload")
 		self.assertTrue(scr.get_onload().get("allow_to_make_qc_after_submission"))
 
+	def test_purchase_receipt_maps_all_receipt_rows(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		set_backflush_based_on("BOM")
+		orders = [get_subcontracting_order(), get_subcontracting_order()]
+		for sco in orders:
+			rm_items = get_rm_items(sco.supplied_items)
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name,
+				rm_items=rm_items,
+				itemwise_details=copy.deepcopy(itemwise_details),
+			)
+
+		scr = make_subcontracting_receipt(orders[0].name)
+		scr.items[0].qty = 6
+		scr.append("items", {**scr.items[0].as_dict(), "name": None, "idx": None, "qty": 4})
+		scr = make_subcontracting_receipt(orders[1].name, scr)
+		scr.save()
+		scr.submit()
+
+		make_purchase_receipt(scr.name).submit()
+
+		for sco in orders:
+			self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "per_received"), 100)
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
