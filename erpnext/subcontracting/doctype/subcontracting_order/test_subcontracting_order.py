@@ -134,6 +134,15 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.items[0].project = other_project
 		self.assertRaises(frappe.ValidationError, sco.save)
 
+	def test_draft_bom_is_refused(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		draft_bom = make_bom(
+			item=sco.items[0].item_code, raw_materials=["Subcontracted SRM Item 1"], do_not_submit=True
+		)
+		sco.items[0].bom = draft_bom.name
+
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
