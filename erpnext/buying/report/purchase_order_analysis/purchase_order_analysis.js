@@ -56,7 +56,7 @@ frappe.query_reports["Purchase Order Analysis"] = {
 				const to_date = frappe.query_report.get_filter_value("to_date");
 				if (from_date && to_date) filters["transaction_date"] = ["between", [from_date, to_date]];
 
-				return frappe.db.get_link_options("Purchase Order", txt, filters);
+				return erpnext.utils.get_link_options("Purchase Order", txt, filters);
 			},
 		},
 		{

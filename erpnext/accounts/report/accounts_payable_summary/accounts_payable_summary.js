@@ -47,7 +47,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
+				return erpnext.utils.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -59,7 +59,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Project",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Project", txt, {
+				return erpnext.utils.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -88,7 +88,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 				let party_type = frappe.query_report.get_filter_value("party_type");
 				if (!party_type) return;
 
-				return frappe.db.get_link_options(party_type, txt);
+				return erpnext.utils.get_link_options(party_type, txt);
 			},
 		},
 		{
@@ -103,7 +103,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Supplier Group",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Supplier Group", txt);
+				return erpnext.utils.get_link_options("Supplier Group", txt);
 			},
 		},
 		{
