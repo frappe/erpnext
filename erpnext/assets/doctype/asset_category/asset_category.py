@@ -7,6 +7,14 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, get_link_to_form
 
+ACCOUNT_FIELDS = (
+	"fixed_asset_account",
+	"accumulated_depreciation_account",
+	"depreciation_expense_account",
+	"capital_work_in_progress_account",
+)
+DISPOSED_ASSET_STATUSES = ("Sold", "Scrapped", "Capitalized")
+
 
 class AssetCategory(Document):
 	# begin: auto-generated types
@@ -32,6 +40,7 @@ class AssetCategory(Document):
 		self.validate_account_types()
 		self.validate_account_currency()
 		self.validate_accounts()
+		self.validate_account_change_for_existing_assets()
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
@@ -42,16 +51,10 @@ class AssetCategory(Document):
 					)
 
 	def validate_account_currency(self):
-		account_types = [
-			"fixed_asset_account",
-			"accumulated_depreciation_account",
-			"depreciation_expense_account",
-			"capital_work_in_progress_account",
-		]
 		invalid_accounts = []
 		for d in self.accounts:
 			company_currency = frappe.get_value("Company", d.get("company_name"), "default_currency")
-			for type_of_account in account_types:
+			for type_of_account in ACCOUNT_FIELDS:
 				if d.get(type_of_account):
 					account_currency = frappe.get_value("Account", d.get(type_of_account), "account_currency")
 					if account_currency != company_currency:
@@ -190,6 +193,48 @@ class AssetCategory(Document):
 			msg += "<br>".join(error_msg)
 
 			frappe.throw(msg, title=_("Missing Accounts"))
+
+	def validate_account_change_for_existing_assets(self):
+		previous_doc = self.get_doc_before_save()
+		if not previous_doc:
+			return
+
+		current_rows = {row.company_name: row for row in self.accounts}
+		for previous_row in previous_doc.accounts:
+			current_row = current_rows.get(previous_row.company_name) or {}
+			changed_fields = [
+				fieldname
+				for fieldname in ACCOUNT_FIELDS
+				if previous_row.get(fieldname) and current_row.get(fieldname) != previous_row.get(fieldname)
+			]
+			if changed_fields and self.has_active_assets(previous_row.company_name):
+				frappe.throw(
+					_("Cannot change {0} for company {1} since it has active assets in this category").format(
+						", ".join(frappe.bold(_(frappe.unscrub(fieldname))) for fieldname in changed_fields),
+						frappe.bold(previous_row.company_name),
+					),
+					title=_("Invalid Account"),
+				)
+
+	def has_active_assets(self, company: str) -> bool:
+		"""Submitted assets not disposed of, or draft assets whose purchase is already booked."""
+		return bool(
+			frappe.get_all(
+				"Asset",
+				filters={
+					"asset_category": self.name,
+					"company": company,
+					"docstatus": ["<", 2],
+					"status": ["not in", DISPOSED_ASSET_STATUSES],
+				},
+				or_filters={
+					"docstatus": 1,
+					"purchase_receipt": ["is", "set"],
+					"purchase_invoice": ["is", "set"],
+				},
+				limit=1,
+			)
+		)
 
 
 def get_asset_category_account(

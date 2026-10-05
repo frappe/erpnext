@@ -116,3 +116,23 @@ class TestAssetCategory(ERPNextTestSuite):
 			)
 		finally:
 			frappe.db.set_value("Company", asset.company, company_acccount_depreciation)
+
+	def test_accounts_cannot_change_while_active_assets_exist(self):
+		asset = create_asset(asset_category="Computers", company="_Test Company", submit=1)
+		asset_category = frappe.get_doc("Asset Category", "Computers")
+		row = next(row for row in asset_category.accounts if row.company_name == asset.company)
+		row.fixed_asset_account = "Furniture and Fixtures - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "Fixed Asset Account", asset_category.save)
+
+		asset_category.reload()
+		asset_category.accounts = [
+			row for row in asset_category.accounts if row.company_name != asset.company
+		]
+		self.assertRaises(frappe.ValidationError, asset_category.save)
+
+		asset.cancel()
+		asset_category.reload()
+		next(
+			row for row in asset_category.accounts if row.company_name == asset.company
+		).fixed_asset_account = "Furniture and Fixtures - _TC"
+		asset_category.save()
