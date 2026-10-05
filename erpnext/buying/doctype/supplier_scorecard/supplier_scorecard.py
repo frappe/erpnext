@@ -59,7 +59,7 @@ class SupplierScorecard(Document):
 		# Guard against recursion: the save() below re-enters on_update().
 		if self.flags.in_rescore:
 			return
-		if make_all_scorecards(self.name) > 0:
+		if create_scorecard_periods(self) > 0:
 			# New periods were created; re-save to refresh score and standings.
 			self.flags.in_rescore = True
 			try:
@@ -175,15 +175,19 @@ def refresh_scorecards():
 	"""
 	scorecards = frappe.get_list("Supplier Scorecard", fields=["name"], pluck="name", limit_page_length=0)
 	for sc_name in scorecards:
-		# Check to see if any new scorecard periods are created
-		if make_all_scorecards(sc_name) > 0:
-			# Save the scorecard to update the score and standings
-			frappe.get_doc("Supplier Scorecard", sc_name).save()
+		make_all_scorecards(sc_name)
 
 
 @frappe.whitelist(methods=["POST"])
 def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
+	scp_count = create_scorecard_periods(sc)
+	if scp_count > 0:
+		sc.save()
+	return scp_count
+
+
+def create_scorecard_periods(sc):
 	supplier = frappe.get_doc("Supplier", sc.supplier)
 	supplier.check_permission("write")
 
@@ -196,8 +200,8 @@ def make_all_scorecards(docname: str):
 	last_end_date = todays
 
 	while (start_date < todays) and (end_date <= todays):
-		if not has_overlapping_period(docname, start_date, end_date):
-			period_card = make_supplier_scorecard(docname, None)
+		if not has_overlapping_period(sc.name, start_date, end_date):
+			period_card = make_supplier_scorecard(sc.name, None)
 			period_card.start_date = start_date
 			period_card.end_date = end_date
 			period_card.insert(ignore_permissions=True)

@@ -90,6 +90,19 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		self.assertGreater(created, 0)
 		self.assertEqual(make_all_scorecards(doc.name), 0)
 
+	def test_make_all_scorecards_refreshes_standing(self):
+		supplier = create_test_supplier("_Test Supplier SC Make All")
+		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+		doc = make_supplier_scorecard()
+		doc.supplier = supplier
+		doc.insert()
+		self.assertEqual(doc.status, "Excellent")
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		frappe.db.set_value("Supplier Scorecard Criteria", "Delivery", "formula", "10")
+		self.assertGreater(make_all_scorecards(doc.name), 0)
+		self.assertEqual(frappe.db.get_value("Supplier Scorecard", doc.name, "status"), "Very Poor")
+
 	def test_dashboard_endpoint_returns_connection_count_and_heatmap(self):
 		supplier = create_test_supplier("_Test Supplier SC Dashboard")
 		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
