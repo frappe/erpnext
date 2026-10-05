@@ -444,6 +444,32 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].billed_amt, 500)
 
+	def test_make_sales_invoice_after_update_stock_credit_note(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		so = make_sales_order(qty=5, rate=100)
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.insert()
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.update_billed_amount_in_sales_order = 1
+		credit_note.get("items")[0].qty = -2
+		credit_note.insert()
+		credit_note.submit()
+
+		self.assertTrue(has_potentially_billable_items(so.name))
+		pending_invoice = make_sales_invoice(so.name)
+		self.assertEqual(pending_invoice.get("items")[0].qty, 2)
+
+		pending_invoice.update_stock = 1
+		pending_invoice.insert()
+		pending_invoice.submit()
+
+		self.assertFalse(has_potentially_billable_items(so.name))
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
 	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
 		so = make_sales_order(
 			item_list=[
