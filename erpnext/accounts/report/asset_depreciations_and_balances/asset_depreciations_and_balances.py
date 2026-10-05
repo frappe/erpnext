@@ -382,7 +382,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 					frappe.qb.terms.Case()
 					.when(
 						(gl_entry.posting_date <= filters.to_date)
-						& (asset.disposal_date.isnull() | (asset.disposal_date >= filters.to_date)),
+						& (asset.disposal_date.isnull() | (asset.disposal_date > filters.to_date)),
 						gl_entry.debit - gl_entry.credit,
 					)
 					.else_(0)
@@ -763,7 +763,7 @@ def get_asset_value_adjustment_map(filters):
 					frappe.qb.terms.Case()
 					.when(
 						(gl_entry.posting_date <= filters.to_date)
-						& (asset.disposal_date.isnull() | (asset.disposal_date >= filters.to_date)),
+						& (asset.disposal_date.isnull() | (asset.disposal_date > filters.to_date)),
 						gl_entry.debit - gl_entry.credit,
 					)
 					.else_(0)
