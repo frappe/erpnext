@@ -211,7 +211,7 @@ def get_actual_cost(po, pi_records):
 	"""Invoiced amount, or the line amount while the order can still be billed."""
 	if invoiced := flt(pi_records.get(po.name)):
 		return invoiced
-	return 0.0 if po.status == "Closed" else flt(po.amount)
+	return 0.0 if po.status == "Closed" else flt(po.base_amount)
 
 
 def get_estimated_cost(po, mr_record, ordered_stock_qty):

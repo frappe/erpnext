@@ -60,8 +60,8 @@ def get_pegged_rate(pegged_map, from_currency, to_currency, transaction_date=Non
 
 @frappe.whitelist()
 def get_exchange_rate(
-	from_currency: str,
-	to_currency: str,
+	from_currency: str | None = None,
+	to_currency: str | None = None,
 	transaction_date: DateTimeLikeObject | None = None,
 	args: str | None = None,
 ):
