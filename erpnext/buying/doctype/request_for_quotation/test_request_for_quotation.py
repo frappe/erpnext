@@ -219,6 +219,13 @@ class TestRequestforQuotation(ERPNextTestSuite):
 			("_Test Item", 1),
 		)
 
+	def test_missing_item_name_is_filled_from_the_item(self):
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].item_name = None
+		rfq.insert()
+
+		self.assertEqual(rfq.items[0].item_name, frappe.db.get_value("Item", "_Test Item", "item_name"))
+
 	def test_make_duplicate_supplier_quotation_from_portal(self):
 		rfq = make_request_for_quotation()
 		rfq.supplier = rfq.suppliers[0].supplier

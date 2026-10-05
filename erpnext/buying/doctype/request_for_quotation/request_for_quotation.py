@@ -76,12 +76,18 @@ class RequestforQuotation(BuyingController):
 		self.validate_supplier_list()
 		super().validate_qty_is_not_zero()
 		validate_for_items(self)
+		self.set_missing_item_names()
 		super().set_qty_as_per_stock_uom()
 		self.update_email_id()
 
 		if self.docstatus < 1:
 			# after amend and save, status still shows as cancelled, until submit
 			self.db_set("status", "Draft")
+
+	def set_missing_item_names(self):
+		for row in self.items:
+			if row.item_code and not row.item_name:
+				row.item_name = frappe.get_cached_value("Item", row.item_code, "item_name")
 
 	def set_has_unit_price_items(self):
 		"""
