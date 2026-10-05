@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 from pypika.terms import Bracket, LiteralValue
 
+import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
@@ -28,6 +29,7 @@ from erpnext.accounts.report.financial_statements import (
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_net_profit_loss,
 )
+from erpnext.accounts.report.utils import convert, get_currency
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -276,7 +278,14 @@ def get_account_type_based_gl_data(company, filters=None):
 	query = apply_gl_filters(query, gl, company, filters)
 
 	result = query.run()
-	return flt(result[0][0]) if result and result[0][0] else 0
+	amount = flt(result[0][0]) if result and result[0][0] else 0
+
+	company_currency = erpnext.get_company_currency(company)
+	if amount and filters.presentation_currency and filters.presentation_currency != company_currency:
+		report_date = get_currency(filters)["report_date"]
+		amount = convert(amount, filters.presentation_currency, company_currency, report_date)
+
+	return amount
 
 
 def apply_gl_filters(query, gl, company, filters):
