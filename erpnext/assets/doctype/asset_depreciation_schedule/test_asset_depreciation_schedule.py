@@ -1275,6 +1275,36 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		asset.cancel()
 		self.assertEqual(frappe.db.get_value(schedule.doctype, schedule.name, "status"), "Cancelled")
 
+	def test_asset_value_follows_default_finance_book(self):
+		asset = create_asset(
+			item_code="Macbook Pro", net_purchase_amount=1200, purchase_amount=1200, do_not_save=1
+		)
+		asset.available_for_use_date = "2023-01-01"
+		asset.calculate_depreciation = 1
+		for finance_book, number_of_depreciations in (
+			("Test Finance Book 1", 12),
+			("Test Finance Book 2", 6),
+		):
+			asset.append(
+				"finance_books",
+				{
+					"finance_book": finance_book,
+					"depreciation_method": "Straight Line",
+					"frequency_of_depreciation": 1,
+					"total_number_of_depreciations": number_of_depreciations,
+					"depreciation_start_date": "2023-01-31",
+				},
+			)
+		asset.submit()
+
+		for finance_book in ("Test Finance Book 1", "Test Finance Book 2"):
+			schedule_name = get_asset_depr_schedule_doc(asset.name, "Active", finance_book).name
+			schedule = _make_depreciation_entry(schedule_name, "2023-06-30")
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "value_after_depreciation"), 600)
+
+		frappe.get_doc("Journal Entry", schedule.depreciation_schedule[-1].journal_entry).cancel()
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "value_after_depreciation"), 600)
+
 
 def create_monthly_asset(**args):
 	defaults = {

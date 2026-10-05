@@ -525,6 +525,8 @@ def reverse_depreciation_entry_made_on_disposal(asset):
 					je = create_reverse_depreciation_entry(asset.name, schedule.journal_entry)
 					update_value_after_depreciation_on_asset_restore(schedule, row, je)
 
+	asset.sync_value_after_depreciation()
+
 
 def disposal_was_made_on_original_schedule_date(schedule_idx, row, disposal_date):
 	"""

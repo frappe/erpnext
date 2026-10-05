@@ -841,6 +841,17 @@ class Asset(AccountsController):
 			if finance_book == row.finance_book:
 				return flt(row.value_after_depreciation, self.precision("net_purchase_amount"))
 
+	def sync_value_after_depreciation(self) -> None:
+		"""Set the header value after depreciation to the default finance book's value."""
+		if not self.calculate_depreciation or not self.get("finance_books"):
+			return
+
+		row = self.finance_books[self.get_default_finance_book_idx() or 0]
+		self.db_set(
+			"value_after_depreciation",
+			frappe.db.get_value("Asset Finance Book", row.name, "value_after_depreciation"),
+		)
+
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
 			self.default_finance_book = erpnext.get_default_finance_book(self.company)
