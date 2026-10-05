@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
+from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import add_months, formatdate, getdate, sbool, today
 from plaid.errors import ItemError
 
@@ -113,7 +114,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 			add_account_subtype(account["subtype"])
 
 		bank_account_name = "{} - {}".format(account["name"], bank["bank_name"])
-		existing_bank_account = frappe.db.exists("Bank Account", bank_account_name)
+		existing_bank_account = get_existing_bank_account(account["id"], bank_account_name, company)
 
 		if not existing_bank_account:
 			try:
@@ -144,7 +145,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 						"company": company,
 					}
 				)
-				new_account.insert()
+				new_account.insert(set_name=append_number_if_name_exists("Bank Account", bank_account_name))
 
 				result.append(new_account.name)
 			except frappe.UniqueValidationError:
@@ -189,6 +190,15 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 				)
 
 	return result
+
+
+def get_existing_bank_account(integration_id: str, bank_account_name: str, company: str) -> str | None:
+	"""Return the company's Bank Account already linked to this Plaid account, or one with the same name."""
+	return frappe.db.get_value(
+		"Bank Account", {"integration_id": integration_id, "company": company}
+	) or frappe.db.get_value(
+		"Bank Account", {"name": bank_account_name, "is_company_account": 1, "company": company}
+	)
 
 
 def add_account_type(account_type):

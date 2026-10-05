@@ -140,6 +140,25 @@ class TestPlaidSettings(ERPNextTestSuite):
 		self.assertCountEqual(imported, ["plaid-sync-test-0", "plaid-sync-test-1"])
 		log_error.assert_called_once()
 
+	def test_linking_does_not_take_over_a_party_bank_account(self):
+		if not frappe.db.exists("Bank", "Citi"):
+			frappe.get_doc({"doctype": "Bank", "bank_name": "Citi"}).insert()
+		party_account = frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": "Plaid plaid-link-test",
+				"bank": "Citi",
+				"party_type": "Customer",
+				"party": "_Test Customer",
+			}
+		).insert()
+
+		bank_account = link_test_bank_account("plaid-link-test")
+
+		self.assertNotEqual(bank_account, party_account.name)
+		self.assertEqual(frappe.db.get_value("Bank Account", bank_account, "company"), "_Test Company")
+		self.assertFalse(frappe.db.get_value("Bank Account", party_account.name, "integration_id"))
+
 
 PLAID_SETTINGS = "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings"
 
