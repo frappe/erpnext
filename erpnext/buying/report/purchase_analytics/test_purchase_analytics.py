@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.report.purchase_analytics.purchase_analytics import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -42,6 +43,13 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 		return create_purchase_order(
 			company=COMPANY, supplier=SUPPLIER, qty=qty, rate=rate, transaction_date="2019-04-10"
 		)
+
+	def make_pi(self, **args):
+		pi = make_purchase_invoice(
+			company=COMPANY, supplier=SUPPLIER, posting_date="2019-04-10", do_not_save=1, **args
+		)
+		pi.set_posting_time = 1
+		return pi
 
 	def test_supplier_entity_filter(self):
 		filters = self._filters(tree_type="Supplier", entity=[SUPPLIER], curves="all")
@@ -129,3 +137,15 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 		self.assertAlmostEqual(
 			rows["All Supplier Groups"]["total"] - base_root_qty, flt(po.total_qty), places=2
 		)
+
+	def test_item_tree_excludes_opening_invoices(self):
+		filters = self._filters(tree_type="Item", doc_type="Purchase Invoice")
+		base_total = flt(self._rows(filters).get("_Test Item", {}).get("total"))
+
+		self.make_pi(qty=2, rate=100).submit()
+		opening = self.make_pi(qty=3, rate=5000)
+		opening.is_opening = "Yes"
+		opening.items[0].expense_account = "Temporary Opening - _TC"
+		opening.submit()
+
+		self.assertAlmostEqual(self._rows(filters)["_Test Item"]["total"] - base_total, 200, places=2)
