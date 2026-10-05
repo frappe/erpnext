@@ -22,6 +22,7 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
@@ -52,6 +53,7 @@ class BuyingController(SubcontractingController):
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
 		self.validate_items()
+		validate_item_uoms(self.get("items"))
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()

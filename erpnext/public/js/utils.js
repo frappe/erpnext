@@ -930,6 +930,10 @@ erpnext.utils.update_child_items = function (opts) {
 			read_only: 0,
 			label: __("UOM"),
 			reqd: 1,
+			get_query: (row) => ({
+				query: "erpnext.controllers.queries.get_item_uom_query",
+				filters: { item_code: row.item_code },
+			}),
 			onchange: function () {
 				frappe.call({
 					method: "erpnext.stock.get_item_details.get_conversion_factor",
