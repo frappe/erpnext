@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.get_item_details import get_conversion_factor
 
 
 @frappe.whitelist()
@@ -66,7 +67,7 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1.0
+		target.conversion_factor = get_conversion_factor(obj.item_code, obj.uom)["conversion_factor"]
 
 	doclist = get_mapped_doc(
 		"Opportunity",
