@@ -25,3 +25,9 @@ class TestItemWisePurchaseHistory(FrappeTestCase):
 
 		names = {row["purchase_order"] for row in self.run_report(item_group="All Item Groups")[1]}
 		self.assertIn(po.name, names)
+
+	def test_runs_without_dates(self):
+		po = create_purchase_order(transaction_date="2026-06-01")
+
+		names = {row["purchase_order"] for row in execute({"company": "_Test Company"})[1]}
+		self.assertIn(po.name, names)
