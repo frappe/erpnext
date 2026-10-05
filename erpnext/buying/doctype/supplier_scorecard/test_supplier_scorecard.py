@@ -114,6 +114,13 @@ class TestSupplierScorecard(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Supplier Scorecard Period", {"scorecard": doc.name}))
 
+	def test_criteria_weights_allow_float_rounding(self):
+		doc = make_supplier_scorecard()
+		doc.criteria = []
+		for weight in (10.1, 66.6, 23.3):
+			doc.append("criteria", {"criteria_name": "Delivery", "weight": weight})
+		doc.validate_criteria_weights()
+
 
 def make_supplier_scorecard():
 	my_doc = frappe.get_doc(valid_scorecard[0])
