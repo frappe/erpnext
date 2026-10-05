@@ -256,7 +256,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 				SUM(
 					CASE
 						WHEN gle.posting_date <= %(to_date)s
-								AND (a.disposal_date IS NULL OR a.disposal_date >= %(to_date)s)
+								AND (a.disposal_date IS NULL OR a.disposal_date > %(to_date)s)
 						THEN gle.debit - gle.credit
 						ELSE 0
 					END
@@ -527,7 +527,7 @@ def get_asset_value_adjustment_map(filters):
 				SUM(
 					CASE
 						WHEN gle.posting_date <= %(to_date)s
-								AND (a.disposal_date IS NULL OR a.disposal_date >= %(to_date)s)
+								AND (a.disposal_date IS NULL OR a.disposal_date > %(to_date)s)
 						THEN gle.debit - gle.credit
 						ELSE 0
 					END
