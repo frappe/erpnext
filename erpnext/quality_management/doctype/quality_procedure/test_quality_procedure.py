@@ -3,12 +3,26 @@
 
 import frappe
 
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
-from .quality_procedure import add_node
+from .quality_procedure import add_node, get_children
 
 
 class TestQualityProcedure(ERPNextTestSuite):
+	def test_get_children_needs_read_permission(self):
+		parent = create_procedure({"quality_procedure_name": "_Test Procedure Tree", "is_group": 1})
+		desk_user = make_fenced_user("quality-procedure-desk@example.com", ["Stock User"])
+		website_user = make_fenced_user("quality-procedure-website@example.com", [])
+
+		with as_user(desk_user):
+			roots = [row.value for row in get_children("Quality Procedure")]
+		self.assertIn(parent.name, roots)
+
+		with as_user(website_user):
+			self.assertRaises(frappe.PermissionError, get_children, "Quality Procedure")
+			self.assertRaises(frappe.PermissionError, get_children, "Quality Procedure", parent.name)
+
 	def test_add_node(self):
 		procedure = create_procedure(
 			{
