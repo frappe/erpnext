@@ -13,6 +13,16 @@ from erpnext.assets.doctype.asset_maintenance.test_asset_maintenance import (
 
 
 class TestAssetActivity(FrappeTestCase):
+	def test_draft_asset_can_be_deleted(self):
+		asset = create_asset()
+		self.assertTrue(frappe.db.exists("Asset Activity", {"asset": asset.name}))
+
+		frappe.delete_doc("Asset", asset.name)
+
+		self.assertFalse(frappe.db.exists("Asset", asset.name))
+		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
+		self.assertIn("Asset deleted", subjects)
+
 	def test_user_sees_only_the_activity_of_assets_they_can_read(self):
 		create_photocopier_data()
 		computer = create_asset(item_code="Macbook Pro").name
