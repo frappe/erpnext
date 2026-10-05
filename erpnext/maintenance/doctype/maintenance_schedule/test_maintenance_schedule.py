@@ -355,7 +355,9 @@ def deliver_serial_nos(item_code, numbers, customer="_Test Customer"):
 	serial_nos = [
 		frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": number}) for number in numbers
 	]
-	create_delivery_note(item_code=item_code, serial_no=serial_nos, qty=len(serial_nos), customer=customer)
+	return create_delivery_note(
+		item_code=item_code, serial_no=serial_nos, qty=len(serial_nos), customer=customer
+	)
 
 
 def make_serial_item_with_serial(self, item_code):

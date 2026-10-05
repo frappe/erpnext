@@ -8,7 +8,9 @@ from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule impor
 	make_maintenance_visit as make_visit_from_schedule,
 )
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+	deliver_serial_nos,
 	make_maintenance_schedule,
+	make_serial_item_with_serial,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -229,6 +231,48 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		partial.cancel()
 
 		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
+
+	def test_visit_serial_checked_against_stock_and_customer(self):
+		self.load_test_records("Stock Entry")
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		in_stock, sold = frappe.get_all(
+			"Serial No", filters={"item_code": item_code, "status": "Active"}, pluck="name", limit=2
+		)
+		visit = make_maintenance_visit()
+		visit.purposes[0].item_code = item_code
+		visit.purposes[0].serial_no = in_stock
+		self.assertRaisesRegex(frappe.ValidationError, "still in stock", visit.save)
+
+		deliver_serial_nos(
+			item_code, [frappe.db.get_value("Serial No", sold, "serial_no")], "_Test Customer 1"
+		)
+		visit.reload()
+		visit.purposes[0].item_code = item_code
+		visit.purposes[0].serial_no = sold
+		frappe.clear_messages()
+		visit.save()
+		self.assertIn("was sold to Customer", str(frappe.get_message_log()))
+
+	def test_visit_allows_returned_serial_of_the_same_customer(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		self.load_test_records("Stock Entry")
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial = frappe.db.get_value(
+			"Serial No", {"item_code": item_code, "status": "Active"}, ["name", "serial_no"], as_dict=True
+		)
+		delivery = deliver_serial_nos(item_code, [serial.serial_no])
+		make_sales_return(delivery.name).submit()
+		self.assertTrue(frappe.db.get_value("Serial No", serial.name, "warehouse"))
+
+		visit = make_maintenance_visit()
+		visit.purposes[0].item_code = item_code
+		visit.purposes[0].serial_no = serial.name
+		visit.save()
+
+		self.assertEqual(visit.purposes[0].serial_no, serial.name)
 
 
 def make_maintenance_visit():

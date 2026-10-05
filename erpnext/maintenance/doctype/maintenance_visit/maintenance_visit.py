@@ -7,6 +7,9 @@ from frappe import _
 from frappe.query_builder import Order
 from frappe.utils import escape_html, format_date, get_datetime
 
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	validate_serial_no_for_customer,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 CLAIM_STATUS = {"Fully Completed": "Closed", "Partially Completed": "Work In Progress"}
@@ -53,7 +56,9 @@ class MaintenanceVisit(TransactionBase):
 		for d in self.get("purposes"):
 			if not d.serial_no:
 				continue
-			serial = frappe.db.get_value("Serial No", d.serial_no, ["serial_no", "item_code"], as_dict=True)
+			serial = frappe.db.get_value(
+				"Serial No", d.serial_no, ["serial_no", "item_code", "warehouse", "customer"], as_dict=True
+			)
 			if not serial:
 				frappe.throw(_("Row #{0}: Selected Serial No no longer exists.").format(d.idx))
 			if serial.item_code != d.item_code:
@@ -62,6 +67,9 @@ class MaintenanceVisit(TransactionBase):
 						escape_html(serial.serial_no), escape_html(d.item_code)
 					)
 				)
+			if serial.warehouse and was_delivered_to(d.serial_no, self.customer):
+				continue
+			validate_serial_no_for_customer(serial, self.customer)
 
 	def validate_purpose_table(self):
 		if not self.purposes:
@@ -291,3 +299,25 @@ class MaintenanceVisit(TransactionBase):
 
 	def on_update(self):
 		pass
+
+
+def was_delivered_to(serial_no, customer):
+	"""Whether the serial was ever delivered to the customer, e.g. before coming back for repair."""
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	deliveries = (
+		frappe.qb.from_(entry)
+		.select(entry.voucher_type, entry.voucher_no)
+		.where(
+			(entry.serial_no == serial_no)
+			& (entry.docstatus == 1)
+			& (entry.is_cancelled == 0)
+			& (entry.type_of_transaction == "Outward")
+			& entry.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+		)
+	).run(as_dict=True)
+
+	for doctype in ("Delivery Note", "Sales Invoice"):
+		names = [row.voucher_no for row in deliveries if row.voucher_type == doctype]
+		if names and frappe.db.exists(doctype, {"name": ("in", names), "customer": customer}):
+			return True
+	return False
