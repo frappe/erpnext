@@ -20,7 +20,7 @@ DATE = "2049-06-01"
 
 
 class TestGrossAndNetProfitReport(ERPNextTestSuite):
-	def run_report(self, from_fiscal_year=FY, to_fiscal_year=FY):
+	def run_report(self, from_fiscal_year=FY, to_fiscal_year=FY, **filters):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
@@ -32,6 +32,7 @@ class TestGrossAndNetProfitReport(ERPNextTestSuite):
 				"periodicity": "Yearly",
 				"accumulated_values": 0,
 				"presentation_currency": None,
+				**filters,
 			}
 		)
 		return execute(filters)[1]
@@ -41,8 +42,8 @@ class TestGrossAndNetProfitReport(ERPNextTestSuite):
 		frappe.db.set_value("Account", account, "include_in_gross", include_in_gross)
 		return account
 
-	def book_income(self, account, amount):
-		make_journal_entry(BANK, account, amount, posting_date=DATE, submit=True)
+	def book_income(self, account, amount, posting_date=DATE):
+		make_journal_entry(BANK, account, amount, posting_date=posting_date, submit=True)
 
 	def book_expense(self, account, amount):
 		make_journal_entry(account, BANK, amount, posting_date=DATE, submit=True)
@@ -76,6 +77,22 @@ class TestGrossAndNetProfitReport(ERPNextTestSuite):
 		data = self.run_report()
 		self.assertEqual(self.report_row(data, "'Gross Profit'")["total"], 4000)
 		self.assertEqual(self.report_row(data, "'Net Profit'")["total"], 4000)
+
+	def test_date_range_across_fiscal_years_counts_both_years(self):
+		income = self.make_account("_Test GNP Range Income", INCOME_PARENT, include_in_gross=1)
+		# one yearly period from July to June spans two calendar fiscal years
+		self.book_income(income, 1000, posting_date="2049-11-01")
+		self.book_income(income, 500, posting_date="2050-02-01")
+
+		data = self.run_report(
+			filter_based_on="Date Range",
+			period_start_date="2049-07-01",
+			period_end_date="2050-06-30",
+			to_fiscal_year="_Test Fiscal Year 2050",
+		)
+
+		self.assertEqual(self.report_row(data, "'Gross Profit'")["total"], 1500)
+		self.assertEqual(self.report_row(data, "'Net Profit'")["total"], 1500)
 
 	def test_nothing_included_in_gross_when_no_entries(self):
 		# a fiscal year with no income/expense entries yields the placeholder row
