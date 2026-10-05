@@ -242,6 +242,13 @@ class MaintenanceSchedule(TransactionBase):
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
+			if d.no_of_visits > date_diff(d.end_date, d.start_date):
+				throw(
+					_(
+						"Row {0}: Number of visits can not be more than the {1} days between Start and End Date"
+					).format(d.idx, date_diff(d.end_date, d.start_date))
+				)
+
 	def validate_sales_order(self):
 		for d in self.get("items"):
 			if d.sales_order:
