@@ -1951,7 +1951,7 @@ class StockEntry(StockController):
 					filters = {
 						"parent": self.get(self.subcontract_data.order_field),
 						"docstatus": 1,
-						"rm_item_code": se_item.item_code,
+						"rm_item_code": se_item.original_item or se_item.item_code,
 						"main_item_code": se_item.subcontracted_item,
 					}
 
@@ -1984,7 +1984,7 @@ class StockEntry(StockController):
 					filters = {
 						"parent": self.get(self.subcontract_data.order_field),
 						"docstatus": 1,
-						"rm_item_code": row.item_code,
+						"rm_item_code": row.original_item or row.item_code,
 						"main_item_code": row.subcontracted_item,
 					}
 
