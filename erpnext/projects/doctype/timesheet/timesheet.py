@@ -68,6 +68,7 @@ class Timesheet(Document):
 
 	def validate(self):
 		self.set_status()
+		self.set_user()
 		self.validate_dates()
 		self.calculate_hours()
 		self.validate_time_logs()
@@ -136,6 +137,11 @@ class Timesheet(Document):
 
 		if self.sales_invoice:
 			self.status = "Completed"
+
+	def set_user(self):
+		self.user = (
+			self.employee and frappe.db.get_value("Employee", self.employee, "user_id")
+		) or self.owner
 
 	def set_dates(self):
 		if self.docstatus < 2 and self.time_logs:
