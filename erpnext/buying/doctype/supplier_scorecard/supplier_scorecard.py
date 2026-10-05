@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_years, get_last_day, getdate, nowdate
 
 from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
-	has_overlapping_period,
+	get_overlapping_period_end,
 	make_supplier_scorecard,
 )
 
@@ -214,16 +214,21 @@ def create_scorecard_periods(sc):
 	last_end_date = todays
 
 	while (start_date < todays) and (end_date <= todays):
-		if not has_overlapping_period(sc.name, start_date, end_date):
-			period_card = make_supplier_scorecard(sc.name, None)
-			period_card.start_date = start_date
-			period_card.end_date = end_date
-			period_card.insert(ignore_permissions=True)
-			period_card.submit()
-			scp_count = scp_count + 1
-			if start_date < first_start_date:
-				first_start_date = start_date
-			last_end_date = end_date
+		overlapping_end = get_overlapping_period_end(sc.name, start_date, end_date)
+		if overlapping_end:
+			start_date = getdate(add_days(overlapping_end, 1))
+			end_date = get_scorecard_date(sc.period, start_date)
+			continue
+
+		period_card = make_supplier_scorecard(sc.name, None)
+		period_card.start_date = start_date
+		period_card.end_date = end_date
+		period_card.insert(ignore_permissions=True)
+		period_card.submit()
+		scp_count = scp_count + 1
+		if start_date < first_start_date:
+			first_start_date = start_date
+		last_end_date = end_date
 
 		start_date = getdate(add_days(end_date, 1))
 		end_date = get_scorecard_date(sc.period, start_date)
@@ -240,7 +245,7 @@ def create_scorecard_periods(sc):
 
 def get_scorecard_date(period, start_date):
 	if period == "Per Week":
-		end_date = getdate(add_days(start_date, 7))
+		end_date = getdate(add_days(start_date, 6))
 	elif period == "Per Month":
 		end_date = get_last_day(start_date)
 	elif period == "Per Year":

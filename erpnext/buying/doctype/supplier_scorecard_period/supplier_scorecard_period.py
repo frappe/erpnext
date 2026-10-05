@@ -135,17 +135,23 @@ class SupplierScorecardPeriod(Document):
 
 
 def has_overlapping_period(scorecard, start_date, end_date):
-	return bool(
-		frappe.db.exists(
-			"Supplier Scorecard Period",
-			{
-				"scorecard": scorecard,
-				"docstatus": 1,
-				"start_date": ["<=", end_date],
-				"end_date": [">=", start_date],
-			},
-		)
+	return bool(get_overlapping_period_end(scorecard, start_date, end_date))
+
+
+def get_overlapping_period_end(scorecard, start_date, end_date):
+	ends = frappe.get_all(
+		"Supplier Scorecard Period",
+		filters={
+			"scorecard": scorecard,
+			"docstatus": 1,
+			"start_date": ["<=", end_date],
+			"end_date": [">=", start_date],
+		},
+		pluck="end_date",
+		order_by="end_date desc",
+		limit=1,
 	)
+	return ends[0] if ends else None
 
 
 def import_string_path(path):
