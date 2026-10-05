@@ -38,7 +38,6 @@ class TestSalesFunnel(ERPNextTestSuite):
 				"transaction_date": today(),
 				"sales_stage": sales_stage,
 				"opportunity_amount": amount,
-				"base_opportunity_amount": amount,
 			}
 		).insert(ignore_permissions=True)
 
