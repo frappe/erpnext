@@ -209,3 +209,25 @@ class TestCallLog(ERPNextTestSuite):
 		self.assertEqual(call_log.customer, "_Test Customer")
 		self.assertIn(("Customer", "_Test Customer"), [(d.link_doctype, d.link_name) for d in call_log.links])
 		self.assertIn(("Contact", contact.name), [(d.link_doctype, d.link_name) for d in call_log.links])
+
+	def test_past_calls_are_linked_to_new_lead_and_new_contact_number(self):
+		number = "96" + "".join(random.choices(string.digits, k=8))
+		call_log = self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "first_name": f"_Test Caller {number}", "mobile_no": f"+91{number}"}
+		).insert(ignore_permissions=True)
+
+		self.contact.reload()
+		self.contact.flags.ignore_auto_link_call_log = False
+		self.contact.append("phone_nos", {"phone": f"+91{number}"})
+		self.contact.save(ignore_permissions=True)
+
+		links = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": "Call Log", "parent": call_log},
+			fields=["link_doctype", "link_name"],
+			as_list=True,
+		)
+		self.assertIn(("Lead", lead.name), links)
+		self.assertIn(("Contact", self.contact.name), links)

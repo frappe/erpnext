@@ -174,16 +174,15 @@ def get_employees_with_number(number):
 
 def link_existing_conversations(doc, state):
 	"""
-	Called from hooks on creation of Contact or Lead to link all the existing conversations.
+	Called from hooks on update of Contact or Lead to link the existing conversations of new numbers.
 	"""
 	if doc.flags.ignore_auto_link_call_log:
 		return
-	if doc.doctype != "Contact":
+	numbers = get_new_phone_numbers(doc)
+	if not numbers:
 		return
 	frappe.db.savepoint("link_call_logs")
 	try:
-		numbers = [d.phone for d in doc.phone_nos]
-
 		for number in numbers:
 			number = strip_number(number)
 			if not number:
@@ -212,6 +211,21 @@ def link_existing_conversations(doc, state):
 	except Exception:
 		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))
+
+
+def get_new_phone_numbers(doc) -> set[str]:
+	numbers = set(get_phone_numbers(doc))
+	if doc_before_save := doc.get_doc_before_save():
+		numbers -= set(get_phone_numbers(doc_before_save))
+	return numbers
+
+
+def get_phone_numbers(doc) -> list[str]:
+	if doc.doctype == "Contact":
+		numbers = [d.phone for d in doc.phone_nos]
+	else:
+		numbers = [doc.get("phone"), doc.get("mobile_no")]
+	return [number for number in numbers if number]
 
 
 def get_linked_call_logs(doctype, docname):
