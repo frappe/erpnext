@@ -58,7 +58,9 @@ class SubcontractingInwardController:
 					self.validate_manufacture()
 
 	def validate_material_receipt(self):
+		self.set_scio_detail_for_received_items()
 		rm_item_fg_combo = []
+		scio_details = []
 		for item in self.items:
 			if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item"):
 				frappe.throw(
@@ -67,6 +69,15 @@ class SubcontractingInwardController:
 						get_link_to_form("Item", item.item_code),
 					)
 				)
+
+			if item.scio_detail in scio_details:
+				frappe.throw(
+					_(
+						"Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+			elif item.scio_detail:
+				scio_details.append(item.scio_detail)
 
 			if (
 				item.scio_detail
@@ -107,6 +118,25 @@ class SubcontractingInwardController:
 							"Row #{0}: Please select the Finished Good Item against which this Customer Provided Item will be used."
 						).format(item.idx)
 					)
+
+	def set_scio_detail_for_received_items(self):
+		"""Receive an extra row on the order's existing row for the same item and finished good."""
+		items = [item for item in self.items if not item.scio_detail]
+		if not items:
+			return
+
+		received_items = frappe.get_all(
+			"Subcontracting Inward Order Received Item",
+			filters={
+				"parent": self.subcontracting_inward_order,
+				"docstatus": 1,
+				"reference_name": ["in", [item.against_fg for item in items]],
+			},
+			fields=["name", "rm_item_code", "reference_name"],
+		)
+		row_names = {(row.rm_item_code, row.reference_name): row.name for row in received_items}
+		for item in items:
+			item.scio_detail = row_names.get((item.item_code, item.against_fg))
 
 	def validate_returns(self):
 		for item in self.items:
