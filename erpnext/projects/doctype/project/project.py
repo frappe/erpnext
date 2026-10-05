@@ -53,7 +53,7 @@ class Project(Document):
 		per_gross_margin: DF.Percent
 		percent_complete: DF.Percent
 		percent_complete_method: DF.Literal["Manual", "Task Completion", "Task Progress", "Task Weight"]
-		priority: DF.Literal["Medium", "Low", "High"]
+		priority: DF.Literal["Low", "Medium", "High"]
 		project_name: DF.Data
 		project_template: DF.Link | None
 		project_type: DF.Link | None
