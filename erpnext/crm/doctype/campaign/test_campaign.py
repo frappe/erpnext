@@ -68,3 +68,12 @@ class TestCampaign(ERPNextTestSuite):
 		second_mirror = frappe.db.get_value("UTM Campaign", {"crm_campaign": second.name})
 		self.assertTrue(second_mirror)
 		self.assertNotEqual(second_mirror, "_Test Shared Mirror")
+
+	def test_deleting_keeps_the_utm_campaign_unlinked(self):
+		campaign = self.make_campaign()
+		utm = frappe.db.get_value("UTM Campaign", {"crm_campaign": campaign.name})
+
+		campaign.delete()
+
+		self.assertFalse(frappe.db.exists("Campaign", campaign.name))
+		self.assertIsNone(frappe.db.get_value("UTM Campaign", utm, "crm_campaign"))

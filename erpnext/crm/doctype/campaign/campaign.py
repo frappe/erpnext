@@ -29,7 +29,12 @@ class Campaign(Document):
 		self.sync_utm_campaign()
 
 	def on_change(self):
-		self.sync_utm_campaign()
+		if not self.flags.in_delete:
+			self.sync_utm_campaign()
+
+	def on_trash(self):
+		# the mirror stays for the leads and transactions that use it
+		frappe.db.set_value("UTM Campaign", {"crm_campaign": self.name}, "crm_campaign", None)
 
 	def sync_utm_campaign(self):
 		mc = self.get_utm_campaign_mirror()
