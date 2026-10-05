@@ -13,6 +13,9 @@ def get_context(context):
 	context.no_cache = 1
 	context.show_sidebar = True
 	context.doc = frappe.get_doc(frappe.form_dict.doctype, frappe.form_dict.name)
+	if context.doc.docstatus != 1:
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
 	context.parents = frappe.form_dict.parents
 	context.doc.supplier = get_supplier()
 	context.doc.rfq_links = get_link_quotation(context.doc.supplier, context.doc.name)
