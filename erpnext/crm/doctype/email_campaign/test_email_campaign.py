@@ -26,7 +26,12 @@ class TestEmailCampaign(ERPNextTestSuite):
 		name = "_Test EC Email Template"
 		if not frappe.db.exists("Email Template", name):
 			frappe.get_doc(
-				{"doctype": "Email Template", "name": name, "subject": "Test", "response": "Hello"}
+				{
+					"doctype": "Email Template",
+					"name": name,
+					"subject": "Hi {{ lead_name }}",
+					"response": "Dear {{ doc.lead_name }}",
+				}
 			).insert()
 		return name
 
@@ -64,11 +69,13 @@ class TestEmailCampaign(ERPNextTestSuite):
 			send_email_to_leads_or_contacts()
 		return [c.kwargs for c in sendmail.call_args_list if recipient_email in c.kwargs["recipients"]]
 
-	def test_campaign_mail_carries_an_unsubscribe_link(self):
+	def test_campaign_mail_is_rendered_and_carries_an_unsubscribe_link(self):
 		lead = self.make_lead()
 		email_campaign = self.make_lead_email_campaign(lead, schedules=[0])
 
 		(mail,) = self.send_campaign_mails(lead.email_id)
+		self.assertEqual(mail["subject"], f"Hi {lead.lead_name}")
+		self.assertIn(f"Dear {lead.lead_name}", mail["content"])
 		self.assertEqual(mail["reference_doctype"], "Email Campaign")
 		self.assertEqual(mail["reference_name"], email_campaign.name)
 		self.assertTrue(mail["unsubscribe_message"])

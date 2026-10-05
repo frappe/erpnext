@@ -226,12 +226,9 @@ def send_mail(entry, email_campaign):
 	email_template = frappe.get_cached_doc("Email Template", entry.get("email_template"))
 	sender = frappe.db.get_value("User", sender_user, "email") if sender_user else None
 
-	# Build context for template rendering
-	if campaign_for != "Email Group":
-		context = {"doc": frappe.get_doc(campaign_for, recipient)}
-	else:
-		# For email groups, use the email group document as context
-		context = {"doc": frappe.get_doc("Email Group", recipient)}
+	# Support both {{ doc.field }} and {{ field }}, as the Email Template help shows
+	doc = frappe.get_doc(campaign_for, recipient)
+	context = {**doc.as_dict(), "doc": doc}
 
 	# Render template
 	subject = frappe.render_template(email_template.get("subject"), context, restrict_globals=True)
