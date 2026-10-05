@@ -187,6 +187,18 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		report_output = {k: v for k, v in report[1][0].items() if k in expected_result}
 		self.assertDictEqual(report_output, expected_result)
 
+	def test_customer_group_filter_includes_child_groups(self):
+		si = self.create_sales_invoice()
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"customer_group": "All Customer Groups",
+			}
+		)
+		self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
+
 	def test_sales_register_ignores_tax_rows_from_other_doctype(self):
 		si = self.create_sales_invoice(rate=98)
 
