@@ -10,6 +10,7 @@ from erpnext.crm.doctype.opportunity.mapper import make_quotation
 from erpnext.crm.doctype.opportunity.opportunity import auto_close_opportunity, get_item_details
 from erpnext.crm.utils import get_linked_communication_list
 from erpnext.exceptions import PartyDisabled
+from erpnext.selling.doctype.quotation.quotation import set_expired_status
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -48,6 +49,18 @@ class TestOpportunity(ERPNextTestSuite):
 
 		doc = frappe.get_doc("Opportunity", doc.name)
 		self.assertEqual(doc.status, "Quotation")
+
+	def test_expired_quotation_reopens_opportunity(self):
+		opp = make_opportunity(with_items=0)
+		submit_quotation(opp, transaction_date=add_days(today(), -5), valid_till=add_days(today(), -1))
+		self.assertEqual(frappe.db.get_value("Opportunity", opp.name, "status"), "Quotation")
+
+		set_expired_status()
+		opp.reload()
+		self.assertEqual(opp.status, "Open")
+		opp.db_set("status", "Quotation")
+		opp.set_status(update=True)
+		self.assertEqual(opp.status, "Open")
 
 	def test_make_new_lead_if_required(self):
 		opp_doc = make_opportunity_from_lead("_Test Company")
@@ -207,6 +220,15 @@ def _ensure_master(doctype, fieldname, value):
 	if not frappe.db.exists(doctype, value):
 		frappe.get_doc({"doctype": doctype, fieldname: value}).insert(ignore_permissions=True)
 	return value
+
+
+def submit_quotation(opportunity, **args):
+	quotation = make_quotation(opportunity.name)
+	quotation.update(args)
+	quotation.append("items", {"item_code": "_Test Item", "qty": 1})
+	quotation.run_method("set_missing_values")
+	quotation.run_method("calculate_taxes_and_totals")
+	return quotation.submit()
 
 
 def make_opportunity_from_lead(company):
