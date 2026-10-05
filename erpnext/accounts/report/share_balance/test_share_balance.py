@@ -227,6 +227,31 @@ class TestShareBalanceReport(ERPNextTestSuite):
 		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
 		self.assertEqual(self.get_row(date="2026-06-15", shareholder=other_holder)[2:], [40, 15, 600])
 
+	def test_backdated_transfer_out_reduces_the_holding(self):
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-10",
+		)
+		create_share_transfer(
+			transfer_type="Transfer",
+			from_shareholder=self.shareholder,
+			to_shareholder=get_shareholder("Thor", COMPANY),
+			share_type=self.share_type,
+			from_no=1,
+			to_no=40,
+			no_of_shares=40,
+			rate=15,
+			date="2026-06-01",
+		)
+
+		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
+
 	def get_row(self, date, shareholder=None):
 		filters = frappe._dict(
 			{"date": date, "company": COMPANY, "shareholder": shareholder or self.shareholder}
