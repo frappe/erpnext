@@ -473,11 +473,13 @@ class PurchaseOrder(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
+		was_closed = self.status == "Closed"
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
-		self.update_subcontracting_order_status()
+		if status == "Closed" or was_closed:
+			self.update_subcontracting_order_status()
 		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -668,9 +670,9 @@ class PurchaseOrder(BuyingController):
 		)
 
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
-			sco = frappe.db.get_value("Subcontracting Order", {"purchase_order": self.name, "docstatus": 1})
-
-			if sco:
+			for sco in frappe.get_all(
+				"Subcontracting Order", {"purchase_order": self.name, "docstatus": 1}, pluck="name"
+			):
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
 	def set_missing_values(self, for_validate=False):
