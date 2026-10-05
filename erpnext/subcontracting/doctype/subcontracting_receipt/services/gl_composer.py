@@ -109,18 +109,6 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 						item=item,
 					)
 
-					if item.additional_cost_per_qty:
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=item.expense_account,
-							cost_center=doc.cost_center or doc.get_company_default("cost_center"),
-							debit=flt(item.received_qty) * item.additional_cost_per_qty,
-							credit=0.0,
-							remarks=remarks,
-							against_account=None,
-							account_currency=get_account_currency(item.expense_account),
-						)
-
 					if divisional_loss := flt(item.amount - stock_value_diff, item.precision("amount")):
 						loss_account = doc.get_company_default(
 							"stock_adjustment_account", ignore_validation=True
@@ -159,6 +147,18 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 			self._make_supplied_items_gl_entries(
 				gl_entries, item, supplied_items_details.get(item.name, []), inventory_account_map, remarks
 			)
+
+			if item.additional_cost_per_qty:
+				self.add_gl_entry(
+					gl_entries=gl_entries,
+					account=item.expense_account,
+					cost_center=doc.cost_center or doc.get_company_default("cost_center"),
+					debit=flt(item.received_qty) * item.additional_cost_per_qty,
+					credit=0.0,
+					remarks=remarks,
+					against_account=None,
+					account_currency=get_account_currency(item.expense_account),
+				)
 
 		for row in doc.additional_costs:
 			credit_amount = (

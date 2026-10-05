@@ -673,6 +673,43 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.db.get_value("Stock Ledger Entry", sle_filters, "stock_value_difference"), 2200
 		)
 
+	def test_additional_costs_without_accepted_qty(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 0
+		scr.items[0].rejected_qty = 10
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "Test Additional Costs",
+				"amount": 100,
+				"base_amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		expense = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries("Subcontracting Receipt", scr.name)
+			if gle.account == scr.items[0].expense_account
+		)
+		self.assertEqual(expense, 1100)
+
 	def test_ledger_preview(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
