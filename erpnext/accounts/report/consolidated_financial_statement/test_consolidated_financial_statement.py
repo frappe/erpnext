@@ -6,6 +6,7 @@ from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
 	execute,
+	prepare_companywise_opening_balance,
 )
 from erpnext.accounts.report.utils import convert
 from erpnext.accounts.utils import get_fiscal_year
@@ -219,3 +220,16 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 	def get_summary_value(self, label, **extra):
 		summary = self.execute_report(**extra)[4]
 		return next(flt(card["value"]) for card in summary if card["label"] == label)
+
+	def test_unclosed_year_message_only_with_opening_balance(self):
+		companies = [PARENT_COMPANY, CHILD_COMPANY]
+		asset_root = frappe._dict(
+			root_type="Asset", account_name="Application of Funds (Assets)", company_wise_opening_bal={}
+		)
+
+		self.assertEqual(prepare_companywise_opening_balance([asset_root], [], [], companies), ("", {}))
+
+		asset_root.company_wise_opening_bal = {CHILD_COMPANY: 500}
+		message, opening_balance = prepare_companywise_opening_balance([asset_root], [], [], companies)
+		self.assertTrue(message)
+		self.assertEqual(opening_balance[CHILD_COMPANY], 500)

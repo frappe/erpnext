@@ -138,7 +138,7 @@ def prepare_companywise_opening_balance(asset_data, liability_data, equity_data,
 
 		opening_balance[company] = opening_value
 
-	if opening_balance:
+	if any(flt(value, 3) for value in opening_balance.values()):
 		return _("Previous Financial Year is not closed"), opening_balance
 
 	return "", {}
