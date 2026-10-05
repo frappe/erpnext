@@ -237,3 +237,20 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual([pi.name, project.name, 300], [row.voucher_no, row.project, row.outstanding])
+
+	def test_supplier_invoice_date_ageing_without_bill_date(self):
+		pi = self.create_purchase_invoice()
+		self.assertFalse(pi.bill_date)
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"ageing_based_on": "Supplier Invoice Date",
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+
+		self.assertEqual(row.range1, 300)
+		self.assertEqual(row.total_due, 300)
