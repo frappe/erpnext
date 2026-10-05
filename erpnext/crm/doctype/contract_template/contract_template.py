@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils.jinja import validate_template
+from frappe.utils.jinja import guess_is_path, validate_template
 
 
 class ContractTemplate(Document):
@@ -42,6 +42,14 @@ def get_contract_template(template_name: str, doc: str | dict | Document):
 	contract_terms = None
 
 	if contract_template.contract_terms:
-		contract_terms = frappe.render_template(contract_template.contract_terms, doc, restrict_globals=True)
+		contract_terms = render_contract_terms(contract_template.contract_terms, doc)
 
 	return {"contract_template": contract_template, "contract_terms": contract_terms}
+
+
+def render_contract_terms(terms: str, context: dict) -> str:
+	# render_template loads a single line ending in a file extension as a template path;
+	# a trailing newline keeps it content and Jinja drops that newline from the output
+	if guess_is_path(terms):
+		terms += "\n"
+	return frappe.render_template(terms, context, restrict_globals=True)
