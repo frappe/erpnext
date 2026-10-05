@@ -7,6 +7,7 @@ import unittest
 import frappe
 from frappe import _
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -403,6 +404,61 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 		pos_inv.insert()
 		self.assertRaises(PartialPaymentValidationError, pos_inv.submit)
+
+	def test_discounted_invoice_status(self):
+		allow_partial_payment = self.pos_profile.allow_partial_payment
+		self.pos_profile.db_set("allow_partial_payment", 1)
+		self.addCleanup(self.pos_profile.db_set, "allow_partial_payment", allow_partial_payment)
+		# v15 does not calculate outstanding_amount for POS Invoice.
+		pos_inv = create_pos_invoice(
+			pos_profile=self.pos_profile.name,
+			rate=100,
+			is_discounted=1,
+			outstanding_amount=10,
+			do_not_save=1,
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 90})
+		pos_inv.insert()
+
+		# Seed the lookup records because Invoice Discounting only accepts Sales Invoice links.
+		discounting = frappe.get_doc(
+			doctype="Invoice Discounting",
+			name=frappe.generate_hash(length=10),
+			company=pos_inv.company,
+			docstatus=1,
+			status="Disbursed",
+		)
+		discounting.db_insert()
+		frappe.get_doc(
+			doctype="Discounted Invoice",
+			parent=discounting.name,
+			parenttype=discounting.doctype,
+			parentfield="invoices",
+			sales_invoice=pos_inv.name,
+			docstatus=1,
+		).db_insert()
+
+		pos_inv.submit()
+		pos_inv.reload()
+		self.assertEqual(pos_inv.docstatus, 1)
+		self.assertEqual(pos_inv.outstanding_amount, 10)
+		self.assertEqual(pos_inv.status, "Unpaid and Discounted")
+
+		for outstanding_amount, due_date, expected_status in (
+			(10, add_days(nowdate(), -1), "Overdue"),
+			(10, nowdate(), "Unpaid"),
+			(100, nowdate(), "Unpaid"),
+		):
+			with self.subTest(status=expected_status):
+				pos_inv.outstanding_amount = outstanding_amount
+				pos_inv.due_date = due_date
+				discounting.db_set("status", "Disbursed")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, f"{expected_status} and Discounted")
+
+				discounting.db_set("status", "Settled")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, expected_status)
 
 	def test_serialized_item_transaction(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
