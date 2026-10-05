@@ -668,7 +668,7 @@ class GrossProfitGenerator:
 				for i, row in enumerate(self.grouped[key]):
 					invoice_portion = 0
 
-					if row.is_return:
+					if row.is_return or (row.invoice_portion is None and row.payment_amount is None):
 						invoice_portion = 100
 					elif row.invoice_portion:
 						invoice_portion = row.invoice_portion

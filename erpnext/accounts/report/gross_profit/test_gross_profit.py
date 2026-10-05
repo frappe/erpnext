@@ -1289,6 +1289,26 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
 
+	def test_payment_term_group_keeps_invoice_without_schedule(self):
+		item = create_item("_Test Gross Profit No Terms Item", is_stock_item=0).name
+		sinv = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item_code=item,
+			rate=500,
+			cost_center=self.cost_center,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+		)
+		# POS invoices have no payment schedule
+		frappe.db.delete("Payment Schedule", {"parent": sinv.name})
+
+		filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), sales_invoice=sinv.name)
+		_, data = execute(frappe._dict(filters, group_by="Payment Term"))
+
+		self.assertEqual(data[-1][1], 500)
+
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
 		components = []
