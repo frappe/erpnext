@@ -147,3 +147,29 @@ class TestCashFlow(ERPNextTestSuite):
 		)
 
 		self.assertEqual(net_change_in_cash() - before, 500)
+
+	def test_opening_balance_is_cash_balance_before_period(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		filters = frappe._dict(
+			company=self.company,
+			from_fiscal_year=fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Yearly",
+			show_opening_and_closing_balance=1,
+		)
+
+		def opening_balance():
+			rows = execute(filters)[1]
+			return next(row for row in rows if row.get("section") == "Opening")["total"]
+
+		before = opening_balance()
+		make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 500, posting_date=add_days(year_start_date, -10), submit=True
+		)
+
+		self.assertEqual(opening_balance() - before, 500)
