@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import add_days, today
 
-from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.billed_items_to_be_received.billed_items_to_be_received import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -94,8 +94,25 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 
 		self.assertEqual([(row.qty, row.received_qty) for row in rows], [(5, 0)])
 
-	def receive(self, invoice: str, posting_date: str) -> None:
+	def test_debit_note_settles_pending_qty(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
+		)
+		self.receive(pi.name, today(), qty=4)
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -6
+		debit_note.insert()
+		debit_note.submit()
+
+		names = {row.name for row in self.run_report()}
+
+		self.assertNotIn(pi.name, names)
+		self.assertNotIn(debit_note.name, names)
+
+	def receive(self, invoice: str, posting_date: str, qty: float | None = None) -> None:
 		receipt = make_purchase_receipt(invoice)
+		if qty:
+			receipt.items[0].qty = receipt.items[0].received_qty = qty
 		receipt.set_posting_time = 1
 		receipt.posting_date = posting_date
 		receipt.insert()
