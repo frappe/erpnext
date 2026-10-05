@@ -4,9 +4,13 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, nowdate
 
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
+	get_item_workdays,
+	get_total_days_late,
 )
 
 
@@ -26,6 +30,16 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 
 		for d in test_bad_variables:
 			self.assertRaises(VariablePathNotFound, frappe.get_doc(d).insert)
+
+	def test_draft_and_cancelled_orders_are_not_late(self):
+		supplier = create_scorecard_supplier("_Test Supplier SC Draft Orders")
+		ordered_on = add_days(nowdate(), -10)
+		create_scorecard_po(supplier, add_days(nowdate(), -5), ordered_on).cancel()
+		create_scorecard_po(supplier, add_days(nowdate(), -5), ordered_on, submit=False)
+
+		scorecard = scorecard_for(supplier)
+		self.assertEqual(get_total_days_late(scorecard), 0)
+		self.assertEqual(get_item_workdays(scorecard), 0)
 
 
 test_existing_variables = [
@@ -57,3 +71,36 @@ test_bad_variables = [
 		"path": "get_fake_variable1",
 	},
 ]
+
+
+def create_scorecard_supplier(supplier_name):
+	if not frappe.db.exists("Supplier", supplier_name):
+		frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": supplier_name,
+				"supplier_group": "_Test Supplier Group",
+			}
+		).insert()
+	return supplier_name
+
+
+def create_scorecard_po(supplier, schedule_date, transaction_date=None, qty=10, rate=100, submit=True):
+	po = create_purchase_order(
+		supplier=supplier, transaction_date=transaction_date, qty=qty, rate=rate, do_not_save=True
+	)
+	po.schedule_date = schedule_date
+	po.items[0].schedule_date = schedule_date
+	po.set_missing_values()
+	po.insert()
+	if submit:
+		po.submit()
+	return po
+
+
+def scorecard_for(supplier):
+	return frappe._dict(
+		supplier=supplier,
+		start_date=add_days(nowdate(), -30),
+		end_date=add_days(nowdate(), 30),
+	)
