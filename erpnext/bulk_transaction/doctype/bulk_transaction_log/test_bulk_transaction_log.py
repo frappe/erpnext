@@ -96,6 +96,13 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 			count, len(frappe.get_all("Bulk Transaction Log Detail", pluck="date", distinct=True))
 		)
 
+	def test_list_requires_read_permission(self):
+		frappe.set_user("test1@example.com")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		self.assertRaises(frappe.PermissionError, get_list)
+		self.assertRaises(frappe.PermissionError, BulkTransactionLog.get_count, frappe._dict(filters=[]))
+
 
 def get_list(**args) -> list:
 	return BulkTransactionLog.get_list(frappe._dict(filters=[], **args))

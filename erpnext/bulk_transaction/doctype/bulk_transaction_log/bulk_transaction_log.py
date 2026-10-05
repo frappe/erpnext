@@ -61,6 +61,7 @@ class BulkTransactionLog(Document):
 
 	@staticmethod
 	def get_list(args):
+		frappe.has_permission("Bulk Transaction Log", "read", throw=True)
 		log_detail = qb.DocType("Bulk Transaction Log Detail")
 		query = (
 			qb.from_(log_detail)
@@ -80,6 +81,7 @@ class BulkTransactionLog(Document):
 
 	@staticmethod
 	def get_count(args):
+		frappe.has_permission("Bulk Transaction Log", "read", throw=True)
 		log_detail = qb.DocType("Bulk Transaction Log Detail")
 		query = qb.from_(log_detail).select(Count(log_detail.date).distinct())
 		return filter_by_date(query, log_detail, parse_list_filters(args)).run()[0][0]
