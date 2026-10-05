@@ -117,6 +117,14 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
 		)
 
+		if self.docstatus == 1:
+			self.set_onload(
+				"allow_to_make_qc_after_submission",
+				frappe.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				),
+			)
+
 	def before_validate(self):
 		super().before_validate()
 		self.validate_items_qty()
