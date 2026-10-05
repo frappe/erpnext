@@ -288,6 +288,18 @@ class TestIssue(TestSetUp):
 		self.assertLess(abs(delay), 60)
 		self.assertEqual(issue.on_hold_since, issue.first_responded_on)
 
+	def test_bulk_status_change_applies_sla(self):
+		from erpnext.support.doctype.issue.issue import set_multiple_status
+
+		issue = make_issue(get_datetime("2019-03-04 11:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		set_multiple_status([issue.name], "Closed")
+
+		issue.reload()
+		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
+		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.agreement_status, "Fulfilled")
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

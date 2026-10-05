@@ -272,7 +272,9 @@ def set_multiple_status(names: str | list, status: str):
 @frappe.whitelist(methods=["POST"])
 def set_status(name: str, status: str):
 	frappe.has_permission("Issue", "write", name, throw=True)
-	frappe.db.set_value("Issue", name, "status", status)
+	issue = frappe.get_doc("Issue", name)
+	issue.status = status
+	issue.save()
 
 
 def auto_close_tickets():
