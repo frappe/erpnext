@@ -285,7 +285,7 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for time_log in self.time_logs:
-			time_log.update_cost(self.employee)
+			time_log.update_cost(self.employee, self.currency)
 
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:
@@ -537,10 +537,10 @@ def _get_activity_cost(
 			["costing_rate", "billing_rate"],
 			as_dict=True,
 		)
-		if rate and currency and currency != base_currency:
-			exchange_rate = get_exchange_rate(base_currency, currency)
-			rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
-			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
+	if rate and currency and currency != base_currency:
+		exchange_rate = get_exchange_rate(base_currency, currency)
+		rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
+		rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
 	return rate[0] if rate else {}
 

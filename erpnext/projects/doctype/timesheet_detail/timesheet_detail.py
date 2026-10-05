@@ -71,14 +71,14 @@ class TimesheetDetail(Document):
 		if flt(self.billing_hours) == 0.0:
 			self.billing_hours = self.hours
 
-	def update_cost(self, employee: str):
+	def update_cost(self, employee: str, currency: str | None = None):
 		"""Update costing and billing rates based on activity type."""
 		from erpnext.projects.doctype.timesheet.timesheet import _get_activity_cost
 
 		if not self.is_billable and not self.activity_type:
 			return
 
-		rate = _get_activity_cost(employee, self.activity_type)
+		rate = _get_activity_cost(employee, self.activity_type, currency)
 		if not rate:
 			return
 

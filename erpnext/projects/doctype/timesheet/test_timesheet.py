@@ -462,6 +462,44 @@ class TestTimesheet(ERPNextTestSuite):
 		# an unknown activity type yields an empty dict, not an error
 		self.assertEqual(get_activity_cost(activity_type="__Nonexistent Activity__"), {})
 
+	def test_employee_activity_cost_is_converted_to_the_timesheet_currency(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"employee": emp,
+				"activity_type": "_Test Activity Type",
+				"billing_rate": 1000,
+				"costing_rate": 600,
+			}
+		).insert()
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"currency": "USD",
+				"exchange_rate": 2,
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"is_billable": 1,
+						"from_time": now_datetime(),
+						"hours": 2,
+					}
+				],
+			}
+		)
+
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0.5):
+			self.assertEqual(get_activity_cost(emp, "_Test Activity Type", "USD")["billing_rate"], 500)
+			timesheet.insert()
+
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 500)
+		self.assertEqual(timesheet.time_logs[0].costing_rate, 300)
+
 	def test_billing_helpers_for_timesheet_detail(self):
 		from erpnext.projects.doctype.timesheet.timesheet import (
 			get_timesheet_data,
