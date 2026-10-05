@@ -480,6 +480,20 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		self.assertEqual(get_actual_gle_dict(asset_capitalization.name)[target_account], 800)
 		self.assertEqual(target_asset.db_get("net_purchase_amount"), 800)
 
+	def test_cancel_is_refused_after_the_target_asset_is_submitted(self):
+		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+		asset_capitalization = create_asset_capitalization(
+			target_asset=target_asset.name,
+			service_rate=500,
+			service_expense_account="Expenses Included In Asset Valuation - _TC",
+			submit=1,
+		)
+		target_asset.reload()
+		target_asset.submit()
+
+		self.assertRaises(frappe.ValidationError, asset_capitalization.cancel)
+		self.assertEqual(target_asset.db_get("net_purchase_amount"), 500)
+
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)

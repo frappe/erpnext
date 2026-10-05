@@ -115,6 +115,14 @@ class AssetCapitalization(StockController):
 		self.repost_future_sle_and_gle()
 		self.update_target_asset()
 
+	def before_cancel(self):
+		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel the submitted Target Asset {0} before cancelling this Asset Capitalization").format(
+					get_link_to_form("Asset", self.target_asset)
+				)
+			)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
