@@ -125,6 +125,28 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			getdate(asset_maintenance.asset_maintenance_tasks[0].next_due_date), add_months(getdate(), 1)
 		)
 
+	def test_asset_is_in_maintenance_while_a_due_log_is_open(self):
+		from erpnext.assets.doctype.asset.asset import update_maintenance_status
+
+		self.submit_asset()
+		tasks = get_maintenance_tasks()[:1]
+		tasks[0].update({"start_date": add_months(nowdate(), -1), "next_due_date": add_days(nowdate(), -1)})
+		self.make_asset_maintenance(tasks)
+
+		update_maintenance_status()
+		self.assertEqual(frappe.db.get_value("Asset", self.asset_name, "status"), "In Maintenance")
+
+		log = frappe.get_last_doc("Asset Maintenance Log", {"asset_name": self.asset_name})
+		log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		log.submit()
+		self.assertEqual(frappe.db.get_value("Asset", self.asset_name, "status"), "Submitted")
+
+	def submit_asset(self):
+		self.asset_doc.update(
+			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}
+		)
+		self.asset_doc.submit()
+
 	def make_asset_maintenance(self, tasks: list[dict] | None = None):
 		return frappe.get_doc(
 			{

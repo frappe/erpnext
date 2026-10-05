@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.query_builder import DocType
 from frappe.utils import getdate, nowdate, today
 
+from erpnext.assets.doctype.asset.asset import has_due_maintenance
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
 
@@ -58,6 +59,7 @@ class AssetMaintenanceLog(Document):
 		if self.maintenance_status not in ["Completed", "Cancelled"]:
 			frappe.throw(_("Maintenance Status has to be Cancelled or Completed to Submit"))
 		self.update_maintenance_task()
+		self.update_asset_status()
 
 	def update_maintenance_task(self):
 		asset_maintenance_doc = frappe.get_doc("Asset Maintenance Task", self.task)
@@ -75,6 +77,11 @@ class AssetMaintenanceLog(Document):
 			asset_maintenance_doc.save()
 		asset_maintenance_doc = frappe.get_doc("Asset Maintenance", self.asset_maintenance)
 		asset_maintenance_doc.save()
+
+	def update_asset_status(self):
+		asset = frappe.get_doc("Asset", self.asset_name)
+		if asset.status == "In Maintenance" and not has_due_maintenance(asset.name):
+			asset.set_status()
 
 
 def update_asset_maintenance_log_status():
