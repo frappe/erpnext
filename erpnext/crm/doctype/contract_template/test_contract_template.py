@@ -49,3 +49,20 @@ class TestContractTemplate(ERPNextTestSuite):
 		).insert()
 
 		self.assertEqual(get_contract_template(template.name, {})["contract_terms"], terms)
+
+	def test_blank_contract_fields_render_empty(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Contract Template",
+				"title": "_Test Blank Fields Contract Template",
+				"contract_terms": "From: {{ start_date }}, To: {{ end_date }}",
+			}
+		).insert()
+
+		for doc in (
+			{"doctype": "Contract", "start_date": "2026-10-03", "end_date": None},
+			{"start_date": "2026-10-03"},
+		):
+			self.assertEqual(
+				get_contract_template(template.name, doc)["contract_terms"], "From: 2026-10-03, To: "
+			)

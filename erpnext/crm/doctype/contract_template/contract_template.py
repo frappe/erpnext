@@ -42,9 +42,16 @@ def get_contract_template(template_name: str, doc: str | dict | Document):
 	contract_terms = None
 
 	if contract_template.contract_terms:
-		contract_terms = render_contract_terms(contract_template.contract_terms, doc)
+		contract_terms = render_contract_terms(contract_template.contract_terms, get_render_context(doc))
 
 	return {"contract_template": contract_template, "contract_terms": contract_terms}
+
+
+def get_render_context(doc: dict) -> dict:
+	"""Blank out empty and unsent fields, so they don't render as None or as the raw placeholder."""
+	context = {df.fieldname: "" for df in frappe.get_meta(doc.get("doctype") or "Contract").fields}
+	context.update({key: value for key, value in doc.items() if value is not None})
+	return context
 
 
 def render_contract_terms(terms: str, context: dict) -> str:
