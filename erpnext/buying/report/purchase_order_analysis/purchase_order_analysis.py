@@ -163,12 +163,13 @@ def prepare_data(data, filters):
 		purchase_order_map = {}
 
 	for row in data:
+		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		if row["status"] == "Closed":
+			row.update(pending_qty=0, qty_to_bill=0, pending_amount=0)
+
 		# sum data for chart
 		completed += row[completed_field]
 		pending += row[pending_field]
-
-		# prepare data for report view
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
 
 		if filters.get("group_by_po"):
 			po_name = row["purchase_order"]
