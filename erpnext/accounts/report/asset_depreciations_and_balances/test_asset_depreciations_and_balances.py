@@ -14,6 +14,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+	make_asset_value_adjustment,
 	make_difference_account,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -129,6 +130,38 @@ class TestAssetDepreciationsAndBalancesReport(ERPNextTestSuite):
 		self.assertEqual(row.accumulated_depreciation_as_on_from_date, 10000)
 		self.assertEqual(row.depreciation_eliminated_via_reversal, 0)
 		self.assertEqual(row.accumulated_depreciation_as_on_to_date, 10000)
+
+	def test_cost_columns_add_up_with_a_value_adjustment(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-01-01",
+			depreciation_start_date="2020-12-31",
+			total_number_of_depreciations=10,
+			submit=1,
+		)
+		post_depreciation_entries(date="2021-01-01")
+		make_asset_value_adjustment(
+			asset=asset.name, date="2021-01-15", current_asset_value=90000, new_asset_value=100000
+		).submit()
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date="2021-01-01",
+			to_date="2021-06-30",
+			group_by="Asset",
+			asset=asset.name,
+		)
+		columns, data = execute(filters)
+		cost_columns = [column["fieldname"] for column in columns][2:8]
+		row = data[0]
+		signs = (1, 1, -1, -1, -1, 1)
+
+		self.assertIn("adjustment_during_period", cost_columns)
+		self.assertEqual(row.adjustment_during_period, 10000)
+		self.assertEqual(
+			sum(sign * row[fieldname] for sign, fieldname in zip(signs, cost_columns, strict=True)),
+			row.value_as_on_to_date,
+		)
 
 
 def get_asset_row(asset: str, from_date: str, to_date: str, **filters) -> frappe._dict:

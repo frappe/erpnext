@@ -862,8 +862,14 @@ def get_columns(filters):
 			"width": 140,
 		},
 		{
-			"label": _("Value of New Capitalized Asset"),
+			"label": _("Value of Assets Consumed in Capitalization"),
 			"fieldname": "value_of_capitalized_asset",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
+			"label": _("Adjustment during the period"),
+			"fieldname": "adjustment_during_period",
 			"fieldtype": "Currency",
 			"width": 140,
 		},
