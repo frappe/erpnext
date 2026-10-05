@@ -376,6 +376,18 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 		asset.reload()
 		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 12000)
 
+	def test_adjustment_before_the_last_booked_depreciation_is_refused(self):
+		asset = create_asset_for_value_adjustment()
+		post_depreciation_entries(getdate("2023-03-31"))
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=100000,
+			date="2023-02-15",
+		)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)

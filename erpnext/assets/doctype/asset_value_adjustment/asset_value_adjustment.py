@@ -11,7 +11,10 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
-from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
+from erpnext.assets.doctype.asset.depreciation import (
+	get_depreciation_accounts,
+	get_last_depreciation_date,
+)
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	reschedule_depreciation,
@@ -66,6 +69,15 @@ class AssetValueAdjustment(Document):
 				_("Asset Value Adjustment cannot be posted before Asset's purchase date <b>{0}</b>.").format(
 					formatdate(asset_purchase_date)
 				),
+				title=_("Incorrect Date"),
+			)
+
+		last_depreciation_date = get_last_depreciation_date(self.asset)
+		if last_depreciation_date and getdate(self.date) < last_depreciation_date:
+			frappe.throw(
+				_(
+					"Asset Value Adjustment cannot be posted before the last depreciation entry dated {0}"
+				).format(formatdate(last_depreciation_date)),
 				title=_("Incorrect Date"),
 			)
 
