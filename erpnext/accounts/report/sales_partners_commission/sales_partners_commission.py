@@ -30,7 +30,7 @@ def get_partner_totals(doctype: str, filters: frappe._dict) -> list[frappe._dict
 	"""Commission per sales partner from the invoices the user is allowed to read."""
 	return frappe.get_list(
 		doctype,
-		filters={"docstatus": 1, "base_net_total": [">", 0], "total_commission": [">", 0]},
+		filters={"docstatus": 1, "total_commission": ["!=", 0]},
 		fields=[
 			"sales_partner",
 			{"SUM": "base_net_total", "as": "invoiced_amount"},
