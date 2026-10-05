@@ -275,8 +275,7 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	filters.end_date = fiscal_year.year_end_date
 
 	for company in companies:
-		filters.company = company
-		amount = get_account_type_based_gl_data(company, filters)
+		amount = get_account_type_based_gl_data(company, frappe._dict(filters, company=company))
 
 		if amount and account_type == "Depreciation":
 			amount *= -1
