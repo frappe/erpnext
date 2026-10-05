@@ -6,6 +6,7 @@ from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_payable_summary.accounts_payable_summary import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -154,3 +155,13 @@ class TestAccountsPayableSummary(ERPNextTestSuite):
 		row = execute(self._filters(ageing_based_on="Due Date"))[1][0]
 
 		self.assertEqual((row.range0, row.range1, row.total_due), (200.0, 0.0, 0.0))
+
+	def test_04_gl_balance_ignores_customer_of_same_name(self):
+		self._make_invoice()
+		if not frappe.db.exists("Customer", self.supplier):
+			frappe.get_doc(doctype="Customer", customer_name=self.supplier).insert()
+		create_sales_invoice(customer=self.supplier, rate=700)
+
+		row = execute(self._filters(show_gl_balance=True))[1][0]
+
+		self.assertEqual((row.gl_balance, row.diff), (200.0, 0.0))
