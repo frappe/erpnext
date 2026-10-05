@@ -233,36 +233,7 @@ class IssueSummary:
 
 		if issues:
 			if self.filters.based_on == "Assigned To":
-				assignment_map = frappe._dict()
-				for d in self.entries:
-					if d._assign:
-						for entry in json.loads(d._assign):
-							for metric in metrics_list:
-								self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(
-									metric, 0.0
-								)
-
-							self.issue_summary_data[entry]["avg_response_time"] += (
-								d.get("avg_response_time") or 0.0
-							)
-							self.issue_summary_data[entry]["avg_first_response_time"] += (
-								d.get("first_response_time") or 0.0
-							)
-							self.issue_summary_data[entry]["avg_hold_time"] += d.get("total_hold_time") or 0.0
-							self.issue_summary_data[entry]["avg_resolution_time"] += (
-								d.get("resolution_time") or 0.0
-							)
-							self.issue_summary_data[entry]["avg_user_resolution_time"] += (
-								d.get("user_resolution_time") or 0.0
-							)
-
-							if not assignment_map.get(entry):
-								assignment_map[entry] = 0
-							assignment_map[entry] += 1
-
-				for entry in assignment_map:
-					for metric in metrics_list:
-						self.issue_summary_data[entry][metric] /= flt(assignment_map.get(entry))
+				self.set_metrics_by_assignee()
 
 			else:
 				issue = frappe.qb.DocType("Issue")
@@ -298,6 +269,25 @@ class IssueSummary:
 					self.issue_summary_data[value]["avg_user_resolution_time"] = (
 						entry.get("avg_user_resolution_time") or 0.0
 					)
+
+	def set_metrics_by_assignee(self):
+		"""Average each metric over the assignee's issues that have it set, as SQL AVG does."""
+		metric_fields = {
+			"avg_response_time": "avg_response_time",
+			"avg_first_response_time": "first_response_time",
+			"avg_hold_time": "total_hold_time",
+			"avg_resolution_time": "resolution_time",
+			"avg_user_resolution_time": "user_resolution_time",
+		}
+		for metric, field in metric_fields.items():
+			values_by_user = frappe._dict()
+			for d in self.entries:
+				if d.get(field) is not None:
+					for user in json.loads(d._assign or "[]"):
+						values_by_user.setdefault(user, []).append(d.get(field))
+
+			for user, values in values_by_user.items():
+				self.issue_summary_data.setdefault(user, frappe._dict())[metric] = sum(values) / len(values)
 
 	def get_chart_data(self):
 		self.chart = []
