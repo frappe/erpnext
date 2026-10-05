@@ -118,7 +118,7 @@ def get_communication_details(filters):
 		first_contact = (
 			frappe.qb.from_(comm)
 			.select(Date(comm.communication_date))
-			.where((comm.recipients == d.contact_email) & comm.communication_date.isnotnull())
+			.where(comm.recipients.like(f"%{d.contact_email}%") & comm.communication_date.isnotnull())
 			.orderby(comm.communication_date)
 			.limit(1)
 			.run()
