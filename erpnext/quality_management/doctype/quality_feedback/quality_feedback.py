@@ -33,7 +33,7 @@ class QualityFeedback(Document):
 
 		self.set("parameters", [])
 		for d in frappe.get_doc("Quality Feedback Template", self.template).parameters:
-			self.append("parameters", dict(parameter=d.parameter, rating=1))
+			self.append("parameters", dict(parameter=d.parameter))
 
 	def validate(self):
 		if not self.document_name:

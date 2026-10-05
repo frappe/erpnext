@@ -47,6 +47,11 @@ class TestQualityFeedback(ERPNextTestSuite):
 		feedback.save()
 		self.assertEqual([d.parameter for d in feedback.parameters], ["Packaging"])
 
+	def test_parameters_start_unrated(self):
+		template = make_template("Test Template", ["Quality"])
+		feedback = frappe.get_doc(doctype="Quality Feedback", template=template.name).insert()
+		self.assertFalse(feedback.parameters[0].rating)
+
 
 def make_template(name, parameters):
 	return frappe.get_doc(
