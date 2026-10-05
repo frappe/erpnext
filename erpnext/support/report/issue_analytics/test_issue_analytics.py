@@ -149,6 +149,7 @@ class TestIssueAnalytics(unittest.TestCase):
 				}
 			).insert(ignore_permissions=True)
 		add_user_permission("Customer", "__Test Customer", user)
+		self.addCleanup(frappe.db.delete, "User Permission", {"user": user})
 
 		filters = {
 			"company": "_Test Company",
@@ -164,6 +165,12 @@ class TestIssueAnalytics(unittest.TestCase):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(sum(row["total"] for row in rows), 1)
+
+	def test_issue_count_over_a_long_weekly_range(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2027-02-15"), "__Test Customer", 1)
+
+		self.assertEqual(self.get_total("2026-01-01", "2027-03-31", "Weekly"), 1)
 
 	def get_total(self, from_date, to_date, period_range):
 		filters = {
