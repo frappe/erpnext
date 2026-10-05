@@ -4,8 +4,8 @@
 import frappe
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import create_production_plan
-from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import execute
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
