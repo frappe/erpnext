@@ -731,6 +731,42 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(expense, 1100)
 
+	def test_additional_cost_without_base_amount(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "Test Additional Costs",
+				"amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		self.assertEqual(scr.additional_costs[0].base_amount, 100)
+		self.assertEqual(
+			sum(
+				gle.credit
+				for gle in get_gl_entries("Subcontracting Receipt", scr.name)
+				if gle.account == "Expenses Included In Valuation - TCP1"
+			),
+			100,
+		)
+
 	def test_ledger_preview(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
