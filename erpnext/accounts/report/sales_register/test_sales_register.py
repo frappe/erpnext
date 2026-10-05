@@ -397,15 +397,22 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		)
 		foreign_invoice.db_set("currency", "USD")
 		foreign_invoice.db_set("conversion_rate", 80)
+		foreign_invoice.db_set("party_account_currency", "USD")
 		foreign_invoice.db_set("outstanding_amount", 100.236)
 		make_customer("_Test Customer2")
 		local_invoice = create_sales_invoice(
 			customer="_Test Customer2", currency="INR", conversion_rate=1, qty=1, rate=200
 		)
 		local_invoice.db_set("outstanding_amount", 200.456)
+		# foreign currency invoice on a company currency receivable: outstanding is already in INR
+		foreign_invoice_on_local_receivable = create_sales_invoice(customer="_Test Customer2", qty=1, rate=10)
+		foreign_invoice_on_local_receivable.db_set("currency", "USD")
+		foreign_invoice_on_local_receivable.db_set("conversion_rate", 80)
+		foreign_invoice_on_local_receivable.db_set("outstanding_amount", 800)
 		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
 		outstanding_precision = 2
 
 		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
 		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
 		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
+		self.assertEqual(data_by_name.get(foreign_invoice_on_local_receivable.name), 800)

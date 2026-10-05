@@ -163,7 +163,7 @@ def _execute(filters, additional_table_columns=None):
 					# credits the invoice itself posts to the receivable (mirrors its GL)
 					"credit": get_in_invoice_receivable_credit(inv),
 					"outstanding_amount": flt(
-						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+						get_outstanding_in_company_currency(inv, company_currency), outstanding_precision
 					),
 				}
 			)
@@ -180,6 +180,14 @@ def _execute(filters, additional_table_columns=None):
 			res[row].update({"balance": running_balance})
 
 	return columns, res, None, None, None, include_payments
+
+
+def get_outstanding_in_company_currency(inv, company_currency):
+	"""Outstanding is in the party account currency."""
+	if inv.party_account_currency == company_currency:
+		return flt(inv.outstanding_amount)
+
+	return flt(inv.outstanding_amount) * (inv.conversion_rate or 1)
 
 
 def get_in_invoice_receivable_credit(inv):
@@ -479,6 +487,7 @@ def get_invoices(filters, additional_query_columns):
 			si.represents_company,
 			si.company,
 			si.conversion_rate,
+			si.party_account_currency,
 		)
 		.where(si.docstatus == 1)
 	)
