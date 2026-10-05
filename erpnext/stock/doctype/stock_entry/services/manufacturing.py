@@ -124,7 +124,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					row.qty * row.get("process_loss_per") / 100, self.doc.precision("fg_completed_qty")
 				)
 
-			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.uom)
+			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
 			self.doc.append("items", item_args)
 
@@ -1292,18 +1292,14 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 		return query.select(
 			doctype.name,
 			doctype.cost_allocation_per,
-			doctype.uom,
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
 			doctype.valuation_type,
-			doctype.conversion_factor,
 			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
 	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
-		return query.select(
-			doctype.allow_alternative_item, doctype.uom, doctype.conversion_factor, doctype.bom_no
-		)
+		return query.select(doctype.allow_alternative_item, doctype.bom_no)
 	return query
 
 
