@@ -109,6 +109,24 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		contact_links = {"link_doctype": "Supplier", "link_name": supplier, "parenttype": "Contact"}
 		self.assertEqual(frappe.db.count("Dynamic Link", contact_links), 1)
 
+	def test_seller_is_matched_by_vat_number_not_by_name(self):
+		frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": "_Test ISI Namesake",
+				"supplier_group": "_Test Supplier Group",
+				"tax_id": "IT99999999999",
+			}
+		).insert()
+		xml = make_invoice_xml(
+			"ISI-NAMESAKE", [make_line("Service", "10.00", "10.00")], supplier="_Test ISI Namesake"
+		)
+		self.import_files({"a.xml": xml})
+
+		supplier = self.get_invoice("ISI-NAMESAKE").supplier
+		self.assertNotEqual(supplier, "_Test ISI Namesake")
+		self.assertEqual(frappe.db.get_value("Supplier", supplier, "tax_id"), "IT01234567890")
+
 	def import_files(self, files: dict[str, str | bytes]):
 		doc = frappe.get_doc(
 			{
