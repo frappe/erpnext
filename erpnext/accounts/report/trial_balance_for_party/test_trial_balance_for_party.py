@@ -5,6 +5,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.trial_balance_for_party.trial_balance_for_party import execute
 from erpnext.accounts.utils import get_fiscal_year
@@ -105,6 +107,21 @@ class TestTrialBalanceForParty(FrappeTestCase):
 
 		self.assertEqual({row["party"] for row in data[:-1]}, {permitted})
 		self.assertEqual(data[-1]["debit"], 10000)
+
+	def test_alternative_finance_book_entries_excluded(self):
+		customer = make_customer("_Test TBP Finance Book Customer")
+		finance_book = create_finance_book().name
+		create_sales_invoice(customer=customer, qty=1, rate=10000)
+		journal = make_journal_entry("Sales - _TC", "Debtors - _TC", 4000, save=False)
+		journal.accounts[1].update({"party_type": "Customer", "party": customer})
+		journal.finance_book = finance_book
+		journal.submit()
+
+		row = self.party_row(customer, include_default_book_entries=1)
+		self.assertEqual((row["credit"], row["closing_debit"]), (0, 10000))
+
+		row = self.party_row(customer, finance_book=finance_book)
+		self.assertEqual((row["credit"], row["closing_debit"]), (4000, 6000))
 
 
 def make_customer(customer_name: str) -> str:
