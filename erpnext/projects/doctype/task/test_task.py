@@ -255,6 +255,18 @@ class TestTask(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, child.save)
 
+	def test_add_multiple_tasks_under_project_root(self):
+		from erpnext.projects.doctype.task.task import add_multiple_tasks
+
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+
+		add_multiple_tasks(frappe.as_json([{"subject": "_Test Bulk Root Task"}]), project, project)
+
+		self.assertEqual(
+			frappe.db.get_value("Task", {"subject": "_Test Bulk Root Task"}, ["project", "parent_task"]),
+			(project, None),
+		)
+
 
 def create_task(
 	subject,
