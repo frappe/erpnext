@@ -2,6 +2,7 @@
 # See license.txt
 
 
+from itertools import pairwise
 from unittest.mock import patch
 
 import frappe
@@ -11,8 +12,12 @@ from frappe.utils import add_days, getdate, nowdate
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
+	get_scorecard_date,
 	make_all_scorecards,
 	refresh_scorecards,
+)
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
+	make_supplier_scorecard as make_scorecard_period,
 )
 
 
@@ -112,6 +117,35 @@ class TestSupplierScorecard(FrappeTestCase):
 
 		po = create_purchase_order(supplier=renamed, do_not_save=True)
 		self.assertRaises(frappe.ValidationError, po.validate_supplier)
+
+	def test_scorecard_period_end_dates(self):
+		start = getdate("2024-01-01")
+		self.assertEqual(get_scorecard_date("Per Week", start), getdate("2024-01-07"))
+		self.assertEqual(get_scorecard_date("Per Month", start), getdate("2024-01-31"))
+		self.assertEqual(get_scorecard_date("Per Year", start), getdate("2024-12-31"))
+
+	def test_weekly_periods_continue_after_an_existing_period(self):
+		doc = make_scorecard_for("_Test Supplier SC Legacy Week", days_since_creation=0)
+		doc.period = "Per Week"
+		doc.insert()
+		start = getdate(add_days(nowdate(), -30))
+		legacy_period = make_scorecard_period(doc.name, None)
+		legacy_period.start_date = start
+		legacy_period.end_date = add_days(start, 7)
+		legacy_period.insert()
+		legacy_period.submit()
+		frappe.db.set_value("Supplier", doc.supplier, "creation", start)
+
+		make_all_scorecards(doc.name)
+
+		periods = frappe.get_all(
+			"Supplier Scorecard Period",
+			filters={"scorecard": doc.name, "docstatus": 1},
+			fields=["start_date", "end_date"],
+			order_by="start_date",
+		)
+		for previous, current in pairwise(periods):
+			self.assertEqual(current.start_date, add_days(previous.end_date, 1))
 
 
 def make_supplier_scorecard():
