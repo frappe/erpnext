@@ -226,6 +226,23 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.total_hold_time, 7200)
 		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
 
+	def test_status_change_times_are_in_system_time_zone(self):
+		user = create_user("test_sla_timezone@example.com")
+		user.time_zone = "Pacific/Kiritimati"
+		user.save(ignore_permissions=True)
+
+		issue = make_issue(index=1)
+		issue.db_set("owner", user.name)
+		frappe.flags.current_time = None
+
+		issue.reload()
+		issue.status = "Replied"
+		issue.save()
+
+		delay = frappe.utils.time_diff_in_seconds(frappe.utils.now_datetime(), issue.first_responded_on)
+		self.assertLess(abs(delay), 60)
+		self.assertEqual(issue.on_hold_since, issue.first_responded_on)
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

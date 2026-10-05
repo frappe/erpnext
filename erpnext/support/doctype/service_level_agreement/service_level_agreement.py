@@ -530,9 +530,9 @@ def remove_sla_if_applied(doc):
 
 def process_sla(doc, sla):
 	if not doc.creation:
-		doc.creation = now_datetime(doc.get("owner"))
+		doc.creation = frappe.utils.now_datetime()
 		if doc.meta.has_field("service_level_agreement_creation"):
-			doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
+			doc.service_level_agreement_creation = frappe.utils.now_datetime()
 
 	doc.service_level_agreement = sla.name
 	doc.priority = doc.get("priority") or sla.default_priority
@@ -543,7 +543,7 @@ def process_sla(doc, sla):
 
 
 def handle_status_change(doc, apply_sla_for_resolution):
-	now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+	now_time = frappe.flags.current_time or frappe.utils.now_datetime()
 	prev_status = frappe.db.get_value(doc.doctype, doc.name, "status")
 
 	hold_statuses = get_hold_statuses(doc.service_level_agreement)
@@ -800,7 +800,7 @@ def reset_service_level_agreement(doctype: str, docname: str, reason: str, user:
 		}
 	).insert(ignore_permissions=True)
 
-	doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
+	doc.service_level_agreement_creation = frappe.utils.now_datetime()
 	doc.save()
 
 
