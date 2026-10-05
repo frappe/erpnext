@@ -149,6 +149,8 @@ class Task(NestedSet):
 	def validate_status(self):
 		if self.is_template and self.status != "Template":
 			self.status = "Template"
+		if self.status == "Overdue" and not (self.exp_end_date and getdate(self.exp_end_date) < getdate()):
+			self.status = "Working" if self.actual_time else "Open"
 		if self.status != self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
