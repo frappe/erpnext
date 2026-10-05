@@ -351,19 +351,61 @@ def get_conditions_join(filters, p):
 
 
 def get_standard_rated_expenses_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
-	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", "!=", 0])
-	query_filters.append(["docstatus", "=", 1])
-	try:
-		return (
-			frappe.db.get_all(
-				"Purchase Invoice", filters=query_filters, fields=["sum(base_total)"], as_list=True, limit=1
-			)[0][0]
-			or 0
+	"""Returns the net amount of the Purchase Invoice lines with UAE VAT, on invoices with recoverable VAT."""
+	i = frappe.qb.DocType("Purchase Invoice Item")
+	p = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(i)
+		.inner_join(p)
+		.on(i.parent == p.name)
+		.select(i.parent, i.item_code, i.item_name, i.base_net_amount)
+		.where((p.docstatus == 1) & (p.recoverable_standard_rated_expenses != 0))
+	)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
+
+	items_with_vat = get_purchase_items_with_vat(filters)
+	return sum(
+		flt(row.base_net_amount)
+		for row in query.run(as_dict=True)
+		if (row.parent, row.item_code or row.item_name) in items_with_vat
+	)
+
+
+def get_purchase_items_with_vat(filters):
+	"""Returns the (invoice, item) pairs of Purchase Invoices that carry UAE VAT.
+
+	Purchase Taxes and Charges.item_wise_tax_detail stores each item's share of the tax row,
+	keyed by item code (or item name), so an item with no VAT has a zero amount.
+	"""
+	p = frappe.qb.DocType("Purchase Invoice")
+	t = frappe.qb.DocType("Purchase Taxes and Charges")
+	uae_vat = frappe.qb.DocType("UAE VAT Account")
+	query = (
+		frappe.qb.from_(t)
+		.inner_join(p)
+		.on(t.parent == p.name)
+		.select(p.name, t.item_wise_tax_detail)
+		.where(
+			(t.parenttype == "Purchase Invoice")
+			& (p.docstatus == 1)
+			& (p.recoverable_standard_rated_expenses != 0)
+			& t.account_head.isin(
+				frappe.qb.from_(uae_vat)
+				.select(uae_vat.account)
+				.where(uae_vat.parent == filters.get("company"))
+			)
 		)
-	except (IndexError, TypeError):
-		return 0
+	)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
+
+	items_with_vat = set()
+	for invoice, item_wise_tax_detail in query.run():
+		for item, tax_detail in json.loads(item_wise_tax_detail or "{}").items():
+			if flt(tax_detail[1]):
+				items_with_vat.add((invoice, item))
+	return items_with_vat
 
 
 def get_standard_rated_expenses_tax(filters):
