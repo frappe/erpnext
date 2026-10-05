@@ -821,6 +821,21 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertFalse([item for item in delivery.items if item.is_finished_item])
 
+	def test_subcontracting_return_uses_delivery_expense_account(self):
+		so, scio = create_delivered_so_scio()
+		delivery_account = frappe.db.get_value(
+			"Stock Entry Detail",
+			{"scio_detail": scio.items[0].name, "docstatus": 1},
+			"expense_account",
+		)
+
+		fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+		fg_return.items[0].qty = 2
+		fg_return.items[0].t_warehouse = "_Test Warehouse - _TC"
+		fg_return.save()
+
+		self.assertEqual(fg_return.items[0].expense_account, delivery_account)
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()
