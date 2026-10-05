@@ -12,6 +12,7 @@ from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule impor
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 # test_records = frappe.get_test_records('Maintenance Schedule')
 
@@ -326,6 +327,25 @@ class TestMaintenanceSchedule(FrappeTestCase):
 
 		self.assertEqual(ms.docstatus, 1)
 		self.assertIn("was sold to Customer", str(frappe.get_message_log()))
+
+	def test_maintenance_manager_can_submit_schedule_with_serials(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(item_code)
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"})
+		deliver_serial_nos(item_code, [serial_no])
+		ms = make_maintenance_schedule(
+			item_code=item_code,
+			start_date=add_days(today(), 1),
+			serial_and_batch_bundle=make_maintenance_bundle(item_code, [serial_no]),
+		)
+		maintenance_manager = make_fenced_user("schedule-serial-manager@example.com", ["Maintenance Manager"])
+
+		with as_user(maintenance_manager):
+			ms.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial_no, "amc_expiry_date"), getdate(ms.items[0].end_date)
+		)
 
 
 def deliver_serial_nos(item_code, serial_nos, customer="_Test Customer"):
