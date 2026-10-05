@@ -36,6 +36,13 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		rfq.save()
 		self.assertEqual(rfq.items[0].qty, 1)
 
+	def test_rfq_zero_qty_cannot_be_forced_by_the_client(self):
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+		rfq.has_unit_price_items = 1
+
+		with self.assertRaises(InvalidQtyError):
+			rfq.save()
+
 	def test_rfq_zero_qty(self):
 		"""
 		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
