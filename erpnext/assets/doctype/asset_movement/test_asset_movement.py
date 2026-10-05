@@ -137,6 +137,31 @@ class TestAssetMovement(ERPNextTestSuite):
 		movement1.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
+	def test_location_and_custodian_are_resolved_separately(self):
+		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
+		asset = create_asset(location="Test Location", submit=1)
+		issue_and_transfer = [
+			("Issue", {"to_employee": employee}),
+			("Transfer", {"source_location": "Test Location", "target_location": "Test Location 2"}),
+		]
+		for purpose, row in issue_and_transfer:
+			create_asset_movement(
+				purpose=purpose, company=asset.company, assets=[{"asset": asset.name, **row}]
+			)
+
+		self.assertEqual(get_location_and_custodian(asset.name), ("Test Location 2", employee))
+
+		asset = create_asset(location="Test Location", submit=1)
+		movements = [
+			create_asset_movement(
+				purpose=purpose, company=asset.company, assets=[{"asset": asset.name, **row}]
+			)
+			for purpose, row in reversed(issue_and_transfer)
+		]
+		movements[0].cancel()
+
+		self.assertEqual(get_location_and_custodian(asset.name), ("Test Location", employee))
+
 	def test_movement_transaction_date(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.save().submit()
@@ -185,3 +210,7 @@ def create_asset_movement(**args):
 			movement.submit()
 
 	return movement
+
+
+def get_location_and_custodian(asset: str) -> tuple[str, str]:
+	return tuple(frappe.db.get_value("Asset", asset, ["location", "custodian"]))
