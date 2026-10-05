@@ -1,15 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import unittest
+from unittest.mock import patch
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.task.task import CircularReferenceError, ParentIsGroupError
 
 
-class TestTask(unittest.TestCase):
+class TestTask(FrappeTestCase):
 	def test_circular_reference(self):
 		task1 = create_task("_Test Task 1", add_days(nowdate(), -15), add_days(nowdate(), -10))
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
@@ -129,6 +130,22 @@ class TestTask(unittest.TestCase):
 		)
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
+
+	def test_actual_dates_outside_project_dates(self):
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+		frappe.db.set_value(
+			"Project",
+			project,
+			{"expected_start_date": add_days(nowdate(), -10), "expected_end_date": add_days(nowdate(), 5)},
+		)
+		task = create_task("_Test Task Late Work", nowdate(), add_days(nowdate(), 3))
+		task.act_start_date = task.act_end_date = add_days(nowdate(), 8)
+
+		with patch.dict(frappe.flags, {"in_test": False}):
+			task.validate_parent_project_dates()
+
+			task.exp_end_date = add_days(nowdate(), 8)
+			self.assertRaises(frappe.exceptions.InvalidDates, task.validate_parent_project_dates)
 
 
 def create_task(
