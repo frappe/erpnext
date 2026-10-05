@@ -62,46 +62,86 @@ def get_columns(filters):
 
 
 def get_all_shares(shareholder, date, company=None):
-	"""Share movements for the shareholder up to (and including) `date`, signed by direction:
-	shares received are positive, shares transferred/sold out are negative.
+	"""Share blocks the shareholder holds on `date`, each at the rate it was received at."""
+	holder = frappe.db.get_value("Shareholder", shareholder, ["name", "is_company", "company"], as_dict=True)
 
-	The shareholder and company predicates are pushed into the query so only the
-	relevant transfers are fetched instead of scanning the whole table."""
+	blocks = []
+	for transfer in get_transfers(holder, date, company):
+		if is_received(transfer, holder):
+			blocks.append(transfer)
+		else:
+			blocks = get_remaining_blocks(blocks, transfer)
+
+	return blocks
+
+
+def get_transfers(holder, date, company=None):
 	share_transfer = frappe.qb.DocType("Share Transfer")
+	is_involved = (share_transfer.to_shareholder == holder.name) | (
+		share_transfer.from_shareholder == holder.name
+	)
+	if holder.is_company:
+		is_involved |= share_transfer.transfer_type.isin(["Issue", "Purchase"]) & (
+			share_transfer.company == holder.company
+		)
+
 	query = (
 		frappe.qb.from_(share_transfer)
 		.select(
+			share_transfer.transfer_type,
 			share_transfer.share_type,
+			share_transfer.from_no,
+			share_transfer.to_no,
 			share_transfer.no_of_shares,
 			share_transfer.rate,
 			share_transfer.amount,
-			share_transfer.from_shareholder,
 			share_transfer.to_shareholder,
 		)
-		.where((share_transfer.docstatus == 1) & (share_transfer.date <= date))
-		.where(
-			(share_transfer.to_shareholder == shareholder) | (share_transfer.from_shareholder == shareholder)
-		)
+		.where((share_transfer.docstatus == 1) & (share_transfer.date <= date) & is_involved)
 		.orderby(share_transfer.date)
+		.orderby(share_transfer.creation)
 	)
 
 	if company:
 		query = query.where(share_transfer.company == company)
 
-	transfers = query.run(as_dict=True)
+	return query.run(as_dict=True)
 
-	shares = []
-	for transfer in transfers:
-		if transfer.to_shareholder == shareholder:
-			shares.append(transfer)
-		elif transfer.from_shareholder == shareholder:
-			shares.append(
-				frappe._dict(
-					share_type=transfer.share_type,
-					no_of_shares=-transfer.no_of_shares,
-					rate=transfer.rate,
-					amount=-transfer.amount,
-				)
-			)
 
-	return shares
+def is_received(transfer, holder):
+	if holder.is_company and transfer.transfer_type == "Issue":
+		return True
+
+	return transfer.to_shareholder == holder.name
+
+
+def get_remaining_blocks(blocks, transfer):
+	"""Blocks left after `transfer` takes its share numbers out; split blocks keep their rate."""
+	remaining = []
+	for block in blocks:
+		if (
+			block.share_type != transfer.share_type
+			or block.to_no < transfer.from_no
+			or block.from_no > transfer.to_no
+		):
+			remaining.append(block)
+			continue
+
+		if block.from_no < transfer.from_no:
+			remaining.append(get_block(block, block.from_no, transfer.from_no - 1))
+		if block.to_no > transfer.to_no:
+			remaining.append(get_block(block, transfer.to_no + 1, block.to_no))
+
+	return remaining
+
+
+def get_block(block, from_no, to_no):
+	no_of_shares = to_no - from_no + 1
+	return frappe._dict(
+		share_type=block.share_type,
+		from_no=from_no,
+		to_no=to_no,
+		no_of_shares=no_of_shares,
+		rate=block.rate,
+		amount=no_of_shares * block.rate,
+	)
