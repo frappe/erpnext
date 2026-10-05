@@ -21,7 +21,12 @@ class AssetShiftFactor(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_shift_factor()
 		self.validate_default()
+
+	def validate_shift_factor(self):
+		if self.shift_factor <= 0:
+			frappe.throw(_("Shift Factor must be greater than zero."))
 
 	def validate_default(self):
 		if self.default:
