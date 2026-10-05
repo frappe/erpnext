@@ -175,7 +175,16 @@ def refresh_scorecards():
 	"""
 	scorecards = frappe.get_list("Supplier Scorecard", fields=["name"], pluck="name", limit_page_length=0)
 	for sc_name in scorecards:
-		make_all_scorecards(sc_name)
+		frappe.db.savepoint("refresh_scorecard")
+		try:
+			make_all_scorecards(sc_name)
+		except Exception:
+			frappe.db.rollback(save_point="refresh_scorecard")
+			frappe.log_error(
+				_("Supplier Scorecard refresh failed"),
+				reference_doctype="Supplier Scorecard",
+				reference_name=sc_name,
+			)
 
 
 @frappe.whitelist(methods=["POST"])
