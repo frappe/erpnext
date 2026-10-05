@@ -67,6 +67,18 @@ frappe.query_reports["Profitability Analysis"] = {
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 		},
 		{
+			fieldname: "finance_book",
+			label: __("Finance Book"),
+			fieldtype: "Link",
+			options: "Finance Book",
+		},
+		{
+			fieldname: "include_default_book_entries",
+			label: __("Include Default FB Entries"),
+			fieldtype: "Check",
+			default: 1,
+		},
+		{
 			fieldname: "show_zero_values",
 			label: __("Show zero values"),
 			fieldtype: "Check",
