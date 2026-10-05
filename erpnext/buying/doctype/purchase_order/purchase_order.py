@@ -524,6 +524,7 @@ class PurchaseOrder(BuyingController):
 		if self.has_drop_ship_item():
 			self.set_received_qty_to_zero_for_drop_ship_items()
 			self.update_receiving_percentage()
+			self.update_delivered_qty_in_sales_order()
 
 		self.update_reserved_qty_for_subcontract()
 		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
