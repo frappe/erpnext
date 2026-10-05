@@ -1064,7 +1064,7 @@ class GrossProfitGenerator:
 			.inner_join(purchase_invoice)
 			.on(purchase_invoice.name == purchase_invoice_item.parent)
 			.select(
-				purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor,
+				purchase_invoice_item.base_net_rate / purchase_invoice_item.conversion_factor,
 			)
 			.where(purchase_invoice.docstatus == 1)
 			.where(purchase_invoice.posting_date <= self.filters.to_date)
