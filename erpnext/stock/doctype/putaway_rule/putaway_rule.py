@@ -4,7 +4,6 @@
 
 import copy
 import json
-from collections import defaultdict
 
 import frappe
 from frappe import _
