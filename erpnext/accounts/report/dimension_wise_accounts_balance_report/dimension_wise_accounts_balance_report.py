@@ -192,7 +192,7 @@ def get_dimensions(filters):
 	if meta.has_field("company"):
 		query_filters = {"company": filters.get("company")}
 
-	return frappe.get_all(filters.get("dimension"), filters=query_filters, pluck="name")
+	return frappe.get_list(filters.get("dimension"), filters=query_filters, pluck="name")
 
 
 def get_columns(dimension_list):
