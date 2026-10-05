@@ -109,7 +109,6 @@ class ImportSupplierInvoice(Document):
 			"bill_date": get_datetime_str(line.Data.text),
 			"bill_no": line.Numero.text,
 			"is_return": line.TipoDocumento.text in RETURN_DOCUMENT_TYPES,
-			"total_discount": 0,
 			"items": [],
 			"buying_price_list": self.default_buying_price_list,
 		}
@@ -143,6 +142,10 @@ class ImportSupplierInvoice(Document):
 		if invoices_args["is_return"] or (rate < 0 and line_total < 0):
 			qty = -abs(qty)
 
+		# PrezzoTotale already includes the line's discounts (SC) and surcharges (MG)
+		if line.find("ScontoMaggiorazione") and qty:
+			rate = line_total / qty
+
 		line_str = re.sub("[^A-Za-z0-9]+", "-", line.Descrizione.text)
 		invoices_args["items"].append(
 			{
@@ -156,10 +159,6 @@ class ImportSupplierInvoice(Document):
 				"tax_rate": flt(line.AliquotaIVA.text) if line.find("AliquotaIVA") else 0,
 			}
 		)
-
-		for disc_line in line.find_all("ScontoMaggiorazione"):
-			if disc_line.find("Percentuale"):
-				invoices_args["total_discount"] += flt((flt(disc_line.Percentuale.text) / 100) * (rate * qty))
 
 	@frappe.whitelist()
 	def process_file_data(self):
@@ -395,11 +394,6 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 	pi.set_missing_values()
 	pi.insert(ignore_mandatory=True)
 
-	# if discount exists in file, apply any discount on grand total
-	if args.total_discount > 0:
-		pi.apply_discount_on = "Grand Total"
-		pi.discount_amount = args.total_discount
-		pi.save()
 	# adjust payment amount to match with grand total calculated
 	calc_total = 0
 	adj = 0

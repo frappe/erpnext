@@ -82,6 +82,21 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 			self.assertEqual([row.qty for row in invoice.items], [-1, -1])
 			self.assertEqual(invoice.grand_total, -97.60)
 
+	def test_line_surcharges_and_amount_discounts(self):
+		surcharge = (
+			"<ScontoMaggiorazione><Tipo>MG</Tipo><Percentuale>10.00</Percentuale></ScontoMaggiorazione>"
+		)
+		discount = "<ScontoMaggiorazione><Tipo>SC</Tipo><Importo>5.00</Importo></ScontoMaggiorazione>"
+		lines = [
+			make_line("Widget", "100.00", "110.00", qty="1.00", discounts=surcharge),
+			make_line("Gadget", "50.00", "90.00", qty="2.00", discounts=discount),
+		]
+		self.import_files({"d.xml": make_invoice_xml("ISI-DISC", lines, tax="44.00")})
+
+		invoice = self.get_invoice("ISI-DISC")
+		self.assertEqual([row.amount for row in invoice.items], [110, 90])
+		self.assertEqual((invoice.net_total, invoice.grand_total), (200, 244))
+
 	def import_files(self, files: dict[str, str | bytes]):
 		doc = frappe.get_doc(
 			{
