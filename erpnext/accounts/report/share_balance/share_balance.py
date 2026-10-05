@@ -77,11 +77,10 @@ def get_all_shares(shareholder, date, company=None):
 			share_transfer.amount,
 			share_transfer.from_shareholder,
 			share_transfer.to_shareholder,
+			share_transfer.transfer_type,
 		)
 		.where((share_transfer.docstatus == 1) & (share_transfer.date <= date))
-		.where(
-			(share_transfer.to_shareholder == shareholder) | (share_transfer.from_shareholder == shareholder)
-		)
+		.where(get_shareholder_condition(share_transfer, shareholder))
 		.orderby(share_transfer.date)
 	)
 
@@ -92,9 +91,10 @@ def get_all_shares(shareholder, date, company=None):
 
 	shares = []
 	for transfer in transfers:
-		if transfer.to_shareholder == shareholder:
+		# an Issue adds to the company shareholder too, which is not on the transfer
+		if transfer.to_shareholder == shareholder or transfer.transfer_type == "Issue":
 			shares.append(transfer)
-		elif transfer.from_shareholder == shareholder:
+		else:
 			shares.append(
 				frappe._dict(
 					share_type=transfer.share_type,
@@ -105,3 +105,18 @@ def get_all_shares(shareholder, date, company=None):
 			)
 
 	return shares
+
+
+def get_shareholder_condition(share_transfer, shareholder: str):
+	"""Transfers that change the shareholder's register, including Issues and Purchases
+	of its company when it is the company shareholder."""
+	condition = (share_transfer.to_shareholder == shareholder) | (
+		share_transfer.from_shareholder == shareholder
+	)
+	is_company, company = frappe.db.get_value("Shareholder", shareholder, ["is_company", "company"])
+	if is_company:
+		condition |= (share_transfer.company == company) & share_transfer.transfer_type.isin(
+			["Issue", "Purchase"]
+		)
+
+	return condition

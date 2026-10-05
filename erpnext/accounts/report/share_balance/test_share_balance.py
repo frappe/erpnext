@@ -171,6 +171,48 @@ class TestShareBalanceReport(ERPNextTestSuite):
 		self.assertEqual(self.get_row(date="2026-06-05")[2], 100)  # only the first issue
 		self.assertEqual(self.get_row(date="2026-06-15")[2], 200)  # both issues
 
+	def test_company_shareholder_holds_issued_shares_less_buy_backs(self):
+		preference = create_share_type("_Test Share Balance Preference")
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-01",
+		)
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=preference,
+			from_no=1,
+			to_no=10,
+			no_of_shares=10,
+			rate=50,
+			date="2026-06-01",
+		)
+		create_share_transfer(
+			transfer_type="Purchase",
+			from_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=10,
+			no_of_shares=10,
+			rate=10,
+			date="2026-06-10",
+		)
+		company_shareholder = frappe.db.get_value("Shareholder", {"company": COMPANY, "is_company": 1})
+
+		self.assertEqual(self.get_row("2026-06-15", company_shareholder)[2:], [90, 10, 900])
+		self.assertEqual(self.get_row("2026-06-15")[2:], [90, 10, 900])
+
+		data = execute(
+			frappe._dict({"date": "2026-06-15", "company": COMPANY, "shareholder": company_shareholder})
+		)[1]
+		self.assertIn([company_shareholder, preference, 10, 50, 500], data)
+
 	def get_row(self, date, shareholder=None):
 		filters = frappe._dict(
 			{"date": date, "company": COMPANY, "shareholder": shareholder or self.shareholder}
