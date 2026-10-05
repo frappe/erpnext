@@ -4,6 +4,7 @@
 
 import frappe
 
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_all_scorecards
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -11,6 +12,9 @@ class TestSupplierScorecard(ERPNextTestSuite):
 	def test_create_scorecard(self):
 		doc = make_supplier_scorecard().insert()
 		self.assertEqual(doc.name, valid_scorecard[0].get("supplier"))
+
+	def test_make_all_scorecards_is_not_whitelisted(self):
+		self.assertRaises(frappe.PermissionError, frappe.is_whitelisted, make_all_scorecards)
 
 	def test_criteria_weight(self):
 		my_doc = make_supplier_scorecard()
