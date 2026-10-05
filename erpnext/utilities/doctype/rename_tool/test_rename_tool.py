@@ -16,7 +16,6 @@ class TestRenameTool(ERPNextTestSuite):
 		for patched in (
 			patch("frappe.enqueue", side_effect=run_job_inline),
 			patch.object(frappe.db, "commit"),
-			patch.object(frappe.db, "rollback"),
 		):
 			patched.start()
 			self.addCleanup(patched.stop)
