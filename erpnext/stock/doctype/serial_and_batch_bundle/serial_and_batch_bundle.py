@@ -2130,6 +2130,8 @@ def make_serial_nos(item_code, serial_nos):
 	if not serial_nos:
 		return
 
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
+
 	serial_nos_details = []
 	user = frappe.session.user
 	for serial_no in serial_nos:
@@ -2179,6 +2181,8 @@ def make_batch_nos(item_code, batch_nos):
 	batch_nos = list(set(batch_nos) - set(existing_batches))
 	if not batch_nos:
 		return
+
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	batch_nos_details = []
 	user = frappe.session.user
@@ -3559,12 +3563,14 @@ def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, ba
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exists").format(serial_no))
 
+		frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 		make_serial_no(serial_no, item_code)
 
 	if batch_no and not frappe.db.exists("Batch", batch_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 
+		frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 		make_batch_no(batch_no, item_code)
 
 
