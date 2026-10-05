@@ -149,7 +149,6 @@ class MaintenanceSchedule(TransactionBase):
 				event = frappe.get_doc(
 					{
 						"doctype": "Event",
-						"owner": email_map.get(d.sales_person, self.owner),
 						"subject": description,
 						"description": description,
 						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
@@ -157,6 +156,15 @@ class MaintenanceSchedule(TransactionBase):
 					}
 				)
 				event.add_participant(self.doctype, self.name)
+				if email_map.get(d.sales_person):
+					event.append(
+						"event_participants",
+						{
+							"reference_doctype": "Sales Person",
+							"reference_docname": d.sales_person,
+							"email": email_map[d.sales_person],
+						},
+					)
 				event.insert(ignore_permissions=1)
 
 		self.db_set("status", "Submitted")

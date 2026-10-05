@@ -240,6 +240,22 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 
 		self.assertEqual(len(get_events(ms)), len(ms.schedules))
 
+	def test_events_are_visible_to_the_sales_person(self):
+		ms = make_maintenance_schedule()
+		ms.items[0].sales_person = "_Test Sales Person"
+		ms.save()
+		ms.submit()
+		events = frappe.get_all(
+			"Event Participants",
+			filters={"reference_doctype": ms.doctype, "reference_docname": ms.name},
+			pluck="parent",
+		)
+
+		with self.set_user("test@example.com"):
+			visible = frappe.get_list("Event", filters={"name": ("in", events)}, pluck="name")
+
+		self.assertEqual(len(visible), len(ms.schedules))
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
