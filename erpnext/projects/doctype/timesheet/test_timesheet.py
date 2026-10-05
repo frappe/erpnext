@@ -331,6 +331,29 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.time_logs[0].billing_rate, 500)
 		self.assertEqual(timesheet.time_logs[0].costing_rate, 300)
 
+	def test_amounts_follow_the_rates_without_an_activity_type(self):
+		from_time = now_datetime()
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"time_logs": [
+					{
+						"from_time": from_time,
+						"to_time": add_to_date(from_time, hours=2),
+						"is_billable": 1,
+						"billing_rate": 100,
+						"billing_amount": 50000,
+						"costing_rate": 10,
+						"costing_amount": 1,
+					}
+				],
+			}
+		).insert()
+
+		self.assertEqual(timesheet.total_billable_amount, 200)
+		self.assertEqual(timesheet.total_costing_amount, 20)
+
 
 def make_timesheet(
 	employee,

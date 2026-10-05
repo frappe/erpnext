@@ -297,33 +297,30 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type or data.is_billable:
-				rate = _get_activity_cost(self.employee, data.activity_type, self.currency)
-				hours = data.billing_hours or 0
-				costing_hours = data.hours or 0
-				if rate:
-					data.billing_rate = (
-						flt(rate.get("billing_rate")) if flt(data.billing_rate) == 0 else data.billing_rate
-					)
-					data.costing_rate = (
-						flt(rate.get("costing_rate")) if flt(data.costing_rate) == 0 else data.costing_rate
-					)
-					data.billing_amount = data.billing_rate * hours
-					data.costing_amount = data.costing_rate * costing_hours
+			rate = (
+				_get_activity_cost(self.employee, data.activity_type, self.currency)
+				if data.activity_type
+				else {}
+			)
+			data.billing_rate = flt(data.billing_rate) or flt(rate.get("billing_rate"))
+			data.costing_rate = flt(data.costing_rate) or flt(rate.get("costing_rate"))
 
-					exchange_rate = flt(self.get("exchange_rate")) or 1.0
-					data.base_billing_rate = flt(
-						data.billing_rate * exchange_rate, data.precision("base_billing_rate")
-					)
-					data.base_costing_rate = flt(
-						data.costing_rate * exchange_rate, data.precision("base_costing_rate")
-					)
-					data.base_billing_amount = flt(
-						data.billing_amount * exchange_rate, data.precision("base_billing_amount")
-					)
-					data.base_costing_amount = flt(
-						data.costing_amount * exchange_rate, data.precision("base_costing_amount")
-					)
+			data.billing_amount = data.billing_rate * flt(data.billing_hours)
+			data.costing_amount = data.costing_rate * flt(data.hours)
+
+			exchange_rate = flt(self.get("exchange_rate")) or 1.0
+			data.base_billing_rate = flt(
+				data.billing_rate * exchange_rate, data.precision("base_billing_rate")
+			)
+			data.base_costing_rate = flt(
+				data.costing_rate * exchange_rate, data.precision("base_costing_rate")
+			)
+			data.base_billing_amount = flt(
+				data.billing_amount * exchange_rate, data.precision("base_billing_amount")
+			)
+			data.base_costing_amount = flt(
+				data.costing_amount * exchange_rate, data.precision("base_costing_amount")
+			)
 
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:
