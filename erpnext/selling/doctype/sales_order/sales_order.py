@@ -24,6 +24,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -2189,6 +2190,7 @@ def get_stock_reservation_status():
 
 @frappe.whitelist()
 def make_subcontracting_inward_order(source_name, target_doc=None):
+	check_on_hold_or_closed_status("Sales Order", source_name)
 	if not is_so_fully_subcontracted(source_name):
 		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:
