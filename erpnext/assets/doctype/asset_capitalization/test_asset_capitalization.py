@@ -405,14 +405,15 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		item = create_item(
 			"_Test Grouped FIFO Rows Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=1
 		)
-		target_item = create_fixed_asset_item("_Test Grouped FIFO Rows Target Item")
+		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
 
 		make_purchase_receipt(item_code=item.item_code, qty=1, rate=100, company=company, warehouse=warehouse)
 		make_purchase_receipt(item_code=item.item_code, qty=1, rate=200, company=company, warehouse=warehouse)
 
 		asset_capitalization = frappe.new_doc("Asset Capitalization")
 		asset_capitalization.company = company
-		asset_capitalization.target_item_code = target_item.name
+		asset_capitalization.target_asset = target_asset.name
+		asset_capitalization.target_item_code = target_asset.item_code
 		asset_capitalization.append(
 			"stock_items", {"item_code": item.item_code, "warehouse": warehouse, "stock_qty": 1}
 		)
@@ -730,6 +731,10 @@ class TestAssetCapitalizationValidation(ERPNextTestSuite):
 		# _Test Item is a stock item, not a fixed asset
 		doc = self.make_capitalization(target_item_code="_Test Item")
 		self.assertRaises(frappe.ValidationError, doc.validate_target_item)
+
+	def test_target_asset_is_mandatory(self):
+		doc = self.make_capitalization(target_item_code="Macbook Pro")
+		self.assertRaises(frappe.MandatoryError, doc.validate_target_asset)
 
 	def test_consumed_stock_row_rejects_a_non_stock_item(self):
 		doc = self.make_capitalization()

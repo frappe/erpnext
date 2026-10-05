@@ -78,7 +78,7 @@ class AssetCapitalization(StockController):
 		set_posting_time: DF.Check
 		stock_items: DF.Table[AssetCapitalizationStockItem]
 		stock_items_total: DF.Currency
-		target_asset: DF.Link | None
+		target_asset: DF.Link
 		target_asset_name: DF.Data | None
 		target_fixed_asset_account: DF.Link | None
 		target_incoming_rate: DF.Currency
@@ -221,35 +221,31 @@ class AssetCapitalization(StockController):
 		self.validate_item(target_item)
 
 	def validate_target_asset(self):
-		if self.target_asset:
-			target_asset = self.get_asset_for_validation(self.target_asset)
+		if not self.target_asset:
+			frappe.throw(_("Target Asset is mandatory"), frappe.MandatoryError)
 
-			if not target_asset.asset_type == "Composite Asset":
-				frappe.throw(_("Target Asset {0} needs to be a composite asset").format(target_asset.name))
+		target_asset = self.get_asset_for_validation(self.target_asset)
 
-			if target_asset.item_code != self.target_item_code:
-				frappe.throw(
-					_("Asset {0} does not belong to Item {1}").format(
-						self.target_asset, self.target_item_code
-					)
-				)
+		if not target_asset.asset_type == "Composite Asset":
+			frappe.throw(_("Target Asset {0} needs to be a composite asset").format(target_asset.name))
 
-			if target_asset.status in ("Scrapped", "Sold", "Capitalized"):
-				frappe.throw(
-					_("Target Asset {0} cannot be {1}").format(target_asset.name, target_asset.status)
-				)
+		if target_asset.item_code != self.target_item_code:
+			frappe.throw(
+				_("Asset {0} does not belong to Item {1}").format(self.target_asset, self.target_item_code)
+			)
 
-			if target_asset.docstatus == 1:
-				frappe.throw(_("Target Asset {0} cannot be submitted").format(target_asset.name))
-			elif target_asset.docstatus == 2:
-				frappe.throw(_("Target Asset {0} cannot be cancelled").format(target_asset.name))
+		if target_asset.status in ("Scrapped", "Sold", "Capitalized"):
+			frappe.throw(_("Target Asset {0} cannot be {1}").format(target_asset.name, target_asset.status))
 
-			if target_asset.company != self.company:
-				frappe.throw(
-					_("Target Asset {0} does not belong to company {1}").format(
-						target_asset.name, self.company
-					)
-				)
+		if target_asset.docstatus == 1:
+			frappe.throw(_("Target Asset {0} cannot be submitted").format(target_asset.name))
+		elif target_asset.docstatus == 2:
+			frappe.throw(_("Target Asset {0} cannot be cancelled").format(target_asset.name))
+
+		if target_asset.company != self.company:
+			frappe.throw(
+				_("Target Asset {0} does not belong to company {1}").format(target_asset.name, self.company)
+			)
 
 	def validate_consumed_stock_item(self):
 		for d in self.stock_items:
