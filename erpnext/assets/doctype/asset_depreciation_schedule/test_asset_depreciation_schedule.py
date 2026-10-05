@@ -1266,6 +1266,15 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		schedule = get_depr_schedule(asset.name, "Active")
 		self.assertEqual([d.depreciation_amount for d in schedule if not d.journal_entry], [90] * 7)
 
+	def test_active_schedule_is_cancelled_only_with_asset(self):
+		asset = create_monthly_asset()
+		schedule = get_asset_depr_schedule_doc(asset.name, "Active")
+		self.assertRaises(frappe.ValidationError, schedule.cancel)
+
+		asset.reload()
+		asset.cancel()
+		self.assertEqual(frappe.db.get_value(schedule.doctype, schedule.name, "status"), "Cancelled")
+
 
 def create_monthly_asset(**args):
 	defaults = {

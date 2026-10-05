@@ -141,6 +141,17 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 				)
 			)
 
+	def before_cancel(self):
+		if self.flags.should_not_cancel_depreciation_entries:
+			return
+
+		if frappe.db.get_value("Asset", self.asset, "docstatus") == 1:
+			frappe.throw(
+				_(
+					"Cannot cancel the depreciation schedule of submitted Asset {0}. Cancel the Asset instead."
+				).format(get_link_to_form("Asset", self.asset))
+			)
+
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 		if not self.flags.should_not_cancel_depreciation_entries:
