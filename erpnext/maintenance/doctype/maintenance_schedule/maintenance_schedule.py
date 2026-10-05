@@ -362,6 +362,7 @@ class MaintenanceSchedule(TransactionBase):
 					"amc_expiry_date",
 					"warehouse",
 					"item_code",
+					"customer",
 				],
 				as_dict=1,
 			)
@@ -394,8 +395,7 @@ class MaintenanceSchedule(TransactionBase):
 					)
 				)
 
-			if sr_details.warehouse:
-				continue
+			validate_serial_no_for_customer(sr_details, self.customer)
 
 			delivery_date = delivery_dates.get(serial_no)
 			if delivery_date and getdate(delivery_date) >= getdate(amc_start_date):
@@ -530,6 +530,25 @@ class MaintenanceSchedule(TransactionBase):
 					and s_date == formatdate(schedule.scheduled_date, "dd-mm-yyyy")
 				):
 					return schedule.name
+
+
+def validate_serial_no_for_customer(serial, customer):
+	"""Refuse a serial still in stock; warn when it was sold to another customer."""
+	number = frappe.bold(escape_html(serial.serial_no))
+	if serial.warehouse:
+		frappe.throw(
+			_("Serial No {0} is still in stock in Warehouse {1}").format(
+				number, frappe.bold(serial.warehouse)
+			)
+		)
+	if serial.customer and serial.customer != customer:
+		frappe.msgprint(
+			_("Serial No {0} was sold to Customer {1}, not {2}").format(
+				number, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(customer))
+			),
+			title=_("Different Customer"),
+			indicator="orange",
+		)
 
 
 @frappe.whitelist()

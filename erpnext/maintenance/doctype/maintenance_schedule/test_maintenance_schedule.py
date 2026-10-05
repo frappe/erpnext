@@ -112,7 +112,10 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 
 		# With serial no. set in schedule -> returns serial nos.
 		make_serial_item_with_serial(self, item_code)
-		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001, TEST002")
+		deliver_serial_nos(item_code, ["TEST001", "TEST002"])
+		ms = make_maintenance_schedule(
+			item_code=item_code, serial_no="TEST001, TEST002", start_date=add_days(today(), 1)
+		)
 		ms.submit()
 
 		s_item = ms.schedules[0]
@@ -207,7 +210,10 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		serial = frappe.db.get_value(
 			"Serial No", {"item_code": item_code, "status": "Active"}, ["name", "serial_no"], as_dict=True
 		)
-		first = make_maintenance_schedule(item_code=item_code, serial_no=serial.serial_no)
+		deliver_serial_nos(item_code, [serial.serial_no])
+		first = make_maintenance_schedule(
+			item_code=item_code, serial_no=serial.serial_no, start_date=add_days(today(), 1)
+		)
 		first.submit()
 		renewal = make_maintenance_schedule(
 			item_code=item_code, serial_no=serial.serial_no, start_date=add_days(first.items[0].end_date, 1)
@@ -320,6 +326,36 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 			start_date="2027-01-01", end_date="2027-03-31", periodicity="Quarterly", no_of_visits=1
 		)
 		self.assertEqual(getdate(ms.items[0].end_date), getdate("2027-03-31"))
+
+	def test_serial_in_stock_is_refused(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		number = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"}, "serial_no")
+		ms = make_maintenance_schedule(item_code=item_code, serial_no=number)
+
+		self.assertRaisesRegex(frappe.ValidationError, "still in stock", ms.submit)
+
+	def test_serial_sold_to_another_customer_is_allowed_with_warning(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		number = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"}, "serial_no")
+		deliver_serial_nos(item_code, [number], customer="_Test Customer 1")
+		ms = make_maintenance_schedule(item_code=item_code, serial_no=number, start_date=add_days(today(), 1))
+		frappe.clear_messages()
+
+		ms.submit()
+
+		self.assertEqual(ms.docstatus, 1)
+		self.assertIn("was sold to Customer", str(frappe.get_message_log()))
+
+
+def deliver_serial_nos(item_code, numbers, customer="_Test Customer"):
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+	serial_nos = [
+		frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": number}) for number in numbers
+	]
+	create_delivery_note(item_code=item_code, serial_no=serial_nos, qty=len(serial_nos), customer=customer)
 
 
 def make_serial_item_with_serial(self, item_code):
