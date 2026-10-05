@@ -41,6 +41,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
+	get_last_depreciation_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
@@ -406,6 +407,8 @@ class SalesInvoice(SellingController):
 							)
 						elif asset_status == "Sold" and not self.is_return:
 							frappe.throw(_("Row #{0}: Asset {1} is already sold").format(d.idx, d.asset))
+
+						self.validate_asset_sale_date(d)
 					elif not self.return_against:
 						frappe.throw(
 							_("Row #{0}: Return Against is required for returning asset").format(d.idx)
@@ -415,6 +418,15 @@ class SalesInvoice(SellingController):
 						_("Row #{0}: You must select an Asset for Item {1}.").format(d.idx, d.item_code),
 						title=_("Missing Asset"),
 					)
+
+	def validate_asset_sale_date(self, item) -> None:
+		last_depreciation_date = get_last_depreciation_date(item.asset)
+		if last_depreciation_date and getdate(self.posting_date) < last_depreciation_date:
+			frappe.throw(
+				_("Row #{0}: Asset {1} cannot be sold before its last depreciation entry dated {2}").format(
+					item.idx, item.asset, frappe.format(last_depreciation_date, "Date")
+				)
+			)
 
 	def validate_item_cost_centers(self):
 		for item in self.items:

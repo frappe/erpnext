@@ -460,6 +460,28 @@ def scrap_asset(asset_name, scrap_date=None):
 	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
 
 
+def get_last_depreciation_date(asset_name, finance_book: str | None = None):
+	depreciation = frappe.qb.DocType("Asset Depreciation Schedule")
+	depreciation_schedule = frappe.qb.DocType("Depreciation Schedule")
+
+	query = (
+		frappe.qb.from_(depreciation)
+		.join(depreciation_schedule)
+		.on(depreciation.name == depreciation_schedule.parent)
+		.select(depreciation_schedule.schedule_date)
+		.where(depreciation.asset == asset_name)
+		.where(depreciation.docstatus == 1)
+		.where(depreciation_schedule.journal_entry != "")
+		.orderby(depreciation_schedule.schedule_date, order=Order.desc)
+		.limit(1)
+	)
+	if finance_book:
+		query = query.where(depreciation.finance_book == finance_book)
+
+	last_depreciation_date = query.run()
+	return last_depreciation_date[0][0] if last_depreciation_date else None
+
+
 def validate_scrap_date(scrap_date, today_date, purchase_date, calculate_depreciation, asset_name):
 	if scrap_date > today_date:
 		frappe.throw(_("Future date is not allowed"))
