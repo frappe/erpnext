@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_lo
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	SalesInvoice,
+	get_discounting_status,
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
@@ -615,7 +616,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) < getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
@@ -623,7 +624,7 @@ class POSInvoice(SalesInvoice):
 				elif (
 					0 < flt(self.outstanding_amount) < total
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Partly Paid and Discounted"
 				elif 0 < flt(self.outstanding_amount) < total:
@@ -632,7 +633,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
