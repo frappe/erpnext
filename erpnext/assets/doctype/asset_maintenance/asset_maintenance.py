@@ -171,7 +171,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 				"due_date": task.next_due_date,
 			}
 		)
-		asset_maintenance_log.insert()
+		asset_maintenance_log.insert(ignore_permissions=True)
 	else:
 		maintenance_log = frappe.get_doc("Asset Maintenance Log", asset_maintenance_log)
 		maintenance_log.assign_to_name = task.assign_to_name
@@ -180,7 +180,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 		maintenance_log.periodicity = str(task.periodicity)
 		maintenance_log.maintenance_type = task.maintenance_type
 		maintenance_log.due_date = task.next_due_date
-		maintenance_log.save()
+		maintenance_log.save(ignore_permissions=True)
 
 
 @frappe.whitelist()

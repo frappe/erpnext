@@ -160,6 +160,24 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		self.assertEqual(statuses.pop(completed_log.name), "Completed")
 		self.assertEqual(set(statuses.values()), {"Cancelled"})
 
+	def test_quality_manager_can_save_asset_maintenance(self):
+		user = "test_asset_maintenance_qm@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "QM", "roles": [{"role": "Quality Manager"}]}
+			).insert()
+
+		frappe.set_user(user)
+		try:
+			asset_maintenance = self.make_asset_maintenance()
+			asset_maintenance.save()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertTrue(
+			frappe.db.exists("Asset Maintenance Log", {"asset_maintenance": asset_maintenance.name})
+		)
+
 	def submit_asset(self):
 		self.asset_doc.update(
 			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}
