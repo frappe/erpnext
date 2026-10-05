@@ -5011,6 +5011,7 @@ def update_child_qty_rate(
 
 	elif parent_doctype == "Supplier Quotation":
 		parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), rfqs_before_update)
+		parent.set_status(update=True)
 
 	elif parent_doctype == "Quotation":
 		parent.set_status(update=True)
