@@ -68,6 +68,13 @@ class TestSubcontractedItemToBeTransferred(ERPNextTestSuite):
 		result = run("Subcontracted Raw Materials To Be Transferred", filters=filters)["result"]
 		self.assertIn(sco.name, {row["subcontract_order"] for row in result if isinstance(row, dict)})
 
+	def test_closed_order_is_not_listed(self):
+		sco = make_subcontracting_order()
+		sco.update_status("Closed")
+
+		data = execute(get_report_filters(sco))[1]
+		self.assertNotIn(sco.name, {row["subcontract_order"] for row in data})
+
 
 def transfer_subcontracted_raw_materials(sco):
 	# Order of supplied items fetched in SCO is flaky
