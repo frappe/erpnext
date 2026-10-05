@@ -539,6 +539,17 @@ class TestProject(ERPNextTestSuite):
 				hourly_reminder()
 			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
 
+	def test_twice_daily_reminder_waits_for_the_second_time(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="09:00:00", second_email="17:00:00"
+		)
+		for time, updates in (("10:00:00", 1), ("11:00:00", 1), ("17:30:00", 2)):
+			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				twice_daily_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
 	def test_costing_rollup_from_sales_documents(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.projects.doctype.project.project import update_costing_and_billing

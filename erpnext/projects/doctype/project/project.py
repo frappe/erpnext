@@ -629,19 +629,16 @@ def daily_reminder():
 	projects = get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.get("daily_time_to_send"), "Daily"):
+		if allow_to_make_project_update(project.name, project.daily_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
 def twice_daily_reminder():
-	fields = ["first_email", "second_email"]
-	projects = get_projects_for_collect_progress("Twice Daily", fields)
-	fields.remove("name")
+	projects = get_projects_for_collect_progress("Twice Daily", ["first_email", "second_email"])
 
 	for project in projects:
-		for d in fields:
-			if allow_to_make_project_update(project.name, project.get(d), "Twicely"):
-				send_project_update_email_to_users(project.name)
+		if allow_to_make_project_update(project.name, project.first_email, project.second_email):
+			send_project_update_email_to_users(project.name)
 
 
 def weekly_reminder():
@@ -653,19 +650,15 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if allow_to_make_project_update(project.name, project.get("weekly_time_to_send"), "Weekly"):
+		if allow_to_make_project_update(project.name, project.weekly_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
-def allow_to_make_project_update(project, time, frequency):
-	data = frappe.get_all("Project Update", filters={"project": project, "date": today()}, pluck="name")
-
-	# len(data) > 1 condition is checked for twicely frequency
-	if data and (frequency in ["Daily", "Weekly"] or len(data) > 1):
-		return False
-
-	if get_time(nowtime()) >= get_time(time):
-		return True
+def allow_to_make_project_update(project, *times):
+	"""Whether fewer updates were made today than there are send times already passed."""
+	now = get_time(nowtime())
+	times_passed = sum(now >= get_time(time) for time in times)
+	return frappe.db.count("Project Update", {"project": project, "date": today()}) < times_passed
 
 
 @frappe.whitelist(methods=["POST"])
