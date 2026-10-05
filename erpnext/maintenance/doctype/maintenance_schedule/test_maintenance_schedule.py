@@ -218,7 +218,7 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 			frappe.db.get_value("Serial No", serial.name, "amc_expiry_date"), getdate(first.items[0].end_date)
 		)
 
-	def test_visit_from_schedule_maps_only_pending_rows(self):
+	def test_visit_from_schedule_skips_completed_rows(self):
 		ms = make_maintenance_schedule()
 		ms.submit()
 		frappe.db.set_value(
