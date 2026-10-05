@@ -10,6 +10,7 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import cstr
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
+from erpnext.accounts.utils import build_qb_match_conditions
 
 
 def execute(filters=None):
@@ -61,6 +62,9 @@ def get_pos_entries(filters, group_by_field):
 
 
 def get_invoice_entries(doctype, filters, group_by_field):
+	if not frappe.has_permission(doctype, "select"):
+		return []
+
 	p = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(p)
@@ -77,6 +81,9 @@ def get_invoice_entries(doctype, filters, group_by_field):
 		)
 		.where(p.docstatus == 1)
 	)
+
+	for condition in build_qb_match_conditions(doctype):
+		query = query.where(condition)
 
 	if doctype == "Sales Invoice":
 		# consolidated invoices only merge POS Invoices that are already listed
