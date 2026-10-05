@@ -447,6 +447,33 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(rate["billing_rate"], 80)
 		self.assertEqual(rate["costing_rate"], 40)
 
+	def test_portal_lists_only_submitted_timesheets(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
+
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Timesheet Portal Contact",
+				"user": "Administrator",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": "_Test Timesheet Portal Project",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+			}
+		).insert()
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		draft = make_timesheet(emp, simulate=True, project=project.name, do_not_submit=True)
+		submitted = make_timesheet(emp, simulate=True, project=project.name)
+
+		names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
+		self.assertIn(submitted.name, names)
+		self.assertNotIn(draft.name, names)
+
 
 def make_timesheet(
 	employee,
