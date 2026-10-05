@@ -42,13 +42,15 @@ def execute(filters=None):
 			s.supplier_group.as_("supplier_group"),
 			gl.party.as_("supplier"),
 			s.tax_id.as_("tax_id"),
-			Sum(gl.debit_in_account_currency).as_("payments"),
+			Sum(gl.debit_in_account_currency - gl.credit_in_account_currency).as_("payments"),
 		)
 		.where(
 			(s.irs_1099 == 1)
 			& (gl.fiscal_year == filters.fiscal_year)
 			& (gl.party_type == "Supplier")
 			& (gl.company == filters.company)
+			& (gl.is_cancelled == 0)
+			& is_payment_voucher(gl)
 		)
 		.groupby(gl.party, s.supplier_group, s.tax_id)
 		.orderby(gl.party, order=frappe.qb.desc)
@@ -60,6 +62,17 @@ def execute(filters=None):
 	data = query.run(as_dict=True)
 
 	return columns, data
+
+
+def is_payment_voucher(gl):
+	"""Payment Entries and Journal Entries through a bank or cash account, so invoices and debit notes are left out."""
+	account = frappe.qb.DocType("Journal Entry Account")
+	bank_or_cash_journals = (
+		frappe.qb.from_(account).select(account.parent).where(account.account_type.isin(["Bank", "Cash"]))
+	)
+	return (gl.voucher_type == "Payment Entry") | (
+		(gl.voucher_type == "Journal Entry") & gl.voucher_no.isin(bank_or_cash_journals)
+	)
 
 
 def get_columns():
