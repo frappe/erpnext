@@ -255,8 +255,8 @@ class AssetRepair(AccountsController):
 		frappe.get_lazy_doc("Asset", self.asset).set_status()
 
 	def check_repair_status(self):
-		if self.repair_status == "Pending" and self.docstatus == 1:
-			frappe.throw(_("Please update Repair Status."))
+		if self.repair_status != "Completed" and self.docstatus == 1:
+			frappe.throw(_("Only an Asset Repair with Repair Status Completed can be submitted."))
 
 	def set_downtime(self):
 		# keep downtime in sync with the entered dates, regardless of edit order

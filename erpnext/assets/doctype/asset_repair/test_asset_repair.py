@@ -465,6 +465,12 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair.cancel()
 		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
 
+	def test_repair_with_cancelled_status_cannot_be_submitted(self):
+		asset_repair = create_asset_repair()
+		asset_repair.update({"repair_status": "Cancelled", "completion_date": nowdate()})
+
+		self.assertRaises(frappe.ValidationError, asset_repair.submit)
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations + (
