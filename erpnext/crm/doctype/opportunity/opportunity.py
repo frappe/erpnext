@@ -138,6 +138,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_party()
 		self.map_fields()
 		self.validate_qty()
+		self.validate_status()
 		self.set_exchange_rate()
 
 		if not self.title:
@@ -156,6 +157,34 @@ class Opportunity(TransactionBase, CRMNote):
 						item.idx, item.item_code
 					)
 				)
+
+	def validate_status(self):
+		"""Quotation and Converted come from the linked quotations and can't be set or left by hand."""
+		if self.is_new() or not self.has_value_changed("status"):
+			return
+
+		quotation_status = self.get_quotation_status()
+		if self.status != quotation_status and (
+			quotation_status or self.status in ("Quotation", "Converted")
+		):
+			if self.status == "Lost":
+				frappe.throw(_("Cannot declare as Lost because an active Quotation exists."))
+			frappe.throw(
+				_("Status {0} is set from the Opportunity's Quotations").format(
+					frappe.bold(_(quotation_status or self.status))
+				)
+			)
+
+		previous = self.get_doc_before_save()
+		if previous and previous.status == "Lost":
+			self.lost_reasons = []
+			self.order_lost_reason = None
+
+	def get_quotation_status(self) -> str | None:
+		if self.has_ordered_quotation():
+			return "Converted"
+		if self.has_active_quotation():
+			return "Quotation"
 
 	def map_fields(self):
 		for field in self.meta.get_valid_columns():
@@ -278,6 +307,9 @@ class Opportunity(TransactionBase, CRMNote):
 		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
 	):
 		if not self.has_active_quotation():
+			if not lost_reasons_list:
+				frappe.throw(_("Please select at least one Lost Reason"))
+
 			self.status = "Lost"
 			self.lost_reasons = []
 			self.competitors = []

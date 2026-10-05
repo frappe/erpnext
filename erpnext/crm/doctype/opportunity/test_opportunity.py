@@ -7,7 +7,11 @@ from frappe.utils import add_days, now_datetime, random_string, today
 from erpnext.crm.doctype.lead.mapper import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.mapper import make_quotation
-from erpnext.crm.doctype.opportunity.opportunity import auto_close_opportunity, get_item_details
+from erpnext.crm.doctype.opportunity.opportunity import (
+	auto_close_opportunity,
+	get_item_details,
+	set_multiple_status,
+)
 from erpnext.crm.utils import get_linked_communication_list
 from erpnext.exceptions import PartyDisabled
 from erpnext.selling.doctype.quotation.quotation import set_expired_status
@@ -171,6 +175,22 @@ class TestOpportunity(ERPNextTestSuite):
 		opp.reload()
 		self.assertRaises(frappe.ValidationError, opp.declare_enquiry_lost, [], [], "x")
 		self.assertNotEqual(opp.status, "Lost")
+
+	def test_status_set_by_hand_must_agree_with_quotations(self):
+		lost_reason = _ensure_master("Opportunity Lost Reason", "lost_reason", "_Test Lost - Too Expensive")
+		fresh = make_opportunity(with_items=0)
+		self.assertRaises(frappe.ValidationError, set_multiple_status, [fresh.name], "Converted")
+		self.assertRaises(frappe.ValidationError, fresh.declare_enquiry_lost, [], [])
+
+		fresh.declare_enquiry_lost([{"lost_reason": lost_reason}], [], "price")
+		fresh.status = "Open"
+		fresh.save()
+		self.assertEqual((fresh.lost_reasons, fresh.order_lost_reason), ([], None))
+
+		quoted = make_opportunity(with_items=0)
+		submit_quotation(quoted)
+		self.assertRaises(frappe.ValidationError, set_multiple_status, [quoted.name], "Lost")
+		self.assertEqual(frappe.db.get_value("Opportunity", quoted.name, "status"), "Quotation")
 
 	def test_get_item_details(self):
 		details = get_item_details("_Test Item")
