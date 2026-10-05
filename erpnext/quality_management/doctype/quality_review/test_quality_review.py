@@ -45,3 +45,10 @@ class TestQualityReview(ERPNextTestSuite):
 		quality_review = frappe.get_doc(doctype="Quality Review", goal=quality_goal.name).insert()
 		quality_review.goal = other_goal.name
 		self.assertRaises(frappe.ValidationError, quality_review.save)
+
+	def test_review_job_runs_once_a_day(self):
+		quality_goal = get_quality_goal()
+		review()
+		review()
+
+		self.assertEqual(frappe.db.count("Quality Review", {"goal": quality_goal.name}), 1)

@@ -89,9 +89,11 @@ def is_review_date(goal_date, today):
 
 
 def create_review(goal):
-	goal = frappe.get_doc("Quality Goal", goal)
+	date = frappe.utils.getdate()
+	if frappe.db.exists("Quality Review", {"goal": goal, "date": date}):
+		return
 
-	review = frappe.get_doc({"doctype": "Quality Review", "goal": goal.name, "date": frappe.utils.getdate()})
+	review = frappe.get_doc({"doctype": "Quality Review", "goal": goal, "date": date})
 
 	review.insert(ignore_permissions=True)
 
