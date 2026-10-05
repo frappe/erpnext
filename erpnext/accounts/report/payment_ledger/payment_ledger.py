@@ -5,7 +5,11 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
+
+from erpnext.accounts.utils import build_qb_match_conditions
 
 
 class PaymentLedger:
@@ -122,6 +126,21 @@ class PaymentLedger:
 		if self.filters.party:
 			self.conditions.append(self.ple.party.isin(self.filters.party))
 
+		self.conditions.extend(build_qb_match_conditions("Payment Ledger Entry"))
+		self.add_party_permission_conditions()
+
+	def add_party_permission_conditions(self):
+		# Party is a dynamic link, so match conditions cannot apply party user permissions
+		user_permissions = get_user_permissions()
+		for party_type in frappe.get_all("Party Type", pluck="name"):
+			if party_type not in user_permissions:
+				continue
+
+			allowed_parties = get_allowed_docs_for_doctype(user_permissions[party_type], party_type)
+			self.conditions.append(
+				(self.ple.party_type != party_type) | self.ple.party.isin(allowed_parties or [""])
+			)
+
 	def get_data(self):
 		ple = self.ple
 
@@ -162,7 +181,13 @@ class PaymentLedger:
 			)
 		)
 		self.columns.append(
-			dict(label=_("Party"), fieldname="party", fieldtype="data", options=options, width="100")
+			dict(
+				label=_("Party"),
+				fieldname="party",
+				fieldtype="Dynamic Link",
+				options="party_type",
+				width="100",
+			)
 		)
 		self.columns.append(
 			dict(
