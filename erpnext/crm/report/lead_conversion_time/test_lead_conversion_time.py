@@ -39,7 +39,9 @@ class TestLeadConversionTime(ERPNextTestSuite):
 
 		si = create_sales_invoice(do_not_save=1)
 		si.contact_email = email
-		si.save()  # draft (docstatus 0 != 2); Date(creation) is today, within range
+		si.set_posting_time = 1
+		si.posting_date = add_days(nowdate(), -2)
+		si.save()
 
 		# count query filters on `sender`; first_contact filters on `recipients` -> set both
 		real = frappe.get_doc(
@@ -53,12 +55,15 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		).insert(ignore_permissions=True)
 		frappe.db.set_value("Communication", nulldate.name, "communication_date", None, update_modified=False)
 
-		data = execute(frappe._dict({"from_date": add_days(nowdate(), -30), "to_date": nowdate()}))[1]
+		filters = frappe._dict({"from_date": add_days(nowdate(), -30), "to_date": nowdate()})
 		# rows are lists: [customer, interactions, duration, support_tickets]
-		row = next((r for r in data if r[0] == customer_name), None)
+		self.assertFalse([r for r in execute(filters)[1] if r[0] == customer_name], "draft invoice counted")
+
+		si.submit()
+		row = next((r for r in execute(filters)[1] if r[0] == customer_name), None)
 		self.assertIsNotNone(row, "lead's converted-customer row missing")
-		# duration must be measured from the earliest REAL contact (22 days), not the NULL-dated one
-		self.assertEqual(row[2], 22.0)
+		# from the earliest REAL contact (22 days ago, not the NULL-dated one) to the posting date
+		self.assertEqual(row[2], 20.0)
 
 	def test_sales_user_can_run_the_report(self):
 		frappe.reload_doc("crm", "report", "lead_conversion_time", force=True)
