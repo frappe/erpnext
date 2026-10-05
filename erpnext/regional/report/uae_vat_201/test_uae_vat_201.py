@@ -6,9 +6,14 @@ from frappe.tests.utils import change_settings
 import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	execute,
 	get_exempt_total,
+	get_reverse_charge_recoverable_tax,
+	get_reverse_charge_recoverable_total,
+	get_reverse_charge_tax,
+	get_reverse_charge_total,
 	get_standard_rated_expenses_tax,
 	get_standard_rated_expenses_total,
 	get_total_emiratewise,
@@ -203,6 +208,24 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_zero_rated_total(filters), 100)
 		self.assertEqual(get_exempt_total(filters), 100)
 
+	def test_uae_vat_201_reverse_charge_debit_note(self):
+		frappe.flags.country = "United Arab Emirates"
+		self.addCleanup(setattr, frappe.flags, "country", None)
+		pi = make_uae_purchase_invoice(qty=10, rate=200)
+		pi.reverse_charge = "Y"
+		pi.recoverable_reverse_charge = 100
+		pi.submit()
+
+		debit_note = make_return_doc("Purchase Invoice", pi.name)
+		debit_note.items[0].qty = -2
+		debit_note.submit()
+
+		filters = {"company": "_Test Company UAE VAT"}
+		self.assertEqual(get_reverse_charge_total(filters), 1600)
+		self.assertEqual(get_reverse_charge_tax(filters), 80)
+		self.assertEqual(get_reverse_charge_recoverable_total(filters), 1600)
+		self.assertEqual(get_reverse_charge_recoverable_tax(filters), 80)
+
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
@@ -364,6 +387,13 @@ def make_sales_invoices():
 
 
 def create_purchase_invoices():
+	pi = make_uae_purchase_invoice()
+	pi.recoverable_standard_rated_expenses = 1
+	pi.submit()
+
+
+def make_uae_purchase_invoice(**args):
+	"""Returns an unsaved AED Purchase Invoice of the UAE test company with VAT 5%."""
 	pi = make_purchase_invoice(
 		company="_Test Company UAE VAT",
 		supplier="_Test UAE Supplier",
@@ -375,6 +405,7 @@ def create_purchase_invoices():
 		item="_Test UAE VAT Item",
 		do_not_save=1,
 		uom="Nos",
+		**args,
 	)
 	pi.append(
 		"taxes",
@@ -386,7 +417,4 @@ def create_purchase_invoices():
 			"rate": 5.0,
 		},
 	)
-
-	pi.recoverable_standard_rated_expenses = 1
-
-	pi.submit()
+	return pi

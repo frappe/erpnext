@@ -258,26 +258,8 @@ def get_reverse_charge_total(filters):
 
 
 def get_reverse_charge_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made."""
-	conditions = get_conditions_join(filters)
-	return (
-		frappe.db.sql(
-			f"""
-		select sum(debit)  from
-			`tabPurchase Invoice` p inner join `tabGL Entry` gl
-		on
-			gl.voucher_no =  p.name
-		where
-			p.reverse_charge = "Y"
-			and p.docstatus = 1
-			and gl.docstatus = 1
-			and account in (select account from `tabUAE VAT Account` where  parent=%(company)s)
-			{conditions} ;
-		""",
-			filters,
-		)[0][0]
-		or 0
-	)
+	"""Returns the reverse charge VAT of Purchase Invoices, net of their debit notes."""
+	return get_reverse_charge_vat(filters)
 
 
 def get_reverse_charge_recoverable_total(filters):
@@ -298,41 +280,51 @@ def get_reverse_charge_recoverable_total(filters):
 
 
 def get_reverse_charge_recoverable_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made."""
-	conditions = get_conditions_join(filters)
-	return (
-		frappe.db.sql(
-			f"""
-		select
-			sum(debit * p.recoverable_reverse_charge / 100)
-		from
-			`tabPurchase Invoice` p  inner join `tabGL Entry` gl
-		on
-			gl.voucher_no = p.name
-		where
-			p.reverse_charge = "Y"
-			and p.docstatus = 1
-			and p.recoverable_reverse_charge > 0
-			and gl.docstatus = 1
-			and account in (select account from `tabUAE VAT Account` where  parent=%(company)s)
-			{conditions} ;
-		""",
-			filters,
-		)[0][0]
-		or 0
+	"""Returns the recoverable reverse charge VAT of Purchase Invoices, net of their debit notes."""
+	return get_reverse_charge_vat(filters, recoverable=True)
+
+
+def get_reverse_charge_vat(filters, recoverable=False):
+	"""Sums the UAE VAT rows of reverse charge invoices, so debit notes reduce the total."""
+	p = frappe.qb.DocType("Purchase Invoice")
+	t = frappe.qb.DocType("Purchase Taxes and Charges")
+	uae_vat = frappe.qb.DocType("UAE VAT Account")
+	tax = t.base_tax_amount_after_discount_amount
+	if recoverable:
+		tax = tax * p.recoverable_reverse_charge / 100
+	query = (
+		frappe.qb.from_(t)
+		.inner_join(p)
+		.on(t.parent == p.name)
+		.select(Sum(tax))
+		.where(
+			(t.parenttype == "Purchase Invoice")
+			& (p.reverse_charge == "Y")
+			& (p.docstatus == 1)
+			& t.category.isin(["Total", "Valuation and Total"])
+			& t.account_head.isin(
+				frappe.qb.from_(uae_vat)
+				.select(uae_vat.account)
+				.where(uae_vat.parent == filters.get("company"))
+			)
+		)
 	)
+	if recoverable:
+		query = query.where(p.recoverable_reverse_charge > 0)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
+	return query.run()[0][0] or 0
 
 
-def get_conditions_join(filters):
+def get_conditions_join(filters, p):
 	"""The conditions to be used to filter data to calculate the total vat."""
-	conditions = ""
-	for opts in (
-		("company", " and p.company=%(company)s"),
-		("from_date", " and p.posting_date>=%(from_date)s"),
-		("to_date", " and p.posting_date<=%(to_date)s"),
-	):
-		if filters.get(opts[0]):
-			conditions += opts[1]
+	conditions = []
+	if filters.get("company"):
+		conditions.append(p.company == filters.get("company"))
+	if filters.get("from_date"):
+		conditions.append(p.posting_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		conditions.append(p.posting_date <= filters.get("to_date"))
 	return conditions
 
 
