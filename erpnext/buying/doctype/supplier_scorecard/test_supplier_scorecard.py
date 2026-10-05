@@ -16,6 +16,7 @@ from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 	make_supplier_scorecard as make_scorecard_period,
 )
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -120,6 +121,34 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		for weight in (10.1, 66.6, 23.3):
 			doc.append("criteria", {"criteria_name": "Delivery", "weight": weight})
 		doc.validate_criteria_weights()
+
+	def test_standing_change_notifies_supplier_and_employee(self):
+		frappe.get_doc(
+			{
+				"doctype": "Email Account",
+				"enable_outgoing": 1,
+				"default_outgoing": 1,
+				"awaiting_password": 1,
+				"auth_method": "Basic",
+				"password": "test",
+				"smtp_server": "localhost",
+				"email_id": "scorecard.outgoing@example.com",
+			}
+		).insert()
+		employee = make_employee("scorecard.employee@example.com", company="_Test Company")
+		doc = make_scorecard_for("_Test Supplier SC Notify")
+		frappe.db.set_value("Supplier", doc.supplier, "email_id", "scorecard.supplier@example.com")
+		doc.criteria[0].criteria_name = make_test_criteria("_Test SC Very Poor", "10")
+		doc.standings[0].update({"notify_supplier": 1, "notify_employee": 1, "employee_link": employee})
+		doc.insert()
+		doc.save()
+
+		self.assertEqual(doc.employee, employee)
+		queues = frappe.get_all("Email Queue", {"reference_name": doc.name}, pluck="name")
+		recipients = frappe.get_all("Email Queue Recipient", {"parent": ["in", queues]}, pluck="recipient")
+		self.assertCountEqual(
+			recipients, ["scorecard.employee@example.com", "scorecard.supplier@example.com"]
+		)
 
 
 def make_supplier_scorecard():
