@@ -1,10 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
-from unittest import TestCase
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -13,7 +11,9 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.regional.report.vat_audit_report.vat_audit_report import execute
 
 
-class TestVATAuditReport(TestCase):
+class TestVATAuditReport(FrappeTestCase):
+	company = "_Test Company SA VAT"
+
 	def setUp(self):
 		frappe.set_user("Administrator")
 		make_company("_Test Company SA VAT", "_TCSV")
@@ -59,6 +59,39 @@ class TestVATAuditReport(TestCase):
 				total_row_tax = total_row_tax + row["tax_amount"]
 
 		self.assertEqual(total_tax_amount, total_row_tax)
+
+	def test_user_permissions(self):
+		other_customer = frappe.get_doc(
+			{"doctype": "Customer", "customer_name": "_Test SA Customer " + frappe.generate_hash(length=6)}
+		).insert()
+		other_invoice = make_sa_sales_invoice("_Test SA VAT Item", 200.0, customer=other_customer.name)
+		other_invoice.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "VAT - 15% - _TCSV",
+				"cost_center": "Main - _TCSV",
+				"description": "VAT 15%",
+				"rate": 15,
+			},
+		)
+		other_invoice.submit()
+
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "test-sa-vat-audit@example.com", "first_name": "SA VAT Audit"}
+		).insert()
+		user.add_roles("Accounts User")
+		user = user.name
+		frappe.permissions.add_user_permission("Customer", "_Test SA Customer", user)
+		filters = {"company": self.company, "from_date": today(), "to_date": today()}
+
+		with self.set_user(user):
+			voucher_nos = [row.get("voucher_no") for row in execute(filters)[1]]
+		self.assertNotIn(other_invoice.name, voucher_nos)
+
+		frappe.permissions.add_user_permission("Company", "_Test Company", user)
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, execute, filters)
 
 	def test_vat_charged_as_actual_amount(self):
 		si = make_sa_sales_invoice("_Test SA VAT Item", 500.0)
