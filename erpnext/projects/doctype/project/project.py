@@ -296,31 +296,26 @@ class Project(Document):
 				)
 				self.percent_complete = flt(flt(completed) / total * 100, 2)
 
-			if self.percent_complete_method == "Task Progress" and total > 0:
-				task = frappe.qb.DocType("Task")
-				progress = (
-					frappe.qb.from_(task).select(Sum(task.progress)).where(task.project == self.name).run()
-				)[0][0]
-				self.percent_complete = flt(flt(progress) / total, 2)
-
-			if self.percent_complete_method == "Task Weight" and total > 0:
-				task = frappe.qb.DocType("Task")
-				weight_sum = (
-					frappe.qb.from_(task).select(Sum(task.task_weight)).where(task.project == self.name).run()
-				)[0][0]
-				weighted_progress = frappe.get_all(
-					"Task", filters={"project": self.name}, fields=["progress", "task_weight"]
-				)
-				pct_complete = 0
-				for row in weighted_progress:
-					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
-				self.percent_complete = flt(flt(pct_complete), 2)
+			if self.percent_complete_method in ("Task Progress", "Task Weight") and total > 0:
+				self.percent_complete = flt(self.get_task_progress(), 2)
 
 		# don't update status if it is manually set to cancelled or on hold
 		if self.status in ("Cancelled", "On hold"):
 			return
 
 		self.status = "Completed" if self.percent_complete == 100 else "Open"
+
+	def get_task_progress(self) -> float:
+		"""Average task progress, weighted for Task Weight. Cancelled tasks count as done."""
+		tasks = frappe.get_all(
+			"Task", filters={"project": self.name}, fields=["status", "progress", "task_weight"]
+		)
+		weights = [flt(task.task_weight) for task in tasks]
+		if self.percent_complete_method != "Task Weight" or not sum(weights):
+			weights = [1] * len(tasks)
+
+		progress = [100 if task.status == "Cancelled" else flt(task.progress) for task in tasks]
+		return sum(p * w for p, w in zip(progress, weights, strict=True)) / sum(weights)
 
 	def update_costing(self):
 		from frappe.query_builder.functions import Max, Min, Sum

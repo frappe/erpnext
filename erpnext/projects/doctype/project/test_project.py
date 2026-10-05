@@ -418,6 +418,18 @@ class TestProject(ERPNextTestSuite):
 		project.update_percent_complete()
 		self.assertEqual(project.percent_complete, 75)  # 100 * 3/4 + 0 * 1/4
 
+	def test_percent_complete_counts_cancelled_tasks_and_zero_weights(self):
+		for method in ("Task Progress", "Task Weight"):
+			project, tasks = self._project_with_tasks(method, 2)
+			frappe.db.set_value("Task", tasks[0], {"status": "Completed", "progress": 100})
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 50)
+
+			frappe.db.set_value("Task", tasks[1], "status", "Cancelled")
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 100)
+			self.assertEqual(project.status, "Completed")
+
 	def test_create_duplicate_project_copies_tasks(self):
 		from erpnext.projects.doctype.project.project import create_duplicate_project
 
