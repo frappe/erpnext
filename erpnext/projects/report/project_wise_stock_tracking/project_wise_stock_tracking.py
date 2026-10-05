@@ -127,16 +127,17 @@ def get_delivered_items_cost():
 		.inner_join(si_item)
 		.on(si.name == si_item.parent)
 		.select(si.project, Sum(si_item.base_net_amount).as_("amount"))
-		.where((si.docstatus == 1) & (si.update_stock == 1) & (si.is_pos == 1) & (si.project != ""))
+		.where((si.docstatus == 1) & (si.update_stock == 1) & (si.project != ""))
 		.groupby(si.project)
 		.run(as_dict=1)
 	)
 
-	dn_item_map = {}
-	for item in dn_items:
-		dn_item_map.setdefault(item.project, item.amount)
+	return sum_amount_by_project(dn_items + si_items)
 
-	for item in si_items:
-		dn_item_map.setdefault(item.project, item.amount)
 
-	return dn_item_map
+def sum_amount_by_project(rows):
+	amounts = {}
+	for row in rows:
+		amounts[row.project] = amounts.get(row.project, 0) + row.amount
+
+	return amounts
