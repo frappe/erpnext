@@ -563,9 +563,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		raise_error_if_no_rate = raise_error_if_no_rate and not self.is_new()
 		has_consumption_basis = self.has_consumption_basis()
 
-		bom_cost_allocation_per = (
-			frappe.get_cached_value("BOM", self.bom_no, "cost_allocation_per") if self.bom_no else None
-		)
+		bom_cost_allocation_per = self.get_finished_item_cost_allocation_per() if self.bom_no else None
 
 		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
 
@@ -600,6 +598,32 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if zero_valuation_items:
 			self._notify_zero_valuation_rate(zero_valuation_items)
+
+	def get_finished_item_cost_allocation_per(self) -> float:
+		"""Share of the cost left for the finished good: what the BOM allocated secondary rows of
+		this entry do not take. A co-product that is not made leaves its share to the finished
+		good, instead of the BOM's fixed percentage leaving it unvalued."""
+		allocated_rows = [
+			d.bom_secondary_item
+			for d in self.get("items")
+			if d.secondary_item_type
+			and d.bom_secondary_item
+			and flt(d.transfer_qty)
+			and not is_costed_out_of_finished_item(d)
+		]
+		if not allocated_rows:
+			return 100
+
+		cost_allocation_per = dict(
+			frappe.get_all(
+				"BOM Secondary Item",
+				filters={"name": ["in", allocated_rows]},
+				fields=["name", "cost_allocation_per"],
+				as_list=True,
+			)
+		)
+		# each row takes its percentage of the cost, so a BOM row repeated in the entry counts twice
+		return max(100 - sum(flt(cost_allocation_per.get(name)) for name in allocated_rows), 0)
 
 	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
 		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""
