@@ -758,6 +758,26 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			frappe.ValidationError, update_subcontracting_inward_order_status, draft.name, "Closed"
 		)
 
+	def test_closing_sales_order_closes_all_inward_orders(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		item_list = [
+			{"item_code": "Service Item 1", "qty": 10, "fg_item": "Basic FG Item", "fg_item_qty": 10}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio_names = []
+		for qty in (4, 6):
+			scio = make_subcontracting_inward_order(so.name)
+			scio.items[0].qty = qty
+			scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+			scio.submit()
+			scio_names.append(scio.name)
+
+		update_status("Closed", so.name)
+
+		for name in scio_names:
+			self.assertEqual(frappe.db.get_value("Subcontracting Inward Order", name, "status"), "Closed")
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()
