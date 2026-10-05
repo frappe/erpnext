@@ -315,6 +315,20 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertFalse(availability["13:30"])
 		self.assertTrue(availability["14:00"])
 
+	def test_unverified_booking_holds_no_capacity(self):
+		booking = self._create_portal_appointment("portal_visitor_unverified@example.com", days_from_now=3)
+		set_booking_setting("number_of_agents", 1)
+
+		create_test_appointment(
+			customer_email="slot_taker@example.com", scheduled_time=booking.scheduled_time
+		)
+		context = self._request_verification(booking)
+		self.assertFalse(context.success)
+		self.assertEqual(get_status(booking.name), "Unverified")
+
+		with self.assertRaisesRegex(frappe.ValidationError, "beginning of an available slot"):
+			self._create_portal_appointment("portal_visitor_off_grid@example.com", time="10:15:00")
+
 	def test_expired_unverified_appointments_are_closed(self):
 		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
 		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)

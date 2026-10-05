@@ -46,17 +46,20 @@ class Appointment(Document):
 
 	def validate(self):
 		self.validate_status_update()
-		if not self.has_value_changed("scheduled_time"):
-			return
+		if self.has_value_changed("scheduled_time"):
+			self.validate_schedule()
 
+		# unverified bookings hold no capacity, so it is checked again on verification
+		if self.has_value_changed("scheduled_time") or self.has_value_changed("email_verified"):
+			self.validate_available_time_slot()
+
+	def validate_schedule(self):
 		self.validate_backdated_booking()
 
 		if is_appointment_scheduling_enabled():
 			self.validate_advanced_booking()
 			self.validate_holiday()
 			self.validate_slot_timing()
-
-		self.validate_available_time_slot()
 
 	def validate_status_update(self):
 		if not self.has_value_changed("status"):
@@ -112,9 +115,15 @@ class Appointment(Document):
 
 		for slot in settings.availability_of_slots:
 			if slot.day_of_week == day_of_week and slot.from_time <= slot_start and slot_end <= slot.to_time:
+				self.validate_on_slot_grid(slot_start - slot.from_time, slot_end - slot_start)
 				return
 
 		frappe.throw(_("Appointment must be scheduled within the available slot timings."))
+
+	def validate_on_slot_grid(self, offset: timedelta, duration: timedelta):
+		"""Portal bookings must start on a slot the portal offers, not between two."""
+		if self.created_through_portal and duration and offset % duration:
+			frappe.throw(_("Appointment must start at the beginning of an available slot."))
 
 	def validate_available_time_slot(self):
 		settings = get_booking_settings()
@@ -368,7 +377,7 @@ def get_verification_link_expiry():
 def count_overlapping_appointments(
 	scheduled_time, appointment_duration, exclude_appointment=None, for_update=False
 ):
-	"""Count non-Closed appointments whose duration window overlaps `scheduled_time`.
+	"""Count Open appointments whose duration window overlaps `scheduled_time`.
 	With `for_update`, the range stays locked until commit, serializing concurrent bookings."""
 	# select the rows (not COUNT) so `for_update` stays valid: PostgreSQL
 	# rejects `FOR UPDATE` combined with an aggregate function
@@ -378,7 +387,7 @@ def count_overlapping_appointments(
 		.select(appointment.name)
 		.where(appointment.scheduled_time > add_to_date(scheduled_time, minutes=-appointment_duration))
 		.where(appointment.scheduled_time < add_to_date(scheduled_time, minutes=appointment_duration))
-		.where(appointment.status != "Closed")
+		.where(appointment.status.notin(["Closed", "Unverified"]))
 	)
 
 	if exclude_appointment:
@@ -449,13 +458,13 @@ def _check_agent_availability(agent_email, scheduled_time):
 
 
 def get_booked_slot_times(from_time, to_time):
-	"""scheduled_times of non-Closed appointments within (from_time, to_time), for slot availability."""
+	"""scheduled_times of Open appointments within (from_time, to_time), for slot availability."""
 	return frappe.get_all(
 		"Appointment",
 		filters=[
 			["scheduled_time", ">", from_time],
 			["scheduled_time", "<", to_time],
-			["status", "!=", "Closed"],
+			["status", "not in", ["Closed", "Unverified"]],
 		],
 		pluck="scheduled_time",
 	)
