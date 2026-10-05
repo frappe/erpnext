@@ -5,10 +5,11 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_last_depreciation_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
 )
@@ -56,6 +57,17 @@ class FixedAssetService:
 			)
 		if asset_status == "Sold":
 			frappe.throw(_("Row #{0}: Asset {1} is already sold").format(item.idx, item.asset))
+
+		self._validate_sale_date(item)
+
+	def _validate_sale_date(self, item) -> None:
+		last_depreciation_date = get_last_depreciation_date(item.asset)
+		if last_depreciation_date and getdate(self.doc.posting_date) < last_depreciation_date:
+			frappe.throw(
+				_("Row #{0}: Asset {1} cannot be sold before its last depreciation entry dated {2}").format(
+					item.idx, item.asset, frappe.format(last_depreciation_date, "Date")
+				)
+			)
 
 	def set_income_account_for_fixed_assets(self) -> None:
 		for item in self.doc.items:

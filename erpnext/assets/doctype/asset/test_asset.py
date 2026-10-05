@@ -1032,6 +1032,18 @@ class TestAsset(AssetSetup):
 			rate=50000,
 		)
 
+		depreciated_asset = create_monthly_depreciating_asset()
+		post_depreciation_entries(date="2025-09-30")
+		self.assertRaises(
+			frappe.ValidationError,
+			create_sales_invoice,
+			item_code="Macbook Pro",
+			asset=depreciated_asset.name,
+			qty=1,
+			rate=80000,
+			posting_date="2025-06-15",
+		)
+
 
 class TestDepreciationMethods(AssetSetup):
 	def setUp(self):
