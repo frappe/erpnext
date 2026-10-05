@@ -20,6 +20,9 @@ class TestContract(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, self.contract_doc.insert)
 
+		self.contract_doc.start_date = None
+		self.contract_doc.insert()
+
 	def test_unsigned_contract_status(self):
 		self.contract_doc.insert()
 		self.assertEqual(self.contract_doc.status, "Unsigned")
