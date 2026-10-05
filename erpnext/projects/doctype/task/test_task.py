@@ -207,6 +207,15 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Open")
 
+	def test_template_task_is_not_overdue(self):
+		task = create_task(
+			"_Test Template Task Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5), is_template=1
+		)
+
+		set_tasks_as_overdue()
+
+		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Template")
+
 	def test_parent_task_must_be_group(self):
 		parent_task = create_task(
 			subject="_Test Parent Task Non Group",
