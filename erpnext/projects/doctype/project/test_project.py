@@ -205,6 +205,15 @@ class TestProject(ERPNextTestSuite):
 		so.reload()
 		self.assertFalse(so.project)
 
+	def test_project_from_sales_order_has_its_sales_amount(self):
+		so = make_sales_order()
+		project = make_project_from_so(so.name).insert()
+
+		self.assertEqual(project.total_sales_amount, so.base_net_total)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_sales_amount"), so.base_net_total
+		)
+
 	def test_sales_order_link_is_not_overwritten_by_second_project(self):
 		so = make_sales_order()
 
