@@ -78,6 +78,13 @@ class TestIRS1099(ERPNextTestSuite):
 
 		self.assertEqual(get_total_payments(supplier), 1100)
 
+	def test_company_outside_united_states(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			execute,
+			{"company": "_Test Company", "fiscal_year": "_Test Fiscal Year 2050"},
+		)
+
 	def test_company_permission(self):
 		frappe.permissions.add_user_permission("Company", "_Test Company", "test2@example.com")
 		frappe.get_doc("User", "test2@example.com").add_roles("Accounts Manager")

@@ -26,10 +26,7 @@ def execute(filters=None):
 		filters.setdefault("company", frappe.db.get_default("company"))
 
 	frappe.has_permission("Company", doc=filters.company, throw=True)
-	region = frappe.db.get_value("Company", filters={"name": filters.company}, fieldname=["country"])
-
-	if region != "United States":
-		return [], []
+	validate_company_region(filters.company)
 
 	columns = get_columns()
 
@@ -63,6 +60,15 @@ def execute(filters=None):
 	data = query.run(as_dict=True)
 
 	return columns, data
+
+
+def validate_company_region(company):
+	if frappe.get_cached_value("Company", company, "country") != "United States":
+		frappe.throw(
+			_(
+				"The company {0} is not in the United States. IRS 1099 is only available for companies in the United States."
+			).format(frappe.bold(company))
+		)
 
 
 def is_payment_voucher(gl):
