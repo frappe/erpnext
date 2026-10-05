@@ -30,6 +30,16 @@ class TestBulkTransactionLogDetail(ERPNextTestSuite):
 		)
 		self.assertEqual(failed_log.transaction_status, "Failed")
 
+	def test_held_and_closed_orders_are_skipped_without_a_client_status(self):
+		held, closed = make_sales_order(), make_sales_order()
+		held.update_status("On Hold")
+		closed.update_status("Closed")
+
+		make_invoices([held, closed])
+		make_invoices([held, closed], status="To Deliver and Bill")
+
+		self.assertFalse(get_invoices(held.name) + get_invoices(closed.name))
+
 
 def make_invoices(orders: list, **kwargs) -> None:
 	data = [{"name": order.name, **kwargs} for order in orders]

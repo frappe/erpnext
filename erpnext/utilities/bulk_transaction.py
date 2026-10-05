@@ -17,9 +17,10 @@ def transaction_processing(
 
 	args = frappe._dict(frappe.parse_json(args) or {})
 
-	skipped_records = [d for d in deserialized_data if d.get("status") in ("On Hold", "Closed")]
+	statuses = get_statuses(from_doctype, deserialized_data)
+	skipped_records = [d for d in deserialized_data if statuses.get(d.get("name")) in ("On Hold", "Closed")]
 
-	deserialized_data = [d for d in deserialized_data if d.get("status") not in ("On Hold", "Closed")]
+	deserialized_data = [d for d in deserialized_data if d not in skipped_records]
 
 	# The checks above are doctype level and never consult User Permissions, so on their own they
 	# let a caller convert documents they cannot read — a company-restricted user could turn another
@@ -57,6 +58,16 @@ def transaction_processing(
 		from_doctype=from_doctype,
 		to_doctype=to_doctype,
 		args=args,
+	)
+
+
+def get_statuses(doctype: str, rows: list) -> dict:
+	if not frappe.get_meta(doctype).has_field("status"):
+		return {}
+
+	names = [row.get("name") for row in rows if isinstance(row.get("name"), str)]
+	return dict(
+		frappe.get_all(doctype, filters={"name": ["in", names]}, fields=["name", "status"], as_list=True)
 	)
 
 
