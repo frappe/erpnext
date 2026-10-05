@@ -70,8 +70,8 @@ class TestCalculatedDiscountMismatch(ERPNextTestSuite):
 		self.assertIsNotNone(row)
 		self.assertEqual(row["doctype"], "Sales Invoice")
 		self.assertEqual(row["actual_discount_percentage"], 10.0)
-		self.assertEqual(row["actual_discount_amount"], actual)
-		self.assertEqual(row["suspected_discount_amount"], suspected)
+		self.assertEqual(row["actual_discount_amount"], tampered_amount)
+		self.assertEqual(row["suspected_discount_amount"], consistent_amount)
 
 	def test_accounts_user_can_run_report(self):
 		frappe.reload_doc("accounts", "report", "calculated_discount_mismatch", force=True)
