@@ -72,6 +72,18 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		two_row_return.append("items", dict(two_row_return.items[0].as_dict(), name=None, dn_detail=None))
 		self.assertRaises(frappe.ValidationError, two_row_return.insert)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_delivery_note_return_rows_add_up_unrounded_stock_qty(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
+		return_dn.insert()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_return_rows_add_up_rounded_stock_qty_when_editable(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3334, delivery_rows=3)
+		return_dn.insert()
+
 	def test_purchase_invoice_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
@@ -176,3 +188,35 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(second_return.items[0].qty, -24)
 		second_return.save().submit()
 		self.addCleanup(self._cancel_and_delete, "Sales Invoice", second_return.name)
+
+
+def make_split_return_of_box_item(conversion_factor, delivery_rows):
+	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+	item_code = make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"uoms": [
+				{"uom": "Kg", "conversion_factor": 1},
+				{"uom": "Box", "conversion_factor": conversion_factor},
+			],
+		}
+	).name
+	make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+	dn = create_delivery_note(item_code=item_code, qty=3 // delivery_rows, do_not_submit=True)
+	for _ in range(delivery_rows - 1):
+		dn.append("items", dict(dn.items[0].as_dict(), name=None))
+	for row in dn.items:
+		row.uom, row.conversion_factor = "Box", conversion_factor
+	dn.submit()
+
+	return_dn = make_sales_return(dn.name)
+	if delivery_rows == 1:
+		return_dn.items[0].qty = -1
+		for _ in range(2):
+			return_dn.append("items", dict(return_dn.items[0].as_dict(), name=None, dn_detail=None))
+	return return_dn
