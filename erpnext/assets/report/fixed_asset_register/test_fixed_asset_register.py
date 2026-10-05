@@ -4,7 +4,11 @@
 import frappe
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
+)
 from erpnext.assets.doctype.asset.test_asset import AssetSetup, create_asset
 from erpnext.assets.doctype.asset_capitalization.test_asset_capitalization import (
 	create_asset_capitalization,
@@ -258,3 +262,22 @@ class TestFixedAssetRegister(AssetSetup):
 		self.assertNotIn(asset.name, {row["asset_id"] for row in self.run_report()})
 		row = self.report_row(asset.name, finance_book="Test Finance Book 1")
 		self.assertEqual(row["depreciated_amount"], 25000)
+
+	def test_reversed_depreciation_is_not_counted(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			available_for_use_date="2019-12-31",
+			depreciation_start_date="2020-12-31",
+			frequency_of_depreciation=12,
+			total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000,
+			submit=True,
+		)
+		post_depreciation_entries(date="2021-01-01")
+		scrap_asset(asset.name, "2021-06-30")
+		restore_asset(asset.name)
+
+		row = self.report_row(asset.name)
+		self.assertEqual(row["depreciated_amount"], 30000)
+		self.assertEqual(row["asset_value"], 70000)
