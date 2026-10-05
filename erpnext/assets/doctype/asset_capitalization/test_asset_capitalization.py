@@ -482,6 +482,31 @@ class TestAssetCapitalization(unittest.TestCase):
 			)
 		self.assertEqual(stock_items[0].purchase_receipt, pr.name)
 
+	def test_rebuilding_gl_entries_does_not_dispose_the_consumed_asset_again(self):
+		consumed_asset = create_depreciation_asset(submit=1, total_number_of_depreciations=10)
+		target_asset = create_asset(is_composite_asset=1, warehouse="Stores - _TC")
+		asset_capitalization = create_asset_capitalization(
+			capitalization_method="Choose a WIP composite asset",
+			target_asset=target_asset.name,
+			consumed_asset=consumed_asset.name,
+			submit=1,
+		)
+
+		schedule_count = frappe.db.count("Asset Depreciation Schedule", {"asset": consumed_asset.name})
+		value_after_depreciation = consumed_asset.db_get("value_after_depreciation")
+		gl_before = get_actual_gle_dict(asset_capitalization.name)
+
+		# a repost of the voucher rebuilds its GL entries
+		rebuilt_gl = {}
+		for gle in asset_capitalization.get_gl_entries():
+			rebuilt_gl[gle.account] = rebuilt_gl.get(gle.account, 0) + gle.debit - gle.credit
+
+		self.assertEqual(rebuilt_gl, gl_before)
+		self.assertEqual(
+			frappe.db.count("Asset Depreciation Schedule", {"asset": consumed_asset.name}), schedule_count
+		)
+		self.assertEqual(consumed_asset.db_get("value_after_depreciation"), value_after_depreciation)
+
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)

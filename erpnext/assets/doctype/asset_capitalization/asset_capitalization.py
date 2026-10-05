@@ -123,6 +123,7 @@ class AssetCapitalization(StockController):
 	def on_submit(self):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
+		self.dispose_consumed_assets()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_target_asset()
@@ -525,21 +526,6 @@ class AssetCapitalization(StockController):
 		# Consumed Assets
 		for item in self.asset_items:
 			asset = frappe.get_doc("Asset", item.asset)
-
-			if asset.calculate_depreciation:
-				frappe.flags.is_composite_component = True
-				try:
-					notes = _(
-						"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
-					).format(
-						get_link_to_form(asset.doctype, asset.name),
-						get_link_to_form(self.doctype, self.get("name")),
-					)
-					depreciate_asset(asset, self.posting_date, notes)
-					asset.reload()
-				finally:
-					frappe.flags.is_composite_component = False
-
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 				asset,
 				item.asset_value,
@@ -548,10 +534,6 @@ class AssetCapitalization(StockController):
 				self.get("name"),
 				self.get("posting_date"),
 			)
-
-			asset.db_set("disposal_date", self.posting_date)
-
-			self.set_consumed_asset_status(asset)
 
 			for gle in fixed_asset_gl_entries:
 				gle["against"] = target_account
@@ -664,6 +646,28 @@ class AssetCapitalization(StockController):
 				get_link_to_form("Asset", asset_doc.name)
 			)
 		)
+
+	def dispose_consumed_assets(self):
+		"""Depreciate consumed assets up to the posting date and mark them capitalized.
+
+		Kept out of the GL entries, which are also rebuilt on every repost."""
+		for item in self.asset_items:
+			asset = frappe.get_doc("Asset", item.asset)
+			if asset.calculate_depreciation:
+				frappe.flags.is_composite_component = True
+				try:
+					notes = _(
+						"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
+					).format(
+						get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
+					)
+					depreciate_asset(asset, self.posting_date, notes)
+					asset.reload()
+				finally:
+					frappe.flags.is_composite_component = False
+
+			asset.db_set("disposal_date", self.posting_date)
+			self.set_consumed_asset_status(asset)
 
 	def restore_consumed_asset_items(self):
 		for item in self.asset_items:
