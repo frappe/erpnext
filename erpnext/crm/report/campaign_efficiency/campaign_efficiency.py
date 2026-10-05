@@ -84,7 +84,8 @@ def get_order_amount(leads):
 		frappe.qb.from_(so_item)
 		.select(Sum(so_item.base_net_amount))
 		.where(
-			so_item.prevdoc_docname.isin(
+			(so_item.docstatus == 1)
+			& so_item.prevdoc_docname.isin(
 				frappe.qb.from_(quotation)
 				.select(quotation.name)
 				.where(

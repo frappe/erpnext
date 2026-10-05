@@ -44,3 +44,48 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		# no quotations/orders seeded for these leads -> derived counts are zero
 		self.assertEqual(row["quot_count"], 0)
 		self.assertEqual(row["order_count"], 0)
+
+	def test_cancelled_orders_left_out(self):
+		campaign = "_Test Campaign Eff Orders"
+		if not frappe.db.exists("UTM Campaign", campaign):
+			frappe.get_doc({"doctype": "UTM Campaign", "__newname": campaign}).insert()
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "lead_name": "_Test Campaign Eff Order Lead", "utm_campaign": campaign}
+		).insert()
+		quotation = make_lead_quotation(lead.name)
+		quotation.submit()
+
+		cancelled = make_lead_sales_order(quotation.name)
+		cancelled.cancel()
+		make_lead_sales_order(quotation.name)
+
+		row = campaign_row(campaign)
+		self.assertEqual(row["order_count"], 1)
+		self.assertEqual(row["order_value"], 1000)
+
+
+def make_lead_sales_order(quotation: str):
+	from erpnext.selling.doctype.quotation.mapper import make_sales_order
+
+	sales_order = make_sales_order(quotation)
+	sales_order.delivery_date = add_days(nowdate(), 7)
+	sales_order.insert()
+	sales_order.submit()
+	return sales_order
+
+
+def make_lead_quotation(lead: str):
+	return frappe.get_doc(
+		{
+			"doctype": "Quotation",
+			"quotation_to": "Lead",
+			"party_name": lead,
+			"company": "_Test Company",
+			"items": [{"item_code": "_Test Item", "qty": 1, "rate": 1000}],
+		}
+	).insert()
+
+
+def campaign_row(campaign: str) -> dict:
+	data = execute(frappe._dict({"from_date": add_days(nowdate(), -1), "to_date": nowdate()}))[1]
+	return next(row for row in data if row["utm_campaign"] == campaign)
