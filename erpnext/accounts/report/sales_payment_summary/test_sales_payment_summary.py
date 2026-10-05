@@ -257,6 +257,18 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 
 		self.assertEqual(run_report(customer, is_pos=1)[0][5], 10000)
 
+	def test_pos_view_includes_foreign_currency_invoices(self):
+		si = make_pos_invoice(
+			"_Test Customer USD",
+			paid=10000,
+			currency="USD",
+			conversion_rate=50,
+			debit_to="_Test Receivable USD - _TC",
+		)
+
+		row = run_report(si.customer, is_pos=1)[0]
+		self.assertEqual((row[3], row[5]), (500000, 500000))
+
 
 def run_report(customer, **filters):
 	filters = frappe._dict(
