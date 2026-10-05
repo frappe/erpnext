@@ -143,9 +143,8 @@ def prepare_data(supplier_quotation_data, filters):
 		# map for chart preparation of the form {'supplier1': {'qty': 'price'}}
 		supplier = data.get("supplier_name")
 		if filters.get("item_code"):
-			if supplier not in supplier_qty_price_map:
-				supplier_qty_price_map[supplier] = {}
-			supplier_qty_price_map[supplier][row["qty"]] = row["base_amount"]
+			qty_prices = supplier_qty_price_map.setdefault(supplier, {})
+			qty_prices[row["qty"]] = min(qty_prices.get(row["qty"], row["base_amount"]), row["base_amount"])
 
 		groups.append(group)
 		suppliers.append(supplier)

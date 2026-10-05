@@ -110,6 +110,13 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		rows = self.run_report(item_code=ITEM, categorize_by="Categorize by Supplier")
 		self.assertEqual({row["quotation"] for row in rows if row.get("min")}, {cheapest.name})
 
+	def test_chart_keeps_the_cheaper_of_two_quotes_for_the_same_qty(self):
+		self.make_quotation("_Test Supplier", qty=10, rate=450)
+		self.make_quotation("_Test Supplier", qty=10, rate=470)
+
+		chart = self.execute_report(item_code=ITEM)[3]
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [4500])
+
 	def test_supplier_restricted_user_sees_only_that_suppliers_quotes(self):
 		own_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
 		self.make_quotation("_Test Supplier 1", qty=10, rate=450)
