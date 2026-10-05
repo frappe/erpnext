@@ -56,6 +56,11 @@ class TestLeadDetailsReport(ERPNextTestSuite):
 		rows = [row for row in get_data(make_filters()) if row.name == lead.name]
 		self.assertEqual([row.city for row in rows], ["Hubballi"])
 
+	def test_lead_without_company_is_listed(self):
+		lead = make_lead(company=None)
+
+		self.assertIn(lead.name, [row.name for row in get_data(make_filters())])
+
 
 def make_lead(**fields):
 	return frappe.get_doc(

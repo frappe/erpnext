@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Order
-from frappe.query_builder.functions import Concat_ws, Date, NullIf
+from frappe.query_builder.functions import Concat_ws, Date, IfNull, NullIf
 from frappe.utils.nestedset import get_descendants_of
 
 
@@ -102,7 +102,7 @@ def get_data(filters):
 			address.state,
 			address.country,
 		)
-		.where(lead.company == filters.company)
+		.where((lead.company == filters.company) | (IfNull(lead.company, "") == ""))
 		.where(Date(lead.creation).between(filters.from_date, filters.to_date))
 	)
 
