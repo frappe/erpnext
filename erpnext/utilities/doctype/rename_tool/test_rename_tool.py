@@ -42,6 +42,18 @@ class TestRenameTool(ERPNextTestSuite):
 		self.assertRaises(frappe.PermissionError, upload, "Customer", file_url)
 		self.assertFalse(frappe.db.exists("Customer", f"{customer} Renamed"))
 
+	def test_failed_rows_are_reported_to_the_user(self):
+		customer, existing = make_customer("_Test Rename Tool D"), make_customer("_Test Rename Tool E")
+		csv = f"{customer},{existing}\n_Test Rename Tool Missing,_Test Rename Tool X\n"
+
+		with patch.object(frappe.db, "rollback"):
+			upload("Customer", attach_csv(csv))
+
+		notification = frappe.get_last_doc("Notification Log", {"for_user": "Administrator"})
+		self.assertIn("2 of 2", notification.subject)
+		self.assertIn(existing, notification.email_content)
+		self.assertIn("_Test Rename Tool Missing", notification.email_content)
+
 
 def attach_csv(content: str) -> str:
 	return save_file("rename.csv", content.encode(), "Rename Tool", "Rename Tool", is_private=1).file_url

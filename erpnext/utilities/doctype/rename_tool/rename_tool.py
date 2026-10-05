@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.rename_doc import bulk_rename
+from frappe.utils import escape_html
 from frappe.utils.csvutils import read_csv_content
 from frappe.utils.deprecations import deprecated
 
@@ -52,7 +53,7 @@ def upload(select_doctype: str | None = None, file_to_rename: str | None = None)
 	# bulk rename allows only 500 rows at a time, so we created one job per 500 rows
 	for i in range(0, len(rows), 500):
 		frappe.enqueue(
-			method=bulk_rename,
+			method=rename_rows,
 			queue="long",
 			doctype=select_doctype,
 			rows=rows[i : i + 500],
@@ -70,6 +71,30 @@ def validate_access(doctype: str | None) -> None:
 
 	if not frappe.has_permission(doctype, "write"):
 		raise frappe.PermissionError
+
+
+def rename_rows(doctype: str, rows: list[list]) -> None:
+	"""Rename the rows with `bulk_rename` and notify the user of the rows that failed."""
+	# same message as bulk_rename, so the prefix matches in the user's language
+	failed_prefix = _("** Failed: {0} to {1}: {2}").split("{0}")[0]
+	failed = [line for line in bulk_rename(doctype, rows=rows) if line.startswith(failed_prefix)]
+	if failed:
+		notify_failed_rows(doctype, failed, len(rows))
+
+
+def notify_failed_rows(doctype: str, failed: list[str], total: int) -> None:
+	subject = _("Rename Tool: {0} of {1} {2} rows could not be renamed").format(
+		len(failed), total, _(doctype)
+	)
+	frappe.get_doc(
+		{
+			"doctype": "Notification Log",
+			"for_user": frappe.session.user,
+			"type": "Alert",
+			"subject": subject,
+			"email_content": "<br>".join(escape_html(line) for line in failed),
+		}
+	).insert(ignore_permissions=True)
 
 
 def get_file_to_rename(file_url: str | None) -> Document:

@@ -61,7 +61,7 @@ frappe.ui.form.on("Rename Tool", {
 				};
 
 				for (const job of jobs) {
-					if (job.job_name !== "frappe.model.rename_doc.bulk_rename") {
+					if (job.job_name !== "erpnext.utilities.doctype.rename_tool.rename_tool.rename_rows") {
 						continue;
 					}
 
