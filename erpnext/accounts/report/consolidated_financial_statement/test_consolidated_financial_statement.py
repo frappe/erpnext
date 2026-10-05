@@ -151,6 +151,18 @@ class TestConsolidatedFinancialStatement(FrappeTestCase):
 		change = self.get_change(before, after, "Net Change in Accounts Receivable", CHILD_COMPANY)
 		self.assertEqual(change, 0)
 
+	def test_summary_does_not_add_columns_in_different_currencies(self):
+		filters = {"report": "Profit and Loss Statement", "accumulated_in_group_company": 0}
+		before = self.get_summary_value("Total Income", **filters)
+		self.post_journal_entry("Cash - _TCCU", "Sales - _TCCU", 100, company=FOREIGN_CHILD_COMPANY)
+		after = self.get_summary_value("Total Income", **filters)
+
+		self.assertEqual(after, before)
+
+	def get_summary_value(self, label, **extra):
+		summary = self.execute_report(**extra)[4]
+		return next(flt(card["value"]) for card in summary if card["label"] == label)
+
 
 def make_company(name, abbr, currency, country, is_group=0, parent_company=None):
 	if frappe.db.exists("Company", name):
