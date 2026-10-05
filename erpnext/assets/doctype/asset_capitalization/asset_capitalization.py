@@ -12,6 +12,7 @@ from frappe.utils import cint, flt, get_link_to_form
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import (
+	depreciate_asset,
 	get_value_after_depreciation_on_disposal_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
@@ -109,6 +110,7 @@ class AssetCapitalization(StockController):
 	def on_submit(self):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
+		self.dispose_consumed_assets()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_target_asset()
@@ -480,6 +482,24 @@ class AssetCapitalization(StockController):
 				get_link_to_form("Asset", asset_doc.name)
 			)
 		)
+
+	def dispose_consumed_assets(self):
+		"""Depreciate consumed assets up to the posting date and mark them capitalized.
+
+		Kept out of the GL composer, which also runs on every repost."""
+		for item in self.asset_items:
+			asset = frappe.get_doc("Asset", item.asset)
+			if asset.asset_type != "Composite Component":
+				notes = _(
+					"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
+				).format(
+					get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
+				)
+				depreciate_asset(asset, self.posting_date, notes)
+				asset.reload()
+
+			asset.db_set("disposal_date", self.posting_date)
+			self.set_consumed_asset_status(asset)
 
 	def restore_consumed_asset_items(self):
 		for item in self.asset_items:
