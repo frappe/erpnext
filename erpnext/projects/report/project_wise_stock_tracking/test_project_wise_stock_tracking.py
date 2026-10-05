@@ -4,7 +4,9 @@
 import frappe
 from frappe.utils import flt, random_string, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.report.project_wise_stock_tracking.project_wise_stock_tracking import execute
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -59,6 +61,16 @@ class TestProjectWiseStockTracking(ERPNextTestSuite):
 		self.assertEqual(self.get_report_row(project)[2], 200)
 		self.assertEqual(self.get_report_row(header_project)[2], 0)
 
+	def test_delivered_cost_includes_update_stock_invoices(self):
+		project = self.make_project()
+		item_code = self.make_stocked_item()
+		self.submit_for_project(create_delivery_note(item_code=item_code, do_not_submit=True), project)
+		self.submit_for_project(
+			create_sales_invoice(item_code=item_code, update_stock=1, do_not_submit=True), project
+		)
+
+		self.assertEqual(self.get_report_row(project)[3], 200)
+
 	def make_project(self):
 		return (
 			frappe.get_doc(
@@ -85,6 +97,10 @@ class TestProjectWiseStockTracking(ERPNextTestSuite):
 		issue.items[0].project = project
 		issue.save()
 		issue.submit()
+
+	def submit_for_project(self, doc, project):
+		doc.project = project
+		doc.submit()
 
 	def get_report_row(self, project):
 		return next(row for row in execute()[1] if row[0] == project)
