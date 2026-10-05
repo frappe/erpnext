@@ -407,6 +407,21 @@ class TestIssue(TestSetUp):
 			self.assertFalse(frappe.has_website_permission(staff_issue, "delete"))
 			self.assertTrue(frappe.has_website_permission(own_issue, "write"))
 
+	def test_hold_time_when_closed_issue_is_reopened_as_replied(self):
+		issue = make_issue(get_datetime("2019-03-04 11:00"), index=1)
+
+		for status, time in (("Closed", "12:00"), ("Replied", "13:00"), ("Open", "14:00")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+			if status == "Replied":
+				self.assertEqual(issue.agreement_status, "Resolution Due")
+				self.assertFalse(issue.sla_resolution_date)
+
+		self.assertEqual(issue.total_hold_time, 7200)
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
