@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import cstr
 
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
@@ -94,6 +95,51 @@ class TestAssetShiftAllocation(ERPNextTestSuite):
 		]
 
 		self.assertEqual(schedules, expected_schedules)
+
+	def test_cancel_restores_previous_schedule(self):
+		asset = create_shift_based_asset()
+		original_schedule = get_active_schedule(asset.name)
+		allocation = make_shift_allocation(asset.name, {0: "Triple"})
+		allocation.submit()
+		self.assertEqual(get_active_schedule(asset.name)[0], ("2023-01-31", 20000.0, "Triple", None))
+
+		allocation.cancel()
+		self.assertEqual(get_active_schedule(asset.name), original_schedule)
+
+		allocation = make_shift_allocation(asset.name, {0: "Triple"})
+		allocation.submit()
+		post_depreciation_entries(date="2023-01-31")
+		self.assertRaisesRegex(frappe.ValidationError, "depreciation has been posted", allocation.cancel)
+
+
+def create_shift_based_asset():
+	return create_asset(
+		calculate_depreciation=1,
+		available_for_use_date="2023-01-01",
+		purchase_date="2023-01-01",
+		net_purchase_amount=120000,
+		depreciation_start_date="2023-01-31",
+		total_number_of_depreciations=12,
+		frequency_of_depreciation=1,
+		shift_based=1,
+		submit=1,
+	)
+
+
+def make_shift_allocation(asset: str, shifts: dict[int, str]):
+	allocation = frappe.get_doc({"doctype": "Asset Shift Allocation", "asset": asset}).insert()
+	allocation = frappe.get_doc(allocation.doctype, allocation.name)
+	for index, shift in shifts.items():
+		allocation.depreciation_schedule[index].shift = shift
+	allocation.save()
+	return allocation
+
+
+def get_active_schedule(asset: str) -> list[tuple]:
+	return [
+		(cstr(d.schedule_date), d.depreciation_amount, d.shift, d.journal_entry)
+		for d in get_depr_schedule(asset, "Active")
+	]
 
 
 def create_asset_shift_factors():
