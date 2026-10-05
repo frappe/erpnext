@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import CustomFunction
 from frappe.query_builder.functions import Count, Sum
-from frappe.utils import getdate
+from frappe.utils import date_diff
 
 DateDiff = CustomFunction("DATEDIFF", ["end_date", "start_date"])
 
@@ -55,8 +55,7 @@ class SupplierScorecardVariable(Document):
 
 def get_total_workdays(scorecard):
 	"""Gets the number of days in this period"""
-	delta = getdate(scorecard.end_date) - getdate(scorecard.start_date)
-	return delta.days
+	return date_diff(scorecard.end_date, scorecard.start_date) + 1
 
 
 def get_item_workdays(scorecard):

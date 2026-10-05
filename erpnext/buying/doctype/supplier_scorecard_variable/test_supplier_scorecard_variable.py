@@ -20,6 +20,7 @@ from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_varia
 	get_rfq_total_number,
 	get_sq_total_number,
 	get_total_days_late,
+	get_total_workdays,
 )
 
 
@@ -67,6 +68,10 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 		self.assertEqual(get_rfq_total_number(scorecard), 1)
 		self.assertEqual(get_sq_total_number(scorecard), 1)
 		self.assertEqual(get_rfq_response_days(scorecard), 4)
+
+	def test_total_workdays_include_both_ends(self):
+		scorecard = frappe._dict(start_date="2026-09-01", end_date="2026-09-30")
+		self.assertEqual(get_total_workdays(scorecard), 30)
 
 
 test_existing_variables = [
