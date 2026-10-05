@@ -1309,6 +1309,20 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		self.assertEqual(data[-1][1], 500)
 
+	def test_project_group_uses_item_project(self):
+		project = frappe.get_doc(
+			{"doctype": "Project", "project_name": "_Test Gross Profit Project", "company": self.company}
+		).insert()
+		sinv = self.create_sales_invoice(rate=500, do_not_save=True)
+		sinv.items[0].project = project.name
+		sinv.submit()
+
+		filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), project=[project.name])
+		_, data = execute(frappe._dict(filters, group_by="Project"))
+
+		self.assertEqual(data[0][0], project.name)
+		self.assertEqual(data[-1][1], 500)
+
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
 		components = []

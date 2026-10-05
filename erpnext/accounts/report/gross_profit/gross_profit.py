@@ -7,7 +7,7 @@ import frappe
 from frappe import _, qb, scrub
 from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import Coalesce
+from frappe.query_builder.functions import Coalesce, NullIf
 from frappe.utils import cint, flt, formatdate
 from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
@@ -1130,7 +1130,8 @@ class GrossProfitGenerator:
 			SalesInvoiceItem.parent,
 			SalesInvoice.posting_date,
 			SalesInvoice.posting_time,
-			SalesInvoice.project,
+			Coalesce(NullIf(SalesInvoiceItem.project, ""), SalesInvoice.project).as_("project"),
+			SalesInvoice.project.as_("invoice_project"),
 			SalesInvoice.update_stock,
 			SalesInvoice.customer,
 			SalesInvoice.customer_group,
@@ -1315,7 +1316,7 @@ class GrossProfitGenerator:
 				"parent": None,
 				"posting_date": row.posting_date,
 				"posting_time": row.posting_time,
-				"project": row.project,
+				"project": row.invoice_project,
 				"update_stock": row.update_stock,
 				"is_debit_note": row.is_debit_note,
 				"customer": row.customer,
