@@ -98,8 +98,7 @@ def get_transfers(holder, date, company=None):
 			share_transfer.to_shareholder,
 		)
 		.where((share_transfer.docstatus == 1) & (share_transfer.date <= date) & is_involved)
-		.orderby(share_transfer.date)
-		.orderby(share_transfer.creation)
+		.orderby(share_transfer.modified)
 	)
 
 	if company:
