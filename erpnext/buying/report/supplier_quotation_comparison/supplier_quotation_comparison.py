@@ -105,6 +105,7 @@ def prepare_data(supplier_quotation_data, filters):
 		"supplier_name" if filters.get("categorize_by") == "Categorize by Supplier" else "item_code"
 	)
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
+	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
 	for data in supplier_quotation_data:
 		group = data.get(group_by_field)  # get item or supplier value for this row
@@ -121,6 +122,7 @@ def prepare_data(supplier_quotation_data, filters):
 			"uom": data.get("uom"),
 			"price_list_currency": data.get("price_list_currency"),
 			"currency": data.get("currency"),
+			"company_currency": company_currency,
 			"stock_uom": data.get("stock_uom"),
 			"base_amount": flt(data.get("base_amount"), float_precision),
 			"base_rate": flt(data.get("base_rate"), float_precision),
@@ -129,6 +131,7 @@ def prepare_data(supplier_quotation_data, filters):
 			"lead_time_days": data.get("lead_time_days"),
 		}
 		row["price_per_unit"] = flt(row["price"]) / (flt(data.get("stock_qty")) or 1)
+		row["base_price_per_unit"] = flt(row["base_amount"]) / (flt(data.get("stock_qty")) or 1)
 
 		# map for report view of form {'supplier1'/'item1':[{},{},...]}
 		group_wise_map[group].append(row)
@@ -138,7 +141,7 @@ def prepare_data(supplier_quotation_data, filters):
 		if filters.get("item_code"):
 			if supplier not in supplier_qty_price_map:
 				supplier_qty_price_map[supplier] = {}
-			supplier_qty_price_map[supplier][row["qty"]] = row["price"]
+			supplier_qty_price_map[supplier][row["qty"]] = row["base_amount"]
 
 		groups.append(group)
 		suppliers.append(supplier)
@@ -156,17 +159,17 @@ def prepare_data(supplier_quotation_data, filters):
 		group_entries[0].update({group_by_field: group})  # Add item/supplier name in first group row
 
 		if highlight_min_price:
-			prices = [group_entry["price_per_unit"] for group_entry in group_entries]
+			prices = [group_entry["base_price_per_unit"] for group_entry in group_entries]
 			min_price = min(prices)
 
 		for entry in group_entries:
-			if highlight_min_price and entry["price_per_unit"] == min_price:
+			if highlight_min_price and entry["base_price_per_unit"] == min_price:
 				entry["min"] = 1
 			out.append(entry)
 
 	if filters.get("item_code"):
 		# render chart only for one item comparison
-		chart_data = prepare_chart_data(suppliers, qty_list, supplier_qty_price_map)
+		chart_data = prepare_chart_data(suppliers, qty_list, supplier_qty_price_map, company_currency)
 
 	return out, chart_data
 
@@ -175,7 +178,7 @@ def get_order_status(status):
 	return status if status in ("Partially Ordered", "Ordered") else "Not Ordered"
 
 
-def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
+def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map, company_currency):
 	data_points_map = {}
 	qty_list.sort()
 
@@ -191,7 +194,7 @@ def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
 				data_points_map[qty].append(None)
 
 	dataset = []
-	currency_symbol = frappe.db.get_value("Currency", frappe.db.get_default("currency"), "symbol")
+	currency_symbol = frappe.db.get_value("Currency", company_currency, "symbol")
 	for qty in qty_list:
 		datapoints = {
 			"name": currency_symbol + " (Qty " + str(qty) + " )",
@@ -259,14 +262,14 @@ def get_columns(filters):
 			"fieldname": "base_amount",
 			"label": _("Price ({0})").format(currency),
 			"fieldtype": "Currency",
-			"options": "price_list_currency",
+			"options": "company_currency",
 			"width": 180,
 		},
 		{
 			"fieldname": "base_rate",
 			"label": _("Price Per Unit ({0})").format(currency),
 			"fieldtype": "Currency",
-			"options": "price_list_currency",
+			"options": "company_currency",
 			"width": 180,
 		},
 		{

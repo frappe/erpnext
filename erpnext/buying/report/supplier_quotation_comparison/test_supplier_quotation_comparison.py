@@ -16,7 +16,7 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 	"""The report lists Supplier Quotation item lines so quotes for the same item can
 	be compared across suppliers."""
 
-	def make_quotation(self, supplier, qty, rate, uom=None, submit=True):
+	def make_quotation(self, supplier, qty, rate, uom=None, submit=True, currency="INR", conversion_rate=1):
 		item = {"item_code": ITEM, "qty": qty, "rate": rate, "warehouse": "_Test Warehouse - _TC"}
 		if uom:
 			item["uom"] = uom
@@ -25,7 +25,8 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 				"doctype": "Supplier Quotation",
 				"supplier": supplier,
 				"company": COMPANY,
-				"currency": "INR",
+				"currency": currency,
+				"conversion_rate": conversion_rate,
 				"transaction_date": "2026-06-01",
 				"items": [item],
 			}
@@ -76,6 +77,16 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		self.assertIn(sq2.name, quotes)
 		self.assertEqual(quotes[sq1.name]["base_rate"], 100)
 		self.assertEqual(quotes[sq2.name]["base_rate"], 120)
+
+	def test_cheapest_quote_is_compared_in_company_currency(self):
+		rupee_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		dollar_quote = self.make_quotation(
+			"_Test Supplier 1", qty=10, rate=10, currency="USD", conversion_rate=80
+		)
+
+		cheapest = {row["quotation"] for row in self.run_report(item_code=ITEM) if row.get("min")}
+		self.assertIn(rupee_quote.name, cheapest)
+		self.assertNotIn(dollar_quote.name, cheapest)
 
 	def test_status_filter(self):
 		draft = self.make_quotation("_Test Supplier", qty=10, rate=100, submit=False)
