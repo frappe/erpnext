@@ -220,6 +220,9 @@ def get_account_type_based_gl_data(company, filters=None):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 		cond += " and cost_center in %(cost_center)s"
 
+	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		cond += " and is_opening != 'Yes'"
+
 	gl_sum = frappe.db.sql_list(
 		f"""
 		select sum(credit) - sum(debit)
