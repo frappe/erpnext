@@ -130,8 +130,13 @@ class CallLog(Document):
 @frappe.whitelist(methods=["POST"])
 def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
 	doc = frappe.get_doc("Call Log", call_log)
+	doc.check_permission("read")
+	# the agent who took the call may record its summary without write access
+	if doc.employee_user_id != frappe.session.user:
+		doc.check_permission("write")
+
 	doc.type_of_call = call_type
-	doc.save()
+	doc.save(ignore_permissions=True)
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
 
 

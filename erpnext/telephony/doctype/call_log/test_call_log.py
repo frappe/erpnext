@@ -6,7 +6,11 @@ import string
 
 import frappe
 
-from erpnext.telephony.doctype.call_log.call_log import link_existing_conversations
+from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.telephony.doctype.call_log.call_log import (
+	add_call_summary_and_call_type,
+	link_existing_conversations,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -110,3 +114,22 @@ class TestCallLog(ERPNextTestSuite):
 		self._run_linker()
 
 		self.assertEqual(self._contact_links_of(other), [], "Log not matching the number must stay unlinked")
+
+	def test_agent_can_save_summary_of_own_call(self):
+		user = "test_call_agent@example.com"
+		employee = make_employee(user, company="_Test Company")
+		call_type = frappe.get_doc({"doctype": "Telephony Call Type", "call_type": "_Test Call Type"})
+		call_type.insert(ignore_if_duplicate=True)
+		call_log = self._make_call_log(
+			**{"from": "+919999999999", "type": "Outgoing"},
+			call_received_by=employee,
+			employee_user_id=user,
+		)
+
+		frappe.set_user(user)
+		try:
+			add_call_summary_and_call_type(call_log, "Wants a quote", "_Test Call Type")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Call Log", call_log, "type_of_call"), "_Test Call Type")
