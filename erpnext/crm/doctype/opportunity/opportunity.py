@@ -23,6 +23,7 @@ from erpnext.crm.utils import (
 	link_open_tasks,
 )
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -507,7 +508,7 @@ def make_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1.0
+		target.conversion_factor = get_conversion_factor(obj.item_code, obj.uom)["conversion_factor"]
 
 	doclist = get_mapped_doc(
 		"Opportunity",

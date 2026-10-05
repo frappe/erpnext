@@ -12,11 +12,13 @@ from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.opportunity import (
 	auto_close_opportunity,
 	make_quotation,
+	make_request_for_quotation,
 	set_multiple_status,
 )
 from erpnext.crm.utils import get_linked_communication_list
 from erpnext.exceptions import PartyDisabled
 from erpnext.selling.doctype.quotation.quotation import set_expired_status
+from erpnext.stock.doctype.item.test_item import make_item
 
 test_records = frappe.get_test_records("Opportunity")
 
@@ -55,6 +57,18 @@ class TestOpportunity(unittest.TestCase):
 
 		self.assertTrue(opp.has_active_quotation())
 		self.assertRaises(frappe.ValidationError, opp.declare_enquiry_lost, [], [])
+
+	def test_request_for_quotation_keeps_the_uom_conversion_factor(self):
+		item = make_item(
+			"_Test Opportunity Boxed Item",
+			{"stock_uom": "_Test UOM", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 12}]},
+		)
+		opp = make_opportunity(with_items=1, item_code=item.name, qty=5)
+		opp.items[0].uom = "_Test UOM 1"
+		opp.save()
+
+		rfq_item = make_request_for_quotation(opp.name).items[0]
+		self.assertEqual((rfq_item.uom, rfq_item.conversion_factor), ("_Test UOM 1", 12))
 
 	def test_make_new_lead_if_required(self):
 		opp_doc = make_opportunity_from_lead()
