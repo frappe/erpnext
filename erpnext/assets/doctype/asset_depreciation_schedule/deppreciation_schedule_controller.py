@@ -280,8 +280,8 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			)
 			if getdate(computed_available_for_use_date) < getdate(self.asset_doc.available_for_use_date):
 				computed_available_for_use_date = self.asset_doc.available_for_use_date
-			depr_booked_for_months = (date_diff(last_depr_date, computed_available_for_use_date) + 1) / (
-				365 / 12
+			depr_booked_for_months = get_elapsed_months(
+				computed_available_for_use_date, last_depr_date, cint(self.fb_row.frequency_of_depreciation)
 			)
 		return depr_booked_for_months
 
@@ -502,3 +502,16 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			fy_end_date = add_days(add_years(fy_start_date, 1), -1)
 
 		return fy_start_date, fy_end_date
+
+
+def get_elapsed_months(from_date, to_date, frequency: int) -> float:
+	"""Months from from_date to to_date: whole periods counted back from to_date, plus the first
+	partial period as a fraction of its days, as the pro-rata first row is computed."""
+	from_date, period_end = getdate(from_date), getdate(add_days(to_date, 1))
+	periods = 0
+	while getdate(add_months(period_end, -frequency * (periods + 1))) >= from_date:
+		periods += 1
+
+	partial_period_end = add_months(period_end, -frequency * periods)
+	partial_period_days = date_diff(partial_period_end, add_months(partial_period_end, -frequency))
+	return (periods + date_diff(partial_period_end, from_date) / partial_period_days) * frequency
