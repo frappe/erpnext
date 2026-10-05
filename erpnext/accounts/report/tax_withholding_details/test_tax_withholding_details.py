@@ -116,6 +116,34 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 		]
 		self.check_expected_values(result, expected_values)
 
+	def test_rows_limited_to_permitted_parties(self):
+		create_tax_category("TDS - 1", rate=10, account="TDS - _TC", cumulative_threshold=1)
+		frappe.db.set_value("Supplier", "Test TDS Supplier", "tax_withholding_category", "TDS - 1")
+		frappe.db.set_value("Supplier", "Test TDS Supplier1", "tax_withholding_category", "TDS - 1")
+		create_purchase_invoice(supplier="Test TDS Supplier", rate=5000).submit()
+		create_purchase_invoice(supplier="Test TDS Supplier1", rate=7000).submit()
+		create_tax_category(cumulative_threshold=300)
+		frappe.db.set_value("Customer", "Test TCS Customer", "tax_withholding_category", "TCS")
+		create_sales_invoice(customer="Test TCS Customer", rate=1000).submit()
+
+		user = "test_twd_party_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "TWD", "roles": [{"role": "Purchase User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Supplier", "Test TDS Supplier", user)
+
+		filters = frappe._dict(company="_Test Company", from_date=today(), to_date=today())
+		frappe.set_user(user)
+		try:
+			parties = {row["party"] for row in execute(filters)[1]}
+			restricted = execute(frappe._dict(filters, party_type="Supplier", party="Test TDS Supplier1"))[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(parties, {"Test TDS Supplier"})
+		self.assertEqual(restricted, [])
+
 	def check_expected_values(self, result, expected_values):
 		self.assertEqual(len(result), len(expected_values))
 		for i in range(len(result)):
