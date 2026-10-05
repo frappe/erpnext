@@ -284,6 +284,12 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "completed_on"), getdate())
 
+	def test_negative_progress(self):
+		task = create_task("_Test Task Negative Progress", save=False)
+		task.progress = -50
+
+		self.assertRaises(frappe.ValidationError, task.save)
+
 	def test_reopen_completed_task(self):
 		task = create_task("_Test Task Reopened")
 		task.status = "Completed"

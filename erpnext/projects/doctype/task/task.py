@@ -176,8 +176,8 @@ class Task(NestedSet):
 			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 
 	def validate_progress(self):
-		if flt(self.progress or 0) > 100:
-			frappe.throw(_("Progress % for a task cannot be more than 100."))
+		if not 0 <= flt(self.progress) <= 100:
+			frappe.throw(_("Progress % for a task must be between 0 and 100."))
 
 		if self.status == "Completed":
 			self.progress = 100
