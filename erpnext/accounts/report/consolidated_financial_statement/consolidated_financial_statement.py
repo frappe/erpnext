@@ -109,7 +109,7 @@ def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
 		data.append(total_credit)
 
 	report_summary, primitive_summary = get_bs_summary(
-		companies,
+		get_summary_companies(companies, filters),
 		asset,
 		liability,
 		equity,
@@ -180,10 +180,26 @@ def get_profit_loss_data(fiscal_year, companies, company_columns, filters):
 	chart = get_pl_chart_data(filters, company_columns, income, expense, net_profit_loss, company_currency)
 
 	report_summary, primitive_summary = get_pl_summary(
-		companies, "", income, expense, net_profit_loss, company_currency, filters, True
+		get_summary_companies(companies, filters),
+		"",
+		income,
+		expense,
+		net_profit_loss,
+		company_currency,
+		filters,
+		True,
 	)
 
 	return data, None, chart, report_summary
+
+
+def get_summary_companies(companies, filters):
+	"""Company columns that can be added up in the summary cards without mixing currencies."""
+	if filters.get("presentation_currency"):
+		return list(companies)
+
+	currencies = {erpnext.get_company_currency(company) for company in companies}
+	return list(companies) if len(currencies) == 1 else [filters.company]
 
 
 def get_income_expense_data(companies, fiscal_year, filters):

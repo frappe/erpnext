@@ -26,6 +26,9 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		self.fiscal_year = get_fiscal_year(today(), company=PARENT_COMPANY)[0]
 
 	def run_report(self, **extra):
+		return self.execute_report(**extra)[1]
+
+	def execute_report(self, **extra):
 		filters = frappe._dict(
 			{
 				"company": PARENT_COMPANY,
@@ -37,7 +40,7 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 			}
 		)
 		filters.update(extra)
-		return execute(filters)[1]
+		return execute(filters)
 
 	def post_journal_entry(self, debit_account, credit_account, amount, company=CHILD_COMPANY, **party):
 		je = frappe.new_doc("Journal Entry")
@@ -204,3 +207,15 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 
 		change = self.get_change(before, after, "Net Change in Accounts Receivable", CHILD_COMPANY)
 		self.assertEqual(change, 0)
+
+	def test_summary_does_not_add_columns_in_different_currencies(self):
+		filters = {"report": "Profit and Loss Statement", "accumulated_in_group_company": 0}
+		before = self.get_summary_value("Total Income", **filters)
+		self.post_journal_entry("Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY)
+		after = self.get_summary_value("Total Income", **filters)
+
+		self.assertEqual(after, before)
+
+	def get_summary_value(self, label, **extra):
+		summary = self.execute_report(**extra)[4]
+		return next(flt(card["value"]) for card in summary if card["label"] == label)
