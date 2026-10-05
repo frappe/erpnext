@@ -51,6 +51,21 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertEqual([(row.qty, row.uom) for row in invoice.items], [(5, "_Test ISI KG"), (1, "Nos")])
 		self.assertEqual((invoice.net_total, invoice.grand_total), (70, 85.40))
 
+	def test_bad_files_are_logged_and_the_rest_imported(self):
+		service = [make_line("Service", "10.00", "10.00")]
+		doc = self.import_files(
+			{
+				"1.xml": make_invoice_xml("ISI-NO-TAX", service, tax=None),
+				"2.xml": make_invoice_xml("ISI-MP99", service, tax="2.20", payments=[("MP99", "12.20")]),
+				"3.xml": make_invoice_xml("ISI-XX", service, country="XX"),
+			}
+		)
+
+		self.assertEqual(doc.status, "Partially Completed - Check Error Log")
+		self.assertEqual(self.get_invoice("ISI-NO-TAX").grand_total, 10)
+		self.assertEqual(self.get_invoice("ISI-MP99").grand_total, 12.20)
+		self.assertFalse(frappe.db.exists("Purchase Invoice", {"bill_no": "ISI-XX"}))
+
 	def import_files(self, files: dict[str, str | bytes]):
 		doc = frappe.get_doc(
 			{
