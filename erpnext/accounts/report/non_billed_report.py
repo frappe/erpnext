@@ -76,6 +76,8 @@ def get_ordered_to_be_billed_data(args, filters=None):
 		.where(
 			(doctype.docstatus == 1)
 			& (doctype.status != "Closed")
+			# a completed document was still to bill on the date only if billed after it
+			& ((doctype.status != "Completed") | later_billed.amount.isnotnull())
 			& (doctype.company == filters.get("company"))
 			& (doctype.posting_date <= as_on_date)
 			& (child_doctype.amount > 0)
