@@ -126,3 +126,10 @@ class TestProcurementTracker(ERPNextTestSuite):
 		orders = {row.get("purchase_order") for row in rows}
 		self.assertIn(with_project.name, orders)
 		self.assertNotIn(without_project.name, orders)
+
+	def test_transfer_request_is_not_listed(self):
+		mr = make_material_request(
+			material_request_type="Material Transfer", from_warehouse="_Test Warehouse 1 - _TC"
+		)
+
+		self.assertNotIn(mr.name, {row.get("material_request_no") for row in self.run_report()})
