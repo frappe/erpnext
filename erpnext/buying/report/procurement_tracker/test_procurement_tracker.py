@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+	create_pr_against_po,
+	create_purchase_order,
+)
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
@@ -13,6 +16,7 @@ from erpnext.stock.doctype.material_request.test_material_request import (
 	make_material_request,
 	make_material_request_for_items,
 )
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice_from_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -99,3 +103,11 @@ class TestProcurementTracker(ERPNextTestSuite):
 			[(row["item_code"], row.get("purchase_order")) for row in rows],
 			[("_Test Item", po.name), ("_Test Item Home Desktop 100", None)],
 		)
+
+	def test_billed_receipt_keeps_actual_delivery_date(self):
+		po = create_purchase_order(qty=10)
+		receipt = create_pr_against_po(po.name, received_qty=5)
+		make_invoice_from_receipt(receipt.name).submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_delivery_date"], getdate(receipt.posting_date))

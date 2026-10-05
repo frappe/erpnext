@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
@@ -293,13 +293,14 @@ def get_mapped_pr_records():
 	pr_records = (
 		frappe.qb.from_(pr)
 		.from_(pr_item)
-		.select(pr_item.purchase_order_item, pr.posting_date)
+		.select(pr_item.purchase_order_item, Max(pr.posting_date))
 		.where(
 			(pr.docstatus == 1)
+			& (pr.is_return == 0)
 			& (pr.name == pr_item.parent)
 			& (pr_item.purchase_order_item.isnotnull())
-			& (pr.status.notin(("Closed", "Completed", "Cancelled")))
 		)
+		.groupby(pr_item.purchase_order_item)
 	).run()
 
 	return frappe._dict(pr_records)
