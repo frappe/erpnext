@@ -9,12 +9,13 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.pos_register.pos_register import execute
 
-PAYMENT_ACCOUNTS = {"Cash": "Cash - _TC", "Credit Card": "_Test Bank - _TC"}
+PAYMENT_ACCOUNTS = {"Cash": "Cash - _TC", "_Test POS Register Card": "_Test Bank - _TC"}
 
 
 class TestPOSRegister(FrappeTestCase):
 	def setUp(self):
 		self.pos_profile = make_pos_profile().name
+		make_card_mode_of_payment()
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -37,6 +38,16 @@ class TestPOSRegister(FrappeTestCase):
 		rows = self.run_report(group_by="")
 		self.assertEqual(
 			[(row.invoice_type, row.pos_invoice) for row in rows], [("Sales Invoice", invoice.name)]
+		)
+
+	def test_payment_method_grouping_counts_each_grand_total_once(self):
+		self.make_pos_sales_invoice({"Cash": 600, "_Test POS Register Card": 400})
+		self.make_pos_sales_invoice({"Cash": 500}, rate=500)
+
+		subtotals = [row for row in self.run_report(group_by="Payment Method") if row.get("bold")]
+		self.assertEqual(
+			[(row["mode_of_payment"], row["grand_total"], row["paid_amount"]) for row in subtotals],
+			[("Cash", 1500, 1100), ("_Test POS Register Card", 0, 400)],
 		)
 
 	def make_pos_sales_invoice(self, payments, rate=1000, **args):
@@ -64,3 +75,15 @@ class TestPOSRegister(FrappeTestCase):
 			**filters,
 		}
 		return execute(frappe._dict(filters))[1]
+
+
+def make_card_mode_of_payment():
+	if not frappe.db.exists("Mode of Payment", "_Test POS Register Card"):
+		frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "_Test POS Register Card",
+				"type": "Bank",
+				"accounts": [{"company": "_Test Company", "default_account": "_Test Bank - _TC"}],
+			}
+		).insert()
