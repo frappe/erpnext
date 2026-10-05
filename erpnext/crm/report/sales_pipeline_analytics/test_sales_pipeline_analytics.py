@@ -195,6 +195,10 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(rows[0]["January"], 9000)
 
+		# amounts of companies with different currencies can't be added together
+		with self.assertRaises(frappe.ValidationError):
+			stage_rows(stage, based_on="Amount", company=None, from_date="2026-01-01", to_date="2026-01-31")
+
 
 def make_sales_stage() -> str:
 	stage = "_Test Pipeline Stage " + frappe.generate_hash(length=5)
