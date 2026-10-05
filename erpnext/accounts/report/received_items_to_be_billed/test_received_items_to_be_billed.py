@@ -5,6 +5,7 @@ import frappe
 
 from erpnext.accounts.report.received_items_to_be_billed.received_items_to_be_billed import execute
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_pi_from_pr
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -99,3 +100,33 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 			"Receipt dated after the cutoff should be excluded",
 		)
 		self.assertIsNotNone(self.get_row(self.run_report(posting_date="2026-06-30"), pr.name))
+
+	def test_billing_after_the_as_on_date_is_not_deducted(self):
+		pr = make_purchase_receipt(qty=10, rate=100, posting_date="2026-06-01")
+		pi = make_pi_from_pr(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = "2026-06-20"
+		pi.submit()
+
+		returned_pr = make_purchase_receipt(qty=10, rate=100, posting_date="2026-06-01")
+		make_receipt_return(returned_pr.name, qty=-4, posting_date="2026-06-20")
+
+		data = self.run_report(posting_date="2026-06-10")
+		row = self.get_row(data, pr.name)
+		self.assertEqual((row.billed_amount, row.pending_amount), (0, 1000))
+		row = self.get_row(data, returned_pr.name)
+		self.assertEqual((row.returned_amount, row.pending_amount), (0, 1000))
+
+		data = self.run_report(posting_date="2026-06-20")
+		self.assertIsNone(self.get_row(data, pr.name))
+		self.assertEqual(self.get_row(data, returned_pr.name).pending_amount, 600)
+
+
+def make_receipt_return(purchase_receipt, qty, posting_date):
+	return_pr = make_purchase_return(purchase_receipt)
+	return_pr.set_posting_time = 1
+	return_pr.posting_date = posting_date
+	return_pr.items[0].qty = qty
+	return_pr.items[0].received_qty = qty
+	return_pr.submit()
+	return return_pr
