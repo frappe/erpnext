@@ -313,6 +313,7 @@ class PurchaseReceipt(BuyingController):
 	def po_required(self):
 		if (
 			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_return
 			and not self.is_internal_transfer()
 		):
 			for d in self.get("items"):
