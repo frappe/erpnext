@@ -98,6 +98,8 @@ def validate_returned_items(doc):
 		as_dict=1,
 	):
 		valid_items = get_ref_item_dict(valid_items, d)
+		if doc.doctype == "Delivery Note":
+			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql(
@@ -125,7 +127,8 @@ def validate_returned_items(doc):
 				key = (d.item_code, d.get(field))
 				raise_exception = True
 		elif doc.doctype == "Delivery Note":
-			key = (d.item_code, d.get("dn_detail"))
+			key = (d.item_code, d.dn_detail) if d.get("dn_detail") else d.item_code
+			raise_exception = True
 
 		if d.item_code and (flt(d.qty) <= 0 or flt(d.get("received_qty")) <= 0):
 			if key not in valid_items:
@@ -318,6 +321,11 @@ def get_already_returned_items(doc):
 	)
 
 	items = {}
+	if doc.doctype == "Delivery Note":
+		for d in data:
+			item_total = items.setdefault(d.item_code, frappe._dict(qty=0, stock_qty=0))
+			item_total.qty += flt(d.qty)
+			item_total.stock_qty += flt(d.stock_qty)
 
 	for d in data:
 		items.setdefault(
