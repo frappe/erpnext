@@ -51,7 +51,7 @@
  "icon": "users",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:29.470120",
+ "modified": "2026-10-05 14:52:56.725983",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",
@@ -77,9 +77,15 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Desk User",
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Desk User"
   }
  ],
  "quick_entry": 1,
