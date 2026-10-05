@@ -79,3 +79,26 @@ class TestProcurementTracker(FrappeTestCase):
 
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_cost"], 630)
+
+	def test_unordered_rows_of_a_partly_ordered_request_are_listed(self):
+		mr = make_material_request(do_not_submit=True)
+		mr.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 10,
+				"schedule_date": mr.items[0].schedule_date,
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
+		mr.submit()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items = po.items[:1]
+		po.submit()
+
+		rows = [row for row in self.run_report() if row.get("material_request_no") == mr.name]
+		self.assertCountEqual(
+			[(row["item_code"], row.get("purchase_order")) for row in rows],
+			[("_Test Item", po.name), ("_Test Item Home Desktop 100", None)],
+		)
