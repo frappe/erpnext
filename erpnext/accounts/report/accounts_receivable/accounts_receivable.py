@@ -781,14 +781,10 @@ class ReceivablePayableReport:
 				future_amount_field = "future_amount_in_base_currency"
 
 			if row.remaining_balance != 0 and future.get(future_amount_field):
-				if future.get(future_amount_field) > row.outstanding:
-					row.future_amount = row.outstanding
-					future[future_amount_field] = future.get(future_amount_field) - row.outstanding
-					row.remaining_balance = 0
-				else:
-					row.future_amount += future.get(future_amount_field)
-					future[future_amount_field] = 0
-					row.remaining_balance = row.outstanding - row.future_amount
+				amount = min(future.get(future_amount_field), row.remaining_balance)
+				row.future_amount += amount
+				future[future_amount_field] -= amount
+				row.remaining_balance = row.outstanding - row.future_amount
 
 				row.setdefault("future_ref", []).append(
 					cstr(future.future_ref) + "/" + cstr(future.future_date)

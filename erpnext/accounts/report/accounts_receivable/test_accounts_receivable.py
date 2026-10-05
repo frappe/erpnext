@@ -831,6 +831,25 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
 		self.assertEqual([row.future_amount, row.remaining_balance], [40.0, 60.0])
 
+	def test_future_payments_spread_over_payment_terms(self):
+		si = self.create_sales_invoice()
+		for days, amount in ((5, 20), (6, 15)):
+			pe = get_payment_entry(si.doctype, si.name, party_amount=amount, bank_account=self.cash)
+			pe.posting_date = add_days(today(), days)
+			pe.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_future_payments": True,
+			"based_on_payment_terms": True,
+		}
+		rows = [row for row in execute(filters)[1] if row.voucher_no == si.name]
+		self.assertEqual(
+			[(row.future_amount, row.remaining_balance) for row in rows], [(30, 0), (5, 45), (0, 20)]
+		)
+
 	def test_future_payments_from_journal_entry(self):
 		# A single future-dated Journal Entry paying two different invoices must surface as one
 		# future-payment row PER invoice, not collapse the whole sum onto one arbitrary invoice
