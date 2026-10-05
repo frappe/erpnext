@@ -971,13 +971,16 @@ class GrossProfitGenerator:
 		return flt(row.qty) * self.drop_ship_buying_rates[row.so_detail]
 
 	def get_buying_amount_from_so_dn(self, sales_order, so_detail, item_code):
-		from frappe.query_builder.functions import Avg
+		from frappe.query_builder.functions import Sum
 
 		delivery_note_item = frappe.qb.DocType("Delivery Note Item")
 
 		query = (
 			frappe.qb.from_(delivery_note_item)
-			.select(Avg(delivery_note_item.incoming_rate))
+			.select(
+				Sum(delivery_note_item.stock_qty * delivery_note_item.incoming_rate)
+				/ Sum(delivery_note_item.stock_qty)
+			)
 			.where(delivery_note_item.docstatus == 1)
 			.where(delivery_note_item.item_code == item_code)
 			.where(delivery_note_item.against_sales_order == sales_order)
