@@ -6,7 +6,6 @@ import json
 import math
 
 import frappe
-from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, update_nsm
 
 EARTH_RADIUS = 6378137
@@ -38,26 +37,21 @@ class Location(NestedSet):
 
 	def validate(self):
 		self.calculate_location_area()
-
-		if not self.is_new() and self.get("parent_location"):
-			self.update_ancestor_location_features()
+		self.previous_ancestors = [] if self.is_new() else self.get_ancestors()
 
 	def on_update(self):
-		# super(Location, self).on_update()
 		NestedSet.on_update(self)
+		self.update_ancestor_location_features()
 
 	def on_trash(self):
 		NestedSet.validate_if_child_exists(self)
+		ancestors = self.get_ancestors()
 		update_nsm(self)
-		self.remove_ancestor_location_features()
-		# super(Location, self).on_update()
+		for ancestor in ancestors:
+			self.set_features_in_ancestor(ancestor, [])
 
 	def calculate_location_area(self):
-		features = self.get_location_features()
-		new_area = compute_area(features)
-
-		self.area_difference = new_area - flt(self.area)
-		self.area = new_area
+		self.area = compute_area(self.get_location_features())
 
 	def get_location_features(self):
 		if not self.location:
@@ -80,43 +74,22 @@ class Location(NestedSet):
 		self.db_set("location", json.dumps(location))
 
 	def update_ancestor_location_features(self):
-		self_features = set(self.add_child_property())
+		ancestors = self.get_ancestors()
+		for ancestor in set(self.get("previous_ancestors") or []) - set(ancestors):
+			self.set_features_in_ancestor(ancestor, [])
 
-		for ancestor in self.get_ancestors():
-			ancestor_doc = frappe.get_doc("Location", ancestor)
-			child_features, ancestor_features = ancestor_doc.feature_seperator(child_feature=self.name)
+		features = self.add_child_property()
+		for ancestor in ancestors:
+			self.set_features_in_ancestor(ancestor, features)
 
-			ancestor_features = list(set(ancestor_features))
-			child_features = set(child_features)
+	def set_features_in_ancestor(self, ancestor: str, features: list[str]):
+		"""Replace this location's features in the ancestor and recompute the ancestor's area."""
+		ancestor_doc = frappe.get_doc("Location", ancestor)
+		_child_features, other_features = ancestor_doc.feature_seperator(child_feature=self.location_name)
+		ancestor_features = [json.loads(feature) for feature in other_features + features]
 
-			if self_features != child_features:
-				features_to_be_appended = self_features - child_features
-				features_to_be_discarded = child_features - self_features
-
-				for feature in features_to_be_discarded:
-					child_features.discard(feature)
-
-				for feature in features_to_be_appended:
-					child_features.add(feature)
-
-			ancestor_features.extend(list(child_features))
-
-			for index, feature in enumerate(ancestor_features):
-				ancestor_features[index] = json.loads(feature)
-
-			ancestor_doc.set_location_features(features=ancestor_features)
-			ancestor_doc.db_set("area", ancestor_doc.area + self.area_difference)
-
-	def remove_ancestor_location_features(self):
-		for ancestor in self.get_ancestors():
-			ancestor_doc = frappe.get_doc("Location", ancestor)
-			child_features, ancestor_features = ancestor_doc.feature_seperator(child_feature=self.name)
-
-			for index, feature in enumerate(ancestor_features):
-				ancestor_features[index] = json.loads(feature)
-
-			ancestor_doc.set_location_features(features=ancestor_features)
-			ancestor_doc.db_set("area", ancestor_doc.area - self.area)
+		ancestor_doc.set_location_features(features=ancestor_features)
+		ancestor_doc.db_set("area", compute_area(ancestor_features))
 
 	def add_child_property(self):
 		features = self.get_location_features()
