@@ -647,6 +647,16 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		new_item_with_tax.delete()
 		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"disable_last_purchase_rate": 1})
+	def test_update_items_keeps_last_purchase_rate_when_disabled(self):
+		item = make_item("_Test Update Items Last Purchase Rate", {"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item, rate=77)
+
+		trans_item = json.dumps([{"item_code": item, "rate": 55, "qty": 10, "docname": po.items[0].name}])
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
+
 	def test_update_qty(self):
 		po = create_purchase_order()
 
