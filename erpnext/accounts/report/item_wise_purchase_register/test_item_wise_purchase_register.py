@@ -112,3 +112,21 @@ class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 		row = next(row for row in execute(filters)[1] if row["invoice"] == pi.name)
 
 		self.assertEqual(row["purchase_receipt"], pr.name)
+
+	def test_grouped_percent_of_grand_total_follows_filters(self):
+		self.create_purchase_invoice()
+		self.supplier = "_Test Supplier 1"
+		self.create_purchase_invoice()
+
+		filters = frappe._dict(
+			from_date=today(),
+			to_date=today(),
+			company=self.company,
+			group_by="Supplier",
+			supplier=self.supplier,
+		)
+		grand_total_row = next(
+			row for row in execute(filters)[1] if row.get("bold") and row.get("item_code") == "Total"
+		)
+
+		self.assertEqual(grand_total_row["percent_gt"], 100)

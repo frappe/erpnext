@@ -10,11 +10,8 @@ from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
-	add_sub_total_row,
-	add_total_row,
 	apply_order_by_conditions,
-	get_grand_total,
-	get_group_by_and_display_fields,
+	get_grouped_data,
 	get_tax_accounts,
 )
 from erpnext.accounts.report.utils import get_values_for_columns
@@ -32,29 +29,25 @@ def _execute(filters=None, additional_table_columns=None):
 	company_currency = erpnext.get_company_currency(filters.company)
 
 	item_list = get_items(filters, additional_table_columns)
+	if not item_list:
+		return columns, [], None, None, None, 0
+
 	aii_account_map = get_aii_accounts()
 	default_taxes = {}
-	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(
-			item_list,
-			columns,
-			company_currency,
-			doctype="Purchase Invoice",
-			tax_doctype="Purchase Taxes and Charges",
-		)
-		for tax in tax_columns:
-			default_taxes[f"{tax}_rate"] = 0
-			default_taxes[f"{tax}_amount"] = 0
+	itemised_tax, tax_columns = get_tax_accounts(
+		item_list,
+		columns,
+		company_currency,
+		doctype="Purchase Invoice",
+		tax_doctype="Purchase Taxes and Charges",
+	)
+	for tax in tax_columns:
+		default_taxes[f"{tax}_rate"] = 0
+		default_taxes[f"{tax}_amount"] = 0
 
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
-	data = []
-	total_row_map = {}
-	skip_total_row = 0
-	prev_group_by_value = ""
-
-	if filters.get("group_by"):
-		grand_total = get_grand_total(filters, "Purchase Invoice")
+	rows = []
 
 	for d in item_list:
 		purchase_receipt = None
@@ -114,34 +107,12 @@ def _execute(filters=None, additional_table_columns=None):
 			}
 		)
 
-		if filters.get("group_by"):
-			row.update({"percent_gt": flt(row["total"] / grand_total) * 100})
-			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
-			data, prev_group_by_value = add_total_row(
-				data,
-				filters,
-				prev_group_by_value,
-				d,
-				total_row_map,
-				group_by_field,
-				subtotal_display_field,
-				grand_total,
-				tax_columns,
-			)
-			add_sub_total_row(row, total_row_map, d.get(group_by_field, ""), tax_columns)
+		rows.append((d, row))
 
-		data.append(row)
+	if filters.get("group_by"):
+		return columns, get_grouped_data(filters, rows, tax_columns), None, None, None, 1
 
-	if filters.get("group_by") and item_list:
-		total_row = total_row_map.get(prev_group_by_value or d.get("item_name"))
-		total_row["percent_gt"] = flt(total_row["total"] / grand_total * 100)
-		data.append(total_row)
-		data.append({})
-		add_sub_total_row(total_row, total_row_map, "total_row", tax_columns)
-		data.append(total_row_map.get("total_row"))
-		skip_total_row = 1
-
-	return columns, data, None, None, None, skip_total_row
+	return columns, [row for _item, row in rows], None, None, None, 0
 
 
 def get_columns(additional_table_columns, filters):
