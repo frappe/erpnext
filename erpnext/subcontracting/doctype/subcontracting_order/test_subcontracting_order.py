@@ -34,6 +34,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
+	update_subcontracting_order_status,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -116,6 +117,16 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.cancel()
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
+
+	def test_status_can_only_be_closed_or_reopened_when_submitted(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_subcontracting_order_status, sco.name, "Closed")
+
+		sco.submit()
+		self.assertRaises(frappe.ValidationError, update_subcontracting_order_status, sco.name, "Completed")
+
+		update_subcontracting_order_status(sco.name, "Closed")
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
 
 	def test_project_is_carried_over_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name

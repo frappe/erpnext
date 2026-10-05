@@ -528,8 +528,14 @@ def set_subcontracting_order_status(sco: str | Document, status: str | None = No
 @frappe.whitelist()
 def update_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	"""Whitelisted boundary for direct API/UI calls — enforces write permission, then delegates."""
+	if status and status != "Closed":
+		frappe.throw(_("Cannot set the status of a Subcontracting Order to {0}.").format(status))
+
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 
 	sco.check_permission("write")
+	if sco.docstatus != 1:
+		frappe.throw(_("Only a submitted Subcontracting Order can be closed or re-opened."))
+
 	set_subcontracting_order_status(sco, status)
