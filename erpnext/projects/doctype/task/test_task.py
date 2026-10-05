@@ -282,6 +282,19 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Task", child.name))
 
+	def test_move_child_task_to_another_parent(self):
+		old_parent = create_task("_Test Old Parent", is_group=1)
+		new_parent = create_task("_Test New Parent", is_group=1)
+		child = create_task("_Test Moved Child", parent_task=old_parent.name)
+
+		child.parent_task = new_parent.name
+		child.save()
+
+		self.assertFalse(frappe.get_all("Task Depends On", filters={"parent": old_parent.name}))
+		self.assertEqual(
+			frappe.get_all("Task Depends On", filters={"parent": new_parent.name}, pluck="task"), [child.name]
+		)
+
 
 def create_task(
 	subject,
