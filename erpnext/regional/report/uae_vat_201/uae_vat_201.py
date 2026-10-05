@@ -323,7 +323,7 @@ def get_conditions_join(filters, p):
 def get_standard_rated_expenses_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", ">", 0])
+	query_filters.append(["recoverable_standard_rated_expenses", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (
@@ -343,7 +343,7 @@ def get_standard_rated_expenses_total(filters):
 def get_standard_rated_expenses_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", ">", 0])
+	query_filters.append(["recoverable_standard_rated_expenses", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (
@@ -363,7 +363,7 @@ def get_standard_rated_expenses_tax(filters):
 def get_tourist_tax_return_total(filters):
 	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters.append(["tourist_tax_return", ">", 0])
+	query_filters.append(["tourist_tax_return", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (
@@ -379,7 +379,7 @@ def get_tourist_tax_return_total(filters):
 def get_tourist_tax_return_tax(filters):
 	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters.append(["tourist_tax_return", ">", 0])
+	query_filters.append(["tourist_tax_return", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (

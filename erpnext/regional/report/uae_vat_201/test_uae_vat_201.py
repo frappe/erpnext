@@ -219,6 +219,28 @@ class TestUaeVat201(ERPNextTestSuite):
 		self.assertEqual(get_reverse_charge_recoverable_total(filters), 1600)
 		self.assertEqual(get_reverse_charge_recoverable_tax(filters), 80)
 
+	def test_uae_vat_201_returns_reduce_expenses_and_tourist_refunds(self):
+		pi = make_uae_purchase_invoice(qty=10, rate=100)
+		pi.recoverable_standard_rated_expenses = 50
+		pi.submit()
+		debit_note = make_return_doc("Purchase Invoice", pi.name)
+		debit_note.items[0].qty = -2
+		debit_note.recoverable_standard_rated_expenses = -10
+		debit_note.submit()
+
+		si = make_uae_sales_invoice("Dubai", qty=1, rate=600)
+		si.tourist_tax_return = 25
+		si.submit()
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.tourist_tax_return = -25
+		credit_note.submit()
+
+		filters = {"company": "_Test Company UAE VAT"}
+		self.assertEqual(get_standard_rated_expenses_total(filters), 800)
+		self.assertEqual(get_standard_rated_expenses_tax(filters), 40)
+		self.assertEqual(get_tourist_tax_return_total(filters), 0)
+		self.assertEqual(get_tourist_tax_return_tax(filters), 0)
+
 
 def set_vat_accounts():
 	if not frappe.db.exists("UAE VAT Settings", "_Test Company UAE VAT"):
@@ -306,32 +328,39 @@ def make_item(item_code, properties=None):
 	return item
 
 
+def make_uae_sales_invoice(emirate, item="_Test UAE VAT Item", tax=True, **args):
+	"""Returns an unsaved AED Sales Invoice of the UAE test company, with VAT 5% when `tax` is set."""
+	si = create_sales_invoice(
+		company="_Test Company UAE VAT",
+		customer="_Test UAE Customer",
+		currency="AED",
+		warehouse="Finished Goods - _TCUV",
+		debit_to="Debtors - _TCUV",
+		income_account="Sales - _TCUV",
+		expense_account="Cost of Goods Sold - _TCUV",
+		cost_center="Main - _TCUV",
+		item=item,
+		do_not_save=1,
+		**args,
+	)
+	si.vat_emirate = emirate
+	if tax:
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "VAT 5% - _TCUV",
+				"cost_center": "Main - _TCUV",
+				"description": "VAT 5% @ 5.0",
+				"rate": 5.0,
+			},
+		)
+	return si
+
+
 def make_sales_invoices():
 	def make_sales_invoices_wrapper(emirate, item, tax=True, tourist_tax=False):
-		si = create_sales_invoice(
-			company="_Test Company UAE VAT",
-			customer="_Test UAE Customer",
-			currency="AED",
-			warehouse="Finished Goods - _TCUV",
-			debit_to="Debtors - _TCUV",
-			income_account="Sales - _TCUV",
-			expense_account="Cost of Goods Sold - _TCUV",
-			cost_center="Main - _TCUV",
-			item=item,
-			do_not_save=1,
-		)
-		si.vat_emirate = emirate
-		if tax:
-			si.append(
-				"taxes",
-				{
-					"charge_type": "On Net Total",
-					"account_head": "VAT 5% - _TCUV",
-					"cost_center": "Main - _TCUV",
-					"description": "VAT 5% @ 5.0",
-					"rate": 5.0,
-				},
-			)
+		si = make_uae_sales_invoice(emirate, item, tax)
 		if tourist_tax:
 			si.tourist_tax_return = 2
 		si.submit()
