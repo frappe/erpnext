@@ -8,9 +8,24 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAssetShiftFactor(ERPNextTestSuite):
+	def test_default_factor_can_be_edited_but_not_duplicated(self):
+		frappe.db.delete("Asset Shift Factor")
+		default = frappe.get_doc(
+			{"doctype": "Asset Shift Factor", "shift_name": "Single", "shift_factor": 1, "default": 1}
+		).insert()
+		default.shift_factor = 1.2
+		default.save()
+
+		double = frappe.get_doc(
+			{"doctype": "Asset Shift Factor", "shift_name": "Double", "shift_factor": 1.5, "default": 1}
+		)
+		self.assertRaises(frappe.ValidationError, double.insert)
+
 	def test_shift_based_depreciation_needs_a_positive_default_factor(self):
 		for factor in (0, -1):
-			shift = frappe.get_doc({"doctype": "Asset Shift Factor", "shift_name": "Zero", "shift_factor": factor})
+			shift = frappe.get_doc(
+				{"doctype": "Asset Shift Factor", "shift_name": "Zero", "shift_factor": factor}
+			)
 			self.assertRaises(frappe.ValidationError, shift.insert)
 
 		frappe.db.delete("Asset Shift Factor")
