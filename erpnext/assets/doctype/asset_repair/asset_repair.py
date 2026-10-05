@@ -4,7 +4,15 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
+from frappe.utils import (
+	add_months,
+	cint,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	time_diff_in_hours,
+)
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -267,7 +275,14 @@ class AssetRepair(AccountsController):
 
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc(
-			{"doctype": "Stock Entry", "stock_entry_type": "Material Issue", "company": self.company}
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Issue",
+				"company": self.company,
+				"set_posting_time": 1,
+				"posting_date": get_datetime(self.completion_date).date(),
+				"posting_time": get_datetime(self.completion_date).time(),
+			}
 		)
 		stock_entry.asset_repair = self.name
 
