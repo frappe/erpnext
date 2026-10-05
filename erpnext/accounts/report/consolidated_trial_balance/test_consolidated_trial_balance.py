@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.report.consolidated_trial_balance.consolidated_trial_balance import execute
 from erpnext.setup.utils import get_exchange_rate
@@ -108,6 +108,33 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_opening_balance_sheet_amounts_translated_at_closing_rate(self):
+		year_start = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_start_date")
+		set_usd_rate(year_start, 80)
+		set_usd_rate(today(), 85)
+		create_journal_entry(
+			company="Child Company US",
+			acc1="Cash - CCU",
+			acc2="Marketing Expenses - CCU",
+			amount=-100,
+			posting_date=year_start,
+		)
+
+		def cash_closing(from_date):
+			filters = frappe._dict(
+				{
+					"company": ["Parent Group Company India", "Child Company US"],
+					"fiscal_year": self.fiscal_year,
+					"from_date": from_date,
+				}
+			)
+			data = execute(filters)[1]
+			return next(
+				row["closing_debit"] - row["closing_credit"] for row in data if row.get("acc_name") == "Cash"
+			)
+
+		self.assertEqual(cash_closing(add_days(year_start, 1)), cash_closing(year_start))
+
 
 def create_journal_entry(**args):
 	args = frappe._dict(args)
@@ -132,3 +159,20 @@ def create_journal_entry(**args):
 	)
 	je.save()
 	je.submit()
+
+
+def set_usd_rate(date, rate):
+	frappe.db.delete(
+		"Currency Exchange", {"date": getdate(date), "from_currency": "USD", "to_currency": "INR"}
+	)
+	frappe.get_doc(
+		{
+			"doctype": "Currency Exchange",
+			"date": date,
+			"from_currency": "USD",
+			"to_currency": "INR",
+			"exchange_rate": rate,
+			"for_buying": 1,
+			"for_selling": 1,
+		}
+	).insert()
