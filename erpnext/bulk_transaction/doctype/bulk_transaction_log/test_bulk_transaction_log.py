@@ -91,7 +91,7 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 			(first_page[0].log_entries, first_page[0].succeeded, first_page[0].failed), (2, 1, 1)
 		)
 
-		count = BulkTransactionLog.get_count(frappe._dict(filters=[]))
+		count = BulkTransactionLog.get_count(frappe._dict())
 		self.assertEqual(
 			count, len(frappe.get_all("Bulk Transaction Log Detail", pluck="date", distinct=True))
 		)
@@ -103,6 +103,22 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 		self.assertRaises(frappe.PermissionError, get_list)
 		self.assertRaises(frappe.PermissionError, BulkTransactionLog.get_count, frappe._dict(filters=[]))
 
+	def test_list_accepts_each_filter_shape(self):
+		date = "2099-02-01"
+		self._insert_detail(date)
+		self._insert_detail("2099-02-02")
+
+		for filters in (
+			{"date": date},
+			{"date": ["=", date]},
+			[["date", "=", date]],
+			[["Bulk Transaction Log", "date", "=", date]],
+		):
+			logs = BulkTransactionLog.get_list(frappe._dict(filters=filters))
+			self.assertEqual([str(log.date) for log in logs], [date], filters)
+
+		self.assertTrue(BulkTransactionLog.get_list(frappe._dict()))
+
 
 def get_list(**args) -> list:
-	return BulkTransactionLog.get_list(frappe._dict(filters=[], **args))
+	return BulkTransactionLog.get_list(frappe._dict(args))

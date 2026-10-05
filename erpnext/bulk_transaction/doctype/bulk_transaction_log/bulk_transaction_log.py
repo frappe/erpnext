@@ -115,12 +115,13 @@ def filter_by_date(query: QueryBuilder, log_detail: Table, filter_date: str | No
 	return query.where(log_detail.date == filter_date) if filter_date else query
 
 
-def parse_list_filters(args):
-	# parse date filter
-	filter_date = None
-	for fil in args.get("filters"):
-		if isinstance(fil, list):
-			for elem in fil:
-				if elem == "date":
-					filter_date = fil[3]
-	return filter_date
+def parse_list_filters(args) -> str | None:
+	"""Return the date filter value from dict filters or 3- and 4-item list filters."""
+	filters = args.get("filters") or []
+	if isinstance(filters, dict):
+		filters = [[field, value] for field, value in filters.items()]
+
+	for condition in filters:
+		if isinstance(condition, list | tuple) and "date" in condition[:-1]:
+			value = condition[-1]
+			return value[-1] if isinstance(value, list | tuple) else value
