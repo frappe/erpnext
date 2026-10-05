@@ -59,6 +59,27 @@ class AssetMaintenanceLog(Document):
 			frappe.throw(_("Maintenance Status has to be Cancelled or Completed to Submit"))
 		self.update_maintenance_task()
 
+	def on_cancel(self):
+		if self.maintenance_status == "Completed":
+			self.revert_maintenance_task()
+
+	def revert_maintenance_task(self):
+		task = frappe.get_doc("Asset Maintenance Task", self.task)
+		if not task.last_completion_date or getdate(task.last_completion_date) != getdate(
+			self.completion_date
+		):
+			return
+
+		task.last_completion_date = frappe.db.get_value(
+			"Asset Maintenance Log",
+			{"task": self.task, "docstatus": 1, "maintenance_status": "Completed", "name": ("!=", self.name)},
+			"completion_date",
+			order_by="completion_date desc",
+		)
+		task.next_due_date = self.due_date
+		task.save()
+		frappe.get_doc("Asset Maintenance", self.asset_maintenance).save()
+
 	def update_maintenance_task(self):
 		asset_maintenance_doc = frappe.get_doc("Asset Maintenance Task", self.task)
 		if self.maintenance_status == "Completed":
