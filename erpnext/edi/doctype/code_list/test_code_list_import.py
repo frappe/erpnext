@@ -125,6 +125,14 @@ class TestCodeListImport(ERPNextTestSuite):
 
 			self.assertEqual(count, 3)
 			self.assertEqual(frappe.db.count("Common Code", {"code_list": import_result["code_list"]}), 3)
+
+			code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+			)
+			self.assertEqual(frappe.db.count("Common Code", {"code_list": import_result["code_list"]}), 3)
 			self.assertEqual(
 				frappe.db.get_value(
 					"Common Code",

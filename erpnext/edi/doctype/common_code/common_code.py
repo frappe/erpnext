@@ -95,13 +95,23 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	elements = get_filtered_rows(root, filters or {})
 	total_elements = len(elements)
 	for i, xml_element in enumerate(elements, start=1):
-		common_code: CommonCode = frappe.new_doc("Common Code")
-		common_code.code_list = code_list
+		common_code = get_common_code_for_row(code_list, column_map["code"], xml_element)
 		common_code.from_genericode(column_map, xml_element)
 		common_code.save()
 		frappe.publish_progress(i / total_elements * 100, title=_("Importing Common Codes"))
 
 	return total_elements
+
+
+def get_common_code_for_row(code_list: str, code_column: str, xml_element: "etree.Element") -> CommonCode:
+	"""Return the list's existing Common Code for the row's code, so a re-import updates it."""
+	code = getattr(get_simple_value(xml_element, code_column), "text", None)
+	if code and (name := frappe.db.get_value("Common Code", {"code_list": code_list, "common_code": code})):
+		return frappe.get_doc("Common Code", name)
+
+	common_code = frappe.new_doc("Common Code")
+	common_code.code_list = code_list
+	return common_code
 
 
 def get_filtered_rows(root: "etree.Element", filters: dict) -> list:
