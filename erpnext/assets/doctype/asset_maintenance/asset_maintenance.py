@@ -37,7 +37,7 @@ class AssetMaintenance(Document):
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
-			if getdate(task.next_due_date) < getdate(nowdate()):
+			if task.maintenance_status != "Cancelled" and getdate(task.next_due_date) < getdate(nowdate()):
 				task.maintenance_status = "Overdue"
 			if not task.assign_to and self.docstatus == 0:
 				throw(_("Row #{}: Please assign task to a member.").format(task.idx))
@@ -56,6 +56,8 @@ class AssetMaintenance(Document):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
 			tasks_names.append(task.name)
+			if task.maintenance_status == "Cancelled":
+				continue
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
 			)

@@ -67,6 +67,19 @@ class TestAssetMaintenanceLog(ERPNextTestSuite):
 		self.assertEqual(getdate(task.next_due_date), getdate())
 		self.assertEqual(getdate(get_open_log(task.name).due_date), getdate())
 
+	def test_cancelled_log_does_not_reschedule_the_task(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		log = get_open_log(task.name)
+		log.maintenance_status = "Cancelled"
+		log.submit()
+
+		self.asset_maintenance.reload()
+		self.asset_maintenance.save()
+
+		task.reload()
+		self.assertEqual(task.maintenance_status, "Cancelled")
+		self.assertFalse(frappe.db.exists("Asset Maintenance Log", {"task": task.name, "docstatus": 0}))
+
 
 def get_open_log(task: str):
 	return frappe.get_doc("Asset Maintenance Log", {"task": task, "docstatus": 0})
