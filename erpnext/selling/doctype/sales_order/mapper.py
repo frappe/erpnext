@@ -165,7 +165,8 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 @frappe.whitelist()
 def make_project(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
-		doc.project_type = "External"
+		if frappe.db.exists("Project Type", "External"):
+			doc.project_type = "External"
 		doc.project_name = source.name
 
 	doc = get_mapped_doc(

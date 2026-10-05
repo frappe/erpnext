@@ -22,6 +22,33 @@ class TestProjectTemplate(ERPNextTestSuite):
 		template.insert()
 		self.assertTrue(frappe.db.exists("Project Template", template.name))
 
+	def test_disabled_template_is_refused_for_projects(self):
+		template = make_project_template("_Test Disabled Project Template")
+		template.db_set("disabled", 1)
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name="_Test Disabled Template Project",
+			project_template=template.name,
+			company="_Test Company",
+		)
+		self.assertRaises(frappe.ValidationError, project.insert)
+
+	def test_template_tasks_are_validated(self):
+		with self.subTest("task that is not a template"):
+			task = create_task("_Test PT Live Task")
+			template = frappe.get_doc(doctype="Project Template", name="_Test PT Live Task Template")
+			template.append("tasks", {"task": task.name})
+			self.assertRaises(frappe.ValidationError, template.insert)
+
+		with self.subTest("child task that ends after its parent"):
+			parent = create_task("_Test PT Phase", is_template=1, is_group=1, duration=2)
+			child = create_task(
+				"_Test PT Long Child", is_template=1, parent_task=parent.name, begin=1, duration=5
+			)
+			template = frappe.get_doc(doctype="Project Template", name="_Test PT Long Child Template")
+			template.extend("tasks", [{"task": parent.name}, {"task": child.name}])
+			self.assertRaises(frappe.ValidationError, template.insert)
+
 
 def make_project_template(project_template_name, project_tasks=None):
 	if project_tasks is None:
