@@ -5,10 +5,11 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb, scrub
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, flt, formatdate
-from pypika.terms import ExistsCriterion
+from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -1055,6 +1056,9 @@ class GrossProfitGenerator:
 		)
 
 		query = self.apply_common_filters(query, SalesInvoice, SalesInvoiceItem, SalesTeam, Item)
+
+		if match_conditions := build_match_conditions("Sales Invoice"):
+			query = query.where(Bracket(LiteralValue(match_conditions)))
 
 		query = query.select(
 			SalesInvoiceItem.parenttype,

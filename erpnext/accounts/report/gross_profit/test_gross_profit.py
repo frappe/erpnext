@@ -1194,3 +1194,34 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(base_rate, 220.0)  # avg selling rate = 220/1
 		self.assertEqual(gross_profit, 120.0)  # 220 - 100
 		self.assertAlmostEqual(gp_percent, 54.545, places=2)  # 120/220 * 100
+
+	def test_restricted_user_sees_only_permitted_customers(self):
+		item = create_item("_Test Gross Profit Permission Item", is_stock_item=0).name
+		for customer, rate in ((self.customer, 500), ("_Test Customer 1", 9000)):
+			create_sales_invoice(
+				company=self.company,
+				customer=customer,
+				item_code=item,
+				rate=rate,
+				cost_center=self.cost_center,
+				debit_to=self.debit_to,
+				income_account=self.income_account,
+				expense_account=self.expense_account,
+			)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": "test@example.com",
+				"allow": "Customer",
+				"for_value": self.customer,
+			}
+		).insert()
+
+		frappe.set_user("test@example.com")
+		try:
+			filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), item_code=item)
+			_, data = execute(frappe._dict(filters, group_by="Item Code"))
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(data[-1][7], 500)
