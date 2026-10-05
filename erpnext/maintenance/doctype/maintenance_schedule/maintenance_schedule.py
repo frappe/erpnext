@@ -180,7 +180,7 @@ class MaintenanceSchedule(TransactionBase):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:
 					schedule_date = self.validate_schedule_date_for_holiday_list(
-						getdate(start_date_copy), sales_person
+						getdate(start_date_copy), sales_person, start_date
 					)
 					if schedule_date > getdate(end_date):
 						schedule_date = getdate(end_date)
@@ -188,9 +188,7 @@ class MaintenanceSchedule(TransactionBase):
 
 		return schedule_list
 
-	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
-		validated = False
-
+	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person, start_date):
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
 		if employee:
 			holiday_list = get_holiday_list_for_employee(employee, raise_exception=False)
@@ -199,16 +197,16 @@ class MaintenanceSchedule(TransactionBase):
 
 		holidays = frappe.get_all("Holiday", filters={"parent": holiday_list}, pluck="holiday_date")
 
-		if not validated and holidays:
-			# max iterations = len(holidays)
-			for _i in range(len(holidays)):
-				if schedule_date in holidays:
-					schedule_date = add_days(schedule_date, -1)
-				else:
-					validated = True
-					break
+		working_date = schedule_date
+		while working_date in holidays:
+			working_date = add_days(working_date, -1)
 
-		return schedule_date
+		if working_date < getdate(start_date):
+			working_date = schedule_date
+			while working_date in holidays:
+				working_date = add_days(working_date, 1)
+
+		return working_date
 
 	def validate_dates_with_periodicity(self):
 		for d in self.get("items"):
