@@ -288,6 +288,23 @@ class TestOpportunity(ERPNextTestSuite):
 		self.assertIn(opp.name, linked)
 		self.assertEqual(linked[opp.name].stage, "Prospecting")
 
+		other_prospect = "_Test Other Prospect For Opportunity"
+		if not frappe.db.exists("Prospect", other_prospect):
+			frappe.get_doc(
+				{"doctype": "Prospect", "company_name": other_prospect, "company": "_Test Company"}
+			).insert(ignore_permissions=True)
+		opp.party_name = other_prospect
+		opp.save()
+		self.assertNotIn(opp.name, get_prospect_opportunities(prospect_name))
+		self.assertIn(opp.name, get_prospect_opportunities(other_prospect))
+
+		opp.delete()
+		self.assertNotIn(opp.name, get_prospect_opportunities(other_prospect))
+
+
+def get_prospect_opportunities(prospect):
+	return frappe.get_all("Prospect Opportunity", {"parent": prospect}, pluck="opportunity")
+
 
 def _ensure_master(doctype, fieldname, value):
 	if not frappe.db.exists(doctype, value):

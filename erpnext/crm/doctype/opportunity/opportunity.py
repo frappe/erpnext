@@ -140,6 +140,9 @@ class Opportunity(TransactionBase, CRMNote):
 	def on_update(self):
 		self.update_prospect()
 
+	def on_trash(self):
+		frappe.db.delete("Prospect Opportunity", {"opportunity": self.name})
+
 	def validate_qty(self):
 		for item in self.items:
 			if flt(item.qty) <= 0:
@@ -218,6 +221,7 @@ class Opportunity(TransactionBase, CRMNote):
 		elif self.opportunity_from == "Lead":
 			prospect_name = frappe.db.get_value("Prospect Lead", {"lead": self.party_name}, "parent")
 
+		self.remove_from_other_prospects(prospect_name)
 		if prospect_name:
 			prospect = frappe.get_doc("Prospect", prospect_name)
 
@@ -244,6 +248,12 @@ class Opportunity(TransactionBase, CRMNote):
 				prospect.flags.ignore_permissions = True
 				prospect.flags.ignore_mandatory = True
 				prospect.save()
+
+	def remove_from_other_prospects(self, prospect_name: str | None):
+		filters = {"opportunity": self.name, "parenttype": "Prospect"}
+		if prospect_name:
+			filters["parent"] = ("!=", prospect_name)
+		frappe.db.delete("Prospect Opportunity", filters)
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
