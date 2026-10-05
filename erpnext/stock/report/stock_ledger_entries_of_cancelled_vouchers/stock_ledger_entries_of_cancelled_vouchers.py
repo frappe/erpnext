@@ -9,6 +9,11 @@ from erpnext.stock.stock_ledger import set_as_cancel
 
 def execute(filters: dict | None = None):
 	filters = frappe._dict(filters or {})
+	if not filters.company:
+		frappe.throw(_("Please select a Company"))
+
+	frappe.has_permission("Company", "read", filters.company, throw=True)
+
 	return get_columns(), get_data(filters)
 
 
@@ -150,7 +155,7 @@ def apply_filters(query, sle, filters):
 
 @frappe.whitelist()
 def fix_uncancelled_entries(selected_rows: str | list):
-	frappe.has_permission("Stock Ledger Entry", "write", throw=True)
+	frappe.only_for(["Stock Manager", "System Manager"])
 
 	if isinstance(selected_rows, str):
 		selected_rows = frappe.parse_json(selected_rows)
@@ -160,6 +165,8 @@ def fix_uncancelled_entries(selected_rows: str | list):
 		# re-check on the server, the client data could be stale
 		if frappe.db.get_value(voucher_type, voucher_no, "docstatus") != 2:
 			continue
+
+		frappe.has_permission(voucher_type, "read", voucher_no, throw=True)
 
 		fix_voucher(voucher_type, voucher_no)
 
