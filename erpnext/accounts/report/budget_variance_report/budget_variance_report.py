@@ -282,6 +282,7 @@ def get_actual_details(name, filters):
 				and b.{budget_against} = gl.{budget_against}
 				and gl.fiscal_year between %s and %s
 				and gl.is_cancelled = 0
+				and gl.voucher_type != 'Period Closing Voucher'
 				and b.{budget_against} = %s
 				and exists(
 					select
