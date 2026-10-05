@@ -59,6 +59,14 @@ class TestSupportHourDistribution(ERPNextTestSuite):
 		row = get_report_row()
 		self.assertEqual(row["9PM - 12AM"], 3)
 
+	def test_issue_on_a_slot_boundary_counts_once(self):
+		make_issue_at(f"{REPORT_DATE} 03:00:00", 1)
+		make_issue_at(f"{REPORT_DATE} 00:00:00", 2)
+
+		row = get_report_row()
+		self.assertEqual(row["12AM - 3AM"], 1)
+		self.assertEqual(row["3AM - 6AM"], 1)
+
 
 REPORT_DATE = "2001-03-04"
 

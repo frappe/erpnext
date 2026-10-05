@@ -6,15 +6,16 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, get_datetime, getdate
 
+# start of each three hour slot
 time_slots = {
-	"12AM - 3AM": "00:00:00-03:00:00",
-	"3AM - 6AM": "03:00:00-06:00:00",
-	"6AM - 9AM": "06:00:00-09:00:00",
-	"9AM - 12PM": "09:00:00-12:00:00",
-	"12PM - 3PM": "12:00:00-15:00:00",
-	"3PM - 6PM": "15:00:00-18:00:00",
-	"6PM - 9PM": "18:00:00-21:00:00",
-	"9PM - 12AM": "21:00:00-23:59:59.999999",
+	"12AM - 3AM": "00:00:00",
+	"3AM - 6AM": "03:00:00",
+	"6AM - 9AM": "06:00:00",
+	"9AM - 12PM": "09:00:00",
+	"12PM - 3PM": "12:00:00",
+	"3PM - 6PM": "15:00:00",
+	"6PM - 9PM": "18:00:00",
+	"9PM - 12AM": "21:00:00",
 }
 
 
@@ -36,9 +37,8 @@ def get_data(filters):
 	while start_date <= getdate(filters.to_date):
 		hours_count = {"date": start_date}
 		for key, value in time_slots.items():
-			start_time, end_time = value.split("-")
-			start_time = get_datetime("{} {}".format(start_date.strftime("%Y-%m-%d"), start_time))
-			end_time = get_datetime("{} {}".format(start_date.strftime("%Y-%m-%d"), end_time))
+			start_time = get_datetime("{} {}".format(start_date.strftime("%Y-%m-%d"), value))
+			end_time = add_to_date(start_time, hours=3)
 			hours_count[key] = get_hours_count(start_time, end_time)
 			time_slot_wise_total_count[key] = time_slot_wise_total_count.get(key, 0) + hours_count[key]
 
@@ -51,7 +51,7 @@ def get_data(filters):
 
 
 def get_hours_count(start_time, end_time):
-	return frappe.db.count("Issue", {"creation": ["between", [start_time, end_time]]})
+	return frappe.db.count("Issue", [["creation", ">=", start_time], ["creation", "<", end_time]])
 
 
 def get_columns():
