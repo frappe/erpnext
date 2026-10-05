@@ -1005,6 +1005,16 @@ class TestAsset(AssetSetup):
 			],
 		)
 
+	def test_split_asset_validations(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_asset(asset_quantity=2, submit=1)
+		self.assertRaises(frappe.ValidationError, split_asset, asset.name, -3)
+		self.assertRaises(frappe.ValidationError, split_asset, asset.name, 0)
+
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=2, rate=60000)
+		self.assertRaises(frappe.ValidationError, split_asset, asset.name, 1)
+
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
 			draft_asset = create_asset(

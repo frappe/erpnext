@@ -196,7 +196,7 @@ def split_asset(asset_name: str, split_qty: int):
 	existing_asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
 
-	validate_split_quantity(existing_asset, split_qty)
+	validate_asset_split(existing_asset, split_qty)
 	remaining_qty = existing_asset.asset_quantity - split_qty
 
 	splitted_asset = create_new_asset_from_split(existing_asset, split_qty)
@@ -205,7 +205,14 @@ def split_asset(asset_name: str, split_qty: int):
 	return splitted_asset
 
 
-def validate_split_quantity(existing_asset, split_qty):
+def validate_asset_split(existing_asset, split_qty):
+	if existing_asset.docstatus != 1 or existing_asset.status in ("Sold", "Scrapped", "Capitalized"):
+		frappe.throw(
+			_("Asset {0} cannot be split, as it is {1}").format(existing_asset.name, existing_asset.status)
+		)
+
+	if split_qty <= 0:
+		frappe.throw(_("Split Quantity must be greater than zero"))
 	if split_qty >= existing_asset.asset_quantity:
 		frappe.throw(_("Split Quantity must be less than Asset Quantity"))
 
