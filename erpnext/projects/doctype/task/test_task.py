@@ -226,6 +226,12 @@ class TestTask(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Project", old_project.name, "percent_complete"), 100)
 
+	def test_negative_progress(self):
+		task = create_task("_Test Task Negative Progress", save=False)
+		task.progress = -50
+
+		self.assertRaises(frappe.ValidationError, task.save)
+
 	def test_reopen_completed_task(self):
 		task = create_task("_Test Task Reopened")
 		task.status = "Completed"
