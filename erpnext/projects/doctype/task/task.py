@@ -272,30 +272,34 @@ class Task(NestedSet):
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
-		if end_date:
-			for task_name in frappe.db.sql(
-				"""
-				select name from `tabTask` as parent
-				where parent.project = %(project)s
-					and parent.name in (
-						select parent from `tabTask Depends On` as child
-						where child.task = %(task)s and child.project = %(project)s)
-			""",
-				{"project": self.project, "task": self.name},
-				as_dict=1,
+		if not end_date:
+			return
+
+		dependent_parents = frappe.get_all(
+			"Task Depends On",
+			filters={"task": self.name, "parent": ["!=", self.parent_task or ""]},
+			pluck="parent",
+		)
+		if not dependent_parents:
+			return
+
+		for task_name in frappe.get_all(
+			"Task",
+			filters={"project": self.project, "name": ["in", dependent_parents]},
+			pluck="name",
+		):
+			task = frappe.get_doc("Task", task_name)
+			if (
+				task.exp_start_date
+				and task.exp_end_date
+				and task.exp_start_date < getdate(end_date)
+				and task.status == "Open"
 			):
-				task = frappe.get_doc("Task", task_name.name)
-				if (
-					task.exp_start_date
-					and task.exp_end_date
-					and task.exp_start_date < getdate(end_date)
-					and task.status == "Open"
-				):
-					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
-					task.exp_start_date = add_days(end_date, 1)
-					task.exp_end_date = add_days(task.exp_start_date, task_duration)
-					task.flags.ignore_recursion_check = True
-					task.save()
+				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
+				task.exp_start_date = add_days(end_date, 1)
+				task.exp_end_date = add_days(task.exp_start_date, task_duration)
+				task.flags.ignore_recursion_check = True
+				task.save()
 
 	def has_webform_permission(self):
 		project_user = frappe.db.get_value(
