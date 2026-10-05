@@ -52,12 +52,30 @@ class AssetMaintenance(Document):
 	def on_update(self):
 		for task in self.get("asset_maintenance_tasks"):
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
+		self.close_unassigned_todos()
 		self.sync_maintenance_tasks()
 
 	def after_delete(self):
 		asset = frappe.get_doc("Asset", self.asset_name)
 		if asset.status == "In Maintenance":
 			asset.set_status()
+
+	def close_unassigned_todos(self):
+		assignees = [
+			frappe.db.get_value("User", task.assign_to, "email") for task in self.asset_maintenance_tasks
+		]
+		unassigned_users = frappe.get_all(
+			"ToDo",
+			filters={
+				"reference_type": self.doctype,
+				"reference_name": self.name,
+				"status": "Open",
+				"allocated_to": ("not in", assignees or [""]),
+			},
+			pluck="allocated_to",
+		)
+		for user in unassigned_users:
+			assign_to.remove(self.doctype, self.name, user)
 
 	def sync_maintenance_tasks(self):
 		tasks_names = []
@@ -97,7 +115,7 @@ def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, nex
 			"reference_type": args["doctype"],
 			"reference_name": args["name"],
 			"status": "Open",
-			"owner": args["assign_to"],
+			"allocated_to": args["assign_to"],
 		},
 	):
 		# assign_to function expects a list

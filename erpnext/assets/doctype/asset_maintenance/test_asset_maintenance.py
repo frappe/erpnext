@@ -178,6 +178,18 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			frappe.db.exists("Asset Maintenance Log", {"asset_maintenance": asset_maintenance.name})
 		)
 
+	def test_todo_of_an_unassigned_user_is_closed(self):
+		asset_maintenance = self.make_asset_maintenance()
+		asset_maintenance.asset_maintenance_tasks[1].assign_to = "marcus@abc.com"
+		asset_maintenance.save()
+
+		open_todos = frappe.get_all(
+			"ToDo",
+			filters={"reference_name": asset_maintenance.name, "status": "Open"},
+			pluck="allocated_to",
+		)
+		self.assertEqual(open_todos, ["marcus@abc.com"])
+
 	def submit_asset(self):
 		self.asset_doc.update(
 			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}
