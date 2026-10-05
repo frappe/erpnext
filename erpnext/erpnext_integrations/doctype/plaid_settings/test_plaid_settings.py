@@ -11,6 +11,7 @@ from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
 	add_account_subtype,
 	add_account_type,
 	add_bank_accounts,
+	enqueue_synchronization,
 	get_plaid_configuration,
 	new_bank_transaction,
 	sync_transactions,
@@ -158,6 +159,18 @@ class TestPlaidSettings(ERPNextTestSuite):
 		self.assertNotEqual(bank_account, party_account.name)
 		self.assertEqual(frappe.db.get_value("Bank Account", bank_account, "company"), "_Test Company")
 		self.assertFalse(frappe.db.get_value("Bank Account", party_account.name, "integration_id"))
+
+	def test_scheduled_sync_skips_disabled_accounts(self):
+		active_account = link_test_bank_account("plaid-active-test")
+		disabled_account = link_test_bank_account("plaid-disabled-test")
+		frappe.db.set_value("Bank Account", disabled_account, "disabled", 1)
+
+		with patch("frappe.enqueue") as enqueue:
+			enqueue_synchronization()
+
+		synced = [call.kwargs["bank_account"] for call in enqueue.call_args_list]
+		self.assertIn(active_account, synced)
+		self.assertNotIn(disabled_account, synced)
 
 
 PLAID_SETTINGS = "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings"
