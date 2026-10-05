@@ -527,6 +527,7 @@ def apply(doc, method=None):
 		or flags.in_install
 		or flags.in_setup_wizard
 		or doc.doctype not in get_documents_with_active_service_level_agreement()
+		or stays_resolved(doc)
 	):
 		return
 
@@ -539,10 +540,23 @@ def apply(doc, method=None):
 	process_sla(doc, sla)
 
 
+def stays_resolved(doc) -> bool:
+	"""A document that remains resolved keeps the SLA outcome it was resolved with."""
+	if doc.is_new() or not doc.get("service_level_agreement"):
+		return False
+	if doc.has_value_changed("service_level_agreement") or doc.has_value_changed("priority"):
+		return False
+
+	fulfillment_statuses = get_fulfillment_statuses(doc.service_level_agreement)
+	previous_status = frappe.db.get_value(doc.doctype, doc.name, "status")
+	return doc.get("status") in fulfillment_statuses and previous_status in fulfillment_statuses
+
+
 def remove_sla_if_applied(doc):
 	doc.service_level_agreement = None
 	doc.response_by = None
 	doc.sla_resolution_by = None
+	doc.agreement_status = None
 
 
 def process_sla(doc, sla):
