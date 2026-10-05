@@ -1,9 +1,12 @@
 # Copyright (c) 2018, Frappe and Contributors
 # See license.txt
 
-import unittest
+import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestQualityMeeting(unittest.TestCase):
-	# nothing to test
-	pass
+class TestQualityMeeting(FrappeTestCase):
+	def test_two_meetings_on_the_same_day(self):
+		first = frappe.get_doc(doctype="Quality Meeting").insert()
+		second = frappe.get_doc(doctype="Quality Meeting").insert()
+		self.assertNotEqual(first.name, second.name)
