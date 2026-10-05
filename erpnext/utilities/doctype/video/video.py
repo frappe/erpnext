@@ -133,7 +133,8 @@ def batch_update_youtube_data():
 	def prepare_and_set_data(video_list):
 		video_ids = get_formatted_ids(video_list)
 		stats = get_youtube_statistics(video_ids)
-		set_youtube_data(stats)
+		if stats:
+			set_youtube_data(stats)
 
 	def set_youtube_data(entries):
 		for entry in entries:
@@ -147,7 +148,11 @@ def batch_update_youtube_data():
 			}
 			frappe.db.set_value("Video", {"youtube_video_id": video_id}, stats)
 
-	video_list = frappe.get_all("Video", fields=["youtube_video_id"])
+	video_list = frappe.get_all(
+		"Video",
+		filters={"provider": "YouTube", "youtube_video_id": ["is", "set"]},
+		fields=["youtube_video_id"],
+	)
 	if len(video_list) > 50:
 		# Update in batches of 50
 		start, end = 0, 50
