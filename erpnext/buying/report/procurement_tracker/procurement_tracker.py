@@ -235,7 +235,12 @@ def get_mapped_mr_details(filters):
 			child.project,
 			child.cost_center,
 		)
-		.where((parent.per_ordered >= 0) & (parent.name == child.parent) & (parent.docstatus == 1))
+		.where(
+			(parent.per_ordered >= 0)
+			& (parent.name == child.parent)
+			& (parent.docstatus == 1)
+			& (parent.material_request_type.isin(("Purchase", "Subcontracting")))
+		)
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
 
