@@ -200,6 +200,25 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_portal_supplier_quotation_is_built_from_the_rfq_rows(self):
+		make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier 2", "supplier_name": "_Test Supplier 2"}]
+		)
+		rfq = make_request_for_quotation()
+
+		rfq.supplier = "_Test Supplier 2"
+		self.assertRaises(frappe.PermissionError, create_supplier_quotation, rfq)
+
+		rfq.supplier = rfq.suppliers[0].supplier
+		rfq.items[0].item_code = "_Test Item 2"
+		rfq.items[0].conversion_factor = 7
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+
+		self.assertEqual(
+			(supplier_quotation.items[0].item_code, supplier_quotation.items[0].conversion_factor),
+			("_Test Item", 1),
+		)
+
 	def test_make_duplicate_supplier_quotation_from_portal(self):
 		rfq = make_request_for_quotation()
 		rfq.supplier = rfq.suppliers[0].supplier
