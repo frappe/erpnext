@@ -504,10 +504,15 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 			self.validate_produced_serial_nos_against_reservation()
 
-		self.process_asset_depreciation()
+		if not self.is_return:
+			self.process_asset_depreciation()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+
+		if self.is_return:
+			# the regain entries need the asset value before the disposal depreciation is reversed
+			self.process_asset_depreciation()
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
