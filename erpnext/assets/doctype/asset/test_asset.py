@@ -1017,6 +1017,18 @@ class TestAsset(AssetSetup):
 		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=2, rate=60000)
 		self.assertRaises(frappe.ValidationError, split_asset, asset.name, 1)
 
+	def test_opening_accumulated_depreciation_without_depreciation(self):
+		asset = create_asset(opening_accumulated_depreciation=150000, do_not_save=1)
+		self.assertRaises(frappe.ValidationError, asset.save)
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
+		asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
+		asset.opening_accumulated_depreciation = 30000
+		asset.save()
+
+		self.assertEqual(asset.opening_accumulated_depreciation, 0)
+		self.assertEqual(asset.value_after_depreciation, 100000)
+
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
 			draft_asset = create_asset(
