@@ -206,6 +206,8 @@ class Project(Document):
 		self.copy_from_template()  # nosemgrep
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+			self.update_sales_amount()
+			self.db_set("total_sales_amount", self.total_sales_amount)
 		self.control_access_for_project_users()
 
 	def on_trash(self):
