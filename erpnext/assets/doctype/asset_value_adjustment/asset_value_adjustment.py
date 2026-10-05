@@ -42,9 +42,22 @@ class AssetValueAdjustment(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_asset_not_disposed()
 		self.validate_date()
 		self.set_current_asset_value()
 		self.set_difference_amount()
+
+	def before_cancel(self):
+		self.validate_asset_not_disposed()
+
+	def validate_asset_not_disposed(self):
+		status, disposal_date = frappe.db.get_value("Asset", self.asset, ["status", "disposal_date"])
+		if disposal_date or status in ("Sold", "Scrapped", "Capitalized"):
+			frappe.throw(
+				_("Asset {0} is disposed, its value cannot be adjusted").format(
+					get_link_to_form("Asset", self.asset)
+				)
+			)
 
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")

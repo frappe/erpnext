@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
@@ -347,6 +347,21 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 
 		self.assertEqual(adjustment.current_asset_value, 110000)
 		self.assertEqual(get_asset_value_after_depreciation(asset.name), 100000)
+
+	def test_value_of_a_disposed_asset_cannot_be_adjusted(self):
+		asset = create_asset_for_value_adjustment()
+		adjustment = make_asset_value_adjustment(asset=asset.name, new_asset_value=100000, date="2023-01-15")
+		adjustment.submit()
+		scrap_asset(asset.name, "2023-09-30")
+
+		self.assertRaises(frappe.ValidationError, adjustment.cancel)
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=50000,
+			date="2023-10-15",
+		)
 
 
 def make_asset_value_adjustment(**args):
