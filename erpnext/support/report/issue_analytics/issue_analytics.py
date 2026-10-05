@@ -3,6 +3,7 @@
 
 
 import json
+from bisect import bisect_left
 
 import frappe
 from frappe import _, scrub
@@ -195,7 +196,7 @@ class IssueAnalytics:
 		self.issue_periodic_data = frappe._dict()
 
 		for d in self.entries:
-			period = self.get_period(d.get("opening_date"))
+			period = self.get_period_of(d.get("opening_date"))
 
 			if self.filters.based_on == "Assigned To":
 				if d._assign:
@@ -211,6 +212,11 @@ class IssueAnalytics:
 
 				self.issue_periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0.0)
 				self.issue_periodic_data[value][period] += 1
+
+	def get_period_of(self, date) -> str:
+		"""Label of the period whose date range holds the date."""
+		index = bisect_left(self.periodic_daterange, getdate(date))
+		return self.get_period(self.periodic_daterange[index])
 
 	def get_chart_data(self):
 		length = len(self.columns)

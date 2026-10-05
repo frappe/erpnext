@@ -14,8 +14,7 @@ months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
 
 
 class TestIssueAnalytics(unittest.TestCase):
-	@classmethod
-	def setUpClass(self):
+	def setUp(self):
 		frappe.db.sql("delete from `tabIssue` where company='_Test Company'")
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 
@@ -115,6 +114,25 @@ class TestIssueAnalytics(unittest.TestCase):
 
 		self.assertEqual(expected_data, report[1])  # rows
 		self.assertEqual(len(report[0]), 4)  # cols
+
+	def test_weekly_issue_count_across_year_end(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2025-12-30"), "__Test Customer", 1)
+		make_issue(getdate("2026-01-14"), "__Test Customer", 2)
+
+		self.assertEqual(self.get_total("2025-12-01", "2026-01-31", "Weekly"), 2)
+
+	def get_total(self, from_date, to_date, period_range):
+		filters = {
+			"company": "_Test Company",
+			"based_on": "Customer",
+			"customer": "__Test Customer",
+			"from_date": from_date,
+			"to_date": to_date,
+			"range": period_range,
+		}
+		rows = execute(filters)[1]
+		return sum(row["total"] for row in rows)
 
 
 def create_issue_types():
