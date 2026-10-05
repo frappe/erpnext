@@ -115,18 +115,36 @@ class AssetShiftAllocation(Document):
 		return new_shift_sum - original_shift_sum
 
 	def reduce_depr_shifts(self, factor_diff, shift_factors_map, reverse_shift_factors_map):
+		last_changed_index = self.get_last_changed_row_index()
 		for i, schedule in reversed(list(enumerate(self.depreciation_schedule))):
-			if factor_diff <= 0:
+			if factor_diff <= 0 or i <= last_changed_index:
 				break
 
 			current_factor = shift_factors_map.get(schedule.shift, 0)
 			if current_factor <= factor_diff:
 				self.depreciation_schedule.pop(i)
 				factor_diff -= current_factor
-			else:
-				new_factor = current_factor - factor_diff
-				self.depreciation_schedule[i].shift = reverse_shift_factors_map.get(new_factor)
+			elif new_shift := reverse_shift_factors_map.get(current_factor - factor_diff):
+				self.depreciation_schedule[i].shift = new_shift
 				factor_diff = 0
+			else:
+				break
+
+		if factor_diff > 0:
+			frappe.throw(
+				_(
+					"The increase in shifts cannot be balanced by reducing the shifts of the rows after the changed rows"
+				)
+			)
+
+	def get_last_changed_row_index(self) -> int:
+		original_schedule = self.asset_depr_schedule_doc.depreciation_schedule
+		changed_indexes = [
+			i
+			for i, schedule in enumerate(self.depreciation_schedule)
+			if i >= len(original_schedule) or schedule.shift != original_schedule[i].shift
+		]
+		return max(changed_indexes, default=-1)
 
 	def add_depr_shifts(self, factor_diff, shift_factors_map, reverse_shift_factors_map):
 		factor_diff = abs(factor_diff)

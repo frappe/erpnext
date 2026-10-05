@@ -128,6 +128,21 @@ class TestAssetShiftAllocation(ERPNextTestSuite):
 		)
 		self.assertEqual(len(schedule), 11)
 
+	def test_increase_is_balanced_only_by_later_rows(self):
+		asset = create_shift_based_asset()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be balanced", make_shift_allocation, asset.name, {11: "Triple"}
+		)
+
+		allocation = make_shift_allocation(asset.name, {0: "Double"})
+		amounts = [row.depreciation_amount for row in allocation.depreciation_schedule]
+		self.assertEqual(amounts, [15000.0] + [10000.0] * 10 + [5000.0])
+
+		frappe.db.delete("Asset Shift Factor", {"name": "Half"})
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be balanced", make_shift_allocation, asset.name, {0: "Double"}
+		)
+
 
 def create_shift_based_asset():
 	return create_asset(
