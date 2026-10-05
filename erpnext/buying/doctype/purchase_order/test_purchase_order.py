@@ -1916,6 +1916,52 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 0)
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 0)
 
+	def test_cancelling_subcontracted_po_keeps_material_request_ordered_qty_in_fg(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		material_request = make_material_request(
+			item_code="Subcontracted Item SA1", qty=10, material_request_type="Subcontracting"
+		)
+
+		def make_subcontracted_po():
+			po = create_purchase_order(
+				rm_items=[
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"item_code": "Subcontracted Service Item 1",
+						"qty": 20,
+						"rate": 100,
+						"fg_item": "Subcontracted Item SA1",
+						"fg_item_qty": 5,
+					}
+				],
+				is_subcontracted=1,
+				supplier_warehouse="_Test Warehouse 1 - _TC",
+				do_not_save=True,
+			)
+			po.items[0].material_request = material_request.name
+			po.items[0].material_request_item = material_request.items[0].name
+			po.insert()
+			po.submit()
+			return po
+
+		make_subcontracted_po()
+		frappe.get_doc("Purchase Order", make_subcontracted_po().name).cancel()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Item", material_request.items[0].name, "ordered_qty"), 5
+		)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (

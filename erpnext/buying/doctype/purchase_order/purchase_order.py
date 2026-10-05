@@ -198,9 +198,6 @@ class PurchaseOrder(BuyingController):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
-		if self.is_subcontracted:
-			self.status_updater[0]["source_field"] = "fg_item_qty"
-
 	def validate(self):
 		super().validate()
 
@@ -420,6 +417,9 @@ class PurchaseOrder(BuyingController):
 		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
 
 	def update_prevdoc_status(self):
+		if self.is_subcontracted:
+			self.status_updater[0]["source_field"] = "fg_item_qty"
+
 		super().update_prevdoc_status()
 
 		for supplier_quotation in {item.supplier_quotation for item in self.items}:
