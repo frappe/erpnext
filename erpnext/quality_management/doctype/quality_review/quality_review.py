@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -28,12 +29,30 @@ class QualityReview(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		# fetch targets from goal
 		if not self.reviews:
-			for d in frappe.get_doc("Quality Goal", self.goal).objectives:
-				self.append("reviews", dict(objective=d.objective, target=d.target, uom=d.uom, status="Open"))
+			self.set_objectives()
+		elif self.has_value_changed("goal"):
+			self.validate_objectives()
 
 		self.set_status()
+
+	def set_objectives(self):
+		for d in frappe.get_doc("Quality Goal", self.goal).objectives:
+			self.append("reviews", dict(objective=d.objective, target=d.target, uom=d.uom, status="Open"))
+
+	def validate_objectives(self):
+		objectives = frappe.get_all(
+			"Quality Goal Objective",
+			filters={"parent": self.goal, "parenttype": "Quality Goal"},
+			pluck="objective",
+		)
+		for d in self.reviews:
+			if d.objective not in objectives:
+				frappe.throw(
+					_("Row #{0}: Objective {1} is not part of Quality Goal {2}").format(
+						d.idx, frappe.bold(d.objective), frappe.bold(self.goal)
+					)
+				)
 
 	def set_status(self):
 		# if any child item is failed, fail the parent
