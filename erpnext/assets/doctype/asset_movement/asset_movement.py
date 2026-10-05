@@ -35,10 +35,18 @@ class AssetMovement(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_duplicate_assets()
 		for d in self.assets:
 			self.validate_asset(d)
 			self.validate_movement(d)
 			self.validate_transaction_date(d)
+
+	def validate_duplicate_assets(self):
+		seen_assets = set()
+		for d in self.assets:
+			if d.asset in seen_assets:
+				frappe.throw(_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset))
+			seen_assets.add(d.asset)
 
 	def validate_asset(self, d):
 		status, company, docstatus = frappe.db.get_value("Asset", d.asset, ["status", "company", "docstatus"])

@@ -176,6 +176,23 @@ class TestAssetMovement(ERPNextTestSuite):
 			)
 			self.assertRaisesRegex(frappe.ValidationError, "cannot be moved", movement.insert)
 
+	def test_same_asset_twice_is_refused(self):
+		asset = create_asset(location="Test Location", submit=1)
+		movement = create_asset_movement(
+			purpose="Transfer",
+			company=asset.company,
+			assets=[
+				{
+					"asset": asset.name,
+					"source_location": "Test Location",
+					"target_location": "Test Location 2",
+				}
+			]
+			* 2,
+			do_not_save=1,
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "already added", movement.insert)
+
 	def test_movement_transaction_date(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.save().submit()
