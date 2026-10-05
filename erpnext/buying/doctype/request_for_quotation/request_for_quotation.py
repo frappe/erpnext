@@ -290,7 +290,7 @@ class RequestforQuotation(BuyingController):
 		user = frappe.get_doc(
 			{
 				"doctype": "User",
-				"send_welcome_email": 0,
+				"send_welcome_email": 1,
 				"email": rfq_supplier.email_id,
 				"first_name": contact_name or rfq_supplier.supplier_name or rfq_supplier.supplier,
 				"user_type": "Website User",
@@ -298,9 +298,8 @@ class RequestforQuotation(BuyingController):
 			}
 		)
 		user.save(ignore_permissions=True)
-		update_password_link = user._reset_password()
 
-		return user, update_password_link
+		return user, get_url("/login#forgot")
 
 	def supplier_rfq_mail(self, data, update_password_link, rfq_link, preview=False):
 		full_name = get_user_fullname(frappe.session["user"])
