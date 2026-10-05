@@ -134,10 +134,11 @@ def apply_filters_on_query(filters, parent, child, query):
 	if filters.get("company"):
 		query = query.where(parent.company == filters.get("company"))
 
-	if filters.get("cost_center") or filters.get("project"):
-		query = query.where(
-			(child.cost_center == filters.get("cost_center")) | (child.project == filters.get("project"))
-		)
+	if filters.get("cost_center"):
+		query = query.where(child.cost_center == filters.get("cost_center"))
+
+	if filters.get("project"):
+		query = query.where(child.project == filters.get("project"))
 
 	if filters.get("from_date"):
 		query = query.where(parent.transaction_date >= filters.get("from_date"))

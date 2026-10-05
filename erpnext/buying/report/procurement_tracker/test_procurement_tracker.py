@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+import frappe
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
@@ -111,3 +112,17 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_delivery_date"], getdate(receipt.posting_date))
+
+	def test_cost_center_and_project_filters_both_apply(self):
+		project = frappe.get_doc(
+			{"doctype": "Project", "project_name": "_Test Procurement Tracker", "company": "_Test Company"}
+		).insert()
+		with_project = create_purchase_order(do_not_submit=True)
+		with_project.items[0].project = project.name
+		with_project.submit()
+		without_project = create_purchase_order()
+
+		rows = self.run_report(cost_center=with_project.items[0].cost_center, project=project.name)
+		orders = {row.get("purchase_order") for row in rows}
+		self.assertIn(with_project.name, orders)
+		self.assertNotIn(without_project.name, orders)
