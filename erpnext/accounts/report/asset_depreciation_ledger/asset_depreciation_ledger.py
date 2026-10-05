@@ -46,7 +46,13 @@ def get_data(filters):
 		"GL Entry",
 		filters=filters_data,
 		or_filters=or_filters_data,
-		fields=["against_voucher", "debit_in_account_currency as debit", "voucher_no", "posting_date"],
+		fields=[
+			"against_voucher",
+			"debit_in_account_currency as debit",
+			"credit_in_account_currency as credit",
+			"voucher_no",
+			"posting_date",
+		],
 		order_by="against_voucher, posting_date",
 	)
 
@@ -62,18 +68,21 @@ def get_data(filters):
 	for d in gl_entries:
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
+			depreciation_amount = flt(d.debit) - flt(d.credit)
 			if asset_data.get("accumulated_depreciation_amount") is None:
 				asset_data.accumulated_depreciation_amount = flt(
 					asset_data.opening_accumulated_depreciation
 				) + depreciation_before_from_date.get(d.against_voucher, 0)
 
-			asset_data.accumulated_depreciation_amount += d.debit
-			asset_data.opening_accumulated_depreciation = asset_data.accumulated_depreciation_amount - d.debit
+			asset_data.accumulated_depreciation_amount += depreciation_amount
+			asset_data.opening_accumulated_depreciation = (
+				asset_data.accumulated_depreciation_amount - depreciation_amount
+			)
 
 			row = frappe._dict(asset_data)
 			row.update(
 				{
-					"depreciation_amount": d.debit,
+					"depreciation_amount": depreciation_amount,
 					"depreciation_date": d.posting_date,
 					"value_after_depreciation": (
 						flt(row.gross_purchase_amount) - flt(row.accumulated_depreciation_amount)
@@ -114,10 +123,13 @@ def get_depreciation_before_from_date(filters_data, or_filters_data, from_date) 
 		"GL Entry",
 		filters=filters_data,
 		or_filters=or_filters_data,
-		fields=["against_voucher", "sum(debit_in_account_currency) as debit"],
+		fields=[
+			"against_voucher",
+			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as depreciation_amount",
+		],
 		group_by="against_voucher",
 	)
-	return {d.against_voucher: flt(d.debit) for d in gl_entries}
+	return {d.against_voucher: flt(d.depreciation_amount) for d in gl_entries}
 
 
 def get_assets_details(assets):
