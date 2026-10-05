@@ -933,6 +933,28 @@ class TestAsset(AssetSetup):
 		purchase_doc.submit()
 		return purchase_doc
 
+	def test_disposal_credits_revalued_asset_value(self):
+		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+			make_asset_value_adjustment,
+		)
+
+		for new_value in (120000, 80000):
+			asset = create_asset(purchase_date="2025-04-01", available_for_use_date="2025-04-01", submit=1)
+			make_asset_value_adjustment(
+				asset=asset.name, date="2025-06-15", current_asset_value=100000, new_asset_value=new_value
+			).submit()
+
+			scrap_asset(asset.name, "2025-09-01")
+			asset.load_from_db()
+
+			self.assertCountEqual(
+				get_gl_entries("Journal Entry", asset.journal_entry_for_scrap),
+				(
+					("_Test Fixed Asset - _TC", 0.0, new_value),
+					("_Test Gain/Loss on Asset Disposal - _TC", new_value, 0.0),
+				),
+			)
+
 
 class TestDepreciationMethods(AssetSetup):
 	def test_schedule_for_straight_line_method(self):
