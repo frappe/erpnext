@@ -199,6 +199,16 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			stage_rows(stage, based_on="Amount", company=None, from_date="2026-01-01", to_date="2026-01-31")
 
+	def test_periods_of_different_years(self):
+		stage = make_sales_stage()
+		make_stage_opportunity(stage, 500, "2025-01-10")
+		make_stage_opportunity(stage, 1000, "2026-01-20")
+		make_stage_opportunity(stage, 300, "2026-02-05")
+
+		rows = stage_rows(stage, from_date="2025-01-01", to_date="2026-02-28")
+
+		self.assertTrue(rows)
+
 
 def make_sales_stage() -> str:
 	stage = "_Test Pipeline Stage " + frappe.generate_hash(length=5)

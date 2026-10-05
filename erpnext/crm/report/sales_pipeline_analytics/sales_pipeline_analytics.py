@@ -279,7 +279,7 @@ class SalesPipelineAnalytics:
 
 		if self.filters.get("range") == "Monthly":
 			frequency_list = self.get_month_list()
-			count = [0] * 12
+			count = [0] * len(frequency_list)
 
 		for info in self.query_result:
 			for i in range(len(frequency_list)):
