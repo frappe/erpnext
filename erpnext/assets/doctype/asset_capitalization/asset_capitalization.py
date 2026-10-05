@@ -7,12 +7,13 @@ import frappe
 
 # import erpnext
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_last_depreciation_date,
 	get_value_after_depreciation_on_disposal_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
@@ -94,6 +95,7 @@ class AssetCapitalization(StockController):
 		self.validate_consumed_stock_item()
 		self.validate_consumed_asset_item()
 		self.validate_duplicate_consumed_assets()
+		self.validate_consumed_asset_disposal_date()
 		self.validate_service_item()
 		self.set_warehouse_details()
 		self.set_asset_values()
@@ -301,6 +303,16 @@ class AssetCapitalization(StockController):
 			if d.asset in consumed_assets:
 				frappe.throw(_("Row #{0}: Consumed Asset {1} is added more than once").format(d.idx, d.asset))
 			consumed_assets.add(d.asset)
+
+	def validate_consumed_asset_disposal_date(self):
+		for d in self.asset_items:
+			last_depreciation_date = get_last_depreciation_date(d.asset)
+			if last_depreciation_date and getdate(self.posting_date) < last_depreciation_date:
+				frappe.throw(
+					_(
+						"Row #{0}: Consumed Asset {1} cannot be capitalized before its last depreciation entry dated {2}"
+					).format(d.idx, d.asset, frappe.format(last_depreciation_date, "Date"))
+				)
 
 	def validate_service_item(self):
 		for d in self.service_items:
