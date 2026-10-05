@@ -1,6 +1,8 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+from itertools import pairwise
 
 import frappe
 from frappe import _
@@ -62,17 +64,19 @@ def get_columns(filters):
 
 
 def get_all_shares(shareholder, date, company=None):
-	"""Share blocks the shareholder holds on `date`, each at the rate it was received at."""
+	"""Share blocks the shareholder holds on `date`, each at the rate it was last received at.
+
+	A share number is held when it was received more often than sent, so the result does not depend
+	on the order the transfers were saved or submitted in."""
 	holder = frappe.db.get_value("Shareholder", shareholder, ["name", "is_company", "company"], as_dict=True)
+	transfers = get_transfers(holder, date, company)
+	received = [transfer for transfer in transfers if is_received(transfer, holder)]
+	sent = [transfer for transfer in transfers if not is_received(transfer, holder)]
 
-	blocks = []
-	for transfer in get_transfers(holder, date, company):
-		if is_received(transfer, holder):
-			blocks.append(transfer)
-		else:
-			blocks = get_remaining_blocks(blocks, transfer)
-
-	return blocks
+	return [
+		get_block(get_last_receipt(received, share_type, from_no, to_no), from_no, to_no)
+		for share_type, from_no, to_no in get_held_ranges(received, sent)
+	]
 
 
 def get_transfers(holder, date, company=None):
@@ -98,6 +102,7 @@ def get_transfers(holder, date, company=None):
 			share_transfer.to_shareholder,
 		)
 		.where((share_transfer.docstatus == 1) & (share_transfer.date <= date) & is_involved)
+		.orderby(share_transfer.date)
 		.orderby(share_transfer.creation)
 	)
 
@@ -114,24 +119,30 @@ def is_received(transfer, holder):
 	return transfer.to_shareholder == holder.name
 
 
-def get_remaining_blocks(blocks, transfer):
-	"""Blocks left after `transfer` takes its share numbers out; split blocks keep their rate."""
-	remaining = []
-	for block in blocks:
-		if (
-			block.share_type != transfer.share_type
-			or block.to_no < transfer.from_no
-			or block.from_no > transfer.to_no
-		):
-			remaining.append(block)
-			continue
+def get_held_ranges(received, sent):
+	"""Share number ranges received more often than sent, split at every transfer boundary."""
+	changes = defaultdict(int)
+	for transfers, sign in ((received, 1), (sent, -1)):
+		for transfer in transfers:
+			changes[(transfer.share_type, transfer.from_no)] += sign
+			changes[(transfer.share_type, transfer.to_no + 1)] -= sign
 
-		if block.from_no < transfer.from_no:
-			remaining.append(get_block(block, block.from_no, transfer.from_no - 1))
-		if block.to_no > transfer.to_no:
-			remaining.append(get_block(block, transfer.to_no + 1, block.to_no))
+	held_ranges = []
+	held_count = 0
+	for (share_type, from_no), (next_share_type, next_no) in pairwise(sorted(changes)):
+		held_count += changes[(share_type, from_no)]
+		if held_count > 0 and share_type == next_share_type:
+			held_ranges.append((share_type, from_no, next_no - 1))
 
-	return remaining
+	return held_ranges
+
+
+def get_last_receipt(received, share_type, from_no, to_no):
+	return [
+		transfer
+		for transfer in received
+		if transfer.share_type == share_type and transfer.from_no <= from_no and transfer.to_no >= to_no
+	][-1]
 
 
 def get_block(block, from_no, to_no):
