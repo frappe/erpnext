@@ -939,9 +939,15 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def update_status(status, name):
+	if status not in ("Draft", "Submitted", "On Hold", "Closed", "Delivered"):
+		frappe.throw(_("Cannot set the status of a Purchase Order to {0}.").format(status))
+
 	frappe.has_permission("Purchase Order", "submit", name, throw=True)
 
 	po = frappe.get_doc("Purchase Order", name)
+	if po.docstatus != 1:
+		frappe.throw(_("Only a submitted Purchase Order can be held, closed or re-opened."))
+
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
 
