@@ -38,7 +38,7 @@ def get_data(filters, show_party_name):
 		party_name_field = "name"
 
 	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
-	parties = frappe.get_all(
+	parties = frappe.get_list(
 		filters.get("party_type"),
 		fields=["name", party_name_field],
 		filters=party_filters,

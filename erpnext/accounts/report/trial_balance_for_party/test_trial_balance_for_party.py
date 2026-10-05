@@ -81,3 +81,40 @@ class TestTrialBalanceForParty(FrappeTestCase):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(row["debit"], 10000)
+
+	def test_totals_cover_only_permitted_parties(self):
+		permitted, other = (
+			make_customer("_Test TBP Permitted Customer"),
+			make_customer("_Test TBP Other Customer"),
+		)
+		create_sales_invoice(customer=permitted, qty=1, rate=10000)
+		create_sales_invoice(customer=other, qty=1, rate=6000)
+
+		user = "test_tbp_party_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Customer", permitted, user)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual({row["party"] for row in data[:-1]}, {permitted})
+		self.assertEqual(data[-1]["debit"], 10000)
+
+
+def make_customer(customer_name: str) -> str:
+	if not frappe.db.exists("Customer", customer_name):
+		frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": customer_name,
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+			}
+		).insert()
+	return customer_name
