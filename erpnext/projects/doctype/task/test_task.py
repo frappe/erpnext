@@ -312,6 +312,21 @@ class TestTask(ERPNextTestSuite):
 			frappe.get_all("Task Depends On", filters={"parent": new_parent.name}, pluck="task"), [child.name]
 		)
 
+	def test_reopen_completed_task(self):
+		task = create_task("_Test Task Reopened")
+		task.status = "Completed"
+		task.save()
+
+		task.status = "Open"
+		task.save()
+		self.assertEqual((task.progress, task.completed_on), (0, None))
+
+		task.status = "Completed"
+		task.save()
+		task.update({"status": "Working", "progress": 60})
+		task.save()
+		self.assertEqual(task.progress, 60)
+
 
 def create_task(
 	subject,
