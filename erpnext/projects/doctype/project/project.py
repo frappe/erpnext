@@ -1,6 +1,8 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from graphlib import TopologicalSorter
+
 import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
@@ -826,11 +828,28 @@ def set_project_status(project: str, status: str):
 	project = frappe.get_doc("Project", project)
 	project.check_permission("write")
 
-	for task in frappe.get_all("Task", dict(project=project.name)):
-		frappe.db.set_value("Task", task.name, "status", status)
+	for task_name in get_tasks_in_dependency_order(project.name, status):
+		task = frappe.get_doc("Task", task_name)
+		task.status = status
+		task.save(ignore_permissions=True)
 
 	project.status = status
 	project.save()
+
+
+def get_tasks_in_dependency_order(project: str, status: str) -> list[str]:
+	"""Project tasks not in `status`, each after the tasks it depends on."""
+	tasks = frappe.get_all("Task", filters={"project": project, "status": ["!=", status]}, pluck="name")
+	if not tasks:
+		return []
+
+	dependencies = {task: set() for task in tasks}
+	for row in frappe.get_all(
+		"Task Depends On", filters={"parenttype": "Task", "parent": ["in", tasks]}, fields=["parent", "task"]
+	):
+		dependencies[row.parent].add(row.task)
+
+	return [task for task in TopologicalSorter(dependencies).static_order() if task in dependencies]
 
 
 def get_holiday_list(company: str | None = None) -> str:
