@@ -1927,16 +1927,20 @@ def get_consumed_operating_cost(wo_name, bom_no, operation_id):
 	return query.run(as_dict=True)
 
 
+def uses_sub_assembly_operating_cost(work_order, bom_no):
+	return bool(
+		bom_no
+		and frappe.db.get_single_value(
+			"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies"
+		)
+		and frappe.get_cached_value("Work Order", work_order.name, "use_multi_level_bom")
+	)
+
+
 def get_remaining_operating_cost(work_order=None, bom_no=None):
 	remaining_operating_cost = 0
 	if work_order:
-		if (
-			bom_no
-			and frappe.db.get_single_value(
-				"Manufacturing Settings", "set_op_cost_and_secondary_items_from_sub_assemblies"
-			)
-			and frappe.get_cached_value("Work Order", work_order.name, "use_multi_level_bom")
-		):
+		if uses_sub_assembly_operating_cost(work_order, bom_no):
 			return get_op_cost_from_sub_assemblies(bom_no)
 
 		if not bom_no:
