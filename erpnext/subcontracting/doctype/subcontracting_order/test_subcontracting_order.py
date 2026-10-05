@@ -177,6 +177,68 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			change(sco)
 			self.assertRaises(frappe.ValidationError, sco.insert)
 
+	def test_purchase_order_is_fully_subcontracted_with_a_non_integer_ratio(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 3,
+			},
+		]
+		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
+		for _ in range(3):
+			sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+			sco.items[0].qty = 1
+			sco.insert()
+			sco.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Purchase Order Item", {"parent": po_name}, "subcontracted_qty"), 10
+		)
+
+	def test_partial_subcontracting_order_leaves_the_exact_remaining_qty(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 3,
+			},
+		]
+		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
+		sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		sco.items[0].qty = 1
+		sco.insert()
+		sco.submit()
+
+		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		self.assertEqual(next_sco.items[0].qty, 2)
+
+	def test_purchase_order_stays_open_while_finished_goods_remain(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 3000,
+			},
+		]
+		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
+		sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		sco.items[0].qty = 2999
+		sco.insert()
+		sco.submit()
+
+		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		self.assertEqual(next_sco.items[0].qty, 1)
+
 	def test_project_is_carried_over_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name
 		po = make_subcontracted_purchase_order(project)

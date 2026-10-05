@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
@@ -139,7 +140,7 @@ class SubcontractingOrder(SubcontractingController):
 
 	def on_cancel(self):
 		self.update_status()
-		self.update_subcontracted_quantity_in_po(cancel=True)
+		self.update_subcontracted_quantity_in_po()
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -424,26 +425,44 @@ class SubcontractingOrder(SubcontractingController):
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
 
-	def update_subcontracted_quantity_in_po(self, cancel=False):
-		for service_item in self.service_items:
-			subcontracted_qty = flt(
-				frappe.db.get_value(
-					"Purchase Order Item", service_item.purchase_order_item, "subcontracted_qty"
-				)
-			)
+	def update_subcontracted_quantity_in_po(self):
+		po_items = [d.purchase_order_item for d in self.service_items if d.purchase_order_item]
+		if not po_items:
+			return
 
-			subcontracted_qty = (
-				(subcontracted_qty + service_item.qty)
-				if not cancel
-				else (subcontracted_qty - service_item.qty)
-			)
-
-			frappe.db.set_value(
-				"Purchase Order Item",
+		service_item = frappe.qb.DocType("Subcontracting Order Service Item")
+		order = frappe.qb.DocType("Subcontracting Order")
+		subcontracted = {
+			row.purchase_order_item: row
+			for row in frappe.qb.from_(service_item)
+			.join(order)
+			.on(order.name == service_item.parent)
+			.select(
 				service_item.purchase_order_item,
-				"subcontracted_qty",
-				subcontracted_qty,
+				Sum(service_item.qty).as_("qty"),
+				Sum(service_item.fg_item_qty).as_("fg_item_qty"),
 			)
+			.where((order.docstatus == 1) & service_item.purchase_order_item.isin(po_items))
+			.groupby(service_item.purchase_order_item)
+			.run(as_dict=True)
+		}
+
+		po_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Purchase Order Item",
+				filters={"name": ["in", po_items]},
+				fields=["name", "qty", "fg_item_qty"],
+			)
+		}
+		precision = frappe.get_precision("Purchase Order Item", "fg_item_qty")
+		for po_item in po_items:
+			row = subcontracted.get(po_item) or frappe._dict()
+			qty = flt(row.qty)
+			if flt(row.fg_item_qty, precision) >= flt(po_rows[po_item].fg_item_qty, precision) > 0:
+				qty = po_rows[po_item].qty
+
+			frappe.db.set_value("Purchase Order Item", po_item, "subcontracted_qty", qty)
 
 	@frappe.whitelist()
 	def reserve_raw_materials(self, items: list | None = None, stock_entry: str | None = None):
