@@ -51,8 +51,16 @@ class MaintenanceVisit(TransactionBase):
 
 	def validate_serial_no(self):
 		for d in self.get("purposes"):
-			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
+			if not d.serial_no:
+				continue
+			serial = frappe.db.get_value(
+				"Serial No", d.serial_no, ["serial_no", "warehouse", "customer"], as_dict=True
+			)
+			if not serial:
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
+			if serial.warehouse and was_delivered_to(d.serial_no, self.customer):
+				continue
+			validate_serial_no_for_customer(serial, self.customer)
 
 	def validate_purpose_table(self):
 		if not self.purposes:
@@ -269,3 +277,44 @@ class MaintenanceVisit(TransactionBase):
 
 	def on_update(self):
 		pass
+
+
+def validate_serial_no_for_customer(serial, customer):
+	"""Refuse a serial still in stock; warn when it was sold to another customer."""
+	number = frappe.bold(escape_html(serial.serial_no))
+	if serial.warehouse:
+		frappe.throw(
+			_("Serial No {0} is still in stock in Warehouse {1}").format(
+				number, frappe.bold(serial.warehouse)
+			)
+		)
+	if serial.customer and serial.customer != customer:
+		frappe.msgprint(
+			_("Serial No {0} was sold to Customer {1}, not {2}").format(
+				number, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(customer))
+			),
+			title=_("Different Customer"),
+			indicator="orange",
+		)
+
+
+def was_delivered_to(serial_no, customer):
+	"""Whether the serial was ever delivered to the customer, e.g. before coming back for repair."""
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	deliveries = (
+		frappe.qb.from_(entry)
+		.select(entry.voucher_type, entry.voucher_no)
+		.where(
+			(entry.serial_no == serial_no)
+			& (entry.docstatus == 1)
+			& (entry.is_cancelled == 0)
+			& (entry.type_of_transaction == "Outward")
+			& entry.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+		)
+	).run(as_dict=True)
+
+	for doctype in ("Delivery Note", "Sales Invoice"):
+		names = [row.voucher_no for row in deliveries if row.voucher_type == doctype]
+		if names and frappe.db.exists(doctype, {"name": ("in", names), "customer": customer}):
+			return True
+	return False
