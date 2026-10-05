@@ -300,6 +300,36 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 
+	def test_changing_sla_keeps_outcome_of_resolved_issues(self):
+		resolved_issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		resolved_issue.status = "Closed"
+		resolved_issue.save()
+		open_issue = make_issue(get_datetime("2019-03-04 12:00"), index=2)
+
+		default_sla = get_service_level_agreement(default_service_level_agreement=1)
+		for priority in default_sla.priorities:
+			priority.response_time, priority.resolution_time = 1800, 3600
+		default_sla.save()
+
+		resolved_issue.reload()
+		resolved_issue.save()
+		self.assertEqual(resolved_issue.response_by, get_datetime("2019-03-04 16:00"))
+		self.assertEqual(resolved_issue.agreement_status, "Fulfilled")
+
+		default_sla.reload()
+		default_sla.enabled = 0
+		default_sla.save()
+
+		resolved_issue.reload()
+		resolved_issue.save()
+		self.assertEqual(resolved_issue.service_level_agreement, default_sla.name)
+
+		open_issue.reload()
+		open_issue.save()
+		self.assertFalse(open_issue.service_level_agreement)
+		self.assertFalse(open_issue.agreement_status)
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
