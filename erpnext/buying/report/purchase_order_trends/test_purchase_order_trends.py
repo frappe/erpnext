@@ -196,3 +196,27 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 
 		self.assertGreater(chart_total, 0)
 		self.assertEqual(chart_total, 300)
+
+	def test_based_on_project_leaves_out_rows_without_a_project(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.buying.report.purchase_order_trends.purchase_order_trends import execute
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		project = make_project({"project_name": "_Test PO Trends Project"}).name
+		po = create_purchase_order(qty=2, rate=100, transaction_date=today(), do_not_save=True)
+		po.items[0].project = project
+		po.insert().submit()
+		create_purchase_order(qty=3, rate=100, transaction_date=today())
+
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"fiscal_year": get_fiscal_year(today())[0],
+				"period": "Monthly",
+				"based_on": "Project",
+			}
+		)
+
+		projects = [row[0] for row in execute(filters)[1]]
+		self.assertIn(project, projects)
+		self.assertTrue(all(projects))
