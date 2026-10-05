@@ -45,9 +45,7 @@ def upload(select_doctype: str | None = None, file_to_rename: str | None = None)
 	if not select_doctype:
 		select_doctype = frappe.form_dict.select_doctype
 
-	if not frappe.has_permission(select_doctype, "write"):
-		raise frappe.PermissionError
-
+	validate_access(select_doctype)
 	file = get_file_to_rename(file_to_rename)
 	rows = read_csv_content(file.get_content())
 
@@ -61,6 +59,17 @@ def upload(select_doctype: str | None = None, file_to_rename: str | None = None)
 		)
 
 	file.delete()
+
+
+def validate_access(doctype: str | None) -> None:
+	frappe.has_permission("Rename Tool", "write", throw=True)
+
+	filters = {"name": doctype, "allow_rename": 1, "module": ["!=", "Core"]}
+	if not doctype or not frappe.db.exists("DocType", filters):
+		frappe.throw(_("{0} cannot be renamed with the Rename Tool").format(doctype))
+
+	if not frappe.has_permission(doctype, "write"):
+		raise frappe.PermissionError
 
 
 def get_file_to_rename(file_url: str | None) -> Document:

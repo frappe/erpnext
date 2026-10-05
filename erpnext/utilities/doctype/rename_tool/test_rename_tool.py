@@ -30,6 +30,18 @@ class TestRenameTool(ERPNextTestSuite):
 		upload("Customer", attach_csv(f"{second},{second} Renamed\n"))
 		self.assertTrue(frappe.db.exists("Customer", f"{second} Renamed"))
 
+	def test_upload_requires_rename_tool_access_and_a_renameable_doctype(self):
+		customer = make_customer("_Test Rename Tool C")
+		file_url = attach_csv(f"{customer},{customer} Renamed\n")
+
+		self.assertRaises(frappe.ValidationError, upload, "Role", file_url)
+
+		frappe.get_doc("User", "test1@example.com").add_roles("Sales Manager")
+		frappe.set_user("test1@example.com")
+		self.addCleanup(frappe.set_user, "Administrator")
+		self.assertRaises(frappe.PermissionError, upload, "Customer", file_url)
+		self.assertFalse(frappe.db.exists("Customer", f"{customer} Renamed"))
+
 
 def attach_csv(content: str) -> str:
 	return save_file("rename.csv", content.encode(), "Rename Tool", "Rename Tool", is_private=1).file_url
