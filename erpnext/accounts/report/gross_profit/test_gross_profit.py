@@ -1235,6 +1235,32 @@ class TestGrossProfit(FrappeTestCase):
 		self.assertEqual(invoice_row.qty, 30000)
 		self.assertEqual(invoice_row.buying_amount, 999999.9)
 
+	def test_undelivered_invoices_use_valuation_rate_of_their_date(self):
+		item = create_item("_Test Gross Profit Moving Average Item")
+		item.db_set("valuation_method", "Moving Average")
+		earlier_date = add_days(nowdate(), -8)
+
+		invoices = []
+		for posting_date, rate in ((earlier_date, 100), (nowdate(), 300)):
+			make_stock_entry(
+				company=self.company,
+				item_code=item.name,
+				target=self.warehouse,
+				qty=2,
+				basic_rate=rate,
+				posting_date=posting_date,
+			)
+			sinv = self.create_sales_invoice(qty=2, rate=500, posting_date=posting_date, do_not_save=True)
+			sinv.items[0].item_code = item.name
+			invoices.append(sinv.submit())
+
+		filters = dict(company=self.company, from_date=earlier_date, to_date=nowdate(), item_code=item.name)
+		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		buying_amounts = {row.sales_invoice: row.buying_amount for row in data if row.indent == 0}
+
+		self.assertEqual(buying_amounts[invoices[0].name], 200)
+		self.assertEqual(buying_amounts[invoices[1].name], 400)
+
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
