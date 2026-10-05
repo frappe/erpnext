@@ -17,10 +17,15 @@ class OpportunitySummaryBySalesStage:
 		self.filters = frappe._dict(filters or {})
 
 	def run(self):
+		self.validate_filters()
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
 		return self.columns, self.data, None, self.chart
+
+	def validate_filters(self):
+		if self.filters.get("data_based_on") == "Amount" and not self.filters.get("company"):
+			frappe.throw(_("Company is mandatory when Data Based On is Amount"))
 
 	def get_columns(self):
 		self.columns = []

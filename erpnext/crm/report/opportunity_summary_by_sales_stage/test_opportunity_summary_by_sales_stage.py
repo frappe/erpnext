@@ -79,6 +79,10 @@ class TestOpportunitySummaryBySalesStage(ERPNextTestSuite):
 
 		self.assertEqual(type_row(opportunity_type, data_based_on="Amount")["Prospecting"], 9000)
 
+		# amounts of companies with different currencies can't be added together
+		with self.assertRaises(frappe.ValidationError):
+			type_row(opportunity_type, data_based_on="Amount", company=None)
+
 
 def make_opportunity_type() -> str:
 	opportunity_type = "_Test Summary Type " + frappe.generate_hash(length=5)
