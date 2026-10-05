@@ -302,6 +302,21 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe.paid_amount = pe.received_amount = pe.references[0].allocated_amount
 		self.assertRaises(frappe.ValidationError, pe.insert)
 
+	def test_allocation_equal_to_outstanding_at_precision_is_allowed(self):
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Pay"
+		pe.party_type = "Employee"
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Employee Advance",
+				"reference_name": "_Test Precision Boundary",
+				"outstanding_amount": 259.99999039999966,
+				"allocated_amount": 260.0,
+			},
+		)
+		pe.validate_allocated_amount()
+
 	def test_payment_against_sales_invoice_to_check_status(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
