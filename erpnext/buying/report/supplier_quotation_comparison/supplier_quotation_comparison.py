@@ -33,12 +33,17 @@ def validate_filters(filters):
 
 
 def get_data(filters):
+	permitted_quotations = get_permitted_supplier_quotations(filters)
+	if not permitted_quotations:
+		return []
+
 	sq = frappe.qb.DocType("Supplier Quotation")
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
 	query = (
 		frappe.qb.from_(sq_item)
-		.from_(sq)
+		.join(sq)
+		.on(sq_item.parent == sq.name)
 		.select(
 			sq_item.parent,
 			sq_item.item_code,
@@ -59,7 +64,7 @@ def get_data(filters):
 			sq.valid_till,
 		)
 		.where(
-			(sq_item.parent == sq.name)
+			(sq.name.isin(permitted_quotations))
 			& (sq.company == filters.get("company"))
 			& (sq.transaction_date.between(filters.get("from_date"), filters.get("to_date")))
 		)
@@ -92,6 +97,18 @@ def get_data(filters):
 	supplier_quotation_data = query.run(as_dict=True)
 
 	return supplier_quotation_data
+
+
+def get_permitted_supplier_quotations(filters):
+	return frappe.get_list(
+		"Supplier Quotation",
+		filters={
+			"company": filters.get("company"),
+			"transaction_date": ["between", [filters.get("from_date"), filters.get("to_date")]],
+		},
+		pluck="name",
+		limit_page_length=0,
+	)
 
 
 def prepare_data(supplier_quotation_data, filters):

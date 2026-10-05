@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison import execute
@@ -61,3 +63,20 @@ class TestSupplierQuotationComparison(FrappeTestCase):
 		self.assertEqual(rows[unit_price_quote.name]["price_per_unit"], 900)
 		self.assertTrue(rows[quantity_quote.name].get("min"))
 		self.assertFalse(rows[unit_price_quote.name].get("min"))
+
+	def test_supplier_restricted_user_sees_only_that_suppliers_quotes(self):
+		own_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		self.make_quotation("_Test Supplier 1", qty=10, rate=450)
+		user = create_user("sq-comparison-buyer@example.com", "Purchase User")
+		add_user_permission("Supplier", "_Test Supplier", user.name)
+
+		frappe.set_user(user.name)
+		try:
+			_columns, data, _message, chart = self.execute_report(
+				item_code=ITEM, categorize_by="Categorize by Supplier"
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual({row["quotation"] for row in data}, {own_quote.name})
+		self.assertEqual(chart["data"]["labels"], ["_Test Supplier"])
