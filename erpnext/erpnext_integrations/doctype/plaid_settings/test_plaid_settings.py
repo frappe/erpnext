@@ -1,7 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import json
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.utils.response import json_handler
@@ -13,6 +13,7 @@ from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
 	add_bank_accounts,
 	get_plaid_configuration,
 	new_bank_transaction,
+	sync_transactions,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -121,3 +122,50 @@ class TestPlaidSettings(ERPNextTestSuite):
 
 		transactions = connector.get_transactions("2026-01-01", "2026-06-30", account_id="acc-1")
 		self.assertEqual(transactions, rows["acc-1"])
+
+	def test_sync_skips_a_failing_transaction(self):
+		bank_account = link_test_bank_account("plaid-sync-test")
+		rows = [
+			make_plaid_transaction("plaid-sync-test", f"plaid-sync-test-{n}", currency)
+			for n, currency in enumerate(["INR", "INR", "USD"])
+		]
+
+		with (
+			patch(f"{PLAID_SETTINGS}.get_transactions", return_value=rows),
+			patch("frappe.log_error") as log_error,
+		):
+			sync_transactions("Citi", bank_account)
+
+		imported = frappe.get_all("Bank Transaction", {"bank_account": bank_account}, pluck="transaction_id")
+		self.assertCountEqual(imported, ["plaid-sync-test-0", "plaid-sync-test-1"])
+		log_error.assert_called_once()
+
+
+PLAID_SETTINGS = "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings"
+
+
+def link_test_bank_account(account_id: str) -> str:
+	"""Link a Plaid account of the Citi bank to _Test Company and return its Bank Account."""
+	if not frappe.db.exists("Bank", "Citi"):
+		frappe.get_doc({"doctype": "Bank", "bank_name": "Citi"}).insert()
+
+	account = {"id": account_id, "name": f"Plaid {account_id}", "type": "depository", "subtype": "checking"}
+	response = {"accounts": [account], "institution": {"institution_id": "ins_6", "name": "Citi"}}
+	bank = json.dumps(frappe.get_doc("Bank", "Citi").as_dict(), default=json_handler)
+	return add_bank_accounts(response, bank, "_Test Company")[0]
+
+
+def make_plaid_transaction(account_id: str, transaction_id: str, currency: str) -> dict:
+	return {
+		"account_id": account_id,
+		"transaction_id": transaction_id,
+		"amount": 10.0,
+		"date": "2026-01-15",
+		"iso_currency_code": currency,
+		"pending": False,
+		"category": None,
+		"name": transaction_id,
+		"transaction_code": None,
+		"check_number": None,
+		"payment_meta": {"payment_method": None, "reference_number": None},
+	}

@@ -229,8 +229,15 @@ def sync_transactions(bank, bank_account):
 				try:
 					result += new_bank_transaction(transaction)
 				except Exception:
+					# skip the row so one bad transaction does not block the rest of the account's sync
 					frappe.db.rollback(save_point="plaid_sync_txn")
-					raise
+					frappe.log_error(
+						_("Plaid transaction {0} could not be imported").format(
+							transaction.get("transaction_id")
+						),
+						reference_doctype="Bank Account",
+						reference_name=bank_account,
+					)
 
 		if result:
 			last_transaction_date = frappe.db.get_value("Bank Transaction", result.pop(), "date")
