@@ -47,6 +47,20 @@ class TestPOSRegister(ERPNextTestSuite):
 			[("Cash", 1500, 1100), ("_Test POS Register Card", 0, 400)],
 		)
 
+	def test_change_is_deducted_in_company_currency(self):
+		self.make_pos_sales_invoice(
+			{"Cash": 15},
+			rate=10,
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+		)
+
+		for group_by in ("Customer", "Payment Method"):
+			row = self.run_report(group_by=group_by)[0]
+			self.assertEqual((row.grand_total, row.paid_amount), (500, 500))
+
 	def make_pos_sales_invoice(self, payments, rate=1000, **args):
 		si = create_sales_invoice(rate=rate, do_not_save=True, **args)
 		si.update({"is_pos": 1, "pos_profile": self.pos_profile, "account_for_change_amount": "Cash - _TC"})
