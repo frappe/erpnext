@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import add_days, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -269,6 +269,14 @@ class TestUaeVat201(ERPNextTestSuite):
 
 		self.assertEqual(pi.base_net_total, 1500)
 		self.assertEqual(get_standard_rated_expenses_total({"company": "_Test Company UAE VAT"}), 1000)
+
+	def test_uae_vat_201_to_date_without_from_date(self):
+		create_purchase_invoices()
+
+		filters = {"company": "_Test Company UAE VAT", "to_date": add_days(nowdate(), -1)}
+		self.assertEqual(get_standard_rated_expenses_tax(filters), 0)
+		filters["to_date"] = nowdate()
+		self.assertEqual(get_standard_rated_expenses_tax(filters), 1)
 
 
 def set_vat_accounts():

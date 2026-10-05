@@ -242,7 +242,7 @@ def get_filters(filters):
 		query_filters.append(["company", "=", filters["company"]])
 	if filters.get("from_date"):
 		query_filters.append(["posting_date", ">=", filters["from_date"]])
-	if filters.get("from_date"):
+	if filters.get("to_date"):
 		query_filters.append(["posting_date", "<=", filters["to_date"]])
 	return query_filters
 
