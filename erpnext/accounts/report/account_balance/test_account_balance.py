@@ -77,6 +77,29 @@ class TestAccountBalance(ERPNextTestSuite):
 
 		self.assertEqual(sales_balance() - before, -30)
 
+	def test_account_restrictions_are_applied(self):
+		make_sales_invoice()
+		filters = {"company": "_Test Company 2", "report_date": getdate()}
+		user = "test_account_balance_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "AB", "roles": [{"role": "Accounts User"}]}
+			).insert()
+
+		def balances_as_user():
+			frappe.set_user(user)
+			try:
+				return {row["account"]: row["balance"] for row in execute(filters)[1]}
+			finally:
+				frappe.set_user("Administrator")
+
+		frappe.permissions.add_user_permission("Account", "Debtors - _TC2", user, applicable_for="GL Entry")
+		self.assertEqual(balances_as_user()["Sales - _TC2"], 0)
+
+		frappe.db.delete("User Permission", {"user": user})
+		frappe.permissions.add_user_permission("Account", "Debtors - _TC2", user)
+		self.assertEqual(list(balances_as_user()), ["Debtors - _TC2"])
+
 
 def make_sales_invoice(**args):
 	frappe.set_user("Administrator")

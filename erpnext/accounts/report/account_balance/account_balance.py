@@ -62,7 +62,7 @@ def get_conditions(filters):
 def get_data(filters):
 	data = []
 	conditions = get_conditions(filters)
-	accounts = frappe.db.get_all(
+	accounts = frappe.get_list(
 		"Account", fields=["name", "account_currency", "report_type"], filters=conditions, order_by="name"
 	)
 	year_start_date = get_year_start_date(filters)
@@ -70,7 +70,9 @@ def get_data(filters):
 	for d in accounts:
 		# income and expense balances run from the start of the fiscal year
 		start_date = year_start_date if d.report_type == "Profit and Loss" else None
-		balance = get_balance_on(d.name, date=filters.report_date, start_date=start_date)
+		balance = get_balance_on(
+			d.name, date=filters.report_date, start_date=start_date, apply_gl_entry_permissions=True
+		)
 		row = {"account": d.name, "balance": balance, "currency": d.account_currency}
 
 		data.append(row)
