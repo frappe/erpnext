@@ -172,6 +172,15 @@ class TestProject(FrappeTestCase):
 		so.reload()
 		self.assertFalse(so.project)
 
+	def test_project_from_sales_order_has_its_sales_amount(self):
+		so = make_sales_order()
+		project = make_project_from_so(so.name).insert()
+
+		self.assertEqual(project.total_sales_amount, so.base_net_total)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_sales_amount"), so.base_net_total
+		)
+
 	def test_project_with_template_tasks_having_common_name(self):
 		# Step - 1: Create Template Parent Tasks
 		template_parent_task1 = create_task(subject="Parent Task - 1", is_template=1, is_group=1)
