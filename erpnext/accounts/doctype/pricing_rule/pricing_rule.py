@@ -788,13 +788,26 @@ def fits_price_list_side(ctx: frappe._dict, price_list: str, side: str) -> bool:
 
 def is_return_against_price_list(ctx: frappe._dict, price_list: str, side: str) -> bool:
 	return_against = ctx.get("return_against")
-	if not (ctx.get("is_return") and isinstance(return_against, str)):
+	if not (
+		ctx.get("is_return")
+		and isinstance(return_against, str)
+		and frappe.get_meta(ctx.doctype).has_field("return_against")
+	):
 		return False
 
-	voucher_price_list = frappe.db.get_value(
-		ctx.doctype, {"name": return_against, "docstatus": 1}, f"{side}_price_list"
+	party_field = "customer" if side == "selling" else "supplier"
+	voucher = frappe.db.get_value(
+		ctx.doctype,
+		{"name": return_against, "docstatus": 1},
+		[f"{side}_price_list", party_field],
+		as_dict=True,
 	)
-	return price_list == voucher_price_list and frappe.has_permission(ctx.doctype, doc=return_against)
+	return bool(
+		voucher
+		and voucher[f"{side}_price_list"] == price_list
+		and voucher[party_field] == ctx.get(party_field)
+		and frappe.has_permission(ctx.doctype, doc=return_against)
+	)
 
 
 def set_transaction_type(pricing_ctx: frappe._dict) -> None:
