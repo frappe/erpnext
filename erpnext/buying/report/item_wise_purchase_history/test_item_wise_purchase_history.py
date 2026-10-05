@@ -80,6 +80,12 @@ class TestItemWisePurchaseHistory(ERPNextTestSuite):
 		self.assertIn(po_test_group.name, names)
 		self.assertNotIn(po_other_group.name, names)
 
+	def test_parent_item_group_filter_includes_child_groups(self):
+		po = create_purchase_order(item_code="_Test Item", transaction_date="2026-06-01")
+
+		names = {row["purchase_order"] for row in self.run_report(item_group="All Item Groups")[1]}
+		self.assertIn(po.name, names)
+
 	def test_supplier_filter(self):
 		create_purchase_order(supplier="_Test Supplier", transaction_date="2026-06-01")
 		create_purchase_order(supplier="_Test Supplier 1", transaction_date="2026-06-01")

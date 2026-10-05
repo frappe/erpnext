@@ -231,9 +231,12 @@ def get_purchase_order_details(company_list, filters):
 		.where(db_po.company.isin(tuple(company_list)))
 	)
 
-	for field in ("item_code", "item_group"):
-		if filters.get(field):
-			query = query.where(db_po_item[field] == filters[field])
+	if filters.get("item_code"):
+		query = query.where(db_po_item.item_code == filters.item_code)
+
+	if filters.get("item_group"):
+		item_groups = [filters.item_group, *get_descendants_of("Item Group", filters.item_group)]
+		query = query.where(db_po_item.item_group.isin(item_groups))
 
 	if filters.get("from_date"):
 		query = query.where(db_po.transaction_date >= filters.from_date)
