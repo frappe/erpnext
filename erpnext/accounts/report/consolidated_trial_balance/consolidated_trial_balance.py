@@ -66,6 +66,7 @@ def validate_companies(filters):
 	)
 
 	for company in filters.company:
+		frappe.has_permission("Company", "read", company, throw=True)
 		if company not in company_subtree:
 			frappe.throw(
 				_("Consolidated Trial Balance can be generated for Companies having same root Company.")

@@ -82,6 +82,32 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 
 		self.assertEqual(total_row["closing_credit"], flt(100000 + ccu_total_credit))
 
+	def test_company_needs_read_permission(self):
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": f"{frappe.generate_hash(length=10)}@example.com",
+				"first_name": "Consolidated Trial Balance Test",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+			}
+		).insert(ignore_permissions=True)
+		filters = frappe._dict({"company": ["Child Company US"], "fiscal_year": self.fiscal_year})
+
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, execute, filters)
+		finally:
+			frappe.set_user("Administrator")
+
 
 def create_journal_entry(**args):
 	args = frappe._dict(args)
