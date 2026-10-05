@@ -1361,6 +1361,18 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(buying_amounts[invoices[0].name], 200)
 		self.assertEqual(buying_amounts[invoices[1].name], 400)
 
+	def test_invoice_warehouse_changed_after_mapping_from_delivery_note(self):
+		item = create_item("_Test Gross Profit Warehouse Item").name
+		for warehouse in (self.warehouse, self.finished_warehouse):
+			make_stock_entry(company=self.company, item_code=item, target=warehouse, qty=5, basic_rate=100)
+
+		dnote = self.create_delivery_note(item=item, qty=4, rate=200)
+		sinv = make_sales_invoice(dnote.name)
+		sinv.items[0].warehouse = self.finished_warehouse
+		sinv.save().submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 400)
+
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
 		components = []

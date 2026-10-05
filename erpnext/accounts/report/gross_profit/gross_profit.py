@@ -850,6 +850,7 @@ class GrossProfitGenerator:
 			if packed_item.get("parent_detail_docname") == row.item_row:
 				packed_item_row = row.copy()
 				packed_item_row.warehouse = packed_item.warehouse
+				packed_item_row.delivered_warehouse = None
 				packed_item_row.qty = packed_item.total_qty * -1 * billed_share
 				packed_item_row.serial_and_batch_bundle = packed_item.serial_and_batch_bundle
 				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
@@ -912,7 +913,7 @@ class GrossProfitGenerator:
 			return flt(row.qty) * item_rate
 
 		else:
-			my_sle = self.get_stock_ledger_entries(item_code, row.warehouse)
+			my_sle = self.get_stock_ledger_entries(item_code, row.delivered_warehouse or row.warehouse)
 			if (row.update_stock or row.dn_detail) and my_sle:
 				parenttype = row.parenttype
 				parent = row.invoice or row.parent
@@ -1120,6 +1121,7 @@ class GrossProfitGenerator:
 		Item = frappe.qb.DocType("Item")
 		SalesTeam = frappe.qb.DocType("Sales Team")
 		PaymentSchedule = frappe.qb.DocType("Payment Schedule")
+		DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
 
 		query = (
 			frappe.qb.from_(SalesInvoice)
@@ -1127,6 +1129,8 @@ class GrossProfitGenerator:
 			.on(SalesInvoiceItem.parent == SalesInvoice.name)
 			.join(Item)
 			.on(Item.name == SalesInvoiceItem.item_code)
+			.left_join(DeliveryNoteItem)
+			.on(DeliveryNoteItem.name == SalesInvoiceItem.dn_detail)
 			.where((SalesInvoice.docstatus == 1) & (SalesInvoice.is_opening != "Yes"))
 		)
 
@@ -1153,6 +1157,7 @@ class GrossProfitGenerator:
 			SalesInvoiceItem.item_name,
 			SalesInvoiceItem.description,
 			SalesInvoiceItem.warehouse,
+			DeliveryNoteItem.warehouse.as_("delivered_warehouse"),
 			SalesInvoiceItem.item_group,
 			SalesInvoiceItem.brand,
 			SalesInvoiceItem.so_detail,
