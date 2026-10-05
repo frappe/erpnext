@@ -1,6 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
@@ -23,6 +25,24 @@ class TestSouthAfricaVATSettings(ERPNextTestSuite):
 				self.assertRaises(frappe.ValidationError, make_settings(accounts).insert)
 
 		make_settings([vat_account]).insert()
+
+	@patch("erpnext.setup.doctype.company.company.install_country_fixtures")
+	def test_company_cannot_be_changed(self, install_country_fixtures):
+		other_company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "_Test SA Other",
+				"abbr": "_TSAO",
+				"default_currency": "ZAR",
+				"country": "South Africa",
+			}
+		).insert()
+		settings = make_settings([get_account(COMPANY)]).insert()
+
+		settings.company = other_company.name
+		settings.vat_accounts = []
+		settings.append("vat_accounts", {"account": get_account(other_company.name)})
+		self.assertRaises(frappe.ValidationError, settings.save)
 
 
 def make_settings(accounts: list):

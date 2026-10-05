@@ -26,8 +26,18 @@ class SouthAfricaVATSettings(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_company_unchanged()
 		self.validate_company_region()
 		self.validate_accounts()
+
+	def validate_company_unchanged(self):
+		# the settings are named after the company and looked up by name
+		if not self.is_new() and self.has_value_changed("company"):
+			frappe.throw(
+				_("Company cannot be changed, create South Africa VAT Settings for {0} instead").format(
+					frappe.bold(self.company)
+				)
+			)
 
 	def validate_company_region(self):
 		if self.company and get_region(self.company) != "South Africa":
