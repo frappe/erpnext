@@ -11,6 +11,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_years, get_last_day, getdate, nowdate
 
 from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+	has_overlapping_period,
 	make_supplier_scorecard,
 )
 
@@ -195,21 +196,7 @@ def make_all_scorecards(docname: str):
 	last_end_date = todays
 
 	while (start_date < todays) and (end_date <= todays):
-		# check to make sure there is no scorecard period already created
-		# (inclusive bounds: a single-day period — supplier created on a month's
-		# last day — must match its own window, else it is re-created every run)
-		scorecards = frappe.get_all(
-			"Supplier Scorecard Period",
-			fields=["name"],
-			filters={
-				"scorecard": docname,
-				"docstatus": 1,
-				"start_date": ["<=", end_date],
-				"end_date": [">=", start_date],
-			},
-			order_by="end_date desc",
-		)
-		if len(scorecards) == 0:
+		if not has_overlapping_period(docname, start_date, end_date):
 			period_card = make_supplier_scorecard(docname, None)
 			period_card.start_date = start_date
 			period_card.end_date = end_date

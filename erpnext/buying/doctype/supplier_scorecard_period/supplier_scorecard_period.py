@@ -7,6 +7,7 @@ import frappe
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import formatdate
 
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
 from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
@@ -45,10 +46,20 @@ class SupplierScorecardPeriod(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_from_to_dates("start_date", "end_date")
+		self.validate_overlapping_period()
 		self.validate_criteria_weights()
 		self.calculate_variables()
 		self.calculate_criteria()
 		self.calculate_score()
+
+	def validate_overlapping_period(self):
+		if has_overlapping_period(self.scorecard, self.start_date, self.end_date):
+			throw(
+				_("Supplier Scorecard {0} already has a submitted period overlapping {1} to {2}").format(
+					self.scorecard, formatdate(self.start_date), formatdate(self.end_date)
+				)
+			)
 
 	def validate_criteria_weights(self):
 		weight = 0
@@ -120,6 +131,20 @@ class SupplierScorecardPeriod(Document):
 					my_eval_statement = my_eval_statement.replace("{" + var.param_name + "}", "0.0")
 
 		return my_eval_statement
+
+
+def has_overlapping_period(scorecard, start_date, end_date):
+	return bool(
+		frappe.db.exists(
+			"Supplier Scorecard Period",
+			{
+				"scorecard": scorecard,
+				"docstatus": 1,
+				"start_date": ["<=", end_date],
+				"end_date": [">=", start_date],
+			},
+		)
+	)
 
 
 def import_string_path(path):
