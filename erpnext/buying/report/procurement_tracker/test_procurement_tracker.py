@@ -4,6 +4,7 @@
 
 from frappe.utils import add_days, nowdate
 
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
 from erpnext.stock.doctype.item.test_item import make_item
@@ -72,3 +73,13 @@ class TestProcurementTracker(ERPNextTestSuite):
 			[(row["item_code"], row["quantity"]) for row in rows],
 			[(item.item_code, item.qty) for item in po.items],
 		)
+
+	def test_actual_cost_adds_up_every_invoice(self):
+		po = create_purchase_order(qty=10, rate=90)
+		for qty in (4, 3):
+			invoice = make_purchase_invoice(po.name)
+			invoice.items[0].qty = qty
+			invoice.submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_cost"], 630)

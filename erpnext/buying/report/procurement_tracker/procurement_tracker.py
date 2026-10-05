@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
@@ -274,12 +275,13 @@ def get_mapped_pi_records():
 		frappe.qb.from_(pi_item)
 		.inner_join(po)
 		.on(pi_item.purchase_order == po.name)
-		.select(pi_item.po_detail, pi_item.base_amount)
+		.select(pi_item.po_detail, Sum(pi_item.base_amount))
 		.where(
 			(pi_item.docstatus == 1)
 			& (po.status.notin(("Closed", "Completed", "Cancelled")))
 			& (pi_item.po_detail.isnotnull())
 		)
+		.groupby(pi_item.po_detail)
 	).run()
 
 	return frappe._dict(pi_records)
