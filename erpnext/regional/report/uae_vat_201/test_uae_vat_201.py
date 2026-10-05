@@ -260,6 +260,16 @@ class TestUaeVat201(ERPNextTestSuite):
 		self.assertEqual(row["amount"], frappe.format(400, "Currency"))
 		self.assertEqual(row["vat_amount"], frappe.format(20, "Currency"))
 
+	def test_uae_vat_201_standard_rated_expenses_exclude_lines_without_vat(self):
+		pi = make_uae_purchase_invoice(qty=10, rate=100)
+		pi.append("items", {**pi.items[0].as_dict(), "name": None, "qty": 5})
+		pi.items[1].item_tax_template = make_zero_vat_template()
+		pi.recoverable_standard_rated_expenses = 50
+		pi.submit()
+
+		self.assertEqual(pi.base_net_total, 1500)
+		self.assertEqual(get_standard_rated_expenses_total({"company": "_Test Company UAE VAT"}), 1000)
+
 
 def set_vat_accounts():
 	if not frappe.db.exists("UAE VAT Settings", "_Test Company UAE VAT"):
@@ -323,6 +333,25 @@ def create_warehouse(warehouse_name, properties=None, company=None):
 		return warehouse.name
 	else:
 		return warehouse_id
+
+
+def make_zero_vat_template():
+	title = "_Test UAE Zero VAT"
+	name = frappe.db.get_value("Item Tax Template", {"title": title, "company": "_Test Company UAE VAT"})
+	if name:
+		return name
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": title,
+				"company": "_Test Company UAE VAT",
+				"taxes": [{"tax_type": "VAT 5% - _TCUV", "tax_rate": 0}],
+			}
+		)
+		.insert()
+		.name
+	)
 
 
 def make_item(item_code, properties=None):

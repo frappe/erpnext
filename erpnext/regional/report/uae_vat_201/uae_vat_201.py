@@ -343,23 +343,45 @@ def get_conditions_join(filters, p):
 
 
 def get_standard_rated_expenses_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
-	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", "!=", 0])
-	query_filters.append(["docstatus", "=", 1])
-	try:
-		return (
-			frappe.db.get_all(
-				"Purchase Invoice",
-				filters=query_filters,
-				fields=[{"SUM": "base_total"}],
-				as_list=True,
-				limit=1,
-			)[0][0]
-			or 0
+	"""Returns the net amount of the Purchase Invoice lines with UAE VAT, on invoices with recoverable VAT."""
+	i = frappe.qb.DocType("Purchase Invoice Item")
+	p = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(i)
+		.inner_join(p)
+		.on(i.parent == p.name)
+		.select(Sum(i.base_net_amount))
+		.where(
+			(p.docstatus == 1)
+			& (p.recoverable_standard_rated_expenses != 0)
+			& i.name.isin(get_purchase_items_with_vat(filters))
 		)
-	except (IndexError, TypeError):
-		return 0
+	)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
+	return query.run()[0][0] or 0
+
+
+def get_purchase_items_with_vat(filters):
+	"""Returns a sub query of the Purchase Invoice Item rows that carry UAE VAT."""
+	d = frappe.qb.DocType("Item Wise Tax Detail")
+	t = frappe.qb.DocType("Purchase Taxes and Charges")
+	uae_vat = frappe.qb.DocType("UAE VAT Account")
+	return (
+		frappe.qb.from_(d)
+		.inner_join(t)
+		.on(d.tax_row == t.name)
+		.select(d.item_row)
+		.where(
+			(d.parenttype == "Purchase Invoice")
+			& (d.amount != 0)
+			& t.account_head.isin(
+				frappe.qb.from_(uae_vat)
+				.select(uae_vat.account)
+				.where(uae_vat.parent == filters.get("company"))
+			)
+		)
+	)
 
 
 def get_standard_rated_expenses_tax(filters):
