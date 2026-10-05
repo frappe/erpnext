@@ -40,6 +40,13 @@ class TestLead(ERPNextTestSuite):
 			contact_doc = frappe.get_doc("Contact", contact)
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
+	def test_lead_converts_to_one_customer_only(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		lead = make_lead()
+		make_customer(lead.name).insert()
+		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
+
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
 

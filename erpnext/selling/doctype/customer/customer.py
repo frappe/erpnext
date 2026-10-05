@@ -190,6 +190,7 @@ class Customer(TransactionBase):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		self.validate_customer_group()
+		self.validate_lead_not_converted()
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
@@ -208,6 +209,18 @@ class Customer(TransactionBase):
 			total = sum(flt(member.allocated_percentage) for member in self.sales_team)
 			if flt(total, self.precision("allocated_percentage", "sales_team")) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
+
+	def validate_lead_not_converted(self):
+		if not (self.is_new() and self.lead_name):
+			return
+
+		if customer := frappe.db.exists("Customer", {"lead_name": self.lead_name}):
+			frappe.throw(
+				_("Lead {0} is already converted to Customer {1}").format(
+					frappe.bold(self.lead_name), get_link_to_form("Customer", customer)
+				),
+				frappe.DuplicateEntryError,
+			)
 
 	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
