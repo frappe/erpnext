@@ -116,8 +116,10 @@ class IssueAnalytics:
 
 		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(self.filters.range, 1)
 
-		if self.filters.range in ["Monthly", "Quarterly"]:
+		if self.filters.range == "Monthly":
 			from_date = from_date.replace(day=1)
+		elif self.filters.range == "Quarterly":
+			from_date = from_date.replace(month=(from_date.month - 1) // 3 * 3 + 1, day=1)
 		elif self.filters.range == "Yearly":
 			from_date = get_fiscal_year(from_date)[1]
 		else:

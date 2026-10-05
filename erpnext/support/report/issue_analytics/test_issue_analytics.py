@@ -126,6 +126,13 @@ class TestIssueAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(self.get_total("2025-12-01", "2026-01-31", "Weekly"), 2)
 
+	def test_quarterly_issue_count_from_mid_quarter(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		for index, opening_date in enumerate(["2026-05-20", "2026-08-10", "2026-11-10"]):
+			make_issue(getdate(opening_date), "__Test Customer", index)
+
+		self.assertEqual(self.get_total("2026-05-15", "2026-12-31", "Quarterly"), 3)
+
 	def get_total(self, from_date, to_date, period_range):
 		filters = {
 			"company": "_Test Company",
