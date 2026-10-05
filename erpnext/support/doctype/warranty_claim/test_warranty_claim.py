@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils.data import today
+from frappe.utils.data import getdate, today
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.support.doctype.warranty_claim.warranty_claim import make_maintenance_visit
@@ -127,3 +127,18 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		self.make_maintenance_visit_for_claim(claim, "Partially Completed")
 
 		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
+
+	def test_reopening_clears_resolution(self):
+		claim = self.make_warranty_claim()
+		claim.status = "Closed"
+		claim.save()
+		claim.db_set("resolution_date", "2020-09-01 10:00:00")
+
+		claim.reload()
+		claim.status = "Open"
+		claim.save()
+		self.assertFalse(claim.resolution_date)
+
+		claim.status = "Closed"
+		claim.save()
+		self.assertEqual(getdate(claim.resolution_date), getdate())
