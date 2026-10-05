@@ -6,7 +6,7 @@ import datetime
 
 import frappe
 from frappe import _
-from frappe.utils import flt, formatdate
+from frappe.utils import cstr, flt, formatdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -262,6 +262,7 @@ def get_actual_details(name, filters):
 				and rgt <= "{cc_rgt}"
 			"""
 
+	company_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 	ac_details = frappe.db.sql(
 		f"""
 			select
@@ -284,6 +285,7 @@ def get_actual_details(name, filters):
 				and gl.is_cancelled = 0
 				and gl.voucher_type != 'Period Closing Voucher'
 				and b.{budget_against} = %s
+				and (gl.finance_book in ('', %s) or gl.finance_book is null)
 				and exists(
 					select
 						name
@@ -297,7 +299,7 @@ def get_actual_details(name, filters):
 					gl.name
 				order by gl.fiscal_year
 		""",
-		(filters.from_fiscal_year, filters.to_fiscal_year, name),
+		(filters.from_fiscal_year, filters.to_fiscal_year, name, cstr(company_finance_book)),
 		as_dict=1,
 	)
 

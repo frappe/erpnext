@@ -54,6 +54,23 @@ class TestBudgetVarianceReport(FrappeTestCase):
 
 		self.assertEqual(self.get_actual(self.run_report(), COST_CENTER), actual)
 
+	def test_entries_of_other_finance_books_are_not_actuals(self):
+		make_large_budget(COST_CENTER)
+		actual = self.get_actual(self.run_report(), COST_CENTER)
+
+		journal_entry = make_journal_entry(ACCOUNT, "_Test Bank - _TC", 7000, cost_center=COST_CENTER, save=False)
+		journal_entry.finance_book = make_finance_book()
+		journal_entry.submit()
+
+		self.assertEqual(self.get_actual(self.run_report(), COST_CENTER), actual)
+
+
+def make_finance_book():
+	finance_book = "_Test Budget Variance Finance Book"
+	if not frappe.db.exists("Finance Book", finance_book):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": finance_book}).insert()
+	return finance_book
+
 
 def make_large_budget(cost_center):
 	return make_budget(
