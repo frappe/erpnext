@@ -956,8 +956,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.items[0].rejected_qty = 3
 		scr.save()
 
-		# consumed_qty should be (accepted_qty * (transfered_qty / qty)) = (5 * (20 / 10)) = 10
-		self.assertEqual(scr.supplied_items[0].consumed_qty, 10)
+		# consumed_qty should be (received_qty * (transfered_qty / qty)) = (8 * (20 / 10)) = 16
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 16)
 
 		# Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")
@@ -2637,6 +2637,40 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.save()
 
 		self.assertRaises(BOMQuantityError, scr.submit)
+
+	def test_transfer_based_backflush_consumes_material_for_rejected_qty(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("Material Transferred for Subcontract")
+
+		item_code = "_Test Subcontracted Rejected Qty FG Item"
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_subcontracted_item(item_code=item_code, raw_materials=[rm_item])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": item_code,
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.to_warehouse = "_Test Warehouse 1 - _TC"
+		ste.save()
+		ste.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "_Test Warehouse 2 - _TC"
+		scr.save()
+
+		self.assertEqual(sum(row.consumed_qty for row in scr.supplied_items), ste.items[0].transfer_qty)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 20})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20})

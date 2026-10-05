@@ -955,7 +955,9 @@ class SubcontractingController(StockController):
 			return transfer_item.qty
 
 		if self.qty_to_be_received.get(key):
-			qty = (flt(item_row.qty) * flt(transfer_item.qty)) / flt(self.qty_to_be_received.get(key))
+			qty = (self.get_qty_for_costing(item_row) * flt(transfer_item.qty)) / flt(
+				self.qty_to_be_received.get(key)
+			)
 			transfer_item.item_details.required_qty = transfer_item.qty
 
 			if transfer_item.serial_no or frappe.get_cached_value(
@@ -1009,7 +1011,7 @@ class SubcontractingController(StockController):
 							row.get(self.subcontract_data.order_field),
 							row.get("bom"),
 						)
-					] -= row.qty
+					] -= self.get_qty_for_costing(row)
 
 	def __set_rate_for_serial_and_batch_bundle(self):
 		if self.doctype != "Subcontracting Receipt":
