@@ -394,8 +394,15 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def set_missing_values(self):
 		self.set_available_qty_for_consumption()
+		self.set_additional_costs_base_amount()
 		self.calculate_additional_costs()
 		self.calculate_items_qty_and_amount()
+
+	def set_additional_costs_base_amount(self):
+		for row in self.get("additional_costs"):
+			row.base_amount = flt(
+				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
+			)
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
