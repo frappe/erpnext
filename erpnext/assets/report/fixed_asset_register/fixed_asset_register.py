@@ -80,7 +80,7 @@ def get_data(filters):
 	assets_record = frappe.get_list("Asset", filters=conditions, fields=fields)
 
 	for asset in assets_record:
-		if assets_linked_to_fb and asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
+		if asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
 			continue
 
 		depreciation_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
@@ -249,7 +249,7 @@ def get_assets_linked_to_fb(filters):
 			(afb.finance_book.isin([cstr(filters.finance_book), ""])) | (afb.finance_book.isnull())
 		)
 
-	assets_linked_to_fb = list(chain(*query.run(as_list=1)))
+	assets_linked_to_fb = set(chain(*query.run(as_list=1)))
 
 	return assets_linked_to_fb
 
@@ -373,7 +373,7 @@ def get_group_by_data(
 	data = []
 
 	for a in assets:
-		if assets_linked_to_fb and a.calculate_depreciation and a.name not in assets_linked_to_fb:
+		if a.calculate_depreciation and a.name not in assets_linked_to_fb:
 			continue
 
 		a["depreciated_amount"] = depreciation_amount_map.get(a["name"], 0.0)
