@@ -172,6 +172,7 @@ class TestTimesheet(FrappeTestCase):
 		sales_invoice.append("timesheets", row)
 		return sales_invoice
 
+	@change_settings("Projects Settings", {"ignore_user_time_overlap": 1})
 	def test_timesheet_time_overlap(self):
 		emp = make_employee("test_employee_6@salary.com")
 
@@ -480,6 +481,42 @@ class TestTimesheet(FrappeTestCase):
 
 		timesheet.time_logs[0].billing_hours = 10
 		self.assertRaises(frappe.UpdateAfterSubmitError, timesheet.save)
+
+	@change_settings("Projects Settings", {"ignore_user_time_overlap": 0})
+	def test_user_time_overlap(self):
+		from_time = now_datetime()
+
+		timesheet = make_timesheet_without_employee(from_time, 3).insert()
+		self.assertEqual(timesheet.user, "Administrator")
+		self.assertRaises(
+			OverlapError, make_timesheet_without_employee(add_to_date(from_time, hours=1), 1).insert
+		)
+
+	def test_patch_sets_the_user_of_older_timesheets(self):
+		from erpnext.patches.v16_0.set_user_on_timesheets import execute
+
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True)
+		timesheet.db_set("user", None)
+
+		without_employee = make_timesheet_without_employee(now_datetime(), 1).insert()
+		without_employee.db_set("user", None)
+
+		execute()
+		self.assertEqual(
+			frappe.db.get_value("Timesheet", timesheet.name, "user"), "test_employee_6@salary.com"
+		)
+		self.assertEqual(frappe.db.get_value("Timesheet", without_employee.name, "user"), "Administrator")
+
+
+def make_timesheet_without_employee(start, hours):
+	return frappe.get_doc(
+		{
+			"doctype": "Timesheet",
+			"company": "_Test Company",
+			"time_logs": [{"from_time": start, "to_time": add_to_date(start, hours=hours)}],
+		}
+	)
 
 
 def make_timesheet(
