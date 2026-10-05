@@ -5,6 +5,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import getdate
 
 from erpnext.buying.report.subcontracted_item_to_be_received.test_subcontracted_item_to_be_received import (
 	get_report_filters,
@@ -81,6 +82,20 @@ class TestSubcontractedItemToBeTransferred(FrappeTestCase):
 
 		data = execute(get_report_filters(sco))[1]
 		self.assertNotIn(sco.name, {row["subcontract_order"] for row in data})
+
+	def test_one_day_range_is_accepted(self):
+		frappe.clear_messages()
+		execute(
+			frappe._dict(
+				{
+					"order_type": "Subcontracting Order",
+					"supplier": "_Test Supplier",
+					"from_date": getdate(),
+					"to_date": getdate(),
+				}
+			)
+		)
+		self.assertFalse(frappe.get_message_log())
 
 
 def transfer_subcontracted_raw_materials(sco):
