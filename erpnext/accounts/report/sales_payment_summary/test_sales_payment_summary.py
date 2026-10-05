@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import (
@@ -239,10 +239,28 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		row = run_report(si.customer)[0]
 		self.assertEqual((row[3], row[4]), (5000, 500))
 
+	def test_journal_entry_payment_on_a_later_day_is_reported_against_the_invoice(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		si = create_sales_invoice_record(customer=customer)
+		si.insert()
+		si.submit()
+		make_journal_entry_receipt(si, posting_date=add_days(today(), 1))
+
+		to_date = add_days(today(), 1)
+		self.assertEqual(run_report(customer, to_date=to_date)[0][5], 10000)
+		detail = run_report(customer, to_date=to_date, payment_detail=1)
+		self.assertEqual([row[5] for row in detail], [0, 10000])
+
 
 def run_report(customer, **filters):
 	filters = frappe._dict(
-		company="_Test Company", from_date=today(), to_date=today(), customer=customer, **filters
+		{
+			"company": "_Test Company",
+			"from_date": today(),
+			"to_date": today(),
+			"customer": customer,
+			**filters,
+		}
 	)
 	return execute(filters)[1]
 
@@ -266,6 +284,30 @@ def make_paid_invoice(customer, **fields):
 	pe.insert()
 	pe.submit()
 	return si
+
+
+def make_journal_entry_receipt(si, posting_date):
+	je = frappe.get_doc(
+		{
+			"doctype": "Journal Entry",
+			"voucher_type": "Cash Entry",
+			"company": si.company,
+			"posting_date": posting_date,
+			"accounts": [
+				{"account": "_Test Cash - _TC", "debit_in_account_currency": si.grand_total},
+				{
+					"account": si.debit_to,
+					"credit_in_account_currency": si.grand_total,
+					"party_type": "Customer",
+					"party": si.customer,
+					"reference_type": "Sales Invoice",
+					"reference_name": si.name,
+				},
+			],
+		}
+	)
+	je.insert()
+	je.submit()
 
 
 def get_filters():

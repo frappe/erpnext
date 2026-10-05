@@ -315,14 +315,17 @@ def get_mode_of_payments(filters):
 			.where(si2.name.isin(invoice_names))
 		)
 
-		# Branch 3: payments via Journal Entry referencing the invoice
+		# Branch 3: payments via Journal Entry referencing the invoice, keyed by the invoice like branch 2
+		si3 = frappe.qb.DocType("Sales Invoice")
 		je = frappe.qb.DocType("Journal Entry")
 		jea = frappe.qb.DocType("Journal Entry Account")
 		branch3 = (
 			frappe.qb.from_(je)
 			.join(jea)
 			.on(je.name == jea.parent)
-			.select(je.owner, je.posting_date, Coalesce(je.voucher_type, "").as_("mode_of_payment"))
+			.join(si3)
+			.on(si3.name == jea.reference_name)
+			.select(si3.owner, si3.posting_date, Coalesce(je.voucher_type, "").as_("mode_of_payment"))
 			.where(je.docstatus == 1)
 			.where(jea.reference_type == "Sales Invoice")
 			.where(jea.reference_name.isin(invoice_names))
@@ -388,7 +391,8 @@ def get_mode_of_payment_details(filters):
 			.groupby(si2.owner, si2.posting_date, mop2)
 		)
 
-		# Branch 3: amounts credited via Journal Entry
+		# Branch 3: amounts credited via Journal Entry, keyed by the invoice like branch 2
+		si3 = frappe.qb.DocType("Sales Invoice")
 		je = frappe.qb.DocType("Journal Entry")
 		jea = frappe.qb.DocType("Journal Entry Account")
 		mop3 = Coalesce(je.voucher_type, "")
@@ -396,13 +400,15 @@ def get_mode_of_payment_details(filters):
 			frappe.qb.from_(je)
 			.join(jea)
 			.on(je.name == jea.parent)
+			.join(si3)
+			.on(si3.name == jea.reference_name)
 			.select(
-				je.owner, je.posting_date, mop3.as_("mode_of_payment"), Sum(jea.credit).as_("paid_amount")
+				si3.owner, si3.posting_date, mop3.as_("mode_of_payment"), Sum(jea.credit).as_("paid_amount")
 			)
 			.where(je.docstatus == 1)
 			.where(jea.reference_type == "Sales Invoice")
 			.where(jea.reference_name.isin(invoice_names))
-			.groupby(je.owner, je.posting_date, mop3)
+			.groupby(si3.owner, si3.posting_date, mop3)
 		)
 
 		# UNION ALL: equal totals from different sources must all be summed
