@@ -278,6 +278,45 @@ class TestShareBalanceReport(ERPNextTestSuite):
 
 		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
 
+	def test_draft_submitted_after_its_shares_come_back_moves_them_out(self):
+		other_holder = create_shareholder("_Test Share Balance Holder 3", COMPANY)
+		transfer = dict(share_type=self.share_type, from_no=1, to_no=40, no_of_shares=40, rate=10)
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-01",
+		)
+		draft = create_share_transfer(
+			submit=False,
+			transfer_type="Transfer",
+			from_shareholder=self.shareholder,
+			to_shareholder=create_shareholder("_Test Share Balance Holder 2", COMPANY),
+			date="2026-06-10",
+			**transfer,
+		)
+		create_share_transfer(
+			transfer_type="Transfer",
+			from_shareholder=self.shareholder,
+			to_shareholder=other_holder,
+			date="2026-06-05",
+			**transfer,
+		)
+		create_share_transfer(
+			transfer_type="Transfer",
+			from_shareholder=other_holder,
+			to_shareholder=self.shareholder,
+			date="2026-06-06",
+			**transfer,
+		)
+		draft.submit()
+
+		self.assertEqual(self.get_row(date="2026-06-15")[2:], [60, 10, 600])
+
 	def get_row(self, date, shareholder=None):
 		filters = frappe._dict(
 			{"date": date, "company": COMPANY, "shareholder": shareholder or self.shareholder}
@@ -299,10 +338,13 @@ def create_shareholder(title, company):
 	return shareholder.name
 
 
-def create_share_transfer(**kwargs):
+def create_share_transfer(submit=True, **kwargs):
 	kwargs.setdefault("company", COMPANY)
 	kwargs.setdefault("asset_account", "Cash - _TC")
 	kwargs.setdefault("equity_or_liability_account", "Creditors - _TC")
 	transfer = frappe.get_doc({"doctype": "Share Transfer", **kwargs})
-	transfer.submit()
+	if submit:
+		transfer.submit()
+	else:
+		transfer.insert()
 	return transfer
