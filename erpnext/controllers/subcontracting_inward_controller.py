@@ -743,7 +743,7 @@ class SubcontractingInwardController:
 					),
 				)
 				scio_rm.flags.skip_docstatus_validation = True
-				scio_rm.insert()
+				scio_rm.insert(ignore_permissions=True)
 				scio_rm.submit()
 				next_received_idx += 1
 				item.db_set("scio_detail", scio_rm.name)
@@ -909,7 +909,7 @@ class SubcontractingInwardController:
 					is_additional_item=True,
 				)
 				doc.flags.skip_docstatus_validation = True
-				doc.insert()
+				doc.insert(ignore_permissions=True)
 				doc.submit()
 				next_received_idx += 1
 
@@ -1000,7 +1000,7 @@ class SubcontractingInwardController:
 						),
 					)
 					doc.flags.skip_docstatus_validation = True
-					doc.insert()
+					doc.insert(ignore_permissions=True)
 					doc.submit()
 					next_secondary_idx += 1
 
