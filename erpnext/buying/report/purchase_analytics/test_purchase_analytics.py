@@ -149,3 +149,26 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 		opening.submit()
 
 		self.assertAlmostEqual(self._rows(filters)["_Test Item"]["total"] - base_total, 200, places=2)
+
+	def test_quantity_in_stock_uom_for_every_tree(self):
+		entities = {
+			"Supplier": SUPPLIER,
+			"Supplier Group": SUPPLIER_GROUP,
+			"Item": "_Test Item",
+			"Item Group": "_Test Item Group",
+		}
+		filters = {tree: self._filters(tree_type=tree, value_quantity="Quantity") for tree in entities}
+		base = {
+			tree: flt(self._rows(filters[tree]).get(entity, {}).get("total"))
+			for tree, entity in entities.items()
+		}
+
+		po = create_purchase_order(
+			company=COMPANY, supplier=SUPPLIER, qty=2, transaction_date="2019-04-10", do_not_save=1
+		)
+		po.items[0].uom = "_Test UOM 1"
+		po.items[0].conversion_factor = 10
+		po.submit()
+
+		for tree, entity in entities.items():
+			self.assertAlmostEqual(self._rows(filters[tree])[entity]["total"] - base[tree], 20, places=2)
