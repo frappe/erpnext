@@ -7,6 +7,19 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_for_items_and_warehouses as get_reserved_stock_details,
 )
 
+QTY_FIELDS = (
+	"projected_qty",
+	"reserved_qty",
+	"reserved_qty_for_production",
+	"reserved_qty_for_sub_contract",
+	"reserved_qty_for_production_plan",
+	"reserved_stock",
+	"ordered_qty",
+	"indented_qty",
+	"planned_qty",
+	"actual_qty",
+)
+
 
 @frappe.whitelist()
 def make_stock_entry(
@@ -58,6 +71,12 @@ def get_data(
 	item_code=None, warehouse=None, item_group=None, start=0, sort_by="actual_qty", sort_order="desc"
 ):
 	"""Return data to render the item dashboard"""
+	if not frappe.has_permission("Bin", "read"):
+		return []
+
+	if sort_by not in QTY_FIELDS or sort_order not in ("asc", "desc"):
+		frappe.throw(_("Invalid sort order"))
+
 	filters = []
 	if item_code:
 		filters.append(["item_code", "=", item_code])
@@ -94,20 +113,9 @@ def get_data(
 			"actual_qty",
 			"valuation_rate",
 		],
-		or_filters={
-			"projected_qty": ["!=", 0],
-			"reserved_qty": ["!=", 0],
-			"reserved_qty_for_production": ["!=", 0],
-			"reserved_qty_for_sub_contract": ["!=", 0],
-			"reserved_qty_for_production_plan": ["!=", 0],
-			"reserved_stock": ["!=", 0],
-			"ordered_qty": ["!=", 0],
-			"indented_qty": ["!=", 0],
-			"planned_qty": ["!=", 0],
-			"actual_qty": ["!=", 0],
-		},
+		or_filters={field: ["!=", 0] for field in QTY_FIELDS},
 		filters=filters,
-		order_by=sort_by + " " + sort_order,
+		order_by=f"{sort_by} {sort_order}",
 		limit_start=start,
 		limit_page_length=21,
 	)
