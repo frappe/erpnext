@@ -89,8 +89,8 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		first_tax_description = "Tax Description A"
 		second_tax_description = "Tax Description B"
-		first_tax_amount_field = f"{frappe.scrub(first_tax_description)}_amount"
-		second_tax_amount_field = f"{frappe.scrub(second_tax_description)}_amount"
+		first_tax_amount_field = f"{frappe.scrub('_Test Account VAT - _TC')}_amount"
+		second_tax_amount_field = f"{frappe.scrub('_Test Account Service Tax - _TC')}_amount"
 
 		self.create_sales_invoice(
 			item=first_item,
@@ -147,6 +147,21 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertEqual(self.get_grand_total_row(data)["total"], 0)
 		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 0)
+
+	def test_tax_columns_are_split_by_account(self):
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "_Test Account VAT - _TC", "description": "GST", "rate": 5},
+				{"account_head": "_Test Account Service Tax - _TC", "description": "GST", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		vat, service_tax = (frappe.scrub(f"_Test Account {name} - _TC") for name in ("VAT", "Service Tax"))
+		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (5, 5))
+		self.assertEqual((row[f"{service_tax}_rate"], row[f"{service_tax}_amount"]), (2, 2))
 
 	def get_grouped_data(self, **filters):
 		filters = frappe._dict(

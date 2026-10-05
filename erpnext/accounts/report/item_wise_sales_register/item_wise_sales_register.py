@@ -575,22 +575,18 @@ def get_tax_accounts(
 	precision = frappe.get_precision(tax_doctype, "tax_amount", currency=company_currency) or 2
 	tax_columns = {}
 	itemised_tax = {}
-	scrubbed_description_map = {}
 
 	for row in tax_details:
-		description = handle_html(row.description) or row.account_head
-		scrubbed_description = scrubbed_description_map.get(description)
-		if not scrubbed_description:
-			scrubbed_description = frappe.scrub(description)
-			scrubbed_description_map[description] = scrubbed_description
+		# keyed by account, as different accounts can share a description
+		account = row.account_head or handle_html(row.description)
+		column_key = frappe.scrub(account)
 
-		if scrubbed_description not in tax_columns and row.amount:
-			# as description is text editor earlier and markup can break the column convention in reports
-			tax_columns[scrubbed_description] = description
+		if column_key not in tax_columns and row.amount:
+			tax_columns[column_key] = account
 
 		rate = "NA" if row.rate == 0 else row.rate
 		itemised_tax.setdefault(row.item_row, {}).setdefault(
-			scrubbed_description,
+			column_key,
 			frappe._dict(
 				{
 					"tax_rate": rate,
@@ -600,16 +596,16 @@ def get_tax_accounts(
 			),
 		)
 
-		itemised_tax[row.item_row][scrubbed_description].tax_amount += flt(row.amount, precision)
+		itemised_tax[row.item_row][column_key].tax_amount += flt(row.amount, precision)
 
 	tax_columns_list = list(tax_columns.keys())
 	tax_columns_list.sort()
-	for scrubbed_desc in tax_columns_list:
-		desc = tax_columns[scrubbed_desc]
+	for column_key in tax_columns_list:
+		account = tax_columns[column_key]
 		columns.append(
 			{
-				"label": _(desc + " Rate"),
-				"fieldname": f"{scrubbed_desc}_rate",
+				"label": _(account + " Rate"),
+				"fieldname": f"{column_key}_rate",
 				"fieldtype": "Float",
 				"width": 100,
 			}
@@ -617,8 +613,8 @@ def get_tax_accounts(
 
 		columns.append(
 			{
-				"label": _(desc + " Amount"),
-				"fieldname": f"{scrubbed_desc}_amount",
+				"label": _(account + " Amount"),
+				"fieldname": f"{column_key}_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 100,
