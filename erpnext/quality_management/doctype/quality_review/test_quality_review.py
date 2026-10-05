@@ -6,7 +6,7 @@ import frappe
 from erpnext.tests.utils import ERPNextTestSuite
 
 from ..quality_goal.test_quality_goal import get_quality_goal
-from .quality_review import review
+from .quality_review import create_review, review
 
 
 class TestQualityReview(ERPNextTestSuite):
@@ -20,3 +20,11 @@ class TestQualityReview(ERPNextTestSuite):
 		quality_review.delete()
 
 		quality_goal.delete()
+
+	def test_scheduled_review_is_open(self):
+		quality_goal = get_quality_goal()
+		create_review(quality_goal.name)
+
+		quality_review = frappe.get_doc("Quality Review", {"goal": quality_goal.name})
+		self.assertEqual(quality_review.status, "Open")
+		self.assertEqual(quality_review.reviews[0].status, "Open")

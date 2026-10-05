@@ -31,13 +31,13 @@ class QualityReview(Document):
 		# fetch targets from goal
 		if not self.reviews:
 			for d in frappe.get_doc("Quality Goal", self.goal).objectives:
-				self.append("reviews", dict(objective=d.objective, target=d.target, uom=d.uom))
+				self.append("reviews", dict(objective=d.objective, target=d.target, uom=d.uom, status="Open"))
 
 		self.set_status()
 
 	def set_status(self):
 		# if any child item is failed, fail the parent
-		if not len(self.reviews or []) or any([d.status == "Open" for d in self.reviews]):
+		if not self.reviews or any(d.status not in ("Passed", "Failed") for d in self.reviews):
 			self.status = "Open"
 		elif any([d.status == "Failed" for d in self.reviews]):
 			self.status = "Failed"
