@@ -44,6 +44,8 @@ def get_data(filters):
 			sq.currency,
 			sq_item.stock_qty,
 			sq_item.amount,
+			sq_item.rate,
+			sq_item.conversion_factor,
 			sq_item.base_rate,
 			sq_item.base_amount,
 			sq.price_list_currency,
@@ -130,8 +132,8 @@ def prepare_data(supplier_quotation_data, filters):
 			"valid_till": data.get("valid_till"),
 			"lead_time_days": data.get("lead_time_days"),
 		}
-		row["price_per_unit"] = flt(row["price"]) / (flt(data.get("stock_qty")) or 1)
-		row["base_price_per_unit"] = flt(row["base_amount"]) / (flt(data.get("stock_qty")) or 1)
+		row["price_per_unit"] = get_price_per_stock_unit(row["price"], data.get("rate"), data)
+		row["base_price_per_unit"] = get_price_per_stock_unit(row["base_amount"], row["base_rate"], data)
 
 		# map for report view of form {'supplier1'/'item1':[{},{},...]}
 		group_wise_map[group].append(row)
@@ -172,6 +174,12 @@ def prepare_data(supplier_quotation_data, filters):
 		chart_data = prepare_chart_data(suppliers, qty_list, supplier_qty_price_map, company_currency)
 
 	return out, chart_data
+
+
+def get_price_per_stock_unit(amount, rate, data):
+	if flt(data.get("stock_qty")):
+		return flt(amount) / flt(data.get("stock_qty"))
+	return flt(rate) / (flt(data.get("conversion_factor")) or 1)
 
 
 def get_order_status(status):
