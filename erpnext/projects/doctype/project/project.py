@@ -154,7 +154,9 @@ class Project(Document):
 		return self.update_if_holiday(self.end_date)
 
 	def update_if_holiday(self, date):
-		holiday_list = self.holiday_list or get_holiday_list(self.company)
+		holiday_list = self.holiday_list or frappe.get_cached_value(
+			"Company", self.company, "default_holiday_list"
+		)
 		while is_holiday(holiday_list, date):
 			date = add_days(date, 1)
 		return date

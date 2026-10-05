@@ -177,6 +177,20 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(len(tasks), 2)
 
+	def test_project_from_template_without_holiday_list(self):
+		template = make_project_template("_Test Template Without Holiday List")
+		self.assertFalse(frappe.db.get_value("Company", "Wind Power LLC", "default_holiday_list"))
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Template Without Holiday List {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=nowdate(),
+			company="Wind Power LLC",
+		).insert()
+
+		self.assertEqual(frappe.db.count("Task", {"project": project.name}), len(template.tasks))
+
 	def test_deleted_template_tasks_are_not_recreated_on_save(self):
 		template = make_project_template("_Test Template Tasks Not Recreated")
 		project = get_project(
