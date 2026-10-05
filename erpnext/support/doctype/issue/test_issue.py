@@ -383,6 +383,16 @@ class TestIssue(TestSetUp):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_update_agreement_status_on_custom_status(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			update_agreement_status_on_custom_status,
+		)
+
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		issue.first_responded_on = get_datetime("2019-03-04 13:00")
+		update_agreement_status_on_custom_status(issue)
+		self.assertEqual(issue.agreement_status, "Resolution Due")
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

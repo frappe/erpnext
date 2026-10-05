@@ -789,27 +789,6 @@ def set_resolution_time(doc):
 	doc.user_resolution_time = resolution_time_in_secs - total_pending_time
 
 
-def change_service_level_agreement_and_priority(self):
-	if (
-		self.service_level_agreement
-		and frappe.db.exists("Issue", self.name)
-		and frappe.db.get_single_value("Support Settings", "track_service_level_agreement")
-	):
-		if self.priority != frappe.db.get_value("Issue", self.name, "priority"):
-			self.set_response_and_resolution_time(
-				priority=self.priority, service_level_agreement=self.service_level_agreement
-			)
-			frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
-
-		if self.service_level_agreement != frappe.db.get_value("Issue", self.name, "service_level_agreement"):
-			self.set_response_and_resolution_time(
-				priority=self.priority, service_level_agreement=self.service_level_agreement
-			)
-			frappe.msgprint(
-				_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement)
-			)
-
-
 def get_response_and_resolution_duration(doc):
 	sla = frappe.get_doc("Service Level Agreement", doc.service_level_agreement)
 	priority = sla.get_service_level_agreement_priority(doc.priority)
@@ -1019,7 +998,10 @@ def get_service_level_agreement_fields(doctype: str):
 
 def update_agreement_status_on_custom_status(doc):
 	# Update Agreement Fulfilled status using Custom Scripts for Custom Status
-	update_agreement_status(doc)
+	apply_sla_for_resolution = frappe.db.get_value(
+		"Service Level Agreement", doc.service_level_agreement, "apply_sla_for_resolution"
+	)
+	update_agreement_status(doc, apply_sla_for_resolution)
 
 
 def update_agreement_status(doc, apply_sla_for_resolution):
