@@ -113,6 +113,24 @@ class TestIssueAnalytics(ERPNextTestSuite):
 		self.assertEqual(expected_data, report[1])  # rows
 		self.assertEqual(len(report[0]), 4)  # cols
 
+	def test_issue_count_over_a_long_weekly_range(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2027-02-15"), "__Test Customer", 1)
+
+		self.assertEqual(self.get_total("2026-01-01", "2027-03-31", "Weekly"), 1)
+
+	def get_total(self, from_date, to_date, period_range):
+		filters = {
+			"company": "_Test Company",
+			"based_on": "Customer",
+			"customer": "__Test Customer",
+			"from_date": from_date,
+			"to_date": to_date,
+			"range": period_range,
+		}
+		rows = execute(filters)[1]
+		return sum(row["total"] for row in rows)
+
 
 def create_issue_types():
 	for entry in ["Bug", "Service Request", "Discomfort"]:

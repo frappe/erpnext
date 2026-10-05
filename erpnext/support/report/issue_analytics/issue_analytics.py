@@ -123,7 +123,7 @@ class IssueAnalytics:
 			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
 
 		self.periodic_daterange = []
-		for _dummy in range(1, 53):
+		while True:
 			if self.filters.range == "Weekly":
 				period_end_date = add_days(from_date, 6)
 			else:
