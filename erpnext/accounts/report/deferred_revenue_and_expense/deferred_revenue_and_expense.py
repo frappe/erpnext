@@ -159,6 +159,7 @@ class Deferred_Item:
 				"Date Range",
 				"Monthly",
 				company=self.filters.company,
+				ignore_fiscal_year=True,
 			)
 
 			for period in self.estimate_for_period_list:
