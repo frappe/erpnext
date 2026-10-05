@@ -60,6 +60,15 @@ class TestProspect(unittest.TestCase):
 		prospect.reload()
 		self.assertEqual(prospect.leads, [])
 
+	def test_lead_can_be_in_one_prospect_only_once(self):
+		lead = make_lead()
+		prospect = make_prospect()
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		self.assertRaises(frappe.ValidationError, add_lead_to_prospect, lead.name, prospect.name)
+		other = make_prospect()
+		self.assertRaises(frappe.ValidationError, add_lead_to_prospect, lead.name, other.name)
+
 
 def make_prospect(**args):
 	args = frappe._dict(args)
