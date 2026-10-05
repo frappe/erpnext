@@ -592,3 +592,7 @@ class TestAppointment(ERPNextTestSuite):
 			customer_email="after_cancellation@example.com", scheduled_time=slot
 		)
 		self.assertTrue(frappe.db.exists("Appointment", after_cancellation.name))
+
+		# reopening the closed one must not double-book the slot it gave away
+		first.status = "Open"
+		self.assertRaisesRegex(frappe.ValidationError, "Time slot is not available", first.save)

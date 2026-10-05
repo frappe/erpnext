@@ -49,8 +49,10 @@ class Appointment(Document):
 		if self.has_value_changed("scheduled_time"):
 			self.validate_schedule()
 
-		# unverified bookings hold no capacity, so it is checked again on verification
-		if self.has_value_changed("scheduled_time") or self.has_value_changed("email_verified"):
+		# unverified and closed appointments hold no capacity: check it again when they open
+		if self.has_value_changed("scheduled_time") or (
+			self.status == "Open" and self.has_value_changed("status")
+		):
 			self.validate_available_time_slot()
 
 	def validate_schedule(self):
