@@ -140,6 +140,7 @@ def get_actual_transactions(dimension_name, filters):
 			& (gle.fiscal_year >= filters.from_fiscal_year)
 			& (gle.fiscal_year <= filters.to_fiscal_year)
 			& (gle.is_cancelled == 0)
+			& (gle.voucher_type != "Period Closing Voucher")
 			& (budget[budget_against] == dimension_name)
 		)
 		# budget[budget_against] is selected from the Budget table, which is not functionally

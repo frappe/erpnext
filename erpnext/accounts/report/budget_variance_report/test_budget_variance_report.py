@@ -13,6 +13,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 ACCOUNT = "_Test Account Cost for Goods Sold - _TC"
 COST_CENTER = "_Test Cost Center - _TC"
 COST_CENTER_2 = "_Test Cost Center 2 - _TC"
+PAST_FISCAL_YEAR = "_Test Fiscal Year 2025"
 
 
 class TestBudgetVarianceReport(ERPNextTestSuite):
@@ -115,3 +116,37 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 		# a dimension without any budget produces no report rows
 		data = self.run_report(budget_against_filter=["_Test Write Off Cost Center - _TC"])
 		self.assertEqual(data, [])
+
+	def test_period_closing_entries_are_not_actuals(self):
+		self.fy = PAST_FISCAL_YEAR
+		make_past_budget(COST_CENTER)
+		make_journal_entry(
+			ACCOUNT, "_Test Bank - _TC", 5000, cost_center=COST_CENTER, posting_date="2025-05-10", submit=True
+		)
+		actual = self.report_row(self.run_report(), COST_CENTER)[self.field("Actual")]
+
+		closing = make_journal_entry(
+			"_Test Bank - _TC",
+			ACCOUNT,
+			actual,
+			cost_center=COST_CENTER,
+			posting_date="2025-12-31",
+			submit=True,
+		)
+		gl_entry = frappe.qb.DocType("GL Entry")
+		frappe.qb.update(gl_entry).set(gl_entry.voucher_type, "Period Closing Voucher").where(
+			gl_entry.voucher_no == closing.name
+		).run()
+
+		self.assertEqual(self.report_row(self.run_report(), COST_CENTER)[self.field("Actual")], actual)
+
+
+def make_past_budget(cost_center):
+	return make_budget(
+		budget_against="Cost Center",
+		cost_center=cost_center,
+		budget_amount=10000000,
+		from_fiscal_year=PAST_FISCAL_YEAR,
+		to_fiscal_year=PAST_FISCAL_YEAR,
+		submit_budget=1,
+	)
