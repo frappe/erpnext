@@ -237,7 +237,7 @@ class MaintenanceVisit(TransactionBase):
 					wc_doc.update(
 						{
 							"resolution_date": mntc_date,
-							"resolved_by": service_person,
+							"resolved_by": get_user_of_sales_person(service_person),
 							"resolution_details": work_done,
 							"status": status,
 						}
@@ -282,6 +282,12 @@ class MaintenanceVisit(TransactionBase):
 
 	def on_update(self):
 		pass
+
+
+def get_user_of_sales_person(sales_person: str | None) -> str | None:
+	"""Resolved By on a Warranty Claim is a User; a Sales Person maps to one through its Employee."""
+	employee = sales_person and frappe.db.get_value("Sales Person", sales_person, "employee")
+	return frappe.db.get_value("Employee", employee, "user_id") if employee else None
 
 
 def was_delivered_to(serial_no: str, item_code: str, customer: str) -> bool:
