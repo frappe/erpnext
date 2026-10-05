@@ -142,6 +142,8 @@ class MaintenanceVisit(TransactionBase):
 		if not self.maintenance_schedule:
 			for d in self.get("purposes"):
 				if d.prevdoc_docname and d.prevdoc_doctype == "Warranty Claim":
+					if flag == 1 and self.is_superseded_by_completed_visit(d.prevdoc_docname):
+						continue
 					if flag == 1:
 						mntc_date = self.mntc_date
 						service_person = d.service_person
@@ -192,6 +194,29 @@ class MaintenanceVisit(TransactionBase):
 					)
 
 					wc_doc.db_update()
+
+	def is_superseded_by_completed_visit(self, warranty_claim: str) -> bool:
+		"""A visit submitted after the claim was fully completed must not reopen it."""
+		if self.completion_status == "Fully Completed":
+			return False
+
+		mv = frappe.qb.DocType("Maintenance Visit")
+		mvp = frappe.qb.DocType("Maintenance Visit Purpose")
+		completed_visit = (
+			frappe.qb.from_(mv)
+			.inner_join(mvp)
+			.on(mvp.parent == mv.name)
+			.select(mv.name)
+			.where(
+				(mvp.prevdoc_docname == warranty_claim)
+				& (mv.name != self.name)
+				& (mv.docstatus == 1)
+				& (mv.completion_status == "Fully Completed")
+			)
+			.limit(1)
+			.run()
+		)
+		return bool(completed_visit)
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ Warranty Claim"""
