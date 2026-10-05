@@ -93,6 +93,7 @@ class AssetCapitalization(StockController):
 		self.validate_target_asset()
 		self.validate_consumed_stock_item()
 		self.validate_consumed_asset_item()
+		self.validate_duplicate_consumed_assets()
 		self.validate_service_item()
 		self.set_warehouse_details()
 		self.set_asset_values()
@@ -293,6 +294,13 @@ class AssetCapitalization(StockController):
 							d.idx, asset.name, self.company
 						)
 					)
+
+	def validate_duplicate_consumed_assets(self):
+		consumed_assets = set()
+		for d in self.asset_items:
+			if d.asset in consumed_assets:
+				frappe.throw(_("Row #{0}: Consumed Asset {1} is added more than once").format(d.idx, d.asset))
+			consumed_assets.add(d.asset)
 
 	def validate_service_item(self):
 		for d in self.service_items:

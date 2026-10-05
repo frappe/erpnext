@@ -494,6 +494,16 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, asset_capitalization.cancel)
 		self.assertEqual(target_asset.db_get("net_purchase_amount"), 500)
 
+	def test_consumed_asset_cannot_be_added_twice(self):
+		consumed_asset = create_asset(submit=1, warehouse="Stores - _TC")
+		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+		asset_capitalization = create_asset_capitalization(
+			target_asset=target_asset.name, consumed_asset=consumed_asset.name
+		)
+		asset_capitalization.append("asset_items", {"asset": consumed_asset.name})
+
+		self.assertRaises(frappe.ValidationError, asset_capitalization.save)
+
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
