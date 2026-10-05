@@ -555,6 +555,21 @@ class TestFirstResponseTime(TestSetUp):
 		)
 		self.assertEqual(issue.first_response_time, 1.0)
 
+	def test_first_response_time_on_same_day_of_a_later_month(self):
+		"""
+		Test frt when the first response falls on the same day of the month as the issue creation.
+		"""
+		issue = create_issue_and_communication(
+			get_datetime("04-01-2019 11:00"), get_datetime("05-01-2019 12:00")
+		)
+		self.assertEqual(issue.first_response_time, 637200)
+
+		# response on a Saturday, which has no working hours
+		issue = create_issue_and_communication(
+			get_datetime("04-01-2019 11:00"), get_datetime("06-01-2019 11:00")
+		)
+		self.assertEqual(issue.first_response_time, 1292400)
+
 	def _get_no_perm_user(self):
 		email = "test_no_issue_perm@example.com"
 		if not frappe.db.exists("User", email):
