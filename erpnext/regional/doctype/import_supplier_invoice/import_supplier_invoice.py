@@ -299,11 +299,11 @@ def create_supplier(supplier_group, args):
 			["Dynamic Link", "parenttype", "=", "Contact"],
 		]
 
-		if not frappe.get_list("Contact", filters):
+		if not frappe.get_all("Contact", filters):
 			new_contact = frappe.new_doc("Contact")
 			new_contact.first_name = args.supplier[:30]
 			new_contact.append("links", {"link_doctype": "Supplier", "link_name": existing_supplier_name})
-			new_contact.insert(ignore_mandatory=True)
+			new_contact.insert(ignore_mandatory=True, ignore_permissions=True)
 
 		return existing_supplier_name
 	else:
@@ -313,13 +313,15 @@ def create_supplier(supplier_group, args):
 		new_supplier.tax_id = args.tax_id
 		new_supplier.fiscal_code = args.fiscal_code
 		new_supplier.fiscal_regime = args.fiscal_regime
-		new_supplier.insert(set_name=get_unique_supplier_name(new_supplier.supplier_name))
+		new_supplier.insert(
+			set_name=get_unique_supplier_name(new_supplier.supplier_name), ignore_permissions=True
+		)
 
 		new_contact = frappe.new_doc("Contact")
 		new_contact.first_name = args.supplier[:30]
 		new_contact.append("links", {"link_doctype": "Supplier", "link_name": new_supplier.name})
 
-		new_contact.insert(ignore_mandatory=True)
+		new_contact.insert(ignore_mandatory=True, ignore_permissions=True)
 
 		return new_supplier.name
 
@@ -338,7 +340,7 @@ def create_address(supplier_name, args):
 		["Dynamic Link", "parenttype", "=", "Address"],
 	]
 
-	existing_address = frappe.get_list("Address", filters)
+	existing_address = frappe.get_all("Address", filters)
 
 	if args.address_line1:
 		new_address_doc = frappe.new_doc("Address")
@@ -363,7 +365,7 @@ def create_address(supplier_name, args):
 
 		new_address_doc.append("links", {"link_doctype": "Supplier", "link_name": supplier_name})
 		new_address_doc.address_type = "Billing"
-		new_address_doc.insert(ignore_mandatory=True)
+		new_address_doc.insert(ignore_mandatory=True, ignore_permissions=True)
 		return new_address_doc.name
 	else:
 		return None
@@ -451,5 +453,5 @@ def create_uom(uom):
 	else:
 		new_uom = frappe.new_doc("UOM")
 		new_uom.uom_name = uom
-		new_uom.save()
+		new_uom.insert(ignore_permissions=True)
 		return new_uom.uom_name
