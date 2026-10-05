@@ -1,9 +1,12 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, getdate, today
 
+from erpnext.crm.doctype.email_campaign.email_campaign import send_email_to_leads_or_contacts
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -37,6 +40,30 @@ class TestEmailCampaign(ERPNextTestSuite):
 		doc.campaign_name = campaign_name
 		doc.start_date = start_date or today()
 		return doc
+
+	def make_lead(self):
+		email = f"_test_ec_{frappe.generate_hash(length=6)}@example.com"
+		return frappe.get_doc({"doctype": "Lead", "lead_name": "_Test EC Lead", "email_id": email}).insert()
+
+	def make_lead_email_campaign(self, lead, schedules, start_date=None):
+		doc = self.make_email_campaign(self.make_campaign(schedules).name, start_date)
+		doc.email_campaign_for = "Lead"
+		doc.recipient = lead.name
+		return doc.insert()
+
+	def send_campaign_mails(self, recipient_email):
+		with patch("frappe.sendmail") as sendmail:
+			send_email_to_leads_or_contacts()
+		return [c.kwargs for c in sendmail.call_args_list if recipient_email in c.kwargs["recipients"]]
+
+	def test_campaign_mail_carries_an_unsubscribe_link(self):
+		lead = self.make_lead()
+		email_campaign = self.make_lead_email_campaign(lead, schedules=[0])
+
+		(mail,) = self.send_campaign_mails(lead.email_id)
+		self.assertEqual(mail["reference_doctype"], "Email Campaign")
+		self.assertEqual(mail["reference_name"], email_campaign.name)
+		self.assertTrue(mail["unsubscribe_message"])
 
 	def test_start_date_cannot_be_in_the_past(self):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
