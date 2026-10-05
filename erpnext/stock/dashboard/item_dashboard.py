@@ -8,6 +8,17 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 
 
 @frappe.whitelist()
+def get_warehouse_company(warehouse: str) -> str | None:
+	"""Return the warehouse's company, or None if the user cannot access the warehouse"""
+	if not frappe.db.exists("Warehouse", warehouse) or not frappe.has_permission(
+		"Warehouse", "select", doc=warehouse
+	):
+		return None
+
+	return frappe.get_cached_value("Warehouse", warehouse, "company")
+
+
+@frappe.whitelist()
 def get_data(
 	item_code=None, warehouse=None, item_group=None, start=0, sort_by="actual_qty", sort_order="desc"
 ):

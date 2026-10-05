@@ -330,13 +330,12 @@ erpnext.stock.with_warehouse_company = function (warehouse, callback) {
 			return;
 		}
 
-		// best-effort: users without Warehouse read access still get the Stock Entry
-		// with the default company instead of being blocked
+		// returns null instead of throwing when the user cannot access the warehouse,
+		// so the Stock Entry still opens with the default company
 		frappe.call({
-			method: "frappe.client.get_value",
-			args: { doctype: "Warehouse", filters: warehouse, fieldname: "company" },
-			silent: true,
-			callback: (r) => callback(r.message?.company),
+			method: "erpnext.stock.dashboard.item_dashboard.get_warehouse_company",
+			args: { warehouse },
+			callback: (r) => callback(r.message),
 			error: () => callback(null),
 		});
 	});
