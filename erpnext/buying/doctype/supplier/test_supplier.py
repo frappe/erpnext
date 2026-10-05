@@ -145,6 +145,10 @@ class TestSupplier(ERPNextTestSuite):
 		supplier.supplier_primary_contact = contact.name
 		supplier.save()
 
+	def test_party_account_must_be_payable(self):
+		self.assertRaises(frappe.ValidationError, create_supplier, party_account="Debtors - _TC")
+		create_supplier(party_account="Creditors - _TC")
+
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType
 		supplier = frappe.get_doc("Supplier", "_Test Supplier with Country")
