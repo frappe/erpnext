@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Concat_ws, Date, NullIf
+from frappe.utils.nestedset import get_descendants_of
 
 
 def execute(filters=None):
@@ -108,7 +109,8 @@ def get_data(filters):
 	)
 
 	if filters.get("territory"):
-		query = query.where(lead.territory == filters.get("territory"))
+		territories = [filters.territory, *get_descendants_of("Territory", filters.territory)]
+		query = query.where(lead.territory.isin(territories))
 
 	if filters.get("status"):
 		query = query.where(lead.status == filters.get("status"))
