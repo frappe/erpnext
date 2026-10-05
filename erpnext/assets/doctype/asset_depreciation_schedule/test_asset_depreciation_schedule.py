@@ -1212,20 +1212,39 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		self.assertEqual(sum(d.depreciation_amount for d in schedule if not d.journal_entry), 700)
 		self.assertEqual(schedule[-1].accumulated_depreciation_amount, 1100)
 
+	def test_manual_schedule_rows_are_validated(self):
+		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
+
+		def edit_schedule(second_row_amount, third_row_amount):
+			schedule = get_asset_depr_schedule_doc(asset.name, "Draft")
+			schedule.depreciation_schedule[1].depreciation_amount = second_row_amount
+			schedule.depreciation_schedule[2].depreciation_amount = third_row_amount
+			schedule.save()
+			return schedule
+
+		self.assertRaises(frappe.ValidationError, edit_schedule, -100, 300)
+		self.assertRaises(frappe.ValidationError, edit_schedule, 150, 100)
+
+		schedule = edit_schedule(150, 50)
+		self.assertEqual(
+			[row.accumulated_depreciation_amount for row in schedule.depreciation_schedule[:3]],
+			[100, 250, 300],
+		)
+
 
 def create_monthly_asset(**args):
-	return create_asset(
-		item_code="Macbook Pro",
-		net_purchase_amount=1200,
-		calculate_depreciation=1,
-		depreciation_method="Straight Line",
-		available_for_use_date="2023-01-01",
-		depreciation_start_date="2023-01-31",
-		frequency_of_depreciation=1,
-		total_number_of_depreciations=12,
-		submit=1,
-		**args,
-	)
+	defaults = {
+		"item_code": "Macbook Pro",
+		"net_purchase_amount": 1200,
+		"calculate_depreciation": 1,
+		"depreciation_method": "Straight Line",
+		"available_for_use_date": "2023-01-01",
+		"depreciation_start_date": "2023-01-31",
+		"frequency_of_depreciation": 1,
+		"total_number_of_depreciations": 12,
+		"submit": 1,
+	}
+	return create_asset(**{**defaults, **args})
 
 
 def cancel_depreciation_entry(asset_name: str, schedule_date: str):

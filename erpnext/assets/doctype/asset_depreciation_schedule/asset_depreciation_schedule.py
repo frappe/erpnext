@@ -55,6 +55,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		if not self.finance_book_id:
 			self.create_depreciation_schedule()
 		self.update_shift_depr_schedule()
+		self.validate_manual_schedule()
 
 	def validate_another_asset_depr_schedule_does_not_exist(self):
 		finance_book_filter = ["finance_book", "is", "not set"]
@@ -83,6 +84,43 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 						asset_depr_schedule, self.asset
 					)
 				)
+
+	def validate_manual_schedule(self):
+		if self.depreciation_method != "Manual" or self.docstatus != 0:
+			return
+
+		available_for_use_date = frappe.db.get_value("Asset", self.asset, "available_for_use_date")
+		for row in self.get("depreciation_schedule"):
+			self.validate_manual_row(row, available_for_use_date)
+
+		self.validate_manual_total()
+		self.set_accumulated_depreciation()
+
+	def validate_manual_row(self, row, available_for_use_date):
+		if flt(row.depreciation_amount) <= 0:
+			frappe.throw(_("Row #{0}: Depreciation Amount must be greater than zero").format(row.idx))
+
+		if getdate(row.schedule_date) < getdate(available_for_use_date):
+			frappe.throw(
+				_("Row #{0}: Schedule Date cannot be before the Available-for-use Date {1}").format(
+					row.idx, frappe.format(available_for_use_date, "Date")
+				)
+			)
+
+	def validate_manual_total(self):
+		precision = self.precision("value_after_depreciation")
+		pending_amount = sum(
+			flt(row.depreciation_amount) for row in self.depreciation_schedule if not row.journal_entry
+		)
+		depreciable_amount = flt(self.value_after_depreciation) - flt(self.expected_value_after_useful_life)
+
+		if flt(pending_amount, precision) != flt(depreciable_amount, precision):
+			frappe.throw(
+				_("Total Depreciation Amount {0} must be equal to the depreciable value {1}").format(
+					frappe.bold(frappe.format(pending_amount, "Currency")),
+					frappe.bold(frappe.format(depreciable_amount, "Currency")),
+				)
+			)
 
 	def on_submit(self):
 		self.validate_asset()
