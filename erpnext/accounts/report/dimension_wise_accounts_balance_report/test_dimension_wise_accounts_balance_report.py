@@ -76,7 +76,40 @@ class TestDimensionWiseAccountsBalance(ERPNextTestSuite):
 		self.assertEqual(rows[expense_parent][column], 300.0)
 		self.assertEqual(rows[cash_parent][column], -300.0)
 
+	def test_user_sees_only_permitted_dimension_values(self):
+		permitted = self._make_cost_center("Test Dimension Permitted CC")
+		for cost_center, amount in ((permitted, 400), ("Main - _TC", 1000)):
+			make_journal_entry(
+				self.expense_account, self.cash_account, amount, cost_center=cost_center, submit=True
+			)
+		user = make_user_restricted_to_cost_center(permitted)
+
+		frappe.set_user(user)
+		try:
+			columns, data = execute(self._filters())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertNotIn(frappe.scrub("Main - _TC"), [column["fieldname"] for column in columns])
+		rows = {row["account"]: row for row in data}
+		self.assertEqual(rows[self.expense_account]["total"], 400)
+
 	def test_requires_fiscal_year(self):
 		filters = self._filters()
 		filters.pop("fiscal_year")
 		self.assertRaises(frappe.ValidationError, execute, filters)
+
+
+def make_user_restricted_to_cost_center(cost_center):
+	user = "test_dimension_wise_balance@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Dimension-wise Balance",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Cost Center", cost_center, user)
+	return user
