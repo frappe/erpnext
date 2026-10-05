@@ -224,12 +224,12 @@ def get_mapped_mr_details(filters):
 		.from_(child)
 		.select(
 			parent.transaction_date,
-			parent.per_ordered,
 			parent.owner,
 			child.name,
 			child.parent,
 			child.amount,
 			child.qty,
+			child.ordered_qty,
 			child.item_code,
 			child.uom,
 			parent.status,
@@ -246,7 +246,7 @@ def get_mapped_mr_details(filters):
 
 	procurement_record_against_mr = []
 	for record in mr_details:
-		if record.per_ordered:
+		if record.ordered_qty:
 			mr_records.setdefault(record.name, []).append(frappe._dict(record))
 		else:
 			procurement_record_details = dict(

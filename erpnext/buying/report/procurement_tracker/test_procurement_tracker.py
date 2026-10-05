@@ -9,7 +9,10 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
-from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+from erpnext.stock.doctype.material_request.test_material_request import (
+	make_material_request,
+	make_material_request_for_items,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -83,3 +86,16 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_cost"], 630)
+
+	def test_unordered_rows_of_a_partly_ordered_request_are_listed(self):
+		mr = make_material_request_for_items(["_Test Item", "_Test Item Home Desktop 100"])
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items = po.items[:1]
+		po.submit()
+
+		rows = [row for row in self.run_report() if row.get("material_request_no") == mr.name]
+		self.assertCountEqual(
+			[(row["item_code"], row.get("purchase_order")) for row in rows],
+			[("_Test Item", po.name), ("_Test Item Home Desktop 100", None)],
+		)
