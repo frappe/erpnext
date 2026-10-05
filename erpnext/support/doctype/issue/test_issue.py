@@ -318,6 +318,22 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.raised_by, "customer@example.com")
 		self.assertIn("Your order is delayed", issue.description)
 
+	def test_closing_issue_closes_its_assignments(self):
+		from frappe.desk.form.assign_to import add as add_assignment
+
+		create_user("test@admin.com")
+		issue = make_issue(index=1)
+		add_assignment({"doctype": "Issue", "name": issue.name, "assign_to": ["test@admin.com"]})
+
+		issue.reload()
+		issue.status = "Closed"
+		issue.save()
+
+		self.assertEqual(
+			frappe.db.get_value("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, "status"),
+			"Closed",
+		)
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

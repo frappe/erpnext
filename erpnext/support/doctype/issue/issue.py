@@ -8,6 +8,7 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.core.utils import get_parent_doc
+from frappe.desk.form.assign_to import close_all_assignments
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -79,6 +80,9 @@ class Issue(Document):
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
+
+		if self.status in ("Resolved", "Closed") and self.has_value_changed("status"):
+			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 
 	def restore_staff_only_fields(self):
 		"""Customer and status are set by the support team, not by portal users."""
