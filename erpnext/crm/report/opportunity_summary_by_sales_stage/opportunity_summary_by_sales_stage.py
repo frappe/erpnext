@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+NO_SALES_STAGE = "Not Set"
+
 
 def execute(filters=None):
 	return OpportunitySummaryBySalesStage(filters).run()
@@ -18,8 +20,8 @@ class OpportunitySummaryBySalesStage:
 
 	def run(self):
 		self.validate_filters()
-		self.get_columns()
 		self.get_data()
+		self.get_columns()
 		self.get_chart_data()
 		return self.columns, self.data, None, self.chart
 
@@ -55,6 +57,8 @@ class OpportunitySummaryBySalesStage:
 
 	def set_sales_stage_columns(self):
 		self.sales_stage_list = frappe.db.get_list("Sales Stage", pluck="name")
+		if any(row["sales_stage"] == NO_SALES_STAGE for row in self.query_result):
+			self.sales_stage_list.append(NO_SALES_STAGE)
 
 		for sales_stage in self.sales_stage_list:
 			if self.filters.get("data_based_on") == "Number":
@@ -94,6 +98,7 @@ class OpportunitySummaryBySalesStage:
 				fields=["sales_stage", data_based_on, based_on],
 				group_by=group_by,
 			)
+			self.set_missing_sales_stage()
 
 		elif self.filters.get("data_based_on") == "Amount":
 			self.query_result = frappe.db.get_list(
@@ -102,6 +107,7 @@ class OpportunitySummaryBySalesStage:
 				fields=["sales_stage", based_on, data_based_on, "conversion_rate"],
 			)
 
+			self.set_missing_sales_stage()
 			self.convert_to_base_currency()
 
 			for row in self.query_result:
@@ -123,6 +129,10 @@ class OpportunitySummaryBySalesStage:
 				)
 
 			self.query_result = self.grouped_data
+
+	def set_missing_sales_stage(self):
+		for row in self.query_result:
+			row["sales_stage"] = row["sales_stage"] or NO_SALES_STAGE
 
 	def get_rows(self):
 		self.data = []

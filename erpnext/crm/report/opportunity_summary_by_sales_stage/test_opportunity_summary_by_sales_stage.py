@@ -83,6 +83,20 @@ class TestOpportunitySummaryBySalesStage(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			type_row(opportunity_type, data_based_on="Amount", company=None)
 
+	def test_opportunity_without_sales_stage(self):
+		opportunity_type = make_opportunity_type()
+		make_typed_opportunity(opportunity_type, 1000)
+		without_stage = make_typed_opportunity(opportunity_type, 500)
+		frappe.db.set_value("Opportunity", without_stage.name, "sales_stage", None)
+
+		columns, data = execute(
+			{"based_on": "Opportunity Type", "data_based_on": "Amount", "company": "Best Test"}
+		)[:2]
+
+		self.assertIn("Not Set", [column["fieldname"] for column in columns])
+		self.assertEqual(type_row(opportunity_type)["Not Set"], 1)
+		self.assertEqual(type_row(opportunity_type, data_based_on="Amount")["Not Set"], 500)
+
 
 def make_opportunity_type() -> str:
 	opportunity_type = "_Test Summary Type " + frappe.generate_hash(length=5)
