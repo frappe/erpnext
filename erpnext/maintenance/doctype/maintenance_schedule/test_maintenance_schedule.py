@@ -4,7 +4,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import format_date
-from frappe.utils.data import add_days, formatdate, today
+from frappe.utils.data import add_days, formatdate, getdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	get_serial_nos_from_schedule,
@@ -214,6 +214,26 @@ class TestMaintenanceSchedule(FrappeTestCase):
 			periodicity="Random",
 			end_date=add_days(today(), 4),
 			no_of_visits=10,
+		)
+
+	def test_holiday_shift_does_not_move_before_start_date(self):
+		from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
+
+		hl = make_holiday_list(
+			"_Test MS Start Holidays " + frappe.generate_hash("", 6),
+			from_date=add_days(today(), -5),
+			to_date=add_days(today(), 10),
+			holiday_dates=[
+				{"holiday_date": add_days(today(), offset), "description": "Test Holiday"}
+				for offset in (-1, 0, 1)
+			],
+		)
+		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", hl.name)
+
+		ms = make_maintenance_schedule(periodicity="Random", end_date=add_days(today(), 2), no_of_visits=2)
+
+		self.assertEqual(
+			[getdate(row.scheduled_date) for row in ms.schedules], [getdate(add_days(today(), 2))] * 2
 		)
 
 
