@@ -4,8 +4,10 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
+from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -32,10 +34,16 @@ value_fields = (
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
 	return columns, data
+
+
+def validate_company_permission(company: str | None) -> None:
+	if company and not frappe.has_permission("Company", "read", company):
+		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
 def validate_filters(filters):
@@ -344,6 +352,9 @@ def get_opening_balance(
 					opening_balance = opening_balance.where(
 						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
 					)
+
+	if match_conditions := build_match_conditions(doctype):
+		opening_balance = opening_balance.where(Bracket(LiteralValue(match_conditions)))
 
 	gle = opening_balance.run(as_dict=1)
 
