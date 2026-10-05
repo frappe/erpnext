@@ -242,6 +242,19 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(row[frappe.scrub("Stock Received But Not Billed - _TC6")], 0)
 		self.assertIn(frappe.scrub(unrealized_account + "_unrealized"), [col["fieldname"] for col in columns])
 
+	def test_group_filters_include_children(self):
+		pi = make_purchase_invoice()
+		filters = frappe._dict(
+			company=pi.company,
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			cost_center=frappe.db.get_value("Cost Center", pi.items[0].cost_center, "parent_cost_center"),
+			item_group="All Item Groups",
+			supplier_group="All Supplier Groups",
+		)
+
+		self.assertIn(pi.name, [row.get("voucher_no") for row in execute(filters)[1]])
+
 	def test_supplier_group_filter_uses_supplier_master(self):
 		# invoices created before the supplier_group field existed have it blank
 		pi = make_purchase_invoice()

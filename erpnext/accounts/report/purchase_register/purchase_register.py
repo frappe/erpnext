@@ -22,6 +22,7 @@ from erpnext.accounts.report.utils import (
 	get_query_columns,
 	get_taxes_query,
 	get_values_for_columns,
+	get_with_descendants,
 )
 
 
@@ -470,7 +471,11 @@ def get_invoices(filters, additional_query_columns):
 			pi.supplier.isin(
 				frappe.qb.from_(supplier)
 				.select(supplier.name)
-				.where(supplier.supplier_group == filters.supplier_group)
+				.where(
+					supplier.supplier_group.isin(
+						get_with_descendants("Supplier Group", filters.supplier_group)
+					)
+				)
 			)
 		)
 

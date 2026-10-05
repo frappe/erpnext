@@ -3,6 +3,7 @@ from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+from frappe.utils.nestedset import get_descendants_of
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
@@ -357,18 +358,28 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 
 	if payments:
 		if doctype == "Journal Entry" and filters.get("cost_center"):
-			query = query.where(child_doc.cost_center == filters.cost_center)
+			query = query.where(
+				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+			)
 		elif filters.get("cost_center"):
-			query = query.where(parent_doc.cost_center == filters.cost_center)
+			query = query.where(
+				parent_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+			)
 	else:
 		if filters.get("cost_center"):
-			query = query.where(child_doc.cost_center == filters.cost_center)
+			query = query.where(
+				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+			)
 			join_required = True
 		if filters.get("warehouse"):
-			query = query.where(child_doc.warehouse == filters.warehouse)
+			query = query.where(
+				child_doc.warehouse.isin(get_with_descendants("Warehouse", filters.warehouse))
+			)
 			join_required = True
 		if filters.get("item_group"):
-			query = query.where(child_doc.item_group == filters.item_group)
+			query = query.where(
+				child_doc.item_group.isin(get_with_descendants("Item Group", filters.item_group))
+			)
 			join_required = True
 
 	if not payments:
@@ -385,6 +396,11 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 		query = filter_invoices_based_on_dimensions(filters, query, parent_doc)
 
 	return query
+
+
+def get_with_descendants(doctype: str, name: str) -> list[str]:
+	"""The tree node and all nodes under it."""
+	return [name, *get_descendants_of(doctype, name)]
 
 
 def get_advance_taxes_and_charges(invoice_list):
