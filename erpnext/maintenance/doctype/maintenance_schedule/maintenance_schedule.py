@@ -7,7 +7,7 @@ from frappe.query_builder.functions import Max
 from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 
 
@@ -427,10 +427,36 @@ class MaintenanceSchedule(TransactionBase):
 				).get_serial_nos()
 
 				if serial_nos:
-					self.update_amc_date(serial_nos)
+					expiry_dates = self.get_other_amc_expiry_dates(d.item_code, serial_nos)
+					for serial_no in serial_nos:
+						self.update_amc_date([serial_no], expiry_dates.get(serial_no))
 
 		self.db_set("status", "Cancelled")
 		delete_events(self.doctype, self.name)
+
+	def get_other_amc_expiry_dates(self, item_code, serial_nos):
+		"""Latest end date per serial across the item's other submitted schedules."""
+		rows = frappe.get_all(
+			"Maintenance Schedule Item",
+			filters={
+				"item_code": item_code,
+				"docstatus": 1,
+				"parent": ("!=", self.name),
+				"serial_and_batch_bundle": ("is", "set"),
+			},
+			fields=["serial_and_batch_bundle", "end_date"],
+		)
+		if not rows:
+			return {}
+
+		bundle_serial_nos = get_serial_nos_from_sle_list([row.serial_and_batch_bundle for row in rows])
+		expiry_dates = {}
+		for row in rows:
+			for serial_no in set(bundle_serial_nos.get(row.serial_and_batch_bundle, [])).intersection(
+				serial_nos
+			):
+				expiry_dates[serial_no] = max(row.end_date, expiry_dates.get(serial_no, row.end_date))
+		return expiry_dates
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)

@@ -293,6 +293,30 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		later.submit()
 		self.assertEqual(later.docstatus, 1)
 
+	def test_cancelling_renewal_restores_earlier_amc_date(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"})
+		deliver_serial_nos(item_code, [serial_no])
+		first = make_maintenance_schedule(
+			item_code=item_code,
+			start_date=add_days(today(), 1),
+			serial_and_batch_bundle=make_maintenance_bundle(item_code, [serial_no]),
+		)
+		first.submit()
+		renewal = make_maintenance_schedule(
+			item_code=item_code,
+			start_date=add_days(first.items[0].end_date, 1),
+			serial_and_batch_bundle=make_maintenance_bundle(item_code, [serial_no]),
+		)
+		renewal.submit()
+
+		renewal.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial_no, "amc_expiry_date"), getdate(first.items[0].end_date)
+		)
+
 
 def deliver_serial_nos(item_code, serial_nos, customer="_Test Customer"):
 	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
