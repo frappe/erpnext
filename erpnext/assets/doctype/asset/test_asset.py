@@ -518,12 +518,14 @@ class TestAsset(AssetSetup):
 		self.assertEqual(new_asset.split_from, asset.name)
 		self.assertEqual(depr_schedule_of_new_asset[0].depreciation_amount, 400)
 		self.assertEqual(depr_schedule_of_new_asset[1].depreciation_amount, 400)
+		self.assertEqual(depr_schedule_of_new_asset[0].accumulated_depreciation_amount, 498.63)
 
 		self.assertEqual(asset.asset_quantity, 8)
 		self.assertEqual(asset.net_purchase_amount, 9600)
 		self.assertEqual(asset.opening_accumulated_depreciation, 394.52)
 		self.assertEqual(depr_schedule_of_asset[0].depreciation_amount, 1600)
 		self.assertEqual(depr_schedule_of_asset[1].depreciation_amount, 1600)
+		self.assertEqual(depr_schedule_of_asset[0].accumulated_depreciation_amount, 1994.52)
 
 		journal_entry = depr_schedule_of_asset[0].journal_entry
 

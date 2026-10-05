@@ -333,7 +333,7 @@ def create_new_depr_schedule(current_depr_schedule_doc, existing_asset, new_asse
 
 def update_depreciation_terms(new_depr_schedule_doc, scaling_factor):
 	"""Update depreciation terms with scaled amounts."""
-	accumulated_depreciation = 0
+	accumulated_depreciation = flt(new_depr_schedule_doc.opening_accumulated_depreciation)
 	for term in new_depr_schedule_doc.get("depreciation_schedule"):
 		depreciation_amount = flt(
 			term.depreciation_amount * scaling_factor, term.precision("depreciation_amount")
