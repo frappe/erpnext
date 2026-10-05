@@ -170,7 +170,7 @@ class Task(NestedSet):
 			if not self.completed_on:
 				self.completed_on = today()
 
-			close_all_assignments(self.doctype, self.name)
+			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 
 	def validate_progress(self):
 		if flt(self.progress or 0) > 100:
@@ -237,9 +237,9 @@ class Task(NestedSet):
 
 	def unassign_todo(self):
 		if self.status == "Completed":
-			close_all_assignments(self.doctype, self.name)
+			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 		if self.status == "Cancelled":
-			clear(self.doctype, self.name)
+			clear(self.doctype, self.name, ignore_permissions=True)
 
 	def update_time_and_costing(self):
 		TimesheetDetail = frappe.qb.DocType("Timesheet Detail")
