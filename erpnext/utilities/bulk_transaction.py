@@ -70,7 +70,7 @@ def retry(date: str | None = None):
 		failed_docs = frappe.db.get_all(
 			"Bulk Transaction Log Detail",
 			filters={"date": date, "transaction_status": "Failed", "retried": 0},
-			fields=["name", "transaction_name", "from_doctype", "to_doctype"],
+			fields=["name", "transaction_name", "from_doctype", "to_doctype", "creation"],
 		)
 		if not failed_docs:
 			frappe.msgprint(_("There are no Failed transactions"))
@@ -89,6 +89,10 @@ def retry(date: str | None = None):
 def retry_failed_transactions(failed_docs: list | None):
 	if failed_docs:
 		for log in failed_docs:
+			if succeeded_since(log):
+				update_log(log.name, "Failed", 1)
+				continue
+
 			try:
 				frappe.db.savepoint("before_creation_state")
 				task(log.transaction_name, log.from_doctype, log.to_doctype)
@@ -97,6 +101,22 @@ def retry_failed_transactions(failed_docs: list | None):
 				update_log(log.name, "Failed", 1, str(frappe.get_traceback(with_context=True)))
 			else:
 				update_log(log.name, "Success", 1)
+
+
+def succeeded_since(log: dict) -> bool:
+	"""Whether a later run already created the target for this failed log's source document."""
+	return bool(
+		frappe.db.exists(
+			"Bulk Transaction Log Detail",
+			{
+				"transaction_name": log.transaction_name,
+				"from_doctype": log.from_doctype,
+				"to_doctype": log.to_doctype,
+				"transaction_status": "Success",
+				"modified": [">", log.creation],
+			},
+		)
+	)
 
 
 def update_log(log_name, status, retried, err=None):
