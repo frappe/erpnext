@@ -87,6 +87,13 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 100)
 		self.assertEqual(timesheet.time_logs[0].base_costing_amount, 40)
 
+	def test_base_amounts_use_the_exchange_rate_being_saved(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, exchange_rate=2, do_not_submit=True)
+
+		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 200)
+		self.assertEqual(timesheet.base_total_billable_amount, 200)
+
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)

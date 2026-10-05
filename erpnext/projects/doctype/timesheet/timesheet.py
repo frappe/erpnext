@@ -285,7 +285,7 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for time_log in self.time_logs:
-			time_log.update_cost(self.employee, self.currency)
+			time_log.update_cost(self.employee, self.currency, self.exchange_rate)
 
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:

@@ -71,7 +71,7 @@ class TimesheetDetail(Document):
 		if flt(self.billing_hours) == 0.0:
 			self.billing_hours = self.hours
 
-	def update_cost(self, employee: str, currency: str | None = None):
+	def update_cost(self, employee: str, currency: str | None = None, exchange_rate: float = 1.0):
 		"""Update costing and billing rates based on activity type."""
 		from erpnext.projects.doctype.timesheet.timesheet import _get_activity_cost
 
@@ -92,7 +92,7 @@ class TimesheetDetail(Document):
 		self.billing_amount = self.billing_rate * (self.billing_hours or 0)
 		self.costing_amount = self.costing_rate * (self.hours or 0)
 
-		exchange_rate = flt(frappe.get_value("Timesheet", self.parent, "exchange_rate")) or 1.0
+		exchange_rate = flt(exchange_rate) or 1.0
 		self.base_billing_rate = flt(self.billing_rate * exchange_rate, self.precision("base_billing_rate"))
 		self.base_costing_rate = flt(self.costing_rate * exchange_rate, self.precision("base_costing_rate"))
 		self.base_billing_amount = flt(
