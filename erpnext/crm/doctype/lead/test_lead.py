@@ -188,6 +188,25 @@ class TestLead(ERPNextTestSuite):
 		frappe.delete_doc("Lead", lead.name)
 		self.assertFalse(frappe.db.exists("Contact", contact))
 
+	def test_lead_with_one_phone_number_can_be_saved_again(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 1)
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "lead_name": "_Test Phone Lead", "phone": "0221234567"}
+		).insert()
+
+		self.assertIsNone(frappe.db.get_value("Lead", lead.name, "mobile_no"))
+		lead.save()
+
+		contact_name = frappe.db.get_value(
+			"Dynamic Link",
+			{"parenttype": "Contact", "link_doctype": "Lead", "link_name": lead.name},
+			"parent",
+		)
+		contact = frappe.get_doc("Contact", contact_name)
+		contact.add_phone("9800011111", is_primary_mobile_no=1)
+		contact.save()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",
