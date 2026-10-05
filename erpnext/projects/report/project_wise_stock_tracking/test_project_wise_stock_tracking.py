@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import flt, random_string, today
 
 from erpnext.projects.report.project_wise_stock_tracking.project_wise_stock_tracking import execute
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -48,6 +49,45 @@ class TestProjectWiseStockTracking(ERPNextTestSuite):
 		self.assertEqual(flt(row[1]), 300)  # get_purchased_items_cost (GROUP BY project)
 		self.assertEqual(flt(row[2]), flt(expected_issued_cost))  # get_issued_items_cost
 		self.assertEqual(flt(row[3]), 200)  # get_delivered_items_cost
+
+	def test_issued_cost_follows_row_project(self):
+		project, header_project = self.make_project(), self.make_project()
+		item_code = self.make_stocked_item()
+		self.make_issue(item_code, project)
+		self.make_issue(item_code, project, header_project=header_project)
+
+		self.assertEqual(self.get_report_row(project)[2], 200)
+		self.assertEqual(self.get_report_row(header_project)[2], 0)
+
+	def make_project(self):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Project",
+					"project_name": "_Test PWST " + random_string(10),
+					"company": "_Test Company",
+				}
+			)
+			.insert()
+			.name
+		)
+
+	def make_stocked_item(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+		return item_code
+
+	def make_issue(self, item_code, project, header_project=None):
+		issue = make_stock_entry(
+			item_code=item_code, qty=1, from_warehouse="_Test Warehouse - _TC", do_not_save=True
+		)
+		issue.project = header_project
+		issue.items[0].project = project
+		issue.save()
+		issue.submit()
+
+	def get_report_row(self, project):
+		return next(row for row in execute()[1] if row[0] == project)
 
 	def make_parent_row(self, doctype, **fields):
 		doc = frappe.new_doc(doctype)
