@@ -530,6 +530,13 @@ def _get_activity_cost(
 		["costing_rate", "billing_rate"],
 		as_dict=True,
 	)
+	if not rate and employee:
+		rate = frappe.db.get_values(
+			"Activity Cost",
+			{"employee": ("is", "not set"), "activity_type": activity_type},
+			["costing_rate", "billing_rate"],
+			as_dict=True,
+		)
 	if not rate:
 		rate = frappe.db.get_values(
 			"Activity Type",

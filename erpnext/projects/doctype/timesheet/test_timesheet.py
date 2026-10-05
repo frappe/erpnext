@@ -530,6 +530,24 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.time_logs[0].billing_rate, 500)
 		self.assertEqual(timesheet.time_logs[0].costing_rate, 300)
 
+	def test_default_activity_cost_applies_to_employees_without_their_own(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		update_activity_type("_Test Activity Type")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"activity_type": "_Test Activity Type",
+				"billing_rate": 80,
+				"costing_rate": 40,
+			}
+		).insert()
+
+		rate = get_activity_cost(emp, "_Test Activity Type")
+		self.assertEqual(rate["billing_rate"], 80)
+		self.assertEqual(rate["costing_rate"], 40)
+
 	def test_billing_helpers_for_timesheet_detail(self):
 		from erpnext.projects.doctype.timesheet.timesheet import (
 			get_timesheet_data,
