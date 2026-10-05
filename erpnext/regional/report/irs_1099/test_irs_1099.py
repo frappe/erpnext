@@ -68,6 +68,13 @@ class TestIRS1099(ERPNextTestSuite):
 
 		self.assertEqual(get_total_payments(supplier), 550)
 
+	def test_company_permission(self):
+		frappe.permissions.add_user_permission("Company", "_Test Company", "test2@example.com")
+		frappe.get_doc("User", "test2@example.com").add_roles("Accounts Manager")
+
+		with self.set_user("test2@example.com"):
+			self.assertRaises(frappe.PermissionError, get_total_payments, "_Test Supplier")
+
 
 def make_1099_supplier() -> str:
 	supplier = frappe.get_doc(
