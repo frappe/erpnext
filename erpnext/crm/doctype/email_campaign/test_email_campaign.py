@@ -101,6 +101,13 @@ class TestEmailCampaign(ERPNextTestSuite):
 		self.assertEqual(email_campaign.status, "Unsubscribed")
 		self.assertEqual(self.send_campaign_mails(lead.email_id), [])
 
+	def test_running_the_send_job_twice_sends_once(self):
+		lead = self.make_lead()
+		self.make_lead_email_campaign(lead, schedules=[0])
+
+		self.assertEqual(len(self.send_campaign_mails(lead.email_id)), 1)
+		self.assertEqual(self.send_campaign_mails(lead.email_id), [])
+
 	def test_campaign_scheduled_ahead_sends_its_first_mail_on_the_start_day(self):
 		lead = self.make_lead()
 		tomorrow = add_days(today(), 1)

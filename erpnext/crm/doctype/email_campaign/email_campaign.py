@@ -161,7 +161,7 @@ def send_email_to_leads_or_contacts():
 		for entry in campaign.get("campaign_schedules"):
 			try:
 				scheduled_date = add_days(getdate(email_campaign.start_date), entry.get("send_after_days"))
-				if scheduled_date == today_date:
+				if scheduled_date == today_date and not is_step_sent(email_campaign.name, entry, today_date):
 					send_mail(entry, email_campaign)
 			except Exception:
 				frappe.log_error(
@@ -170,6 +170,20 @@ def send_email_to_leads_or_contacts():
 						email_campaign.name, email_campaign.recipient
 					),
 				)
+
+
+def is_step_sent(email_campaign: str, entry: Document, on_date: date) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Communication",
+			{
+				"reference_doctype": "Email Campaign",
+				"reference_name": email_campaign,
+				"email_template": entry.get("email_template"),
+				"communication_date": (">=", on_date),
+			},
+		)
+	)
 
 
 def send_mail(entry, email_campaign):
