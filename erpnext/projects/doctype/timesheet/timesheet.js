@@ -90,10 +90,6 @@ frappe.ui.form.on("Timesheet", {
 				}
 			}).addClass("btn-primary");
 		}
-		if (frm.doc.per_billed > 0) {
-			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
-			frm.fields_dict["time_logs"].grid.toggle_enable("is_billable", false);
-		}
 
 		let filters = {
 			status: "Open",

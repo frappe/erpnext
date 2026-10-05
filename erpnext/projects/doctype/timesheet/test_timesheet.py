@@ -117,6 +117,13 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.total_billable_amount, 200)
 		self.assertEqual(timesheet.total_costing_amount, 20)
 
+	def test_billing_fields_cannot_change_after_submit(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		timesheet.time_logs[0].billing_hours = 10
+		self.assertRaises(frappe.UpdateAfterSubmitError, timesheet.save)
+
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
