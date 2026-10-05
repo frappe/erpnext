@@ -500,6 +500,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			doc.tax_withholding_group = source.tax_withholding_group
 			doc.ignore_tax_withholding_threshold = source.ignore_tax_withholding_threshold
 
+		if doc.doctype in ["Sales Invoice", "POS Invoice", "Purchase Invoice"]:
+			# Keep the original invoice's advances out of the return.
+			doc.set("advances", [])
+			doc.allocate_advances_automatically = 0
+
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
