@@ -232,6 +232,14 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 			[row.name for row in ms.schedules[1:]],
 		)
 
+	def test_one_event_per_schedule_row_when_item_repeats(self):
+		ms = make_maintenance_schedule()
+		ms.append("items", ms.items[0].as_dict(no_default_fields=True))
+		ms.save()
+		ms.submit()
+
+		self.assertEqual(len(get_events(ms)), len(ms.schedules))
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)

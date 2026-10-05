@@ -137,7 +137,7 @@ class MaintenanceSchedule(TransactionBase):
 
 			scheduled_date = frappe.db.get_all(
 				"Maintenance Schedule Detail",
-				{"parent": self.name, "item_code": d.item_code},
+				{"parent": self.name, "item_reference": d.name},
 				["scheduled_date"],
 				as_list=False,
 			)
