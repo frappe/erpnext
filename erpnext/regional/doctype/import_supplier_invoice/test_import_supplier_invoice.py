@@ -66,6 +66,22 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertEqual(self.get_invoice("ISI-MP99").grand_total, 12.20)
 		self.assertFalse(frappe.db.exists("Purchase Invoice", {"bill_no": "ISI-XX"}))
 
+	def test_credit_notes_are_imported_as_returns(self):
+		negative = [make_line("Return one", "-50.00", "-50.00"), make_line("Return two", "-30.00", "-30.00")]
+		positive = [make_line("Return one", "50.00", "50.00"), make_line("Return two", "30.00", "30.00")]
+		self.import_files(
+			{
+				"c1.xml": make_invoice_xml("ISI-CN-NEG", negative, tax="-17.60", document_type="TD04"),
+				"c2.xml": make_invoice_xml("ISI-CN-POS", positive, tax="17.60", document_type="TD04"),
+			}
+		)
+
+		for bill_no in ("ISI-CN-NEG", "ISI-CN-POS"):
+			invoice = self.get_invoice(bill_no)
+			self.assertEqual(invoice.is_return, 1)
+			self.assertEqual([row.qty for row in invoice.items], [-1, -1])
+			self.assertEqual(invoice.grand_total, -97.60)
+
 	def import_files(self, files: dict[str, str | bytes]):
 		doc = frappe.get_doc(
 			{
