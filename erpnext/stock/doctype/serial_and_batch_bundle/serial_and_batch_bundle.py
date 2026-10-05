@@ -1910,6 +1910,7 @@ def download_blank_csv_template(content):
 @frappe.whitelist()
 def upload_csv_file(item_code, file_path):
 	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	serial_nos, batch_nos = [], []
 	serial_nos, batch_nos = get_serial_batch_from_csv(item_code, file_path)
@@ -2029,6 +2030,7 @@ def get_serial_batch_from_data(item_code, kwargs):
 @frappe.whitelist()
 def create_serial_nos(item_code, serial_nos):
 	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	serial_nos = get_serial_batch_from_data(
 		item_code,
@@ -3484,12 +3486,14 @@ def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, ba
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exists").format(serial_no))
 
+		frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 		make_serial_no(serial_no, item_code)
 
 	if batch_no and not frappe.db.exists("Batch", batch_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 
+		frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 		make_batch_no(batch_no, item_code)
 
 
