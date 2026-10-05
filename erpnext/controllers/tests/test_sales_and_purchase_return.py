@@ -36,6 +36,28 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 		return_dn.insert()
 		return_dn.submit()
 
+	def test_delivery_note_returns_with_and_without_dn_detail_share_the_delivered_qty(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		dn = create_delivery_note(qty=5)
+
+		unlinked_return = make_sales_return(dn.name)
+		unlinked_return.items[0].dn_detail = None
+		unlinked_return.items[0].qty = unlinked_return.items[0].stock_qty = -4
+		unlinked_return.insert()
+		unlinked_return.submit()
+
+		linked_return = make_sales_return(dn.name)
+		linked_return.items[0].qty = linked_return.items[0].stock_qty = -4
+		self.assertRaises(frappe.ValidationError, linked_return.insert)
+
+		two_row_return = make_sales_return(create_delivery_note(qty=5).name)
+		two_row_return.append("items", dict(two_row_return.items[0].as_dict(), name=None, dn_detail=None))
+		self.assertRaises(frappe.ValidationError, two_row_return.insert)
+
 	def test_purchase_invoice_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
