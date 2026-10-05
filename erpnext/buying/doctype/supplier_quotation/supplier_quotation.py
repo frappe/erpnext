@@ -12,6 +12,7 @@ from frappe.utils import flt, getdate, nowdate
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.deprecation_dumpster import deprecated
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -299,6 +300,12 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
+@deprecated(
+	f"{__name__}.make_purchase_invoice",
+	"2026-10-05",
+	"v18",
+	"Make the Purchase Invoice from the Purchase Order.",
+)
 def make_purchase_invoice(source_name, target_doc=None):
 	doc = get_mapped_doc(
 		"Supplier Quotation",
