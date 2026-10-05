@@ -2,6 +2,7 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_and_payment_ledger_comparison.general_and_payment_ledger_comparison import (
 	execute,
@@ -55,6 +56,8 @@ class TestGeneralAndPaymentLedger(ERPNextTestSuite, AccountsTestMixin):
 			"voucher_no": sinv.name,
 			"party_type": "Customer",
 			"party": sinv.customer,
+			"against_voucher_type": sinv.doctype,
+			"against_voucher_no": sinv.name,
 			"gl_balance": sinv.grand_total,
 			"pl_balance": sinv.grand_total - 1,
 		}
@@ -134,3 +137,38 @@ class TestGeneralAndPaymentLedger(ERPNextTestSuite, AccountsTestMixin):
 			frappe.set_user("Administrator")
 
 		self.assertEqual([row.party for row in data], ["_Test Customer"])
+
+	def test_payment_applied_to_another_invoice_in_payment_ledger(self):
+		invoices = [
+			create_sales_invoice(
+				company=self.company,
+				debit_to=self.debit_to,
+				expense_account=self.expense_account,
+				cost_center=self.cost_center,
+				income_account=self.income_account,
+				warehouse=self.warehouse,
+			)
+			for _i in range(2)
+		]
+		payment = get_payment_entry("Sales Invoice", invoices[0].name)
+		# 20 stays unallocated: it has no against voucher in GL and must not be reported
+		payment.paid_amount = payment.received_amount = 60
+		payment.references[0].allocated_amount = 40
+		payment.submit()
+		frappe.db.set_value(
+			"Payment Ledger Entry",
+			{"voucher_no": payment.name, "against_voucher_no": invoices[0].name, "delinked": 0},
+			"against_voucher_no",
+			invoices[1].name,
+		)
+
+		data = execute(filters=frappe._dict({"company": self.company}))[1]
+
+		against = {(row.voucher_no, row.against_voucher_no): (row.gl_balance, row.pl_balance) for row in data}
+		self.assertEqual(
+			against,
+			{
+				(payment.name, invoices[0].name): (-40, None),
+				(payment.name, invoices[1].name): (0, -40),
+			},
+		)
