@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_months, getdate, nowdate
+from frappe.utils import add_days, add_months, getdate, nowdate
 
 from erpnext.assets.doctype.asset_maintenance.test_asset_maintenance import (
 	get_maintenance_tasks,
@@ -80,12 +80,20 @@ class TestAssetMaintenanceLog(ERPNextTestSuite):
 		self.assertEqual(task.maintenance_status, "Cancelled")
 		self.assertFalse(frappe.db.exists("Asset Maintenance Log", {"task": task.name, "docstatus": 0}))
 
-	def test_task_must_belong_to_the_asset_maintenance(self):
+	def test_task_and_completion_date_validations(self):
 		other_task = make_asset_maintenance().asset_maintenance_tasks[0]
 		log = get_open_log(self.asset_maintenance.asset_maintenance_tasks[0].name)
 		log.task = other_task.name
 
 		self.assertRaisesRegex(frappe.ValidationError, "does not belong", log.save)
+
+		log.reload()
+		log.task = None
+		self.assertRaisesRegex(frappe.ValidationError, "select a Task", log.save)
+
+		log.reload()
+		log.update({"maintenance_status": "Completed", "completion_date": add_days(nowdate(), 1)})
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be in the future", log.save)
 
 
 def get_open_log(task: str):

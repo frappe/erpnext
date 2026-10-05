@@ -52,14 +52,16 @@ class AssetMaintenanceLog(Document):
 		if self.maintenance_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Asset Maintenance Log"))
 
+		if self.completion_date and getdate(self.completion_date) > getdate(nowdate()):
+			frappe.throw(_("Completion Date cannot be in the future"))
+
 		if self.maintenance_status != "Completed" and self.completion_date:
 			frappe.throw(_("Please select Maintenance Status as Completed or remove Completion Date"))
 
 	def validate_task(self):
-		if (
-			self.task
-			and frappe.db.get_value("Asset Maintenance Task", self.task, "parent") != self.asset_maintenance
-		):
+		if not self.task:
+			frappe.throw(_("Please select a Task"))
+		if frappe.db.get_value("Asset Maintenance Task", self.task, "parent") != self.asset_maintenance:
 			frappe.throw(
 				_("Task {0} does not belong to Asset Maintenance {1}").format(
 					self.task, self.asset_maintenance
