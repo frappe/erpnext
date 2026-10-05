@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.utils import format_date
-from frappe.utils.data import add_days, formatdate, today
+from frappe.utils.data import add_days, formatdate, getdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	get_serial_no_query,
@@ -199,6 +199,20 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		with as_user(maintenance_user):
 			serial_nos = get_serial_no_query("Serial No", "", "name", 0, 20, filters)
 		self.assertEqual([row[1] for row in serial_nos], ["TEST001"])
+
+	def test_maintenance_manager_can_submit_schedule_with_serials(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		maintenance_manager = make_fenced_user("schedule-serial-manager@example.com", ["Maintenance Manager"])
+
+		with as_user(maintenance_manager):
+			ms.submit()
+
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": "TEST001"})
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial_no, "amc_expiry_date"), getdate(ms.items[0].end_date)
+		)
 
 	def test_validate_schedule_date_skips_holiday(self):
 		# validate_schedule_date_for_holiday_list reads the holiday list via the converted
