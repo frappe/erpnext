@@ -4,10 +4,13 @@
 
 import frappe
 from frappe import _, qb
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
 from frappe.utils import getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.utils import build_qb_match_conditions
 
 
 def execute(filters=None):
@@ -146,11 +149,12 @@ def get_conditions(filters):
 	conditions.append(ple.delinked.eq(0))
 	conditions.append(ple.voucher_type.isin(["Payment Entry", "Journal Entry"]))
 	if filters.payment_type == _("Outgoing"):
-		conditions.append(ple.party_type.eq("Supplier"))
+		party_type = "Supplier"
 		conditions.append(ple.against_voucher_type.eq("Purchase Invoice"))
 	else:
-		conditions.append(ple.party_type.eq("Customer"))
+		party_type = "Customer"
 		conditions.append(ple.against_voucher_type.eq("Sales Invoice"))
+	conditions.append(ple.party_type.eq(party_type))
 
 	if filters.party:
 		conditions.append(ple.party.eq(filters.party))
@@ -164,7 +168,20 @@ def get_conditions(filters):
 	if filters.get("company"):
 		conditions.append(ple.company.eq(filters.get("company")))
 
+	conditions.extend(build_qb_match_conditions("Payment Ledger Entry"))
+	if allowed_parties := get_allowed_parties(party_type):
+		conditions.append(ple.party.isin(allowed_parties))
+
 	return conditions
+
+
+def get_allowed_parties(party_type: str) -> list[str] | None:
+	"""Parties the user is restricted to; the party is a dynamic link, which match conditions skip."""
+	user_permissions = get_user_permissions()
+	if party_type not in user_permissions:
+		return None
+
+	return get_allowed_docs_for_doctype(user_permissions[party_type], party_type) or [""]
 
 
 def get_entries(filters):
