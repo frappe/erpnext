@@ -353,6 +353,36 @@ class TestIssue(TestSetUp):
 		self.assertFalse(split.sla_resolution_date)
 		self.assertEqual(split.agreement_status, "First Response Due")
 
+	def test_sla_whitelisted_methods_use_session_permissions(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			get_service_level_agreement_filters,
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+		reset_service_level_agreement("Issue", issue.name, "customer asked", "someone@example.com")
+		self.assertEqual(
+			frappe.db.get_value(
+				"Comment", {"reference_name": issue.name, "comment_type": "Info"}, "comment_email"
+			),
+			"Administrator",
+		)
+
+		website_user = create_user("test_sla_website_user@example.com")
+		website_user.db_set("user_type", "Website User")
+		frappe.set_user(website_user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				get_service_level_agreement_filters,
+				"Issue",
+				issue.service_level_agreement,
+				"_Test Customer",
+			)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

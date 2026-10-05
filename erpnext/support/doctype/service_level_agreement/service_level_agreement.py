@@ -450,6 +450,7 @@ def get_customer_territory(customer):
 
 @frappe.whitelist()
 def get_service_level_agreement_filters(doctype: str, name: str, customer: str | None = None):
+	frappe.has_permission(doctype, "read", throw=True)
 	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 		return
 
@@ -817,7 +818,7 @@ def get_response_and_resolution_duration(doc):
 
 
 @frappe.whitelist(methods=["POST"])
-def reset_service_level_agreement(doctype: str, docname: str, reason: str, user: str):
+def reset_service_level_agreement(doctype: str, docname: str, reason: str, user: str | None = None):
 	if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
 
@@ -828,7 +829,7 @@ def reset_service_level_agreement(doctype: str, docname: str, reason: str, user:
 			"comment_type": "Info",
 			"reference_doctype": doc.doctype,
 			"reference_name": doc.name,
-			"comment_email": user,
+			"comment_email": frappe.session.user,
 			"content": f" resetted Service Level Agreement - {_(reason)}",
 		}
 	).insert(ignore_permissions=True)
