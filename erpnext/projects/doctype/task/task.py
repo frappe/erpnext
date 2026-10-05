@@ -558,10 +558,14 @@ def add_node():
 
 
 @frappe.whitelist(methods=["POST"])
-def add_multiple_tasks(data: str | list, parent: str):
+def add_multiple_tasks(data: str | list, parent: str, project: str | None = None):
 	data = frappe.parse_json(data)
-	new_doc = {"doctype": "Task", "parent_task": parent if parent != "All Tasks" else ""}
-	new_doc["project"] = frappe.db.get_value("Task", {"name": parent}, "project") or ""
+	is_root = parent in ("All Tasks", project)
+	new_doc = {
+		"doctype": "Task",
+		"parent_task": None if is_root else parent,
+		"project": project if is_root else frappe.db.get_value("Task", parent, "project"),
+	}
 
 	for d in data:
 		if not d.get("subject"):

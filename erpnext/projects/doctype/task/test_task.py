@@ -325,6 +325,18 @@ class TestTask(ERPNextTestSuite):
 		# the row with a blank subject is skipped
 		self.assertEqual(sorted(children), ["_Test Bulk Child A", "_Test Bulk Child B"])
 
+	def test_add_multiple_tasks_under_project_root(self):
+		from erpnext.projects.doctype.task.task import add_multiple_tasks
+
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+
+		add_multiple_tasks(frappe.as_json([{"subject": "_Test Bulk Root Task"}]), project, project)
+
+		self.assertEqual(
+			frappe.db.get_value("Task", {"subject": "_Test Bulk Root Task"}, ["project", "parent_task"]),
+			(project, None),
+		)
+
 	def test_template_task_dependency_must_be_template(self):
 		normal_task = create_task("_Test Non Template Dependency")
 		template_task = create_task("_Test Template With Dependency", is_template=1, save=False)
