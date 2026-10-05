@@ -733,7 +733,7 @@ class SubcontractingInwardController:
 						"Subcontracting Inward Order Item", item.against_fg, "item_code"
 					),
 				)
-				scio_rm.insert()
+				scio_rm.insert(ignore_permissions=True)
 				scio_rm.submit()
 				item.db_set("scio_detail", scio_rm.name)
 
@@ -891,7 +891,7 @@ class SubcontractingInwardController:
 					warehouse=extra_item.s_warehouse,
 					is_additional_item=True,
 				)
-				doc.insert()
+				doc.insert(ignore_permissions=True)
 				doc.submit()
 
 	def update_inward_order_secondary_items(self):
@@ -978,7 +978,7 @@ class SubcontractingInwardController:
 							"Work Order", self.work_order, "subcontracting_inward_order_item"
 						),
 					)
-					doc.insert()
+					doc.insert(ignore_permissions=True)
 					doc.submit()
 
 	def cancel_stock_reservation_entries_for_inward(self):
