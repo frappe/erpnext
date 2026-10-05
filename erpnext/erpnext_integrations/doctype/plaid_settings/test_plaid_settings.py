@@ -1,10 +1,12 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import json
+from unittest.mock import MagicMock
 
 import frappe
 from frappe.utils.response import json_handler
 
+from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
 	add_account_subtype,
 	add_account_type,
@@ -99,3 +101,23 @@ class TestPlaidSettings(ERPNextTestSuite):
 		new_bank_transaction(transactions)
 
 		self.assertEqual(len(frappe.get_all("Bank Transaction")), 1)
+
+	def test_get_transactions_keeps_the_account_filter_on_every_page(self):
+		rows = {
+			account_id: [
+				{"account_id": account_id, "transaction_id": f"{account_id}-{n}"} for n in range(150)
+			]
+			for account_id in ("acc-1", "acc-2")
+		}
+
+		def get_page(access_token, start_date, end_date, account_ids=None, offset=0):
+			matching = [row for account_id in account_ids or rows for row in rows[account_id]]
+			return {"transactions": matching[offset : offset + 100], "total_transactions": len(matching)}
+
+		connector = PlaidConnector.__new__(PlaidConnector)
+		connector.access_token = "access-test"
+		connector.client = MagicMock()
+		connector.client.Transactions.get.side_effect = get_page
+
+		transactions = connector.get_transactions("2026-01-01", "2026-06-30", account_id="acc-1")
+		self.assertEqual(transactions, rows["acc-1"])
