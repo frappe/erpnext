@@ -391,10 +391,13 @@ class SalesInvoice(SellingController):
 			if d.is_fixed_asset:
 				if d.asset:
 					if not self.is_return:
-						asset_status = frappe.db.get_value("Asset", d.asset, "status")
+						asset_status, asset_docstatus = frappe.db.get_value(
+							"Asset", d.asset, ["status", "docstatus"]
+						)
 						if self.update_stock:
 							frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
-
+						elif asset_docstatus == 0:
+							frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 						elif asset_status in ("Scrapped", "Cancelled", "Capitalized"):
 							frappe.throw(
 								_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(
