@@ -127,6 +127,12 @@ class TimesheetDetail(Document):
 					)
 				)
 
+	def validate_activity_type(self):
+		if self.activity_type and frappe.get_cached_value("Activity Type", self.activity_type, "disabled"):
+			frappe.throw(
+				_("Row {0}: Activity Type {1} is disabled").format(self.idx, frappe.bold(self.activity_type))
+			)
+
 	def validate_billing_hours(self):
 		"""Warn if billing hours are more than actual hours."""
 		if flt(self.billing_hours) > flt(self.hours):
