@@ -80,6 +80,13 @@ class TestAssetMaintenanceLog(ERPNextTestSuite):
 		self.assertEqual(task.maintenance_status, "Cancelled")
 		self.assertFalse(frappe.db.exists("Asset Maintenance Log", {"task": task.name, "docstatus": 0}))
 
+	def test_task_must_belong_to_the_asset_maintenance(self):
+		other_task = make_asset_maintenance().asset_maintenance_tasks[0]
+		log = get_open_log(self.asset_maintenance.asset_maintenance_tasks[0].name)
+		log.task = other_task.name
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong", log.save)
+
 
 def get_open_log(task: str):
 	return frappe.get_doc("Asset Maintenance Log", {"task": task, "docstatus": 0})
