@@ -154,3 +154,26 @@ class TestAssetCategory(ERPNextTestSuite):
 			)
 			asset_category.flags.ignore_mandatory = True
 			self.assertRaisesRegex(frappe.ValidationError, error, asset_category.insert)
+
+	def test_depreciation_settings_are_checked(self):
+		asset_category = frappe.get_doc("Asset Category", "Computers")
+		for field, value, error in (
+			("salvage_value_percentage", 150, "between 0 and 100"),
+			("rate_of_depreciation", -10, "cannot be negative"),
+		):
+			asset_category.reload()
+			finance_book = asset_category.append(
+				"finance_books",
+				{
+					"depreciation_method": "Straight Line",
+					"total_number_of_depreciations": 3,
+					"frequency_of_depreciation": 1,
+				},
+			)
+			finance_book.set(field, value)
+			self.assertRaisesRegex(frappe.ValidationError, error, asset_category.save)
+
+		create_asset(asset_category="Computers", calculate_depreciation=1, submit=1)
+		asset_category.reload()
+		asset_category.non_depreciable_category = 1
+		self.assertRaisesRegex(frappe.ValidationError, "Non Depreciable", asset_category.save)

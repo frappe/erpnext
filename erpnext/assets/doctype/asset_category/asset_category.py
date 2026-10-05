@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form
 
 ACCOUNT_FIELDS = (
 	"fixed_asset_account",
@@ -36,11 +36,26 @@ class AssetCategory(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_non_depreciable_category()
 		self.validate_finance_books()
 		self.validate_account_types()
 		self.validate_account_currency()
 		self.validate_accounts()
 		self.validate_account_change_for_existing_assets()
+
+	def validate_non_depreciable_category(self):
+		if self.non_depreciable_category and frappe.db.exists(
+			"Asset",
+			{
+				"asset_category": self.name,
+				"calculate_depreciation": 1,
+				"docstatus": 1,
+				"status": ["in", ("Submitted", "Partially Depreciated")],
+			},
+		):
+			frappe.throw(
+				_("Cannot mark the category as Non Depreciable since it has assets being depreciated")
+			)
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
@@ -49,6 +64,11 @@ class AssetCategory(Document):
 					frappe.throw(
 						_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError
 					)
+
+			if not 0 <= flt(d.salvage_value_percentage) <= 100:
+				frappe.throw(_("Row {0}: Salvage Value Percentage must be between 0 and 100").format(d.idx))
+			if flt(d.rate_of_depreciation) < 0:
+				frappe.throw(_("Row {0}: Rate of Depreciation cannot be negative").format(d.idx))
 
 	def validate_account_currency(self):
 		invalid_accounts = []
