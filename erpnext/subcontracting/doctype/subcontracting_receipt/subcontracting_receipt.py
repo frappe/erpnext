@@ -557,6 +557,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if self.is_return and self.return_against:
 			self.set_additional_costs_for_return()
 		else:
+			self.set_additional_costs_base_amount()
 			self.calculate_additional_costs()
 
 	def set_additional_costs_for_return(self):
@@ -597,6 +598,12 @@ class SubcontractingReceipt(SubcontractingController):
 				},
 			)
 		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
+
+	def set_additional_costs_base_amount(self):
+		for row in self.get("additional_costs"):
+			row.base_amount = flt(
+				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
+			)
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
