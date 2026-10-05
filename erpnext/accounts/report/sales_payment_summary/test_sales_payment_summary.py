@@ -6,12 +6,14 @@ from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import (
+	execute,
 	get_mode_of_payment_details,
 	get_mode_of_payments,
 	get_pos_invoice_data,
 	get_pos_row_key,
 	get_pos_row_labels,
 )
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -210,6 +212,42 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		filters["customer"] = si.customer
 		self.assertTrue(any(flt(row.get("paid_amount")) >= 10000 for row in get_pos_invoice_data(filters)))
 
+	def test_equal_payments_from_different_sources_are_all_summed(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		make_pos_invoice(customer, paid=10000)
+		make_paid_invoice(customer)
+
+		row = run_report(customer)[0]
+		self.assertEqual((row[3], row[5]), (20000, 20000))
+
+
+def run_report(customer, **filters):
+	filters = frappe._dict(
+		company="_Test Company", from_date=today(), to_date=today(), customer=customer, **filters
+	)
+	return execute(filters)[1]
+
+
+def make_pos_invoice(customer, paid, **fields):
+	si = create_sales_invoice_record(customer=customer)
+	si.update({"is_pos": 1, **fields})
+	si.append("payments", {"mode_of_payment": "Cash", "account": "_Test Cash - _TC", "amount": paid})
+	si.insert()
+	si.submit()
+	return si
+
+
+def make_paid_invoice(customer, **fields):
+	si = create_sales_invoice_record(customer=customer)
+	si.update(fields)
+	si.insert()
+	si.submit()
+	pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+	pe.update({"mode_of_payment": "Cash", "reference_no": "_Test", "reference_date": today()})
+	pe.insert()
+	pe.submit()
+	return si
+
 
 def get_filters():
 	return {"from_date": "1900-01-01", "to_date": today(), "company": "_Test Company"}
@@ -230,12 +268,12 @@ def create_mode_of_payment(name, account, company="_Test Company"):
 	return name
 
 
-def create_sales_invoice_record(qty=1):
+def create_sales_invoice_record(qty=1, customer=None):
 	# return sales invoice doc object
 	return frappe.get_doc(
 		{
 			"doctype": "Sales Invoice",
-			"customer": frappe.get_doc("Customer", {"customer_name": "Prestiga-Biz"}).name,
+			"customer": customer or frappe.get_doc("Customer", {"customer_name": "Prestiga-Biz"}).name,
 			"company": "_Test Company",
 			"due_date": today(),
 			"posting_date": today(),

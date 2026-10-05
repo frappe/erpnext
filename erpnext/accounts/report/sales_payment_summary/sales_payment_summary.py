@@ -405,8 +405,8 @@ def get_mode_of_payment_details(filters):
 			.groupby(je.owner, je.posting_date, mop3)
 		)
 
-		# bare UNION => de-duplicated rows; wrapped as subquery `t` for the outer re-aggregation
-		t = branch1.union(branch2).union(branch3)
+		# UNION ALL: equal totals from different sources must all be summed
+		t = branch1.union_all(branch2).union_all(branch3)
 		inv_mop_detail = (
 			frappe.qb.from_(t)
 			.select(
