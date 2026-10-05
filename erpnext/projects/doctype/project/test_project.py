@@ -452,6 +452,18 @@ class TestProject(ERPNextTestSuite):
 				twice_daily_reminder()
 			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
 
+	def test_percent_complete_counts_cancelled_tasks_and_zero_weights(self):
+		for method in ("Task Progress", "Task Weight"):
+			project, tasks = self._project_with_tasks(method, 2)
+			frappe.db.set_value("Task", tasks[0], {"status": "Completed", "progress": 100})
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 50)
+
+			frappe.db.set_value("Task", tasks[1], "status", "Cancelled")
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 100)
+			self.assertEqual(project.status, "Completed")
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
