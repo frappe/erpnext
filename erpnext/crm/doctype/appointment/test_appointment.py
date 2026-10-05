@@ -185,6 +185,15 @@ class TestAppointment(ERPNextTestSuite):
 		appointment = create_test_appointment(customer_email=email, scheduled_time=slot_on(2, 16))
 		self.assertEqual((appointment.appointment_with, appointment.party), ("Customer", "_Test Customer"))
 
+	def test_appointment_with_must_be_customer_or_lead(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			create_test_appointment,
+			customer_email="appointment_with_user@example.com",
+			appointment_with="User",
+			party="Administrator",
+		)
+
 	def test_desk_created_appointment_skips_email_verification(self):
 		"""Appointments created from the desk (created_through_portal unset) must be
 		linked and confirmed immediately - no verification email should be sent."""

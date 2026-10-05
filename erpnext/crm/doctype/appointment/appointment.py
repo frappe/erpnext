@@ -46,6 +46,7 @@ class Appointment(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_appointment_with()
 		self.validate_status_update()
 		if self.has_value_changed("scheduled_time"):
 			self.validate_schedule()
@@ -63,6 +64,10 @@ class Appointment(Document):
 			self.validate_advanced_booking()
 			self.validate_holiday()
 			self.validate_slot_timing()
+
+	def validate_appointment_with(self):
+		if self.appointment_with and self.appointment_with not in ("Customer", "Lead"):
+			frappe.throw(_("Appointment With must be a Customer or a Lead"))
 
 	def validate_status_update(self):
 		if not self.has_value_changed("status"):
