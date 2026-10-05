@@ -85,6 +85,7 @@ class Task(NestedSet):
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
+		self.clear_completion_on_reopen()
 		self.update_depends_on()
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
@@ -180,6 +181,15 @@ class Task(NestedSet):
 
 		if self.status == "Completed":
 			self.progress = 100
+
+	def clear_completion_on_reopen(self):
+		if self.get_value_before_save("status") != "Completed" or self.status in ("Completed", "Cancelled"):
+			return
+
+		self.completed_on = None
+		self.completed_by = None
+		if not self.has_value_changed("progress"):
+			self.progress = 0
 
 	def validate_dependencies_for_template_task(self):
 		if self.is_template:

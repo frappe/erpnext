@@ -284,6 +284,21 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "completed_on"), getdate())
 
+	def test_reopen_completed_task(self):
+		task = create_task("_Test Task Reopened")
+		task.status = "Completed"
+		task.save()
+
+		task.status = "Open"
+		task.save()
+		self.assertEqual((task.progress, task.completed_on), (0, None))
+
+		task.status = "Completed"
+		task.save()
+		task.update({"status": "Working", "progress": 60})
+		task.save()
+		self.assertEqual(task.progress, 60)
+
 	def test_add_multiple_tasks_under_parent(self):
 		from erpnext.projects.doctype.task.task import add_multiple_tasks
 
