@@ -51,6 +51,19 @@ class TestProspect(ERPNextTestSuite):
 		customer.company = "_Test Company"
 		customer.insert()
 
+		self.assertRaises(frappe.ValidationError, make_customer_from_prospect, "_Test Prospect")
+
+	def test_make_customer_converts_the_prospects_lead(self):
+		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+		lead = make_lead()
+		prospect = make_prospect(company="_Test Company")
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		make_customer_from_prospect(prospect.name).insert()
+
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Converted")
+
 	def test_deleting_the_only_lead_keeps_the_prospect(self):
 		lead = make_lead()
 		prospect = make_prospect(company="_Test Company")

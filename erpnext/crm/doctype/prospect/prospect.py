@@ -115,10 +115,20 @@ class Prospect(CRMNote):
 
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
+	if customer := frappe.db.exists("Customer", {"prospect_name": source_name}):
+		frappe.throw(
+			_("Prospect {0} is already converted to Customer {1}").format(
+				frappe.bold(source_name), frappe.bold(customer)
+			)
+		)
+
 	def set_missing_values(source, target):
 		target.customer_type = "Company"
 		target.company_name = source.name
 		target.customer_group = source.customer_group or frappe.db.get_default("Customer Group")
+		# a single lead is converted with the prospect
+		if len(source.leads) == 1 and not frappe.db.exists("Customer", {"lead_name": source.leads[0].lead}):
+			target.lead_name = source.leads[0].lead
 
 	doclist = get_mapped_doc(
 		"Prospect",
