@@ -123,3 +123,8 @@ class TestSalesFunnel(ERPNextTestSuite):
 		after_converted = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Converted")
 		self.assertEqual(after_converted - baseline_converted, 1)
 		self.assertGreaterEqual(after_converted, 1)
+
+	def test_funnel_single_day_range(self):
+		company = "_Test Company"
+		data = get_funnel_data(today(), today(), company)
+		self.assertTrue(any(stage["title"] == "Active Leads" for stage in data))

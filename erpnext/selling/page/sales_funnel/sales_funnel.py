@@ -12,7 +12,7 @@ from erpnext.accounts.report.utils import convert
 
 
 def validate_filters(from_date, to_date, company):
-	if from_date and to_date and (from_date >= to_date):
+	if from_date and to_date and (from_date > to_date):
 		frappe.throw(_("To Date must be greater than From Date"))
 
 	if not company:
