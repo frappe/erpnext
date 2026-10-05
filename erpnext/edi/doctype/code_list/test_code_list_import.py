@@ -177,6 +177,21 @@ class TestCodeListImport(ERPNextTestSuite):
 		self.assertEqual([import_with(value) for value in offered], [1, 2])
 		self.assertEqual(import_with("Côte d'Ivoire"), 1)
 
+	def test_process_genericode_import_refuses_a_row_without_code(self):
+		content = SAMPLE_GENERICODE.replace(
+			b'<Value ColumnRef="code"><SimpleValue>B</SimpleValue></Value>', b""
+		)
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Row 2"):
+			code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+			)
+
 	@staticmethod
 	@contextmanager
 	def upload_context(
