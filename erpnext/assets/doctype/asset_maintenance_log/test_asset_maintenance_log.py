@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import nowdate
+from frappe.utils import add_months, getdate, nowdate
 
 from erpnext.assets.doctype.asset_maintenance.test_asset_maintenance import (
 	create_asset_data,
@@ -56,6 +56,24 @@ class TestAssetMaintenanceLog(FrappeTestCase):
 				)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_cancelling_a_completed_log_reverts_the_task(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		log = get_open_log(task.name)
+		log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		log.submit()
+		self.assertEqual(getdate(get_open_log(task.name).due_date), add_months(getdate(), 1))
+
+		log.cancel()
+
+		task.reload()
+		self.assertIsNone(task.last_completion_date)
+		self.assertEqual(getdate(task.next_due_date), getdate())
+		self.assertEqual(getdate(get_open_log(task.name).due_date), getdate())
+
+
+def get_open_log(task: str):
+	return frappe.get_doc("Asset Maintenance Log", {"task": task, "docstatus": 0})
 
 
 def make_asset_maintenance():
