@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
 
 from erpnext.buying.report.subcontract_order_summary.subcontract_order_summary import execute
@@ -41,6 +43,19 @@ class TestSubcontractOrderSummary(ERPNextTestSuite):
 		self.assertTrue(rows, "Subcontracting Order finished item missing from report")
 		self.assertEqual(rows[0]["qty"], 10)
 		self.assertEqual(rows[0]["received_qty"], 0)  # nothing received yet
+
+	def test_restricted_user_sees_only_permitted_suppliers(self):
+		permitted = get_subcontracting_order()
+		other = get_subcontracting_order()
+		frappe.db.set_value("Subcontracting Order", other.name, "supplier", "_Test Supplier 1")
+		user = create_user("subcontract_summary_restricted@example.com", "Purchase User").name
+		add_user_permission("Supplier", "_Test Supplier", user)
+
+		with self.set_user(user):
+			orders = {row.get("order_id") for row in self.run_report() if row.get("order_id")}
+
+		self.assertIn(permitted.name, orders)
+		self.assertNotIn(other.name, orders)
 
 	def test_out_of_range_date_excludes_order(self):
 		sco = get_subcontracting_order()
