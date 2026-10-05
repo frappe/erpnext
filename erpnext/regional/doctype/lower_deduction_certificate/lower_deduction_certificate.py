@@ -32,8 +32,16 @@ class LowerDeductionCertificate(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.set_pan_from_supplier()
 		self.validate_dates()
 		self.validate_supplier_against_tax_category()
+
+	def set_pan_from_supplier(self):
+		"""Certificates are matched to invoices by the supplier's PAN, so keep the PAN in line with it."""
+		if not (self.supplier and frappe.get_meta("Supplier").has_field("pan")):
+			return
+		if pan := frappe.db.get_value("Supplier", self.supplier, "pan"):
+			self.pan_no = pan
 
 	def validate_dates(self):
 		if getdate(self.valid_upto) < getdate(self.valid_from):
