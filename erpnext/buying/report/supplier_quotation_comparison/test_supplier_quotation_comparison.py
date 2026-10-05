@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison import execute
 
@@ -51,3 +51,13 @@ class TestSupplierQuotationComparison(FrappeTestCase):
 		cheapest = {row["quotation"] for row in self.run_report(item_code=ITEM) if row.get("min")}
 		self.assertIn(rupee_quote.name, cheapest)
 		self.assertNotIn(dollar_quote.name, cheapest)
+
+	@change_settings("Buying Settings", {"allow_zero_qty_in_supplier_quotation": 1})
+	def test_unit_price_quote_is_compared_by_rate(self):
+		quantity_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		unit_price_quote = self.make_quotation("_Test Supplier 1", qty=0, rate=900)
+
+		rows = {row["quotation"]: row for row in self.run_report(item_code=ITEM)}
+		self.assertEqual(rows[unit_price_quote.name]["price_per_unit"], 900)
+		self.assertTrue(rows[quantity_quote.name].get("min"))
+		self.assertFalse(rows[unit_price_quote.name].get("min"))
