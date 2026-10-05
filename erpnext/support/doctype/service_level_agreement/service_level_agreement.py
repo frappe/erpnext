@@ -351,41 +351,18 @@ def get_active_service_level_agreement_for(doc):
 	if doc.get("priority"):
 		filters.append(["Service Level Priority", "priority", "=", doc.get("priority")])
 
-	or_filters = []
-	if doc.get("service_level_agreement"):
-		or_filters = [
-			["Service Level Agreement", "name", "=", doc.get("service_level_agreement")],
-		]
+	entities = get_sla_entities(doc.get("customer"))
+	or_filters = [["Service Level Agreement", "entity_type", "is", "not set"]]
+	if entities:
+		or_filters.append(["Service Level Agreement", "entity", "in", entities])
 
-	customer = doc.get("customer")
-	if customer:
-		or_filters.extend(
-			[
-				[
-					"Service Level Agreement",
-					"entity",
-					"in",
-					[customer, *get_customer_group(customer), *get_customer_territory(customer)],
-				],
-				["Service Level Agreement", "entity_type", "is", "not set"],
-			]
-		)
-	else:
-		or_filters.append(["Service Level Agreement", "entity_type", "is", "not set"])
-
+	fields = ["name", "default_priority", "apply_sla_for_resolution", "condition", "entity"]
 	default_sla_filter = [*filters, ["Service Level Agreement", "default_service_level_agreement", "=", 1]]
-	default_sla = frappe.get_all(
-		"Service Level Agreement",
-		filters=default_sla_filter,
-		fields=["name", "default_priority", "apply_sla_for_resolution", "condition"],
-	)
+	default_sla = frappe.get_all("Service Level Agreement", filters=default_sla_filter, fields=fields)
 
 	filters += [["Service Level Agreement", "default_service_level_agreement", "=", 0]]
 	agreements = frappe.get_all(
-		"Service Level Agreement",
-		filters=filters,
-		or_filters=or_filters,
-		fields=["name", "default_priority", "apply_sla_for_resolution", "condition"],
+		"Service Level Agreement", filters=filters, or_filters=or_filters, fields=fields
 	)
 
 	# check if the current document on which SLA is to be applied fulfills all the conditions
@@ -395,10 +372,29 @@ def get_active_service_level_agreement_for(doc):
 		if not condition or (condition and frappe.safe_eval(condition, None, get_context(doc))):
 			filtered_agreements.append(agreement)
 
-	# if any default sla
+	# most specific entity first: customer, customer group, territory, then SLAs without an entity
+	filtered_agreements.sort(
+		key=lambda agreement: entities.index(agreement.entity)
+		if agreement.entity in entities
+		else len(entities)
+	)
 	filtered_agreements += default_sla
 
-	return filtered_agreements[0] if filtered_agreements else None
+	return get_selected_or_first(filtered_agreements, doc.get("service_level_agreement"))
+
+
+def get_sla_entities(customer: str | None) -> list[str]:
+	if not customer:
+		return []
+	return [customer, *get_customer_group(customer), *get_customer_territory(customer)]
+
+
+def get_selected_or_first(agreements: list, selected: str | None):
+	"""Keep the SLA already on the document while it still applies, else the best match."""
+	for agreement in agreements:
+		if agreement.name == selected:
+			return agreement
+	return agreements[0] if agreements else None
 
 
 def get_context(doc):
