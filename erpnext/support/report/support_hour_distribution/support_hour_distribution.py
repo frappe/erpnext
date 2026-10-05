@@ -39,7 +39,7 @@ def get_data(filters):
 		for key, value in time_slots.items():
 			start_time = get_datetime("{} {}".format(start_date.strftime("%Y-%m-%d"), value))
 			end_time = add_to_date(start_time, hours=3)
-			hours_count[key] = get_hours_count(start_time, end_time)
+			hours_count[key] = get_hours_count(start_time, end_time, filters.get("company"))
 			time_slot_wise_total_count[key] = time_slot_wise_total_count.get(key, 0) + hours_count[key]
 
 		if hours_count:
@@ -50,8 +50,12 @@ def get_data(filters):
 	return data, time_slot_wise_total_count
 
 
-def get_hours_count(start_time, end_time):
-	return frappe.db.count("Issue", [["creation", ">=", start_time], ["creation", "<", end_time]])
+def get_hours_count(start_time, end_time, company=None):
+	filters = [["creation", ">=", start_time], ["creation", "<", end_time]]
+	if company:
+		filters.append(["company", "=", company])
+
+	return frappe.get_list("Issue", filters=filters, fields=[{"COUNT": "*", "as": "count"}])[0].count
 
 
 def get_columns():
