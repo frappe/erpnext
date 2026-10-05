@@ -330,6 +330,29 @@ class TestIssue(TestSetUp):
 		self.assertFalse(open_issue.service_level_agreement)
 		self.assertFalse(open_issue.agreement_status)
 
+	def test_split_issue_starts_without_hold_time(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		issue.db_set({"total_hold_time": 172800, "sla_resolution_date": get_datetime("2019-03-04 13:00")})
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"sent_or_received": "Received",
+				"subject": "Split",
+				"sender": "test@example.com",
+				"reference_doctype": "Issue",
+				"reference_name": issue.name,
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", issue.name)
+		split = issue.split_issue(subject="Split issue", communication_id=communication.name)
+		split = frappe.get_doc("Issue", split)
+
+		self.assertFalse(split.total_hold_time)
+		self.assertFalse(split.sla_resolution_date)
+		self.assertEqual(split.agreement_status, "First Response Due")
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

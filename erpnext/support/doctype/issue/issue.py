@@ -179,7 +179,10 @@ class Issue(Document):
 			replicated_issue.service_level_agreement = None
 			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
-			replicated_issue.resolution_by = None
+			replicated_issue.sla_resolution_by = None
+			replicated_issue.sla_resolution_date = None
+			replicated_issue.on_hold_since = None
+			replicated_issue.total_hold_time = None
 			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
