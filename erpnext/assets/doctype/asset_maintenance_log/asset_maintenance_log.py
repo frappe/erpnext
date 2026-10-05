@@ -43,11 +43,8 @@ class AssetMaintenanceLog(Document):
 
 	def validate(self):
 		self.validate_task()
-		if getdate(self.due_date) < getdate(nowdate()) and self.maintenance_status not in [
-			"Completed",
-			"Cancelled",
-		]:
-			self.maintenance_status = "Overdue"
+		if self.maintenance_status in ("Planned", "Overdue"):
+			self.maintenance_status = "Overdue" if getdate(self.due_date) < getdate(nowdate()) else "Planned"
 
 		if self.maintenance_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Asset Maintenance Log"))
@@ -119,6 +116,16 @@ def update_asset_maintenance_log_status():
 		.set(AssetMaintenanceLog.maintenance_status, "Overdue")
 		.where(
 			(AssetMaintenanceLog.maintenance_status == "Planned") & (AssetMaintenanceLog.due_date < today())
+		)
+	).run()
+
+	AssetMaintenanceTask = DocType("Asset Maintenance Task")
+	(
+		frappe.qb.update(AssetMaintenanceTask)
+		.set(AssetMaintenanceTask.maintenance_status, "Overdue")
+		.where(
+			(AssetMaintenanceTask.maintenance_status == "Planned")
+			& (AssetMaintenanceTask.next_due_date < today())
 		)
 	).run()
 

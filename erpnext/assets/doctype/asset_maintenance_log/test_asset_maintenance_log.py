@@ -95,6 +95,28 @@ class TestAssetMaintenanceLog(ERPNextTestSuite):
 		log.update({"maintenance_status": "Completed", "completion_date": add_days(nowdate(), 1)})
 		self.assertRaisesRegex(frappe.ValidationError, "cannot be in the future", log.save)
 
+	def test_overdue_status_follows_the_due_date(self):
+		from erpnext.assets.doctype.asset_maintenance_log.asset_maintenance_log import (
+			update_asset_maintenance_log_status,
+		)
+
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		frappe.db.set_value(
+			"Asset Maintenance Log", get_open_log(task.name).name, "due_date", add_days(nowdate(), -1)
+		)
+		frappe.db.set_value("Asset Maintenance Task", task.name, "next_due_date", add_days(nowdate(), -1))
+
+		update_asset_maintenance_log_status()
+		self.assertEqual(
+			frappe.db.get_value("Asset Maintenance Task", task.name, "maintenance_status"), "Overdue"
+		)
+		log = get_open_log(task.name)
+		self.assertEqual(log.maintenance_status, "Overdue")
+
+		frappe.db.set_value("Asset Maintenance Task", task.name, "next_due_date", add_days(nowdate(), 10))
+		log.save()
+		self.assertEqual(log.maintenance_status, "Planned")
+
 
 def get_open_log(task: str):
 	return frappe.get_doc("Asset Maintenance Log", {"task": task, "docstatus": 0})
