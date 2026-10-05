@@ -78,6 +78,31 @@ class TestTimesheet(ERPNextTestSuite):
 			{"doc_type": "Timesheet", "field_name": "time_logs", "property": "allow_on_submit"},
 		)
 
+	def test_task_status_follows_its_remaining_time_logs(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		task = create_task("_Test Timesheet Status Task")
+
+		def log_time(completed=0):
+			timesheet = make_timesheet(emp, simulate=True, task=task.name, do_not_submit=True)
+			timesheet.time_logs[0].completed = completed
+			return timesheet.submit()
+
+		def task_status():
+			return frappe.db.get_value("Task", task.name, "status")
+
+		log_time().cancel()
+		self.assertEqual(task_status(), "Open")
+
+		log_time(completed=1)
+		later = log_time()
+		self.assertEqual(task_status(), "Completed")
+		later.cancel()
+		self.assertEqual(task_status(), "Completed")
+
+		frappe.db.set_value("Task", task.name, "status", "Cancelled")
+		log_time()
+		self.assertEqual(task_status(), "Cancelled")
+
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)

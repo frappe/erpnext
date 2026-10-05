@@ -174,12 +174,7 @@ class Timesheet(Document):
 			if data.task and data.task not in tasks:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
-				time_logs_completed = all(tl.completed for tl in self.time_logs if tl.task == task.name)
-
-				if time_logs_completed:
-					task.status = "Completed"
-				else:
-					task.status = "Working"
+				task.status = get_task_status(task)
 				task.save(ignore_permissions=True)
 				tasks.append(data.task)
 
@@ -300,6 +295,21 @@ class Timesheet(Document):
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_status()
+
+
+def get_task_status(task: Document) -> str:
+	"""Status from the task's submitted time logs; a Completed or Cancelled task is never reopened."""
+	if task.status in ("Completed", "Cancelled"):
+		return task.status
+
+	completed = frappe.get_all(
+		"Timesheet Detail",
+		filters={"task": task.name, "docstatus": 1, "parenttype": "Timesheet"},
+		pluck="completed",
+	)
+	if not completed:
+		return "Open"
+	return "Completed" if any(completed) else "Working"
 
 
 @frappe.whitelist()
