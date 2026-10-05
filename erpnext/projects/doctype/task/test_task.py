@@ -53,17 +53,9 @@ class TestTask(ERPNextTestSuite):
 		task3.append("depends_on", {"task": task4.name})
 
 	def test_reschedule_dependent_task(self):
-		project = frappe.get_value("Project", {"project_name": "_Test Project"})
-
 		task1 = create_task("_Test Task 1", nowdate(), add_days(nowdate(), 10))
-
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
-		task2.get("depends_on")[0].project = project
-		task2.save()
-
 		task3 = create_task("_Test Task 3", add_days(nowdate(), 11), add_days(nowdate(), 15), task2.name)
-		task3.get("depends_on")[0].project = project
-		task3.save()
 
 		task1.update({"exp_end_date": add_days(nowdate(), 20)})
 		task1.save()
@@ -84,6 +76,21 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(
 			getdate(frappe.db.get_value("Task", task3.name, "exp_end_date")), getdate(add_days(nowdate(), 30))
+		)
+
+	def test_child_task_does_not_reschedule_its_parent(self):
+		parent = create_task("_Test Parent Not Rescheduled", nowdate(), add_days(nowdate(), 10), is_group=1)
+		child = create_task(
+			"_Test Child Of Parent Not Rescheduled",
+			nowdate(),
+			add_days(nowdate(), 3),
+			parent_task=parent.name,
+		)
+
+		child.save()
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", parent.name, "exp_start_date")), getdate(nowdate())
 		)
 
 	def test_close_assignment(self):
