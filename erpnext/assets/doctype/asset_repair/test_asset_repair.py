@@ -455,6 +455,16 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset.set_status()
 		self.assertEqual(asset.db_get("status"), "Out of Order")
 
+	def test_capitalized_repair_raises_value_of_asset_without_depreciation(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000 + asset_repair.repair_cost)
+
+		asset_repair.cancel()
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations + (

@@ -274,6 +274,8 @@ class AssetRepair(AccountsController):
 		if self.asset_doc.calculate_depreciation:
 			for row in self.asset_doc.finance_books:
 				row.value_after_depreciation += flt(total_repair_cost)
+		else:
+			self.asset_doc.value_after_depreciation += flt(total_repair_cost)
 
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.save()
