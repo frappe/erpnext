@@ -369,13 +369,14 @@ class Task(NestedSet):
 	def after_delete(self):
 		self.update_project()
 
-	def update_status(self):
-		if self.status not in ("Cancelled", "Completed") and self.exp_end_date:
-			from datetime import datetime
+	@property
+	def is_overdue(self) -> bool:
+		return bool(self.exp_end_date) and getdate(self.exp_end_date) < getdate()
 
-			if self.exp_end_date < datetime.now():
-				self.db_set("status", "Overdue", update_modified=False)
-				self.update_project()
+	def update_status(self):
+		if self.status not in ("Cancelled", "Completed") and self.is_overdue:
+			self.db_set("status", "Overdue", update_modified=False)
+			self.update_project()
 
 
 @frappe.whitelist()
