@@ -240,6 +240,16 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_delete_asset_maintenance_with_draft_logs(self):
+		asset_maintenance = self.make_asset_maintenance()
+
+		asset_maintenance.delete()
+
+		self.assertFalse(frappe.db.exists("Asset Maintenance", asset_maintenance.name))
+		self.assertFalse(
+			frappe.db.exists("Asset Maintenance Log", {"asset_maintenance": asset_maintenance.name})
+		)
+
 	def submit_asset(self):
 		self.asset_doc.update(
 			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}

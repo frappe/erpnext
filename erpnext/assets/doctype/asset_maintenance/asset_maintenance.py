@@ -55,6 +55,13 @@ class AssetMaintenance(Document):
 		self.close_unassigned_todos()
 		self.sync_maintenance_tasks()
 
+	def on_trash(self):
+		draft_logs = frappe.get_all(
+			"Asset Maintenance Log", filters={"asset_maintenance": self.name, "docstatus": 0}, pluck="name"
+		)
+		for log in draft_logs:
+			frappe.delete_doc("Asset Maintenance Log", log, ignore_permissions=True)
+
 	def after_delete(self):
 		asset = frappe.get_doc("Asset", self.asset_name)
 		if asset.status == "In Maintenance":
