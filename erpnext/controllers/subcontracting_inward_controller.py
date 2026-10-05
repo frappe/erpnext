@@ -452,7 +452,7 @@ class SubcontractingInwardController:
 			frappe.qb.from_(table)
 			.join(child_table)
 			.on(table.name == child_table.parent)
-			.select(child_table.serial_no, child_table.batch_no, child_table.qty)
+			.select(child_table.serial_no, child_table.batch_no, child_table.qty, child_table.delivered_qty)
 			.where((table.docstatus == 1) & (table.voucher_detail_no == scio_detail))
 		)
 
@@ -464,8 +464,9 @@ class SubcontractingInwardController:
 		for d in query.run(as_dict=True):
 			if d.serial_no and d.serial_no not in serial_nos:
 				serial_nos.append(d.serial_no)
-			if d.batch_no and d.batch_no not in batch_nos:
-				batch_nos[d.batch_no] = d.qty
+			if d.batch_no:
+				qty = d.qty - d.delivered_qty if only_pending else d.qty
+				batch_nos[d.batch_no] = batch_nos.get(d.batch_no, 0) + qty
 
 		return serial_nos, batch_nos
 
@@ -1058,6 +1059,7 @@ class SubcontractingInwardController:
 							child_table.name.as_("sbe_name"),
 							child_table.batch_no,
 							child_table.qty,
+							child_table.delivered_qty,
 						)
 						.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
 					)
@@ -1084,7 +1086,10 @@ class SubcontractingInwardController:
 								)
 							)
 
-							qty = min(row.qty, sabe_qty)
+							open_qty = (
+								row.qty - row.delivered_qty if self._action == "submit" else row.delivered_qty
+							)
+							qty = min(open_qty, sabe_qty - consumed_qty[row.batch_no])
 							sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
 							sbe_doc.db_set(
 								"delivered_qty",
