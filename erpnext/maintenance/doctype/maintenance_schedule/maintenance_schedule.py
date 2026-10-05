@@ -526,8 +526,10 @@ class MaintenanceSchedule(TransactionBase):
 			if not s_date:
 				frappe.throw(_("Scheduled Date is required."))
 			for schedule in self.schedules:
-				if schedule.item_name == item_name and s_date == formatdate(
-					schedule.scheduled_date, "dd-mm-yyyy"
+				if (
+					schedule.item_name == item_name
+					and schedule.completion_status == "Pending"
+					and s_date == formatdate(schedule.scheduled_date, "dd-mm-yyyy")
 				):
 					return schedule.name
 

@@ -256,6 +256,23 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 
 		self.assertEqual(len(visible), len(ms.schedules))
 
+	def test_pending_data_id_skips_completed_row(self):
+		ms = make_maintenance_schedule()
+		ms.append("items", ms.items[0].as_dict(no_default_fields=True))
+		ms.save()
+		ms.submit()
+		completed = ms.schedules[0]
+		completed.db_set("completion_status", "Fully Completed")
+		pending = next(row for row in ms.schedules[1:] if row.scheduled_date == completed.scheduled_date)
+
+		s_id = ms.get_pending_data(
+			data_type="id",
+			item_name=completed.item_name,
+			s_date=formatdate(completed.scheduled_date, "dd-mm-yyyy"),
+		)
+
+		self.assertEqual(s_id, pending.name)
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
