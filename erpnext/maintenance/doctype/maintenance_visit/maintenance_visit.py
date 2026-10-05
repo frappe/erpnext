@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Order
 from frappe.utils import escape_html, format_date, get_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
@@ -138,35 +139,53 @@ class MaintenanceVisit(TransactionBase):
 		self.validate_maintenance_date()
 		self.validate_purpose_table()
 
-	def update_status_and_actual_date(self, cancel=False):
-		status = "Pending"
-		actual_date = None
-		if not cancel:
-			status = self.completion_status
-			actual_date = self.mntc_date
+	def update_status_and_actual_date(self):
+		details = self.get_schedule_details()
+		if not details:
+			return
 
-		if self.maintenance_schedule_detail:
+		visits = self.get_submitted_schedule_visits(details)
+		for detail in details:
+			references = [visit for visit in visits if visit.detail == detail]
+			fully_completed = [visit for visit in references if visit.completion_status == "Fully Completed"]
+			latest = next(iter(fully_completed or references), None)
 			frappe.db.set_value(
-				"Maintenance Schedule Detail", self.maintenance_schedule_detail, "completion_status", status
+				"Maintenance Schedule Detail",
+				detail,
+				{
+					"completion_status": latest.completion_status if latest else "Pending",
+					"actual_date": latest.mntc_date if latest else None,
+				},
 			)
-			frappe.db.set_value(
-				"Maintenance Schedule Detail", self.maintenance_schedule_detail, "actual_date", actual_date
+
+	def get_submitted_schedule_visits(self, details):
+		"""Submitted visits referencing the schedule rows, latest first."""
+		visit = frappe.qb.DocType("Maintenance Visit")
+		purpose = frappe.qb.DocType("Maintenance Visit Purpose")
+		visits = (
+			frappe.qb.from_(visit)
+			.inner_join(purpose)
+			.on(purpose.parent == visit.name)
+			.select(
+				visit.maintenance_schedule_detail.as_("header_detail"),
+				purpose.maintenance_schedule_detail.as_("detail"),
+				visit.completion_status,
+				visit.mntc_date,
 			)
-		else:
-			for purpose in self.purposes:
-				if purpose.maintenance_schedule_detail:
-					frappe.db.set_value(
-						"Maintenance Schedule Detail",
-						purpose.maintenance_schedule_detail,
-						"completion_status",
-						status,
-					)
-					frappe.db.set_value(
-						"Maintenance Schedule Detail",
-						purpose.maintenance_schedule_detail,
-						"actual_date",
-						actual_date,
-					)
+			.where(
+				(visit.docstatus == 1)
+				& (
+					visit.maintenance_schedule_detail.isin(details)
+					| purpose.maintenance_schedule_detail.isin(details)
+				)
+			)
+			.orderby(visit.mntc_date, order=Order.desc)
+			.orderby(visit.creation, order=Order.desc)
+		).run(as_dict=True)
+
+		for row in visits:
+			row.detail = row.header_detail or row.detail
+		return visits
 
 	def update_customer_issue(self, flag):
 		if not self.maintenance_schedule:
@@ -269,7 +288,7 @@ class MaintenanceVisit(TransactionBase):
 	def on_cancel(self):
 		self.check_if_last_visit()
 		self.db_set("status", "Cancelled")
-		self.update_status_and_actual_date(cancel=True)
+		self.update_status_and_actual_date()
 
 	def on_update(self):
 		pass
