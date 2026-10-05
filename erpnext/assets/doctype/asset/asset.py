@@ -220,10 +220,12 @@ class Asset(AccountsController):
 		if self.split_from:
 			return
 
-		self.value_after_depreciation = (
+		self.db_set(
+			"value_after_depreciation",
 			flt(self.net_purchase_amount)
 			- flt(self.opening_accumulated_depreciation)
-			+ flt(self.additional_asset_cost)
+			+ flt(self.additional_asset_cost),
+			update_modified=False,
 		)
 		if self.calculate_depreciation:
 			self.set_depreciation_rate()

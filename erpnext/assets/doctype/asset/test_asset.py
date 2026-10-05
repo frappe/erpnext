@@ -986,6 +986,20 @@ class TestAsset(AssetSetup):
 		frappe.get_doc("Journal Entry", first_depreciation_entry).cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
+	def test_value_after_depreciation_is_stored_for_draft(self):
+		for calculate_depreciation in (0, 1):
+			draft_asset = create_asset(
+				calculate_depreciation=calculate_depreciation,
+				opening_accumulated_depreciation=10000,
+				opening_number_of_booked_depreciations=1,
+				depreciation_start_date="2025-04-30",
+			)
+			frappe.get_doc("Asset", draft_asset.name).submit()
+
+			self.assertEqual(
+				frappe.db.get_value("Asset", draft_asset.name, "value_after_depreciation"), 90000
+			)
+
 	def test_asset_sale_validations(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
