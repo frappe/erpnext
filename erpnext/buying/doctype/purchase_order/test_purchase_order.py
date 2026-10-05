@@ -2057,6 +2057,36 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, sco.save)
 
+	def test_drop_ship_delivered_qty_is_converted_to_sales_order_uom(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item(
+			"_Test Drop Ship Box Item",
+			{"is_stock_item": 1, "delivered_by_supplier": 1},
+			uoms=[{"uom": "Box", "conversion_factor": 12}],
+		)
+		so_item = {
+			"item_code": item.name,
+			"warehouse": "",
+			"qty": 2,
+			"uom": "Box",
+			"conversion_factor": 12,
+			"rate": 1200,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[so_item])
+		po = make_po_from_so(so.name, selected_items=[so_item])[0]
+		po.items[0].uom = item.stock_uom
+		po.items[0].conversion_factor = 1
+		po.items[0].qty = 24
+		po.submit()
+		po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 12}])
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 1)
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 50)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
