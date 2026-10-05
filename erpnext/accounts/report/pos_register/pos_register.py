@@ -87,7 +87,7 @@ def get_invoice_entries(doctype, filters, group_by_field):
 
 	if group_by_field == "mode_of_payment":
 		sip = frappe.qb.DocType("Sales Invoice Payment")
-		paid_amount = sip.base_amount - Case().when(sip.type == "Cash", p.change_amount).else_(0)
+		paid_amount = sip.base_amount - Case().when(sip.type == "Cash", p.base_change_amount).else_(0)
 		query = (
 			query.inner_join(sip)
 			.on((sip.parent == p.name) & (sip.parenttype == doctype))
@@ -95,7 +95,7 @@ def get_invoice_entries(doctype, filters, group_by_field):
 			.where(IfNull(paid_amount, 0) != 0)
 		)
 	elif group_by_field:
-		query = query.select((p.base_paid_amount - p.change_amount).as_("paid_amount"))
+		query = query.select((p.base_paid_amount - p.base_change_amount).as_("paid_amount"))
 
 	return query.run(as_dict=1)
 
