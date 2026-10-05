@@ -494,6 +494,8 @@ def validate_scrap_date(scrap_date, today_date, purchase_date, calculate_depreci
 def restore_asset(asset_name):
 	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.journal_entry_for_scrap:
+		frappe.throw(_("Asset {0} cannot be restored, as it is not scrapped").format(asset_name))
 
 	reverse_depreciation_entry_made_after_disposal(asset, asset.disposal_date)
 

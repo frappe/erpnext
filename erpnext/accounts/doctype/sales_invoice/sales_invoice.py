@@ -1412,7 +1412,7 @@ class SalesInvoice(SellingController):
 		"""
 
 		def _update_asset(asset, disposal_date, note, asset_status=None):
-			frappe.db.set_value("Asset", d.asset, "disposal_date", disposal_date)
+			asset.db_set("disposal_date", disposal_date)
 			add_asset_activity(asset.name, note)
 			asset.set_status(asset_status)
 
