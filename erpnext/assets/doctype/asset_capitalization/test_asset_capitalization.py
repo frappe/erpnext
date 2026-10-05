@@ -570,6 +570,19 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, asset_capitalization.save)
 
+	def test_capitalization_before_the_last_booked_depreciation_is_refused(self):
+		consumed_asset = create_depreciation_asset(submit=1)
+		target_asset = create_asset(is_composite_asset=1, warehouse="Stores - _TC")
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_asset_capitalization,
+			capitalization_method="Choose a WIP composite asset",
+			target_asset=target_asset.name,
+			consumed_asset=consumed_asset.name,
+			posting_date="2020-06-30",
+		)
+
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
