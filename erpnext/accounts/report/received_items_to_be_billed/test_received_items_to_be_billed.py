@@ -5,7 +5,10 @@ import frappe
 
 from erpnext.accounts.report.received_items_to_be_billed.received_items_to_be_billed import execute
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_pi_from_pr
-from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+from erpnext.stock.doctype.purchase_receipt.mapper import (
+	make_purchase_return,
+	make_purchase_return_against_rejected_warehouse,
+)
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -129,6 +132,16 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 
 		row = self.get_row(self.run_report(), pr.name)
 		self.assertEqual((row.returned_amount, row.pending_amount), (1000, 1000))
+
+	def test_returning_rejected_qty_keeps_the_pending_amount(self):
+		pr = make_purchase_receipt(qty=8, rejected_qty=2, rate=100, posting_date="2026-06-01")
+		return_pr = make_purchase_return_against_rejected_warehouse(pr.name)
+		return_pr.set_posting_time = 1
+		return_pr.posting_date = "2026-06-02"
+		return_pr.submit()
+
+		row = self.get_row(self.run_report(), pr.name)
+		self.assertEqual((row.returned_amount, row.pending_amount), (0, 800))
 
 
 def make_receipt_return(purchase_receipt, qty, posting_date):
