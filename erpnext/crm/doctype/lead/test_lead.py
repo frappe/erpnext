@@ -229,6 +229,18 @@ class TestLead(ERPNextTestSuite):
 			)
 		)
 
+	def test_prospect_from_lead_needs_prospect_create_permission(self):
+		sales_user = make_user("_test_lead_sales_user@example.com", "Sales User")
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(sales_user)
+		lead = make_lead()
+
+		self.assertRaises(
+			frappe.PermissionError,
+			lead.create_prospect_and_contact,
+			{"create_prospect": 1, "prospect_name": "_Test Prospect From Lead"},
+		)
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",

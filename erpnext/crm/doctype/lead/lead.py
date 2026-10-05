@@ -264,6 +264,7 @@ class Lead(SellingController, CRMNote):
 			self.link_to_contact()
 
 		if data.create_prospect:
+			frappe.has_permission("Prospect", "create", throw=True)
 			self.create_prospect(data.prospect_name)
 
 	def create_contact(self):
