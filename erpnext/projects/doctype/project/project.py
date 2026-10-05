@@ -91,7 +91,6 @@ class Project(Document):
 
 	def validate(self):
 		if not self.is_new():
-			self.copy_from_template()
 			self.control_access_for_project_users()
 		self.send_welcome_email()
 		self.update_costing()
@@ -99,7 +98,7 @@ class Project(Document):
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
-	def copy_from_template(self, trigger=None):
+	def copy_from_template(self):
 		"""
 		Copy tasks from template
 		"""
@@ -108,15 +107,13 @@ class Project(Document):
 			if not self.expected_start_date:
 				# project starts today
 				self.expected_start_date = today()
-				if trigger == "after_insert":
-					self.db_set("expected_start_date", self.expected_start_date)
+				self.db_set("expected_start_date", self.expected_start_date)
 
 			template = frappe.get_doc("Project Template", self.project_template)
 
 			if not self.project_type:
 				self.project_type = template.project_type
-				if trigger == "after_insert":
-					self.db_set("project_type", self.project_type)
+				self.db_set("project_type", self.project_type)
 
 			# create tasks from template
 			project_tasks = []
@@ -240,7 +237,7 @@ class Project(Document):
 		self.db_update()
 
 	def after_insert(self):
-		self.copy_from_template("after_insert")
+		self.copy_from_template()
 		self.link_with_sales_order()
 		self.control_access_for_project_users()
 

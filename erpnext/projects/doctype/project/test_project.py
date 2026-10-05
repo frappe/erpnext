@@ -177,6 +177,19 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(len(tasks), 2)
 
+	def test_deleted_template_tasks_are_not_recreated_on_save(self):
+		template = make_project_template("_Test Template Tasks Not Recreated")
+		project = get_project(
+			f"_Test Template Tasks Not Recreated {frappe.generate_hash(length=6)}", template
+		)
+		for task in frappe.get_all("Task", filters={"project": project.name}, pluck="name"):
+			frappe.delete_doc("Task", task)
+
+		project.reload()
+		project.save()
+
+		self.assertFalse(frappe.db.exists("Task", {"project": project.name}))
+
 	def test_project_linking_with_sales_order(self):
 		so = make_sales_order()
 		project = make_project_from_so(so.name)
