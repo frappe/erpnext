@@ -402,6 +402,6 @@ def get_purchase_receipts_against_purchase_order(item_list):
 		)
 
 		for pr in purchase_receipts:
-			po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
+			po_pr_map.setdefault(pr.purchase_order_item, []).append(pr.parent)
 
 	return po_pr_map
