@@ -13,6 +13,7 @@ from frappe.utils import (
 	cint,
 	cstr,
 	flt,
+	fmt_money,
 	get_link_to_form,
 	nowdate,
 )
@@ -764,8 +765,35 @@ class StockEntry(StockController, SubcontractingInwardController):
 			}
 		)
 
+	def get_manual_finished_items_cost(self) -> float:
+		"""Value of the finished good rows with a manual rate. It is taken out of the cost the
+		other finished good rows split, or that value would be booked twice."""
+		return sum(
+			flt(d.transfer_qty) * flt(d.basic_rate)
+			for d in self.get("items")
+			if d.is_finished_item and d.set_basic_rate_manually and not is_costed_out_of_finished_item(d)
+		)
+
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
 		outgoing_items_cost -= self.get_costed_out_items_cost()
+
+		manual_finished_items_cost = self.get_manual_finished_items_cost()
+		# refused when the user saves; a repost must not fail, it values the other rows at zero
+		if manual_finished_items_cost > outgoing_items_cost and getattr(self, "_action", None) in (
+			"save",
+			"submit",
+		):
+			currency = erpnext.get_company_currency(self.company)
+			frappe.throw(
+				_(
+					"The finished goods with a manual rate are valued at {0}, more than the consumed cost {1} left for finished goods, so nothing is left to value the other finished goods. Lower the manual rates, or set the rate manually on every finished good."
+				).format(
+					fmt_money(manual_finished_items_cost, currency=currency),
+					fmt_money(outgoing_items_cost, currency=currency),
+				)
+			)
+
+		outgoing_items_cost = max(outgoing_items_cost - manual_finished_items_cost, 0)
 
 		finished_items = [
 			d.item_code for d in self.get("items") if d.is_finished_item and not d.set_basic_rate_manually

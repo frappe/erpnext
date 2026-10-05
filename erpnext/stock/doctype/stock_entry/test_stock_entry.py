@@ -1941,6 +1941,91 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(entry.items[2].basic_rate, 50)
 		self.assertEqual(entry.items[1].basic_rate, 1400)
 
+	def test_repack_takes_manual_finished_good_value_out_of_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Repack"
+		entry.set_stock_entry_type()
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		entry.append(
+			"items",
+			stock_entry_row(
+				fg_item,
+				5,
+				t_warehouse="_Test Warehouse 1 - _TC",
+				set_basic_rate_manually=1,
+				basic_rate=60,
+			),
+		)
+		entry.append("items", stock_entry_row(fg_item, 5, t_warehouse="_Test Warehouse 1 - _TC"))
+		entry.insert()
+		entry.submit()
+
+		self.assertEqual(entry.items[1].basic_rate, 60)
+		self.assertEqual(entry.items[2].basic_rate, 140)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
+		entry = frappe.copy_doc(entry)
+		entry.items[1].basic_rate = 300
+		self.assertRaisesRegex(frappe.ValidationError, "more than the consumed cost", entry.insert)
+
+	def test_repack_repost_with_manual_finished_good_above_cost(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Repack"
+		entry.set_stock_entry_type()
+		entry.set_posting_time = 1
+		entry.posting_date = add_days(today(), -5)
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		entry.append(
+			"items",
+			stock_entry_row(
+				fg_item,
+				5,
+				t_warehouse="_Test Warehouse 1 - _TC",
+				set_basic_rate_manually=1,
+				basic_rate=150,
+			),
+		)
+		entry.append("items", stock_entry_row(fg_item, 5, t_warehouse="_Test Warehouse 1 - _TC"))
+		entry.insert()
+		entry.submit()
+		self.assertEqual(entry.items[2].basic_rate, 50)
+
+		# the consumed cost drops to 550, below the manual row's 750
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=10,
+			posting_date=add_days(today(), -8),
+		)
+		for repost in frappe.get_all(
+			"Repost Item Valuation", filters={"item_code": rm_item, "docstatus": 1, "status": "Queued"}
+		):
+			repost_sl_entries(frappe.get_doc("Repost Item Valuation", repost.name))
+
+		entry.load_from_db()
+		self.assertEqual(entry.items[0].basic_rate, 55)
+		self.assertEqual(entry.items[1].basic_rate, 150)
+		self.assertEqual(entry.items[2].basic_rate, 0)
+
 	def test_valuation_rate_lookup_without_voucher_no(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
