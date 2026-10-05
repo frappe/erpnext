@@ -141,3 +141,18 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual((row["quantity"], row["unit_of_measurement"]), (10, "_Test UOM 1"))
+
+	def test_completed_and_closed_orders_are_shown_on_request(self):
+		completed = create_purchase_order(qty=10)
+		create_pr_against_po(completed.name, received_qty=10)
+		make_purchase_invoice(completed.name).submit()
+		closed = create_purchase_order()
+		closed.update_status("Closed")
+
+		orders = {row.get("purchase_order") for row in self.run_report()}
+		self.assertNotIn(completed.name, orders)
+		self.assertNotIn(closed.name, orders)
+
+		rows = {row.get("purchase_order"): row for row in self.run_report(show_completed_orders=1)}
+		self.assertEqual(rows[completed.name]["actual_cost"], 5000)
+		self.assertEqual(rows[closed.name]["actual_cost"], 0)

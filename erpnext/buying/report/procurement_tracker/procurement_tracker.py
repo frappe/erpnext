@@ -153,7 +153,7 @@ def get_data(filters):
 	purchase_order_entry = get_po_entries(filters)
 	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters)
 	pr_records = get_mapped_pr_records()
-	pi_records = get_mapped_pi_records()
+	pi_records = get_mapped_pi_records(filters)
 	ordered_stock_qty = get_ordered_stock_qty_by_request_item(purchase_order_entry)
 
 	procurement_record = []
@@ -180,7 +180,7 @@ def get_data(filters):
 				"purchase_order": po.parent,
 				"supplier": po.supplier,
 				"estimated_cost": get_estimated_cost(po, mr_record, ordered_stock_qty),
-				"actual_cost": flt(pi_records.get(po.name)) or flt(po.amount),
+				"actual_cost": get_actual_cost(po, pi_records),
 				"purchase_order_amt": flt(po.amount),
 				"purchase_order_amt_in_company_currency": flt(po.base_amount),
 				"expected_delivery_date": po.schedule_date,
@@ -205,6 +205,13 @@ def get_ordered_stock_qty_by_request_item(purchase_order_entry):
 			as_list=True,
 		)
 	)
+
+
+def get_actual_cost(po, pi_records):
+	"""Invoiced amount, or the line amount while the order can still be billed."""
+	if invoiced := flt(pi_records.get(po.name)):
+		return invoiced
+	return 0.0 if po.status == "Closed" else flt(po.amount)
 
 
 def get_estimated_cost(po, mr_record, ordered_stock_qty):
@@ -274,7 +281,13 @@ def get_mapped_mr_details(filters):
 	return mr_records, procurement_record_against_mr
 
 
-def get_mapped_pi_records():
+def get_hidden_order_statuses(filters):
+	if filters.get("show_completed_orders"):
+		return ("Cancelled",)
+	return ("Closed", "Completed", "Cancelled")
+
+
+def get_mapped_pi_records(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 	pi_records = (
@@ -284,7 +297,7 @@ def get_mapped_pi_records():
 		.select(pi_item.po_detail, Sum(pi_item.base_amount))
 		.where(
 			(pi_item.docstatus == 1)
-			& (po.status.notin(("Closed", "Completed", "Cancelled")))
+			& (po.status.notin(get_hidden_order_statuses(filters)))
 			& (pi_item.po_detail.isnotnull())
 		)
 		.groupby(pi_item.po_detail)
@@ -342,7 +355,7 @@ def get_po_entries(filters):
 		.where(
 			(parent.docstatus == 1)
 			& (parent.name == child.parent)
-			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
+			& (parent.status.notin(get_hidden_order_statuses(filters)))
 		)
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
