@@ -89,6 +89,7 @@ class TestCashFlow(ERPNextTestSuite):
 			row = self.get_row("Net Change in Fixed Asset", presentation_currency="USD")
 
 		self.assertEqual(row["total"], self.get_row("Net Change in Fixed Asset")["total"] / 80)
+		self.assertEqual(row["currency"], "USD")
 
 	def test_group_by_dimension(self):
 		"""Cash movements must land in their own cost center's column, not just the overall total."""
