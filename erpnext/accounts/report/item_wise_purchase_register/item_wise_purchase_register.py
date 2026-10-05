@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
@@ -306,7 +307,11 @@ def apply_conditions(query, pi, pii, filters):
 		query = query.where(pii.item_code == filters.get("item_code"))
 
 	if filters.get("item_group"):
-		query = query.where(pii.item_group == filters.get("item_group"))
+		item_groups = [
+			filters.get("item_group"),
+			*get_descendants_of("Item Group", filters.get("item_group")),
+		]
+		query = query.where(pii.item_group.isin(item_groups))
 
 	return query
 

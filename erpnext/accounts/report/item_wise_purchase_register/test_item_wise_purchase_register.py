@@ -88,3 +88,12 @@ class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(row["total_tax"], 18)
 		self.assertEqual(row["total_other_charges"], 10)
 		self.assertEqual(row["total"], pi.base_grand_total)
+
+	def test_item_group_filter_includes_child_groups(self):
+		pi = self.create_purchase_invoice()
+
+		for item_group in ("All Item Groups", pi.items[0].item_group):
+			filters = frappe._dict(
+				{"from_date": today(), "to_date": today(), "company": self.company, "item_group": item_group}
+			)
+			self.assertEqual([row["invoice"] for row in execute(filters)[1]], [pi.name])
