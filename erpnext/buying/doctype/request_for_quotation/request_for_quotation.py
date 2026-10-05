@@ -290,6 +290,7 @@ class RequestforQuotation(BuyingController):
 				"first_name": contact_name or rfq_supplier.supplier_name or rfq_supplier.supplier,
 				"user_type": "Website User",
 				"redirect_url": link,
+				"roles": [{"role": "Supplier"}],
 			}
 		)
 		user.save(ignore_permissions=True)

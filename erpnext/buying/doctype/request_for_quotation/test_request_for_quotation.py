@@ -284,6 +284,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 
 		supplier_doc.reload()
 		self.assertTrue(supplier_doc.portal_users[0].user)
+		self.assertIn("Supplier", frappe.get_roles(supplier_doc.portal_users[0].user))
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1})
 	def test_supplier_quotation_from_zero_qty_rfq(self):
