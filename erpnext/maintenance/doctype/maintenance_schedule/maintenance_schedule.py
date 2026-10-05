@@ -430,8 +430,10 @@ class MaintenanceSchedule(TransactionBase):
 			return items
 		elif data_type == "id":
 			for schedule in self.schedules:
-				if schedule.item_name == item_name and s_date == formatdate(
-					schedule.scheduled_date, "dd-mm-yyyy"
+				if (
+					schedule.item_name == item_name
+					and schedule.completion_status == "Pending"
+					and s_date == formatdate(schedule.scheduled_date, "dd-mm-yyyy")
 				):
 					return schedule.name
 
