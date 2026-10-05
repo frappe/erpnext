@@ -48,11 +48,13 @@ def get_funnel_data(from_date: str, to_date: str, company: str):
 	quotation = frappe.qb.DocType("Quotation")
 	quotations = (
 		frappe.qb.from_(quotation)
+		.left_join(opportunity)
+		.on(quotation.opportunity == opportunity.name)
 		.select(Count("*"))
 		.where(
 			(quotation.docstatus == 1)
 			& Date(quotation.creation).between(from_date, to_date)
-			& ((quotation.opportunity != "") | (quotation.quotation_to == "Lead"))
+			& ((opportunity.opportunity_from == "Lead") | (quotation.quotation_to == "Lead"))
 			& (quotation.company == company)
 		)
 		.run()

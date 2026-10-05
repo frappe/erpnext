@@ -82,23 +82,24 @@ class TestSalesFunnel(ERPNextTestSuite):
 		self.assertEqual(after_leads, baseline_leads)
 
 	def test_funnel_quotations_count(self):
-		# A submitted Quotation linked to an Opportunity (the `opportunity != ""`
-		# branch of the funnel filter) must be reflected in the Quotations stage.
 		company = "_Test Company"
 		from_date, to_date = today(), add_days(today(), 1)
 
 		baseline_quotations = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Quotations")
 
-		opportunity = make_opportunity(company=company, opportunity_from="Customer")
+		lead = self.make_lead(company)
+		lead_opportunity = make_opportunity(company=company, opportunity_from="Lead", lead=lead.name)
+		lead_quotation = make_quotation(party_name="_Test Customer", company=company, do_not_submit=True)
+		lead_quotation.opportunity = lead_opportunity.name
+		lead_quotation.submit()
 
-		quotation = make_quotation(party_name="_Test Customer", company=company, do_not_submit=True)
-		quotation.opportunity = opportunity.name
-		quotation.submit()
-		self.assertEqual(quotation.docstatus, 1)
+		customer_opportunity = make_opportunity(company=company, opportunity_from="Customer")
+		customer_quotation = make_quotation(party_name="_Test Customer", company=company, do_not_submit=True)
+		customer_quotation.opportunity = customer_opportunity.name
+		customer_quotation.submit()
 
 		after_quotations = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Quotations")
 		self.assertEqual(after_quotations - baseline_quotations, 1)
-		self.assertGreaterEqual(after_quotations, 1)
 
 	def test_funnel_converted_count(self):
 		# A Customer joined to a Lead of this company (Customer INNER JOIN Lead on
