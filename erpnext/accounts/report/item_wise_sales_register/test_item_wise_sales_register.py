@@ -137,6 +137,17 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 100)
 
+	def test_grouped_report_with_zero_grand_total(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		self.customer = "_Test Customer 2"
+		make_sales_return(self.create_sales_invoice().name).submit()
+
+		data = self.get_grouped_data(customer=self.customer)
+
+		self.assertEqual(self.get_grand_total_row(data)["total"], 0)
+		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 0)
+
 	def get_grouped_data(self, **filters):
 		filters = frappe._dict(
 			from_date=today(), to_date=today(), company=self.company, group_by="Customer", **filters

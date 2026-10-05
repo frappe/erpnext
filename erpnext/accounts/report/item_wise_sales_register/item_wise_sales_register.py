@@ -129,7 +129,7 @@ def get_grouped_data(filters: dict, rows: list[tuple[dict, dict]], tax_columns: 
 	group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
 
 	for d, row in rows:
-		row["percent_gt"] = flt(row["total"] / grand_total) * 100
+		row["percent_gt"] = get_percent(row["total"], grand_total)
 		data, prev_group_by_value = add_total_row(
 			data,
 			filters,
@@ -145,12 +145,16 @@ def get_grouped_data(filters: dict, rows: list[tuple[dict, dict]], tax_columns: 
 		data.append(row)
 
 	total_row = total_row_map.get(prev_group_by_value or d.get("item_name"))
-	total_row["percent_gt"] = flt(total_row["total"] / grand_total * 100)
+	total_row["percent_gt"] = get_percent(total_row["total"], grand_total)
 	data.append(total_row)
 	data.append({})
 	add_sub_total_row(total_row, total_row_map, "total_row", tax_columns)
 	data.append(total_row_map.get("total_row"))
 	return data
+
+
+def get_percent(value: float, grand_total: float) -> float:
+	return flt(value) / grand_total * 100 if grand_total else 0.0
 
 
 def get_income_account(row):
