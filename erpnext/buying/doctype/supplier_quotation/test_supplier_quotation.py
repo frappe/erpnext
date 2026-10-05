@@ -465,3 +465,26 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(len(po.get("items")), 1)
 		self.assertEqual(po.get("items")[0].qty, 0)
 		self.assertEqual(po.get("items")[0].item_code, sq.get("items")[0].item_code)
+
+	def test_removing_quoted_rows_resets_rfq_quote_status(self):
+		rfq = make_request_for_quotation(do_not_submit=True)
+		rfq.append("items", dict(rfq.items[0].as_dict(), name=None, idx=None, item_code="_Test Item 2"))
+		rfq.submit()
+		supplier = rfq.suppliers[0].supplier
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.submit()
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Received")
+
+		row = sq.items[0]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "rate": row.rate, "qty": row.qty, "docname": row.name}]
+		)
+		update_child_qty_rate("Supplier Quotation", trans_items, sq.name)
+
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Pending")
+
+
+def rfq_quote_status(rfq, supplier):
+	return frappe.db.get_value(
+		"Request for Quotation Supplier", {"parent": rfq, "supplier": supplier}, "quote_status"
+	)
