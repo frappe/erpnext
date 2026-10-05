@@ -258,7 +258,7 @@ class RequestforQuotation(BuyingController):
 
 	def update_user_in_supplier(self, supplier, user):
 		"""Update user in Supplier."""
-		if not frappe.db.exists("Portal User", {"parent": supplier, "user": user}):
+		if not frappe.db.exists("Portal User", {"parenttype": "Supplier", "parent": supplier, "user": user}):
 			supplier_doc = frappe.get_doc("Supplier", supplier)
 			supplier_doc.append(
 				"portal_users",
