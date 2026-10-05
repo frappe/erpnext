@@ -349,13 +349,11 @@ def get_assets_for_grouped_by_category(filters):
 
 
 def get_finance_book_condition(gl_entry, filters):
-	"""GL rows of the selected finance book, or of no book and the company's default book when none is selected."""
-	finance_book = IfNull(gl_entry.finance_book, "")
-	if filters.get("finance_book"):
-		return finance_book == filters.finance_book
-
-	default_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
-	return finance_book.isin(["", default_finance_book or ""])
+	"""GL rows with no finance book, plus the selected book or else the company's default book."""
+	finance_book = filters.get("finance_book") or frappe.get_cached_value(
+		"Company", filters.company, "default_finance_book"
+	)
+	return IfNull(gl_entry.finance_book, "").isin(["", finance_book or ""])
 
 
 def get_asset_value_adjustment_map_by_category(filters):
@@ -405,6 +403,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 		.where(asset.purchase_date <= filters.to_date)
 		.where(gl_entry.account == asset_category_account.fixed_asset_account)
 		.where(gl_entry.is_opening == "No")
+		.where(get_finance_book_condition(gl_entry, filters))
 		.groupby(asset.asset_category)
 	).run(as_dict=True)
 
@@ -786,6 +785,7 @@ def get_asset_value_adjustment_map(filters):
 		.where(asset.purchase_date <= filters.to_date)
 		.where(gl_entry.account == asset_category_account.fixed_asset_account)
 		.where(gl_entry.is_opening == "No")
+		.where(get_finance_book_condition(gl_entry, filters))
 		.groupby(asset.name)
 	).run(as_dict=True)
 
