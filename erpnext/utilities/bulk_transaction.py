@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 import frappe
 from frappe import _
-from frappe.utils import get_link_to_form, today
+from frappe.utils import escape_html, get_link_to_form, today
 
 
 @frappe.whitelist(methods=["POST"])
@@ -138,7 +138,7 @@ def update_log(log_name, status, retried, err=None):
 
 
 def job(deserialized_data, from_doctype, to_doctype, args):
-	fail_count = 0
+	failed = []
 
 	if args:
 		# currently: flag-based transport to `task`
@@ -151,7 +151,7 @@ def job(deserialized_data, from_doctype, to_doctype, args):
 			task(doc_name, from_doctype, to_doctype)
 		except Exception:
 			frappe.db.rollback(save_point="before_creation_state")
-			fail_count += 1
+			failed.append(doc_name)
 			create_log(
 				doc_name,
 				str(frappe.get_traceback(with_context=True)),
@@ -163,7 +163,7 @@ def job(deserialized_data, from_doctype, to_doctype, args):
 		else:
 			create_log(doc_name, None, from_doctype, to_doctype, status="Success", log_date=str(date.today()))
 
-	show_job_status(fail_count, len(deserialized_data), to_doctype)
+	show_job_status(failed, len(deserialized_data), to_doctype)
 
 
 def task(doc_name, from_doctype, to_doctype):
@@ -244,30 +244,40 @@ def create_log(doc_name, e, from_doctype, to_doctype, status, log_date=None, res
 	transaction_log.save(ignore_permissions=True)
 
 
-def show_job_status(fail_count, deserialized_data_count, to_doctype):
-	if not fail_count:
+def show_job_status(failed: list[str], deserialized_data_count: int, to_doctype: str) -> None:
+	if not failed:
 		frappe.msgprint(
 			_("Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful").format(
 				to_doctype.lower().replace(" ", "-"), to_doctype
 			),
 			title="Successful",
 			indicator="green",
+			realtime=True,
 		)
-	elif fail_count != 0 and fail_count < deserialized_data_count:
+	elif len(failed) < deserialized_data_count:
 		frappe.msgprint(
 			_(
 				"""Creation of {0} partially successful.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
-			).format(to_doctype),
+			).format(to_doctype)
+			+ get_failed_list(failed),
 			title="Partially successful",
 			indicator="orange",
+			realtime=True,
 		)
 	else:
 		frappe.msgprint(
 			_(
 				"""Creation of {0} failed.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
-			).format(to_doctype),
+			).format(to_doctype)
+			+ get_failed_list(failed),
 			title="Failed",
 			indicator="red",
+			realtime=True,
 		)
+
+
+def get_failed_list(failed: list[str]) -> str:
+	items = "".join(f"<li>{frappe.bold(escape_html(name))}</li>" for name in failed)
+	return "<br><br>" + _("Could not be created from:") + f"<ul>{items}</ul>"

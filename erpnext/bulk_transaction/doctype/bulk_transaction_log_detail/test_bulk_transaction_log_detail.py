@@ -40,6 +40,22 @@ class TestBulkTransactionLogDetail(ERPNextTestSuite):
 
 		self.assertFalse(get_invoices(held.name) + get_invoices(closed.name))
 
+	def test_job_result_is_sent_to_the_user_with_the_failed_sources(self):
+		submitted, draft = make_sales_order(), make_sales_order(do_not_submit=True)
+
+		with patch("frappe.publish_realtime") as publish_realtime:
+			make_invoices([submitted, draft])
+
+		messages = [
+			c.kwargs["message"]
+			for c in publish_realtime.call_args_list
+			if c.kwargs.get("event") == "msgprint"
+		]
+		self.assertEqual(len(messages), 1)
+		self.assertEqual(messages[0].indicator, "orange")
+		self.assertIn(draft.name, messages[0].message)
+		self.assertNotIn(submitted.name, messages[0].message)
+
 
 def make_invoices(orders: list, **kwargs) -> None:
 	data = [{"name": order.name, **kwargs} for order in orders]
