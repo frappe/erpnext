@@ -246,15 +246,21 @@ class AssetDepreciationSchedule(Document):
 
 		if date_of_disposal and row.depreciation_method == "Manual":
 			self.truncate_manual_depr_schedule(asset_doc, row, date_of_disposal)
+			self.add_remaining_booked_rows()
 			return
 
 		self._make_depr_schedule(
 			asset_doc, row, start, date_of_disposal, update_asset_finance_book_row, value_after_depreciation
 		)
+		self.add_remaining_booked_rows()
 
 	def truncate_manual_depr_schedule(self, asset_doc, row, date_of_disposal):
 		start = len(self.depreciation_schedule)
 		for idx, schedule in enumerate(self.schedules_before_clearing[start:], start):
+			if schedule.journal_entry:
+				self.append("depreciation_schedule", schedule)
+				continue
+
 			if getdate(schedule.schedule_date) < getdate(date_of_disposal):
 				self.add_depr_schedule_row(schedule.schedule_date, schedule.depreciation_amount, idx)
 				continue
@@ -289,23 +295,44 @@ class AssetDepreciationSchedule(Document):
 		return getdate(asset_doc.available_for_use_date)
 
 	def clear_depr_schedule(self):
-		start = 0
-		num_of_depreciations_completed = 0
-		depr_schedule = []
+		"""Keep the booked rows; rows booked after an unbooked one are put back in place later."""
+		rows = self.get("depreciation_schedule")
+		self.schedules_before_clearing = rows
+		gap_idx = next((idx for idx, row in enumerate(rows) if not row.journal_entry), None)
 
-		self.schedules_before_clearing = self.get("depreciation_schedule")
+		self.depreciation_schedule = list(rows) if gap_idx is None else rows[:gap_idx]
+		self.booked_rows_after_gap = (
+			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
+		)
 
-		for schedule in self.get("depreciation_schedule"):
-			if schedule.journal_entry:
-				num_of_depreciations_completed += 1
-				depr_schedule.append(schedule)
-			else:
-				start = num_of_depreciations_completed
-				break
+		return gap_idx or 0
 
-		self.depreciation_schedule = depr_schedule
+	def add_booked_row(self, schedule_date, schedule_idx: int) -> bool:
+		"""Keep a row booked after an unbooked one in place of regenerating it.
 
-		return start
+		The row is matched by its date, or by its position for a shortened (pro rata) row."""
+		booked_rows = self.get("booked_rows_after_gap") or []
+		booked_row = next(
+			(row for row in booked_rows if getdate(row.schedule_date) == getdate(schedule_date)),
+			None,
+		)
+		if not booked_row and len(self.schedules_before_clearing) > schedule_idx:
+			row_at_idx = self.schedules_before_clearing[schedule_idx]
+			booked_row = row_at_idx if row_at_idx in booked_rows else None
+		if not booked_row:
+			return False
+
+		self.booked_rows_after_gap.remove(booked_row)
+		self.append("depreciation_schedule", booked_row)
+		return True
+
+	def add_remaining_booked_rows(self):
+		rows = self.depreciation_schedule + (self.get("booked_rows_after_gap") or [])
+		self.booked_rows_after_gap = []
+		self.depreciation_schedule = []
+		for idx, row in enumerate(sorted(rows, key=lambda row: getdate(row.schedule_date)), 1):
+			row.idx = idx
+			self.append("depreciation_schedule", row)
 
 	def _make_depr_schedule(
 		self,
@@ -347,7 +374,9 @@ class AssetDepreciationSchedule(Document):
 
 		depreciation_amount = 0
 
-		number_of_pending_depreciations = final_number_of_depreciations - start
+		number_of_pending_depreciations = (
+			final_number_of_depreciations - start - len(self.get("booked_rows_after_gap") or [])
+		)
 		yearly_opening_wdv = value_after_depreciation
 		current_fiscal_year_end_date = None
 		prev_per_day_depr = True
@@ -369,6 +398,13 @@ class AssetDepreciationSchedule(Document):
 				prev_depreciation_amount = self.get("depreciation_schedule")[n - 1].depreciation_amount
 			else:
 				prev_depreciation_amount = 0
+
+			booked_row_date = add_months(row.depreciation_start_date, n * cint(row.frequency_of_depreciation))
+			if should_get_last_day:
+				booked_row_date = get_last_day(booked_row_date)
+			if self.add_booked_row(booked_row_date, n):
+				continue
+
 			depreciation_amount, prev_per_day_depr = get_depreciation_amount(
 				self,
 				asset_doc,
@@ -570,6 +606,12 @@ class AssetDepreciationSchedule(Document):
 
 		for i, d in enumerate(self.get("depreciation_schedule")):
 			if ignore_booked_entry and d.journal_entry:
+				# a row booked after an unbooked one still adds to the running total
+				if accumulated_depreciation is not None:
+					accumulated_depreciation += d.depreciation_amount
+					d.accumulated_depreciation_amount = flt(
+						accumulated_depreciation, d.precision("accumulated_depreciation_amount")
+					)
 				continue
 
 			if not accumulated_depreciation:
