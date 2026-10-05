@@ -17,6 +17,9 @@ def get_scheduled_employees_for_popup(communication_medium):
 	if not communication_medium:
 		return []
 
+	if frappe.db.get_value("Communication Medium", communication_medium, "disabled"):
+		return []
+
 	now_time = frappe.utils.nowtime()
 	weekday = frappe.utils.get_weekday()
 
