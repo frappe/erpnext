@@ -97,6 +97,15 @@ class TestProjectUpdate(ERPNextTestSuite):
 		self.assertIn("Entered by hand", statuses)
 		self.assertTrue(any("Done with design" in status for status in statuses))
 
+	def test_reply_from_unknown_sender_is_skipped(self):
+		project_update = make_project_update()
+		receive_reply(project_update, "_test_outsider@example.com", "Looks good")
+		receive_reply(project_update, "admin@example.com", "Done with design")
+
+		collect_project_status()
+		users = frappe.get_doc("Project Update", project_update).users
+		self.assertEqual([row.user for row in users], ["Administrator"])
+
 
 def make_project_update():
 	return (

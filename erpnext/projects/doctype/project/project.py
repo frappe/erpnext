@@ -783,9 +783,11 @@ def get_project_update_replies(project_update):
 
 	users = []
 	for d in replies:
-		user_data = frappe.db.get_values(
+		user_data = frappe.db.get_value(
 			"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
-		)[0]
+		)
+		if not user_data:
+			continue
 
 		users.append(
 			{
