@@ -85,18 +85,32 @@ class TestAssetDepreciationLedger(ERPNextTestSuite):
 			rows[-1].value_after_depreciation, 110000 - rows[-1].accumulated_depreciation_amount, places=2
 		)
 
+	def test_cost_center_filter(self):
+		assets = {}
+		for cost_center in ("Main - _TC", "_Test Cost Center - _TC"):
+			assets[cost_center] = create_depreciating_asset(cost_center=cost_center)
+		post_depreciation_entries(date="2021-01-01")
 
-def create_depreciating_asset(**args) -> frappe._dict:
-	return create_asset(
+		rows = get_asset_rows(None, "2020-01-01", "2021-12-31", cost_center="_Test Cost Center - _TC")
+		reported_assets = {row.asset for row in rows}
+
+		self.assertIn(assets["_Test Cost Center - _TC"].name, reported_assets)
+		self.assertNotIn(assets["Main - _TC"].name, reported_assets)
+
+
+def create_depreciating_asset(cost_center: str | None = None):
+	asset = create_asset(
 		calculate_depreciation=1,
 		available_for_use_date="2020-01-01",
 		depreciation_start_date="2020-12-31",
 		total_number_of_depreciations=10,
-		submit=1,
-		**args,
+		do_not_save=1,
 	)
+	asset.cost_center = cost_center or asset.cost_center
+	asset.submit()
+	return asset
 
 
-def get_asset_rows(asset: str, from_date: str, to_date: str, **filters) -> list[frappe._dict]:
+def get_asset_rows(asset: str | None, from_date: str, to_date: str, **filters) -> list[frappe._dict]:
 	filters = frappe._dict(company="_Test Company", from_date=from_date, to_date=to_date, **filters)
-	return [row for row in execute(filters)[1] if row.asset == asset]
+	return [row for row in execute(filters)[1] if not asset or row.asset == asset]

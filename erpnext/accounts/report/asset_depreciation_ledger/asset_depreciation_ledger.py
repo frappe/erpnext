@@ -28,11 +28,9 @@ def get_data(filters):
 	if filters.get("asset"):
 		filters_data.append(["against_voucher", "=", filters.get("asset")])
 
-	if filters.get("asset_category"):
-		assets = frappe.get_all(
-			"Asset", filters={"asset_category": filters.get("asset_category"), "docstatus": 1}, pluck="name"
-		)
-
+	asset_filters = {key: filters.get(key) for key in ("asset_category", "cost_center") if filters.get(key)}
+	if asset_filters:
+		assets = frappe.get_all("Asset", filters={**asset_filters, "docstatus": 1}, pluck="name")
 		filters_data.append(["against_voucher", "in", assets])
 
 	or_filters_data = get_finance_book_filters(filters)
