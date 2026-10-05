@@ -14,8 +14,13 @@ frappe.ui.form.on("Campaign", {
 			frm.add_custom_button(
 				__("View Leads"),
 				function () {
-					frappe.route_options = { utm_source: "Campaign", utm_campaign: frm.doc.name };
-					frappe.set_route("List", "Lead");
+					// leads link to the UTM Campaign mirror, named after campaign_name
+					frappe.db
+						.get_value("UTM Campaign", { crm_campaign: frm.doc.name }, "name")
+						.then(({ message }) => {
+							frappe.route_options = { utm_campaign: message?.name || frm.doc.name };
+							frappe.set_route("List", "Lead");
+						});
 				},
 				null,
 				true
