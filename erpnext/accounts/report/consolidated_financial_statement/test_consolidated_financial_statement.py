@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, flt, today
 
@@ -38,10 +40,12 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		filters.update(extra)
 		return execute(filters)[1]
 
-	def post_journal_entry(self, debit_account, credit_account, amount, posting_date=None):
+	def post_journal_entry(
+		self, debit_account, credit_account, amount, posting_date=None, company=CHILD_COMPANY
+	):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = posting_date or today()
-		je.company = CHILD_COMPANY
+		je.company = company
 		je.set(
 			"accounts",
 			[
@@ -189,3 +193,12 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		self.assertEqual(
 			flt(accumulated_row[PARENT_COMPANY]), flt(own_row[PARENT_COMPANY]) + flt(own_row[CHILD_COMPANY])
 		)
+
+	def test_accumulated_cash_flow_row_total_is_the_group_company_value(self):
+		self.post_journal_entry("Office Equipment - CCU", "Cash - CCU", 100, company="Child Company US")
+
+		with patch("erpnext.accounts.report.utils.get_rate_as_at", return_value=0.0125):
+			data = self.run_report(report="Cash Flow", accumulated_in_group_company=1)
+
+		row = self.get_row(data, "Net Change in Fixed Asset")
+		self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]))
