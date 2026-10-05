@@ -5,6 +5,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_payable_summary.accounts_payable_summary import execute
@@ -53,3 +55,13 @@ class TestAccountsPayableSummary(FrappeTestCase):
 		row = execute(self._filters(show_gl_balance=True))[1][0]
 
 		self.assertEqual((row.gl_balance, row.diff), (200.0, 0.0))
+
+	def test_advance_follows_cost_center_filter(self):
+		for cost_center, amount in (("Main - _TC", 50), ("_Test Cost Center 2 - _TC", 30)):
+			pe = create_payment_entry(party=self.supplier, paid_amount=amount)
+			pe.cost_center = cost_center
+			pe.save().submit()
+
+		row = execute(self._filters(cost_center="Main - _TC"))[1][0]
+
+		self.assertEqual((row.advance, row.paid, row.outstanding), (50.0, 0.0, -50.0))
