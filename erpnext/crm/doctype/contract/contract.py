@@ -116,14 +116,15 @@ def get_status(start_date, end_date):
 	        str: 'Active' if within range, otherwise 'Inactive'
 	"""
 
-	if not end_date:
-		return "Active"
-
-	start_date = getdate(start_date)
-	end_date = getdate(end_date)
 	now_date = getdate(nowdate())
+	if start_date and getdate(start_date) > now_date:
+		return "Inactive"
 
-	return "Active" if start_date <= now_date <= end_date else "Inactive"
+	# a blank end date means the contract is open-ended
+	if end_date and getdate(end_date) < now_date:
+		return "Inactive"
+
+	return "Active"
 
 
 def update_status_for_contracts():

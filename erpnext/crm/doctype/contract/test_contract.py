@@ -48,6 +48,13 @@ class TestContract(ERPNextTestSuite):
 
 		self.assertEqual(self.contract_doc.status, "Inactive")
 
+	def test_open_ended_contract_starting_later_is_inactive(self):
+		self.contract_doc.is_signed = True
+		self.contract_doc.start_date = add_days(nowdate(), 30)
+		self.contract_doc.insert()
+
+		self.assertEqual(self.contract_doc.status, "Inactive")
+
 	def test_contract_status_with_no_fulfilment_terms(self):
 		self.contract_doc.contract_term = "_Test Customer Contract"
 		self.contract_doc.insert()
