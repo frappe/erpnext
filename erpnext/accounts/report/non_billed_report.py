@@ -79,7 +79,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 			& (doctype.company == filters.get("company"))
 			& (doctype.posting_date <= as_on_date)
 			& (child_doctype.amount > 0)
-			& (item.is_stock_item == 1)
+			& ((item.is_stock_item == 1) | (item.is_fixed_asset == 1))
 			& (child_doctype.base_amount - Round(billed_amount, precision) - returned_amount > 0)
 		)
 		.orderby(doctype[args.get("order")], order=args.get("order_by"))
