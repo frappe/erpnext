@@ -141,7 +141,10 @@ class TestCallLog(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertEqual(frappe.db.get_value("Call Log", call_log, "type_of_call"), "_Test Call Type")
+		self.assertEqual(
+			frappe.db.get_value("Call Log", call_log, ["type_of_call", "summary"]),
+			("_Test Call Type", "Wants a quote"),
+		)
 
 	def test_timeline_shows_only_permitted_call_logs(self):
 		self.assertEqual(len(get_linked_call_logs("Contact", self.contact.name)), 1)

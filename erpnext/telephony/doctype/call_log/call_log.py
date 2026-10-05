@@ -135,6 +135,7 @@ def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
 		doc.check_permission("write")
 
 	doc.type_of_call = call_type
+	doc.summary = summary
 	doc.save(ignore_permissions=True)
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
 
