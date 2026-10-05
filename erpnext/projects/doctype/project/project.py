@@ -93,7 +93,6 @@ class Project(Document):
 
 	def validate(self):
 		if not self.is_new():
-			self.copy_from_template()
 			self.control_access_for_project_users()
 		self.send_welcome_email()
 		self.update_costing()
