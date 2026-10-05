@@ -211,3 +211,26 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 
 		row = self.get_row(data, "Net Change in Fixed Asset")
 		self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]))
+
+	def test_accumulated_column_uses_its_own_company_currency(self):
+		intermediate_company = "_Test Company 7"
+		child_company = frappe.get_doc("Company", "Best Test")
+		child_company.parent_company = intermediate_company
+		child_company.save()
+		self.post_journal_entry("Cash - BT", "Sales - BT", 8000, company=child_company.name)
+
+		filters = {"company": "_Test Company 6", "report": "Profit and Loss Statement"}
+		with patch(
+			"erpnext.accounts.report.utils.get_rate_as_at",
+			side_effect=lambda date, from_, to: {("USD", "INR"): 80, ("INR", "USD"): 0.0125}[(from_, to)],
+		):
+			own_data = self.run_report(**filters, accumulated_in_group_company=0)
+			accumulated_data = self.run_report(**filters, accumulated_in_group_company=1)
+
+		own_row = self.get_row(own_data, "Profit for the year")
+		accumulated_row = self.get_row(accumulated_data, "Profit for the year")
+		self.assertAlmostEqual(
+			flt(accumulated_row[intermediate_company]),
+			flt(own_row.get(intermediate_company)) + flt(own_row[child_company.name]) * 0.0125,
+			places=2,
+		)
