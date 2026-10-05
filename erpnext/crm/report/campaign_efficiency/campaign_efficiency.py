@@ -11,7 +11,7 @@ from frappe.utils import add_days, flt
 def execute(filters=None):
 	columns, data = [], []
 	columns = get_columns("utm_campaign")
-	data = get_lead_data(filters or {}, "utm_campaign")
+	data = get_lead_data(filters, "utm_campaign")
 	return columns, data
 
 
@@ -30,6 +30,7 @@ def get_columns(based_on):
 
 
 def get_lead_data(filters, based_on):
+	filters = frappe._dict(filters or {})
 	based_on_field = frappe.scrub(based_on)
 
 	lead_filters = [[based_on_field, "is", "set"]]
