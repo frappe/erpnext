@@ -112,6 +112,15 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 		self.assertEqual(row["billed_qty"], 6)
 		self.assertEqual(row["billed_amount"], 3000)
 
+	def test_closed_order_has_nothing_pending(self):
+		po = self.make_purchase_order(qty=10)
+		create_pr_against_po(po.name, received_qty=4)
+		po.reload()
+		po.update_status("Closed")
+
+		row = next(row for row in execute(self.get_filters())[1] if row["purchase_order"] == po.name)
+		self.assertEqual((row["pending_qty"], row["qty_to_bill"], row["pending_amount"]), (0, 0, 0))
+
 	def test_group_by_item_keeps_each_uom_apart(self):
 		self.make_purchase_order(qty=10)
 		self.add_uom("Box", 10)

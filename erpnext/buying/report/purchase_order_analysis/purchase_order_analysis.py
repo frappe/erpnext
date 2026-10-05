@@ -164,10 +164,12 @@ def prepare_data(data, filters):
 	completed, pending = 0, 0
 
 	for row in data:
+		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		if row["status"] == "Closed":
+			row.update(pending_qty=0, qty_to_bill=0, pending_amount=0)
+
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
-
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
 
 	chart_data = prepare_chart_data(pending, completed)
 
