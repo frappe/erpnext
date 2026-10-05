@@ -38,10 +38,12 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		filters.update(extra)
 		return execute(filters)[1]
 
-	def post_journal_entry(self, debit_account, credit_account, amount, posting_date=None):
+	def post_journal_entry(
+		self, debit_account, credit_account, amount, posting_date=None, company=CHILD_COMPANY
+	):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = posting_date or today()
-		je.company = CHILD_COMPANY
+		je.company = company
 		je.set(
 			"accounts",
 			[
@@ -189,3 +191,22 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		self.assertEqual(
 			flt(accumulated_row[PARENT_COMPANY]), flt(own_row[PARENT_COMPANY]) + flt(own_row[CHILD_COMPANY])
 		)
+
+	def test_accumulated_cash_flow_row_total_is_the_group_company_value(self):
+		year_start_date = get_fiscal_year(today(), company=PARENT_COMPANY)[1]
+		for from_currency, to_currency, exchange_rate in (("USD", "INR", 80), ("INR", "USD", 0.0125)):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date=year_start_date,
+				from_currency=from_currency,
+				to_currency=to_currency,
+				exchange_rate=exchange_rate,
+				for_buying=1,
+				for_selling=1,
+			).insert()
+		self.post_journal_entry("Office Equipment - CCU", "Cash - CCU", 100, company="Child Company US")
+
+		data = self.run_report(report="Cash Flow", accumulated_in_group_company=1)
+
+		row = self.get_row(data, "Net Change in Fixed Asset")
+		self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]))
