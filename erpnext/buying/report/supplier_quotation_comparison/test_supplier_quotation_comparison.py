@@ -80,3 +80,10 @@ class TestSupplierQuotationComparison(FrappeTestCase):
 
 		self.assertEqual({row["quotation"] for row in data}, {own_quote.name})
 		self.assertEqual(chart["data"]["labels"], ["_Test Supplier"])
+
+	def test_cheapest_quote_is_flagged_across_suppliers_when_categorized_by_supplier(self):
+		self.make_quotation("_Test Supplier", qty=10, rate=500)
+		cheapest = self.make_quotation("_Test Supplier 1", qty=10, rate=450)
+
+		rows = self.run_report(item_code=ITEM, categorize_by="Categorize by Supplier")
+		self.assertEqual({row["quotation"] for row in rows if row.get("min")}, {cheapest.name})
