@@ -4,8 +4,10 @@
 
 import frappe
 from frappe import _, qb
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Criterion
 from frappe.utils import cstr, flt
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.report.financial_statements import (
@@ -232,6 +234,9 @@ def set_gl_entries_by_account(
 
 	if ignore_closing_entries:
 		conditions.append(gl.voucher_type.ne("Period Closing Voucher"))
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		conditions.append(Bracket(LiteralValue(match_conditions)))
 
 	root_subquery = qb.from_(acc).select(acc.root_type).where(acc.name.eq(gl.account))
 	gl_entries = (
