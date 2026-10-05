@@ -64,6 +64,18 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 		subcontracting_bom.is_active = 0
 		subcontracting_bom.save()
 
+	def test_quantities_must_be_greater_than_zero(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		subcontracting_bom = create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=template_bom.name, service_item=service_item.name
+		)
+
+		for fieldname in ("finished_good_qty", "service_item_qty"):
+			subcontracting_bom.reload()
+			subcontracting_bom.set(fieldname, 0)
+			self.assertRaises(frappe.ValidationError, subcontracting_bom.save)
+
 	def test_finished_good_bom_query_lists_variant_and_template_boms(self):
 		variant, template_bom = make_subcontracted_variant()
 		variant_bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
