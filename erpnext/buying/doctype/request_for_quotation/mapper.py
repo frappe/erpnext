@@ -60,7 +60,9 @@ def create_supplier_quotation(doc: str | Document | dict):
 	doc = frappe.parse_json(doc)
 	supplier = doc.get("supplier")
 
-	if frappe.session.user not in frappe.get_all("Portal User", {"parent": supplier}, pluck="user"):
+	if frappe.session.user not in frappe.get_all(
+		"Portal User", {"parenttype": "Supplier", "parent": supplier}, pluck="user"
+	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 	validate_existing_supplier_quotation(supplier, doc.get("items"))
