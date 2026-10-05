@@ -355,6 +355,21 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertTrue(half_day_slots)
 		self.assertTrue(all(slot["availability"] for slot in half_day_slots))
 
+	def test_portal_hides_slots_past_in_system_time(self):
+		from frappe.utils.data import get_system_timezone
+
+		self._configure_booking_settings()
+		day = getdate(add_to_date(getdate(), days=2))
+		with (
+			patch("frappe.utils.now_datetime", return_value=slot_on(2, 12)),
+			self.set_user("Guest"),
+		):
+			slots = get_appointment_slots(str(day), get_system_timezone())
+
+		availability = {slot["time"].strftime("%H:%M"): slot["availability"] for slot in slots}
+		self.assertFalse(availability["11:30"])
+		self.assertTrue(availability["12:00"])
+
 	def test_expired_unverified_appointments_are_closed(self):
 		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
 		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)

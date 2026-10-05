@@ -55,7 +55,7 @@ def get_appointment_slots(date: str, timezone: str):
 	query_end_time = datetime.datetime.strptime(date + " 23:59:59", format_string)
 	query_start_time = convert_to_system_timezone(timezone, query_start_time)
 	query_end_time = convert_to_system_timezone(timezone, query_end_time)
-	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
+	now = convert_to_guest_timezone(timezone, frappe.utils.now_datetime())
 
 	# Database queries
 	settings = frappe.get_single_value(
