@@ -138,8 +138,8 @@ def add_company_columns(columns):
 		dict(
 			label=_("Parent Company"),
 			fieldname="parent_company",
-			fieldtype="Link",
-			options="Company",
+			# not a Link: frappe would hide the rows of users who cannot read the parent
+			fieldtype="Data",
 			width=160,
 		),
 	)
