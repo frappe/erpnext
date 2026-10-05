@@ -305,10 +305,25 @@ class Project(Document):
 		if self.status in ("Cancelled", "On hold"):
 			return
 
+		self.validate_completed_status()
 		self.status = "Completed" if self.percent_complete == 100 else "Open"
 
+	def validate_completed_status(self):
+		"""Refuse a status set to Completed by hand while the tasks are not all done."""
+		previous = self.get_doc_before_save()
+		if not previous or previous.status == "Completed" or self.status != "Completed":
+			return
+
+		if flt(self.percent_complete) < 100:
+			frappe.throw(
+				_("Project {0} is only {1} complete. Complete or cancel its tasks first.").format(
+					frappe.bold(self.name), frappe.format(self.percent_complete, {"fieldtype": "Percent"})
+				),
+				title=_("Cannot set Project to Completed"),
+			)
+
 	def get_task_progress(self) -> float:
-		"""Average task progress, weighted for Task Weight. Cancelled tasks count as done."""
+		"""Average task progress, weighted for Task Weight. Completed and cancelled tasks count as done."""
 		tasks = frappe.get_all(
 			"Task", filters={"project": self.name}, fields=["status", "progress", "task_weight"]
 		)
@@ -316,7 +331,9 @@ class Project(Document):
 		if self.percent_complete_method != "Task Weight" or not sum(weights):
 			weights = [1] * len(tasks)
 
-		progress = [100 if task.status == "Cancelled" else flt(task.progress) for task in tasks]
+		progress = [
+			100 if task.status in ("Completed", "Cancelled") else flt(task.progress) for task in tasks
+		]
 		return sum(p * w for p, w in zip(progress, weights, strict=True)) / sum(weights)
 
 	def update_costing(self):
