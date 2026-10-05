@@ -649,6 +649,26 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		self.assertEqual([(item.item_code, item.qty) for item in rm_return.items], [("Basic RM", 2)])
 
+	def test_partly_subcontracted_service_item_in_larger_uom(self):
+		item_list = [
+			{
+				"item_code": "Service Item 1",
+				"qty": 2,
+				"uom": "Box",
+				"conversion_factor": 10,
+				"fg_item": "Basic FG Item",
+				"fg_item_qty": 20,
+			}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].qty = 2
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.submit()
+
+		scio = make_subcontracting_inward_order(so.name)
+		self.assertEqual(scio.items[0].qty, 18)
+
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	item_list = [{"item_code": service_item, "qty": 5, "fg_item": fg_item, "fg_item_qty": 5}]
