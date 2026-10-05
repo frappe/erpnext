@@ -68,6 +68,13 @@ class TestSubcontractedItemToBeReceived(ERPNextTestSuite):
 		result = run("Subcontracted Item To Be Received", filters=get_report_filters(sco))["result"]
 		self.assertIn(sco.name, {row["subcontract_order"] for row in result if isinstance(row, dict)})
 
+	def test_closed_order_is_not_listed(self):
+		sco = make_subcontracting_order()
+		sco.update_status("Closed")
+
+		data = execute(get_report_filters(sco))[1]
+		self.assertNotIn(sco.name, {row["subcontract_order"] for row in data})
+
 
 def make_subcontracting_order():
 	make_service_item("Subcontracted Service Item 1")

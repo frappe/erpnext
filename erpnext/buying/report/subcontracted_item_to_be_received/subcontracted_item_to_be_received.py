@@ -84,6 +84,7 @@ def get_subcontract_orders(filters):
 		["transaction_date", "<=", filters.to_date],
 		["transaction_date", ">=", filters.from_date],
 		["docstatus", "=", 1],
+		["status", "!=", "Closed"],
 	]
 
 	order = frappe.qb.DocType("Subcontracting Order")
