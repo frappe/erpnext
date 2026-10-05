@@ -4575,7 +4575,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_pending_work_orders(
-	doctype: str, txt: str, searchfield: str, start: int, page_length: int, filters: dict
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
 ) -> list:
 	work_order = frappe.qb.DocType("Work Order")
 	query = frappe.qb.get_query(
@@ -4587,7 +4587,7 @@ def get_pending_work_orders(
 			"name": ("like", f"%{txt}%"),
 		},
 		order_by="name",
-		limit=cint(page_length),
+		limit=cint(page_len),
 		offset=cint(start),
 		ignore_permissions=False,
 	)
