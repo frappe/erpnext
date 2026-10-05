@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import CurDate, DateDiff
 from frappe.utils import cint
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_companies_condition,
@@ -66,9 +67,10 @@ def get_data(filters):
 	data = []
 	items = get_items(filters)
 	territories = get_territories(filters)
-	sales_invoice_data = get_sales_details(filters)
+	sales_by_item = get_sales_details(filters)
 
 	for territory in territories:
+		subtree = {territory.name, *get_descendants_of("Territory", territory.name)}
 		for item in items:
 			row = {
 				"territory": territory.name,
@@ -77,20 +79,21 @@ def get_data(filters):
 				"item_name": item.item_name,
 			}
 
-			if sales_invoice_data.get((territory.name, item.item_code)):
-				item_obj = sales_invoice_data[(territory.name, item.item_code)]
-				if item_obj.days_since_last_order > cint(filters["days"]):
-					row.update(
-						{
-							"territory": item_obj.territory,
-							"customer": item_obj.customer,
-							"last_order_date": item_obj.last_order_date,
-							"qty": item_obj.qty,
-							"days_since_last_order": item_obj.days_since_last_order,
-						}
-					)
-				else:
+			last_sale = next(
+				(d for d in sales_by_item.get(item.item_code, []) if d.territory in subtree), None
+			)
+			if last_sale:
+				if last_sale.days_since_last_order <= cint(filters["days"]):
 					continue
+
+				row.update(
+					{
+						"customer": last_sale.customer,
+						"last_order_date": last_sale.last_order_date,
+						"qty": last_sale.qty,
+						"days_since_last_order": last_sale.days_since_last_order,
+					}
+				)
 
 			data.append(row)
 
@@ -136,7 +139,7 @@ def get_sales_details(filters):
 	sales_data = query.run(as_dict=True)
 
 	for d in sales_data:
-		item_details_map.setdefault((d.territory, d.item_code), d)
+		item_details_map.setdefault(d.item_code, []).append(d)
 
 	return item_details_map
 
