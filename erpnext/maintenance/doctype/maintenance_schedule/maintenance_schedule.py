@@ -4,7 +4,7 @@
 import frappe
 from frappe import _, throw
 from frappe.query_builder.functions import Max
-from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
+from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
@@ -317,7 +317,14 @@ class MaintenanceSchedule(TransactionBase):
 			sr_details = frappe.db.get_value(
 				"Serial No",
 				serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "warehouse", "item_code"],
+				[
+					"serial_no",
+					"warranty_expiry_date",
+					"amc_expiry_date",
+					"warehouse",
+					"item_code",
+					"customer",
+				],
 				as_dict=1,
 			)
 
@@ -348,12 +355,10 @@ class MaintenanceSchedule(TransactionBase):
 					)
 				)
 
+			validate_serial_no_for_customer(sr_details, self.customer)
+
 			delivery_date = delivery_dates.get(serial_no)
-			if (
-				not sr_details.warehouse
-				and delivery_date
-				and getdate(delivery_date) >= getdate(amc_start_date)
-			):
+			if delivery_date and getdate(delivery_date) >= getdate(amc_start_date):
 				throw(
 					_("Maintenance start date can not be before delivery date for Serial No {0}").format(
 						serial_no
@@ -485,6 +490,25 @@ class MaintenanceSchedule(TransactionBase):
 					and s_date == formatdate(schedule.scheduled_date, "dd-mm-yyyy")
 				):
 					return schedule.name
+
+
+def validate_serial_no_for_customer(serial, customer):
+	"""Refuse a serial still in stock; warn when it was sold to another customer."""
+	number = frappe.bold(escape_html(serial.serial_no))
+	if serial.warehouse:
+		frappe.throw(
+			_("Serial No {0} is still in stock in Warehouse {1}").format(
+				number, frappe.bold(serial.warehouse)
+			)
+		)
+	if serial.customer and serial.customer != customer:
+		frappe.msgprint(
+			_("Serial No {0} was sold to Customer {1}, not {2}").format(
+				number, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(customer))
+			),
+			title=_("Different Customer"),
+			indicator="orange",
+		)
 
 
 @frappe.whitelist()
