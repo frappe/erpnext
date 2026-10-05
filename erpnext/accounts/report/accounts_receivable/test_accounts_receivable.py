@@ -813,6 +813,24 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
 			)
 
+	def test_draft_future_payments_are_ignored(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)
+		for days, amount, submit in ((5, 40, True), (6, 30, False)):
+			pe = get_payment_entry(si.doctype, si.name, party_amount=amount, bank_account=self.cash)
+			pe.posting_date = add_days(today(), days)
+			pe.insert()
+			if submit:
+				pe.submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_future_payments": True,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertEqual([row.future_amount, row.remaining_balance], [40.0, 60.0])
+
 	def test_future_payments_from_journal_entry(self):
 		# A single future-dated Journal Entry paying two different invoices must surface as one
 		# future-payment row PER invoice, not collapse the whole sum onto one arbitrary invoice

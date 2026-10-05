@@ -705,7 +705,7 @@ class ReceivablePayableReport:
 				.as_("future_amount_in_base_currency"),
 			)
 			.where(
-				(pe.docstatus < 2)
+				(pe.docstatus == 1)
 				& (pe.posting_date > self.filters.report_date)
 				& (pe.party_type.isin(self.party_type))
 			)
@@ -726,7 +726,7 @@ class ReceivablePayableReport:
 				je.cheque_no.as_("future_ref"),
 			)
 			.where(
-				(je.docstatus < 2)
+				(je.docstatus == 1)
 				& (je.posting_date > self.filters.report_date)
 				& (jea.party_type.isin(self.party_type))
 				& (jea.reference_name.isnotnull())
