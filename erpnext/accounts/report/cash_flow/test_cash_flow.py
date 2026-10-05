@@ -173,3 +173,27 @@ class TestCashFlow(ERPNextTestSuite):
 		)
 
 		self.assertEqual(opening_balance() - before, 500)
+
+	def test_summary_with_accumulated_values_counts_movement_once(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		filters = frappe._dict(
+			company=self.company,
+			from_fiscal_year=fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Quarterly",
+			accumulated_values=1,
+		)
+
+		def net_change_card():
+			summary = execute(filters)[4]
+			return next(card["value"] for card in summary if card["label"] == "Net Change in Cash")
+
+		before = net_change_card()
+		make_journal_entry("Cash - _TC", "Sales - _TC", 500, posting_date=year_start_date, submit=True)
+
+		self.assertEqual(net_change_card() - before, 500)

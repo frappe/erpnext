@@ -22,6 +22,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	get_data,
 	get_filtered_list_for_consolidated_report,
+	get_period_keys_for_total,
 	is_dimension_grouped,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -206,7 +207,6 @@ def get_cash_flow_accounts():
 
 def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
 	data = {}
-	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
 		filters.start_date = start_date
@@ -220,10 +220,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		if amount and account_type == "Depreciation":
 			amount *= -1
 
-		total += amount
 		data.setdefault(period["key"], amount)
 
-	data["total"] = total
+	data["total"] = sum(data[key] for key in get_period_keys_for_total(period_list, accumulated_values))
 	return data
 
 
@@ -339,8 +338,6 @@ def add_total_row_account(
 		"currency": currency,
 	}
 
-	summary_data[label] = 0
-
 	# from consolidated financial statement
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
@@ -351,10 +348,12 @@ def add_total_row_account(
 				key = period if consolidated else period["key"]
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
-				summary_data[label] += row.get(key) or 0.0
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row.get("total", 0.0)
+
+	summary_keys = get_period_keys_for_total(period_list, filters.get("accumulated_values"), consolidated)
+	summary_data[label] = sum(flt(total_row.get(key)) for key in summary_keys)
 
 	out.append(total_row)
 
