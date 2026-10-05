@@ -51,6 +51,16 @@ class TestProspect(ERPNextTestSuite):
 		customer.company = "_Test Company"
 		customer.insert()
 
+	def test_deleting_the_only_lead_keeps_the_prospect(self):
+		lead = make_lead()
+		prospect = make_prospect(company="_Test Company")
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		lead.delete()
+
+		prospect.reload()
+		self.assertEqual(prospect.leads, [])
+
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
 		prospect = frappe.new_doc("Prospect")

@@ -189,9 +189,10 @@ class TestLead(ERPNextTestSuite):
 		lead.save()
 		self.assertEqual(frappe.db.get_value("Prospect Lead", {"lead": lead.name}, "mobile_no"), "9999999999")
 
-		# deleting the only lead of a prospect removes the prospect
+		# deleting the only lead of a prospect keeps the prospect, without the lead
 		lead.delete()
-		self.assertFalse(frappe.db.exists("Prospect", prospect_name))
+		self.assertFalse(frappe.db.exists("Prospect Lead", {"parent": prospect_name}))
+		self.assertTrue(frappe.db.exists("Prospect", prospect_name))
 
 	def test_set_lead_name_fallbacks(self):
 		# organization name is used when there is no person name
