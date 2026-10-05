@@ -221,6 +221,15 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 			("Fully Completed", getdate(today())),
 		)
 
+	def test_cancelling_partial_visit_keeps_claim_closed_by_full_visit(self):
+		claim = self.make_warranty_claim()
+		partial = self.make_visit(claim, "Partially Completed")
+		self.make_visit(claim, "Fully Completed")
+
+		partial.cancel()
+
+		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
+
 
 def make_maintenance_visit():
 	mv = frappe.new_doc("Maintenance Visit")

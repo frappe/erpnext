@@ -9,6 +9,8 @@ from frappe.utils import escape_html, format_date, get_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
+CLAIM_STATUS = {"Fully Completed": "Closed", "Partially Completed": "Work In Progress"}
+
 
 class MaintenanceVisit(TransactionBase):
 	# begin: auto-generated types
@@ -195,11 +197,7 @@ class MaintenanceVisit(TransactionBase):
 						mntc_date = self.mntc_date
 						service_person = d.service_person
 						work_done = d.work_done
-						status = "Open"
-						if self.completion_status == "Fully Completed":
-							status = "Closed"
-						elif self.completion_status == "Partially Completed":
-							status = "Work In Progress"
+						status = CLAIM_STATUS.get(self.completion_status, "Open")
 					else:
 						mv = frappe.qb.DocType("Maintenance Visit")
 						mvp = frappe.qb.DocType("Maintenance Visit Purpose")
@@ -207,10 +205,11 @@ class MaintenanceVisit(TransactionBase):
 							frappe.qb.from_(mv)
 							.inner_join(mvp)
 							.on(mvp.parent == mv.name)
-							.select(mv.name, mv.mntc_date, mvp.service_person, mvp.work_done)
+							.select(
+								mv.name, mv.mntc_date, mvp.service_person, mvp.work_done, mv.completion_status
+							)
 							.where(
-								(mv.completion_status == "Partially Completed")
-								& (mvp.prevdoc_docname == d.prevdoc_docname)
+								(mvp.prevdoc_docname == d.prevdoc_docname)
 								& (mv.name != self.name)
 								& (mv.docstatus == 1)
 							)
@@ -220,7 +219,7 @@ class MaintenanceVisit(TransactionBase):
 						)
 
 						if nm:
-							status = "Work In Progress"
+							status = CLAIM_STATUS.get(nm[0][4], "Open")
 							mntc_date = nm and nm[0][1] or ""
 							service_person = nm and nm[0][2] or ""
 							work_done = nm and nm[0][3] or ""
