@@ -223,6 +223,7 @@ class Task(NestedSet):
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.unassign_todo()
+		self.remove_from_previous_parent_depends_on()
 		self.populate_depends_on()
 
 	def unassign_todo(self):
@@ -335,6 +336,11 @@ class Task(NestedSet):
 					"depends_on", {"doctype": "Task Depends On", "task": self.name, "subject": self.subject}
 				)
 				parent.save()
+
+	def remove_from_previous_parent_depends_on(self):
+		previous_parent = (self.get_doc_before_save() or frappe._dict()).get("parent_task")
+		if previous_parent != self.parent_task:
+			self.remove_from_parent_depends_on(previous_parent)
 
 	def remove_from_parent_depends_on(self, parent_task: str | None):
 		if not parent_task:
