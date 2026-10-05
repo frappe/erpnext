@@ -226,6 +226,21 @@ class TestTask(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Project", old_project.name, "percent_complete"), 100)
 
+	def test_reopen_completed_task(self):
+		task = create_task("_Test Task Reopened")
+		task.status = "Completed"
+		task.save()
+
+		task.status = "Open"
+		task.save()
+		self.assertEqual((task.progress, task.completed_on), (0, None))
+
+		task.status = "Completed"
+		task.save()
+		task.update({"status": "Working", "progress": 60})
+		task.save()
+		self.assertEqual(task.progress, 60)
+
 
 def create_task(
 	subject,
