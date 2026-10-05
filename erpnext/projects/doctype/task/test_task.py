@@ -292,12 +292,38 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, parent.delete)
 
+	def test_delete_child_task(self):
+		parent = create_task("_Test Parent Of Deleted Child", is_group=1)
+		child = create_task("_Test Deleted Child", parent_task=parent.name)
+
+		child.delete()
+
+		parent.reload()
+		self.assertFalse(parent.depends_on)
+
 	def test_child_task_registers_in_parent_depends_on(self):
 		parent = create_task("_Test Parent Depends On", is_group=1)
 		child = create_task("_Test Child Depends On", parent_task=parent.name)
 
 		parent.reload()
 		self.assertIn(child.name, [row.task for row in parent.depends_on])
+
+	def test_delete_child_task_without_parent_write_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		parent = create_task("_Test Parent In Restricted Project", is_group=1)
+		child = create_task("_Test Child In Permitted Project", parent_task=parent.name, save=False)
+		child.project = make_project({"project_name": "_Test Project Child Only"}).name
+		child.save()
+		user = create_user("test_task_child_deleter@example.com", "Projects User")
+		frappe.permissions.add_user_permission("Project", child.project, user.name)
+
+		with self.set_user(user.name):
+			frappe.delete_doc("Task", child.name)
+
+		self.assertFalse(frappe.db.exists("Task", child.name))
 
 
 def create_task(

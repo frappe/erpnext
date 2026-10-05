@@ -362,10 +362,21 @@ class Task(NestedSet):
 				)
 				parent.save()
 
+	def remove_from_parent_depends_on(self, parent_task: str | None):
+		if not parent_task:
+			return
+
+		parent = frappe.get_doc("Task", parent_task)
+		rows = [row for row in parent.depends_on if row.task != self.name]
+		if len(rows) != len(parent.depends_on):
+			parent.set("depends_on", rows)
+			parent.save(ignore_permissions=True)
+
 	def on_trash(self):
 		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You cannot delete this Task."))
 
+		self.remove_from_parent_depends_on(self.parent_task)
 		self.update_nsm_model()
 
 	def after_delete(self):
