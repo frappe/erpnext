@@ -129,6 +129,17 @@ class TestEmailCampaign(ERPNextTestSuite):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
 		self.assertRaises(frappe.ValidationError, doc.set_date)
 
+	def test_started_campaign_can_be_edited(self):
+		lead = self.make_lead()
+		email_campaign = self.make_lead_email_campaign(lead, schedules=[0, 2])
+		email_campaign.db_set("start_date", add_days(today(), -1))
+		email_campaign.reload()
+
+		email_campaign.sender = "Administrator"
+		email_campaign.save()
+		email_campaign.start_date = add_days(today(), -2)
+		self.assertRaises(frappe.ValidationError, email_campaign.save)
+
 	def test_end_date_is_start_plus_max_send_after_days(self):
 		campaign = self.make_campaign(schedules=[0, 5])
 		doc = self.make_email_campaign(campaign.name)

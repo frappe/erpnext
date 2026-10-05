@@ -44,7 +44,8 @@ class EmailCampaign(Document):
 			self.validate_contact()
 
 	def set_date(self):
-		if getdate(self.start_date) < getdate(today()):
+		start_date_changed = self.is_new() or self.has_value_changed("start_date")
+		if start_date_changed and getdate(self.start_date) < getdate(today()):
 			frappe.throw(_("Start Date cannot be before the current date"))
 
 		self.end_date = self.get_end_date()
