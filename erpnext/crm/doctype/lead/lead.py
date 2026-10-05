@@ -88,6 +88,8 @@ class Lead(SellingController, CRMNote):
 		self.set_onload("linked_prospects", self.get_linked_prospects())
 
 	def validate(self):
+		if self.lead_owner == "Guest":
+			self.lead_owner = None
 		self.set_full_name()
 		self.set_lead_name()
 		self.set_title()
