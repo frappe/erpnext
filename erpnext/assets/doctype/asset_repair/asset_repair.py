@@ -211,6 +211,14 @@ class AssetRepair(AccountsController):
 
 		self.cancel_sabb()
 
+	def on_cancel(self):
+		self.cancel_stock_entry()
+
+	def cancel_stock_entry(self):
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
+		if stock_entry:
+			frappe.get_doc("Stock Entry", stock_entry).cancel()
+
 	def after_delete(self):
 		frappe.get_doc("Asset", self.asset).set_status()
 
