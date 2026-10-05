@@ -155,6 +155,8 @@ def make_opportunity_from_communication(
 	frappe.has_permission("Communication", doc=communication, throw=True)
 
 	doc = frappe.get_doc("Communication", communication)
+	if doc.reference_doctype == "Opportunity" and doc.reference_name:
+		return doc.reference_name
 
 	# make_lead_from_communication() carries its own check, but it is skipped entirely when the
 	# email already references a Lead, so this cannot rely on it.

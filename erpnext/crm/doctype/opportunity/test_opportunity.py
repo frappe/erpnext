@@ -9,7 +9,11 @@ from frappe.utils import add_days, now_datetime, random_string, today
 from erpnext.crm.doctype.lead.mapper import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.mapper import make_customer as make_customer_from_opportunity
-from erpnext.crm.doctype.opportunity.mapper import make_quotation, make_request_for_quotation
+from erpnext.crm.doctype.opportunity.mapper import (
+	make_opportunity_from_communication,
+	make_quotation,
+	make_request_for_quotation,
+)
 from erpnext.crm.doctype.opportunity.opportunity import (
 	auto_close_opportunity,
 	get_item_details,
@@ -185,6 +189,13 @@ class TestOpportunity(ERPNextTestSuite):
 		opp_doc.add_comment("Comment", text="Test Comment 4")
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
+
+	def test_opportunity_from_communication_is_made_once(self):
+		lead = make_lead()
+		communication = create_communication("Lead", lead.name, lead.email_id, sent_or_received="Received")
+
+		first = make_opportunity_from_communication(communication.name, "_Test Company")
+		self.assertEqual(make_opportunity_from_communication(communication.name, "_Test Company"), first)
 
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
@@ -433,3 +444,4 @@ def create_communication(reference_doctype, reference_name, sender, sent_or_rece
 		}
 	)
 	communication.save()
+	return communication
