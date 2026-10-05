@@ -4278,6 +4278,23 @@ def update_child_qty_rate(
 				if flt(new_data.get("qty")) < qty_to_check:
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
+	def validate_uom_unchanged_after_fulfilment(child_item, new_data):
+		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
+			parent_doctype
+		)
+		if not fulfilled_qty_field or not flt(child_item.get(fulfilled_qty_field)):
+			return
+
+		uom_changed = new_data.get("uom") not in (None, child_item.uom)
+		factor_changed = flt(new_data.get("conversion_factor")) not in (0, flt(child_item.conversion_factor))
+		if uom_changed or factor_changed:
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
+				).format(child_item.idx, frappe.bold(child_item.item_code)),
+				title=_("Invalid UOM"),
+			)
+
 	def should_update_supplied_items(doc) -> bool:
 		"""Subcontracted PO can allow following changes *after submit*:
 
@@ -4394,6 +4411,8 @@ def update_child_qty_rate(
 				continue
 
 		validate_quantity_and_rate(child_item, d)
+		if not new_child_flag:
+			validate_uom_unchanged_after_fulfilment(child_item, d)
 
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True
