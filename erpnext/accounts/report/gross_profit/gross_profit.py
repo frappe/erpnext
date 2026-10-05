@@ -517,6 +517,7 @@ class GrossProfitGenerator:
 		self.get_delivery_notes()
 
 		self.load_product_bundle()
+		self.load_bundle_deliveries()
 		if filters.group_by == "Invoice":
 			self.group_items_by_invoice()
 
@@ -580,6 +581,10 @@ class GrossProfitGenerator:
 				row.buying_amount = flt(
 					self.get_buying_amount_from_product_bundle(row, product_bundles[row.item_code]),
 					self.currency_precision,
+				)
+			elif row.item_row in self.bundle_deliveries:
+				row.buying_amount = flt(
+					self.get_buying_amount_from_delivered_bundles(row), self.currency_precision
 				)
 			else:
 				row.buying_amount = flt(self.get_buying_amount(row, row.item_code), self.currency_precision)
@@ -840,6 +845,23 @@ class GrossProfitGenerator:
 				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
 
 		return flt(buying_amount, self.currency_precision)
+
+	def get_buying_amount_from_delivered_bundles(self, row):
+		"""Buying amount of a bundle row delivered by Delivery Notes made from the invoice."""
+		buying_amount = 0.0
+		for delivered_row, packed_items in self.bundle_deliveries[row.item_row]:
+			delivery = row.copy()
+			delivery.update(
+				{
+					"dn_detail": delivered_row.name,
+					"delivery_note": delivered_row.parent,
+					"item_row": delivered_row.name,
+					"qty": delivered_row.stock_qty,
+				}
+			)
+			buying_amount += self.get_buying_amount_from_product_bundle(delivery, packed_items)
+
+		return buying_amount
 
 	def get_billed_share_of_bundle(self, row):
 		"""Share of the delivered bundle qty billed by this invoice row; packed item qty is the delivered qty."""
@@ -1371,6 +1393,32 @@ class GrossProfitGenerator:
 			self.product_bundles.setdefault(d.parenttype, frappe._dict()).setdefault(
 				d.parent, frappe._dict()
 			).setdefault(d.parent_item, []).append(d)
+
+	def load_bundle_deliveries(self):
+		"""Bundle rows of Delivery Notes made from the invoices, keyed by the invoice row."""
+		self.bundle_deliveries = {}
+		invoices = {row.parent for row in self.si_list}
+		if not invoices:
+			return
+
+		dni = qb.DocType("Delivery Note Item")
+		delivered_rows = (
+			qb.from_(dni)
+			.select(dni.name, dni.parent, dni.item_code, dni.stock_qty, dni.si_detail)
+			.where(
+				(dni.docstatus == 1) & dni.against_sales_invoice.isin(invoices) & dni.si_detail.isnotnull()
+			)
+			.run(as_dict=True)
+		)
+
+		delivery_note_bundles = self.product_bundles.get("Delivery Note", {})
+		for delivered_row in delivered_rows:
+			if packed_items := delivery_note_bundles.get(delivered_row.parent, {}).get(
+				delivered_row.item_code
+			):
+				self.bundle_deliveries.setdefault(delivered_row.si_detail, []).append(
+					(delivered_row, packed_items)
+				)
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")

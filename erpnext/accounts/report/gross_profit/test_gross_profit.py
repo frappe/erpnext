@@ -1237,6 +1237,24 @@ class TestGrossProfit(ERPNextTestSuite):
 			sinv.save().submit()
 			self.assertEqual(self.get_invoice_buying_amount(sinv.name), 260)
 
+	def test_bundle_invoiced_before_delivery(self):
+		bundle = self.make_stocked_bundle()
+		sinv = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item_code=bundle,
+			qty=3,
+			rate=500,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+		)
+		make_delivery_note(sinv.name).submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 390)
+
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
 		components = []
