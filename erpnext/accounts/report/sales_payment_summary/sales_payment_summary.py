@@ -171,7 +171,7 @@ def get_invoice_totals():
 			Sum(si.base_total).as_("base_total"),
 			Sum(si.base_net_total).as_("net_total"),
 			Sum(si.base_total_taxes_and_charges).as_("total_taxes"),
-			Sum(si.base_paid_amount).as_("paid_amount"),
+			Sum(si.base_paid_amount - si.base_change_amount).as_("paid_amount"),
 			Sum(si.outstanding_amount).as_("outstanding_amount"),
 		)
 		.groupby(si.name)

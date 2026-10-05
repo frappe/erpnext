@@ -251,6 +251,12 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		detail = run_report(customer, to_date=to_date, payment_detail=1)
 		self.assertEqual([row[5] for row in detail], [0, 10000])
 
+	def test_pos_view_deducts_change_from_payments(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		make_pos_invoice(customer, paid=12000)
+
+		self.assertEqual(run_report(customer, is_pos=1)[0][5], 10000)
+
 
 def run_report(customer, **filters):
 	filters = frappe._dict(
