@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.report.cash_flow.cash_flow import execute
 from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
@@ -123,3 +123,27 @@ class TestCashFlow(ERPNextTestSuite):
 		opening_entry.submit()
 
 		self.assertEqual(self.net_change_in_cash() - before, 0)
+
+	def test_date_range_across_fiscal_years_keeps_earlier_profit(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		year_start_date = get_fiscal_year(today(), company=self.company)[1]
+		filters = frappe._dict(
+			company=self.company,
+			period_start_date=add_days(year_start_date, -30),
+			period_end_date=getdate(),
+			filter_based_on="Date Range",
+			periodicity="Yearly",
+			accumulated_values=0,
+		)
+
+		def net_change_in_cash():
+			rows = execute(filters)[1]
+			return next(row for row in rows if row.get("section") == "'Net Change in Cash'")["total"]
+
+		before = net_change_in_cash()
+		make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 500, posting_date=add_days(year_start_date, -10), submit=True
+		)
+
+		self.assertEqual(net_change_in_cash() - before, 500)
