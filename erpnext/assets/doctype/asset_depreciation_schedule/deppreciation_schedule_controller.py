@@ -36,20 +36,15 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		self.set_accumulated_depreciation()
 
 	def clear(self):
-		self.first_non_depreciated_row_idx = 0
-		num_of_depreciations_completed = 0
-		depr_schedule = []
+		rows = self.get("depreciation_schedule")
+		self.schedules_before_clearing = rows
+		gap_idx = next((idx for idx, row in enumerate(rows) if not row.journal_entry), None)
 
-		self.schedules_before_clearing = self.get("depreciation_schedule")
-		for schedule in self.get("depreciation_schedule"):
-			if schedule.journal_entry:
-				num_of_depreciations_completed += 1
-				depr_schedule.append(schedule)
-			else:
-				self.first_non_depreciated_row_idx = num_of_depreciations_completed
-				break
-
-		self.depreciation_schedule = depr_schedule
+		self.first_non_depreciated_row_idx = gap_idx or 0
+		self.depreciation_schedule = list(rows) if gap_idx is None else rows[:gap_idx]
+		self.booked_rows_after_gap = (
+			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
+		)
 
 	def create(self):
 		self.initialize_variables()
@@ -65,6 +60,8 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			self.get_prev_depreciation_amount(row_idx)
 
 			self.schedule_date = self.get_next_schedule_date(row_idx)
+			if self.add_booked_row(self.schedule_date):
+				continue
 
 			self.depreciation_amount = self.get_depreciation_amount(row_idx)
 
@@ -95,6 +92,35 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 
 			if flt(self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")) > 0:
 				self.add_depr_schedule_row(row_idx)
+
+		self.add_remaining_booked_rows()
+
+	def add_booked_row(self, schedule_date) -> bool:
+		"""Keep a row booked after an unbooked one in place of regenerating it."""
+		booked_row = next(
+			(
+				row
+				for row in self.booked_rows_after_gap
+				if getdate(row.schedule_date) == getdate(schedule_date)
+			),
+			None,
+		)
+		if not booked_row:
+			return False
+
+		self.booked_rows_after_gap.remove(booked_row)
+		self.append("depreciation_schedule", booked_row)
+		return True
+
+	def add_remaining_booked_rows(self):
+		if not self.booked_rows_after_gap:
+			return
+
+		rows = self.depreciation_schedule + self.booked_rows_after_gap
+		self.booked_rows_after_gap = []
+		self.depreciation_schedule = []
+		for row in sorted(rows, key=lambda row: getdate(row.schedule_date)):
+			self.append("depreciation_schedule", row)
 
 	def initialize_variables(self):
 		self.pending_depreciation_amount = self.fb_row.value_after_depreciation
@@ -219,7 +245,9 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			self.fb_row.frequency_of_depreciation
 		) + cint(self.fb_row.increase_in_asset_life)
 		last_depr_date = self.get_last_booked_depreciation_date()
-		depr_booked_for_months = self.get_booked_depr_for_months_count(last_depr_date)
+		depr_booked_for_months = self.get_booked_depr_for_months_count(last_depr_date) + len(
+			self.booked_rows_after_gap
+		) * cint(self.fb_row.frequency_of_depreciation)
 
 		self.pending_months = total_months - depr_booked_for_months
 
@@ -433,10 +461,6 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 		for d in self.get("depreciation_schedule"):
-			if d.journal_entry:
-				accumulated_depreciation = d.accumulated_depreciation_amount
-				continue
-
 			accumulated_depreciation += d.depreciation_amount
 			d.accumulated_depreciation_amount = flt(
 				accumulated_depreciation, d.precision("accumulated_depreciation_amount")

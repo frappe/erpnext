@@ -1196,6 +1196,22 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		self.assertEqual(get_depreciation_entry_count(asset.name), 6)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "value_after_depreciation"), 600)
 
+	def test_reschedule_keeps_rows_booked_after_a_cancelled_entry(self):
+		asset = create_monthly_asset()
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-05-31")
+		cancel_depreciation_entry(asset.name, "2023-02-28")
+
+		make_asset_value_adjustment(
+			asset=asset.name, date="2023-06-01", current_asset_value=800, new_asset_value=700
+		).submit()
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		booked_dates = [cstr(d.schedule_date) for d in schedule if d.journal_entry]
+		self.assertEqual(booked_dates, ["2023-01-31", "2023-03-31", "2023-04-30", "2023-05-31"])
+		self.assertEqual(len({d.schedule_date for d in schedule}), 12)
+		self.assertEqual(sum(d.depreciation_amount for d in schedule if not d.journal_entry), 700)
+		self.assertEqual(schedule[-1].accumulated_depreciation_amount, 1100)
+
 
 def create_monthly_asset(**args):
 	return create_asset(
