@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
@@ -245,6 +246,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def get_production_items(self):
 		item_list = []
+		pending_qty = self.get_pending_work_order_qty()
 
 		for d in self.items:
 			if d.produced_qty >= d.qty:
@@ -277,13 +279,31 @@ class SubcontractingInwardOrder(SubcontractingController):
 			)
 			qty = min(
 				int(qty) if frappe.get_cached_value("UOM", d.stock_uom, "must_be_whole_number") else qty,
-				d.qty - d.produced_qty,
+				d.qty - d.produced_qty - flt(pending_qty.get(d.name)),
 			)
 
 			item_details.update({"qty": qty, "max_producible_qty": qty})
 			item_list.append(item_details)
 
 		return item_list
+
+	def get_pending_work_order_qty(self):
+		"""Qty still to be produced by open Work Orders, per inward order item."""
+		wo = frappe.qb.DocType("Work Order")
+		query = (
+			frappe.qb.from_(wo)
+			.select(
+				wo.subcontracting_inward_order_item,
+				Sum(wo.qty - wo.produced_qty - wo.process_loss_qty),
+			)
+			.where(
+				(wo.subcontracting_inward_order == self.name)
+				& (wo.docstatus == 1)
+				& (wo.status.notin(["Completed", "Closed"]))
+			)
+			.groupby(wo.subcontracting_inward_order_item)
+		)
+		return frappe._dict(query.run())
 
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError

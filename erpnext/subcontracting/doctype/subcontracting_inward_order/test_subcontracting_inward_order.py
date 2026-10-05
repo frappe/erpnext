@@ -719,6 +719,23 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual(scio.received_items[-1].billed_qty, 0)
 
+	def test_work_order_qty_excludes_open_work_orders(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		for item in rm_in.items:
+			item.qty *= 2
+		rm_in.submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 3
+		wo.submit()
+
+		scio.reload()
+		self.assertEqual(scio.get_production_items()[0]["qty"], 2)
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()
