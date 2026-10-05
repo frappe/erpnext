@@ -736,6 +736,28 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual(scio.get_production_items()[0]["qty"], 2)
 
+	def test_status_api_allows_only_close_and_reopen(self):
+		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
+			update_subcontracting_inward_order_status,
+		)
+
+		so, scio = create_so_scio()
+		self.assertRaises(
+			frappe.ValidationError, update_subcontracting_inward_order_status, scio.name, "Delivered"
+		)
+		update_subcontracting_inward_order_status(scio.name, "Closed")
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Closed")
+
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+		draft = make_subcontracting_inward_order(
+			make_sales_order(is_subcontracted=1, item_list=item_list).name
+		)
+		draft.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		draft.insert()
+		self.assertRaises(
+			frappe.ValidationError, update_subcontracting_inward_order_status, draft.name, "Closed"
+		)
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()

@@ -585,4 +585,9 @@ def update_subcontracting_inward_order_status(scio: str | Document, status: str 
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 
 	scio.check_permission("write")
+	if scio.docstatus != 1:
+		frappe.throw(_("Only a submitted Subcontracting Inward Order can be closed or re-opened."))
+	if status and status != "Closed":
+		frappe.throw(_("Status {0} cannot be set manually.").format(frappe.bold(status)))
+
 	set_subcontracting_inward_order_status(scio, status)
