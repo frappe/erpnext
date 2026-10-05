@@ -347,8 +347,9 @@ def make_issue_from_communication(communication: str, ignore_communication_links
 		{
 			"doctype": "Issue",
 			"subject": doc.subject,
+			"description": doc.content,
 			"communication_medium": doc.communication_medium,
-			"raised_by": doc.sender or "",
+			"raised_by": get_customer_email(doc),
 			"raised_by_phone": doc.phone_no or "",
 		}
 	).insert()
@@ -356,6 +357,13 @@ def make_issue_from_communication(communication: str, ignore_communication_links
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 
 	return issue.name
+
+
+def get_customer_email(communication) -> str:
+	"""The sender of a received mail, or the first recipient of a sent one."""
+	if communication.sent_or_received == "Sent":
+		return (communication.recipients or "").split(",")[0].strip()
+	return communication.sender or ""
 
 
 def get_time_in_timedelta(time):

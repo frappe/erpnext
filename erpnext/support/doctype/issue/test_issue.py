@@ -298,6 +298,26 @@ class TestIssue(TestSetUp):
 		issue = make_issue(index=1)
 		self.assertRaises(frappe.ValidationError, set_status, issue.name, "Banana")
 
+	def test_issue_from_sent_mail_is_raised_by_the_recipient(self):
+		from erpnext.support.doctype.issue.issue import make_issue_from_communication
+
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"communication_medium": "Email",
+				"sent_or_received": "Sent",
+				"subject": "Follow up",
+				"sender": "agent@example.com",
+				"recipients": "customer@example.com",
+				"content": "Your order is delayed",
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", make_issue_from_communication(communication.name))
+		self.assertEqual(issue.raised_by, "customer@example.com")
+		self.assertIn("Your order is delayed", issue.description)
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
