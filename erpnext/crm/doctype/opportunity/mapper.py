@@ -6,6 +6,7 @@ from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import get_link_to_form
 
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -89,6 +90,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
+		validate_no_customer_exists(source)
 		target.opportunity_name = source.name
 
 		if source.opportunity_from == "Lead":
@@ -108,6 +110,22 @@ def make_customer(source_name: str, target_doc: str | dict | Document | None = N
 	)
 
 	return doclist
+
+
+def validate_no_customer_exists(opportunity: Document):
+	if opportunity.opportunity_from == "Customer":
+		frappe.throw(_("Opportunity {0} is already for a Customer").format(frappe.bold(opportunity.name)))
+
+	or_filters = {"opportunity_name": opportunity.name}
+	if opportunity.opportunity_from == "Lead":
+		or_filters["lead_name"] = opportunity.party_name
+
+	if customer := frappe.get_all("Customer", or_filters=or_filters, pluck="name", limit=1):
+		frappe.throw(
+			_("Customer {0} already exists for this Opportunity").format(
+				get_link_to_form("Customer", customer[0])
+			)
+		)
 
 
 @frappe.whitelist()

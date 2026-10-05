@@ -6,6 +6,7 @@ from frappe.utils import add_days, now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.mapper import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
+from erpnext.crm.doctype.opportunity.mapper import make_customer as make_customer_from_opportunity
 from erpnext.crm.doctype.opportunity.mapper import make_quotation, make_request_for_quotation
 from erpnext.crm.doctype.opportunity.opportunity import (
 	auto_close_opportunity,
@@ -88,6 +89,14 @@ class TestOpportunity(ERPNextTestSuite):
 
 		rfq_item = make_request_for_quotation(opp.name).items[0]
 		self.assertEqual((rfq_item.uom, rfq_item.conversion_factor), ("_Test UOM 1", 12))
+
+	def test_make_customer_refuses_duplicates(self):
+		lead_opportunity = make_opportunity(opportunity_from="Lead", lead=make_lead().name)
+		make_customer_from_opportunity(lead_opportunity.name).insert()
+		self.assertRaises(frappe.ValidationError, make_customer_from_opportunity, lead_opportunity.name)
+
+		customer_opportunity = make_opportunity(with_items=0)
+		self.assertRaises(frappe.ValidationError, make_customer_from_opportunity, customer_opportunity.name)
 
 	def test_make_new_lead_if_required(self):
 		opp_doc = make_opportunity_from_lead("_Test Company")
