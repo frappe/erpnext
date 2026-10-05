@@ -1043,6 +1043,21 @@ class TestAsset(AssetSetup):
 			):
 				self.assertRaises(frappe.PermissionError, method, *args)
 
+	def test_cwip_asset_is_capitalised_after_a_missed_daily_run(self):
+		from erpnext.assets.doctype.asset.asset import make_post_gl_entry
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=5000, location="Test Location")
+		asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
+		asset.available_for_use_date = add_days(nowdate(), 5)
+		asset.submit()
+		self.assertFalse(asset.booked_fixed_asset)
+
+		# the available-for-use date has passed without a daily run on that date
+		asset.db_set("available_for_use_date", add_days(nowdate(), -1))
+		make_post_gl_entry()
+
+		self.assertTrue(frappe.db.get_value("Asset", asset.name, "booked_fixed_asset"))
+
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
 			draft_asset = create_asset(

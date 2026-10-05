@@ -1126,7 +1126,7 @@ def make_post_gl_entry():
 				filters={
 					"asset_category": asset_category.name,
 					"booked_fixed_asset": 0,
-					"available_for_use_date": nowdate(),
+					"available_for_use_date": ("<=", nowdate()),
 					"docstatus": 1,
 				},
 				pluck="name",
@@ -1134,7 +1134,8 @@ def make_post_gl_entry():
 
 			for asset in assets:
 				doc = frappe.get_doc("Asset", asset)
-				doc.make_gl_entries()
+				if doc.validate_make_gl_entry():
+					doc.make_gl_entries()
 
 
 def get_asset_naming_series():
