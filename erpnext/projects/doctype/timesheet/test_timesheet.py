@@ -354,6 +354,26 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.total_billable_amount, 200)
 		self.assertEqual(timesheet.total_costing_amount, 20)
 
+	def test_default_activity_cost_applies_to_employees_without_their_own(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		activity_type = frappe.get_doc(
+			{"doctype": "Activity Type", "activity_type": "_Test Default Cost Activity"}
+		).insert()
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"activity_type": activity_type.name,
+				"billing_rate": 80,
+				"costing_rate": 40,
+			}
+		).insert()
+
+		rate = get_activity_cost(emp, activity_type.name)
+		self.assertEqual(rate["billing_rate"], 80)
+		self.assertEqual(rate["costing_rate"], 40)
+
 
 def make_timesheet(
 	employee,
