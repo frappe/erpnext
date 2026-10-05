@@ -45,6 +45,10 @@ status_map = {
 	"Supplier Quotation": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
+		[
+			"Expired",
+			"eval:self.docstatus==1 and self.valid_till and getdate(self.valid_till) < getdate(nowdate())",
+		],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Partially Ordered", "is_partially_ordered"],
 		["Ordered", "is_fully_ordered"],

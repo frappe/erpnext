@@ -89,14 +89,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		partial_order.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Supplier Quotation", partially_ordered.name, "status"),
-			"Submitted",
-		)
-
-		set_expired_status()
-		self.assertEqual(
-			frappe.db.get_value("Supplier Quotation", partially_ordered.name, "status"),
 			"Expired",
 		)
+		self.assertRaises(frappe.ValidationError, make_purchase_order, partially_ordered.name)
+
+		valid.db_set("valid_till", add_days(today(), -1))
+		self.assertRaises(frappe.ValidationError, make_purchase_order, valid.name)
 
 	def test_submit_and_cancel_updates_rfq_quote_status(self):
 		rfq = make_request_for_quotation()

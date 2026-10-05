@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
@@ -15,6 +16,9 @@ from erpnext.controllers.mapper import get_qty_already_mapped
 def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
+	if frappe.get_doc("Supplier Quotation", source_name).get_status()["status"] == "Expired":
+		frappe.throw(_("Supplier Quotation {0} has expired.").format(source_name))
+
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
