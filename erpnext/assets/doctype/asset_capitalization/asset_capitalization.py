@@ -448,40 +448,44 @@ class AssetCapitalization(StockController):
 		else:
 			return self.target_fixed_asset_account
 
-	def get_composite_component_value(self):
-		composite_component_value = 0
-		for item in self.asset_items:
-			asset = frappe.db.get_value("Asset", item.asset, ["asset_type"], as_dict=True)
-			if asset and asset.asset_type == "Composite Component":
-				composite_component_value += flt(item.asset_value, item.precision("asset_value"))
-		return composite_component_value
-
 	def update_target_asset(self):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
-		asset_doc = frappe.get_doc("Asset", self.target_asset)
-
 		if self.docstatus == 2:
-			net_purchase_amount = asset_doc.net_purchase_amount - total_target_asset_value
-			purchase_amount = asset_doc.purchase_amount - total_target_asset_value
-			total_asset_cost = asset_doc.total_asset_cost - total_target_asset_value
-		else:
-			net_purchase_amount = asset_doc.net_purchase_amount + total_target_asset_value
-			purchase_amount = asset_doc.purchase_amount + total_target_asset_value
-			total_asset_cost = asset_doc.total_asset_cost + total_target_asset_value
+			total_target_asset_value *= -1
 
-		asset_doc.db_set(
-			{
-				"net_purchase_amount": net_purchase_amount,
-				"purchase_amount": purchase_amount,
-				"total_asset_cost": total_asset_cost,
-			}
-		)
+		self.add_to_target_asset_cost(total_target_asset_value)
 
 		frappe.msgprint(
 			_("Asset {0} has been updated. Please set the depreciation details if any and submit it.").format(
-				get_link_to_form("Asset", asset_doc.name)
+				get_link_to_form("Asset", self.target_asset)
 			)
 		)
+
+	def add_to_target_asset_cost(self, amount: float) -> None:
+		asset_doc = frappe.get_doc("Asset", self.target_asset)
+		asset_doc.db_set(
+			{
+				"net_purchase_amount": asset_doc.net_purchase_amount + amount,
+				"purchase_amount": asset_doc.purchase_amount + amount,
+				"total_asset_cost": asset_doc.total_asset_cost + amount,
+			}
+		)
+
+	def update_stock_item_rate(self, row_name: str, valuation_rate: float) -> None:
+		"""Called on repost when the stock ledger revalues a consumed stock row."""
+		row = self.get("stock_items", {"name": row_name})[0]
+		previous_total = self.total_value
+
+		row.valuation_rate = valuation_rate
+		self.calculate_totals()
+		difference = flt(self.total_value - previous_total, self.precision("total_value"))
+		if not difference:
+			return
+
+		row.db_update()
+		self.db_update()
+		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 0:
+			self.add_to_target_asset_cost(difference)
 
 	def dispose_consumed_assets(self):
 		"""Depreciate consumed assets up to the posting date and mark them capitalized.

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, now_datetime
+from frappe.utils import add_days, cint, flt, now_datetime, today
 
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import (
@@ -445,6 +445,40 @@ class TestAssetCapitalization(ERPNextTestSuite):
 			frappe.db.count("Asset Depreciation Schedule", {"asset": consumed_asset.name}), schedule_count
 		)
 		self.assertEqual(consumed_asset.db_get("value_after_depreciation"), value_after_depreciation)
+
+	def test_backdated_receipt_revalues_consumed_stock_on_repost(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = create_warehouse("_Test Warehouse for Capitalization Repost", company=company)
+		item = create_item("_Test Capitalization Repost Item", is_stock_item=1, is_fixed_asset=0)
+		item.db_set("valuation_method", "FIFO")
+		receipt_args = {"item_code": item.name, "warehouse": warehouse, "company": company}
+		make_purchase_receipt(qty=10, rate=100, posting_date=add_days(today(), -2), **receipt_args)
+
+		target_asset = create_asset(asset_type="Composite Asset", warehouse=warehouse, company=company)
+		asset_capitalization = frappe.new_doc("Asset Capitalization")
+		asset_capitalization.update(
+			{
+				"company": company,
+				"target_asset": target_asset.name,
+				"target_item_code": target_asset.item_code,
+			}
+		)
+		asset_capitalization.append(
+			"stock_items", {"item_code": item.name, "warehouse": warehouse, "stock_qty": 4}
+		)
+		asset_capitalization.submit()
+		self.assertEqual(asset_capitalization.total_value, 400)
+
+		make_purchase_receipt(qty=5, rate=200, posting_date=add_days(today(), -3), **receipt_args)
+
+		asset_capitalization.reload()
+		target_account = asset_capitalization.get_target_account()
+		self.assertEqual(asset_capitalization.stock_items[0].amount, 800)
+		self.assertEqual(asset_capitalization.total_value, 800)
+		self.assertEqual(get_actual_gle_dict(asset_capitalization.name)[target_account], 800)
+		self.assertEqual(target_asset.db_get("net_purchase_amount"), 800)
 
 
 def create_asset_capitalization_data():

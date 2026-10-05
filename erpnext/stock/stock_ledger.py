@@ -1781,6 +1781,10 @@ class update_entries_after:
 				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Subcontracting Receipt":
 				self.update_rate_on_subcontracting_receipt(sle, outgoing_rate)
+			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Asset Capitalization":
+				frappe.get_doc(sle.voucher_type, sle.voucher_no).update_stock_item_rate(
+					sle.voucher_detail_no, outgoing_rate
+				)
 
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)

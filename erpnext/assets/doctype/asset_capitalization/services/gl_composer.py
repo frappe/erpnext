@@ -37,10 +37,7 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 		self._get_gl_entries_for_consumed_asset_items(gl_entries, target_account, target_against)
 		self._get_gl_entries_for_consumed_service_items(gl_entries, target_account, target_against)
 
-		composite_component_value = doc.get_composite_component_value()
-		self._get_gl_entries_for_target_item(
-			gl_entries, target_account, target_against, composite_component_value
-		)
+		self._get_gl_entries_for_target_item(gl_entries, target_account, target_against)
 
 		return gl_entries
 
@@ -124,14 +121,11 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 			)
 
 	def _get_gl_entries_for_target_item(
-		self,
-		gl_entries: list,
-		target_account: str,
-		target_against: set,
-		composite_component_value: float,
+		self, gl_entries: list, target_account: str, target_against: set
 	) -> None:
+		"""Debit the target with the net of the consumed credits, which follow the stock ledger on repost."""
 		doc = self.doc
-		total_value = flt(doc.total_value - composite_component_value, self.precision)
+		total_value = flt(sum(flt(gle.credit) - flt(gle.debit) for gle in gl_entries), self.precision)
 		if total_value:
 			gl_entries.append(
 				self.get_gl_dict(
