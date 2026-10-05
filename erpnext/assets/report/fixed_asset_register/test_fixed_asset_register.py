@@ -4,7 +4,7 @@
 import frappe
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
 from erpnext.assets.doctype.asset.test_asset import AssetSetup, create_asset
 from erpnext.assets.doctype.asset_capitalization.test_asset_capitalization import (
 	create_asset_capitalization,
@@ -224,3 +224,14 @@ class TestFixedAssetRegister(AssetSetup):
 			frappe.set_user("Administrator")
 
 		self.assertEqual([row["net_purchase_amount"] for row in rows], [100000])
+
+	def test_disposed_assets_have_no_value(self):
+		sold_asset = create_asset(item_code="Macbook Pro", net_purchase_amount=100000, submit=True)
+		create_sales_invoice(item_code="Macbook Pro", asset=sold_asset.name, qty=1, rate=80000)
+		scrapped_asset = create_asset(item_code="Macbook Pro", net_purchase_amount=100000, submit=True)
+		scrap_asset(scrapped_asset.name)
+
+		self.assertEqual(self.report_row(sold_asset.name)["asset_value"], 0)
+		self.assertEqual(self.report_row(scrapped_asset.name)["asset_value"], 0)
+		group_row = self.run_report(group_by="Asset Category", status="Disposed")[0]
+		self.assertEqual(group_row["asset_value"], 0)

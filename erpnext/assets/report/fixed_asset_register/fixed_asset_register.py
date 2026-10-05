@@ -85,12 +85,7 @@ def get_data(filters):
 
 		depreciation_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
 		revaluation_amount = revaluation_amount_map.get(asset.asset_id, 0.0)
-		asset_value = (
-			asset.net_purchase_amount
-			- asset.opening_accumulated_depreciation
-			- depreciation_amount
-			+ revaluation_amount
-		)
+		asset_value = get_asset_value(asset, depreciation_amount, revaluation_amount)
 
 		row = {
 			"asset_id": asset.asset_id,
@@ -113,6 +108,19 @@ def get_data(filters):
 		data.append(row)
 
 	return data
+
+
+def get_asset_value(asset, depreciation_amount: float, revaluation_amount: float) -> float:
+	"""A disposed asset is no longer in the books, so it carries no value."""
+	if asset.status in ("Sold", "Scrapped", "Capitalized"):
+		return 0.0
+
+	return (
+		asset.net_purchase_amount
+		- asset.opening_accumulated_depreciation
+		- depreciation_amount
+		+ revaluation_amount
+	)
 
 
 def get_conditions(filters):
@@ -358,6 +366,7 @@ def get_group_by_data(
 		"net_purchase_amount",
 		"opening_accumulated_depreciation",
 		"calculate_depreciation",
+		"status",
 	]
 	assets = frappe.get_list("Asset", filters=conditions, fields=fields)
 
@@ -369,15 +378,11 @@ def get_group_by_data(
 
 		a["depreciated_amount"] = depreciation_amount_map.get(a["name"], 0.0)
 		a["revaluation_amount"] = revaluation_amount_map.get(a["name"], 0.0)
-		a["asset_value"] = (
-			a["net_purchase_amount"]
-			- a["opening_accumulated_depreciation"]
-			- a["depreciated_amount"]
-			+ a["revaluation_amount"]
-		)
+		a["asset_value"] = get_asset_value(a, a["depreciated_amount"], a["revaluation_amount"])
 
 		del a["name"]
 		del a["calculate_depreciation"]
+		del a["status"]
 
 		idx = ([i for i, d in enumerate(data) if a[group_by] == d[group_by]] or [None])[0]
 		if idx is None:
