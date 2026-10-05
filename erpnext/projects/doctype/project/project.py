@@ -606,10 +606,16 @@ def hourly_reminder():
 	projects = get_projects_for_collect_progress("Hourly", fields)
 
 	for project in projects:
-		if get_time(nowtime()) >= get_time(project.from_time) or get_time(nowtime()) <= get_time(
-			project.to_time
-		):
+		if is_now_between(project.from_time, project.to_time):
 			send_project_update_email_to_users(project.name)
+
+
+def is_now_between(from_time, to_time) -> bool:
+	"""Whether the current time is in the window, which may cross midnight."""
+	now, from_time, to_time = get_time(nowtime()), get_time(from_time), get_time(to_time)
+	if from_time <= to_time:
+		return from_time <= now <= to_time
+	return now >= from_time or now <= to_time
 
 
 def project_status_update_reminder():

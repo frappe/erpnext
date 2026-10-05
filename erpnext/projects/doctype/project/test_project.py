@@ -1,7 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
+from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
@@ -513,6 +516,28 @@ class TestProject(ERPNextTestSuite):
 
 		project, _ = self._project_with_tasks("Task Completion", 1)
 		self.assertRaises(frappe.ValidationError, set_project_status, project.name, "Open")
+
+	def _progress_project(self, **settings):
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Progress {frappe.generate_hash(length=8)}",
+			company="_Test Company",
+			collect_progress=1,
+			subject="Progress",
+			message="Reply with your progress",
+			**settings,
+		)
+		project.append("users", {"user": "test@example.com", "welcome_email_sent": 1})
+		return project.insert()
+
+	def test_hourly_reminder_is_sent_only_within_the_time_window(self):
+		from erpnext.projects.doctype.project.project import hourly_reminder
+
+		project = self._progress_project(frequency="Hourly", from_time="14:00:00", to_time="18:00:00")
+		for time, updates in (("10:00:00", 0), ("15:00:00", 1)):
+			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				hourly_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
 
 	def test_costing_rollup_from_sales_documents(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
