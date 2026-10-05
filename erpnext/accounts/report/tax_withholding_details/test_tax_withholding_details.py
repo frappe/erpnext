@@ -35,7 +35,9 @@ class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 		filters = frappe._dict(
 			company="_Test Company", party_type="Customer", from_date=today(), to_date=today()
 		)
-		result = execute(filters)[1]
+		columns, result = execute(filters)
+		labels = {column["fieldname"]: column["label"] for column in columns}
+		self.assertEqual(labels["base_total"], "Total (Company Currency)")
 
 		expected_values = [
 			[jv.name, "TCS", 0.075, 1000.75, 0.75, 1000.75],

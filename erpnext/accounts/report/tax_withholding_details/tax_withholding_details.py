@@ -265,7 +265,7 @@ class TaxWithholdingDetailsReport:
 			},
 			{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Currency", "width": 120},
 			{
-				"label": _("Grand Total (Company Currency)"),
+				"label": _("Total (Company Currency)"),
 				"fieldname": "base_total",
 				"fieldtype": "Currency",
 				"width": 150,
