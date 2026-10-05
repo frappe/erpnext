@@ -329,7 +329,7 @@ class ServiceLevelAgreement(Document):
 def check_agreement_status():
 	service_level_agreements = frappe.get_all(
 		"Service Level Agreement",
-		filters=[{"enabled": 1}, {"default_service_level_agreement": 0}],
+		filters={"enabled": 1},
 		fields=["name"],
 	)
 
@@ -356,9 +356,21 @@ def get_active_service_level_agreement_for(doc):
 	if entities:
 		or_filters.append(["Service Level Agreement", "entity", "in", entities])
 
-	fields = ["name", "default_priority", "apply_sla_for_resolution", "condition", "entity"]
+	fields = [
+		"name",
+		"default_priority",
+		"apply_sla_for_resolution",
+		"condition",
+		"entity",
+		"start_date",
+		"end_date",
+	]
 	default_sla_filter = [*filters, ["Service Level Agreement", "default_service_level_agreement", "=", 1]]
-	default_sla = frappe.get_all("Service Level Agreement", filters=default_sla_filter, fields=fields)
+	default_sla = [
+		agreement
+		for agreement in frappe.get_all("Service Level Agreement", filters=default_sla_filter, fields=fields)
+		if is_valid_today(agreement)
+	]
 
 	filters += [["Service Level Agreement", "default_service_level_agreement", "=", 0]]
 	agreements = frappe.get_all(
@@ -368,6 +380,8 @@ def get_active_service_level_agreement_for(doc):
 	# check if the current document on which SLA is to be applied fulfills all the conditions
 	filtered_agreements = []
 	for agreement in agreements:
+		if not is_valid_today(agreement):
+			continue
 		condition = agreement.get("condition")
 		if not condition or (condition and frappe.safe_eval(condition, None, get_context(doc))):
 			filtered_agreements.append(agreement)
@@ -381,6 +395,13 @@ def get_active_service_level_agreement_for(doc):
 	filtered_agreements += default_sla
 
 	return get_selected_or_first(filtered_agreements, doc.get("service_level_agreement"))
+
+
+def is_valid_today(agreement) -> bool:
+	today = getdate()
+	return (not agreement.start_date or getdate(agreement.start_date) <= today) and (
+		not agreement.end_date or getdate(agreement.end_date) >= today
+	)
 
 
 def get_sla_entities(customer: str | None) -> list[str]:

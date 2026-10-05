@@ -107,6 +107,25 @@ class TestIssue(TestSetUp):
 		issue.save()
 		self.assertEqual(issue.service_level_agreement, group_sla.name)
 
+	def test_sla_outside_its_validity_is_not_applied(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			check_agreement_status,
+		)
+
+		today = frappe.utils.getdate()
+		customer_sla = get_service_level_agreement(entity_type="Customer", entity="_Test Customer")
+		customer_sla.db_set("start_date", frappe.utils.add_days(today, 1))
+		default_sla = get_service_level_agreement(default_service_level_agreement=1)
+
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+		self.assertEqual(issue.service_level_agreement, default_sla.name)
+
+		default_sla.db_set(
+			{"start_date": frappe.utils.add_days(today, -10), "end_date": frappe.utils.add_days(today, -1)}
+		)
+		check_agreement_status()
+		self.assertFalse(frappe.db.get_value("Service Level Agreement", default_sla.name, "enabled"))
+
 	def test_hold_time_on_replied(self):
 		creation = get_datetime("2020-03-04 4:00")
 
