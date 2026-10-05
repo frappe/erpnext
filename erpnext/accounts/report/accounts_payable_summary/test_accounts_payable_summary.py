@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -32,15 +32,19 @@ class TestAccountsPayableSummary(ERPNextTestSuite):
 		filters.update(overrides)
 		return filters
 
-	def _make_invoice(self, rate=200):
-		return make_purchase_invoice(
+	def _make_invoice(self, rate=200, due_date=None):
+		pi = make_purchase_invoice(
 			company=self.company,
 			supplier=self.supplier,
 			qty=1,
 			rate=rate,
 			price_list_rate=rate,
 			posting_date=today(),
+			do_not_save=True,
 		)
+		pi.due_date = due_date or today()
+		pi.insert()
+		return pi.submit()
 
 	def _expected_row(self, pi, **overrides):
 		supplier_group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
@@ -52,6 +56,7 @@ class TestAccountsPayableSummary(ERPNextTestSuite):
 			"paid": 0.0,
 			"credit_note": 0.0,
 			"outstanding": 200.0,
+			"range0": 0.0,
 			"range1": 200.0,
 			"range2": 0.0,
 			"range3": 0.0,
@@ -142,3 +147,10 @@ class TestAccountsPayableSummary(ERPNextTestSuite):
 		get_payment_entry(pi.doctype, pi.name).save().submit()
 		rows = execute(filters)[1]
 		self.assertEqual(len(rows), 0)
+
+	def test_03_not_yet_due_in_range0(self):
+		self._make_invoice(due_date=add_days(today(), 20))
+
+		row = execute(self._filters(ageing_based_on="Due Date"))[1][0]
+
+		self.assertEqual((row.range0, row.range1, row.total_due), (200.0, 0.0, 0.0))

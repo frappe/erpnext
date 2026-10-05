@@ -114,7 +114,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"sales_person": [],
 			"party_type": row.party_type,
 		}
-		for i in self.range_numbers:
+		for i in [0, *self.range_numbers]:
 			range_key = f"range{i}"
 			default_dict[range_key] = 0.0
 
