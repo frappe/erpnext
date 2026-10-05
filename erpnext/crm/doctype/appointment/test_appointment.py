@@ -472,6 +472,47 @@ class TestAppointment(ERPNextTestSuite):
 		first.save()
 		self.assertTrue(all(status == "Open" for status in get_todo_statuses(first.name)))
 
+	def test_busy_agent_is_not_assigned_again(self):
+		from frappe.desk.form.assign_to import add as add_assignment
+		from frappe.desk.form.assign_to import clear as clear_assignments
+
+		agent_email = "appointment_agent@example.com"
+		if not frappe.db.exists("User", agent_email):
+			frappe.get_doc(
+				{"doctype": "User", "email": agent_email, "first_name": "Appointment Agent"}
+			).insert(ignore_permissions=True)
+		self._configure_booking_settings(agents=["Administrator", agent_email])
+		busy = create_test_appointment(customer_email="busy_agent@example.com", scheduled_time=slot_on(2, 10))
+		(busy_agent,) = get_assignees(busy.name)
+
+		# rescheduled into a slot where its agent is busy: moves to the free agent
+		moved = create_test_appointment(customer_email="moved@example.com", scheduled_time=slot_on(2, 15))
+		clear_assignments("Appointment", moved.name)
+		add_assignment({"doctype": "Appointment", "name": moved.name, "assign_to": [busy_agent]})
+		moved.reload()
+		moved.scheduled_time = slot_on(2, 10)
+		moved.save()
+		self.assertNotIn(busy_agent, get_assignees(moved.name))
+
+		# the agent of the lead's opportunity is skipped while busy
+		busy_again = create_test_appointment(
+			customer_email="busy_again@example.com", scheduled_time=slot_on(3, 10)
+		)
+		clear_assignments("Appointment", busy_again.name)
+		add_assignment({"doctype": "Appointment", "name": busy_again.name, "assign_to": [busy_agent]})
+		lead = create_lead("busy_agent_lead@example.com")
+		opportunity = frappe.get_doc(
+			{
+				"doctype": "Opportunity",
+				"opportunity_from": "Lead",
+				"party_name": lead.name,
+				"company": "_Test Company",
+			}
+		).insert()
+		add_assignment({"doctype": "Opportunity", "name": opportunity.name, "assign_to": [busy_agent]})
+		for_lead = create_test_appointment(customer_email=lead.email_id, scheduled_time=slot_on(3, 10))
+		self.assertNotIn(busy_agent, get_assignees(for_lead.name))
+
 	def test_agent_busy_for_the_whole_appointment_duration(self):
 		self._configure_booking_settings()
 		slot = slot_on(3, 11)

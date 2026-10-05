@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
+from frappe.desk.form.assign_to import clear as clear_assignments
 from frappe.model.document import Document
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
@@ -224,6 +225,21 @@ class Appointment(Document):
 			self.create_calendar_event()
 
 		self.sync_calendar_event()
+		self.reassign_if_agent_busy()
+
+	def reassign_if_agent_busy(self):
+		"""On reschedule, move the appointment to a free agent if its agent is busy at the new time."""
+		if not (self._assign and self.has_value_changed("scheduled_time")):
+			return
+
+		busy_agents = get_busy_agents(self.scheduled_time, exclude_appointment=self.name)
+		current_agents = frappe.parse_json(self._assign)
+		if not busy_agents.intersection(current_agents):
+			return
+
+		if agent := self.get_free_agent(busy_agents):
+			clear_assignments(self.doctype, self.name, ignore_permissions=True)
+			self.assign_agent(agent)
 
 	def sync_calendar_event(self):
 		if not self.calendar_event or not self.has_value_changed("scheduled_time"):
@@ -294,16 +310,17 @@ class Appointment(Document):
 		if self._assign:
 			return
 
-		if existing_assignee := self.get_assignee_from_latest_opportunity():
-			# assign to whoever handles the party's latest opportunity
-			self.assign_agent(existing_assignee)
-			return
+		if agent := self.get_free_agent(get_busy_agents(self.scheduled_time, exclude_appointment=self.name)):
+			self.assign_agent(agent)
 
-		busy_agents = get_busy_agents(self.scheduled_time)
-		for agent in _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time)):
-			if agent not in busy_agents:
-				self.assign_agent(agent)
-				break
+	def get_free_agent(self, busy_agents: set[str]) -> str | None:
+		"""Whoever handles the party's latest opportunity, else the least loaded agent, if not busy."""
+		existing_assignee = self.get_assignee_from_latest_opportunity()
+		if existing_assignee and existing_assignee not in busy_agents:
+			return existing_assignee
+
+		agents = _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time))
+		return next((agent for agent in agents if agent not in busy_agents), None)
 
 	def get_assignee_from_latest_opportunity(self):
 		if not self.party or not frappe.db.exists("Lead", self.party):
@@ -440,7 +457,7 @@ def _get_agents_sorted_by_asc_workload(date):
 	return [agent for agent, _workload in reversed(workload.most_common())]
 
 
-def get_busy_agents(scheduled_time):
+def get_busy_agents(scheduled_time, exclude_appointment: str | None = None) -> set[str]:
 	"""Agents already assigned to a non-Closed appointment overlapping `scheduled_time`."""
 	duration = _get_appointment_duration()
 	assigns = frappe.get_all(
@@ -449,6 +466,7 @@ def get_busy_agents(scheduled_time):
 			["scheduled_time", ">", add_to_date(scheduled_time, minutes=-duration)],
 			["scheduled_time", "<", add_to_date(scheduled_time, minutes=duration)],
 			["status", "!=", "Closed"],
+			["name", "!=", exclude_appointment or ""],
 		],
 		pluck="_assign",
 	)
