@@ -195,6 +195,15 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		)
 
 	def test_accumulated_cash_flow_row_total_is_the_group_company_value(self):
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date=get_fiscal_year(today(), company=PARENT_COMPANY)[1],
+			from_currency="USD",
+			to_currency="INR",
+			exchange_rate=80,
+			for_buying=1,
+			for_selling=1,
+		).insert()
 		self.post_journal_entry("Office Equipment - CCU", "Cash - CCU", 100, company="Child Company US")
 
 		with patch("erpnext.accounts.report.utils.get_rate_as_at", return_value=0.0125):
