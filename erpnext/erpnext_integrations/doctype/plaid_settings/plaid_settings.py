@@ -221,7 +221,21 @@ def sync_transactions(bank, bank_account):
 		result = []
 		if transactions:
 			for transaction in reversed(transactions):
-				result += new_bank_transaction(transaction)
+				# per-transaction savepoint: a failed insert/submit must not discard the Bank
+				# Transactions already synced this run (MariaDB keeps them) nor poison the txn on Postgres
+				frappe.db.savepoint("plaid_sync_txn")
+				try:
+					result += new_bank_transaction(transaction)
+				except Exception:
+					# skip the row so one bad transaction does not block the rest of the account's sync
+					frappe.db.rollback(save_point="plaid_sync_txn")
+					frappe.log_error(
+						_("Plaid transaction {0} could not be imported").format(
+							transaction.get("transaction_id")
+						),
+						reference_doctype="Bank Account",
+						reference_name=bank_account,
+					)
 
 		if result:
 			last_transaction_date = frappe.db.get_value("Bank Transaction", result.pop(), "date")
