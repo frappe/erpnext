@@ -1996,6 +1996,44 @@ class TestStockEntry(ERPNextTestSuite):
 
 		assert_finished_good_value(200)
 
+	def test_manufacture_gives_zero_valued_finished_good_row_no_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.fg_completed_qty = 10
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		entry.append(
+			"items",
+			stock_entry_row(
+				fg_item,
+				5,
+				t_warehouse="_Test Warehouse 1 - _TC",
+				is_finished_item=1,
+				allow_zero_valuation_rate=1,
+			),
+		)
+		entry.append(
+			"items", stock_entry_row(fg_item, 5, t_warehouse="_Test Warehouse 2 - _TC", is_finished_item=1)
+		)
+		entry.insert()
+		entry.submit()
+		entry.load_from_db()
+
+		self.assertEqual(entry.items[1].basic_rate, 0)
+		self.assertEqual(entry.items[2].basic_rate, 200)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
+		# every finished good row zero valued: nothing to share the cost over
+		entry = frappe.copy_doc(entry)
+		entry.items[2].allow_zero_valuation_rate = 1
+		entry.insert()
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [0, 0])
+
 	def test_valuation_rate_lookup_without_voucher_no(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
