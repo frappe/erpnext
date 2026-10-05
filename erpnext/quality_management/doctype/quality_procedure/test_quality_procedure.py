@@ -126,6 +126,21 @@ class TestQualityProcedure(ERPNextTestSuite):
 		group_qp.reload()
 		self.assertFalse([d for d in group_qp.processes if d.procedure == child_qp.name])
 
+	def test_move_child_to_another_parent(self):
+		first_parent = create_procedure({"quality_procedure_name": "Test First Parent"})
+		second_parent = create_procedure({"quality_procedure_name": "Test Second Parent"})
+		child = create_procedure(
+			{"quality_procedure_name": "Test Moved Child", "parent_quality_procedure": first_parent.name}
+		)
+
+		child.parent_quality_procedure = second_parent.name
+		child.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Quality Procedure", child.name, "parent_quality_procedure"),
+			second_parent.name,
+		)
+
 
 def create_procedure(kwargs=None):
 	kwargs = frappe._dict(kwargs or {})
@@ -133,6 +148,7 @@ def create_procedure(kwargs=None):
 	doc = frappe.new_doc("Quality Procedure")
 	doc.quality_procedure_name = kwargs.quality_procedure_name or "_Test Procedure"
 	doc.is_group = kwargs.is_group or 0
+	doc.parent_quality_procedure = kwargs.parent_quality_procedure
 
 	for process in kwargs.processes or []:
 		doc.append("processes", process)

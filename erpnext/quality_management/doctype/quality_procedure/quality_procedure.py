@@ -91,7 +91,14 @@ class QualityProcedure(NestedSet):
 				if removed_child_procedures := list(
 					old_child_procedures.difference(current_child_procedures)
 				):
-					for child_procedure in removed_child_procedures:
+					for child_procedure in frappe.get_all(
+						"Quality Procedure",
+						filters={
+							"name": ["in", removed_child_procedures],
+							"parent_quality_procedure": self.name,
+						},
+						pluck="name",
+					):
 						frappe.db.set_value(
 							"Quality Procedure", child_procedure, "parent_quality_procedure", None
 						)
