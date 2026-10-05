@@ -7,6 +7,9 @@ from frappe import _
 from frappe.query_builder import Order
 from frappe.utils import escape_html, format_date, get_datetime
 
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	validate_serial_no_for_customer,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 CLAIM_STATUS = {"Fully Completed": "Closed", "Partially Completed": "Work In Progress"}
@@ -277,25 +280,6 @@ class MaintenanceVisit(TransactionBase):
 
 	def on_update(self):
 		pass
-
-
-def validate_serial_no_for_customer(serial, customer):
-	"""Refuse a serial still in stock; warn when it was sold to another customer."""
-	number = frappe.bold(escape_html(serial.serial_no))
-	if serial.warehouse:
-		frappe.throw(
-			_("Serial No {0} is still in stock in Warehouse {1}").format(
-				number, frappe.bold(serial.warehouse)
-			)
-		)
-	if serial.customer and serial.customer != customer:
-		frappe.msgprint(
-			_("Serial No {0} was sold to Customer {1}, not {2}").format(
-				number, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(customer))
-			),
-			title=_("Different Customer"),
-			indicator="orange",
-		)
 
 
 def was_delivered_to(serial_no, customer):
