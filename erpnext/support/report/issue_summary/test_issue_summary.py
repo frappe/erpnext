@@ -103,6 +103,15 @@ class TestIssueSummary(ERPNextTestSuite):
 		self.assertEqual(row["closed"], 1)
 		self.assertEqual(row["first_response_due"], 0)
 
+	def test_assigned_to_filter_matches_the_user_exactly(self):
+		user = "test-issue-summary-filter@example.com"
+		make_issue("__Test Issue Summary Assigned", _assign=json.dumps([user]))
+		make_issue("__Test Issue Summary Lookalike", _assign=json.dumps([f"x-{user}"]))
+
+		row = get_report_row("Assigned To", "user", user, assigned_to=user)
+		self.assertEqual(row["total_issues"], 1)
+		self.assertIsNone(get_report_row("Assigned To", "user", f"x-{user}", assigned_to=user))
+
 
 def make_issue(subject: str, **values) -> str:
 	"""Insert an open Issue opened today and set `values` on it directly."""

@@ -142,7 +142,7 @@ class IssueSummary:
 		filters["opening_date"] = ("between", [self.filters.from_date, self.filters.to_date])
 
 		if self.filters.get("assigned_to"):
-			filters["_assign"] = ("like", "%" + self.filters.get("assigned_to") + "%")
+			filters["_assign"] = ("like", '%"' + self.filters.get("assigned_to") + '"%')
 
 		for entry in ["company", "status", "priority", "customer", "project"]:
 			if self.filters.get(entry):
