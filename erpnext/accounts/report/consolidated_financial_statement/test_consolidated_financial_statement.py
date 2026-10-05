@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, flt, today
 
@@ -193,20 +195,10 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		)
 
 	def test_accumulated_cash_flow_row_total_is_the_group_company_value(self):
-		year_start_date = get_fiscal_year(today(), company=PARENT_COMPANY)[1]
-		for from_currency, to_currency, exchange_rate in (("USD", "INR", 80), ("INR", "USD", 0.0125)):
-			frappe.get_doc(
-				doctype="Currency Exchange",
-				date=year_start_date,
-				from_currency=from_currency,
-				to_currency=to_currency,
-				exchange_rate=exchange_rate,
-				for_buying=1,
-				for_selling=1,
-			).insert()
 		self.post_journal_entry("Office Equipment - CCU", "Cash - CCU", 100, company="Child Company US")
 
-		data = self.run_report(report="Cash Flow", accumulated_in_group_company=1)
+		with patch("erpnext.accounts.report.utils.get_rate_as_at", return_value=0.0125):
+			data = self.run_report(report="Cash Flow", accumulated_in_group_company=1)
 
 		row = self.get_row(data, "Net Change in Fixed Asset")
 		self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]))
