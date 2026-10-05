@@ -165,6 +165,18 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.append("items", sco.items[0].as_dict(no_default_fields=True))
 		self.assertRaises(frappe.ValidationError, sco.insert)
 
+	def test_order_must_match_its_purchase_order(self):
+		sa1_bom = frappe.db.get_value("BOM", {"item": "Subcontracted Item SA1", "is_default": 1})
+		changes = (
+			lambda sco: sco.update({"supplier": "_Test Supplier 1"}),
+			lambda sco: sco.items[0].update({"item_code": "Subcontracted Item SA1", "bom": sa1_bom}),
+			lambda sco: sco.service_items[0].update({"rate": 1000}),
+		)
+		for change in changes:
+			sco = get_subcontracting_order(do_not_save=1)
+			change(sco)
+			self.assertRaises(frappe.ValidationError, sco.insert)
+
 	def test_project_is_carried_over_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name
 		po = make_subcontracted_purchase_order(project)

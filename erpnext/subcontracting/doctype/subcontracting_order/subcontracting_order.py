@@ -125,6 +125,8 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_purchase_order_for_subcontracting()
 		self.validate_items()
 		self.validate_service_items()
+		self.validate_header_with_purchase_order()
+		self.validate_rows_with_purchase_order()
 		self.validate_supplied_items()
 		self.set_missing_values()
 		self.validate_with_previous_doc()
@@ -150,13 +152,22 @@ class SubcontractingOrder(SubcontractingController):
 			}
 		)
 
+	def get_purchase_order_items(self):
+		return {
+			d.name: d
+			for d in frappe.get_all(
+				"Purchase Order Item",
+				filters={"parent": self.purchase_order},
+				fields=["name", "item_code", "rate", "qty", "fg_item", "fg_item_qty"],
+			)
+		}
+
 	def set_subcontracting_conversion_factor(self):
-		po_items = frappe.get_all(
-			"Purchase Order Item",
-			filters={"parent": self.purchase_order},
-			fields=["name", "qty", "fg_item_qty"],
-		)
-		conversion_factors = {d.name: flt(d.qty) / flt(d.fg_item_qty) for d in po_items if flt(d.fg_item_qty)}
+		conversion_factors = {
+			d.name: flt(d.qty) / flt(d.fg_item_qty)
+			for d in self.get_purchase_order_items().values()
+			if flt(d.fg_item_qty)
+		}
 		for item in self.items:
 			if item.purchase_order_item in conversion_factors:
 				item.subcontracting_conversion_factor = conversion_factors[item.purchase_order_item]
@@ -199,6 +210,41 @@ class SubcontractingOrder(SubcontractingController):
 			service_item.qty = item.qty * item.subcontracting_conversion_factor
 			service_item.fg_item_qty = item.qty
 			service_item.amount = service_item.qty * service_item.rate
+
+	def validate_header_with_purchase_order(self):
+		po = frappe.db.get_value("Purchase Order", self.purchase_order, ["supplier", "company"], as_dict=True)
+		for fieldname in ("supplier", "company"):
+			if self.get(fieldname) != po.get(fieldname):
+				frappe.throw(
+					_("{0} must be the same as in Purchase Order {1}.").format(
+						_(self.meta.get_label(fieldname)), self.purchase_order
+					)
+				)
+
+	def validate_rows_with_purchase_order(self):
+		po_items = self.get_purchase_order_items()
+		for item in self.items:
+			po_item = po_items.get(item.purchase_order_item)
+			if not po_item or item.item_code != po_item.fg_item:
+				frappe.throw(
+					_("Row {0}: Item {1} is not the Finished Good of Purchase Order {2}.").format(
+						item.idx, item.item_code, self.purchase_order
+					)
+				)
+
+		for service_item in self.service_items:
+			po_item = po_items.get(service_item.purchase_order_item)
+			precision = service_item.precision("rate")
+			if (
+				not po_item
+				or service_item.item_code != po_item.item_code
+				or flt(service_item.rate, precision) != flt(po_item.rate, precision)
+			):
+				frappe.throw(
+					_("Row {0}: Service Item {1} and its rate must match Purchase Order {2}.").format(
+						service_item.idx, service_item.item_code, self.purchase_order
+					)
+				)
 
 	def validate_supplied_items(self):
 		if self.supplier_warehouse:
