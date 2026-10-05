@@ -73,6 +73,7 @@ class RequestforQuotation(BuyingController):
 
 	def validate(self):
 		self.validate_duplicate_supplier()
+		self.ensure_supplier_is_not_blocked()
 		self.validate_supplier_list()
 		super().validate_qty_is_not_zero()
 		validate_for_items(self)

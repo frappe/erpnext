@@ -101,7 +101,7 @@ class Supplier(TransactionBase):
 			self.hold_type = "All"
 
 	def is_blocked_for(self, hold_type: str) -> bool:
-		"""Whether transactions of `hold_type` ("Invoices" or "Payments") are on hold today."""
+		"""Whether transactions of `hold_type` ("Invoices", "Payments" or "All") are on hold today."""
 		return bool(
 			self.on_hold
 			and self.hold_type in ("All", hold_type)
