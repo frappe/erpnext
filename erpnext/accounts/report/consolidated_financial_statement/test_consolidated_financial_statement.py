@@ -6,6 +6,7 @@ from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
 	execute,
+	get_subsidiary_companies,
 	prepare_companywise_opening_balance,
 )
 from erpnext.accounts.report.utils import convert
@@ -43,9 +44,11 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		filters.update(extra)
 		return execute(filters)
 
-	def post_journal_entry(self, debit_account, credit_account, amount, company=CHILD_COMPANY, **party):
+	def post_journal_entry(
+		self, debit_account, credit_account, amount, company=CHILD_COMPANY, posting_date=None, **party
+	):
 		je = frappe.new_doc("Journal Entry")
-		je.posting_date = today()
+		je.posting_date = posting_date or today()
 		je.company = company
 		je.set(
 			"accounts",
@@ -155,6 +158,19 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		for label in ("Provisional Profit / Loss (Credit)", "Total (Credit)"):
 			row = self.get_row(data, label)
 			self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]), label)
+
+	def test_unclosed_fiscal_years_total_covers_every_company(self):
+		year_start_date = get_fiscal_year(today(), company=PARENT_COMPANY)[1]
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", 6000, posting_date=add_days(year_start_date, -1))
+
+		data = self.run_report(report="Balance Sheet", accumulated_in_group_company=0)
+		row = self.get_row(data, "Unclosed Fiscal Years")
+		companies_total = sum(flt(row[company]) for company in get_subsidiary_companies(PARENT_COMPANY))
+		self.assertEqual(flt(row["total"]), companies_total)
+
+		data = self.run_report(report="Balance Sheet", accumulated_in_group_company=1)
+		row = self.get_row(data, "Unclosed Fiscal Years")
+		self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]))
 
 	def test_child_only_account_of_foreign_child_is_converted(self):
 		account = frappe.get_doc(
