@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
 
 from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order
@@ -37,9 +39,12 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		return sq
 
 	def run_report(self, **extra):
+		return self.execute_report(**extra)[1]
+
+	def execute_report(self, **extra):
 		filters = frappe._dict({"company": COMPANY, "from_date": "2026-01-01", "to_date": "2026-12-31"})
 		filters.update(extra)
-		return execute(filters)[1]
+		return execute(filters)
 
 	def make_order(self, supplier_quotation, qty):
 		purchase_order = make_purchase_order(supplier_quotation.name)
@@ -97,6 +102,20 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		self.assertEqual(rows[unit_price_quote.name]["price_per_unit"], 900)
 		self.assertTrue(rows[quantity_quote.name].get("min"))
 		self.assertFalse(rows[unit_price_quote.name].get("min"))
+
+	def test_supplier_restricted_user_sees_only_that_suppliers_quotes(self):
+		own_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		self.make_quotation("_Test Supplier 1", qty=10, rate=450)
+		user = create_user("sq-comparison-buyer@example.com", "Purchase User")
+		add_user_permission("Supplier", "_Test Supplier", user.name)
+
+		with self.set_user(user.name):
+			_columns, data, _message, chart = self.execute_report(
+				item_code=ITEM, categorize_by="Categorize by Supplier"
+			)
+
+		self.assertEqual({row["quotation"] for row in data}, {own_quote.name})
+		self.assertEqual(chart["data"]["labels"], ["_Test Supplier"])
 
 	def test_status_filter(self):
 		draft = self.make_quotation("_Test Supplier", qty=10, rate=100, submit=False)

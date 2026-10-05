@@ -35,8 +35,9 @@ def get_data(filters):
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
 	query = (
-		frappe.qb.from_(sq_item)
-		.from_(sq)
+		frappe.get_query("Supplier Quotation", ignore_permissions=False)
+		.join(sq_item)
+		.on(sq_item.parent == sq.name)
 		.select(
 			sq_item.parent,
 			sq_item.item_code,
@@ -58,8 +59,7 @@ def get_data(filters):
 			sq.valid_till,
 		)
 		.where(
-			(sq_item.parent == sq.name)
-			& (sq.company == filters.get("company"))
+			(sq.company == filters.get("company"))
 			& (sq.transaction_date.between(filters.get("from_date"), filters.get("to_date")))
 		)
 		.orderby(sq.transaction_date, sq_item.item_code)
