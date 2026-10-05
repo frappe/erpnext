@@ -657,8 +657,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			zero_valuation_items.append(d.item_code)
 		elif d.is_finished_item:
 			if self.purpose == "Manufacture":
+				# the cost is split over every finished good row, so a split row is not given all of it
 				d.basic_rate = self.get_basic_rate_for_manufactured_item(
-					d.transfer_qty, outgoing_items_cost, has_consumption_basis
+					self.get_finished_items_qty(), outgoing_items_cost, has_consumption_basis
 				)
 				has_derived_rate = has_consumption_basis
 			elif self.purpose == "Repack":
@@ -762,6 +763,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				"batch_no": item.batch_no,
 				"serial_no": item.serial_no,
 			}
+		)
+
+	def get_finished_items_qty(self) -> float:
+		"""Qty of the received finished good rows whose rate is derived from the consumed cost."""
+		return sum(
+			flt(d.transfer_qty)
+			for d in self.get("items")
+			if d.is_finished_item and d.t_warehouse and not d.s_warehouse and not d.set_basic_rate_manually
 		)
 
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
@@ -1180,7 +1189,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					},
 				)
 
-				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
+				# every finished good row takes its rate from the consumed cost, not only the last one
+				if cstr(d.s_warehouse) or (finished_item_row and d.is_finished_item):
 					sle.recalculate_rate = 1
 
 				allowed_types = [

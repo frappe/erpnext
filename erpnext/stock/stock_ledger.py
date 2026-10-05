@@ -955,8 +955,10 @@ class update_entries_after:
 			sle.voucher_no
 		)
 
-		if sle.voucher_type == "Stock Entry" and is_repack_entry(sle.voucher_no):
-			dependant_sles = self.get_sles_for_repack(sle)
+		# the consumed cost is split over all the entry's outputs, so all of them are reposted,
+		# not only the finished good row the consumed row points at
+		if produced_by_manufacture:
+			dependant_sles = self.get_incoming_sles_of_entry(sle)
 		else:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
@@ -1059,7 +1061,7 @@ class update_entries_after:
 			kwargs, ">=", "asc", check_serial_no=False, fields=REPOST_SLE_QUEUE_FIELDS
 		)
 
-	def get_sles_for_repack(self, sle):
+	def get_incoming_sles_of_entry(self, sle):
 		return (
 			frappe.get_all(
 				"Stock Ledger Entry",
