@@ -16,6 +16,9 @@ from frappe.utils.data import format_datetime
 import erpnext
 from erpnext.regional.italy import mode_of_payment_codes
 
+# TD04 credit note, TD08 simplified credit note
+RETURN_DOCUMENT_TYPES = ("TD04", "TD08")
+
 
 class ImportSupplierInvoice(Document):
 	# begin: auto-generated types
@@ -105,6 +108,7 @@ class ImportSupplierInvoice(Document):
 			"document_type": line.TipoDocumento.text,
 			"bill_date": get_datetime_str(line.Data.text),
 			"bill_no": line.Numero.text,
+			"is_return": line.TipoDocumento.text in RETURN_DOCUMENT_TYPES,
 			"total_discount": 0,
 			"items": [],
 			"buying_price_list": self.default_buying_price_list,
@@ -116,7 +120,9 @@ class ImportSupplierInvoice(Document):
 		supp_dict = get_supplier_details(file_content)
 		invoices_args["destination_code"] = get_destination_code_from_file(file_content)
 		self.prepare_items_for_invoice(file_content, invoices_args)
-		invoices_args["taxes"] = get_taxes_from_file(file_content, self.tax_account)
+		invoices_args["taxes"] = get_taxes_from_file(
+			file_content, self.tax_account, invoices_args["is_return"]
+		)
 		invoices_args["terms"] = get_payment_terms_from_file(file_content)
 
 		supplier_name = create_supplier(self.supplier_group, supp_dict)
@@ -134,9 +140,8 @@ class ImportSupplierInvoice(Document):
 		qty = flt(line.Quantita.text) if line.find("Quantita") else 1
 		uom = create_uom(line.UnitaMisura.text) if line.find("UnitaMisura") else self.default_uom
 
-		if rate < 0 and line_total < 0:
+		if invoices_args["is_return"] or (rate < 0 and line_total < 0):
 			qty = -abs(qty)
-			invoices_args["return_invoice"] = 1
 
 		line_str = re.sub("[^A-Za-z0-9]+", "-", line.Descrizione.text)
 		invoices_args["items"].append(
@@ -226,7 +231,7 @@ def get_supplier_details(file_content):
 		return supplier_info
 
 
-def get_taxes_from_file(file_content, tax_account):
+def get_taxes_from_file(file_content, tax_account, is_return: bool = False):
 	taxes = []
 	# read file for taxes information
 	for line in file_content.find_all("DatiRiepilogo"):
@@ -235,13 +240,14 @@ def get_taxes_from_file(file_content, tax_account):
 				descr = line.EsigibilitaIVA.text
 			else:
 				descr = "None"
+			tax_amount = flt(line.Imposta.text) if line.find("Imposta") else 0
 			taxes.append(
 				{
 					"charge_type": "Actual",
 					"account_head": tax_account,
 					"tax_rate": flt(line.AliquotaIVA.text) or 0,
 					"description": descr,
-					"tax_amount": flt(line.Imposta.text) if line.find("Imposta") else 0,
+					"tax_amount": -abs(tax_amount) if is_return else tax_amount,
 				}
 			)
 
