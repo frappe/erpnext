@@ -237,17 +237,17 @@ def get_assets_for_grouped_by_category(filters):
 
 
 def get_finance_book_condition(filters) -> str:
-	"""GL rows of the selected finance book, or of no book and the company's default book when none is selected."""
-	if filters.get("finance_book"):
-		return f"ifnull(gle.finance_book, '') = {frappe.db.escape(filters.finance_book)}"
-
-	default_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
-	return f"ifnull(gle.finance_book, '') in ('', {frappe.db.escape(cstr(default_finance_book))})"
+	"""GL rows with no finance book, plus the selected book or else the company's default book."""
+	finance_book = filters.get("finance_book") or frappe.get_cached_value(
+		"Company", filters.company, "default_finance_book"
+	)
+	return f"ifnull(gle.finance_book, '') in ('', {frappe.db.escape(cstr(finance_book))})"
 
 
 def get_asset_value_adjustment_map_by_category(filters):
+	# nosemgrep
 	asset_value_adjustments = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			a.asset_category AS asset_category,
 			IFNULL(
@@ -282,6 +282,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 			AND a.purchase_date <= %(to_date)s
 			AND gle.account = aca.fixed_asset_account
 			AND gle.is_opening = 'No'
+			AND {get_finance_book_condition(filters)}
 		GROUP BY a.asset_category
 	""",
 		{"from_date": filters.from_date, "to_date": filters.to_date, "company": filters.company},
@@ -528,8 +529,9 @@ def get_assets_for_grouped_by_asset(filters):
 
 
 def get_asset_value_adjustment_map(filters):
+	# nosemgrep
 	asset_with_value_adjustments = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			a.name AS asset,
 			IFNULL(
@@ -564,6 +566,7 @@ def get_asset_value_adjustment_map(filters):
 			AND a.purchase_date <= %(to_date)s
 			AND gle.account = aca.fixed_asset_account
 			AND gle.is_opening = 'No'
+			AND {get_finance_book_condition(filters)}
 		GROUP BY a.name
 	""",
 		{"from_date": filters.from_date, "to_date": filters.to_date, "company": filters.company},
