@@ -1,9 +1,12 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, nowdate
 
+from erpnext.crm.doctype.contract.contract import update_status_for_contracts
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -98,6 +101,30 @@ class TestContract(ERPNextTestSuite):
 		self.contract_doc.save()
 
 		self.assertEqual(self.contract_doc.fulfilment_status, "Lapsed")
+
+	def test_daily_job_lapses_fulfilment_after_the_deadline(self):
+		contract = self.make_signed_contract(fulfilment_deadline=nowdate())
+		self.assertEqual(contract.fulfilment_status, "Unfulfilled")
+
+		with patch("erpnext.crm.doctype.contract.contract.nowdate", return_value=add_days(nowdate(), 1)):
+			update_status_for_contracts()
+		self.assertEqual(frappe.db.get_value("Contract", contract.name, "fulfilment_status"), "Lapsed")
+
+	def make_signed_contract(self, **fields):
+		self.contract_doc.update(
+			{
+				"is_signed": 1,
+				"signee": "Test Signee",
+				"signed_on": frappe.utils.now_datetime(),
+				"start_date": nowdate(),
+				"requires_fulfilment": 1,
+				**fields,
+			}
+		)
+		self.contract_doc.append("fulfilment_terms", {"requirement": "Deliver 10 tables"})
+		self.contract_doc.insert()
+		self.contract_doc.submit()
+		return self.contract_doc
 
 
 def get_contract():

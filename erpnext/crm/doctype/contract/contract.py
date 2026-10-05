@@ -142,3 +142,20 @@ def update_status_for_contracts():
 		status = get_status(contract.get("start_date"), contract.get("end_date"))
 
 		frappe.db.set_value("Contract", contract.get("name"), "status", status)
+
+	set_lapsed_fulfilment_status()
+
+
+def set_lapsed_fulfilment_status():
+	"""Mark submitted contracts whose fulfilment deadline passed unfulfilled as Lapsed."""
+	frappe.db.set_value(
+		"Contract",
+		{
+			"docstatus": 1,
+			"requires_fulfilment": 1,
+			"fulfilment_deadline": ("<", nowdate()),
+			"fulfilment_status": ("not in", ["Fulfilled", "Lapsed"]),
+		},
+		"fulfilment_status",
+		"Lapsed",
+	)
