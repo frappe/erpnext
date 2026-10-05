@@ -156,7 +156,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		report = execute(filters)
 
-		expected_data_after_credit_note = [0, 0, 100, 0, -100, self.debit_to]
+		expected_data_after_credit_note = [0, 0, 0, 100, -100, self.debit_to]
 
 		row = report[1][-1]
 		self.assertEqual(
@@ -386,7 +386,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		expected_data_after_credit_note = [
 			[100.0, 100.0, 40.0, 0.0, 60.0, si.name],
-			[0, 0, 100.0, 0.0, -100.0, cr_note.name],
+			[0, 0, 0.0, 100.0, -100.0, cr_note.name],
 		]
 		self.assertEqual(len(report[1]), 2)
 		si_row = next(
@@ -799,7 +799,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		for row in rows:
 			self.assertEqual(
 				expected_data[row.voucher_no],
-				[row.invoiced or row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+				[row.invoiced or row.credit_note, row.outstanding, row.remaining_balance, row.future_amount],
 			)
 
 		pe.cancel()

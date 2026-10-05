@@ -320,7 +320,7 @@ class ReceivablePayableReport:
 				row.invoiced_in_account_currency += amount_in_account_currency
 		else:
 			if self.is_invoice(ple):
-				if row.voucher_no == ple.voucher_no == ple.against_voucher_no:
+				if row.voucher_no == ple.voucher_no == ple.against_voucher_no and not self.is_return(ple):
 					row.paid -= amount
 					row.paid_in_account_currency -= amount_in_account_currency
 				else:
@@ -468,7 +468,7 @@ class ReceivablePayableReport:
 					"company": self.filters.company,
 					"docstatus": 1,
 				},
-				fields=["name", "due_date", "po_no", "sales_partner"],
+				fields=["name", "due_date", "po_no", "sales_partner", "is_return"],
 			)
 			for d in si_list:
 				self.invoice_details.setdefault(d.name, d)
@@ -494,7 +494,7 @@ class ReceivablePayableReport:
 					"company": self.filters.company,
 					"docstatus": 1,
 				},
-				fields=["name", "due_date", "bill_no", "bill_date"],
+				fields=["name", "due_date", "bill_no", "bill_date", "is_return"],
 			)
 
 			for pi in invoices:
@@ -1157,6 +1157,9 @@ class ReceivablePayableReport:
 						self.qb_selection_filter.append(
 							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
 						)
+
+	def is_return(self, ple):
+		return (self.invoice_details.get(ple.voucher_no) or {}).get("is_return")
 
 	def is_invoice(self, ple):
 		if ple.voucher_type in ("Sales Invoice", "Purchase Invoice"):
