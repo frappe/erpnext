@@ -204,6 +204,7 @@ class ChildItemUpdater:
 
 		elif self.parent_doctype == "Supplier Quotation":
 			parent.update_rfq_supplier_status(parent.docstatus.is_submitted())
+			parent.set_status(update=True)
 
 		parent.reload()
 		self._validate_workflow()
