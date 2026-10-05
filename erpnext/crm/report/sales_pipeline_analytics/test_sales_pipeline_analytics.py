@@ -1,4 +1,5 @@
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import today
 
 from erpnext.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
@@ -222,6 +223,18 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 		columns, data = execute(stage_filters(from_date="2026-01-15", to_date="2026-02-10"))[:2]
 
 		self.assertIn("february_2026", [column["fieldname"] for column in columns])
+
+	def test_territory_restricted_user_sees_only_permitted_opportunities(self):
+		stage = make_sales_stage()
+		make_stage_opportunity(stage, 100, "2026-01-20", territory="_Test Territory India")
+		make_stage_opportunity(stage, 100, "2026-01-20", territory="_Test Territory Rest Of The World")
+		user = create_user("pipeline_territory_user@example.com", "Sales User")
+		frappe.permissions.add_user_permission("Territory", "_Test Territory India", user.name)
+
+		with self.set_user(user.name):
+			rows = stage_rows(stage, from_date="2026-01-01", to_date="2026-01-31")
+
+		self.assertEqual(rows[0]["january_2026"], 1)
 
 
 def make_sales_stage() -> str:

@@ -106,7 +106,7 @@ class SalesPipelineAnalytics:
 						frappe.query_builder.functions.Count("*").as_("count"),
 						*self.period_fields,
 					],
-					ignore_permissions=True,
+					ignore_permissions=False,
 				)
 				.groupby(pipeline_field, *self.period_expressions)
 				.orderby(*self.period_expressions)
@@ -118,7 +118,7 @@ class SalesPipelineAnalytics:
 			query = frappe.qb.get_query(
 				"Opportunity",
 				filters=self.get_conditions(),
-				ignore_permissions=True,
+				ignore_permissions=False,
 			)
 			self.query_result = query.select(
 				pipeline_field.as_(self.pipeline_by),
