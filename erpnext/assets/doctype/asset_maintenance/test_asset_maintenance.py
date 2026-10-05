@@ -190,6 +190,24 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		)
 		self.assertEqual(open_todos, ["marcus@abc.com"])
 
+	def test_assign_task_to_user_whose_name_is_not_the_email(self):
+		team = frappe.get_doc("Asset Maintenance Team", "Team Awesome")
+		team.append(
+			"maintenance_team_members", {"team_member": "Administrator", "maintenance_role": "Technician"}
+		)
+		team.save()
+		tasks = get_maintenance_tasks()
+		tasks[0]["assign_to"] = "Administrator"
+
+		asset_maintenance = self.make_asset_maintenance(tasks)
+
+		self.assertTrue(
+			frappe.db.exists(
+				"ToDo",
+				{"reference_name": asset_maintenance.name, "allocated_to": "Administrator", "status": "Open"},
+			)
+		)
+
 	def submit_asset(self):
 		self.asset_doc.update(
 			{"available_for_use_date": nowdate(), "purchase_date": nowdate(), "maintenance_required": 1}

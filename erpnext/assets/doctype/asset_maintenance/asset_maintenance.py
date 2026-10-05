@@ -61,9 +61,7 @@ class AssetMaintenance(Document):
 			asset.set_status()
 
 	def close_unassigned_todos(self):
-		assignees = [
-			frappe.db.get_value("User", task.assign_to, "email") for task in self.asset_maintenance_tasks
-		]
+		assignees = [task.assign_to for task in self.asset_maintenance_tasks]
 		unassigned_users = frappe.get_all(
 			"ToDo",
 			filters={
@@ -101,10 +99,9 @@ class AssetMaintenance(Document):
 
 
 def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
-	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
 		"doctype": "Asset Maintenance",
-		"assign_to": team_member,
+		"assign_to": assign_to_member,
 		"name": asset_maintenance_name,
 		"description": maintenance_task,
 		"date": next_due_date,
