@@ -48,6 +48,18 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(get_area_and_feature_count(parent.name), (0, 0))
 		self.assertEqual(get_area_and_feature_count(other_parent.name), (child.area, 1))
 
+	def test_coordinates_out_of_range_are_refused(self):
+		for coordinates in (
+			{"latitude": 123.4},
+			{"latitude": -90.5},
+			{"longitude": -999},
+			{"longitude": 180.1},
+		):
+			self.assertRaises(frappe.ValidationError, make_location, "Bad Coordinates", **coordinates)
+
+		location = make_location("Edge Coordinates", latitude=-90, longitude=180)
+		self.assertEqual((location.latitude, location.longitude), (-90, 180))
+
 
 def make_location(location_name: str, **args):
 	return frappe.get_doc({"doctype": "Location", "location_name": location_name, **args}).insert()

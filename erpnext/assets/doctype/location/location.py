@@ -6,6 +6,8 @@ import json
 import math
 
 import frappe
+from frappe import _
+from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, update_nsm
 
 EARTH_RADIUS = 6378137
@@ -36,6 +38,7 @@ class Location(NestedSet):
 	nsm_parent_field = "parent_location"
 
 	def validate(self):
+		self.validate_coordinates()
 		self.calculate_location_area()
 		self.previous_ancestors = [] if self.is_new() else self.get_ancestors()
 
@@ -49,6 +52,12 @@ class Location(NestedSet):
 		update_nsm(self)
 		for ancestor in ancestors:
 			self.set_features_in_ancestor(ancestor, [])
+
+	def validate_coordinates(self):
+		if abs(flt(self.latitude)) > 90:
+			frappe.throw(_("Latitude must be between -90 and 90"))
+		if abs(flt(self.longitude)) > 180:
+			frappe.throw(_("Longitude must be between -180 and 180"))
 
 	def calculate_location_area(self):
 		self.area = compute_area(self.get_location_features())
