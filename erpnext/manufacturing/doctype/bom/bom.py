@@ -1966,7 +1966,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 
 
 @frappe.whitelist()
-def get_bom_diff(bom1, bom2):
+def get_bom_diff(bom1: str, bom2: str):
 	from frappe.model import table_fields
 
 	if bom1 == bom2:
@@ -1998,7 +1998,10 @@ def get_bom_diff(bom1, bom2):
 		old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
 
 		if df.fieldtype in table_fields:
-			identifier = identifiers[df.fieldname]
+			identifier = identifiers.get(df.fieldname)
+			if not identifier:
+				continue
+
 			# make maps
 			old_row_by_identifier, new_row_by_identifier = {}, {}
 			for d in old_value:
