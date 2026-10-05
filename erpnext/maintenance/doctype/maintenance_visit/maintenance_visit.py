@@ -172,12 +172,11 @@ class MaintenanceVisit(TransactionBase):
 					wc_doc.db_update()
 
 	def check_if_last_visit(self):
-		"""check if last maintenance visit against same sales order/ Warranty Claim"""
+		"""check if last maintenance visit against same Warranty Claim"""
 		check_for_docname = None
 		for d in self.get("purposes"):
-			if d.prevdoc_docname:
+			if d.prevdoc_docname and d.prevdoc_doctype == "Warranty Claim":
 				check_for_docname = d.prevdoc_docname
-				# check_for_doctype = d.prevdoc_doctype
 
 		if check_for_docname:
 			check = frappe.db.sql(
@@ -189,7 +188,9 @@ class MaintenanceVisit(TransactionBase):
 				check_lst = [x[0] for x in check]
 				check_lst = ",".join(check_lst)
 				frappe.throw(
-					_("Cancel Material Visits {0} before cancelling this Maintenance Visit").format(check_lst)
+					_("Cancel Maintenance Visits {0} before cancelling this Maintenance Visit").format(
+						check_lst
+					)
 				)
 				raise Exception
 			else:
