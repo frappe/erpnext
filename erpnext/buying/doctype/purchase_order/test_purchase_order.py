@@ -2117,6 +2117,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 				frappe.ValidationError, update_child_qty_rate, "Purchase Order", trans_items, po.name
 			)
 
+	def test_return_receipt_submitted_as_built_updates_po_returned_qty(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(qty=10)
+		pr = make_pr_against_po(po.name, 10)
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		purchase_return.items[0].qty = purchase_return.items[0].received_qty = -3
+		purchase_return.insert()
+		purchase_return.submit()
+
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "returned_qty"), 3)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
