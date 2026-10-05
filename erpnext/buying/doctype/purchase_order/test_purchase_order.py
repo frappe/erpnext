@@ -1989,6 +1989,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			frappe.ValidationError, "fully ordered", make_inter_company_sales_order, po.name
 		)
 
+	def test_update_status_accepts_only_hold_close_and_reopen_on_submitted_po(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
+
+		po = create_purchase_order()
+		self.assertRaises(frappe.ValidationError, update_status, "Delivered", po.name)
+		self.assertRaises(
+			frappe.ValidationError, update_status, "Closed", create_purchase_order(do_not_submit=True).name
+		)
+
+		update_status("On Hold", po.name)
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "On Hold")
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (

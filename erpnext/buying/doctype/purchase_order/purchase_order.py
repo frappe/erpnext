@@ -658,6 +658,12 @@ def get_list_context(context=None):
 
 @frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
+	if status not in ("Draft", "Submitted", "On Hold", "Closed"):
+		frappe.throw(_("Cannot set the status of a Purchase Order to {0}.").format(status))
+
 	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
+	if po.docstatus != 1:
+		frappe.throw(_("Only a submitted Purchase Order can be held, closed or re-opened."))
+
 	po.update_status(status)
 	DropShipService(po).update_delivered_qty_in_sales_order()
