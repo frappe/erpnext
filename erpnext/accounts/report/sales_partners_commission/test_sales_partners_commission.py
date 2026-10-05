@@ -4,6 +4,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_partners_commission.sales_partners_commission import execute
 from erpnext.selling.doctype.customer.test_customer import make_customer
@@ -35,6 +36,14 @@ class TestSalesPartnersCommission(FrappeTestCase):
 
 	def get_partner_row(self) -> dict:
 		return next(row for row in execute()[1] if row["sales_partner"] == self.sales_partner)
+
+	def test_credit_note_reverses_commission(self):
+		invoice = self.make_invoice("_Test Customer", 1000)
+		self.make_invoice("_Test Customer", 400)
+		make_sales_return(invoice.name).insert().submit()
+
+		row = self.get_partner_row()
+		self.assertEqual((row["invoiced_amount"], row["total_commission"]), (400, 40))
 
 	def test_user_sees_commission_on_permitted_customers_only(self):
 		self.make_invoice("_Test Customer", 1000)
