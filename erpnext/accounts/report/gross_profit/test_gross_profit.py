@@ -1255,6 +1255,29 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 390)
 
+	def test_sales_order_delivered_in_parts_uses_qty_weighted_rate(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = create_item("_Test Gross Profit Partly Delivered Item").name
+		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=1, basic_rate=100)
+		so = make_sales_order(
+			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=4
+		)
+
+		delivered_value = 0
+		for qty in (1, 3):
+			make_stock_entry(
+				company=self.company, item_code=item, target=self.warehouse, qty=qty, basic_rate=300
+			)
+			dnote = make_delivery_note(so.name)
+			dnote.items[0].qty = qty
+			dnote.submit()
+			delivered_value += dnote.items[0].stock_qty * dnote.items[0].incoming_rate
+		sinv = make_sales_invoice(so.name).submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
+
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
 		components = []
