@@ -172,3 +172,18 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 
 		for tree, entity in entities.items():
 			self.assertAlmostEqual(self._rows(filters[tree])[entity]["total"] - base[tree], 20, places=2)
+
+	def test_weekly_range_keeps_iso_week_across_year_end(self):
+		filters = self._filters(
+			tree_type="Supplier", range="Weekly", from_date="2020-12-21", to_date="2021-01-10"
+		)
+		base = self._rows(filters).get(SUPPLIER, {})
+
+		for transaction_date, rate in (("2020-12-30", 1000), ("2021-01-02", 2000)):
+			create_purchase_order(
+				company=COMPANY, supplier=SUPPLIER, qty=1, rate=rate, transaction_date=transaction_date
+			)
+
+		row = self._rows(filters)[SUPPLIER]
+		self.assertAlmostEqual(row["week_53_2020"] - flt(base.get("week_53_2020")), 3000, places=2)
+		self.assertAlmostEqual(row["total"] - flt(base.get("total")), 3000, places=2)
