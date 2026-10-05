@@ -12,6 +12,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
+	get_asset_depreciation_schedule,
 	get_depr_schedule,
 )
 from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
@@ -1243,6 +1244,16 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 
 		asset = create_monthly_asset(**args, expected_value_after_useful_life=100)
 		self.assertLess(asset.finance_books[0].rate_of_depreciation, 100)
+
+	def test_schedule_is_read_only_with_asset_permission(self):
+		asset = create_monthly_asset()
+
+		for method in (get_depr_schedule, get_asset_depr_schedule_doc):
+			self.assertRaises(frappe.PermissionError, frappe.is_whitelisted, method)
+
+		self.assertEqual(get_asset_depreciation_schedule(asset.name, "Active").asset, asset.name)
+		with self.set_user("Guest"):
+			self.assertRaises(frappe.PermissionError, get_asset_depreciation_schedule, asset.name, "Active")
 
 
 def create_monthly_asset(**args):

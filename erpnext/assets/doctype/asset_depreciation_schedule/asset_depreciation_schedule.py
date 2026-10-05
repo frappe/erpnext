@@ -312,6 +312,13 @@ def get_asset_shift_factors_map():
 
 
 @frappe.whitelist()
+def get_asset_depreciation_schedule(
+	asset_name: str, status: str | None = None, finance_book: str | None = None
+):
+	frappe.has_permission("Asset", "read", asset_name, throw=True)
+	return get_asset_depr_schedule_doc(asset_name, status, finance_book)
+
+
 def get_depr_schedule(asset_name: str, status: str, finance_book: str | None = None):
 	asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_name, status, finance_book)
 
@@ -321,7 +328,6 @@ def get_depr_schedule(asset_name: str, status: str, finance_book: str | None = N
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
 
-@frappe.whitelist()
 def get_asset_depr_schedule_doc(asset_name: str, status: str | None = None, finance_book: str | None = None):
 	asset_depr_schedule = get_asset_depr_schedule_name(asset_name, status, finance_book)
 
