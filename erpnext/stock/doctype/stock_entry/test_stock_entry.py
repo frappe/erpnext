@@ -5041,6 +5041,13 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 			self.assertEqual(se.process_loss_qty, 10)
 			self.assertEqual(se.process_loss_percentage, 10)
 
+	def test_from_bom_entry_rejects_finished_good_qty_above_fg_completed_qty(self):
+		for purpose in ("Manufacture", "Repack"):
+			se = self.make_process_loss_entry(purpose)
+			self.get_finished_good_row(se).qty = 101
+
+			self.assertRaisesRegex(FinishedGoodError, "more than the Finished Good Quantity", se.save)
+
 	def test_process_loss_counts_variant_of_bom_item(self):
 		make_item_variant()
 		se = self.make_process_loss_entry(fg_item="_Test Variant Item")

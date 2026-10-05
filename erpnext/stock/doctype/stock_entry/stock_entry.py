@@ -1539,8 +1539,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def set_process_loss_from_finished_goods(self):
 		"""Loss is the part of Finished Good Quantity the BOM item rows do not cover."""
-		process_loss_qty = max(flt(self.fg_completed_qty) - self.get_bom_item_finished_qty(), 0)
-		self.process_loss_qty = flt(process_loss_qty, self.precision("process_loss_qty"))
+		precision = self.precision("process_loss_qty")
+		finished_qty = flt(self.get_bom_item_finished_qty(), precision)
+		fg_completed_qty = flt(self.fg_completed_qty, precision)
+
+		# raw materials are fetched and consumed for Finished Good Quantity, so making more than
+		# that would book finished goods without the material (and value) behind them
+		if finished_qty > fg_completed_qty:
+			frappe.throw(
+				_(
+					"The finished good rows receive {0}, which is more than the Finished Good Quantity {1}. Set Finished Good Quantity to {0} and get the items again, or reduce the finished good rows."
+				).format(frappe.bold(finished_qty), frappe.bold(fg_completed_qty)),
+				title=_("Finished Good Quantity Exceeded"),
+				exc=FinishedGoodError,
+			)
+
+		process_loss_qty = fg_completed_qty - finished_qty
+		self.process_loss_qty = flt(process_loss_qty, precision)
 		self.set_process_loss_percentage()
 
 	def get_bom_item_finished_qty(self):
