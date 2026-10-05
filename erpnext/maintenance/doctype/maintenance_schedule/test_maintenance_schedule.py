@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.utils import format_date
-from frappe.utils.data import add_days, formatdate, today
+from frappe.utils.data import add_days, formatdate, getdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	get_serial_nos_from_schedule,
@@ -199,6 +199,25 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		unchanged = ms.validate_schedule_date_for_holiday_list(getdate(non_holiday), sp.name)
 		self.assertEqual(getdate(unchanged), getdate(non_holiday))
 
+	def test_cancelling_renewal_restores_earlier_amc_date(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial = frappe.db.get_value(
+			"Serial No", {"item_code": item_code, "status": "Active"}, ["name", "serial_no"], as_dict=True
+		)
+		first = make_maintenance_schedule(item_code=item_code, serial_no=serial.serial_no)
+		first.submit()
+		renewal = make_maintenance_schedule(
+			item_code=item_code, serial_no=serial.serial_no, start_date=add_days(first.items[0].end_date, 1)
+		)
+		renewal.submit()
+
+		renewal.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial.name, "amc_expiry_date"), getdate(first.items[0].end_date)
+		)
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
@@ -228,7 +247,7 @@ def make_maintenance_schedule(**args):
 		"items",
 		{
 			"item_code": args.get("item_code") or "_Test Item",
-			"start_date": today(),
+			"start_date": args.get("start_date") or today(),
 			"periodicity": "Weekly",
 			"no_of_visits": 4,
 			"serial_no": args.get("serial_no"),
