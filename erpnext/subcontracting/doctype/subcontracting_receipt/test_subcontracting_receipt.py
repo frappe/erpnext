@@ -658,6 +658,44 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				flt(return_row.additional_cost_per_qty, 2), flt(original_row.additional_cost_per_qty, 2)
 			)
 
+	def test_rejected_only_row_posts_raw_material_gl_entry(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 0
+		scr.items[0].rejected_qty = 10
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.save()
+		scr.submit()
+
+		consumed_value = sum(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": scr.name, "warehouse": scr.supplier_warehouse},
+				pluck="stock_value_difference",
+			)
+		)
+		supplier_warehouse_account = get_inventory_account(scr.company, scr.supplier_warehouse)
+		gl_value = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries("Subcontracting Receipt", scr.name)
+			if gle.account == supplier_warehouse_account
+		)
+
+		self.assertEqual(consumed_value, -1000)
+		self.assertEqual(gl_value, consumed_value)
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
