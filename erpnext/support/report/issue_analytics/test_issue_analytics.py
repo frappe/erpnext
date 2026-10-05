@@ -169,6 +169,30 @@ class TestIssueAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(sum(row["total"] for row in rows), 1)
 
+	def test_assigned_to_matches_whole_user_and_lists_unassigned(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		create_user("test@example.com")
+		create_user("atest@example.com")
+		for index, user in enumerate(["test@example.com", "atest@example.com", None]):
+			issue = make_issue(getdate("2026-05-20"), index=index)
+			if user:
+				add_assignment({"assign_to": [user], "doctype": "Issue", "name": issue.name})
+
+		filters = {
+			"company": "_Test Company",
+			"based_on": "Assigned To",
+			"from_date": "2026-05-01",
+			"to_date": "2026-05-31",
+			"range": "Monthly",
+		}
+		rows = {row["user"]: row["total"] for row in execute(filters)[1]}
+		self.assertEqual(rows.get("Not Assigned"), 1)
+
+		filters["assigned_to"] = "test@example.com"
+		rows = {row["user"]: row["total"] for row in execute(filters)[1]}
+		self.assertEqual(rows, {"test@example.com": 1})
+
 	def get_total(self, from_date, to_date, period_range):
 		filters = {
 			"company": "_Test Company",

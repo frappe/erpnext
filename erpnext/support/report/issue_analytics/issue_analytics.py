@@ -161,7 +161,7 @@ class IssueAnalytics:
 		filters["opening_date"] = ("between", [self.filters.from_date, self.filters.to_date])
 
 		if self.filters.get("assigned_to"):
-			filters["_assign"] = ("like", "%" + self.filters.get("assigned_to") + "%")
+			filters["_assign"] = ("like", '%"' + self.filters.get("assigned_to") + '"%')
 
 		for entry in ["company", "status", "priority", "customer", "project"]:
 			if self.filters.get(entry):
@@ -201,10 +201,9 @@ class IssueAnalytics:
 			period = self.get_period_of(d.get("opening_date"))
 
 			if self.filters.based_on == "Assigned To":
-				if d._assign:
-					for entry in json.loads(d._assign):
-						self.issue_periodic_data.setdefault(entry, frappe._dict()).setdefault(period, 0.0)
-						self.issue_periodic_data[entry][period] += 1
+				for entry in json.loads(d._assign or "[]") or [_("Not Assigned")]:
+					self.issue_periodic_data.setdefault(entry, frappe._dict()).setdefault(period, 0.0)
+					self.issue_periodic_data[entry][period] += 1
 
 			else:
 				field = self.field_map.get(self.filters.based_on)
