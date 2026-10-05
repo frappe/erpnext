@@ -164,6 +164,9 @@ class SalesPipelineAnalytics:
 		if self.filters.get("company"):
 			conditions.append({"company": self.filters.get("company")})
 
+		if self.filters.get("assigned_to"):
+			conditions.append(["_assign", "like", f'%"{self.filters.get("assigned_to")}"%'])
+
 		if self.filters.get("from_date") and self.filters.get("to_date"):
 			conditions.append(
 				["expected_closing", "between", [self.filters.get("from_date"), self.filters.get("to_date")]]

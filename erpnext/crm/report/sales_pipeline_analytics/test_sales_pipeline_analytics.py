@@ -236,6 +236,18 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(rows[0]["january_2026"], 1)
 
+	def test_assigned_to_filters_sales_stage_pipeline(self):
+		stage = make_sales_stage()
+		assigned = make_stage_opportunity(stage, 100, "2026-01-20")
+		make_stage_opportunity(stage, 100, "2026-01-20")
+		frappe.db.set_value("Opportunity", assigned.name, "_assign", '["test1@example.com"]')
+
+		rows = stage_rows(
+			stage, assigned_to="test1@example.com", from_date="2026-01-01", to_date="2026-01-31"
+		)
+
+		self.assertEqual(rows[0]["january_2026"], 1)
+
 
 def make_sales_stage() -> str:
 	stage = "_Test Pipeline Stage " + frappe.generate_hash(length=5)
