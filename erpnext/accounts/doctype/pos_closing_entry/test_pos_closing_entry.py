@@ -470,6 +470,7 @@ def init_user_and_profile(**args):
 		return test_user
 
 	pos_profile = make_pos_profile(**args)
+	pos_profile.reload()
 	pos_profile.append("applicable_for_users", {"default": 1, "user": user})
 
 	pos_profile.save()
