@@ -279,6 +279,7 @@ def get_mapped_subcontracting_order(
 ) -> Document:
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
+		source_rows = {row.name: row for row in source_doc.items}
 
 		if target_doc.set_warehouse:
 			for item in target_doc.items:
@@ -288,11 +289,11 @@ def get_mapped_subcontracting_order(
 				for item in target_doc.items:
 					item.warehouse = source_doc.set_warehouse
 			else:
-				for idx, item in enumerate(target_doc.items):
-					item.warehouse = source_doc.items[idx].warehouse
+				for item in target_doc.items:
+					item.warehouse = source_rows[item.purchase_order_item].warehouse
 
-		for idx, item in enumerate(target_doc.items):
-			item.job_card = source_doc.items[idx].job_card
+		for item in target_doc.items:
+			item.job_card = source_rows[item.purchase_order_item].job_card
 			if not target_doc.supplier_warehouse:
 				# WIP warehouse is set as Supplier Warehouse in Job Card
 				target_doc.supplier_warehouse = frappe.get_cached_value(

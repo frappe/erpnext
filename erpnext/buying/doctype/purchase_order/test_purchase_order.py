@@ -2001,6 +2001,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		update_status("On Hold", po.name)
 		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "On Hold")
 
+	def test_subcontracting_order_takes_warehouse_from_its_own_po_row(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+
+		po = create_two_row_subcontracted_po()
+		sco = make_subcontracting_order(po.name)
+		sco.items.pop(1)
+		sco.save()
+		sco.submit()
+
+		sco = make_subcontracting_order(po.name)
+		self.assertEqual(
+			[(row.item_code, row.warehouse) for row in sco.items],
+			[("Subcontracted Item SA2", "_Test Warehouse 2 - _TC")],
+		)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -2046,6 +2061,44 @@ def create_po_for_sc_testing():
 		rm_items=service_items,
 		is_subcontracted=1,
 		supplier_warehouse="_Test Warehouse 1 - _TC",
+	)
+
+
+def create_two_row_subcontracted_po(**args):
+	from erpnext.controllers.tests.test_subcontracting_controller import (
+		make_bom_for_subcontracted_items,
+		make_raw_materials,
+		make_service_items,
+		make_subcontracted_items,
+	)
+
+	make_subcontracted_items()
+	make_raw_materials()
+	make_service_items()
+	make_bom_for_subcontracted_items()
+
+	return create_purchase_order(
+		rm_items=[
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse 2 - _TC",
+				"item_code": "Subcontracted Service Item 2",
+				"qty": 20,
+				"rate": 25,
+				"fg_item": "Subcontracted Item SA2",
+				"fg_item_qty": 15,
+			},
+		],
+		is_subcontracted=1,
+		supplier_warehouse="_Test Warehouse 1 - _TC",
+		**args,
 	)
 
 
