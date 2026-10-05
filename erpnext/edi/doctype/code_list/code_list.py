@@ -5,6 +5,7 @@ import re
 from typing import TYPE_CHECKING
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import escape_html
 
@@ -30,6 +31,20 @@ class CodeList(Document):
 		url: DF.Data | None
 		version: DF.Data | None
 	# end: auto-generated types
+
+	def validate(self):
+		self.validate_default_common_code()
+
+	def validate_default_common_code(self):
+		if not self.default_common_code:
+			return
+
+		if frappe.db.get_value("Common Code", self.default_common_code, "code_list") != self.name:
+			frappe.throw(
+				_("Default Common Code {0} does not belong to Code List {1}").format(
+					frappe.bold(self.default_common_code), frappe.bold(self.name)
+				)
+			)
 
 	def on_trash(self):
 		if not frappe.flags.in_bulk_delete:
