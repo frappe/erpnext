@@ -263,7 +263,7 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
 
-	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
+	stock_qty = flt(abs(flt(row.qty) * flt(row.conversion_factor or 1)), row.precision("stock_qty"))
 	for returned_key in {key, row.item_code}:
 		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
 		returned.qty = flt(returned.qty) + abs(flt(row.qty))
