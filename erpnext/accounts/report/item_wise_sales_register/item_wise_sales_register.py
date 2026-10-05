@@ -707,6 +707,7 @@ def add_total_row(
 				"amount": 0.0,
 				"bold": 1,
 				"total_tax": 0.0,
+				"total_other_charges": 0.0,
 				"total": 0.0,
 				"percent_gt": 0.0,
 			},
@@ -720,6 +721,7 @@ def add_total_row(
 				"amount": 0.0,
 				"bold": 1,
 				"total_tax": 0.0,
+				"total_other_charges": 0.0,
 				"total": 0.0,
 				"percent_gt": 0.0,
 			},
@@ -765,6 +767,7 @@ def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	total_row["stock_qty"] += item["stock_qty"]
 	total_row["amount"] += item["amount"]
 	total_row["total_tax"] += item["total_tax"]
+	total_row["total_other_charges"] += flt(item.get("total_other_charges"))
 	total_row["total"] += item["total"]
 	total_row["percent_gt"] += item["percent_gt"]
 

@@ -163,6 +163,19 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (5, 5))
 		self.assertEqual((row[f"{service_tax}_rate"], row[f"{service_tax}_amount"]), (2, 2))
 
+	def test_subtotal_rows_include_other_charges(self):
+		self.customer = "_Test Customer 2"
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "Freight and Forwarding Charges - _TC", "description": "Freight", "rate": 10}
+			]
+		)
+
+		data = self.get_grouped_data(customer=self.customer)
+
+		self.assertEqual(self.get_grand_total_row(data)["total_other_charges"], 10)
+		self.assertEqual(self.get_grand_total_row(data)["total"], 110)
+
 	def get_grouped_data(self, **filters):
 		filters = frappe._dict(
 			from_date=today(), to_date=today(), company=self.company, group_by="Customer", **filters
