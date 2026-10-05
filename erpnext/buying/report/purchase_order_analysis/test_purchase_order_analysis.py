@@ -6,6 +6,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, nowdate
 
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
@@ -56,9 +57,6 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 		return [row for row in data if row["item_code"] == ITEM_CODE]
 
 	def test_report_executes_and_lists_po(self):
-		# get_data groups by (Purchase Order Item, Purchase Order) while selecting other parent
-		# columns; this exercises that GROUP BY so the report stays valid on Postgres (which rejects
-		# selecting non-grouped columns).
 		po = create_purchase_order(company="_Test Company")
 
 		result = execute(self.get_filters())
@@ -99,6 +97,20 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 		fieldnames = [column["fieldname"] for column in columns]
 		self.assertIn("uom", fieldnames)
 		self.assertNotIn("purchase_order", fieldnames)
+
+	def test_billed_qty_leaves_out_debit_notes_that_keep_the_order_billed(self):
+		po = self.make_purchase_order(qty=10)
+		pi = make_purchase_invoice(po.name)
+		pi.items[0].qty = 6
+		pi.insert().submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -2
+		debit_note.insert().submit()
+
+		row = next(row for row in execute(self.get_filters())[1] if row["purchase_order"] == po.name)
+		self.assertEqual(row["billed_qty"], 6)
+		self.assertEqual(row["billed_amount"], 3000)
 
 	def test_group_by_item_keeps_each_uom_apart(self):
 		self.make_purchase_order(qty=10)
