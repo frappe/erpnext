@@ -1434,6 +1434,14 @@ def make_sales_invoice(
 
 		return pending_qty_by_item[source.name]
 
+	def is_qty_billed_below_amount(source):
+		billed_qty = get_billed_qty_by_item().get(source.name, 0)
+		return (
+			source.name not in mapped_qty_by_item
+			and flt(flt(source.qty) - billed_qty, source.precision("qty")) <= 0
+			and abs(flt(source.billed_amt)) < abs(flt(source.amount))
+		)
+
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
@@ -1555,8 +1563,10 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or is_amount_billable(doc))
-						and get_pending_qty(doc) > 0
+						and (
+							((doc.base_amount == 0 or is_amount_billable(doc)) and get_pending_qty(doc) > 0)
+							or is_qty_billed_below_amount(doc)
+						)
 					)
 				),
 			},
@@ -2223,15 +2233,18 @@ def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 	return target_doc
 
 
-def get_pending_qty_criterion(sales_order_item):
-	"""Mirror the mapper's pending quantity check."""
+def get_billed_qty_query(sales_order_item):
+	"""Return the qty billed against a Sales Order Item by submitted Sales Invoices."""
 	invoice_item = qb.DocType("Sales Invoice Item")
-	billed_qty = (
+	return (
 		qb.from_(invoice_item)
 		.select(IfNull(Sum(invoice_item.qty), 0))
 		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
 	)
 
+
+def get_pending_qty_criterion(sales_order_item, billed_qty):
+	"""Mirror the mapper's pending quantity check."""
 	qty_precision = frappe.get_precision("Sales Order Item", "qty")
 	has_unbilled_ordered_qty = Round(sales_order_item.qty - billed_qty, qty_precision) > 0
 	has_unbilled_delivered_qty = (
@@ -2239,6 +2252,14 @@ def get_pending_qty_criterion(sales_order_item):
 	) | (Round(sales_order_item.delivered_qty - billed_qty, qty_precision) > 0)
 
 	return has_unbilled_ordered_qty & has_unbilled_delivered_qty
+
+
+def get_qty_billed_below_amount_criterion(sales_order_item, billed_qty):
+	"""Mirror the mapper's check for a fully billed qty that is billed below the row amount."""
+	qty_precision = frappe.get_precision("Sales Order Item", "qty")
+	return (Round(sales_order_item.qty - billed_qty, qty_precision) <= 0) & (
+		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount)
+	)
 
 
 def get_potentially_billable_item_criterion(sales_order, sales_order_item, item):
@@ -2252,8 +2273,10 @@ def get_potentially_billable_item_criterion(sales_order, sales_order_item, item)
 		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount) * (1 + allowance / 100)
 	)
 	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
-	is_billable_row = (
-		(sales_order_item.qty != 0) & has_amount_headroom & get_pending_qty_criterion(sales_order_item)
+	billed_qty = get_billed_qty_query(sales_order_item)
+	is_billable_row = (sales_order_item.qty != 0) & (
+		(has_amount_headroom & get_pending_qty_criterion(sales_order_item, billed_qty))
+		| get_qty_billed_below_amount_criterion(sales_order_item, billed_qty)
 	)
 
 	return is_unit_price_row | is_billable_row
