@@ -629,6 +629,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				Coalesce(table.sales_invoice, child_table.sales_invoice).as_("sales_invoice"),
 				child_table.project,
 			)
+			.where(table.docstatus == 1)
 			.orderby(table.end_date)
 			.limit(limit_page_length)
 			.offset(limit_start)
