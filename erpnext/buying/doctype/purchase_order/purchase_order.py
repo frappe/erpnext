@@ -805,6 +805,10 @@ def set_missing_values(source, target):
 	target.run_method("set_use_serial_batch_fields")
 
 
+def is_unit_price_row(po_item, has_unit_price_items) -> bool:
+	return bool(has_unit_price_items) and po_item.qty == 0
+
+
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None, args=None):
 	if args is None:
@@ -813,17 +817,13 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 		args = json.loads(args)
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
-
-	def is_unit_price_row(source):
-		return has_unit_price_items and source.qty == 0
-
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
 
 	def update_item(obj, target, source_parent):
 		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
 		pending_qty = flt(obj.qty) - received_qty
 
-		target.qty = flt(obj.qty) if is_unit_price_row(obj) else pending_qty
+		target.qty = flt(obj.qty) if is_unit_price_row(obj, has_unit_price_items) else pending_qty
 		target.stock_qty = pending_qty * flt(obj.conversion_factor)
 		target.amount = pending_qty * flt(obj.rate)
 		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
@@ -859,7 +859,7 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 				"postprocess": update_item,
 				"condition": lambda doc: (
 					doc.name not in mapped_qty_by_item
-					if is_unit_price_row(doc)
+					if is_unit_price_row(doc, has_unit_price_items)
 					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0)) < abs(doc.qty)
 				)
 				and doc.delivered_by_supplier != 1
@@ -921,13 +921,18 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		)
 		return query.run(pluck="qty")[0] or 0
 
+	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
 
 	def get_billed_and_mapped_qty(po_item_name):
 		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
 
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+		target.qty = (
+			0
+			if is_unit_price_row(obj, has_unit_price_items)
+			else flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -966,11 +971,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: (
-				doc.base_amount == 0
-				or abs(doc.billed_amt) < abs(doc.amount)
-				or doc.qty > flt(get_billed_qty(doc.name))
+				doc.name not in mapped_qty_by_item
+				if is_unit_price_row(doc, has_unit_price_items)
+				else doc.qty > get_billed_and_mapped_qty(doc.name)
 			)
-			and (doc.name not in mapped_qty_by_item or doc.qty > get_billed_and_mapped_qty(doc.name))
 			and select_item(doc),
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
