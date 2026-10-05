@@ -12,7 +12,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_datetime_str, today
 from frappe.utils.data import format_datetime
-from frappe.utils.file_manager import save_file
 
 import erpnext
 from erpnext.regional.italy import mode_of_payment_codes
@@ -46,16 +45,34 @@ class ImportSupplierInvoice(Document):
 			self.name = "Import Invoice on " + format_datetime(self.creation)
 
 	def import_xml_data(self):
-		zip_file = frappe.get_doc(
-			"File",
-			{"file_url": self.zip_file, "attached_to_doctype": self.doctype, "attached_to_name": self.name},
-		)
-
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
 
 		self.file_count = 0
 		self.purchase_invoices_count = 0
 		self.default_uom = frappe.db.get_value("Stock Settings", fieldname="stock_uom")
+
+		try:
+			self.import_zip_file()
+		except Exception:
+			frappe.log_error(
+				"Unable to import the zip file", reference_doctype=self.doctype, reference_name=self.name
+			)
+			self.status = "Error"
+		else:
+			if self.purchase_invoices_count == self.file_count:
+				self.status = "File Import Completed"
+			else:
+				self.status = "Partially Completed - Check Error Log"
+
+		self.publish("File Import", _("XML Files Processed"), 2, 3)
+		self.save()
+		self.publish("File Import", _("XML Files Processed"), 3, 3)
+
+	def import_zip_file(self):
+		zip_file = frappe.get_doc(
+			"File",
+			{"file_url": self.zip_file, "attached_to_doctype": self.doctype, "attached_to_name": self.name},
+		)
 
 		with zipfile.ZipFile(zip_file.get_full_path()) as zf:
 			for file_name in zf.namelist():
@@ -63,55 +80,48 @@ class ImportSupplierInvoice(Document):
 				file_content = bs(content, "xml")
 				self.prepare_data_for_import(file_content, file_name, content)
 
-		if self.purchase_invoices_count == self.file_count:
-			self.status = "File Import Completed"
-			self.publish("File Import", _("XML Files Processed"), 2, 3)
-		else:
-			self.status = "Partially Completed - Check Error Log"
-			self.publish("File Import", _("XML Files Processed"), 2, 3)
-
-		self.save()
-		self.publish("File Import", _("XML Files Processed"), 3, 3)
-
 	def prepare_data_for_import(self, file_content, file_name, encoded_content):
 		for line in file_content.find_all("DatiGeneraliDocumento"):
-			invoices_args = {
-				"company": self.company,
-				"naming_series": self.invoice_series,
-				"document_type": line.TipoDocumento.text,
-				"bill_date": get_datetime_str(line.Data.text),
-				"bill_no": line.Numero.text,
-				"total_discount": 0,
-				"items": [],
-				"buying_price_list": self.default_buying_price_list,
-			}
-
-			if not invoices_args.get("bill_no", ""):
-				frappe.throw(_("Numero has not set in the XML file"))
-
-			supp_dict = get_supplier_details(file_content)
-			invoices_args["destination_code"] = get_destination_code_from_file(file_content)
-			self.prepare_items_for_invoice(file_content, invoices_args)
-			invoices_args["taxes"] = get_taxes_from_file(file_content, self.tax_account)
-			invoices_args["terms"] = get_payment_terms_from_file(file_content)
-
-			supplier_name = create_supplier(self.supplier_group, supp_dict)
-			create_address(supplier_name, supp_dict)
-			pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
-
 			self.file_count += 1
-			if pi_name:
-				self.purchase_invoices_count += 1
-				save_file(
-					file_name,
-					encoded_content,
-					"Purchase Invoice",
-					pi_name,
-					folder=None,
-					decode=False,
-					is_private=1,
-					df=None,
+			frappe.db.savepoint("import_invoice")
+			try:
+				pi_name = self.create_invoice_from_file(line, file_content, file_name)
+				attach_file_to_invoice(pi_name, file_name, encoded_content)
+			except Exception:
+				frappe.db.rollback(save_point="import_invoice")
+				frappe.log_error(
+					"Unable to create Purchase Invoice",
+					reference_doctype=self.doctype,
+					reference_name=self.name,
 				)
+				continue
+
+			self.purchase_invoices_count += 1
+
+	def create_invoice_from_file(self, line, file_content, file_name):
+		invoices_args = {
+			"company": self.company,
+			"naming_series": self.invoice_series,
+			"document_type": line.TipoDocumento.text,
+			"bill_date": get_datetime_str(line.Data.text),
+			"bill_no": line.Numero.text,
+			"total_discount": 0,
+			"items": [],
+			"buying_price_list": self.default_buying_price_list,
+		}
+
+		if not invoices_args.get("bill_no", ""):
+			frappe.throw(_("Numero has not set in the XML file"))
+
+		supp_dict = get_supplier_details(file_content)
+		invoices_args["destination_code"] = get_destination_code_from_file(file_content)
+		self.prepare_items_for_invoice(file_content, invoices_args)
+		invoices_args["taxes"] = get_taxes_from_file(file_content, self.tax_account)
+		invoices_args["terms"] = get_payment_terms_from_file(file_content)
+
+		supplier_name = create_supplier(self.supplier_group, supp_dict)
+		create_address(supplier_name, supp_dict)
+		return create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
 		for line in file_content.find_all("DettaglioLinee"):
@@ -159,6 +169,17 @@ class ImportSupplierInvoice(Document):
 			{"title": title, "message": message, "count": count, "total": total},
 			user=self.modified_by,
 		)
+
+
+def attach_file_to_invoice(pi_name, file_name, encoded_content):
+	file_doc = frappe.new_doc("File")
+	file_doc.file_name = file_name
+	file_doc.attached_to_doctype = "Purchase Invoice"
+	file_doc.attached_to_name = pi_name
+	file_doc.content = encoded_content
+	file_doc.decode = False
+	file_doc.is_private = True
+	file_doc.insert(ignore_permissions=True)
 
 
 def get_file_content(file_name, zip_file_object):
@@ -220,7 +241,7 @@ def get_taxes_from_file(file_content, tax_account):
 					"account_head": tax_account,
 					"tax_rate": flt(line.AliquotaIVA.text) or 0,
 					"description": descr,
-					"tax_amount": flt(line.Imposta.text) if len(line.find("Imposta")) != 0 else 0,
+					"tax_amount": flt(line.Imposta.text) if line.find("Imposta") else 0,
 				}
 			)
 
@@ -232,7 +253,8 @@ def get_payment_terms_from_file(file_content):
 	mop_dict = dict(code.split("-", 1) for code in mode_of_payment_codes)
 	# read file for payment information
 	for line in file_content.find_all("DettaglioPagamento"):
-		mop_code = line.ModalitaPagamento.text + "-" + mop_dict.get(line.ModalitaPagamento.text)
+		code = line.ModalitaPagamento.text
+		mop_code = f"{code}-{mop_dict[code]}" if code in mop_dict else ""
 		if line.find("DataScadenzaPagamento"):
 			due_date = dateutil.parser.parse(line.DataScadenzaPagamento.text).strftime("%Y-%m-%d")
 		else:
@@ -364,41 +386,36 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 		}
 	)
 
-	try:
-		pi.set_missing_values()
-		pi.insert(ignore_mandatory=True)
+	pi.set_missing_values()
+	pi.insert(ignore_mandatory=True)
 
-		# if discount exists in file, apply any discount on grand total
-		if args.total_discount > 0:
-			pi.apply_discount_on = "Grand Total"
-			pi.discount_amount = args.total_discount
-			pi.save()
-		# adjust payment amount to match with grand total calculated
-		calc_total = 0
-		adj = 0
-		for term in args.terms:
-			calc_total += flt(term["payment_amount"])
-		if flt(calc_total - flt(pi.grand_total)) != 0:
-			adj = calc_total - flt(pi.grand_total)
-		pi.payment_schedule = []
-		for term in args.terms:
-			pi.append(
-				"payment_schedule",
-				{
-					"mode_of_payment_code": term["mode_of_payment_code"],
-					"bank_account_iban": term["bank_account_iban"],
-					"due_date": term["due_date"],
-					"payment_amount": flt(term["payment_amount"]) - adj,
-				},
-			)
-			adj = 0
-		pi.imported_grand_total = calc_total
+	# if discount exists in file, apply any discount on grand total
+	if args.total_discount > 0:
+		pi.apply_discount_on = "Grand Total"
+		pi.discount_amount = args.total_discount
 		pi.save()
-		return pi.name
-	except Exception:
-		frappe.db.set_value("Import Supplier Invoice", name, "status", "Error")
-		pi.log_error("Unable to create Puchase Invoice")
-		return None
+	# adjust payment amount to match with grand total calculated
+	calc_total = 0
+	adj = 0
+	for term in args.terms:
+		calc_total += flt(term["payment_amount"])
+	if flt(calc_total - flt(pi.grand_total)) != 0:
+		adj = calc_total - flt(pi.grand_total)
+	pi.payment_schedule = []
+	for term in args.terms:
+		pi.append(
+			"payment_schedule",
+			{
+				"mode_of_payment_code": term["mode_of_payment_code"],
+				"bank_account_iban": term["bank_account_iban"],
+				"due_date": term["due_date"],
+				"payment_amount": flt(term["payment_amount"]) - adj,
+			},
+		)
+		adj = 0
+	pi.imported_grand_total = calc_total
+	pi.save()
+	return pi.name
 
 
 def get_country(code):
