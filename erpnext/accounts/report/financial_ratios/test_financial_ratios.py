@@ -37,6 +37,15 @@ class TestFinancialRatios(ERPNextTestSuite):
 		# (the old behaviour divided by total assets, giving 20,000 / 30,000 = 0.667)
 		self.assertEqual(ratio_row[year_key], 2.0)
 
+	def test_creditor_turnover_is_positive(self):
+		self.set_account_type("Direct Expenses", "Direct Expense")
+		self.make_journal_entry("Cost of Goods Sold", "Creditors", 200, supplier="_Test Supplier")
+
+		columns, data = execute(self.get_report_filters())
+		ratio_row = next(row for row in data if row.get("ratio") == "Creditor Turnover Ratio")
+
+		self.assertGreater(ratio_row[columns[1]["fieldname"]], 0)
+
 	def test_income_is_for_the_selected_year_only(self):
 		filters = self.get_report_filters()
 		self.make_journal_entry("Cash", "Sales", 500)
@@ -77,13 +86,13 @@ class TestFinancialRatios(ERPNextTestSuite):
 			periodicity="Yearly",
 		)
 
-	def make_journal_entry(self, debit_account, credit_account, amount, posting_date=None):
+	def make_journal_entry(self, debit_account, credit_account, amount, posting_date=None, supplier=None):
 		journal_entry = frappe.new_doc("Journal Entry")
 		journal_entry.posting_date = posting_date or today()
 		journal_entry.company = self.company
-		for account, debit, credit in (
-			(debit_account, amount, 0),
-			(credit_account, 0, amount),
+		for account, debit, credit, party in (
+			(debit_account, amount, 0, None),
+			(credit_account, 0, amount, supplier),
 		):
 			journal_entry.append(
 				"accounts",
@@ -91,6 +100,8 @@ class TestFinancialRatios(ERPNextTestSuite):
 					"account": f"{account} - {self.abbr}",
 					"debit_in_account_currency": debit,
 					"credit_in_account_currency": credit,
+					"party_type": "Supplier" if party else None,
+					"party": party,
 				},
 			)
 		journal_entry.insert()
