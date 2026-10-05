@@ -986,6 +986,19 @@ class TestAsset(AssetSetup):
 		frappe.get_doc("Journal Entry", first_depreciation_entry).cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
+	def test_asset_sale_validations(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		draft_asset = create_asset()
+		self.assertRaises(
+			frappe.ValidationError,
+			create_sales_invoice,
+			item_code="Macbook Pro",
+			asset=draft_asset.name,
+			qty=1,
+			rate=50000,
+		)
+
 
 class TestDepreciationMethods(AssetSetup):
 	def setUp(self):

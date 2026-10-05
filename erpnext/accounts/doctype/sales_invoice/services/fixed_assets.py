@@ -45,7 +45,9 @@ class FixedAssetService:
 		if doc.update_stock:
 			frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-		asset_status = frappe.db.get_value("Asset", item.asset, "status")
+		asset_status, asset_docstatus = frappe.db.get_value("Asset", item.asset, ["status", "docstatus"])
+		if asset_docstatus == 0:
+			frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(item.idx, item.asset))
 		if asset_status in ("Scrapped", "Cancelled", "Capitalized"):
 			frappe.throw(
 				_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(

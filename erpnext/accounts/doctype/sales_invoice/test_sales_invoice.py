@@ -2076,7 +2076,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
 	def test_gle_made_when_asset_is_returned(self):
-		asset = create_asset(item_code="Macbook Pro")
+		asset = create_asset(item_code="Macbook Pro", submit=1)
 
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
 		return_si = create_sales_invoice(
