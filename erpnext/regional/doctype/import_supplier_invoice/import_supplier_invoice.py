@@ -10,6 +10,7 @@ import frappe
 from bs4 import BeautifulSoup as bs
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import flt, get_datetime_str, getdate, today
 from frappe.utils.data import format_datetime
 
@@ -292,13 +293,6 @@ def create_supplier(supplier_group, args):
 		"Supplier", filters={"tax_id": args.tax_id}, fieldname="name"
 	)
 	if existing_supplier_name:
-		pass
-	else:
-		existing_supplier_name = frappe.db.get_value(
-			"Supplier", filters={"name": args.supplier}, fieldname="name"
-		)
-
-	if existing_supplier_name:
 		filters = [
 			["Dynamic Link", "link_doctype", "=", "Supplier"],
 			["Dynamic Link", "link_name", "=", existing_supplier_name],
@@ -319,7 +313,7 @@ def create_supplier(supplier_group, args):
 		new_supplier.tax_id = args.tax_id
 		new_supplier.fiscal_code = args.fiscal_code
 		new_supplier.fiscal_regime = args.fiscal_regime
-		new_supplier.save()
+		new_supplier.insert(set_name=get_unique_supplier_name(new_supplier.supplier_name))
 
 		new_contact = frappe.new_doc("Contact")
 		new_contact.first_name = args.supplier[:30]
@@ -328,6 +322,11 @@ def create_supplier(supplier_group, args):
 		new_contact.insert(ignore_mandatory=True)
 
 		return new_supplier.name
+
+
+def get_unique_supplier_name(supplier_name: str) -> str | None:
+	if frappe.db.exists("Supplier", supplier_name):
+		return append_number_if_name_exists("Supplier", supplier_name)
 
 
 def create_address(supplier_name, args):
