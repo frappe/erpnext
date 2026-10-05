@@ -491,7 +491,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 			{
 				"main_item_code": "Subcontracted Item SA4",
 				"item_code": "Subcontracted SRM Item 3",
-				"qty": 3.0,
+				"qty": 1.0,
 				"rate": 100.0,
 				"stock_uom": "Nos",
 				"warehouse": "_Test Warehouse - _TC",

@@ -1,11 +1,13 @@
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Coalesce, NullIf, Sum
 from frappe.utils import flt
 
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_bin
 
 from .stock_entry_base import BaseStockEntry
@@ -26,19 +28,22 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 			subcontract_order = frappe.get_doc(
 				self.doc.subcontract_data.order_doctype, self.doc.get(self.doc.subcontract_data.order_field)
 			)
+			qty_in_entry = defaultdict(float)
 			for se_item in self.doc.items:
-				self.validate_subcontracting_order_for_bom(se_item, subcontract_order)
+				self.validate_subcontracting_order_for_bom(se_item, subcontract_order, qty_in_entry)
 
 		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
 			for row in self.doc.items:
 				self.validate_subcontracting_order_for_transfer(row)
 
-	def validate_subcontracting_order_for_bom(self, child_row, subcontract_order):
+	def validate_subcontracting_order_for_bom(self, child_row, subcontract_order, qty_in_entry):
 		item_code = child_row.original_item or child_row.item_code
 		required_qty = self._get_required_qty_for_bom(item_code, child_row, subcontract_order)
 		qty_allowance = flt(frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"))
 		total_allowed = required_qty + (required_qty * qty_allowance / 100)
-		self._validate_transfer_qty(child_row, item_code, total_allowed)
+		stock_qty = self.get_stock_qty(child_row)
+		self._validate_transfer_qty(child_row, item_code, total_allowed, qty_in_entry[item_code], stock_qty)
+		qty_in_entry[item_code] += stock_qty
 		self._link_rm_detail_if_missing(child_row, item_code)
 
 	def _get_required_qty_for_bom(self, item_code, child_row, subcontract_order):
@@ -64,15 +69,30 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 			)
 		return required_qty
 
-	def _validate_transfer_qty(self, child_row, item_code, total_allowed):
-		total_supplied = self.get_total_supplied_qty(child_row)
+	def get_stock_qty(self, child_row):
+		"""Row qty in stock UOM; transfer_qty is set only after this validation runs."""
+		if not child_row.uom or child_row.uom == frappe.get_cached_value(
+			"Item", child_row.item_code, "stock_uom"
+		):
+			return flt(child_row.qty)
+
+		conversion_factor = flt(child_row.conversion_factor)
+		if not conversion_factor:
+			conversion_factor = flt(
+				get_conversion_factor(child_row.item_code, child_row.uom).get("conversion_factor")
+			)
+		return flt(child_row.qty) * (conversion_factor or 1)
+
+	def _validate_transfer_qty(self, child_row, item_code, total_allowed, earlier_rows_qty, stock_qty):
+		total_supplied = self.get_total_supplied_qty(item_code)
 		total_returned = (
-			self.get_total_returned_qty(child_row)
+			self.get_total_returned_qty(item_code)
 			if self.doc.subcontract_data.order_doctype == "Subcontracting Order"
 			else 0
 		)
 		if flt(
-			total_supplied + child_row.transfer_qty - total_returned, child_row.precision("transfer_qty")
+			total_supplied + earlier_rows_qty + stock_qty - total_returned,
+			child_row.precision("transfer_qty"),
 		) > flt(total_allowed, child_row.precision("transfer_qty")):
 			frappe.throw(
 				_("Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}").format(
@@ -111,10 +131,10 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 			if order_rm_detail:
 				child_row.db_set(self.doc.subcontract_data.rm_detail_field, order_rm_detail)
 
-	def get_total_supplied_qty(self, child_row):
+	def get_total_supplied_qty(self, item_code):
 		se = frappe.qb.DocType("Stock Entry")
 		sed = frappe.qb.DocType("Stock Entry Detail")
-		order_filter = self._get_supplied_qty_order_filter(se, sed, child_row)
+		order_filter = self._get_supplied_qty_order_filter(se, sed)
 		return (
 			frappe.qb.from_(se)
 			.inner_join(sed)
@@ -123,19 +143,17 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 			.where(
 				(se.purpose == "Send to Subcontractor")
 				& (se.docstatus == 1)
-				& (sed.item_code == child_row.item_code)
+				& (Coalesce(NullIf(sed.original_item, ""), sed.item_code) == item_code)
 				& order_filter
 			)
 		).run()[0][0] or 0
 
-	def _get_supplied_qty_order_filter(self, se, sed, child_row):
+	def _get_supplied_qty_order_filter(self, se, sed):
 		if self.doc.subcontract_data.order_doctype == "Purchase Order":
 			return (se.purchase_order == self.doc.purchase_order) & (sed.po_detail == self.doc.po_detail)
-		return (se.subcontracting_order == self.doc.subcontracting_order) & (
-			sed.sco_rm_detail == child_row.sco_rm_detail
-		)
+		return se.subcontracting_order == self.doc.subcontracting_order
 
-	def get_total_returned_qty(self, child_row):
+	def get_total_returned_qty(self, item_code):
 		se = frappe.qb.DocType("Stock Entry")
 		sed = frappe.qb.DocType("Stock Entry Detail")
 		return (
@@ -147,8 +165,7 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				(se.purpose == "Material Transfer")
 				& (se.docstatus == 1)
 				& (se.is_return == 1)
-				& (sed.item_code == child_row.item_code)
-				& (sed.sco_rm_detail == child_row.sco_rm_detail)
+				& (Coalesce(NullIf(sed.original_item, ""), sed.item_code) == item_code)
 				& (se.subcontracting_order == self.doc.subcontracting_order)
 			)
 		).run()[0][0] or 0

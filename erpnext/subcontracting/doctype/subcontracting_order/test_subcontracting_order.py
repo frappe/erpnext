@@ -549,6 +549,42 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value(row.doctype, row.name, "total_supplied_qty"), row.required_qty)
 		self.assertEqual(get_bin(row.rm_item_code, row.reserve_warehouse).reserved_qty_for_sub_contract, 0)
 
+	def test_alternative_item_transfer_counts_against_its_original_requirement(self):
+		service_item = {
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA1",
+			"fg_item_qty": 10,
+		}
+		sco = get_subcontracting_order(service_items=[service_item])
+		original, alternative = sco.supplied_items[0], sco.supplied_items[1]
+		set_alternative_item(original.rm_item_code, alternative.rm_item_code)
+		make_stock_entry(
+			item_code=alternative.rm_item_code,
+			target=alternative.reserve_warehouse,
+			qty=original.required_qty + alternative.required_qty,
+			basic_rate=10,
+		)
+
+		replacement = make_supplied_item_transfer(sco, original)
+		replacement.items[0].update(
+			{
+				"item_code": alternative.rm_item_code,
+				"original_item": original.rm_item_code,
+				"allow_alternative_item": 1,
+			}
+		)
+		replacement.insert()
+		replacement.submit()
+
+		own_transfer = make_supplied_item_transfer(sco, alternative)
+		own_transfer.insert()
+		own_transfer.submit()
+
+		self.assertEqual(own_transfer.docstatus, 1)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
@@ -881,6 +917,53 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			self.assertEqual(row.supplied_qty, 250.0)
 
 		set_backflush_based_on("BOM")
+
+	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
+		make_subcontracted_item(
+			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Shared RM",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(
+			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+		)
+
+		def transfer_20_for(fg_item):
+			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+			ste.items = [row for row in ste.items if row.subcontracted_item == fg_item]
+			ste.items[0].qty = 20
+			ste.save()
+			ste.submit()
+
+		both_rows = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in both_rows.items:
+			row.qty = 20
+		self.assertRaises(frappe.ValidationError, both_rows.save)
+
+		stock_uom_row = frappe.get_doc(make_rm_stock_entry(sco.name))
+		stock_uom_row.items = stock_uom_row.items[:1]
+		stock_uom_row.items[0].update({"qty": 100, "conversion_factor": 0.1})
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be transferred more than", stock_uom_row.save)
+
+		transfer_20_for("Subcontracted Item SA7")
+		self.assertRaises(frappe.ValidationError, transfer_20_for, "Subcontracted Item Shared RM")
 
 	def test_get_materials_from_supplier(self):
 		# Create SCO
