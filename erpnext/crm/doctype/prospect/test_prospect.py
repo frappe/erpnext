@@ -50,6 +50,16 @@ class TestProspect(unittest.TestCase):
 		customer.company = "_Test Company"
 		customer.insert()
 
+	def test_deleting_the_only_lead_keeps_the_prospect(self):
+		lead = make_lead()
+		prospect = make_prospect()
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		lead.delete()
+
+		prospect.reload()
+		self.assertEqual(prospect.leads, [])
+
 
 def make_prospect(**args):
 	args = frappe._dict(args)

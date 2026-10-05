@@ -219,17 +219,9 @@ class Lead(SellingController, CRMNote):
 
 		for d in prospects:
 			prospect = frappe.get_doc("Prospect", d.parent)
-			if len(prospect.get("leads")) == 1:
-				prospect.delete(ignore_permissions=True)
-			else:
-				to_remove = None
-				for d in prospect.get("leads"):
-					if d.lead == self.name:
-						to_remove = d
-
-				if to_remove:
-					prospect.remove(to_remove)
-					prospect.save(ignore_permissions=True)
+			prospect.set("leads", [row for row in prospect.leads if row.lead != self.name])
+			prospect.flags.ignore_mandatory = True
+			prospect.save(ignore_permissions=True)
 
 	def get_linked_prospects(self):
 		return frappe.get_all(
