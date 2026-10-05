@@ -34,8 +34,29 @@ class TestSupplierScorecardPeriod(ERPNextTestSuite):
 		period.insert()
 		self.assertEqual(period.supplier, scorecard.supplier)
 
+	def test_period_score_is_normalised_by_max_score(self):
+		period = make_period(
+			criteria=[
+				{"criteria_name": "C1", "formula": "10", "max_score": 10, "weight": 50},
+				{"criteria_name": "C2", "formula": "50", "max_score": 200, "weight": 50},
+			]
+		)
+		period.calculate_criteria()
+		period.calculate_score()
+
+		self.assertEqual(period.total_score, 62.5)
+
 
 def make_manual_period(scorecard, start_date, end_date):
 	period = make_supplier_scorecard(scorecard)
 	period.update({"supplier": "_Test Supplier", "start_date": start_date, "end_date": end_date})
+	return period
+
+
+def make_period(variables=None, criteria=None):
+	period = frappe.new_doc("Supplier Scorecard Period")
+	for variable in variables or []:
+		period.append("variables", variable)
+	for criterion in criteria or []:
+		period.append("criteria", criterion)
 	return period
