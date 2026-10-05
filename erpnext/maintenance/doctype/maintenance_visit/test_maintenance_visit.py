@@ -24,7 +24,7 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		claim.insert(ignore_permissions=True)
 		return claim
 
-	def make_visit(self, claim, completion_status, mntc_date=None, mntc_time=None, submit=True):
+	def make_visit(self, reference, completion_status, mntc_date=None, mntc_time=None, submit=True):
 		visit = frappe.new_doc("Maintenance Visit")
 		visit.company = "_Test Company"
 		visit.customer = "_Test Customer"
@@ -40,8 +40,8 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 				"service_person": self.sales_person.name,
 				"work_done": "Replaced the faulty component",
 				"description": "Warranty repair",
-				"prevdoc_doctype": "Warranty Claim",
-				"prevdoc_docname": claim.name,
+				"prevdoc_doctype": reference.doctype,
+				"prevdoc_docname": reference.name,
 			},
 		)
 		visit.insert(ignore_permissions=True)
@@ -127,6 +127,17 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		self.assertIsNone(claim.resolved_by)
 		self.assertIsNone(claim.resolution_details)
 		self.assertIsNone(claim.resolution_date)
+
+	def test_sales_order_visit_cancel_not_blocked_by_later_visit(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order()
+		earlier = self.make_visit(so, "Partially Completed", mntc_date=today())
+		self.make_visit(so, "Partially Completed", mntc_date=add_days(today(), 1))
+
+		earlier.cancel()
+
+		self.assertEqual(frappe.db.get_value("Maintenance Visit", earlier.name, "docstatus"), 2)
 
 
 def make_maintenance_visit():
