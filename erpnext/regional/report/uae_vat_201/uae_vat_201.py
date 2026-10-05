@@ -123,7 +123,22 @@ def append_emiratewise_expenses(data, emirates, amounts_by_emirate):
 				frappe.format(0, "Currency"),
 				frappe.format(0, "Currency"),
 			)
+	append_supplies_without_emirate(data, emirates, amounts_by_emirate)
 	return amounts_by_emirate
+
+
+def append_supplies_without_emirate(data, emirates, amounts_by_emirate):
+	"""Append standard rated supplies of invoices with no VAT Emirate, so they are not left out of box 1."""
+	rows = [row for emirate, row in amounts_by_emirate.items() if emirate not in emirates]
+	if not rows:
+		return
+	append_data(
+		data,
+		"1",
+		_("Standard rated supplies with no VAT Emirate"),
+		frappe.format(sum(row["raw_amount"] for row in rows), "Currency"),
+		frappe.format(sum(row["raw_vat_amount"] for row in rows), "Currency"),
+	)
 
 
 def append_vat_on_expenses(data, filters):

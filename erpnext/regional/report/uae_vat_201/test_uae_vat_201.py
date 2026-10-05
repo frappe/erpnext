@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import nowdate
 
 import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -248,6 +249,16 @@ class TestUaeVat201(ERPNextTestSuite):
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 40)
 		self.assertEqual(get_tourist_tax_return_total(filters), 0)
 		self.assertEqual(get_tourist_tax_return_tax(filters), 0)
+
+	def test_uae_vat_201_supplies_without_emirate(self):
+		make_uae_sales_invoice(None, qty=10, rate=40).submit()
+
+		_columns, data = execute(
+			{"company": "_Test Company UAE VAT", "from_date": nowdate(), "to_date": nowdate()}
+		)
+		row = next(row for row in data if row["legend"] == "Standard rated supplies with no VAT Emirate")
+		self.assertEqual(row["amount"], frappe.format(400, "Currency"))
+		self.assertEqual(row["vat_amount"], frappe.format(20, "Currency"))
 
 
 def set_vat_accounts():
