@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint, get_last_day
 
 
 class QualityReview(Document):
@@ -65,9 +66,9 @@ class QualityReview(Document):
 
 
 def review():
-	day = frappe.utils.getdate().day
-	weekday = frappe.utils.getdate().strftime("%A")
-	month = frappe.utils.getdate().strftime("%B")
+	today = frappe.utils.getdate()
+	weekday = today.strftime("%A")
+	month = today.strftime("%B")
 
 	for goal in frappe.get_list("Quality Goal", fields=["name", "frequency", "date", "weekday"]):
 		if goal.frequency == "Daily":
@@ -76,11 +77,15 @@ def review():
 		elif goal.frequency == "Weekly" and goal.weekday == weekday:
 			create_review(goal.name)
 
-		elif goal.frequency == "Monthly" and goal.date == str(day):
+		elif goal.frequency == "Monthly" and is_review_date(goal.date, today):
 			create_review(goal.name)
 
-		elif goal.frequency == "Quarterly" and goal.date == str(day) and get_quarter(month):
+		elif goal.frequency == "Quarterly" and is_review_date(goal.date, today) and get_quarter(month):
 			create_review(goal.name)
+
+
+def is_review_date(goal_date, today):
+	return min(cint(goal_date), get_last_day(today).day) == today.day
 
 
 def create_review(goal):
