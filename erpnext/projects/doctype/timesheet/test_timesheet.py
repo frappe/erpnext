@@ -251,6 +251,15 @@ class TestTimesheet(ERPNextTestSuite):
 		second_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
 		self.assertRaises(frappe.ValidationError, second_invoice.save)
 
+	def test_same_time_log_twice_in_an_invoice_is_refused(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice.due_date = nowdate()
+		sales_invoice.append("timesheets", sales_invoice.timesheets[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
 	def _invoice_with_timesheet_row(self, time_sheet, timesheet_detail, with_amounts=True):
 		sales_invoice = create_sales_invoice(do_not_save=True)
 		row = {"time_sheet": time_sheet, "timesheet_detail": timesheet_detail}

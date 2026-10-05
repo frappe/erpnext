@@ -15,8 +15,17 @@ class TimesheetBillingService:
 		self.doc = doc
 
 	def validate_time_sheets_are_submitted(self) -> None:
+		listed = set()
 		for data in self.doc.timesheets:
+			if data.timesheet_detail in listed:
+				frappe.throw(
+					_("Row {0}: The same time log of Timesheet {1} is added more than once").format(
+						data.idx, frappe.bold(data.time_sheet)
+					)
+				)
+
 			if data.time_sheet and data.timesheet_detail:
+				listed.add(data.timesheet_detail)
 				if sales_invoice := frappe.db.get_value(
 					"Timesheet Detail", data.timesheet_detail, "sales_invoice"
 				):
