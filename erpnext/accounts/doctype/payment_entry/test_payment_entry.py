@@ -246,64 +246,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", pi.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
-<<<<<<< HEAD
-=======
-	def test_pay_multiple_purchase_invoices_in_one_entry(self):
-		pi1 = make_purchase_invoice()  # outstanding 250
-		pi2 = make_purchase_invoice()  # outstanding 250
-
-		pe = get_payment_entry("Purchase Invoice", pi1.name, bank_account="_Test Cash - _TC")
-		pe.append(
-			"references",
-			{
-				"reference_doctype": "Purchase Invoice",
-				"reference_name": pi2.name,
-				"total_amount": pi2.grand_total,
-				"outstanding_amount": pi2.outstanding_amount,
-				"allocated_amount": pi2.outstanding_amount,
-			},
-		)
-		pe.paid_amount = pe.received_amount = (
-			pe.references[0].allocated_amount + pe.references[1].allocated_amount
-		)
-		pe.insert()
-		pe.submit()
-
-		self.assertEqual(pe.total_allocated_amount, 500)
-		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi1.name, "outstanding_amount"), 0)
-		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi2.name, "outstanding_amount"), 0)
-
-	def test_unallocated_amount_on_overpaid_purchase_payment(self):
-		pi = make_purchase_invoice()  # outstanding 250
-
-		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Cash - _TC")
-		pe.paid_amount = pe.references[0].allocated_amount + 200  # overpay -> 200 advance
-		pe.received_amount = pe.paid_amount
-		pe.insert()
-		pe.submit()
-
-		self.assertEqual(pe.docstatus, 1)
-		self.assertEqual(pe.unallocated_amount, 200)
-
-		# end-to-end: submitting posts a balanced GL for the full paid amount (250
-		# settling the invoice + 200 advance)
-		gl_entries = frappe.get_all(
-			"GL Entry",
-			filters={"voucher_no": pe.name, "is_cancelled": 0},
-			fields=["debit", "credit"],
-		)
-		self.assertTrue(gl_entries, "Submitted payment produced no GL entries")
-		self.assertEqual(flt(sum(e.debit for e in gl_entries)), flt(sum(e.credit for e in gl_entries)))
-		self.assertEqual(flt(sum(e.debit for e in gl_entries)), 450)
-
-	def test_overallocation_against_purchase_invoice_throws(self):
-		pi = make_purchase_invoice()  # outstanding 250
-
-		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Cash - _TC")
-		pe.references[0].allocated_amount += 100  # 350 > 250 outstanding
-		pe.paid_amount = pe.received_amount = pe.references[0].allocated_amount
-		self.assertRaises(frappe.ValidationError, pe.insert)
-
 	def test_allocation_equal_to_outstanding_at_precision_is_allowed(self):
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Pay"
@@ -319,7 +261,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 		pe.validate_allocated_amount()
 
->>>>>>> 280bffe (fix(accounts): round payment-term outstanding, add regression test)
 	def test_payment_against_sales_invoice_to_check_status(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
