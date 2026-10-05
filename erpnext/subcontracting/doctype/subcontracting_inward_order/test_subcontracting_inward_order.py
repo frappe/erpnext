@@ -317,6 +317,23 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		)
 		self.assertEqual([entry.delivered_qty for entry in entries], [entry.qty for entry in entries])
 
+	def test_consumed_serial_and_batch_reservation(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 2)).submit()
+
+		consumed_qty = frappe.db.get_value(
+			"Stock Reservation Entry",
+			{"voucher_no": wo.name, "item_code": "RM with Serial and Batch", "docstatus": 1},
+			"consumed_qty",
+		)
+		self.assertEqual(consumed_qty, 2)
+
 	def test_subcontracting_delivery(self):
 		from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 
