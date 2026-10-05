@@ -2,9 +2,10 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
-from erpnext.accounts.report.financial_ratios.financial_ratios import execute
+from erpnext.accounts.report.financial_ratios.financial_ratios import execute, get_gl_data
+from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -36,6 +37,29 @@ class TestFinancialRatios(ERPNextTestSuite):
 		# (the old behaviour divided by total assets, giving 20,000 / 30,000 = 0.667)
 		self.assertEqual(ratio_row[year_key], 2.0)
 
+	def test_income_is_for_the_selected_year_only(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+		self.make_journal_entry("Cash", "Sales", 1000, posting_date=add_days(filters.period_start_date, -10))
+
+		self.assertEqual(self.get_total_income(filters), before)
+
+	def get_total_income(self, filters):
+		period_list = get_period_list(
+			filters.from_fiscal_year,
+			filters.to_fiscal_year,
+			filters.period_start_date,
+			filters.period_end_date,
+			filters.filter_based_on,
+			filters.periodicity,
+			company=filters.company,
+		)
+		income = get_gl_data(filters, period_list, [])[2]
+		return next(row for row in income if row.get("account") and not row.get("parent_account"))[
+			period_list[0].key
+		]
+
 	def get_report_filters(self):
 		active_fy = frappe.db.get_value(
 			"Fiscal Year",
@@ -53,9 +77,9 @@ class TestFinancialRatios(ERPNextTestSuite):
 			periodicity="Yearly",
 		)
 
-	def make_journal_entry(self, debit_account, credit_account, amount):
+	def make_journal_entry(self, debit_account, credit_account, amount, posting_date=None):
 		journal_entry = frappe.new_doc("Journal Entry")
-		journal_entry.posting_date = today()
+		journal_entry.posting_date = posting_date or today()
 		journal_entry.company = self.company
 		for account, debit, credit in (
 			(debit_account, amount, 0),

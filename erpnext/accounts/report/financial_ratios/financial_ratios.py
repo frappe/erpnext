@@ -122,19 +122,26 @@ def get_ratios_data(filters, period_list, years):
 def get_gl_data(filters, period_list, years):
 	data = {}
 
-	for d in [
-		["Asset", "Debit"],
-		["Liability", "Credit"],
-		["Income", "Credit"],
-		["Expense", "Debit"],
-	]:
-		data[frappe.scrub(d[0])] = get_data(
+	for root_type, balance_must_be in [["Asset", "Debit"], ["Liability", "Credit"]]:
+		data[frappe.scrub(root_type)] = get_data(
 			filters.company,
-			d[0],
-			d[1],
+			root_type,
+			balance_must_be,
 			period_list,
 			only_current_fiscal_year=False,
 			filters=filters,
+		)
+
+	# income and expense of each period only, as in the Profit and Loss Statement
+	for root_type, balance_must_be in [["Income", "Credit"], ["Expense", "Debit"]]:
+		data[frappe.scrub(root_type)] = get_data(
+			filters.company,
+			root_type,
+			balance_must_be,
+			period_list,
+			filters=filters,
+			accumulated_values=0,
+			ignore_closing_entries=True,
 		)
 
 	assets, liabilities, income, expense = (
