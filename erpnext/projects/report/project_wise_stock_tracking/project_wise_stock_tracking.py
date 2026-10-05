@@ -75,11 +75,19 @@ def get_purchased_items_cost():
 		group_by="project",
 	)
 
-	pr_item_map = {}
-	for item in pr_items:
-		pr_item_map.setdefault(item.project, item.amount)
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	pi_items = (
+		frappe.qb.from_(pi)
+		.inner_join(pi_item)
+		.on(pi.name == pi_item.parent)
+		.select(pi_item.project, Sum(pi_item.base_net_amount).as_("amount"))
+		.where((pi.docstatus == 1) & (pi.update_stock == 1) & (pi_item.project != ""))
+		.groupby(pi_item.project)
+		.run(as_dict=1)
+	)
 
-	return pr_item_map
+	return sum_amount_by_project(pr_items + pi_items)
 
 
 def get_issued_items_cost():
