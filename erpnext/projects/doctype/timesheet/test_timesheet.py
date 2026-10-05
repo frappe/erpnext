@@ -251,6 +251,42 @@ class TestTimesheet(ERPNextTestSuite):
 		second_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
 		self.assertRaises(frappe.ValidationError, second_invoice.save)
 
+	def test_zero_rate_log_can_be_invoiced_after_the_priced_logs(self):
+		update_activity_type("_Test Activity Type")
+		from_time = now_datetime()
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"is_billable": 1,
+						"from_time": from_time,
+						"to_time": add_to_date(from_time, hours=2),
+					},
+					{
+						"is_billable": 1,
+						"from_time": add_to_date(from_time, hours=2),
+						"to_time": add_to_date(from_time, hours=5),
+					},
+				],
+			}
+		).insert()
+		timesheet.submit()
+
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice.due_date = nowdate()
+		sales_invoice.timesheets.pop()
+		sales_invoice.submit()
+		self.assertEqual(frappe.db.get_value("Timesheet", timesheet.name, "status"), "Billed")
+
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice.due_date = nowdate()
+		sales_invoice.submit()
+		timesheet.reload()
+		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice.name)
+
 	def test_same_time_log_twice_in_an_invoice_is_refused(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)

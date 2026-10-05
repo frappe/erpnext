@@ -37,7 +37,7 @@ class TimesheetBillingService:
 
 			if data.time_sheet:
 				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
-				if status not in ["Submitted", "Payslip", "Partially Billed"]:
+				if status not in ["Submitted", "Payslip", "Partially Billed", "Billed"]:
 					frappe.throw(
 						_("Timesheet {0} cannot be invoiced in its current state").format(data.time_sheet)
 					)
