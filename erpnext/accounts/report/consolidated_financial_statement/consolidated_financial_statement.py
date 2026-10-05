@@ -271,24 +271,46 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 
 
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
-	data = {}
-	total = 0
-	filters.account_type = account_type
-	filters.start_date = fiscal_year.year_start_date
-	filters.end_date = fiscal_year.year_end_date
+	gl_filters = frappe._dict(filters, account_type=account_type)
+	gl_filters.start_date = fiscal_year.year_start_date
+	gl_filters.end_date = fiscal_year.year_end_date
 
-	for company in companies:
-		filters.company = company
-		amount = get_account_type_based_gl_data(company, filters)
+	own_amounts = {company: get_company_account_type_amount(company, gl_filters) for company in companies}
+	data = {company: get_column_amount(company, companies, own_amounts, gl_filters) for company in companies}
 
-		if amount and account_type == "Depreciation":
-			amount *= -1
+	if filters.get("accumulated_in_group_company"):
+		data["total"] = data[filters.company]
+	else:
+		data["total"] = sum(own_amounts.values())
 
-		total += amount
-		data.setdefault(company, amount)
-
-	data["total"] = total
 	return data
+
+
+def get_company_account_type_amount(company, filters):
+	amount = get_account_type_based_gl_data(company, filters)
+	return amount * -1 if filters.account_type == "Depreciation" else amount
+
+
+def get_column_amount(company, companies, own_amounts, filters):
+	"""Amount for a company column, including its subsidiaries when accumulating into group companies."""
+	if not filters.get("accumulated_in_group_company"):
+		return own_amounts[company]
+
+	amount = sum(
+		convert_to_column_currency(own_amounts[subsidiary], subsidiary, company, filters)
+		for subsidiary in companies[company]
+	)
+	return flt(amount, 3)
+
+
+def convert_to_column_currency(amount, company, column_company, filters):
+	column_currency = erpnext.get_company_currency(column_company)
+	company_currency = erpnext.get_company_currency(company)
+
+	if filters.get("presentation_currency") or column_currency == company_currency:
+		return amount
+
+	return convert(amount, column_currency, company_currency, filters.end_date)
 
 
 def get_company_columns(companies, filters):

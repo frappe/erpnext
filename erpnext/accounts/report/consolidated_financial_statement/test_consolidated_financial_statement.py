@@ -151,3 +151,32 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		self.assertAlmostEqual(
 			flt(row.get(PARENT_COMPANY)), flt(convert(100, "INR", "USD", year_end_date), 3)
 		)
+
+	def test_cash_flow_accumulates_working_capital_into_group(self):
+		filters = {"report": "Cash Flow", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		self.post_credit_sales()
+		after = self.run_report(**filters)
+
+		profit_change = self.get_change(before, after, "Profit for the year")
+		receivable_change = self.get_change(before, after, "Net Change in Accounts Receivable")
+		self.assertGreater(profit_change, 100)
+		self.assertAlmostEqual(receivable_change, -profit_change, 2)
+		self.assertAlmostEqual(self.get_change(before, after, "Net Change in Cash"), 0, 2)
+
+	def post_credit_sales(self):
+		self.post_journal_entry(
+			"Debtors - CCI", "Sales - CCI", 100, party_type="Customer", party="_Test Customer"
+		)
+		self.post_journal_entry(
+			"Debtors - CCU",
+			"Sales - CCU",
+			100,
+			company=FOREIGN_CHILD_COMPANY,
+			party_type="Customer",
+			party="_Test Customer USD",
+		)
+
+	def get_change(self, before, after, account_name, company=PARENT_COMPANY):
+		before_row = self.get_row(before, account_name) or {}
+		return flt(self.get_row(after, account_name).get(company)) - flt(before_row.get(company))
