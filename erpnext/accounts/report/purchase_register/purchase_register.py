@@ -147,15 +147,15 @@ def _execute(filters=None, additional_table_columns=None):
 		if inv.doctype == "Purchase Invoice":
 			row.update(
 				{
-					"debit": inv.base_grand_total,
-					"credit": 0.0,
+					"debit": get_in_invoice_payable_debit(inv),
+					"credit": inv.base_grand_total,
 					"outstanding_amount": flt(
 						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
 					),
 				}
 			)
 		else:
-			row.update({"debit": 0.0, "credit": inv.base_grand_total})
+			row.update({"debit": inv.base_grand_total, "credit": 0.0})
 		data.append(row)
 
 	res += sorted(data, key=lambda x: x["posting_date"])
@@ -167,6 +167,14 @@ def _execute(filters=None, additional_table_columns=None):
 			res[row].update({"balance": running_balance})
 
 	return columns, res, None, None, None, include_payments
+
+
+def get_in_invoice_payable_debit(inv):
+	"""Amount a paid invoice settles against its own payable, as in its GL entries."""
+	if not inv.is_paid:
+		return 0.0
+
+	return flt(inv.base_paid_amount) + flt(inv.base_write_off_amount)
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
@@ -429,6 +437,9 @@ def get_invoices(filters, additional_query_columns):
 			pi.outstanding_amount,
 			pi.mode_of_payment,
 			pi.conversion_rate,
+			pi.is_paid,
+			pi.base_paid_amount,
+			pi.base_write_off_amount,
 		)
 		.where(pi.docstatus == 1)
 	)
