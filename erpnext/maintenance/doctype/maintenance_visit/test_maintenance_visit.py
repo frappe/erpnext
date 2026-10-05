@@ -3,7 +3,7 @@
 import unittest
 
 import frappe
-from frappe.utils.data import add_days, today
+from frappe.utils.data import add_days, getdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	make_maintenance_visit as make_visit_from_schedule,
@@ -123,6 +123,23 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		visit = self.make_schedule_visit(schedule, schedule.schedules[0].name, submit=False)
 		schedule.cancel()
 		self.assertRaises(frappe.ValidationError, visit.submit)
+
+	def test_schedule_row_keeps_status_of_its_completing_visit(self):
+		schedule = make_maintenance_schedule()
+		schedule.submit()
+		row = schedule.schedules[0].name
+		self.make_schedule_visit(schedule, row)
+		later = self.make_schedule_visit(schedule, row, "Partially Completed", mntc_date=add_days(today(), 1))
+		self.assertEqual(
+			frappe.db.get_value("Maintenance Schedule Detail", row, "completion_status"), "Fully Completed"
+		)
+
+		later.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value("Maintenance Schedule Detail", row, ["completion_status", "actual_date"]),
+			("Fully Completed", getdate(today())),
+		)
 
 
 def make_maintenance_visit():
