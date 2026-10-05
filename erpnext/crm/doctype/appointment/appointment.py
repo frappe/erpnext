@@ -352,7 +352,7 @@ class Appointment(Document):
 				"subject": f"Appointment with {self.customer_name}",
 				"starts_on": self.scheduled_time,
 				"status": "Open",
-				"type": "Public",
+				"event_type": "Public",
 				"send_reminder": cint(get_booking_settings().email_reminders),
 				"event_participants": self.get_event_participants(),
 			}

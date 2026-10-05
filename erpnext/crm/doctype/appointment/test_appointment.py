@@ -166,6 +166,7 @@ class TestAppointment(ERPNextTestSuite):
 	def test_calendar_event_created(self):
 		cal_event = frappe.get_doc("Event", self.test_appointment.calendar_event)
 		self.assertEqual(cal_event.starts_on, self.test_appointment.scheduled_time)
+		self.assertEqual(cal_event.event_type, "Public")
 
 	def test_lead_linked(self):
 		self.assertTrue(self.test_appointment.party)
