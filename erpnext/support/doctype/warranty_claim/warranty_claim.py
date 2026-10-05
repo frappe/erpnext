@@ -52,6 +52,8 @@ class WarrantyClaim(TransactionBase):
 
 	def validate(self):
 		self.validate_serial_no()
+		if self.status == "Cancelled" and self.has_value_changed("status"):
+			self.validate_no_active_visits()
 		if session["user"] != "Guest" and not self.customer:
 			frappe.throw(_("Customer is required"))
 
@@ -73,7 +75,7 @@ class WarrantyClaim(TransactionBase):
 				)
 			)
 
-	def on_cancel(self):
+	def validate_no_active_visits(self):
 		mv = frappe.qb.DocType("Maintenance Visit")
 		mvp = frappe.qb.DocType("Maintenance Visit Purpose")
 		# filter the parent Maintenance Visit's docstatus (as the original SQL did), not the child row's
@@ -89,8 +91,6 @@ class WarrantyClaim(TransactionBase):
 		if visits:
 			lst1 = ",".join(x[0] for x in visits)
 			frappe.throw(_("Cancel Material Visit {0} before cancelling this Warranty Claim").format(lst1))
-		else:
-			self.db_set("status", "Cancelled")
 
 	def on_update(self):
 		pass

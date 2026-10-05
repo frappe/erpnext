@@ -86,20 +86,19 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		self.assertTrue(target.is_new())
 		self.assertEqual(target.doctype, "Maintenance Visit")
 
-	def test_on_cancel_blocked_by_active_maintenance_visit(self):
-		# on_cancel's converted query joins Maintenance Visit Purpose -> Maintenance Visit and
-		# filters the PARENT visit's docstatus != 2; a submitted (non-cancelled) visit referencing
-		# the claim must block cancellation.
+	def test_cancel_blocked_by_active_maintenance_visit(self):
 		claim = self.make_warranty_claim()
 		self.make_maintenance_visit_for_claim(claim, "Partially Completed")
 
-		self.assertRaises(frappe.ValidationError, claim.on_cancel)
+		claim.reload()
+		claim.status = "Cancelled"
+		self.assertRaises(frappe.ValidationError, claim.save)
 
-	def test_on_cancel_allowed_when_no_active_visit(self):
-		# No referencing visit -> the query returns nothing -> the claim is marked Cancelled.
+	def test_cancel_allowed_when_no_active_visit(self):
 		claim = self.make_warranty_claim()
 
-		claim.on_cancel()
+		claim.status = "Cancelled"
+		claim.save()
 
 		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Cancelled")
 
