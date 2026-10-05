@@ -127,3 +127,25 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		cash_row = self.get_row(data, "Cash")
 		self.assertIsNotNone(cash_row, "Cash asset row missing from consolidated Balance Sheet")
 		self.assertGreaterEqual(flt(cash_row.get(CHILD_COMPANY)), amount)
+
+	def test_accumulated_profit_total_is_the_group_company_value(self):
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", 5000)
+
+		data = self.run_report(report="Profit and Loss Statement", accumulated_in_group_company=1)
+
+		profit_row = self.get_row(data, "Profit for the year")
+		total_income_row = self.get_row(data, "Total Income (Credit)")
+		total_expense_row = self.get_row(data, "Total Expense (Debit)") or {}
+		self.assertEqual(flt(profit_row["total"]), flt(profit_row[PARENT_COMPANY]))
+		self.assertEqual(
+			flt(profit_row["total"]), flt(total_income_row["total"]) - flt(total_expense_row.get("total"))
+		)
+
+	def test_accumulated_balance_sheet_profit_totals_are_the_group_company_value(self):
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", 4000)
+
+		data = self.run_report(report="Balance Sheet", accumulated_in_group_company=1)
+
+		for label in ("Provisional Profit / Loss (Credit)", "Total (Credit)"):
+			row = self.get_row(data, label)
+			self.assertEqual(flt(row["total"]), flt(row[PARENT_COMPANY]), label)
