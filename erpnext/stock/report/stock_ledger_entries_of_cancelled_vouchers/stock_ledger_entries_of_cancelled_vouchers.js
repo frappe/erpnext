@@ -1,7 +1,7 @@
 // Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Uncancelled Stock Ledger Entries"] = {
+frappe.query_reports["Stock Ledger Entries of Cancelled Vouchers"] = {
 	filters: [
 		{
 			fieldname: "company",
@@ -64,7 +64,7 @@ frappe.query_reports["Uncancelled Stock Ledger Entries"] = {
 				),
 				() => {
 					frappe.call({
-						method: "erpnext.stock.report.uncancelled_stock_ledger_entries.uncancelled_stock_ledger_entries.fix_uncancelled_entries",
+						method: "erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.stock_ledger_entries_of_cancelled_vouchers.fix_uncancelled_entries",
 						freeze: true,
 						args: {
 							selected_rows: selected_rows,

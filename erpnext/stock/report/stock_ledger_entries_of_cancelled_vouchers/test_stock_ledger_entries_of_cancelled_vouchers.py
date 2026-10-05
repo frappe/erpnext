@@ -6,13 +6,13 @@ from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.uncancelled_stock_ledger_entries.uncancelled_stock_ledger_entries import (
+from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.stock_ledger_entries_of_cancelled_vouchers import (
 	execute,
 	fix_uncancelled_entries,
 )
 
 
-class TestUncancelledStockLedgerEntries(FrappeTestCase):
+class TestStockLedgerEntriesOfCancelledVouchers(FrappeTestCase):
 	def run_report(self):
 		return execute(frappe._dict({"company": "_Test Company", "voucher_type": "Stock Entry"}))[1]
 

@@ -12,11 +12,11 @@
  "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Uncancelled Stock Ledger Entries",
+ "name": "Stock Ledger Entries of Cancelled Vouchers",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Stock Ledger Entry",
- "report_name": "Uncancelled Stock Ledger Entries",
+ "report_name": "Stock Ledger Entries of Cancelled Vouchers",
  "report_type": "Script Report",
  "roles": [
   {
