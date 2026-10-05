@@ -915,6 +915,29 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(sco.supplied_items[0].returned_qty, 5)
 
+	def test_status_counts_materials_returned_by_supplier(self):
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		ste.items[0].qty = 4
+		ste.save()
+		ste.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
+		)
+		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).has_unreserved_stock())
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
