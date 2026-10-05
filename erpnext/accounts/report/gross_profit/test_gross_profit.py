@@ -691,6 +691,16 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertIsNone(data[1].buying_rate)
 		self.assertEqual(data[1]["gross_profit_%"], 20)
 
+	def test_drop_ship_not_yet_billed_by_supplier(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so = self.create_drop_ship_order(buying_rate=70, bill_purchase_order=False)
+		si = make_sales_invoice(so.name)
+		si.items[0].delivered_by_supplier = 1
+		si.submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(si.name), 700)
+
 	def test_drop_ship_partial_billing_and_return(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
@@ -1026,7 +1036,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(invoice_row.qty, 30000)
 		self.assertEqual(invoice_row.buying_amount, 999999.9)
 
-	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
+	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80, bill_purchase_order=True):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -1038,7 +1048,8 @@ class TestGrossProfit(ERPNextTestSuite):
 		purchase_order.items[0].rate = buying_rate
 		purchase_order.supplier = "_Test Supplier"
 		purchase_order.submit()
-		make_purchase_invoice(purchase_order.name).submit()
+		if bill_purchase_order:
+			make_purchase_invoice(purchase_order.name).submit()
 
 		return so
 

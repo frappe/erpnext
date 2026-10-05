@@ -960,6 +960,37 @@ class GrossProfitGenerator:
 		)
 
 		for row in buying_amounts:
+			if flt(row.stock_qty):
+				self.drop_ship_buying_rates[row.sales_order_item] = flt(row.buying_amount) / flt(
+					row.stock_qty
+				)
+
+		self.load_drop_ship_order_rates(sales_order_items - set(self.drop_ship_buying_rates))
+
+	def load_drop_ship_order_rates(self, sales_order_items):
+		"""Purchase Order rates for drop-ship rows the supplier has not invoiced yet."""
+		if not sales_order_items:
+			return
+
+		from frappe.query_builder.functions import Sum
+
+		purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+		order_amounts = (
+			frappe.qb.from_(purchase_order_item)
+			.select(
+				purchase_order_item.sales_order_item,
+				Sum(purchase_order_item.base_net_amount).as_("buying_amount"),
+				Sum(purchase_order_item.stock_qty).as_("stock_qty"),
+			)
+			.where(
+				(purchase_order_item.sales_order_item.isin(sales_order_items))
+				& (purchase_order_item.docstatus == 1)
+			)
+			.groupby(purchase_order_item.sales_order_item)
+			.run(as_dict=True)
+		)
+
+		for row in order_amounts:
 			self.drop_ship_buying_rates[row.sales_order_item] = (
 				flt(row.buying_amount) / flt(row.stock_qty) if flt(row.stock_qty) else 0
 			)
