@@ -111,11 +111,8 @@ def get_entries_for_bank_clearance_summary(filters):
 			pe.clearance_date,
 			pe.party.as_("against_account"),
 			Case()
-			.when(
-				(pe.paid_from == filters.account),
-				((pe.paid_amount * -1) - pe.total_taxes_and_charges),
-			)
-			.else_(pe.received_amount),
+			.when(pe.paid_from == filters.account, pe.paid_amount_after_tax * -1)
+			.else_(pe.received_amount_after_tax),
 		)
 		.where((pe.paid_from == filters.account) | (pe.paid_to == filters.account))
 		.where(
