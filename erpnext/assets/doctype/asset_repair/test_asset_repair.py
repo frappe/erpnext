@@ -379,6 +379,34 @@ class TestAssetRepair(ERPNextTestSuite):
 		self.assertEqual(asset.additional_asset_cost, asset_repair.repair_cost)
 		self.assertEqual(booked_value, asset_repair.repair_cost)
 
+	def test_capitalized_stock_items_are_valued_at_the_stock_ledger_rate(self):
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		asset = create_asset(calculate_depreciation=1, submit=1)
+		spare_part = create_item("_Test Asset Repair Spare Part").name
+		asset_repair = create_asset_repair(
+			asset=asset, stock_consumption=1, item_code=spare_part, rate=500, qty=2
+		)
+		make_stock_entry(
+			item_code=spare_part, target=asset_repair.stock_items[0].warehouse, qty=2, basic_rate=100
+		)
+
+		asset_repair.update(
+			{
+				"repair_status": "Completed",
+				"completion_date": nowdate(),
+				"capitalize_repair_cost": 1,
+				"cost_center": "Main - _TC",
+			}
+		)
+		asset_repair.submit()
+		asset.reload()
+
+		self.assertEqual(asset_repair.stock_items[0].total_value, 200)
+		self.assertEqual(asset_repair.total_repair_cost, 200)
+		self.assertEqual(asset.additional_asset_cost, 200)
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations + (

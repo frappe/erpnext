@@ -201,6 +201,7 @@ class AssetRepair(AccountsController):
 
 	def on_submit(self):
 		self.decrease_stock_quantity()
+		self.set_consumed_items_cost_from_stock_entry()
 
 		if self.get("capitalize_repair_cost"):
 			self.update_asset_value()
@@ -299,6 +300,27 @@ class AssetRepair(AccountsController):
 
 		stock_entry.insert()
 		stock_entry.submit()
+
+	def set_consumed_items_cost_from_stock_entry(self):
+		"""Use the stock ledger's outgoing value, which the GL also uses, instead of the entered rate."""
+		if not self.get("stock_items"):
+			return
+
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
+		stock_entry_items = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": stock_entry},
+			fields=["valuation_rate", "amount"],
+			order_by="idx",
+		)
+		for stock_item, stock_entry_item in zip(self.stock_items, stock_entry_items, strict=True):
+			stock_item.valuation_rate = stock_entry_item.valuation_rate
+			stock_item.total_value = stock_entry_item.amount
+			stock_item.db_update()
+
+		self.consumed_items_cost = self.get_total_value_of_stock_consumed()
+		self.calculate_total_repair_cost()
+		self.db_update()
 
 	def validate_serial_no(self, stock_item):
 		if not stock_item.serial_and_batch_bundle and frappe.get_cached_value(
