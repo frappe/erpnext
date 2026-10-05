@@ -986,6 +986,25 @@ class TestAsset(AssetSetup):
 		frappe.get_doc("Journal Entry", first_depreciation_entry).cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
+	def test_sale_return_reverses_sale_gl(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_monthly_depreciating_asset()
+		post_depreciation_entries(date="2025-08-31")
+		sale_args = {"item_code": "Macbook Pro", "asset": asset.name, "rate": 50000}
+		sale = create_sales_invoice(qty=1, posting_date="2025-09-15", **sale_args)
+		sale_return = create_sales_invoice(
+			qty=-1, posting_date="2025-09-20", is_return=1, return_against=sale.name, **sale_args
+		)
+
+		self.assertCountEqual(
+			get_gl_entries("Sales Invoice", sale_return.name),
+			[
+				(account, credit, debit)
+				for account, debit, credit in get_gl_entries("Sales Invoice", sale.name)
+			],
+		)
+
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
 			draft_asset = create_asset(
