@@ -58,6 +58,7 @@ class CallLog(Document):
 
 		if contact := get_contact_with_phone_number(strip_number(lead_number)):
 			self.add_link(link_type="Contact", link_name=contact)
+			self.link_customer_of_contact(contact)
 
 		if lead := get_lead_with_phone_number(lead_number):
 			self.add_link(link_type="Lead", link_name=lead)
@@ -93,6 +94,16 @@ class CallLog(Document):
 
 	def add_link(self, link_type, link_name):
 		self.append("links", {"link_doctype": link_type, "link_name": link_name})
+
+	def link_customer_of_contact(self, contact: str):
+		customer = frappe.db.get_value(
+			"Dynamic Link",
+			{"parenttype": "Contact", "parent": contact, "link_doctype": "Customer"},
+			"link_name",
+		)
+		if customer:
+			self.customer = customer
+			self.add_link(link_type="Customer", link_name=customer)
 
 	def trigger_call_popup(self):
 		if not self.is_incoming_call():

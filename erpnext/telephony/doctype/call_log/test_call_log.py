@@ -190,3 +190,22 @@ class TestCallLog(ERPNextTestSuite):
 	def test_summary_can_be_saved_without_call_type(self):
 		add_call_summary_and_call_type(self.linked_log, "No type chosen", None)
 		self.assertEqual(frappe.db.get_value("Call Log", self.linked_log, "summary"), "No type chosen")
+
+	def test_call_from_customer_contact_links_the_customer(self):
+		number = "97" + "".join(random.choices(string.digits, k=8))
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Customer Caller {number}",
+				"phone_nos": [{"phone": f"+91{number}", "is_primary_phone": 1}],
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+
+		call_log = frappe.get_doc(
+			"Call Log", self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+		)
+
+		self.assertEqual(call_log.customer, "_Test Customer")
+		self.assertIn(("Customer", "_Test Customer"), [(d.link_doctype, d.link_name) for d in call_log.links])
+		self.assertIn(("Contact", contact.name), [(d.link_doctype, d.link_name) for d in call_log.links])
