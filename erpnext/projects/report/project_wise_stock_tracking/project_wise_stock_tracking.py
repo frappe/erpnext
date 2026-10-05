@@ -116,31 +116,25 @@ def get_issued_items_cost():
 
 
 def get_delivered_items_cost():
-	dn = frappe.qb.DocType("Delivery Note")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 	dn_item = frappe.qb.DocType("Delivery Note Item")
-	dn_items = (
-		frappe.qb.from_(dn)
-		.inner_join(dn_item)
-		.on(dn.name == dn_item.parent)
-		.select(dn.project, Sum(dn_item.base_net_amount).as_("amount"))
-		.where((dn.docstatus == 1) & (dn.project != ""))
-		.groupby(dn.project)
-		.run(as_dict=1)
-	)
-
-	si = frappe.qb.DocType("Sales Invoice")
 	si_item = frappe.qb.DocType("Sales Invoice Item")
-	si_items = (
-		frappe.qb.from_(si)
-		.inner_join(si_item)
-		.on(si.name == si_item.parent)
-		.select(si.project, Sum(si_item.base_net_amount).as_("amount"))
-		.where((si.docstatus == 1) & (si.update_stock == 1) & (si.project != ""))
-		.groupby(si.project)
-		.run(as_dict=1)
+	project = Coalesce(NullIf(dn_item.project, ""), NullIf(si_item.project, ""), sle.project)
+	return dict(
+		frappe.qb.from_(sle)
+		.left_join(dn_item)
+		.on((sle.voucher_type == "Delivery Note") & (dn_item.name == sle.voucher_detail_no))
+		.left_join(si_item)
+		.on((sle.voucher_type == "Sales Invoice") & (si_item.name == sle.voucher_detail_no))
+		.select(project, -Sum(sle.stock_value_difference))
+		.where(
+			sle.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			& (sle.is_cancelled == 0)
+			& (project != "")
+		)
+		.groupby(project)
+		.run()
 	)
-
-	return sum_amount_by_project(dn_items + si_items)
 
 
 def sum_amount_by_project(rows):
