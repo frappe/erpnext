@@ -1910,7 +1910,6 @@ def download_blank_csv_template(content):
 @frappe.whitelist()
 def upload_csv_file(item_code, file_path):
 	frappe.has_permission("Item", ptype="select", throw=True)
-	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	serial_nos, batch_nos = [], []
 	serial_nos, batch_nos = get_serial_batch_from_csv(item_code, file_path)
@@ -2030,7 +2029,6 @@ def get_serial_batch_from_data(item_code, kwargs):
 @frappe.whitelist()
 def create_serial_nos(item_code, serial_nos):
 	frappe.has_permission("Item", ptype="select", throw=True)
-	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	serial_nos = get_serial_batch_from_data(
 		item_code,
@@ -2056,6 +2054,8 @@ def make_serial_nos(item_code, serial_nos):
 
 	if not serial_nos:
 		return
+
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	serial_nos_details = []
 	user = frappe.session.user
@@ -2106,6 +2106,8 @@ def make_batch_nos(item_code, batch_nos):
 	batch_nos = list(set(batch_nos) - set(existing_batches))
 	if not batch_nos:
 		return
+
+	frappe.has_permission("Serial and Batch Bundle", "create", throw=True)
 
 	batch_nos_details = []
 	user = frappe.session.user
