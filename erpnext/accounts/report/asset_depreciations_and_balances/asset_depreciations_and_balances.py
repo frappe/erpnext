@@ -361,7 +361,7 @@ def get_asset_details_for_grouped_by_category(filters):
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
 	# nosemgrep
-	return frappe.db.sql(
+	asset_details = frappe.db.sql(
 		f"""
 		SELECT a.name, a.asset_name,
 			   ifnull(sum(case when a.purchase_date < %(from_date)s then
@@ -430,6 +430,18 @@ def get_asset_details_for_grouped_by_category(filters):
 		},
 		as_dict=1,
 	)
+
+	return get_permitted_assets(asset_details)
+
+
+def get_permitted_assets(asset_details: list) -> list:
+	"""Keep only the assets the user may read."""
+	if not asset_details:
+		return []
+
+	names = [asset.name for asset in asset_details]
+	permitted = set(frappe.get_list("Asset", filters={"name": ["in", names]}, pluck="name"))
+	return [asset for asset in asset_details if asset.name in permitted]
 
 
 def get_assets_for_grouped_by_asset(filters):
