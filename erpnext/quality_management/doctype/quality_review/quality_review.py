@@ -79,7 +79,7 @@ def review():
 		elif goal.frequency == "Monthly" and goal.date == str(day):
 			create_review(goal.name)
 
-		elif goal.frequency == "Quarterly" and day == 1 and get_quarter(month):
+		elif goal.frequency == "Quarterly" and goal.date == str(day) and get_quarter(month):
 			create_review(goal.name)
 
 
