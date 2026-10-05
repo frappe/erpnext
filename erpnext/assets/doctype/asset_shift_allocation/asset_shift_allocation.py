@@ -47,9 +47,10 @@ class AssetShiftAllocation(Document):
 
 	def validate(self):
 		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
-
-		self.validate_invalid_shift_change()
-		self.update_depr_schedule()
+		if self.get("depreciation_schedule"):
+			self.set_booked_journal_entries()
+			self.validate_invalid_shift_change()
+			self.update_depr_schedule()
 
 	def on_submit(self):
 		self.create_new_asset_depr_schedule()
@@ -87,10 +88,16 @@ class AssetShiftAllocation(Document):
 				)
 			)
 
-	def validate_invalid_shift_change(self):
-		if not self.get("depreciation_schedule") or self.docstatus == 1:
-			return
+	def set_booked_journal_entries(self):
+		"""Take booked entries from the active schedule, as depreciation may be posted after the allocation was saved."""
+		journal_entries = {
+			getdate(row.schedule_date): row.journal_entry
+			for row in self.asset_depr_schedule_doc.depreciation_schedule
+		}
+		for row in self.depreciation_schedule:
+			row.journal_entry = journal_entries.get(getdate(row.schedule_date))
 
+	def validate_invalid_shift_change(self):
 		for i, sch in enumerate(self.depreciation_schedule):
 			if sch.journal_entry and self.asset_depr_schedule_doc.depreciation_schedule[i].shift != sch.shift:
 				frappe.throw(
@@ -100,9 +107,6 @@ class AssetShiftAllocation(Document):
 				)
 
 	def update_depr_schedule(self):
-		if not self.get("depreciation_schedule") or self.docstatus == 1:
-			return
-
 		self.allocate_shift_diff_in_depr_schedule()
 
 		asset_doc = frappe.get_doc("Asset", self.asset)
