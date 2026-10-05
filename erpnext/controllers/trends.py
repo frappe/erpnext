@@ -90,8 +90,9 @@ def get_data(filters, conditions):
 		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
 			posting_date = "t1." + filters.period_based_on
 
-	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
-		cond = " and " + conditions["based_on_select"][:-1] + " IS Not NULL"
+	if filters.get("based_on") == "Project":
+		project_field = conditions["group_by"].split(",")[0]
+		cond = f" and ifnull({project_field}, '') != ''"
 
 	if not filters.get("include_closed_orders"):
 		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:

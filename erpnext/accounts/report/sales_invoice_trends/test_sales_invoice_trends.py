@@ -147,3 +147,17 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 		total_index = labels.index("Total(Amt)")
 		self.assertEqual(by_customer[-1][total_index], permitted_amount)
 		self.assertEqual(by_item[-1][labels_by_item.index("Total(Amt)")], permitted_amount)
+
+	def test_based_on_project_excludes_invoices_without_project(self):
+		project = frappe.db.get_value("Project", {"project_name": "_Test Project"})
+		invoice = create_sales_invoice(item="_Test Item", rate=1000, posting_date=POSTING_DATE, do_not_save=1)
+		invoice.project = project
+		invoice.submit()
+		create_sales_invoice(item="_Test Item", rate=4000, posting_date=POSTING_DATE)
+
+		labels, data = self.run_report(based_on="Project")
+		projects = [row[0] for row in data[:-1]]
+		self.assertIn(project, projects)
+		self.assertNotIn(None, projects)
+		self.assertNotIn("", projects)
+		self.assertEqual(data[-1][labels.index("Total(Amt)")], sum(row[-1] for row in data[:-1]))
