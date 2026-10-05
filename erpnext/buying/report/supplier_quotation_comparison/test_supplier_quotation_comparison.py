@@ -103,6 +103,13 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		self.assertTrue(rows[quantity_quote.name].get("min"))
 		self.assertFalse(rows[unit_price_quote.name].get("min"))
 
+	def test_cheapest_quote_is_flagged_across_suppliers_when_categorized_by_supplier(self):
+		self.make_quotation("_Test Supplier", qty=10, rate=500)
+		cheapest = self.make_quotation("_Test Supplier 1", qty=10, rate=450)
+
+		rows = self.run_report(item_code=ITEM, categorize_by="Categorize by Supplier")
+		self.assertEqual({row["quotation"] for row in rows if row.get("min")}, {cheapest.name})
+
 	def test_supplier_restricted_user_sees_only_that_suppliers_quotes(self):
 		own_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
 		self.make_quotation("_Test Supplier 1", qty=10, rate=450)

@@ -102,6 +102,7 @@ def prepare_data(supplier_quotation_data, filters):
 	out, groups, qty_list, suppliers, chart_data = [], [], [], [], []
 	group_wise_map = defaultdict(list)
 	supplier_qty_price_map = {}
+	rows_by_item = defaultdict(list)
 
 	group_by_field = (
 		"supplier_name" if filters.get("categorize_by") == "Categorize by Supplier" else "item_code"
@@ -137,6 +138,7 @@ def prepare_data(supplier_quotation_data, filters):
 
 		# map for report view of form {'supplier1'/'item1':[{},{},...]}
 		group_wise_map[group].append(row)
+		rows_by_item[data.get("item_code")].append(row)
 
 		# map for chart preparation of the form {'supplier1': {'qty': 'price'}}
 		supplier = data.get("supplier_name")
@@ -153,27 +155,28 @@ def prepare_data(supplier_quotation_data, filters):
 	suppliers = list(set(suppliers))
 	qty_list = list(set(qty_list))
 
-	highlight_min_price = group_by_field == "item_code" or filters.get("item_code")
+	if group_by_field == "item_code" or filters.get("item_code"):
+		flag_cheapest_quotes(rows_by_item)
 
 	# final data format for report view
 	for group in groups:
 		group_entries = group_wise_map[group]  # all entries pertaining to item/supplier
 		group_entries[0].update({group_by_field: group})  # Add item/supplier name in first group row
-
-		if highlight_min_price:
-			prices = [group_entry["base_price_per_unit"] for group_entry in group_entries]
-			min_price = min(prices)
-
-		for entry in group_entries:
-			if highlight_min_price and entry["base_price_per_unit"] == min_price:
-				entry["min"] = 1
-			out.append(entry)
+		out.extend(group_entries)
 
 	if filters.get("item_code"):
 		# render chart only for one item comparison
 		chart_data = prepare_chart_data(suppliers, qty_list, supplier_qty_price_map, company_currency)
 
 	return out, chart_data
+
+
+def flag_cheapest_quotes(rows_by_item):
+	for rows in rows_by_item.values():
+		min_price = min(row["base_price_per_unit"] for row in rows)
+		for row in rows:
+			if row["base_price_per_unit"] == min_price:
+				row["min"] = 1
 
 
 def get_price_per_stock_unit(amount, rate, data):
