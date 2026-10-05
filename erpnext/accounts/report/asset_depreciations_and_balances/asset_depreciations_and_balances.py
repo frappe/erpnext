@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, flt, formatdate
+from frappe.utils import add_days, cstr, flt, formatdate
 
 
 def execute(filters=None):
@@ -157,9 +157,8 @@ def get_assets_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
 		condition = f" and a.asset_category = '{filters.get('asset_category')}'"
-	finance_book_filter = ""
+	finance_book_filter = f" and {get_finance_book_condition(filters)}"
 	if filters.get("finance_book"):
-		finance_book_filter += " and ifnull(gle.finance_book, '')=%(finance_book)s"
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
 	# nosemgrep
@@ -235,6 +234,15 @@ def get_assets_for_grouped_by_category(filters):
 		},
 		as_dict=1,
 	)
+
+
+def get_finance_book_condition(filters) -> str:
+	"""GL rows of the selected finance book, or of no book and the company's default book when none is selected."""
+	if filters.get("finance_book"):
+		return f"ifnull(gle.finance_book, '') = {frappe.db.escape(filters.finance_book)}"
+
+	default_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+	return f"ifnull(gle.finance_book, '') in ('', {frappe.db.escape(cstr(default_finance_book))})"
 
 
 def get_asset_value_adjustment_map_by_category(filters):
@@ -428,9 +436,8 @@ def get_assets_for_grouped_by_asset(filters):
 	condition = ""
 	if filters.get("asset"):
 		condition = f" and a.name = '{filters.get('asset')}'"
-	finance_book_filter = ""
+	finance_book_filter = f" and {get_finance_book_condition(filters)}"
 	if filters.get("finance_book"):
-		finance_book_filter += " and ifnull(gle.finance_book, '')=%(finance_book)s"
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
 	# nosemgrep
