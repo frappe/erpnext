@@ -209,6 +209,9 @@ def send_mail(entry, email_campaign):
 			sender=sender,
 			communication=comm["name"],
 			queue_separately=True,
+			reference_doctype="Email Campaign",
+			reference_name=campaign_name,
+			unsubscribe_message=_("Unsubscribe from this campaign"),
 		)
 	except Exception:
 		frappe.log_error(title="Email Campaign Failed.")
