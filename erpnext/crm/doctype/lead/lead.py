@@ -260,7 +260,8 @@ class Lead(SellingController, CRMNote):
 
 		data = frappe._dict(data)
 		if data.create_contact:
-			self.create_contact()
+			self.contact_doc = self.create_contact()
+			self.link_to_contact()
 
 		if data.create_prospect:
 			self.create_prospect(data.prospect_name)

@@ -218,6 +218,17 @@ class TestLead(ERPNextTestSuite):
 		lead.save()
 		self.assertEqual(lead.status, "Do Not Contact")
 
+	def test_contact_created_from_the_opportunity_dialog_is_linked_to_the_lead(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 0)
+		lead = make_lead()
+		lead.create_prospect_and_contact({"create_contact": 1})
+
+		self.assertTrue(
+			frappe.db.exists(
+				"Dynamic Link", {"parenttype": "Contact", "link_doctype": "Lead", "link_name": lead.name}
+			)
+		)
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",
