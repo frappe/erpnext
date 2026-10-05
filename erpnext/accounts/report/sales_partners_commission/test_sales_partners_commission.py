@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -31,8 +32,9 @@ class TestSalesPartnersCommission(ERPNextTestSuite):
 		invoice.commission_rate = 10
 		return invoice.insert().submit()
 
-	def get_partner_row(self) -> dict:
-		return next(row for row in execute()[1] if row["sales_partner"] == self.sales_partner)
+	def get_partner_row(self, **filters) -> dict:
+		filters = {"company": "_Test Company", **filters}
+		return next(row for row in execute(filters)[1] if row["sales_partner"] == self.sales_partner)
 
 	def test_credit_note_reverses_commission(self):
 		invoice = self.make_invoice("_Test Customer", 1000)
@@ -41,6 +43,20 @@ class TestSalesPartnersCommission(ERPNextTestSuite):
 
 		row = self.get_partner_row()
 		self.assertEqual((row["invoiced_amount"], row["total_commission"]), (400, 40))
+
+	def test_company_and_date_filters(self):
+		self.make_invoice("_Test Customer", 1000)
+		old_invoice = create_sales_invoice(rate=300, posting_date=add_days(today(), -40), do_not_save=1)
+		old_invoice.sales_partner = self.sales_partner
+		old_invoice.commission_rate = 10
+		old_invoice.insert().submit()
+
+		row = self.get_partner_row(from_date=add_days(today(), -30), to_date=today())
+		self.assertEqual((row["invoiced_amount"], row["total_commission"]), (1000, 100))
+		self.assertEqual(self.get_partner_row()["invoiced_amount"], 1300)
+		self.assertNotIn(
+			self.sales_partner, [row["sales_partner"] for row in execute({"company": "_Test Company 1"})[1]]
+		)
 
 	def test_user_sees_commission_on_permitted_customers_only(self):
 		self.make_invoice("_Test Customer", 1000)
