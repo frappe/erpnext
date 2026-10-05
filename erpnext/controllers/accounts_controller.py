@@ -16,7 +16,6 @@ from frappe.utils import (
 	flt,
 	get_link_to_form,
 	getdate,
-	nowdate,
 	today,
 )
 
@@ -155,20 +154,15 @@ class AccountsController(TransactionBase):
 		is_supplier_payment = self.doctype == "Payment Entry" and self.party_type == "Supplier"
 		is_buying_invoice = self.doctype in ["Purchase Invoice", "Purchase Order"]
 		supplier_name = self.supplier if is_buying_invoice else self.party if is_supplier_payment else None
-		supplier = None
+		if not supplier_name:
+			return
 
-		if supplier_name:
-			supplier = frappe.get_lazy_doc("Supplier", supplier_name)
-
-		if supplier and supplier.on_hold:
-			if (is_buying_invoice and supplier.hold_type in ["All", "Invoices"]) or (
-				is_supplier_payment and supplier.hold_type in ["All", "Payments"]
-			):
-				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
-					frappe.msgprint(
-						_("{0} is blocked so this transaction cannot proceed").format(supplier_name),
-						raise_exception=1,
-					)
+		hold_type = "Invoices" if is_buying_invoice else "Payments"
+		if frappe.get_lazy_doc("Supplier", supplier_name).is_blocked_for(hold_type):
+			frappe.msgprint(
+				_("{0} is blocked so this transaction cannot proceed").format(supplier_name),
+				raise_exception=1,
+			)
 
 	def validate_against_voucher_outstanding(self):
 		from frappe.model.meta import get_meta

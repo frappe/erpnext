@@ -10,7 +10,7 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
-from frappe.utils import get_link_to_form
+from frappe.utils import get_link_to_form, getdate, nowdate
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
@@ -99,6 +99,14 @@ class Supplier(TransactionBase):
 			self.release_date = ""
 		elif self.on_hold and not self.hold_type:
 			self.hold_type = "All"
+
+	def is_blocked_for(self, hold_type: str) -> bool:
+		"""Whether transactions of `hold_type` ("Invoices" or "Payments") are on hold today."""
+		return bool(
+			self.on_hold
+			and self.hold_type in ("All", hold_type)
+			and (not self.release_date or getdate(nowdate()) <= getdate(self.release_date))
+		)
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
