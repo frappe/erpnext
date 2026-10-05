@@ -836,6 +836,33 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(fg_return.items[0].expense_account, delivery_account)
 
+	def test_extra_receipt_of_bom_item_uses_existing_row(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = []
+		rm_in.append(
+			"items",
+			{
+				"item_code": "Basic RM",
+				"qty": 4,
+				"t_warehouse": scio.customer_warehouse,
+				"against_fg": scio.items[0].name,
+			},
+		)
+		rm_in.submit()
+
+		scio.reload()
+		rows = [row for row in scio.received_items if row.rm_item_code == "Basic RM"]
+		self.assertEqual([row.received_qty for row in rows], [9])
+
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
 
 def create_delivered_so_scio():
 	so, scio = create_so_scio()
