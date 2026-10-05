@@ -47,6 +47,15 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 		before_fy = self.make_ldc(add_days(fy_start, -1), fy_end, fiscal_year=fy_name)
 		self.assertRaises(frappe.ValidationError, before_fy.validate_dates)
 
+	def test_rate_and_limit_must_be_in_range(self):
+		for rate, limit in ((-5, 50000), (100, 50000), (150, 50000), (1, 0), (1, -50000)):
+			doc = frappe.new_doc("Lower Deduction Certificate", rate=rate, certificate_limit=limit)
+			self.assertRaises(frappe.ValidationError, doc.validate_rate_and_limit)
+
+		frappe.new_doc(
+			"Lower Deduction Certificate", rate=0, certificate_limit=50000
+		).validate_rate_and_limit()
+
 	def test_pan_follows_the_supplier(self):
 		supplier = frappe.get_doc(
 			{
@@ -59,6 +68,13 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 
 		fy_name, fy_start, fy_end = get_fiscal_year(today())
 		doc = self.make_ldc(fy_start, fy_end, fiscal_year=fy_name)
-		doc.update({"company": "_Test Company", "supplier": supplier.name, "pan_no": "BBBPB1234B"})
+		doc.update(
+			{
+				"company": "_Test Company",
+				"supplier": supplier.name,
+				"pan_no": "BBBPB1234B",
+				"certificate_limit": 1,
+			}
+		)
 		doc.validate()
 		self.assertEqual(doc.pan_no, "AAAPA1234A")
