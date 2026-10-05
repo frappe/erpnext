@@ -11,6 +11,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestProjectTemplate(ERPNextTestSuite):
 	pass
 
+	def test_disabled_template_is_refused_for_projects(self):
+		template = make_project_template("_Test Disabled Project Template")
+		template.db_set("disabled", 1)
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name="_Test Disabled Template Project",
+			project_template=template.name,
+			company="_Test Company",
+		)
+		self.assertRaises(frappe.ValidationError, project.insert)
+
 
 def make_project_template(project_template_name, project_tasks=None):
 	if project_tasks is None:
