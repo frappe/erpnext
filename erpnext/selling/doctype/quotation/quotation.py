@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.desk.notifications import get_open_count as get_linked_document_counts
 from frappe.model.document import Document
-from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
+from frappe.utils import add_days, cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -169,6 +169,7 @@ class Quotation(SellingController):
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
+		self.set_default_valid_till()
 		self.validate_valid_till()
 		self.validate_revision()
 		self.set_customer_name()
@@ -184,6 +185,11 @@ class Quotation(SellingController):
 
 	def before_submit(self):
 		self.set_has_alternative_item()
+
+	def set_default_valid_till(self):
+		validity_days = cint(frappe.get_single_value("CRM Settings", "default_valid_till"))
+		if self.is_new() and not self.valid_till and validity_days > 0:
+			self.valid_till = add_days(self.transaction_date, validity_days)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):

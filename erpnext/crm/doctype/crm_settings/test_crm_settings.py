@@ -53,3 +53,11 @@ class TestCRMSettings(ERPNextTestSuite):
 
 		self.assertGreater(frappe.db.get_value("Lead", lead.name, "modified"), old_timestamp)
 		self.assertEqual(frappe.db.get_value("Customer", "_Test Customer", "modified"), old_timestamp)
+
+	def test_default_quotation_validity_days_must_be_a_whole_number(self):
+		for value in ("30 days", "-10", "1.5"):
+			doc = self.make_settings(default_valid_till=value)
+			self.assertRaises(frappe.ValidationError, doc.validate_default_valid_till)
+
+		for value in ("30", "0", ""):
+			self.make_settings(default_valid_till=value).validate_default_valid_till()
