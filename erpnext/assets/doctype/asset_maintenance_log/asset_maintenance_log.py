@@ -42,6 +42,7 @@ class AssetMaintenanceLog(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_task()
 		if getdate(self.due_date) < getdate(nowdate()) and self.maintenance_status not in [
 			"Completed",
 			"Cancelled",
@@ -53,6 +54,17 @@ class AssetMaintenanceLog(Document):
 
 		if self.maintenance_status != "Completed" and self.completion_date:
 			frappe.throw(_("Please select Maintenance Status as Completed or remove Completion Date"))
+
+	def validate_task(self):
+		if (
+			self.task
+			and frappe.db.get_value("Asset Maintenance Task", self.task, "parent") != self.asset_maintenance
+		):
+			frappe.throw(
+				_("Task {0} does not belong to Asset Maintenance {1}").format(
+					self.task, self.asset_maintenance
+				)
+			)
 
 	def on_submit(self):
 		if self.maintenance_status not in ["Completed", "Cancelled"]:
