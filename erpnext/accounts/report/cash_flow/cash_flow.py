@@ -176,7 +176,6 @@ def get_cash_flow_accounts():
 
 def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
 	data = {}
-	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
 		filters.start_date = start_date
@@ -188,11 +187,21 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		if amount and account_type == "Depreciation":
 			amount *= -1
 
-		total += amount
 		data.setdefault(period["key"], amount)
 
-	data["total"] = total
+	data["total"] = sum(data[key] for key in get_total_keys(period_list, accumulated_values))
 	return data
+
+
+def get_total_keys(period_list: list[dict], accumulated_values: bool, consolidated: bool = False) -> list:
+	"""Period keys whose values add up to the total; accumulated columns are already running totals."""
+	if consolidated:
+		return list(period_list)
+
+	if accumulated_values:
+		return [period_list[-1]["key"]] if period_list else []
+
+	return [period["key"] for period in period_list]
 
 
 def get_account_type_based_gl_data(company, filters=None):
@@ -255,8 +264,6 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 		"currency": currency,
 	}
 
-	summary_data[label] = 0
-
 	# from consolidated financial statement
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
@@ -267,10 +274,12 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 				key = period if consolidated else period["key"]
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
-				summary_data[label] += row.get(key)
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row["total"]
+
+	summary_keys = get_total_keys(period_list, filters.get("accumulated_values"), consolidated)
+	summary_data[label] = sum(flt(total_row.get(key)) for key in summary_keys)
 
 	out.append(total_row)
 	out.append({})
