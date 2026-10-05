@@ -4,7 +4,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date
+from frappe.utils import add_days, add_to_date, nowdate
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -420,6 +420,54 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(pos_inv.status, "Paid")
 
 		set_allow_partial_payment(self.pos_profile, 0)
+
+	def test_discounted_invoice_status(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos_inv = create_pos_invoice(
+			pos_profile=self.pos_profile.name, rate=100, is_discounted=1, do_not_save=1
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 90})
+		pos_inv.insert()
+
+		# Seed the lookup records because Invoice Discounting only accepts Sales Invoice links.
+		discounting = frappe.get_doc(
+			doctype="Invoice Discounting",
+			name=frappe.generate_hash(length=10),
+			company=pos_inv.company,
+			docstatus=1,
+			status="Disbursed",
+		)
+		discounting.db_insert()
+		frappe.get_doc(
+			doctype="Discounted Invoice",
+			parent=discounting.name,
+			parenttype=discounting.doctype,
+			parentfield="invoices",
+			sales_invoice=pos_inv.name,
+			docstatus=1,
+		).db_insert()
+
+		pos_inv.submit()
+		pos_inv.reload()
+		self.assertEqual(pos_inv.docstatus, 1)
+		self.assertEqual(pos_inv.outstanding_amount, 10)
+		self.assertEqual(pos_inv.status, "Partly Paid and Discounted")
+
+		for outstanding_amount, due_date, expected_status in (
+			(10, add_days(nowdate(), -1), "Overdue"),
+			(10, nowdate(), "Partly Paid"),
+			(100, nowdate(), "Unpaid"),
+		):
+			with self.subTest(status=expected_status):
+				pos_inv.outstanding_amount = outstanding_amount
+				pos_inv.due_date = due_date
+				discounting.db_set("status", "Disbursed")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, f"{expected_status} and Discounted")
+
+				discounting.db_set("status", "Settled")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, expected_status)
 
 	def test_multi_payment_for_partly_paid_invoices(self):
 		set_allow_partial_payment(self.pos_profile, 1)
