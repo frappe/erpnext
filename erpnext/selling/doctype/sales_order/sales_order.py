@@ -837,8 +837,20 @@ class SalesOrder(SellingController):
 			if item.reserve_stock and (not enable_stock_reservation or not cint(item.is_stock_item)):
 				item.reserve_stock = 0
 
-			if item.ensure_delivery_based_on_produced_serial_no and not enable_stock_reservation:
-				item.ensure_delivery_based_on_produced_serial_no = 0
+			if item.ensure_delivery_based_on_produced_serial_no:
+				if not enable_stock_reservation:
+					item.ensure_delivery_based_on_produced_serial_no = 0
+				elif item.reserve_stock:
+					# the produced Serial Nos are reserved by the Manufacture Stock Entry; reserving
+					# existing stock here would use up the row's reservable qty and skip that
+					item.reserve_stock = 0
+					frappe.msgprint(
+						_(
+							"Row #{0}: Stock cannot be reserved for the Item {1} as its delivery is ensured based on the produced Serial Nos. The Work Order will reserve them on manufacture."
+						).format(item.idx, frappe.bold(item.item_code)),
+						title=_("Stock Reservation"),
+						indicator="yellow",
+					)
 
 	def has_unreserved_stock(self) -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
