@@ -144,6 +144,14 @@ class TestPurchaseOrder(FrappeTestCase):
 		sq.save()
 		self.assertEqual(sq.items[0].qty, 1)
 
+	def test_supplier_quotation_zero_qty_cannot_be_forced_by_the_client(self):
+		sq = frappe.copy_doc(test_records[0])
+		sq.items[0].qty = 0
+		sq.has_unit_price_items = 1
+
+		with self.assertRaises(InvalidQtyError):
+			sq.save()
+
 	def test_make_purchase_order(self):
 		sq = frappe.copy_doc(test_records[0]).insert()
 
