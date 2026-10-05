@@ -96,6 +96,13 @@ class TestLead(unittest.TestCase):
 			("Customer", customer.name),
 		)
 
+	def test_lead_converts_to_one_customer_only(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+
+		lead = make_lead()
+		make_customer(lead.name).insert()
+		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
+
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
