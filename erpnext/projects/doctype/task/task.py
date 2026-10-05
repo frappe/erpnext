@@ -91,6 +91,7 @@ class Task(NestedSet):
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
 		self.validate_parent_is_group()
+		self.validate_parent_not_completed()
 		self.validate_web_form_project_permission()
 
 	def validate_dates(self):
@@ -228,6 +229,20 @@ class Task(NestedSet):
 					),
 					ParentIsGroupError,
 				)
+
+	def validate_parent_not_completed(self):
+		if not self.parent_task or self.status in ("Completed", "Cancelled"):
+			return
+
+		if (
+			self.has_value_changed("parent_task")
+			and frappe.db.get_value("Task", self.parent_task, "status") == "Completed"
+		):
+			frappe.throw(
+				_("Cannot add an open task under completed Parent Task {0}.").format(
+					get_link_to_form("Task", self.parent_task)
+				)
+			)
 
 	def update_depends_on(self):
 		depends_on_tasks = ""

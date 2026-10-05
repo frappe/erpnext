@@ -257,6 +257,14 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+	def test_open_task_under_completed_parent(self):
+		parent = create_task("_Test Completed Parent", is_group=1)
+		parent.status = "Completed"
+		parent.save()
+		child = create_task("_Test Open Child Of Completed Parent", parent_task=parent.name, save=False)
+
+		self.assertRaises(frappe.ValidationError, child.save)
+
 	def test_expected_end_date(self):
 		task = create_task("Testing End Date", add_days(nowdate(), 1), add_days(nowdate(), 5))
 		task.expected_time = 72
