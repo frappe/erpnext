@@ -151,8 +151,23 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertEqual(doc.status, "File Import Completed")
 		self.assertEqual(self.get_invoice("ISI-ACC-USER").supplier, "_Test ISI New Seller")
 
+	def test_imports_created_in_the_same_second_get_unique_names(self):
+		first = self.make_import()
+		second = frappe.new_doc("Import Supplier Invoice")
+		second.creation = first.creation
+		second.autoname()
+
+		self.assertNotEqual(second.name, first.name)
+
 	def import_files(self, files: dict[str, str | bytes]):
-		doc = frappe.get_doc(
+		doc = self.make_import()
+		doc.zip_file = make_zip_attachment(doc, files).file_url
+		doc.save()
+		doc.import_xml_data()
+		return doc
+
+	def make_import(self):
+		return frappe.get_doc(
 			{
 				"doctype": "Import Supplier Invoice",
 				"company": "_Test Company",
@@ -163,10 +178,6 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 				"default_buying_price_list": "Standard Buying",
 			}
 		).insert()
-		doc.zip_file = make_zip_attachment(doc, files).file_url
-		doc.save()
-		doc.import_xml_data()
-		return doc
 
 	def get_invoice(self, bill_no: str):
 		return frappe.get_doc("Purchase Invoice", {"bill_no": bill_no})
