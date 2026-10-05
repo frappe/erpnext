@@ -94,6 +94,15 @@ class TestGrossAndNetProfitReport(ERPNextTestSuite):
 		self.assertEqual(self.report_row(data, "'Gross Profit'")["total"], 1500)
 		self.assertEqual(self.report_row(data, "'Net Profit'")["total"], 1500)
 
+	def test_net_profit_shown_when_nothing_is_included_in_gross(self):
+		self.book_income(NON_GROSS_INCOME, 3000)
+		self.book_expense(NON_GROSS_EXPENSE, 1000)
+
+		data = self.run_report()
+
+		self.assertEqual(data[0]["account"], "'Nothing is included in gross'")
+		self.assertEqual(self.report_row(data, "'Net Profit'")["total"], 2000)
+
 	def test_nothing_included_in_gross_when_no_entries(self):
 		# a fiscal year with no income/expense entries yields the placeholder row
 		data = self.run_report(
