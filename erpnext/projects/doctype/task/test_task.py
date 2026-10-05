@@ -7,7 +7,11 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.projects.doctype.task.task import CircularReferenceError, ParentIsGroupError
+from erpnext.projects.doctype.task.task import (
+	CircularReferenceError,
+	ParentIsGroupError,
+	set_tasks_as_overdue,
+)
 
 
 class TestTask(FrappeTestCase):
@@ -146,6 +150,15 @@ class TestTask(FrappeTestCase):
 
 			task.exp_end_date = add_days(nowdate(), 8)
 			self.assertRaises(frappe.exceptions.InvalidDates, task.validate_parent_project_dates)
+
+	def test_template_task_is_not_overdue(self):
+		task = create_task(
+			"_Test Template Task Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5), is_template=1
+		)
+
+		set_tasks_as_overdue()
+
+		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Template")
 
 
 def create_task(

@@ -398,7 +398,7 @@ def set_multiple_status(names, status):
 def set_tasks_as_overdue():
 	tasks = frappe.get_all(
 		"Task",
-		filters={"status": ["not in", ["Cancelled", "Completed"]]},
+		filters={"status": ["not in", ["Cancelled", "Completed", "Template"]]},
 		fields=["name", "status", "review_date"],
 	)
 	for task in tasks:
