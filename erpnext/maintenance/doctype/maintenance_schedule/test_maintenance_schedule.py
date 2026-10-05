@@ -256,6 +256,14 @@ class TestMaintenanceSchedule(FrappeTestCase):
 		self.assertEqual(getdate(ms.items[0].end_date), getdate("2027-03-31"))
 
 
+def deliver_serial_nos(item_code, serial_nos, customer="_Test Customer"):
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+	return create_delivery_note(
+		item_code=item_code, serial_no=serial_nos, qty=len(serial_nos), customer=customer
+	)
+
+
 def make_serial_item_with_serial(item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
 	if not serial_item_doc.has_serial_no or not serial_item_doc.serial_no_series:
