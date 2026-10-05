@@ -123,10 +123,14 @@ class EmailCampaign(Document):
 def send_email_to_leads_or_contacts():
 	today_date = getdate(today())
 
-	# Get all active email campaigns in a single query
+	# Select by date, not status: the daily status job may run after this one
 	email_campaigns = frappe.get_all(
 		"Email Campaign",
-		filters={"status": "In Progress"},
+		filters={
+			"status": ("!=", "Unsubscribed"),
+			"start_date": ("<=", today_date),
+			"end_date": (">=", today_date),
+		},
 		fields=["name", "campaign_name", "email_campaign_for", "recipient", "start_date", "sender"],
 	)
 
