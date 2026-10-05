@@ -815,6 +815,7 @@ class SubcontractingReceipt(SubcontractingController):
 	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		warehouse_with_no_account = []
 
+		remarks = self.get("remarks") or _("Accounting Entry for Stock")
 		supplied_items_details = frappe._dict()
 		for item in self.supplied_items:
 			supplied_items_details.setdefault(item.reference_name, []).append(
@@ -844,8 +845,6 @@ class SubcontractingReceipt(SubcontractingController):
 						},
 						"stock_value_difference",
 					)
-
-					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# Accepted Warehouse Account (Debit)
 					self.add_gl_entry(
@@ -892,39 +891,6 @@ class SubcontractingReceipt(SubcontractingController):
 						project=item.project,
 						item=item,
 					)
-
-					if flt(item.rm_supp_cost):
-						for rm_item in supplied_items_details.get(item.name):
-							_inv_dict = self.get_inventory_account_dict(
-								rm_item, inventory_account_map, "supplier_warehouse"
-							)
-
-							# Supplier Warehouse Account (Credit)
-							self.add_gl_entry(
-								gl_entries=gl_entries,
-								account=_inv_dict.get("account"),
-								cost_center=rm_item.cost_center or item.cost_center,
-								debit=0.0,
-								credit=flt(rm_item.amount),
-								remarks=remarks,
-								against_account=rm_item.expense_account or item.expense_account,
-								account_currency=_inv_dict.get("account_currency"),
-								project=item.project,
-								item=item,
-							)
-							# Expense Account (Debit)
-							self.add_gl_entry(
-								gl_entries=gl_entries,
-								account=rm_item.expense_account or item.expense_account,
-								cost_center=rm_item.cost_center or item.cost_center,
-								debit=flt(rm_item.amount),
-								credit=0.0,
-								remarks=remarks,
-								against_account=_inv_dict.get("account"),
-								account_currency=get_account_currency(item.expense_account),
-								project=item.project,
-								item=item,
-							)
 
 					# Expense Account (Debit)
 					if item.additional_cost_per_qty:
@@ -976,6 +942,10 @@ class SubcontractingReceipt(SubcontractingController):
 				):
 					warehouse_with_no_account.append(item.warehouse)
 
+			self._make_supplied_items_gl_entries(
+				gl_entries, item, supplied_items_details.get(item.name, []), inventory_account_map, remarks
+			)
+
 		for row in self.additional_costs:
 			credit_amount = (
 				flt(row.base_amount)
@@ -1000,6 +970,42 @@ class SubcontractingReceipt(SubcontractingController):
 				_("No accounting entries for the following warehouses")
 				+ ": \n"
 				+ "\n".join(warehouse_with_no_account)
+			)
+
+	def _make_supplied_items_gl_entries(
+		self, gl_entries: list, item, supplied_items: list, inventory_account_map: dict | None, remarks: str
+	) -> None:
+		"""Credit the supplier warehouse for consumed raw materials, also when the row has no accepted qty."""
+		for rm_item in supplied_items:
+			if not flt(rm_item.amount):
+				continue
+
+			_inv_dict = self.get_inventory_account_dict(rm_item, inventory_account_map, "supplier_warehouse")
+			expense_account = rm_item.expense_account or item.expense_account
+
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=_inv_dict.get("account"),
+				cost_center=rm_item.cost_center or item.cost_center,
+				debit=0.0,
+				credit=flt(rm_item.amount),
+				remarks=remarks,
+				against_account=expense_account,
+				account_currency=_inv_dict.get("account_currency"),
+				project=item.project,
+				item=item,
+			)
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=expense_account,
+				cost_center=rm_item.cost_center or item.cost_center,
+				debit=flt(rm_item.amount),
+				credit=0.0,
+				remarks=remarks,
+				against_account=_inv_dict.get("account"),
+				account_currency=get_account_currency(item.expense_account),
+				project=item.project,
+				item=item,
 			)
 
 	def make_item_gl_entries_for_lcv(self, gl_entries, inventory_account_map):
