@@ -268,6 +268,9 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None, args=None):
+	if frappe.get_doc("Supplier Quotation", source_name).get_status()["status"] == "Expired":
+		frappe.throw(_("Supplier Quotation {0} has expired.").format(source_name))
+
 	if args is None:
 		args = {}
 	if isinstance(args, str):

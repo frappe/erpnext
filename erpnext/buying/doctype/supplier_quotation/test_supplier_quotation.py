@@ -78,14 +78,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		partial_order.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Supplier Quotation", partially_ordered.name, "status"),
-			"Submitted",
-		)
-
-		set_expired_status()
-		self.assertEqual(
-			frappe.db.get_value("Supplier Quotation", partially_ordered.name, "status"),
 			"Expired",
 		)
+		self.assertRaises(frappe.ValidationError, make_purchase_order, partially_ordered.name)
+
+		valid.db_set("valid_till", add_days(today(), -1))
+		self.assertRaises(frappe.ValidationError, make_purchase_order, valid.name)
 
 	def test_purchase_order_updates_order_status(self):
 		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
