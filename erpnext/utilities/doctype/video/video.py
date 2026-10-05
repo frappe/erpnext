@@ -46,7 +46,7 @@ class Video(Document):
 			self.set_youtube_statistics()
 
 	def set_video_id(self):
-		if self.url and not self.get("youtube_video_id"):
+		if self.url and (not self.get("youtube_video_id") or self.has_value_changed("url")):
 			self.youtube_video_id = get_id_from_url(self.url)
 
 	def set_youtube_statistics(self):

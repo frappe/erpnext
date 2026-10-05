@@ -74,6 +74,14 @@ class TestVideo(ERPNextTestSuite):
 		for url in ("https://www.youtube.com/", "https://example.com/video.mp4"):
 			self.assertRaises(frappe.ValidationError, get_id_from_url, url)
 
+	def test_changing_url_refreshes_video_id_and_statistics(self):
+		video = make_video("Test URL Change", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+		video.url = "https://www.youtube.com/watch?v=9bZkp7q1z0E"
+		video.save()
+
+		self.assertEqual(video.youtube_video_id, "9bZkp7q1z0E")
+		self.assertEqual(video.view_count, 7)
+
 
 def make_video(title: str, url: str, provider: str = "YouTube"):
 	return frappe.get_doc(
