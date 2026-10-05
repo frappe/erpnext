@@ -1,11 +1,28 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-# import frappe
+import frappe
 
-
+from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAssetShiftFactor(ERPNextTestSuite):
-	pass
+	def test_shift_based_depreciation_needs_a_positive_default_factor(self):
+		for factor in (0, -1):
+			shift = frappe.get_doc({"doctype": "Asset Shift Factor", "shift_name": "Zero", "shift_factor": factor})
+			self.assertRaises(frappe.ValidationError, shift.insert)
+
+		frappe.db.delete("Asset Shift Factor")
+		frappe.clear_document_cache("Asset Shift Factor")
+		self.assertRaises(
+			frappe.ValidationError,
+			create_asset,
+			calculate_depreciation=1,
+			available_for_use_date="2023-01-01",
+			purchase_date="2023-01-01",
+			depreciation_start_date="2023-01-31",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			shift_based=1,
+		)

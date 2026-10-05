@@ -418,7 +418,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			shift = (
 				self.schedules_before_clearing[row_idx].shift
 				if (self.schedules_before_clearing and len(self.schedules_before_clearing) > row_idx)
-				else frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
+				else get_default_shift_name()
 			)
 
 		self.append(
@@ -478,3 +478,10 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			fy_end_date = add_days(add_years(fy_start_date, 1), -1)
 
 		return fy_start_date, fy_end_date
+
+
+def get_default_shift_name() -> str:
+	shift_name = frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
+	if not shift_name:
+		frappe.throw(_("Please set a default Asset Shift Factor to use shift based depreciation."))
+	return shift_name
