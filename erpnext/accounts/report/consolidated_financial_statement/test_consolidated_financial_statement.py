@@ -127,3 +127,15 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		cash_row = self.get_row(data, "Cash")
 		self.assertIsNotNone(cash_row, "Cash asset row missing from consolidated Balance Sheet")
 		self.assertGreaterEqual(flt(cash_row.get(CHILD_COMPANY)), amount)
+
+	def test_accumulated_cash_flow_section_total_is_under_the_group_company(self):
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", 5000)
+
+		data = self.run_report(report="Cash Flow", accumulated_in_group_company=1)
+
+		operations_header = data[0]["account"]
+		section_rows = [row for row in data if row.get("parent_account") == operations_header]
+		section_total = self.get_row(data, "Net Cash from Operations")
+		self.assertEqual(
+			flt(section_total.get(PARENT_COMPANY)), sum(flt(row.get(PARENT_COMPANY)) for row in section_rows)
+		)
