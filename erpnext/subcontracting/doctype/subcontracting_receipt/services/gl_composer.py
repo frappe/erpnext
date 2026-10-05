@@ -114,7 +114,7 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 							gl_entries=gl_entries,
 							account=item.expense_account,
 							cost_center=doc.cost_center or doc.get_company_default("cost_center"),
-							debit=item.qty * item.additional_cost_per_qty,
+							debit=flt(item.received_qty) * item.additional_cost_per_qty,
 							credit=0.0,
 							remarks=remarks,
 							against_account=None,

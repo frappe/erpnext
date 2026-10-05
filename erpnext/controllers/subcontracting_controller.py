@@ -1293,10 +1293,10 @@ class SubcontractingController(StockController):
 					if not item.get("secondary_item_type") and not item.get("valuation_type"):
 						item.additional_cost_per_qty = (
 							(item.amount * self.total_additional_costs) / total_amt
-						) / item.qty
+						) / self.get_qty_for_costing(item)
 			else:
 				total_qty = sum(
-					flt(item.qty)
+					self.get_qty_for_costing(item)
 					for item in self.get("items")
 					if not item.get("secondary_item_type") and not item.get("valuation_type")
 				)
@@ -1308,6 +1308,10 @@ class SubcontractingController(StockController):
 			for item in self.items:
 				if not item.get("secondary_item_type") and not item.get("valuation_type"):
 					item.additional_cost_per_qty = 0
+
+	def get_qty_for_costing(self, item):
+		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
+		return flt(item.qty) + flt(item.get("rejected_qty")) + flt(item.get("process_loss_qty"))
 
 	@frappe.whitelist()
 	def get_current_stock(self):

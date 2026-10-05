@@ -486,6 +486,48 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(additional_costs, 40)
 
+	def test_return_takes_back_additional_costs_of_rows_with_rejected_qty(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		additional_costs_account = "Expenses Included In Valuation - TCP1"
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": additional_costs_account,
+				"description": "Test Additional Costs",
+				"amount": 100,
+				"base_amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(
+			scr_name=scr.name, qty=-8, supplier_warehouse=scr.supplier_warehouse
+		)
+
+		additional_costs = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
+			if gle.account == additional_costs_account
+		)
+		self.assertEqual(additional_costs, 100)
+
 	def test_return_takes_back_additional_costs_allocated_by_amount(self):
 		service_items = [
 			{
@@ -579,6 +621,57 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(consumed_value, -1000)
 		self.assertEqual(gl_value, consumed_value)
+
+	def test_additional_and_landed_costs_with_rejected_qty(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "Test Additional Costs",
+				"amount": 100,
+				"base_amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		sle_filters = {"voucher_no": scr.name, "warehouse": "Stores - TCP1", "is_cancelled": 0}
+		self.assertEqual(
+			frappe.db.get_value("Stock Ledger Entry", sle_filters, "stock_value_difference"), 2100
+		)
+
+		make_landed_cost_voucher(
+			company=scr.company,
+			receipt_document_type="Subcontracting Receipt",
+			receipt_document=scr.name,
+			charges=100,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - TCP1",
+		)
+		self.assertEqual(
+			frappe.db.get_value("Stock Ledger Entry", sle_filters, "stock_value_difference"), 2200
+		)
 
 	def test_ledger_preview(self):
 		sco = get_subcontracting_order(
