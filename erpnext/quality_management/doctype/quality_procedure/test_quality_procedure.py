@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.utils.nestedset import NestedSetRecursionError, get_descendants_of
 
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -140,6 +141,30 @@ class TestQualityProcedure(ERPNextTestSuite):
 			frappe.db.get_value("Quality Procedure", child.name, "parent_quality_procedure"),
 			second_parent.name,
 		)
+
+	def test_processes_update_the_tree(self):
+		parent = create_procedure({"quality_procedure_name": "Test Tree Parent"})
+		child = create_procedure({"quality_procedure_name": "Test Tree Child"})
+
+		parent.append("processes", {"procedure": child.name})
+		parent.save()
+		self.assertEqual(get_descendants_of("Quality Procedure", parent.name), [child.name])
+
+		parent.processes = []
+		parent.save()
+		self.assertEqual(get_descendants_of("Quality Procedure", parent.name), [])
+
+	def test_procedure_cannot_be_its_own_ancestor(self):
+		procedure = create_procedure({"quality_procedure_name": "Test Self Parent"})
+		procedure.append("processes", {"procedure": procedure.name})
+		self.assertRaises(NestedSetRecursionError, procedure.save)
+
+		parent = create_procedure({"quality_procedure_name": "Test Loop Parent"})
+		child = create_procedure(
+			{"quality_procedure_name": "Test Loop Child", "parent_quality_procedure": parent.name}
+		)
+		child.append("processes", {"procedure": parent.name})
+		self.assertRaises(NestedSetRecursionError, child.save)
 
 
 def create_procedure(kwargs=None):
