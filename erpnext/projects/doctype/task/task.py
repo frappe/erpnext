@@ -222,6 +222,7 @@ class Task(NestedSet):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
+		self.update_previous_project()
 		self.unassign_todo()
 		self.remove_from_previous_parent_depends_on()
 		self.populate_depends_on()
@@ -251,6 +252,11 @@ class Task(NestedSet):
 	def update_project(self):
 		if self.project and not self.flags.from_project:
 			frappe.get_cached_doc("Project", self.project).update_project()
+
+	def update_previous_project(self):
+		previous_project = (self.get_doc_before_save() or frappe._dict()).get("project")
+		if previous_project and previous_project != self.project:
+			frappe.get_cached_doc("Project", previous_project).update_project()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check:

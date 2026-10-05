@@ -209,6 +209,23 @@ class TestTask(FrappeTestCase):
 			frappe.get_all("Task Depends On", filters={"parent": new_parent.name}, pluck="task"), [child.name]
 		)
 
+	def test_move_task_to_another_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		old_project = make_project({"project_name": "_Test Project Task Moved Out"})
+		new_project = make_project({"project_name": "_Test Project Task Moved In"})
+		completed_task = create_task("_Test Task Completed In Old Project", save=False)
+		completed_task.update({"project": old_project.name, "status": "Completed"})
+		completed_task.save()
+		moved_task = create_task("_Test Task Moved", save=False)
+		moved_task.project = old_project.name
+		moved_task.save()
+
+		moved_task.project = new_project.name
+		moved_task.save()
+
+		self.assertEqual(frappe.db.get_value("Project", old_project.name, "percent_complete"), 100)
+
 
 def create_task(
 	subject,
