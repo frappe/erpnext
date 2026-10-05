@@ -738,6 +738,26 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			],
 		)
 
+	def test_group_by_party_totals_all_ageing_buckets(self):
+		self.create_sales_invoice()
+		overdue = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		overdue.posting_date = overdue.due_date = add_days(today(), -170)
+		overdue.set_posting_time = 1
+		overdue.payment_schedule = []
+		overdue.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120, 150",
+			"ageing_based_on": "Due Date",
+			"group_by_party": True,
+			"party_type": "Customer",
+			"party": [self.customer],
+		}
+		party_total = next(row for row in execute(filters)[1] if row.get("bold") and row.get("party"))
+		self.assertEqual([party_total["range0"], party_total["range6"]], [100.0, 100.0])
+
 	def test_future_payments(self):
 		sr = self.create_sales_invoice(do_not_submit=True)
 		sr.is_return = 1

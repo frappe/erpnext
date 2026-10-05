@@ -230,11 +230,7 @@ class ReceivablePayableReport:
 			"paid",
 			"credit_note",
 			"outstanding",
-			"range1",
-			"range2",
-			"range3",
-			"range4",
-			"range5",
+			*[f"range{i}" for i in [0, *self.range_numbers]],
 			"future_amount",
 			"remaining_balance",
 		]
