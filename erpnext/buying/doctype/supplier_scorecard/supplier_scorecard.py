@@ -56,7 +56,7 @@ class SupplierScorecard(Document):
 		self.update_standing()
 
 	def on_update(self):
-		if make_all_scorecards(self.name) > 0:
+		if create_scorecard_periods(self) > 0:
 			self.save()
 
 	def validate_standings(self):
@@ -191,15 +191,19 @@ def refresh_scorecards():
 		as_dict=1,
 	)
 	for sc in scorecards:
-		# Check to see if any new scorecard periods are created
-		if make_all_scorecards(sc.name) > 0:
-			# Save the scorecard to update the score and standings
-			frappe.get_doc("Supplier Scorecard", sc.name).save()
+		make_all_scorecards(sc.name)
 
 
 @frappe.whitelist()
 def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
+	scp_count = create_scorecard_periods(sc)
+	if scp_count > 0:
+		sc.save()
+	return scp_count
+
+
+def create_scorecard_periods(sc):
 	supplier = frappe.get_doc("Supplier", sc.supplier)
 	supplier.check_permission("write")
 
@@ -212,8 +216,8 @@ def make_all_scorecards(docname: str):
 	last_end_date = todays
 
 	while (start_date < todays) and (end_date <= todays):
-		if not has_overlapping_period(docname, start_date, end_date):
-			period_card = make_supplier_scorecard(docname, None)
+		if not has_overlapping_period(sc.name, start_date, end_date):
+			period_card = make_supplier_scorecard(sc.name, None)
 			period_card.start_date = start_date
 			period_card.end_date = end_date
 			period_card.insert(ignore_permissions=True)
