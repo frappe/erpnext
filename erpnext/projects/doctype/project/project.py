@@ -88,6 +88,7 @@ class Project(Document):
 		self.onload()
 
 	def validate(self):
+		self.validate_project_template()
 		if not self.is_new():
 			self.copy_from_template()
 			self.control_access_for_project_users()
@@ -96,6 +97,14 @@ class Project(Document):
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
+
+	def validate_project_template(self):
+		if (
+			self.project_template
+			and self.has_value_changed("project_template")
+			and frappe.db.get_value("Project Template", self.project_template, "disabled")
+		):
+			frappe.throw(_("Project Template {0} is disabled").format(frappe.bold(self.project_template)))
 
 	def copy_from_template(self, trigger=None):
 		"""
