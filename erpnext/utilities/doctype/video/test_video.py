@@ -8,7 +8,7 @@ from unittest.mock import patch
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
-from erpnext.utilities.doctype.video.video import batch_update_youtube_data
+from erpnext.utilities.doctype.video.video import batch_update_youtube_data, get_id_from_url
 
 
 class FakeYouTubeApi:
@@ -58,6 +58,21 @@ class TestVideo(ERPNextTestSuite):
 		FakeYouTubeApi.fail = True
 		with patch("frappe.log_error"):
 			batch_update_youtube_data()
+
+	def test_video_id_from_url(self):
+		for url in (
+			"https://youtu.be/dQw4w9WgXcQ",
+			"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+			"https://www.youtube.com/watch?feature=share&v=dQw4w9WgXcQ",
+			"https://www.youtube.com/shorts/dQw4w9WgXcQ",
+			"https://www.youtube.com/live/dQw4w9WgXcQ",
+			"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+			"HTTPS://WWW.YOUTUBE.COM/watch?v=dQw4w9WgXcQ",
+		):
+			self.assertEqual(get_id_from_url(url), "dQw4w9WgXcQ", url)
+
+		for url in ("https://www.youtube.com/", "https://example.com/video.mp4"):
+			self.assertRaises(frappe.ValidationError, get_id_from_url, url)
 
 
 def make_video(title: str, url: str, provider: str = "YouTube"):

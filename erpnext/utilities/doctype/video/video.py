@@ -4,6 +4,7 @@
 
 import re
 from datetime import datetime
+from urllib.parse import parse_qs, urlparse
 
 import frappe
 from frappe import _
@@ -11,6 +12,9 @@ from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 from pyyoutube import Api
+
+YOUTUBE_DOMAINS = ("youtube.com", "youtu.be", "youtube-nocookie.com")
+YOUTUBE_VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}")
 
 
 class Video(Document):
@@ -113,9 +117,28 @@ def get_id_from_url(url: str):
 	if not isinstance(url, str):
 		frappe.throw(_("URL can only be a string"), title=_("Invalid URL"))
 
-	pattern = re.compile(r'[a-z\:\//\.]+(youtube|youtu)\.(com|be)/(watch\?v=|embed/|.+\?v=)?([^"&?\s]{11})?')
-	id = pattern.match(url)
-	return id.groups()[-1]
+	video_id = parse_youtube_video_id(url)
+	if not video_id:
+		frappe.throw(_("Could not find a YouTube video ID in the URL"), title=_("Invalid URL"))
+
+	return video_id
+
+
+def parse_youtube_video_id(url: str) -> str | None:
+	parsed = urlparse(url.strip() if "://" in url else f"https://{url.strip()}")
+	host = parsed.hostname or ""
+	if not any(host == domain or host.endswith(f".{domain}") for domain in YOUTUBE_DOMAINS):
+		return None
+
+	segments = [segment for segment in parsed.path.split("/") if segment]
+	if host.endswith("youtu.be"):
+		video_id = segments[0] if segments else None
+	elif len(segments) > 1 and segments[0] in ("embed", "shorts", "live", "v"):
+		video_id = segments[1]
+	else:
+		video_id = parse_qs(parsed.query).get("v", [None])[0]
+
+	return video_id if video_id and YOUTUBE_VIDEO_ID.fullmatch(video_id) else None
 
 
 @frappe.whitelist()
