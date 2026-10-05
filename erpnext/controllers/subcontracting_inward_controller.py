@@ -1006,17 +1006,7 @@ class SubcontractingInwardController:
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":
-			table = frappe.qb.DocType("Stock Reservation Entry")
-			query = (
-				frappe.qb.from_(table)
-				.select(table.name)
-				.where(
-					(table.docstatus == 1)
-					& (table.voucher_detail_no.isin([item.scio_detail for item in self.items]))
-				)
-			)
-			for sre in query.run(pluck="name"):
-				frappe.get_doc("Stock Reservation Entry", sre).cancel()
+			self.adjust_inward_reservations(release=True)
 
 	def remove_reference_for_additional_items(self):
 		if self.subcontracting_inward_order:
@@ -1066,98 +1056,99 @@ class SubcontractingInwardController:
 
 	def adjust_stock_reservation_entries_for_return(self):
 		if self.purpose == "Return Raw Material to Customer":
-			for item in self.items:
-				serial_list, batch_list = get_serial_batch_list_from_item(item)
+			self.adjust_inward_reservations(release=self._action == "submit")
 
-				if serial_list or batch_list:
-					table = frappe.qb.DocType("Stock Reservation Entry")
-					child_table = frappe.qb.DocType("Serial and Batch Entry")
-					query = (
-						frappe.qb.from_(table)
-						.join(child_table)
-						.on(table.name == child_table.parent)
-						.select(
-							table.name.as_("sre_name"),
-							child_table.name.as_("sbe_name"),
-							child_table.batch_no,
-							child_table.qty,
-							child_table.delivered_qty,
-						)
-						.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
+	def adjust_inward_reservations(self, release):
+		for item in self.items:
+			serial_list, batch_list = get_serial_batch_list_from_item(item)
+
+			if serial_list or batch_list:
+				table = frappe.qb.DocType("Stock Reservation Entry")
+				child_table = frappe.qb.DocType("Serial and Batch Entry")
+				query = (
+					frappe.qb.from_(table)
+					.join(child_table)
+					.on(table.name == child_table.parent)
+					.select(
+						table.name.as_("sre_name"),
+						child_table.name.as_("sbe_name"),
+						child_table.batch_no,
+						child_table.qty,
+						child_table.delivered_qty,
 					)
+					.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
+				)
+				if serial_list:
+					query = query.where(child_table.serial_no.isin(serial_list))
+				if batch_list:
+					query = query.where(child_table.batch_no.isin(batch_list))
+				result = query.run(as_dict=True)
+
+				qty_to_deliver = {row.sre_name: 0 for row in result}
+				consumed_qty = {batch: 0 for batch in batch_list}
+				for row in result:
 					if serial_list:
-						query = query.where(child_table.serial_no.isin(serial_list))
-					if batch_list:
-						query = query.where(child_table.batch_no.isin(batch_list))
-					result = query.run(as_dict=True)
+						frappe.get_doc("Serial and Batch Entry", row.sbe_name).db_set(
+							"delivered_qty", 1 if release else 0
+						)
+						qty_to_deliver[row.sre_name] += row.qty
+					elif batch_list and not serial_list:
+						sabe_qty = abs(
+							frappe.get_value(
+								"Serial and Batch Entry",
+								{"parent": item.serial_and_batch_bundle, "batch_no": row.batch_no},
+								"qty",
+							)
+						)
 
-					qty_to_deliver = {row.sre_name: 0 for row in result}
-					consumed_qty = {batch: 0 for batch in batch_list}
-					for row in result:
-						if serial_list:
-							frappe.get_doc("Serial and Batch Entry", row.sbe_name).db_set(
-								"delivered_qty", 1 if self._action == "submit" else 0
-							)
-							qty_to_deliver[row.sre_name] += row.qty
-						elif batch_list and not serial_list:
-							sabe_qty = abs(
-								frappe.get_value(
-									"Serial and Batch Entry",
-									{"parent": item.serial_and_batch_bundle, "batch_no": row.batch_no},
-									"qty",
-								)
-							)
-
-							open_qty = (
-								row.qty - row.delivered_qty if self._action == "submit" else row.delivered_qty
-							)
-							qty = min(open_qty, sabe_qty - consumed_qty[row.batch_no])
-							sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
-							sbe_doc.db_set(
-								"delivered_qty",
-								sbe_doc.delivered_qty + (qty if self._action == "submit" else -qty),
-							)
-							qty_to_deliver[row.sre_name] += qty
-							consumed_qty[row.batch_no] += qty
-
-					for sre_name, qty in qty_to_deliver.items():
-						sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
-						sre_doc.db_set(
+						open_qty = row.qty - row.delivered_qty if release else row.delivered_qty
+						qty = min(open_qty, sabe_qty - consumed_qty[row.batch_no])
+						sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
+						sbe_doc.db_set(
 							"delivered_qty",
-							sre_doc.delivered_qty + (qty if self._action == "submit" else -qty),
+							sbe_doc.delivered_qty + (qty if release else -qty),
 						)
-						sre_doc.update_status()
-						sre_doc.update_reserved_stock_in_bin()
-				else:
-					table = frappe.qb.DocType("Stock Reservation Entry")
-					query = (
-						frappe.qb.from_(table)
-						.select(
-							table.name,
-							(table.reserved_qty - table.delivered_qty).as_("qty"),
-						)
-						.where(
-							(table.docstatus == 1)
-							& (table.voucher_detail_no == item.scio_detail)
-							& (table.delivered_qty < table.reserved_qty)
-						)
-						.orderby(table.creation)
+						qty_to_deliver[row.sre_name] += qty
+						consumed_qty[row.batch_no] += qty
+
+				for sre_name, qty in qty_to_deliver.items():
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+					sre_doc.db_set(
+						"delivered_qty",
+						sre_doc.delivered_qty + (qty if release else -qty),
 					)
-					sre_list = query.run(as_dict=True)
+					sre_doc.update_status()
+					sre_doc.update_reserved_stock_in_bin()
+			else:
+				table = frappe.qb.DocType("Stock Reservation Entry")
+				query = (
+					frappe.qb.from_(table)
+					.select(
+						table.name,
+						(table.reserved_qty - table.delivered_qty).as_("qty"),
+					)
+					.where(
+						(table.docstatus == 1)
+						& (table.voucher_detail_no == item.scio_detail)
+						& (table.delivered_qty < table.reserved_qty)
+					)
+					.orderby(table.creation)
+				)
+				sre_list = query.run(as_dict=True)
 
-					voucher_qty = item.transfer_qty
-					for sre in sre_list:
-						qty = min(sre.qty, voucher_qty)
-						sre_doc = frappe.get_doc("Stock Reservation Entry", sre.name)
-						sre_doc.db_set(
-							"delivered_qty",
-							sre_doc.delivered_qty + (qty if self._action == "submit" else -qty),
-						)
-						sre_doc.update_status()
-						sre_doc.update_reserved_stock_in_bin()
-						voucher_qty -= qty
-						if voucher_qty <= 0:
-							break
+				voucher_qty = item.transfer_qty
+				for sre in sre_list:
+					qty = min(sre.qty, voucher_qty)
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre.name)
+					sre_doc.db_set(
+						"delivered_qty",
+						sre_doc.delivered_qty + (qty if release else -qty),
+					)
+					sre_doc.update_status()
+					sre_doc.update_reserved_stock_in_bin()
+					voucher_qty -= qty
+					if voucher_qty <= 0:
+						break
 
 	def update_inward_order_status(self):
 		if self.subcontracting_inward_order:

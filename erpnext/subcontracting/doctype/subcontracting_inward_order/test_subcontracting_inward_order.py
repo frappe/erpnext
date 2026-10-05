@@ -669,6 +669,26 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio = make_subcontracting_inward_order(so.name)
 		self.assertEqual(scio.items[0].qty, 18)
 
+	def test_receipt_cancel_keeps_other_receipt_reservation(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher,
+		)
+
+		so, scio = create_so_scio()
+		receipts = []
+		for qty in (2, 3):
+			scio.reload()
+			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			rm_in.items = [item for item in rm_in.items if item.item_code == "Basic RM"]
+			rm_in.items[0].qty = qty
+			rm_in.submit()
+			receipts.append(rm_in)
+
+		receipts[0].cancel()
+
+		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
+		self.assertEqual(reserved_qty.get(receipts[1].items[0].scio_detail), 3)
+
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	item_list = [{"item_code": service_item, "qty": 5, "fg_item": fg_item, "fg_item_qty": 5}]
