@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import today
 
+from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.customer_ledger_summary.customer_ledger_summary import execute
@@ -390,3 +391,21 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 					f"Field {field} does not match expected value. "
 					f"Expected: {expected_value}, Got: {actual_value}",
 				)
+
+	def test_several_group_cost_centers_include_all_their_children(self):
+		for group in ("_Test CLS Group A", "_Test CLS Group B"):
+			create_cost_center(cost_center_name=group, is_group=1)
+			create_cost_center(cost_center_name=f"{group} Child", parent_cost_center=f"{group} - _TC")
+			self.cost_center = f"{group} Child - _TC"
+			self.create_sales_invoice()
+
+		filters = {
+			"company": self.company,
+			"from_date": today(),
+			"to_date": today(),
+			"cost_center": ["_Test CLS Group A - _TC", "_Test CLS Group B - _TC"],
+		}
+
+		report = execute(filters)[1]
+
+		self.assertEqual([(row.party, row.invoiced_amount) for row in report], [(self.customer, 2000.0)])
