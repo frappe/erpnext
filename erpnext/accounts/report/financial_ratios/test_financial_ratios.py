@@ -4,7 +4,11 @@
 import frappe
 from frappe.utils import add_days, today
 
-from erpnext.accounts.report.financial_ratios.financial_ratios import execute, get_gl_data
+from erpnext.accounts.report.financial_ratios.financial_ratios import (
+	avg_ratio_balance,
+	execute,
+	get_gl_data,
+)
 from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -54,8 +58,33 @@ class TestFinancialRatios(ERPNextTestSuite):
 
 		self.assertEqual(self.get_total_income(filters), before)
 
-	def get_total_income(self, filters):
-		period_list = get_period_list(
+	def test_average_debtors_in_company_currency(self):
+		filters = self.get_report_filters()
+		period_key = self.get_period_list(filters)[0].key
+
+		def average_debtors():
+			return avg_ratio_balance("Receivable", self.get_period_list(filters), 2, filters)[period_key]
+
+		before = average_debtors()
+		journal_entry = frappe.new_doc("Journal Entry")
+		journal_entry.update({"posting_date": today(), "company": self.company, "multi_currency": 1})
+		journal_entry.append(
+			"accounts",
+			{
+				"account": "_Test Receivable USD - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer USD",
+				"exchange_rate": 80,
+				"debit_in_account_currency": 100,
+			},
+		)
+		journal_entry.append("accounts", {"account": "Sales - _TC", "credit_in_account_currency": 8000})
+		journal_entry.submit()
+
+		self.assertEqual(average_debtors() - before, 4000)
+
+	def get_period_list(self, filters):
+		return get_period_list(
 			filters.from_fiscal_year,
 			filters.to_fiscal_year,
 			filters.period_start_date,
@@ -64,6 +93,9 @@ class TestFinancialRatios(ERPNextTestSuite):
 			filters.periodicity,
 			company=filters.company,
 		)
+
+	def get_total_income(self, filters):
+		period_list = self.get_period_list(filters)
 		income = get_gl_data(filters, period_list, [])[2]
 		return next(row for row in income if row.get("account") and not row.get("parent_account"))[
 			period_list[0].key

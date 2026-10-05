@@ -274,11 +274,13 @@ def avg_ratio_balance(account_type, period_list, precision, filters):
 			date=closing_date,
 			company=filters.company,
 			account_type=account_type,
+			in_account_currency=False,
 		)
 		opening_balance = get_balance_on(
 			date=opening_date,
 			company=filters.company,
 			account_type=account_type,
+			in_account_currency=False,
 		)
 		avg_ratio[period["key"]] = flt((flt(closing_balance) + flt(opening_balance)) / 2, precision=precision)
 
