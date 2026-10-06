@@ -25,3 +25,37 @@ class TestQualityFeedback(ERPNextTestSuite):
 
 		feedback.delete()
 		template.delete()
+
+	def test_parameters_follow_template(self):
+		first = make_template("Test Template", ["Quality", "Delivery"])
+		second = make_template("Test Template 2", ["Packaging"])
+
+		made_up = frappe.get_doc(
+			doctype="Quality Feedback",
+			template=first.name,
+			parameters=[dict(parameter="Made up", rating="5")],
+		)
+		self.assertRaises(frappe.ValidationError, made_up.insert)
+
+		feedback = frappe.get_doc(doctype="Quality Feedback", template=first.name).insert()
+		feedback.template = second.name
+		self.assertRaises(frappe.ValidationError, feedback.save)
+
+		feedback.reload()
+		feedback.template = second.name
+		feedback.set_parameters()
+		feedback.save()
+		self.assertEqual([d.parameter for d in feedback.parameters], ["Packaging"])
+
+	def test_parameters_start_unrated(self):
+		template = make_template("Test Template", ["Quality"])
+		feedback = frappe.get_doc(doctype="Quality Feedback", template=template.name).insert()
+		self.assertFalse(feedback.parameters[0].rating)
+
+
+def make_template(name, parameters):
+	return frappe.get_doc(
+		doctype="Quality Feedback Template",
+		template=name,
+		parameters=[dict(parameter=parameter) for parameter in parameters],
+	).insert()
