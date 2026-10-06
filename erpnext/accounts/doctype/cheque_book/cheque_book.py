@@ -411,4 +411,4 @@ def cancel_cheque_payment(
 			"reason": reason,
 			"remarks": remarks,
 		}
-	).insert()
+	).insert().submit()

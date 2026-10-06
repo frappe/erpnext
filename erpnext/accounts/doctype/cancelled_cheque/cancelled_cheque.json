@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:{cheque_book}-{cheque_no}",
+ "autoname": "hash",
  "creation": "2026-09-17 12:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,7 +10,8 @@
   "column_break_reason",
   "reason",
   "payment_entry",
-  "remarks"
+  "remarks",
+  "amended_from"
  ],
  "fields": [
   {
@@ -20,8 +21,7 @@
    "in_standard_filter": 1,
    "label": "Cheque Book",
    "options": "Cheque Book",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "cheque_no",
@@ -29,8 +29,7 @@
    "in_list_view": 1,
    "label": "Cheque No",
    "length": 6,
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "column_break_reason",
@@ -57,17 +56,30 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cancelled Cheque",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-09-17 12:00:00.000000",
+ "modified": "2026-10-06 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancelled Cheque",
- "naming_rule": "Expression",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "email": 1,
    "export": 1,
@@ -76,6 +88,7 @@
    "report": 1,
    "role": "Accounts Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -87,10 +100,10 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

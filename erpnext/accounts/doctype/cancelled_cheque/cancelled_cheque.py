@@ -23,16 +23,21 @@ class CancelledCheque(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		amended_from: DF.Link | None
 		cheque_book: DF.Link
 		cheque_no: DF.Data
 		payment_entry: DF.Link | None
-		reason: DF.Data
+		reason: DF.Autocomplete
 		remarks: DF.SmallText | None
 	# end: auto-generated types
 
-	def before_insert(self):
-		# Runs before naming, so the name gets the padded number
+	def before_validate(self):
 		self.cheque_no = ChequeBook.format_cheque_no(self.cheque_no)
+
+	def get_invalid_links(self, is_submittable=False, link_value_cache=None):
+		invalid, cancelled = super().get_invalid_links(is_submittable, link_value_cache)
+		# This audit link intentionally points to a cancelled payment; validate checks its identity.
+		return invalid, [link for link in cancelled if link[0] != "payment_entry"]
 
 	def validate(self):
 		# Share the book lock with Payment Entry submission before checking whether the cheque is used.
@@ -52,6 +57,12 @@ class CancelledCheque(Document):
 			frappe.throw(
 				_("Cheque No {0} is used in {1}. Cancel the Payment Entry first.").format(
 					frappe.bold(self.cheque_no), get_link_to_form("Payment Entry", usage.source_name)
+				)
+			)
+		if usage and usage.source_type == self.doctype and usage.source_name != self.name:
+			frappe.throw(
+				_("Cheque No {0} is already marked as cancelled in {1}").format(
+					frappe.bold(self.cheque_no), get_link_to_form(self.doctype, usage.source_name)
 				)
 			)
 
@@ -75,18 +86,18 @@ class CancelledCheque(Document):
 					)
 				)
 
-	def on_update(self):
-		# Also keeps the displayed cancellation reason current when a record is edited.
+	def on_submit(self):
 		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
 		claim_cheque(book, self.cheque_no, self.doctype, self.name, self.reason)
 		book.advance_next_cheque_no(self.cheque_no)
 
-	def on_trash(self):
-		# Lock before removal so submission cannot race with freeing this cheque.
+	def before_cancel(self):
+		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
+
+	def on_cancel(self):
 		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
 		release_cheque(book, self.cheque_no, self.doctype, self.name)
+		book.advance_next_cheque_no(self.cheque_no, freed=True)
 
-	def after_delete(self):
-		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).advance_next_cheque_no(
-			self.cheque_no, freed=True
-		)
+	def on_trash(self):
+		frappe.throw(_("Cancelled Cheque records cannot be deleted. Cancel the record to reverse it."))

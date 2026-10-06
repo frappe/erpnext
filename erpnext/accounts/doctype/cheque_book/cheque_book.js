@@ -36,12 +36,7 @@ frappe.ui.form.on("Cheque Book", {
 
 		frm.add_custom_button(
 			__("Issue Cancel Cheque"),
-			() => {
-				const doc = frappe.model.get_new_doc("Cancelled Cheque");
-				doc.cheque_book = frm.doc.name;
-				// reloaded because cancelling a cheque can move Next Cheque No and finish the book
-				frappe.ui.form.make_quick_entry("Cancelled Cheque", () => frm.reload_doc(), null, doc);
-			},
+			() => frappe.new_doc("Cancelled Cheque", { cheque_book: frm.doc.name }),
 			__("Actions")
 		);
 
@@ -111,7 +106,7 @@ async function show_cheques(frm) {
 
 	frm.cancelled_cheques = make_list(frm, "cancelled_cheques_html", {
 		doctype: "Cancelled Cheque",
-		filters: { cheque_book: frm.doc.name },
+		filters: { cheque_book: frm.doc.name, docstatus: 1 },
 		fields: ["name", "cheque_no", "creation", "reason", "remarks", "payment_entry", "owner"],
 		order_by: "cheque_no asc",
 		empty_message: __("No cheque of this book is cancelled."),
