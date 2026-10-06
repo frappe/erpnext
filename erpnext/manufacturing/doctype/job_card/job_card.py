@@ -766,11 +766,8 @@ class JobCard(Document):
 				)
 
 			share = shares.get((d.item_code, d.operation), 1)
-			if share and (
-				self.get("operation") == d.operation
-				or self.operation_row_id == d.operation_row_id
-				or self.is_corrective_job_card
-			):
+			matches_row = doc.track_semi_finished_goods and self.operation_row_id == d.operation_row_id
+			if share and (self.get("operation") == d.operation or matches_row or self.is_corrective_job_card):
 				self.append(
 					"items",
 					{

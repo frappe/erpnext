@@ -3,7 +3,7 @@
 
 import functools
 import re
-from collections import deque
+from collections import Counter, deque
 from operator import itemgetter
 
 import frappe
@@ -293,6 +293,8 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
+		self.validate_item_operation_row_ids()
+		self.warn_items_of_repeated_operations()
 		self.calculate_cost()
 		self.update_exploded_items(save=False)
 		self.update_stock_qty()
@@ -1319,6 +1321,52 @@ class BOM(WebsiteGenerator):
 	def set_routing_operations(self):
 		if self.routing and self.with_operations and not self.operations:
 			self.get_routing()
+
+	def validate_item_operation_row_ids(self):
+		"""Fill an item's empty operation from its Operation Row No., and reject a row number that
+		points to a missing row or to another operation, as after operations are reordered."""
+		if self.track_semi_finished_goods or not self.with_operations:
+			return
+
+		operations = {row.idx: row.operation for row in self.operations}
+		for item in self.items:
+			if not item.operation_row_id:
+				continue
+
+			operation = operations.get(item.operation_row_id)
+			if not operation:
+				frappe.throw(
+					_(
+						"Row #{0}: Operation Row No. {1} does not match any row in the Operations table"
+					).format(item.idx, item.operation_row_id)
+				)
+
+			if item.operation and item.operation != operation:
+				frappe.throw(
+					_("Row #{0}: Operation Row No. {1} is operation {2}, not {3}").format(
+						item.idx, item.operation_row_id, bold(operation), bold(item.operation)
+					)
+				)
+			item.operation = operation
+
+	def warn_items_of_repeated_operations(self):
+		if self.track_semi_finished_goods or self.transfer_material_against != "Job Card":
+			return
+
+		operation_count = Counter(row.operation for row in self.operations)
+		rows = [
+			str(item.idx)
+			for item in self.items
+			if not item.operation_row_id and operation_count[item.operation] > 1
+		]
+		if rows:
+			frappe.msgprint(
+				_(
+					"Set Operation Row No. on rows {0}. Their operation is used more than once, so without it their materials go to the Job Card of every row with that operation."
+				).format(", ".join(rows)),
+				title=_("Operation Row No. Missing"),
+				indicator="orange",
+			)
 
 	def validate_operations(self):
 		if self.with_operations and not self.get("operations") and self.docstatus == 1:
