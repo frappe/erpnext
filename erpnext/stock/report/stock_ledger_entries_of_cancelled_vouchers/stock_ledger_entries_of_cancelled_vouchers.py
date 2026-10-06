@@ -12,9 +12,26 @@ def execute(filters: dict | None = None):
 	if not filters.company:
 		frappe.throw(_("Please select a Company"))
 
-	frappe.has_permission("Company", "read", filters.company, throw=True)
+	validate_company_permission(filters.company)
 
 	return get_columns(), get_data(filters)
+
+
+def validate_company_permission(company):
+	# Stock Manager has no read access on Company, so check the user permissions directly
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+
+	allowed_companies = [
+		d.doc
+		for d in get_user_permissions().get("Company", [])
+		if not d.applicable_for or d.applicable_for == "Stock Ledger Entry"
+	]
+
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(
+			_("You are not permitted to access Company {0}").format(frappe.bold(company)),
+			frappe.PermissionError,
+		)
 
 
 def get_columns() -> list[dict]:
@@ -166,7 +183,8 @@ def fix_uncancelled_entries(selected_rows: str | list):
 		if frappe.db.get_value(voucher_type, voucher_no, "docstatus") != 2:
 			continue
 
-		frappe.has_permission(voucher_type, "read", voucher_no, throw=True)
+		# the repair completes the cancellation of the voucher
+		frappe.has_permission(voucher_type, "cancel", voucher_no, throw=True)
 
 		fix_voucher(voucher_type, voucher_no)
 

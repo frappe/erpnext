@@ -103,26 +103,38 @@ class TestStockLedgerEntriesOfCancelledVouchers(FrappeTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-	def test_fix_checks_voucher_permission(self):
-		from frappe.permissions import add_user_permission
-
+	def test_stock_manager_can_run_report_and_fix(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		entry = make_stock_entry(
 			item_code=item, qty=5, rate=100, to_warehouse="Stores - _TC", posting_date="2026-06-01"
 		)
 		entry.cancel()
 
-		user = "sle-cancelled-voucher@example.com"
-		if not frappe.db.exists("User", user):
-			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "SLE", "send_welcome_email": 0}
-			).insert(ignore_permissions=True)
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name, "actual_qty": 5})
+		frappe.db.set_value("Stock Ledger Entry", sle, "is_cancelled", 0)
 
-		frappe.get_doc("User", user).add_roles("Stock Manager")
-		add_user_permission("Company", "_Test Company 1", user)
-
-		frappe.set_user(user)
+		frappe.set_user(make_stock_manager("sle-cancelled-voucher-sm@example.com"))
 		try:
+			rows = [d for d in self.run_report() if d.voucher_no == entry.name]
+			self.assertEqual([d.name for d in rows], [sle])
+			fix_uncancelled_entries(rows)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle, "is_cancelled"), 1)
+
+	def test_company_user_permission(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		entry = make_stock_entry(
+			item_code=item, qty=5, rate=100, to_warehouse="Stores - _TC", posting_date="2026-06-01"
+		)
+		entry.cancel()
+
+		frappe.set_user(
+			make_stock_manager("sle-cancelled-voucher-restricted@example.com", company="_Test Company 1")
+		)
+		try:
+			self.assertRaises(frappe.PermissionError, self.run_report)
 			self.assertRaises(
 				frappe.PermissionError,
 				fix_uncancelled_entries,
@@ -133,3 +145,18 @@ class TestStockLedgerEntriesOfCancelledVouchers(FrappeTestCase):
 
 	def test_company_is_mandatory(self):
 		self.assertRaises(frappe.ValidationError, execute, frappe._dict())
+
+
+def make_stock_manager(user, company=None):
+	from frappe.permissions import add_user_permission
+
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{"doctype": "User", "email": user, "first_name": "Stock Manager", "send_welcome_email": 0}
+		).insert(ignore_permissions=True)
+
+	frappe.get_doc("User", user).add_roles("Stock Manager")
+	if company:
+		add_user_permission("Company", company, user)
+
+	return user
