@@ -1367,11 +1367,12 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	return target_doc
 
 
-def get_qty_net_of_returns(so_item) -> float:
+def get_qty_net_of_returns(so_item, credit_note_returned_qty: float = 0) -> float:
 	"""Return the ordered quantity billable after returns and re-deliveries."""
 	qty = flt(so_item.qty)
+	returned_qty = flt(so_item.returned_qty) - flt(credit_note_returned_qty)
 
-	return min(qty, max(qty - flt(so_item.returned_qty), flt(so_item.delivered_qty)))
+	return min(qty, max(qty - returned_qty, flt(so_item.delivered_qty)))
 
 
 @frappe.whitelist()
@@ -1388,7 +1389,7 @@ def make_sales_invoice(
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
-	billed_qty_by_item = None
+	invoiced_qty_by_item = None
 	pending_qty_by_item = {}
 	amount_allowance_by_item = {}
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
@@ -1407,38 +1408,49 @@ def make_sales_invoice(
 		allowance = amount_allowance_by_item[source.item_code]
 		return abs(flt(source.billed_amt)) < abs(flt(source.amount)) * (1 + allowance / 100)
 
-	def get_billed_qty_by_item():
-		nonlocal billed_qty_by_item
+	def get_invoiced_qty_by_item():
+		nonlocal invoiced_qty_by_item
 
-		if billed_qty_by_item is None:
+		if invoiced_qty_by_item is None:
+			invoice = frappe.qb.DocType("Sales Invoice")
 			invoice_item = frappe.qb.DocType("Sales Invoice Item")
 			sales_order_item = frappe.qb.DocType("Sales Order Item")
+			credit_note_qty = (
+				Case().when(get_credit_note_return_criterion(invoice), -invoice_item.qty).else_(0)
+			)
 			rows = (
 				frappe.qb.from_(invoice_item)
 				.inner_join(sales_order_item)
 				.on(invoice_item.so_detail == sales_order_item.name)
-				.select(invoice_item.so_detail, Sum(invoice_item.qty).as_("qty"))
+				.inner_join(invoice)
+				.on(invoice.name == invoice_item.parent)
+				.select(
+					invoice_item.so_detail,
+					Sum(invoice_item.qty).as_("billed_qty"),
+					Sum(credit_note_qty).as_("credit_note_returned_qty"),
+				)
 				.where((invoice_item.docstatus == 1) & (sales_order_item.parent == source_name))
 				.groupby(invoice_item.so_detail)
 			).run(as_dict=True)
-			billed_qty_by_item = {row.so_detail: flt(row.qty) for row in rows}
+			invoiced_qty_by_item = {row.so_detail: row for row in rows}
 
-		return billed_qty_by_item
+		return invoiced_qty_by_item
 
 	def get_pending_qty(source):
 		if source.name not in pending_qty_by_item:
-			billable_qty = get_qty_net_of_returns(source)
-			billable_qty -= get_billed_qty_by_item().get(source.name, 0)
+			invoiced = get_invoiced_qty_by_item().get(source.name, frappe._dict())
+			billable_qty = get_qty_net_of_returns(source, invoiced.credit_note_returned_qty)
+			billable_qty -= flt(invoiced.billed_qty)
 			billable_qty -= mapped_qty_by_item.get(source.name, 0)
 			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
 		return pending_qty_by_item[source.name]
 
 	def is_qty_billed_below_amount(source):
-		billed_qty = get_billed_qty_by_item().get(source.name, 0)
+		invoiced = get_invoiced_qty_by_item().get(source.name, frappe._dict())
 		return (
 			source.name not in mapped_qty_by_item
-			and flt(flt(source.qty) - billed_qty, source.precision("qty")) <= 0
+			and flt(flt(source.qty) - flt(invoiced.billed_qty), source.precision("qty")) <= 0
 			and abs(flt(source.billed_amt)) < abs(flt(source.amount))
 		)
 
@@ -2233,6 +2245,15 @@ def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 	return target_doc
 
 
+def get_credit_note_return_criterion(invoice):
+	"""Match return invoices that reverse both the delivery and the billing of Sales Order rows."""
+	return (
+		(invoice.is_return == 1)
+		& (invoice.update_stock == 1)
+		& (invoice.update_billed_amount_in_sales_order == 1)
+	)
+
+
 def get_billed_qty_query(sales_order_item):
 	"""Return the qty billed against a Sales Order Item by submitted Sales Invoices."""
 	invoice_item = qb.DocType("Sales Invoice Item")
@@ -2245,10 +2266,25 @@ def get_billed_qty_query(sales_order_item):
 
 def get_pending_qty_criterion(sales_order_item, billed_qty):
 	"""Mirror the mapper's pending quantity check."""
+	invoice = qb.DocType("Sales Invoice")
+	invoice_item = qb.DocType("Sales Invoice Item")
+	credit_note_returned_qty = (
+		qb.from_(invoice_item)
+		.inner_join(invoice)
+		.on(invoice.name == invoice_item.parent)
+		.select(IfNull(Sum(-invoice_item.qty), 0))
+		.where(
+			(invoice_item.docstatus == 1)
+			& (invoice_item.so_detail == sales_order_item.name)
+			& get_credit_note_return_criterion(invoice)
+		)
+	)
+	returned_qty = sales_order_item.returned_qty - credit_note_returned_qty
+
 	qty_precision = frappe.get_precision("Sales Order Item", "qty")
 	has_unbilled_ordered_qty = Round(sales_order_item.qty - billed_qty, qty_precision) > 0
 	has_unbilled_delivered_qty = (
-		Round(sales_order_item.qty - sales_order_item.returned_qty - billed_qty, qty_precision) > 0
+		Round(sales_order_item.qty - returned_qty - billed_qty, qty_precision) > 0
 	) | (Round(sales_order_item.delivered_qty - billed_qty, qty_precision) > 0)
 
 	return has_unbilled_ordered_qty & has_unbilled_delivered_qty
