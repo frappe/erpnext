@@ -40,6 +40,22 @@ class TestInactiveSalesItems(ERPNextTestSuite):
 
 		self.assertNotIn(item, [row["item"] for row in data])
 
+	def test_auditor_can_run_report_for_group_territory(self):
+		item = make_item("_Test Inactive Sales Item Auditor").name
+		auditor = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test_inactive_sales_auditor@example.com",
+				"first_name": "Auditor",
+				"roles": [{"role": "Auditor"}],
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(auditor.name):
+			data = self.run_report(territory="All Territories")
+
+		self.assertIn(item, [row["item"] for row in data])
+
 	def run_report(self, **filters) -> list[dict]:
 		return execute(frappe._dict(based_on="Sales Invoice", days=30, **filters))[1]
 
