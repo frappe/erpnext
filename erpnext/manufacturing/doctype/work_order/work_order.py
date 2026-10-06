@@ -1260,11 +1260,14 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
 			)
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
-		data = query.run(as_dict=1) or []
-		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		# an alternative item transferred in place of a required item is credited to the required item
+		transferred_items = frappe._dict()
+		for d in query.run(as_dict=1) or []:
+			key = d.original_item or d.item_code
+			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
 
 		for row in self.required_items:
 			row.db_set(
@@ -1354,8 +1357,8 @@ class WorkOrder(Document):
 						AND entry.docstatus = 1
 						AND detail.parent = entry.name
 						AND detail.s_warehouse IS NOT null
-						AND (detail.item_code = %(item)s
-							OR detail.original_item = %(item)s)
+						AND (detail.original_item = %(item)s
+							OR (IFNULL(detail.original_item, '') = '' AND detail.item_code = %(item)s))
 				""",
 				{"name": self.name, "item": item.item_code},
 			)[0][0]
