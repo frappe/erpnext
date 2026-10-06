@@ -168,6 +168,22 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "completed_on"), getdate())
 
+	def test_parent_task_must_be_in_the_same_project(self):
+		other_project = frappe.get_doc(
+			doctype="Project", project_name="_Test Parent Task Project", company="_Test Company"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Other Project Group", project=other_project.name, is_group=1
+		).insert()
+
+		child_task = create_task("_Test Child In Another Project", parent_task=group.name, save=False)
+		self.assertRaises(frappe.ValidationError, child_task.save)
+
+		child_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group.name
+		).insert()
+		self.assertEqual(child_without_project.project, other_project.name)
+
 
 def create_task(
 	subject,
