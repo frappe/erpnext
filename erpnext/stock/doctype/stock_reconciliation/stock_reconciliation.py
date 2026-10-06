@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
 from datetime import timedelta
 
 import frappe
@@ -124,6 +125,9 @@ class StockReconciliation(StockController):
 		self.validate_expense_account()
 		AdjustmentEntry(self).validate()
 
+		if self._action == "submit":
+			self.validate_reserved_stock()
+
 	def on_update(self):
 		super().on_update()
 		self.set_serial_and_batch_bundle(ignore_validate=True)
@@ -223,6 +227,7 @@ class StockReconciliation(StockController):
 		)
 
 		if self.purpose == ADJUSTMENT_ENTRY:
+			self.validate_reserved_stock()
 			AdjustmentEntry(self).cancel()
 			self.make_gl_entries_on_cancel()
 			self.repost_future_sle_and_gle()
@@ -903,12 +908,9 @@ class StockReconciliation(StockController):
 		)
 
 		item_code_list, warehouse_list = [], []
-		for item in self.items:
-			if item.qty == item.current_qty:
-				continue
-
-			item_code_list.append(item.item_code)
-			warehouse_list.append(item.warehouse)
+		for item_code, warehouse in self.get_item_warehouses_changing_qty():
+			item_code_list.append(item_code)
+			warehouse_list.append(warehouse)
 
 		sre_reserved_qty_details = get_sre_reserved_qty_details(item_code_list, warehouse_list)
 
@@ -937,6 +939,18 @@ class StockReconciliation(StockController):
 				msg,
 				title=_("Stock Reservation"),
 			)
+
+	def get_item_warehouses_changing_qty(self) -> list[tuple[str, str]]:
+		if self.purpose != ADJUSTMENT_ENTRY:
+			return [(item.item_code, item.warehouse) for item in self.items if item.qty != item.current_qty]
+
+		# an Adjustment Entry spreads an item-warehouse over several rows, with the qty the ledger
+		# held on the first one
+		qty_change = defaultdict(float)
+		for item in self.items:
+			qty_change[(item.item_code, item.warehouse)] += flt(item.qty) - flt(item.current_qty)
+
+		return [key for key, change in qty_change.items() if abs(change) > 1e-9]
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		"""find difference between current and expected entries

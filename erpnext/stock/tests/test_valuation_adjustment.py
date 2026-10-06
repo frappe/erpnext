@@ -12,6 +12,8 @@ set right twice, in separate tests:
   year as it was filed and sets stock and accounts right from its date on.
 """
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, add_to_date, flt, getdate, nowdate
 
@@ -23,6 +25,9 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
+from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.test_stock_ledger_entries_of_cancelled_vouchers import (
+	make_stock_manager,
+)
 from erpnext.stock.report.stock_valuation_comparison.stock_valuation_comparison import (
 	SHOW_ALL_DIFFERENCES,
 	execute,
@@ -702,6 +707,60 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 			batch_no=batch_no,
 			posting_date=last_year(10),
 		)
+
+	def test_reserved_stock_blocks_an_adjustment_that_changes_qty(self):
+		item = self.make_wrong_balance_qty()
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
+
+		# the ledger holds 7 and the adjustment sets 6, which reserved stock may not allow
+		with patch_reserved_qty({(item, WAREHOUSE): 1}):
+			self.assertRaises(frappe.ValidationError, adjustment.submit)
+
+	def test_reserved_stock_does_not_block_an_adjustment_of_value_alone(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
+
+		with patch_reserved_qty({(item, WAREHOUSE): 1}) as reserved_qty:
+			adjustment.submit()
+
+		reserved_qty.assert_called_once_with([], [])
+
+
+class TestPermissions(ValuationFixTestCase):
+	def test_company_user_permission(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		differences = self.get_differences(item)
+
+		frappe.set_user(make_stock_manager("svc-restricted@example.com", company="_Test Company 1"))
+		try:
+			self.assertRaises(frappe.PermissionError, self.run_report, item)
+			self.assertRaises(frappe.PermissionError, get_repost_preview, COMPANY, differences)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_adjustment_entry,
+				COMPANY,
+				differences,
+				get_adjustment_date(),
+				"00:00:00",
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+
+def patch_reserved_qty(reserved_qty: dict):
+	"""Stock reserved for the item-warehouses, as reservations would leave it."""
+
+	def get_reserved_qty(item_codes, warehouses):
+		return {
+			key: qty for key, qty in reserved_qty.items() if key[0] in item_codes and key[1] in warehouses
+		}
+
+	return patch(
+		"erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.get_sre_reserved_qty_for_items_and_warehouses",
+		side_effect=get_reserved_qty,
+	)
 
 
 class TestRepost(ValuationFixTestCase):

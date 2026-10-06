@@ -17,6 +17,10 @@ from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.expected_valuation import iterate_expected_valuations
+from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.stock_ledger_entries_of_cancelled_vouchers import (
+	get_allowed_values,
+	validate_company_permission,
+)
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.stock.valuation_adjustment import get_adjusted_until
 from erpnext.stock.valuation_adjustment import make_adjustment_entry as make_draft_adjustment_entry
@@ -43,6 +47,8 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	if not filters.company:
 		frappe.throw(_("Please select a Company"))
+
+	validate_company_permission(filters.company)
 
 	return get_columns(), get_data(filters)
 
@@ -194,6 +200,11 @@ def get_item_warehouses(filters) -> list[dict]:
 	if filters.warehouse:
 		parent = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=True)
 		query = query.where((warehouse.lft >= parent.lft) & (warehouse.rgt <= parent.rgt))
+
+	allowed_values = get_allowed_values()
+	for field in ("item_code", "warehouse"):
+		if allowed_values.get(field):
+			query = query.where(bin[field].isin(allowed_values[field]))
 
 	return query.run(as_dict=True)
 
@@ -388,10 +399,18 @@ def get_differences_to_fix(company: str, stock_ledger_entries) -> dict[tuple[str
 	if not stock_ledger_entries:
 		frappe.throw(_("Select the differences to fix."))
 
+	validate_company_permission(company)
+
+	# only the entries of the items and warehouses the user is permitted
+	filters = {"name": ("in", stock_ledger_entries), "company": company, "is_cancelled": 0}
+	for field, values in get_allowed_values().items():
+		if field in ("item_code", "warehouse"):
+			filters[field] = ("in", values)
+
 	first_differences = {}
 	for entry in frappe.get_all(
 		"Stock Ledger Entry",
-		filters={"name": ("in", stock_ledger_entries), "company": company, "is_cancelled": 0},
+		filters=filters,
 		fields=["name", "item_code", "warehouse", "posting_date", "posting_time", "posting_datetime"],
 		order_by="posting_datetime asc, creation asc",
 	):
