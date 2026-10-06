@@ -185,6 +185,66 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo = make_work_order(bom_no=bom_for_two_cars.name, item=car, qty=2, company="_Test Company")
 		self.assertEqual([row.qty_to_produce for row in wo.operations], [4, 2])
 
+		batch_bom = frappe.copy_doc(bom)
+		batch_bom.is_default = 0
+		batch_bom.operations[0].batch_size = 4
+		batch_bom.insert()
+		batch_bom.submit()
+		wheel_operation = frappe.get_doc("Operation", "_Test WO Make Wheels")
+		wheel_operation.create_job_card_based_on_batch_size = 1
+		wheel_operation.save()
+		wo = make_work_order(bom_no=batch_bom.name, item=car, qty=2, company="_Test Company")
+		self.assertEqual(wo.operations[0].qty_to_produce, 8)
+		self.assertEqual(wo.operations[0].time_in_mins, 120)
+
+	def test_exploded_semi_finished_batch_time_uses_output_qty(self):
+		rm_item, intermediate, sub_assembly, fg_item = (make_item().name for _ in range(4))
+		operation, workstation = make_review_operation()
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+		sub_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			quantity=2,
+			operations=[
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"time_in_mins": 60,
+					"hour_rate": 600,
+					"batch_size": 4,
+					"finished_good": intermediate,
+					"finished_good_qty": 4,
+				},
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"time_in_mins": 60,
+					"finished_good": sub_assembly,
+					"finished_good_qty": 2,
+					"is_final_finished_good": 1,
+				},
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": sub_assembly, "qty": 2, "bom_no": sub_bom.name}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+		)
+		wo = frappe.new_doc(
+			"Work Order",
+			company="_Test Company",
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=3,
+			use_multi_level_bom=1,
+			track_semi_finished_goods=1,
+		)
+		wo.set_work_order_operations()
+		self.assertEqual(wo.operations[0].qty_to_produce, 12)
+		self.assertEqual(wo.operations[1].qty_to_produce, 6)
+		self.assertEqual(wo.operations[0].time_in_mins, 180)
+		self.assertEqual(wo.operations[0].planned_operating_cost, 1800)
+
 	def test_sfg_target_recalculated_after_quantity_edit(self):
 		wo = make_sfg_review_work_order(output_qty=1, final_qty=3, qty=1, submit=False)
 		self.assertEqual(flt(wo.operations[0].qty_to_produce, 3), 0.333)
@@ -199,6 +259,13 @@ class TestWorkOrder(ERPNextTestSuite):
 			),
 			[1, 3],
 		)
+
+	def test_sfg_sequence_rounds_converted_quantity(self):
+		wo = make_sfg_review_work_order(output_qty=7, final_qty=100)
+		first, last = get_sfg_review_job_cards(wo)
+		complete_sfg_review_job_card(first, 7, manufacture=True)
+		self.assertEqual(last.get_max_completable_qty(), 100)
+		complete_sfg_review_job_card(last, 100)
 
 	def test_sfg_partial_production_can_continue(self):
 		wo = make_sfg_review_work_order(output_qty=2, final_qty=8, batch_size=1)
@@ -260,6 +327,17 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.save()
 		self.assertEqual([row.qty_to_produce for row in wo.operations], [8, 2])
 		self.assertEqual(wo.operations[0].time_in_mins, time)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 0})
+	def test_sfg_batch_schedule_uses_job_card_time(self):
+		wo = make_sfg_review_work_order(batch_size=1)
+		cards = get_sfg_review_job_cards(wo)
+		self.assertEqual(len(cards), 5)
+		self.assertEqual([card.time_required for card in cards], [60] * 5)
+		self.assertEqual(
+			sum(row.time_in_mins for card in cards[:4] for row in card.scheduled_time_logs),
+			wo.operations[0].time_in_mins,
+		)
 
 	def check_planned_qty(self):
 		planned0 = (

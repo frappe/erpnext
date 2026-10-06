@@ -712,7 +712,7 @@ class JobCard(Document):
 		return time_slot
 
 	def schedule_time_logs(self, row):
-		row.remaining_time_in_mins = row.time_in_mins
+		row.remaining_time_in_mins = self.time_required
 		while row.remaining_time_in_mins > 0:
 			slot_end = self.place_row_start(row)
 			if not slot_end:
@@ -793,11 +793,8 @@ class JobCard(Document):
 			self.validate_overlap_for_workstation(args, row)
 
 	def schedule_without_working_hours(self, row):
-		if get_datetime(row.planned_end_time) <= get_datetime(row.planned_start_time):
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.time_in_mins)
-			row.remaining_time_in_mins = 0.0
-		else:
-			row.remaining_time_in_mins -= time_diff_in_minutes(row.planned_end_time, row.planned_start_time)
+		row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		row.remaining_time_in_mins = 0.0
 
 		self.update_time_logs(row)
 
@@ -1776,6 +1773,10 @@ class JobCard(Document):
 			return None
 
 		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
+		current_target = self.get_operation_target_qty()
+		if not current_target:
+			return None
+
 		min_completed_qty = min(
 			self.get_qty_in_operation_units(row.get(qty_field), row) for row in previous_operations
 		)
@@ -1819,8 +1820,14 @@ class JobCard(Document):
 	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
 		manufactured_qty = flt(row.manufactured_qty)
 		current_target = self.get_operation_target_qty()
-		previous_target = flt(row.qty_to_produce) or current_target
-		current_qty_in_previous_units = current_operation_qty * previous_target / current_target
+		previous_target = flt(row.qty_to_produce)
+		current_qty_in_previous_units = current_operation_qty
+		if current_target and previous_target:
+			current_qty_in_previous_units *= previous_target / current_target
+
+		current_qty_in_previous_units = flt(
+			current_qty_in_previous_units, self.precision("total_completed_qty")
+		)
 
 		if not manufactured_qty:
 			frappe.throw(
