@@ -141,7 +141,7 @@ class StockEntryDetail(Document):
 				flt(self.qty) * flt(self.conversion_factor), self.precision("transfer_qty")
 			)
 
-		if purpose == "Subcontracting Delivery":
+		if purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
 			self.expense_account = frappe.get_value("Company", company, "default_expense_account")
 
 	def validate_expense_account(self, is_opening, purpose):
@@ -178,7 +178,7 @@ class StockEntryDetail(Document):
 			)
 
 		if (
-			purpose not in ["Material Issue", "Subcontracting Delivery"]
+			purpose not in ["Material Issue", "Subcontracting Delivery", "Subcontracting Return"]
 			and acc_details.account_type == "Cost of Goods Sold"
 		):
 			frappe.msgprint(

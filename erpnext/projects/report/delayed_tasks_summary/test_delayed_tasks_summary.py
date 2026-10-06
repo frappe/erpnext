@@ -41,3 +41,15 @@ class TestDelayedTasksSummary(ERPNextTestSuite):
 
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[1].get(key), data.get(key))
+
+	def test_cancelled_and_template_tasks_are_excluded(self):
+		cancelled = create_task("_Test Task Cancelled", add_days(nowdate(), -10), add_days(nowdate(), -5))
+		cancelled.status = "Cancelled"
+		cancelled.save()
+		template = create_task(
+			"_Test Task Template", add_days(nowdate(), -10), add_days(nowdate(), -5), is_template=1
+		)
+
+		tasks = {row.name for row in execute(frappe._dict())[1]}
+		self.assertNotIn(cancelled.name, tasks)
+		self.assertNotIn(template.name, tasks)

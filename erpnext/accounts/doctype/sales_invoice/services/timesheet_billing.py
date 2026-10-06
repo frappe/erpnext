@@ -106,6 +106,7 @@ class TimesheetBillingService:
 			not doc.is_return
 			and not doc.timesheets
 			and doc.project
+			and doc.has_value_changed("project")
 			and frappe.db.get_single_value("Projects Settings", "fetch_timesheet_in_sales_invoice")
 		):
 			self.add_timesheet_data()
