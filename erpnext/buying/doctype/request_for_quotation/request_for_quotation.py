@@ -266,7 +266,7 @@ class RequestforQuotation(BuyingController):
 
 	def update_user_in_supplier(self, supplier, user):
 		"""Update user in Supplier."""
-		if not frappe.db.exists("Portal User", {"parent": supplier, "user": user}):
+		if not frappe.db.exists("Portal User", {"parenttype": "Supplier", "parent": supplier, "user": user}):
 			supplier_doc = frappe.get_doc("Supplier", supplier)
 			supplier_doc.append(
 				"portal_users",
@@ -493,7 +493,9 @@ def create_supplier_quotation(doc: str | Document | dict):
 		doc = json.loads(doc)
 	supplier = doc.get("supplier")
 
-	if frappe.session.user not in frappe.get_all("Portal User", {"parent": supplier}, pluck="user"):
+	if frappe.session.user not in frappe.get_all(
+		"Portal User", {"parenttype": "Supplier", "parent": supplier}, pluck="user"
+	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 	validate_existing_supplier_quotation(supplier, doc.get("items"))
