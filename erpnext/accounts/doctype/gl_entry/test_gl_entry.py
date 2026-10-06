@@ -5,6 +5,9 @@ import unittest
 import frappe
 from frappe.model.naming import parse_naming_series
 
+from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
+	set_amount_in_reporting_currency,
+)
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -140,3 +143,24 @@ class TestGLEntry(ERPNextTestSuite):
 
 		jv.save().submit()
 		self.assertEqual(1, jv.docstatus)
+
+	def test_no_reporting_currency_conversion_without_reporting_currency(self):
+		company = "_Test Company"
+		frappe.db.set_value("Company", company, "reporting_currency", None)
+		frappe.clear_document_cache("Company", company)
+		self.addCleanup(frappe.clear_document_cache, "Company", company)
+
+		je = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC", "_Test Bank - _TC", 100, submit=True
+		)
+		exchange_rates = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Journal Entry", "voucher_no": je.name},
+			pluck="reporting_currency_exchange_rate",
+		)
+		self.assertTrue(exchange_rates)
+		self.assertFalse(any(exchange_rates))
+
+		closing_entry = frappe._dict(debit=100, credit=0)
+		set_amount_in_reporting_currency(closing_entry, company, je.posting_date)
+		self.assertEqual(closing_entry, {"debit": 100, "credit": 0})
