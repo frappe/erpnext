@@ -329,7 +329,8 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.track_semi_finished_goods ==1",
+   "depends_on": "eval:parent.with_operations == 1",
+   "description": "Row number of the operation that consumes this item. Set it when the same operation is used more than once.",
    "fieldname": "operation_row_id",
    "fieldtype": "Int",
    "label": "Operation ID"
@@ -378,7 +379,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-23 16:10:42.455422",
+ "modified": "2026-10-06 16:23:37.817685",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

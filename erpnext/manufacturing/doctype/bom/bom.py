@@ -327,6 +327,7 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
+		self.set_item_operations_from_row_id()
 		self.calculate_cost()
 		self.update_exploded_items(save=False)
 		self.update_stock_qty()
@@ -1104,6 +1105,23 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				self._validate_operation_row(d)
 
+	def set_item_operations_from_row_id(self):
+		if self.track_semi_finished_goods or not self.with_operations:
+			return
+
+		operations = {row.idx: row.operation for row in self.operations}
+		for item in self.items:
+			if not item.operation_row_id:
+				continue
+
+			if item.operation_row_id not in operations:
+				frappe.throw(
+					_("Row #{0}: Operation ID {1} does not match any row in the Operations table").format(
+						item.idx, item.operation_row_id
+					)
+				)
+			item.operation = operations[item.operation_row_id]
+
 	def _validate_operation_row(self, d):
 		if not d.description:
 			d.description = frappe.db.get_value("Operation", d.operation, "description")
@@ -1591,7 +1609,12 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 	if track_semi_finished_goods:
 		group_by = [t.bom_item.item_code, t.bom_item.operation_row_id, t.item_doc.stock_uom]
 	else:
-		group_by = [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
+		group_by = [
+			t.bom_item.item_code,
+			t.item_doc.stock_uom,
+			t.bom_item.operation,
+			t.bom_item.operation_row_id,
+		]
 	group_by += [t.bom_item.bom_no, t.bom_item.is_phantom_item]
 
 	return query, group_by
@@ -1606,7 +1629,7 @@ def _add_bom_item_to_dict(item_dict, item, company, opts):
 		key = (item.item_code, item.operation_row_id)
 
 	if item.operation:
-		key = (item.item_code, item.operation)
+		key = (item.item_code, item.operation, item.operation_row_id)
 
 	stock_qty = item.pop("stock_qty")
 	if item.get("is_phantom_item"):
