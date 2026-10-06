@@ -208,7 +208,10 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 	def test_maintenance_manager_can_submit_schedule_with_serials(self):
 		item_code = "_Test Serial Item"
 		make_serial_item_with_serial(self, item_code)
-		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		deliver_serial_nos(item_code, ["TEST001"])
+		ms = make_maintenance_schedule(
+			item_code=item_code, serial_no="TEST001", start_date=add_days(today(), 1)
+		)
 		maintenance_manager = make_fenced_user("schedule-serial-manager@example.com", ["Maintenance Manager"])
 
 		with as_user(maintenance_manager):

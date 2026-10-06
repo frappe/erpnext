@@ -93,14 +93,14 @@ class TestTimesheet(ERPNextTestSuite):
 		log_time().cancel()
 		self.assertEqual(task_status(), "Open")
 
-		log_time(completed=1)
+		completed = log_time(completed=1)
 		later = log_time()
 		self.assertEqual(task_status(), "Completed")
 		later.cancel()
 		self.assertEqual(task_status(), "Completed")
 
 		frappe.db.set_value("Task", task.name, "status", "Cancelled")
-		log_time()
+		completed.cancel()
 		self.assertEqual(task_status(), "Cancelled")
 
 	def test_timesheet_base_amount(self):
