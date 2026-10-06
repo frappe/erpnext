@@ -3,6 +3,7 @@
 
 
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class WorkOrderOperation(Document):
@@ -40,6 +41,7 @@ class WorkOrderOperation(Document):
 		planned_start_time: DF.Datetime | None
 		process_loss_qty: DF.Float
 		quality_inspection_required: DF.Check
+		qty_to_produce: DF.Float
 		sequence_id: DF.Int
 		skip_material_transfer: DF.Check
 		source_warehouse: DF.Link | None
@@ -51,4 +53,6 @@ class WorkOrderOperation(Document):
 		workstation_type: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def get_work_order_qty(self, qty, work_order_qty):
+		"""Convert this operation's output quantity to Work Order units."""
+		return flt(qty) * flt(work_order_qty) / (flt(self.qty_to_produce) or flt(work_order_qty))

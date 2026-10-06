@@ -391,6 +391,7 @@ def get_operation_details(name, work_order, parent_bom):
 				"fg_warehouse": row.fg_warehouse,
 				"wip_warehouse": row.wip_warehouse,
 				"finished_good": row.finished_good,
+				"qty_to_produce": row.qty_to_produce,
 				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
 			}
@@ -398,7 +399,7 @@ def get_operation_details(name, work_order, parent_bom):
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
-		row.batch_size = row.get("qty") or wo_doc.qty
+		row.batch_size = row.get("qty") or row.get("qty_to_produce") or wo_doc.qty
 
 	row.job_card_qty = row.batch_size
 	if row.batch_size and qty >= row.batch_size:
@@ -519,7 +520,8 @@ def _job_card_warehouse_values(work_order, row, qty):
 
 	return {
 		"serial_no": row.get("serial_no"),
-		"time_required": (row.get("time_in_mins", 0) / work_order.qty) * qty,
+		"time_required": (row.get("time_in_mins", 0) / (flt(row.get("qty_to_produce")) or work_order.qty))
+		* qty,
 		"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 		"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 		"wip_warehouse": wip_warehouse,

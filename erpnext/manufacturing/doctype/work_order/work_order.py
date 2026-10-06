@@ -300,7 +300,7 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = self.qty - flt(operation_details.get(d.name))
+			job_card_qty = (flt(d.qty_to_produce) or self.qty) - flt(operation_details.get(d.name))
 			if job_card_qty > 0:
 				return True
 
@@ -1156,7 +1156,8 @@ class WorkOrder(Document):
 			return row
 
 		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
-			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
+			completed_qty = operation.get_work_order_qty(operation.completed_qty, self.qty)
+			time_per_unit = flt(operation.actual_operation_time) / completed_qty
 		else:
 			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 

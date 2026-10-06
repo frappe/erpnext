@@ -65,7 +65,7 @@ def _non_stock_items_cost(item_amounts, stock_entry, bom):
 
 	cost = 0.0
 	for name in non_stock_items:
-		cost += flt(item_amounts.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+		cost += flt(item_amounts.get(name[0])) * _get_work_order_qty(stock_entry) / flt(bom.quantity)
 	return cost
 
 
@@ -230,7 +230,7 @@ def _add_additional_operating_cost(stock_entry, work_order, expense_account):
 		{
 			"expense_account": expense_account,
 			"description": "Additional Operating Cost",
-			"amount": per_unit * flt(stock_entry.fg_completed_qty),
+			"amount": per_unit * _get_work_order_qty(stock_entry),
 		},
 	)
 
@@ -247,7 +247,7 @@ def _add_corrective_operation_cost(stock_entry, work_order, expense_account):
 			"expense_account": expense_account,
 			"description": "Corrective Operation Cost",
 			"has_corrective_cost": 1,
-			"amount": remaining / max_qty * flt(stock_entry.fg_completed_qty),
+			"amount": remaining / max_qty * _get_work_order_qty(stock_entry),
 		},
 	)
 
@@ -256,15 +256,30 @@ def _max_operation_quantity(work_order):
 	table = frappe.qb.DocType("Job Card")
 	query = (
 		frappe.qb.from_(table)
-		.select(Sum(table.total_completed_qty).as_("qty"))
+		.select(table.operation_id, Sum(table.total_completed_qty).as_("qty"))
 		.where(
 			(table.docstatus == 1)
 			& (table.work_order == work_order.name)
 			& (table.is_corrective_job_card == 0)
 		)
-		.groupby(table.operation)
+		.groupby(table.operation_id)
 	)
-	return min([d.qty for d in query.run(as_dict=True)], default=0)
+	operations = {row.name: row for row in work_order.operations}
+	return min(
+		(
+			operations[row.operation_id].get_work_order_qty(row.qty, work_order.qty)
+			for row in query.run(as_dict=True)
+		),
+		default=0,
+	)
+
+
+def _get_work_order_qty(stock_entry):
+	if stock_entry.job_card:
+		return frappe.get_doc("Job Card", stock_entry.job_card).get_work_order_qty(
+			stock_entry.fg_completed_qty
+		)
+	return flt(stock_entry.fg_completed_qty)
 
 
 def _corrective_cost_enabled():

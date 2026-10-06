@@ -85,7 +85,7 @@ frappe.ui.form.on("Work Order", {
 
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
-			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
+			return (flt(doc.qty_to_produce) || frm.doc.qty) == doc.completed_qty ? "green" : "orange";
 		});
 
 		frm.fields_dict["non_stock_items"].grid.set_column_disp_in_list_view("secondary_item_type", false);
@@ -211,7 +211,9 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
-		let pending_ops = frm.doc?.operations?.filter((op) => op.completed_qty < frm.doc.qty);
+		let pending_ops = frm.doc?.operations?.filter(
+			(op) => op.completed_qty < (flt(op.qty_to_produce) || frm.doc.qty)
+		);
 		// Jump to the operator Shop Floor view, pre-filtered to this work order.
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && pending_ops && pending_ops.length > 0) {
 			frm.add_custom_button(__("Operator Dashboard"), () => {
@@ -532,8 +534,9 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
-			if (data.completed_qty + data.process_loss_qty != frm.doc.qty) {
-				pending_qty = frm.doc.qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+			const operation_qty = flt(data.qty_to_produce) || frm.doc.qty;
+			if (data.completed_qty + data.process_loss_qty != operation_qty) {
+				pending_qty = operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty);
 
 				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({
@@ -676,13 +679,15 @@ frappe.ui.form.on("Work Order", {
 			let message = "";
 			let title = "";
 			let status_wise_oprtation_data = {};
-			let total_completed_qty = frm.doc.qty * frm.doc.operations.length;
+			let total_completed_qty = frm.doc.operations.length * frm.doc.qty;
 
 			frm.doc.operations.forEach((d) => {
+				const completed_qty =
+					(d.completed_qty * frm.doc.qty) / (flt(d.qty_to_produce) || frm.doc.qty);
 				if (!status_wise_oprtation_data[d.status]) {
-					status_wise_oprtation_data[d.status] = [d.completed_qty, d.operation];
+					status_wise_oprtation_data[d.status] = [completed_qty, d.operation];
 				} else {
-					status_wise_oprtation_data[d.status][0] += d.completed_qty;
+					status_wise_oprtation_data[d.status][0] += completed_qty;
 					status_wise_oprtation_data[d.status][1] += ", " + d.operation;
 				}
 			});
