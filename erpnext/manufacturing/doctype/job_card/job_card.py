@@ -34,6 +34,9 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order.services.operation_material_shares import (
+	OperationMaterialShares,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -751,6 +754,9 @@ class JobCard(Document):
 		):
 			return
 
+		shares = (
+			{} if self.is_corrective_job_card else OperationMaterialShares(doc).get_shares(self.operation_id)
+		)
 		for d in doc.required_items:
 			if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
 				frappe.throw(
@@ -759,7 +765,8 @@ class JobCard(Document):
 					)
 				)
 
-			if (
+			share = shares.get((d.item_code, d.operation), 1)
+			if share and (
 				self.get("operation") == d.operation
 				or self.operation_row_id == d.operation_row_id
 				or self.is_corrective_job_card
@@ -772,7 +779,7 @@ class JobCard(Document):
 						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 						"item_name": d.item_name,
 						"description": d.description,
-						"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+						"required_qty": (d.required_qty * flt(self.for_quantity) * share) / doc.qty,
 						"rate": d.rate,
 						"amount": d.amount,
 					},
