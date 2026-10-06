@@ -38,6 +38,9 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order.services.operation_material_shares import (
+	OperationMaterialShares,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -814,10 +817,11 @@ class JobCard(Document):
 		):
 			return
 
+		shares = OperationMaterialShares(doc).get_shares(self.operation_id)
 		for d in doc.required_items:
-			self.append_required_item(doc, d)
+			self.append_required_item(doc, d, shares.get((d.item_code, d.operation), 1))
 
-	def append_required_item(self, doc, d):
+	def append_required_item(self, doc, d, share=1):
 		if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
 			frappe.throw(
 				_("Row {0} : Operation is required against the raw material item {1}").format(
@@ -825,7 +829,9 @@ class JobCard(Document):
 				)
 			)
 
-		if not (self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id):
+		if not share or not (
+			self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id
+		):
 			return
 
 		self.append(
@@ -836,7 +842,7 @@ class JobCard(Document):
 				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 				"item_name": d.item_name,
 				"description": d.description,
-				"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+				"required_qty": (d.required_qty * flt(self.for_quantity) * share) / doc.qty,
 				"rate": d.rate,
 				"amount": d.amount,
 			},
