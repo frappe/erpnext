@@ -29,21 +29,22 @@ class OperationMaterialShares:
 		unedited = self.get_unedited_required_items(material_qty)
 		qty_by_bom = defaultdict(dict)
 		for (item_code, operation, bom), qty in material_qty.items():
-			if qty and operation == row.operation and bom in boms and (item_code, operation) in unedited:
+			if qty and operation == row.operation and bom in boms and item_code in unedited:
 				qty_by_bom[(item_code, operation)][bom] = qty
 
 		return {key: flt(qty.get(row.bom)) / sum(qty.values()) for key, qty in qty_by_bom.items()}
 
-	def get_unedited_required_items(self, material_qty: dict) -> set[tuple[str, str]]:
-		"""(item_code, operation) keys whose Work Order requirement still equals the BOM's, so an
-		item replaced or resized on the Work Order keeps matching on the operation name."""
+	def get_unedited_required_items(self, material_qty: dict) -> set[str]:
+		"""Item codes whose Work Order requirement still equals the BOM's, so an item replaced or
+		resized on the Work Order keeps matching on the operation name. v15 merges an item's BOM
+		lines into one required row whatever their operation, so the check is per item code."""
 		bom_qty = defaultdict(float)
-		for (item_code, operation, _bom), qty in material_qty.items():
-			bom_qty[(item_code, operation)] += qty * flt(self.work_order.qty)
+		for (item_code, _operation, _bom), qty in material_qty.items():
+			bom_qty[item_code] += qty * flt(self.work_order.qty)
 
 		required_qty = defaultdict(float)
 		for item in self.work_order.required_items:
-			required_qty[(item.item_code, item.operation)] += flt(item.required_qty)
+			required_qty[item.item_code] += flt(item.required_qty)
 
 		tolerance = 10 ** -frappe.get_precision("Work Order Item", "required_qty")
 		return {key for key, qty in required_qty.items() if abs(qty - bom_qty[key]) <= tolerance}
