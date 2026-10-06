@@ -1495,6 +1495,33 @@ class TestBOM(ERPNextTestSuite):
 		bom.items[0].operation_row_id = 1
 		self.assertRaisesRegex(frappe.ValidationError, "Operation Row No. 1 is operation", bom.save)
 
+	def test_warns_when_item_of_repeated_operation_has_no_row(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		cutting = "_Test Row Cutting"
+		make_operation(operation=cutting, workstation="_Test Workstation 1")
+
+		bom = frappe.new_doc(
+			"BOM",
+			item="_Test FG Item 2",
+			quantity=1,
+			with_operations=1,
+			transfer_material_against="Job Card",
+			company="_Test Company",
+		)
+		for _row in range(2):
+			bom.append(
+				"operations", {"operation": cutting, "workstation": "_Test Workstation 1", "time_in_mins": 60}
+			)
+		bom.append("items", {"item_code": "_Test Item", "qty": 1, "operation": cutting})
+		bom.append("items", {"item_code": "_Test Item Home Desktop 100", "qty": 1, "operation_row_id": 2})
+
+		frappe.clear_messages()
+		bom.insert()
+
+		messages = [message.get("message") for message in frappe.get_message_log()]
+		self.assertTrue(any("Set Operation Row No. on rows 1." in message for message in messages))
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
