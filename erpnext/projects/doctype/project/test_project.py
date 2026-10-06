@@ -1,7 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
+from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
@@ -174,6 +177,33 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(len(tasks), 2)
 
+	def test_project_from_template_without_holiday_list(self):
+		template = make_project_template("_Test Template Without Holiday List")
+		self.assertFalse(frappe.db.get_value("Company", "Wind Power LLC", "default_holiday_list"))
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Template Without Holiday List {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=nowdate(),
+			company="Wind Power LLC",
+		).insert()
+
+		self.assertEqual(frappe.db.count("Task", {"project": project.name}), len(template.tasks))
+
+	def test_deleted_template_tasks_are_not_recreated_on_save(self):
+		template = make_project_template("_Test Template Tasks Not Recreated")
+		project = get_project(
+			f"_Test Template Tasks Not Recreated {frappe.generate_hash(length=6)}", template
+		)
+		for task in frappe.get_all("Task", filters={"project": project.name}, pluck="name"):
+			frappe.delete_doc("Task", task)
+
+		project.reload()
+		project.save()
+
+		self.assertFalse(frappe.db.exists("Task", {"project": project.name}))
+
 	def test_project_linking_with_sales_order(self):
 		so = make_sales_order()
 		project = make_project_from_so(so.name)
@@ -188,6 +218,15 @@ class TestProject(ERPNextTestSuite):
 
 		so.reload()
 		self.assertFalse(so.project)
+
+	def test_project_from_sales_order_has_its_sales_amount(self):
+		so = make_sales_order()
+		project = make_project_from_so(so.name).insert()
+
+		self.assertEqual(project.total_sales_amount, so.base_net_total)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_sales_amount"), so.base_net_total
+		)
 
 	def test_sales_order_link_is_not_overwritten_by_second_project(self):
 		so = make_sales_order()
@@ -393,6 +432,29 @@ class TestProject(ERPNextTestSuite):
 		project.update_percent_complete()
 		self.assertEqual(project.percent_complete, 75)  # 100 * 3/4 + 0 * 1/4
 
+	def test_percent_complete_counts_cancelled_tasks_and_zero_weights(self):
+		for method in ("Task Progress", "Task Weight"):
+			project, tasks = self._project_with_tasks(method, 2)
+			frappe.db.set_value("Task", tasks[0], {"status": "Completed", "progress": 100})
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 50)
+
+			frappe.db.set_value("Task", tasks[1], "status", "Cancelled")
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 100)
+			self.assertEqual(project.status, "Completed")
+
+	def test_completed_status_is_refused_until_tasks_are_done(self):
+		project, tasks = self._project_with_tasks("Task Progress", 1)
+		project.status = "Completed"
+		self.assertRaises(frappe.ValidationError, project.save)
+
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.reload()
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
 	def test_create_duplicate_project_copies_tasks(self):
 		from erpnext.projects.doctype.project.project import create_duplicate_project
 
@@ -406,6 +468,58 @@ class TestProject(ERPNextTestSuite):
 		self.assertTrue(new_project)
 		copied_tasks = frappe.get_all("Task", filters={"project": new_project})
 		self.assertEqual(len(copied_tasks), len(tasks))
+
+	def test_create_duplicate_project_links_tasks_to_their_copies(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 0)
+		group = frappe.get_doc(doctype="Task", subject="Phase 1", project=source.name, is_group=1).insert()
+		design = frappe.get_doc(
+			doctype="Task", subject="Design", project=source.name, parent_task=group.name
+		).insert()
+		build = frappe.get_doc(
+			doctype="Task",
+			subject="Build",
+			project=source.name,
+			parent_task=group.name,
+			depends_on=[{"task": design.name}],
+		).insert()
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
+
+		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
+		copied_tasks = frappe.get_all(
+			"Task", filters={"project": copy}, fields=["name", "parent_task", "depends_on_tasks"]
+		)
+		links = {
+			link
+			for task in copied_tasks
+			for link in [task.parent_task, *(task.depends_on_tasks or "").split(",")]
+			if link
+		}
+		self.assertEqual(len(copied_tasks), 3)
+		self.assertFalse(links & {group.name, design.name, build.name})
+		self.assertEqual(
+			set(frappe.get_all("Task Depends On", filters={"parent": group.name}, pluck="task")),
+			{design.name, build.name},
+		)
+
+	def test_create_duplicate_project_detaches_parents_outside_the_project(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 0)
+		other, _ = self._project_with_tasks("Task Completion", 0)
+		outside_group = frappe.get_doc(
+			doctype="Task", subject="Other phase", project=other.name, is_group=1
+		).insert()
+		frappe.get_doc(
+			doctype="Task", subject="Moved", project=source.name, parent_task=outside_group.name
+		).insert()
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
+
+		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
+		self.assertEqual(frappe.get_all("Task", filters={"project": copy}, pluck="parent_task"), [None])
 
 	def test_create_duplicate_project_rejects_same_name(self):
 		from erpnext.projects.doctype.project.project import create_duplicate_project
@@ -429,11 +543,71 @@ class TestProject(ERPNextTestSuite):
 		for task in tasks:
 			self.assertEqual(frappe.db.get_value("Task", task, "status"), "Cancelled")
 
+	def test_set_project_status_completes_tasks_in_dependency_order(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Progress", 2)
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+
+		set_project_status(project.name, "Completed")
+
+		self.assertEqual(frappe.db.get_value("Project", project.name, "status"), "Completed")
+		for task in tasks:
+			self.assertEqual(frappe.db.get_value("Task", task, ["status", "progress"]), ("Completed", 100))
+
+	def test_set_project_status_by_projects_manager(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 1)
+		user = create_user("projects-manager-only@example.com", "Projects Manager")
+
+		with self.set_user(user.name):
+			set_project_status(project.name, "Cancelled")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[0], "status"), "Cancelled")
+
 	def test_set_project_status_rejects_invalid_status(self):
 		from erpnext.projects.doctype.project.project import set_project_status
 
 		project, _ = self._project_with_tasks("Task Completion", 1)
 		self.assertRaises(frappe.ValidationError, set_project_status, project.name, "Open")
+
+	def _progress_project(self, **settings):
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Progress {frappe.generate_hash(length=8)}",
+			company="_Test Company",
+			collect_progress=1,
+			subject="Progress",
+			message="Reply with your progress",
+			**settings,
+		)
+		project.append("users", {"user": "test@example.com", "welcome_email_sent": 1})
+		return project.insert()
+
+	def test_hourly_reminder_is_sent_only_within_the_time_window(self):
+		from erpnext.projects.doctype.project.project import hourly_reminder
+
+		project = self._progress_project(frequency="Hourly", from_time="14:00:00", to_time="18:00:00")
+		for time, updates in (("10:00:00", 0), ("15:00:00", 1)):
+			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				hourly_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
+	def test_twice_daily_reminder_waits_for_the_second_time(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="09:00:00", second_email="17:00:00"
+		)
+		for time, updates in (("10:00:00", 1), ("11:00:00", 1), ("17:30:00", 2)):
+			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				twice_daily_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
 
 	def test_costing_rollup_from_sales_documents(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
