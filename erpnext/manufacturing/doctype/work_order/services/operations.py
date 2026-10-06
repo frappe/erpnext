@@ -38,6 +38,7 @@ _BOM_OPERATION_FIELDS = [
 	"idx",
 	"finished_good",
 	"finished_good_qty",
+	"is_final_finished_good",
 	"is_subcontracted",
 	"wip_warehouse",
 	"source_warehouse",
@@ -353,8 +354,11 @@ class OperationsService:
 
 	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
 		if self.doc.track_semi_finished_goods:
-			factor = qty if exploded else 1 / flt(qty)
-			d.qty_to_produce = flt(d.finished_good_qty) * factor * flt(self.doc.qty)
+			if d.is_final_finished_good:
+				d.qty_to_produce = flt(units) * flt(self.doc.qty)
+			else:
+				factor = qty if exploded else 1 / flt(qty)
+				d.qty_to_produce = flt(d.finished_good_qty) * factor * flt(self.doc.qty)
 
 		if not d.fixed_time:
 			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
