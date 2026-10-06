@@ -13,6 +13,7 @@ from frappe.utils import cint, date_diff, flt, get_datetime
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.valuation import round_off_if_near_zero
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 Filters = frappe._dict
 
@@ -303,6 +304,8 @@ class FIFOSlots:
 		"""
 		stock_ledger_entries = self.sle
 		bundle_wise_serial_nos, bundle_wise_batch_nos = self._get_bundle_wise_details(stock_ledger_entries)
+		# an Adjustment Entry counts stock out and back in, which would restart its age
+		adjustment_netting = AdjustmentNetting(by_lot=True)
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
@@ -318,7 +321,7 @@ class FIFOSlots:
 			if stock_ledger_entries is None:
 				stock_ledger_entries = self._get_stock_ledger_entries()
 
-			for row in stock_ledger_entries:
+			for row in adjustment_netting.net_by_lot(stock_ledger_entries, item_field="name"):
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
 			# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
@@ -402,7 +405,8 @@ class FIFOSlots:
 	def _set_stock_reconciliation_actual_qty(
 		self, row: dict, key: tuple, fifo_queue: list, prev_balance_qty: float
 	) -> None:
-		if row.voucher_type != "Stock Reconciliation":
+		# the net change of an Adjustment Entry moves stock, it does not set a balance
+		if row.voucher_type != "Stock Reconciliation" or row.get("is_adjustment_entry"):
 			return
 
 		if row.has_serial_no and (not row.batch_no or row.serial_no or row.serial_and_batch_bundle):
@@ -424,6 +428,10 @@ class FIFOSlots:
 			return
 
 		if row.has_batch_no:
+			# a batch an Adjustment Entry changed arrives or leaves at its own value
+			if row.get("is_adjustment_entry"):
+				return
+
 			if flt(row.actual_qty) > 0:
 				self._revalue_reconciled_batch_slots(fifo_queue, batch_nos)
 			return
@@ -1045,6 +1053,7 @@ class FIFOSlots:
 				sle.qty_after_transaction,
 				sle.serial_and_batch_bundle,
 				sle.warehouse,
+				sle.is_adjustment_entry,
 			)
 			.where(
 				(sle.item_code == item.name)
