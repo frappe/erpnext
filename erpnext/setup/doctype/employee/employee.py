@@ -152,7 +152,6 @@ class Employee(NestedSet):
 		)
 
 	def set_salary_currency(self):
-		"""Default the salary currency to the company's currency, if not set already."""
 		if self.salary_currency:
 			return
 

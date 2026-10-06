@@ -99,8 +99,6 @@ frappe.ui.form.on("Employee", {
 	},
 
 	company: function (frm) {
-		// keep salary currency aligned with the employee's company;
-		// can still be changed manually afterwards
 		frm.set_value("salary_currency", erpnext.get_currency(frm.doc.company));
 	},
 
