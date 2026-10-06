@@ -15,8 +15,17 @@ class TimesheetBillingService:
 		self.doc = doc
 
 	def validate_time_sheets_are_submitted(self) -> None:
+		listed = set()
 		for data in self.doc.timesheets:
+			if data.timesheet_detail in listed:
+				frappe.throw(
+					_("Row {0}: The same time log of Timesheet {1} is added more than once").format(
+						data.idx, frappe.bold(data.time_sheet)
+					)
+				)
+
 			if data.time_sheet and data.timesheet_detail:
+				listed.add(data.timesheet_detail)
 				if sales_invoice := frappe.db.get_value(
 					"Timesheet Detail", data.timesheet_detail, "sales_invoice"
 				):
@@ -28,7 +37,7 @@ class TimesheetBillingService:
 
 			if data.time_sheet:
 				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
-				if status not in ["Submitted", "Payslip", "Partially Billed"]:
+				if status not in ["Submitted", "Payslip", "Partially Billed", "Billed"]:
 					frappe.throw(
 						_("Timesheet {0} cannot be invoiced in its current state").format(data.time_sheet)
 					)
@@ -52,16 +61,44 @@ class TimesheetBillingService:
 			timesheet.db_update_all()
 
 	def set_billing_hours_and_amount(self) -> None:
+		"""Fill rows from their time logs; a row without one is replaced by its timesheet's unbilled logs."""
 		doc = self.doc
-		if doc.project:
+		if doc.is_return:
 			return
 
-		for timesheet in doc.timesheets:
-			ts_doc = frappe.get_doc("Timesheet", timesheet.time_sheet)
-			if not timesheet.billing_hours and ts_doc.total_billable_hours:
-				timesheet.billing_hours = ts_doc.total_billable_hours
-			if not timesheet.billing_amount and ts_doc.total_billable_amount:
-				timesheet.billing_amount = ts_doc.total_billable_amount
+		pending = [
+			row
+			for row in doc.timesheets
+			if row.time_sheet and not (row.timesheet_detail and row.billing_hours and row.billing_amount)
+		]
+		unbilled_logs = {
+			name: get_projectwise_timesheet_data(doc.project, name)
+			for name in {row.time_sheet for row in pending}
+		}
+		for row in pending:
+			if row.timesheet_detail:
+				self.fill_from_time_log(row, unbilled_logs[row.time_sheet])
+			else:
+				self.replace_with_time_logs(row, unbilled_logs[row.time_sheet])
+
+	def fill_from_time_log(self, row, time_logs: list) -> None:
+		if log := next((log for log in time_logs if log.name == row.timesheet_detail), None):
+			row.billing_hours = row.billing_hours or log.billing_hours
+			row.billing_amount = row.billing_amount or log.billing_amount
+
+	def replace_with_time_logs(self, row, time_logs: list) -> None:
+		listed = {d.timesheet_detail for d in self.doc.timesheets}
+		time_logs = [log for log in time_logs if log.name not in listed]
+		if not time_logs:
+			frappe.throw(
+				_("Row {0}: Timesheet {1} has no unbilled billable time logs").format(
+					row.idx, frappe.bold(row.time_sheet)
+				)
+			)
+
+		self.doc.remove(row)
+		for log in time_logs:
+			self.doc.append("timesheets", self.get_timesheet_row(log))
 
 	def update_timesheet_billing_for_project(self) -> None:
 		doc = self.doc
@@ -81,18 +118,19 @@ class TimesheetBillingService:
 		doc.set("timesheets", [])
 		if doc.project:
 			for data in get_projectwise_timesheet_data(doc.project):
-				doc.append(
-					"timesheets",
-					{
-						"time_sheet": data.time_sheet,
-						"billing_hours": data.billing_hours,
-						"billing_amount": data.billing_amount,
-						"timesheet_detail": data.name,
-						"activity_type": data.activity_type,
-						"description": data.description,
-					},
-				)
+				doc.append("timesheets", self.get_timesheet_row(data))
 			self.calculate_billing_amount_for_timesheet()
+
+	@staticmethod
+	def get_timesheet_row(time_log) -> dict:
+		return {
+			"time_sheet": time_log.time_sheet,
+			"billing_hours": time_log.billing_hours,
+			"billing_amount": time_log.billing_amount,
+			"timesheet_detail": time_log.name,
+			"activity_type": time_log.activity_type,
+			"description": time_log.description,
+		}
 
 	def calculate_billing_amount_for_timesheet(self) -> None:
 		doc = self.doc
