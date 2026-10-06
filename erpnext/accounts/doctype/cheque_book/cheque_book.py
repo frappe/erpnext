@@ -43,7 +43,7 @@ class ChequeBook(Document):
 		bank_accounts = {self.bank_account}
 		if not self.is_new():
 			bank_accounts.add(frappe.db.get_value("Cheque Book", self.name, "bank_account"))
-		for bank_account in sorted(filter(None, bank_accounts)):
+		for bank_account in sorted(name for name in bank_accounts if name):
 			frappe.db.get_value("Bank Account", bank_account, "name", for_update=True)
 		super().check_if_latest()
 
