@@ -201,7 +201,12 @@ def apply_filters(query, sle, filters):
 
 @frappe.whitelist()
 def fix_uncancelled_entries(selected_rows: str | list):
-	frappe.only_for(["Stock Manager", "System Manager"])
+	# not frappe.only_for, it skips the check in tests on v15
+	if not {"Stock Manager", "System Manager"}.intersection(frappe.get_roles()):
+		frappe.throw(
+			_("Only a Stock Manager or System Manager can repair Stock Ledger Entries"),
+			frappe.PermissionError,
+		)
 
 	if isinstance(selected_rows, str):
 		selected_rows = frappe.parse_json(selected_rows)
