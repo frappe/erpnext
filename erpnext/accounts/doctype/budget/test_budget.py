@@ -153,6 +153,36 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 		po.cancel()
 
+	def test_monthly_budget_crossed_for_po_in_foreign_currency(self):
+		budget = make_budget(
+			applicable_on_purchase_order=1,
+			action_if_accumulated_monthly_budget_exceeded_on_po="Stop",
+			budget_against="Cost Center",
+		)
+
+		fiscal_year = get_fiscal_year(nowdate())[0]
+		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
+		frappe.db.set_value("Budget", budget.name, "fiscal_year", fiscal_year)
+
+		accumulated_limit = get_accumulated_monthly_budget(
+			budget.monthly_distribution, nowdate(), budget.fiscal_year, budget.accounts[0].budget_amount
+		)
+		po = create_purchase_order(
+			currency="USD",
+			transaction_date=nowdate(),
+			qty=1,
+			rate=accumulated_limit / 2,
+			do_not_submit=True,
+		)
+		po.set_missing_values()
+		po.conversion_rate = 80
+
+		self.assertRaises(BudgetError, po.submit)
+
+		budget.load_from_db()
+		budget.cancel()
+		po.cancel()
+
 	def test_monthly_budget_crossed_stop2(self):
 		set_total_expense_zero(nowdate(), "project")
 
