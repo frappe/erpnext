@@ -367,12 +367,37 @@ class TestSalesOrder(ERPNextTestSuite):
 
 			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
+	def test_full_qty_billed_below_amount_is_offered_with_zero_qty(self):
+		so = make_sales_order(qty=1, rate=1000)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].rate = 400
+		si.insert()
+		si.submit()
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+		rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+		self.assertIn(so.name, [row.name for row in rows])
+		self.assertTrue(has_potentially_billable_items(so.name))
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual([row.qty for row in si.get("items")], [0])
+		self.assertEqual(len(make_sales_invoice(so.name, target_doc=si).get("items")), 1)
+
+		si.get("items")[0].qty = 1
+		si.get("items")[0].rate = 600
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+		self.assertFalse(has_potentially_billable_items(so.name))
+
 	def test_order_with_sub_precision_pending_qty_is_not_offered(self):
 		item = make_item("_Test Sub Precision Qty Item", {"is_stock_item": 1}).name
 		so = make_sales_order(item_code=item, qty=10, rate=100)
 
 		si = make_sales_invoice(so.name)
-		si.get("items")[0].rate = 90
 		si.insert()
 		si.submit()
 
@@ -382,8 +407,9 @@ class TestSalesOrder(ERPNextTestSuite):
 			"Sales Invoice Item", si.get("items")[0].name, "qty", billed_qty, update_modified=False
 		)
 
-		self.assertFalse(has_potentially_billable_items(so.name))
-		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
