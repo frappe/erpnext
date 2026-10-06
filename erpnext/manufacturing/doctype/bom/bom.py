@@ -1106,8 +1106,8 @@ class BOM(WebsiteGenerator):
 				self._validate_operation_row(d)
 
 	def validate_item_operation_row_ids(self):
-		"""Fill an item's empty operation from its Operation ID, and reject an ID that points to a
-		missing row or to another operation, as after operations are reordered."""
+		"""Fill an item's empty operation from its Operation Row No., and reject a row number that
+		points to a missing row or to another operation, as after operations are reordered."""
 		if self.track_semi_finished_goods or not self.with_operations:
 			return
 
@@ -1119,14 +1119,14 @@ class BOM(WebsiteGenerator):
 			operation = operations.get(item.operation_row_id)
 			if not operation:
 				frappe.throw(
-					_("Row #{0}: Operation ID {1} does not match any row in the Operations table").format(
-						item.idx, item.operation_row_id
-					)
+					_(
+						"Row #{0}: Operation Row No. {1} does not match any row in the Operations table"
+					).format(item.idx, item.operation_row_id)
 				)
 
 			if item.operation and item.operation != operation:
 				frappe.throw(
-					_("Row #{0}: Operation ID {1} is operation {2}, not {3}").format(
+					_("Row #{0}: Operation Row No. {1} is operation {2}, not {3}").format(
 						item.idx, item.operation_row_id, bold(operation), bold(item.operation)
 					)
 				)
