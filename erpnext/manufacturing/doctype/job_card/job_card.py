@@ -1547,6 +1547,9 @@ class JobCard(Document):
 
 		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
 		current_target = self.get_operation_target_qty()
+		if not current_target:
+			return None
+
 		min_completed_qty = min(
 			flt(row.get(qty_field)) * current_target / (flt(row.qty_to_produce) or current_target)
 			for row in previous_operations
@@ -1584,8 +1587,10 @@ class JobCard(Document):
 	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
 		manufactured_qty = flt(row.manufactured_qty)
 		current_target = self.get_operation_target_qty()
-		previous_target = flt(row.qty_to_produce) or current_target
-		current_qty_in_previous_units = current_operation_qty * previous_target / current_target
+		previous_target = flt(row.qty_to_produce)
+		current_qty_in_previous_units = current_operation_qty
+		if current_target and previous_target:
+			current_qty_in_previous_units *= previous_target / current_target
 
 		if not manufactured_qty:
 			frappe.throw(

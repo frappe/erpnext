@@ -172,6 +172,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo = make_work_order(bom_no=bom_for_two_cars.name, item=car, qty=2, company="_Test Company")
 		self.assertEqual([row.qty_to_produce for row in wo.operations], [4, 2])
 
+		batch_bom = frappe.copy_doc(bom)
+		batch_bom.is_default = 0
+		batch_bom.operations[0].batch_size = 4
+		batch_bom.insert()
+		batch_bom.submit()
+		wheel_operation = frappe.get_doc("Operation", "_Test WO Make Wheels")
+		wheel_operation.create_job_card_based_on_batch_size = 1
+		wheel_operation.save()
+		wo = make_work_order(bom_no=batch_bom.name, item=car, qty=2, company="_Test Company")
+		self.assertEqual(wo.operations[0].qty_to_produce, 8)
+		self.assertEqual(wo.operations[0].time_in_mins, 120)
+
 	def check_planned_qty(self):
 		planned0 = (
 			frappe.db.get_value(

@@ -280,9 +280,12 @@ class OperationsService:
 				d.qty_to_produce = flt(d.finished_good_qty) * factor * flt(self.doc.qty)
 
 		if not d.fixed_time:
-			if batch_size_flags.get(d.operation):
+			is_batch_operation = batch_size_flags.get(d.operation)
+			if is_batch_operation:
 				qty = d.batch_size
 			d.time_in_mins = d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
+			if is_batch_operation and self.doc.track_semi_finished_goods:
+				d.time_in_mins *= flt(d.qty_to_produce) / flt(self.doc.qty)
 
 		d.status = "Pending"
 		if self.doc.track_semi_finished_goods and not d.sequence_id:
