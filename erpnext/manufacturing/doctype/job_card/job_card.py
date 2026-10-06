@@ -829,9 +829,8 @@ class JobCard(Document):
 				)
 			)
 
-		if not share or not (
-			self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id
-		):
+		matches_row = doc.track_semi_finished_goods and self.operation_row_id == d.operation_row_id
+		if not share or not (matches_row or self.get("operation") == d.operation):
 			return
 
 		self.append(
