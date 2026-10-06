@@ -327,7 +327,7 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
-		self.set_item_operations_from_row_id()
+		self.validate_item_operation_row_ids()
 		self.calculate_cost()
 		self.update_exploded_items(save=False)
 		self.update_stock_qty()
@@ -1105,7 +1105,9 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				self._validate_operation_row(d)
 
-	def set_item_operations_from_row_id(self):
+	def validate_item_operation_row_ids(self):
+		"""Fill an item's empty operation from its Operation ID, and reject an ID that points to a
+		missing row or to another operation, as after operations are reordered."""
 		if self.track_semi_finished_goods or not self.with_operations:
 			return
 
@@ -1114,13 +1116,21 @@ class BOM(WebsiteGenerator):
 			if not item.operation_row_id:
 				continue
 
-			if item.operation_row_id not in operations:
+			operation = operations.get(item.operation_row_id)
+			if not operation:
 				frappe.throw(
 					_("Row #{0}: Operation ID {1} does not match any row in the Operations table").format(
 						item.idx, item.operation_row_id
 					)
 				)
-			item.operation = operations[item.operation_row_id]
+
+			if item.operation and item.operation != operation:
+				frappe.throw(
+					_("Row #{0}: Operation ID {1} is operation {2}, not {3}").format(
+						item.idx, item.operation_row_id, bold(operation), bold(item.operation)
+					)
+				)
+			item.operation = operation
 
 	def _validate_operation_row(self, d):
 		if not d.description:
