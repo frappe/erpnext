@@ -694,6 +694,7 @@ def get_ordered_amount(params):
 	item_code = params.get("item_code")
 	condition = get_other_condition(params, "Purchase Order")
 
+<<<<<<< HEAD
 	data = frappe.db.sql(
 		f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
 		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
@@ -701,6 +702,29 @@ def get_ordered_amount(params):
 		and parent.status != 'Closed' and {condition}""",
 		item_code,
 		as_list=1,
+=======
+	child = frappe.qb.DocType("Purchase Order Item")
+	parent = frappe.qb.DocType("Purchase Order")
+
+	data = (
+		frappe.qb.from_(child)
+		.join(parent)
+		.on(parent.name == child.parent)
+		.select(
+			Coalesce(Sum((child.amount - child.billed_amt) * Coalesce(parent.conversion_rate, 1)), 0).as_(
+				"amount"
+			)
+		)
+		.where(
+			(child.item_code == item_code)
+			& (parent.docstatus == 1)
+			& (child.amount > child.billed_amt)
+			& (child.closed == 0)
+			& (parent.status != "Closed")
+			& Criterion.all(get_other_condition(params, child, parent, "Purchase Order"))
+		)
+		.run(as_list=1)
+>>>>>>> 5dec6d6 (fix(budget): convert po amount to company currency in both controller modes)
 	)
 
 	return data[0][0] if data else 0
