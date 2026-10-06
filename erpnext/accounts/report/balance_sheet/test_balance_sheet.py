@@ -2,7 +2,7 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.utils.data import today
+from frappe.utils.data import add_years, today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
 from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
@@ -180,10 +180,77 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(bank_row[key_for(cc2.name)], 500)
 		self.assertEqual(bank_row["total"], 800)
 
+	def test_unclosed_fiscal_years_split_by_dimension(self):
+		"""An unclosed previous year must be split across dimension columns, not dropped."""
+		create_account("BS Unclosed Test Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
 
-def make_journal_entry(rows):
+		parent_cc = frappe.db.get_value("Cost Center", {"company": COMPANY, "is_group": 1}, "name")
+		cost_centers = []
+		for name in ("BS Unclosed CC A", "BS Unclosed CC B"):
+			cc = frappe.new_doc("Cost Center")
+			cc.cost_center_name = name
+			cc.parent_cost_center = parent_cc
+			cc.company = COMPANY
+			cc.insert()
+			cost_centers.append(cc.name)
+
+		# Profit earned last year and never closed: cash lands on the Balance Sheet,
+		# the matching income stays in a P&L account, so the opening position is short.
+		last_year = add_years(today(), -1)
+		for cost_center, amount in zip(cost_centers, (300, 500), strict=True):
+			make_journal_entry(
+				[
+					dict(
+						account_name="BS Unclosed Test Bank",
+						debit_in_account_currency=amount,
+						credit_in_account_currency=0,
+						cost_center=cost_center,
+					),
+					dict(
+						account_name="Sales",
+						debit_in_account_currency=0,
+						credit_in_account_currency=amount,
+						cost_center=cost_center,
+					),
+				],
+				posting_date=last_year,
+			)
+
+		filters = frappe._dict(
+			company=COMPANY,
+			period_start_date=today(),
+			period_end_date=today(),
+			periodicity="Yearly",
+			filter_based_on="Date Range",
+			accumulated_values=True,
+			group_by_dimension="Cost Center",
+		)
+		period_list = build_period_list(filters)
+		_columns, data, message, *_ = execute(filters)
+
+		self.assertEqual(message, "Previous Financial Year is not closed")
+
+		unclosed = next((r for r in data if "Unclosed Fiscal Years" in str(r.get("account_name", ""))), None)
+		self.assertIsNotNone(unclosed)
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		self.assertEqual(unclosed[key_for(cost_centers[0])], 300)
+		self.assertEqual(unclosed[key_for(cost_centers[1])], 500)
+		self.assertEqual(unclosed["total"], 800)
+
+		# unaccumulated columns show period movement, which an opening position does not belong in
+		filters.accumulated_values = False
+		_columns, data, *_ = execute(filters)
+		self.assertIsNone(
+			next((r for r in data if "Unclosed Fiscal Years" in str(r.get("account_name", ""))), None)
+		)
+
+
+def make_journal_entry(rows, posting_date=None):
 	jv = frappe.new_doc("Journal Entry")
-	jv.posting_date = today()
+	jv.posting_date = posting_date or today()
 	jv.company = COMPANY
 	jv.user_remark = "test"
 
