@@ -35,17 +35,22 @@ def get_allowed_values() -> dict:
 	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 
 	user_permissions = get_user_permissions()
+	if not user_permissions:
+		return {}
 
 	allowed_values = {}
-	for field, doctype in (("company", "Company"), ("item_code", "Item"), ("warehouse", "Warehouse")):
+	for df in frappe.get_meta("Stock Ledger Entry").get_link_fields():
+		if df.ignore_user_permissions:
+			continue
+
 		values = [
 			d.doc
-			for d in user_permissions.get(doctype, [])
+			for d in user_permissions.get(df.options, [])
 			if not d.applicable_for or d.applicable_for == "Stock Ledger Entry"
 		]
 
 		if values:
-			allowed_values[field] = values
+			allowed_values[df.fieldname] = values
 
 	return allowed_values
 
@@ -183,8 +188,13 @@ def apply_filters(query, sle, filters):
 	if filters.to_date:
 		query = query.where(sle.posting_date <= filters.to_date)
 
+	strict = frappe.get_system_settings("apply_strict_user_permissions")
 	for field, values in get_allowed_values().items():
-		query = query.where(sle[field].isin(values))
+		condition = sle[field].isin(values)
+		if not strict:
+			condition |= sle[field].isnull() | (sle[field] == "")
+
+		query = query.where(condition)
 
 	return query
 
@@ -211,26 +221,33 @@ def fix_uncancelled_entries(selected_rows: str | list):
 
 
 def validate_voucher_permission(voucher_type, voucher_no):
-	# the user can repair only the entries the report shows them
-	allowed_values = get_allowed_values()
-	if not allowed_values:
+	# check the user permissions on the voucher and on every record the repair changes,
+	# role permissions are covered by the report roles
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+	from frappe.permissions import has_user_permission
+
+	if not get_user_permissions():
 		return
 
-	entries = frappe.get_all(
+	docs = [frappe.get_doc(voucher_type, voucher_no)]
+	for name in frappe.get_all(
 		"Stock Ledger Entry",
-		filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
-		fields=list(allowed_values),
-	)
+		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+		pluck="name",
+	):
+		docs.append(frappe.get_doc("Stock Ledger Entry", name))
 
-	for entry in entries:
-		for field, values in allowed_values.items():
-			if entry[field] not in values:
-				frappe.throw(
-					_("You are not permitted to repair the Stock Ledger Entries of {0} {1}").format(
-						_(voucher_type), frappe.bold(voucher_no)
-					),
-					frappe.PermissionError,
-				)
+	for name in get_bundles_to_cancel(voucher_type, voucher_no):
+		docs.append(frappe.get_doc("Serial and Batch Bundle", name))
+
+	for doc in docs:
+		if not has_user_permission(doc):
+			frappe.throw(
+				_("You are not permitted to repair the Stock Ledger Entries of {0} {1}").format(
+					_(voucher_type), frappe.bold(voucher_no)
+				),
+				frappe.PermissionError,
+			)
 
 
 def fix_voucher(voucher_type, voucher_no):
@@ -249,15 +266,18 @@ def fix_voucher(voucher_type, voucher_no):
 	repost_future_entries(entries)
 
 
-def cancel_serial_and_batch_bundles(voucher_type, voucher_no):
+def get_bundles_to_cancel(voucher_type, voucher_no):
 	# bundles of a different voucher type (POS Invoice, Asset Repair) are not cancelled with this voucher
-	bundles = frappe.get_all(
+	return frappe.get_all(
 		"Serial and Batch Bundle",
 		filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "docstatus": ["!=", 0]},
 		or_filters={"is_cancelled": 0, "docstatus": 1},
 		pluck="name",
 	)
 
+
+def cancel_serial_and_batch_bundles(voucher_type, voucher_no):
+	bundles = get_bundles_to_cancel(voucher_type, voucher_no)
 	if not bundles:
 		return
 

@@ -175,6 +175,113 @@ class TestStockLedgerEntriesOfCancelledVouchers(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle, "is_cancelled"), 0)
 
+	def test_restricted_bundle_blocks_repair(self):
+		# the active entry is in an allowed warehouse, but a submitted bundle is in a restricted one
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "USLE-WH-.#####",
+			}
+		).name
+
+		entry = make_stock_entry(
+			item_code=batch_item,
+			qty=5,
+			rate=100,
+			to_warehouse="Stores - _TC",
+			posting_date="2026-06-01",
+			do_not_save=True,
+		)
+		entry.append(
+			"items",
+			{
+				"item_code": batch_item,
+				"t_warehouse": "Finished Goods - _TC",
+				"qty": 3,
+				"basic_rate": 100,
+				"conversion_factor": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"expense_account": entry.items[0].expense_account,
+				"cost_center": entry.items[0].cost_center,
+			},
+		)
+		entry.insert()
+		entry.submit()
+		entry.cancel()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": entry.name, "warehouse": "Stores - _TC", "actual_qty": 5}
+		)
+		frappe.db.set_value("Stock Ledger Entry", sle, "is_cancelled", 0)
+
+		restricted_bundle = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_no": entry.name, "warehouse": "Finished Goods - _TC"}
+		)
+		frappe.db.set_value("Serial and Batch Bundle", restricted_bundle, {"is_cancelled": 0, "docstatus": 1})
+
+		user = make_stock_manager("sle-cancelled-voucher-bundle@example.com")
+		add_user_permission("Warehouse", "Stores - _TC", user)
+
+		frappe.set_user(user)
+		try:
+			rows = [d for d in self.run_report() if d.voucher_no == entry.name]
+			self.assertEqual([d.name for d in rows], [sle])
+			self.assertRaises(frappe.PermissionError, fix_uncancelled_entries, rows)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle, "is_cancelled"), 0)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", restricted_bundle, "docstatus"), 1)
+
+	def test_project_user_permission(self):
+		projects = []
+		for project_name in ("USLE Project A", "USLE Project B"):
+			if not frappe.db.exists("Project", {"project_name": project_name}):
+				frappe.get_doc(
+					{"doctype": "Project", "project_name": project_name, "company": "_Test Company"}
+				).insert()
+
+			projects.append(frappe.db.get_value("Project", {"project_name": project_name}))
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			rate=100,
+			to_warehouse="Stores - _TC",
+			posting_date="2026-06-01",
+			do_not_save=True,
+		)
+		entry.project = projects[0]
+		entry.insert()
+		entry.submit()
+		self.assertEqual(
+			frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name}, "project"), projects[0]
+		)
+		entry.cancel()
+
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name, "actual_qty": 5})
+		frappe.db.set_value("Stock Ledger Entry", sle, "is_cancelled", 0)
+
+		user = make_stock_manager("sle-cancelled-voucher-project@example.com")
+		add_user_permission("Project", projects[1], user)
+
+		frappe.set_user(user)
+		try:
+			self.assertFalse([d for d in self.run_report() if d.voucher_no == entry.name])
+			self.assertRaises(
+				frappe.PermissionError,
+				fix_uncancelled_entries,
+				[{"voucher_type": "Stock Entry", "voucher_no": entry.name}],
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle, "is_cancelled"), 0)
+
 	def test_company_is_mandatory(self):
 		self.assertRaises(frappe.ValidationError, execute, frappe._dict())
 
