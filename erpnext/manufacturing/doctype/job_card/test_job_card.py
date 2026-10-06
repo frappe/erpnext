@@ -512,6 +512,49 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.reload()
 		self.assertEqual(job_card.transferred_qty, 0.0)
 
+	def test_repeated_operation_in_bom_matches_items_on_operation_row(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		cutting, stitching = "_Test Row Cutting", "_Test Row Stitching"
+		for operation in (cutting, stitching):
+			make_operation(operation=operation, workstation="_Test Workstation 1")
+		raw_a, raw_b, finished_good = (
+			create_item(f"_Test Operation Row {name}").name for name in ("RM A", "RM B", "FG")
+		)
+
+		bom = frappe.new_doc(
+			"BOM", item=finished_good, quantity=1, with_operations=1, company="_Test Company"
+		)
+		for operation in (cutting, stitching, cutting):
+			bom.append(
+				"operations",
+				{"operation": operation, "workstation": "_Test Workstation 1", "time_in_mins": 60},
+			)
+		bom.append("items", {"item_code": raw_a, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": raw_a, "qty": 2, "operation_row_id": 3})
+		bom.append("items", {"item_code": raw_b, "qty": 1, "operation_row_id": 2})
+		bom.submit()
+		self.assertEqual([item.operation for item in bom.items], [cutting, cutting, stitching])
+
+		work_order = make_wo_order_test_record(
+			item=finished_good, bom_no=bom.name, qty=2, transfer_material_against="Job Card"
+		)
+
+		required_items = {}
+		for job_card in frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, fields=["name", "operation_row_id"]
+		):
+			required_items[job_card.operation_row_id] = dict(
+				frappe.get_all(
+					"Job Card Item",
+					filters={"parent": job_card.name},
+					fields=["item_code", "required_qty"],
+					as_list=True,
+				)
+			)
+
+		self.assertEqual(required_items, {1: {raw_a: 2}, 2: {raw_b: 2}, 3: {raw_a: 4}})
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
