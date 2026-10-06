@@ -520,6 +520,14 @@ def make_sales_invoice(
 
 		return pending_qty_by_item[source.name]
 
+	def is_qty_billed_below_amount(source):
+		invoiced = get_invoiced_qty_by_item().get(source.name, frappe._dict())
+		return (
+			source.name not in mapped_qty_by_item
+			and flt(flt(source.qty) - flt(invoiced.billed_qty), source.precision("qty")) <= 0
+			and abs(flt(source.billed_amt)) < abs(flt(source.amount))
+		)
+
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
@@ -652,8 +660,10 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or is_amount_billable(doc))
-						and get_pending_qty(doc) > 0
+						and (
+							((doc.base_amount == 0 or is_amount_billable(doc)) and get_pending_qty(doc) > 0)
+							or is_qty_billed_below_amount(doc)
+						)
 					)
 				),
 			},
