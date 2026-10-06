@@ -110,6 +110,46 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_cheque_book, self.bank_account, "CB-2", "101", "105")
 		make_cheque_book(self.bank_account, "CB-3", "000106", "000110")
 
+	def test_draft_account_change_locks_both_accounts_before_the_book(self):
+		other_account = make_company_bank_account("_Test Other Cheque Bank", "_Test Other Cheque Account")
+		book = make_cheque_book(self.bank_account, "CB-MOVE", "000201", "000205", submit=False)
+		book.bank_account = other_account
+		locked_accounts = []
+		original_get_value, original_get_doc = frappe.db.get_value, frappe.get_doc
+
+		def get_value(*args, **kwargs):
+			if args[0] == "Bank Account" and kwargs.get("for_update"):
+				locked_accounts.append(args[1])
+			return original_get_value(*args, **kwargs)
+
+		def get_doc(*args, **kwargs):
+			if args[:2] == ("Cheque Book", book.name) and kwargs.get("for_update"):
+				self.assertEqual(locked_accounts, sorted([self.bank_account, other_account]))
+			return original_get_doc(*args, **kwargs)
+
+		with (
+			patch.object(frappe.db, "get_value", side_effect=get_value),
+			patch.object(frappe, "get_doc", side_effect=get_doc),
+		):
+			book.save()
+		self.assertEqual(frappe.db.get_value("Cheque Book", book.name, "bank_account"), other_account)
+
+	def test_payment_retries_if_book_account_mapping_changed_before_locking(self):
+		payment = self.make_cheque_payment("000101", submit=False)
+		other_account = make_company_bank_account("_Test Other Cheque Bank", "_Test Other Cheque Account")
+		original_get_value = frappe.db.get_value
+
+		def get_value(*args, **kwargs):
+			# Simulate an outdated link read before locking the current book.
+			if args[:3] == ("Cheque Book", self.book.name, "bank_account"):
+				return other_account
+			return original_get_value(*args, **kwargs)
+
+		with patch.object(frappe.db, "get_value", side_effect=get_value):
+			with self.assertRaises(frappe.TimestampMismatchError):
+				payment.submit()
+		self.assertIsNone(get_cheque_usage(self.book.name, "000101"))
+
 	def test_next_cheque_book_no_is_suggested(self):
 		# the only book of this account is named CB-1, so there is no number to follow
 		self.assertEqual(get_next_cheque_book_no(self.bank_account), "01")

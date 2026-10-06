@@ -6,8 +6,13 @@ from threading import Barrier, Event
 from unittest.mock import patch
 
 import frappe
+from frappe.database.database import Database
 
-from erpnext.accounts.doctype.cheque_book.cheque_book import get_occupied_cheque_nos, validate_cheque
+from erpnext.accounts.doctype.cheque_book.cheque_book import (
+	ChequeBook,
+	get_occupied_cheque_nos,
+	validate_cheque,
+)
 from erpnext.accounts.doctype.cheque_book.test_cheque_book import (
 	make_cheque_book,
 	make_company_bank_account,
@@ -40,7 +45,8 @@ class TestChequeUsageConcurrency(ERPNextTestSuite):
 
 	def clean_up_committed_records(self):
 		frappe.db.rollback()
-		for name in frappe.get_all("Payment Entry", filters={"cheque_book": self.book.name}, pluck="name"):
+		books = frappe.get_all("Cheque Book", filters={"bank_account": self.bank_account}, pluck="name")
+		for name in frappe.get_all("Payment Entry", filters={"cheque_book": ("in", books)}, pluck="name"):
 			payment = frappe.get_doc("Payment Entry", name)
 			if payment.docstatus == 1:
 				payment.cancel()
@@ -48,9 +54,11 @@ class TestChequeUsageConcurrency(ERPNextTestSuite):
 			for doctype in ("GL Entry", "Payment Ledger Entry"):
 				frappe.db.delete(doctype, {"voucher_type": "Payment Entry", "voucher_no": name})
 			payment.delete()
-		book = frappe.get_doc("Cheque Book", self.book.name)
-		book.cancel()
-		book.delete()
+		for name in books:
+			book = frappe.get_doc("Cheque Book", name)
+			if book.docstatus == 1:
+				book.cancel()
+			book.delete()
 		frappe.delete_doc("Bank Account", self.bank_account)
 		frappe.delete_doc("Account", self.book.account)
 		frappe.db.commit()
@@ -88,6 +96,84 @@ class TestChequeUsageConcurrency(ERPNextTestSuite):
 		finally:
 			frappe.db.rollback()
 			frappe.destroy()
+
+	def test_book_save_does_not_deadlock_with_payment_from_another_book(self):
+		draft = make_cheque_book(self.bank_account, "DRAFT", "000201", "000205", submit=False)
+		payment = self.make_payment("000101")
+		frappe.db.commit()
+		self.check_concurrent_book_save(draft, lambda: frappe.get_doc("Payment Entry", payment.name).submit())
+		frappe.db.rollback()
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 1)
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
+
+	def test_two_draft_books_can_be_saved_without_deadlocking(self):
+		first = make_cheque_book(self.bank_account, "DRAFT-1", "000201", "000205", submit=False)
+		second = make_cheque_book(self.bank_account, "DRAFT-2", "000301", "000305", submit=False)
+		frappe.db.commit()
+		self.check_concurrent_book_save(first, lambda: frappe.get_doc("Cheque Book", second.name).save())
+
+	def test_concurrent_overlapping_books_have_one_winner(self):
+		barrier = Barrier(2)
+
+		def create_book(number):
+			if not frappe.flags.cheque_test_attempt:
+				# Establish snapshots before either creation can lock the account.
+				frappe.db.get_value("Cheque Book", self.book.name, "cheque_end_no")
+				barrier.wait(timeout=10)
+			try:
+				return make_cheque_book(self.bank_account, number, "000201", "000205").name
+			except frappe.ValidationError as error:
+				if "overlaps" not in str(error):
+					raise
+				frappe.db.rollback()
+
+		with ThreadPoolExecutor(max_workers=2) as pool:
+			futures = [
+				pool.submit(self.run_transaction, lambda number=number: create_book(number))
+				for number in ("OVERLAP-1", "OVERLAP-2")
+			]
+			self.assertEqual(sum(bool(future.result(timeout=20)) for future in futures), 1)
+		frappe.db.rollback()
+		self.assertEqual(
+			frappe.db.count("Cheque Book", {"bank_account": self.bank_account, "cheque_start_no": "000201"}),
+			1,
+		)
+
+	def check_concurrent_book_save(self, draft, other_action):
+		account_locked, other_account_requested = Event(), Event()
+		original_overlap = ChequeBook.validate_overlapping_range
+		original_get_value = Database.get_value
+
+		def overlap(book):
+			if book.name == draft.name and not frappe.flags.cheque_test_attempt:
+				# The save owns the Bank Account, but has not locked the sibling book yet.
+				account_locked.set()
+				self.assertTrue(other_account_requested.wait(10))
+			original_overlap(book)
+
+		def get_value(db, doctype, *args, **kwargs):
+			if (
+				doctype == "Bank Account"
+				and kwargs.get("for_update")
+				and frappe.flags.cheque_test_other_operation
+			):
+				other_account_requested.set()
+			return original_get_value(db, doctype, *args, **kwargs)
+
+		def run_other():
+			frappe.flags.cheque_test_other_operation = True
+			return other_action()
+
+		with (
+			patch.object(ChequeBook, "validate_overlapping_range", overlap),
+			patch.object(Database, "get_value", get_value),
+			ThreadPoolExecutor(max_workers=2) as pool,
+		):
+			save = pool.submit(self.run_transaction, lambda: frappe.get_doc("Cheque Book", draft.name).save())
+			self.assertTrue(account_locked.wait(10))
+			other = pool.submit(self.run_transaction, run_other)
+			save.result(timeout=20)
+			other.result(timeout=20)
 
 	def test_submission_does_not_wait_for_a_higher_payment_being_cancelled(self):
 		later = self.make_payment("000150", submit=True)

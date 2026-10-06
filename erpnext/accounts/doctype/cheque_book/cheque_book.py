@@ -37,6 +37,16 @@ class ChequeBook(Document):
 		if self.bank_account:
 			return frappe.db.get_value("Bank Account", self.bank_account, "account")
 
+	def check_if_latest(self):
+		# Frappe locks this book in the parent method, before validate/before_validate.
+		# Lock accounts first, including both sides of a draft's account change.
+		bank_accounts = {self.bank_account}
+		if not self.is_new():
+			bank_accounts.add(frappe.db.get_value("Cheque Book", self.name, "bank_account"))
+		for bank_account in sorted(filter(None, bank_accounts)):
+			frappe.db.get_value("Bank Account", bank_account, "name", for_update=True)
+		super().check_if_latest()
+
 	def validate(self):
 		self.validate_bank_account()
 		self.validate_cheque_range()
@@ -305,15 +315,21 @@ def validate_cheque(payment_entry):
 			frappe.throw(_("Please select a Cheque Book"))
 		return
 
-	# Existing documents are locked by Frappe before validation: book, then bank account.
-	book = frappe.get_doc("Cheque Book", doc.cheque_book, for_update=doc.docstatus == 1)
+	# Match Cheque Book saves: account first, then book, then usage. Reading the
+	# link without locking avoids acquiring the book before its account.
+	bank_account_name = frappe.db.get_value("Cheque Book", doc.cheque_book, "bank_account")
 	bank_account = frappe.db.get_value(
 		"Bank Account",
-		book.bank_account,
+		{"name": bank_account_name},
 		["account", "company", "is_company_account", "disabled"],
 		as_dict=True,
 		for_update=doc.docstatus == 1,
 	)
+	book = frappe.get_doc("Cheque Book", doc.cheque_book, for_update=doc.docstatus == 1)
+	if book.bank_account != bank_account_name:
+		frappe.throw(
+			_("Cheque Book has changed. Please reload and try again."), frappe.TimestampMismatchError
+		)
 
 	if not bank_account or not bank_account.is_company_account:
 		frappe.throw(_("Bank Account {0} is not a Company Account").format(frappe.bold(book.bank_account)))
