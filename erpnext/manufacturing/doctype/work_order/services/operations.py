@@ -308,25 +308,33 @@ class OperationsService:
 
 		return holidays[holiday_list]
 
-	def update_operation_status(self):
+	def update_operation_status(self, operation_id=None):
+		for d in self.doc.get("operations"):
+			if d.name == operation_id:
+				self.validate_operation_overproduction(d)
+
+			d.status = self._operation_status(d)
+
+	def validate_operation_overproduction(self, d):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		max_allowed_qty_for_wo = flt(self.doc.qty) + (allowance_percentage / 100 * flt(self.doc.qty))
 
-		for d in self.doc.get("operations"):
-			d.status = self._operation_status(d, max_allowed_qty_for_wo)
+		if self._operation_qty(d) > flt(max_allowed_qty_for_wo, d.precision("completed_qty")):
+			frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
 
-	def _operation_status(self, d, max_allowed_qty_for_wo):
-		precision = d.precision("completed_qty")
-		qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
+	def _operation_status(self, d):
+		qty = self._operation_qty(d)
 		if not qty:
 			return "Pending"
-		if qty < flt(self.doc.qty, precision):
+		if qty < flt(self.doc.qty, d.precision("completed_qty")):
 			return "Work in Progress"
-		if qty <= flt(max_allowed_qty_for_wo, precision):
-			return "Completed"
-		frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
+		return "Completed"
+
+	def _operation_qty(self, d):
+		precision = d.precision("completed_qty")
+		return flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
 
 	def set_actual_dates(self):
 		if self.doc.get("operations"):

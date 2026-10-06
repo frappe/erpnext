@@ -1010,8 +1010,8 @@ class WorkOrder(Document):
 	def set_operation_warehouses(self):
 		return OperationsService(self).set_operation_warehouses()
 
-	def update_operation_status(self):
-		return OperationsService(self).update_operation_status()
+	def update_operation_status(self, operation_id=None):
+		return OperationsService(self).update_operation_status(operation_id)
 
 	def set_actual_dates(self):
 		return OperationsService(self).set_actual_dates()
