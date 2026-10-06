@@ -14,7 +14,9 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_
 def update_last_purchase_rate(doc, is_submit) -> None:
 	"""updates last_purchase_rate in item table for each item"""
 
-	if doc.get("is_internal_supplier"):
+	if doc.get("is_internal_supplier") or frappe.db.get_single_value(
+		"Buying Settings", "disable_last_purchase_rate"
+	):
 		return
 
 	this_purchase_date = getdate(doc.get("posting_date") or doc.get("transaction_date"))
@@ -60,7 +62,13 @@ def validate_for_items(doc) -> None:
 
 def validate_duplicate_items(doc) -> None:
 	rows = [
-		(row.item_code, row.get("purchase_receipt"), row.get("purchase_order"))
+		(
+			row.item_code,
+			row.get("purchase_receipt"),
+			row.get("purchase_order"),
+			row.get("material_request"),
+			row.get("supplier_quotation"),
+		)
 		for row in doc.get("items")
 		if row.item_code
 	]

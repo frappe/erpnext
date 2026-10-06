@@ -51,7 +51,6 @@ from erpnext.accounts.utils import (
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
-	get_supplier_block_status,
 	validate_taxes_and_charges,
 )
 from erpnext.setup.utils import get_exchange_rate
@@ -2064,18 +2063,10 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	accounting_dimensions_filter = []
 	posting_and_due_date = []
 
-	# confirm that Supplier is not blocked
-	if args.get("party_type") == "Supplier":
-		supplier_status = get_supplier_block_status(args["party"])
-		if supplier_status["on_hold"]:
-			if supplier_status["hold_type"] == "All":
-				return []
-			elif supplier_status["hold_type"] == "Payments":
-				if (
-					not supplier_status["release_date"]
-					or getdate(nowdate()) <= supplier_status["release_date"]
-				):
-					return []
+	if args.get("party_type") == "Supplier" and frappe.get_lazy_doc("Supplier", args["party"]).is_blocked_for(
+		"Payments"
+	):
+		return []
 
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.get_cached_value("Company", args.get("company"), "default_currency")
