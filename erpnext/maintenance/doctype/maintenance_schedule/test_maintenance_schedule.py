@@ -6,11 +6,13 @@ from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, getdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	get_serial_no_query,
 	get_serial_nos_from_schedule,
 	make_maintenance_visit,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -171,6 +173,51 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		first.submit()
 
 		self.assertRaises(frappe.ValidationError, make_maintenance_schedule, sales_order=so.name)
+
+	def test_maintenance_roles_can_make_visits_from_schedule(self):
+		ms = make_maintenance_schedule()
+		ms.submit()
+
+		for index, role in enumerate(("Maintenance User", "Maintenance Manager")):
+			user = make_fenced_user(f"schedule-visit-{index}@example.com", [role])
+			with as_user(user):
+				visit = make_maintenance_visit(source_name=ms.name, s_id=ms.schedules[index].name)
+				visit.completion_status = "Partially Completed"
+				visit.purposes[0].work_done = "Serviced"
+				visit.insert()
+				visit.submit()
+
+			self.assertEqual(visit.docstatus, 1)
+
+	def test_serial_no_query_needs_schedule_read(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		filters = {"item_code": item_code, "schedule": ms.name}
+		sales_user = make_fenced_user("schedule-serial-sales@example.com", ["Sales User"])
+		maintenance_user = make_fenced_user("schedule-serial-maintenance@example.com", ["Maintenance User"])
+
+		with as_user(sales_user):
+			self.assertRaises(
+				frappe.PermissionError, get_serial_no_query, "Serial No", "", "name", 0, 20, filters
+			)
+		with as_user(maintenance_user):
+			serial_nos = get_serial_no_query("Serial No", "", "name", 0, 20, filters)
+		self.assertEqual([row[1] for row in serial_nos], ["TEST001"])
+
+	def test_maintenance_manager_can_submit_schedule_with_serials(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		maintenance_manager = make_fenced_user("schedule-serial-manager@example.com", ["Maintenance Manager"])
+
+		with as_user(maintenance_manager):
+			ms.submit()
+
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": "TEST001"})
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial_no, "amc_expiry_date"), getdate(ms.items[0].end_date)
+		)
 
 	def test_validate_schedule_date_skips_holiday(self):
 		# validate_schedule_date_for_holiday_list reads the holiday list via the converted

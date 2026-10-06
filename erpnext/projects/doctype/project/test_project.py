@@ -7,6 +7,7 @@ import frappe
 from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.projects.doctype.project.project import create_kanban_board_if_not_exists, get_cost_center_name
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.mapper import make_project as make_project_from_so
@@ -709,6 +710,28 @@ class TestProject(ERPNextTestSuite):
 		project.save()
 		self.assertFalse(project.has_permission(user=leaves))
 		self.assertTrue(project.has_permission(user=stays))
+
+	def test_kanban_board_needs_project_read(self):
+		project = make_project({"project_name": f"_Test Kanban Access {frappe.generate_hash(length=6)}"})
+		stock_user = self._create_portal_user(f"kanban_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", stock_user).add_roles("Stock User")
+
+		with self.set_user(stock_user):
+			self.assertRaises(frappe.PermissionError, create_kanban_board_if_not_exists, project.name)
+
+		self.assertFalse(frappe.db.exists("Kanban Board", project.project_name))
+
+	def test_cost_center_name_needs_project_access(self):
+		project = make_project({"project_name": f"_Test Cost Center Access {frappe.generate_hash(length=6)}"})
+		project.db_set("cost_center", "_Test Cost Center - _TC")
+		website_user = self._create_portal_user(f"cost_center_{frappe.generate_hash(length=6)}@example.com")
+		sales_user = self._create_portal_user(f"cost_center_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", sales_user).add_roles("Sales User")
+
+		with self.set_user(sales_user):
+			self.assertEqual(get_cost_center_name(project.name), "_Test Cost Center - _TC")
+		with self.set_user(website_user):
+			self.assertRaises(frappe.PermissionError, get_cost_center_name, project.name)
 
 
 def get_project(name, template):

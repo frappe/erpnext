@@ -621,6 +621,7 @@ def get_users_for_project(doctype: str, txt: str, searchfield: str, start: int, 
 
 @frappe.whitelist()
 def get_cost_center_name(project: str):
+	frappe.has_permission("Project", "select", project, throw=True)
 	return frappe.db.get_value("Project", project, "cost_center")
 
 
@@ -875,6 +876,7 @@ def create_kanban_board_if_not_exists(project: str):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
 	project = frappe.get_doc("Project", project)
+	project.check_permission("read")
 	if not frappe.db.exists("Kanban Board", project.project_name):
 		quick_kanban_board("Task", project.project_name, "status", project.name)
 

@@ -348,7 +348,7 @@ class MaintenanceSchedule(TransactionBase):
 		for serial_no in serial_nos:
 			serial_no_doc = frappe.get_doc("Serial No", serial_no)
 			serial_no_doc.amc_expiry_date = amc_expiry_date
-			serial_no_doc.save()
+			serial_no_doc.save(ignore_permissions=True)
 
 	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
 		delivery_dates = self.get_delivery_dates(item_code, serial_nos)
@@ -575,6 +575,7 @@ def get_serial_no_query(doctype: str, txt: str, searchfield: str, start: int, pa
 		return []
 	query_filters = {"item_code": filters["item_code"]}
 	if filters.get("schedule"):
+		frappe.has_permission("Maintenance Schedule", "read", doc=filters["schedule"], throw=True)
 		serial_ids = get_schedule_serial_ids(filters["item_code"], filters["schedule"])
 		if serial_ids:
 			query_filters["name"] = ("in", serial_ids)

@@ -242,7 +242,9 @@ def get_customers_suppliers(doctype, user):
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
 		suppliers = get_parents_for_user("Supplier")
 		customers = get_parents_for_user("Customer")
-	elif frappe.has_permission(doctype, "read", user=user):
+	elif frappe.has_permission(doctype, "read", user=user) and frappe.has_permission(
+		"Customer", "read", user=user
+	):
 		customer_list = frappe.get_list("Customer")
 		customers = suppliers = [customer.name for customer in customer_list]
 

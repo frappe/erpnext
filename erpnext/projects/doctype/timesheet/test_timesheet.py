@@ -186,6 +186,14 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(item.qty, 2.00)
 		self.assertEqual(item.rate, 50.00)
 
+	def test_sales_invoice_from_timesheet_needs_timesheet_read(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+		sales_user = make_fenced_user("timesheet-invoice-sales@example.com", ["Sales User"])
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, timesheet.name)
+
 	@ERPNextTestSuite.change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
 	def test_timesheet_billing_based_on_project(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")

@@ -35,11 +35,12 @@ def get_subcontracted_orders(report_filters):
 		"`tabSubcontracting Order Item`.`name`",
 		"`tabSubcontracting Order Item`.`received_qty`",
 		"`tabSubcontracting Order`.`status`",
+		"`tabSubcontracting Order`.`supplier`",
 	]
 
 	filters = get_filters(report_filters)
 
-	return frappe.get_all("Subcontracting Order", fields=fields, filters=filters) or []
+	return frappe.get_list("Subcontracting Order", fields=fields, filters=filters) or []
 
 
 def get_filters(report_filters):
@@ -122,6 +123,13 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"options": "Subcontracting Order",
 			"width": 100,
+		},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"fieldtype": "Link",
+			"options": "Supplier",
+			"width": 120,
 		},
 		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 80},
 		{
