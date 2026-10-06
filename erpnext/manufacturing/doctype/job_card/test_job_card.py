@@ -449,6 +449,45 @@ class TestJobCard(FrappeTestCase):
 			required_items, {sub_assembly_bom: {raw_a: 2}, finished_good_bom: {raw_a: 4, raw_b: 2}}
 		)
 
+	def test_repeated_operation_keeps_edited_work_order_items(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		make_operation(operation="_Test Repeated Cutting", workstation="_Test Workstation 1")
+		raw_a, raw_b, sub_assembly, finished_good = (
+			create_item(f"_Test Repeated Operation {name}").name for name in ("RM A", "RM B", "SA", "FG")
+		)
+		sub_assembly_bom = create_bom_with_cutting(sub_assembly, [(raw_a, 1, None)])
+		finished_good_bom = create_bom_with_cutting(
+			finished_good, [(sub_assembly, 1, sub_assembly_bom), (raw_b, 1, None)]
+		)
+
+		with change_settings(
+			"Manufacturing Settings", {"allow_editing_of_items_and_quantities_in_work_order": 1}
+		):
+			work_order = make_wo_order_test_record(
+				item=finished_good,
+				bom_no=finished_good_bom,
+				qty=1,
+				use_multi_level_bom=1,
+				transfer_material_against="Job Card",
+				do_not_submit=1,
+			)
+			work_order.required_items[1].item_code = raw_b
+			work_order.submit()
+
+		required_items = {}
+		for job_card in frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, fields=["name", "operation_id"]
+		):
+			bom = frappe.db.get_value("Work Order Operation", job_card.operation_id, "bom")
+			required_items[bom] = frappe.get_all(
+				"Job Card Item", filters={"parent": job_card.name}, pluck="item_code"
+			)
+
+		self.assertEqual(
+			required_items, {sub_assembly_bom: [raw_b, raw_b], finished_good_bom: [raw_b, raw_b]}
+		)
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
