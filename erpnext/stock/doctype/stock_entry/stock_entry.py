@@ -247,6 +247,7 @@ class StockEntry(StockController):
 		self.validate_batch()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_finished_good_qty_against_fg_completed_qty()
 		self.validate_difference_account()
 		self.set_job_card_data()
 		self.validate_job_card_item()
@@ -777,6 +778,40 @@ class StockEntry(StockController):
 						"The finished product {0} quantity {1} and For Quantity {2} cannot be different"
 					).format(frappe.bold(item_code), frappe.bold(total), frappe.bold(self.fg_completed_qty))
 				)
+
+	def validate_finished_good_qty_against_fg_completed_qty(self):
+		if self.purpose not in ("Manufacture", "Repack"):
+			return
+
+		if not (self.from_bom and self.bom_no and flt(self.fg_completed_qty)):
+			return
+
+		precision = self.precision("process_loss_qty")
+		finished_qty = flt(self.get_bom_item_finished_qty(), precision)
+		fg_completed_qty = flt(self.fg_completed_qty, precision)
+
+		# raw materials are fetched and consumed for Finished Good Quantity, so making more than
+		# that would book finished goods without the material (and value) behind them
+		if finished_qty > fg_completed_qty:
+			frappe.throw(
+				_(
+					"The finished good rows receive {0}, which is more than the Finished Good Quantity {1}. Set Finished Good Quantity to {0} and get the items again, or reduce the finished good rows."
+				).format(frappe.bold(finished_qty), frappe.bold(fg_completed_qty)),
+				title=_("Finished Good Quantity Exceeded"),
+				exc=FinishedGoodError,
+			)
+
+	def get_bom_item_finished_qty(self):
+		"""Received qty of the BOM item and its variants. Other Repack outputs do not count."""
+		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
+		return sum(
+			flt(row.qty) * flt(row.conversion_factor)
+			for row in self.items
+			if row.is_finished_item
+			and row.t_warehouse
+			and not row.s_warehouse
+			and bom_item in (row.item_code, frappe.get_cached_value("Item", row.item_code, "variant_of"))
+		)
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):

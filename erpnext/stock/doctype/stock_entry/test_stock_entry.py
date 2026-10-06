@@ -3666,6 +3666,33 @@ class TestStockEntry(FrappeTestCase):
 		# delete naming rule
 		frappe.delete_doc("Document Naming Rule", qc_naming_rule.name)
 
+	def test_from_bom_entry_rejects_finished_good_qty_above_fg_completed_qty(self):
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item", "is_default": 1, "docstatus": 1})
+		self.assertTrue(bom_no)
+
+		for purpose in ("Manufacture", "Repack"):
+			se = frappe.new_doc("Stock Entry")
+			se.update({"purpose": purpose, "from_bom": 1, "bom_no": bom_no, "fg_completed_qty": 100})
+			se.append(
+				"items",
+				{
+					"item_code": "_Test FG Item",
+					"qty": 101,
+					"conversion_factor": 1,
+					"t_warehouse": "_Test Warehouse - _TC",
+					"is_finished_item": 1,
+				},
+			)
+
+			self.assertRaisesRegex(
+				FinishedGoodError,
+				"more than the Finished Good Quantity",
+				se.validate_finished_good_qty_against_fg_completed_qty,
+			)
+
+			se.items[0].qty = 100
+			se.validate_finished_good_qty_against_fg_completed_qty()
+
 	def test_process_loss_percentage_resyncs_from_qty(self):
 		# changing fg qty recomputes process_loss_qty
 		se = frappe.new_doc("Stock Entry")
