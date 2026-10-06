@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.utils import flt
+from frappe.utils.caching import request_cache
 
 
 class OperationMaterialShares:
@@ -24,16 +25,28 @@ class OperationMaterialShares:
 		if len(boms) < 2:
 			return {}
 
-		self.load_bom_tree()
 		qty_by_bom = defaultdict(dict)
-		for (item_code, operation, bom), qty in self.get_material_qty(self.work_order.bom_no).items():
+		for (item_code, operation, bom), qty in get_material_qty_by_owner(self.work_order.bom_no).items():
 			if qty and operation == row.operation and bom in boms:
 				qty_by_bom[(item_code, operation)][bom] = qty
 
 		return {key: flt(qty.get(row.bom)) / sum(qty.values()) for key, qty in qty_by_bom.items()}
 
-	def load_bom_tree(self):
-		self.items_by_bom, pending = {}, {self.work_order.bom_no}
+
+@request_cache
+def get_material_qty_by_owner(bom_no: str) -> dict[tuple[str, str, str], float]:
+	"""Qty per unit of `bom_no`, keyed by (item_code, operation, BOM whose operation consumes it)."""
+	return BOMMaterialOwners(bom_no).get_material_qty(bom_no)
+
+
+class BOMMaterialOwners:
+	"""Traces the materials of a BOM tree to the BOM whose operation consumes them."""
+
+	def __init__(self, bom_no: str):
+		self.load_bom_tree(bom_no)
+
+	def load_bom_tree(self, bom_no: str):
+		self.items_by_bom, pending = {}, {bom_no}
 		while pending:
 			items = frappe.get_all(
 				"BOM Item",
