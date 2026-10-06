@@ -3631,6 +3631,64 @@ class TestProductionPlan(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	def test_shared_batch_delivered_qty_split_per_reservation_on_transfer(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+			reserve_stock_for_production_plan,
+		)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = "Shared Batch RM For SR Split"
+		parent_bom = create_nested_bom({"Shared Batch FG For SR Split": {rm_item: {}}}, prefix="")
+		item = frappe.get_doc("Item", rm_item)
+		item.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BCH-SR-SPLIT-.#####"})
+		item.save()
+
+		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+		plan.submit()
+
+		# A second reservation on the same row picks up the same batch
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=6, basic_rate=100, batch_no=batch_no)
+		reserve_stock_for_production_plan(plan, table_name="mr_items")
+
+		source_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+		self.assertEqual(sorted(row.sabb_qty for row in source_entries), [4, 6])
+		self.assertEqual({row.batch_no for row in source_entries}, {batch_no})
+
+		def batch_delivered_qty():
+			return {
+				row.name: frappe.db.get_value(
+					"Serial and Batch Entry", {"parent": row.name, "batch_no": batch_no}, "delivered_qty"
+				)
+				for row in source_entries
+			}
+
+		plan.make_work_order()
+		wo = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		wo.source_warehouse = wo.wip_warehouse = wo.fg_warehouse = warehouse
+		wo.submit()
+
+		self.assertEqual(batch_delivered_qty(), {row.name: row.sabb_qty for row in source_entries})
+
+		wo.cancel()
+		self.assertEqual(batch_delivered_qty(), {row.name: 0 for row in source_entries})
+
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
