@@ -7,6 +7,11 @@ from frappe.model.document import Document
 from frappe.utils import get_link_to_form
 
 from erpnext.accounts.doctype.cheque_book.cheque_book import ChequeBook
+from erpnext.accounts.doctype.cheque_usage.cheque_usage import (
+	claim_cheque,
+	get_cheque_usage,
+	release_cheque,
+)
 
 
 class CancelledCheque(Document):
@@ -42,14 +47,11 @@ class CancelledCheque(Document):
 				)
 			)
 
-		if payment_entry := frappe.db.get_value(
-			"Payment Entry",
-			{"cheque_book": book.name, "reference_no": self.cheque_no, "docstatus": 1},
-			for_update=True,
-		):
+		usage = get_cheque_usage(book.name, self.cheque_no, for_update=True)
+		if usage and usage.source_type == "Payment Entry":
 			frappe.throw(
 				_("Cheque No {0} is used in {1}. Cancel the Payment Entry first.").format(
-					frappe.bold(self.cheque_no), get_link_to_form("Payment Entry", payment_entry)
+					frappe.bold(self.cheque_no), get_link_to_form("Payment Entry", usage.source_name)
 				)
 			)
 
@@ -73,14 +75,16 @@ class CancelledCheque(Document):
 					)
 				)
 
-	def after_insert(self):
-		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).advance_next_cheque_no(
-			self.cheque_no
-		)
+	def on_update(self):
+		# Also keeps the displayed cancellation reason current when a record is edited.
+		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
+		claim_cheque(book, self.cheque_no, self.doctype, self.name, self.reason)
+		book.advance_next_cheque_no(self.cheque_no)
 
 	def on_trash(self):
 		# Lock before removal so submission cannot race with freeing this cheque.
-		frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
+		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
+		release_cheque(book, self.cheque_no, self.doctype, self.name)
 
 	def after_delete(self):
 		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).advance_next_cheque_no(

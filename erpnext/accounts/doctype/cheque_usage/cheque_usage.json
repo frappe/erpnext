@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "autoname": "format:{cheque_book}-{cheque_no}",
+ "creation": "2026-10-06 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cheque_book",
+  "cheque_no",
+  "source_type",
+  "source_name",
+  "reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "cheque_book",
+   "fieldtype": "Link",
+   "label": "Cheque Book",
+   "options": "Cheque Book",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "label": "Cheque No",
+   "length": 6,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_type",
+   "fieldtype": "Select",
+   "label": "Source Type",
+   "options": "Payment Entry\nCancelled Cheque",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "label": "Source Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Data",
+   "label": "Reason",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-06 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cheque Usage",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

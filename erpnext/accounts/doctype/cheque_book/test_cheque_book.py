@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.cheque_book.cheque_book import (
 	get_occupied_cheque_nos,
 	is_cheque_payment,
 )
+from erpnext.accounts.doctype.cheque_usage.cheque_usage import get_cheque_usage, release_cheque
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -283,6 +284,8 @@ class TestChequeBook(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 2)
 		cancelled = frappe.get_doc("Cancelled Cheque", f"{self.book.name}-000101")
+		usage = get_cheque_usage(self.book.name, "000101")
+		self.assertEqual((usage.source_type, usage.source_name), ("Cancelled Cheque", cancelled.name))
 		self.assertEqual(
 			(cancelled.payment_entry, cancelled.reason, cancelled.remarks),
 			(payment.name, "Spoiled", "Printer jam"),
@@ -313,6 +316,7 @@ class TestChequeBook(ERPNextTestSuite):
 		frappe.db.rollback(save_point="cheque_cancellation")
 		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 1)
 		self.assertFalse(frappe.db.exists("Cancelled Cheque", f"{self.book.name}-000101"))
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
 
 	def test_finished_book_reopens_when_cancelled_cheque_is_deleted(self):
 		cancelled = [
@@ -460,18 +464,13 @@ class TestChequeBook(ERPNextTestSuite):
 		with patch.object(frappe, "get_doc", wraps=frappe.get_doc) as get_doc:
 
 			def check_usage(*args, **kwargs):
-				if (
-					args
-					and args[0] == "Payment Entry"
-					and isinstance(args[1], dict)
-					and args[1].get("cheque_book") == self.book.name
-				):
+				if args and args[0] == "Cheque Usage":
 					self.assertIn(
 						call("Cheque Book", self.book.name, for_update=True), get_doc.call_args_list
 					)
 					self.assertTrue(kwargs.get("for_update"))
-				if args and args[0] == "Cancelled Cheque" and args[1] == f"{self.book.name}-000102":
-					self.assertTrue(kwargs.get("for_update"))
+				if args and args[0] == "Payment Entry":
+					self.assertFalse(kwargs.get("for_update"))
 				return original_get_value(*args, **kwargs)
 
 			with patch.object(frappe.db, "get_value", side_effect=check_usage):
@@ -482,9 +481,7 @@ class TestChequeBook(ERPNextTestSuite):
 		with patch.object(frappe, "get_doc", wraps=frappe.get_doc) as get_doc:
 
 			def check_usage(*args, **kwargs):
-				if args[:3] == ("Cancelled Cheque", f"{self.book.name}-000101", "reason") and kwargs.get(
-					"for_update"
-				):
+				if args[:2] == ("Cheque Usage", f"{self.book.name}-000101") and kwargs.get("for_update"):
 					self.assertIn(
 						call("Cheque Book", self.book.name, for_update=True), get_doc.call_args_list
 					)
@@ -494,23 +491,62 @@ class TestChequeBook(ERPNextTestSuite):
 				payment = self.make_cheque_payment("000101")
 
 		self.assertIn(call("Cheque Book", self.book.name, for_update=True), get_doc.call_args_list)
-		self.assertIn(
-			call("Cancelled Cheque", f"{self.book.name}-000101", "reason", for_update=True),
-			get_value.call_args_list,
-		)
-		self.assertIn(
-			call(
-				"Payment Entry",
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
+		for args, kwargs in get_value.call_args_list:
+			if args and args[0] in ("Payment Entry", "Cancelled Cheque"):
+				self.assertFalse(kwargs.get("for_update"))
+
+	def test_usage_cannot_be_changed_from_the_form(self):
+		payment = self.make_cheque_payment("000101")
+		usage = frappe.get_doc("Cheque Usage", f"{self.book.name}-000101")
+		with self.assertRaises(frappe.ValidationError):
+			usage.save()
+		with self.assertRaises(frappe.ValidationError):
+			usage.delete()
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
+
+	def test_database_rejects_a_second_claim_even_with_a_different_name(self):
+		self.make_cheque_payment("000101")
+		frappe.db.savepoint("duplicate_cheque_usage")
+		with self.assertRaises(frappe.UniqueValidationError):
+			frappe.get_doc(
 				{
+					"doctype": "Cheque Usage",
+					"name": "different-usage-name",
 					"cheque_book": self.book.name,
-					"reference_no": "000101",
-					"name": ("!=", payment.name),
-					"docstatus": 1,
-				},
-				for_update=True,
-			),
-			get_value.call_args_list,
-		)
+					"cheque_no": "000101",
+					"source_type": "Cancelled Cheque",
+					"source_name": "another-document",
+				}
+			).db_insert()
+		frappe.db.rollback(save_point="duplicate_cheque_usage")
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_type, "Payment Entry")
+
+	def test_editing_cancellation_updates_the_usage_reason(self):
+		cancelled = cancel_cheque(self.book.name, "000101")
+		cancelled.reason = "Lost"
+		cancelled.save()
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").reason, "Lost")
+		with self.assertRaisesRegex(frappe.ValidationError, "Lost"):
+			self.make_cheque_payment("000101")
+
+	def test_releasing_another_documents_cheque_does_not_free_it(self):
+		payment = self.make_cheque_payment("000101")
+		book = frappe.get_doc("Cheque Book", self.book.name, for_update=True)
+		release_cheque(book, "000101", "Payment Entry", "wrong-payment")
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
+
+	def test_failed_submission_rolls_back_cheque_claim(self):
+		from erpnext.accounts.doctype.cheque_book.cheque_book import ChequeBook
+
+		payment = self.make_cheque_payment("000101", submit=False)
+		frappe.db.savepoint("failed_cheque_submission")
+		with patch.object(ChequeBook, "advance_next_cheque_no", side_effect=frappe.ValidationError("Failed")):
+			with self.assertRaises(frappe.ValidationError):
+				payment.submit()
+		frappe.db.rollback(save_point="failed_cheque_submission")
+		self.assertIsNone(get_cheque_usage(self.book.name, "000101"))
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 0)
 
 	def test_duplicate_cancelled_cheque_is_rejected(self):
 		cancel_cheque(self.book.name, "102")

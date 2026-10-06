@@ -6,6 +6,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, get_link_to_form
 
+from erpnext.accounts.doctype.cheque_usage.cheque_usage import claim_cheque, get_cheque_usage
+
 MAX_DIGITS = 6
 
 
@@ -131,7 +133,12 @@ class ChequeBook(Document):
 
 	def on_cancel(self):
 		# Submitted Payment Entries using this book already block the cancellation
-		if cheque_no := frappe.db.get_value("Cancelled Cheque", {"cheque_book": self.name}, "cheque_no"):
+		if cheque_no := frappe.db.get_value(
+			"Cheque Usage",
+			{"cheque_book": self.name, "source_type": "Cancelled Cheque"},
+			"cheque_no",
+			for_update=True,
+		):
 			frappe.throw(
 				_("Cannot cancel {0} because cheque {1} is marked as cancelled").format(
 					frappe.bold(self.name), frappe.bold(cheque_no)
@@ -157,14 +164,7 @@ class ChequeBook(Document):
 		return str(int(cheque_no) + 1).zfill(MAX_DIGITS)
 
 	def is_used(self, cheque_no):
-		return bool(
-			frappe.db.get_value("Cancelled Cheque", f"{self.name}-{cheque_no}", for_update=True)
-			or frappe.db.get_value(
-				"Payment Entry",
-				{"cheque_book": self.name, "reference_no": cheque_no, "docstatus": 1},
-				for_update=True,
-			)
-		)
+		return bool(get_cheque_usage(self.name, cheque_no, for_update=True))
 
 	def advance_next_cheque_no(self, cheque_no, *, freed=False):
 		"""Advance after use, or reopen a Finished book when a cheque is freed."""
@@ -197,28 +197,19 @@ class ChequeBook(Document):
 
 
 def get_occupied_cheque_nos(book, from_no=None, for_update=False):
-	issued_filters = {"cheque_book": book.name, "docstatus": 1}
-	cancelled_filters = {"cheque_book": book.name}
+	filters = {"cheque_book": book.name}
 	if from_no:
-		issued_filters["reference_no"] = (">=", from_no)
-		cancelled_filters["cheque_no"] = (">=", from_no)
+		filters["cheque_no"] = (">=", from_no)
 
-	issued = frappe.db.get_values(
-		"Payment Entry",
-		issued_filters,
-		"reference_no",
-		pluck=True,
-		for_update=for_update,
-	)
-	cancelled = frappe.db.get_values(
-		"Cancelled Cheque",
-		cancelled_filters,
+	numbers = frappe.db.get_values(
+		"Cheque Usage",
+		filters,
 		"cheque_no",
 		pluck=True,
 		for_update=for_update,
 	)
 	start, end = int(book.cheque_start_no), int(book.cheque_end_no)
-	return {int(no) for no in issued + cancelled if no and no.isdigit() and start <= int(no) <= end}
+	return {int(no) for no in numbers if no and no.isdigit() and start <= int(no) <= end}
 
 
 def count_free_cheques(book, for_update=False):
@@ -307,12 +298,11 @@ def validate_cheque(payment_entry):
 		return
 
 	if doc.docstatus == 1:
-		# Match Cheque Book validation's account-then-book lock order.
-		bank_account = frappe.db.get_value("Cheque Book", doc.cheque_book, "bank_account")
-		is_company_account, disabled = frappe.db.get_value(
-			"Bank Account", bank_account, ["is_company_account", "disabled"], for_update=True
-		)
+		# Existing documents are locked by Frappe before validation: book, then bank account.
 		book = frappe.get_doc("Cheque Book", doc.cheque_book, for_update=True)
+		is_company_account, disabled = frappe.db.get_value(
+			"Bank Account", book.bank_account, ["is_company_account", "disabled"], for_update=True
+		)
 	else:
 		book = frappe.get_doc("Cheque Book", doc.cheque_book)
 		is_company_account, disabled = frappe.db.get_value(
@@ -349,24 +339,20 @@ def validate_cheque(payment_entry):
 			)
 		)
 
-	if reason := frappe.db.get_value(
-		"Cancelled Cheque",
-		f"{book.name}-{doc.reference_no}",
-		"reason",
-		for_update=doc.docstatus == 1,
-	):
-		frappe.throw(_("Cheque No {0} is cancelled ({1})").format(frappe.bold(doc.reference_no), reason))
+	usage = get_cheque_usage(book.name, doc.reference_no, for_update=doc.docstatus == 1)
+	if usage:
+		if usage.source_type == "Cancelled Cheque":
+			frappe.throw(
+				_("Cheque No {0} is cancelled ({1})").format(frappe.bold(doc.reference_no), usage.reason)
+			)
+		if usage.source_name != doc.name:
+			frappe.throw(
+				_("Cheque No {0} is already used in {1}").format(
+					frappe.bold(doc.reference_no), get_link_to_form("Payment Entry", usage.source_name)
+				)
+			)
 
 	filters = {"cheque_book": book.name, "reference_no": doc.reference_no, "name": ("!=", doc.name)}
-	if used_in := frappe.db.get_value(
-		"Payment Entry", {**filters, "docstatus": 1}, for_update=doc.docstatus == 1
-	):
-		frappe.throw(
-			_("Cheque No {0} is already used in {1}").format(
-				frappe.bold(doc.reference_no), get_link_to_form("Payment Entry", used_in)
-			)
-		)
-
 	if doc.docstatus == 0 and (draft := frappe.db.get_value("Payment Entry", {**filters, "docstatus": 0})):
 		frappe.msgprint(
 			_("Cheque No {0} is also used in draft {1}").format(
@@ -380,6 +366,7 @@ def validate_cheque(payment_entry):
 def update_cheque_book(payment_entry):
 	if is_cheque_payment(payment_entry) and payment_entry.cheque_book:
 		book = frappe.get_doc("Cheque Book", payment_entry.cheque_book, for_update=True)
+		claim_cheque(book, payment_entry.reference_no, "Payment Entry", payment_entry.name)
 		book.advance_next_cheque_no(payment_entry.reference_no)
 
 

@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_party_bank_account,
 )
 from erpnext.accounts.doctype.cheque_book.cheque_book import update_cheque_book, validate_cheque
+from erpnext.accounts.doctype.cheque_usage.cheque_usage import release_cheque
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -336,9 +337,9 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
 		if self.cheque_book:
-			frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).advance_next_cheque_no(
-				self.reference_no, freed=True
-			)
+			book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
+			release_cheque(book, self.reference_no, self.doctype, self.name)
+			book.advance_next_cheque_no(self.reference_no, freed=True)
 
 	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
