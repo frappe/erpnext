@@ -1,6 +1,7 @@
 import datetime
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, add_months, flt, nowdate
 
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
@@ -532,3 +533,39 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 			flt(sinv.base_grand_total),
 			places=2,
 		)
+
+	def test_user_permission_on_company(self):
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test Excavator 1", is_stock_item=0)
+		orders = {}
+		for company, warehouse, conversion_rate in (
+			("_Test Company", "_Test Warehouse - _TC", 1),
+			("_Test Company 1", "_Test Warehouse 2 - _TC1", 0.02),
+		):
+			so = make_sales_order(
+				company=company,
+				customer="_Test Customer 1",
+				transaction_date="2021-06-15",
+				warehouse=warehouse,
+				item=item.item_code,
+				qty=1,
+				rate=1000,
+				do_not_save=True,
+			)
+			so.conversion_rate = conversion_rate
+			so.plc_conversion_rate = conversion_rate
+			so.payment_terms_template = self.template.name
+			so.save()
+			so.submit()
+			orders[company] = so.name
+
+		user = create_user("test_payment_terms_status_user@example.com", "Sales User")
+		frappe.permissions.add_user_permission("Company", "_Test Company", user.name)
+
+		filters = frappe._dict({"period_start_date": "2021-06-01", "period_end_date": "2021-06-30"})
+		with self.set_user(user.name):
+			_, own, _, _ = execute(filters.copy().update({"company": "_Test Company"}))
+			_, other, _, _ = execute(filters.copy().update({"company": "_Test Company 1"}))
+
+		self.assertIn(orders["_Test Company"], [row.name for row in own])
+		self.assertNotIn(orders["_Test Company 1"], [row.name for row in other])
