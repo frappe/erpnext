@@ -164,6 +164,14 @@ class TestWorkOrder(ERPNextTestSuite):
 				final_job_card.submit()
 				frappe.get_doc(final_job_card.make_stock_entry_for_semi_fg_item()).submit()
 
+		bom_for_two_cars = frappe.copy_doc(bom)
+		bom_for_two_cars.quantity = 2
+		bom_for_two_cars.is_default = 0
+		bom_for_two_cars.insert()
+		bom_for_two_cars.submit()
+		wo = make_work_order(bom_no=bom_for_two_cars.name, item=car, qty=2, company="_Test Company")
+		self.assertEqual([row.qty_to_produce for row in wo.operations], [4, 2])
+
 	def check_planned_qty(self):
 		planned0 = (
 			frappe.db.get_value(
