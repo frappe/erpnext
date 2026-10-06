@@ -55,7 +55,7 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "\nOpening Stock\nStock Reconciliation",
+   "options": "\nOpening Stock\nStock Reconciliation\nAdjustment Entry",
    "reqd": 1
   },
   {
@@ -192,7 +192,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:21:20.179658",
+ "modified": "2026-09-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
