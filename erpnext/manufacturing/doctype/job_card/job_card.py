@@ -759,11 +759,7 @@ class JobCard(Document):
 					)
 				)
 
-			if (
-				self.get("operation") == d.operation
-				or self.operation_row_id == d.operation_row_id
-				or self.is_corrective_job_card
-			):
+			if self.is_corrective_job_card or self.is_required_item_for_operation(doc, d):
 				self.append(
 					"items",
 					{
@@ -777,6 +773,15 @@ class JobCard(Document):
 						"amount": d.amount,
 					},
 				)
+
+	def is_required_item_for_operation(self, doc, d):
+		"""Match on the operation row when both sides have one and it still holds the item's
+		operation, else on the operation name."""
+		row = next((op for op in doc.operations if op.idx == d.operation_row_id), None)
+		if row and self.operation_row_id and (not d.operation or d.operation == row.operation):
+			return self.operation_row_id == d.operation_row_id
+
+		return self.get("operation") == d.operation
 
 	def before_save(self):
 		self.set_expected_and_actual_time()
