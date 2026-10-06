@@ -3175,6 +3175,40 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(so.items[0].ensure_delivery_based_on_produced_serial_no, 0)
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
+	def test_reserve_stock_skipped_on_submit_for_ensure_delivery_by_serial_no(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item(
+			"Test Produced Serial FG",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TPSFG-.####"},
+		).name
+		rm_item = make_item("Test Produced Serial RM", {"is_stock_item": 1}).name
+		plain_item = make_item("Test Produced Serial Plain", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse)
+		make_stock_entry(item_code=fg_item, target=warehouse, qty=1, basic_rate=100)
+		make_stock_entry(item_code=plain_item, target=warehouse, qty=1, basic_rate=100)
+
+		so = make_sales_order(item_code=fg_item, qty=1, warehouse=warehouse, do_not_submit=True)
+		so.append("items", {"item_code": plain_item, "warehouse": warehouse, "qty": 1, "rate": 100})
+		so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+		so.reserve_stock = 1
+		so.submit()
+		so.reload()
+
+		self.assertEqual(so.items[0].reserve_stock, 1)
+		self.assertEqual(so.items[0].stock_reserved_qty, 0)
+		self.assertEqual(so.items[1].stock_reserved_qty, 1)
+
+		so.create_stock_reservation_entries(
+			items_details=[
+				{"sales_order_item": so.items[0].name, "warehouse": warehouse, "qty_to_reserve": 1}
+			]
+		)
+		so.reload()
+		self.assertEqual(so.items[0].stock_reserved_qty, 1)
+
 
 def make_so_with_reserved_produced_serial_no():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
