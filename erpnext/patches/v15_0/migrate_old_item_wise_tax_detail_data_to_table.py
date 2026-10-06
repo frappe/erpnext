@@ -3,6 +3,7 @@ import frappe
 from frappe import parse_json
 from frappe.model.document import bulk_insert
 from frappe.utils import flt
+from pypika.terms import ValueWrapper
 
 DOCTYPES_TO_PATCH = {
 	"Sales Taxes and Charges": [
@@ -92,10 +93,13 @@ def get_items_for_docs(parents, doctype):
 	item = frappe.qb.DocType(f"{doctype} Item")
 	additional_fields = []
 
-	# the tax withholding refactor removed these columns; fresh migrations of
-	# old databases never get them, so select only what exists
-	if doctype in TAX_WITHHOLDING_DOCS and frappe.db.has_column(f"{doctype} Item", "apply_tds"):
-		additional_fields.append(item.apply_tds)
+	# the tax withholding refactor removed these columns, so older databases may not have them;
+	# such documents withheld tax on every item
+	if doctype in TAX_WITHHOLDING_DOCS:
+		if frappe.db.has_column(f"{doctype} Item", "apply_tds"):
+			additional_fields.append(item.apply_tds)
+		else:
+			additional_fields.append(ValueWrapper(1).as_("apply_tds"))
 
 	return (
 		frappe.qb.from_(item)
@@ -118,8 +122,12 @@ def get_items_for_docs(parents, doctype):
 def get_doc_details(parents, doctype):
 	inv = frappe.qb.DocType(doctype)
 	additional_fields = []
-	if doctype in TAX_WITHHOLDING_DOCS and frappe.db.has_column(doctype, "base_tax_withholding_net_total"):
-		additional_fields.append(inv.base_tax_withholding_net_total)
+	# without the column, tax was withheld on the document's net total
+	if doctype in TAX_WITHHOLDING_DOCS:
+		if frappe.db.has_column(doctype, "base_tax_withholding_net_total"):
+			additional_fields.append(inv.base_tax_withholding_net_total)
+		else:
+			additional_fields.append(inv.base_net_total.as_("base_tax_withholding_net_total"))
 
 	return (
 		frappe.qb.from_(inv)
