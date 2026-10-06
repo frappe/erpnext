@@ -523,6 +523,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		self.assertRaises(OperationsNotCompleteError, stock_entry.insert)
 
+	def test_skip_transfer_work_order_completed_with_fractional_process_loss(self):
+		# 11.2 + 0.2 == 11.399999999999999 in float, which must still complete 11.4
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{"docstatus": 1, "skip_transfer": 1, "qty": 11.4, "produced_qty": 11.2, "process_loss_qty": 0.2}
+		)
+
+		self.assertEqual(work_order.get_status(), "Completed")
+
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
 		item_code = make_item("_Test Item For Process Loss", {"is_stock_item": 1}).name
