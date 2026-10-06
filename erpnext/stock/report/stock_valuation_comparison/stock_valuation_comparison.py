@@ -393,12 +393,22 @@ def get_pending_reposts(item_warehouses: list[tuple[str, str]]) -> dict[tuple[st
 	return {key: repost.name for key, repost in pending.items()}
 
 
+def validate_report_permission() -> None:
+	"""The fixes act on what the report shows, so they are for those who may run it."""
+	if not frappe.get_cached_doc("Report", "Stock Valuation Comparison").is_permitted():
+		frappe.throw(
+			_("You are not permitted to access the Stock Valuation Comparison report."),
+			frappe.PermissionError,
+		)
+
+
 def get_differences_to_fix(company: str, stock_ledger_entries) -> dict[tuple[str, str], frappe._dict]:
 	"""The earliest of the given entries of each item-warehouse, which is where fixing it starts."""
 	stock_ledger_entries = frappe.parse_json(stock_ledger_entries) or []
 	if not stock_ledger_entries:
 		frappe.throw(_("Select the differences to fix."))
 
+	validate_report_permission()
 	validate_company_permission(company)
 
 	# only the entries of the items and warehouses the user is permitted
@@ -419,6 +429,13 @@ def get_differences_to_fix(company: str, stock_ledger_entries) -> dict[tuple[str
 	return first_differences
 
 
+def get_fiscal_year_of(date, company: str) -> tuple | None:
+	"""(name, start date, end date) of the fiscal year of the date, or None when there is none."""
+	# with boolean, get_fiscal_year returns every fiscal year it found, not the first
+	fiscal_years = get_fiscal_year(date, company=company, boolean=True)
+	return fiscal_years[0] if fiscal_years else None
+
+
 @frappe.whitelist()
 def get_repost_preview(company: str, stock_ledger_entries: str | list) -> list[dict]:
 	"""What reposting the differences would do: one repost per item-warehouse from its first
@@ -427,11 +444,11 @@ def get_repost_preview(company: str, stock_ledger_entries: str | list) -> list[d
 
 	first_differences = get_differences_to_fix(company, stock_ledger_entries)
 	pending_reposts = get_pending_reposts(list(first_differences))
-	current_fiscal_year_start = get_fiscal_year(nowdate(), company=company, boolean=True)
+	current_fiscal_year = get_fiscal_year_of(nowdate(), company)
 
 	preview = []
 	for (item_code, warehouse), entry in first_differences.items():
-		fiscal_year = get_fiscal_year(entry.posting_date, company=company, boolean=True)
+		fiscal_year = get_fiscal_year_of(entry.posting_date, company)
 		preview.append(
 			{
 				"item_code": item_code,
@@ -440,7 +457,7 @@ def get_repost_preview(company: str, stock_ledger_entries: str | list) -> list[d
 				"posting_time": entry.posting_time,
 				"fiscal_year": fiscal_year[0] if fiscal_year else None,
 				"is_past_fiscal_year": bool(
-					current_fiscal_year_start and getdate(entry.posting_date) < current_fiscal_year_start[1]
+					current_fiscal_year and getdate(entry.posting_date) < getdate(current_fiscal_year[1])
 				),
 				"pending_repost": pending_reposts.get((item_code, warehouse)),
 			}
@@ -499,6 +516,8 @@ def make_adjustment_entry(
 	"""A draft Adjustment Entry that settles the differences of the item-warehouses on the given
 	date, and why the others cannot be settled by it."""
 	frappe.has_permission("Stock Reconciliation", "create", throw=True)
+	if expense_account:
+		validate_expense_account(expense_account, company)
 
 	adjustment_datetime = get_combine_datetime(posting_date, posting_time)
 	first_differences = get_differences_to_fix(company, stock_ledger_entries)
@@ -535,3 +554,13 @@ def make_adjustment_entry(
 			)
 
 	return {"adjustment_entry": doc.name if doc.items else None, "not_adjusted": not_adjusted}
+
+
+def validate_expense_account(expense_account: str, company: str) -> None:
+	account = frappe.db.get_value("Account", expense_account, ["company", "is_group"], as_dict=True)
+	if not account or account.company != company or account.is_group:
+		frappe.throw(
+			_("Account {0} is not a ledger account of Company {1}.").format(
+				frappe.bold(expense_account), frappe.bold(company)
+			)
+		)

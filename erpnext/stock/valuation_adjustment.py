@@ -39,7 +39,12 @@ from frappe.utils import create_batch, flt, format_datetime, get_datetime, get_l
 from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.expected_valuation import ADJUSTMENT_ENTRY, QueuePool, iterate_expected_stock_at
+from erpnext.stock.expected_valuation import (
+	ADJUSTMENT_ENTRY,
+	BatchLot,
+	QueuePool,
+	iterate_expected_stock_at,
+)
 from erpnext.stock.stock_ledger import make_sl_entries
 from erpnext.stock.utils import get_combine_datetime
 
@@ -93,6 +98,8 @@ class LedgerLots:
 	batch_qty: dict[str, float] = field(default_factory=lambda: defaultdict(float))
 	batch_value: dict[str, float] = field(default_factory=lambda: defaultdict(float))
 	serial_qty: dict[str, float] = field(default_factory=lambda: defaultdict(float))
+	# the rate a serial no goes out at: that of its latest receipt
+	serial_rate: dict[str, float] = field(default_factory=dict)
 
 
 def get_adjustment_plans(
@@ -115,6 +122,9 @@ def get_adjustment_plans(
 		if (
 			abs(plan.ledger_qty - stock.qty) < details.qty_tolerance
 			and abs(plan.ledger_value - stock.carried_value) < details.value_tolerance
+			and ledger_holds_expected_lots(
+				plan, stock, details, last_entry, posting_datetime, exclude_voucher_no
+			)
 		):
 			plan.reason = _("Its stock qty and value are already right on this date.")
 		else:
@@ -123,6 +133,68 @@ def get_adjustment_plans(
 		plans[(item_code, warehouse)] = plan
 
 	return plans
+
+
+def ledger_holds_expected_lots(
+	plan: AdjustmentPlan, stock, details, last_entry, posting_datetime, exclude_voucher_no
+) -> bool:
+	"""Whether the ledger holds the serial nos, batches and layers at the values they should have.
+	Wrong values can offset each other in the totals, and still misprice the next issue."""
+	item = details.data.items[plan.item_code]
+	precision = details.currency_precision
+
+	if item.has_serial_no or item.has_batch_no:
+		lots = get_ledger_lots(plan.item_code, plan.warehouse, posting_datetime, exclude_voucher_no)
+
+		serials_on_hand = {serial_no for serial_no, qty in lots.serial_qty.items() if qty > 0}
+		if not values_serial_nos_in_pool(item, details) and serials_on_hand != set(stock.serial_rates):
+			return False
+
+		for serial_no, rate in stock.serial_rates.items():
+			if flt(lots.serial_rate.get(serial_no), precision) != flt(rate, precision):
+				return False
+
+		batches = {batch_no for batch_no in lots.batch_qty if details.is_valued_batch_wise(batch_no)}
+		for batch_no in batches | set(stock.batch_lots):
+			lot = stock.batch_lots.get(batch_no) or BatchLot()
+			if (
+				abs(lots.batch_qty.get(batch_no, 0.0) - lot.qty) >= details.qty_tolerance
+				or abs(lots.batch_value.get(batch_no, 0.0) - lot.value) >= details.value_tolerance
+			):
+				return False
+
+	elif isinstance(stock.pool, QueuePool):
+		# the ledger's queue is the pool only for stock without serial nos or batches
+		ledger_queue = frappe.db.get_value("Stock Ledger Entry", last_entry.name, "stock_queue")
+		if not queues_match(frappe.parse_json(ledger_queue) or [], stock.pool.layers, details):
+			return False
+
+	return True
+
+
+def queues_match(ledger_layers, expected_layers, details) -> bool:
+	"""Whether two queues hold the same layers, leaving out empty layers and merging adjacent
+	layers of the same rate."""
+
+	def merge(layers):
+		merged = []
+		for qty, rate in layers:
+			qty, rate = flt(qty), flt(rate, details.currency_precision)
+			if abs(qty) < details.qty_tolerance:
+				continue
+
+			if merged and merged[-1][1] == rate:
+				merged[-1][0] += qty
+			else:
+				merged.append([qty, rate])
+
+		return merged
+
+	ledger_layers, expected_layers = merge(ledger_layers), merge(expected_layers)
+	return len(ledger_layers) == len(expected_layers) and all(
+		a[1] == b[1] and abs(a[0] - b[0]) < details.qty_tolerance
+		for a, b in zip(ledger_layers, expected_layers, strict=True)
+	)
 
 
 def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, exclude_voucher_no) -> None:
@@ -248,7 +320,7 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 		frappe.qb.from_(bundle)
 		.inner_join(entry)
 		.on(entry.parent == bundle.name)
-		.select(entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
+		.select(entry.serial_no, entry.batch_no, entry.qty, entry.incoming_rate, entry.stock_value_difference)
 		.where(
 			(bundle.item_code == item_code)
 			& (bundle.warehouse == warehouse)
@@ -261,7 +333,13 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 	)
 	legacy_entries = (
 		frappe.qb.from_(ledger)
-		.select(ledger.serial_no, ledger.batch_no, ledger.actual_qty, ledger.stock_value_difference)
+		.select(
+			ledger.serial_no,
+			ledger.batch_no,
+			ledger.actual_qty,
+			ledger.incoming_rate,
+			ledger.stock_value_difference,
+		)
 		.where(
 			(ledger.item_code == item_code)
 			& (ledger.warehouse == warehouse)
@@ -270,6 +348,8 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 			& (ledger.serial_and_batch_bundle.isnull() | (ledger.serial_and_batch_bundle == ""))
 			& ((ledger.batch_no.isnotnull() & (ledger.batch_no != "")) | ledger.serial_no.isnotnull())
 		)
+		.orderby(ledger.posting_datetime)
+		.orderby(ledger.creation)
 	)
 	if exclude_voucher_no:
 		bundle_entries = bundle_entries.where(bundle.voucher_no != exclude_voucher_no)
@@ -279,16 +359,25 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 	for row in bundle_entries.run(as_dict=True):
 		if row.serial_no:
 			lots.serial_qty[row.serial_no] += flt(row.qty)
+			if flt(row.qty) > 0:
+				lots.serial_rate[row.serial_no] = flt(row.incoming_rate)
 		if row.batch_no:
 			lots.batch_qty[row.batch_no] += flt(row.qty)
 			lots.batch_value[row.batch_no] += flt(row.stock_value_difference)
 
+	legacy_serial_rates = {}
 	for row in legacy_entries.run(as_dict=True):
 		for serial_no in get_serial_nos(row.serial_no or ""):
 			lots.serial_qty[serial_no] += 1 if flt(row.actual_qty) > 0 else -1
+			if flt(row.actual_qty) > 0:
+				legacy_serial_rates[serial_no] = flt(row.incoming_rate)
 		if row.batch_no:
 			lots.batch_qty[row.batch_no] += flt(row.actual_qty)
 			lots.batch_value[row.batch_no] += flt(row.stock_value_difference)
+
+	# entries made before bundles are older than any bundle
+	for serial_no, rate in legacy_serial_rates.items():
+		lots.serial_rate.setdefault(serial_no, rate)
 
 	return lots
 
