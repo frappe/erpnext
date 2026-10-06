@@ -263,6 +263,9 @@ def get_parents_for_user(parenttype: str) -> list[str]:
 
 def has_website_permission(doc, ptype, user, verbose=False):
 	doctype = doc.doctype
+	if not has_common(["Supplier", "Customer"], frappe.get_roles(user)):
+		return frappe.has_permission(doctype, ptype=ptype, doc=doc, user=user)
+
 	customers, suppliers = get_customers_suppliers(doctype, user)
 	if customers:
 		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
