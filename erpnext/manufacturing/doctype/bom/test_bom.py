@@ -1473,7 +1473,7 @@ class TestBOM(ERPNextTestSuite):
 		bom.operations[1].finished_good = fg_item
 		bom.insert()
 
-	def test_item_operation_id_must_point_to_the_item_operation(self):
+	def test_item_operation_row_must_hold_the_item_operation(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 
 		cutting, stitching = "_Test Row Cutting", "_Test Row Stitching"
@@ -1492,7 +1492,7 @@ class TestBOM(ERPNextTestSuite):
 			"items", {"item_code": "_Test Item", "qty": 1, "operation": cutting, "operation_row_id": 1}
 		)
 
-		self.assertRaisesRegex(frappe.ValidationError, "Operation ID 1 is operation", bom.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Operation Row No. 1 is operation", bom.insert)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
