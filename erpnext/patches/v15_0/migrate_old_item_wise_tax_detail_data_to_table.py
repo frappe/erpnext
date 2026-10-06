@@ -122,12 +122,9 @@ def get_items_for_docs(parents, doctype):
 def get_doc_details(parents, doctype):
 	inv = frappe.qb.DocType(doctype)
 	additional_fields = []
-	# without the column, tax was withheld on the document's net total
-	if doctype in TAX_WITHHOLDING_DOCS:
-		if frappe.db.has_column(doctype, "base_tax_withholding_net_total"):
-			additional_fields.append(inv.base_tax_withholding_net_total)
-		else:
-			additional_fields.append(inv.base_net_total.as_("base_tax_withholding_net_total"))
+	# without the column, compile_docs derives the withholding base from the items
+	if doctype in TAX_WITHHOLDING_DOCS and frappe.db.has_column(doctype, "base_tax_withholding_net_total"):
+		additional_fields.append(inv.base_tax_withholding_net_total)
 
 	return (
 		frappe.qb.from_(inv)
@@ -155,6 +152,13 @@ def compile_docs(doc_info, taxes, items, doctype, tax_doctype):
 
 	for item in items:
 		response[item.parent]["items"].append(item)
+
+	if doctype in TAX_WITHHOLDING_DOCS:
+		for doc in response.values():
+			if "base_tax_withholding_net_total" not in doc:
+				doc.base_tax_withholding_net_total = sum(
+					flt(item.base_net_amount) for item in doc["items"] if item.get("apply_tds")
+				)
 
 	return response.values()
 
