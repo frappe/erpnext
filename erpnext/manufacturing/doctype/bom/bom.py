@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import re
-from collections import deque
+from collections import Counter, deque
 
 import frappe
 from frappe import _, bold
@@ -328,6 +328,7 @@ class BOM(WebsiteGenerator):
 		self.set_routing_operations()
 		self.validate_operations()
 		self.validate_item_operation_row_ids()
+		self.warn_items_of_repeated_operations()
 		self.calculate_cost()
 		self.update_exploded_items(save=False)
 		self.update_stock_qty()
@@ -1131,6 +1132,25 @@ class BOM(WebsiteGenerator):
 					)
 				)
 			item.operation = operation
+
+	def warn_items_of_repeated_operations(self):
+		if self.track_semi_finished_goods or self.transfer_material_against != "Job Card":
+			return
+
+		operation_count = Counter(row.operation for row in self.operations)
+		rows = [
+			str(item.idx)
+			for item in self.items
+			if not item.operation_row_id and operation_count[item.operation] > 1
+		]
+		if rows:
+			frappe.msgprint(
+				_(
+					"Set Operation Row No. on rows {0}. Their operation is used more than once, so without it their materials go to the Job Card of every row with that operation."
+				).format(", ".join(rows)),
+				title=_("Operation Row No. Missing"),
+				indicator="orange",
+			)
 
 	def _validate_operation_row(self, d):
 		if not d.description:
