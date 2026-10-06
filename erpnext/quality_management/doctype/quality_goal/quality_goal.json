@@ -2,7 +2,9 @@
  "actions": [],
  "autoname": "field:goal",
  "creation": "2018-10-02 12:17:41.727541",
+ "description": "Something you measure and improve on a schedule, like on-time delivery.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_goal",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -68,6 +70,7 @@
    "unique": 1
   }
  ],
+ "icon": "target",
  "index_web_pages_for_search": 1,
  "links": [
   {
@@ -76,7 +79,7 @@
    "link_fieldname": "goal"
   }
  ],
- "modified": "2024-03-27 13:10:28.400976",
+ "modified": "2026-10-05 14:52:57.768508",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Goal",
@@ -102,9 +105,15 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Desk User",
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Desk User"
   }
  ],
  "sort_field": "creation",

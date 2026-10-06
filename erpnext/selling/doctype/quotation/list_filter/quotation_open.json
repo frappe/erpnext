@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"transaction_date\", \"label\": \"Date\"}, {\"fieldname\": \"valid_till\", \"label\": \"Valid Till\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.581349",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Open",
+ "filters": "[[\"Quotation\", \"status\", \"in\", [\"Open\", \"Replied\", \"Partially Ordered\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.581349",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Quotation-Open",
+ "owner": "Administrator",
+ "reference_doctype": "Quotation",
+ "route_signature": "status=[\"in\",[\"Open\",\"Replied\",\"Partially Ordered\"]]",
+ "sort_field": "valid_till",
+ "sort_order": "asc"
+}

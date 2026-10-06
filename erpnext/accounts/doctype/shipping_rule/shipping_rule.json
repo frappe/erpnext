@@ -3,8 +3,9 @@
  "allow_import": 1,
  "autoname": "field:label",
  "creation": "2013-06-25 11:48:03",
- "description": "Specify conditions to calculate shipping amount",
+ "description": "Works out the shipping charge on a sale or purchase.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/shipping-rule",
  "engine": "InnoDB",
  "field_order": [
   "label",
@@ -146,7 +147,7 @@
    "options": "Project"
   }
  ],
- "icon": "fa fa-truck",
+ "icon": "truck",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

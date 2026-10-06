@@ -9,7 +9,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -45,7 +45,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "review",
+   "icon": "star",
    "indent": 0,
    "keep_closed": 0,
    "label": "Quality Review",
@@ -147,7 +147,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-12 12:59:09.607272",
+ "modified": "2026-07-03 12:59:09.607272",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",

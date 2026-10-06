@@ -3,6 +3,7 @@
 
 import json
 import time
+from unittest.mock import patch
 from uuid import uuid4
 
 import frappe
@@ -1128,6 +1129,35 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
+
+	def test_repost_does_not_revive_entry_cancelled_midway(self):
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		item_code = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+		second = make_stock_entry(item_code=item_code, target=warehouse, qty=5, rate=120)
+		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": second.name, "is_cancelled": 0})
+
+		process_sle = update_entries_after.process_sle
+
+		def cancel_while_reposting(obj, sle):
+			# the repost has already read this entry as active; the user cancels it now
+			if sle.name == sle_name:
+				frappe.db.set_value("Stock Ledger Entry", sle_name, "is_cancelled", 1)
+			return process_sle(obj, sle)
+
+		with patch.object(update_entries_after, "process_sle", cancel_while_reposting):
+			update_entries_after(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"posting_date": "1900-01-01",
+					"posting_time": "00:01",
+				}
+			)
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_name, "is_cancelled"), 1)
 
 	def test_timestamp_clash(self):
 		item = make_item().name

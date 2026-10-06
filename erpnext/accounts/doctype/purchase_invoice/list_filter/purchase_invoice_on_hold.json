@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"bill_no\", \"label\": \"Supplier Invoice No\"}, {\"fieldname\": \"due_date\", \"label\": \"Due Date\"}, {\"fieldname\": \"release_date\", \"label\": \"Release Date\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.554846",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "On Hold",
+ "filters": "[[\"Purchase Invoice\", \"docstatus\", \"=\", 1], [\"Purchase Invoice\", \"on_hold\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 22:30:19.146016",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Purchase Invoice-On Hold",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Invoice",
+ "route_signature": "docstatus=1&on_hold=1",
+ "sort_field": "due_date",
+ "sort_order": "asc"
+}

@@ -124,7 +124,10 @@ $.extend(erpnext.stock_reservation, {
 						in_list_view: 1,
 						get_query: () => {
 							return {
-								filters: [["Warehouse", "is_group", "!=", 1]],
+								filters: [
+									["Warehouse", "is_group", "!=", 1],
+									["Warehouse", "company", "=", frm.doc.company],
+								],
 							};
 						},
 					},

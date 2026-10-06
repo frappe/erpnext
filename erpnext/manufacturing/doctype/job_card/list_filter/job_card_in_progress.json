@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"operation\", \"label\": \"Operation\"}, {\"fieldname\": \"work_order\", \"label\": \"Work Order\"}, {\"fieldname\": \"workstation\", \"label\": \"Workstation\"}, {\"fieldname\": \"for_quantity\", \"label\": \"Qty to Manufacture\"}, {\"fieldname\": \"total_completed_qty\", \"label\": \"Total Completed qty\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:57.019925",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "In Progress",
+ "filters": "[[\"Job Card\", \"status\", \"=\", \"Work In Progress\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:57.019925",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Job Card-In Progress",
+ "owner": "Administrator",
+ "reference_doctype": "Job Card",
+ "route_signature": "status=Work In Progress",
+ "sort_field": "expected_start_date",
+ "sort_order": "asc"
+}

@@ -4,8 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:activity_type",
  "creation": "2013-03-05 10:14:59",
+ "description": "A kind of work you track time against, like design or support.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/activity-type",
  "engine": "InnoDB",
  "field_order": [
   "activity_type",
@@ -26,6 +28,7 @@
   {
    "fieldname": "costing_rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Default Costing Rate"
   },
   {
@@ -35,6 +38,7 @@
   {
    "fieldname": "billing_rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Default Billing Rate"
   },
   {
@@ -44,7 +48,7 @@
    "label": "Disabled"
   }
  ],
- "icon": "icon-flag",
+ "icon": "tag",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

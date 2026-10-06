@@ -1,0 +1,21 @@
+{
+ "action": "Complete Onboarding",
+ "action_label": "Open Quality",
+ "creation": "2026-10-04 03:16:15.376980",
+ "description": "Set up an inspection and record your first check.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 03:16:15.376980",
+ "modified_by": "Administrator",
+ "module_onboarding": "Quality Onboarding",
+ "name": "Complete Quality Onboarding",
+ "owner": "Administrator",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Keep quality in check",
+ "validate_action": 1
+}

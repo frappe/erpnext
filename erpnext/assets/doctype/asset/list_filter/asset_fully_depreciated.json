@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"asset_name\", \"label\": \"Asset Name\"}, {\"fieldname\": \"asset_category\", \"label\": \"Asset Category\"}, {\"fieldname\": \"location\", \"label\": \"Location\"}, {\"fieldname\": \"available_for_use_date\", \"label\": \"Available for Use Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.967462",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Fully Depreciated",
+ "filters": "[[\"Asset\", \"status\", \"=\", \"Fully Depreciated\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.967462",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset-Fully Depreciated",
+ "owner": "Administrator",
+ "reference_doctype": "Asset",
+ "route_signature": "status=Fully Depreciated",
+ "sort_field": "asset_name",
+ "sort_order": "asc"
+}

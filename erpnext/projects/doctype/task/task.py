@@ -166,6 +166,10 @@ class Task(NestedSet):
 						).format(frappe.bold(self.name), frappe.bold(d.task))
 					)
 
+			# the form asks for it, but the list's bulk action and the Kanban board don't
+			if not self.completed_on:
+				self.completed_on = today()
+
 			close_all_assignments(self.doctype, self.name)
 
 	def validate_progress(self):

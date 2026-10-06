@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:parcel_template_name",
  "creation": "2020-07-09 11:43:43.470339",
+ "description": "A parcel size you ship often.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -51,6 +52,7 @@
    "unique": 1
   }
  ],
+ "icon": "package",
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",

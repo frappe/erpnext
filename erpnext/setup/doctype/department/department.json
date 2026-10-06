@@ -3,8 +3,10 @@
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2013-02-05 11:48:26",
+ "description": "A department of your company.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/department",
  "engine": "InnoDB",
  "field_order": [
   "department_name",
@@ -31,6 +33,7 @@
    "fieldname": "parent_department",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Parent Department",
    "options": "Department"
@@ -48,6 +51,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Group"
   },
@@ -86,7 +90,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "building",
  "idx": 1,
  "is_tree": 1,
  "links": [],

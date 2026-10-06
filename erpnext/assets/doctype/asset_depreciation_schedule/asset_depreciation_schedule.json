@@ -3,7 +3,9 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2022-10-31 15:03:35.424877",
+ "description": "When an asset depreciates, and by how much.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/asset-depreciation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -212,6 +214,7 @@
    "read_only": 1
   }
  ],
+ "icon": "trending-down",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

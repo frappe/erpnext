@@ -135,3 +135,49 @@ class TestPointOfSaleGetItems(ERPNextTestSuite):
 
 		out_of_stock_codes = self._get_item_codes(out_of_stock_item)
 		self.assertNotIn(out_of_stock_item, out_of_stock_codes)
+
+	def test_get_parent_item_group_returns_common_ancestor(self):
+		from erpnext.selling.page.point_of_sale.point_of_sale import get_parent_item_group
+
+		root = frappe.db.get_value("Item Group", {"is_group": 1, "lft": 1}, "name")
+		suffix = random_string(6)
+
+		def make_group(name, parent, is_group=0):
+			return (
+				frappe.get_doc(
+					{
+						"doctype": "Item Group",
+						"item_group_name": name,
+						"parent_item_group": parent,
+						"is_group": is_group,
+					}
+				)
+				.insert()
+				.name
+			)
+
+		branch_a = make_group(f"_Test POS LCA A {suffix}", root, is_group=1)
+		leaf_a1 = make_group(f"_Test POS LCA A1 {suffix}", branch_a)
+		leaf_a2 = make_group(f"_Test POS LCA A2 {suffix}", branch_a)
+		branch_b = make_group(f"_Test POS LCA B {suffix}", root, is_group=1)
+		leaf_b1 = make_group(f"_Test POS LCA B1 {suffix}", branch_b)
+
+		# Groups across two top-level branches -> common ancestor is the root.
+		profile = make_pos_profile(name=f"_Test POS Profile LCA Root {suffix}")
+		profile.append("item_groups", {"item_group": leaf_a1})
+		profile.append("item_groups", {"item_group": leaf_b1})
+		profile.save()
+		self.assertEqual(get_parent_item_group(profile.name), root)
+
+		# Groups sharing one branch -> common ancestor is that branch.
+		profile = make_pos_profile(name=f"_Test POS Profile LCA Branch {suffix}")
+		profile.append("item_groups", {"item_group": leaf_a1})
+		profile.append("item_groups", {"item_group": leaf_a2})
+		profile.save()
+		self.assertEqual(get_parent_item_group(profile.name), branch_a)
+
+		# A single configured group -> that group itself.
+		profile = make_pos_profile(name=f"_Test POS Profile LCA Single {suffix}")
+		profile.append("item_groups", {"item_group": leaf_a1})
+		profile.save()
+		self.assertEqual(get_parent_item_group(profile.name), leaf_a1)

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "hash",
  "creation": "2024-09-29 07:01:18.133067",
+ "description": "A code from a code list and what it maps to.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -81,6 +82,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "code",
  "links": [],
  "modified": "2025-10-04 17:22:28.176155",
  "modified_by": "Administrator",

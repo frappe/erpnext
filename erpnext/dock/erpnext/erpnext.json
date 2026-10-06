@@ -1,0 +1,111 @@
+{
+ "app": "erpnext",
+ "creation": "2026-08-26 23:30:00",
+ "docstatus": 0,
+ "doctype": "Dock",
+ "idx": 0,
+ "items": [
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "sliders-duotone",
+   "link_to": "Setup",
+   "link_type": "Sidebar",
+   "title": "Setup"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "calculator-duotone",
+   "link_to": "Accounts",
+   "link_type": "Sidebar",
+   "title": "Accounts"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "storefront-duotone",
+   "link_to": "Selling",
+   "link_type": "Sidebar",
+   "title": "Selling"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "shopping-cart-duotone",
+   "link_to": "Buying",
+   "link_type": "Sidebar",
+   "title": "Buying"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "shelf-rack-duotone",
+   "link_to": "Stock",
+   "link_type": "Sidebar",
+   "title": "Stock"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "factory-duotone",
+   "link_to": "Manufacturing",
+   "link_type": "Sidebar",
+   "title": "Manufacturing"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "gantt-chart-duotone",
+   "link_to": "Projects",
+   "link_type": "Sidebar",
+   "title": "Projects"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "asset-hand-duotone",
+   "link_to": "Assets",
+   "link_type": "Sidebar",
+   "title": "Assets"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "quality-seal-duotone",
+   "link_to": "Quality",
+   "link_type": "Sidebar",
+   "title": "Quality"
+  },
+  {
+   "added": 0,
+   "hidden": 1,
+   "icon": "handshake",
+   "link_to": "CRM",
+   "link_type": "Sidebar",
+   "title": "CRM"
+  },
+  {
+   "added": 0,
+   "hidden": 1,
+   "icon": "headset",
+   "link_to": "Support",
+   "link_type": "Sidebar",
+   "title": "Support"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "panels-top-left",
+   "link_to": "Portal",
+   "link_type": "Sidebar",
+   "title": "Portal"
+  }
+ ],
+ "modified": "2026-10-04 13:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "erpnext",
+ "owner": "Administrator",
+ "standard": 1,
+ "user": ""
+}

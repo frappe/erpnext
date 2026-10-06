@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"posting_date\", \"label\": \"Date\"}, {\"fieldname\": \"return_against\", \"label\": \"Return Against Delivery Note\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.808579",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Returns",
+ "filters": "[[\"Delivery Note\", \"is_return\", \"=\", 1], [\"Delivery Note\", \"docstatus\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.808579",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Note-Returns",
+ "owner": "Administrator",
+ "reference_doctype": "Delivery Note",
+ "route_signature": "docstatus=1&is_return=1",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

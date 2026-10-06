@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "field:distribution_id",
  "creation": "2013-01-10 16:34:05",
- "description": "Helps you distribute the Budget/Target across months if you have seasonality in your business.",
+ "description": "Spreads a yearly budget or target across months for seasonal businesses.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -43,7 +43,7 @@
    "options": "Monthly Distribution Percentage"
   }
  ],
- "icon": "fa fa-bar-chart",
+ "icon": "chart-bar",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

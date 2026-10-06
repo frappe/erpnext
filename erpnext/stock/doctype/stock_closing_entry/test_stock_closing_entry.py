@@ -67,6 +67,87 @@ class TestStockClosingEntry(ERPNextTestSuite):
 				self.assertEqual(balance.actual_qty, expected_qty)
 				self.assertEqual(balance.stock_value_difference, expected_qty * 10)
 
+	def test_batch_zero_values_in_closing_balance(self):
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		item_details = frappe._dict(
+			item_group="All Item Groups", item_name="Closing Test", stock_uom="Nos", has_serial_no=0
+		)
+		for batch_qty, batch_value, ledger_qty, balance_qty, expected_qty, expected_value in (
+			(10, 0, 20, 20, 20, 0),
+			(0, 0, 20, 20, 0, 0),
+			(0, 0, 0, 20, 0, 0),
+			(10, 50, 20, 20, 20, 100),
+			(None, None, 20, 20, 40, 200),
+			(None, None, 0, None, 0, 200),
+		):
+			with self.subTest(batch_qty=batch_qty, batch_value=batch_value, ledger_qty=ledger_qty):
+				rows = [
+					frappe._dict(
+						name=f"Closing SLE {index}",
+						item_code="Closing Test",
+						warehouse=WAREHOUSE,
+						batch_no="Closing Batch",
+						sabb_qty=batch_qty,
+						sabb_stock_value_difference=batch_value,
+						actual_qty=ledger_qty,
+						qty_after_transaction=balance_qty,
+						stock_value_difference=100,
+						posting_date="2026-01-01",
+					)
+					for index in range(2)
+				]
+				with (
+					patch(f"{module}.get_inventory_dimensions", return_value=[]),
+					patch.object(StockClosing, "get_last_stock_closing_entry", return_value=None),
+					patch.object(StockClosing, "get_sle_entries", return_value=rows),
+					patch("frappe.get_cached_value", return_value=item_details),
+				):
+					entries = StockClosing(COMPANY, "2026-01-01", "2026-01-03").get_stock_closing_entries()
+
+				balance = entries[("Closing Test", WAREHOUSE, "Closing Batch")]
+				self.assertEqual(balance.actual_qty, expected_qty)
+				self.assertEqual(balance.stock_value_difference, expected_value)
+				self.assertEqual(entries[("Closing Test", WAREHOUSE)].stock_value_difference, 200)
+
+	def test_zero_value_batch_in_joined_closing_entries(self):
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		item_details = frappe._dict(
+			item_group="All Item Groups", item_name="Closing Test", stock_uom="Nos", has_serial_no=0
+		)
+		rows = [
+			frappe._dict(
+				name="Closing SLE",
+				item_code="Closing Test",
+				warehouse=WAREHOUSE,
+				batch_no=None,
+				sabb_batch_no=batch,
+				sabb_qty=-10,
+				sabb_stock_value_difference=value,
+				actual_qty=-20,
+				qty_after_transaction=0,
+				stock_value_difference=-100,
+				posting_date="2026-01-01",
+			)
+			for batch, value in (("Batch A", 0), ("Batch B", -100))
+		]
+		with (
+			patch(f"{module}.get_inventory_dimensions", return_value=[]),
+			patch.object(StockClosing, "get_last_stock_closing_entry", return_value=None),
+			patch.object(StockClosing, "get_sle_entries", return_value=rows),
+			patch("frappe.get_cached_value", return_value=item_details),
+		):
+			entries = StockClosing(COMPANY, "2026-01-01", "2026-01-03").get_stock_closing_entries()
+
+		self.assertEqual(len(entries), 3)
+		for batch, expected_value in (("Batch A", 0), ("Batch B", -100)):
+			balance = entries[("Closing Test", WAREHOUSE, batch)]
+			self.assertEqual(balance.actual_qty, -10)
+			self.assertEqual(balance.stock_value_difference, expected_value)
+
+		total = entries[("Closing Test", WAREHOUSE)]
+		self.assertEqual(total.actual_qty, -20)
+		self.assertEqual(total.stock_value_difference, -100)
+
 	def test_closing_entry_reads_previous_closing_balance(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		first_date = add_days(today(), -10)

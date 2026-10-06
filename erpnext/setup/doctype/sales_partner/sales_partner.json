@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:partner_name",
  "creation": "2013-04-12 15:34:06",
- "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.",
+ "description": "A distributor, dealer or reseller who sells for you on commission.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-partner",
  "engine": "InnoDB",
  "field_order": [
   "partner_name",
@@ -48,6 +49,7 @@
   {
    "fieldname": "partner_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Partner Type",
@@ -189,7 +191,7 @@
    "label": "Description"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "handshake",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

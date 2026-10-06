@@ -280,9 +280,15 @@ class MaterialRequest(BuyingController):
 			)
 			result = query.run(as_dict=True)
 
+			requested_qty = {}
 			for item in items_from_pp:
+				plan_item = item.material_request_plan_item
+				requested_qty[plan_item] = requested_qty.get(plan_item, 0) + item.qty
 				row = next(r for r in result if r.name == item.material_request_plan_item)
-				if item.qty > row.available_qty:
+				if (
+					item.qty > row.available_qty
+					or flt(requested_qty[plan_item], item.precision("qty")) > row.available_qty
+				):
 					frappe.throw(
 						_("Quantity cannot be greater than {0} for Item {1}").format(
 							row.available_qty, item.item_code
@@ -548,7 +554,7 @@ def update_item(obj, target, source_parent):
 		target.schedule_date = None
 
 	if target.fg_item:
-		target.fg_item_qty = obj.stock_qty
+		target.fg_item_qty = target.stock_qty
 		if sc_bom := get_subcontracting_boms_for_finished_goods(target.fg_item):
 			target.item_code = sc_bom.service_item
 			target.uom = sc_bom.service_item_uom
@@ -858,15 +864,19 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=Non
 
 
 @frappe.whitelist()
-def get_items_based_on_default_supplier(supplier):
-	supplier_items = [
-		d.parent
-		for d in frappe.db.get_all(
-			"Item Default", {"default_supplier": supplier, "parenttype": "Item"}, "parent"
-		)
-	]
+def get_items_based_on_default_supplier(supplier: str):
+	frappe.has_permission("Item", "select", throw=True)
+	# Child rows are only candidates; return names allowed by the parent Item permissions.
+	supplier_items = frappe.get_all(
+		"Item Default", {"default_supplier": supplier, "parenttype": "Item"}, pluck="parent"
+	)
+	if not supplier_items:
+		return []
 
-	return supplier_items
+	permitted_items = set(
+		frappe.get_list("Item", filters={"name": ["in", supplier_items]}, pluck="name", limit=0)
+	)
+	return [item for item in supplier_items if item in permitted_items]
 
 
 @frappe.whitelist()

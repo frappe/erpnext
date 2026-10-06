@@ -4,9 +4,10 @@
  "allow_import": 1,
  "creation": "2013-01-23 19:57:17",
  "default_view": "Tree",
- "description": "Track separate Income and Expense for product verticals or divisions.",
+ "description": "A part of your business you track income and expenses for, like a branch or product line.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/cost-center",
  "engine": "InnoDB",
  "field_order": [
   "sb0",
@@ -39,6 +40,7 @@
   {
    "fieldname": "cost_center_number",
    "fieldtype": "Data",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Cost Center Number",
@@ -76,6 +78,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Is Group"
   },
   {
@@ -122,7 +125,7 @@
    "label": "Disabled"
   }
  ],
- "icon": "fa fa-money",
+ "icon": "chart-pie",
  "idx": 1,
  "is_tree": 1,
  "links": [],

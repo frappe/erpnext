@@ -17,7 +17,14 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 	prepare_data_for_internal_transfer,
 )
+from erpnext.controllers.accounts_controller import get_payment_term_details, get_payment_terms
 from erpnext.projects.doctype.project.test_project import make_project
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -2411,3 +2418,72 @@ class TestAccountsController(ERPNextTestSuite):
 		si.posting_date = "2026-01-01"
 		si.save()
 		self.assertEqual(si.name, "SI-01-2026-00002")
+
+	def test_get_payment_terms_respects_user_permission(self):
+		user = make_fenced_user("payment-terms-user@example.com", ["Sales User"])
+
+		with as_user(user):
+			schedule = get_payment_terms("_Test Payment Term Template 1", nowdate(), 100, 100)
+		self.assertEqual(schedule[0].get("payment_term"), "_Test EONM")
+
+		make_fenced_user(user, ["Sales User"], [("Payment Terms Template", "_Test Payment Term Template")])
+		with as_user(user):
+			schedule = get_payment_terms("_Test Payment Term Template", nowdate(), 100, 100)
+			self.assertEqual(len(schedule), 2)
+			self.assertEqual(schedule[0].get("payment_amount"), 50)
+
+			assert_refused_without(
+				self, ["_Test EONM"], get_payment_terms, "_Test Payment Term Template 1", nowdate(), 100, 100
+			)
+
+			def build_kwargs(terms_template):
+				return {
+					"terms_template": terms_template,
+					"posting_date": nowdate(),
+					"grand_total": 100,
+					"base_grand_total": 100,
+				}
+
+			assert_refused_for_names(
+				self,
+				get_payment_terms,
+				build_kwargs,
+				[["_Test Payment Term Template 1"]],
+				type_gated=True,
+				caller_supplied=True,
+			)
+
+	def test_get_payment_term_details_respects_user_permission(self):
+		user = make_fenced_user("payment-term-details-user@example.com", ["Sales User"])
+
+		with as_user(user):
+			details = get_payment_term_details("_Test COD", nowdate(), 100, 100)
+		self.assertEqual(details.credit_days, 0)
+
+		make_fenced_user(user, ["Sales User"], [("Payment Term", "_Test N30")])
+		with as_user(user):
+			details = get_payment_term_details("_Test N30", nowdate(), 100, 100)
+			self.assertEqual(details.credit_days, 30)
+			self.assertEqual(details.payment_amount, 50)
+
+			assert_refused_without(
+				self,
+				["Day(s) after invoice date"],
+				get_payment_term_details,
+				"_Test COD",
+				nowdate(),
+				100,
+				100,
+			)
+
+			def build_kwargs(term):
+				return {"term": term, "posting_date": nowdate(), "grand_total": 100, "base_grand_total": 100}
+
+			assert_refused_for_names(
+				self,
+				get_payment_term_details,
+				build_kwargs,
+				[["_Test COD"]],
+				type_gated=True,
+				caller_supplied=True,
+			)

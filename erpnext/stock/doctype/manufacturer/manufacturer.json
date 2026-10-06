@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:short_name",
  "creation": "2016-01-17 11:04:52.761731",
- "description": "Manufacturers used in Items",
+ "description": "A company that makes the items you buy or sell.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/manufacturer",
  "engine": "InnoDB",
  "field_order": [
   "short_name",
@@ -85,7 +86,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "icon": "fa fa-certificate",
+ "icon": "factory",
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",

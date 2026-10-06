@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"warranty_expiry_date\", \"label\": \"Warranty Expiry Date\"}, {\"fieldname\": \"amc_expiry_date\", \"label\": \"AMC Expiry Date\"}]",
+ "creation": "2026-09-30 21:12:57.000003",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Warranty Expiring",
+ "filters": "[[\"Serial No\", \"warranty_expiry_date\", \"Timespan\", \"next 30 days\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:57.000003",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial No-Warranty Expiring",
+ "owner": "Administrator",
+ "reference_doctype": "Serial No",
+ "route_signature": "warranty_expiry_date=[\"Timespan\",\"next 30 days\"]",
+ "sort_field": "warranty_expiry_date",
+ "sort_order": "asc"
+}

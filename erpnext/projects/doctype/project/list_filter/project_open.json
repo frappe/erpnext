@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"project_name\", \"label\": \"Project Name\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"percent_complete\", \"label\": \"% Completed\"}, {\"fieldname\": \"expected_end_date\", \"label\": \"Expected End Date\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.932184",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Open",
+ "filters": "[[\"Project\", \"status\", \"=\", \"Open\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.932184",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project-Open",
+ "owner": "Administrator",
+ "reference_doctype": "Project",
+ "route_signature": "status=Open",
+ "sort_field": "expected_end_date",
+ "sort_order": "asc"
+}

@@ -232,8 +232,8 @@ class WorkstationDashboard {
 					.find(".section-body-job-card")
 					.hasClass("hide")
 			)
-				$(e.currentTarget).html(frappe.utils.icon("es-line-down", "sm", "mb-1"));
-			else $(e.currentTarget).html(frappe.utils.icon("es-line-up", "sm", "mb-1"));
+				$(e.currentTarget).html(frappe.utils.icon("chevron-down", "sm", "mb-1"));
+			else $(e.currentTarget).html(frappe.utils.icon("chevron-up", "sm", "mb-1"));
 		});
 	}
 

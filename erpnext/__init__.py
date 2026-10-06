@@ -4,6 +4,7 @@ from typing import TypeVar
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cstr
 from frappe.utils.user import is_website_user
 
 __version__ = "16.37.0"
@@ -198,3 +199,60 @@ def normalize_ctx_input(T: type) -> callable:
 		return wrapper
 
 	return decorator
+
+
+def require_party_permission(party_type, party):
+	party = cstr(party)
+	if not party:
+		return
+	party_type = cstr(party_type)
+	if not frappe.db.exists("Party Type", party_type):
+		_refuse()
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	if not frappe.has_permission(party_type, ptype, doc=party):
+		_refuse()
+
+
+def _is_permitted(doctype, name, ptype):
+	name = cstr(name)
+	if not name:
+		return False
+	saved_messages = frappe.get_message_log()
+	frappe.clear_messages()
+	try:
+		return frappe.has_permission(doctype, ptype, doc=name)
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = saved_messages
+
+
+def require_permission(doctype, name, ptype="read"):
+	if not _is_permitted(doctype, name, ptype):
+		_refuse()
+
+
+def require_user_permission(doctype, name):
+	if not _is_within_user_permissions(doctype, name):
+		_refuse()
+
+
+def _is_within_user_permissions(doctype, name):
+	from frappe.permissions import has_user_permission
+
+	name = cstr(name)
+	if not name:
+		return False
+	saved_messages = frappe.get_message_log()
+	frappe.clear_messages()
+	try:
+		return has_user_permission(frappe.get_doc(doctype, name), frappe.session.user)
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = saved_messages
+
+
+def _refuse():
+	frappe.flags.disable_traceback = True
+	frappe.throw_permission_error()

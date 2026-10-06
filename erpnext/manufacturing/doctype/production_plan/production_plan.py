@@ -39,7 +39,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.utils import get_or_make_bin
+from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -94,6 +94,7 @@ class ProductionPlan(Document):
 		posting_date: DF.Date
 		prod_plan_references: DF.Table[ProductionPlanItemReference]
 		project: DF.Link | None
+		raw_material_group_warehouse: DF.Link | None
 		reserve_stock: DF.Check
 		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
 		sales_orders: DF.Table[ProductionPlanSalesOrder]
@@ -140,9 +141,40 @@ class ProductionPlan(Document):
 		self.set_status()
 		self._rename_temporary_references()
 		validate_uom_is_integer(self, "stock_uom", "planned_qty")
+		self.validate_data()
 		self.validate_sales_orders()
 		self.validate_material_request_type()
+		self.validate_raw_material_group_warehouse()
+		if self.for_warehouse:
+			validate_warehouse_company(self.for_warehouse, self.company)
 		self.enable_auto_reserve_stock()
+
+	def validate_raw_material_group_warehouse(self):
+		if not self.raw_material_group_warehouse:
+			return
+
+		group = frappe.db.get_value(
+			"Warehouse",
+			{"name": self.raw_material_group_warehouse, "is_group": 1, "company": self.company},
+			["lft", "rgt"],
+			as_dict=True,
+		)
+		if not group:
+			frappe.throw(
+				_("{0} must be a group warehouse of company {1}.").format(
+					frappe.bold(_("Raw Material Group Warehouse")), frappe.bold(self.company)
+				)
+			)
+
+		if self.for_warehouse and not frappe.db.exists(
+			"Warehouse",
+			{"name": self.for_warehouse, "is_group": 0, "lft": (">", group.lft), "rgt": ("<", group.rgt)},
+		):
+			frappe.throw(
+				_("For Warehouse {0} must be a non-group warehouse under {1}.").format(
+					frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
+				)
+			)
 
 	def enable_auto_reserve_stock(self):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
@@ -197,14 +229,20 @@ class ProductionPlan(Document):
 			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
+		validated_boms = set()
 		for d in self.get("po_items"):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
-			else:
+			elif (d.item_code, d.bom_no) not in validated_boms:
 				validate_bom_no(d.item_code, d.bom_no)
+				validated_boms.add((d.item_code, d.bom_no))
 
 			if not flt(d.planned_qty):
-				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
+				frappe.throw(
+					_("Row #{0}: Planned Qty must be greater than 0 for Item {1}.").format(
+						d.idx, frappe.bold(d.item_code)
+					)
+				)
 
 	def _rename_temporary_references(self):
 		"""po_items and sub_assembly_items items are both constructed client side without saving.
@@ -985,6 +1023,14 @@ class ProductionPlan(Document):
 
 			item_doc = frappe.get_cached_doc("Item", item.item_code)
 
+			# a group warehouse cannot receive stock; it must never reach a Material Request line
+			if item.warehouse and frappe.get_cached_value("Warehouse", item.warehouse, "is_group"):
+				frappe.throw(
+					_("Cannot create Material Request for item {0} in group warehouse {1}.").format(
+						frappe.bold(item.item_code), frappe.bold(item.warehouse)
+					)
+				)
+
 			material_request_type = item.material_request_type or item_doc.default_material_request_type
 
 			# key for Sales Order:Material Request Type:Customer
@@ -1458,11 +1504,13 @@ def get_material_request_items(
 	ignore_existing_ordered_qty,
 	include_safety_stock,
 	warehouse,
+	target_warehouse,
 	bin_dict,
 	consumed_qty,
+	shortage_bin,
 ):
 	required_qty = _required_qty_for_mr(
-		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+		row, ignore_existing_ordered_qty, warehouse, shortage_bin, consumed_qty, include_safety_stock
 	)
 
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
@@ -1490,7 +1538,7 @@ def get_material_request_items(
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
-		"warehouse": warehouse
+		"warehouse": target_warehouse
 		or row.get("source_warehouse")
 		or row.get("default_warehouse")
 		or item_group_defaults.get("default_warehouse"),
@@ -1787,15 +1835,12 @@ def get_items_for_material_requests(
 
 	doc = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
 	_authorize_mr_request(doc, warehouses)
+	_validate_group_warehouse_target(doc)
 
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))
 
-		if (
-			doc.get("for_warehouse")
-			and not get_parent_warehouse_data
-			and doc.get("for_warehouse") in warehouses
-		):
+		if doc.get("for_warehouse") in warehouses:
 			warehouses.remove(doc.get("for_warehouse"))
 
 	doc["mr_items"] = []
@@ -1844,7 +1889,6 @@ def get_items_for_material_requests(
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
 		ignore_existing_ordered_qty = data.get("ignore_existing_ordered_qty") or ignore_existing_ordered_qty
-		warehouse = doc.get("for_warehouse")
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):
@@ -1937,13 +1981,28 @@ def get_items_for_material_requests(
 
 	mr_items = []
 	consumed_qty = defaultdict(float)
+	# raw_material_group_warehouse (optional, group) only widens the availability
+	# scope to its child warehouses; material is still received into for_warehouse.
+	target_warehouse = doc.get("for_warehouse")
+	scope_warehouse = doc.get("raw_material_group_warehouse") or target_warehouse
+	is_transfer = bool((ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses)
 
 	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
-			warehouse = warehouse or details.get("source_warehouse") or details.get("default_warehouse")
-			bin_dict = get_bin_details(details, doc.company, warehouse)
-			bin_dict = bin_dict[0] if bin_dict else {}
+			fallback = details.get("source_warehouse") or details.get("default_warehouse")
+			scope_warehouse = scope_warehouse or fallback
+			target_warehouse = target_warehouse or fallback
+			# get_bin_details scopes to the warehouse's descendants, returning one row per
+			# child warehouse; sum them so a group warehouse reflects combined child stock.
+			bins = get_bin_details(details, doc.company, scope_warehouse)
+			bin_dict = _aggregate_bin_details(bins)
+			shortage_warehouse, shortage_bin = scope_warehouse, bin_dict
+			if is_transfer and scope_warehouse != target_warehouse:
+				shortage_warehouse = target_warehouse
+				shortage_bin = _aggregate_bin_details(
+					row for row in bins if row.warehouse == target_warehouse
+				)
 
 			if details.qty > 0:
 				items = get_material_request_items(
@@ -1953,14 +2012,16 @@ def get_items_for_material_requests(
 					company,
 					ignore_existing_ordered_qty,
 					include_safety_stock,
-					warehouse,
+					shortage_warehouse,
+					target_warehouse,
 					bin_dict,
 					consumed_qty,
+					shortage_bin,
 				)
 				if items:
 					mr_items.append(items)
 
-	if (ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses:
+	if is_transfer:
 		new_mr_items = []
 		locations_by_item = _get_transfer_locations(mr_items, warehouses, company)
 		for item in mr_items:
@@ -1994,6 +2055,32 @@ def get_items_for_material_requests(
 		frappe.msgprint(message, title=_("Note"))
 
 	return mr_items
+
+
+def _validate_group_warehouse_target(doc):
+	# the group only scopes availability; raw materials still need a concrete
+	# receiving warehouse, so for_warehouse is required once we generate items.
+	if doc.get("raw_material_group_warehouse") and not doc.get("for_warehouse"):
+		frappe.throw(
+			_("{0} is required to get raw materials when {1} is set.").format(
+				frappe.bold(_("For Warehouse")), frappe.bold(_("Raw Material Group Warehouse"))
+			)
+		)
+
+
+def _aggregate_bin_details(bin_list):
+	qty_fields = (
+		"projected_qty",
+		"actual_qty",
+		"ordered_qty",
+		"reserved_qty_for_production",
+		"planned_qty",
+	)
+	aggregated = {field: 0 for field in qty_fields}
+	for row in bin_list or []:
+		for field in qty_fields:
+			aggregated[field] += flt(row.get(field))
+	return aggregated
 
 
 def get_materials_from_other_locations(

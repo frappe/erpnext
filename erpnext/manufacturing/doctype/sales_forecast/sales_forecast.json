@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-08-12 17:20:16.012501",
+ "description": "How much you expect to sell, to plan production.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -155,6 +156,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "trending-up",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

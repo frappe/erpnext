@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"item_group\", \"label\": \"Item Group\"}, {\"fieldname\": \"stock_uom\", \"label\": \"Default Unit of Measure\"}, {\"fieldname\": \"has_expiry_date\", \"label\": \"Has Expiry Date\"}, {\"fieldname\": \"shelf_life_in_days\", \"label\": \"Shelf Life In Days\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}]",
+ "creation": "2026-09-30 21:12:56.856781",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Batch Tracked",
+ "filters": "[[\"Item\", \"disabled\", \"=\", 0], [\"Item\", \"has_batch_no\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 5,
+ "modified": "2026-09-30 21:12:56.856781",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item-Batch Tracked",
+ "owner": "Administrator",
+ "reference_doctype": "Item",
+ "route_signature": "disabled=0&has_batch_no=1",
+ "sort_field": "item_name",
+ "sort_order": "asc"
+}

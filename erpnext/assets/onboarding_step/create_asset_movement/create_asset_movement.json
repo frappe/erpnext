@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Asset Movement",
+ "creation": "2026-10-04 01:52:52.537909",
+ "description": "Record who has it and where it is, so you always know. See [Asset Movement](https://docs.frappe.io/erpnext/user/manual/en/asset-movement).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:52:52.537909",
+ "modified_by": "Administrator",
+ "name": "Create Asset Movement",
+ "owner": "Administrator",
+ "reference_document": "Asset Movement",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Hand it to a person or place",
+ "validate_action": 1
+}

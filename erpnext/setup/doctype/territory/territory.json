@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:territory_name",
  "creation": "2013-01-10 16:34:24",
- "description": "Classification of Customers by region",
+ "description": "A region you sell in, to group customers and set targets.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/territory",
  "engine": "InnoDB",
  "field_order": [
   "territory_name",
@@ -37,6 +38,7 @@
    "fieldname": "parent_territory",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Parent Territory",
    "oldfieldname": "parent_territory",
@@ -49,6 +51,7 @@
    "description": "Only leaf nodes are allowed in transaction",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Group",
    "oldfieldname": "is_group",
@@ -120,7 +123,7 @@
    "options": "Target Detail"
   }
  ],
- "icon": "fa fa-map-marker",
+ "icon": "map",
  "idx": 1,
  "is_tree": 1,
  "links": [],

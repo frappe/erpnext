@@ -2,8 +2,10 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2021-09-04 13:38:04.217187",
+ "description": "Turns stock items or services into an asset, or one asset into another.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-capitalization",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -292,6 +294,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "trending-up",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"item_group\", \"label\": \"Item Group\"}, {\"fieldname\": \"end_of_life\", \"label\": \"End of Life\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}]",
+ "creation": "2026-09-30 21:12:56.861489",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Disabled",
+ "filters": "[[\"Item\", \"disabled\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 7,
+ "modified": "2026-09-30 21:12:56.861489",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item-Disabled",
+ "owner": "Administrator",
+ "reference_doctype": "Item",
+ "route_signature": "disabled=1",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

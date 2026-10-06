@@ -3,6 +3,7 @@
  "allow_copy": 1,
  "creation": "2013-05-02 17:53:24",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/global-defaults",
  "engine": "InnoDB",
  "field_order": [
   "default_company",
@@ -101,7 +102,7 @@
  ],
  "grid_page_length": 50,
  "hide_toolbar": 0,
- "icon": "fa fa-cog",
+ "icon": "settings",
  "idx": 1,
  "in_create": 1,
  "issingle": 1,

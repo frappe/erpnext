@@ -1828,6 +1828,43 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 	return cost_added
 
 
+def _add_operation_cost(stock_entry, work_order, operation, expense_account):
+	amount, qty = _get_operation_cost_and_qty(stock_entry, work_order, operation)
+	if amount > 0:
+		_append_operating_cost(stock_entry, expense_account, amount, operation_id=operation.name, qty=qty)
+
+
+def _get_operation_cost_and_qty(stock_entry, work_order, operation):
+	from erpnext.stock.doctype.stock_entry.stock_entry import get_consumed_operating_cost
+
+	qty = flt(stock_entry.fg_completed_qty)
+	if not flt(operation.completed_qty):
+		cost_per_unit = flt(operation.planned_operating_cost) / flt(work_order.qty) if work_order.qty else 0
+		return cost_per_unit * qty, qty
+
+	consumed = get_consumed_operating_cost(work_order.name, stock_entry.bom_no, operation.name)
+	remaining_cost = flt(operation.actual_operating_cost) - sum(flt(row.consumed_cost) for row in consumed)
+	remaining_qty = flt(operation.completed_qty) - max((flt(row.consumed_qty) for row in consumed), default=0)
+	if remaining_qty <= 0:
+		return 0, 0
+
+	qty = min(remaining_qty, qty)
+	return remaining_cost / remaining_qty * qty, qty
+
+
+def _append_operating_cost(stock_entry, expense_account, amount, **operation_fields):
+	stock_entry.append(
+		"additional_costs",
+		{
+			"expense_account": expense_account,
+			"description": _("Operating Cost as per Work Order / BOM"),
+			"amount": flt(amount, frappe.get_precision("Landed Cost Taxes and Charges", "amount")),
+			"has_operating_cost": 1,
+			**operation_fields,
+		},
+	)
+
+
 @frappe.request_cache
 def get_component_account(parent, company):
 	return frappe.db.get_value(
@@ -1838,6 +1875,7 @@ def get_component_account(parent, company):
 def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_card=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import (
 		get_remaining_operating_cost,
+		uses_sub_assembly_operating_cost,
 	)
 
 	remaining_operating_cost = get_remaining_operating_cost(work_order, stock_entry.bom_no)
@@ -1851,18 +1889,13 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 		)
 
 		if not cost_added and not job_card:
-			stock_entry.append(
-				"additional_costs",
-				{
-					"expense_account": expense_account,
-					"description": _("Operating Cost as per Work Order / BOM"),
-					"amount": flt(
-						remaining_operating_cost * stock_entry.fg_completed_qty,
-						frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
-					),
-					"has_operating_cost": 1,
-				},
-			)
+			if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
+				for operation in work_order.operations:
+					_add_operation_cost(stock_entry, work_order, operation, expense_account)
+			else:
+				_append_operating_cost(
+					stock_entry, expense_account, remaining_operating_cost * flt(stock_entry.fg_completed_qty)
+				)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
 		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
@@ -1933,7 +1966,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 
 
 @frappe.whitelist()
-def get_bom_diff(bom1, bom2):
+def get_bom_diff(bom1: str, bom2: str):
 	from frappe.model import table_fields
 
 	if bom1 == bom2:
@@ -1965,7 +1998,10 @@ def get_bom_diff(bom1, bom2):
 		old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
 
 		if df.fieldtype in table_fields:
-			identifier = identifiers[df.fieldname]
+			identifier = identifiers.get(df.fieldname)
+			if not identifier:
+				continue
+
 			# make maps
 			old_row_by_identifier, new_row_by_identifier = {}, {}
 			for d in old_value:

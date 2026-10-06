@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:price_list_name",
  "creation": "2013-01-25 11:35:09",
- "description": "A Price List is a collection of Item Prices either Selling, Buying, or both",
+ "description": "A set of item prices for buying, selling or both.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/price-lists",
  "engine": "InnoDB",
  "field_order": [
   "enabled",
@@ -53,6 +54,7 @@
    "default": "0",
    "fieldname": "buying",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Buying"
   },
@@ -60,6 +62,7 @@
    "default": "0",
    "fieldname": "selling",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Selling"
   },
@@ -80,7 +83,7 @@
    "options": "Price List Country"
   }
  ],
- "icon": "fa fa-tags",
+ "icon": "tags",
  "idx": 1,
  "links": [],
  "max_attachments": 1,

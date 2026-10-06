@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"bill_no\", \"label\": \"Supplier Invoice No\"}, {\"fieldname\": \"due_date\", \"label\": \"Due Date\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.550257",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Pay",
+ "filters": "[[\"Purchase Invoice\", \"docstatus\", \"=\", 1], [\"Purchase Invoice\", \"outstanding_amount\", \">\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 22:30:19.092259",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Purchase Invoice-To Pay",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Invoice",
+ "route_signature": "docstatus=1&outstanding_amount=[\">\",0]",
+ "sort_field": "due_date",
+ "sort_order": "asc"
+}

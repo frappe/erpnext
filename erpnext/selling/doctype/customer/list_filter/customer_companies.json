@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"customer_group\", \"label\": \"Customer Group\"}, {\"fieldname\": \"territory\", \"label\": \"Territory\"}, {\"fieldname\": \"industry\", \"label\": \"Industry\"}, {\"fieldname\": \"tax_id\", \"label\": \"Tax ID\"}, {\"fieldname\": \"default_currency\", \"label\": \"Billing Currency\"}]",
+ "creation": "2026-09-30 21:12:56.753734",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Companies",
+ "filters": "[[\"Customer\", \"disabled\", \"=\", 0], [\"Customer\", \"customer_type\", \"=\", \"Company\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.753734",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer-Companies",
+ "owner": "Administrator",
+ "reference_doctype": "Customer",
+ "route_signature": "customer_type=Company&disabled=0",
+ "sort_field": "customer_name",
+ "sort_order": "asc"
+}

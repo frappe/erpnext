@@ -3,8 +3,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
+ "description": "A bill from a supplier for what you bought.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/purchase-invoice",
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -257,6 +259,7 @@
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Due Date",
    "oldfieldname": "due_date",
@@ -334,6 +337,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -391,6 +395,8 @@
   {
    "fieldname": "bill_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier Invoice No",
@@ -406,6 +412,7 @@
   {
    "fieldname": "bill_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Supplier Invoice Date",
    "no_copy": 1,
    "oldfieldname": "bill_date",
@@ -458,7 +465,6 @@
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "label": "Contact Person",
    "options": "Contact",
    "print_hide": 1
@@ -1700,11 +1706,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "receipt-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

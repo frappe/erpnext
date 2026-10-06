@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"production_item\", \"label\": \"Item To Manufacture\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"qty\", \"label\": \"Qty To Manufacture\"}, {\"fieldname\": \"produced_qty\", \"label\": \"Manufactured Qty\"}, {\"fieldname\": \"planned_start_date\", \"label\": \"Planned Start Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.897021",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "In Process",
+ "filters": "[[\"Work Order\", \"status\", \"=\", \"In Process\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.897021",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Work Order-In Process",
+ "owner": "Administrator",
+ "reference_doctype": "Work Order",
+ "route_signature": "status=In Process",
+ "sort_field": "planned_start_date",
+ "sort_order": "asc"
+}

@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"return_against\", \"label\": \"Return Against\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.543064",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Credit Notes",
+ "filters": "[[\"Sales Invoice\", \"is_return\", \"=\", 1], [\"Sales Invoice\", \"docstatus\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.543064",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Invoice-Credit Notes",
+ "owner": "Administrator",
+ "reference_doctype": "Sales Invoice",
+ "route_signature": "docstatus=1&is_return=1",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

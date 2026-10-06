@@ -3,8 +3,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2017-10-23 11:38:54.004355",
+ "description": "A repair made to an asset, and what it cost.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-repair",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -42,7 +44,7 @@
   "total_repair_cost",
   "accounting_dimensions_section",
   "cost_center",
-  "column_break_14",
+  "dimension_col_break",
   "project",
   "connection_tab"
  ],
@@ -173,7 +175,7 @@
    "options": "Project"
   },
   {
-   "fieldname": "column_break_14",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -267,6 +269,7 @@
    "show_dashboard": 1
   }
  ],
+ "icon": "wrench",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
@@ -275,7 +278,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2026-06-20 15:43:54.943335",
+ "modified": "2026-09-30 13:13:52.023971",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

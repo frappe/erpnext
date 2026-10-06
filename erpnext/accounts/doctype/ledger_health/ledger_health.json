@@ -40,6 +40,7 @@
    "label": "General and Payment Ledger mismatch"
   }
  ],
+ "icon": "heart-pulse",
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],

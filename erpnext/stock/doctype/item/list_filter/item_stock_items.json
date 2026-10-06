@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"item_group\", \"label\": \"Item Group\"}, {\"fieldname\": \"stock_uom\", \"label\": \"Default Unit of Measure\"}, {\"fieldname\": \"valuation_rate\", \"label\": \"Valuation Rate\"}, {\"fieldname\": \"brand\", \"label\": \"Brand\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}]",
+ "creation": "2026-09-30 21:12:56.842621",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Stock Items",
+ "filters": "[[\"Item\", \"disabled\", \"=\", 0], [\"Item\", \"is_stock_item\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.842621",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item-Stock Items",
+ "owner": "Administrator",
+ "reference_doctype": "Item",
+ "route_signature": "disabled=0&is_stock_item=1",
+ "sort_field": "item_name",
+ "sort_order": "asc"
+}

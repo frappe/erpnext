@@ -3,8 +3,10 @@
  "allow_import": 1,
  "autoname": "field:batch_id",
  "creation": "2013-03-05 14:50:38",
+ "description": "A group of units of an item made or received together.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/batch",
  "engine": "InnoDB",
  "field_order": [
   "sb_batch",
@@ -58,6 +60,7 @@
   {
    "fieldname": "item",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Item",
    "link_filters": "[\n    [\"Item\", \"has_batch_no\", \"=\", 1],\n    [\"Item\", \"is_stock_item\", \"=\", 1]\n]",
@@ -85,6 +88,7 @@
    "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Manufacturing Date"
   },
   {
@@ -94,6 +98,7 @@
   {
    "fieldname": "expiry_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
    "oldfieldtype": "Date"
@@ -210,12 +215,12 @@
    "no_copy": 1
   }
  ],
- "icon": "fa fa-archive",
+ "icon": "layers",
  "idx": 1,
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -290,6 +295,7 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
+ "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

@@ -332,6 +332,21 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.assertEqual(jv.inter_company_journal_entry_reference, "")
 		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
 
+	def test_validate_account_company_mismatch_on_save(self):
+		jv = make_journal_entry(
+			"Sales Expenses - _TC",
+			"Buildings - _TC",
+			100,
+			posting_date=nowdate(),
+			cost_center="Main - _TC",
+			save=True,
+		)
+
+		jv.company = "_Test Company 1"
+		for row in jv.accounts:
+			row.cost_center = "Main - _TC1"
+		self.assertRaises(frappe.ValidationError, jv.save)
+
 	def test_jv_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 

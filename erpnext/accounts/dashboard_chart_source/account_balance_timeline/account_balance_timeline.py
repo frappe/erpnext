@@ -37,13 +37,16 @@ def get(
 	filters = frappe.parse_json(filters) or frappe.parse_json(chart.filters_json)
 
 	account = filters.get("account")
-	filters.get("company")
+	company = filters.get("company")
 
-	if not account and chart_name:
+	# the account defaults to the company's default bank account, which a new company has not set yet
+	if not account:
+		if not company:
+			frappe.throw(_("Choose a company in this chart's filters to see its bank balance."))
 		frappe.throw(
-			_("Account is not set for the dashboard chart {0}").format(
-				get_link_to_form("Dashboard Chart", chart_name)
-			)
+			_(
+				"Choose a bank account in this chart's filters, or set a default bank account on {0}, to see its balance."
+			).format(company)
 		)
 
 	if not frappe.db.exists("Account", account) and chart_name:

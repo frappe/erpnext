@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"production_item\", \"label\": \"Item To Manufacture\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"qty\", \"label\": \"Qty To Manufacture\"}, {\"fieldname\": \"produced_qty\", \"label\": \"Manufactured Qty\"}, {\"fieldname\": \"actual_end_date\", \"label\": \"Actual End Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.904545",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Completed This Month",
+ "filters": "[[\"Work Order\", \"status\", \"=\", \"Completed\"], [\"Work Order\", \"actual_end_date\", \"Timespan\", \"this month\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.904545",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Work Order-Completed This Month",
+ "owner": "Administrator",
+ "reference_doctype": "Work Order",
+ "route_signature": "actual_end_date=[\"Timespan\",\"this month\"]&status=Completed",
+ "sort_field": "actual_end_date",
+ "sort_order": "desc"
+}

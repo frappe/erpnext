@@ -8,7 +8,7 @@ app_email = "hello@frappe.io"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-app_home = "/desk"
+app_home = "/desk/home"
 
 add_to_apps_screen = [
 	{
@@ -16,9 +16,34 @@ add_to_apps_screen = [
 		"logo": "/assets/erpnext/images/erpnext-logo.svg",
 		"title": app_title,
 		"route": app_home,
+		"setup_wizard_text": "Let's give your business a home.",
 		"has_permission": "erpnext.check_app_permission",
+		"sequence_id": 1,
 	}
 ]
+
+# Modules that are only accessible via code and not via the UI. These modules are not shown in the sidebar or in the modules list.
+code_only_modules = {
+	# Integrations and Utilities are a handful of settings and tools each, so they sit in the Setup
+	# sidebar with the rest of the configuration rather than taking two places in the dock.
+	"ERPNext Integrations": ["Setup"],
+	"Utilities": ["Setup"],
+	"Telephony": ["Setup"],
+	# Its one doctype, Communication Medium, describes how a call reaches someone, so it sits in
+	# the Integrations section beside the call settings rather than in a shell of its own.
+	"Communication": ["Setup"],
+	"EDI": ["Setup"],
+	"Bulk Transaction": ["Setup"],
+	# Subcontracting is sending work out to be manufactured, so its orders and receipts live in the
+	# Manufacturing sidebar.
+	"Subcontracting": ["Manufacturing"],
+	# Its records are country-specific tax settings and returns, so they sit with the rest of the
+	# tax setup and reports in Accounts.
+	"Regional": ["Accounts"],
+	# Maintenance schedules and visits are after-sales upkeep of what was sold, so they live in a
+	# Maintenance section of the Quality sidebar.
+	"Maintenance": ["Quality Management"],
+}
 
 develop_version = "15.x.x-develop"
 
@@ -29,6 +54,7 @@ email_css = "email_erpnext.bundle.css"
 
 app_include_icons = [
 	"/assets/erpnext/icons/pos-icons.svg",
+	"/assets/erpnext/icons/module-icons.svg",
 ]
 
 web_include_icons = [
@@ -74,7 +100,6 @@ never_skip_patches = ["erpnext.patches.v16_0.update_serial_batch_entries"]
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
-leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
 filters_config = "erpnext.startup.filters.get_filters_config"
 additional_print_settings = "erpnext.controllers.print_settings.get_print_settings"
 
@@ -649,41 +674,29 @@ global_search_doctypes = {
 		{"doctype": "Customer", "index": 0},
 		{"doctype": "Supplier", "index": 1},
 		{"doctype": "Item", "index": 2},
-		{"doctype": "Warehouse", "index": 3},
-		{"doctype": "Account", "index": 4},
-		{"doctype": "Employee", "index": 5},
-		{"doctype": "BOM", "index": 6},
-		{"doctype": "Sales Invoice", "index": 7},
-		{"doctype": "Sales Order", "index": 8},
-		{"doctype": "Quotation", "index": 9},
-		{"doctype": "Work Order", "index": 10},
-		{"doctype": "Purchase Order", "index": 11},
-		{"doctype": "Purchase Receipt", "index": 12},
-		{"doctype": "Purchase Invoice", "index": 13},
-		{"doctype": "Delivery Note", "index": 14},
-		{"doctype": "Stock Entry", "index": 15},
-		{"doctype": "Material Request", "index": 16},
-		{"doctype": "Delivery Trip", "index": 17},
-		{"doctype": "Pick List", "index": 18},
-		{"doctype": "Payment Entry", "index": 22},
-		{"doctype": "Lead", "index": 23},
-		{"doctype": "Opportunity", "index": 24},
-		{"doctype": "Item Price", "index": 25},
-		{"doctype": "Purchase Taxes and Charges Template", "index": 26},
-		{"doctype": "Sales Taxes and Charges", "index": 27},
-		{"doctype": "Asset", "index": 28},
-		{"doctype": "Project", "index": 29},
-		{"doctype": "Task", "index": 30},
-		{"doctype": "Timesheet", "index": 31},
-		{"doctype": "Issue", "index": 32},
-		{"doctype": "Serial No", "index": 33},
-		{"doctype": "Batch", "index": 34},
-		{"doctype": "Branch", "index": 35},
-		{"doctype": "Department", "index": 36},
-		{"doctype": "Designation", "index": 38},
-		{"doctype": "Maintenance Schedule", "index": 45},
-		{"doctype": "Maintenance Visit", "index": 46},
-		{"doctype": "Warranty Claim", "index": 47},
+		{"doctype": "Sales Invoice", "index": 3},
+		{"doctype": "Purchase Invoice", "index": 4},
+		{"doctype": "Sales Order", "index": 5},
+		{"doctype": "Purchase Order", "index": 6},
+		{"doctype": "Quotation", "index": 7},
+		{"doctype": "Delivery Note", "index": 8},
+		{"doctype": "Purchase Receipt", "index": 9},
+		{"doctype": "Payment Entry", "index": 10},
+		{"doctype": "Journal Entry", "index": 11},
+		{"doctype": "Lead", "index": 12},
+		{"doctype": "Opportunity", "index": 13},
+		{"doctype": "Supplier Quotation", "index": 14},
+		{"doctype": "Material Request", "index": 15},
+		{"doctype": "Stock Entry", "index": 16},
+		{"doctype": "Work Order", "index": 17},
+		{"doctype": "BOM", "index": 18},
+		{"doctype": "Project", "index": 19},
+		{"doctype": "Task", "index": 20},
+		{"doctype": "Issue", "index": 21},
+		{"doctype": "Asset", "index": 22},
+		{"doctype": "Serial No", "index": 23},
+		{"doctype": "Batch", "index": 24},
+		{"doctype": "Employee", "index": 25},
 	],
 }
 
@@ -719,3 +732,12 @@ repost_allowed_doctypes = [
 	"Payment Entry",
 	"Purchase Receipt",
 ]
+
+
+# Data Import
+# -----------
+# Import a Customer or Supplier with its contacts and addresses in one file.
+data_import_providers = {
+	"Customer": "erpnext.utilities.party_import_provider.PartyImportProvider",
+	"Supplier": "erpnext.utilities.party_import_provider.PartyImportProvider",
+}

@@ -5,7 +5,11 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.permissions import has_user_permission
+from frappe.utils import cstr
+from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import _refuse, require_user_permission
 from erpnext.stock.utils import get_stock_balance, get_stock_value_on
 
 
@@ -32,14 +36,28 @@ class QuickStockBalance(Document):
 
 
 @frappe.whitelist()
-def get_stock_item_details(warehouse, date, item=None, barcode=None):
+def get_stock_item_details(warehouse: str, date: str, item: str | None = None, barcode: str | None = None):
+	if not frappe.has_permission("Item", "read"):
+		_refuse()
+
+	warehouse = cstr(warehouse)
+	if not warehouse or not has_user_permission(frappe.get_doc("Warehouse", warehouse)):
+		_refuse()
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		for descendant in get_descendants_of("Warehouse", warehouse, ignore_permissions=True):
+			require_user_permission("Warehouse", descendant)
+
 	out = {}
 	if barcode:
 		out["item"] = frappe.db.get_value("Item Barcode", filters={"barcode": barcode}, fieldname=["parent"])
 		if not out["item"]:
 			frappe.throw(_("Invalid Barcode. There is no Item attached to this barcode."))
+		require_user_permission("Item", out["item"])
 	else:
+		item = cstr(item)
 		out["item"] = item
+		if not item or not has_user_permission(frappe.get_doc("Item", item)):
+			_refuse()
 
 	barcodes = frappe.db.get_values("Item Barcode", filters={"parent": out["item"]}, fieldname=["barcode"])
 

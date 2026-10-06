@@ -6,11 +6,23 @@ from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
+	create_unreconcile_doc_for_selection,
+)
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.permission_test_utils import (
+	MISSING_NAME,
+	as_user,
+	assert_not_found,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -541,3 +553,94 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
+
+	def create_allocated_payment(self, cost_center):
+		si = self.create_sales_invoice()
+		pe = self.create_payment_entry()
+		pe.cost_center = cost_center
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 100},
+		)
+		pe.save().submit()
+		return si, pe
+
+	def get_selection(self, si, voucher_no):
+		return {
+			"company": self.company,
+			"voucher_type": "Payment Entry",
+			"voucher_no": voucher_no,
+			"against_voucher_type": si.doctype,
+			"against_voucher_no": si.name,
+		}
+
+	def test_create_unreconcile_doc_for_selection_respects_user_permission(self):
+		si_inside, pe_inside = self.create_allocated_payment("Main - _TC")
+		si_unfenced, pe_unfenced = self.create_allocated_payment("_Test Cost Center 2 - _TC")
+		si_outside, pe_outside = self.create_allocated_payment("_Test Cost Center 2 - _TC")
+		user = make_fenced_user("unreconcile-payment-user@example.com", ["Accounts User"])
+
+		with as_user(user):
+			create_unreconcile_doc_for_selection([self.get_selection(si_unfenced, pe_unfenced.name)])
+		si_unfenced.reload()
+		self.assertEqual(si_unfenced.outstanding_amount, 100)
+
+		make_fenced_user(user, ["Accounts User"], [("Cost Center", "Main - _TC")])
+		hidden = ["_Test Cost Center 2 - _TC"]
+		with as_user(user):
+			create_unreconcile_doc_for_selection(
+				frappe.as_json([self.get_selection(si_inside, pe_inside.name)])
+			)
+			si_inside.reload()
+			self.assertEqual(si_inside.outstanding_amount, 100)
+
+			assert_refused_without(
+				self,
+				hidden,
+				create_unreconcile_doc_for_selection,
+				[self.get_selection(si_outside, pe_outside.name)],
+			)
+			assert_not_found(
+				self,
+				create_unreconcile_doc_for_selection,
+				[self.get_selection(si_outside, [pe_outside.name])],
+			)
+			for voucher_no in ("", None):
+				assert_refused(
+					self,
+					create_unreconcile_doc_for_selection,
+					[self.get_selection(si_outside, voucher_no)],
+				)
+			for voucher_no in (0, False):
+				assert_not_found(
+					self,
+					create_unreconcile_doc_for_selection,
+					[self.get_selection(si_outside, voucher_no)],
+				)
+
+			def build_kwargs(voucher_no):
+				return {"selections": [self.get_selection(si_outside, voucher_no)]}
+
+			assert_refused_for_names(
+				self, create_unreconcile_doc_for_selection, build_kwargs, [], caller_supplied=True
+			)
+			assert_refused_without(
+				self,
+				hidden,
+				create_unreconcile_doc_for_selection,
+				[
+					self.get_selection(si_inside, pe_inside.name),
+					self.get_selection(si_outside, pe_outside.name),
+				],
+			)
+			assert_not_found(
+				self,
+				create_unreconcile_doc_for_selection,
+				[
+					self.get_selection(si_inside, pe_inside.name),
+					self.get_selection(si_outside, MISSING_NAME),
+				],
+			)
+
+		si_outside.reload()
+		self.assertEqual(si_outside.outstanding_amount, 0)

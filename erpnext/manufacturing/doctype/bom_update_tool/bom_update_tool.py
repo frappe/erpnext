@@ -8,8 +8,11 @@ if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import date_diff, get_datetime, now
+from frappe.utils import cstr, date_diff, get_datetime, now
+
+from erpnext import _refuse, require_permission
 
 
 class BOMUpdateTool(Document):
@@ -31,9 +34,42 @@ class BOMUpdateTool(Document):
 @frappe.whitelist()
 def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None = None) -> "BOMUpdateLog":
 	"""Returns a BOM Update Log (that queues a job) for BOM Replacement."""
+	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMMissingError
+
 	boms = boms or args
 	if isinstance(boms, str):
 		boms = json.loads(boms)
+
+	requested = boms or {}
+	if not requested.get("current_bom") or not requested.get("new_bom"):
+		frappe.throw(
+			msg=_("Please mention the Current and New BOM for replacement."),
+			title=_("Mandatory"),
+			exc=BOMMissingError,
+		)
+
+	boms["current_bom"] = cstr(boms.get("current_bom"))
+	boms["new_bom"] = cstr(boms.get("new_bom"))
+	if not frappe.has_permission("BOM", "write", doc=boms["current_bom"]):
+		_refuse()
+	if not frappe.has_permission("BOM", "read", doc=boms["new_bom"]):
+		_refuse()
+
+	rewritten_boms = []
+	pending = [boms.get("current_bom"), boms.get("new_bom")]
+	while pending:
+		child_bom = pending.pop()
+		for parent in frappe.get_all(
+			"BOM Item",
+			filters={"bom_no": child_bom, "parenttype": "BOM", "docstatus": ["<", 2]},
+			pluck="parent",
+		):
+			if parent not in rewritten_boms:
+				rewritten_boms.append(parent)
+				pending.append(parent)
+
+	for parent in rewritten_boms:
+		require_permission("BOM", parent, "write")
 
 	update_log = create_bom_update_log(boms=boms)
 	return update_log
