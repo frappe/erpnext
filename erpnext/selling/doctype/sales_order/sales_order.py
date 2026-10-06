@@ -929,19 +929,41 @@ def get_stock_reservation_status():
 	return frappe.get_single_value("Stock Settings", "enable_stock_reservation")
 
 
+def get_credit_note_return_criterion(invoice):
+	"""Match return invoices that reverse both the delivery and the billing of Sales Order rows."""
+	return (
+		(invoice.is_return == 1)
+		& (invoice.update_stock == 1)
+		& (invoice.update_billed_amount_in_sales_order == 1)
+	)
+
+
 def get_pending_qty_criterion(sales_order_item):
 	"""Mirror the mapper's pending quantity check."""
+	invoice = qb.DocType("Sales Invoice")
 	invoice_item = qb.DocType("Sales Invoice Item")
 	billed_qty = (
 		qb.from_(invoice_item)
 		.select(IfNull(Sum(invoice_item.qty), 0))
 		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
 	)
+	credit_note_returned_qty = (
+		qb.from_(invoice_item)
+		.inner_join(invoice)
+		.on(invoice.name == invoice_item.parent)
+		.select(IfNull(Sum(-invoice_item.qty), 0))
+		.where(
+			(invoice_item.docstatus == 1)
+			& (invoice_item.so_detail == sales_order_item.name)
+			& get_credit_note_return_criterion(invoice)
+		)
+	)
+	returned_qty = sales_order_item.returned_qty - credit_note_returned_qty
 
 	qty_precision = frappe.get_precision("Sales Order Item", "qty")
 	has_unbilled_ordered_qty = Round(sales_order_item.qty - billed_qty, qty_precision) > 0
 	has_unbilled_delivered_qty = (
-		Round(sales_order_item.qty - sales_order_item.returned_qty - billed_qty, qty_precision) > 0
+		Round(sales_order_item.qty - returned_qty - billed_qty, qty_precision) > 0
 	) | (Round(sales_order_item.delivered_qty - billed_qty, qty_precision) > 0)
 
 	return has_unbilled_ordered_qty & has_unbilled_delivered_qty

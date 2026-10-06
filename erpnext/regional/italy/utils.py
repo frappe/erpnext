@@ -421,7 +421,7 @@ def get_e_invoice_attachments(invoices):
 	attachments = frappe.get_all(
 		"File",
 		fields=("name", "file_name", "attached_to_name", "is_private"),
-		filters={"attached_to_name": ("in", tax_id_map), "attached_to_doctype": "Sales Invoice"},
+		filters={"attached_to_name": ("in", list(tax_id_map)), "attached_to_doctype": "Sales Invoice"},
 	)
 
 	out = []

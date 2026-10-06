@@ -111,6 +111,9 @@ class StatusService:
 		"""Return the status based on stock entries against this work order"""
 		status = status or self.doc.status
 
+		if self.doc.docstatus == 1 and status == "Closed":
+			return status
+
 		if self.doc.docstatus == 0:
 			status = "Draft"
 		elif self.doc.docstatus == 1:

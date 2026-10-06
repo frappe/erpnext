@@ -1,6 +1,8 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import Counter
+
 import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
@@ -88,6 +90,7 @@ class Project(Document):
 		self.onload()
 
 	def validate(self):
+		self.validate_project_template()
 		if not self.is_new():
 			self.copy_from_template()
 			self.control_access_for_project_users()
@@ -96,6 +99,14 @@ class Project(Document):
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
+
+	def validate_project_template(self):
+		if (
+			self.project_template
+			and self.has_value_changed("project_template")
+			and frappe.db.get_value("Project Template", self.project_template, "disabled")
+		):
+			frappe.throw(_("Project Template {0} is disabled").format(frappe.bold(self.project_template)))
 
 	def copy_from_template(self, trigger=None):
 		"""
@@ -737,37 +748,58 @@ def send_project_update_email_to_users(project):
 
 def collect_project_status():
 	for data in frappe.get_all("Project Update", {"date": today(), "sent": 0}):
-		replies = frappe.get_all(
-			"Communication",
-			fields=["content", "text_content", "sender"],
-			filters=dict(
-				reference_doctype="Project Update",
-				reference_name=data.name,
-				communication_type="Communication",
-				sent_or_received="Received",
-			),
-			order_by="creation asc",
-		)
-
-		for d in replies:
-			doc = frappe.get_doc("Project Update", data.name)
-			user_data = frappe.db.get_values(
-				"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
-			)[0]
-
-			doc.append(
-				"users",
-				{
-					"user": user_data.name,
-					"full_name": user_data.full_name,
-					"image": user_data.user_image,
-					"project_status": frappe.utils.md_to_html(
-						EmailReplyParser.parse_reply(d.text_content) or d.content
-					),
-				},
-			)
-
+		doc = frappe.get_doc("Project Update", data.name)
+		new_replies = get_uncollected_replies(doc)
+		if new_replies:
+			for reply in new_replies:
+				doc.append("users", reply)
 			doc.save(ignore_permissions=True)
+
+
+def get_uncollected_replies(project_update):
+	collected = Counter((row.user, row.project_status) for row in project_update.users)
+	new_replies = []
+	for reply in get_project_update_replies(project_update.name):
+		key = (reply["user"], reply["project_status"])
+		if collected[key]:
+			collected[key] -= 1
+		else:
+			new_replies.append(reply)
+	return new_replies
+
+
+def get_project_update_replies(project_update):
+	replies = frappe.get_all(
+		"Communication",
+		fields=["content", "text_content", "sender"],
+		filters=dict(
+			reference_doctype="Project Update",
+			reference_name=project_update,
+			communication_type="Communication",
+			sent_or_received="Received",
+		),
+		order_by="creation asc",
+	)
+
+	users = []
+	for d in replies:
+		user_data = frappe.db.get_value(
+			"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
+		)
+		if not user_data:
+			continue
+
+		users.append(
+			{
+				"user": user_data.name,
+				"full_name": user_data.full_name,
+				"image": user_data.user_image,
+				"project_status": frappe.utils.md_to_html(
+					EmailReplyParser.parse_reply(d.text_content) or d.content
+				),
+			}
+		)
+	return users
 
 
 def send_project_status_email_to_users():
