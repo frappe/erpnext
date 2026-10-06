@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
@@ -268,9 +268,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			if not item.s_warehouse:
 				continue
 
-			key = (
-				item.item_code if item.item_code in pending_by_item else getattr(item, "original_item", None)
-			)
+			key = item.original_item or item.item_code
 			if key not in pending_by_item:
 				continue
 
@@ -398,8 +396,10 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 			item_row["from_warehouse"] = d.source_warehouse
 		item_row["to_warehouse"] = wip_warehouse
-		if item_row["allow_alternative_item"]:
-			item_row["allow_alternative_item"] = work_order.allow_alternative_item
+		item_row["allow_alternative_item"] = cint(
+			work_order.allow_alternative_item
+			and frappe.get_cached_value("Item", d.item_code, "allow_alternative_item")
+		)
 		item_dict.setdefault(d.item_code, item_row)
 
 	def _get_job_card_item(self, item_code):
