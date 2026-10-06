@@ -23,11 +23,17 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 	keeps the asserted number exact and makes the test fail if the conversion breaks.
 	"""
 
-	def make_component(self):
+	def make_component(self, stock_uom="Nos"):
 		return make_item(
 			f"_Test Packing Component {random_string(10)}",
-			{"is_stock_item": 1},
+			{"is_stock_item": 1, "stock_uom": stock_uom},
 		).name
+
+	def make_fractional_uom(self):
+		name = "_Test Fractional UOM"
+		if not frappe.db.exists("UOM", name):
+			frappe.get_doc({"doctype": "UOM", "uom_name": name, "must_be_whole_number": 0}).insert()
+		return name
 
 	def make_bundle_parent(self):
 		return make_item(
@@ -153,6 +159,53 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 
 		# ...and disappears once cancelled (is_active cleared, docstatus 2).
 		bundle.cancel()
+		self.assertEqual(self.report_rows_for(parent), [])
+
+	def test_fractional_bundles_are_floored(self):
+		comp_a = self.make_component()
+		parent = self.make_bundle_parent()
+
+		# 13 / 2 = 6.5 -> only 6 complete bundles can be packed
+		self.set_bin_projected_qty(comp_a, WAREHOUSE, 13)
+		self.make_active_bundle(parent, [(comp_a, 2)])
+
+		rows = self.report_rows_for(parent)
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(flt(rows[0][5]), 6.0)
+
+	def test_fractional_stock_not_lost_to_float_error(self):
+		# a fractional-UOM component can have a non-integer qty per bundle, which triggers the float case
+		comp_a = self.make_component(stock_uom=self.make_fractional_uom())
+		parent = self.make_bundle_parent()
+
+		# 0.3 / 0.1 == 2.9999999999999996 in float; must still report 3 whole bundles
+		self.set_bin_projected_qty(comp_a, WAREHOUSE, 0.3)
+		self.make_active_bundle(parent, [(comp_a, 0.1)])
+
+		rows = self.report_rows_for(parent)
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(flt(rows[0][5]), 3.0)
+
+	def test_genuine_fraction_is_not_rounded_up(self):
+		comp_a = self.make_component()
+		parent = self.make_bundle_parent()
+
+		# 8.99 / 3 == 2.996...; only 2 complete bundles can be packed, must not round up to 3
+		self.set_bin_projected_qty(comp_a, WAREHOUSE, 8.99)
+		self.make_active_bundle(parent, [(comp_a, 3)])
+
+		rows = self.report_rows_for(parent)
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(flt(rows[0][5]), 2.0)
+
+	def test_negative_projected_drops_row(self):
+		comp_a = self.make_component()
+		parent = self.make_bundle_parent()
+
+		# negative projected qty cannot yield any bundle -> row dropped (no negative bundles)
+		self.set_bin_projected_qty(comp_a, WAREHOUSE, -30)
+		self.make_active_bundle(parent, [(comp_a, 3)])
+
 		self.assertEqual(self.report_rows_for(parent), [])
 
 	def make_secondary_warehouse(self):

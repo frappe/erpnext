@@ -3,10 +3,14 @@
 
 
 import frappe
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt
+from frappe.utils import floor, flt
 
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_masters_condition,
+	get_allowed_warehouses_condition,
+)
 
 
 def execute(filters=None):
@@ -94,12 +98,7 @@ def get_item_warehouse_quantity_map():
 	component_items = list({c.item_code for c in bundle_components})
 
 	bin_projected = {
-		(b.item_code, b.warehouse): flt(b.projected_qty)
-		for b in frappe.get_all(
-			"Bin",
-			filters={"item_code": ["in", component_items]},
-			fields=["item_code", "warehouse", "projected_qty"],
-		)
+		(b.item_code, b.warehouse): flt(b.projected_qty) for b in get_component_bins(component_items)
 	}
 
 	# Only warehouses that hold at least one component can yield a non-zero packable qty; a warehouse
@@ -121,7 +120,34 @@ def get_item_warehouse_quantity_map():
 
 	sbom_map = {}
 	for (parent, warehouse), qty in packable_qty.items():
-		if qty != 0:  # HAVING MIN(qty) != 0
-			sbom_map.setdefault(parent, {})[warehouse] = qty
+		# strip float-division noise (0.3 / 0.1 == 2.9999…) without rounding away a real fraction (8.99 / 3),
+		# then floor: only whole bundles can be packed and negative projected stock cannot
+		bundles = max(0, floor(flt(qty, 9)))
+		if bundles:
+			sbom_map.setdefault(parent, {})[warehouse] = bundles
 
 	return sbom_map
+
+
+def get_component_bins(component_items):
+	bin_table = frappe.qb.DocType("Bin")
+	query = (
+		frappe.qb.from_(bin_table)
+		.select(bin_table.item_code, bin_table.warehouse, bin_table.projected_qty)
+		.where(bin_table.item_code.isin(component_items))
+	)
+
+	if condition := get_allowed_warehouses_condition(bin_table.warehouse):
+		query = query.where(condition)
+
+	if warehouses := get_user_permitted_warehouses():
+		query = query.where(bin_table.warehouse.isin(warehouses))
+
+	return query.run(as_dict=True)
+
+
+def get_user_permitted_warehouses():
+	# Warehouse user permissions that apply to Bin; an empty set means no restriction, matching how
+	# Frappe itself scopes link fields by User Permission (applicable_for)
+	warehouse_permissions = get_user_permissions(frappe.session.user).get("Warehouse") or []
+	return get_allowed_docs_for_doctype(warehouse_permissions, "Bin")
