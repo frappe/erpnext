@@ -67,10 +67,10 @@ def get_data(filters):
 	data = []
 	items = get_items(filters)
 	territories = get_territories(filters)
-	sales_by_item = get_sales_details(filters)
+	last_sales = get_sales_details(filters)
 
 	for territory in territories:
-		subtree = {territory.name, *get_descendants_of("Territory", territory.name)}
+		subtree = {territory.name, *get_descendants_of("Territory", territory.name, ignore_permissions=True)}
 		for item in items:
 			row = {
 				"territory": territory.name,
@@ -79,9 +79,7 @@ def get_data(filters):
 				"item_name": item.item_name,
 			}
 
-			last_sale = next(
-				(d for d in sales_by_item.get(item.item_code, []) if d.territory in subtree), None
-			)
+			last_sale = get_last_sale(last_sales, item.item_code, subtree)
 			if last_sale:
 				if last_sale.days_since_last_order <= cint(filters["days"]):
 					continue
@@ -98,6 +96,11 @@ def get_data(filters):
 			data.append(row)
 
 	return data
+
+
+def get_last_sale(last_sales: dict, item_code: str, territories: set[str]) -> dict | None:
+	sales = (last_sales[(item_code, t)] for t in territories if (item_code, t) in last_sales)
+	return min(sales, key=lambda d: d.days_since_last_order, default=None)
 
 
 def get_sales_details(filters):
@@ -141,8 +144,9 @@ def get_sales_details(filters):
 
 	sales_data = query.run(as_dict=True)
 
+	# rows are ordered by recency, so the first one per (item, territory) is the latest sale
 	for d in sales_data:
-		item_details_map.setdefault(d.item_code, []).append(d)
+		item_details_map.setdefault((d.item_code, d.territory), d)
 
 	return item_details_map
 
