@@ -216,21 +216,27 @@ class TestBalanceSheet(ERPNextTestSuite):
 				posting_date=last_year,
 			)
 
-		filters = frappe._dict(
-			company=COMPANY,
-			period_start_date=today(),
-			period_end_date=today(),
-			periodicity="Yearly",
-			filter_based_on="Date Range",
-			accumulated_values=True,
-			group_by_dimension="Cost Center",
-		)
-		period_list = build_period_list(filters)
-		_columns, data, message, *_ = execute(filters)
+		# execute() rewrites period_start_date, so each run needs its own filters
+		def make_filters(accumulated_values):
+			return frappe._dict(
+				company=COMPANY,
+				period_start_date=today(),
+				period_end_date=today(),
+				periodicity="Yearly",
+				filter_based_on="Date Range",
+				accumulated_values=accumulated_values,
+				group_by_dimension="Cost Center",
+			)
+
+		def unclosed_row(data):
+			return next((r for r in data if "Unclosed Fiscal Years" in str(r.get("account_name", ""))), None)
+
+		period_list = build_period_list(make_filters(True))
+		_columns, data, message, *_ = execute(make_filters(True))
 
 		self.assertEqual(message, "Previous Financial Year is not closed")
 
-		unclosed = next((r for r in data if "Unclosed Fiscal Years" in str(r.get("account_name", ""))), None)
+		unclosed = unclosed_row(data)
 		self.assertIsNotNone(unclosed)
 
 		def key_for(cost_center):
@@ -240,12 +246,15 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(unclosed[key_for(cost_centers[1])], 500)
 		self.assertEqual(unclosed["total"], 800)
 
+		# the carried-in amount is out of Provisional Profit / Loss, columns and Total alike
+		provisional = next(r for r in data if "Provisional Profit / Loss" in str(r.get("account_name", "")))
+		self.assertEqual(provisional[key_for(cost_centers[0])], 0)
+		self.assertEqual(provisional[key_for(cost_centers[1])], 0)
+		self.assertEqual(provisional["total"], sum(provisional[p.key] for p in period_list))
+
 		# unaccumulated columns show period movement, which an opening position does not belong in
-		filters.accumulated_values = False
-		_columns, data, *_ = execute(filters)
-		self.assertIsNone(
-			next((r for r in data if "Unclosed Fiscal Years" in str(r.get("account_name", ""))), None)
-		)
+		_columns, data, *_ = execute(make_filters(False))
+		self.assertIsNone(unclosed_row(data))
 
 
 def make_journal_entry(rows, posting_date=None):

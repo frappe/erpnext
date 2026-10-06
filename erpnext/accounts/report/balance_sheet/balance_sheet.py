@@ -226,6 +226,11 @@ def add_unclosed_fiscal_years_row(
 			provisional_profit_loss[period.key] = provisional_profit_loss[period.key] - amount
 
 	unclosed["total"] = get_company_wide_opening_balance(opening_balance, period_list)
+
+	# the Total cell was summed before this row existed, so it needs the same adjustment
+	if provisional_profit_loss:
+		provisional_profit_loss["total"] = flt(provisional_profit_loss["total"]) - unclosed["total"]
+
 	data.append(unclosed)
 
 
