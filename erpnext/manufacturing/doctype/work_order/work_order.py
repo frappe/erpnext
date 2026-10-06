@@ -2553,7 +2553,11 @@ def get_consumed_qty(work_order, item_code):
 			& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 			& (stock_entry.docstatus == 1)
 			& (stock_entry_detail.s_warehouse.isnotnull())
-			& ((stock_entry_detail.item_code == item_code) | (stock_entry_detail.original_item == item_code))
+			# an alternative item row belongs to the item it replaced, not to both item codes
+			& (
+				fn.Coalesce(fn.NullIf(stock_entry_detail.original_item, ""), stock_entry_detail.item_code)
+				== item_code
+			)
 		)
 	)
 
