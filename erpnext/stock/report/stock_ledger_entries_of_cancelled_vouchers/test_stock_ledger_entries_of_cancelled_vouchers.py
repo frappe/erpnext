@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.permissions import add_user_permission
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -130,6 +131,9 @@ class TestStockLedgerEntriesOfCancelledVouchers(FrappeTestCase):
 		)
 		entry.cancel()
 
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name, "actual_qty": 5})
+		frappe.db.set_value("Stock Ledger Entry", sle, "is_cancelled", 0)
+
 		frappe.set_user(
 			make_stock_manager("sle-cancelled-voucher-restricted@example.com", company="_Test Company 1")
 		)
@@ -143,13 +147,39 @@ class TestStockLedgerEntriesOfCancelledVouchers(FrappeTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle, "is_cancelled"), 0)
+
+	def test_warehouse_user_permission(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		entry = make_stock_entry(
+			item_code=item, qty=5, rate=100, to_warehouse="Stores - _TC", posting_date="2026-06-01"
+		)
+		entry.cancel()
+
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name, "actual_qty": 5})
+		frappe.db.set_value("Stock Ledger Entry", sle, "is_cancelled", 0)
+
+		user = make_stock_manager("sle-cancelled-voucher-warehouse@example.com")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+
+		frappe.set_user(user)
+		try:
+			self.assertFalse([d for d in self.run_report() if d.voucher_no == entry.name])
+			self.assertRaises(
+				frappe.PermissionError,
+				fix_uncancelled_entries,
+				[{"voucher_type": "Stock Entry", "voucher_no": entry.name}],
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle, "is_cancelled"), 0)
+
 	def test_company_is_mandatory(self):
 		self.assertRaises(frappe.ValidationError, execute, frappe._dict())
 
 
 def make_stock_manager(user, company=None):
-	from frappe.permissions import add_user_permission
-
 	if not frappe.db.exists("User", user):
 		frappe.get_doc(
 			{"doctype": "User", "email": user, "first_name": "Stock Manager", "send_welcome_email": 0}
