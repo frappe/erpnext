@@ -421,6 +421,98 @@ class TestChequeBook(ERPNextTestSuite):
 			cheque_book=self.book.name,
 		)
 
+	def change_bank_ledger(self):
+		ledger = create_account(
+			account_name="_Test Remapped Cheque Bank",
+			account_type="Bank",
+			company="_Test Company",
+			parent_account="Bank Accounts - _TC",
+		)
+		bank_account = frappe.get_doc("Bank Account", self.bank_account)
+		bank_account.account = ledger
+		bank_account.save()
+		return ledger
+
+	def test_ledger_change_keeps_book_usable_without_rewriting_history(self):
+		self.assertIsNone(frappe.new_doc("Cheque Book").as_dict().current_account)
+		payment = self.make_cheque_payment("000101")
+		cancel_cheque(self.book.name, "000102")
+		book_modified = frappe.db.get_value("Cheque Book", self.book.name, "modified")
+		ledger = self.change_bank_ledger()
+		self.book.reload()
+		self.assertEqual(self.book.account, BANK_LEDGER)
+		self.assertEqual(self.book.current_account, ledger)
+		self.assertEqual(self.book.as_dict().current_account, ledger)
+		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "modified"), book_modified)
+		payment.reload()
+		self.assertEqual((payment.paid_from, payment.docstatus), (BANK_LEDGER, 1))
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {})
+		self.assertEqual(get_next_cheque(BANK_LEDGER, self.book.name), {})
+		for book in (None, self.book.name):
+			self.assertEqual(get_next_cheque(ledger, book)["cheque_no"], "000103")
+		for cheque_no in ("000101", "000102", "000999"):
+			with self.subTest(cheque_no=cheque_no):
+				with self.assertRaises(frappe.ValidationError):
+					self.make_cheque_payment(cheque_no, paid_from=ledger)
+		self.make_cheque_payment(paid_from=ledger)
+		self.assertEqual(get_next_cheque(ledger)["cheque_no"], "000104")
+		self.book.reload()
+		self.book.status = "Disabled"
+		self.book.save()
+		self.assertEqual(self.book.account, BANK_LEDGER)
+		self.assertEqual(self.book.as_dict().current_account, ledger)
+
+	def test_cheque_bank_account_must_belong_to_payment_company(self):
+		frappe.db.set_value("Bank Account", self.bank_account, "company", "_Test Company 1")
+		with self.assertRaisesRegex(frappe.ValidationError, "Payment Entry company"):
+			self.make_cheque_payment("000101")
+
+	def test_payment_drafted_before_ledger_change_must_use_current_ledger(self):
+		payment = self.make_cheque_payment("000101", submit=False)
+		ledger = self.change_bank_ledger()
+		with self.assertRaisesRegex(frappe.ValidationError, "Account Paid From"):
+			payment.submit()
+		self.assertIsNone(get_cheque_usage(self.book.name, "000101"))
+		payment.reload()
+		payment.paid_from = ledger
+		payment.submit()
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
+
+	def test_ledger_change_does_not_allow_missing_book_for_tracked_numbers(self):
+		ledger = self.change_bank_ledger()
+		for status in ("Submitted", "Finished", "Disabled"):
+			with self.subTest(status=status):
+				self.book.db_set("status", status)
+				payment = create_payment_entry(paid_from=ledger)
+				payment.mode_of_payment = "Cheque"
+				payment.reference_no = "000101"
+				with self.assertRaisesRegex(frappe.ValidationError, "Please select a Cheque Book"):
+					payment.save()
+
+	def test_cheque_book_dropdown_uses_current_bank_ledger(self):
+		from frappe.desk.search import search_link
+
+		ledger = self.change_bank_ledger()
+		user = make_fenced_user(
+			"cheque-ledger-user@example.com", ["Accounts User"], [("Bank Account", self.bank_account)]
+		)
+		with as_user(user):
+			for account, expected in ((BANK_LEDGER, []), (ledger, [self.book.name])):
+				results = search_link(
+					"Cheque Book",
+					"",
+					filters={
+						"bank_account.account": account,
+						"bank_account.is_company_account": 1,
+						"bank_account.disabled": 0,
+						"company": "_Test Company",
+						"docstatus": 1,
+						"status": "Submitted",
+					},
+					reference_doctype="Payment Entry",
+				)
+				self.assertEqual([row["value"] for row in results], expected)
+
 	def test_cheque_book_is_required_when_account_has_books(self):
 		for status in ("Submitted", "Finished", "Disabled"):
 			with self.subTest(status=status):

@@ -99,7 +99,14 @@ frappe.ui.form.on("Payment Entry", {
 		});
 
 		frm.set_query("cheque_book", () => ({
-			filters: { account: frm.doc.paid_from, docstatus: 1, status: "Submitted" },
+			filters: {
+				"bank_account.account": frm.doc.paid_from,
+				"bank_account.is_company_account": 1,
+				"bank_account.disabled": 0,
+				company: frm.doc.company,
+				docstatus: 1,
+				status: "Submitted",
+			},
 		}));
 
 		frm.set_query("contact_person", function () {

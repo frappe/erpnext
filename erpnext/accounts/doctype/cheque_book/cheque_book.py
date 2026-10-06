@@ -24,13 +24,18 @@ class ChequeBook(Document):
 		amended_from: DF.Link | None
 		bank_account: DF.Link
 		cheque_book_no: DF.Data
-		cheque_end_no: DF.Data
-		cheque_start_no: DF.Data
+		cheque_end_no: DF.Data | None
+		cheque_start_no: DF.Data | None
 		company: DF.Link | None
 		next_cheque_no: DF.Data | None
 		no_of_cheques: DF.Int
 		status: DF.Literal["Draft", "Submitted", "Finished", "Disabled", "Cancelled"]
 	# end: auto-generated types
+
+	@property
+	def current_account(self):
+		if self.bank_account:
+			return frappe.db.get_value("Bank Account", self.bank_account, "account")
 
 	def validate(self):
 		self.validate_bank_account()
@@ -249,7 +254,7 @@ def get_next_cheque(account: str, cheque_book: str | None = None, include_free: 
 	if not enabled_bank_accounts:
 		return {}
 
-	filters = {"name": cheque_book} if cheque_book else {"account": account}
+	filters = {"name": cheque_book} if cheque_book else {}
 	books = frappe.get_list(
 		"Cheque Book",
 		filters={
@@ -293,35 +298,38 @@ def validate_cheque(payment_entry):
 		doc.reference_date = doc.reference_date or doc.posting_date
 
 	if not doc.cheque_book:
-		if frappe.db.exists("Cheque Book", {"account": doc.paid_from, "docstatus": 1}):
+		bank_accounts = frappe.get_all("Bank Account", filters={"account": doc.paid_from}, pluck="name")
+		if bank_accounts and frappe.db.exists(
+			"Cheque Book", {"bank_account": ("in", bank_accounts), "docstatus": 1}
+		):
 			frappe.throw(_("Please select a Cheque Book"))
 		return
 
-	if doc.docstatus == 1:
-		# Existing documents are locked by Frappe before validation: book, then bank account.
-		book = frappe.get_doc("Cheque Book", doc.cheque_book, for_update=True)
-		is_company_account, disabled = frappe.db.get_value(
-			"Bank Account", book.bank_account, ["is_company_account", "disabled"], for_update=True
-		)
-	else:
-		book = frappe.get_doc("Cheque Book", doc.cheque_book)
-		is_company_account, disabled = frappe.db.get_value(
-			"Bank Account", book.bank_account, ["is_company_account", "disabled"]
-		)
+	# Existing documents are locked by Frappe before validation: book, then bank account.
+	book = frappe.get_doc("Cheque Book", doc.cheque_book, for_update=doc.docstatus == 1)
+	bank_account = frappe.db.get_value(
+		"Bank Account",
+		book.bank_account,
+		["account", "company", "is_company_account", "disabled"],
+		as_dict=True,
+		for_update=doc.docstatus == 1,
+	)
 
-	if not is_company_account:
+	if not bank_account or not bank_account.is_company_account:
 		frappe.throw(_("Bank Account {0} is not a Company Account").format(frappe.bold(book.bank_account)))
-	if disabled:
+	if bank_account.disabled:
 		frappe.throw(_("Bank Account {0} is disabled").format(frappe.bold(book.bank_account)))
+	if bank_account.company != doc.company or book.company != doc.company:
+		frappe.throw(_("Cheque Book and Bank Account must belong to the Payment Entry company"))
 
 	# A finished book still accepts a number, so a payment on its last cheque can be amended
 	if book.docstatus != 1 or book.status == "Disabled":
 		frappe.throw(_("Cheque Book {0} must be submitted and enabled").format(frappe.bold(book.name)))
 
-	if book.account != doc.paid_from:
+	if bank_account.account != doc.paid_from:
 		frappe.throw(
 			_("Cheque Book {0} belongs to account {1}, but Account Paid From is {2}").format(
-				frappe.bold(book.name), frappe.bold(book.account), frappe.bold(doc.paid_from)
+				frappe.bold(book.name), frappe.bold(bank_account.account), frappe.bold(doc.paid_from)
 			)
 		)
 

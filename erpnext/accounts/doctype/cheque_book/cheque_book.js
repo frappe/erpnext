@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Cheque Book", {
 	setup(frm) {
+		frm.add_fetch("bank_account", "account", "current_account");
 		frm.set_query("bank_account", () => ({
 			filters: { is_company_account: 1, disabled: 0 },
 		}));

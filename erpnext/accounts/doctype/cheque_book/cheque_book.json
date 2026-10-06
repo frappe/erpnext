@@ -8,6 +8,7 @@
  "field_order": [
   "details_tab",
   "bank_account",
+  "current_account",
   "account",
   "company",
   "column_break_bank",
@@ -41,10 +42,19 @@
    "reqd": 1
   },
   {
+   "description": "The current ledger linked to the Company Bank Account",
+   "fieldname": "current_account",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Account",
+   "read_only": 1
+  },
+  {
    "fetch_from": "bank_account.account",
    "fieldname": "account",
    "fieldtype": "Link",
-   "label": "Account",
+   "hidden": 1,
+   "label": "Original Account",
    "options": "Account",
    "read_only": 1
   },
@@ -157,7 +167,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-17 12:00:00.000000",
+ "modified": "2026-10-06 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Book",
