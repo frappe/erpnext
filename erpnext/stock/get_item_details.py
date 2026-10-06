@@ -137,6 +137,7 @@ def get_item_details(
 		):
 			fallback_args = args.copy()
 			fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			fallback_args.price_list_uom_dependant = None
 			out.update(get_price_list_rate(fallback_args, item))
 
 	args.customer = current_customer
