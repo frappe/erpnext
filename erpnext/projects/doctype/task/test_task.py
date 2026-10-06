@@ -314,6 +314,22 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+	def test_parent_task_must_be_in_the_same_project(self):
+		other_project = frappe.get_doc(
+			doctype="Project", project_name="_Test Parent Task Project", company="_Test Company"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Other Project Group", project=other_project.name, is_group=1
+		).insert()
+
+		child_task = create_task("_Test Child In Another Project", parent_task=group.name, save=False)
+		self.assertRaises(frappe.ValidationError, child_task.save)
+
+		child_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group.name
+		).insert()
+		self.assertEqual(child_without_project.project, other_project.name)
+
 	def test_open_task_under_completed_parent(self):
 		parent = create_task("_Test Completed Parent", is_group=1)
 		parent.status = "Completed"
@@ -442,11 +458,11 @@ class TestTask(ERPNextTestSuite):
 		from erpnext.projects.doctype.project.test_project import make_project
 
 		parent = create_task("_Test Parent In Restricted Project", is_group=1)
-		child = create_task("_Test Child In Permitted Project", parent_task=parent.name, save=False)
-		child.project = make_project({"project_name": "_Test Project Child Only"}).name
-		child.save()
+		child = create_task("_Test Child In Permitted Project", parent_task=parent.name)
+		child_project = make_project({"project_name": "_Test Project Child Only"}).name
+		frappe.db.set_value("Task", child.name, "project", child_project)
 		user = create_user("test_task_child_deleter@example.com", "Projects User")
-		frappe.permissions.add_user_permission("Project", child.project, user.name)
+		frappe.permissions.add_user_permission("Project", child_project, user.name)
 
 		with self.set_user(user.name):
 			frappe.delete_doc("Task", child.name)

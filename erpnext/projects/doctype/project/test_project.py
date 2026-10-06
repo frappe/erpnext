@@ -513,9 +513,8 @@ class TestProject(ERPNextTestSuite):
 		outside_group = frappe.get_doc(
 			doctype="Task", subject="Other phase", project=other.name, is_group=1
 		).insert()
-		frappe.get_doc(
-			doctype="Task", subject="Moved", project=source.name, parent_task=outside_group.name
-		).insert()
+		moved = frappe.get_doc(doctype="Task", subject="Moved", project=source.name).insert()
+		frappe.db.set_value("Task", moved.name, "parent_task", outside_group.name)
 
 		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
 
