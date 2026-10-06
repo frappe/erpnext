@@ -382,21 +382,13 @@ class ValuationFixTestCase(ERPNextTestSuite):
 		item = self.make_standard_cost_item(has_serial_no=1, serial_no_series="SVA-SCS-.#####")
 
 		receipt = make_stock_entry(
-			item_code=item,
-			target=WAREHOUSE,
-			qty=3,
-			basic_rate=100,
-			use_serial_batch_fields=1,
-			posting_date=last_year(60),
+			item_code=item, target=WAREHOUSE, qty=3, basic_rate=100, posting_date=last_year(60)
 		)
-		serial_no = get_serial_nos(receipt.items[0].serial_no)[0]
+		serial_no = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "serial_no"
+		)
 		issue = make_stock_entry(
-			item_code=item,
-			source=WAREHOUSE,
-			qty=1,
-			serial_no=serial_no,
-			use_serial_batch_fields=1,
-			posting_date=last_year(50),
+			item_code=item, source=WAREHOUSE, qty=1, serial_no=[serial_no], posting_date=last_year(50)
 		)
 		self.corrupt_entry(issue.name, stock_value_difference=-150, stock_value=150)
 
