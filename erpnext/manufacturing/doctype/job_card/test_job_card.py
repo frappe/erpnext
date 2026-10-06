@@ -527,6 +527,44 @@ class TestJobCard(ERPNextTestSuite):
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, min(completed_qty))
 
+	def test_repeated_operation_in_multi_level_bom_splits_required_items(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		make_operation(operation="_Test Repeated Cutting", workstation="_Test Workstation 1")
+		raw_a, raw_b, sub_assembly, finished_good = (
+			create_item(f"_Test Repeated Operation {name}").name for name in ("RM A", "RM B", "SA", "FG")
+		)
+		sub_assembly_bom = create_bom_with_cutting(sub_assembly, [(raw_a, 1, None)])
+		finished_good_bom = create_bom_with_cutting(
+			finished_good, [(sub_assembly, 1, sub_assembly_bom), (raw_a, 2, None), (raw_b, 1, None)]
+		)
+
+		work_order = make_wo_order_test_record(
+			item=finished_good,
+			bom_no=finished_good_bom,
+			qty=2,
+			use_multi_level_bom=1,
+			transfer_material_against="Job Card",
+		)
+
+		required_items = {}
+		for job_card in frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, fields=["name", "operation_id"]
+		):
+			bom = frappe.db.get_value("Work Order Operation", job_card.operation_id, "bom")
+			required_items[bom] = dict(
+				frappe.get_all(
+					"Job Card Item",
+					filters={"parent": job_card.name},
+					fields=["item_code", "required_qty"],
+					as_list=True,
+				)
+			)
+
+		self.assertEqual(
+			required_items, {sub_assembly_bom: {raw_a: 2}, finished_good_bom: {raw_a: 4, raw_b: 2}}
+		)
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
@@ -3328,5 +3366,20 @@ def create_semi_fg_bom(semi_fg_item, raw_item, inspection_required):
 	bom.quantity = 1
 	bom.inspection_required = inspection_required
 	bom.append("items", {"item_code": raw_item, "qty": 1})
+	bom.submit()
+	return bom.name
+
+
+def create_bom_with_cutting(item, items):
+	bom = frappe.new_doc("BOM", item=item, quantity=1, with_operations=1, company="_Test Company")
+	bom.append(
+		"operations",
+		{"operation": "_Test Repeated Cutting", "workstation": "_Test Workstation 1", "time_in_mins": 60},
+	)
+	for item_code, qty, bom_no in items:
+		bom.append(
+			"items",
+			{"item_code": item_code, "qty": qty, "bom_no": bom_no, "operation": "_Test Repeated Cutting"},
+		)
 	bom.submit()
 	return bom.name
