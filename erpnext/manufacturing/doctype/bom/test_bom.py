@@ -1473,6 +1473,27 @@ class TestBOM(ERPNextTestSuite):
 		bom.operations[1].finished_good = fg_item
 		bom.insert()
 
+	def test_item_operation_id_must_point_to_the_item_operation(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		cutting, stitching = "_Test Row Cutting", "_Test Row Stitching"
+		for operation in (cutting, stitching):
+			make_operation(operation=operation, workstation="_Test Workstation 1")
+
+		bom = frappe.new_doc(
+			"BOM", item="_Test FG Item 2", quantity=1, with_operations=1, company="_Test Company"
+		)
+		for operation in (stitching, cutting):
+			bom.append(
+				"operations",
+				{"operation": operation, "workstation": "_Test Workstation 1", "time_in_mins": 60},
+			)
+		bom.append(
+			"items", {"item_code": "_Test Item", "qty": 1, "operation": cutting, "operation_row_id": 1}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Operation ID 1 is operation", bom.insert)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
