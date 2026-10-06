@@ -18,20 +18,36 @@ def execute(filters: dict | None = None):
 
 
 def validate_company_permission(company):
-	# Stock Manager has no read access on Company, so check the user permissions directly
-	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
-
-	allowed_companies = [
-		d.doc
-		for d in get_user_permissions().get("Company", [])
-		if not d.applicable_for or d.applicable_for == "Stock Ledger Entry"
-	]
-
+	allowed_companies = get_allowed_values().get("company")
 	if allowed_companies and company not in allowed_companies:
 		frappe.throw(
 			_("You are not permitted to access Company {0}").format(frappe.bold(company)),
 			frappe.PermissionError,
 		)
+
+
+def get_allowed_values() -> dict:
+	"""Values allowed by the user's User Permissions on the links of Stock Ledger Entry.
+
+	Read directly because the report roles (Stock Manager) have no role permission on
+	Stock Ledger Entry or Company, so frappe's permission query cannot be used.
+	"""
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+
+	user_permissions = get_user_permissions()
+
+	allowed_values = {}
+	for field, doctype in (("company", "Company"), ("item_code", "Item"), ("warehouse", "Warehouse")):
+		values = [
+			d.doc
+			for d in user_permissions.get(doctype, [])
+			if not d.applicable_for or d.applicable_for == "Stock Ledger Entry"
+		]
+
+		if values:
+			allowed_values[field] = values
+
+	return allowed_values
 
 
 def get_columns() -> list[dict]:
@@ -167,6 +183,9 @@ def apply_filters(query, sle, filters):
 	if filters.to_date:
 		query = query.where(sle.posting_date <= filters.to_date)
 
+	for field, values in get_allowed_values().items():
+		query = query.where(sle[field].isin(values))
+
 	return query
 
 
@@ -183,14 +202,35 @@ def fix_uncancelled_entries(selected_rows: str | list):
 		if frappe.db.get_value(voucher_type, voucher_no, "docstatus") != 2:
 			continue
 
-		# the repair completes the cancellation of the voucher
-		frappe.has_permission(voucher_type, "cancel", voucher_no, throw=True)
-
+		validate_voucher_permission(voucher_type, voucher_no)
 		fix_voucher(voucher_type, voucher_no)
 
 	frappe.msgprint(
 		_("Stock Ledger Entries of the selected vouchers have been cancelled and reposting has been queued.")
 	)
+
+
+def validate_voucher_permission(voucher_type, voucher_no):
+	# the user can repair only the entries the report shows them
+	allowed_values = get_allowed_values()
+	if not allowed_values:
+		return
+
+	entries = frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+		fields=list(allowed_values),
+	)
+
+	for entry in entries:
+		for field, values in allowed_values.items():
+			if entry[field] not in values:
+				frappe.throw(
+					_("You are not permitted to repair the Stock Ledger Entries of {0} {1}").format(
+						_(voucher_type), frappe.bold(voucher_no)
+					),
+					frappe.PermissionError,
+				)
 
 
 def fix_voucher(voucher_type, voucher_no):
