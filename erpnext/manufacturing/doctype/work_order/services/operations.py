@@ -36,6 +36,7 @@ _BOM_OPERATION_FIELDS = [
 	"workstation",
 	"idx",
 	"finished_good",
+	"finished_good_qty",
 	"is_subcontracted",
 	"wip_warehouse",
 	"source_warehouse",
@@ -94,7 +95,7 @@ class OperationsService:
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
 		for idx, row in enumerate(self.doc.operations):
-			qty = self.doc.qty
+			qty = flt(row.qty_to_produce) or self.doc.qty
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self.doc, row, qty)
 				if row.job_card_qty > 0:
@@ -270,6 +271,10 @@ class OperationsService:
 		)
 
 	def _adjust_operation_row(self, d, qty, exploded, batch_size_flags):
+		if self.doc.track_semi_finished_goods:
+			factor = qty if exploded else 1 / flt(qty)
+			d.qty_to_produce = flt(d.finished_good_qty) * factor * flt(self.doc.qty)
+
 		if not d.fixed_time:
 			if batch_size_flags.get(d.operation):
 				qty = d.batch_size
@@ -319,16 +324,18 @@ class OperationsService:
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		max_allowed_qty_for_wo = flt(self.doc.qty) + (allowance_percentage / 100 * flt(self.doc.qty))
+		operation_qty = flt(d.qty_to_produce) or flt(self.doc.qty)
+		max_allowed_qty_for_wo = operation_qty * (1 + allowance_percentage / 100)
 
 		if self._operation_qty(d) > flt(max_allowed_qty_for_wo, d.precision("completed_qty")):
 			frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
 
 	def _operation_status(self, d):
 		qty = self._operation_qty(d)
+		operation_qty = flt(d.qty_to_produce) or flt(self.doc.qty)
 		if not qty:
 			return "Pending"
-		if qty < flt(self.doc.qty, d.precision("completed_qty")):
+		if qty < flt(operation_qty, d.precision("completed_qty")):
 			return "Work in Progress"
 		return "Completed"
 

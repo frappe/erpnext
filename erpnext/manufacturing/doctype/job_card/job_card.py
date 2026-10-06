@@ -259,7 +259,7 @@ class JobCard(Document):
 			self.throw_extra_qty_error()
 
 	def get_allowed_wo_qty(self):
-		wo_qty = flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
+		wo_qty = self.get_operation_target_qty()
 		over_production_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -828,6 +828,11 @@ class JobCard(Document):
 		if not (self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id):
 			return
 
+		operation_qty = (
+			next((flt(row.qty_to_produce) for row in doc.operations if row.name == self.operation_id), 0)
+			or doc.qty
+		)
+
 		self.append(
 			"items",
 			{
@@ -836,7 +841,7 @@ class JobCard(Document):
 				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 				"item_name": d.item_name,
 				"description": d.description,
-				"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+				"required_qty": (d.required_qty * flt(self.for_quantity)) / operation_qty,
 				"rate": d.rate,
 				"amount": d.amount,
 			},
@@ -1480,7 +1485,15 @@ class JobCard(Document):
 	def get_previous_operations(self):
 		previous_operations = frappe.get_all(
 			"Work Order Operation",
-			fields=["name", "operation", "status", "completed_qty", "sequence_id", "finished_good"],
+			fields=[
+				"name",
+				"operation",
+				"status",
+				"completed_qty",
+				"sequence_id",
+				"finished_good",
+				"qty_to_produce",
+			],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
@@ -1533,7 +1546,11 @@ class JobCard(Document):
 			return None
 
 		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
-		min_completed_qty = min(flt(row.get(qty_field)) for row in previous_operations)
+		current_target = self.get_operation_target_qty()
+		min_completed_qty = min(
+			flt(row.get(qty_field)) * current_target / (flt(row.qty_to_produce) or current_target)
+			for row in previous_operations
+		)
 
 		precision = self.precision("total_completed_qty")
 		return flt(min_completed_qty - self.get_current_operation_completed_qty(), precision)
@@ -1566,6 +1583,9 @@ class JobCard(Document):
 
 	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
 		manufactured_qty = flt(row.manufactured_qty)
+		current_target = self.get_operation_target_qty()
+		previous_target = flt(row.qty_to_produce) or current_target
+		current_qty_in_previous_units = current_operation_qty * previous_target / current_target
 
 		if not manufactured_qty:
 			frappe.throw(
@@ -1580,10 +1600,10 @@ class JobCard(Document):
 				OperationSequenceError,
 			)
 
-		if manufactured_qty >= current_operation_qty:
+		if manufactured_qty >= current_qty_in_previous_units:
 			return
 
-		if manufactured_qty + flt(row.process_loss_qty) >= current_operation_qty:
+		if manufactured_qty + flt(row.process_loss_qty) >= current_qty_in_previous_units:
 			frappe.throw(
 				_(
 					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}, as {4} was booked as process loss there."
@@ -1608,6 +1628,10 @@ class JobCard(Document):
 			),
 			OperationSequenceError,
 		)
+
+	def get_operation_target_qty(self):
+		operation_qty = frappe.db.get_value("Work Order Operation", self.operation_id, "qty_to_produce")
+		return flt(operation_qty) or flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
