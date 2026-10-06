@@ -1,0 +1,376 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-09-24 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "details_section",
+  "naming_series",
+  "investment",
+  "transaction_type",
+  "instrument_class",
+  "posting_date",
+  "column_break_details",
+  "company",
+  "currency",
+  "conversion_rate",
+  "units_section",
+  "units",
+  "column_break_units",
+  "rate",
+  "amounts_section",
+  "gross_amount",
+  "interest_amount",
+  "charges",
+  "column_break_amounts",
+  "tax_withheld",
+  "net_amount",
+  "bond_section",
+  "accrued_interest_in_purchase",
+  "exit_section",
+  "penalty_applied",
+  "cost_of_units_sold",
+  "column_break_exit",
+  "realised_gain_loss",
+  "accounts_tab",
+  "accounting_section",
+  "cash_account",
+  "cost_center",
+  "more_info_tab",
+  "reference_section",
+  "reference_no",
+  "reference_date",
+  "column_break_reference",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "INV-TXN-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "INV-TXN-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "investment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Investment",
+   "options": "Investment",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transaction Type",
+   "options": "\nOpening\nPurchase\nSale\nRedemption\nWithdrawal\nMaturity\nInterest Receipt\nDividend\nCharges",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "investment.instrument_class",
+   "fieldname": "instrument_class",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Instrument Class",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "investment.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "investment.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "fieldname": "units_section",
+   "fieldtype": "Section Break",
+   "label": "Units"
+  },
+  {
+   "fieldname": "units",
+   "fieldtype": "Float",
+   "label": "Units"
+  },
+  {
+   "fieldname": "column_break_units",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "NAV / Rate",
+   "options": "currency"
+  },
+  {
+   "fieldname": "amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "depends_on": "eval:!in_list(['Interest Receipt', 'Charges'], doc.transaction_type)",
+   "fieldname": "gross_amount",
+   "fieldtype": "Currency",
+   "label": "Gross Amount",
+   "options": "currency"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type=='Interest Receipt'",
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "label": "Interest Amount",
+   "options": "currency"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type!='Opening'",
+   "fieldname": "charges",
+   "fieldtype": "Currency",
+   "label": "Charges",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_amounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:in_list(['Sale', 'Redemption', 'Withdrawal', 'Maturity', 'Interest Receipt', 'Dividend'], doc.transaction_type)",
+   "fieldname": "tax_withheld",
+   "fieldtype": "Currency",
+   "label": "Tax Withheld",
+   "options": "currency"
+  },
+  {
+   "fieldname": "net_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Bond'",
+   "fieldname": "bond_section",
+   "fieldtype": "Section Break",
+   "label": "Bond"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type=='Purchase'",
+   "fieldname": "accrued_interest_in_purchase",
+   "fieldtype": "Currency",
+   "label": "Accrued Interest in Purchase",
+   "options": "currency"
+  },
+  {
+   "depends_on": "eval:in_list(['Sale', 'Redemption', 'Withdrawal', 'Maturity'], doc.transaction_type)",
+   "fieldname": "exit_section",
+   "fieldtype": "Section Break",
+   "label": "Exit"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Deposit' && doc.transaction_type=='Withdrawal'",
+   "fieldname": "penalty_applied",
+   "fieldtype": "Currency",
+   "label": "Penalty Applied",
+   "options": "currency"
+  },
+  {
+   "fieldname": "cost_of_units_sold",
+   "fieldtype": "Currency",
+   "label": "Cost of Units Sold",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_exit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realised_gain_loss",
+   "fieldtype": "Currency",
+   "label": "Realised Gain / Loss",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type!='Opening'",
+   "fieldname": "cash_account",
+   "fieldtype": "Link",
+   "label": "Cash / Bank Account",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "investment.cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Reference No"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "column_break_reference",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Investment Transaction",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-06 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Transaction",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "investment,transaction_type,reference_no",
+ "show_title_field_in_link": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

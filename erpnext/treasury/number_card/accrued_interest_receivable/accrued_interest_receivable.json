@@ -1,0 +1,21 @@
+{
+ "aggregate_function_based_on": "accrued_interest",
+ "creation": "2026-10-04 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Investment",
+ "dynamic_filters_json": "[[\"Investment\", \"company\", \"=\", \"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+ "filters_json": "[[\"Investment\", \"docstatus\", \"=\", \"1\"]]",
+ "function": "Sum",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Accrued Interest Receivable",
+ "modified": "2026-10-06 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Accrued Interest Receivable",
+ "owner": "Administrator",
+ "show_percentage_stats": 0,
+ "type": "Document Type"
+}

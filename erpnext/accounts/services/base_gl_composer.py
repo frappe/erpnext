@@ -185,6 +185,7 @@ def get_voucher_subtype(doc) -> str:
 		"Payment Entry": "payment_type",
 		"Stock Entry": "stock_entry_type",
 		"Asset Capitalization": "entry_type",
+		"Investment Transaction": "transaction_type",
 	}
 
 	for method_name in frappe.get_hooks("voucher_subtypes"):

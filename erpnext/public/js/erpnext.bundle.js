@@ -1,4 +1,5 @@
 import "./utils";
+import "./treasury";
 import "./stock_reservation";
 import "./queries";
 import "./sms_manager";

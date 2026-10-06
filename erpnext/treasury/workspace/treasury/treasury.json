@@ -1,0 +1,250 @@
+{
+ "app": "erpnext",
+ "charts": [],
+ "content": "[{\"id\": \"inv-nc-ih\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Investments\", \"col\": 6}}, {\"id\": \"inv-nc-pa\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Investments Pending Approval\", \"col\": 6}}, {\"id\": \"inv-hdr-sc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"inv-sc-ih\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment\", \"col\": 4}}, {\"id\": \"inv-sc-itx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment Transaction\", \"col\": 4}}, {\"id\": \"inv-hdr-mr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Masters &amp; Reports</b></span>\", \"col\": 12}}, {\"id\": \"inv-card-hd\", \"type\": \"card\", \"data\": {\"card_name\": \"Investments\", \"col\": 4}}, {\"id\": \"inv-card-ms\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"inv-card-rp\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "creation": "2026-09-24 13:07:37.032186",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "chart",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Treasury",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investments",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investment",
+   "link_count": 0,
+   "link_to": "Investment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investment Transaction",
+   "link_count": 0,
+   "link_to": "Investment Transaction",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investment Interest Accrual",
+   "link_count": 0,
+   "link_to": "Investment Interest Accrual",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investment Revaluation",
+   "link_count": 0,
+   "link_to": "Investment Revaluation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investment Renewal",
+   "link_count": 0,
+   "link_to": "Investment Renewal",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Masters",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Financial Institution",
+   "link_count": 0,
+   "link_to": "Financial Institution",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Investment Type",
+   "link_count": 0,
+   "link_to": "Investment Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 8,
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Bank and Cash Balances",
+   "link_count": 0,
+   "link_to": "Bank and Cash Balances",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Cash Flow Forecast",
+   "link_count": 0,
+   "link_to": "Cash Flow Forecast",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Portfolio Statement",
+   "link_count": 0,
+   "link_to": "Portfolio Statement",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Upcoming Maturities",
+   "link_count": 0,
+   "link_to": "Upcoming Maturities",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Investments by Issuer",
+   "link_count": 0,
+   "link_to": "Investments by Issuer",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Investment Returns",
+   "link_count": 0,
+   "link_to": "Investment Returns",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Interest Earned and Received",
+   "link_count": 0,
+   "link_to": "Interest Earned and Received",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "General Ledger",
+   "link_count": 0,
+   "link_to": "General Ledger",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-10-06 18:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Treasury",
+ "number_cards": [
+  {
+   "label": "Active Investments",
+   "number_card_name": "Active Investments"
+  },
+  {
+   "label": "Investments Pending Approval",
+   "number_card_name": "Investments Pending Approval"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Investment",
+   "link_to": "Investment",
+   "stats_filter": "[[\"Investment\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Investment Transaction",
+   "link_to": "Investment Transaction",
+   "stats_filter": "[[\"Investment Transaction\",\"docstatus\",\"=\",\"0\",false]]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Treasury",
+ "type": "Workspace"
+}

@@ -1,0 +1,13 @@
+{
+ "creation": "2026-10-04 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2026-10-04 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Book vs Market Value",
+ "owner": "Administrator",
+ "source_name": "Investment Book vs Market Value",
+ "timeseries": 0
+}

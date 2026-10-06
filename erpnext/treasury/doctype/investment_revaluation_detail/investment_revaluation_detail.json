@@ -1,0 +1,178 @@
+{
+ "actions": [],
+ "creation": "2026-09-25 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "investment",
+  "instrument_class",
+  "investment_currency",
+  "units_held",
+  "nav_per_unit",
+  "market_price",
+  "column_break_inputs",
+  "measurement_category",
+  "conversion_rate",
+  "posts_gl_entry",
+  "values_section",
+  "book_value",
+  "fair_value",
+  "previous_amount",
+  "column_break_values",
+  "unrealised_gain_loss",
+  "adjustment_amount"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "investment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Investment",
+   "options": "Investment",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "investment.instrument_class",
+   "fieldname": "instrument_class",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Instrument Class",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "investment.currency",
+   "fieldname": "investment_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Investment Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "fieldname": "units_held",
+   "fieldtype": "Float",
+   "label": "Units Held",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.instrument_class=='Units'",
+   "description": "Latest NAV of one unit of the fund",
+   "fieldname": "nav_per_unit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price per Unit (NAV)",
+   "options": "investment_currency"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.instrument_class=='Bond'",
+   "description": "Latest market price of one bond",
+   "fieldname": "market_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Market Price per Unit",
+   "options": "investment_currency"
+  },
+  {
+   "fieldname": "column_break_inputs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The investment's Measurement Category: decides whether the change is posted to the ledger",
+   "fetch_from": "investment.measurement_category",
+   "fieldname": "measurement_category",
+   "fieldtype": "Data",
+   "label": "Accounting Method",
+   "read_only": 1
+  },
+  {
+   "description": "Value of 1 unit of the investment's currency in the company's currency",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9"
+  },
+  {
+   "default": "0",
+   "description": "Ticked when this revaluation posts an accounting entry for this investment",
+   "fieldname": "posts_gl_entry",
+   "fieldtype": "Check",
+   "label": "Posts to Ledger",
+   "read_only": 1
+  },
+  {
+   "fieldname": "values_section",
+   "fieldtype": "Section Break",
+   "label": "Values"
+  },
+  {
+   "columns": 1,
+   "description": "What the investment is carried at in the accounts on the revaluation date",
+   "fieldname": "book_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Value in Books",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "description": "Units Held x price x exchange rate",
+   "fieldname": "fair_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Market Value",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "description": "Paper gain / loss or expected loss recorded by this investment's last revaluation of the same type",
+   "fieldname": "previous_amount",
+   "fieldtype": "Currency",
+   "label": "Last Revaluation Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_values",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "description": "Market Value - Value in Books; becomes real only when sold",
+   "fieldname": "unrealised_gain_loss",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Paper Gain / Loss",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "description": "New amount - Last Revaluation Amount; only this difference is posted",
+   "fieldname": "adjustment_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount Posted Now",
+   "options": "currency",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-06 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Revaluation Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

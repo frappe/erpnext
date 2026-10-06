@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "creation": "2026-10-04 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "general_section",
+  "company",
+  "accounts_section",
+  "investment_account",
+  "charges_account",
+  "tax_withheld_receivable_account",
+  "column_break_accounts",
+  "interest_income_account",
+  "accrued_interest_account",
+  "dividend_income_account",
+  "gain_loss_section",
+  "realised_gain_loss_account",
+  "unrealised_gain_loss_account",
+  "fair_value_adjustment_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "description": "Company shown by default everywhere in the Treasury module: dashboard, reports, lists and new documents. Leave empty to use each user's default company.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.company",
+   "description": "Used for an Investment of the company above whenever its own account is left empty",
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Default Ledger Accounts"
+  },
+  {
+   "fieldname": "investment_account",
+   "fieldtype": "Link",
+   "label": "Investment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "charges_account",
+   "fieldtype": "Link",
+   "label": "Charges Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "tax_withheld_receivable_account",
+   "fieldtype": "Link",
+   "label": "Tax Withheld Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_accounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interest_income_account",
+   "fieldtype": "Link",
+   "label": "Interest Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "accrued_interest_account",
+   "fieldtype": "Link",
+   "label": "Accrued Interest Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "dividend_income_account",
+   "fieldtype": "Link",
+   "label": "Dividend Income Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.company",
+   "fieldname": "gain_loss_section",
+   "fieldtype": "Section Break",
+   "label": "Gain / Loss Accounts"
+  },
+  {
+   "fieldname": "realised_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Realised Gain / Loss Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "unrealised_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealised Gain / Loss Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "fair_value_adjustment_account",
+   "fieldtype": "Link",
+   "label": "Fair Value Adjustment Account",
+   "options": "Account"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-06 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
