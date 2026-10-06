@@ -2,6 +2,7 @@
 # See license.txt
 
 
+import gzip
 from unittest.mock import MagicMock, call, patch
 
 import frappe
@@ -706,19 +707,20 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			}
 		).insert(ignore_permissions=True)
 
-		attached = frappe.get_doc(
-			{
-				"doctype": "File",
-				"file_name": "corrupt_repost_data.json.gz",
-				"content": "not gzip content",
-				"attached_to_doctype": riv.doctype,
-				"attached_to_name": riv.name,
-				"attached_to_field": "reposting_data_file",
-			}
-		).insert(ignore_permissions=True)
-		riv.db_set("reposting_data_file", attached.file_url)
+		for index, content in enumerate(("not gzip content", gzip.compress(b"not json"))):
+			attached = frappe.get_doc(
+				{
+					"doctype": "File",
+					"file_name": f"corrupt_repost_data_{index}.json.gz",
+					"content": content,
+					"attached_to_doctype": riv.doctype,
+					"attached_to_name": riv.name,
+					"attached_to_field": "reposting_data_file",
+				}
+			).insert(ignore_permissions=True)
 
-		self.assertRaises(frappe.ValidationError, get_reposting_data, attached.file_url)
+			with self.assertRaisesRegex(frappe.ValidationError, "is corrupted"):
+				get_reposting_data(attached.file_url)
 
 	def test_clear_attachment_skips_referenced_data_file(self):
 		riv = frappe.get_doc(
