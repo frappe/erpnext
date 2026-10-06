@@ -1060,7 +1060,7 @@ class WorkOrder(Document):
 
 		return holidays[holiday_list]
 
-	def update_operation_status(self):
+	def update_operation_status(self, operation_id=None):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -1075,7 +1075,7 @@ class WorkOrder(Document):
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif qty <= flt(max_allowed_qty_for_wo, precision):
+			elif qty <= flt(max_allowed_qty_for_wo, precision) or d.name != operation_id:
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
