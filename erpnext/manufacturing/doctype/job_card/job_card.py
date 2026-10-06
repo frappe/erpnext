@@ -27,6 +27,9 @@ from frappe.utils import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.work_order.services.operation_material_shares import (
+	OperationMaterialShares,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
 
@@ -643,6 +646,9 @@ class JobCard(Document):
 		if doc.transfer_material_against == "Work Order" or doc.skip_transfer:
 			return
 
+		shares = (
+			{} if self.is_corrective_job_card else OperationMaterialShares(doc).get_shares(self.operation_id)
+		)
 		for d in doc.required_items:
 			if not d.operation:
 				frappe.throw(
@@ -651,7 +657,8 @@ class JobCard(Document):
 					)
 				)
 
-			if self.get("operation") == d.operation or self.is_corrective_job_card:
+			share = shares.get((d.item_code, d.operation), 1)
+			if share and (self.get("operation") == d.operation or self.is_corrective_job_card):
 				self.append(
 					"items",
 					{
@@ -660,7 +667,7 @@ class JobCard(Document):
 						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 						"item_name": d.item_name,
 						"description": d.description,
-						"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+						"required_qty": (d.required_qty * flt(self.for_quantity) * share) / doc.qty,
 						"rate": d.rate,
 						"amount": d.amount,
 					},
