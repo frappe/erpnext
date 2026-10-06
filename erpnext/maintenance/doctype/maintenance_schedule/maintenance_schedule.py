@@ -8,7 +8,7 @@ from frappe.query_builder.functions import Max
 from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
@@ -81,30 +81,23 @@ class MaintenanceSchedule(TransactionBase):
 		days_in_period = {"Weekly": 7, "Monthly": 30, "Quarterly": 91, "Half Yearly": 182, "Yearly": 365}
 		for item in self.items:
 			if item.periodicity and item.periodicity != "Random" and item.start_date:
+				days = days_in_period[item.periodicity]
 				if not item.end_date:
-					if item.no_of_visits:
-						item.end_date = add_days(
-							item.start_date, item.no_of_visits * days_in_period[item.periodicity]
+					item.end_date = add_days(item.start_date, (item.no_of_visits or 1) * days)
+
+				no_of_visits = round((date_diff(item.end_date, item.start_date) + 1) / days)
+				if not item.no_of_visits:
+					item.no_of_visits = no_of_visits
+				elif item.no_of_visits != no_of_visits:
+					throw(
+						_(
+							"Row {0}: {1} {2} visits need an End Date of {3}. Change the End Date or the Number of Visits."
+						).format(
+							item.idx,
+							item.no_of_visits,
+							_(item.periodicity),
+							formatdate(add_days(item.start_date, item.no_of_visits * days)),
 						)
-					else:
-						item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-
-				diff = date_diff(item.end_date, item.start_date) + 1
-				no_of_visits = cint(diff / days_in_period[item.periodicity])
-
-				if not item.no_of_visits or item.no_of_visits == 0:
-					item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-					diff = date_diff(item.end_date, item.start_date) + 1
-					item.no_of_visits = cint(diff / days_in_period[item.periodicity])
-
-				elif item.no_of_visits > no_of_visits:
-					item.end_date = add_days(
-						item.start_date, item.no_of_visits * days_in_period[item.periodicity]
-					)
-
-				elif item.no_of_visits < no_of_visits:
-					item.end_date = add_days(
-						item.start_date, item.no_of_visits * days_in_period[item.periodicity]
 					)
 
 	def on_submit(self):
@@ -137,7 +130,7 @@ class MaintenanceSchedule(TransactionBase):
 
 			scheduled_date = frappe.db.get_all(
 				"Maintenance Schedule Detail",
-				{"parent": self.name, "item_code": d.item_code},
+				{"parent": self.name, "item_reference": d.name},
 				["scheduled_date"],
 				as_list=False,
 			)
@@ -149,7 +142,6 @@ class MaintenanceSchedule(TransactionBase):
 				event = frappe.get_doc(
 					{
 						"doctype": "Event",
-						"owner": email_map.get(d.sales_person, self.owner),
 						"subject": description,
 						"description": description,
 						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
@@ -157,6 +149,15 @@ class MaintenanceSchedule(TransactionBase):
 					}
 				)
 				event.add_participant(self.doctype, self.name)
+				if email_map.get(d.sales_person):
+					event.append(
+						"event_participants",
+						{
+							"reference_doctype": "Sales Person",
+							"reference_docname": d.sales_person,
+							"email": email_map[d.sales_person],
+						},
+					)
 				event.insert(ignore_permissions=1)
 
 		self.db_set("status", "Submitted")
@@ -172,7 +173,7 @@ class MaintenanceSchedule(TransactionBase):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:
 					schedule_date = self.validate_schedule_date_for_holiday_list(
-						getdate(start_date_copy), sales_person
+						getdate(start_date_copy), sales_person, start_date
 					)
 					if schedule_date > getdate(end_date):
 						schedule_date = getdate(end_date)
@@ -180,27 +181,25 @@ class MaintenanceSchedule(TransactionBase):
 
 		return schedule_list
 
-	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
-		validated = False
-
+	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person, start_date):
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
 		if employee:
-			holiday_list = get_holiday_list_for_employee(employee)
+			holiday_list = get_holiday_list_for_employee(employee, raise_exception=False)
 		else:
 			holiday_list = frappe.get_cached_value("Company", self.company, "default_holiday_list")
 
 		holidays = frappe.get_all("Holiday", filters={"parent": holiday_list}, pluck="holiday_date")
 
-		if not validated and holidays:
-			# max iterations = len(holidays)
-			for _i in range(len(holidays)):
-				if schedule_date in holidays:
-					schedule_date = add_days(schedule_date, -1)
-				else:
-					validated = True
-					break
+		working_date = schedule_date
+		while working_date in holidays:
+			working_date = add_days(working_date, -1)
 
-		return schedule_date
+		if working_date < getdate(start_date):
+			working_date = schedule_date
+			while working_date in holidays:
+				working_date = add_days(working_date, 1)
+
+		return working_date
 
 	def validate_dates_with_periodicity(self):
 		for d in self.get("items"):
@@ -235,6 +234,13 @@ class MaintenanceSchedule(TransactionBase):
 
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
+
+			if d.no_of_visits > date_diff(d.end_date, d.start_date):
+				throw(
+					_(
+						"Row {0}: Number of visits can not be more than the {1} days between Start and End Date"
+					).format(d.idx, date_diff(d.end_date, d.start_date))
+				)
 
 	def validate_sales_order(self):
 		ms = frappe.qb.DocType("Maintenance Schedule")
@@ -356,6 +362,7 @@ class MaintenanceSchedule(TransactionBase):
 					"amc_expiry_date",
 					"warehouse",
 					"item_code",
+					"customer",
 				],
 				as_dict=1,
 			)
@@ -388,8 +395,7 @@ class MaintenanceSchedule(TransactionBase):
 					)
 				)
 
-			if sr_details.warehouse:
-				continue
+			validate_serial_no_for_customer(sr_details, self.customer)
 
 			delivery_date = delivery_dates.get(serial_no)
 			if delivery_date and getdate(delivery_date) >= getdate(amc_start_date):
@@ -462,10 +468,36 @@ class MaintenanceSchedule(TransactionBase):
 		for d in self.get("items"):
 			serial_nos = self.get_serial_nos_with_row_amc_date(d)
 			if serial_nos:
-				self.update_amc_date(serial_nos)
+				expiry_dates = self.get_other_amc_expiry_dates(d.item_code, serial_nos)
+				for serial_no in serial_nos:
+					self.update_amc_date([serial_no], expiry_dates.get(serial_no))
 
 		self.db_set("status", "Cancelled")
 		delete_events(self.doctype, self.name)
+
+	def get_other_amc_expiry_dates(self, item_code, serial_nos):
+		"""Latest end date per serial across the item's other submitted schedules."""
+		rows = frappe.get_all(
+			"Maintenance Schedule Item",
+			filters={"item_code": item_code, "docstatus": 1, "parent": ("!=", self.name)},
+			fields=["serial_no", "serial_and_batch_bundle", "end_date"],
+		)
+		bundles = [row.serial_and_batch_bundle for row in rows if row.serial_and_batch_bundle]
+		bundle_serial_nos = get_serial_nos_from_sle_list(bundles) if bundles else {}
+		names = {
+			number.lower(): name
+			for name, number in SerialBatchIdentity("Serial No").get_number_map(serial_nos).items()
+		}
+
+		expiry_dates = {}
+		for row in rows:
+			if row.serial_and_batch_bundle:
+				row_serial_nos = bundle_serial_nos.get(row.serial_and_batch_bundle, [])
+			else:
+				row_serial_nos = [names.get(number.lower()) for number in get_serial_nos(row.serial_no)]
+			for serial_no in set(row_serial_nos).intersection(serial_nos):
+				expiry_dates[serial_no] = max(row.end_date, expiry_dates.get(serial_no, row.end_date))
+		return expiry_dates
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
@@ -492,10 +524,31 @@ class MaintenanceSchedule(TransactionBase):
 			if not s_date:
 				frappe.throw(_("Scheduled Date is required."))
 			for schedule in self.schedules:
-				if schedule.item_name == item_name and s_date == formatdate(
-					schedule.scheduled_date, "dd-mm-yyyy"
+				if (
+					schedule.item_name == item_name
+					and schedule.completion_status == "Pending"
+					and s_date == formatdate(schedule.scheduled_date, "dd-mm-yyyy")
 				):
 					return schedule.name
+
+
+def validate_serial_no_for_customer(serial, customer):
+	"""Refuse a serial still in stock; warn when it was sold to another customer."""
+	number = frappe.bold(escape_html(serial.serial_no))
+	if serial.warehouse:
+		frappe.throw(
+			_("Serial No {0} is still in stock in Warehouse {1}").format(
+				number, frappe.bold(serial.warehouse)
+			)
+		)
+	if serial.customer and serial.customer != customer:
+		frappe.msgprint(
+			_("Serial No {0} was sold to Customer {1}, not {2}").format(
+				number, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(customer))
+			),
+			title=_("Different Customer"),
+			indicator="orange",
+		)
 
 
 @frappe.whitelist()
@@ -549,10 +602,9 @@ def make_maintenance_visit(
 	def condition(doc):
 		if s_id:
 			return doc.name == s_id
-		elif item_name:
-			return doc.item_name == item_name
-
-		return True
+		if item_name and doc.item_name != item_name:
+			return False
+		return doc.completion_status != "Fully Completed"
 
 	def update_status_and_detail(source, target, parent):
 		target.maintenance_type = "Scheduled"
