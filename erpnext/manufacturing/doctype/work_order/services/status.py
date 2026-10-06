@@ -177,11 +177,12 @@ class StatusService:
 		return flt(qty) > 0
 
 	def _is_partial_skip_transfer(self):
-		return bool(
-			self.doc.skip_transfer
-			and self.doc.produced_qty
-			and self.doc.qty > (flt(self.doc.produced_qty) + flt(self.doc.process_loss_qty))
-		)
+		if not (self.doc.skip_transfer and self.doc.produced_qty):
+			return False
+
+		precision = frappe.get_precision("Work Order", "produced_qty")
+		total_qty = flt(self.doc.produced_qty, precision) + flt(self.doc.process_loss_qty, precision)
+		return flt(self.doc.qty, precision) > flt(total_qty, precision)
 
 	def _reservation_status(self, status):
 		for row in self.doc.required_items:
