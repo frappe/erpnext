@@ -1,12 +1,31 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_auto_repeat_invoice_still_checks_approval(self):
+		invoice = frappe.get_doc({"doctype": "Sales Invoice", "auto_repeat": "OTHER-REPEAT"})
+		with (
+			patch("erpnext.accounts.doctype.sales_invoice.sales_invoice.POSService"),
+			patch(
+				"erpnext.accounts.doctype.sales_invoice.sales_invoice.frappe.get_cached_doc"
+			) as get_control,
+		):
+			get_control.return_value.validate_approving_authority.side_effect = frappe.ValidationError(
+				"approval required"
+			)
+			with self.assertRaises(frappe.ValidationError):
+				invoice.on_submit()
+			get_control.return_value.validate_approving_authority.assert_called_once_with(
+				"Sales Invoice", invoice.company, invoice.base_grand_total, invoice
+			)
+
 	def test_validate_approving_authority_raises_when_over_limit(self):
 		# Exercises validate_approving_authority -> the based_on query-builder lookups and the
 		# coalesce()-based rule lookups (formerly ifnull, which is invalid on Postgres).
