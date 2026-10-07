@@ -42,6 +42,7 @@ class ItemAttribute(Document):
 
 	def validate(self):
 		frappe.flags.attribute_values = None
+		self.validate_numeric_change()
 		self.validate_numeric()
 		self.validate_duplication()
 
@@ -63,29 +64,41 @@ class ItemAttribute(Document):
 
 			query.run()
 
-	def validate_exising_items(self):
-		"""Validate that if there are existing items with attributes, they are valid"""
-		attributes_list = [d.attribute_value for d in self.item_attribute_values]
-
-		# Get Item Variant Attribute details of variant items
+	def get_variants_using_attribute(self, limit=None):
 		iva = frappe.qb.DocType("Item Variant Attribute")
 		i = frappe.qb.DocType("Item")
-		items = (
+		query = (
 			frappe.qb.from_(iva)
 			.inner_join(i)
 			.on(iva.parent == i.name)
 			.select(i.name, iva.attribute_value.as_("value"))
 			.where((iva.attribute == self.name) & i.variant_of.isnotnull() & (i.variant_of != ""))
-			.run(as_dict=1)
 		)
 
-		for item in items:
+		return query.limit(limit).run(as_dict=1) if limit else query.run(as_dict=1)
+
+	def validate_exising_items(self):
+		"""Validate that if there are existing items with attributes, they are valid"""
+		attributes_list = [d.attribute_value for d in self.item_attribute_values]
+
+		for item in self.get_variants_using_attribute():
 			if self.numeric_values:
 				validate_is_incremental(self, self.name, item.value, item.name)
 			else:
 				validate_item_attribute_value(
 					attributes_list, self.name, item.value, item.name, from_variant=False
 				)
+
+	def validate_numeric_change(self):
+		if self.is_new() or not self.has_value_changed("numeric_values"):
+			return
+
+		if self.get_variants_using_attribute(limit=1):
+			frappe.throw(
+				_("Numeric Values cannot be changed for Attribute {0} as it is used in variants").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def validate_numeric(self):
 		if self.numeric_values:

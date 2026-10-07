@@ -86,3 +86,13 @@ class TestItemAttribute(ERPNextTestSuite):
 		self.assertTrue(frappe.db.exists("Item", f"{template.name}-RD"))
 		self.assertTrue(frappe.db.exists("Item", "_Test Custom Blue SKU"))
 		self.assertFalse(frappe.db.exists("Item", f"{template.name}-BL"))
+
+	def test_numeric_values_cannot_change_while_used_by_variants(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		attribute.update({"numeric_values": 1, "from_range": 0, "to_range": 100, "increment": 1})
+		self.assertRaises(frappe.ValidationError, attribute.save)
