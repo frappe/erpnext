@@ -193,11 +193,10 @@ def get_position(investment, book_values, accrued_interest, unrealised, units):
 	return position
 
 
-def add_total_row(data, fieldnames, label_field, currency, **values):
-	"""Append a bold Total row summing `fieldnames`; `values` adds already computed totals."""
-	total = frappe._dict({"bold": 1, label_field: _("Total"), "currency": currency, **values})
+def add_total_row(data, fieldnames, label_field, currency):
+	total = frappe._dict({"bold": 1, label_field: _("Total"), "currency": currency})
 	for fieldname in fieldnames:
-		total.setdefault(fieldname, sum(flt(row.get(fieldname)) for row in data))
+		total[fieldname] = sum(flt(row.get(fieldname)) for row in data)
 
 	data.append(total)
 
