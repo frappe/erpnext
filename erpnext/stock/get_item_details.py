@@ -22,7 +22,6 @@ from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
 	set_transaction_type,
-	validate_pricing_context,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -86,17 +85,6 @@ def _preprocess_ctx(ctx):
 def get_item_details(
 	ctx: ItemDetailsCtx,
 	doc: Document | str | dict | None = None,
-	for_validate: bool | None = False,
-	overwrite_warehouse: bool = True,
-) -> ItemDetails:
-	validate_pricing_context(ctx)
-	return _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
-
-
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
-def _get_item_details(
-	ctx: ItemDetailsCtx,
-	doc: Document | str | None = None,
 	for_validate: bool | None = False,
 	overwrite_warehouse: bool = True,
 ) -> ItemDetails:
@@ -345,7 +333,7 @@ def update_stock(ctx, out, doc=None):
 				filter_batches(batches, doc)
 
 			for batch_no, batch_qty in batches.items():
-				rate = _get_batch_based_item_price(
+				rate = get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
@@ -1393,12 +1381,6 @@ def _order_item_prices(query, ip, pctx):
 
 @frappe.whitelist()
 def get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code) -> float:
-	pctx = frappe._dict(parse_json(pctx))
-	validate_pricing_context(pctx)
-	return _get_batch_based_item_price(pctx, item_code)
-
-
-def _get_batch_based_item_price(pctx: ItemPriceCtx | dict | str, item_code) -> float:
 	pctx = parse_json(pctx)
 
 	item_price = get_item_price(pctx, item_code, force_batch_no=True)
@@ -1738,12 +1720,6 @@ def get_batch_qty(batch_no, warehouse, item_code):
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def apply_price_list(ctx, as_doc=False, doc=None):
-	validate_pricing_context(ctx)
-	return _apply_price_list(ctx, as_doc, doc)
-
-
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
-def _apply_price_list(ctx, as_doc=False, doc=None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1932,7 +1908,7 @@ def get_serial_no(_args, serial_nos=None, sales_order=None):
 
 def update_party_blanket_order(ctx: ItemDetailsCtx, out: ItemDetails | dict):
 	if out["against_blanket_order"]:
-		blanket_order_details = _get_blanket_order_details(ctx)
+		blanket_order_details = get_blanket_order_details(ctx)
 		if blanket_order_details:
 			out.update(blanket_order_details)
 
@@ -1940,12 +1916,6 @@ def update_party_blanket_order(ctx: ItemDetailsCtx, out: ItemDetails | dict):
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_blanket_order_details(ctx: ItemDetailsCtx):
-	validate_pricing_context(ctx)
-	return _get_blanket_order_details(ctx)
-
-
-@erpnext.normalize_ctx_input(ItemDetailsCtx)
-def _get_blanket_order_details(ctx: ItemDetailsCtx):
 	blanket_order_details = None
 
 	if ctx.item_code:

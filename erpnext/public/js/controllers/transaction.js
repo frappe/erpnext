@@ -827,7 +827,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_return: cint(me.frm.doc.is_return),
-							return_against: me.frm.doc.return_against,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 							doctype: me.frm.doc.doctype,
@@ -2237,7 +2236,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			doctype: me.frm.doc.doctype,
 			name: me.frm.doc.name,
 			is_return: cint(me.frm.doc.is_return),
-			return_against: me.frm.doc.return_against,
 			update_stock: ["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)
 				? cint(me.frm.doc.update_stock)
 				: 0,
