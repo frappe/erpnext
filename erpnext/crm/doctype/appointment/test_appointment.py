@@ -353,17 +353,33 @@ class TestAppointment(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "beginning of an available slot"):
 			self._create_portal_appointment("portal_visitor_off_grid@example.com", time="10:15:00")
 
-	def test_capacity_check_locks_the_capacity_setting(self):
-		# concurrent verifications of Unverified bookings lock no common appointment row,
-		# so the capacity setting is the shared lock that serializes them
+	def test_capacity_lock_taken_before_the_appointment_row_lock(self):
+		# concurrent verifications of Unverified bookings share no appointment row, so the capacity
+		# setting serializes them; taking it before frappe locks the row keeps reschedules deadlock-free
 		set_booking_setting("number_of_agents", 1)
-		appointment = frappe.get_doc(
-			{"doctype": "Appointment", "scheduled_time": slot_on(1, 10), "customer_email": LEAD_EMAIL}
-		)
-		with patch.object(frappe.db, "get_single_value", wraps=frappe.db.get_single_value) as mock_get:
-			appointment.validate_available_time_slot()
+		appointment = create_test_appointment(scheduled_time=slot_on(1, 10))
+		appointment.scheduled_time = slot_on(1, 11)
+		locks = []
+		get_single_value = frappe.db.get_single_value
+		load_doc_before_save = Appointment.load_doc_before_save
 
-		mock_get.assert_any_call("Appointment Booking Settings", "number_of_agents", for_update=True)
+		def record_capacity_lock(*args, **kwargs):
+			if kwargs.get("for_update"):
+				locks.append("capacity")
+			return get_single_value(*args, **kwargs)
+
+		def record_row_lock(doc, *args, **kwargs):
+			locks.append("row")
+			return load_doc_before_save(doc, *args, **kwargs)
+
+		with (
+			patch.object(frappe.db, "get_single_value", side_effect=record_capacity_lock),
+			patch.object(Appointment, "load_doc_before_save", autospec=True, side_effect=record_row_lock),
+		):
+			appointment.save()
+
+		self.assertEqual(locks[:2], ["capacity", "row"])
+		self.assertIn("capacity", locks[2:])
 
 	def test_portal_slot_on_any_overlapping_availability_grid(self):
 		self._configure_booking_settings()

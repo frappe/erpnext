@@ -45,6 +45,12 @@ class Appointment(Document):
 		verification_token: DF.Data | None
 	# end: auto-generated types
 
+	def check_if_latest(self):
+		# frappe locks this appointment's row here: take the capacity lock first, so concurrent
+		# saves lock in the same order and the overlapping-row locks cannot deadlock
+		lock_booking_capacity()
+		super().check_if_latest()
+
 	def validate(self):
 		self.validate_appointment_with()
 		self.validate_status_update()
@@ -141,9 +147,7 @@ class Appointment(Document):
 	def validate_available_time_slot(self):
 		# locking the capacity setting serializes all capacity checks: locking only the Open
 		# rows misses Unverified bookings of the same slot being verified at the same time
-		number_of_agents = cint(
-			frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents", for_update=True)
-		)
+		number_of_agents = lock_booking_capacity()
 		if not number_of_agents:
 			return
 
@@ -411,6 +415,13 @@ class Appointment(Document):
 
 def get_booking_settings():
 	return frappe.get_cached_doc("Appointment Booking Settings")
+
+
+def lock_booking_capacity() -> int:
+	"""Read the number of agents with a row lock, held until commit."""
+	return cint(
+		frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents", for_update=True)
+	)
 
 
 def is_appointment_scheduling_enabled():
