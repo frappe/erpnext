@@ -46,6 +46,7 @@ def get_timezones():
 	return zoneinfo.available_timezones()
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; returns free slots only, booking must be enabled
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date: str, timezone: str):
 	# Convert query to local timezones
@@ -104,6 +105,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 	return timeslots
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; rate limited, slot and capacity validated, unverified until confirmed by email
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=300)
 def create_appointment(date: str, time: str, tz: str, contact: str | dict):
