@@ -8,6 +8,7 @@ from erpnext.manufacturing.doctype.operation.test_operation import make_operatio
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	NotInWorkingHoursError,
+	OverlapError,
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
 	get_raw_materials,
@@ -17,6 +18,38 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestWorkstation(ERPNextTestSuite):
+	def make_workstation(self, name, *timings):
+		doc = frappe.new_doc("Workstation", workstation_name=name)
+		for start_time, end_time in timings:
+			doc.append("working_hours", {"start_time": start_time, "end_time": end_time})
+		return doc
+
+	def test_back_to_back_working_hours_do_not_overlap(self):
+		doc = self.make_workstation(
+			"_Test Back To Back Shifts", ("08:00:00", "16:00:00"), ("16:00:00", "23:59:59")
+		)
+		doc.insert()
+
+		# also holds when the touching row is added to an already saved workstation
+		doc.append("working_hours", {"start_time": "05:00:00", "end_time": "08:00:00"})
+		doc.save()
+		self.assertEqual(len(doc.working_hours), 3)
+
+	def test_overlapping_working_hours_raise_error(self):
+		for timing in (
+			("15:00:00", "20:00:00"),  # partial overlap at the end
+			("06:00:00", "09:00:00"),  # partial overlap at the start
+			("10:00:00", "12:00:00"),  # enclosed
+			("07:00:00", "17:00:00"),  # enclosing
+			("08:00:00", "16:00:00"),  # identical
+		):
+			with self.subTest(timing=timing):
+				doc = self.make_workstation("_Test Overlapping Shifts", ("08:00:00", "16:00:00"))
+				doc.insert()
+				doc.append("working_hours", {"start_time": timing[0], "end_time": timing[1]})
+				self.assertRaises(OverlapError, doc.save)
+				doc.delete()
+
 	def test_get_raw_materials_without_items(self):
 		for skip_transfer, backflush_from_wip in ((0, 0), (1, 0), (1, 1)):
 			with self.subTest(skip_transfer=skip_transfer, backflush_from_wip=backflush_from_wip):
