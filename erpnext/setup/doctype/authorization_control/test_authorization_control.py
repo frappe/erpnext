@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import frappe
 
@@ -9,6 +9,22 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_update_items_checks_discounts_on_updated_parent(self):
+		from erpnext.accounts.services.child_item_update import ChildItemUpdater
+
+		updater = object.__new__(ChildItemUpdater)
+		updater.parent = MagicMock(doctype="Sales Order", company="_Test Company", base_grand_total=500)
+		updater.parent_doctype = "Sales Order"
+		with patch("erpnext.accounts.services.child_item_update.frappe.get_cached_doc") as get_control:
+			get_control.return_value.validate_approving_authority.side_effect = frappe.ValidationError(
+				"discount exceeds limit"
+			)
+			with self.assertRaises(frappe.ValidationError):
+				updater._post_update(False, False, False)
+			get_control.return_value.validate_approving_authority.assert_called_once_with(
+				"Sales Order", "_Test Company", 500, updater.parent
+			)
+
 	def test_auto_repeat_invoice_still_checks_approval(self):
 		invoice = frappe.get_doc({"doctype": "Sales Invoice", "auto_repeat": "OTHER-REPEAT"})
 		with (
