@@ -104,7 +104,7 @@ def _execute(filters=None, additional_table_columns=None):
 		# map expense values
 		base_net_total = 0
 		for expense_acc in expense_accounts:
-			if inv.is_internal_supplier and inv.company == inv.represents_company:
+			if is_internal_transfer(inv):
 				expense_amount = 0
 			else:
 				expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
@@ -180,10 +180,18 @@ def get_outstanding_in_company_currency(inv, company_currency):
 
 def get_payable_credit(inv):
 	"""Amount the invoice credits to its payable, rounded like its GL entry."""
+	if is_internal_transfer(inv):
+		return 0
+
 	if inv.base_rounding_adjustment and inv.base_rounded_total:
 		return inv.base_rounded_total
 
 	return inv.base_grand_total
+
+
+def is_internal_transfer(inv) -> bool:
+	"""Transfers within the company post nothing to the payable or to expenses."""
+	return bool(inv.is_internal_supplier and inv.company == inv.represents_company)
 
 
 def get_in_invoice_payable_debit(inv):

@@ -302,6 +302,37 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(row[frappe.scrub("Stock Received But Not Billed - _TC6")], 0)
 		self.assertIn(frappe.scrub(unrealized_account + "_unrealized"), [col["fieldname"] for col in columns])
 
+	def test_ledger_view_shows_nothing_payable_for_internal_transfer_invoices(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		si = create_sales_invoice(
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			warehouse="Stores - TCP1",
+		)
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+		filters = frappe._dict(
+			company=pi.company,
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier=pi.supplier,
+		)
+
+		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == pi.name)
+
+		self.assertEqual((row["debit"], row["credit"]), (0, 0))
+
 	def test_group_filters_include_children(self):
 		pi = make_purchase_invoice()
 		filters = frappe._dict(
