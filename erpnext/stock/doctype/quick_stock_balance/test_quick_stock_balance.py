@@ -1,7 +1,9 @@
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.quick_stock_balance.quick_stock_balance import get_stock_item_details
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
@@ -26,6 +28,24 @@ class TestQuickStockBalance(ERPNextTestSuite):
 				}
 			).insert()
 		return full_name
+
+	def test_past_date_balance_covers_whole_day(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		posting_date = add_days(today(), -1)
+		for qty, posting_time in ((10, "00:00:01"), (5, "23:59:58")):
+			make_stock_entry(
+				item_code=item,
+				target="_Test Warehouse - _TC",
+				qty=qty,
+				rate=100,
+				posting_date=posting_date,
+				posting_time=posting_time,
+				set_posting_time=1,
+			)
+
+		details = get_stock_item_details("_Test Warehouse - _TC", posting_date, item)
+
+		self.assertEqual((details["qty"], details["value"]), (15, 1500))
 
 	def test_warehouse_and_item_fences(self):
 		def stock_kwargs(name):
