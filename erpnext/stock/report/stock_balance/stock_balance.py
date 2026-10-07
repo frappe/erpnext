@@ -106,7 +106,9 @@ class StockBalanceReport:
 					"out_val": 0.0,
 					"bal_qty": entry.actual_qty,
 					"bal_val": entry.stock_value_difference,
-					"val_rate": 0.0,
+					"val_rate": flt(entry.stock_value_difference / entry.actual_qty)
+					if entry.actual_qty
+					else 0.0,
 				}
 			)
 
