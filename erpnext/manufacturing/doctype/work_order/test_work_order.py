@@ -4972,6 +4972,32 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(len(sl_data), 2)
 
+	def test_stock_reservation_status_with_unreserved_components(self):
+		from erpnext.manufacturing.doctype.work_order.services.status import StatusService
+
+		cases = [
+			([], "Not Started"),
+			([(10, 0), (10, 0)], "Not Started"),
+			([(10, 10), (10, 0)], "Stock Partially Reserved"),
+			([(10, 0), (10, 10)], "Stock Partially Reserved"),
+			([(10, 5), (10, 0)], "Stock Partially Reserved"),
+			([(10, 10), (10, 5)], "Stock Partially Reserved"),
+			([(10, 10), (10, 10)], "Stock Reserved"),
+			([(10, 12), (10, 10)], "Stock Reserved"),
+			([(0, 0), (10, 10)], "Stock Reserved"),
+		]
+		for quantities, expected_status in cases:
+			with self.subTest(quantities=quantities):
+				work_order = frappe._dict(
+					required_items=[
+						frappe._dict(required_qty=required_qty, stock_reserved_qty=reserved_qty)
+						for required_qty, reserved_qty in quantities
+					]
+				)
+				self.assertEqual(
+					StatusService(work_order)._reservation_status("Not Started"), expected_status
+				)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
