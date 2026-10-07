@@ -1284,6 +1284,23 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		schedule = get_depr_schedule(asset.name, "Active")
 		self.assertEqual([d.depreciation_amount for d in schedule if not d.journal_entry], [90] * 7)
 
+	def test_reschedule_counts_partial_rows_booked_after_a_cancelled_entry(self):
+		asset = create_monthly_asset(available_for_use_date="2023-01-16")
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2024-01-31")
+		cancel_depreciation_entry(asset.name, "2023-01-31")
+		current_value = frappe.db.get_value("Asset", asset.name, "value_after_depreciation")
+
+		make_asset_value_adjustment(
+			asset=asset.name,
+			date="2024-02-01",
+			current_asset_value=current_value,
+			new_asset_value=current_value - 10,
+		).submit()
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		pending = [d.depreciation_amount for d in schedule if not d.journal_entry]
+		self.assertEqual(flt(sum(pending), 2), flt(current_value - 10, 2))
+
 	def test_active_schedule_is_cancelled_only_with_asset(self):
 		asset = create_monthly_asset()
 		schedule = get_asset_depr_schedule_doc(asset.name, "Active")

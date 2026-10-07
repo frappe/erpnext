@@ -245,11 +245,27 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			self.fb_row.frequency_of_depreciation
 		) + cint(self.fb_row.increase_in_asset_life)
 		last_depr_date = self.get_last_booked_depreciation_date()
-		depr_booked_for_months = self.get_booked_depr_for_months_count(last_depr_date) + len(
-			self.booked_rows_after_gap
-		) * cint(self.fb_row.frequency_of_depreciation)
+		depr_booked_for_months = (
+			self.get_booked_depr_for_months_count(last_depr_date) + self.get_months_booked_after_gap()
+		)
 
 		self.pending_months = total_months - depr_booked_for_months
+
+	def get_months_booked_after_gap(self) -> float:
+		"""Months covered by rows booked after an unbooked one, partial rows by the days they cover."""
+		if not self.booked_rows_after_gap:
+			return 0
+
+		rows = self.schedules_before_clearing
+		return sum(
+			get_elapsed_months(
+				add_days(rows[idx - 1].schedule_date, 1),
+				rows[idx].schedule_date,
+				cint(self.fb_row.frequency_of_depreciation),
+			)
+			for idx in range(self.first_non_depreciated_row_idx + 1, len(rows))
+			if rows[idx].journal_entry
+		)
 
 	def get_last_booked_depreciation_date(self):
 		last_depr_date = None
