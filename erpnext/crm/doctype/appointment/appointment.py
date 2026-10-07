@@ -21,6 +21,7 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method -- create_calendar_event persists calendar_event through self.save()
 class Appointment(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
