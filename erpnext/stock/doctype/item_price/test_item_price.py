@@ -280,3 +280,35 @@ class TestItemPrice(ERPNextTestSuite):
 		)
 		self.assertEqual(get_price_list_rate_for(ctx.copy().update(qty=24), item_code), 90)
 		self.assertEqual(get_price_list_rate_for(ctx.copy().update(qty=5), item_code), 100)
+
+	def test_duplicate_check_gaps(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		valid_from = add_days(today(), -10)
+		self.make_price(item_code, 1000, valid_from, price_list="Standard Selling")
+
+		self.assertRaises(
+			ItemPriceDuplicateItem,
+			self.make_price,
+			item_code,
+			1100,
+			valid_from,
+			price_list="Standard Selling",
+			supplier="_Test Supplier",
+		)
+		self.assertRaises(
+			ItemPriceDuplicateItem,
+			self.make_price,
+			item_code,
+			450,
+			valid_from,
+			price_list="Standard Selling",
+			valid_upto=add_days(today(), 10),
+		)
+
+		other_item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1, "is_stock_item": 1}).name
+		batch = frappe.get_doc({"doctype": "Batch", "item": other_item}).insert()
+		self.assertRaises(
+			frappe.ValidationError, self.make_price, item_code, 900, valid_from, batch_no=batch.name
+		)
