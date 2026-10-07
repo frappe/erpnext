@@ -211,6 +211,7 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == je.name)
 
 		self.assertEqual((row["debit"], row["credit"]), (0, 300))
+		self.assertEqual(row["voucher_type"], "Journal Entry")
 
 	def test_write_off_settles_the_payable_of_paid_and_unpaid_invoices(self):
 		write_off = {"write_off_amount": 100, "write_off_account": "Write Off - _TC6"}

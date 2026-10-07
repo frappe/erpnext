@@ -264,7 +264,7 @@ def get_journal_entries(filters, args):
 		.inner_join(journal_account)
 		.on(je.name == journal_account.parent)
 		.select(
-			je.voucher_type.as_("doctype"),
+			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
 			je.posting_date,
 			journal_account.account.as_(args.account),
