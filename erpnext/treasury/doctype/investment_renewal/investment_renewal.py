@@ -41,10 +41,10 @@ class InvestmentRenewal(Document):
 		new_terms_changed: DF.Check
 		original_investment: DF.Link
 		principal_renewed: DF.Currency
+		reason_for_change: DF.SmallText | None
 		remarks: DF.SmallText | None
 		renewal_date: DF.Date
 		renewal_type: DF.Literal["", "Auto Renewal", "Switch Scheme", "Reinvestment"]
-		terms_change_reason: DF.SmallText | None
 		total_renewed: DF.Currency
 	# end: auto-generated types
 
@@ -264,18 +264,18 @@ def update_new_investment(new_investment):
 	)
 
 
-def validate_terms_change_reason(new_investment):
+def validate_reason_for_change(new_investment):
 	"""Called before an investment is submitted: a renewal whose terms were changed must say why."""
 	if not new_investment.investment_renewal:
 		return
 
 	renewal = frappe.get_doc("Investment Renewal", new_investment.investment_renewal)
-	if renewal.terms_change_reason or not has_new_terms(renewal.get_original_investment(), new_investment):
+	if renewal.reason_for_change or not has_new_terms(renewal.get_original_investment(), new_investment):
 		return
 
 	frappe.throw(
 		_(
-			"The terms of this investment differ from the original. Please enter the Reason for Change in Terms in Investment Renewal {0} first."
+			"The terms of this investment differ from the original. Please enter the Reason for Change in Investment Renewal {0} first."
 		).format(frappe.get_desk_link(renewal.doctype, renewal.name)),
 		title=_("Reason Required"),
 	)

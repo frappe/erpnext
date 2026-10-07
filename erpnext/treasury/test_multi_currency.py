@@ -171,7 +171,7 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, conversion_rate=82).submit()
 
 		row = revaluation.investments[0]
-		self.assertEqual((row.book_value, row.fair_value, row.unrealised_gain_loss), (80000, 98400, 18400))
+		self.assertEqual((row.book_value, row.market_value, row.unrealised_gain_loss), (80000, 98400, 18400))
 		self.assertEqual(
 			get_gl_entries(revaluation.name, "Investment Revaluation"),
 			{FAIR_VALUE_ACCOUNT: (18400, 0), UNREALISED_ACCOUNT: (0, 18400)},
@@ -195,7 +195,7 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, conversion_rate=5).insert()
 
 		row = revaluation.investments[0]
-		self.assertEqual((row.conversion_rate, row.fair_value), (1, 1200))
+		self.assertEqual((row.conversion_rate, row.market_value), (1, 1200))
 
 	def test_renewal_keeps_investment_currency(self):
 		investment = make_usd_investment()

@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:institution_name",
- "creation": "2026-10-07 14:19:40.720938",
+ "creation": "2026-10-07 15:58:33.666288",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -54,7 +54,7 @@
    "description": "e.g. RBI licence or SEBI registration number",
    "fieldname": "registration_number",
    "fieldtype": "Data",
-   "label": "Registration / License Number"
+   "label": "Registration Number"
   },
   {
    "default": "1",
@@ -82,7 +82,7 @@
   }
  ],
  "links": [],
- "modified": "2026-10-07 14:19:41.483476",
+ "modified": "2026-10-07 15:58:34.498764",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Financial Institution",

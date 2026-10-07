@@ -23,8 +23,11 @@ class InvestmentRevaluation(AccountsController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.treasury.doctype.investment_revaluation_detail.investment_revaluation_detail import InvestmentRevaluationDetail
 		from frappe.types import DF
+
+		from erpnext.treasury.doctype.investment_revaluation_detail.investment_revaluation_detail import (
+			InvestmentRevaluationDetail,
+		)
 
 		amended_from: DF.Link | None
 		company: DF.Link
@@ -154,18 +157,18 @@ class InvestmentRevaluation(AccountsController):
 
 	def set_row_values(self, row):
 		investment = self.get_investment(row.investment)
-		row.posts_gl_entry = int(investment.measurement_category in GL_CATEGORIES)
+		row.posts_to_ledger = int(investment.measurement_category in GL_CATEGORIES)
 		self.set_book_values(row, investment)
 		self.set_fair_value(row, investment)
 		row.adjustment_amount = flt(
-			row.unrealised_gain_loss - row.previous_amount, row.precision("adjustment_amount")
+			row.unrealised_gain_loss - row.previous_gain_loss, row.precision("adjustment_amount")
 		)
 
 	def set_book_values(self, row, investment):
 		"""Book value, previous amount and units held on the revaluation date."""
 		previous_row = self.get_previous_row(row.investment)
 		row.book_value = investment.get_ledger_balance(investment.investment_account, self.revaluation_date)
-		row.previous_amount = flt(previous_row.unrealised_gain_loss) if previous_row else 0
+		row.previous_gain_loss = flt(previous_row.unrealised_gain_loss) if previous_row else 0
 		row.units_held = flt(
 			get_units_held(investment.name, self.revaluation_date), row.precision("units_held")
 		)
@@ -182,10 +185,10 @@ class InvestmentRevaluation(AccountsController):
 				)
 			)
 
-		fair_value = flt(row.units_held) * flt(price) * flt(row.conversion_rate)
-		row.fair_value = flt(fair_value, row.precision("fair_value"))
+		market_value = flt(row.units_held) * flt(price) * flt(row.conversion_rate)
+		row.market_value = flt(market_value, row.precision("market_value"))
 		row.unrealised_gain_loss = flt(
-			row.fair_value - flt(row.book_value), row.precision("unrealised_gain_loss")
+			row.market_value - flt(row.book_value), row.precision("unrealised_gain_loss")
 		)
 
 	def set_total_gain_loss(self):

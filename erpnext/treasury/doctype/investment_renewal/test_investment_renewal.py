@@ -177,7 +177,7 @@ class TestInvestmentRenewal(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, new_investment.submit)
 
 		renewal.reload()
-		renewal.terms_change_reason = "Bank raised the rate to 8%"
+		renewal.reason_for_change = "Bank raised the rate to 8%"
 		renewal.save()
 		new_investment.reload()
 		new_investment.submit()

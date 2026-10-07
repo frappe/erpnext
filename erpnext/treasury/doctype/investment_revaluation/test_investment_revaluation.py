@@ -34,7 +34,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		revaluation = make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
 		row = revaluation.investments[0]
-		self.assertEqual((row.book_value, row.fair_value, row.unrealised_gain_loss), (1000, 1200, 200))
+		self.assertEqual((row.book_value, row.market_value, row.unrealised_gain_loss), (1000, 1200, 200))
 		self.assertEqual(
 			get_gl_entries(revaluation.name), {FAIR_VALUE_ACCOUNT: (200, 0), UNREALISED_ACCOUNT: (0, 200)}
 		)
@@ -48,7 +48,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 
 		revaluation = make_market_revaluation(investment.name, nav_per_unit=11, days=1).submit()
 
-		self.assertEqual(revaluation.investments[0].previous_amount, 200)
+		self.assertEqual(revaluation.investments[0].previous_gain_loss, 200)
 		self.assertEqual(revaluation.investments[0].adjustment_amount, -100)
 		self.assertEqual(
 			get_gl_entries(revaluation.name), {UNREALISED_ACCOUNT: (100, 0), FAIR_VALUE_ACCOUNT: (0, 100)}
@@ -58,7 +58,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		investment = make_fund_investment("Amortized Cost")
 		revaluation = make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
-		self.assertEqual(revaluation.investments[0].posts_gl_entry, 0)
+		self.assertEqual(revaluation.investments[0].posts_to_ledger, 0)
 		self.assertEqual(get_gl_entries(revaluation.name), {})
 		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 200)
 

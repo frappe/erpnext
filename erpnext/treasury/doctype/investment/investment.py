@@ -29,8 +29,11 @@ class Investment(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.treasury.doctype.investment_interest_schedule.investment_interest_schedule import InvestmentInterestSchedule
 		from frappe.types import DF
+
+		from erpnext.treasury.doctype.investment_interest_schedule.investment_interest_schedule import (
+			InvestmentInterestSchedule,
+		)
 
 		accrued_interest: DF.Currency
 		accrued_interest_account: DF.Link | None
@@ -72,7 +75,16 @@ class Investment(Document):
 		rate_of_interest: DF.Percent
 		realised_gain_loss_account: DF.Link | None
 		scheme_name: DF.Data | None
-		status: DF.Literal["Draft", "Pending Approval", "Rejected", "Active", "Partially Redeemed", "Matured", "Redeemed", "Cancelled"]
+		status: DF.Literal[
+			"Draft",
+			"Pending Approval",
+			"Rejected",
+			"Active",
+			"Partially Redeemed",
+			"Matured",
+			"Redeemed",
+			"Cancelled",
+		]
 		tax_withheld_receivable_account: DF.Link | None
 		total_cost: DF.Currency
 		unamortised_premium_discount: DF.Currency
@@ -99,10 +111,10 @@ class Investment(Document):
 
 	def before_submit(self):
 		from erpnext.treasury.doctype.investment_renewal.investment_renewal import (
-			validate_terms_change_reason,
+			validate_reason_for_change,
 		)
 
-		validate_terms_change_reason(self)
+		validate_reason_for_change(self)
 		self.approved_by = frappe.session.user
 
 	def on_cancel(self):

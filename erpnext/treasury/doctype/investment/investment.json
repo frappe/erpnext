@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2026-10-07 15:28:30.050806",
+ "creation": "2026-10-07 15:58:36.060129",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -116,11 +116,12 @@
    "read_only": 1
   },
   {
+   "description": "The bank, fund house or company that issued this investment",
    "fieldname": "issuer",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Issuer / Fund House / Bank",
+   "label": "Issuer",
    "options": "Financial Institution",
    "reqd": 1
   },
@@ -187,19 +188,20 @@
    "fieldname": "instrument_id",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Instrument ID / FD No. / Folio No."
+   "label": "Instrument ID"
   },
   {
    "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "description": "The broker or bank that holds this investment for you",
    "fieldname": "custodian",
    "fieldtype": "Link",
-   "label": "Custodian / Broker",
+   "label": "Custodian",
    "options": "Financial Institution"
   },
   {
    "fieldname": "investment_renewal",
    "fieldtype": "Link",
-   "label": "Renewed From",
+   "label": "Investment Renewal",
    "no_copy": 1,
    "options": "Investment Renewal",
    "read_only": 1,
@@ -440,7 +442,7 @@
    "allow_on_submit": 1,
    "fieldname": "accrued_upto",
    "fieldtype": "Date",
-   "label": "Interest Accrued Upto",
+   "label": "Accrued Upto",
    "no_copy": 1,
    "read_only": 1
   },
@@ -595,7 +597,7 @@
    "link_fieldname": "original_investment"
   }
  ],
- "modified": "2026-10-07 15:28:31.026503",
+ "modified": "2026-10-07 15:58:36.516234",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment",

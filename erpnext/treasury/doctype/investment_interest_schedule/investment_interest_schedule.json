@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2026-10-07 15:28:32.454883",
+ "creation": "2026-10-07 15:58:35.025126",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -85,14 +85,14 @@
   {
    "fieldname": "interest_accrual",
    "fieldtype": "Link",
-   "label": "Investment Interest Accrual",
+   "label": "Interest Accrual",
    "options": "Investment Interest Accrual",
    "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-10-07 15:28:32.579300",
+ "modified": "2026-10-07 15:58:35.174631",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Interest Schedule",

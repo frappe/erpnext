@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2026-10-07 15:28:34.333713",
+ "creation": "2026-10-07 15:58:38.096030",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -151,7 +151,7 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "label": "NAV / Rate",
+   "label": "Rate",
    "options": "currency"
   },
   {
@@ -312,7 +312,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 15:28:34.547452",
+ "modified": "2026-10-07 15:58:38.355294",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Transaction",

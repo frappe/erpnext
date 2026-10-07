@@ -76,7 +76,18 @@ class InvestmentTransaction(AccountsController):
 		reference_no: DF.Data | None
 		remarks: DF.SmallText | None
 		tax_withheld: DF.Currency
-		transaction_type: DF.Literal["", "Opening", "Purchase", "Sale", "Redemption", "Withdrawal", "Maturity", "Interest Receipt", "Dividend", "Charges"]
+		transaction_type: DF.Literal[
+			"",
+			"Opening",
+			"Purchase",
+			"Sale",
+			"Redemption",
+			"Withdrawal",
+			"Maturity",
+			"Interest Receipt",
+			"Dividend",
+			"Charges",
+		]
 		units: DF.Float
 	# end: auto-generated types
 
@@ -182,7 +193,7 @@ class InvestmentTransaction(AccountsController):
 				frappe.throw(_("{0} cannot be negative").format(_(self.meta.get_label(fieldname))))
 
 		if self.is_unit_movement() and (flt(self.units) <= 0 or flt(self.rate) <= 0):
-			frappe.throw(_("Units and NAV / Rate must be greater than zero"))
+			frappe.throw(_("Units and Rate must be greater than zero"))
 
 		if flt(self.accrued_interest_in_purchase) > flt(self.gross_amount):
 			frappe.throw(_("Accrued Interest in Purchase cannot be more than Gross Amount"))

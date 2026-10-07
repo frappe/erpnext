@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2026-10-07 15:28:32.888804",
+ "creation": "2026-10-07 15:58:37.382824",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -16,7 +16,7 @@
   "renewal_type",
   "new_investment",
   "new_terms_changed",
-  "terms_change_reason",
+  "reason_for_change",
   "amounts_section",
   "principal_renewed",
   "interest_renewed",
@@ -125,9 +125,9 @@
    "allow_on_submit": 1,
    "depends_on": "eval:doc.new_terms_changed",
    "description": "What changed and why, e.g. \"Bank cut the rate from 7.5% to 7.0%\". Needed before the new investment can be submitted.",
-   "fieldname": "terms_change_reason",
+   "fieldname": "reason_for_change",
    "fieldtype": "Small Text",
-   "label": "Reason for Change in Terms",
+   "label": "Reason for Change",
    "no_copy": 1
   },
   {
@@ -184,7 +184,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 15:28:33.079715",
+ "modified": "2026-10-07 15:58:37.693158",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Renewal",

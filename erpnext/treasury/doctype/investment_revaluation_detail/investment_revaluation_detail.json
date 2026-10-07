@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2026-10-07 15:06:41.544607",
+ "creation": "2026-10-07 15:58:35.478804",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -14,11 +14,11 @@
   "column_break_inputs",
   "measurement_category",
   "conversion_rate",
-  "posts_gl_entry",
+  "posts_to_ledger",
   "values_section",
   "book_value",
-  "fair_value",
-  "previous_amount",
+  "market_value",
+  "previous_gain_loss",
   "column_break_values",
   "unrealised_gain_loss",
   "adjustment_amount"
@@ -67,7 +67,7 @@
    "fieldname": "nav_per_unit",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Price per Unit (NAV)",
+   "label": "NAV per Unit",
    "options": "investment_currency"
   },
   {
@@ -77,7 +77,7 @@
    "fieldname": "market_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Market Price per Unit",
+   "label": "Market Price",
    "options": "investment_currency"
   },
   {
@@ -89,7 +89,7 @@
    "fetch_from": "investment.measurement_category",
    "fieldname": "measurement_category",
    "fieldtype": "Data",
-   "label": "Accounting Method",
+   "label": "Measurement Category",
    "read_only": 1
   },
   {
@@ -102,7 +102,7 @@
   {
    "default": "0",
    "description": "Ticked when this row makes an entry in the books",
-   "fieldname": "posts_gl_entry",
+   "fieldname": "posts_to_ledger",
    "fieldtype": "Check",
    "label": "Posts to Ledger",
    "read_only": 1
@@ -116,23 +116,23 @@
    "description": "What your books say this investment is worth right now",
    "fieldname": "book_value",
    "fieldtype": "Currency",
-   "label": "Value in Books",
+   "label": "Book Value",
    "options": "currency",
    "read_only": 1
   },
   {
    "description": "What it is really worth today: units x price x exchange rate",
-   "fieldname": "fair_value",
+   "fieldname": "market_value",
    "fieldtype": "Currency",
    "label": "Market Value",
    "options": "currency",
    "read_only": 1
   },
   {
-   "description": "The paper gain or loss recorded the last time you valued this investment",
-   "fieldname": "previous_amount",
+   "description": "The unrealised gain or loss recorded the last time you valued this investment",
+   "fieldname": "previous_gain_loss",
    "fieldtype": "Currency",
-   "label": "Last Revaluation Amount",
+   "label": "Previous Gain / Loss",
    "options": "currency",
    "read_only": 1
   },
@@ -142,11 +142,11 @@
   },
   {
    "columns": 1,
-   "description": "Market Value minus Value in Books. It becomes real only when you sell",
+   "description": "Market Value minus Book Value. It becomes real only when you sell",
    "fieldname": "unrealised_gain_loss",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Paper Gain / Loss",
+   "label": "Unrealised Gain / Loss",
    "options": "currency",
    "read_only": 1
   },
@@ -156,14 +156,14 @@
    "fieldname": "adjustment_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount Posted Now",
+   "label": "Adjustment Amount",
    "options": "currency",
    "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-10-07 15:06:42.363932",
+ "modified": "2026-10-07 15:58:35.674462",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Revaluation Detail",
