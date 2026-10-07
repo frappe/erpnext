@@ -29,6 +29,7 @@ from frappe.utils import (
 from frappe.utils.csvutils import build_csv_response
 from pypika.terms import ExistsCriterion
 
+from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
@@ -721,19 +722,16 @@ class ProductionPlan(Document):
 
 		return so_wise_planned_qty
 
-	def update_bin_qty(self):
-		self.update_raw_material_bin_qty()
-
-		for d in self.sub_assembly_items:
-			if d.fg_warehouse and d.type_of_manufacturing == "In House":
-				bin_name = get_or_make_bin(d.production_item, d.fg_warehouse)
-				bin = frappe.get_doc("Bin", bin_name, for_update=True)
-				bin.update_reserved_qty_for_for_sub_assembly()
-
-	def update_raw_material_bin_qty(self, item_codes: set[str] | None = None):
-		for d in self.mr_items:
-			if d.warehouse and (item_codes is None or d.item_code in item_codes):
-				bin_name = get_or_make_bin(d.item_code, d.warehouse)
+	def update_bin_qty(self, item_codes: set[str] | None = None):
+		rows = [(d.item_code, d.warehouse) for d in self.mr_items]
+		rows += [
+			(d.production_item, d.fg_warehouse)
+			for d in self.sub_assembly_items
+			if d.type_of_manufacturing == "In House"
+		]
+		for item_code, warehouse in rows:
+			if warehouse and (item_codes is None or item_code in item_codes):
+				bin_name = get_or_make_bin(item_code, warehouse)
 				bin = frappe.get_doc("Bin", bin_name, for_update=True)
 				bin.update_reserved_qty_for_production_plan()
 
@@ -2290,9 +2288,15 @@ def _get_remaining_reserved_qty(plan_qty_by_warehouse, work_order_qty_by_warehou
 
 
 def _get_plan_reservations(item_code):
+	return _group_by_plan_and_warehouse(
+		_get_material_request_plan_query(item_code), _get_sub_assembly_plan_query(item_code)
+	)
+
+
+def _get_material_request_plan_query(item_code):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
-	query = (
+	return (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
@@ -2304,14 +2308,34 @@ def _get_plan_reservations(item_code):
 				* child.conversion_factor
 			).as_("reserved_qty"),
 		)
-		.where(
-			(table.docstatus == 1)
-			& (child.item_code == item_code)
-			& (table.status.notin(["Completed", "Closed"]))
-		)
+		.where(_is_open_plan(table) & (child.item_code == item_code))
 		.groupby(table.name, child.warehouse)
 	)
-	return _group_by_plan_and_warehouse(query)
+
+
+def _get_sub_assembly_plan_query(item_code):
+	table = frappe.qb.DocType("Production Plan")
+	child = frappe.qb.DocType("Production Plan Sub Assembly Item")
+	return (
+		frappe.qb.from_(table)
+		.inner_join(child)
+		.on(table.name == child.parent)
+		.select(
+			table.name.as_("production_plan"),
+			child.fg_warehouse.as_("warehouse"),
+			Sum(child.required_qty).as_("reserved_qty"),
+		)
+		.where(
+			_is_open_plan(table)
+			& (child.production_item == item_code)
+			& (child.type_of_manufacturing == "In House")
+		)
+		.groupby(table.name, child.fg_warehouse)
+	)
+
+
+def _is_open_plan(table):
+	return (table.docstatus == 1) & table.status.notin(["Completed", "Closed"])
 
 
 def _get_work_order_reservations(item_code, plan_names):
@@ -2337,10 +2361,11 @@ def _get_work_order_reservations(item_code, plan_names):
 	return _group_by_plan_and_warehouse(query)
 
 
-def _group_by_plan_and_warehouse(query):
-	reservations = {}
-	for row in query.run(as_dict=True):
-		reservations.setdefault(row.production_plan, {})[row.warehouse] = flt(row.reserved_qty)
+def _group_by_plan_and_warehouse(*queries):
+	reservations = defaultdict(lambda: defaultdict(float))
+	for query in queries:
+		for row in query.run(as_dict=True):
+			reservations[row.production_plan][row.warehouse] += flt(row.reserved_qty)
 	return reservations
 
 
@@ -2486,35 +2511,14 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 	return query.run()
 
 
+@deprecated(
+	f"{__name__}.get_reserved_qty_for_sub_assembly",
+	"2026-10-07",
+	"v18",
+	"Use get_reserved_qty_for_production_plan, which also counts sub-assembly items.",
+)
 def get_reserved_qty_for_sub_assembly(item_code, warehouse):
-	table = frappe.qb.DocType("Production Plan")
-	child = frappe.qb.DocType("Production Plan Sub Assembly Item")
-
-	query = (
-		frappe.qb.from_(table)
-		.inner_join(child)
-		.on(table.name == child.parent)
-		.select(
-			Sum(
-				Case().when(child.qty > 0, child.qty).else_(child.required_qty)
-				- IfNull(child.wo_produced_qty, 0)
-			)
-		)
-		.where(
-			(table.docstatus == 1)
-			& (child.production_item == item_code)
-			& (child.fg_warehouse == warehouse)
-			& (table.status.notin(["Completed", "Closed"]))
-		)
-	)
-
-	query = query.run()
-
-	if not query or query[0][0] is None:
-		return None
-
-	qty = flt(query[0][0])
-	return qty if qty > 0 else 0.0
+	return get_reserved_qty_for_production_plan(item_code, warehouse)
 
 
 @frappe.whitelist()
