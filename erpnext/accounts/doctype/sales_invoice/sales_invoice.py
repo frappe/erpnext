@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 import frappe.utils
 from frappe import _, msgprint, throw
@@ -666,6 +668,7 @@ class SalesInvoice(SellingController):
 				"second_source_field": "-1 * qty",
 				"second_join_field": "so_detail",
 				"extra_cond": """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)""",
+				"second_source_extra_cond": """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)""",
 			}
 		)
 
@@ -953,22 +956,23 @@ class SalesInvoice(SellingController):
 	def validate_scio_self_rm_qty(self):
 		self_rms = [item for item in self.items if item.scio_detail]
 		if self_rms:
+			stock_qty = self.get_scio_self_rm_stock_qty()
 			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 			query = (
 				frappe.qb.from_(table)
 				.select(table.required_qty, table.consumed_qty, table.billed_qty, table.name)
-				.where((table.docstatus == 1) & (table.name.isin([item.scio_detail for item in self_rms])))
+				.where((table.docstatus == 1) & (table.name.isin(list(stock_qty))))
 			)
 			result = query.run(as_dict=True)
 			data = {item.name: item for item in result}
 			for item in self_rms:
 				row = data.get(item.scio_detail)
 				max_qty = max(row.required_qty, row.consumed_qty) - row.billed_qty
-				if item.stock_qty > max_qty:
+				if stock_qty[item.scio_detail] > max_qty:
 					frappe.throw(
 						_("Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}").format(
 							item.idx,
-							item.stock_qty,
+							stock_qty[item.scio_detail],
 							item.stock_uom,
 							get_link_to_form("Item", item.item_code),
 							frappe.bold(max_qty),
@@ -1157,17 +1161,9 @@ class SalesInvoice(SellingController):
 			project.db_update()
 
 	def update_billed_qty_in_scio(self):
-		if self.is_return:
-			return
-
 		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-		data = frappe._dict(
-			{
-				item.scio_detail: item.stock_qty if self._action == "submit" else -item.stock_qty
-				for item in self.items
-				if item.scio_detail
-			}
-		)
+		sign = 1 if self._action == "submit" else -1
+		data = {name: sign * qty for name, qty in self.get_scio_self_rm_stock_qty().items()}
 
 		if data:
 			case_expr = Case()
@@ -1176,6 +1172,13 @@ class SalesInvoice(SellingController):
 			frappe.qb.update(table).set(table.billed_qty, case_expr).where(
 				(table.name.isin(list(data.keys()))) & (table.docstatus == 1)
 			).run()
+
+	def get_scio_self_rm_stock_qty(self):
+		stock_qty = defaultdict(float)
+		for item in self.items:
+			if item.scio_detail:
+				stock_qty[item.scio_detail] += flt(item.stock_qty)
+		return stock_qty
 
 	def on_update_after_submit(self):
 		fields_to_check = [

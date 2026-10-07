@@ -2,13 +2,28 @@
 # See license.txt
 
 import frappe
+from frappe.utils.nestedset import NestedSetRecursionError, get_descendants_of
 
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
-from .quality_procedure import add_node
+from .quality_procedure import add_node, get_children
 
 
 class TestQualityProcedure(ERPNextTestSuite):
+	def test_get_children_needs_read_permission(self):
+		parent = create_procedure({"quality_procedure_name": "_Test Procedure Tree", "is_group": 1})
+		desk_user = make_fenced_user("quality-procedure-desk@example.com", ["Stock User"])
+		website_user = make_fenced_user("quality-procedure-website@example.com", [])
+
+		with as_user(desk_user):
+			roots = [row.value for row in get_children("Quality Procedure")]
+		self.assertIn(parent.name, roots)
+
+		with as_user(website_user):
+			self.assertRaises(frappe.PermissionError, get_children, "Quality Procedure")
+			self.assertRaises(frappe.PermissionError, get_children, "Quality Procedure", parent.name)
+
 	def test_add_node(self):
 		procedure = create_procedure(
 			{
@@ -126,6 +141,45 @@ class TestQualityProcedure(ERPNextTestSuite):
 		group_qp.reload()
 		self.assertFalse([d for d in group_qp.processes if d.procedure == child_qp.name])
 
+	def test_move_child_to_another_parent(self):
+		first_parent = create_procedure({"quality_procedure_name": "Test First Parent"})
+		second_parent = create_procedure({"quality_procedure_name": "Test Second Parent"})
+		child = create_procedure(
+			{"quality_procedure_name": "Test Moved Child", "parent_quality_procedure": first_parent.name}
+		)
+
+		child.parent_quality_procedure = second_parent.name
+		child.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Quality Procedure", child.name, "parent_quality_procedure"),
+			second_parent.name,
+		)
+
+	def test_processes_update_the_tree(self):
+		parent = create_procedure({"quality_procedure_name": "Test Tree Parent"})
+		child = create_procedure({"quality_procedure_name": "Test Tree Child"})
+
+		parent.append("processes", {"procedure": child.name})
+		parent.save()
+		self.assertEqual(get_descendants_of("Quality Procedure", parent.name), [child.name])
+
+		parent.processes = []
+		parent.save()
+		self.assertEqual(get_descendants_of("Quality Procedure", parent.name), [])
+
+	def test_procedure_cannot_be_its_own_ancestor(self):
+		procedure = create_procedure({"quality_procedure_name": "Test Self Parent"})
+		procedure.append("processes", {"procedure": procedure.name})
+		self.assertRaises(NestedSetRecursionError, procedure.save)
+
+		parent = create_procedure({"quality_procedure_name": "Test Loop Parent"})
+		child = create_procedure(
+			{"quality_procedure_name": "Test Loop Child", "parent_quality_procedure": parent.name}
+		)
+		child.append("processes", {"procedure": parent.name})
+		self.assertRaises(NestedSetRecursionError, child.save)
+
 
 def create_procedure(kwargs=None):
 	kwargs = frappe._dict(kwargs or {})
@@ -133,6 +187,7 @@ def create_procedure(kwargs=None):
 	doc = frappe.new_doc("Quality Procedure")
 	doc.quality_procedure_name = kwargs.quality_procedure_name or "_Test Procedure"
 	doc.is_group = kwargs.is_group or 0
+	doc.parent_quality_procedure = kwargs.parent_quality_procedure
 
 	for process in kwargs.processes or []:
 		doc.append("processes", process)

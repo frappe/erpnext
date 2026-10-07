@@ -464,12 +464,37 @@ class TestSalesOrder(ERPNextTestSuite):
 
 			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
+	def test_full_qty_billed_below_amount_is_offered_with_zero_qty(self):
+		so = make_sales_order(qty=1, rate=1000)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].rate = 400
+		si.insert()
+		si.submit()
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+		rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+		self.assertIn(so.name, [row.name for row in rows])
+		self.assertTrue(has_potentially_billable_items(so.name))
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual([row.qty for row in si.get("items")], [0])
+		self.assertEqual(len(make_sales_invoice(so.name, target_doc=si).get("items")), 1)
+
+		si.get("items")[0].qty = 1
+		si.get("items")[0].rate = 600
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+		self.assertFalse(has_potentially_billable_items(so.name))
+
 	def test_order_with_sub_precision_pending_qty_is_not_offered(self):
 		item = make_item("_Test Sub Precision Qty Item", {"is_stock_item": 1}).name
 		so = make_sales_order(item_code=item, qty=10, rate=100)
 
 		si = make_sales_invoice(so.name)
-		si.get("items")[0].rate = 90
 		si.insert()
 		si.submit()
 
@@ -479,8 +504,9 @@ class TestSalesOrder(ERPNextTestSuite):
 			"Sales Invoice Item", si.get("items")[0].name, "qty", billed_qty, update_modified=False
 		)
 
-		self.assertFalse(has_potentially_billable_items(so.name))
-		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
@@ -540,6 +566,59 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].billed_amt, 500)
+
+	def test_make_sales_invoice_after_update_stock_credit_note(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		so = make_sales_order(qty=5, rate=100)
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.insert()
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.update_billed_amount_in_sales_order = 1
+		credit_note.get("items")[0].qty = -2
+		credit_note.insert()
+		credit_note.submit()
+
+		self.assertTrue(has_potentially_billable_items(so.name))
+		pending_invoice = make_sales_invoice(so.name)
+		self.assertEqual(pending_invoice.get("items")[0].qty, 2)
+
+		pending_invoice.update_stock = 1
+		pending_invoice.insert()
+		pending_invoice.submit()
+
+		self.assertFalse(has_potentially_billable_items(so.name))
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_returned_qty_after_return_delivery_note_and_update_stock_credit_note(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return as make_credit_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		for credit_note_first in (False, True):
+			with self.subTest(credit_note_first=credit_note_first):
+				so = make_sales_order(qty=5, rate=100)
+				dn = create_dn_against_so(so.name, 2)
+				si = make_sales_invoice(so.name)
+				si.update_stock = 1
+				si.get("items")[0].qty = 3
+				si.insert()
+				si.submit()
+
+				dn_return = frappe.get_doc(make_sales_return(dn.name).as_dict())
+				credit_note = make_credit_note(si.name)
+				credit_note.update_billed_amount_in_sales_order = 1
+				credit_note.get("items")[0].qty = -1
+
+				for return_doc in [credit_note, dn_return] if credit_note_first else [dn_return, credit_note]:
+					return_doc.insert()
+					return_doc.submit()
+
+				so.load_from_db()
+				self.assertEqual(so.get("items")[0].returned_qty, 3)
+				self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 1)
 
 	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
 		so = make_sales_order(

@@ -523,6 +523,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		self.assertRaises(OperationsNotCompleteError, stock_entry.insert)
 
+	def test_skip_transfer_work_order_completed_with_fractional_process_loss(self):
+		# 11.2 + 0.2 == 11.399999999999999 in float, which must still complete 11.4
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{"docstatus": 1, "skip_transfer": 1, "qty": 11.4, "produced_qty": 11.2, "process_loss_qty": 0.2}
+		)
+
+		self.assertEqual(work_order.get_status(), "Completed")
+
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
 		item_code = make_item("_Test Item For Process Loss", {"is_stock_item": 1}).name
@@ -1619,8 +1628,25 @@ class TestWorkOrder(ERPNextTestSuite):
 		work_order = self._make_shared_alternative_transfer()
 
 		return_entry = make_stock_return_entry(work_order.name)
-		return_entry.company = work_order.company
 		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_entry.save)
+
+	def test_return_entry_uses_work_order_company(self):
+		"""Return Components must take the company from the Work Order, not the user default."""
+		previous_default = frappe.defaults.get_user_default("company")
+		self.addCleanup(self._set_default_company, previous_default)
+		self._set_default_company("_Test Company 1")
+
+		work_order = self._make_shared_alternative_transfer()
+		self.assertEqual(work_order.company, "_Test Company")
+
+		return_entry = make_stock_return_entry(work_order.name)
+		self.assertEqual(return_entry.company, work_order.company)
+
+	@staticmethod
+	def _set_default_company(company):
+		frappe.defaults.set_user_default("company", company)
+		# new_doc caches a per doctype template, drop it so the changed default applies
+		frappe.local.new_doc_templates.clear()
 
 	def test_return_attribution_when_item_doubles_as_alternative(self):
 		"""An item transferred for itself and as an alternative must return per requirement."""
@@ -1631,7 +1657,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		close_work_order(work_order.name, "Closed")
 
 		return_entry = make_stock_return_entry(work_order.name)
-		return_entry.company = work_order.company
 		rows_by_attribution = {row.original_item: row for row in return_entry.items}
 		self.assertEqual(set(rows_by_attribution), {None, "_Test Item Home Desktop 100"})
 		self.assertEqual(rows_by_attribution[None].qty, 2)
@@ -2586,7 +2611,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(wo_doc.status, "Completed")
 		return_ste_doc = make_stock_return_entry(wo_doc.name)
-		return_ste_doc.company = wo_doc.company
 		return_ste_doc.save()
 
 		self.assertTrue(return_ste_doc.is_return)
@@ -4912,7 +4936,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		close_work_order(wo.name, "Closed")
 
 		first_return = make_stock_return_entry(wo.name)
-		first_return.company = wo.company
 		first_return.items[0].qty = 1
 		first_return.submit()
 

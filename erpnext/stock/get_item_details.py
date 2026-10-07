@@ -158,6 +158,7 @@ def get_item_details(
 		):
 			fallback_args = ctx.copy()
 			fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			fallback_args.price_list_uom_dependant = None
 			out.update(get_price_list_rate(fallback_args, item))
 
 	ctx.customer = current_customer
@@ -1184,6 +1185,12 @@ def get_price_list_rate(ctx: frappe._dict, item_doc, out: frappe._dict = None):
 		if meta.get_field("currency"):
 			validate_conversion_rate(ctx, meta)
 
+		# Transactions have no field for this flag, so item rows must read it from the Price List
+		if ctx.get("price_list_uom_dependant") is None and ctx.price_list:
+			ctx.price_list_uom_dependant = frappe.get_cached_value(
+				"Price List", ctx.price_list, "price_not_uom_dependent"
+			)
+
 		price_list_rate = get_price_list_rate_for(ctx, item_doc.name)
 
 		# variant
@@ -1811,7 +1818,7 @@ def get_price_list_currency_and_exchange_rate(ctx: frappe._dict):
 	price_list_details = get_price_list_details(ctx.price_list)
 
 	price_list_currency = price_list_details.get("currency")
-	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+	price_list_uom_dependant = price_list_details.get("price_not_uom_dependent")
 
 	plc_conversion_rate = ctx.plc_conversion_rate
 	company_currency = get_company_currency(ctx.company)
