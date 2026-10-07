@@ -688,6 +688,22 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(data[-1][5], 1000)
 		self.assertEqual(data[-1][6], 1000)
 
+	def test_sales_person_total_keeps_invoices_billing_one_delivery_row(self):
+		item = create_item("_Test Gross Profit Partly Billed Item").name
+		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=4, basic_rate=50)
+		dnote = self.create_delivery_note(item=item, qty=4, rate=100)
+		for _ in range(2):
+			sinv = make_sales_invoice(dnote.name)
+			sinv.items[0].qty = 2
+			sinv.append("sales_team", {"sales_person": "_Test Sales Person", "allocated_percentage": 100})
+			sinv.save().submit()
+
+		filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), item_code=item)
+		_, data = execute(frappe._dict(filters, group_by="Sales Person"))
+
+		self.assertEqual(data[-1][5], 400)
+		self.assertEqual(data[-1][6], 200)
+
 	def test_drop_ship(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 

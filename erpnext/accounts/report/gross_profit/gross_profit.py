@@ -638,7 +638,7 @@ class GrossProfitGenerator:
 
 			# add to grouped
 			self.grouped.setdefault(row.get(scrub(self.filters.group_by)), []).append(row)
-			self.invoice_item_amounts[row.item_row] = frappe._dict(
+			self.invoice_item_amounts[sales_invoice_item] = frappe._dict(
 				base_amount=row.base_amount, buying_amount=row.buying_amount
 			)
 
