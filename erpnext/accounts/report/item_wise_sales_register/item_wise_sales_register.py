@@ -2,6 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import hashlib
+import re
+
 import frappe
 from frappe import _
 from frappe.query_builder import functions as fn
@@ -658,17 +661,24 @@ def get_tax_accounts(
 
 
 def get_column_key(account: str, column_keys: dict) -> str:
-	"""Return a unique column key for the account, as scrub maps e.g. "Tax-1" and "Tax 1" to the same key."""
+	"""Return a column key for the account that does not depend on the other accounts in the report.
+
+	Accounts whose names scrub to the same key (e.g. "Tax-1 - TC" and "Tax 1 - TC") get a suffix
+	derived from their own name, so a saved report keeps each column on its account across filters.
+	"""
 	if account not in column_keys:
-		key = frappe.scrub(account)
-		used_keys = set(column_keys.values())
-		suffix = 1
-		while key in used_keys:
-			suffix += 1
-			key = f"{frappe.scrub(account)}_{suffix}"
-		column_keys[account] = key
+		column_keys[account] = frappe.scrub(account)
+		if has_scrubbed_name_clash(account):
+			column_keys[account] += "_" + hashlib.sha256(account.encode()).hexdigest()[:8]
 
 	return column_keys[account]
+
+
+def has_scrubbed_name_clash(account: str) -> bool:
+	# "_" is a single character wildcard, so this matches every name that may scrub to the same key
+	pattern = re.sub(r"[ \-%\\]", "_", account)
+	similar_accounts = frappe.get_all("Account", filters={"name": ("like", pattern)}, pluck="name")
+	return any(name != account and frappe.scrub(name) == frappe.scrub(account) for name in similar_accounts)
 
 
 def combine_tax_rates(existing_rate: float | str, rate: float | str) -> float | str:

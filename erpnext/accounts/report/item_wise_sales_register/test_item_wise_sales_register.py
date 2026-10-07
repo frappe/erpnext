@@ -190,21 +190,28 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		vat = frappe.scrub("_Test Account VAT - _TC")
 		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (4, 4))
 
-	def test_accounts_with_same_scrubbed_name_get_separate_columns(self):
+	def test_accounts_with_same_scrubbed_name_keep_their_own_columns(self):
 		accounts = [self.create_tax_account(name) for name in ("_Test Tax-1", "_Test Tax 1")]
-		self.create_sales_invoice(
-			taxes=[
-				{"account_head": accounts[0], "description": "Tax", "rate": 5},
-				{"account_head": accounts[1], "description": "Tax", "rate": 2},
-			]
-		)
+		customers = ("_Test Customer", "_Test Customer 1")
+		for customer, account in zip(customers, accounts, strict=True):
+			self.customer = customer
+			self.create_sales_invoice(taxes=[{"account_head": account, "description": "Tax", "rate": 5}])
 
-		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
-		columns, data = execute(filters)[:2]
+		all_fieldnames = self.get_amount_fieldnames()
+		self.assertEqual(len(set(all_fieldnames.values())), 2)
+		for customer, account in zip(customers, accounts, strict=True):
+			# filtering out the other account must not move this account to another column
+			fieldnames = self.get_amount_fieldnames(customer=customer)
+			self.assertEqual(fieldnames, {account: all_fieldnames[account]})
 
-		amount_columns = {c["label"]: c["fieldname"] for c in columns if c["fieldname"].endswith("_amount")}
-		self.assertEqual(data[0][amount_columns[f"{accounts[0]} Amount"]], 5)
-		self.assertEqual(data[0][amount_columns[f"{accounts[1]} Amount"]], 2)
+	def get_amount_fieldnames(self, **filters):
+		filters = frappe._dict(from_date=today(), to_date=today(), company=self.company, **filters)
+		columns = execute(filters)[0]
+		return {
+			column["label"].removesuffix(" Amount"): column["fieldname"]
+			for column in columns
+			if column["fieldname"].endswith("_amount") and column["label"].startswith("_Test Tax")
+		}
 
 	def create_tax_account(self, account_name):
 		account = frappe.get_doc(
