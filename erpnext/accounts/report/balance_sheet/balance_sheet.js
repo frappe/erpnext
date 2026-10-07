@@ -9,6 +9,13 @@ erpnext.utils.add_dimensions(BS_REPORT_NAME, 10);
 
 frappe.query_reports[BS_REPORT_NAME]["filters"].push(
 	{
+		fieldname: "group_by_dimension",
+		label: __("Group by Dimension"),
+		fieldtype: "Select",
+		options: erpnext.financial_statements.get_accounting_dimension_options(),
+		depends_on: "eval: !doc.report_template",
+	},
+	{
 		fieldname: "report_template",
 		label: __("Report Template"),
 		fieldtype: "Link",
