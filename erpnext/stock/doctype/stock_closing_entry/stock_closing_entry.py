@@ -174,7 +174,25 @@ class StockClosingEntry(Document):
 	def validate_later_closing_entry(self):
 		# A later closing is built on top of this one's balance, so cancelling this one would leave
 		# the later balance resting on figures that no longer exist.
-		later_entry = frappe.db.get_value(
+		if later_entry := self.get_later_closing_entry():
+			frappe.throw(
+				_(
+					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def validate_later_closing_entry_for_regenerate(self):
+		if later_entry := self.get_later_closing_entry():
+			frappe.throw(
+				_(
+					"Cannot regenerate Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def get_later_closing_entry(self):
+		return frappe.db.get_value(
 			"Stock Closing Entry",
 			{
 				"company": self.company,
@@ -185,14 +203,6 @@ class StockClosingEntry(Document):
 			"name",
 			order_by="to_date desc",
 		)
-
-		if later_entry:
-			frappe.throw(
-				_(
-					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
-				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
-				title=_("Later Stock Closing Entry Exists"),
-			)
 
 	def validate_closed_period_lock(self):
 		pcv = frappe.db.get_value(
@@ -230,6 +240,7 @@ class StockClosingEntry(Document):
 		self.check_permission("write")
 
 		self.validate_closed_period_lock()
+		self.validate_later_closing_entry_for_regenerate()
 		self.remove_stock_closing()
 		self.enqueue_job()
 

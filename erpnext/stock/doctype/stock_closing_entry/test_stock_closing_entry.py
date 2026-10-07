@@ -424,3 +424,9 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 		rows = stock_balance(filters.copy().update(item_group=item_group.name))[1]
 		self.assertEqual({row["item_code"] for row in rows}, {item})
+
+	def test_cannot_regenerate_closing_with_later_closing(self):
+		first = self.submit_closing(self.make_closing("2026-03-31"))
+		self.submit_closing(self.make_closing("2026-06-30"))
+
+		self.assertRaises(frappe.ValidationError, first.regenerate_closing_balance)
