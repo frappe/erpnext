@@ -1725,6 +1725,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			and not d.allow_zero_valuation_rate
 		)
 
+	def get_manually_rated_finished_items(self) -> tuple[float, float]:
+		"""Qty and value of the received finished good rows whose rate was set by hand."""
+		rows = [
+			d
+			for d in self.get("items")
+			if d.is_finished_item and d.t_warehouse and not d.s_warehouse and d.set_basic_rate_manually
+		]
+		return (
+			sum(flt(d.transfer_qty) for d in rows),
+			sum(flt(d.transfer_qty) * flt(d.basic_rate) for d in rows),
+		)
+
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
 		outgoing_items_cost -= self.get_costed_out_items_cost()
 
@@ -1810,6 +1822,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
 		scrap_items_cost = self.get_costed_out_items_cost()
+		manual_qty, manual_cost = self.get_manually_rated_finished_items()
 
 		if settings.material_consumption:
 			if settings.get_rm_cost_from_consumption_entry and self.work_order:
@@ -1855,10 +1868,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			# Estimate from the BOM only when nothing was consumed. A consumed cost of zero is a
 			# real cost, so substituting BOM rates would value free inputs as output.
 			elif not outgoing_items_cost and not has_consumption_basis:
-				bom_items = self.get_bom_raw_materials(finished_item_qty)
+				bom_items = self.get_bom_raw_materials(finished_item_qty + manual_qty)
 				outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
 
-		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
+		return flt((outgoing_items_cost - scrap_items_cost - manual_cost) / finished_item_qty)
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
