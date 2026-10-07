@@ -2065,18 +2065,34 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 def get_serial_batch_to_reverse(
 	serial_batch_data: frappe._dict, source_batch_qty: dict, sre_name: str
 ) -> frappe._dict:
-	"""Batch qty this transfer took from the source SRE, limited to what the target has not used."""
-	if not source_batch_qty:
-		return serial_batch_data
+	"""Batch qty this transfer took from the source SRE, limited to what the target has not used.
+
+	Targets created before the source split was stored are capped at the source's delivered batch qty.
+	"""
+	batch_qty_taken = (
+		source_batch_qty.get(sre_name, {}) if source_batch_qty else get_delivered_batch_qty(sre_name)
+	)
 
 	batches = {}
-	for batch_no, qty in source_batch_qty.get(sre_name, {}).items():
+	for batch_no, qty in batch_qty_taken.items():
 		qty_to_reverse = min(qty, serial_batch_data.batches.get(batch_no, 0))
 		if qty_to_reverse > 0:
 			batches[batch_no] = qty_to_reverse
 			serial_batch_data.batches[batch_no] -= qty_to_reverse
 
 	return frappe._dict(serial_nos=serial_batch_data.serial_nos, batches=batches)
+
+
+def get_delivered_batch_qty(sre_name: str) -> dict:
+	delivered_qty_by_batch = defaultdict(float)
+	for entry in frappe.get_all(
+		"Serial and Batch Entry",
+		filters={"parent": sre_name, "parenttype": "Stock Reservation Entry", "batch_no": ("is", "set")},
+		fields=["batch_no", "delivered_qty"],
+	):
+		delivered_qty_by_batch[entry.batch_no] += flt(entry.delivered_qty)
+
+	return delivered_qty_by_batch
 
 
 def get_reserved_materials(voucher_no):

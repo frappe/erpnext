@@ -3632,6 +3632,12 @@ class TestProductionPlan(ERPNextTestSuite):
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_shared_batch_delivered_qty_split_per_reservation_on_transfer(self):
+		self.assert_shared_batch_split_reversed_on_cancel("SPLIT")
+
+	def test_cancelling_legacy_transfer_reverses_each_source_reservation_once(self):
+		self.assert_shared_batch_split_reversed_on_cancel("LEGACY", clear_source_batches=True)
+
+	def assert_shared_batch_split_reversed_on_cancel(self, suffix, clear_source_batches=False):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 			reserve_stock_for_production_plan,
@@ -3639,10 +3645,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 		warehouse = "_Test Warehouse - _TC"
-		rm_item = "Shared Batch RM For SR Split"
-		parent_bom = create_nested_bom({"Shared Batch FG For SR Split": {rm_item: {}}}, prefix="")
+		rm_item = f"Shared Batch RM For SR {suffix}"
+		parent_bom = create_nested_bom({f"Shared Batch FG For SR {suffix}": {rm_item: {}}}, prefix="")
 		item = frappe.get_doc("Item", rm_item)
-		item.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BCH-SR-SPLIT-.#####"})
+		item.update(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": f"BCH-SR-{suffix}-.#####"}
+		)
 		item.save()
 
 		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
@@ -3685,6 +3693,15 @@ class TestProductionPlan(ERPNextTestSuite):
 		wo.submit()
 
 		self.assertEqual(batch_delivered_qty(), {row.name: row.sabb_qty for row in source_entries})
+
+		if clear_source_batches:
+			targets = frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_type": "Work Order", "voucher_no": wo.name},
+				pluck="name",
+			)
+			self.assertTrue(frappe.db.exists("Stock Reservation Source", {"parent": ("in", targets)}))
+			frappe.db.delete("Stock Reservation Source", {"parent": ("in", targets)})
 
 		wo.cancel()
 		self.assertEqual(batch_delivered_qty(), {row.name: 0 for row in source_entries})
