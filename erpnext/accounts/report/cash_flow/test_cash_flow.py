@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, getdate, today
 
@@ -14,8 +16,7 @@ class TestCashFlow(ERPNextTestSuite):
 	def setUp(self):
 		self.company = "_Test Company"
 
-	def net_change_in_cash(self):
-		"""Run the report for the current fiscal year and return the Net Change in Cash total."""
+	def run_report(self, **extra):
 		fiscal_year, year_start, year_end = get_fiscal_year(today(), company=self.company)
 		filters = frappe._dict(
 			company=self.company,
@@ -26,8 +27,17 @@ class TestCashFlow(ERPNextTestSuite):
 			filter_based_on="Fiscal Year",
 			periodicity="Yearly",
 			accumulated_values=0,
+			**extra,
 		)
-		rows = execute(filters)[1]
+		return execute(filters)[1]
+
+	def get_row(self, label, **extra):
+		rows = self.run_report(**extra)
+		return next(row for row in rows if label in str(row.get("section_name") or row.get("account_name")))
+
+	def net_change_in_cash(self):
+		"""Run the report for the current fiscal year and return the Net Change in Cash total."""
+		rows = self.run_report()
 		row = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
 		return row["total"]
 
@@ -69,6 +79,17 @@ class TestCashFlow(ERPNextTestSuite):
 		make_journal_entry(asset_account, "Cash - _TC", 800, posting_date=today(), submit=True)
 
 		self.assertEqual(self.net_change_in_cash() - before, -800)
+
+	def test_presentation_currency_converts_account_type_rows(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		make_journal_entry("Office Equipment - _TC", "Cash - _TC", 4000, posting_date=today(), submit=True)
+
+		with patch("erpnext.accounts.report.utils.get_rate_as_at", return_value=80):
+			row = self.get_row("Net Change in Fixed Asset", presentation_currency="USD")
+
+		self.assertEqual(row["total"], self.get_row("Net Change in Fixed Asset")["total"] / 80)
+		self.assertEqual(row["currency"], "USD")
 
 	def test_group_by_dimension(self):
 		"""Cash movements must land in their own cost center's column, not just the overall total."""
