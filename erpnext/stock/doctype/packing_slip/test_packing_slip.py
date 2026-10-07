@@ -151,3 +151,21 @@ class TestPackingSlipValidation(ERPNextTestSuite):
 		# positive qty but neither a Delivery Note Item nor a Packed Item reference
 		doc.append("items", {"item_code": "_Test Item", "qty": 1})
 		self.assertRaises(frappe.ValidationError, doc.validate_items)
+
+
+class TestPackingSlipReferences(ERPNextTestSuite):
+	def make_draft_delivery_note(self, qty=5, **kwargs):
+		item_code = make_item(properties={"is_stock_item": 1, **kwargs}).name
+		return create_delivery_note(item_code=item_code, qty=qty, do_not_submit=True)
+
+	def test_row_must_belong_to_slip_delivery_note_and_item(self):
+		dn_a = self.make_draft_delivery_note()
+		dn_b = self.make_draft_delivery_note()
+
+		slip = make_packing_slip(dn_a.name)
+		slip.items[0].dn_detail = dn_b.items[0].name
+		self.assertRaises(frappe.ValidationError, slip.insert)
+
+		slip = make_packing_slip(dn_a.name)
+		slip.items[0].item_code = dn_b.items[0].item_code
+		self.assertRaises(frappe.ValidationError, slip.insert)

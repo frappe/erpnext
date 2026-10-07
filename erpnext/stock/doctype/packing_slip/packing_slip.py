@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 from erpnext.controllers.status_updater import StatusUpdater
@@ -127,31 +126,40 @@ class PackingSlip(StatusUpdater):
 						item.idx
 					)
 				)
-			DocType = frappe.qb.DocType("Delivery Note Item" if item.dn_detail else "Packed Item")
-			remaining_qty = frappe.db.get_value(
-				"Delivery Note Item" if item.dn_detail else "Packed Item",
-				{"name": item.dn_detail or item.pi_detail, "docstatus": 0},
-				Sum(DocType.qty - DocType.packed_qty),
+
+			reference = self.get_reference_row(item)
+			self.validate_reference_row(item, reference)
+			self.validate_remaining_qty(item, flt(reference.qty) - flt(reference.packed_qty))
+
+	def get_reference_row(self, item):
+		return frappe.db.get_value(
+			"Delivery Note Item" if item.dn_detail else "Packed Item",
+			{"name": item.dn_detail or item.pi_detail, "docstatus": 0},
+			["parent", "item_code", "qty", "packed_qty"],
+			as_dict=True,
+		)
+
+	def validate_reference_row(self, item, reference):
+		if not reference or reference.parent != self.delivery_note or reference.item_code != item.item_code:
+			frappe.throw(
+				_("Row {0}: Please provide a valid Delivery Note Item or Packed Item reference.").format(
+					item.idx
+				)
 			)
 
-			if remaining_qty is None:
-				frappe.throw(
-					_("Row {0}: Please provide a valid Delivery Note Item or Packed Item reference.").format(
-						item.idx
-					)
+	def validate_remaining_qty(self, item, remaining_qty):
+		if remaining_qty <= 0:
+			frappe.throw(
+				_("Row {0}: Packing Slip is already created for Item {1}.").format(
+					item.idx, frappe.bold(item.item_code)
 				)
-			elif remaining_qty <= 0:
-				frappe.throw(
-					_("Row {0}: Packing Slip is already created for Item {1}.").format(
-						item.idx, frappe.bold(item.item_code)
-					)
+			)
+		elif item.qty > remaining_qty:
+			frappe.throw(
+				_("Row {0}: Qty cannot be greater than {1} for the Item {2}.").format(
+					item.idx, frappe.bold(remaining_qty), frappe.bold(item.item_code)
 				)
-			elif item.qty > remaining_qty:
-				frappe.throw(
-					_("Row {0}: Qty cannot be greater than {1} for the Item {2}.").format(
-						item.idx, frappe.bold(remaining_qty), frappe.bold(item.item_code)
-					)
-				)
+			)
 
 	def set_missing_values(self):
 		if not self.from_case_no:
