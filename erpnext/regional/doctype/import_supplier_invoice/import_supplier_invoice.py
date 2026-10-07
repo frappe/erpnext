@@ -390,7 +390,9 @@ def validate_invoice_not_imported(supplier_name: str, args: dict) -> None:
 	existing_invoice = frappe.db.exists(
 		"Purchase Invoice",
 		{
+			"company": args["company"],
 			"supplier": supplier_name,
+			"is_return": args["is_return"],
 			"bill_no": args["bill_no"],
 			"bill_date": getdate(args["bill_date"]),
 			"docstatus": ["!=", 2],

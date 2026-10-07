@@ -118,6 +118,23 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		)
 		self.assertEqual(frappe.db.get_value("Address", address, "pincode"), "00185")
 
+	def test_same_bill_number_is_imported_for_another_company_or_as_a_credit_note(self):
+		lines = [make_line("Service", "10.00", "10.00")]
+		credit_note = make_invoice_xml("ISI-SHARED", lines, document_type="TD04")
+		self.import_files({"a.xml": make_invoice_xml("ISI-SHARED", lines), "b.xml": credit_note})
+		doc = self.import_files(
+			{"a.xml": make_invoice_xml("ISI-SHARED", lines)},
+			company="_Test Company with perpetual inventory",
+			tax_account="_Test Account VAT - TCP1",
+		)
+
+		self.assertEqual(doc.status, "File Import Completed")
+		invoices = frappe.get_all("Purchase Invoice", {"bill_no": "ISI-SHARED"}, ["company", "is_return"])
+		self.assertCountEqual(
+			[(row.company, row.is_return) for row in invoices],
+			[("_Test Company", 0), ("_Test Company", 1), ("_Test Company with perpetual inventory", 0)],
+		)
+
 	def test_seller_is_matched_by_vat_number_not_by_name(self):
 		frappe.get_doc(
 			{
@@ -161,21 +178,21 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 
 		self.assertNotEqual(second.name, first.name)
 
-	def import_files(self, files: dict[str, str | bytes]):
-		doc = self.make_import()
+	def import_files(self, files: dict[str, str | bytes], **settings):
+		doc = self.make_import(**settings)
 		doc.zip_file = make_zip_attachment(doc, files).file_url
 		doc.save()
 		doc.import_xml_data()
 		return doc
 
-	def make_import(self):
+	def make_import(self, company: str = "_Test Company", tax_account: str = "_Test Account VAT - _TC"):
 		return frappe.get_doc(
 			{
 				"doctype": "Import Supplier Invoice",
-				"company": "_Test Company",
+				"company": company,
 				"item_code": "_Test Non Stock Item",
 				"supplier_group": "_Test Supplier Group",
-				"tax_account": "_Test Account VAT - _TC",
+				"tax_account": tax_account,
 				"invoice_series": "ACC-PINV-.YYYY.-",
 				"default_buying_price_list": "Standard Buying",
 			}
@@ -233,7 +250,7 @@ def make_invoice_xml(
 	imposta = f"<Imposta>{tax}</Imposta>" if tax is not None else ""
 	payment_xml = "".join(
 		f"<DettaglioPagamento><ModalitaPagamento>{code}</ModalitaPagamento>"
-		f"<ImportoPagamento>{amount}</ImportoPagamento></DettaglioPagamento>"
+		+ f"<ImportoPagamento>{amount}</ImportoPagamento></DettaglioPagamento>"
 		for code, amount in payments
 	)
 	return f"""<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
