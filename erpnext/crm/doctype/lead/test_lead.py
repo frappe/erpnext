@@ -228,6 +228,11 @@ class TestLead(ERPNextTestSuite):
 		lead.save()
 		self.assertEqual(lead.status, "Do Not Contact")
 
+		opportunity.reload()
+		opportunity.status = "Replied"
+		opportunity.save()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Do Not Contact")
+
 	def test_contact_created_from_the_opportunity_dialog_is_linked_to_the_lead(self):
 		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 0)
 		lead = make_lead()

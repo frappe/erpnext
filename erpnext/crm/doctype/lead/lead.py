@@ -93,10 +93,13 @@ class Lead(SellingController, CRMNote):
 		self.set_full_name()
 		self.set_lead_name()
 		self.set_title()
-		if self.status != "Do Not Contact":
-			self.set_status()
+		self.set_status()
 		self.check_email_id_is_unique()
 		self.validate_email_id()
+
+	def set_status(self, update: bool = False, status: str | None = None, update_modified: bool = True):
+		if self.status != "Do Not Contact":
+			super().set_status(update=update, status=status, update_modified=update_modified)
 
 	def before_insert(self):
 		self.contact_doc = None
