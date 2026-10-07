@@ -323,7 +323,7 @@ class StockClosing:
 							closing_stock[key].actual_qty = row.qty_after_transaction
 
 						fifo_queue = closing_stock[key].fifo_queue
-						if fifo_queue:
+						if fifo_queue is not None:
 							self.update_fifo_queue(fifo_queue, actual_qty, row.posting_date)
 							closing_stock[key].fifo_queue = fifo_queue
 					else:
@@ -359,17 +359,25 @@ class StockClosing:
 	def update_fifo_queue(self, fifo_queue, actual_qty, posting_date):
 		if actual_qty > 0:
 			fifo_queue.append([actual_qty, get_date_str(posting_date)])
-		else:
-			remaining_qty = actual_qty
-			for idx, queue in enumerate(fifo_queue):
-				if queue[0] + remaining_qty >= 0:
-					queue[0] += remaining_qty
-					if queue[0] == 0:
-						fifo_queue.pop(idx)
-					break
-				else:
-					remaining_qty += queue[0]
-					fifo_queue.pop(0)
+			return
+
+		qty_to_consume = abs(actual_qty)
+		while qty_to_consume > 0 and fifo_queue:
+			if fifo_queue[0][0] > qty_to_consume:
+				fifo_queue[0][0] -= qty_to_consume
+				break
+
+			qty_to_consume -= fifo_queue[0][0]
+			fifo_queue.pop(0)
+
+	def get_initial_fifo_queue(self, row, actual_qty, has_serial_no):
+		if has_serial_no:
+			return None
+
+		if row.from_closing_balance and row.fifo_queue:
+			return json.loads(row.fifo_queue)
+
+		return [[actual_qty, get_date_str(row.posting_date)]] if actual_qty else []
 
 	def get_initialized_entry(self, row, dimension_fields, value_difference):
 		item_details = frappe.get_cached_value(
@@ -397,9 +405,7 @@ class StockClosing:
 				"item_name": item_details.item_name,
 				"stock_uom": item_details.stock_uom,
 				"inventory_dimension_key": inventory_dimension_key,
-				"fifo_queue": [[actual_qty, get_date_str(row.posting_date)]]
-				if not item_details.has_serial_no
-				else [],
+				"fifo_queue": self.get_initial_fifo_queue(row, actual_qty, item_details.has_serial_no),
 			}
 		)
 
@@ -432,6 +438,7 @@ class StockClosing:
 					"valuation_rate",
 					"stock_value",
 					"stock_value_difference",
+					"fifo_queue",
 				],
 				filters={
 					"company": self.company,
