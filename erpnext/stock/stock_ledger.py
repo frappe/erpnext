@@ -1806,6 +1806,7 @@ class update_entries_after:
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
 		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
+		stock_entry.flags.via_repost = True
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		update_additional_cost_rows = bool(stock_entry.get("additional_costs"))
