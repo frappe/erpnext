@@ -400,7 +400,7 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 
 def get_with_descendants(doctype: str, name: str) -> list[str]:
 	"""The tree node and all nodes under it."""
-	return [name, *get_descendants_of(doctype, name)]
+	return [name, *get_descendants_of(doctype, name, ignore_permissions=True)]
 
 
 def get_advance_taxes_and_charges(invoice_list):

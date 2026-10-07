@@ -255,6 +255,25 @@ class TestPurchaseRegister(ERPNextTestSuite):
 
 		self.assertIn(pi.name, [row.get("voucher_no") for row in execute(filters)[1]])
 
+	def test_group_filters_need_no_access_to_the_tree(self):
+		pi = make_purchase_invoice()
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "_test_pr_auditor@example.com", "first_name": "Auditor"}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles("Auditor")
+		filters = frappe._dict(
+			company=pi.company,
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			supplier_group="All Supplier Groups",
+		)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertIn(pi.name, [row.get("voucher_no") for row in execute(filters)[1]])
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_supplier_group_filter_uses_supplier_master(self):
 		# invoices created before the supplier_group field existed have it blank
 		pi = make_purchase_invoice()
