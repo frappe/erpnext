@@ -1,8 +1,7 @@
 {
- "app": "erpnext",
  "charts": [],
- "content": "[{\"id\": \"inv-nc-ih\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Investments\", \"col\": 6}}, {\"id\": \"inv-nc-pa\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Investments Pending Approval\", \"col\": 6}}, {\"id\": \"inv-hdr-sc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"inv-sc-ih\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment\", \"col\": 4}}, {\"id\": \"inv-sc-itx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment Transaction\", \"col\": 4}}, {\"id\": \"inv-hdr-mr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Masters &amp; Reports</b></span>\", \"col\": 12}}, {\"id\": \"inv-card-hd\", \"type\": \"card\", \"data\": {\"card_name\": \"Investments\", \"col\": 4}}, {\"id\": \"inv-card-ms\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"inv-card-rp\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
- "creation": "2026-09-24 13:07:37.032186",
+ "content": "[{\"id\": \"inv-nc-ih\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Investments\", \"col\": 6}}, {\"id\": \"inv-nc-pa\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Investments Pending Approval\", \"col\": 6}}, {\"id\": \"inv-hdr-sc\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eYour Shortcuts\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"inv-sc-ih\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment\", \"col\": 4}}, {\"id\": \"inv-sc-itx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment Transaction\", \"col\": 4}}, {\"id\": \"inv-hdr-mr\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eMasters &amp; Reports\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"inv-card-hd\", \"type\": \"card\", \"data\": {\"card_name\": \"Investments\", \"col\": 4}}, {\"id\": \"inv-card-ms\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"inv-card-rp\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "creation": "2026-10-07 15:48:30.203611",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -206,7 +205,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-06 18:00:00.000000",
+ "modified": "2026-10-07 15:48:30.702627",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Treasury",
@@ -245,6 +244,7 @@
    "type": "DocType"
   }
  ],
+ "standard": 1,
  "title": "Treasury",
  "type": "Workspace"
 }

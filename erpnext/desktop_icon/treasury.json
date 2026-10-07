@@ -1,6 +1,6 @@
 {
  "app": "erpnext",
- "creation": "2026-09-24 12:00:00.000000",
+ "creation": "2026-10-07 15:49:16.110598",
  "docstatus": 0,
  "doctype": "Desktop Icon",
  "hidden": 0,
@@ -10,7 +10,7 @@
  "label": "Treasury",
  "link_to": "Treasury",
  "link_type": "Workspace Sidebar",
- "modified": "2026-10-07 13:00:00.000000",
+ "modified": "2026-10-07 15:49:16.561333",
  "modified_by": "Administrator",
  "name": "Treasury",
  "owner": "Administrator",
