@@ -145,12 +145,14 @@ class VATAuditReport:
 
 			parent_items = self.invoice_items.get(tax_detail.parent, {})
 			parent_tax_rates = self.items_based_on_tax_rate.setdefault(tax_detail.parent, {})
+			is_actual = tax_detail.charge_type == "Actual"
+			actual_tax_rate = get_actual_tax_rate(item_wise_tax_detail, parent_items) if is_actual else 0
 
 			for item, taxes in item_wise_tax_detail.items():
 				is_zero_rated = parent_items.get(item, {}).get("is_zero_rated")
-				if tax_detail.charge_type == "Actual":
-					# Actual rows store a rate of 0, so derive it from the tax and taxable amounts
-					taxes = [get_actual_tax_rate(taxes[1], parent_items.get(item, {}).get("net_amount")), taxes[1]]
+				if is_actual:
+					# Actual rows store a rate of 0, so use the rate derived from the row's total
+					taxes = [actual_tax_rate, taxes[1]]
 				# to skip items with non-zero tax rate in multiple rows
 				if taxes[0] == 0 and not is_zero_rated:
 					continue
@@ -283,8 +285,10 @@ class VATAuditReport:
 		]
 
 
-def get_actual_tax_rate(tax_amount: float, taxable_amount: float) -> float:
-	"""Rate of an Actual tax amount on its taxable amount."""
+def get_actual_tax_rate(item_wise_tax_detail: dict, items: dict) -> float:
+	"""Rate of an Actual tax row on its whole taxable amount, so its items aren't split by rounding."""
+	tax_amount = sum(flt(taxes[1]) for taxes in item_wise_tax_detail.values())
+	taxable_amount = sum(flt(items.get(item, {}).get("net_amount")) for item in item_wise_tax_detail)
 	if not taxable_amount:
 		return 0
-	return flt(flt(tax_amount) / flt(taxable_amount) * 100, 2)
+	return flt(tax_amount / taxable_amount * 100, 2)
