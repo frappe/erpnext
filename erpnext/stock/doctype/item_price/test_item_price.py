@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
 from erpnext.stock.get_item_details import get_price_list_rate_for
@@ -194,3 +195,73 @@ class TestItemPrice(ERPNextTestSuite):
 		price = get_price_list_rate_for(ctx, doc.item_code)
 
 		self.assertEqual(price, 21)
+
+	def make_price(self, item_code, rate, valid_from, **kwargs):
+		return frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": "_Test Price List",
+				"item_code": item_code,
+				"price_list_rate": rate,
+				"valid_from": valid_from,
+				**kwargs,
+			}
+		).insert()
+
+	def test_customer_price_wins_over_newer_general_price(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		self.make_price(item_code, 900, add_days(today(), -200), customer="_Test Customer")
+		self.make_price(item_code, 1000, add_days(today(), -30))
+
+		ctx = frappe._dict(
+			price_list="_Test Price List",
+			customer="_Test Customer",
+			uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+			transaction_date=today(),
+			qty=1,
+		)
+		self.assertEqual(get_price_list_rate_for(ctx, item_code), 900)
+
+	def test_supplier_price_wins_over_newer_general_price(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		price_list = "_Test Buying Price List"
+		self.make_price(
+			item_code, 800, add_days(today(), -200), price_list=price_list, supplier="_Test Supplier"
+		)
+		self.make_price(item_code, 1000, add_days(today(), -30), price_list=price_list)
+
+		ctx = frappe._dict(
+			price_list=price_list,
+			supplier="_Test Supplier",
+			uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+			transaction_date=today(),
+			qty=1,
+		)
+		self.assertEqual(get_price_list_rate_for(ctx, item_code), 800)
+
+	def test_batch_price_wins_over_newer_general_price(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 0}).name
+		batch_no = (
+			frappe.get_doc(
+				{"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": item_code}
+			)
+			.insert()
+			.name
+		)
+		self.make_price(item_code, 700, add_days(today(), -200), batch_no=batch_no)
+		self.make_price(item_code, 1000, add_days(today(), -30))
+
+		ctx = frappe._dict(
+			price_list="_Test Price List",
+			batch_no=batch_no,
+			uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+			transaction_date=today(),
+			qty=1,
+		)
+		self.assertEqual(get_price_list_rate_for(ctx, item_code), 700)

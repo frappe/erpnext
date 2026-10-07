@@ -1349,10 +1349,6 @@ def get_item_price(pctx: frappe._dict, item_code, ignore_party=False, force_batc
 			& (ip.price_list == pctx.price_list)
 			& (IfNull(ip.uom, "").isin(["", pctx.uom]))
 		)
-		.orderby(ip.valid_from.isnull(), order=frappe.qb.asc)
-		.orderby(ip.valid_from, order=frappe.qb.desc)
-		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
-		.orderby(ip.uom, order=frappe.qb.desc)
 		.limit(1)
 	)
 
@@ -1362,18 +1358,7 @@ def get_item_price(pctx: frappe._dict, item_code, ignore_party=False, force_batc
 		query = query.where(IfNull(ip.batch_no, "").isin(["", pctx.batch_no]))
 
 	if not ignore_party:
-		if pctx.customer:
-			query = query.where(
-				(ip.customer == pctx.customer)
-				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
-			).orderby(IfNull(ip.customer, ""), order=frappe.qb.desc)
-		elif pctx.supplier:
-			query = query.where(
-				(ip.supplier == pctx.supplier)
-				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
-			).orderby(IfNull(ip.supplier, ""), order=frappe.qb.desc)
-		else:
-			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+		query = apply_item_price_party_filter(query, ip, pctx)
 
 	if pctx.transaction_date:
 		query = query.where(
@@ -1381,11 +1366,35 @@ def get_item_price(pctx: frappe._dict, item_code, ignore_party=False, force_batc
 			& (IfNull(ip.valid_upto, "2500-12-31") >= pctx.transaction_date)
 		)
 
+	return apply_item_price_order(query, ip).run(as_dict=True)
+
+
+def apply_item_price_party_filter(query, ip, pctx):
+	without_party = (IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == "")
+
+	if pctx.customer:
+		return query.where((ip.customer == pctx.customer) | without_party).orderby(
+			IfNull(ip.customer, ""), order=frappe.qb.desc
+		)
+
+	if pctx.supplier:
+		return query.where((ip.supplier == pctx.supplier) | without_party).orderby(
+			IfNull(ip.supplier, ""), order=frappe.qb.desc
+		)
+
+	return query.where(without_party)
+
+
+def apply_item_price_order(query, ip):
 	# Final unique tiebreaker: rows tied on every sort key above (same valid_from/batch/uom/party)
 	# would otherwise be picked arbitrarily -- MariaDB and Postgres can differ. Pin the pick.
-	query = query.orderby(ip.name, order=frappe.qb.desc)
-
-	return query.run(as_dict=True)
+	return (
+		query.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
+		.orderby(ip.valid_from.isnull(), order=frappe.qb.asc)
+		.orderby(ip.valid_from, order=frappe.qb.desc)
+		.orderby(ip.uom, order=frappe.qb.desc)
+		.orderby(ip.name, order=frappe.qb.desc)
+	)
 
 
 @frappe.whitelist()
