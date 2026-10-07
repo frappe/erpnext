@@ -369,6 +369,26 @@ class TestBatch(ERPNextTestSuite):
 			BatchExpiredError, SerialBatchBundleService(delivery_note).validate_outward_bundle_batches
 		)
 
+	def test_batch_stock_endpoints_need_batch_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.batch.batch import get_batches_by_oldest, get_pos_reserved_batch_qty
+
+		portal_user = create_user("test_batch_portal@example.com", "Customer")
+		sales_user = create_user("test_batch_sales@example.com", "Sales User")
+		kwargs = {"item_code": "ITEM-BATCH-1", "warehouse": "_Test Warehouse - _TC"}
+
+		frappe.set_user(portal_user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, get_batch_qty, **kwargs)
+			self.assertRaises(frappe.PermissionError, get_batches_by_oldest, **kwargs)
+			self.assertRaises(frappe.PermissionError, get_pos_reserved_batch_qty, kwargs)
+
+			frappe.set_user(sales_user.name)
+			get_batch_qty(**kwargs)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_batch_negative_stock_error(self):
 		"""Test automatic batch selection for outgoing items"""
 		receipt = self.test_purchase_receipt(100)

@@ -276,6 +276,8 @@ def get_batch_qty(
 	:param item_code: Optional - give qty for this item
 	:param for_stock_levels: True consider expired batches"""
 
+	frappe.has_permission("Batch", "select", throw=True)
+
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 		combine_datetime,
 		get_auto_batch_nos,
@@ -315,6 +317,8 @@ def get_batch_qty(
 @frappe.whitelist()
 def get_batches_by_oldest(item_code: str, warehouse: str):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
+	frappe.has_permission("Batch", "select", throw=True)
+
 	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
 	if not batches:
 		return []
@@ -449,6 +453,8 @@ def make_batch(kwargs):
 @frappe.whitelist()
 def get_pos_reserved_batch_qty(filters: dict | str):
 	import json
+
+	frappe.has_permission("Batch", "select", throw=True)
 
 	filters = frappe.parse_json(filters)
 
