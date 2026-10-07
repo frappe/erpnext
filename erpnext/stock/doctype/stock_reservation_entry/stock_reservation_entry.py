@@ -25,6 +25,9 @@ class StockReservationEntry(Document):
 		from frappe.types import DF
 
 		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import SerialandBatchEntry
+		from erpnext.stock.doctype.stock_reservation_source.stock_reservation_source import (
+			StockReservationSource,
+		)
 
 		amended_from: DF.Link | None
 		available_qty: DF.Float
@@ -49,7 +52,7 @@ class StockReservationEntry(Document):
 		reservation_based_on: DF.Literal["Qty", "Serial and Batch"]
 		reserved_qty: DF.Float
 		sb_entries: DF.Table[SerialandBatchEntry]
-		source_batch_qty: DF.JSON | None
+		source_batches: DF.Table[StockReservationSource]
 		status: DF.Literal[
 			"Draft",
 			"Partially Reserved",
@@ -167,7 +170,7 @@ class StockReservationEntry(Document):
 			).run(as_list=True)[0][0] or 0
 
 			serial_batch_data = self.get_serial_batch_entries()
-			source_batch_qty = frappe.parse_json(self.source_batch_qty or "{}")
+			source_batch_qty = self.get_source_batch_qty()
 			sres = self.get_from_voucher_reservation_entries()
 			for row in sres:
 				if delivered_qty < 0.0:
@@ -198,6 +201,14 @@ class StockReservationEntry(Document):
 					)
 
 					delivered_qty -= row.reserved_qty
+
+	def get_source_batch_qty(self) -> dict:
+		"""Batch qty taken from each source reservation when this entry was transferred."""
+		source_batch_qty = defaultdict(lambda: defaultdict(float))
+		for row in self.source_batches:
+			source_batch_qty[row.source_reservation_entry][row.batch_no] += row.qty
+
+		return source_batch_qty
 
 	def get_serial_batch_entries(self):
 		serial_nos = []
@@ -1556,7 +1567,12 @@ class StockReservation:
 		sre.reservation_based_on = against_row.reservation_based_on
 		sre.has_serial_no = against_row.has_serial_no
 		sre.has_batch_no = against_row.has_batch_no
-		sre.source_batch_qty = row.get("sre_batches") or None
+		for source_reservation_entry, batches in (row.get("sre_batches") or {}).items():
+			for batch_no, qty in batches.items():
+				sre.append(
+					"source_batches",
+					{"source_reservation_entry": source_reservation_entry, "batch_no": batch_no, "qty": qty},
+				)
 
 		if row.serial_nos:
 			for serial_no in row.serial_nos:
