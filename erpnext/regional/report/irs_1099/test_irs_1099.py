@@ -78,6 +78,15 @@ class TestIRS1099(ERPNextTestSuite):
 
 		self.assertEqual(get_total_payments(supplier), 800)
 
+	def test_journal_entries_through_bank_or_cash_only(self):
+		supplier = make_1099_supplier()
+		make_supplier_journal_entry(supplier, 400, "Cash - _TC1")
+		make_supplier_journal_entry(supplier, -100, "Cash - _TC1")
+		make_supplier_journal_entry(supplier, 300, "Cash - _TC1").cancel()
+		make_supplier_journal_entry(supplier, 70, "Cost of Goods Sold - _TC1")
+
+		self.assertEqual(get_total_payments(supplier), 300)
+
 	def test_total_payments_in_company_currency(self):
 		supplier = make_1099_supplier(currency="EUR", payable_account=make_eur_payable_account())
 		pi = make_us_purchase_invoice(supplier, currency="EUR", conversion_rate=1.1, qty=10, rate=100)
@@ -143,6 +152,36 @@ def make_us_purchase_invoice(supplier: str, currency: str = "USD", **args):
 		expense_account="Cost of Goods Sold - _TC1",
 		**args,
 	)
+
+
+def make_supplier_journal_entry(supplier: str, amount: float, against_account: str):
+	"""Debits the supplier by `amount` (credits it when negative) against `against_account`."""
+	journal_entry = frappe.new_doc("Journal Entry")
+	journal_entry.update(
+		{"company": US_COMPANY, "posting_date": nowdate(), "cheque_no": "_Test", "cheque_date": nowdate()}
+	)
+	debit, credit = (amount, 0) if amount > 0 else (0, -amount)
+	journal_entry.append(
+		"accounts",
+		{
+			"account": "Creditors - _TC1",
+			"party_type": "Supplier",
+			"party": supplier,
+			"debit_in_account_currency": debit,
+			"credit_in_account_currency": credit,
+			"cost_center": "Main - _TC1",
+		},
+	)
+	journal_entry.append(
+		"accounts",
+		{
+			"account": against_account,
+			"debit_in_account_currency": credit,
+			"credit_in_account_currency": debit,
+			"cost_center": "Main - _TC1",
+		},
+	)
+	return journal_entry.submit()
 
 
 def pay(pi, amount: float):
