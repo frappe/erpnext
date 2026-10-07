@@ -258,14 +258,30 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 
 		rows = self.schedules_before_clearing
 		return sum(
-			get_elapsed_months(
-				add_days(rows[idx - 1].schedule_date, 1),
-				rows[idx].schedule_date,
-				cint(self.fb_row.frequency_of_depreciation),
-			)
+			self.get_months_covered(rows[idx - 1].schedule_date, rows[idx].schedule_date)
 			for idx in range(self.first_non_depreciated_row_idx + 1, len(rows))
 			if rows[idx].journal_entry
 		)
+
+	def get_months_covered(self, previous_date, schedule_date) -> float:
+		frequency = cint(self.fb_row.frequency_of_depreciation)
+		if self.is_full_period(previous_date, schedule_date):
+			return frequency
+
+		return get_elapsed_months(add_days(previous_date, 1), schedule_date, frequency)
+
+	def is_full_period(self, previous_date, schedule_date) -> bool:
+		"""Whether both dates are consecutive dates of the regular schedule."""
+		start_date, schedule_date = getdate(self.fb_row.depreciation_start_date), getdate(schedule_date)
+		frequency = cint(self.fb_row.frequency_of_depreciation)
+		months = (schedule_date.year - start_date.year) * 12 + schedule_date.month - start_date.month
+		if months % frequency:
+			return False
+
+		row_idx = months // frequency
+		return getdate(self.get_next_schedule_date(row_idx)) == schedule_date and getdate(
+			self.get_next_schedule_date(row_idx - 1)
+		) == getdate(previous_date)
 
 	def get_last_booked_depreciation_date(self):
 		last_depr_date = None

@@ -1302,6 +1302,20 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		pending = [d.depreciation_amount for d in schedule if not d.journal_entry]
 		self.assertEqual(flt(sum(pending), 2), flt(current_value - 10, 2))
 
+	def test_reschedule_counts_short_month_rows_booked_after_a_cancelled_entry(self):
+		asset = create_monthly_asset(
+			available_for_use_date="2022-12-31", depreciation_start_date="2023-01-30"
+		)
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-02-28")
+		cancel_depreciation_entry(asset.name, "2023-01-30")
+
+		make_asset_value_adjustment(
+			asset=asset.name, date="2023-03-01", current_asset_value=1100, new_asset_value=1000
+		).submit()
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		self.assertEqual(schedule[2].depreciation_amount, flt(1000 / 11, 2))
+
 	def test_manual_asset_split_with_rounded_rows(self):
 		asset = create_monthly_asset(depreciation_method="Manual", asset_quantity=3)
 
