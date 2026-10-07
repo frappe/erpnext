@@ -9,6 +9,23 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_customerwise_uses_customer_id_not_display_name(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		with patch.object(controller, "validate_auth_rule") as check:
+			for doctype in ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+				order = frappe._dict(
+					doctype=doctype,
+					quotation_to="Customer",
+					party_name="CUST-001",
+					customer="CUST-001",
+					customer_name="Display Name",
+				)
+				controller.bifurcate_based_on_type(
+					doctype, 100, 20, "Customerwise Discount", order, 0, "_Test Company"
+				)
+				self.assertIn("CUST-001", check.call_args.args[3])
+				self.assertNotIn("Display Name", check.call_args.args[3])
+
 	def test_direct_rate_discount_is_checked_for_item_and_group(self):
 		controller = frappe.get_cached_doc("Authorization Control")
 		order = frappe._dict(

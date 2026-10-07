@@ -131,10 +131,10 @@ class AuthorizationControl(TransactionBase):
 			auth_value = total
 		elif based_on == "Customerwise Discount":
 			if doc_obj:
-				if doc_obj.doctype == "Sales Invoice":
-					customer = doc_obj.customer
+				if doc_obj.doctype == "Quotation":
+					customer = doc_obj.party_name if doc_obj.quotation_to == "Customer" else None
 				else:
-					customer = doc_obj.customer_name
+					customer = doc_obj.customer
 				add_cond = f" and master_name = {frappe.db.escape(customer)}"
 		if based_on in ("Itemwise Discount", "Item Group wise Discount"):
 			if doc_obj:
