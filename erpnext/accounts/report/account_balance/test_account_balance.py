@@ -1,9 +1,11 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, getdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.account_balance.account_balance import execute
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, get_gl_entry_match_conditions
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -99,6 +101,11 @@ class TestAccountBalance(ERPNextTestSuite):
 		frappe.db.delete("User Permission", {"user": user})
 		frappe.permissions.add_user_permission("Account", "Debtors - _TC2", user)
 		self.assertEqual(list(balances_as_user()), ["Debtors - _TC2"])
+
+	def test_gl_entry_match_conditions_use_alias_on_postgres(self):
+		postgres_condition = """"tabGL Entry"."company" = '_Test Company 2'"""
+		with patch("frappe.desk.reportview.build_match_conditions", return_value=postgres_condition):
+			self.assertEqual(get_gl_entry_match_conditions(), ["""(gle."company" = '_Test Company 2')"""])
 
 
 def make_sales_invoice(**args):

@@ -363,9 +363,12 @@ def get_gl_entry_match_conditions() -> list[str]:
 	"""The user's GL Entry permission conditions, for queries aliasing GL Entry as `gle`."""
 	from frappe.desk.reportview import build_match_conditions
 
-	if match_conditions := build_match_conditions("GL Entry"):
-		return [f"({match_conditions})".replace("`tabGL Entry`.", "gle.")]
-	return []
+	match_conditions = build_match_conditions("GL Entry")
+	if not match_conditions:
+		return []
+	for quoted_table in ("`tabGL Entry`.", '"tabGL Entry".'):
+		match_conditions = match_conditions.replace(quoted_table, "gle.")
+	return [f"({match_conditions})"]
 
 
 def get_count_on(account, fieldname, date):
