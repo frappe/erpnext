@@ -46,6 +46,24 @@ class TestSerialNo(ERPNextTestSuite):
 		sr.warehouse = "_Test Warehouse - _TC"
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.save)
 
+	def test_cancelled_stock_reconciliation_marks_serials_inactive(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		item_code = make_item(
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "SNRECO-.#####"}
+		).name
+		reco = create_stock_reconciliation(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=2, rate=100
+		)
+		serial_nos = get_serial_nos_from_bundle(reco.items[0].serial_and_batch_bundle)
+		reco.cancel()
+
+		for serial_no in serial_nos:
+			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Inactive")
+
 	def test_inter_company_transfer(self):
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
