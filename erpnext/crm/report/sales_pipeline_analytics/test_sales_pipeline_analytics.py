@@ -200,6 +200,24 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			stage_rows(stage, based_on="Amount", company=None, from_date="2026-01-01", to_date="2026-01-31")
 
+	def test_amount_without_conversion_rate_uses_exchange_rate(self):
+		stage = make_sales_stage()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": "2025-12-01",
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 85,
+			}
+		).insert(ignore_if_duplicate=True)
+		opportunity = make_stage_opportunity(stage, 100, "2026-01-25", currency="USD", conversion_rate=80)
+		frappe.db.set_value("Opportunity", opportunity.name, "conversion_rate", 0)
+
+		rows = stage_rows(stage, based_on="Amount", from_date="2026-01-01", to_date="2026-01-31")
+
+		self.assertEqual(rows[0]["january_2026"], 8500)
+
 	def test_periods_of_different_years(self):
 		stage = make_sales_stage()
 		make_stage_opportunity(stage, 500, "2025-01-10")
