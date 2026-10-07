@@ -75,3 +75,13 @@ class TestItemLeadTime(ERPNextTestSuite):
 			self.make_lead_time(item_code, capacity_per_day=10)
 
 		self.assertRaises(frappe.ValidationError, frappe.rename_doc, "Item", source, target, merge=True)
+
+	def test_manufacturing_roles_can_access_lead_times(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		manager = create_user("test_lead_time_manager@example.com", "Manufacturing Manager")
+		user = create_user("test_lead_time_user@example.com", "Manufacturing User")
+
+		self.assertTrue(frappe.has_permission("Item Lead Time", "write", user=manager.name))
+		self.assertTrue(frappe.has_permission("Item Lead Time", "read", user=user.name))
+		self.assertFalse(frappe.has_permission("Item Lead Time", "write", user=user.name))
