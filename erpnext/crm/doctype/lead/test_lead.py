@@ -323,6 +323,38 @@ class TestLead(ERPNextTestSuite):
 		lead.delete()
 		self.assertFalse(frappe.db.exists("Prospect", prospect_name))
 
+	def test_emails_from_a_known_sender_reach_the_existing_lead(self):
+		from frappe.email.receive import InboundMail
+
+		frappe.db.set_single_value("CRM Settings", "allow_lead_duplication_based_on_emails", 1)
+		account = frappe.get_doc(
+			{
+				"doctype": "Email Account",
+				"email_account_name": "_Test Lead Inbox",
+				"email_id": "_test_lead_inbox@example.com",
+				"append_to": "Lead",
+			}
+		)
+		account.name = account.email_account_name
+		account.db_insert()  # validate would connect to a mail server
+
+		sender = f"buyer_{random_string(5)}@example.com"
+
+		def receive(subject):
+			raw = (
+				f"From: Ravi Buyer <{sender}>\r\nTo: {account.email_id}\r\nSubject: {subject}\r\n"
+				f"Message-ID: <{random_string(10)}@example.com>\r\nContent-Type: text/plain\r\n\r\nHi\r\n"
+			)
+			return InboundMail(raw.encode(), account).process().reference_name
+
+		first_lead = receive("Need a quote for tables")
+		self.assertEqual(receive("Chairs too"), first_lead)
+
+		# a Lead created by hand may still share the email; later emails go to the latest Lead
+		latest_lead = make_lead(email_id=sender).name
+		self.assertEqual(receive("Sofas as well"), latest_lead)
+		self.assertEqual(frappe.db.count("Lead", {"email_id": sender}), 2)
+
 	def test_set_lead_name_fallbacks(self):
 		# organization name is used when there is no person name
 		lead = frappe.new_doc("Lead")

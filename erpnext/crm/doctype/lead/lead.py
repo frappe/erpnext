@@ -174,7 +174,9 @@ class Lead(SellingController, CRMNote):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			if not frappe.db.get_single_value("CRM Settings", "allow_lead_duplication_based_on_emails"):
+			if self.is_created_from_incoming_email() or not frappe.db.get_single_value(
+				"CRM Settings", "allow_lead_duplication_based_on_emails"
+			):
 				duplicate_leads = frappe.get_all(
 					"Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]}
 				)
@@ -189,6 +191,11 @@ class Lead(SellingController, CRMNote):
 						),
 						frappe.DuplicateEntryError,
 					)
+
+	def is_created_from_incoming_email(self) -> bool:
+		"""An incoming email creates its Lead with mandatory checks off. On a duplicate email error,
+		the email is appended to the sender's existing Lead instead, so each email doesn't add a Lead."""
+		return self.is_new() and bool(self.flags.ignore_mandatory)
 
 	def validate_email_id(self):
 		if self.email_id:
