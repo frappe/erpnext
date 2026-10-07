@@ -46,3 +46,15 @@ class TestItemManufacturer(ERPNextTestSuite):
 		row.save()
 
 		self.assertEqual(self.get_item_default(), (None, None))
+
+	def test_default_needs_item_write_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		user = create_user("test_item_manufacturer@example.com", "Stock User")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, self.make_row, "_Test IM Maker 2", "SU-1", 1)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(self.get_item_default(), (None, None))

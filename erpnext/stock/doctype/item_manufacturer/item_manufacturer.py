@@ -66,6 +66,7 @@ class ItemManufacturer(Document):
 		return tuple(item_default) == (previous.manufacturer, previous.manufacturer_part_no)
 
 	def set_item_default(self, manufacturer, manufacturer_part_no):
+		frappe.has_permission("Item", "write", doc=self.item_code, throw=True)
 		frappe.db.set_value(
 			"Item",
 			self.item_code,
