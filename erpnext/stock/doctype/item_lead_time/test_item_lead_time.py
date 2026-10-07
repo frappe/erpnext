@@ -66,3 +66,12 @@ class TestItemLeadTime(ERPNextTestSuite):
 			(lead_time.total_workstation_time, lead_time.no_of_units_produced, lead_time.capacity_per_day),
 			(0, 0, 0),
 		)
+
+	def test_merging_items_with_lead_times_is_refused_cleanly(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		source, target = (make_item(properties={"is_stock_item": 1}).name for _i in range(2))
+		for item_code in (source, target):
+			self.make_lead_time(item_code, capacity_per_day=10)
+
+		self.assertRaises(frappe.ValidationError, frappe.rename_doc, "Item", source, target, merge=True)
