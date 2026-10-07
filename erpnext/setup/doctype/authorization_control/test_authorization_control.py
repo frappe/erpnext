@@ -9,6 +9,63 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_customerwise_uses_customer_id_not_display_name(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		with patch.object(controller, "validate_auth_rule") as check:
+			for doctype in ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+				order = frappe._dict(
+					doctype=doctype,
+					quotation_to="Customer",
+					party_name="CUST-001",
+					customer="CUST-001",
+					customer_name="Display Name",
+				)
+				controller.bifurcate_based_on_type(
+					doctype, 100, 20, "Customerwise Discount", order, 0, "_Test Company"
+				)
+				self.assertIn("CUST-001", check.call_args.args[3])
+				self.assertNotIn("Display Name", check.call_args.args[3])
+
+	def test_customerwise_skips_documents_without_customer(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		for doctype in (
+			"Supplier Quotation",
+			"Purchase Order",
+			"Purchase Invoice",
+			"Purchase Receipt",
+			"Quotation",
+		):
+			with self.subTest(doctype=doctype):
+				doc = frappe.get_doc(doctype=doctype)
+				with patch.object(controller, "validate_auth_rule") as check:
+					controller.bifurcate_based_on_type(
+						doctype, 100, 20, "Customerwise Discount", doc, 0, "_Test Company"
+					)
+					check.assert_not_called()
+
+	def test_supplier_quotation_update_with_unrelated_rule(self):
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		self.load_test_records("Supplier Quotation")
+		quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		quotation.submit()
+		frappe.get_doc(
+			doctype="Authorization Rule",
+			transaction="Sales Order",
+			based_on="Grand Total",
+			company="_Test Company",
+			value=1000,
+			approving_user="Administrator",
+		).insert()
+		item = quotation.items[0]
+		update_child_qty_rate(
+			"Supplier Quotation",
+			[{"item_code": item.item_code, "rate": 300, "qty": item.qty, "docname": item.name}],
+			quotation.name,
+		)
+		quotation.reload()
+		self.assertEqual(quotation.items[0].rate, 300)
+
 	def test_direct_rate_discount_is_checked_for_item_and_group(self):
 		controller = frappe.get_cached_doc("Authorization Control")
 		order = frappe.get_doc(
