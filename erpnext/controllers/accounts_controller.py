@@ -5046,7 +5046,7 @@ def update_child_qty_rate(
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)
 	frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-		parent.doctype, parent.company, parent.base_grand_total
+		parent.doctype, parent.company, parent.base_grand_total, parent
 	)
 
 	if parent_doctype != "Supplier Quotation":
