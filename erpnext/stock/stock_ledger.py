@@ -655,7 +655,11 @@ def get_reposting_data(file_path) -> dict:
 	)
 
 	if not file_name:
-		return frappe._dict()
+		frappe.throw(
+			_(
+				"The reposting data file {0} is missing. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	attached_file = frappe.get_doc("File", file_name)
 
@@ -664,11 +668,13 @@ def get_reposting_data(file_path) -> dict:
 		content = content.encode("utf-8")
 
 	try:
-		data = gzip.decompress(content)
+		data = json.loads(gzip.decompress(content).decode("utf-8"))
 	except Exception:
-		return frappe._dict()
-
-	data = json.loads(data.decode("utf-8"))
+		frappe.throw(
+			_(
+				"The reposting data file {0} is corrupted. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	return parse_json(data)
 
