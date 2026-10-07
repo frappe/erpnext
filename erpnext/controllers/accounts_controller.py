@@ -1711,10 +1711,8 @@ def get_missing_company_details(doctype: str, docname: str):
 	from frappe.contacts.doctype.address.address import get_address_display_list
 
 	company = frappe.db.get_value(doctype, docname, "company")
-	if doctype in ["Purchase Order", "Purchase Invoice"]:
+	if doctype in ["Purchase Order", "Purchase Invoice", "Request for Quotation"]:
 		company_address = frappe.db.get_value(doctype, docname, "billing_address")
-	elif doctype in ["Request for Quotation"]:
-		company_address = frappe.db.get_value(doctype, docname, "shipping_address")
 	else:
 		company_address = frappe.db.get_value(doctype, docname, "company_address")
 
@@ -1843,7 +1841,7 @@ def update_doc_company_address(current_doctype, docname, company_address, detail
 		"Delivery Note": ("company_address", "company_address_display"),
 		"POS Invoice": ("company_address", "company_address_display"),
 		"Quotation": ("company_address", "company_address_display"),
-		"Request for Quotation": ("shipping_address", "shipping_address_display"),
+		"Request for Quotation": ("billing_address", "billing_address_display"),
 	}
 
 	address_field, display_field = address_field_map.get(
