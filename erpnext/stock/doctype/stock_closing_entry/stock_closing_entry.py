@@ -375,7 +375,9 @@ class StockClosing:
 			return None
 
 		if row.from_closing_balance and row.fifo_queue:
-			return json.loads(row.fifo_queue)
+			fifo_queue = json.loads(row.fifo_queue)
+			if not flt(sum(slot[0] for slot in fifo_queue) - actual_qty, 6):
+				return fifo_queue
 
 		return [[actual_qty, get_date_str(row.posting_date)]] if actual_qty else []
 
