@@ -317,15 +317,24 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 
 
 def get_opening_balance(company, period_list, filters):
-	"""Balance of the Cash and Bank accounts before the first period."""
-	filters = frappe._dict(filters, company=company, start_date=period_list[0]["from_date"])
+	"""Balance of the Cash and Bank accounts before the first period, plus their opening entries."""
+	filters = frappe._dict(
+		filters,
+		company=company,
+		start_date=period_list[0]["from_date"],
+		end_date=period_list[-1]["to_date"],
+	)
 	cond = get_gl_conditions(company, filters)
+	date_condition = "posting_date < %(start_date)s"
+	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		# opening entries in the report range are left out of the movements, so they belong to the opening
+		date_condition = f"({date_condition} or (is_opening = 'Yes' and posting_date <= %(end_date)s))"
 
 	balance = frappe.db.sql_list(
 		f"""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry`
-		where company=%(company)s and is_cancelled = 0 and posting_date < %(start_date)s
+		where company=%(company)s and is_cancelled = 0 and {date_condition}
 			and account in (
 				select name from tabAccount
 				where company=%(company)s and is_group = 0 and account_type in ('Cash', 'Bank')
