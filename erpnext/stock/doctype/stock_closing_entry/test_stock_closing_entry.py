@@ -454,3 +454,26 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 	def test_future_to_date_is_rejected(self):
 		self.assertRaises(frappe.ValidationError, self.make_closing(add_days(today(), 30)).insert)
+
+	def test_stock_balance_ageing_does_not_count_closed_stock_twice(self):
+		from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
+
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		for qty, days in ((10, -60), (10, -50), (10, -40)):
+			make_stock_entry(
+				item_code=item, target=WAREHOUSE, qty=qty, rate=100, posting_date=add_days(today(), days)
+			)
+		make_stock_entry(item_code=item, source=WAREHOUSE, qty=12, posting_date=add_days(today(), -20))
+		self.make_generated_closing(add_days(today(), -10))
+
+		filters = frappe._dict(
+			company=COMPANY,
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			show_stock_ageing_data=1,
+		)
+		row = stock_balance(filters)[1][0]
+
+		self.assertEqual(sum(slot[0] for slot in row["fifo_queue"]), 18)
+		self.assertEqual(row["average_age"], 44.44)

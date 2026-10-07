@@ -105,7 +105,6 @@ class StockBalanceReport:
 					"item_name": entry.item_name,
 					"opening_qty": entry.actual_qty,
 					"opening_val": entry.stock_value_difference,
-					"opening_fifo_queue": json.loads(entry.fifo_queue) if entry.fifo_queue else [],
 					"in_qty": 0.0,
 					"in_val": 0.0,
 					"out_qty": 0.0,
@@ -323,21 +322,7 @@ class StockBalanceReport:
 				report_data.update(variant_data)
 
 			if self.filters.get("show_stock_ageing_data"):
-				opening_fifo_queue = self.get_opening_fifo_queue(report_data) or []
-
-				fifo_queue = []
-				if fifo_queue := item_wise_fifo_queue.get((report_data.item_code, report_data.warehouse)):
-					fifo_queue = fifo_queue.get("fifo_queue")
-
-				if fifo_queue:
-					opening_fifo_queue.extend(fifo_queue)
-
-				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
-
-				if opening_fifo_queue:
-					stock_ageing_data.update(get_stock_ageing_data(opening_fifo_queue, self.to_date))
-
-				report_data.update(stock_ageing_data)
+				report_data.update(self.get_row_stock_ageing_data(report_data, item_wise_fifo_queue))
 
 			report_data.update(
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
@@ -428,7 +413,6 @@ class StockBalanceReport:
 				"item_name": entry.item_name,
 				"opening_qty": 0.0,
 				"opening_val": 0.0,
-				"opening_fifo_queue": [],
 				"in_qty": 0.0,
 				"in_val": 0.0,
 				"out_qty": 0.0,
@@ -805,13 +789,16 @@ class StockBalanceReport:
 	def get_inventory_dimension_fields():
 		return [dimension.fieldname for dimension in get_inventory_dimensions()]
 
-	@staticmethod
-	def get_opening_fifo_queue(report_data):
-		opening_fifo_queue = report_data.get("opening_fifo_queue") or []
-		for row in opening_fifo_queue:
-			row[1] = getdate(row[1])
+	def get_row_stock_ageing_data(self, report_data, item_wise_fifo_queue):
+		fifo_queue = (item_wise_fifo_queue.get((report_data.item_code, report_data.warehouse)) or {}).get(
+			"fifo_queue"
+		)
 
-		return opening_fifo_queue
+		stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
+		if fifo_queue:
+			stock_ageing_data.update(get_stock_ageing_data(fifo_queue, self.to_date))
+
+		return stock_ageing_data
 
 
 def get_stock_ageing_data(fifo_queue: list, to_date: str) -> dict:
@@ -849,7 +836,6 @@ def filter_items_with_no_transactions(
 				"project",
 				"stock_uom",
 				"company",
-				"opening_fifo_queue",
 			]:
 				continue
 
