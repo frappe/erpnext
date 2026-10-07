@@ -2066,8 +2066,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
 
 		return_entry = make_stock_return_entry(wo.name)
-		return_entry.company = wo.company
 		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_entry.save)
+
+	def test_return_entry_uses_work_order_company(self):
+		"""Return Components must take the company from the Work Order, not the user default."""
+		wo = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		for item_code in ("_Test Item", "_Test Item Home Desktop 100"):
+			test_stock_entry.make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+			)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
+
+		previous_default = frappe.defaults.get_user_default("company")
+		self.addCleanup(self._set_default_company, previous_default)
+		self._set_default_company("_Test Company 1")
+
+		return_entry = make_stock_return_entry(wo.name)
+		self.assertEqual(return_entry.company, wo.company)
+
+	@staticmethod
+	def _set_default_company(company):
+		frappe.defaults.set_user_default("company", company)
+		# new_doc caches a per doctype template, drop it so the changed default applies
+		frappe.local.new_doc_templates.clear()
 
 	###
 	def test_non_consumed_material_return_against_work_order(self):
@@ -2131,7 +2152,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(wo_doc.status, "Completed")
 		return_ste_doc = make_stock_return_entry(wo_doc.name)
-		return_ste_doc.company = wo_doc.company
 		return_ste_doc.save()
 
 		self.assertTrue(return_ste_doc.is_return)
@@ -2166,7 +2186,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		close_work_order(wo.name, "Closed")
 
 		first_return = make_stock_return_entry(wo.name)
-		first_return.company = wo.company
 		first_return.items[0].qty = 1
 		first_return.submit()
 
