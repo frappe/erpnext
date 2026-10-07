@@ -9,6 +9,30 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_foreign_currency_additional_discount_uses_base_amount(self):
+		frappe.get_doc(
+			{
+				"doctype": "Authorization Rule",
+				"transaction": "Sales Order",
+				"based_on": "Average Discount",
+				"company": "_Test Company",
+				"value": 10,
+				"approving_user": "Administrator",
+			}
+		).insert()
+		order = frappe._dict(
+			doctype="Sales Order",
+			customer_name="_Test Customer",
+			items=[frappe._dict(base_price_list_rate=8300, base_rate=8300, qty=1)],
+			discount_amount=30,
+			base_discount_amount=2490,
+		)
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.ValidationError):
+				frappe.get_cached_doc("Authorization Control").validate_approving_authority(
+					"Sales Order", "_Test Company", 5810, order
+				)
+
 	def test_zero_rate_items_count_toward_average_discount(self):
 		frappe.get_doc(
 			{
