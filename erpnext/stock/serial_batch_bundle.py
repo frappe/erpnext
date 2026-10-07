@@ -41,7 +41,7 @@ def get_serial_no_status(sle):
 
 def get_status_for_serial_nos(sle):
 	status = "Inactive"
-	if sle.actual_qty < 0:
+	if sle.actual_qty < 0 and sle.voucher_type not in ["Purchase Invoice", "Purchase Receipt"]:
 		status = "Delivered"
 		if sle.voucher_type == "Stock Entry":
 			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
