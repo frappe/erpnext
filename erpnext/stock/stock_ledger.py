@@ -1139,7 +1139,7 @@ class update_entries_after:
 
 		sle.doctype = "Stock Ledger Entry"
 		sle.modified = now()
-		frappe.get_doc(sle).db_update()
+		self.update_sle_valuation_fields(sle)
 
 		self.prev_sle_dict[key] = sle
 
@@ -1158,6 +1158,26 @@ class update_entries_after:
 
 		if self.args.item_code != sle.item_code or self.args.warehouse != sle.warehouse:
 			self.repost_affected_transaction.add((sle.voucher_type, sle.voucher_no))
+
+	def update_sle_valuation_fields(self, sle):
+		# Write back only what the repost recomputes. A full db_update would also write the
+		# docstatus / is_cancelled read at the start of the repost, reviving an entry the user
+		# cancelled while the repost was running.
+		table = frappe.qb.DocType("Stock Ledger Entry")
+		query = frappe.qb.update(table)
+		for fieldname in (
+			"incoming_rate",
+			"outgoing_rate",
+			"valuation_rate",
+			"qty_after_transaction",
+			"stock_value",
+			"stock_value_difference",
+			"stock_queue",
+			"modified",
+		):
+			query = query.set(table[fieldname], sle.get(fieldname))
+
+		query.where((table.name == sle.name) & (table.is_cancelled == 0)).run()
 
 	def get_serialized_values(self, sle):
 		from erpnext.stock.serial_batch_bundle import SerialNoValuation

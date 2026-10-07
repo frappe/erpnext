@@ -492,6 +492,35 @@ class SerialBatchBundle:
 
 		query.run()
 
+		if warehouse:
+			self.update_item_in_serial_nos(sle, serial_nos)
+
+	def update_item_in_serial_nos(self, sle, serial_nos):
+		"""Move serial nos to the item of the inward entry.
+
+		A Repack or Manufacture entry can produce a finished good with the serial no of a
+		consumed raw material. Cancelling the entry moves the serial no back.
+		"""
+		item = frappe.get_cached_value(
+			"Item",
+			sle.item_code,
+			["item_name", "description", "item_group", "brand"],
+			as_dict=1,
+		)
+
+		sn_table = frappe.qb.DocType("Serial No")
+		query = (
+			frappe.qb.update(sn_table)
+			.set(sn_table.item_code, sle.item_code)
+			.set(sn_table.item_name, item.item_name)
+			.set(sn_table.description, item.description)
+			.set(sn_table.item_group, item.item_group)
+			.set(sn_table.brand, item.brand)
+			.where(sn_table.name.isin(serial_nos) & (sn_table.item_code != sle.item_code))
+		)
+
+		query.run()
+
 	def update_serial_no_status_for_stock_reco(self, serial_nos):
 		for serial_no in serial_nos:
 			sle_doctype = frappe.qb.DocType("Stock Ledger Entry")

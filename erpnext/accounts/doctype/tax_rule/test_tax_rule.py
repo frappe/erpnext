@@ -4,10 +4,20 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import today
 
-from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
+from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_party_details, get_tax_template
+from erpnext.accounts.party import _get_party_details
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 
 test_records = frappe.get_test_records("Tax Rule")
 
@@ -416,3 +426,80 @@ def make_tax_rule(**args):
 		tax_rule.insert()
 
 	return tax_rule
+
+
+class TestTaxRulePartyDetailsPermissions(FrappeTestCase):
+	def setUp(self):
+		self.address_a = self.make_address("_Test Customer", "Tax City A")
+		self.address_b = self.make_address("_Test Customer 1", "Tax City B")
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def make_address(self, customer, city):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": city,
+					"address_type": "Billing",
+					"address_line1": "1 Tax Street",
+					"city": city,
+					"country": "India",
+					"is_primary_address": 1,
+					"links": [{"link_doctype": "Customer", "link_name": customer}],
+				}
+			)
+			.insert()
+			.name
+		)
+
+	def customer_kwargs(self, name):
+		return {"party": name, "party_type": "Customer"}
+
+	def address_kwargs(self, name):
+		return {"party": "_Test Customer", "party_type": "Customer", "args": {"billing_address": name}}
+
+	def test_get_party_details_refuses_a_party_outside_the_customer_fence(self):
+		fenced = make_fenced_user(
+			"tax-rule-party@example.com", ["Accounts Manager"], [("Customer", "_Test Customer")]
+		)
+		with as_user(fenced):
+			assert_refused_for_names(
+				self, get_party_details, self.customer_kwargs, ["_Test Customer 1"], caller_supplied=True
+			)
+			assert_refused_without(
+				self, ["linked to"], get_party_details, **self.customer_kwargs("_Test Customer 1")
+			)
+			assert_refused(self, get_party_details, party="test@example.com", party_type="User")
+			details = get_party_details(party="_Test Customer", party_type="customer")
+		self.assertEqual(details["billing_city"], "Tax City A")
+
+	def test_get_party_details_refuses_an_address_outside_the_address_fence(self):
+		fenced = make_fenced_user(
+			"tax-rule-address@example.com", ["Accounts Manager"], [("Address", self.address_a)]
+		)
+		with as_user(fenced):
+			assert_refused(self, get_party_details, **self.address_kwargs(self.address_b))
+			self.assertRaises(
+				frappe.PermissionError, get_party_details, **self.address_kwargs({"name": ["like", "%"]})
+			)
+
+	def test_get_party_details_allows_an_unfenced_accounts_user(self):
+		user = make_fenced_user("tax-rule-open@example.com", ["Accounts User"])
+		with as_user(user):
+			details = get_party_details(**self.customer_kwargs("_Test Customer 1"))
+		self.assertEqual(details["billing_city"], "Tax City B")
+
+	def test_internal_party_details_skip_address_checks_when_asked(self):
+		user = make_fenced_user("tax-rule-stock-user@example.com", ["Stock User"])
+		with as_user(user):
+			details = _get_party_details(
+				"_Test Customer",
+				"Customer",
+				company="_Test Company",
+				doctype="Delivery Note",
+				ignore_permissions=True,
+				posting_date=today(),
+			)
+		self.assertEqual(details.get("customer_address"), self.address_a)

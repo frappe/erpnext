@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -20,6 +21,8 @@ from frappe.utils.data import add_to_date
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
+	get_values_from_purchase_doc,
+	make_asset_movement,
 	make_sales_invoice,
 	split_asset,
 	update_maintenance_status,
@@ -40,6 +43,14 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 
 class AssetSetup(unittest.TestCase):
@@ -518,6 +529,71 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(new_asset.asset_quantity, 2)
 		self.assertEqual(new_asset.gross_purchase_amount, 24000)
+
+	def test_split_of_composite_asset_keeps_purchase_amount_in_sync(self):
+		composite_asset = frappe.get_doc(
+			{
+				"doctype": "Asset",
+				"asset_name": "Composite Asset for Split Test",
+				"asset_category": "Computers",
+				"item_code": "Macbook Pro",
+				"company": "_Test Company",
+				"is_composite_asset": 1,
+				"booked_fixed_asset": 1,
+				"location": "Test Location",
+				"available_for_use_date": "2020-01-01",
+				"purchase_date": "2020-01-01",
+				"gross_purchase_amount": 120000,
+				"purchase_amount": 120000,
+				"asset_quantity": 10,
+			}
+		)
+		composite_asset.insert()
+
+		asset_capitalization = frappe.get_doc(
+			{
+				"doctype": "Asset Capitalization",
+				"naming_series": "ACC-ASC-.YYYY.-",
+				"capitalization_method": "Choose a WIP composite asset",
+				"target_asset": composite_asset.name,
+				"target_item_code": composite_asset.item_code,
+				"company": composite_asset.company,
+				"posting_date": composite_asset.purchase_date,
+			}
+		)
+		asset_capitalization.flags.ignore_validate = True
+		asset_capitalization.flags.ignore_mandatory = True
+		asset_capitalization.insert(ignore_permissions=True)
+		frappe.db.set_value("Asset Capitalization", asset_capitalization.name, "docstatus", 1)
+
+		composite_asset.submit()
+
+		new_asset = split_asset(composite_asset.name, 4)
+
+		composite_asset.load_from_db()
+		self.assertEqual(composite_asset.asset_quantity, 6)
+		self.assertEqual(composite_asset.gross_purchase_amount, 72000)
+		self.assertEqual(composite_asset.purchase_amount, composite_asset.gross_purchase_amount)
+
+		self.assertEqual(new_asset.docstatus, 1)
+		self.assertEqual(new_asset.asset_quantity, 4)
+		self.assertEqual(new_asset.gross_purchase_amount, 48000)
+		self.assertEqual(new_asset.purchase_amount, new_asset.gross_purchase_amount)
+
+		composite_asset.save()
+
+		# splitting an asset that was itself split from the capitalized asset must also pass
+		nested_asset = split_asset(new_asset.name, 1)
+
+		new_asset.load_from_db()
+		self.assertEqual(new_asset.asset_quantity, 3)
+		self.assertEqual(new_asset.gross_purchase_amount, 36000)
+
+		self.assertEqual(nested_asset.docstatus, 1)
+		self.assertEqual(nested_asset.split_from, new_asset.name)
+		self.assertEqual(nested_asset.asset_quantity, 1)
+		self.assertEqual(nested_asset.gross_purchase_amount, 12000)
+		self.assertEqual(nested_asset.purchase_amount, nested_asset.gross_purchase_amount)
 
 	def test_asset_splitting(self):
 		asset = create_asset(
@@ -1885,3 +1961,80 @@ def set_depreciation_settings_in_company(company=None):
 
 def enable_cwip_accounting(asset_category, enable=1):
 	frappe.db.set_value("Asset Category", asset_category, "enable_cwip_accounting", enable)
+
+
+class TestAssetMovementPermissions(FrappeTestCase):
+	def setUp(self):
+		self.asset = create_asset(asset_name="UP Asset", location="Test Location").name
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def movement_kwargs(self, name):
+		return {"assets": frappe.as_json([{"name": name}])}
+
+	def test_make_asset_movement_refuses_an_asset_outside_the_company_fence(self):
+		fenced = make_company_fenced_user(
+			"asset-move-fenced@example.com", ["Accounts Manager"], OTHER_COMPANY
+		)
+		with as_user(fenced):
+			assert_refused_for_names(
+				self, make_asset_movement, self.movement_kwargs, [self.asset], caller_supplied=True
+			)
+			assert_refused_without(
+				self,
+				["linked to", "'_Test Company'"],
+				make_asset_movement,
+				**self.movement_kwargs(self.asset),
+			)
+
+	def test_make_asset_movement_allows_a_user_inside_the_company_fence(self):
+		fenced = make_company_fenced_user(
+			"asset-move-in-fence@example.com", ["Accounts Manager"], "_Test Company"
+		)
+		with as_user(fenced):
+			movement = make_asset_movement(**self.movement_kwargs(self.asset))
+		self.assertEqual(movement["assets"][0]["source_location"], "Test Location")
+
+	def test_make_asset_movement_allows_an_unfenced_accounts_manager(self):
+		user = make_fenced_user("asset-move-open@example.com", ["Accounts Manager"])
+		with as_user(user):
+			movement = make_asset_movement(**self.movement_kwargs(self.asset))
+		self.assertEqual(movement["assets"][0]["asset"], self.asset)
+
+
+class TestAssetPurchaseDocPermissions(FrappeTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		create_asset_data()
+
+	def setUp(self):
+		self.pr = make_purchase_receipt(
+			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
+		)
+		self.pi = make_invoice(self.pr.name)
+		self.pi.submit()
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def purchase_docs(self):
+		return (("Purchase Receipt", self.pr.name), ("Purchase Invoice", self.pi.name))
+
+	def test_purchase_doc_values_need_read_on_the_purchase_doc(self):
+		user = make_fenced_user("asset-purchase-doc-qm@example.com", ["Quality Manager"])
+		for doctype, name in self.purchase_docs():
+			with as_user(user), self.assertRaises(frappe.PermissionError):
+				get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			frappe.flags.pop("disable_traceback", None)
+			frappe.clear_messages()
+
+	def test_purchase_doc_values_for_an_accounts_user(self):
+		user = make_fenced_user("asset-purchase-doc-au@example.com", ["Accounts User"])
+		for doctype, name in self.purchase_docs():
+			expected = get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			with as_user(user):
+				values = get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			self.assertEqual(values, expected)
+			self.assertEqual(values["gross_purchase_amount"], 100000.0)

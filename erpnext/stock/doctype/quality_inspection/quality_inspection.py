@@ -71,7 +71,6 @@ class QualityInspection(Document):
 				for d in parameters:
 					if reading.specification == d.specification:
 						reading.update(d)
-						reading.status = "Accepted"
 
 		if self.readings:
 			self.inspect_and_set_status()

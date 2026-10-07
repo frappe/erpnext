@@ -13,6 +13,7 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
+from erpnext import _refuse, require_party_permission, require_permission
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 from erpnext.setup.doctype.supplier_group.supplier_group import get_parent_supplier_groups
 
@@ -142,42 +143,59 @@ class TaxRule(Document):
 
 @frappe.whitelist()
 def get_party_details(party, party_type, args=None):
-	out = {}
-	billing_address, shipping_address = None, None
+	if party_type in ("customer", "supplier"):
+		party_type = party_type.title()
+	require_party_permission(party_type, party)
+	address_names = get_party_address_names(party, party_type, args)
+	for address_name in address_names:
+		if not address_name:
+			continue
+		if not args:
+			require_permission("Address", address_name, "read")
+		elif not frappe.has_permission("Address", "read", doc=address_name):
+			_refuse()
+
+	return get_address_details(*address_names)
+
+
+def get_tax_rule_party_details(party, party_type, args=None):
+	return get_address_details(*get_party_address_names(party, party_type, args))
+
+
+def get_party_address_names(party, party_type, args=None):
 	if args:
-		# each of these names a single Address. A dict is read as a filter instead, and `get_doc`
-		# would resolve it to whichever Address happens to match, so only a plain name is accepted
 		for fieldname in ("billing_address", "shipping_address"):
 			if args.get(fieldname) and not isinstance(args.get(fieldname), str):
 				frappe.throw(_("Invalid address"), frappe.PermissionError)
 
-		if args.get("billing_address"):
-			billing_address = frappe.get_doc("Address", args.get("billing_address"))
-		if args.get("shipping_address"):
-			shipping_address = frappe.get_doc("Address", args.get("shipping_address"))
-	else:
-		billing_address_name = get_default_address(party_type, party)
-		shipping_address_name = get_default_address(party_type, party, "is_shipping_address")
-		if billing_address_name:
-			billing_address = frappe.get_doc("Address", billing_address_name)
-		if shipping_address_name:
-			shipping_address = frappe.get_doc("Address", shipping_address_name)
+		return args.get("billing_address"), args.get("shipping_address")
 
-	if billing_address:
-		out["billing_city"] = billing_address.city
-		out["billing_county"] = billing_address.county
-		out["billing_state"] = billing_address.state
-		out["billing_zipcode"] = billing_address.pincode
-		out["billing_country"] = billing_address.country
+	return (
+		get_default_address(party_type, party),
+		get_default_address(party_type, party, "is_shipping_address"),
+	)
 
-	if shipping_address:
-		out["shipping_city"] = shipping_address.city
-		out["shipping_county"] = shipping_address.county
-		out["shipping_state"] = shipping_address.state
-		out["shipping_zipcode"] = shipping_address.pincode
-		out["shipping_country"] = shipping_address.country
+
+def get_address_details(billing_address_name=None, shipping_address_name=None):
+	out = {}
+	if billing_address_name:
+		out.update(get_address_fields(billing_address_name, "billing"))
+
+	if shipping_address_name:
+		out.update(get_address_fields(shipping_address_name, "shipping"))
 
 	return out
+
+
+def get_address_fields(address_name, prefix):
+	address = frappe.get_doc("Address", address_name)
+	return {
+		f"{prefix}_city": address.city,
+		f"{prefix}_county": address.county,
+		f"{prefix}_state": address.state,
+		f"{prefix}_zipcode": address.pincode,
+		f"{prefix}_country": address.country,
+	}
 
 
 def get_tax_template(posting_date, args):

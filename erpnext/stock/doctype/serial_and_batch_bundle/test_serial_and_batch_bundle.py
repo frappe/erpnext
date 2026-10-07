@@ -13,12 +13,14 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_available_batches_qty,
 	get_qty_based_available_batches,
+	get_serial_batch_ledgers,
 	get_type_of_transaction,
 	make_batch_nos,
 	make_serial_nos,
 	parse_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import as_user, assert_refused, insert_test_record, make_fenced_user
 
 
 class TestSerialandBatchBundle(FrappeTestCase):
@@ -2252,3 +2254,155 @@ class TestSerialandBatchBundleLogic(FrappeTestCase):
 			self.assertEqual(flt(sle.stock_value_difference, 2), flt(sle.actual_qty * outgoing_rate, 2))
 
 		self.assertEqual(flt(sl_entries[-1].stock_value, 2), flt(balance_value, 2))
+
+
+class TestSerialandBatchBundlePermissions(FrappeTestCase):
+	def setUp(self):
+		self.item = "_Test Item"
+		for batch in ("UP-BATCH-IN", "UP-BATCH-OUT"):
+			insert_test_record("Batch", {"name": batch, "batch_id": batch, "item": self.item})
+		for serial_no in ("UP-SERIAL-IN", "UP-SERIAL-OUT"):
+			insert_test_record(
+				"Serial No", {"name": serial_no, "serial_no": serial_no, "item_code": self.item}
+			)
+		self.batch_in = self.insert_bundle("_Test Warehouse - _TC", batch_no="UP-BATCH-IN")
+		self.batch_out = self.insert_bundle("_Test Warehouse - _TC", batch_no="UP-BATCH-OUT")
+		self.serial_in = self.insert_bundle("_Test Warehouse - _TC", serial_no="UP-SERIAL-IN")
+		self.serial_out = self.insert_bundle("_Test Warehouse - _TC", serial_no="UP-SERIAL-OUT")
+		self.draft_bundle = self.insert_bundle("Stores - _TC", batch_no="UP-BATCH-IN", docstatus=0)
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def insert_bundle(self, warehouse, batch_no=None, serial_no=None, docstatus=1):
+		bundle = insert_test_record(
+			"Serial and Batch Bundle",
+			{
+				"company": "_Test Company",
+				"item_code": self.item,
+				"warehouse": warehouse,
+				"type_of_transaction": "Inward",
+				"voucher_type": "Stock Entry",
+				"has_batch_no": 1 if batch_no else 0,
+				"has_serial_no": 1 if serial_no else 0,
+				"docstatus": docstatus,
+			},
+		)
+		insert_test_record(
+			"Serial and Batch Entry",
+			{
+				"parent": bundle,
+				"parenttype": "Serial and Batch Bundle",
+				"parentfield": "entries",
+				"idx": 1,
+				"qty": 1,
+				"warehouse": warehouse,
+				"batch_no": batch_no,
+				"serial_no": serial_no,
+			},
+		)
+		return bundle
+
+	def ledger_values(self, user, names):
+		values = []
+		with as_user(user):
+			for row in get_serial_batch_ledgers(name=names):
+				values.append(row.batch_no or row.serial_no)
+		values.sort()
+		return values
+
+	def update_kwargs(self, bundle):
+		return {
+			"entries": frappe.as_json([{"batch_no": "UP-BATCH-IN", "qty": 1}]),
+			"child_row": frappe.as_json(
+				{"doctype": "Stock Entry Detail", "name": "UP-ROW", "serial_and_batch_bundle": bundle}
+			),
+			"doc": frappe.as_json({"doctype": "Stock Entry", "posting_date": today()}),
+			"warehouse": "Stores - _TC",
+		}
+
+	def test_get_serial_batch_ledgers_drops_batches_outside_the_fence(self):
+		fenced = make_fenced_user("sbb-batch@example.com", ["Stock User"], [("Batch", "UP-BATCH-IN")])
+		self.assertEqual(self.ledger_values(fenced, [self.batch_in, self.batch_out]), ["UP-BATCH-IN"])
+
+	def test_get_serial_batch_ledgers_drops_serial_nos_outside_the_fence(self):
+		fenced = make_fenced_user("sbb-serial@example.com", ["Stock User"], [("Serial No", "UP-SERIAL-IN")])
+		self.assertEqual(self.ledger_values(fenced, [self.serial_in, self.serial_out]), ["UP-SERIAL-IN"])
+
+	def test_get_serial_batch_ledgers_keeps_every_row_for_an_unfenced_stock_user(self):
+		user = make_fenced_user("sbb-ledger-open@example.com", ["Stock User"])
+		names = [self.batch_in, self.batch_out, self.serial_in, self.serial_out]
+		self.assertEqual(
+			self.ledger_values(user, names), ["UP-BATCH-IN", "UP-BATCH-OUT", "UP-SERIAL-IN", "UP-SERIAL-OUT"]
+		)
+
+	def test_get_serial_batch_ledgers_filters_bundles_outside_the_warehouse_fence(self):
+		fenced = make_fenced_user(
+			"sbb-warehouse@example.com", ["Stock User"], [("Warehouse", "Stores - _TC")]
+		)
+		self.assertEqual(self.ledger_values(fenced, [self.batch_in, self.batch_out]), [])
+
+	def test_add_serial_batch_ledgers_refuses_a_bundle_outside_the_warehouse_fence(self):
+		fenced = make_fenced_user(
+			"sbb-update-fenced@example.com", ["Stock User"], [("Warehouse", "_Test Warehouse - _TC")]
+		)
+		with as_user(fenced):
+			assert_refused(self, add_serial_batch_ledgers, **self.update_kwargs(self.draft_bundle))
+
+	def bundle_state(self):
+		state = []
+		for bundle in frappe.get_all(
+			"Serial and Batch Bundle",
+			fields=["name", "modified", "voucher_no", "voucher_detail_no", "total_qty"],
+			order_by="name",
+		):
+			state.append(bundle)
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			fields=["name", "parent", "modified", "qty", "batch_no", "serial_no"],
+			order_by="name",
+		):
+			state.append(entry)
+		return state
+
+	def filter_update_kwargs(self, bundle):
+		kwargs = self.update_kwargs(bundle)
+		kwargs["entries"] = frappe.as_json([{"batch_no": "UP-BATCH-FILTER", "qty": 1}])
+		return kwargs
+
+	def test_add_serial_batch_ledgers_leaves_existing_bundles_alone_for_a_filter_name(self):
+		self.item = make_item("_Test SBB Filter Item", {"has_batch_no": 1, "is_stock_item": 1}).name
+		insert_test_record(
+			"Batch", {"name": "UP-BATCH-FILTER", "batch_id": "UP-BATCH-FILTER", "item": self.item}
+		)
+		draft = self.insert_bundle("Stores - _TC", batch_no="UP-BATCH-FILTER", docstatus=0)
+		fenced = make_fenced_user(
+			"sbb-update-fenced@example.com", ["Stock User"], [("Warehouse", "_Test Warehouse - _TC")]
+		)
+		before = self.bundle_state()
+		for user in (fenced, "Administrator"):
+			for bundle in ({"name": ["like", "%"]}, {"name": draft}):
+				with as_user(user):
+					try:
+						add_serial_batch_ledgers(**self.filter_update_kwargs(bundle))
+					except (frappe.PermissionError, frappe.ValidationError):
+						pass
+		after = self.bundle_state()
+		for row in before:
+			self.assertIn(row, after)
+
+		modified = frappe.db.get_value("Serial and Batch Bundle", draft, "modified")
+		add_serial_batch_ledgers(**self.filter_update_kwargs(draft))
+		self.assertNotEqual(frappe.db.get_value("Serial and Batch Bundle", draft, "modified"), modified)
+
+	def test_add_serial_batch_ledgers_allows_a_bundle_inside_the_warehouse_fence(self):
+		fenced = make_fenced_user(
+			"sbb-update-in-fence@example.com", ["Stock User"], [("Warehouse", "Stores - _TC")]
+		)
+		with as_user(fenced):
+			try:
+				add_serial_batch_ledgers(**self.update_kwargs(self.draft_bundle))
+			except frappe.PermissionError:
+				self.fail("a user inside the fence was refused")
+			except frappe.ValidationError:
+				pass

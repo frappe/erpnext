@@ -33,6 +33,7 @@ def after_install():
 	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
+	grant_address_read_to_accounts_manager()
 	add_app_name()
 	hide_workspaces()
 	update_roles()
@@ -383,3 +384,26 @@ def after_app_uninstall(app_name=None):
 		disable_frappe_crm_data_synchronization_on_crm_uninstall()
 
 		frappe.db.commit()  # nosemgrep
+
+
+def grant_address_read_to_accounts_manager():
+	from frappe.permissions import add_permission, get_all_perms, update_permission_property
+
+	if not frappe.db.exists("Role", "Accounts Manager"):
+		return
+	for rule in get_all_perms("Accounts Manager"):
+		if rule.parent == "Address":
+			print("Address / Accounts Manager: kept, the site already has a rule")
+			return
+	try:
+		frappe.db.savepoint("grant_address_read_to_accounts_manager")
+		add_permission("Address", "Accounts Manager", 0, "read")
+		update_permission_property("Address", "Accounts Manager", 0, "export", 0)
+		frappe.clear_cache(doctype="Address")
+		print("Address / Accounts Manager: added read")
+	except Exception:
+		frappe.db.rollback(save_point="grant_address_read_to_accounts_manager")
+		frappe.log_error(
+			title="Could not add permission",
+			message=f"Address / Accounts Manager\n\n{frappe.get_traceback()}",
+		)

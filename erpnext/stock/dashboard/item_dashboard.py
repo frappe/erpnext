@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cint, escape_html, flt
 
@@ -6,12 +7,76 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_for_items_and_warehouses as get_reserved_stock_details,
 )
 
+QTY_FIELDS = (
+	"projected_qty",
+	"reserved_qty",
+	"reserved_qty_for_production",
+	"reserved_qty_for_sub_contract",
+	"reserved_qty_for_production_plan",
+	"reserved_stock",
+	"ordered_qty",
+	"indented_qty",
+	"planned_qty",
+	"actual_qty",
+)
+
+
+@frappe.whitelist()
+def make_stock_entry(
+	item_code: str,
+	source_warehouse: str | None = None,
+	target_warehouse: str | None = None,
+	stock_entry_type: str | None = None,
+	qty: float | None = None,
+	rate: float | None = None,
+):
+	"""Return an unsaved Stock Entry for the item, with company taken from the warehouse"""
+	stock_entry = frappe.new_doc("Stock Entry")
+	if warehouse := source_warehouse or target_warehouse:
+		stock_entry.company = frappe.get_cached_value("Warehouse", warehouse, "company")
+
+	stock_entry.stock_entry_type = stock_entry_type or (
+		"Material Transfer" if source_warehouse else "Material Receipt"
+	)
+	stock_entry.purpose = frappe.get_cached_value("Stock Entry Type", stock_entry.stock_entry_type, "purpose")
+	stock_entry.from_warehouse = source_warehouse
+	stock_entry.to_warehouse = target_warehouse
+
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	stock_entry.append(
+		"items",
+		{
+			"item_code": item_code,
+			"s_warehouse": source_warehouse,
+			"t_warehouse": target_warehouse,
+			"qty": flt(qty),
+			"transfer_qty": flt(qty),
+			"basic_rate": flt(rate),
+			"uom": stock_uom,
+			"stock_uom": stock_uom,
+			"conversion_factor": 1,
+		},
+	)
+
+	# checked against the doc so user permissions on company, warehouses and item apply;
+	# generic message so values of restricted records are not leaked
+	if not frappe.has_permission("Stock Entry", "create", doc=stock_entry):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	return stock_entry
+
 
 @frappe.whitelist()
 def get_data(
 	item_code=None, warehouse=None, item_group=None, start=0, sort_by="actual_qty", sort_order="desc"
 ):
 	"""Return data to render the item dashboard"""
+	if not frappe.has_permission("Bin", "read"):
+		return []
+
+	if sort_by not in QTY_FIELDS or sort_order not in ("asc", "desc"):
+		frappe.throw(_("Invalid sort order"))
+
 	filters = []
 	if item_code:
 		filters.append(["item_code", "=", item_code])
@@ -48,20 +113,9 @@ def get_data(
 			"actual_qty",
 			"valuation_rate",
 		],
-		or_filters={
-			"projected_qty": ["!=", 0],
-			"reserved_qty": ["!=", 0],
-			"reserved_qty_for_production": ["!=", 0],
-			"reserved_qty_for_sub_contract": ["!=", 0],
-			"reserved_qty_for_production_plan": ["!=", 0],
-			"reserved_stock": ["!=", 0],
-			"ordered_qty": ["!=", 0],
-			"indented_qty": ["!=", 0],
-			"planned_qty": ["!=", 0],
-			"actual_qty": ["!=", 0],
-		},
+		or_filters={field: ["!=", 0] for field in QTY_FIELDS},
 		filters=filters,
-		order_by=sort_by + " " + sort_order,
+		order_by=f"{sort_by} {sort_order}",
 		limit_start=start,
 		limit_page_length=21,
 	)

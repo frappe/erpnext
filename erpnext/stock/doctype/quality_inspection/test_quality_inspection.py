@@ -299,6 +299,48 @@ class TestQualityInspection(FrappeTestCase):
 
 		se.delete()
 
+	def test_job_card_qi_keeps_manually_rejected_reading(self):
+		create_quality_inspection_parameter("Finish")
+		parameter = {"specification": "Finish", "numeric": 0, "value": "OK"}
+		if not frappe.db.exists("Quality Inspection Template", "_Test QI Template Finish"):
+			frappe.get_doc(
+				{
+					"doctype": "Quality Inspection Template",
+					"quality_inspection_template_name": "_Test QI Template Finish",
+					"item_quality_inspection_parameter": [parameter],
+				}
+			).insert()
+		item = create_item("_Test Item QI Finish")
+		item.db_set("quality_inspection_template", "_Test QI Template Finish")
+
+		qa = create_quality_inspection(
+			item_code=item.name,
+			inspection_type="In Process",
+			reference_type="Job Card",
+			reference_name=make_minimal_job_card(production_item=item.name),
+			readings=[
+				dict(parameter, reading_value="Scratched", manual_inspection=1, status="Rejected"),
+			],
+			do_not_submit=True,
+		)
+
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
+
+def make_minimal_job_card(production_item):
+	"""db_insert a minimal submitted Job Card row carrying only the columns the
+	converted UPDATE reads (name, production_item, quality_inspection, modified)."""
+	jc = frappe.new_doc("Job Card")
+	jc.name = "_T-Job Card-" + frappe.utils.random_string(10)
+	jc.flags.name_set = True
+	jc.production_item = production_item
+	jc.company = "_Test Company"
+	jc.for_quantity = 1
+	jc.docstatus = 1
+	jc.db_insert()
+	return jc.name
+
 
 def create_quality_inspection(**args):
 	args = frappe._dict(args)

@@ -16,6 +16,7 @@ from frappe.utils import (
 	add_months,
 	cint,
 	comma_and,
+	cstr,
 	flt,
 	fmt_money,
 	formatdate,
@@ -1337,7 +1338,7 @@ class AccountsController(TransactionBase):
 			if not tax_master_doctype:
 				tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-			self.extend("taxes", get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
+			self.extend("taxes", _get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
 
 	def append_taxes_from_item_tax_template(self):
 		if not frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template"):
@@ -2715,7 +2716,7 @@ class AccountsController(TransactionBase):
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					self.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -3155,7 +3156,6 @@ class AccountsController(TransactionBase):
 
 		return False
 
-	@frappe.whitelist()
 	def repost_accounting_entries(self):
 		repost_ledger = frappe.new_doc("Repost Accounting Ledger")
 		repost_ledger.company = self.company
@@ -3287,6 +3287,13 @@ def validate_tax_master(master_doctype):
 
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
+	default = _get_default_taxes_and_charges(master_doctype, tax_template, company)
+	if default and default.get("taxes_and_charges"):
+		erpnext.require_permission(master_doctype, default["taxes_and_charges"], "select")
+	return default
+
+
+def _get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
 	if not company:
 		return {}
 
@@ -3301,12 +3308,18 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 
 	return {
 		"taxes_and_charges": default_tax,
-		"taxes": get_taxes_and_charges(master_doctype, default_tax),
+		"taxes": _get_taxes_and_charges(master_doctype, default_tax),
 	}
 
 
 @frappe.whitelist()
 def get_taxes_and_charges(master_doctype, master_name):
+	if master_name:
+		erpnext.require_permission(master_doctype, master_name, "select")
+	return _get_taxes_and_charges(master_doctype, master_name)
+
+
+def _get_taxes_and_charges(master_doctype, master_name):
 	if not master_name:
 		return
 
@@ -3723,6 +3736,19 @@ def update_invoice_status():
 def get_payment_terms(
 	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
 ):
+	if terms_template:
+		terms_template = cstr(terms_template)
+		if not terms_template or not frappe.has_permission(
+			"Payment Terms Template", "read", doc=terms_template
+		):
+			erpnext._refuse()
+
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+def _get_payment_terms(
+	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+):
 	if not terms_template:
 		return
 
@@ -3742,7 +3768,15 @@ def get_payment_term_details(
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		if not term:
+			erpnext._refuse()
+		if not frappe.has_permission("Payment Term", "select", doc=term) and not frappe.has_permission(
+			"Payment Term", "read", doc=term
+		):
+			erpnext._refuse()
 		term = frappe.get_doc("Payment Term", term)
+	elif not hasattr(term, "payment_term"):
+		erpnext._refuse()
 	else:
 		term_details.payment_term = term.payment_term
 

@@ -8,13 +8,16 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
-from frappe.utils.data import comma_and
+from frappe.utils.data import comma_and, cstr
 
+from erpnext import _refuse
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
+
+UNRECONCILABLE_DOCTYPES = ("Payment Entry", "Journal Entry")
 
 
 class UnreconcilePayment(Document):
@@ -199,6 +202,16 @@ def get_linked_advances(company, docname):
 def create_unreconcile_doc_for_selection(selections=None):
 	if selections:
 		selections = json.loads(selections)
+		for row in selections:
+			voucher_type = row.get("voucher_type")
+			if voucher_type not in UNRECONCILABLE_DOCTYPES:
+				frappe.throw(_("{0} cannot be unreconciled").format(voucher_type))
+		for row in selections:
+			voucher_no = cstr(row.get("voucher_no"))
+			row["voucher_no"] = voucher_no
+			if not voucher_no or not frappe.has_permission(row.get("voucher_type"), "write", doc=voucher_no):
+				_refuse()
+
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payment")
