@@ -1620,6 +1620,7 @@
    "fieldname": "use_transaction_date_exchange_rate",
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -1664,7 +1665,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 12:00:00.000000",
+ "modified": "2026-10-07 20:56:49.769456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
