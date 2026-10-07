@@ -26,6 +26,17 @@ class SerialNoWarehouseError(ValidationError):
 	pass
 
 
+STOCK_MANAGED_FIELDS = (
+	"item_code",
+	"warehouse",
+	"batch_no",
+	"status",
+	"company",
+	"customer",
+	"purchase_rate",
+)
+
+
 class SerialNo(StockController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -85,12 +96,15 @@ class SerialNo(StockController):
 		self.validate_warehouse()
 
 	def validate_warehouse(self):
-		if not self.get("__islocal"):
-			item_code, warehouse = frappe.db.get_value("Serial No", self.name, ["item_code", "warehouse"])
-			if not self.via_stock_ledger and item_code != self.item_code:
-				frappe.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
-			if not self.via_stock_ledger and warehouse != self.warehouse:
-				frappe.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
+		if self.get("__islocal") or self.via_stock_ledger:
+			return
+
+		for fieldname in STOCK_MANAGED_FIELDS:
+			if self.has_value_changed(fieldname):
+				frappe.throw(
+					_("{0} cannot be changed for Serial No.").format(_(self.meta.get_label(fieldname))),
+					SerialNoCannotCannotChangeError,
+				)
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
