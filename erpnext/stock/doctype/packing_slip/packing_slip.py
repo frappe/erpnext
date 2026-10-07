@@ -190,9 +190,15 @@ class PackingSlip(StatusUpdater):
 			)
 
 			if weight_per_unit and not item.net_weight:
-				item.net_weight = weight_per_unit
+				item.net_weight = flt(weight_per_unit) * self.get_conversion_factor(item)
 			if weight_uom and not item.weight_uom:
 				item.weight_uom = weight_uom
+
+	def get_conversion_factor(self, item):
+		if not item.dn_detail:
+			return 1.0
+
+		return flt(frappe.db.get_value("Delivery Note Item", item.dn_detail, "conversion_factor")) or 1.0
 
 	def get_recommended_case_no(self):
 		"""Returns the next case no. for a new packing slip for a delivery note"""

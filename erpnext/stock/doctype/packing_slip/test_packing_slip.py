@@ -177,3 +177,21 @@ class TestPackingSlipReferences(ERPNextTestSuite):
 		slip.items[0].qty = 4
 		slip.append("items", slip.items[0].as_dict().copy().update({"name": None, "idx": 2}))
 		self.assertRaises(frappe.ValidationError, slip.insert)
+
+	def test_net_weight_uses_uom_conversion(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"weight_per_unit": 1,
+				"weight_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		delivery_note = create_delivery_note(item_code=item_code, qty=2, do_not_save=True)
+		delivery_note.items[0].update({"uom": "Box", "conversion_factor": 12})
+		delivery_note.save()
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.insert()
+
+		self.assertEqual(slip.net_weight_pkg, 24)
