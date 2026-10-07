@@ -9,6 +9,32 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_zero_rate_items_count_toward_average_discount(self):
+		frappe.get_doc(
+			{
+				"doctype": "Authorization Rule",
+				"transaction": "Sales Order",
+				"based_on": "Average Discount",
+				"company": "_Test Company",
+				"value": 10,
+				"approving_user": "Administrator",
+			}
+		).insert()
+		order = frappe._dict(
+			doctype="Sales Order",
+			customer_name="_Test Customer",
+			items=[
+				frappe._dict(base_price_list_rate=4200, base_rate=4200, qty=1),
+				frappe._dict(base_price_list_rate=4200, base_rate=0, qty=1),
+			],
+			discount_amount=0,
+		)
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.ValidationError):
+				frappe.get_cached_doc("Authorization Control").validate_approving_authority(
+					"Sales Order", "_Test Company", 4200, order
+				)
+
 	def test_update_items_checks_discounts_on_updated_parent(self):
 		from erpnext.accounts.services.child_item_update import ChildItemUpdater
 
