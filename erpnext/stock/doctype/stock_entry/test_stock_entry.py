@@ -4214,6 +4214,7 @@ class TestStockEntry(ERPNextTestSuite):
 					"item_code": "_Test FG Item",
 					"qty": 101,
 					"conversion_factor": 1,
+					"transfer_qty": 101,
 					"t_warehouse": "_Test Warehouse - _TC",
 					"is_finished_item": 1,
 				},
@@ -4225,8 +4226,12 @@ class TestStockEntry(ERPNextTestSuite):
 				se.validate_finished_good_qty_against_fg_completed_qty,
 			)
 
-			se.items[0].qty = 100
+			se.items[0].qty = se.items[0].transfer_qty = 100
 			se.validate_finished_good_qty_against_fg_completed_qty()
+
+			# zero Finished Good Quantity must not skip the check
+			se.fg_completed_qty = 0
+			self.assertRaises(FinishedGoodError, se.validate_finished_good_qty_against_fg_completed_qty)
 
 	def test_process_loss_percentage_resyncs_from_qty(self):
 		# changing fg qty recomputes process_loss_qty

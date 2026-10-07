@@ -907,10 +907,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose not in ("Manufacture", "Repack"):
 			return
 
-		if not (self.from_bom and self.bom_no and flt(self.fg_completed_qty)):
+		if not (self.from_bom and self.bom_no):
 			return
 
-		precision = self.precision("process_loss_qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		finished_qty = flt(self.get_bom_item_finished_qty(), precision)
 		fg_completed_qty = flt(self.fg_completed_qty, precision)
 
@@ -926,10 +926,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 
 	def get_bom_item_finished_qty(self):
-		"""Received qty of the BOM item and its variants. Other Repack outputs do not count."""
+		"""Received stock qty of the BOM item and its variants. Other Repack outputs do not count."""
 		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
 		return sum(
-			flt(row.qty) * flt(row.conversion_factor)
+			flt(row.transfer_qty)
 			for row in self.items
 			if row.is_finished_item
 			and row.t_warehouse
