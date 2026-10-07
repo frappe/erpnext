@@ -330,17 +330,7 @@ def get_company_account_type_amount(company, filters):
 	if filters.account_type == "Depreciation":
 		amount *= -1
 
-	return convert_to_presentation_currency_amount(amount, company, filters)
-
-
-def convert_to_presentation_currency_amount(amount, company, filters):
-	presentation_currency = filters.get("presentation_currency")
-	company_currency = erpnext.get_company_currency(company)
-
-	if not presentation_currency or presentation_currency == company_currency:
-		return amount
-
-	return flt(convert(amount, presentation_currency, company_currency, filters.end_date), 3)
+	return amount
 
 
 def get_column_amount(company, companies, own_amounts, filters):
