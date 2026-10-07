@@ -353,6 +353,18 @@ class TestAppointment(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "beginning of an available slot"):
 			self._create_portal_appointment("portal_visitor_off_grid@example.com", time="10:15:00")
 
+	def test_capacity_check_locks_the_capacity_setting(self):
+		# concurrent verifications of Unverified bookings lock no common appointment row,
+		# so the capacity setting is the shared lock that serializes them
+		set_booking_setting("number_of_agents", 1)
+		appointment = frappe.get_doc(
+			{"doctype": "Appointment", "scheduled_time": slot_on(1, 10), "customer_email": LEAD_EMAIL}
+		)
+		with patch.object(frappe.db, "get_single_value", wraps=frappe.db.get_single_value) as mock_get:
+			appointment.validate_available_time_slot()
+
+		mock_get.assert_any_call("Appointment Booking Settings", "number_of_agents", for_update=True)
+
 	def test_portal_slot_on_any_overlapping_availability_grid(self):
 		self._configure_booking_settings()
 		settings = frappe.get_doc("Appointment Booking Settings")

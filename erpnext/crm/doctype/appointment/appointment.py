@@ -139,20 +139,22 @@ class Appointment(Document):
 			frappe.throw(_("Appointment must start at the beginning of an available slot."))
 
 	def validate_available_time_slot(self):
-		settings = get_booking_settings()
-		if not cint(settings.number_of_agents):
+		# locking the capacity setting serializes all capacity checks: locking only the Open
+		# rows misses Unverified bookings of the same slot being verified at the same time
+		number_of_agents = cint(
+			frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents", for_update=True)
+		)
+		if not number_of_agents:
 			return
 
-		# the locking read serializes concurrent bookings for the same window,
-		# so two simultaneous requests cannot both pass the capacity check
 		booked = count_overlapping_appointments(
 			self.scheduled_time,
-			cint(settings.appointment_duration),
+			cint(get_booking_settings().appointment_duration),
 			exclude_appointment=self.name,
 			for_update=True,
 		)
 
-		if booked >= cint(settings.number_of_agents):
+		if booked >= number_of_agents:
 			frappe.throw(_("Time slot is not available"))
 
 	def before_insert(self):
