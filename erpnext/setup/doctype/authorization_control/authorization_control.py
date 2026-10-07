@@ -190,9 +190,9 @@ class AuthorizationControl(TransactionBase):
 			x[0]
 			for x in frappe.db.sql(
 				"""select distinct based_on from `tabAuthorization Rule`
-			where transaction = %s and system_user = %s
+			where transaction = %s and system_user = %s and based_on in %s
 			and (company = %s or ifnull(company,'')='') and docstatus != 2""",
-				(doctype_name, session["user"], company),
+				(doctype_name, session["user"], tuple(final_based_on), company),
 			)
 		]
 
