@@ -4,7 +4,14 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import ceil, cint, flt
+
+MANUFACTURING_INPUT_FIELDS = (
+	"shift_time_in_hours",
+	"no_of_workstations",
+	"no_of_shift",
+	"manufacturing_time_in_mins",
+)
 
 
 class ItemLeadTime(Document):
@@ -37,7 +44,27 @@ class ItemLeadTime(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.set_capacity_per_day()
 		self.validate_supplier_lead_times()
+
+	def set_capacity_per_day(self):
+		self.total_workstation_time = (
+			cint(self.shift_time_in_hours) * cint(self.no_of_workstations) * cint(self.no_of_shift)
+		)
+		if self.total_workstation_time and cint(self.manufacturing_time_in_mins):
+			units_produced = flt(self.total_workstation_time) / cint(self.manufacturing_time_in_mins) * 60
+		elif self.has_manufacturing_inputs_changed():
+			units_produced = 0
+		else:
+			return
+
+		self.no_of_units_produced = cint(units_produced)
+		self.capacity_per_day = ceil(flt(self.daily_yield) * units_produced / 100)
+
+	def has_manufacturing_inputs_changed(self):
+		return not self.is_new() and any(
+			self.has_value_changed(fieldname) for fieldname in MANUFACTURING_INPUT_FIELDS
+		)
 
 	def validate_supplier_lead_times(self):
 		suppliers = set()
