@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class QualityInspectionTemplate(Document):
@@ -25,8 +26,40 @@ class QualityInspectionTemplate(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_duplicate_parameters()
 		for row in self.item_quality_inspection_parameter:
 			self.validate_acceptance_formula(row)
+			self.validate_acceptance_values(row)
+
+	def validate_duplicate_parameters(self):
+		parameters = set()
+		for row in self.item_quality_inspection_parameter:
+			if row.specification in parameters:
+				frappe.throw(
+					_("Row #{0}: Parameter {1} is added more than once").format(
+						row.idx, frappe.bold(row.specification)
+					)
+				)
+
+			parameters.add(row.specification)
+
+	def validate_acceptance_values(self, row):
+		if row.formula_based_criteria:
+			return
+
+		if row.numeric and flt(row.min_value) > flt(row.max_value):
+			frappe.throw(
+				_("Row #{0}: Minimum Value cannot be greater than Maximum Value for parameter {1}").format(
+					row.idx, frappe.bold(row.specification)
+				)
+			)
+
+		if not row.numeric and not row.value:
+			frappe.throw(
+				_("Row #{0}: Acceptance Criteria Value is required for parameter {1}").format(
+					row.idx, frappe.bold(row.specification)
+				)
+			)
 
 	def validate_acceptance_formula(self, row):
 		if row.formula_based_criteria and not row.acceptance_formula:
