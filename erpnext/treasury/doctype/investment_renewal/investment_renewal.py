@@ -36,10 +36,7 @@ class InvestmentRenewal(Document):
 		self.link_or_create_new_investment()
 
 	def before_cancel(self):
-		self.validate_new_investment_not_submitted()
-
-	def on_cancel(self):
-		self.delete_draft_new_investment()
+		self.validate_new_investment_cancelled()
 
 	def get_original_investment(self):
 		if not getattr(self, "_original_investment", None):
@@ -148,23 +145,16 @@ class InvestmentRenewal(Document):
 
 		return None
 
-	def validate_new_investment_not_submitted(self):
-		"""A submitted new investment is a real financial record: it has to be cancelled first."""
-		if submitted := frappe.db.get_value("Investment", {"investment_renewal": self.name, "docstatus": 1}):
+	def validate_new_investment_cancelled(self):
+		"""The user decides what happens to the new investment, so a draft is never deleted silently."""
+		if open_investment := frappe.db.get_value(
+			"Investment", {"investment_renewal": self.name, "docstatus": ("<", 2)}
+		):
 			frappe.throw(
 				_(
-					"Cannot cancel this renewal because its new Investment {0} is submitted. Cancel {0} first."
-				).format(frappe.get_desk_link("Investment", submitted))
+					"Cannot cancel this renewal because its new Investment {0} is still open. Delete {0} if it is a draft, or cancel it if it is submitted."
+				).format(frappe.get_desk_link("Investment", open_investment))
 			)
-
-	def delete_draft_new_investment(self):
-		"""The draft was only prepared by this renewal, so it goes with it; a cancelled one stays as audit trail."""
-		for name in frappe.get_all(
-			"Investment", filters={"investment_renewal": self.name, "docstatus": 0}, pluck="name"
-		):
-			self.db_set({"new_investment": None, "new_terms_changed": 0})
-			frappe.db.set_value("Investment", name, "investment_renewal", None)
-			frappe.delete_doc("Investment", name, ignore_permissions=True)
 
 	def validate_can_create_new_investment(self, new_investment=None):
 		if self.docstatus != 1:

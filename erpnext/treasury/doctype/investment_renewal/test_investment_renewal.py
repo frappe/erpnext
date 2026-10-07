@@ -88,15 +88,21 @@ class TestInvestmentRenewal(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_new_investment, renewal.name)
 
-	def test_cancelling_renewal_deletes_draft_new_investment(self):
+	def test_cannot_cancel_renewal_with_draft_new_investment(self):
 		renewal = make_submitted_renewal(self.investment.name)
-		draft_name = renewal.new_investment
+
+		renewal.reload()
+		self.assertRaises(frappe.ValidationError, renewal.cancel)
+		self.assertTrue(frappe.db.exists("Investment", renewal.new_investment))
+
+	def test_renewal_can_be_cancelled_once_draft_is_deleted(self):
+		renewal = make_submitted_renewal(self.investment.name)
+		frappe.delete_doc("Investment", renewal.new_investment)
 
 		renewal.reload()
 		renewal.cancel()
 
-		self.assertFalse(frappe.db.exists("Investment", draft_name))
-		self.assertFalse(frappe.db.get_value("Investment Renewal", renewal.name, "new_investment"))
+		self.assertEqual(renewal.docstatus, 2)
 
 	def test_cannot_cancel_renewal_with_submitted_new_investment(self):
 		renewal = make_submitted_renewal(self.investment.name)
@@ -118,6 +124,7 @@ class TestInvestmentRenewal(ERPNextTestSuite):
 
 	def test_amended_renewal_creates_new_draft(self):
 		renewal = make_submitted_renewal(self.investment.name)
+		frappe.delete_doc("Investment", renewal.new_investment)
 		renewal.reload()
 		renewal.cancel()
 
