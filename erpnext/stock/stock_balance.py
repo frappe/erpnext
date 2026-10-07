@@ -5,7 +5,7 @@
 import frappe
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import cstr, flt, now, nowdate, nowtime
+from frappe.utils import cstr, flt, nowdate, nowtime
 
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 
@@ -264,19 +264,16 @@ def get_planned_qty(item_code, warehouse):
 
 
 def update_bin_qty(item_code, warehouse, qty_dict=None):
+	from erpnext.stock.doctype.bin.bin import update_bin_columns
 	from erpnext.stock.utils import get_bin
 
 	bin = get_bin(item_code, warehouse)
-	mismatch = False
-	for field, value in qty_dict.items():
-		if flt(bin.get(field)) != flt(value):
-			bin.set(field, flt(value))
-			mismatch = True
+	changed_values = {
+		field: flt(value) for field, value in qty_dict.items() if flt(bin.get(field)) != flt(value)
+	}
 
-	bin.modified = now()
-	if mismatch:
-		bin.set_projected_qty()
-		bin.db_update()
+	if changed_values:
+		update_bin_columns(bin.name, changed_values)
 		bin.clear_cache()
 
 

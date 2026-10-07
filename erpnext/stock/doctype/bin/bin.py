@@ -6,7 +6,16 @@ import frappe
 from frappe.model.document import Document
 from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import flt
+from frappe.utils import flt, now
+from pypika.terms import ValueWrapper
+
+PROJECTED_QTY_ADDITIONS = ("actual_qty", "ordered_qty", "indented_qty", "planned_qty")
+PROJECTED_QTY_DEDUCTIONS = (
+	"reserved_qty",
+	"reserved_qty_for_production",
+	"reserved_qty_for_sub_contract",
+	"reserved_qty_for_production_plan",
+)
 
 
 class Bin(Document):
@@ -256,6 +265,30 @@ def get_bin_details(bin_name):
 		],
 		as_dict=1,
 	)
+
+
+def update_bin_columns(bin_name, values):
+	table = frappe.qb.DocType("Bin")
+	query = frappe.qb.update(table).set(table.modified, now()).where(table.name == bin_name)
+
+	for fieldname, value in values.items():
+		query = query.set(table[fieldname], value)
+
+	query.set(table.projected_qty, get_projected_qty_term(table, values)).run()
+
+
+def get_projected_qty_term(table, values):
+	def qty(fieldname):
+		return flt(values[fieldname]) if fieldname in values else Coalesce(table[fieldname], 0)
+
+	projected_qty = ValueWrapper(0)
+	for fieldname in PROJECTED_QTY_ADDITIONS:
+		projected_qty = projected_qty + qty(fieldname)
+
+	for fieldname in PROJECTED_QTY_DEDUCTIONS:
+		projected_qty = projected_qty - qty(fieldname)
+
+	return projected_qty
 
 
 def update_qty_from_sle(bin_name, args):
