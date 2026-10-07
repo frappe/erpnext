@@ -158,10 +158,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists, invalidate_future_sle_cache
 
 	if sl_entries:
-		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
-		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
-			sle_processing_gate(*pair)
-
+		acquire_sle_processing_gates(sl_entries)
 		validate_stock_frozen_by_closing_entry(sl_entries)
 
 		cancelled = sl_entries[0].get("is_cancelled")
@@ -335,6 +332,12 @@ def repost_gate(item_code, warehouse):
 		# Tuple key: a colon in item_code/warehouse can't collide two distinct pairs onto one lock.
 		return frappe.db.advisory_lock(("stock_repost", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 	return nullcontext()
+
+
+def acquire_sle_processing_gates(sl_entries):
+	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order."""
+	for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+		sle_processing_gate(*pair)
 
 
 def sle_processing_gate(item_code, warehouse):
@@ -1767,15 +1770,8 @@ class update_entries_after:
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no or self.has_bundle_picked_on_submit(sle):
+		if not self.args.get("sle_id") and not sle.dependant_sle_voucher_detail_no:
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
-
-	def has_bundle_picked_on_submit(self, sle):
-		return bool(
-			self.args.get("sle_id")
-			and sle.serial_and_batch_bundle
-			and sle.auto_created_serial_and_batch_bundle
-		)
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
 		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
