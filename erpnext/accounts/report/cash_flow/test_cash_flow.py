@@ -230,6 +230,14 @@ class TestCashFlow(ERPNextTestSuite):
 		self.assertEqual(opening - before_opening, 500)
 		self.assertEqual(closing - before_closing, 500)
 
+		late_opening_entry = make_journal_entry(
+			"Cash - _TC", "Temporary Opening - _TC", 300, posting_date=add_days(year_end_date, 1), save=False
+		)
+		late_opening_entry.is_opening = "Yes"
+		late_opening_entry.submit()
+
+		self.assertEqual(opening_and_closing(), (opening + 300, closing + 300))
+
 	def test_accumulated_totals_across_fiscal_years_keep_earlier_years(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 

@@ -437,9 +437,8 @@ def get_opening_balance(company, period_list, filters):
 	if frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
 		query = query.where(before_first_period)
 	else:
-		# opening entries in the report range are left out of the movements, so they belong to the opening
-		opening_entries = (gl.is_opening == "Yes") & (gl.posting_date <= period_list[-1]["to_date"])
-		query = query.where(before_first_period | opening_entries)
+		# opening entries are left out of the movements, so they belong to the opening whatever their date
+		query = query.where(before_first_period | (gl.is_opening == "Yes"))
 	query = apply_gl_filters(query, gl, company, filters)
 
 	result = query.run()
