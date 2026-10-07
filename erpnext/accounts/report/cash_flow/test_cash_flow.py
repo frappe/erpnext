@@ -150,3 +150,11 @@ class TestCashFlow(FrappeTestCase):
 		opening, closing = opening_and_closing()
 		self.assertEqual(opening - before_opening, 500)
 		self.assertEqual(closing - before_closing, 500)
+
+		late_opening_entry = make_journal_entry(
+			"Cash - _TC", "Temporary Opening - _TC", 300, posting_date=add_days(year_end_date, 1), save=False
+		)
+		late_opening_entry.is_opening = "Yes"
+		late_opening_entry.submit()
+
+		self.assertEqual(opening_and_closing(), (opening + 300, closing + 300))
