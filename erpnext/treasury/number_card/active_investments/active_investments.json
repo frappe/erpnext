@@ -1,5 +1,5 @@
 {
- "creation": "2026-09-24 12:00:00.000000",
+ "creation": "2026-10-07 15:28:35.440398",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Investment",
@@ -10,11 +10,12 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Active Investments",
- "modified": "2026-10-06 12:00:00.000000",
+ "modified": "2026-10-07 15:28:35.450838",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Active Investments",
  "owner": "Administrator",
+ "show_full_number": 0,
  "show_percentage_stats": 1,
  "stats_time_interval": "Monthly",
  "type": "Document Type"

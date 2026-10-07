@@ -23,6 +23,64 @@ ACCOUNT_FIELDS = (
 
 
 class Investment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from erpnext.treasury.doctype.investment_interest_schedule.investment_interest_schedule import InvestmentInterestSchedule
+		from frappe.types import DF
+
+		accrued_interest: DF.Currency
+		accrued_interest_account: DF.Link | None
+		accrued_upto: DF.Date | None
+		amended_from: DF.Link | None
+		approval_reference: DF.Attach | None
+		approved_amount: DF.Currency
+		approved_by: DF.Link | None
+		charges_account: DF.Link | None
+		company: DF.Link
+		company_currency: DF.Link | None
+		compounding_frequency: DF.Literal["Monthly", "Quarterly", "Semi-Annual", "Annual", "At Maturity"]
+		cost_center: DF.Link | None
+		coupon_frequency: DF.Literal["Monthly", "Quarterly", "Semi-Annual", "Annual", "At Maturity"]
+		coupon_rate: DF.Percent
+		currency: DF.Link
+		custodian: DF.Link | None
+		day_count_convention: DF.Literal["Actual/365", "Actual/360", "30/360", "Actual/Actual (ICMA)"]
+		dividend_income_account: DF.Link | None
+		face_value: DF.Currency
+		fair_value_adjustment_account: DF.Link | None
+		instrument_class: DF.Data | None
+		instrument_id: DF.Data | None
+		interest_income_account: DF.Link | None
+		interest_payout_type: DF.Literal["Cumulative", "Non-Cumulative"]
+		interest_schedule: DF.Table[InvestmentInterestSchedule]
+		investment_account: DF.Link | None
+		investment_rationale: DF.SmallText
+		investment_renewal: DF.Link | None
+		investment_type: DF.Link
+		issuer: DF.Link
+		market_value: DF.Currency
+		maturity_date: DF.Date | None
+		measurement_category: DF.Literal["Amortized Cost", "FVOCI", "FVTPL"]
+		naming_series: DF.Literal["INV-.YYYY.-"]
+		payout_frequency: DF.Literal["Monthly", "Quarterly", "Semi-Annual", "Annual", "At Maturity"]
+		principal_amount: DF.Currency
+		purchase_date: DF.Date
+		rate_of_interest: DF.Percent
+		realised_gain_loss_account: DF.Link | None
+		scheme_name: DF.Data | None
+		status: DF.Literal["Draft", "Pending Approval", "Rejected", "Active", "Partially Redeemed", "Matured", "Redeemed", "Cancelled"]
+		tax_withheld_receivable_account: DF.Link | None
+		total_cost: DF.Currency
+		unamortised_premium_discount: DF.Currency
+		units_held: DF.Float
+		unrealised_gain_loss: DF.Currency
+		unrealised_gain_loss_account: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.set_default_accounts()
 		self.validate_masters_are_active()

@@ -45,6 +45,41 @@ ALLOWED_INSTRUMENTS = {
 
 
 class InvestmentTransaction(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		accrued_interest_in_purchase: DF.Currency
+		amended_from: DF.Link | None
+		cash_account: DF.Link | None
+		charges: DF.Currency
+		company: DF.Link
+		conversion_rate: DF.Float
+		cost_center: DF.Link | None
+		cost_of_units_sold: DF.Currency
+		currency: DF.Link
+		gross_amount: DF.Currency
+		instrument_class: DF.Data | None
+		interest_amount: DF.Currency
+		investment: DF.Link
+		naming_series: DF.Literal["INV-TXN-.YYYY.-"]
+		net_amount: DF.Currency
+		penalty_applied: DF.Currency
+		posting_date: DF.Date
+		rate: DF.Currency
+		realised_gain_loss: DF.Currency
+		reference_date: DF.Date | None
+		reference_no: DF.Data | None
+		remarks: DF.SmallText | None
+		tax_withheld: DF.Currency
+		transaction_type: DF.Literal["", "Opening", "Purchase", "Sale", "Redemption", "Withdrawal", "Maturity", "Interest Receipt", "Dividend", "Charges"]
+		units: DF.Float
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_investment()
 		set_conversion_rate(self)

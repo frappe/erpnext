@@ -24,6 +24,32 @@ from erpnext.treasury.interest_schedule import (
 
 
 class InvestmentInterestAccrual(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		amortisation_amount: DF.Currency
+		company: DF.Link
+		conversion_rate: DF.Float
+		cost_center: DF.Link | None
+		currency: DF.Link
+		estimated_interest: DF.Currency
+		from_date: DF.Date
+		instrument_class: DF.Data | None
+		interest_amount: DF.Currency
+		investment: DF.Link
+		naming_series: DF.Literal["INV-ACCR-.YYYY.-"]
+		posting_date: DF.Date
+		remarks: DF.SmallText | None
+		to_date: DF.Date
+		variance: DF.Currency
+	# end: auto-generated types
+
 	"""Interest earned on a Deposit or Bond over a date range, as reported by the bank / issuer."""
 
 	def validate(self):

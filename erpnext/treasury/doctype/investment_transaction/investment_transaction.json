@@ -1,8 +1,7 @@
 {
  "actions": [],
- "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2026-09-24 00:00:00.000000",
+ "creation": "2026-10-07 15:28:34.333713",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -311,10 +310,9 @@
    "search_index": 1
   }
  ],
- "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-06 14:00:00.000000",
+ "modified": "2026-10-07 15:28:34.547452",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Transaction",
@@ -367,8 +365,8 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "investment,transaction_type,reference_no",
- "show_title_field_in_link": 0,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

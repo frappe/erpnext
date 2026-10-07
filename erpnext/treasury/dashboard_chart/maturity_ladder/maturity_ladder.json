@@ -1,7 +1,7 @@
 {
  "chart_name": "Maturity Ladder",
  "chart_type": "Custom",
- "creation": "2026-10-04 12:00:00.000000",
+ "creation": "2026-10-07 15:28:35.215403",
  "custom_options": "{\"fieldtype\": \"Currency\"}",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
@@ -9,7 +9,7 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2026-10-04 12:00:00.000000",
+ "modified": "2026-10-07 15:28:35.224508",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Maturity Ladder",
@@ -23,6 +23,7 @@
    "role": "Accounts Manager"
   }
  ],
+ "show_values_over_chart": 0,
  "source": "Investment Maturity Ladder",
  "timeseries": 0,
  "type": "Bar",

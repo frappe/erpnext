@@ -23,6 +23,31 @@ TERM_FIELDS = {
 
 
 class InvestmentRenewal(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		currency: DF.Link
+		instrument_class: DF.Data | None
+		interest_renewed: DF.Currency
+		naming_series: DF.Literal["INV-RENEW-.YYYY.-"]
+		new_investment: DF.Link | None
+		new_terms_changed: DF.Check
+		original_investment: DF.Link
+		principal_renewed: DF.Currency
+		remarks: DF.SmallText | None
+		renewal_date: DF.Date
+		renewal_type: DF.Literal["", "Auto Renewal", "Switch Scheme", "Reinvestment"]
+		terms_change_reason: DF.SmallText | None
+		total_renewed: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_original_investment()
 		self.set_renewal_type()

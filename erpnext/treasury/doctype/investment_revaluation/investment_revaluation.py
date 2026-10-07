@@ -17,6 +17,27 @@ GL_CATEGORIES = ("FVOCI", "FVTPL")
 
 
 class InvestmentRevaluation(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from erpnext.treasury.doctype.investment_revaluation_detail.investment_revaluation_detail import InvestmentRevaluationDetail
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		cost_center: DF.Link | None
+		currency: DF.Link | None
+		finance_book: DF.Link | None
+		investments: DF.Table[InvestmentRevaluationDetail]
+		naming_series: DF.Literal["INV-REVAL-.YYYY.-"]
+		remarks: DF.SmallText | None
+		revaluation_date: DF.Date
+		total_gain_loss: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.set_missing_values()
 		self.validate_duplicate_investments()

@@ -1,6 +1,6 @@
 {
  "aggregate_function_based_on": "accrued_interest",
- "creation": "2026-10-04 12:00:00.000000",
+ "creation": "2026-10-07 15:28:35.393425",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Investment",
@@ -11,11 +11,12 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Accrued Interest Receivable",
- "modified": "2026-10-06 12:00:00.000000",
+ "modified": "2026-10-07 15:28:35.406925",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Accrued Interest Receivable",
  "owner": "Administrator",
+ "show_full_number": 0,
  "show_percentage_stats": 0,
  "type": "Document Type"
 }

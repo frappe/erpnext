@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2026-10-04 12:00:00.000000",
+ "creation": "2026-10-07 15:28:33.911436",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -106,7 +106,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-10-06 16:00:00.000000",
+ "modified": "2026-10-07 15:28:34.030568",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Settings",
@@ -131,6 +131,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

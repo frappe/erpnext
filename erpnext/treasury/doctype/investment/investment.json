@@ -1,8 +1,7 @@
 {
  "actions": [],
- "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2026-09-24 00:00:00.000000",
+ "creation": "2026-10-07 15:28:30.050806",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -570,7 +569,6 @@
    "show_dashboard": 1
   }
  ],
- "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
   {
@@ -597,7 +595,7 @@
    "link_fieldname": "original_investment"
   }
  ],
- "modified": "2026-10-06 16:00:00.000000",
+ "modified": "2026-10-07 15:28:31.026503",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment",
@@ -646,8 +644,8 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "investment_type,issuer,instrument_id",
- "show_title_field_in_link": 0,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
