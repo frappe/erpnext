@@ -135,8 +135,7 @@ class InvestmentInterestAccrual(AccountsController):
 			frappe.throw(_("Posting Date cannot be before To Date"))
 
 	def validate_accrual_period(self):
-		"""Accruals follow each other without gaps or overlaps, from the first purchase until maturity
-		or full exit, so every day's interest is booked exactly once."""
+		"""Accruals must follow each other with no gap or overlap, so each day's interest is booked once."""
 		schedule_end = getdate(self.get_schedule()[-1].period_to)
 		self.validate_from_date(schedule_end)
 
@@ -256,8 +255,7 @@ def get_accrual_defaults(investment: str) -> dict | None:
 
 
 def make_draft_accruals():
-	"""Daily job: once a schedule period has ended, make a draft accrual for it prefilled with the
-	estimate, so the user only corrects the amount to the bank's figure and submits."""
+	"""Daily job: draft an accrual for each ended period, so the user only types the bank's figure."""
 	for investment in get_investments_due_for_accrual():
 		make_draft_accrual(investment)
 

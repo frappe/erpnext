@@ -125,9 +125,7 @@ def get_investment_flows(filters):
 
 
 def get_interest_flows(investments, filters):
-	"""Interest from the interest schedules: cumulative deposits pay all of it at maturity, everything
-	else at the end of each payout / coupon period. Interest of periods that already ended and is not
-	received yet is overdue, dated at the end of the last ended period."""
+	"""Interest due at maturity (cumulative) or each period end; unpaid past periods show as overdue."""
 	by_name = {investment.name: investment for investment in investments}
 	received = get_interest_received(list(by_name))
 	flows, overdue = [], {}
@@ -167,8 +165,7 @@ def get_interest_received(investments):
 
 
 def get_schedule_periods(investments):
-	"""Interest of each schedule period: the actual interest once the period is fully accrued, else the
-	estimate."""
+	"""Actual interest of fully accrued periods, else the estimate, so the forecast uses real figures."""
 	if not investments:
 		return []
 

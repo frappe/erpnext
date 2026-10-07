@@ -1,12 +1,7 @@
 # Copyright (c) 2026, Aagnya Mistry and contributors
 # For license information, please see license.txt
 
-"""Interest Schedule of a Deposit or Bond investment: estimated interest per payout / compounding /
-coupon period, next to the actual interest the user accrued with Investment Interest Accruals.
-
-An accrual can cover any date range, so its interest is spread over the schedule periods it overlaps
-in proportion to days.
-"""
+"""Estimated vs actual interest per period, so the user sees where the bank paid a different amount."""
 
 import frappe
 from frappe.utils import add_days, date_diff, flt, getdate
@@ -43,8 +38,7 @@ def get_schedule_rows(calculator, accruals, accrued_upto):
 
 
 def allocate_accruals(rows, accruals, precision):
-	"""Spread each accrual's interest over the periods it covers, rounded as a running total so the
-	shares add up to exactly the accrued amount."""
+	"""Spread each accrual over the periods it covers by days, since an accrual can span any range."""
 	for accrual in accruals:
 		total_days = date_diff(accrual.to_date, accrual.from_date) + 1
 		covered_days, allocated = 0, 0
@@ -79,8 +73,7 @@ def get_period_status(row, accrued_upto):
 
 
 def set_estimated_interest(calculator, rows, precision):
-	"""A cumulative deposit compounds on the actual interest of fully accrued periods, and on the
-	estimate of the rest, so estimates of later periods follow what the bank really credited."""
+	"""Compound on actual interest where known, so later estimates follow what the bank credited."""
 	compounded_interest = 0
 	for row in rows:
 		end = add_days(row.period_to, 1)

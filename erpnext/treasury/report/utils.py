@@ -18,7 +18,7 @@ from erpnext.treasury.doctype.investment_transaction.investment_transaction impo
 )
 from erpnext.treasury.ledger import get_investment_gl_query
 
-# investment fields holding the ledger accounts the reports read, in matching priority
+# accounts the reports read, in priority order: the first match wins when two share an account
 ACCOUNT_ROLES = (
 	"investment_account",
 	"accrued_interest_account",
@@ -27,7 +27,7 @@ ACCOUNT_ROLES = (
 	"realised_gain_loss_account",
 	"charges_account",
 )
-# company fields holding ledger accounts that investment vouchers also post to
+# company accounts investment vouchers also post to, so exchange gains count in returns
 COMPANY_ACCOUNT_ROLES = ("exchange_gain_loss_account",)
 
 
@@ -161,8 +161,7 @@ def get_units_held(investments, as_on_date):
 
 
 def get_positions(filters, as_on_date):
-	"""Each investment still holding a balance on the date, with book value, accrued interest,
-	unrealised gain or loss and market value as they stood that day."""
+	"""Positions as they stood on the date, so reports can be run for any past day."""
 	investments = get_investments(filters)
 	names = [investment.name for investment in investments]
 	movements = get_ledger_movements(filters.company, as_on_date, names)

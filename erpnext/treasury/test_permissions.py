@@ -1,8 +1,7 @@
 # Copyright (c) 2026, Aagnya Mistry and contributors
 # See license.txt
 
-"""Treasury used by the people who do the work: an accountant (Accounts User) records, a manager
-(Accounts Manager) approves and sets things up. Everything here runs as them, not as Administrator."""
+"""Runs as Accounts User and Accounts Manager, not Administrator, to catch missing permissions."""
 
 import frappe
 from frappe.desk.search import search_link

@@ -1,8 +1,7 @@
 # Copyright (c) 2026, Aagnya Mistry and contributors
 # See license.txt
 
-"""Investments in a currency other than the company currency (_Test Company is INR, these are USD).
-Amounts on the vouchers are in the investment currency, and GL Entries post them times the Exchange Rate."""
+"""USD investments in an INR company: vouchers hold USD, the ledger gets USD times the Exchange Rate."""
 
 from unittest.mock import patch
 

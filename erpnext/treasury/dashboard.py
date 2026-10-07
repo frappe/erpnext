@@ -38,8 +38,7 @@ def get_company(filters):
 
 
 def get_income_query(company, account_field, from_date, to_date):
-	"""Credit minus debit (company currency) that investment vouchers posted to each investment's own
-	`account_field` account."""
+	"""Income in each investment's own `account_field` account, so others' entries there are left out."""
 	ledger = get_investment_gl_query()
 	gl_entry = ledger.gl_entry
 	investment = frappe.qb.DocType("Investment")

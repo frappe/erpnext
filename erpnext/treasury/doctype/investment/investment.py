@@ -231,8 +231,7 @@ class Investment(Document):
 		return flt(balance[0][0], self.precision("total_cost"))
 
 	def get_unamortised_premium_discount(self, units_held):
-		"""Face value still held minus its book value, both in the investment currency: positive is
-		discount, negative is premium."""
+		"""Face value minus book value of what is still held: positive is a discount, negative a premium."""
 		if self.instrument_class != "Bond":
 			return 0
 

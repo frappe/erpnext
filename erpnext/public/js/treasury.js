@@ -1,10 +1,9 @@
 // Copyright (c) 2026, Aagnya Mistry and contributors
 // For license information, please see license.txt
 
-// shared by the Treasury module: forms, lists, dashboard and reports
 frappe.provide("erpnext.treasury");
 
-// ledger account fields of Investment, also kept as defaults in Investment Settings
+// listed once so Investment and Investment Settings always offer the same accounts
 erpnext.treasury.ACCOUNT_FIELDS = [
 	"investment_account",
 	"accrued_interest_account",
@@ -51,7 +50,7 @@ erpnext.treasury.get_as_on_date_filter = function () {
 	};
 };
 
-// From Date (start of the fiscal year) and To Date (today)
+// reports default to this fiscal year so far, the period users check most
 erpnext.treasury.get_period_filters = function () {
 	return [
 		{

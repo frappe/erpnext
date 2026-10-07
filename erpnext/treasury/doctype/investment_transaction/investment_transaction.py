@@ -487,8 +487,7 @@ class InvestmentTransaction(AccountsController):
 		return self.get_investment().get_account(fieldname)
 
 	def get_settled_book_value(self):
-		"""Account and company currency value settled by an exit or interest receipt, at the rates it was
-		booked at; None when there is no currency conversion."""
+		"""Value an exit or receipt settles at its booked rates, so a rate change shows as exchange gain."""
 		if self.currency == erpnext.get_company_currency(self.company):
 			return None
 
@@ -515,8 +514,7 @@ class InvestmentTransaction(AccountsController):
 		return frappe._dict(account=account, base_credit=base_credit)
 
 	def get_exchange_gain_loss_entries(self, gl_entries):
-		"""Cash moves at today's rate and the amount settled leaves at its booked rate; the difference is
-		the exchange gain or loss."""
+		"""Cash moves at today's rate, the settled amount at its booked rate; the gap is exchange gain/loss."""
 		difference = flt(
 			sum(flt(gl_entry.debit) - flt(gl_entry.credit) for gl_entry in gl_entries),
 			self.precision("net_amount"),
@@ -567,8 +565,7 @@ def get_gl_entry(doc, account, debit, credit, base_credit=None):
 
 
 def set_conversion_rate(doc):
-	"""Amounts are in the investment currency and posted times the Exchange Rate; an investment in
-	company currency has nothing to convert, and a foreign one must have its rate entered."""
+	"""A foreign-currency investment needs an Exchange Rate, as its amounts are posted times that rate."""
 	company_currency = erpnext.get_company_currency(doc.company)
 	if doc.currency == company_currency:
 		doc.conversion_rate = 1
@@ -599,8 +596,7 @@ def get_unreceived_interest(investment, upto=None, exclude_receipt=None):
 
 
 def validate_interest_not_received(doc, message):
-	"""Interest that a receipt has already collected cannot be taken back by cancelling `doc`.
-	`message` is a whole translated sentence with {0} for the investment."""
+	"""Block cancelling `doc` once a receipt collected its interest; `message` is whole for translators."""
 	received = get_interest_received(doc.investment)
 	accrued = get_accrued_interest(doc.investment, exclude=doc.name)
 	if received > flt(accrued, doc.precision("interest_amount")):

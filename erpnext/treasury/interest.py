@@ -1,9 +1,7 @@
 # Copyright (c) 2026, Aagnya Mistry and contributors
 # For license information, please see license.txt
 
-"""Interest and bond amortisation maths. Only cumulative deposits compound.
-
-Periods include `start` and exclude `end`, so each day earns interest exactly once."""
+"""Interest and bond amortisation maths; periods include `start` but not `end`, so each day earns once."""
 
 from functools import cached_property
 from itertools import pairwise
@@ -65,8 +63,7 @@ class InterestCalculator:
 		return min(max(exit_dates, default=self.maturity_date), self.maturity_date)
 
 	def get_interest(self, start, end, compounded_interest=0):
-		"""Interest for the period; `compounded_interest` is the interest of earlier periods that a
-		cumulative deposit has added to its balance."""
+		"""Interest for the period, also on `compounded_interest` that a cumulative deposit added to it."""
 		interest = 0
 		for piece_start, piece_end in self.split_at_balance_changes(start, end):
 			principal = sum(lot.get_quantity(piece_start) for lot in self.lots) * self.unit_value
