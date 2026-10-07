@@ -39,3 +39,27 @@ class BaseStockEntry:
 
 		if msg:
 			frappe.throw(msg)
+
+	def validate_alternative_items(self):
+		if not self.wo_doc:
+			return
+
+		from erpnext.stock.doctype.item_alternative.item_alternative import is_alternative_item
+
+		for row in self.doc.items:
+			if not row.original_item or row.original_item == row.item_code:
+				continue
+
+			if not self.wo_doc.allow_alternative_item:
+				frappe.throw(
+					_("Row #{0}: Work Order {1} does not allow alternative items").format(
+						row.idx, frappe.bold(self.doc.work_order)
+					)
+				)
+
+			if not is_alternative_item(row.original_item, row.item_code):
+				frappe.throw(
+					_("Row #{0}: Item {1} is not an alternative of Item {2}").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(row.original_item)
+					)
+				)

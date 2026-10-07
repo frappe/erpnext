@@ -84,6 +84,18 @@ class ItemAlternative(Document):
 			frappe.throw(_("Record already exists for the item {0}").format(self.item_code))
 
 
+def is_alternative_item(item_code, alternative_item_code):
+	return bool(
+		frappe.db.exists(
+			"Item Alternative", {"item_code": item_code, "alternative_item_code": alternative_item_code}
+		)
+		or frappe.db.exists(
+			"Item Alternative",
+			{"item_code": alternative_item_code, "alternative_item_code": item_code, "two_way": 1},
+		)
+	)
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_items(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
