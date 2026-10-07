@@ -282,15 +282,17 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 
 	def test_opening_balances_follow_user_permissions(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 		from erpnext.accounts.utils import get_fiscal_year
 
 		fiscal_year, year_start, year_end = get_fiscal_year(today(), company="_Test Company")
-		self.make_accounts_and_entry(500, year_start)
+		_, credit_account = self.make_accounts_and_entry(500, year_start)
 		permitted_account = create_account(
 			account_name="_Test Trial Balance Permitted",
 			company="_Test Company",
 			parent_account="Current Assets - _TC",
 		)
+		make_journal_entry(permitted_account, credit_account, 200, posting_date=year_start, submit=True)
 		filters = frappe._dict(
 			company="_Test Company",
 			fiscal_year=fiscal_year,
@@ -305,7 +307,7 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 			total_row = execute(frappe._dict(filters))[1][-1]
 		finally:
 			frappe.set_user("Administrator")
-		self.assertEqual((total_row["opening_debit"], total_row["opening_credit"]), (0, 0))
+		self.assertEqual((total_row["opening_debit"], total_row["opening_credit"]), (200, 0))
 
 		frappe.set_user(
 			make_restricted_user("test_trial_balance_company@example.com", "Company", "_Test Company 1")
@@ -314,6 +316,13 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, execute, frappe._dict(filters))
 		finally:
 			frappe.set_user("Administrator")
+
+		frappe.set_user(make_auditor("test_trial_balance_auditor@example.com"))
+		try:
+			total_row = execute(frappe._dict(filters))[1][-1]
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual(total_row["opening_debit"], total_row["opening_credit"])
 
 	def close_fiscal_year_2021_for_pcv_company(self):
 		"""Post a 400 balance to Cash - TPC in FY 2021 and close it with a PCV. Returns the surplus account."""
@@ -363,4 +372,12 @@ def make_restricted_user(user, doctype, value):
 			}
 		).insert()
 	frappe.permissions.add_user_permission(doctype, value, user)
+	return user
+
+
+def make_auditor(user):
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{"doctype": "User", "email": user, "first_name": "Trial Balance", "roles": [{"role": "Auditor"}]}
+		).insert()
 	return user

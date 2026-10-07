@@ -42,7 +42,7 @@ def execute(filters=None):
 
 
 def validate_company_permission(company: str | None) -> None:
-	if company and not frappe.has_permission("Company", "read", company):
+	if company and not frappe.has_permission("Company", "select", company):
 		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
