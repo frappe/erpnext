@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Aagnya Mistry and contributors
 # For license information, please see license.txt
 
+from functools import partial
+
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Max, Min, Sum
@@ -42,7 +44,7 @@ def get_data(filters, period_ends):
 	net = [inflow - outflow for inflow, outflow in zip(total_in, total_out, strict=True)]
 	opening, closing = get_running_balances(get_opening_balance(filters), net)
 
-	row = lambda *args, **kwargs: make_row(filters.currency, *args, **kwargs)  # noqa: E731
+	row = partial(make_row, filters.currency)
 	return [
 		row(_("Opening Balance"), opening, bold=1, total=opening[0]),
 		row(_("Cash Inflows"), bold=1),
