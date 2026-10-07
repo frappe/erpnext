@@ -127,3 +127,15 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		cash_row = self.get_row(data, "Cash")
 		self.assertIsNotNone(cash_row, "Cash asset row missing from consolidated Balance Sheet")
 		self.assertGreaterEqual(flt(cash_row.get(CHILD_COMPANY)), amount)
+
+	def test_cash_flow_accumulated_profit_total_is_not_double_counted(self):
+		amount = 100
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", amount)
+
+		data = self.run_report(report="Cash Flow", accumulated_in_group_company=1)
+
+		profit_row = self.get_row(data, "Profit for the year")
+		self.assertIsNotNone(profit_row, "Profit for the year row missing from consolidated Cash Flow")
+		self.assertGreaterEqual(flt(profit_row.get(CHILD_COMPANY)), amount)
+		# the parent column already includes the child, so the total must not add the child again
+		self.assertEqual(flt(profit_row.get("total")), flt(profit_row.get(PARENT_COMPANY)))

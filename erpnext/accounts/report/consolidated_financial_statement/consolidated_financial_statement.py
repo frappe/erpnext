@@ -202,6 +202,10 @@ def get_income_expense_data(companies, fiscal_year, filters):
 		accumulated_values=bool(filters.accumulated_values),
 	)
 
+	# the group company column already includes its descendants, same as the income/expense rows
+	if net_profit_loss and filters.get("accumulated_in_group_company"):
+		net_profit_loss["total"] = flt(net_profit_loss.get(filters.company), 3)
+
 	return income, expense, net_profit_loss
 
 
