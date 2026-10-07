@@ -182,6 +182,36 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.credit, 0)
 		self.assertEqual(first_row.balance, -500)
 
+	def test_ledger_view_shows_journal_credit_to_the_supplier_as_credit(self):
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Credit Note",
+				"company": "_Test Company 6",
+				"posting_date": today(),
+				"accounts": [
+					{"account": "Write Off - _TC6", "debit_in_account_currency": 300},
+					{
+						"account": "Creditors - _TC6",
+						"party_type": "Supplier",
+						"party": "_Test Supplier",
+						"credit_in_account_currency": 300,
+					},
+				],
+			}
+		).submit()
+		filters = frappe._dict(
+			company="_Test Company 6",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier="_Test Supplier",
+		)
+
+		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == je.name)
+
+		self.assertEqual((row["debit"], row["credit"]), (0, 300))
+
 	def test_write_off_settles_the_payable_of_paid_and_unpaid_invoices(self):
 		write_off = {"write_off_amount": 100, "write_off_account": "Write Off - _TC6"}
 		unpaid = make_purchase_invoice(write_off)

@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
@@ -276,10 +277,11 @@ def get_journal_entries(filters, args):
 			je.total_amount.as_("base_grand_total"),
 			je.mode_of_payment,
 			journal_account.project,
+			journal_account.debit,
+			journal_account.credit,
 		)
 		.where(
-			(je.voucher_type == "Journal Entry")
-			& (je.docstatus == 1)
+			(je.docstatus == 1)
 			& (journal_account.party == filters.get(args.party))
 			& (journal_account.account.isin(args.party_account))
 		)
@@ -295,13 +297,14 @@ def get_journal_entries(filters, args):
 
 def get_payment_entries(filters, args):
 	pe = frappe.qb.DocType("Payment Entry")
+	paid_from_party = pe.paid_from.isin(args.party_account)
 	query = (
 		frappe.qb.from_(pe)
 		.select(
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
 			pe.posting_date,
-			pe[args.account_fieldname].as_(args.account),
+			Case().when(paid_from_party, pe.paid_from).else_(pe.paid_to).as_(args.account),
 			pe.party.as_(args.party),
 			pe.party_name.as_(args.party_name),
 			pe.remarks,
@@ -317,7 +320,7 @@ def get_payment_entries(filters, args):
 		.where(
 			(pe.docstatus == 1)
 			& (pe.party == filters.get(args.party))
-			& (pe[args.account_fieldname].isin(args.party_account))
+			& (paid_from_party | pe.paid_to.isin(args.party_account))
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
@@ -339,7 +342,31 @@ def get_payment_entries(filters, args):
 			) or 1
 			d.base_grand_total = flt(d.base_grand_total) + flt(deduction_totals.get(d.name)) / exchange_rate
 
+		set_party_ledger_amounts(payment_entries, filters.get(args.party), args.party_account)
+
 	return payment_entries
+
+
+def set_party_ledger_amounts(payment_entries, party, party_account):
+	"""Set each entry's debit and credit to the party account, in company currency, from its GL."""
+	gle = frappe.qb.DocType("GL Entry")
+	amounts = (
+		frappe.qb.from_(gle)
+		.select(gle.voucher_no, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
+		.where(
+			(gle.voucher_type == "Payment Entry")
+			& (gle.voucher_no.isin([d.name for d in payment_entries]))
+			& (gle.party == party)
+			& (gle.account.isin(party_account))
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_no)
+		.run(as_dict=True)
+	)
+	amounts = {d.voucher_no: d for d in amounts}
+	for d in payment_entries:
+		d.debit = flt(amounts.get(d.name, {}).get("debit"))
+		d.credit = flt(amounts.get(d.name, {}).get("credit"))
 
 
 def apply_common_conditions(filters, query, doctype, child_doctype=None, payments=False):
