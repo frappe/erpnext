@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case, Field, Table
+from frappe.query_builder import Case, Field
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt, getdate
@@ -206,7 +206,7 @@ def get_payment_entries(filters):
 def get_purchase_invoices(filters):
 	pi = frappe.qb.DocType("Purchase Invoice")
 	acc = frappe.qb.DocType("Account")
-	paid_amount = get_amount_in_bank_currency(filters.account, pi, pi.paid_amount, pi.base_paid_amount)
+	paid_amount = get_amount_in_bank_currency(filters, pi.paid_amount, pi.base_paid_amount)
 	return (
 		frappe.qb.from_(pi)
 		.inner_join(acc)
@@ -249,9 +249,7 @@ def get_pos_entries(filters):
 		.select(
 			ConstantColumn("Sales Invoice").as_("payment_document"),
 			si.name.as_("payment_entry"),
-			get_amount_in_bank_currency(filters.account, si, si_payment.amount, si_payment.base_amount).as_(
-				"debit"
-			),
+			get_amount_in_bank_currency(filters, si_payment.amount, si_payment.base_amount).as_("debit"),
 			si.posting_date,
 			si.debit_to.as_("against_account"),
 			si_payment.clearance_date,
@@ -330,9 +328,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	pi_amount = (
 		frappe.qb.from_(pi)
 		.select(
-			Sum(-get_amount_in_bank_currency(filters.account, pi, pi.paid_amount, pi.base_paid_amount)).as_(
-				"amount"
-			),
+			Sum(-get_amount_in_bank_currency(filters, pi.paid_amount, pi.base_paid_amount)).as_("amount"),
 		)
 		.where(
 			(pi.docstatus == 1)
@@ -349,10 +345,11 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	return je_amount + pe_amount + pi_amount
 
 
-def get_amount_in_bank_currency(bank_account: str, invoice: Table, amount: Field, base_amount: Field) -> Case:
-	"""Invoice amount as posted to the bank: the base amount unless the bank is in the invoice currency."""
-	bank_currency = frappe.get_cached_value("Account", bank_account, "account_currency")
-	return Case().when(invoice.currency == bank_currency, amount).else_(base_amount)
+def get_amount_in_bank_currency(filters: dict, amount: Field, base_amount: Field) -> Field:
+	"""Invoice amount as posted to the bank: the base amount when the bank is in company currency."""
+	bank_currency = frappe.get_cached_value("Account", filters.account, "account_currency")
+	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	return base_amount if bank_currency == company_currency else amount
 
 
 def get_balance_row(label, amount, account_currency):

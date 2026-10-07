@@ -64,6 +64,24 @@ class TestBankReconciliationStatement(ERPNextTestSuite):
 		self.assertEqual(rows["Outstanding Cheques and Deposits to clear"].credit, 8000)
 		self.assertEqual(rows["Calculated Bank Statement balance"].debit, 100000)
 
+	def test_invoice_paid_from_bank_in_third_currency(self):
+		self.bank = create_account(
+			account_name="_Test BRS EUR Bank",
+			parent_account="Bank Accounts - _TC",
+			account_type="Bank",
+			company="_Test Company",
+			account_currency="EUR",
+		)
+		invoice = self.make_paid_purchase_invoice(
+			rate=100, supplier="_Test Supplier USD", currency="USD", conversion_rate=80
+		)
+
+		rows = self.get_summary_rows("2025-09-10")
+
+		self.assertEqual(rows[invoice.name].credit, 100)
+		self.assertEqual(rows["Bank Statement balance as per General Ledger"].credit, 100)
+		self.assertEqual(rows["Calculated Bank Statement balance"].credit, 0)
+
 	def get_summary_rows(self, report_date, **filters):
 		filters = frappe._dict(company="_Test Company", account=self.bank, report_date=report_date, **filters)
 		return {
