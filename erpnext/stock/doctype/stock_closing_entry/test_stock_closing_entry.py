@@ -13,6 +13,7 @@ from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
 	prepare_closing_stock_balance,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -388,3 +389,38 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 		first.reload()
 		first.cancel()
 		self.assertEqual(first.docstatus, 2)
+
+	def make_generated_closing(self, to_date):
+		closing = self.submit_closing(self.make_closing(to_date))
+		prepare_closing_stock_balance(closing.name)
+		return closing
+
+	def test_stock_balance_filters_apply_to_closing_opening(self):
+		from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
+
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Closing Group",
+				"parent_item_group": "All Item Groups",
+			}
+		).insert(ignore_if_duplicate=True)
+		item = make_item(properties={"is_stock_item": 1, "item_group": item_group.name}).name
+		warehouse = create_warehouse("_Test Closing Child WH")
+		group_warehouse = frappe.db.get_value("Warehouse", warehouse, "parent_warehouse")
+
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=100, posting_date=add_days(today(), -30)
+		)
+		self.make_generated_closing(add_days(today(), -10))
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=2, rate=100, posting_date=add_days(today(), -2)
+		)
+
+		filters = frappe._dict(company=COMPANY, from_date=add_days(today(), -5), to_date=today())
+
+		rows = stock_balance(filters.copy().update(warehouse=[group_warehouse], item_code=[item]))[1]
+		self.assertEqual((rows[0]["opening_qty"], rows[0]["bal_qty"]), (10, 12))
+
+		rows = stock_balance(filters.copy().update(item_group=item_group.name))[1]
+		self.assertEqual({row["item_code"] for row in rows}, {item})

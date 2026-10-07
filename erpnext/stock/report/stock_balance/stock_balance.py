@@ -128,37 +128,42 @@ class StockBalanceReport:
 
 		self.start_from = add_days(stk_cl_obj.last_closing_balance.to_date, 1)
 
-		query_filters = {}
-		dimenion_keys = []
-		for field in self.filter_fields():
-			if not self.filters.get(field):
-				continue
-
-			if field in self.inventory_dimensions:
-				dimenion_keys.append(field)
-
-			query_filters[field] = self.filters.get(field)
-
-		if dimenion_keys:
-			query_filters["inventory_dimension_key"] = json.dumps(("item_code", "warehouse", *dimenion_keys))
-		else:
-			query_filters["inventory_dimension_key"] = ("is", "not set")
-
-		opening_entries = stk_cl_obj.get_stock_closing_balance(query_filters)
-		if not opening_entries:
-			return []
+		closing_entry = stk_cl_obj.last_closing_balance.name
+		opening_entries = self.get_closing_balance_query(closing_entry).run(as_dict=True)
 
 		# Batch wise rows carry no inventory dimension key either, but they share the item and
 		# warehouse group key with the item level row and would overwrite its opening.
 		return [d for d in opening_entries if not d.batch_no]
 
-	def filter_fields(self) -> list[str]:
-		fields = ["item_code", "warehouse"]
+	def get_closing_balance_query(self, stock_closing_entry):
+		closing = frappe.qb.DocType("Stock Closing Balance")
+		item_table = frappe.qb.DocType("Item")
 
+		query = (
+			frappe.qb.from_(closing)
+			.inner_join(item_table)
+			.on(closing.item_code == item_table.name)
+			.select(closing.star)
+			.where(closing.stock_closing_entry == stock_closing_entry)
+		)
+
+		query = self.apply_closing_dimension_filters(query, closing)
+		query = self.apply_warehouse_filters(query, closing)
+		return self.apply_items_filters(query, item_table)
+
+	def apply_closing_dimension_filters(self, query, closing):
+		dimension_keys = []
 		for field in self.inventory_dimensions:
-			fields.append(field)
+			if values := self.filters.get(field):
+				dimension_keys.append(field)
+				query = query.where(closing[field].isin(values if isinstance(values, list) else [values]))
 
-		return fields
+		if dimension_keys:
+			return query.where(
+				closing.inventory_dimension_key == json.dumps(("item_code", "warehouse", *dimension_keys))
+			)
+
+		return query.where(closing.inventory_dimension_key.isnull() | (closing.inventory_dimension_key == ""))
 
 	def prepare_sle_query(self):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
