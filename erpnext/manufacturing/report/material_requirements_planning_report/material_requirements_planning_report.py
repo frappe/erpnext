@@ -1310,7 +1310,7 @@ def convert_to_daily_bucket_data(data):
 def get_item_capacity(item_code, bucket_size):
 	capacity = frappe.db.get_value(
 		"Item Lead Time",
-		item_code,
+		{"item_code": item_code},
 		"capacity_per_day",
 	)
 
