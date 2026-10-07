@@ -190,6 +190,7 @@ class Customer(TransactionBase):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		self.validate_customer_group()
+		self.validate_lead_not_converted()
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
@@ -208,6 +209,18 @@ class Customer(TransactionBase):
 			total = sum(flt(member.allocated_percentage) for member in self.sales_team)
 			if flt(total, self.precision("allocated_percentage", "sales_team")) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
+
+	def validate_lead_not_converted(self):
+		if not (self.is_new() and self.lead_name):
+			return
+
+		if customer := frappe.db.exists("Customer", {"lead_name": self.lead_name}):
+			frappe.throw(
+				_("Lead {0} is already converted to Customer {1}").format(
+					frappe.bold(self.lead_name), get_link_to_form("Customer", customer)
+				),
+				frappe.DuplicateEntryError,
+			)
 
 	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
@@ -311,7 +324,7 @@ class Customer(TransactionBase):
 			)
 
 	def create_primary_contact(self):
-		if not self.customer_primary_contact and not self.lead_name:
+		if not self.customer_primary_contact and not self.lead_has_contact():
 			if self.mobile_no or self.email_id or self.first_name or self.last_name:
 				contact = make_contact(self)
 				self.db_set("customer_primary_contact", contact.name)
@@ -319,6 +332,15 @@ class Customer(TransactionBase):
 				self.db_set("email_id", self.email_id)
 		elif self.customer_primary_contact:
 			frappe.set_value("Contact", self.customer_primary_contact, "is_primary_contact", 1)  # ensure
+
+	def lead_has_contact(self) -> bool:
+		"""The lead's contacts are linked to the customer instead of making a new one."""
+		return bool(
+			self.lead_name
+			and frappe.db.exists(
+				"Dynamic Link", {"parenttype": "Contact", "link_doctype": "Lead", "link_name": self.lead_name}
+			)
+		)
 
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display

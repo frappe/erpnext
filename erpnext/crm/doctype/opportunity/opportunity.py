@@ -146,6 +146,15 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def on_update(self):
 		self.update_prospect()
+		if self.has_value_changed("status"):
+			self.update_lead_status()
+
+	def after_delete(self):
+		self.update_lead_status()
+
+	def update_lead_status(self):
+		if self.opportunity_from == "Lead" and frappe.db.exists("Lead", self.party_name):
+			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
 	def validate_qty(self):
 		for item in self.items:
