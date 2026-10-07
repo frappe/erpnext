@@ -117,7 +117,6 @@ class SerialBatchBundleService:
 				)
 
 	def validate_serialized_batch(self):
-		from erpnext.exceptions import BatchExpiredError
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		is_material_issue = False
@@ -150,17 +149,37 @@ class SerialBatchBundleService:
 				and self.doc.docstatus < 2
 			):
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
+				self.validate_batch_not_expired(d.idx, d.batch_no, expiry_date)
 
-				if expiry_date and getdate(expiry_date) < getdate(self.doc.posting_date):
-					frappe.throw(
-						_("Row #{0}: The batch {1} has already expired.").format(
-							d.idx,
-							get_link_to_form(
-								"Batch", d.batch_no, SerialBatchIdentity("Batch").get_label(d.batch_no)
-							),
-						),
-						BatchExpiredError,
-					)
+		if not is_material_issue:
+			self.validate_outward_bundle_batches()
+
+	def validate_batch_not_expired(self, idx, batch_no, expiry_date):
+		from erpnext.exceptions import BatchExpiredError
+
+		if expiry_date and getdate(expiry_date) < getdate(self.doc.posting_date):
+			frappe.throw(
+				_("Row #{0}: The batch {1} has already expired.").format(
+					idx,
+					get_link_to_form("Batch", batch_no, SerialBatchIdentity("Batch").get_label(batch_no)),
+				),
+				BatchExpiredError,
+			)
+
+	def validate_outward_bundle_batches(self):
+		if self.doc.get("is_return") or not self.doc.get("posting_date") or self.doc.docstatus == 2:
+			return
+
+		row_idx_by_bundle = {
+			d.serial_and_batch_bundle: d.idx
+			for d in self.doc.get("items")
+			if d.get("serial_and_batch_bundle") and flt(d.get("qty")) > 0
+		}
+		if not row_idx_by_bundle:
+			return
+
+		for row in get_expired_outward_bundle_batches(list(row_idx_by_bundle), self.doc.posting_date):
+			self.validate_batch_not_expired(row_idx_by_bundle[row.bundle], row.batch_no, row.expiry_date)
 
 	def clean_serial_nos(self):
 		from erpnext.stock.doctype.serial_no.serial_no import clean_serial_no_string
@@ -713,3 +732,24 @@ class SerialBatchBundleService:
 			)
 			.where((doctype.docstatus == 1) & (child_doc.batch_no.isin(batches)))
 		).run(as_dict=True)
+
+
+def get_expired_outward_bundle_batches(bundles, posting_date):
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	batch = frappe.qb.DocType("Batch")
+
+	return (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.join(batch)
+		.on(entry.batch_no == batch.name)
+		.select(bundle.name.as_("bundle"), entry.batch_no, batch.expiry_date)
+		.where(
+			bundle.name.isin(bundles)
+			& (bundle.type_of_transaction == "Outward")
+			& (batch.expiry_date < getdate(posting_date))
+		)
+		.run(as_dict=True)
+	)

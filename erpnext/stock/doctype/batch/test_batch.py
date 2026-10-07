@@ -277,6 +277,49 @@ class TestBatch(ERPNextTestSuite):
 			batch_no,
 		)
 
+	def make_delivery_note_with_bundle(self, receipt, batch_no, qty):
+		bundle_id = (
+			SerialBatchCreation(
+				{
+					"item_code": receipt.items[0].item_code,
+					"warehouse": receipt.items[0].warehouse,
+					"actual_qty": qty,
+					"voucher_type": "Delivery Note",
+					"batches": frappe._dict({batch_no: qty}),
+					"type_of_transaction": "Outward",
+					"company": receipt.company,
+					"do_not_submit": 1,
+				}
+			)
+			.make_serial_and_batch_bundle()
+			.name
+		)
+
+		return frappe.get_doc(
+			doctype="Delivery Note",
+			customer="_Test Customer",
+			company=receipt.company,
+			items=[
+				dict(
+					item_code=receipt.items[0].item_code,
+					qty=qty,
+					rate=10,
+					warehouse=receipt.items[0].warehouse,
+					serial_and_batch_bundle=bundle_id,
+				)
+			],
+		)
+
+	def test_expired_batch_in_bundle_cannot_be_delivered(self):
+		from erpnext.exceptions import BatchExpiredError
+
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_to_date(getdate(), days=-5))
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		self.assertRaises(BatchExpiredError, delivery_note.insert)
+
 	def test_batch_negative_stock_error(self):
 		"""Test automatic batch selection for outgoing items"""
 		receipt = self.test_purchase_receipt(100)
