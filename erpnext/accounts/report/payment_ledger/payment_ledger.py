@@ -190,7 +190,13 @@ class PaymentLedger:
 			)
 		)
 		self.columns.append(
-			dict(label=_("Party"), fieldname="party", fieldtype="data", options=options, width="100")
+			dict(
+				label=_("Party"),
+				fieldname="party",
+				fieldtype="Dynamic Link",
+				options="party_type",
+				width="100",
+			)
 		)
 		self.columns.append(
 			dict(
