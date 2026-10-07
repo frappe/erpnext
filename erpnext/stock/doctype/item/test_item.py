@@ -1169,10 +1169,42 @@ class TestItem(FrappeTestCase):
 			5,
 		)
 
+<<<<<<< HEAD
 	def test_opening_stock_for_batch_without_series(self):
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
+=======
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_opening_stock_as_string(self):
+		zero_stock_item = make_item(properties={"has_serial_no": 1, "opening_stock": "0"})
+
+		self.assertEqual(zero_stock_item.opening_stock, 0)
+		self.assertFalse(frappe.db.exists("Stock Reconciliation Item", {"item_code": zero_stock_item.name}))
+
+		stock_item = make_item(
+			properties={
+				"has_serial_no": 1,
+				"opening_stock": "5",
+				"serial_no_series": "SN-STR-.####",
+				"valuation_rate": 100,
+			}
+		)
+
+		self.assertEqual(stock_item.opening_stock, 5)
+		self.assertTrue(frappe.db.exists("Stock Reconciliation Item", {"item_code": stock_item.name}))
+
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_opening_stock_for_serial_batch(self):
+		items = {
+			"Test Opening Stock for Serial No": {
+				"has_serial_no": 1,
+				"opening_stock": 5,
+				"serial_no_series": "SN-TOPN-.####",
+				"valuation_rate": 100,
+			},
+			"Test Opening Stock for Batch No": {
+>>>>>>> 4a8a94a (fix(stock): normalize Item opening stock before comparison)
 				"has_batch_no": 1,
 				"create_new_batch": 1,
 				"opening_stock": 5,

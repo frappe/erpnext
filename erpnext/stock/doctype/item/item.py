@@ -178,6 +178,18 @@ class Item(Document):
 			for default in self.item_defaults or [frappe._dict()]:
 				self.add_price(default.default_price_list)
 
+<<<<<<< HEAD
+=======
+			frappe.msgprint(
+				_("Item Price created at rate {0}").format(
+					frappe.format(self.standard_rate, {"fieldtype": "Currency"})
+				),
+				indicator="green",
+				alert=True,
+			)
+
+		self.opening_stock = flt(self.opening_stock)
+>>>>>>> 4a8a94a (fix(stock): normalize Item opening stock before comparison)
 		if self.opening_stock:
 			self.set_opening_stock()
 
