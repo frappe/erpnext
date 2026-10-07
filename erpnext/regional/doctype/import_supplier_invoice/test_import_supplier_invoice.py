@@ -69,6 +69,15 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Purchase Invoice", {"bill_no": "ISI-XX"}))
 		self.assertEqual((doc.file_count, doc.purchase_invoices_count), (4, 2))
 
+	def test_a_damaged_file_does_not_stop_the_rest(self):
+		service = [make_line("Service", "10.00", "10.00")]
+		files = {"1.xml": "<damaged/>", "2.xml": make_invoice_xml("ISI-AFTER-DAMAGED", service)}
+		doc = self.import_files(files, damaged_file="1.xml")
+
+		self.assertEqual(doc.status, "Partially Completed - Check Error Log")
+		self.assertEqual(self.get_invoice("ISI-AFTER-DAMAGED").grand_total, 10)
+		self.assertEqual((doc.file_count, doc.purchase_invoices_count), (2, 1))
+
 	def test_credit_notes_are_imported_as_returns(self):
 		negative = [make_line("Return one", "-50.00", "-50.00"), make_line("Return two", "-30.00", "-30.00")]
 		positive = [make_line("Return one", "50.00", "50.00"), make_line("Return two", "30.00", "30.00")]
@@ -178,9 +187,9 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 
 		self.assertNotEqual(second.name, first.name)
 
-	def import_files(self, files: dict[str, str | bytes], **settings):
+	def import_files(self, files: dict[str, str | bytes], damaged_file: str | None = None, **settings):
 		doc = self.make_import(**settings)
-		doc.zip_file = make_zip_attachment(doc, files).file_url
+		doc.zip_file = make_zip_attachment(doc, files, damaged_file).file_url
 		doc.save()
 		doc.import_xml_data()
 		return doc
@@ -202,17 +211,23 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		return frappe.get_doc("Purchase Invoice", {"bill_no": bill_no})
 
 
-def make_zip_attachment(doc, files: dict[str, str | bytes]):
+def make_zip_attachment(doc, files: dict[str, str | bytes], damaged_file: str | None = None):
 	buffer = io.BytesIO()
 	with zipfile.ZipFile(buffer, "w") as zip_file:
 		for name, content in files.items():
 			zip_file.writestr(name, content)
 
+	content = buffer.getvalue()
+	if damaged_file:
+		# reversing the stored bytes breaks the member's CRC
+		stored = files[damaged_file].encode()
+		content = content.replace(stored, stored[::-1])
+
 	return frappe.get_doc(
 		{
 			"doctype": "File",
 			"file_name": f"{frappe.generate_hash(length=8)}.zip",
-			"content": buffer.getvalue(),
+			"content": content,
 			"attached_to_doctype": doc.doctype,
 			"attached_to_name": doc.name,
 			"is_private": 1,

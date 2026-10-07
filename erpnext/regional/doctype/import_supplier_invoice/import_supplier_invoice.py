@@ -86,9 +86,22 @@ class ImportSupplierInvoice(Document):
 					self.log_signed_file(file_name)
 					continue
 
-				content = get_file_content(file_name, zf)
+				try:
+					content = get_file_content(file_name, zf)
+				except Exception:
+					self.log_unreadable_file(file_name)
+					continue
+
 				file_content = bs(content, "xml")
 				self.prepare_data_for_import(file_content, file_name, content)
+
+	def log_unreadable_file(self, file_name: str) -> None:
+		self.file_count += 1
+		frappe.log_error(
+			title=_("Unable to read file {0}").format(file_name),
+			reference_doctype=self.doctype,
+			reference_name=self.name,
+		)
 
 	def log_signed_file(self, file_name: str) -> None:
 		self.file_count += 1
