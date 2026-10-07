@@ -74,6 +74,18 @@ class TestOpportunity(ERPNextTestSuite):
 		opp.set_status(update=True)
 		self.assertEqual(opp.status, "Open")
 
+		# a closed opportunity whose inactive quotation expires stays closed
+		closed = make_opportunity(with_items=0)
+		quotation = submit_quotation(closed, transaction_date=add_days(today(), -5), valid_till=today())
+		quotation.db_set({"is_active": 0, "valid_till": add_days(today(), -1)})
+		closed.reload()
+		closed.status = "Closed"
+		closed.save()
+
+		set_expired_status()
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Expired")
+		self.assertEqual(frappe.db.get_value("Opportunity", closed.name, "status"), "Closed")
+
 	def test_quotation_found_after_items_are_added_to_opportunity(self):
 		opp = make_opportunity(with_items=0)
 		submit_quotation(opp)

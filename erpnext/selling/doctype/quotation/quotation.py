@@ -576,4 +576,4 @@ def set_expired_status():
 	frappe.qb.update(quotation).set(quotation.status, "Expired").where(expiring).run()
 
 	for name in expired_quotations:
-		frappe.get_doc("Quotation", name).update_opportunity("Open")
+		frappe.get_doc("Quotation", name).update_opportunity(None)
