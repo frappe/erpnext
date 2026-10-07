@@ -114,17 +114,19 @@ class VATAuditReport:
 
 		tax_details = (
 			get_tax_details_query(doctype, self.tax_doctype)
+			.select(item_wise_tax.tax_row)
 			.where(item_wise_tax.parent.isin(invoice_names))
 			.where(taxes_and_charges.account_head.isin(self.sa_vat_accounts))
 			.run(as_dict=True)
 		)
+		actual_tax_rates = get_actual_tax_rates(tax_details)
 
 		for row in tax_details:
 			parent = row.parent
 			item = row.item_row
 			is_zero_rated = self.invoice_items.get(item)
-			if row.charge_type == "Actual" and row.taxable_amount:
-				row.rate = flt(row.amount / row.taxable_amount * 100, 2)
+			if row.charge_type == "Actual":
+				row.rate = actual_tax_rates.get(row.tax_row, 0)
 			if row.rate == 0 and not is_zero_rated:
 				continue
 
@@ -239,3 +241,18 @@ class VATAuditReport:
 			{"fieldname": "tax_amount", "label": "Tax Amount", "fieldtype": "Currency", "width": 130},
 			{"fieldname": "gross_amount", "label": "Gross Amount", "fieldtype": "Currency", "width": 130},
 		]
+
+
+def get_actual_tax_rates(tax_details: list[dict]) -> dict[str, float]:
+	"""Rate of each Actual tax row on its whole taxable amount, so its items aren't split by rounding."""
+	totals = {}
+	for row in tax_details:
+		if row.charge_type == "Actual":
+			amount, taxable_amount = totals.get(row.tax_row, (0.0, 0.0))
+			totals[row.tax_row] = (amount + flt(row.amount), taxable_amount + flt(row.taxable_amount))
+
+	return {
+		tax_row: flt(amount / taxable_amount * 100, 2)
+		for tax_row, (amount, taxable_amount) in totals.items()
+		if taxable_amount
+	}

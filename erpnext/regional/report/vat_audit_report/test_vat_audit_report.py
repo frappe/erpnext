@@ -105,6 +105,29 @@ class TestVATAuditReport(ERPNextTestSuite):
 		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == si.name)
 		self.assertEqual((row["net_amount"], row["tax_amount"]), (500, 75))
 
+	def test_actual_vat_is_one_rate_per_invoice(self):
+		make_item("_Test SA VAT Item 2")
+		si = make_sa_sales_invoice("_Test SA VAT Item", 500.0)
+		si.append(
+			"items", {**si.items[0].as_dict(), "name": None, "item_code": "_Test SA VAT Item 2", "rate": 0.99}
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "VAT - 15% - _TCSV",
+				"cost_center": "Main - _TCSV",
+				"description": "VAT 15%",
+				"tax_amount": 75.15,
+			},
+		)
+		si.submit()
+
+		filters = {"company": self.company, "from_date": today(), "to_date": today()}
+		rows = [row for row in execute(filters)[1] if row.get("voucher_no") == si.name]
+		self.assertEqual(len(rows), 1)
+		self.assertEqual((rows[0]["net_amount"], rows[0]["tax_amount"]), (500.99, 75.15))
+
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
