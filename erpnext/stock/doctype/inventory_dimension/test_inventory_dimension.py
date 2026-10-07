@@ -78,6 +78,34 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		self.assertFalse(custom_field)
 
+	def test_delete_dimension_removes_only_its_own_custom_fields(self):
+		dimension = create_inventory_dimension(
+			reference_document="Shelf",
+			dimension_name="Shelf Cleanup",
+			apply_to_all_doctypes=1,
+			do_not_save=True,
+		)
+		dimension.set_source_and_target_fieldname()
+		custom_field_filters = []
+		get_all = frappe.get_all
+
+		def record_custom_field_filters(doctype, *args, **kwargs):
+			if doctype == "Custom Field":
+				custom_field_filters.append(kwargs["filters"])
+				return []
+			return get_all(doctype, *args, **kwargs)
+
+		with patch("frappe.get_all", side_effect=record_custom_field_filters):
+			dimension.delete_custom_fields()
+
+		doctypes = {filters.get("dt") for filters in custom_field_filters}
+		self.assertNotIn(None, doctypes)
+		self.assertNotIn("Customer", doctypes)
+		self.assertTrue({"Stock Entry Detail", "Stock Ledger Entry", "Stock Closing Balance"} <= doctypes)
+
+		with patch.object(type(dimension), "has_stock_ledger", return_value=[frappe._dict(name="SLE")]):
+			self.assertRaises(DoNotChangeError, dimension.on_trash)
+
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
 		warehouse = "Shelf Warehouse - _TC"

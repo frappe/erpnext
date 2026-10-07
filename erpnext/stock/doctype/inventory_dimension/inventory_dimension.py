@@ -93,29 +93,44 @@ class InventoryDimension(Document):
 				frappe.throw(_(msg), DoNotChangeError)
 
 	def on_trash(self):
+		if self.has_stock_ledger():
+			frappe.throw(
+				_("Inventory Dimension {0} cannot be deleted as stock transactions exist against it").format(
+					bold(self.name)
+				),
+				DoNotChangeError,
+			)
+
 		self.delete_custom_fields()
 
 	def delete_custom_fields(self):
-		filters = {
-			"fieldname": (
-				"in",
-				[
-					self.source_fieldname,
-					f"to_{self.source_fieldname}",
-					f"from_{self.source_fieldname}",
-					f"rejected_{self.source_fieldname}",
-				],
-			)
-		}
+		document_fieldnames = [
+			self.source_fieldname,
+			f"to_{self.source_fieldname}",
+			f"from_{self.source_fieldname}",
+			f"rejected_{self.source_fieldname}",
+		]
 
-		if self.document_type:
-			filters["dt"] = self.document_type
+		for doctype in self.get_dimension_doctypes():
+			for field in frappe.get_all(
+				"Custom Field", filters={"dt": doctype, "fieldname": ("in", document_fieldnames)}
+			):
+				frappe.delete_doc("Custom Field", field.name)
 
-		for field in frappe.get_all("Custom Field", filters=filters):
-			frappe.delete_doc("Custom Field", field.name)
+		for doctype in ("Stock Ledger Entry", "Stock Closing Balance"):
+			for field in frappe.get_all(
+				"Custom Field", filters={"dt": doctype, "fieldname": self.target_fieldname}
+			):
+				frappe.delete_doc("Custom Field", field.name)
 
 		msg = f"Deleted custom fields related to the dimension {self.name}"
 		frappe.msgprint(_(msg))
+
+	def get_dimension_doctypes(self):
+		if not self.apply_to_all_doctypes:
+			return [self.document_type]
+
+		return [row[0] for row in get_inventory_documents()]
 
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
