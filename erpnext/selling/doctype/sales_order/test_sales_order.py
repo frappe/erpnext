@@ -347,6 +347,37 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(dn.doctype, "Delivery Note")
 		self.assertEqual(len(dn.get("items")), len(so.get("items")))
 
+	def test_over_delivery_of_fully_delivered_rows(self):
+		item_list = []
+		for item_name in ("_Test Over Delivery Item A", "_Test Over Delivery Item B"):
+			item = make_item(item_name, {"is_stock_item": 1, "over_delivery_receipt_allowance": 50}).name
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=20, rate=100)
+			item_list.append(
+				{"item_code": item, "qty": 10, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+			)
+
+		so = make_sales_order(item_list=item_list)
+		first_row, second_row = (row.name for row in so.items)
+
+		def deliver(*selected_rows):
+			return make_delivery_note(so.name, kwargs={"filtered_children": list(selected_rows)})
+
+		def get_mapped_rows(*selected_rows):
+			return [(row.so_detail, row.qty) for row in deliver(*selected_rows).items]
+
+		deliver(first_row).submit()
+		self.assertEqual(get_mapped_rows(), [(second_row, 10)])
+		self.assertEqual(get_mapped_rows(first_row, second_row), [(first_row, 5), (second_row, 10)])
+
+		deliver(second_row).submit()
+		self.assertEqual(get_mapped_rows(), [(first_row, 5), (second_row, 5)])
+
+		deliver(first_row).submit()
+		self.assertEqual(get_mapped_rows(), [(second_row, 5)])
+
+		deliver(second_row).submit()
+		self.assertEqual(get_mapped_rows(), [])
+
 	def test_make_production_plan(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
