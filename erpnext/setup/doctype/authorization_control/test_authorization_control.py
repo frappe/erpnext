@@ -9,6 +9,28 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_direct_rate_discount_is_checked_for_item_and_group(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		order = frappe._dict(
+			items=[
+				frappe._dict(
+					price_list_rate=4200,
+					rate=2100,
+					discount_percentage=0,
+					item_code="_Test Item",
+					item_group="Products",
+				)
+			]
+		)
+		with patch.object(controller, "validate_auth_rule") as check:
+			for basis, master_name in (
+				("Itemwise Discount", "_Test Item"),
+				("Item Group wise Discount", "Products"),
+			):
+				controller.bifurcate_based_on_type("Sales Order", 2100, 0, basis, order, 0, "_Test Company")
+				self.assertEqual(check.call_args.args[1], 50)
+				self.assertEqual(check.call_args.args[-1], master_name)
+
 	def test_foreign_currency_additional_discount_uses_base_amount(self):
 		frappe.get_doc(
 			{
