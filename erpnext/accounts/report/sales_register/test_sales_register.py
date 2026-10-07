@@ -199,6 +199,29 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		)
 		self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
 
+	def test_group_filters_need_no_access_to_the_tree(self):
+		si = self.create_sales_invoice()
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "_test_sr_accounts_manager@example.com",
+				"first_name": "Accounts Manager",
+			}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles("Accounts Manager")
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			customer_group="All Customer Groups",
+		)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_sales_register_ignores_tax_rows_from_other_doctype(self):
 		si = self.create_sales_invoice(rate=98)
 

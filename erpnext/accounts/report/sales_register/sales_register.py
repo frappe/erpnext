@@ -503,7 +503,7 @@ def get_invoices(filters, additional_query_columns):
 	if filters.get("customer_group"):
 		customer_groups = [
 			filters.customer_group,
-			*get_descendants_of("Customer Group", filters.customer_group),
+			*get_descendants_of("Customer Group", filters.customer_group, ignore_permissions=True),
 		]
 		query = query.where(si.customer_group.isin(customer_groups))
 
