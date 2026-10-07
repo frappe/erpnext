@@ -248,6 +248,7 @@ class StockClosingEntry(Document):
 			if row.fifo_queue is not None:
 				row.fifo_queue = json.dumps(row.fifo_queue)
 
+			set_stock_value_and_valuation_rate(row)
 			new_doc = frappe.new_doc("Stock Closing Balance")
 			new_doc.update(row)
 			new_doc.posting_date = self.to_date
@@ -268,6 +269,11 @@ class StockClosingEntry(Document):
 			return parse_json(data)
 
 		return frappe._dict({})
+
+
+def set_stock_value_and_valuation_rate(row):
+	row.stock_value = flt(row.stock_value_difference)
+	row.valuation_rate = flt(row.stock_value / row.actual_qty) if row.actual_qty else 0.0
 
 
 def prepare_closing_stock_balance(name):
