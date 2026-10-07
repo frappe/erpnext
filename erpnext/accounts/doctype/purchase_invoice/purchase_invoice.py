@@ -43,7 +43,6 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
-from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	update_billed_amount_based_on_po,
 )
@@ -416,25 +415,7 @@ class PurchaseInvoice(BuyingController):
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1
 
-		if not for_validate:
-			self.set_transaction_date_exchange_rate()
-
 		super().set_missing_values(for_validate)
-
-	def set_transaction_date_exchange_rate(self):
-		"""Replace the exchange rate mapped from a Purchase Order with the posting date rate."""
-		if not (
-			self.currency
-			and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
-			and any(item.purchase_order for item in self.items)
-			and not any(item.purchase_receipt for item in self.items)
-		):
-			return
-
-		self.use_transaction_date_exchange_rate = 1
-		self.conversion_rate = get_exchange_rate(
-			self.currency, self.company_currency, self.posting_date, "for_buying"
-		)
 
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
