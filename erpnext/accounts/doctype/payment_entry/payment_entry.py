@@ -2775,12 +2775,8 @@ def get_account_details(account, date, cost_center=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_company_defaults(company):
-=======
-def get_company_defaults(company: str):
 	frappe.has_permission("Company", doc=company, throw=True)
->>>>>>> 3786f67 (fix: add permission check for `get_company_defaults` (#60167))
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
