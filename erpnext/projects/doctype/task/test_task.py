@@ -469,6 +469,21 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Task", child.name))
 
+	def test_child_tasks_are_listed_only_for_a_readable_task(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+		from erpnext.projects.doctype.task.task import check_if_child_exists
+
+		group = create_task("_Test Group Hidden From User", is_group=1)
+		create_task("_Test Child Hidden From User", parent_task=group.name)
+		user = create_user("test_task_child_lister@example.com", "Projects User")
+		other_project = make_project({"project_name": "_Test Project Child Lister"}).name
+		frappe.permissions.add_user_permission("Project", other_project, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, check_if_child_exists, group.name)
+
 
 def create_task(
 	subject,
