@@ -33,6 +33,13 @@ class TestPaymentLedger(ERPNextTestSuite):
 		self.assertEqual(outstanding[0].get("amount"), 0)
 
 	def test_rows_limited_to_permitted_parties(self):
+		self.assertEqual(self.get_parties_visible_with_permission(), {"_Test Customer"})
+
+	def test_party_permission_for_other_doctype_does_not_limit_rows(self):
+		parties = self.get_parties_visible_with_permission(applicable_for="Sales Invoice")
+		self.assertTrue({"_Test Customer", "_Test Customer 1"}.issubset(parties))
+
+	def get_parties_visible_with_permission(self, applicable_for=None):
 		for customer in ("_Test Customer", "_Test Customer 1"):
 			create_sales_invoice(
 				company=self.company,
@@ -49,7 +56,9 @@ class TestPaymentLedger(ERPNextTestSuite):
 			frappe.get_doc(
 				{"doctype": "User", "email": user, "first_name": "PL", "roles": [{"role": "Accounts User"}]}
 			).insert()
-		frappe.permissions.add_user_permission("Customer", "_Test Customer", user)
+		frappe.permissions.add_user_permission(
+			"Customer", "_Test Customer", user, applicable_for=applicable_for
+		)
 
 		frappe.set_user(user)
 		try:
@@ -57,4 +66,4 @@ class TestPaymentLedger(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertEqual({row.party for row in data if row.party}, {"_Test Customer"})
+		return {row.party for row in data if row.party}

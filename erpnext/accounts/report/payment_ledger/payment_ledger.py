@@ -136,10 +136,13 @@ class PaymentLedger:
 			if party_type not in user_permissions:
 				continue
 
-			allowed_parties = get_allowed_docs_for_doctype(user_permissions[party_type], party_type)
-			self.conditions.append(
-				(self.ple.party_type != party_type) | self.ple.party.isin(allowed_parties or [""])
+			allowed_parties = get_allowed_docs_for_doctype(
+				user_permissions[party_type], "Payment Ledger Entry"
 			)
+			if allowed_parties:
+				self.conditions.append(
+					(self.ple.party_type != party_type) | self.ple.party.isin(allowed_parties)
+				)
 
 	def get_data(self):
 		ple = self.ple
