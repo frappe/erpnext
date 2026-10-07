@@ -1757,10 +1757,51 @@ class TestStockEntry(ERPNextTestSuite):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 
+		entry = self.make_manufacture_entry_with_manually_rated_row(rm_item, fg_item)
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 150])
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 750])
+
+	def test_manufacture_never_gives_finished_good_row_a_negative_rate(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+		entry = self.make_manufacture_entry_with_manually_rated_row(
+			rm_item, fg_item, posting_date=add_days(today(), -5)
+		)
+
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=90,
+			basic_rate=1,
+			posting_date=add_days(today(), -8),
+		)
+		for repost in frappe.get_all(
+			"Repost Item Valuation", filters={"item_code": rm_item, "docstatus": 1, "status": "Queued"}
+		):
+			repost_sl_entries(frappe.get_doc("Repost Item Valuation", repost.name))
+
+		entry.load_from_db()
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 0])
+		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 0])
+
+	def make_manufacture_entry_with_manually_rated_row(self, rm_item, fg_item, posting_date=None):
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = "_Test Company"
 		entry.purpose = "Manufacture"
 		entry.set_stock_entry_type()
+		if posting_date:
+			entry.set_posting_time = 1
+			entry.posting_date = posting_date
 		entry.fg_completed_qty = 10
 		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
 		entry.append(
@@ -1780,10 +1821,7 @@ class TestStockEntry(ERPNextTestSuite):
 		entry.insert()
 		entry.submit()
 		entry.load_from_db()
-
-		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 150])
-		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
-		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 750])
+		return entry
 
 	def test_manufacture_gives_zero_valued_finished_good_row_no_cost(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name

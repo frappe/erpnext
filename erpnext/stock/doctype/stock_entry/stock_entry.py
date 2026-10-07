@@ -1871,7 +1871,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				bom_items = self.get_bom_raw_materials(finished_item_qty + manual_qty)
 				outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
 
-		return flt((outgoing_items_cost - scrap_items_cost - manual_cost) / finished_item_qty)
+		return flt(max(outgoing_items_cost - scrap_items_cost - manual_cost, 0) / finished_item_qty)
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
