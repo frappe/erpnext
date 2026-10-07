@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.buying.test_utils import create_user_with_roles
 from erpnext.regional.united_arab_emirates.setup import add_permissions
 from erpnext.regional.united_arab_emirates.utils import get_tax_accounts
 from erpnext.tests.utils import ERPNextTestSuite
@@ -40,10 +41,14 @@ class TestUAEVATSettings(ERPNextTestSuite):
 				"country": "United Arab Emirates",
 			}
 		).insert()
-		vat_account = frappe.db.get_value("Account", {"company": company.name, "account_type": "Tax"})
+		vat_account = get_account(company.name)
 		make_settings(company.name, [vat_account]).insert()
 
+		create_user_with_roles("test_uae_vat_hr_manager@example.com", "HR Manager")
+		frappe.set_user("test_uae_vat_hr_manager@example.com")
+		self.addCleanup(frappe.set_user, "Administrator")
 		frappe.rename_doc("Company", company.name, "_Test UAE Renamed")
+		frappe.set_user("Administrator")
 
 		self.assertEqual(list(get_tax_accounts("_Test UAE Renamed")), [vat_account])
 
