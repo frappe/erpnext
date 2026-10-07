@@ -79,6 +79,25 @@ class TestAccountBalance(ERPNextTestSuite):
 
 		self.assertEqual(sales_balance() - before, -30)
 
+	def test_year_start_resolved_per_company_without_company_filter(self):
+		frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": "_Test AB Fiscal Year 2026-27",
+				"year_start_date": "2026-04-01",
+				"year_end_date": "2027-03-31",
+				"companies": [{"company": "_Test Company 2"}],
+			}
+		).insert()
+		self.addCleanup(frappe.cache().delete_key, "fiscal_years")
+		create_sales_invoice(posting_date="2026-02-01", rate=70)
+
+		def sales_balance(company=None):
+			filters = {"company": company, "report_date": "2026-10-15", "root_type": "Income"}
+			return next(row["balance"] for row in execute(filters)[1] if row["account"] == "Sales - _TC")
+
+		self.assertEqual(sales_balance(), sales_balance("_Test Company"))
+
 	def test_account_restrictions_are_applied(self):
 		make_sales_invoice()
 		filters = {"company": "_Test Company 2", "report_date": getdate()}
