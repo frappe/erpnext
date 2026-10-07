@@ -193,11 +193,9 @@ class TestBalanceSheet(ERPNextTestSuite):
 			cc.company = COMPANY
 			cc.insert()
 			cost_centers.append(cc.name)
+		cc_a, cc_b = cost_centers
 
-		# Profit earned last year and never closed: cash lands on the Balance Sheet,
-		# the matching income stays in a P&L account, so the opening position is short.
-		last_year = add_years(today(), -1)
-		for cost_center, amount in zip(cost_centers, (300, 500), strict=True):
+		def book_sale(cost_center, amount, posting_date=None):
 			make_journal_entry(
 				[
 					dict(
@@ -213,8 +211,17 @@ class TestBalanceSheet(ERPNextTestSuite):
 						cost_center=cost_center,
 					),
 				],
-				posting_date=last_year,
+				posting_date=posting_date,
 			)
+
+		# last year's profit, never closed
+		last_year = add_years(today(), -1)
+		book_sale(cc_a, 300, last_year)
+		book_sale(cc_b, 500, last_year)
+
+		# this year's profit
+		book_sale(cc_a, 100)
+		book_sale(cc_b, 100)
 
 		# execute() rewrites period_start_date, so each run needs its own filters
 		def make_filters(accumulated_values):
@@ -228,33 +235,32 @@ class TestBalanceSheet(ERPNextTestSuite):
 				group_by_dimension="Cost Center",
 			)
 
-		def unclosed_row(data):
-			return next((r for r in data if "Unclosed Fiscal Years" in str(r.get("account_name", ""))), None)
-
 		period_list = build_period_list(make_filters(True))
-		_columns, data, message, *_ = execute(make_filters(True))
-
-		self.assertEqual(message, "Previous Financial Year is not closed")
-
-		unclosed = unclosed_row(data)
-		self.assertIsNotNone(unclosed)
 
 		def key_for(cost_center):
 			return next(p.key for p in period_list if p.dimension_value == cost_center)
 
-		self.assertEqual(unclosed[key_for(cost_centers[0])], 300)
-		self.assertEqual(unclosed[key_for(cost_centers[1])], 500)
-		self.assertEqual(unclosed["total"], 800)
+		def find_row(data, name):
+			return next((r for r in data if name in str(r.get("account_name", ""))), None)
 
-		# the carried-in amount is out of Provisional Profit / Loss, columns and Total alike
-		provisional = next(r for r in data if "Provisional Profit / Loss" in str(r.get("account_name", "")))
-		self.assertEqual(provisional[key_for(cost_centers[0])], 0)
-		self.assertEqual(provisional[key_for(cost_centers[1])], 0)
-		self.assertEqual(provisional["total"], sum(provisional[p.key] for p in period_list))
+		def values(row):
+			# (CC A, CC B, Total), as the report shows them
+			return (row[key_for(cc_a)], row[key_for(cc_b)], row["total"])
 
-		# unaccumulated columns show period movement, which an opening position does not belong in
-		_columns, data, *_ = execute(make_filters(False))
-		self.assertIsNone(unclosed_row(data))
+		# Accumulated: last year gets its own row, Provisional keeps only this year
+		_columns, data, message, *_ = execute(make_filters(True))
+		self.assertEqual(message, "Previous Financial Year is not closed")
+
+		unclosed = find_row(data, "Unclosed Fiscal Years")
+		self.assertIsNotNone(unclosed)
+		self.assertEqual(values(unclosed), (300, 500, 800))
+		self.assertEqual(values(find_row(data, "Provisional Profit / Loss")), (100, 100, 200))
+
+		# Not accumulated: columns are this year's movement only, nothing to split out
+		_columns, data, message, *_ = execute(make_filters(False))
+		self.assertEqual(message, "Previous Financial Year is not closed")
+		self.assertIsNone(find_row(data, "Unclosed Fiscal Years"))
+		self.assertEqual(values(find_row(data, "Provisional Profit / Loss")), (100, 100, 200))
 
 
 def make_journal_entry(rows, posting_date=None):

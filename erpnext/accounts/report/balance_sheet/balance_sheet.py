@@ -90,8 +90,14 @@ def execute(filters=None):
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
+
 	add_unclosed_fiscal_years_row(
-		data, provisional_profit_loss, opening_balance, period_list, currency, filters.accumulated_values
+		data,
+		provisional_profit_loss,
+		opening_balance,
+		period_list,
+		currency,
+		filters.accumulated_values,
 	)
 
 	if provisional_profit_loss:
@@ -205,7 +211,12 @@ def get_company_wide_opening_balance(opening_balance, period_list):
 
 
 def add_unclosed_fiscal_years_row(
-	data, provisional_profit_loss, opening_balance, period_list, currency, accumulated_values
+	data,
+	provisional_profit_loss,
+	opening_balance,
+	period_list,
+	currency,
+	accumulated_values,
 ):
 	# Opening balance is a position, not movement: it only belongs in accumulated columns
 	if not opening_balance or not accumulated_values:
@@ -340,14 +351,21 @@ def execute_snapshot_report(filters):
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(
 		asset, liability, equity, period_list, filters.company, currency
 	)
+
 	message, opening_balance = check_opening_balance(asset, liability, equity, period_list)
 
 	data = []
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
+
 	add_unclosed_fiscal_years_row(
-		data, provisional_profit_loss, opening_balance, period_list, currency, filters.accumulated_values
+		data,
+		provisional_profit_loss,
+		opening_balance,
+		period_list,
+		currency,
+		filters.accumulated_values,
 	)
 
 	if provisional_profit_loss:

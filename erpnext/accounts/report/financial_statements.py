@@ -446,16 +446,18 @@ def calculate_values(
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 	"""accumulate children's values in parent accounts"""
 	for account_row in reversed(accounts):
-		if account_row.parent_account:
-			parent = accounts_by_name[account_row.parent_account]
-			opening_balance = account_row.get("opening_balance") or {}
-			parent_opening_balance = parent.setdefault("opening_balance", {})
+		if not account_row.parent_account:
+			continue
 
-			for period in period_list:
-				parent[period.key] = parent.get(period.key, 0.0) + account_row.get(period.key, 0.0)
-				parent_opening_balance[period.key] = parent_opening_balance.get(
-					period.key, 0.0
-				) + opening_balance.get(period.key, 0.0)
+		parent = accounts_by_name[account_row.parent_account]
+		opening_balance = account_row.get("opening_balance") or {}
+		parent_opening_balance = parent.setdefault("opening_balance", {})
+
+		for period in period_list:
+			key = period.key
+
+			parent[key] = parent.get(key, 0.0) + account_row.get(key, 0.0)
+			parent_opening_balance[key] = parent_opening_balance.get(key, 0.0) + opening_balance.get(key, 0.0)
 
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency, accumulated_values):
@@ -539,18 +541,21 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 	}
 
 	for row in out:
-		if not row.get("parent_account"):
-			for period in period_list:
-				total_row.setdefault(period.key, 0.0)
-				total_row[period.key] += row.get(period.key, 0.0)
+		if row.get("parent_account"):
+			continue
 
-			total_row.setdefault("total", 0.0)
-			total_row["total"] += flt(row["total"])
-			for key, value in row["opening_balance"].items():
-				total_row["opening_balance"][key] = total_row["opening_balance"].get(key, 0.0) + value
+		for period in period_list:
+			total_row.setdefault(period.key, 0.0)
+			total_row[period.key] += row.get(period.key, 0.0)
+
+		total_row.setdefault("total", 0.0)
+		total_row["total"] += flt(row["total"])
+
+		for key, value in row["opening_balance"].items():
+			total_row["opening_balance"][key] = total_row["opening_balance"].get(key, 0.0) + value
 
 	if "total" in total_row:
-		# only the total row carries opening_balance onward; no column renders it
+		# not shown in the report; only the total row keeps it, for check_opening_balance
 		for row in out:
 			row.pop("opening_balance", None)
 
