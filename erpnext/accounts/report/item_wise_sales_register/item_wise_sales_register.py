@@ -575,28 +575,30 @@ def get_tax_accounts(
 	precision = frappe.get_precision(tax_doctype, "tax_amount", currency=company_currency) or 2
 	tax_columns = {}
 	itemised_tax = {}
+	column_keys = {}
 
 	for row in tax_details:
 		# keyed by account, as different accounts can share a description
 		account = row.account_head or handle_html(row.description)
-		column_key = frappe.scrub(account)
+		column_key = get_column_key(account, column_keys)
 
 		if column_key not in tax_columns and row.amount:
 			tax_columns[column_key] = account
 
 		rate = "NA" if row.rate == 0 else row.rate
-		itemised_tax.setdefault(row.item_row, {}).setdefault(
-			column_key,
-			frappe._dict(
+		item_taxes = itemised_tax.setdefault(row.item_row, {})
+		if column_key in item_taxes:
+			item_taxes[column_key].tax_rate = combine_tax_rates(item_taxes[column_key].tax_rate, rate)
+		else:
+			item_taxes[column_key] = frappe._dict(
 				{
 					"tax_rate": rate,
 					"tax_amount": 0,
 					"is_other_charges": 0 if row.account_type == "Tax" else 1,
 				}
-			),
-		)
+			)
 
-		itemised_tax[row.item_row][column_key].tax_amount += flt(row.amount, precision)
+		item_taxes[column_key].tax_amount += flt(row.amount, precision)
 
 	tax_columns_list = list(tax_columns.keys())
 	tax_columns_list.sort()
@@ -653,6 +655,28 @@ def get_tax_accounts(
 	]
 
 	return itemised_tax, tax_columns_list
+
+
+def get_column_key(account: str, column_keys: dict) -> str:
+	"""Return a unique column key for the account, as scrub maps e.g. "Tax-1" and "Tax 1" to the same key."""
+	if account not in column_keys:
+		key = frappe.scrub(account)
+		used_keys = set(column_keys.values())
+		suffix = 1
+		while key in used_keys:
+			suffix += 1
+			key = f"{frappe.scrub(account)}_{suffix}"
+		column_keys[account] = key
+
+	return column_keys[account]
+
+
+def combine_tax_rates(existing_rate: float | str, rate: float | str) -> float | str:
+	"""Sum rates of tax rows booked to the same account; "NA" if any of them has no rate."""
+	if "NA" in (existing_rate, rate):
+		return "NA"
+
+	return flt(existing_rate) + flt(rate)
 
 
 def get_tax_details_query(doctype, tax_doctype):

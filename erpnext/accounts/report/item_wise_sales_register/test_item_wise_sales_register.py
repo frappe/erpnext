@@ -176,6 +176,48 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(self.get_grand_total_row(data)["total_other_charges"], 10)
 		self.assertEqual(self.get_grand_total_row(data)["total"], 110)
 
+	def test_tax_rows_on_same_account_combine_rates(self):
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "_Test Account VAT - _TC", "description": "VAT A", "rate": 2},
+				{"account_head": "_Test Account VAT - _TC", "description": "VAT B", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		vat = frappe.scrub("_Test Account VAT - _TC")
+		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (4, 4))
+
+	def test_accounts_with_same_scrubbed_name_get_separate_columns(self):
+		accounts = [self.create_tax_account(name) for name in ("_Test Tax-1", "_Test Tax 1")]
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": accounts[0], "description": "Tax", "rate": 5},
+				{"account_head": accounts[1], "description": "Tax", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		columns, data = execute(filters)[:2]
+
+		amount_columns = {c["label"]: c["fieldname"] for c in columns if c["fieldname"].endswith("_amount")}
+		self.assertEqual(data[0][amount_columns[f"{accounts[0]} Amount"]], 5)
+		self.assertEqual(data[0][amount_columns[f"{accounts[1]} Amount"]], 2)
+
+	def create_tax_account(self, account_name):
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": account_name,
+				"parent_account": "Duties and Taxes - _TC",
+				"company": self.company,
+				"account_type": "Tax",
+			}
+		).insert()
+		return account.name
+
 	def get_grouped_data(self, **filters):
 		filters = frappe._dict(
 			from_date=today(), to_date=today(), company=self.company, group_by="Customer", **filters
