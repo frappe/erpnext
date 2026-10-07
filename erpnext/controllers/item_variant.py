@@ -457,8 +457,21 @@ def generate_keyed_value_combinations(args):
 
 
 def copy_attributes_to_variant(item, variant):
-	# copy non no-copy fields
+	exclude_fields = get_fields_excluded_from_variant_copy(item, variant)
 
+	allow_fields = [d.field_name for d in frappe.get_all("Variant Field", fields=["field_name"])]
+	if "variant_based_on" not in allow_fields:
+		allow_fields.append("variant_based_on")
+	for field in item.meta.fields:
+		# "Table" is part of `no_value_field` but we shouldn't ignore tables
+		if (field.reqd or field.fieldname in allow_fields) and field.fieldname not in exclude_fields:
+			copy_field_to_variant(item, variant, field)
+
+	variant.variant_of = item.name
+	set_variant_description(item, variant, allow_fields)
+
+
+def get_fields_excluded_from_variant_copy(item, variant):
 	exclude_fields = [
 		"naming_series",
 		"item_code",
@@ -473,25 +486,29 @@ def copy_attributes_to_variant(item, variant):
 		# don't copy manufacturer values if based on part no
 		exclude_fields += ["manufacturer", "manufacturer_part_no"]
 
-	allow_fields = [d.field_name for d in frappe.get_all("Variant Field", fields=["field_name"])]
-	if "variant_based_on" not in allow_fields:
-		allow_fields.append("variant_based_on")
-	for field in item.meta.fields:
-		# "Table" is part of `no_value_field` but we shouldn't ignore tables
-		if (field.reqd or field.fieldname in allow_fields) and field.fieldname not in exclude_fields:
-			if variant.get(field.fieldname) != item.get(field.fieldname):
-				if field.fieldtype == "Table":
-					variant.set(field.fieldname, [])
-					for d in item.get(field.fieldname):
-						row = copy.deepcopy(d)
-						if row.get("name"):
-							row.name = None
-						variant.append(field.fieldname, row)
-				else:
-					variant.set(field.fieldname, item.get(field.fieldname))
+	if not variant.is_new() and frappe.get_single_value("Item Variant Settings", "allow_different_uom"):
+		exclude_fields += ["stock_uom", "uoms"]
 
-	variant.variant_of = item.name
+	return exclude_fields
 
+
+def copy_field_to_variant(item, variant, field):
+	if variant.get(field.fieldname) == item.get(field.fieldname):
+		return
+
+	if field.fieldtype != "Table":
+		variant.set(field.fieldname, item.get(field.fieldname))
+		return
+
+	variant.set(field.fieldname, [])
+	for d in item.get(field.fieldname):
+		row = copy.deepcopy(d)
+		if row.get("name"):
+			row.name = None
+		variant.append(field.fieldname, row)
+
+
+def set_variant_description(item, variant, allow_fields):
 	if "description" not in allow_fields:
 		if not variant.description:
 			variant.description = ""
