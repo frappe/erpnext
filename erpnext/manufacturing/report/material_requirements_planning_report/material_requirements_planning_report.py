@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
@@ -267,22 +266,17 @@ class MaterialRequirementsPlanningReport:
 
 	def get_detailed_view_chart_data(self, data):
 		chart_data = frappe._dict({})
-		i = 0
 
 		sorted_data = sorted(data, key=lambda x: getdate(x.get("delivery_date")))
 		for row in sorted_data:
-			if getdate(row.deliver_date) < getdate(today()):
-				continue
-
 			if not row.delivery_date:
 				continue
 
-			if i == 10:
-				break
+			if getdate(row.delivery_date) < getdate(today()):
+				continue
 
-			delivery_date = formatdate(row.delivery_date, "dd MMM")
+			delivery_date = getdate(row.delivery_date)
 			if delivery_date not in chart_data:
-				i += 1
 				chart_data[delivery_date] = frappe._dict(
 					{
 						"demand": 0.0,
@@ -298,6 +292,7 @@ class MaterialRequirementsPlanningReport:
 
 		demand_data = []
 		supply_data = []
+		delivery_dates = list(chart_data)
 		for row in chart_data:
 			value = chart_data[row]
 
@@ -306,7 +301,7 @@ class MaterialRequirementsPlanningReport:
 
 		return {
 			"data": {
-				"labels": list(chart_data.keys()),
+				"labels": self.get_detailed_chart_labels(delivery_dates),
 				"datasets": [
 					{
 						"name": _("Demand"),
@@ -323,6 +318,10 @@ class MaterialRequirementsPlanningReport:
 			"colors": ["#7cd6fd", "green"],
 			"title": _("Demand vs Supply"),
 		}
+
+	def get_detailed_chart_labels(self, delivery_dates):
+		date_format = "dd MMM yyyy" if len({date.year for date in delivery_dates}) > 1 else "dd MMM"
+		return [formatdate(date, date_format) for date in delivery_dates]
 
 	def get_bucket_view_chart_data(self, data):
 		chart_data = frappe._dict({})
@@ -441,7 +440,6 @@ class MaterialRequirementsPlanningReport:
 
 			row.indent = 0
 			row.bom_no = rm_details.get("bom_no")
-			row.lead_time = math.ceil(rm_details.get("lead_time", 0))
 			if not row.sales_forecast_qty:
 				row.sales_forecast_qty = 0
 
@@ -450,7 +448,7 @@ class MaterialRequirementsPlanningReport:
 			if row.get("is_adhoc"):
 				row.planned_qty += row.adhoc_qty
 
-			for field in ["min_order_qty", "purchase_uom", "safety_stock"]:
+			for field in ("min_order_qty", "purchase_uom", "safety_stock", "default_supplier"):
 				if rm_details.get(field):
 					row[field] = rm_details.get(field)
 
@@ -460,18 +458,11 @@ class MaterialRequirementsPlanningReport:
 
 			i += 1
 			row.capacity = 0
+			row.type_of_material = get_type_of_material(rm_details.get("is_purchase_item"), row.bom_no)
 			if rm_details.raw_materials:
 				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
-				row.type_of_material = "Manufacture"
-				if row.lead_time and row.required_qty:
-					row.lead_time = math.ceil(row.required_qty / row.lead_time)
-				elif not row.required_qty:
-					row.lead_time = 0
 
-			if not row.lead_time and rm_details.raw_materials:
-				row.lead_time = self.get_lead_time_from_raw_materials(rm_details.raw_materials)
-
-			row.release_date = add_days(row.delivery_date, row.lead_time * -1)
+			self.set_lead_time(row, rm_details.raw_materials)
 			data.append(row)
 			if rm_details.raw_materials:
 				self.update_rm_details(
@@ -480,12 +471,36 @@ class MaterialRequirementsPlanningReport:
 
 		return data
 
-	def get_lead_time_from_raw_materials(self, raw_materials):
+	def set_lead_time(self, row, raw_materials=None):
+		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
+		if (
+			raw_materials
+			and row.required_qty > 0
+			and flt(get_item_lead_time_details(row.item_code).manufacturing_time_in_mins) <= 0
+		):
+			lead_time += self.get_lead_time_from_raw_materials(raw_materials, row.required_qty)
+
+		row.lead_time = math.ceil(lead_time)
+		row.release_date = add_days(row.delivery_date, -row.lead_time)
+
+	def get_lead_time_from_raw_materials(self, raw_materials, qty=1):
 		lead_time = 0
 		for material in raw_materials:
-			lead_time += math.ceil(material.lead_time)
-			if material.raw_materials:
-				lead_time += self.get_lead_time_from_raw_materials(material.raw_materials)
+			material_qty = material.stock_qty * qty
+			# Reuse descendant totals within this report, keeping different net quantities separate.
+			subtree_lead_times = material.setdefault("subtree_lead_times", {})
+			if material_qty not in subtree_lead_times:
+				type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
+				material_lead_time = math.ceil(
+					get_item_lead_time(material.item_code, type_of_material, material_qty)
+				)
+				if material.raw_materials:
+					material_lead_time += self.get_lead_time_from_raw_materials(
+						material.raw_materials, material_qty
+					)
+				subtree_lead_times[material_qty] = material_lead_time
+
+			lead_time += subtree_lead_times[material_qty]
 
 		return lead_time
 
@@ -781,7 +796,6 @@ class MaterialRequirementsPlanningReport:
 
 	def update_rm_details(self, raw_materials, delivery_date, planned_qty, bom_no, data):
 		for material in raw_materials:
-			lead_time = math.ceil(material.lead_time)
 			row = frappe._dict(
 				{
 					"item_code": material.item_code,
@@ -791,8 +805,6 @@ class MaterialRequirementsPlanningReport:
 					"planned_qty": material.stock_qty * planned_qty,
 					"projected_qty": 0,
 					"delivery_date": delivery_date,
-					"lead_time": lead_time,
-					"release_date": add_days(delivery_date, lead_time * -1),
 					"indent": material.indent + 1,
 					"parent_bom": bom_no,
 					"bom_no": material.bom_no,
@@ -804,13 +816,12 @@ class MaterialRequirementsPlanningReport:
 			)
 
 			row.capacity = 0
+			row.type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
 			if material.raw_materials:
 				row.capacity = get_item_capacity(material.item_code, self.filters.bucket_size)
-				row.type_of_material = "Manufacture"
-			else:
-				row.type_of_material = "Purchase"
 
 			self.update_required_qty(row)
+			self.set_lead_time(row, material.raw_materials)
 
 			data.append(row)
 
@@ -893,14 +904,19 @@ class MaterialRequirementsPlanningReport:
 				item_wise_rm_details[item_code] = frappe.db.get_value(
 					"Item",
 					item_code,
-					["default_bom as bom_no", "safety_stock", "min_order_qty", "purchase_uom"],
+					[
+						"default_bom as bom_no",
+						"safety_stock",
+						"min_order_qty",
+						"purchase_uom",
+						"is_purchase_item",
+					],
 					as_dict=True,
 				)
 
 			item_data = item_wise_rm_details[item_code]
-			item_data.lead_time = get_item_lead_time(
-				item_code, "Manufacture" if item_data.bom_no else "Purchase"
-			)
+			if details := get_item_details(item_code, self.filters.get("company")):
+				item_data.update(details)
 
 			if item_code not in self.fg_items:
 				self.fg_items.append(item_code)
@@ -938,9 +954,6 @@ class MaterialRequirementsPlanningReport:
 
 			if material.bom_no:
 				material.raw_materials = self.get_raw_materials(material.bom_no, indent + 1)
-				material.lead_time = get_item_lead_time(material.item_code, "Manufacture")
-			else:
-				material.lead_time = get_item_lead_time(material.item_code, "Purchase")
 
 		return raw_materials
 
@@ -1099,7 +1112,7 @@ class MaterialRequirementsPlanningReport:
 			from_date = get_first_day(from_date)
 
 		dates_list = []
-		while getdate(self.filters.to_date) > getdate(from_date):
+		while getdate(from_date) <= getdate(self.filters.to_date):
 			args = {"from_date": from_date}
 
 			days = 1 if bucket_size == "Daily" else 7
@@ -1111,7 +1124,7 @@ class MaterialRequirementsPlanningReport:
 			args["to_date"] = add_days(from_date, -1)
 
 			if bucket_size == "Monthly":
-				args["label"] = formatdate(from_date, "MMM YYYY")
+				args["label"] = formatdate(args["from_date"], "MMM YYYY")
 			else:
 				if bucket_size == "Weekly":
 					args["label"] = (
@@ -1188,10 +1201,17 @@ class MaterialRequirementsPlanningReport:
 		return convert_to_daily_bucket_data(sales_data)
 
 
+def get_type_of_material(is_purchase_item, bom_no):
+	return "Purchase" if is_purchase_item and not bom_no else "Manufacture"
+
+
 @frappe.request_cache
 def get_item_details(item_code, company):
 	data = frappe.db.get_value(
-		"Item", item_code, ["safety_stock", "min_order_qty", "purchase_uom"], as_dict=True
+		"Item",
+		item_code,
+		["safety_stock", "min_order_qty", "purchase_uom", "is_purchase_item"],
+		as_dict=True,
 	) or frappe._dict({"safety_stock": 0})
 
 	default_data = frappe.db.get_value(
@@ -1204,35 +1224,43 @@ def get_item_details(item_code, company):
 	if default_data:
 		data.update(default_data)
 
+	if not data.get("default_supplier"):
+		# fall back to the item's Item Group default supplier (mirrors BuyingController)
+		item_group = frappe.db.get_value("Item", item_code, "item_group")
+		data.default_supplier = frappe.db.get_value(
+			"Item Default", {"parent": item_group, "company": company}, "default_supplier"
+		)
+
 	return data
 
 
-@frappe.request_cache
-def get_item_lead_time(item_code, type_of_material):
-	doctype = frappe.qb.DocType("Item Lead Time")
-
-	query = frappe.qb.from_(doctype).where(doctype.item_code == item_code)
-
+def get_item_lead_time(item_code, type_of_material, qty=1):
+	"""Return calendar days, scaling only manufacturing time by the required quantity."""
+	details = get_item_lead_time_details(item_code)
 	if type_of_material == "Manufacture":
-		query = query.select(
-			Case()
-			.when(
-				(doctype.manufacturing_time_in_mins.isnull() | (doctype.manufacturing_time_in_mins <= 0)), 0
-			)
-			.else_(1440.0 / doctype.manufacturing_time_in_mins + doctype.buffer_time)
-			.as_("lead_time")
-		)
+		if qty <= 0:
+			return 0
+		# Keep MRP's 24-hour planning day; buffer days do not increase production capacity.
+		time_in_days = max(flt(details.manufacturing_time_in_mins), 0) * qty / 1440.0
 	else:
-		query = query.select(
-			Case()
-			.when(doctype.purchase_time.isnull(), 0)
-			.else_(doctype.purchase_time + doctype.buffer_time)
-			.as_("lead_time")
+		if details.purchase_time is None:
+			return 0
+		time_in_days = flt(details.purchase_time)
+
+	return time_in_days + flt(details.buffer_time)
+
+
+@frappe.request_cache
+def get_item_lead_time_details(item_code):
+	return (
+		frappe.db.get_value(
+			"Item Lead Time",
+			{"item_code": item_code},
+			["manufacturing_time_in_mins", "purchase_time", "buffer_time"],
+			as_dict=True,
 		)
-
-	time = query.run(pluck="lead_time")
-
-	return time[0] if time else 0
+		or frappe._dict()
+	)
 
 
 def convert_to_daily_bucket_data(data):
@@ -1307,15 +1335,46 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 	if not frappe.db.exists("Company", company):
 		frappe.throw(_("Company {0} does not exist").format(company))
 
+	qty_precision = frappe.get_precision("Purchase Order Item", "qty")
 	purchase_orders = {}
 	work_orders = []
+	covered_rows = 0
+	missing_bom = []
+	missing_supplier = []
 	for row in selected_rows:
 		row = frappe._dict(row)
-		if row.type_of_material == "Purchase":
-			purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+		# what is left to order once stock and the orders already placed are counted. rounding
+		# to the precision an order is stored in, so what is left of a covered row after all the
+		# subtracting does not become an order line of its own
+		if flt(row.required_qty, qty_precision) <= 0:
+			covered_rows += 1
+			continue
 
-		if row.type_of_material == "Manufacture" and row.bom_no:
-			work_orders.append(row)
+		if row.type_of_material == "Purchase":
+			if row.default_supplier:
+				purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+			elif row.item_code not in missing_supplier:
+				missing_supplier.append(row.item_code)
+
+		if row.type_of_material == "Manufacture":
+			if row.bom_no:
+				work_orders.append(row)
+			elif row.item_code not in missing_bom:
+				missing_bom.append(row.item_code)
+
+	if missing_bom:
+		frappe.throw(_("Default BOM for {0} not found").format(", ".join(missing_bom)))
+
+	if missing_supplier:
+		frappe.throw(_("Default Supplier for {0} not found").format(", ".join(missing_supplier)))
+
+	if not purchase_orders and not work_orders:
+		frappe.msgprint(
+			_("Nothing to order, the selected rows are already covered by stock or existing orders")
+			if covered_rows
+			else _("Nothing to order from the selected rows")
+		)
+		return
 
 	if purchase_orders:
 		make_purchase_orders(purchase_orders, company, warehouse=warehouse, mps=mps)
@@ -1326,13 +1385,7 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 
 def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 	for (supplier, release_date), items in purchase_orders.items():
-		po = frappe.new_doc("Purchase Order")
-		po.supplier = supplier
-		po.company = company
-		po.mps = mps
-		po.transaction_date = release_date
-		po.set("items", [])
-
+		po_items = []
 		for item in items:
 			uom = item.purchase_uom or item.uom
 			if not uom:
@@ -1345,23 +1398,33 @@ def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 			if flt(item.required_qty) < flt(item.min_order_qty):
 				item.required_qty = item.min_order_qty
 
-			po.append(
-				"items",
+			po_items.append(
 				{
 					"item_code": item.item_code,
 					"qty": item.required_qty,
 					"uom": uom,
 					"schedule_date": item.delivery_date if item.delivery_date else today(),
 					"warehouse": warehouse or item.default_warehouse,
-				},
+				}
 			)
 
-		if len(po.items) > 0:
-			po.insert()
-			frappe.msgprint(
-				_("Purchase Order {0} created").format(frappe.bold(po.name)),
-				alert=True,
-			)
+		if not po_items:
+			continue
+
+		po = frappe.new_doc("Purchase Order")
+		po.supplier = supplier
+		po.company = company
+		po.mps = mps
+		po.transaction_date = release_date
+		po.set("items", po_items)
+
+		po.run_method("set_missing_values")
+		po.insert()
+
+		frappe.msgprint(
+			_("Purchase Order {0} created").format(frappe.bold(po.name)),
+			alert=True,
+		)
 
 
 def make_work_orders(work_orders, company, warehouse=None, mps=None):

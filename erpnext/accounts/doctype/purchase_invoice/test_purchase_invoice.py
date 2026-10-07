@@ -11,6 +11,9 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.mapper import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.mapper import (
+	make_purchase_receipt as create_purchase_receipt_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -56,6 +59,37 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.items[0].qty = 1
 		pi.save()
 		self.assertEqual(pi.items[0].qty, 1)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_duplicate_items_without_update_stock(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		self.assertRaisesRegex(frappe.ValidationError, "Same item cannot be entered", pi.save)
+
+	def test_same_item_from_different_receipts(self):
+		first_receipt = make_purchase_receipt()
+		second_receipt = make_purchase_receipt()
+		pi = create_purchase_invoice_from_receipt(first_receipt.name)
+		pi = create_purchase_invoice_from_receipt(second_receipt.name, target_doc=pi)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			pi.save()
+
+		self.assertEqual(
+			[row.purchase_receipt for row in pi.items], [first_receipt.name, second_receipt.name]
+		)
+
+	def test_same_item_from_different_orders_in_one_receipt(self):
+		orders = [create_purchase_order(), create_purchase_order()]
+		receipt = create_purchase_receipt_from_order(orders[0].name)
+		receipt = create_purchase_receipt_from_order(orders[1].name, target_doc=receipt)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			receipt.submit()
+			pi = create_purchase_invoice_from_receipt(receipt.name)
+			pi.save()
+
+		self.assertEqual([row.purchase_order for row in pi.items], [order.name for order in orders])
 
 	def test_purchase_invoice_received_qty(self):
 		"""
@@ -217,7 +251,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_purchase_invoice_for_blocked_supplier_payment_today_date(self):
+	def test_purchase_invoice_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.hold_type = "Payments"
@@ -226,13 +260,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pi = make_purchase_invoice()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Invoice",
-			dn=pi.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()
@@ -278,13 +307,165 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_purchase_invoice_explicit_block(self):
 		pi = make_purchase_invoice()
-		pi.block_invoice()
+		release_date = add_days(nowdate(), 10)
+
+		pi.block_invoice(hold_comment="Waiting for the goods", release_date=release_date)
 
 		self.assertEqual(pi.on_hold, 1)
+
+		on_hold, hold_comment, saved_release_date = frappe.db.get_value(
+			"Purchase Invoice", pi.name, ["on_hold", "hold_comment", "release_date"]
+		)
+		self.assertEqual(on_hold, 1)
+		self.assertEqual(hold_comment, "Waiting for the goods")
+		self.assertEqual(getdate(saved_release_date), getdate(release_date))
 
 		pi.unblock_invoice()
 
 		self.assertEqual(pi.on_hold, 0)
+
+		on_hold, saved_release_date = frappe.db.get_value(
+			"Purchase Invoice", pi.name, ["on_hold", "release_date"]
+		)
+		self.assertEqual(on_hold, 0)
+		self.assertIsNone(saved_release_date)
+
+	def test_purchase_invoice_cannot_be_held_before_submission(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.on_hold = 1
+
+		self.assertRaises(frappe.ValidationError, pi.save)
+
+		pi.on_hold = 0
+		pi.save()
+		pi.submit()
+
+		pi.block_invoice()
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "on_hold"), 1)
+
+	def test_return_purchase_invoice_cannot_be_held(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pi = make_purchase_invoice()
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.on_hold = 1
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be held", return_pi.save)
+
+		return_pi.on_hold = 0
+		return_pi.save()
+		return_pi.submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be held", return_pi.block_invoice)
+
+	def test_return_purchase_invoice_is_not_affected_by_hold_validations(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pi = make_purchase_invoice()
+
+		# a return has a negative outstanding amount, which must not be mistaken
+		# for an invalid hold on a document that was never held
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.save()
+		return_pi.submit()
+
+		self.assertEqual(return_pi.docstatus, 1)
+		self.assertEqual(return_pi.on_hold, 0)
+		self.assertLess(return_pi.outstanding_amount, 0)
+
+	def test_settled_purchase_invoice_cannot_be_held(self):
+		pi = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.save()
+		pe.submit()
+
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 0)
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice)
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "on_hold"), 0)
+
+	def test_release_date_of_held_invoice_must_be_in_future(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", nowdate())
+
+	def test_rejected_hold_does_not_partially_update_invoice(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
+
+		pi.reload()
+		self.assertEqual(pi.on_hold, 0)
+		self.assertIsNone(pi.release_date)
+
+	def test_change_release_date_of_held_invoice(self):
+		pi = make_purchase_invoice()
+		pi.block_invoice(hold_comment="Hold", release_date=add_days(nowdate(), 10))
+
+		new_release_date = add_days(nowdate(), 20)
+		pi.change_release_date(new_release_date)
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Purchase Invoice", pi.name, "release_date")),
+			getdate(new_release_date),
+		)
+
+		self.assertRaises(frappe.ValidationError, pi.change_release_date, add_days(nowdate(), -1))
+
+	def test_release_date_cannot_be_changed_on_an_invoice_that_is_not_held(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Invoice is not blocked",
+			pi.change_release_date,
+			add_days(nowdate(), 10),
+		)
+
+		self.assertIsNone(frappe.db.get_value("Purchase Invoice", pi.name, "release_date"))
+
+	def test_hold_methods_are_whitelisted_document_methods(self):
+		import erpnext.accounts.doctype.purchase_invoice.purchase_invoice as purchase_invoice_module
+
+		pi = frappe.new_doc("Purchase Invoice")
+
+		for method in ("block_invoice", "unblock_invoice", "change_release_date"):
+			# raises if the method is not whitelisted for client side calls
+			pi.is_whitelisted(method)
+
+			self.assertFalse(
+				hasattr(purchase_invoice_module, method),
+				f"{method} should only be exposed as a document method",
+			)
+
+	def test_hold_methods_require_write_permission(self):
+		pi = make_purchase_invoice()
+		user = "test_pi_hold_permission@example.com"
+
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Test PI Hold",
+					"roles": [{"role": "Employee"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(frappe.PermissionError, pi.block_invoice)
+			self.assertRaises(frappe.PermissionError, pi.unblock_invoice)
+			self.assertRaises(frappe.PermissionError, pi.change_release_date, add_days(nowdate(), 10))
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "on_hold"), 0)
 
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = make_purchase_receipt(
@@ -426,10 +607,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		original_value = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
-
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
 
 		pr = make_purchase_receipt(
@@ -442,25 +619,15 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi = create_purchase_invoice(pr.name)
 		pi.conversion_rate = 80
 
+		self.assertRaises(frappe.ValidationError, pi.insert)
+
+		pi.conversion_rate = 70
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
-		)
-
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[0].base_net_amount - pr.items[0].base_net_amount
-		)
-
-		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
-
-		frappe.db.set_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", original_value
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
@@ -468,7 +635,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		# Creating Purchase Invoice with USD currency
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
 		pr.company = "_Test Company with perpetual inventory"
@@ -482,33 +650,54 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				"rate": 100,
 			},
 		)
-		pr.append(
-			"items",
-			{"item_code": "_Test Item", "qty": 1, "rate": 5, "warehouse": "Stores - TCP1"},
-		)
 		pr.insert()
 		pr.submit()
 
-		# Createing purchase invoice against Purchase Receipt
 		pi = create_purchase_invoice(pr.name)
 		pi.conversion_rate = 70
 		pi.credit_to = "_Test Payable USD - TCP1"
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "credit"
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[1].base_net_amount - pr.items[1].base_net_amount
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"use_transaction_date_exchange_rate": 1, "set_landed_cost_based_on_purchase_invoice_rate": 0},
+	)
+	def test_transaction_date_exchange_rate_applies_only_when_mapping_from_purchase_order(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		self.assertEqual(flt(discrepancy_caused_by_exchange_rate_diff, 2), amount)
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			currency="USD",
+			conversion_rate=70,
+		)
+		pi = create_purchase_invoice(pr.name)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 70)
+
+		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD")
+		pi = make_pi_from_po(po.name)
+		self.assertTrue(pi.use_transaction_date_exchange_rate)
+		pi.conversion_rate = 75
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 75)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"pr_required": "Yes"})
+	def test_purchase_receipt_not_required_when_invoice_updates_stock(self):
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		pi = make_purchase_invoice(update_stock=1)
+		self.assertEqual(pi.docstatus, 1)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][1])
@@ -719,7 +908,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0].base_net_amount or 0
 
-		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project=project.name)
+		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project=project.name, do_not_save=True)
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.submit()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15000,
@@ -731,12 +922,14 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			existing_purchase_cost + 15500,
 		)
 
+		pi1.reload()
 		pi1.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15000,
 		)
 
+		pi.reload()
 		pi.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_purchase_cost"), existing_purchase_cost
@@ -2149,6 +2342,25 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_adjust_incoming_rate_keeps_discounted_pr_value(self):
+		pr = make_purchase_receipt(qty=10, rate=100, do_not_submit=True)
+		pr.apply_discount_on = "Net Total"
+		pr.additional_discount_percentage = 10
+		pr.submit()
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+		pr.reload()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pr.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(pr.items[0].amount_difference_with_purchase_invoice, 0)
+		self.assertEqual(stock_value_difference, 900)
+
 	def test_item_less_defaults(self):
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier = "_Test Supplier"
@@ -2499,6 +2711,582 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi.submit()
 		self.assertEqual(return_pi.docstatus, 1)
 
+	def test_internal_transfer_invoice_with_rejected_qty(self):
+		"""An invoice that updates stock moves rejected material out of the in-transit warehouse and
+		books it, like a receipt does."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			get_gl_entries,
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Invoice Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Invoice Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Invoice Transfer Rejected", company=company)
+
+		item_doc = create_item("Test Invoice Internal Transfer Item")
+
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item_doc.name,
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = transit_warehouse
+		si.insert()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = to_warehouse
+		pi.items[0].qty = 7
+		pi.items[0].rejected_qty = 3
+		pi.items[0].received_qty = 10
+		pi.items[0].rejected_warehouse = rejected_warehouse
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "stock_value_difference"],
+		)
+
+		stock_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		self.assertEqual(stock_qty[transit_warehouse], -10)
+		self.assertEqual(stock_qty[to_warehouse], 7)
+		self.assertEqual(stock_qty[rejected_warehouse], 3)
+
+		booked_value = {}
+		for entry in get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True):
+			booked_value.setdefault(entry.account, 0)
+			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
+		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], -1000)
+		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
+		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
+
+	def test_internal_transfer_invoice_with_rejected_batch_qty(self):
+		"""Batch material rejected on a stock updating internal transfer invoice gets its own package."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Batch Invoice Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Batch Invoice Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Batch Invoice Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Batch Invoice Transfer Rejected", company=company)
+
+		item = make_item(
+			"Test Invoice Internal Transfer Batch Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TIITB-.####",
+			},
+		)
+
+		make_purchase_receipt(
+			item_code=item.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = transit_warehouse
+		si.insert()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = to_warehouse
+		pi.items[0].qty = 7
+		pi.items[0].rejected_qty = 3
+		pi.items[0].received_qty = 10
+		pi.items[0].rejected_warehouse = rejected_warehouse
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		row = pi.items[0]
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty"), 7
+		)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "total_qty"),
+			3,
+		)
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "stock_value_difference"],
+		)
+		moved_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		moved_value = {d.warehouse: d.stock_value_difference for d in sl_entries}
+
+		self.assertEqual(moved_qty[transit_warehouse], -10)
+		self.assertEqual(moved_qty[to_warehouse], 7)
+		self.assertEqual(moved_qty[rejected_warehouse], 3)
+		self.assertEqual(flt(moved_value[transit_warehouse]), -1000)
+		self.assertEqual(flt(moved_value[to_warehouse]), 700)
+		self.assertEqual(flt(moved_value[rejected_warehouse]), 300)
+
+	def test_internal_transfer_invoice_with_every_unit_rejected(self):
+		"""An invoice may reject a whole row, and the in-transit warehouse is emptied all the same."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Rejected Invoice From", company=company)
+		transit_warehouse = create_warehouse("_Test Rejected Invoice Transit", company=company)
+		to_warehouse = create_warehouse("_Test Rejected Invoice To", company=company)
+		rejected_warehouse = create_warehouse("_Test Rejected Invoice Rejected", company=company)
+
+		item_doc = create_item("Test Fully Rejected Transfer Item")
+
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item_doc.name,
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = transit_warehouse
+		si.insert()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = to_warehouse
+		pi.items[0].qty = 0
+		pi.items[0].rejected_qty = 10
+		pi.items[0].received_qty = 10
+		pi.items[0].rejected_warehouse = rejected_warehouse
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "stock_value_difference"],
+		)
+		moved_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		moved_value = {d.warehouse: d.stock_value_difference for d in sl_entries}
+
+		self.assertNotIn(to_warehouse, moved_qty)
+		self.assertEqual(moved_qty[transit_warehouse], -10)
+		self.assertEqual(moved_qty[rejected_warehouse], 10)
+		self.assertEqual(flt(moved_value[transit_warehouse]), -1000)
+		self.assertEqual(flt(moved_value[rejected_warehouse]), 1000)
+
+	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
+		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
+		with, and the entries say the same as the stock."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Returned Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Returned Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Returned Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Returned Transfer Rejected", company=company)
+
+		item_doc = create_item("Test Returned Fully Rejected Transfer Item")
+
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item_doc.name,
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = transit_warehouse
+		si.insert()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = to_warehouse
+		pi.items[0].qty = 0
+		pi.items[0].rejected_qty = 10
+		pi.items[0].received_qty = 10
+		pi.items[0].rejected_warehouse = rejected_warehouse
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.update_stock = 1
+		returned.submit()
+
+		moved = {
+			d.warehouse: flt(d.stock_value_difference)
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": returned.name, "is_cancelled": 0},
+				fields=["warehouse", "stock_value_difference"],
+			)
+		}
+		self.assertEqual(moved[transit_warehouse], 1000)
+		self.assertEqual(moved[rejected_warehouse], -1000)
+
+		booked = {}
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": returned.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			booked.setdefault(entry.account, 0)
+			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(flt(sum(booked.values()), 2), 0)
+		self.assertEqual(booked[get_inventory_account(company, transit_warehouse)], 1000)
+		self.assertEqual(booked[get_inventory_account(company, rejected_warehouse)], -1000)
+
+	def test_stock_updating_invoice_rejects_every_unit_of_a_row(self):
+		"""A row of a stock updating invoice may be rejected in full."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1}).name
+		rejected_warehouse = create_warehouse("_Test Fully Rejected Invoice Warehouse", company=company)
+
+		pi = make_purchase_invoice(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=0,
+			rejected_qty=10,
+			received_qty=10,
+			rate=100,
+			rejected_warehouse=rejected_warehouse,
+			update_stock=1,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			do_not_save=True,
+		)
+		pi.submit()
+
+		moved_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pi.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+		self.assertEqual(moved_qty, {rejected_warehouse: 10})
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
+	def test_stock_updating_invoice_bills_the_rejected_quantity(self):
+		"""With the rejected quantity billed and valued, the invoice pays for every unit received and
+		the stock it moves matches the entries it books."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		rejected_warehouse = create_warehouse("_Test Invoice Billed Rejected Warehouse", company=company)
+
+		pi = make_purchase_invoice(
+			item_code=item,
+			company=company,
+			warehouse="Stores - TCP1",
+			rejected_warehouse=rejected_warehouse,
+			cost_center="Main - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			expense_account="_Test Account Cost for Goods Sold - TCP1",
+			update_stock=1,
+			received_qty=10,
+			qty=6,
+			rejected_qty=4,
+			rate=100,
+		)
+
+		self.assertEqual(pi.items[0].amount, 1000)
+		self.assertEqual(pi.items[0].valuation_rate, 100)
+
+		stock_value = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "stock_value_difference"],
+		)
+		by_warehouse = {d.warehouse: d.stock_value_difference for d in stock_value}
+
+		self.assertEqual(by_warehouse["Stores - TCP1"], 600)
+		self.assertEqual(by_warehouse[rejected_warehouse], 400)
+
+		booked = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pi.name, "is_cancelled": 0}, fields=["debit"]
+		)
+		self.assertEqual(sum(flt(d.debit) for d in booked), 1000)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
+	def test_rejected_material_is_reposted_after_the_setting_changes(self):
+		"""The entries an invoice books follow the stock it moved, so they can be built again once
+		the settings have moved on."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		rejected_warehouse = create_warehouse("_Test Invoice Repost Rejected", company=company)
+
+		pi = make_purchase_invoice(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=6,
+			rejected_qty=4,
+			received_qty=10,
+			rate=100,
+			rejected_warehouse=rejected_warehouse,
+			update_stock=1,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 0)
+
+		rebuilt = pi.get_gl_entries()
+		rejected_account = get_inventory_account(company, rejected_warehouse)
+
+		self.assertEqual(
+			flt(sum(flt(entry.get("debit")) - flt(entry.get("credit")) for entry in rebuilt), 2), 0
+		)
+		self.assertEqual(
+			flt(
+				sum(flt(entry.get("debit")) for entry in rebuilt if entry.get("account") == rejected_account)
+			),
+			400,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
+	def test_return_without_a_reference_books_both_warehouses(self):
+		"""A return that stands on its own gives back the rejected material too, and books it once."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		accepted_warehouse = create_warehouse("_Test Invoice Return Accepted", company=company)
+		rejected_warehouse = create_warehouse("_Test Invoice Return Rejected", company=company)
+
+		def make_invoice(sign):
+			return make_purchase_invoice(
+				company=company,
+				item_code=item,
+				warehouse=accepted_warehouse,
+				qty=6 * sign,
+				rejected_qty=4 * sign,
+				received_qty=10 * sign,
+				rate=100,
+				rejected_warehouse=rejected_warehouse,
+				update_stock=1,
+				is_return=1 if sign < 0 else 0,
+				expense_account="Cost of Goods Sold - TCP1",
+				cost_center="Main - TCP1",
+			)
+
+		make_invoice(1)
+		returned = make_invoice(-1)
+
+		booked = {}
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": returned.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			booked.setdefault(entry.account, 0)
+			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(flt(sum(booked.values()), 2), 0)
+		self.assertEqual(booked[get_inventory_account(company, accepted_warehouse)], -600)
+		self.assertEqual(booked[get_inventory_account(company, rejected_warehouse)], -400)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
+	def test_discount_on_an_invoice_that_bills_the_rejected_quantity(self):
+		"""A discount is spread over every unit the invoice pays for, not the accepted ones alone."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		rejected_warehouse = create_warehouse("_Test Invoice Discount Rejected", company=company)
+
+		pi = make_purchase_invoice(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=6,
+			rejected_qty=4,
+			received_qty=10,
+			rate=100,
+			rejected_warehouse=rejected_warehouse,
+			update_stock=1,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			do_not_save=True,
+		)
+		pi.apply_discount_on = "Net Total"
+		pi.additional_discount_percentage = 10
+		pi.submit()
+
+		self.assertEqual(pi.items[0].amount, 1000)
+		self.assertEqual(pi.items[0].net_rate, 90)
+		self.assertEqual(pi.grand_total, 900)
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 90)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"set_valuation_rate_for_rejected_materials": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_rejected_material_is_not_valued_on_a_stock_updating_invoice(self):
+		"""An invoice that does not bill the rejected quantity has nothing to pay for that material,
+		so it carries no cost and the stock the invoice moves matches the entries it books."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		rejected_warehouse = create_warehouse("_Test Invoice Rejected Warehouse", company=company)
+
+		pi = make_purchase_invoice(
+			item_code=item,
+			company=company,
+			warehouse="Stores - TCP1",
+			rejected_warehouse=rejected_warehouse,
+			cost_center="Main - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			expense_account="_Test Account Cost for Goods Sold - TCP1",
+			update_stock=1,
+			received_qty=10,
+			qty=6,
+			rejected_qty=4,
+			rate=100,
+		)
+
+		self.assertEqual(pi.items[0].amount, 600)
+
+		stock_value = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "stock_value_difference"],
+		)
+		by_warehouse = {d.warehouse: d.stock_value_difference for d in stock_value}
+
+		self.assertEqual(by_warehouse["Stores - TCP1"], 600)
+		self.assertEqual(by_warehouse[rejected_warehouse], 0)
+
+		booked = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pi.name, "is_cancelled": 0}, fields=["debit"]
+		)
+		self.assertEqual(sum(flt(d.debit) for d in booked), sum(by_warehouse.values()))
+
 	def test_purchase_invoice_with_use_serial_batch_field_for_rejected_qty(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -2518,7 +3306,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		batch_no = "BATCH-PI-BNU-TPRBI-0001"
 		serial_nos = ["SNU-PI-TPRSI-0001", "SNU-PI-TPRSI-0002", "SNU-PI-TPRSI-0003"]
 
-		if not frappe.db.exists("Batch", batch_no):
+		if not frappe.db.exists("Batch", {"item": batch_item, "batch_id": batch_no}):
 			frappe.get_doc(
 				{
 					"doctype": "Batch",
@@ -2526,6 +3314,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 					"item": batch_item,
 				}
 			).insert()
+		batch_no = frappe.db.get_value("Batch", {"item": batch_item, "batch_id": batch_no}, "name")
 
 		for serial_no in serial_nos:
 			if not frappe.db.exists("Serial No", serial_no):
@@ -2936,6 +3725,23 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
 
+	def test_partial_returns_ignore_received_qty_without_update_stock(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		invoice = make_purchase_invoice(qty=10, received_qty=10)
+
+		first_return = make_return_doc(invoice.doctype, invoice.name)
+		first_return.items[0].qty = -4
+		first_return.save().submit()
+
+		self.assertEqual(first_return.items[0].received_qty, -10)
+
+		second_return = make_return_doc(invoice.doctype, invoice.name)
+		second_return.items[0].qty = -6
+		second_return.save().submit()
+
+		self.assertEqual(second_return.docstatus, 1)
+
 	def test_apply_discount_on_grand_total(self):
 		"""
 		To test if after applying discount on grand total,
@@ -3045,6 +3851,74 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_receipt_over_billing_by_qty_when_landed_cost_follows_invoice_rate(self):
+		pr = make_purchase_receipt(qty=100, rate=50)
+		for qty in (25, 75):
+			pi = create_purchase_invoice_from_receipt(pr.name)
+			pi.items[0].qty = qty
+			pi.items[0].rate = 200
+			pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.status, "Completed")
+
+		extra_invoice = frappe.copy_doc(pi)
+		extra_invoice.items[0].qty = 100
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+		},
+	)
+	def test_qty_over_billing_counts_billed_rejected_qty(self):
+		pr = make_purchase_receipt(received_qty=100, qty=90, rejected_qty=10, rate=50)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+		self.assertEqual(pi.items[0].qty, 100)
+
+		extra_invoice = frappe.copy_doc(pi)
+		extra_invoice.items[0].qty = 50
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_non_updating_debit_note_gives_no_qty_billing_room(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+
+		pr = make_purchase_receipt(qty=100, rate=50)
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -20
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.submit()
+
+		extra_invoice = frappe.copy_doc(pi)
+		extra_invoice.items[0].qty = 20
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot overbill", extra_invoice.submit)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	def test_non_stock_item_over_billing_against_po_is_blocked(self):
@@ -3401,7 +4275,6 @@ def make_purchase_invoice_against_cost_center(**args):
 
 def setup_provisional_accounting(**args):
 	args = frappe._dict(args)
-	create_item("_Test Non Stock Item", is_stock_item=0)
 	company = args.company or "_Test Company"
 	provisional_account = create_account(
 		account_name=args.account_name or "Provision Account",

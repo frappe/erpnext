@@ -1,10 +1,12 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "field:batch_id",
+ "autoname": "hash",
  "creation": "2013-03-05 14:50:38",
+ "description": "A group of units of an item made or received together.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/batch",
  "engine": "InnoDB",
  "field_order": [
   "sb_batch",
@@ -44,20 +46,22 @@
    "report_hide": 1
   },
   {
-   "depends_on": "eval:doc.__islocal",
    "fieldname": "batch_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "in_list_view": 1,
-   "label": "Batch ID",
+   "label": "Batch No",
    "no_copy": 1,
    "oldfieldname": "batch_id",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "unique": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "item",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Item",
    "link_filters": "[\n    [\"Item\", \"has_batch_no\", \"=\", 1],\n    [\"Item\", \"is_stock_item\", \"=\", 1]\n]",
@@ -65,7 +69,8 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "read_only_depends_on": "eval:!doc.__islocal",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "image",
@@ -85,6 +90,7 @@
    "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Manufacturing Date"
   },
   {
@@ -94,6 +100,7 @@
   {
    "fieldname": "expiry_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
    "oldfieldtype": "Date"
@@ -210,16 +217,16 @@
    "no_copy": 1
   }
  ],
- "icon": "fa fa-archive",
+ "icon": "layers",
  "idx": 1,
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-06-17 16:01:26.556324",
+ "modified": "2026-10-01 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
@@ -232,6 +239,72 @@
    "read": 1,
    "report": 1,
    "role": "Item Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "select": 1,
    "share": 1,
    "write": 1
   }
@@ -242,5 +315,7 @@
  "sort_order": "DESC",
  "states": [],
  "title_field": "batch_id",
- "track_changes": 1
+ "track_changes": 1,
+ "show_title_field_in_link": 1,
+ "search_fields": "item"
 }

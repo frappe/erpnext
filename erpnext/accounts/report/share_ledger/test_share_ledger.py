@@ -23,7 +23,7 @@ COL_SHARE_TRANSFER = 8
 
 class TestShareLedger(ERPNextTestSuite):
 	def setUp(self):
-		self.shareholder = self.create_shareholder("_Test Share Ledger Holder")
+		self.shareholder = self.get_shareholder("Iron Man")
 		# Issue 100 shares on 2026-06-01, then another 50 on 2026-06-10.
 		self.first = self.issue_shares(date="2026-06-01", from_no=1, to_no=100, rate=10)
 		self.second = self.issue_shares(date="2026-06-10", from_no=101, to_no=150, rate=12)
@@ -72,7 +72,7 @@ class TestShareLedger(ERPNextTestSuite):
 		self.assertEqual(data[0][COL_NO_OF_SHARES], 100)
 
 	def test_transfer_type_label_when_shareholder_is_seller(self):
-		buyer = self.create_shareholder("_Test Share Ledger Buyer")
+		buyer = self.get_shareholder("Thor")
 		transfer = self.make_transfer(
 			from_shareholder=self.shareholder,
 			to_shareholder=buyer,
@@ -87,7 +87,7 @@ class TestShareLedger(ERPNextTestSuite):
 		self.assertEqual(row[COL_TRANSFER_TYPE], f"Transfer to {buyer}")
 
 	def test_transfer_type_label_when_shareholder_is_buyer(self):
-		seller = self.create_shareholder("_Test Share Ledger Seller")
+		seller = self.get_shareholder("Hulk")
 		# the seller must own shares before it can transfer them
 		self.issue_shares(date="2026-06-12", from_no=201, to_no=300, rate=10, shareholder=seller)
 		transfer = self.make_transfer(
@@ -119,15 +119,8 @@ class TestShareLedger(ERPNextTestSuite):
 		self.assertIsNotNone(row, f"Share Transfer {transfer_name} missing from ledger")
 		return row
 
-	def create_shareholder(self, title):
-		doc = frappe.get_doc(
-			{
-				"doctype": "Shareholder",
-				"title": title,
-				"company": COMPANY,
-			}
-		).insert()
-		return doc.name
+	def get_shareholder(self, title):
+		return frappe.db.get_value("Shareholder", {"title": title, "company": COMPANY}, "name")
 
 	def issue_shares(self, date, from_no, to_no, rate, shareholder=None):
 		doc = frappe.get_doc(

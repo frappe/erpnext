@@ -8,27 +8,16 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPartnersPage(ERPNextTestSuite):
-	def _make_partner(self, name, show_in_website):
-		if not frappe.db.exists("Sales Partner", name):
-			frappe.get_doc(
-				{
-					"doctype": "Sales Partner",
-					"partner_name": name,
-					"territory": "_Test Territory",
-					"commission_rate": 5,
-					"show_in_website": show_in_website,
-				}
-			).insert(ignore_permissions=True)
-		return name
-
 	def test_get_context_lists_only_website_partners(self):
 		"""partners.py builds the /partners list via
 		frappe.get_all("Sales Partner", filters={"show_in_website": 1}, ...).
 		Seed one website-visible partner and one hidden control partner, then assert the
 		returned context contains the visible one and excludes the hidden one -- real
 		membership of the converted query's result, not a tautology."""
-		visible = self._make_partner("_Test Website Sales Partner", 1)
-		hidden = self._make_partner("_Test Hidden Sales Partner", 0)
+		visible = "_Test Sales Partner India - 1"
+		hidden = "_Test Sales Partner India - 2"
+		frappe.db.set_value("Sales Partner", visible, "show_in_website", 1)
+		frappe.db.set_value("Sales Partner", hidden, "show_in_website", 0)
 
 		result = get_context(frappe._dict())
 

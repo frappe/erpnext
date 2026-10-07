@@ -194,7 +194,7 @@ class TestSerialNo(ERPNextTestSuite):
 		serial_nos = ["LOWVALUATION", "HIGHVALUATION"]
 
 		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
+			if not frappe.db.exists("Serial No", {"item_code": item_code, "serial_no": serial_no}):
 				frappe.get_doc(
 					{
 						"doctype": "Serial No",
@@ -203,6 +203,11 @@ class TestSerialNo(ERPNextTestSuite):
 						"company": "_Test Company",
 					}
 				).insert()
+
+		serial_nos = [
+			frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": number}, "name")
+			for number in serial_nos
+		]
 
 		make_stock_entry(
 			item_code=item_code, to_warehouse=warehouse, qty=1, rate=42, serial_no=[serial_nos[0]]

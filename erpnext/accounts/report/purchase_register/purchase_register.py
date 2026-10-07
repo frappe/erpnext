@@ -175,6 +175,8 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		{
 			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 120,
 		},
 		{
@@ -438,7 +440,15 @@ def get_invoices(filters, additional_query_columns):
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters.supplier)
 	if filters.get("supplier_group"):
-		query = query.where(pi.supplier_group == filters.supplier_group)
+		# read the group from the supplier master, to match the Supplier Group column
+		supplier = frappe.qb.DocType("Supplier")
+		query = query.where(
+			pi.supplier.isin(
+				frappe.qb.from_(supplier)
+				.select(supplier.name)
+				.where(supplier.supplier_group == filters.supplier_group)
+			)
+		)
 
 	query = get_conditions(filters, query, "Purchase Invoice")
 
@@ -553,8 +563,8 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts, inc
 			else:
 				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)
 		else:
-			invoice_tax_map.setdefault(d.parent, frappe._dict()).setdefault(d.account_head, [])
-			invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
+			invoice_tax_map.setdefault(d.parent, frappe._dict()).setdefault(d.account_head, 0.0)
+			invoice_tax_map[d.parent][d.account_head] += flt(d.tax_amount)
 
 	return invoice_expense_map, invoice_tax_map
 

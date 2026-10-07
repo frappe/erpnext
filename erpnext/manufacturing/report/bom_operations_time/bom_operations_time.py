@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	data = get_data(filters)
@@ -71,6 +73,9 @@ def get_filtered_data(filters):
 
 	if filters.get("workstation"):
 		bom_ops_query = bom_ops_query.where(bom_ops.workstation == filters.get("workstation"))
+
+	if condition := get_allowed_companies_condition(bom.company, "BOM"):
+		bom_ops_query = bom_ops_query.where(condition)
 
 	bom_operation_data = bom_ops_query.run(as_dict=True)
 

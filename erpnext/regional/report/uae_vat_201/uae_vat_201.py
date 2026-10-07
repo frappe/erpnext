@@ -145,22 +145,67 @@ def append_data(data, no, legend, amount, vat_amount):
 
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
+	amounts = get_emiratewise_standard_rated_amount(filters)
+	vat_amounts = get_emiratewise_vat_amount(filters)
+	return [
+		(emirate, amounts.get(emirate, 0), vat_amounts.get(emirate, 0))
+		for emirate in dict.fromkeys([*amounts, *vat_amounts])
+	]
+
+
+def get_emiratewise_standard_rated_amount(filters):
+	"""Returns emiratewise net amount of standard rated supplies in company currency."""
 	i = frappe.qb.DocType("Sales Invoice Item")
 	s = frappe.qb.DocType("Sales Invoice")
 	query = (
 		frappe.qb.from_(i)
 		.inner_join(s)
 		.on(i.parent == s.name)
-		.select(s.vat_emirate.as_("emirate"), Sum(i.base_net_amount).as_("total"), Sum(i.tax_amount))
+		.select(s.vat_emirate, Sum(i.base_net_amount))
 		.where((s.docstatus == 1) & (i.is_exempt != 1) & (i.is_zero_rated != 1))
 		.groupby(s.vat_emirate)
 	)
 	for condition in get_conditions(filters, s):
 		query = query.where(condition)
-	try:
-		return query.run()
-	except (IndexError, TypeError):
-		return 0
+	return dict(query.run())
+
+
+def get_emiratewise_vat_amount(filters):
+	"""Returns emiratewise VAT on standard rated supplies in company currency.
+
+	Item Wise Tax Detail.amount is the item's share of the tax row already converted to
+	company currency, so it keeps the item level exempt / zero rated split.
+	"""
+	i = frappe.qb.DocType("Sales Invoice Item")
+	s = frappe.qb.DocType("Sales Invoice")
+	t = frappe.qb.DocType("Sales Taxes and Charges")
+	d = frappe.qb.DocType("Item Wise Tax Detail")
+	uae_vat = frappe.qb.DocType("UAE VAT Account")
+	query = (
+		frappe.qb.from_(d)
+		.inner_join(s)
+		.on(d.parent == s.name)
+		.inner_join(i)
+		.on(d.item_row == i.name)
+		.inner_join(t)
+		.on(d.tax_row == t.name)
+		.select(s.vat_emirate, Sum(d.amount))
+		.where(
+			(d.parenttype == "Sales Invoice")
+			& (s.docstatus == 1)
+			& (i.is_exempt != 1)
+			& (i.is_zero_rated != 1)
+			& t.account_head.isin(
+				frappe.qb.from_(uae_vat)
+				.select(uae_vat.account)
+				.where(uae_vat.parent == filters.get("company"))
+			)
+		)
+		.groupby(s.vat_emirate)
+	)
+	for condition in get_conditions(filters, s):
+		query = query.where(condition)
+	return dict(query.run())
 
 
 def get_emirates():

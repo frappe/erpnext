@@ -1,7 +1,12 @@
 {
  "app": "erpnext",
- "charts": [],
- "content": "[]",
+ "charts": [
+  {
+   "chart_name": "Bank Balance",
+   "label": "Bank Balance"
+  }
+ ],
+ "content": "[{\"id\": \"8ad97059fb\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Bank Balance\", \"col\": 12}}, {\"id\": \"0290c3d3fb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Payment\", \"col\": 4}}, {\"id\": \"4751e5b274\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Outgoing Payment\", \"col\": 4}}, {\"id\": \"4852db07c3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Outgoing Bills\", \"col\": 4}}]",
  "creation": "2026-06-11 11:51:21.886461",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,12 +20,25 @@
  "label": "Payments",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-07-14 12:00:00.000000",
+ "modified": "2026-08-26 18:34:03.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",
  "name": "Payments",
- "number_cards": [],
+ "number_cards": [
+  {
+   "label": "Total Incoming Payment",
+   "number_card_name": "Total Incoming Payment"
+  },
+  {
+   "label": "Total Outgoing Payment",
+   "number_card_name": "Total Outgoing Payment"
+  },
+  {
+   "label": "Total Outgoing Bills",
+   "number_card_name": "Total Outgoing Bills"
+  }
+ ],
  "owner": "Administrator",
  "public": 1,
  "quick_lists": [],

@@ -8,6 +8,7 @@ from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.utils import cint, cstr, flt
 
+from erpnext.controllers.item_close import validate_parent_reopen
 from erpnext.selling.doctype.sales_order.services.subcontracting import SubcontractingService
 
 
@@ -27,6 +28,10 @@ class StatusService:
 	def update_status(self, status: str) -> None:
 		doc = self.doc
 		self.check_modified_date()
+
+		if status != "Closed" and doc.status == "Closed":
+			validate_parent_reopen(doc)
+
 		doc.set_status(update=True, status=status)
 		# Upon Sales Order Re-open, check for credit limit.
 		# Limit should be checked after the 'Hold/Closed' status is reset.
@@ -37,6 +42,48 @@ class StatusService:
 		doc.notify_update()
 		clear_doctype_notifications(doc)
 		doc.update_blanket_order()
+
+	def recalculate_after_item_close(self) -> None:
+		"""Refresh progress after row flags changed.
+
+		Billing runs last because it reloads the parent and writes the final
+		status from both percentages.
+		"""
+		doc = self.doc
+		doc.update_reserved_qty()
+		self.update_picking_status()
+		self.update_delivery_percentage()
+		self.update_billing_percentage()
+
+	def update_delivery_percentage(self, update_modified: bool = True) -> None:
+		self.doc._update_percent_field(
+			{
+				"target_dt": "Sales Order Item",
+				"target_parent_dt": "Sales Order",
+				"target_parent_field": "per_delivered",
+				"target_ref_field": "qty",
+				"target_field": "delivered_qty",
+				"status_field": "delivery_status",
+				"keyword": "Delivered",
+				"name": self.doc.name,
+			},
+			update_modified,
+		)
+
+	def update_billing_percentage(self, update_modified: bool = True) -> None:
+		self.doc._update_percent_field(
+			{
+				"target_dt": "Sales Order Item",
+				"target_parent_dt": "Sales Order",
+				"target_parent_field": "per_billed",
+				"target_ref_field": "amount",
+				"target_field": "billed_amt",
+				"status_field": "billing_status",
+				"keyword": "Billed",
+				"name": self.doc.name,
+			},
+			update_modified,
+		)
 
 	def check_modified_date(self) -> None:
 		doc = self.doc
@@ -50,6 +97,9 @@ class StatusService:
 		tot_qty, delivered_qty = 0.0, 0.0
 
 		for item in doc.items:
+			if item.skip_delivery:
+				continue
+
 			if item.delivered_by_supplier:
 				item_delivered_qty = frappe.get_all(
 					"Purchase Order Item",
@@ -71,7 +121,7 @@ class StatusService:
 		total_qty = 0.0
 		per_picked = 0.0
 
-		for so_item in doc.items:
+		for so_item in [item for item in doc.items if not item.closed] or doc.items:
 			if cint(
 				frappe.get_cached_value("Item", so_item.item_code, "is_stock_item")
 			) or doc.has_product_bundle(so_item.item_code):

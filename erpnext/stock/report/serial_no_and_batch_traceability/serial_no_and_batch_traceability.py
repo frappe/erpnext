@@ -1,9 +1,17 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder import Case
+
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters: dict | None = None):
@@ -13,7 +21,7 @@ def execute(filters: dict | None = None):
 	has_serial_no, has_batch_no = check_has_serial_no_in_data(data)
 	columns = report.get_columns(has_serial_no, has_batch_no)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def check_has_serial_no_in_data(data):
@@ -36,6 +44,7 @@ class ReportData:
 	def __init__(self, filters):
 		self.filters = filters
 		self.doctype_name = self.get_doctype()
+		self.mapped_fg_entries = {}
 
 	def validate_filters(self):
 		if not self.filters.item_code and not self.filters.batches and not self.filters.serial_nos:
@@ -170,6 +179,9 @@ class ReportData:
 		else:
 			query = query.where(sabb_entry.serial_no == row.serial_no)
 
+		if condition := get_allowed_companies_condition(sabb.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
+
 		results = query.run(as_dict=True)
 		return results[0] if results else {}
 
@@ -182,10 +194,17 @@ class ReportData:
 
 		materials = self.get_materials(sabb_data)
 		for material in materials:
+			# raw material mapped to a different finished good serial / batch of the same entry
+			if material.fg_serial_no and material.fg_serial_no != sabb_data.serial_no:
+				continue
+
+			if material.fg_batch_no and material.fg_batch_no != sabb_data.batch_no:
+				continue
+
 			# Recursive: batch has sub-components
 			if material.serial_no or material.batch_no:
-				key = (material.item_code, material.reference_name, material.name)
 				value = material.serial_no or material.batch_no
+				key = (material.item_code, material.reference_name, material.name, value)
 
 				if key not in sabb_data.raw_materials:
 					details = self.get_serial_no_batches(value)
@@ -255,7 +274,36 @@ class ReportData:
 			else:
 				query = query.where(doctype.item == self.filters.item_code)
 
-		return query.run(as_dict=True)
+		item_field = doctype.item_code if self.doctype_name == "Serial No" else doctype.item
+		if condition := get_allowed_masters_condition(item_field, "Item"):
+			query = query.where(condition)
+
+		number_field = doctype.serial_no if self.doctype_name == "Serial No" else doctype.batch_id
+		rows = query.orderby(number_field).orderby(item_field).run(as_dict=True)
+		hidden_references = self.get_other_company_references(rows)
+		return [row for row in rows if (row.reference_doctype, row.reference_name) not in hidden_references]
+
+	def get_other_company_references(self, rows):
+		references = defaultdict(set)
+		for row in rows:
+			if row.reference_doctype and row.reference_name:
+				references[row.reference_doctype].add(row.reference_name)
+
+		hidden_references = set()
+		for doctype, names in references.items():
+			if not frappe.get_meta(doctype).has_field("company"):
+				continue
+
+			condition = get_allowed_companies_condition(frappe.qb.DocType(doctype).company, doctype)
+			if not condition:
+				continue
+
+			allowed = frappe.get_all(
+				doctype, filters=[{"name": ("in", list(names))}, condition], pluck="name"
+			)
+			hidden_references.update((doctype, name) for name in names.difference(allowed))
+
+		return hidden_references
 
 	def get_doctype(self):
 		if self.filters.item_code:
@@ -309,6 +357,8 @@ class ReportData:
 				sabb_entry.batch_no,
 				sabb_entry.serial_no,
 				sabb_entry.qty.as_("quantity"),
+				sabb_entry.fg_serial_no,
+				sabb_entry.fg_batch_no,
 			)
 			.where(
 				(stock_entry.docstatus == 1)
@@ -317,6 +367,9 @@ class ReportData:
 				& (stock_entry_detail.s_warehouse.isnotnull())
 			)
 		)
+
+		if condition := get_allowed_companies_condition(stock_entry.company, "Stock Entry"):
+			query = query.where(condition)
 
 		return query.run(as_dict=True)
 
@@ -356,6 +409,8 @@ class ReportData:
 				SABB.item_name,
 				SABB.posting_datetime,
 				SABB.warehouse,
+				SABE.fg_serial_no,
+				SABE.fg_batch_no,
 			)
 			.where(
 				(SABB.is_cancelled == 0)
@@ -367,6 +422,9 @@ class ReportData:
 
 		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
 
+		if condition := get_allowed_companies_condition(SABB.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
+
 		return query.run(as_dict=True)
 
 	def process_manufacture_or_repack_entry(self, row, batch_details):
@@ -377,10 +435,35 @@ class ReportData:
 			if not fg_item:
 				return
 
-			key = (fg_item.item_code, row.reference_name)
+			mapped_fg_entries = self.get_mapped_fg_entries(row.reference_name, row.item_code)
+			fg_value = row.fg_serial_no or row.fg_batch_no
+			if fg_value:
+				# the finished good row that produced the mapped serial / batch
+				fg_entries = [
+					entry
+					for entry in mapped_fg_entries
+					if (row.fg_serial_no and entry.serial_no == row.fg_serial_no)
+					or (row.fg_batch_no and entry.batch_no == row.fg_batch_no)
+				]
+				if fg_entries:
+					fg_item = self.get_finished_item_from_stock_entry(
+						row.reference_name, fg_entries[0].detail_name
+					)
+
+			key = (fg_item.item_code, row.reference_name, fg_value)
 
 			if key not in batch_details:
 				serial_no, batch_no = self.get_serial_batch_no(fg_item.serial_and_batch_bundle)
+				if fg_value:
+					serial_no, batch_no = row.fg_serial_no, row.fg_batch_no
+					fg_item.qty = sum(abs(entry.qty) for entry in fg_entries) or fg_item.qty
+				elif mapped_fg_entries:
+					# unmapped raw materials of a partly mapped entry: only the unmapped production
+					serial_no, batch_no = None, None
+					fg_item.qty -= sum(
+						abs(entry.qty) for entry in mapped_fg_entries if entry.detail_name == fg_item.name
+					)
+
 				fg_item.update(
 					{
 						"work_order": ste.work_order,
@@ -400,11 +483,16 @@ class ReportData:
 					(row.item_code, row.reference_name, row.serial_no, row.batch_no)
 				] = row
 
-	def get_finished_item_from_stock_entry(self, reference_name):
+	def get_finished_item_from_stock_entry(self, reference_name, detail_name=None):
+		filters = {"parent": reference_name, "is_finished_item": 1}
+		if detail_name:
+			filters["name"] = detail_name
+
 		return frappe.db.get_value(
 			"Stock Entry Detail",
-			{"parent": reference_name, "is_finished_item": 1},
+			filters,
 			[
+				"name",
 				"item_code",
 				"item_name",
 				"serial_and_batch_bundle",
@@ -416,15 +504,65 @@ class ReportData:
 			as_dict=True,
 		)
 
+	def get_mapped_fg_entries(self, stock_entry, item_code):
+		"""Finished good serial / batch entries of the stock entry that this raw material item is mapped to."""
+		if (stock_entry, item_code) in self.mapped_fg_entries:
+			return self.mapped_fg_entries[(stock_entry, item_code)]
+
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		sabe = frappe.qb.DocType("Serial and Batch Entry")
+
+		mapped_values = (
+			frappe.qb.from_(sed)
+			.inner_join(sabe)
+			.on(sed.serial_and_batch_bundle == sabe.parent)
+			.select(sabe.fg_serial_no, sabe.fg_batch_no)
+			.distinct()
+			.where(
+				(sed.parent == stock_entry)
+				& (sed.item_code == item_code)
+				& (sed.is_finished_item == 0)
+				& (sabe.fg_serial_no.isnotnull() | sabe.fg_batch_no.isnotnull())
+			)
+		).run(as_dict=True)
+
+		mapped_entries = []
+		if mapped_values:
+			serial_nos = {row.fg_serial_no for row in mapped_values if row.fg_serial_no}
+			batch_nos = {row.fg_batch_no for row in mapped_values if row.fg_batch_no}
+
+			fg_entries = (
+				frappe.qb.from_(sed)
+				.inner_join(sabe)
+				.on(sed.serial_and_batch_bundle == sabe.parent)
+				.select(sed.name.as_("detail_name"), sabe.serial_no, sabe.batch_no, sabe.qty)
+				.where((sed.parent == stock_entry) & (sed.is_finished_item == 1))
+			).run(as_dict=True)
+
+			mapped_entries = [
+				entry
+				for entry in fg_entries
+				if (entry.serial_no and entry.serial_no in serial_nos)
+				or (not entry.serial_no and entry.batch_no in batch_nos)
+			]
+
+		self.mapped_fg_entries[(stock_entry, item_code)] = mapped_entries
+		return mapped_entries
+
 	def get_serial_batch_no(self, serial_and_batch_bundle):
-		sabb_details = frappe.db.get_value(
+		sabb_details = frappe.get_all(
 			"Serial and Batch Entry",
-			{"parent": serial_and_batch_bundle},
-			["batch_no", "serial_no"],
-			as_dict=True,
+			filters={"parent": serial_and_batch_bundle},
+			fields=["batch_no", "serial_no"],
 		)
 
-		return (sabb_details.serial_no, sabb_details.batch_no) if sabb_details else (None, None)
+		# a bundle with several serial / batch nos can't be pinned to one of them
+		serial_nos = {row.serial_no for row in sabb_details}
+		batch_nos = {row.batch_no for row in sabb_details}
+		return (
+			serial_nos.pop() if len(serial_nos) == 1 else None,
+			batch_nos.pop() if len(batch_nos) == 1 else None,
+		)
 
 	def get_columns(self, has_serial_no=None, has_batch_no=None):
 		columns = [
@@ -484,7 +622,8 @@ class ReportData:
 				{
 					"fieldname": "reference_doctype",
 					"label": _("Voucher Type"),
-					"fieldtype": "Data",
+					"fieldtype": "Link",
+					"options": "DocType",
 					"width": 130,
 				},
 				{

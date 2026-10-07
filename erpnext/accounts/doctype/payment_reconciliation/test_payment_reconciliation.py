@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import add_days, add_years, cint, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -186,6 +187,200 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			],
 		)
 		return je
+
+	def setup_split_exchange_accounts(self):
+		gain_account = create_account(
+			account_name="_Test PR Split Exchange Gain",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		)
+		loss_account = create_account(
+			account_name="_Test PR Split Exchange Loss",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		)
+		frappe.db.set_value("Company", self.company, "exchange_gain_account", gain_account)
+		frappe.db.set_value("Company", self.company, "exchange_loss_account", loss_account)
+		return gain_account, loss_account
+
+	def create_foreign_currency_sales_invoice(self, conversion_rate):
+		si = self.create_sales_invoice(
+			qty=1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		si.customer = self.customer_usd
+		si.currency = "USD"
+		si.conversion_rate = conversion_rate
+		si.debit_to = self.debtors_usd
+		si.save().submit()
+		return si
+
+	def create_foreign_currency_journal_payment(self, debtors_account, exchange_rate):
+		je = self.create_journal_entry(self.bank, debtors_account, 100, nowdate())
+		je.multi_currency = 1
+		je.accounts[0].exchange_rate = 1
+		je.accounts[0].credit_in_account_currency = 0
+		je.accounts[0].credit = 0
+		je.accounts[0].debit_in_account_currency = 100 * exchange_rate
+		je.accounts[0].debit = 100 * exchange_rate
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer_usd
+		je.accounts[1].exchange_rate = exchange_rate
+		je.accounts[1].credit_in_account_currency = 100
+		je.accounts[1].credit = 100 * exchange_rate
+		je.accounts[1].debit_in_account_currency = 0
+		je.accounts[1].debit = 0
+		je.save()
+		je.submit()
+		return je
+
+	def test_voucher_outstanding_metadata_comes_from_one_ledger_entry(self):
+		"""cost_center and remarks must describe the same Payment Ledger Entry.
+
+		A voucher can post several ledger entries for one party with different cost centers and
+		remarks. Aggregating each column on its own can pair one entry's cost center with another's
+		remarks -- a row that was never posted -- and because Max() over text is a sort, MariaDB and
+		PostgreSQL can pick differently on top of that.
+		"""
+		from erpnext.accounts.utils import QueryPaymentLedger
+
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = nowdate()
+		je.company = self.company
+		je.user_remark = "aaa base remark"
+		for cost_center, remark, amount in (
+			(self.main_cc, "aaa main line", 100),
+			(self.sub_cc, "zzz sub line", 50),
+		):
+			je.append(
+				"accounts",
+				{
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"cost_center": cost_center,
+					"user_remark": remark,
+					"debit_in_account_currency": amount,
+				},
+			)
+		je.append(
+			"accounts", {"account": self.cash, "cost_center": self.main_cc, "credit_in_account_currency": 150}
+		)
+		je.save()
+		je.submit()
+
+		posted = {
+			(row.cost_center, row.remarks)
+			for row in frappe.get_all(
+				"Payment Ledger Entry",
+				filters={"voucher_no": je.name, "delinked": 0},
+				fields=["cost_center", "remarks"],
+			)
+		}
+		self.assertGreater(len(posted), 1, "fixture must post more than one ledger entry to be meaningful")
+
+		ledger = QueryPaymentLedger()
+		rows = ledger.get_voucher_outstandings(
+			vouchers=[frappe._dict(voucher_type="Journal Entry", voucher_no=je.name)]
+		)
+		self.assertTrue(rows)
+
+		for row in rows:
+			self.assertIn((row.cost_center, row.remarks), posted)
+
+	def test_voucher_outstanding_splits_by_party_account(self):
+		"""A voucher posting to two party accounts must report each account separately.
+
+		account is the join key between the amount and outstanding CTEs. Selecting Max(account)
+		while grouping without it made that key an aggregate over two different row sets, so the two
+		sides could pick different accounts, the join would miss and the outstanding come back NULL.
+		It also summed amounts across accounts that need not share a currency.
+		"""
+		from erpnext.accounts.utils import QueryPaymentLedger
+
+		second_receivable = "_Test Receivable - _TC"
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = nowdate()
+		je.company = self.company
+		je.user_remark = "two receivable accounts"
+		for account, amount in ((self.debit_to, 100), (second_receivable, 60)):
+			je.append(
+				"accounts",
+				{
+					"account": account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"cost_center": self.main_cc,
+					"debit_in_account_currency": amount,
+				},
+			)
+		je.append(
+			"accounts", {"account": self.cash, "cost_center": self.main_cc, "credit_in_account_currency": 160}
+		)
+		je.save()
+		je.submit()
+
+		rows = QueryPaymentLedger().get_voucher_outstandings(
+			vouchers=[frappe._dict(voucher_type="Journal Entry", voucher_no=je.name)]
+		)
+		by_account = {row.account: row for row in rows}
+
+		self.assertEqual(set(by_account), {self.debit_to, second_receivable})
+		self.assertEqual(flt(by_account[self.debit_to].invoice_amount), 100)
+		self.assertEqual(flt(by_account[second_receivable].invoice_amount), 60)
+		for row in rows:
+			self.assertIsNotNone(row.outstanding)
+
+	def test_invoice_limit_keeps_a_voucher_outstanding_on_one_account(self):
+		"""The invoice limit must judge each party account on its own, like the main query.
+
+		A Journal Entry with +100 on one receivable account and -100 on another nets to 0. Netting it
+		dropped the voucher before the limit, so its +100 outstanding never showed.
+		"""
+		from erpnext.accounts.utils import get_outstanding_invoices
+
+		self.customer = (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Invoice Limit Customer",
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+				}
+			)
+			.insert()
+			.name
+		)
+		second_receivable = "_Test Receivable - _TC"
+		sales_invoice = self.create_sales_invoice(qty=1, rate=50)
+
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = nowdate()
+		je.company = self.company
+		for account, amount_field in (
+			(self.debit_to, "debit_in_account_currency"),
+			(second_receivable, "credit_in_account_currency"),
+		):
+			je.append(
+				"accounts",
+				{
+					"account": account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"cost_center": self.main_cc,
+					amount_field: 100,
+				},
+			)
+		je.save()
+		je.submit()
+
+		invoices = get_outstanding_invoices(
+			"Customer", self.customer, [self.debit_to, second_receivable], limit=10
+		)
+		outstanding = {(row.voucher_no, row.account): row.outstanding_amount for row in invoices}
+
+		self.assertEqual(
+			outstanding, {(sales_invoice.name, self.debit_to): 50, (je.name, self.debit_to): 100}
+		)
 
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
@@ -859,6 +1054,85 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"), "Exchange Gain Or Loss"
 		)
 
+	def test_exchange_gain_loss_split_default_account(self):
+		gain_account, loss_account = self.setup_split_exchange_accounts()
+
+		self.create_foreign_currency_sales_invoice(conversion_rate=80)
+		self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=85)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(pr.allocation[0].difference_amount, 500)
+		self.assertEqual(pr.allocation[0].difference_account, gain_account)
+		pr.reconcile()
+
+		self.create_foreign_currency_sales_invoice(conversion_rate=85)
+		self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=80)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(pr.allocation[0].difference_amount, -500)
+		self.assertEqual(pr.allocation[0].difference_account, loss_account)
+
+	def test_payment_reconciliation_difference_account_override(self):
+		_, loss_account = self.setup_split_exchange_accounts()
+		override_account = create_account(
+			account_name="_Test PR Override Exchange Account",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		)
+
+		si = self.create_foreign_currency_sales_invoice(conversion_rate=85)
+		self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=80)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Default, computed from the split company fields, is pre-filled onto the row...
+		self.assertEqual(pr.allocation[0].difference_amount, -500)
+		self.assertEqual(pr.allocation[0].difference_account, loss_account)
+
+		# ...but the user can override it in the "Select Difference Account" dialog before reconciling,
+		# and that explicit choice must be what actually gets booked, not the computed default.
+		pr.allocation[0].difference_account = override_account
+		pr.reconcile()
+
+		jea_parent = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"account": self.debtors_usd, "docstatus": 1, "reference_name": si.name, "credit": 500},
+			fields=["parent"],
+		)[0]
+		self.assertEqual(
+			frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"), "Exchange Gain Or Loss"
+		)
+
+		gain_loss_line_account = frappe.db.get_value(
+			"Journal Entry Account",
+			{"parent": jea_parent.parent, "account": ["!=", self.debtors_usd]},
+			"account",
+		)
+		self.assertEqual(gain_loss_line_account, override_account)
+
 	def test_difference_amount_via_negative_debit_or_credit_journal_entry(self):
 		# Make Sale Invoice
 		si = self.create_sales_invoice(
@@ -1107,15 +1381,6 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		test_user = "test@example.com"
 		permitted_ccs = ["_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"]
 		restricted_cc = "_Test Write Off Cost Center - _TC"
-		existing_apply_strict_user_permissions = cint(
-			frappe.db.get_single_value("System Settings", "apply_strict_user_permissions")
-		)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"System Settings",
-			"apply_strict_user_permissions",
-			existing_apply_strict_user_permissions,
-		)
 		transaction_date = nowdate()
 		rate = 100
 
@@ -1445,6 +1710,77 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
+	def test_allocate_entries_rounds_running_balance_to_currency_precision(self):
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debit_to
+		pr.set("invoices", [{"invoice_number": "INV-1"}])
+		pr.set("payments", [{"reference_name": "PAY-1"}])
+
+		invoices = [
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": "INV-1",
+				"outstanding_amount": 17592.415,
+				"currency": "INR",
+			},
+		]
+		payments = [
+			{
+				"reference_type": "Payment Entry",
+				"reference_name": "PAY-1",
+				"amount": 18230,
+				"currency": "INR",
+			}
+		]
+
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(payments[0]["amount"], flt(637.585, 2))
+
+	@ERPNextTestSuite.change_settings(
+		"System Settings", {"currency_precision": "", "use_number_format_from_currency": 1}
+	)
+	def test_allocate_entries_rounds_running_balance_to_account_currency_precision(self):
+		account_currency = frappe.get_cached_value("Account", self.debit_to, "account_currency")
+		original_number_format = frappe.db.get_value("Currency", account_currency, "number_format")
+		frappe.db.set_value("Currency", account_currency, "number_format", "#,###.###")
+		self.addCleanup(
+			frappe.db.set_value, "Currency", account_currency, "number_format", original_number_format
+		)
+
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debit_to
+		pr.set("invoices", [{"invoice_number": "INV-1"}])
+		pr.set("payments", [{"reference_name": "PAY-1"}])
+
+		invoices = [
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": "INV-1",
+				"outstanding_amount": 17592.415,
+				"currency": account_currency,
+			},
+		]
+		payments = [
+			{
+				"reference_type": "Payment Entry",
+				"reference_name": "PAY-1",
+				"amount": 18230,
+				"currency": account_currency,
+			}
+		]
+
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(payments[0]["amount"], flt(637.585, 3))
 
 	def test_reverse_payment_against_payment_for_supplier(self):
 		"""
@@ -2401,6 +2737,86 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		# Check the difference_amount is a loss of 5000
 		self.assertEqual(flt(pr.allocation[0].get("difference_amount")), -5000.0)
 		pr.reconcile()
+
+	def test_foreign_currency_reverse_payment_entry_gain_for_supplier(self):
+		transaction_date = nowdate()
+		self.supplier = "_Test Supplier USD"
+		amount = 100
+		department = frappe.db.get_value("Department", {"company": self.company, "is_group": 0}, "name")
+
+		# Pay USD 100 at an exchange rate of 90.
+		pe = self.create_payment_entry(amount=amount, posting_date=transaction_date)
+		pe.payment_type = "Pay"
+		pe.party_type = "Supplier"
+		pe.party = self.supplier
+		pe.paid_from = self.cash
+		pe.paid_from_account_currency = "INR"
+		pe.target_exchange_rate = 90
+		pe.paid_amount = 90 * amount
+		pe.received_amount = amount
+		pe.paid_to = self.creditors_usd
+		pe.paid_to_account_currency = "USD"
+		pe.department = department
+		pe = pe.save().submit()
+
+		# Receive USD 100 from the supplier at an exchange rate of 100.
+		reverse_pe = self.create_payment_entry(amount=amount, posting_date=transaction_date)
+		reverse_pe.payment_type = "Receive"
+		reverse_pe.party_type = "Supplier"
+		reverse_pe.party = self.supplier
+		reverse_pe.paid_from = self.creditors_usd
+		reverse_pe.paid_from_account_currency = "USD"
+		reverse_pe.source_exchange_rate = 100
+		reverse_pe.paid_amount = amount
+		reverse_pe.received_amount = 100 * amount
+		reverse_pe.paid_to = self.cash
+		reverse_pe.paid_to_account_currency = "INR"
+		reverse_pe.department = department
+		reverse_pe = reverse_pe.save().submit()
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.get_unreconciled_entries()
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		for row in pr.allocation:
+			row.department = department
+
+		self.assertEqual(flt(pr.allocation[0].difference_amount), 1000)
+		pr.reconcile()
+
+		gain_loss_journal = frappe.db.get_value(
+			"Journal Entry Account",
+			{
+				"reference_type": reverse_pe.doctype,
+				"reference_name": reverse_pe.name,
+				"party": self.supplier,
+				"docstatus": 1,
+			},
+			"parent",
+		)
+		party_row = frappe.db.get_value(
+			"Journal Entry Account",
+			{"parent": gain_loss_journal, "party": self.supplier},
+			["debit", "credit"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(party_row.debit), 1000)
+		self.assertEqual(flt(party_row.credit), 0)
+
+		party_gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": ["in", [pe.name, reverse_pe.name, gain_loss_journal]],
+				"account": self.creditors_usd,
+				"party": self.supplier,
+				"is_cancelled": 0,
+			},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(flt(sum(row.debit - row.credit for row in party_gl_entries)), 0)
 
 	def test_foreign_currency_reverse_journal_entry_against_journal_entry_for_customer(self):
 		transaction_date = nowdate()

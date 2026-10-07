@@ -81,4 +81,4 @@ erpnext.selling.InstallationNote = class InstallationNote extends frappe.ui.form
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.selling.InstallationNote({ frm: cur_frm }));
+frappe.ui.form.set_controller("Installation Note", erpnext.selling.InstallationNote);

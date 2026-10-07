@@ -1,6 +1,7 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from datetime import date
 
 import frappe
 from frappe import _
@@ -29,32 +30,67 @@ class EmailCampaign(Document):
 
 	def validate(self):
 		self.set_date()
-		# checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.
-		if self.email_campaign_for == "Lead":
-			self.validate_lead()
+		self.validate_recipient_email()
 		self.validate_email_campaign_already_exists()
 		self.update_status()
 
+	def validate_recipient_email(self):
+		if not self.recipient:
+			return
+
+		if self.email_campaign_for == "Lead":
+			self.validate_lead()
+		elif self.email_campaign_for == "Contact":
+			self.validate_contact()
+
 	def set_date(self):
-		if getdate(self.start_date) < getdate(today()):
+		start_date_changed = self.is_new() or self.has_value_changed("start_date")
+		if start_date_changed and getdate(self.start_date) < getdate(today()):
 			frappe.throw(_("Start Date cannot be before the current date"))
 
-		# set the end date as start date + max(send after days) in campaign schedule
-		campaign = frappe.get_cached_doc("Campaign", self.campaign_name)
-		send_after_days = [entry.send_after_days for entry in campaign.get("campaign_schedules")]
-
-		if not send_after_days:
+		self.end_date = self.get_end_date()
+		if not self.end_date:
 			frappe.throw(
 				_("Please set up the Campaign Schedule in the Campaign {0}").format(self.campaign_name)
 			)
 
-		self.end_date = add_days(getdate(self.start_date), max(send_after_days))
+	def get_end_date(self) -> date | None:
+		"""Return start date + the longest send after days in the Campaign's current schedule."""
+		campaign = frappe.get_cached_doc("Campaign", self.campaign_name)
+		send_after_days = [entry.send_after_days for entry in campaign.get("campaign_schedules")]
+		if send_after_days:
+			return add_days(getdate(self.start_date), max(send_after_days))
+
+	def refresh_end_date(self):
+		end_date = self.get_end_date()
+		if end_date and end_date != getdate(self.end_date):
+			self.db_set("end_date", end_date, update_modified=False)
 
 	def validate_lead(self):
-		lead_email_id = frappe.db.get_value("Lead", self.recipient, "email_id")
-		if not lead_email_id:
-			lead_name = frappe.db.get_value("Lead", self.recipient, "lead_name")
-			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
+		lead = frappe.db.get_value(
+			"Lead", self.recipient, ["email_id", "lead_name", "unsubscribed"], as_dict=True
+		)
+		if not lead.email_id:
+			frappe.throw(_("Please set an email id for the Lead {0}").format(lead.lead_name))
+		self.validate_not_unsubscribed(lead)
+
+	def validate_contact(self):
+		contact = frappe.db.get_value(
+			"Contact", self.recipient, ["email_id", "full_name", "unsubscribed"], as_dict=True
+		)
+		if contact and not contact.email_id:
+			frappe.throw(
+				_("Please set a primary email ID for the Contact {0}").format(frappe.bold(contact.full_name))
+			)
+		self.validate_not_unsubscribed(contact)
+
+	def validate_not_unsubscribed(self, recipient: dict | None):
+		if self.is_new() and recipient and recipient.unsubscribed:
+			frappe.throw(
+				_("{0} {1} has unsubscribed from emails").format(
+					_(self.email_campaign_for), frappe.bold(self.recipient)
+				)
+			)
 
 	def validate_email_campaign_already_exists(self):
 		email_campaign_exists = frappe.db.exists(
@@ -74,6 +110,9 @@ class EmailCampaign(Document):
 			)
 
 	def update_status(self):
+		if self.status == "Unsubscribed":
+			return
+
 		start_date = getdate(self.start_date)
 		end_date = getdate(self.end_date)
 		today_date = getdate(today())
@@ -93,10 +132,15 @@ class EmailCampaign(Document):
 def send_email_to_leads_or_contacts():
 	today_date = getdate(today())
 
-	# Get all active email campaigns in a single query
+	# Refresh end dates first, so steps added to a Campaign since the last status run are not missed
+	set_email_campaign_status()
 	email_campaigns = frappe.get_all(
 		"Email Campaign",
-		filters={"status": "In Progress"},
+		filters={
+			"status": ("!=", "Unsubscribed"),
+			"start_date": ("<=", today_date),
+			"end_date": (">=", today_date),
+		},
 		fields=["name", "campaign_name", "email_campaign_for", "recipient", "start_date", "sender"],
 	)
 
@@ -118,7 +162,7 @@ def send_email_to_leads_or_contacts():
 		for entry in campaign.get("campaign_schedules"):
 			try:
 				scheduled_date = add_days(getdate(email_campaign.start_date), entry.get("send_after_days"))
-				if scheduled_date == today_date:
+				if scheduled_date == today_date and not is_step_sent(email_campaign.name, entry, today_date):
 					send_mail(entry, email_campaign)
 			except Exception:
 				frappe.log_error(
@@ -127,6 +171,20 @@ def send_email_to_leads_or_contacts():
 						email_campaign.name, email_campaign.recipient
 					),
 				)
+
+
+def is_step_sent(email_campaign: str, entry: Document, on_date: date) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Communication",
+			{
+				"reference_doctype": "Email Campaign",
+				"reference_name": email_campaign,
+				"email_template": entry.get("email_template"),
+				"communication_date": (">=", on_date),
+			},
+		)
+	)
 
 
 def send_mail(entry, email_campaign):
@@ -143,11 +201,17 @@ def send_mail(entry, email_campaign):
 			pluck="email",
 		)
 	else:
-		email_id = frappe.db.get_value(campaign_for, recipient, "email_id")
+		email_id, unsubscribed = frappe.db.get_value(campaign_for, recipient, ["email_id", "unsubscribed"])
 		if not email_id:
 			frappe.log_error(
 				title=_("Email Campaign Error"),
 				message=_("No email found for {0} {1}").format(campaign_for, recipient),
+			)
+			return
+		if unsubscribed:
+			frappe.log_error(
+				title=_("Email Campaign Error"),
+				message=_("{0} {1} has unsubscribed from emails").format(campaign_for, recipient),
 			)
 			return
 		recipient_list = [email_id]
@@ -163,16 +227,13 @@ def send_mail(entry, email_campaign):
 	email_template = frappe.get_cached_doc("Email Template", entry.get("email_template"))
 	sender = frappe.db.get_value("User", sender_user, "email") if sender_user else None
 
-	# Build context for template rendering
-	if campaign_for != "Email Group":
-		context = {"doc": frappe.get_doc(campaign_for, recipient)}
-	else:
-		# For email groups, use the email group document as context
-		context = {"doc": frappe.get_doc("Email Group", recipient)}
+	# Support both {{ doc.field }} and {{ field }}, as the Email Template help shows
+	doc = frappe.get_doc(campaign_for, recipient)
+	context = {**doc.as_dict(), "doc": doc}
 
 	# Render template
-	subject = frappe.render_template(email_template.get("subject"), context)
-	content = frappe.render_template(email_template.response_, context)
+	subject = frappe.render_template(email_template.get("subject"), context, restrict_globals=True)
+	content = frappe.render_template(email_template.response_, context, restrict_globals=True)
 
 	frappe.db.savepoint("email_campaign_send")
 	try:
@@ -196,6 +257,9 @@ def send_mail(entry, email_campaign):
 			sender=sender,
 			communication=comm["name"],
 			queue_separately=True,
+			reference_doctype="Email Campaign",
+			reference_name=campaign_name,
+			unsubscribe_message=_("Unsubscribe from this campaign"),
 		)
 	except Exception:
 		frappe.db.rollback(save_point="email_campaign_send")
@@ -234,4 +298,5 @@ def set_email_campaign_status():
 
 	for name in email_campaigns:
 		email_campaign = frappe.get_doc("Email Campaign", name)
+		email_campaign.refresh_end_date()
 		email_campaign.update_status()

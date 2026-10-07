@@ -27,6 +27,7 @@ def get_payment_entry_against_order(
 ) -> dict | Document:
 	"""Build an advance-payment Journal Entry against an unbilled Sales/Purchase Order."""
 	ref_doc = frappe.get_doc(dt, dn)
+	ref_doc.check_permission()
 
 	if flt(ref_doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
@@ -78,6 +79,8 @@ def get_payment_entry_against_invoice(
 ) -> dict | Document:
 	"""Build a payment Journal Entry against a Sales/Purchase Invoice's outstanding amount."""
 	ref_doc = frappe.get_doc(dt, dn)
+	ref_doc.check_permission()
+
 	if dt == "Sales Invoice":
 		party_type = "Customer"
 		party_account = get_party_account_based_on_invoice_discounting(dn) or ref_doc.debit_to
@@ -118,6 +121,8 @@ def get_payment_entry(ref_doc, args: dict) -> dict | Document:
 	Returns the Journal Entry document when `args["journal_entry"]` is truthy, otherwise its
 	dict (for client calls).
 	"""
+	frappe.has_permission("Journal Entry", ptype="create", throw=True)
+
 	je = frappe.new_doc("Journal Entry")
 	je.update({"voucher_type": "Bank Entry", "company": ref_doc.company, "remark": args.get("remarks")})
 
@@ -222,6 +227,20 @@ def make_inter_company_journal_entry(name: str, voucher_type: str, company: str)
 @frappe.whitelist()
 def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Document | None = None) -> Document:
 	"""Map a submitted Journal Entry to a reversing one (debits and credits swapped)."""
+	# `get_mapped_doc` checks this as well, but the guards below disclose which entry
+	# reverses which, so read access has to be settled before they run
+	if not frappe.has_permission("Journal Entry", doc=source_name):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	reversal_of = frappe.db.get_value("Journal Entry", source_name, "reversal_of")
+	if reversal_of:
+		frappe.throw(
+			_("{0} is already a Reverse Journal Entry of {1}. Cancel it instead of reversing it.").format(
+				get_link_to_form("Journal Entry", source_name),
+				get_link_to_form("Journal Entry", reversal_of),
+			)
+		)
+
 	existing_reverse = frappe.db.exists("Journal Entry", {"reversal_of": source_name, "docstatus": 1})
 	if existing_reverse:
 		frappe.throw(
@@ -234,6 +253,10 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 
 	def post_process(source, target) -> None:
 		target.reversal_of = source.name
+		target.naming_series = source.naming_series
+		if source.voucher_type == "Bank Entry":
+			target.cheque_no = source.cheque_no
+			target.cheque_date = source.cheque_date
 
 	doclist = get_mapped_doc(
 		"Journal Entry",

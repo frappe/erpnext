@@ -6,7 +6,6 @@ frappe.provide("erpnext.stock.utils");
 
 $.extend(erpnext, {
 	get_currency: function (company) {
-		if (!company && cur_frm) company = cur_frm.doc.company;
 		if (company)
 			return frappe.get_doc(":Company", company)?.default_currency || frappe.boot.sysdefaults.currency;
 		else return frappe.boot.sysdefaults.currency;
@@ -110,13 +109,10 @@ $.extend(erpnext, {
 		frm.fields_dict[child_name].grid.reset_grid();
 	},
 
-	toggle_naming_series: function () {
-		if (
-			cur_frm &&
-			cur_frm.fields_dict.naming_series &&
-			cur_frm.meta.naming_rule == 'By "Naming Series" field'
-		) {
-			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal ? true : false);
+	// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
+	toggle_naming_series: function (frm = cur_frm) {
+		if (frm?.fields_dict.naming_series && frm.meta.naming_rule == 'By "Naming Series" field') {
+			frm.toggle_display("naming_series", frm.doc.__islocal ? true : false);
 		}
 	},
 
@@ -171,6 +167,49 @@ $.extend(erpnext, {
 });
 
 $.extend(erpnext.utils, {
+	async load_serial_batch_titles(item_code, rows) {
+		await Promise.all(
+			[
+				["Serial No", "serial_no"],
+				["Batch", "batch_no"],
+			].map(async ([doctype, field]) => {
+				const names = [...new Set(rows.map((row) => row[field]))].filter(
+					(name) => name && !frappe.utils.get_link_title(doctype, name)
+				);
+				if (!names.length) return;
+				const numbers = await frappe.xcall(
+					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
+					{ item_code, doctype, names }
+				);
+				for (const [name, number] of Object.entries(numbers)) {
+					frappe.utils.add_link_title(doctype, name, number);
+				}
+			})
+		);
+	},
+
+	format_serial_batch_number(value, row, column, data, default_formatter) {
+		const reference = column.serial_batch;
+		if (!reference) {
+			return default_formatter(value, row, column, data);
+		}
+		const name = data?.[reference.fieldname];
+		const label = frappe.utils.escape_html(value || "");
+		if (
+			!name ||
+			(reference.multiple && /[\n,]/.test(name)) ||
+			!frappe.model.can_read(reference.doctype)
+		) {
+			return label;
+		}
+		return frappe.utils.get_form_link(
+			reference.doctype,
+			reference.multiple ? name.trim() : name,
+			true,
+			label
+		);
+	},
+
 	set_party_dashboard_indicators: function (frm) {
 		if (frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var company_wise_info = frm.doc.__onload.dashboard_info;
@@ -214,7 +253,8 @@ $.extend(erpnext.utils, {
 	},
 
 	view_serial_batch_nos: function (frm) {
-		if (!frm.doc?.items) {
+		// the Serial and Batch Summary report only lists submitted bundles
+		if (!frm.doc?.items || frm.doc.docstatus !== 1) {
 			return;
 		}
 
@@ -367,10 +407,11 @@ $.extend(erpnext.utils, {
 								fieldname: dimension["fieldname"],
 								label: __(dimension["doctype"]),
 								fieldtype: "MultiSelectList",
-								depends_on:
-									report_name === "Stock Balance"
-										? "eval:doc.show_dimension_wise_stock === 1"
-										: "",
+								depends_on: ["Stock Balance", "Serial and Batch Wise Stock Balance"].includes(
+									report_name
+								)
+									? "eval:doc.show_dimension_wise_stock === 1"
+									: "",
 								get_data: function (txt) {
 									return frappe.db.get_link_options(dimension["doctype"], txt);
 								},
@@ -426,6 +467,26 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+	/**
+	 * Row flags for the Account / Cost Center trees: the caller's badges plus
+	 * a shared "Disabled" marker for records shown through the tree's
+	 * "include disabled" toggle.
+	 * @param {Object} node tree node (from treeview_settings.onrender)
+	 * @param {Array<string|HTMLElement>} flags badge markup / elements
+	 */
+	render_tree_node_flags: function (node, flags = []) {
+		if (cint(node.data?.disabled)) {
+			flags.push(frappe.ui.badge({ label: __("Disabled"), variant: "outline" }));
+			node.$tree_link.find("a.tree-label").addClass("text-ink-gray-5");
+		}
+		if (!flags.length) return;
+		const $flags = $(
+			'<span class="tree-node-flags inline-flex items-center gap-1.5 ms-2 shrink-0"></span>'
+		);
+		flags.forEach((flag) => $flags.append(flag));
+		$flags.insertAfter(node.$tree_link.find("a.tree-label"));
+	},
+
 	get_tree_options: function (option) {
 		// get valid options for tree based on user permission & locals dict
 		let unscrub_option = frappe.model.unscrub(option);
@@ -730,23 +791,26 @@ erpnext.utils.update_child_items = function (opts) {
 	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
 
-	this.data = frm.doc[opts.child_docname].map((d) => {
-		return {
-			docname: d.name,
-			name: d.name,
-			item_code: d.item_code,
-			item_name: d.item_name,
-			delivery_date: d.delivery_date,
-			schedule_date: d.schedule_date,
-			conversion_factor: d.conversion_factor,
-			qty: d.qty,
-			rate: d.rate,
-			uom: d.uom,
-			fg_item: d.fg_item,
-			fg_item_qty: d.fg_item_qty,
-			description: d.description,
-		};
-	});
+	this.data = frm.doc[opts.child_docname]
+		.filter((d) => !d.closed)
+		.map((d) => {
+			return {
+				docname: d.name,
+				name: d.name,
+				item_code: d.item_code,
+				item_name: d.item_name,
+				delivery_date: d.delivery_date,
+				schedule_date: d.schedule_date,
+				conversion_factor: d.conversion_factor,
+				qty: d.qty,
+				rate: d.rate,
+				uom: d.uom,
+				warehouse: d.warehouse,
+				fg_item: d.fg_item,
+				fg_item_qty: d.fg_item_qty,
+				description: d.description,
+			};
+		});
 
 	const fields = [
 		{
@@ -829,6 +893,7 @@ erpnext.utils.update_child_items = function (opts) {
 								item_name,
 								bom_no,
 								description,
+								warehouse,
 							} = r.message;
 							const row = dialog.fields_dict.trans_items.df.data.find(
 								(row) => row.name == me.doc.name
@@ -842,6 +907,7 @@ erpnext.utils.update_child_items = function (opts) {
 									item_name: item_name,
 									bom_no: bom_no,
 									description: me.doc.description || description,
+									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
 								});
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
@@ -864,6 +930,10 @@ erpnext.utils.update_child_items = function (opts) {
 			read_only: 0,
 			label: __("UOM"),
 			reqd: 1,
+			get_query: (row) => ({
+				query: "erpnext.controllers.queries.get_item_uom_query",
+				filters: { item_code: row.item_code },
+			}),
 			onchange: function () {
 				frappe.call({
 					method: "erpnext.stock.get_item_details.get_conversion_factor",
@@ -929,6 +999,29 @@ erpnext.utils.update_child_items = function (opts) {
 		});
 	}
 
+	const warehouse_df = child_meta.fields.find((f) => f.fieldname == "warehouse");
+	if (warehouse_df) {
+		fields.splice(3, 0, {
+			fieldtype: "Link",
+			fieldname: "warehouse",
+			options: "Warehouse",
+			in_list_view: 1,
+			label: __(warehouse_df.label),
+			// only new rows may set it, existing rows would leave their
+			// reserved qty stranded in the previous warehouse's bin
+			read_only_depends_on: "eval:doc.docname",
+			get_query: () => {
+				return {
+					filters: {
+						company: frm.doc.company,
+						is_group: 0,
+						disabled: 0,
+					},
+				};
+			},
+		});
+	}
+
 	if (["Purchase Order", "Sales Order"].includes(frm.doc.doctype) && frm.doc.is_subcontracted) {
 		fields.push(
 			{
@@ -942,11 +1035,7 @@ erpnext.utils.update_child_items = function (opts) {
 				label: __("Finished Good Item"),
 				get_query: () => {
 					return {
-						filters: {
-							is_stock_item: 1,
-							is_sub_contracted_item: 1,
-							default_bom: ["!=", ""],
-						},
+						query: "erpnext.controllers.queries.subcontracted_item_query",
 					};
 				},
 			},
@@ -1019,15 +1108,18 @@ erpnext.utils.update_child_items = function (opts) {
 };
 
 erpnext.utils.map_current_doc = function (opts) {
+	// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
+	const frm = opts.target || cur_frm;
+
 	function _map() {
-		if ($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
+		if ($.isArray(frm.doc.items) && frm.doc.items.length > 0) {
 			// remove first item row if empty
-			if (!cur_frm.doc.items[0].item_code) {
-				cur_frm.doc.items = cur_frm.doc.items.splice(1);
+			if (!frm.doc.items[0].item_code) {
+				frm.doc.items = frm.doc.items.splice(1);
 			}
 
 			// find the doctype of the items table
-			var items_doctype = frappe.meta.get_docfield(cur_frm.doctype, "items").options;
+			var items_doctype = frappe.meta.get_docfield(frm.doctype, "items").options;
 
 			// find the link fieldname from items table for the given
 			// source_doctype
@@ -1040,7 +1132,7 @@ erpnext.utils.map_current_doc = function (opts) {
 			var already_set = false;
 			var item_qty_map = {};
 
-			$.each(cur_frm.doc.items, function (i, d) {
+			$.each(frm.doc.items, function (i, d) {
 				opts.source_name.forEach(function (src) {
 					if (d[link_fieldname] == src) {
 						already_set = true;
@@ -1064,7 +1156,7 @@ erpnext.utils.map_current_doc = function (opts) {
 
 					if (already_set) {
 						frappe.msgprint(
-							__("You have already selected items from {0} {1}", [opts.source_doctype, src])
+							__("You have already selected items from {0} {1}", [__(opts.source_doctype), src])
 						);
 						return;
 					}
@@ -1080,7 +1172,7 @@ erpnext.utils.map_current_doc = function (opts) {
 			args: {
 				method: opts.method,
 				source_names: opts.source_name,
-				target_doc: cur_frm.doc,
+				target_doc: frm.doc,
 				args: opts.args,
 			},
 			freeze: true,
@@ -1088,8 +1180,8 @@ erpnext.utils.map_current_doc = function (opts) {
 			callback: function (r) {
 				if (!r.exc) {
 					frappe.model.sync(r.message);
-					cur_frm.dirty();
-					cur_frm.refresh();
+					frm.dirty();
+					frm.refresh();
 				}
 			},
 		});
@@ -1111,7 +1203,7 @@ erpnext.utils.map_current_doc = function (opts) {
 	if (opts.source_doctype) {
 		let data_fields = [];
 		if (["Purchase Receipt", "Delivery Note", "Purchase Invoice"].includes(opts.source_doctype)) {
-			let target_meta = frappe.get_meta(cur_frm.doc.doctype);
+			let target_meta = frappe.get_meta(frm.doc.doctype);
 			if (target_meta.fields.find((f) => f.fieldname === "taxes")) {
 				data_fields.push({
 					fieldname: "merge_taxes",
@@ -1185,7 +1277,8 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @returns {string} - The link value with the added title.
  */
 function add_link_title(value, doc, df, title_field) {
-	if (value && doc[title_field]) {
+	const title_belongs_to_value = df.options !== df.parent || value === doc.name;
+	if (value && title_belongs_to_value && doc[title_field]) {
 		if (doc[title_field] !== value && doc[df.fieldname] === value) {
 			return value + ": " + doc[title_field];
 		} else if (doc.doctype == df.parent) {
@@ -1212,7 +1305,7 @@ $(document).on("app_ready", function () {
 			],
 			function (i, d) {
 				frappe.ui.form.on(d, "onload", function (frm) {
-					cur_frm.set_df_property("posting_time", "description", frappe.sys_defaults.time_zone);
+					frm.set_df_property("posting_time", "description", frappe.sys_defaults.time_zone);
 				});
 			}
 		);
@@ -1388,7 +1481,13 @@ function attach_selector_button(inner_text, append_loction, context, grid_row) {
 $.extend(erpnext.stock.utils, {
 	set_item_details_using_barcode(frm, child_row, callback) {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
-		barcode_scanner.scan_api_call(child_row.barcode, callback);
+		barcode_scanner.scan_api_call(child_row.barcode, async (r) => {
+			if (r.message?.candidates) {
+				r.message = await erpnext.utils.BarcodeScanner.select_scan_match(r.message.candidates);
+				if (!r.message) return;
+			}
+			return callback(r);
+		});
 	},
 
 	get_serial_range(range_string, separator) {

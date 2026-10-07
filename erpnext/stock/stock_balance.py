@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cstr, flt, now, nowdate, nowtime
 
@@ -96,6 +97,7 @@ def get_reserved_qty(item_code, warehouse):
 
 	open_so = (so.docstatus == 1) & so.status.notin(["On Hold", "Closed"])
 	not_delivered_by_supplier = so_item.delivered_by_supplier.isnull() | (so_item.delivered_by_supplier == 0)
+	not_closed = so_item.closed.isnull() | (so_item.closed == 0)
 
 	# Keep the reserved-qty rollup in the DB (one aggregate per branch) instead of streaming
 	# every open packed-item / SO-item row into Python. `qty <> 0` mirrors the original
@@ -122,6 +124,7 @@ def get_reserved_qty(item_code, warehouse):
 			& (packed_item.parenttype == "Sales Order")
 			& (packed_item.item_code != packed_item.parent_item)
 			& not_delivered_by_supplier
+			& not_closed
 			& open_so
 			& reservable
 		)
@@ -138,6 +141,7 @@ def get_reserved_qty(item_code, warehouse):
 			(so_item.item_code == item_code)
 			& (so_item.warehouse == warehouse)
 			& not_delivered_by_supplier
+			& not_closed
 			& open_so
 			& reservable
 		)
@@ -159,34 +163,21 @@ def get_indented_qty(item_code, warehouse):
 		& (mr.docstatus == 1)
 	)
 
-	inward_qty = (
+	pending_qty = mr_item.stock_qty - mr_item.ordered_qty
+	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
+	quantities = (
 		frappe.qb.from_(mr_item)
 		.inner_join(mr)
 		.on(mr_item.parent == mr.name)
-		.select(Sum(mr_item.stock_qty - mr_item.ordered_qty))
-		.where(
-			base_conditions
-			& mr.material_request_type.isin(
-				["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
-			)
+		.select(
+			Sum(Case().when(mr.material_request_type.isin(inward_types), pending_qty).else_(0)),
+			Sum(Case().when(mr.material_request_type == "Material Issue", pending_qty).else_(0)),
 		)
+		.where(base_conditions)
 		.run()
 	)
-	inward_qty = flt(inward_qty[0][0]) if inward_qty else 0
 
-	outward_qty = (
-		frappe.qb.from_(mr_item)
-		.inner_join(mr)
-		.on(mr_item.parent == mr.name)
-		.select(Sum(mr_item.stock_qty - mr_item.ordered_qty))
-		.where(base_conditions & (mr.material_request_type == "Material Issue"))
-		.run()
-	)
-	outward_qty = flt(outward_qty[0][0]) if outward_qty else 0
-
-	requested_qty = inward_qty - outward_qty
-
-	return requested_qty
+	return flt(quantities[0][0]) - flt(quantities[0][1]) if quantities else 0
 
 
 def get_ordered_qty(item_code, warehouse):
@@ -219,6 +210,7 @@ def get_purchase_order_qty(item_code, warehouse):
 			& (PurchaseOrder.status.notin(["Closed", "Delivered"]))
 			& (PurchaseOrder.docstatus == 1)
 			& (Coalesce(PurchaseOrderItem.delivered_by_supplier, 0) == 0)
+			& (Coalesce(PurchaseOrderItem.closed, 0) == 0)
 		)
 		.run()
 	)

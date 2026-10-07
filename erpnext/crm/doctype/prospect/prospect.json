@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:company_name",
  "creation": "2021-08-19 00:21:06.995448",
+ "description": "A company you are trying to win as a customer, with its leads.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -218,6 +219,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "user-round-search",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2025-03-06 11:31:49.083983",

@@ -5,6 +5,7 @@
  "autoname": "field:title",
  "creation": "2018-10-17 05:47:13.087395",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/video",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -128,6 +129,7 @@
    "read_only": 1
   }
  ],
+ "icon": "video",
  "image_field": "image",
  "links": [],
  "modified": "2024-03-27 13:10:58.743905",

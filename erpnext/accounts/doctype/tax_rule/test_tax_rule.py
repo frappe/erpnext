@@ -2,10 +2,19 @@
 # See license.txt
 
 import frappe
+from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
 from erpnext.crm.doctype.opportunity.mapper import make_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+	malformed_names,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -63,25 +72,6 @@ class TestTaxRule(ERPNextTestSuite):
 
 	def test_for_parent_supplier_group(self):
 		purchase_template = "_Test Purchase Taxes and Charges Template - _TC"
-		if not frappe.db.exists("Purchase Taxes and Charges Template", purchase_template):
-			frappe.get_doc(
-				{
-					"doctype": "Purchase Taxes and Charges Template",
-					"title": "_Test Purchase Taxes and Charges Template",
-					"company": "_Test Company",
-					"taxes": [
-						{
-							"account_head": "_Test Account VAT - _TC",
-							"charge_type": "On Net Total",
-							"description": "VAT",
-							"doctype": "Purchase Taxes and Charges",
-							"cost_center": "Main - _TC",
-							"rate": 6,
-						}
-					],
-				}
-			).insert()
-
 		make_tax_rule(
 			supplier_group="All Supplier Groups",
 			tax_type="Purchase",
@@ -388,6 +378,92 @@ class TestTaxRule(ERPNextTestSuite):
 
 		# Check if accounts heads and rate fetched are also fetched from tax template or not
 		self.assertGreater(len(quotation.taxes), 0)
+
+	def make_customer_address(self):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": "UP Tax Rule Address",
+					"address_type": "Billing",
+					"address_line1": "1 Fence Road",
+					"city": "Fence City",
+					"country": "India",
+					"is_primary_address": 1,
+					"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+				}
+			)
+			.insert()
+			.name
+		)
+
+	def test_get_party_details_checks_the_party_and_the_address(self):
+		from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details
+
+		address = self.make_customer_address()
+
+		def party_kwargs(name):
+			return {"party": name, "party_type": "Customer"}
+
+		def address_kwargs(name):
+			return {"party": "_Test Customer", "party_type": "Customer", "args": {"billing_address": name}}
+
+		outside = make_fenced_user(
+			"taxrule-fenced@example.com", ["Accounts User"], [("Customer", "_Test Customer 1")]
+		)
+		with as_user(outside):
+			assert_refused(self, get_party_details, "_Test Customer", "customer")
+			assert_refused(self, get_party_details, **address_kwargs(address))
+			assert_refused_for_names(
+				self, get_party_details, party_kwargs, [], type_gated=True, caller_supplied=True
+			)
+		unfenced = make_fenced_user("taxrule-unfenced@example.com", ["Accounts User"])
+		with as_user(unfenced):
+			assert_refused(self, get_party_details, unfenced, "User")
+			assert_refused(self, get_party_details, "_Test Customer", "")
+			for name in malformed_names():
+				if isinstance(name, str):
+					self.assertRaises(frappe.DoesNotExistError, get_party_details, **address_kwargs(name))
+				else:
+					self.assertRaises(frappe.PermissionError, get_party_details, **address_kwargs(name))
+		inside = make_fenced_user(
+			"taxrule-fenced@example.com", ["Accounts User"], [("Customer", "_Test Customer")]
+		)
+		with as_user(inside):
+			self.assertEqual(get_party_details("_Test Customer", "customer")["billing_city"], "Fence City")
+
+	def test_get_party_details_refuses_an_unreadable_address_but_set_taxes_still_works(self):
+		from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details
+		from erpnext.accounts.party import set_taxes
+
+		address = self.make_customer_address()
+		stock_user = make_fenced_user("taxrule-stock@example.com", ["Stock User"])
+		with as_user(stock_user):
+			assert_refused(
+				self, get_party_details, "_Test Customer", "Customer", {"billing_address": address}
+			)
+			set_taxes("_Test Customer", "Customer", nowdate(), "_Test Company", billing_address=address)
+		other_address = (
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": "UP Tax Rule Other Address",
+					"address_type": "Billing",
+					"address_line1": "2 Fence Road",
+					"city": "Fence City",
+					"country": "India",
+				}
+			)
+			.insert()
+			.name
+		)
+		address_fenced = make_fenced_user(
+			"taxrule-address@example.com",
+			["Accounts User"],
+			[("Customer", "_Test Customer"), ("Address", other_address)],
+		)
+		with as_user(address_fenced):
+			assert_refused_without(self, [address], get_party_details, "_Test Customer", "Customer")
 
 
 def make_tax_rule(**args):

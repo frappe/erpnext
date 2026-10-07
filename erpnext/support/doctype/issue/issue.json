@@ -4,8 +4,10 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-02-01 10:36:25",
+ "description": "A problem or question raised by a customer.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/issue",
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -84,6 +86,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Customer",
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
@@ -97,6 +100,7 @@
    "fieldname": "raised_by",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Raised By (Email)",
    "oldfieldname": "raised_by",
@@ -111,6 +115,7 @@
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
@@ -123,6 +128,7 @@
   {
    "fieldname": "priority",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Priority",
@@ -131,6 +137,7 @@
   {
    "fieldname": "issue_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Issue Type",
    "options": "Issue Type"
   },
@@ -145,7 +152,7 @@
    "bold": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Description",
    "oldfieldname": "problem_description",
    "oldfieldtype": "Text"
@@ -390,10 +397,10 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-ticket",
+ "icon": "ticket",
  "idx": 7,
  "links": [],
- "modified": "2026-04-09 19:14:57.692236",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -418,12 +425,17 @@
   {
    "role": "HR User",
    "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
  "search_fields": "status,customer,subject,raised_by",
  "sender_field": "raised_by",
+ "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

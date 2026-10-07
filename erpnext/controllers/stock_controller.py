@@ -31,8 +31,10 @@ from erpnext.exceptions import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock import get_warehouse_account_map
+from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
@@ -103,7 +105,7 @@ class StockController(AccountsController):
 						_("Row #{0}: Item {1} has zero rate but '{2}' is not enabled.").format(
 							item.idx,
 							frappe.bold(item.item_code),
-							item.meta.get_label("allow_zero_valuation_rate"),
+							item.meta.get_translated_label("allow_zero_valuation_rate"),
 						),
 						indicator="orange",
 					)
@@ -135,7 +137,9 @@ class StockController(AccountsController):
 	def use_item_inventory_account(self):
 		return frappe.get_cached_value("Company", self.company, "enable_item_wise_inventory_account")
 
-	def get_inventory_account_dict(self, row, inventory_account_map, warehouse_field=None):
+	def get_inventory_account_dict(
+		self, row, inventory_account_map, warehouse_field=None, *, raise_error=True
+	):
 		account_dict = frappe._dict()
 
 		if isinstance(row, dict):
@@ -164,8 +168,15 @@ class StockController(AccountsController):
 		if not warehouse:
 			warehouse = self.get(warehouse_field)
 
-		if warehouse and warehouse in inventory_account_map:
-			account_dict = inventory_account_map[warehouse]
+		if warehouse:
+			account_dict = inventory_account_map.get(warehouse)
+			if not account_dict and raise_error:
+				account = get_warehouse_account(frappe.get_cached_doc("Warehouse", warehouse))
+				account_dict = frappe._dict(
+					account=account,
+					account_currency=frappe.get_cached_value("Account", account, "account_currency"),
+				)
+				inventory_account_map[warehouse] = account_dict
 
 		return account_dict
 
@@ -251,12 +262,25 @@ class StockController(AccountsController):
 		return SerialBatchBundleService(self).set_serial_and_batch_bundle(table_name, ignore_validate)
 
 	def make_package_for_transfer(
-		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
+		self,
+		serial_and_batch_bundle,
+		warehouse,
+		type_of_transaction=None,
+		do_not_submit=None,
+		qty=0,
+		include_bundle=None,
+		exclude_serial_nos=None,
 	):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
 		return SerialBatchBundleService(self).make_package_for_transfer(
-			serial_and_batch_bundle, warehouse, type_of_transaction, do_not_submit, qty
+			serial_and_batch_bundle,
+			warehouse,
+			type_of_transaction,
+			do_not_submit,
+			qty,
+			include_bundle,
+			exclude_serial_nos,
 		)
 
 	def get_sl_entries(self, d, args):
@@ -306,27 +330,82 @@ class StockController(AccountsController):
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
-		target_ref_field = "amount"
+		args = {
+			"target_dt": self.doctype + " Item",
+			"target_parent_dt": self.doctype,
+			"target_parent_field": "per_billed",
+			"target_ref_field": "amount",
+			"target_field": "billed_amt",
+			"name": self.name,
+		}
+
 		if self.doctype == "Delivery Note":
-			total_amount = total_returned = 0
-			for item in self.items:
-				total_amount += flt(item.amount)
-				total_returned += flt(item.returned_qty * item.rate)
+			# Bill by amount, falling back to qty when the invoiced amount is short (e.g. rate drop).
+			args["billing_percentage"] = self.get_delivery_note_billing_percentage()
+		elif self.doctype == "Purchase Order" and is_billed_by_qty():
+			from erpnext.buying.doctype.purchase_order.services.status import StatusService
 
-			if total_returned < total_amount:
-				target_ref_field = {"SUB": ["amount", {"MUL": ["returned_qty", "rate"]}], "as": "ref_amount"}
+			args["billing_percentage"] = StatusService(self).get_percent_billed_by_qty()
 
-		self._update_percent_field(
-			{
-				"target_dt": self.doctype + " Item",
-				"target_parent_dt": self.doctype,
-				"target_parent_field": "per_billed",
-				"target_ref_field": target_ref_field,
-				"target_field": "billed_amt",
-				"name": self.name,
-			},
-			update_modified,
+		self._update_percent_field(args, update_modified)
+
+	def get_delivery_note_billing_percentage(self):
+		invoiced_qty_map = self.get_invoiced_qty_map()
+
+		# Read fresh values; billed_amt is set on the rows just before this runs.
+		items = frappe.get_all(
+			"Delivery Note Item",
+			filters={"parent": self.name, "parenttype": "Delivery Note"},
+			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt", "closed"],
 		)
+		# A written off row leaves the basis. Once every row is written off there is
+		# nothing left to measure against, so fall back to the whole table.
+		items = [item for item in items if not item.closed] or items
+
+		total_amount = sum(flt(item.amount) for item in items)
+		total_returned = sum(flt(item.returned_qty) * flt(item.rate) for item in items)
+		# Preserve the original amount basis once the entire Delivery Note is returned.
+		use_original_amount = total_returned >= total_amount
+
+		total_ref = total_billed = 0.0
+		for item in items:
+			net_amount = abs(
+				flt(item.amount)
+				if use_original_amount
+				else flt(item.amount) - flt(item.returned_qty) * flt(item.rate)
+			)
+			if not net_amount:
+				continue
+
+			# Amount basis, capped at the delivery amount (mirrors _update_percent_field).
+			amount_billed = min(abs(flt(item.billed_amt)), net_amount)
+
+			# Qty basis: only raises billing when the amount is short; SO/SI-linked rows have
+			# no invoiced qty here, so the amount basis wins via max() below.
+			net_qty = flt(item.qty) - flt(item.returned_qty)
+			invoiced_qty = flt(invoiced_qty_map.get(item.name, 0))
+			qty_billed = net_amount * min(invoiced_qty / net_qty, 1) if net_qty else 0
+
+			total_ref += net_amount
+			total_billed += max(amount_billed, qty_billed)
+
+		return round(total_billed / total_ref * 100, 6) if total_ref else 0
+
+	def get_invoiced_qty_map(self):
+		from erpnext.stock.doctype.delivery_note.services.billing_status import (
+			get_invoiced_qty_against_dn,
+			get_invoiced_qty_based_on_so,
+		)
+
+		# Direct Delivery Note -> Sales Invoice billing
+		qty_map = get_invoiced_qty_against_dn(delivery_note=self.name)
+
+		# Sales Order -> Delivery Note -> Sales Invoice-from-SO billing: attribute qty via
+		# so_detail using the same FIFO distribution as update_billed_amount_based_on_so.
+		for so_detail in {item.so_detail for item in self.items if item.so_detail}:
+			qty_map.update(get_invoiced_qty_based_on_so(so_detail))
+
+		return qty_map
 
 	def validate_inspection(self):
 		from erpnext.stock.services.quality_inspection_service import QualityInspectionService
@@ -378,6 +457,7 @@ class StockController(AccountsController):
 		voucher_detail_no=None,
 		item=None,
 		posting_date=None,
+		dimensions=None,
 	):
 		from erpnext.accounts.services.base_gl_composer import add_gl_entry
 
@@ -397,6 +477,7 @@ class StockController(AccountsController):
 			voucher_detail_no,
 			item,
 			posting_date,
+			dimensions,
 		)
 
 	def update_stock_reservation_entries(self):
@@ -579,7 +660,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	from erpnext.controllers.ledger_preview import get_stock_ledger_preview
 
-	filters = frappe._dict(company=company)
+	filters = frappe._dict(company=company, valuation_field_type="Currency")
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
 	doc.run_method("before_sl_preview")
@@ -685,7 +766,7 @@ def make_quality_inspections(
 				"item_code": item.get("item_code"),
 				"description": item.get("description"),
 				"sample_size": flt(item.get("sample_size")),
-				"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+				"item_serial_no": get_first_serial_id(item),
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),
 			}
@@ -696,23 +777,43 @@ def make_quality_inspections(
 	return inspections
 
 
+def get_first_serial_id(item):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serial_numbers = get_serial_nos(item.get("serial_no"))
+	if not serial_numbers:
+		return None
+	records = SerialBatchIdentity("Serial No").get_records(
+		item.get("item_code"), serial_numbers[:1], ["name"]
+	)
+	return records[0].name if records else None
+
+
 def is_reposting_pending():
 	return frappe.db.exists(
 		"Repost Item Valuation", {"docstatus": 1, "status": ["in", ["Queued", "In Progress"]]}
 	)
 
 
-def future_sle_exists(args, sl_entries=None):
+def invalidate_future_sle_cache(voucher_type, voucher_no):
+	if hasattr(frappe.local, "future_sle"):
+		frappe.local.future_sle.pop((voucher_type, voucher_no), None)
+
+
+def future_sle_exists(args, sl_entries=None, for_update=False):
 	from erpnext.stock.utils import get_combine_datetime
 
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):
 		frappe.local.future_sle = {}
 
-	if validate_future_sle_not_exists(args, key, sl_entries):
-		return False
-	elif get_cached_data(args, key):
-		return True
+	# The locking read neither uses nor fills the cache: a cached result may come from a plain
+	# read that predates a concurrent later-posted SLE.
+	if not for_update:
+		if validate_future_sle_not_exists(args, key, sl_entries):
+			return False
+		elif get_cached_data(args, key):
+			return True
 
 	if not sl_entries:
 		sl_entries = get_sle_entries_against_voucher(args)
@@ -724,7 +825,7 @@ def future_sle_exists(args, sl_entries=None):
 	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	data = (
+	query = (
 		frappe.qb.from_(sle)
 		.select(sle.item_code, sle.warehouse, Count(sle.name).as_("total_row"))
 		.where(
@@ -734,11 +835,21 @@ def future_sle_exists(args, sl_entries=None):
 			& (sle.is_cancelled == 0)
 		)
 		.groupby(sle.item_code, sle.warehouse)
-		.run(as_dict=1)
 	)
 
-	for d in data:
-		frappe.local.future_sle[key][(d.item_code, d.warehouse)] = d.total_row
+	# A plain read uses the transaction's snapshot, which can predate a later-posted SLE that a
+	# concurrent submit committed meanwhile; this voucher would then skip the repost it needs.
+	# A locking read sees the latest committed rows and waits on uncommitted ones. Only the final
+	# repost decision asks for it: by then this voucher already holds these ranges, whereas an
+	# upfront lock over every item-warehouse pair deadlocks with concurrent submits.
+	if for_update and frappe.db.db_type == "mariadb":
+		query = query.for_update()
+
+	data = query.run(as_dict=1)
+
+	if not for_update:
+		for d in data:
+			frappe.local.future_sle[key][(d.item_code, d.warehouse)] = d.total_row
 
 	return len(data)
 
@@ -874,10 +985,20 @@ def make_bundle_for_material_transfer(**kwargs):
 	bundle_doc.voucher_no = "" if kwargs.is_new or kwargs.docstatus == 2 else kwargs.voucher_no
 	bundle_doc.is_cancelled = 0
 
+	if kwargs.include_bundle:
+		for entry in frappe.get_doc("Serial and Batch Bundle", kwargs.include_bundle).entries:
+			bundle_doc.append("entries", entry.as_dict(no_default_fields=True))
+
+	if kwargs.exclude_serial_nos:
+		keep = [row for row in bundle_doc.entries if row.serial_no not in set(kwargs.exclude_serial_nos)]
+		bundle_doc.entries = keep
+		for idx, row in enumerate(keep, start=1):
+			row.idx = idx
+
 	qty = 0
 	if (
 		len(bundle_doc.entries) == 1
-		and flt(kwargs.qty) < flt(bundle_doc.total_qty)
+		and abs(flt(kwargs.qty)) < abs(flt(bundle_doc.total_qty))
 		and not bundle_doc.has_serial_no
 	):
 		qty = kwargs.qty
@@ -888,7 +1009,7 @@ def make_bundle_for_material_transfer(**kwargs):
 		row.stock_value_difference = abs(row.stock_value_difference)
 		if kwargs.type_of_transaction == "Outward":
 			row.qty *= -1
-			row.stock_value_difference *= row.stock_value_difference
+			row.stock_value_difference *= -1
 			row.is_outward = 1
 
 		row.warehouse = kwargs.warehouse

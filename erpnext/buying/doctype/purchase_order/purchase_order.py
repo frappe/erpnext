@@ -116,6 +116,7 @@ class PurchaseOrder(BuyingController):
 		pricing_rules: DF.Table[PricingRuleDetail]
 		project: DF.Link | None
 		ref_sq: DF.Link | None
+		remarks: DF.SmallText | None
 		represents_company: DF.Link | None
 		rounded_total: DF.Currency
 		rounding_adjustment: DF.Currency
@@ -178,7 +179,15 @@ class PurchaseOrder(BuyingController):
 				"global_allowance_field": "over_order_allowance",
 				"global_allowance_doctype": "Buying Settings",
 				"item_allowance_field": "over_order_allowance",
-			}
+			},
+			{
+				"source_dt": "Purchase Order Item",
+				"target_dt": "Supplier Quotation Item",
+				"join_field": "supplier_quotation_item",
+				"target_field": "ordered_qty",
+				"target_ref_field": "stock_qty",
+				"source_field": "stock_qty",
+			},
 		]
 
 	def onload(self):
@@ -218,6 +227,7 @@ class PurchaseOrder(BuyingController):
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.set_missing_terms()
 
 	def set_has_unit_price_items(self):
 		"""
@@ -250,6 +260,7 @@ class PurchaseOrder(BuyingController):
 						["conversion_factor", "="],
 					],
 					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
 				},
 				"Material Request": {
 					"ref_dn_field": "material_request",
@@ -272,7 +283,7 @@ class PurchaseOrder(BuyingController):
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, "prevent_pos")
 		if prevent_po:
-			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, "status")
+			standing = frappe.db.get_value("Supplier Scorecard", {"supplier": self.supplier}, "status")
 			if standing:
 				frappe.throw(
 					_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(
@@ -282,7 +293,7 @@ class PurchaseOrder(BuyingController):
 
 		warn_po = frappe.db.get_value("Supplier", self.supplier, "warn_pos")
 		if warn_po:
-			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, "status")
+			standing = frappe.db.get_value("Supplier Scorecard", {"supplier": self.supplier}, "status")
 			frappe.msgprint(
 				_(
 					"{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
@@ -310,12 +321,45 @@ class PurchaseOrder(BuyingController):
 			itemwise_qty.setdefault(d.item_code, 0)
 			itemwise_qty[d.item_code] += flt(d.stock_qty)
 
+		precision = self.items[0].precision("stock_qty")
 		for item_code, qty in itemwise_qty.items():
-			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
+			if flt(qty, precision) < flt(itemwise_min_order_qty.get(item_code), precision):
 				frappe.throw(
 					_(
 						"Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
-					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
+					).format(item_code, flt(qty, precision), itemwise_min_order_qty.get(item_code))
+				)
+
+		self.warn_marginal_min_order_qty(itemwise_qty, itemwise_min_order_qty)
+
+	def warn_marginal_min_order_qty(self, itemwise_qty, itemwise_min_order_qty):
+		"""Toast when an item's ordered qty exceeds its minimum only by purchase UOM rounding."""
+		if not self.is_new():
+			return
+
+		precision = self.items[0].precision("stock_qty")
+		itemwise_step = frappe._dict()
+		itemwise_stock_uom = frappe._dict()
+		for d in self.get("items"):
+			step = 10 ** -d.precision("qty") * flt(d.conversion_factor)
+			itemwise_step[d.item_code] = max(itemwise_step.get(d.item_code, 0), step)
+			itemwise_stock_uom[d.item_code] = d.stock_uom
+
+		for item_code, qty in itemwise_qty.items():
+			min_order_qty = flt(itemwise_min_order_qty.get(item_code))
+			overage = flt(qty) - min_order_qty
+			if min_order_qty and flt(overage, precision) > 0 and overage < itemwise_step[item_code]:
+				frappe.toast(
+					_(
+						"Item {0}: Ordered qty {1} {2} exceeds the minimum order qty {3} {2} by {4} {2} due to purchase UOM rounding."
+					).format(
+						item_code,
+						flt(qty, precision),
+						itemwise_stock_uom[item_code],
+						min_order_qty,
+						flt(overage, precision),
+					),
+					indicator="orange",
 				)
 
 	def get_schedule_dates(self):
@@ -368,6 +412,25 @@ class PurchaseOrder(BuyingController):
 
 	def update_status(self, status):
 		StatusService(self).update_status(status)
+
+	def on_item_close_status_change(self):
+		StatusService(self).recalculate_after_item_close()
+
+	def is_item_closable(self, item):
+		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
+
+	def update_prevdoc_status(self):
+		super().update_prevdoc_status()
+
+		for supplier_quotation in {item.supplier_quotation for item in self.items}:
+			if not supplier_quotation:
+				continue
+
+			doc = frappe.get_doc("Supplier Quotation", supplier_quotation)
+			if doc.docstatus.is_cancelled():
+				frappe.throw(_("Supplier Quotation {0} is cancelled").format(supplier_quotation))
+
+			doc.set_status(update=True)
 
 	def on_submit(self):
 		super().on_submit()
@@ -498,7 +561,7 @@ class PurchaseOrder(BuyingController):
 		considering the configured over_delivery_receipt_allowance.
 		"""
 		for item in self.get("items", []):
-			if item.delivered_by_supplier:
+			if item.delivered_by_supplier or item.closed:
 				continue
 			tolerance = flt(get_allowance_for(item.item_code, qty_or_amount="qty")[0])
 			max_receivable_qty = flt(item.qty) * (100 + tolerance) / 100
@@ -549,14 +612,19 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 			return item_last_purchase_rate
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_purchase_orders(names: str | list, status: str):
-	if not frappe.has_permission("Purchase Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Purchase Order", "write", throw=True)
 
 	names = frappe.parse_json(names)
 	for name in names:
-		po = frappe.get_lazy_doc("Purchase Order", name)
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level and never consults User Permissions, so on its own it
+		# lets a caller restricted to one company close another company's orders. Checking each
+		# document is what scopes it, and matches what update_status() below already does.
+		po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 		if po.docstatus == 1:
 			if status == "Closed":
 				if po.status not in ("Cancelled", "Closed") and (
@@ -587,7 +655,7 @@ def get_list_context(context=None):
 	return list_context
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
 	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 	po.update_status(status)

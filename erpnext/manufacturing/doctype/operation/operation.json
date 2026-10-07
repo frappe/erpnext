@@ -4,8 +4,10 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2014-11-07 16:20:30.683186",
+ "description": "A step in making an item, like cutting or assembly.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/operation",
  "engine": "InnoDB",
  "field_order": [
   "workstation",
@@ -27,6 +29,7 @@
   {
    "fieldname": "workstation",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Workstation",
@@ -41,6 +44,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text",
+   "in_import_template": 1,
    "in_preview": 1,
    "label": "Description"
   },
@@ -110,7 +114,7 @@
    "options": "Quality Inspection Template"
   }
  ],
- "icon": "fa fa-wrench",
+ "icon": "cog",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2025-08-04 16:14:57.659318",

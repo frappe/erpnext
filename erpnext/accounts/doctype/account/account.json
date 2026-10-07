@@ -4,9 +4,10 @@
  "allow_import": 1,
  "creation": "2013-01-30 12:49:46",
  "default_view": "Tree",
- "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.",
+ "description": "A ledger in your chart of accounts that entries are posted to.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/chart-of-accounts",
  "engine": "InnoDB",
  "field_order": [
   "properties",
@@ -55,6 +56,7 @@
   {
    "fieldname": "account_number",
    "fieldtype": "Data",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Account Number"
@@ -63,6 +65,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Is Group"
   },
   {
@@ -98,6 +101,7 @@
    "depends_on": "eval:doc.is_group==0",
    "fieldname": "account_currency",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Currency",
    "options": "Currency"
   },
@@ -122,6 +126,8 @@
    "description": "Setting Account Type helps in selecting this Account in transactions.",
    "fieldname": "account_type",
    "fieldtype": "Select",
+   "in_import_template": 1,
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Account Type",
    "oldfieldname": "account_type",
@@ -199,11 +205,11 @@
    "options": "Account Category"
   }
  ],
- "icon": "fa fa-money",
+ "icon": "vault",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-04-14 18:14:42.202065",
+ "modified": "2026-09-03 12:59:42.190900",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -263,6 +269,46 @@
   },
   {
    "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
    "select": 1
   }
  ],

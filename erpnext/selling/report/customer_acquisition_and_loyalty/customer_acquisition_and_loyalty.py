@@ -2,11 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import calendar
-
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, getdate
+from frappe.utils import cint, cstr, formatdate, getdate
 
 
 def execute(filters=None):
@@ -85,7 +83,7 @@ def get_data_by_time(filters, common_columns):
 			out.append(
 				{
 					"year": cstr(year),
-					"month": calendar.month_name[month],
+					"month": formatdate(f"{key}-01", "MMMM"),
 					"new_customers": new[0],
 					"repeat_customers": repeat[0],
 					"total": new[0] + repeat[0],

@@ -141,7 +141,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 		},
 		{
 			fieldname: "for_revaluation_journals",
-			label: __("Revaluation Journals"),
+			label: __("Include Revaluation Journals"),
 			fieldtype: "Check",
 		},
 	],

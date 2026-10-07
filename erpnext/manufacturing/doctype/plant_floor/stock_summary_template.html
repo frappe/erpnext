@@ -2,9 +2,9 @@
 <div class="row" style="border-bottom:1px solid var(--border-color); padding:4px 5px; margin-top: 3px;margin-bottom: 3px;">
 	<div class="col-sm-1">
 		{% if(row.image) { %}
-			<img style="width:50px;height:50px;" src="{{row.image}}">
+			<img style="width:50px;height:50px;" src="{{frappe.utils.escape_html(row.image)}}">
 		{% } else { %}
-			<div style="width:50px;height:50px;background-color:var(--control-bg);text-align:center;padding-top:15px">{{frappe.get_abbr(row.item_code, 2)}}</div>
+			<div style="width:50px;height:50px;background-color:var(--control-bg);text-align:center;padding-top:15px">{{frappe.get_abbr(frappe.utils.escape_html(row.item_code), 2)}}</div>
 		{% } %}
 	</div>
 	<div class="col-sm-3">
@@ -13,7 +13,7 @@
 		{% } else { %}
 			{{row.item_link}}
 			<p>
-				{{row.item_name}}
+				{{frappe.utils.escape_html(row.item_name)}}
 			</p>
 		{% } %}
 
@@ -52,10 +52,10 @@
 		</span>
 	</div>
 	<div class="col-sm-1">
-		<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add" data-item-code="{{ escape(row.item_code) }}">{{ __("Add") }}</button>
+		<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add" data-item-code="{{ frappe.utils.escape_html(row.item_code) }}">{{ __("Add") }}</button>
 	</div>
 	<div class="col-sm-1">
-		<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-move" data-item-code="{{ escape(row.item_code) }}">{{ __("Move") }}</button>
+		<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-move" data-item-code="{{ frappe.utils.escape_html(row.item_code) }}">{{ __("Move") }}</button>
 	</div>
 </div>
 {% }); %}

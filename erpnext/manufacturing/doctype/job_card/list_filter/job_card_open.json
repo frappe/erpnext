@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"operation\", \"label\": \"Operation\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"work_order\", \"label\": \"Work Order\"}, {\"fieldname\": \"workstation\", \"label\": \"Workstation\"}, {\"fieldname\": \"for_quantity\", \"label\": \"Qty to Manufacture\"}, {\"fieldname\": \"expected_start_date\", \"label\": \"Expected Start Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:57.017452",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Open",
+ "filters": "[[\"Job Card\", \"status\", \"in\", [\"Open\", \"Material Transferred\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:57.017452",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Job Card-Open",
+ "owner": "Administrator",
+ "reference_doctype": "Job Card",
+ "route_signature": "status=[\"in\",[\"Open\",\"Material Transferred\"]]",
+ "sort_field": "expected_start_date",
+ "sort_order": "asc"
+}

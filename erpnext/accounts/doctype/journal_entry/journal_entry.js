@@ -32,7 +32,7 @@ frappe.ui.form.on("Journal Entry", {
 			erpnext.journal_entry.lock_reversal_entry(frm);
 		}
 
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(frm);
 		erpnext.journal_entry.add_custom_buttons(frm);
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
@@ -235,7 +235,7 @@ Object.assign(erpnext.journal_entry, {
 	lock_reversal_entry(frm) {
 		frm.fields
 			.filter((field) => field.has_input)
-			.filter((field) => field.df.fieldname != "posting_date")
+			.filter((field) => !["posting_date", "custom_remark", "remark"].includes(field.df.fieldname))
 			.forEach((field) => frm.set_df_property(field.df.fieldname, "read_only", 1));
 		frm.set_df_property("accounts", "read_only", 1);
 	},
@@ -249,7 +249,7 @@ Object.assign(erpnext.journal_entry, {
 			);
 		}
 
-		if (frm.doc.docstatus == 1) {
+		if (frm.doc.docstatus == 1 && !frm.doc.reversal_of) {
 			frm.add_custom_button(
 				__("Reverse Journal Entry"),
 				() => erpnext.journal_entry.reverse_journal_entry(frm),
@@ -624,8 +624,8 @@ Object.assign(erpnext.journal_entry, {
 			total_credit += flt(row.credit, precision("credit", row));
 		});
 
-		frm.doc.total_debit = total_debit;
-		frm.doc.total_credit = total_credit;
+		frm.doc.total_debit = flt(total_debit, precision("total_debit"));
+		frm.doc.total_credit = flt(total_credit, precision("total_credit"));
 		frm.doc.difference = flt(total_debit - total_credit, precision("difference"));
 		["total_debit", "total_credit", "difference"].forEach((field) => frm.refresh_field(field));
 	},
@@ -677,6 +677,6 @@ Object.assign(erpnext.journal_entry, {
 		} else {
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 		}
-		frm.refresh_field("accounts");
+		frm.get_field("accounts").grid.refresh_row(cdn);
 	},
 });

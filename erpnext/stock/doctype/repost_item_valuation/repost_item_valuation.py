@@ -17,6 +17,7 @@ from frappe.utils import (
 	getdate,
 	now,
 	nowtime,
+	to_timedelta,
 )
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
@@ -92,6 +93,7 @@ class RepostItemValuation(Document):
 	def validate(self):
 		self.set_default_posting_time()
 		self.reset_repost_only_accounting_ledgers()
+		self.validate_repost_only_accounting_ledgers()
 		self.set_company()
 		self.validate_update_stock()
 		self.validate_period_closing_voucher()
@@ -111,6 +113,19 @@ class RepostItemValuation(Document):
 	def reset_repost_only_accounting_ledgers(self):
 		if self.repost_only_accounting_ledgers and self.based_on != "Transaction":
 			self.repost_only_accounting_ledgers = 0
+
+	def validate_repost_only_accounting_ledgers(self):
+		if not self.repost_only_accounting_ledgers:
+			return
+
+		# A GL Entry is not a stock transaction, so there are no stock ledger entries to rebuild its
+		# accounting ledgers from; reposting it would only delete the entries it already has.
+		if self.voucher_type == "GL Entry":
+			frappe.throw(
+				_("GL reposting is not allowed against the voucher type {0}.").format(
+					frappe.bold(_("GL Entry"))
+				)
+			)
 
 	def validate_update_stock(self):
 		if (
@@ -149,8 +164,8 @@ class RepostItemValuation(Document):
 		year_end_date = self.get_max_period_closing_date(self.company)
 		if year_end_date and getdate(self.posting_date) <= getdate(year_end_date):
 			date = frappe.format(year_end_date, "Date")
-			msg = f"Due to period closing, you cannot repost item valuation before {date}"
-			frappe.throw(_(msg))
+			msg = _("Due to period closing, you cannot repost item valuation before {0}").format(date)
+			frappe.throw(msg)
 
 		# Accounting Period
 		if self.voucher_type:
@@ -234,6 +249,8 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def set_company(self):
+		self.check_permission("write")
+
 		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
 		elif self.warehouse:
@@ -286,6 +303,8 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def restart_reposting(self):
+		self.check_permission("write")
+
 		self.set_status("Queued", write=False)
 		self.current_index = 0
 		self.distinct_item_and_warehouse = None
@@ -386,8 +405,13 @@ class RepostItemValuation(Document):
 			doc.update_stock_ledger(allow_negative_stock=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def bulk_restart_reposting(names: str | list):
+	# restart_reposting() below checks write per document and lets the error propagate, so the
+	# authorisation is already correct — but it only fires after each document has been loaded and
+	# its status read. Gate first; this denies exactly who the per-document check would.
+	frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
 	names = frappe.parse_json(names)
 	for name in names:
 		doc = frappe.get_doc("Repost Item Valuation", name)
@@ -525,6 +549,7 @@ def mark_covered_transaction_reposts(source, coverage, affected):
 
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Repost Item Valuation", ["voucher_no", "voucher_type", "status"], "voucher_status")
 
 
 def repost(doc):
@@ -567,7 +592,7 @@ def repost(doc):
 			raise
 
 		frappe.db.rollback()
-		traceback = frappe.get_traceback(with_context=True)
+		traceback = frappe.get_traceback()
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""
@@ -942,10 +967,10 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 	if get_weekday() == repost_settings.limits_dont_apply_on:
 		return True
 
-	start_time = repost_settings.start_time
-	end_time = repost_settings.end_time
+	start_time = to_timedelta(repost_settings.start_time)
+	end_time = to_timedelta(repost_settings.end_time)
 
-	now_time = current_time or nowtime()
+	now_time = to_timedelta(current_time or nowtime())
 
 	if start_time < end_time:
 		return end_time >= now_time >= start_time
@@ -953,9 +978,19 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 		return now_time >= start_time or now_time <= end_time
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def execute_repost_item_valuation():
 	"""Execute repost item valuation via scheduler."""
+	# Force-enqueues the site-wide reposting job, so it needs the same right as restarting one.
+	frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
+	if not in_configured_timeslot():
+		frappe.msgprint(
+			_("Reposting will start within the timeslot configured in {0}").format(
+				get_link_to_form("Stock Reposting Settings", "Stock Reposting Settings")
+			)
+		)
+		return False
 
 	method = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
 	if frappe.db.get_single_value("Stock Reposting Settings", "enable_parallel_reposting"):
@@ -967,6 +1002,8 @@ def execute_repost_item_valuation():
 		"name",
 	):
 		frappe.get_doc("Scheduled Job Type", name).enqueue(force=True)
+
+	return True
 
 
 def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):

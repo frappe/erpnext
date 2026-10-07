@@ -3,8 +3,10 @@
  "allow_bulk_edit": 1,
  "autoname": "ACC-BG-.YYYY.-.#####",
  "creation": "2016-12-17 10:43:35.731631",
+ "description": "A guarantee a bank gives on your behalf, or on a customer's or supplier's.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bank-guarantee",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -216,6 +218,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "shield-check",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-05-25 18:12:10.768835",

@@ -232,7 +232,6 @@ class TestPackedItem(ERPNextTestSuite):
 
 		# a disabled version is rejected
 		frappe.db.set_value("Product Bundle", version, "disabled", 1)
-		self.addCleanup(frappe.db.set_value, "Product Bundle", version, "disabled", 0)
 		self.assertRaises(
 			frappe.ValidationError,
 			get_items_from_product_bundle,

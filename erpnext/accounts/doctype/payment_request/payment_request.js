@@ -1,9 +1,7 @@
-cur_frm.add_fetch("payment_gateway_account", "payment_account", "payment_account");
-cur_frm.add_fetch("payment_gateway_account", "payment_gateway", "payment_gateway");
-cur_frm.add_fetch("payment_gateway_account", "message", "message");
-
 frappe.ui.form.on("Payment Request", {
 	setup: function (frm) {
+		frm.add_fetch("payment_gateway_account", "message", "message");
+
 		frm.set_query("party_type", function () {
 			return {
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
@@ -37,6 +35,8 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 		frm.set_intro(__("Failure: {0}", [frm.doc.failed_reason]), "red");
 	}
 
+	let sending_email = false;
+
 	if (
 		frm.doc.payment_request_type == "Inward" &&
 		frm.doc.payment_channel !== "Phone" &&
@@ -45,16 +45,16 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 		frm.doc.docstatus == 1
 	) {
 		frm.add_custom_button(__("Resend Payment Email"), function () {
-			frappe.call({
-				method: "erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email",
-				args: { docname: frm.doc.name },
-				freeze: true,
-				freeze_message: __("Sending"),
-				callback: function (r) {
-					if (!r.exc) {
-						frappe.msgprint(__("Message Sent"));
-					}
-				},
+			if (sending_email) {
+				frappe.show_alert({ message: __("Sending Email"), indicator: "blue" });
+				return;
+			}
+			sending_email = true;
+			frappe.show_alert({ message: __("Sending Email"), indicator: "blue" });
+			frm.call("resend_payment_email").then((r) => {
+				const msg = !r.exc ? __("Email Sent") : __("Email couldn't be sent.");
+				frappe.show_alert({ message: msg, indicator: !r.exc ? "green" : "red" });
+				sending_email = false;
 			});
 		});
 	}
@@ -90,6 +90,7 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
 			freeze: true,
 			callback: function (data) {
 				if (!data.exc) {
+					frm.clear_table("subscription_plans");
 					$.each(data.message || [], function (i, v) {
 						var d = frappe.model.add_child(
 							frm.doc,

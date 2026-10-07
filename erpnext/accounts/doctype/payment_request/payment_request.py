@@ -589,6 +589,18 @@ class PaymentRequest(Document):
 
 		return payment_entry
 
+	@frappe.whitelist(methods=["POST"])
+	def resend_payment_email(self):
+		if not (
+			self.docstatus == 1
+			and self.payment_request_type == "Inward"
+			and self.payment_channel != "Phone"
+			and self.status not in ["Initiated", "Paid"]
+		):
+			frappe.throw(_("Payment Link couldn't be sent."))
+
+		self.send_email()
+
 	def send_email(self):
 		"""send email with payment link"""
 		email_args = {
@@ -606,11 +618,14 @@ class PaymentRequest(Document):
 				)
 			],
 		}
+		job_id = f"send_payment_email::{self.name}"
 		enqueue(
 			method=frappe.sendmail,
 			queue="short",
 			timeout=300,
 			is_async=True,
+			job_id=job_id,
+			deduplicate=True,
 			enqueue_after_commit=True,
 			**email_args,
 		)
@@ -625,7 +640,7 @@ class PaymentRequest(Document):
 		}
 
 		if self.message:
-			return frappe.render_template(self.message, context)
+			return frappe.render_template(self.message, context, restrict_globals=True)
 
 	def set_failed(self):
 		pass
@@ -860,6 +875,7 @@ def make_payment_request(**args):
 			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
+		subscription_plans = get_subscription_details(ref_doc.doctype, ref_doc.name)
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -891,12 +907,24 @@ def make_payment_request(**args):
 					or gateway_account.get("payment_channel", "Email") != "Email"
 				),
 				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
+				"is_a_subscription": 1 if subscription_plans else 0,
 			}
 		)
 
 		if selected_payment_schedules:
 			apply_payment_references(pr, payment_reference)
 
+		if subscription_plans:
+			pr.set(
+				"subscription_plans",
+				[
+					{
+						"plan": row.plan,
+						"qty": row.qty,
+					}
+					for row in subscription_plans
+				],
+			)
 		# Dimensions
 		pr.update(
 			{
@@ -1116,11 +1144,6 @@ def get_print_format_list(ref_doctype: str):
 
 
 @frappe.whitelist()
-def resend_payment_email(docname: str):
-	return frappe.get_doc("Payment Request", docname).send_email()
-
-
-@frappe.whitelist()
 def make_payment_entry(docname: str):
 	doc = frappe.get_doc("Payment Request", docname)
 	doc.check_permission("read")
@@ -1215,20 +1238,25 @@ def get_dummy_message(doc):
 
 
 @frappe.whitelist()
-def get_subscription_details(reference_doctype: str, reference_name: str):
-	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.get_all(
-			"Subscription Invoice",
-			filters={"invoice": reference_name},
-			fields=["parent as sub_name"],
-			order_by="",  # match the original query (no ORDER BY); avoid get_all's default sort
-		)
-		subscription_plans = []
-		for subscription in subscriptions:
-			plans = frappe.get_doc("Subscription", subscription.sub_name).plans
-			for plan in plans:
-				subscription_plans.append(plan)
-		return subscription_plans
+def get_subscription_details(reference_doctype: str, reference_name: str) -> list[dict]:
+	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
+
+	if not frappe.get_meta(reference_doctype).has_field("subscription"):
+		return []
+
+	subscription = frappe.db.get_value(reference_doctype, reference_name, "subscription")
+
+	if not subscription:
+		return []
+
+	return frappe.get_all(
+		"Subscription Plan Detail",
+		filters={"parent": subscription, "parenttype": "Subscription", "parentfield": "plans"},
+		fields=[
+			"plan",
+			"qty",
+		],
+	)
 
 
 @frappe.whitelist()
@@ -1331,6 +1359,7 @@ def get_irequests_of_payment_request(doc: str | None = None) -> list:
 @frappe.whitelist()
 def get_available_payment_schedules(reference_doctype: str, reference_name: str):
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
+	ref_doc.check_permission()
 
 	if not hasattr(ref_doc, "payment_schedule") or not ref_doc.payment_schedule:
 		return []

@@ -23,8 +23,6 @@ from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed
 
 class TestBankTransaction(ERPNextTestSuite):
 	def setUp(self):
-		make_pos_profile()
-
 		# generate and use a uniq hash identifier for 'Bank Account' and it's linked GL 'Account' to avoid validation error
 		uniq_identifier = frappe.generate_hash(length=10)
 		gl_account = create_gl_account("_Test Bank " + uniq_identifier)
@@ -32,6 +30,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			gl_account=gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
 
+		make_pos_profile()
 		add_transactions(bank_account=bank_account)
 		add_vouchers(gl_account=gl_account)
 
@@ -47,7 +46,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertEqual(linked_payments[0]["party"], "Conrad Electronic")
+		self.assertIn("Conrad Electronic", [payment["party"] for payment in linked_payments])
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):

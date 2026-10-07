@@ -2,8 +2,57 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Authorization Rule", {
+	setup: function (frm) {
+		frm.set_query("system_user", function () {
+			return { query: "frappe.core.doctype.user.user.user_query" };
+		});
+
+		frm.set_query("approving_user", function () {
+			return { query: "frappe.core.doctype.user.user.user_query" };
+		});
+
+		frm.set_query("system_role", function () {
+			return {
+				filters: [["Role", "name", "not in", "Administrator, Guest, All"]],
+			};
+		});
+
+		frm.set_query("master_name", function () {
+			return frm.events.get_master_name_query(frm);
+		});
+
+		frm.set_query("to_emp", function () {
+			return { query: "erpnext.controllers.queries.employee_query" };
+		});
+	},
 	refresh: function (frm) {
 		frm.events.set_master_type(frm);
+		unhide_field(["system_role", "system_user", "value"]);
+		hide_field(["to_emp", "to_designation"]);
+	},
+	get_master_name_query: function (frm) {
+		if (frm.doc.based_on == "Customerwise Discount") {
+			return {
+				doctype: "Customer",
+				filters: [["Customer", "docstatus", "!=", 2]],
+			};
+		} else if (frm.doc.based_on == "Itemwise Discount") {
+			return {
+				doctype: "Item",
+				query: "erpnext.controllers.queries.item_query",
+			};
+		} else if (frm.doc.based_on === "Item Group wise Discount") {
+			return {
+				doctype: "Item Group",
+				filters: {
+					is_group: 0,
+				},
+			};
+		} else {
+			return {
+				filters: [["Item", "name", "=", "cheating done to avoid null"]],
+			};
+		}
 	},
 	set_master_type: function (frm) {
 		if (frm.doc.based_on === "Customerwise Discount") {
@@ -35,60 +84,3 @@ frappe.ui.form.on("Authorization Rule", {
 		hide_field(["to_emp", "to_designation"]);
 	},
 });
-
-// Settings Module
-cur_frm.cscript.refresh = function (doc, cdt, cdn) {
-	if (doc.based_on == "Not Applicable") hide_field("value");
-	else unhide_field("value");
-
-	unhide_field(["system_role", "system_user", "value"]);
-	hide_field(["to_emp", "to_designation"]);
-};
-
-cur_frm.fields_dict.system_user.get_query = function (doc, cdt, cdn) {
-	return { query: "frappe.core.doctype.user.user.user_query" };
-};
-
-cur_frm.fields_dict.approving_user.get_query = function (doc, cdt, cdn) {
-	return { query: "frappe.core.doctype.user.user.user_query" };
-};
-
-cur_frm.fields_dict["approving_role"].get_query = cur_frm.fields_dict["system_role"].get_query;
-
-// System Role Trigger
-// -----------------------
-cur_frm.fields_dict["system_role"].get_query = function (doc) {
-	return {
-		filters: [["Role", "name", "not in", "Administrator, Guest, All"]],
-	};
-};
-
-// Master Name Trigger
-// --------------------
-cur_frm.fields_dict["master_name"].get_query = function (doc) {
-	if (doc.based_on == "Customerwise Discount")
-		return {
-			doctype: "Customer",
-			filters: [["Customer", "docstatus", "!=", 2]],
-		};
-	else if (doc.based_on == "Itemwise Discount")
-		return {
-			doctype: "Item",
-			query: "erpnext.controllers.queries.item_query",
-		};
-	else if (doc.based_on === "Item Group wise Discount")
-		return {
-			doctype: "Item Group",
-			filters: {
-				is_group: 0,
-			},
-		};
-	else
-		return {
-			filters: [["Item", "name", "=", "cheating done to avoid null"]],
-		};
-};
-
-cur_frm.fields_dict.to_emp.get_query = function (doc, cdt, cdn) {
-	return { query: "erpnext.controllers.queries.employee_query" };
-};

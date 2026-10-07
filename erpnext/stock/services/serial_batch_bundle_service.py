@@ -13,7 +13,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.utils import cstr, flt, get_link_to_form, getdate
+from frappe.utils import escape_html, flt, get_link_to_form, getdate
 
 from erpnext.controllers.sales_and_purchase_return import (
 	available_serial_batch_for_return,
@@ -25,6 +25,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class SerialBatchBundleService:
@@ -32,25 +33,37 @@ class SerialBatchBundleService:
 		self.doc = doc
 
 	def validate_warehouse_of_sabb(self):
-		if self.doc.is_internal_transfer():
-			return
-
+		is_internal_transfer = self.doc.is_internal_transfer()
 		doc_before_save = self.doc.get_doc_before_save()
+		bundle_details = {}
 
 		for row in self.doc.items:
-			if not row.get("serial_and_batch_bundle"):
-				continue
+			for fieldname in ("serial_and_batch_bundle", "rejected_serial_and_batch_bundle"):
+				bundle = row.get(fieldname)
+				if not bundle:
+					continue
 
-			sabb_details = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				row.serial_and_batch_bundle,
-				["type_of_transaction", "warehouse", "has_serial_no"],
-				as_dict=True,
-			)
+				if bundle not in bundle_details:
+					bundle_details[bundle] = frappe.db.get_value(
+						"Serial and Batch Bundle",
+						bundle,
+						["company", "type_of_transaction", "warehouse", "has_serial_no"],
+						as_dict=True,
+					)
+
+				sabb_details = bundle_details[bundle]
+				if sabb_details and sabb_details.company != self.doc.company:
+					frappe.throw(
+						_(
+							"Row #{0}: Company {1} does not match with the company {2} in Serial and Batch Bundle {3}."
+						).format(row.idx, self.doc.company, sabb_details.company, bundle)
+					)
+
+			sabb_details = bundle_details.get(row.get("serial_and_batch_bundle"))
 			if not sabb_details:
 				continue
 
-			if sabb_details.type_of_transaction != "Outward":
+			if is_internal_transfer or sabb_details.type_of_transaction != "Outward":
 				continue
 
 			warehouse = row.get("warehouse") or row.get("s_warehouse")
@@ -113,17 +126,17 @@ class SerialBatchBundleService:
 
 		for d in self.doc.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
-				serial_nos = frappe.get_all(
-					"Serial No",
-					fields=["batch_no", "name", "warehouse"],
-					filters={"name": ("in", get_serial_nos(d.serial_no))},
+				serial_nos = SerialBatchIdentity("Serial No").get_records(
+					d.item_code, get_serial_nos(d.serial_no), ["batch_no", "serial_no", "warehouse"]
 				)
 
 				for row in serial_nos:
 					if row.warehouse and row.batch_no != d.batch_no:
 						frappe.throw(
 							_("Row #{0}: Serial No {1} does not belong to Batch {2}").format(
-								d.idx, row.name, d.batch_no
+								d.idx,
+								escape_html(row.serial_no),
+								SerialBatchIdentity("Batch").get_label(d.batch_no),
 							)
 						)
 
@@ -141,7 +154,10 @@ class SerialBatchBundleService:
 				if expiry_date and getdate(expiry_date) < getdate(self.doc.posting_date):
 					frappe.throw(
 						_("Row #{0}: The batch {1} has already expired.").format(
-							d.idx, get_link_to_form("Batch", d.get("batch_no"))
+							d.idx,
+							get_link_to_form(
+								"Batch", d.batch_no, SerialBatchIdentity("Batch").get_label(d.batch_no)
+							),
 						),
 						BatchExpiredError,
 					)
@@ -456,7 +472,16 @@ class SerialBatchBundleService:
 	def create_serial_batch_bundle(self, bundle_details, row):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		sn_doc = SerialBatchCreation(bundle_details).make_serial_and_batch_bundle()
+		resolved_details = bundle_details.copy()
+		if bundle_details.get("serial_nos"):
+			resolved_details["serial_nos"] = SerialBatchIdentity("Serial No").resolve(
+				bundle_details["item_code"],
+				bundle_details["serial_nos"],
+				create=bundle_details.get("type_of_transaction") == "Inward",
+				defaults={"company": self.doc.company, "batch_no": bundle_details.get("batch_no")},
+				ignore_permissions=self.doc.flags.ignore_permissions,
+			)
+		sn_doc = SerialBatchCreation(resolved_details).make_serial_and_batch_bundle()
 
 		field = "serial_and_batch_bundle"
 		if bundle_details.get("is_rejected"):
@@ -472,19 +497,15 @@ class SerialBatchBundleService:
 		if row.serial_no:
 			serial_nos = frappe.get_all(
 				"Serial and Batch Entry",
-				fields=["serial_no"],
+				pluck="serial_no",
 				filters={"parent": row.serial_and_batch_bundle},
 			)
-			serial_nos = sorted([cstr(d.serial_no) for d in serial_nos])
-			parsed_serial_nos = get_serial_nos(row.serial_no)
-
-			if len(serial_nos) != len(parsed_serial_nos):
-				throw_error = True
-			elif serial_nos != parsed_serial_nos:
-				for serial_no in serial_nos:
-					if serial_no not in parsed_serial_nos:
-						throw_error = True
-						break
+			parsed_serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.get("rm_item_code") or row.item_code,
+				get_serial_nos(row.serial_no),
+				ignore_permissions=self.doc.flags.ignore_permissions,
+			)
+			throw_error = sorted(name or "" for name in serial_nos) != sorted(parsed_serial_nos)
 
 		elif row.batch_no:
 			batches = sorted(
@@ -568,7 +589,14 @@ class SerialBatchBundleService:
 					)
 
 	def make_package_for_transfer(
-		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
+		self,
+		serial_and_batch_bundle,
+		warehouse,
+		type_of_transaction=None,
+		do_not_submit=None,
+		qty=0,
+		include_bundle=None,
+		exclude_serial_nos=None,
 	):
 		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
 
@@ -582,6 +610,8 @@ class SerialBatchBundleService:
 			type_of_transaction=type_of_transaction,
 			do_not_submit=do_not_submit,
 			qty=qty,
+			include_bundle=include_bundle,
+			exclude_serial_nos=exclude_serial_nos,
 		)
 
 	def validate_reserved_batches(self):
@@ -656,7 +686,7 @@ class SerialBatchBundleService:
 				_(
 					"The batch {0} is reserved for {1} in the warehouse {2} and the remaining quantity is not enough to cover the reservations. So, cannot proceed with the {3} {4}."
 				).format(
-					frappe.bold(batch_no),
+					frappe.bold(SerialBatchIdentity("Batch").get_label(batch_no)),
 					vouchers,
 					frappe.bold(warehouse),
 					frappe.bold(self.doc.doctype),

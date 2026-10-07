@@ -2,7 +2,11 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
+from frappe.utils import add_days, today
 
+from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order
 from erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -14,7 +18,7 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 	"""The report lists Supplier Quotation item lines so quotes for the same item can
 	be compared across suppliers."""
 
-	def make_quotation(self, supplier, qty, rate, uom=None):
+	def make_quotation(self, supplier, qty, rate, uom=None, submit=True, currency="INR", conversion_rate=1):
 		item = {"item_code": ITEM, "qty": qty, "rate": rate, "warehouse": "_Test Warehouse - _TC"}
 		if uom:
 			item["uom"] = uom
@@ -23,19 +27,33 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 				"doctype": "Supplier Quotation",
 				"supplier": supplier,
 				"company": COMPANY,
-				"currency": "INR",
+				"currency": currency,
+				"conversion_rate": conversion_rate,
 				"transaction_date": "2026-06-01",
 				"items": [item],
 			}
 		)
 		sq.insert()
-		sq.submit()
+		if submit:
+			sq.submit()
 		return sq
 
 	def run_report(self, **extra):
+		return self.execute_report(**extra)[1]
+
+	def execute_report(self, **extra):
 		filters = frappe._dict({"company": COMPANY, "from_date": "2026-01-01", "to_date": "2026-12-31"})
 		filters.update(extra)
-		return execute(filters)[1]
+		return execute(filters)
+
+	def make_order(self, supplier_quotation, qty):
+		purchase_order = make_purchase_order(supplier_quotation.name)
+		purchase_order.naming_series = "_T-Purchase Order-"
+		purchase_order.items[0].qty = qty
+		purchase_order.items[0].schedule_date = add_days(today(), 1)
+		purchase_order.insert()
+		purchase_order.submit()
+		return purchase_order
 
 	def test_no_filters_returns_empty(self):
 		self.assertEqual(execute(None)[1], [])
@@ -64,3 +82,100 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		self.assertIn(sq2.name, quotes)
 		self.assertEqual(quotes[sq1.name]["base_rate"], 100)
 		self.assertEqual(quotes[sq2.name]["base_rate"], 120)
+
+	def test_cheapest_quote_is_compared_in_company_currency(self):
+		rupee_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		dollar_quote = self.make_quotation(
+			"_Test Supplier 1", qty=10, rate=10, currency="USD", conversion_rate=80
+		)
+
+		cheapest = {row["quotation"] for row in self.run_report(item_code=ITEM) if row.get("min")}
+		self.assertIn(rupee_quote.name, cheapest)
+		self.assertNotIn(dollar_quote.name, cheapest)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_supplier_quotation": 1})
+	def test_unit_price_quote_is_compared_by_rate(self):
+		quantity_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		unit_price_quote = self.make_quotation("_Test Supplier 1", qty=0, rate=900)
+
+		rows = {row["quotation"]: row for row in self.run_report(item_code=ITEM)}
+		self.assertEqual(rows[unit_price_quote.name]["price_per_unit"], 900)
+		self.assertTrue(rows[quantity_quote.name].get("min"))
+		self.assertFalse(rows[unit_price_quote.name].get("min"))
+
+	def test_cheapest_quote_is_flagged_across_suppliers_when_categorized_by_supplier(self):
+		self.make_quotation("_Test Supplier", qty=10, rate=500)
+		cheapest = self.make_quotation("_Test Supplier 1", qty=10, rate=450)
+
+		rows = self.run_report(item_code=ITEM, categorize_by="Categorize by Supplier")
+		self.assertEqual({row["quotation"] for row in rows if row.get("min")}, {cheapest.name})
+
+	def test_chart_keeps_the_cheaper_of_two_quotes_for_the_same_qty(self):
+		self.make_quotation("_Test Supplier", qty=10, rate=450)
+		self.make_quotation("_Test Supplier", qty=10, rate=470)
+
+		chart = self.execute_report(item_code=ITEM)[3]
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [4500])
+
+	def test_supplier_restricted_user_sees_only_that_suppliers_quotes(self):
+		own_quote = self.make_quotation("_Test Supplier", qty=10, rate=500)
+		self.make_quotation("_Test Supplier 1", qty=10, rate=450)
+		user = create_user("sq-comparison-buyer@example.com", "Purchase User")
+		add_user_permission("Supplier", "_Test Supplier", user.name)
+
+		with self.set_user(user.name):
+			_columns, data, _message, chart = self.execute_report(
+				item_code=ITEM, categorize_by="Categorize by Supplier"
+			)
+
+		self.assertEqual({row["quotation"] for row in data}, {own_quote.name})
+		self.assertEqual(chart["data"]["labels"], ["_Test Supplier"])
+
+	def test_status_filter(self):
+		draft = self.make_quotation("_Test Supplier", qty=10, rate=100, submit=False)
+		submitted = self.make_quotation("_Test Supplier 1", qty=10, rate=120)
+
+		def names(**extra):
+			return {r["quotation"] for r in self.run_report(item_code=ITEM, **extra)}
+
+		# default (Submitted) hides drafts
+		self.assertNotIn(draft.name, names(status="Submitted"))
+		self.assertIn(submitted.name, names(status="Submitted"))
+		# Draft shows only drafts
+		self.assertIn(draft.name, names(status="Draft"))
+		self.assertNotIn(submitted.name, names(status="Draft"))
+		# blank shows both
+		both = names(status="")
+		self.assertIn(draft.name, both)
+		self.assertIn(submitted.name, both)
+
+	def test_order_status_and_filter(self):
+		supplier_quotation = self.make_quotation("_Test Supplier", qty=10, rate=100)
+
+		def get_order_status():
+			return next(
+				row["order_status"]
+				for row in self.run_report(item_code=ITEM)
+				if row["quotation"] == supplier_quotation.name
+			)
+
+		def quotations_with_status(order_status):
+			return {row["quotation"] for row in self.run_report(item_code=ITEM, order_status=order_status)}
+
+		self.assertEqual(get_order_status(), "Not Ordered")
+		self.assertIn(supplier_quotation.name, quotations_with_status("Not Ordered"))
+
+		partial_order = self.make_order(supplier_quotation, qty=4)
+		self.assertEqual(get_order_status(), "Partially Ordered")
+		self.assertIn(supplier_quotation.name, quotations_with_status("Partially Ordered"))
+		self.assertNotIn(supplier_quotation.name, quotations_with_status("Ordered"))
+
+		complete_order = self.make_order(supplier_quotation, qty=6)
+		self.assertEqual(get_order_status(), "Ordered")
+		self.assertIn(supplier_quotation.name, quotations_with_status("Ordered"))
+
+		complete_order.cancel()
+		self.assertEqual(get_order_status(), "Partially Ordered")
+
+		partial_order.cancel()
+		self.assertEqual(get_order_status(), "Not Ordered")

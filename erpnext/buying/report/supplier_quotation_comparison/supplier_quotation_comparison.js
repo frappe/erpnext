@@ -86,6 +86,28 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			default: __("Categorize by Supplier"),
 		},
 		{
+			fieldname: "status",
+			label: __("Status"),
+			fieldtype: "Select",
+			options: [
+				{ label: "", value: "" },
+				{ label: __("Draft"), value: "Draft" },
+				{ label: __("Submitted"), value: "Submitted" },
+			],
+			default: "Submitted",
+		},
+		{
+			fieldname: "order_status",
+			label: __("Order Status"),
+			fieldtype: "Select",
+			options: [
+				{ label: "", value: "" },
+				{ label: __("Not Ordered"), value: "Not Ordered" },
+				{ label: __("Partially Ordered"), value: "Partially Ordered" },
+				{ label: __("Ordered"), value: "Ordered" },
+			],
+		},
+		{
 			fieldtype: "Check",
 			label: __("Include Expired"),
 			fieldname: "include_expired",

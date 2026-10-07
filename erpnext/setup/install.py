@@ -2,14 +2,22 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
 import os
 
 import frappe
+from frappe import N_ as _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+from frappe.permissions import (
+	add_permission,
+	get_all_perms,
+	get_doctypes_with_custom_docperms,
+	update_permission_property,
+)
+from frappe.utils import cint
 
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
-from erpnext.setup.utils import identity as _
 
 from .default_success_action import get_default_success_action
 
@@ -37,11 +45,76 @@ def after_install():
 	add_standard_navbar_items()
 	add_app_name()
 	update_roles()
+	grant_address_read_to_accounts_manager()
 	make_default_operations()
 	update_pegged_currencies()
 	set_default_print_formats()
 	toggle_hidden_fields()
 	frappe.db.commit()
+
+
+def grant_address_read_to_accounts_manager():
+	if not frappe.db.exists("Role", "Accounts Manager"):
+		return
+	has_disabled_column = frappe.db.has_column("Custom DocPerm", "is_app_disabled")
+	if (
+		has_disabled_column
+		and "Address" in get_doctypes_with_custom_docperms()
+		and not frappe.db.exists("Custom DocPerm", {"parent": "Address", "is_app_disabled": 0})
+	):
+		print("Address / Accounts Manager: skipped, the site's Address rules are disabled with their app")
+		return
+	has_disabled_rule = False
+	has_rule = False
+	for rule in get_role_rules("Address", "Accounts Manager"):
+		if not cint(rule.get("is_app_disabled")):
+			has_rule = True
+		elif not cint(rule.permlevel):
+			has_disabled_rule = True
+	if has_disabled_rule:
+		print("Address / Accounts Manager: kept, the role's rule is disabled with its app")
+		return
+	if has_rule:
+		print("Address / Accounts Manager: kept, the role already has a rule")
+		return
+	logs = frappe.get_all(
+		"Permission Log",
+		filters={"for_doctype": "DocType", "for_document": "Address", "reference_type": "Custom DocPerm"},
+		fields=["name", "status", "reference", "changes"],
+	)
+	changed_rules = set()
+	for log in logs:
+		if log.status in ("Removed", "Updated"):
+			changed_rules.add(log.reference or log.name)
+	changed_roles = set()
+	if changed_rules:
+		changed_roles.update(
+			frappe.get_all("Custom DocPerm", filters={"name": ("in", list(changed_rules))}, pluck="role")
+		)
+	for log in logs:
+		if (log.reference or log.name) not in changed_rules:
+			continue
+		try:
+			logged = json.loads(log.changes) or {}
+		except (TypeError, ValueError):
+			continue
+		changed_roles.update(((logged.get("from") or {}).get("role"), (logged.get("to") or {}).get("role")))
+	if "Accounts Manager" in changed_roles:
+		print("Address / Accounts Manager: skipped, this site changed the rule")
+		return
+	add_permission("Address", "Accounts Manager", 0, "read")
+	update_permission_property("Address", "Accounts Manager", 0, "export", 0)
+	frappe.clear_cache(doctype="Address")
+	print("Address / Accounts Manager: granted read")
+
+
+def get_role_rules(doctype: str, role: str) -> list:
+	# frappe.get_meta reads only shipped rules while a patch or install runs; get_all_perms reads the site's.
+	rules = []
+	for rule in get_all_perms(role):
+		if rule.parent == doctype:
+			rules.append(rule)
+	return rules
 
 
 def make_default_operations():
@@ -345,28 +418,23 @@ def update_pegged_currencies():
 
 
 def set_default_print_formats():
-	# For each doctype, prefer the newer builder-made "Modern with Images" format,
-	# falling back to the older "with Item Image" format if it isn't present.
-	default_map = {
-		"Sales Order": ["Sales Order Modern with Images", "Sales Order with Item Image"],
-		"Sales Invoice": ["Sales Invoice Modern with Images", "Sales Invoice with Item Image"],
-		"Delivery Note": ["Delivery Note Modern with Images", "Delivery Note with Item Image"],
-		"Purchase Order": ["Purchase Order Modern with Images", "Purchase Order with Item Image"],
-		"Purchase Invoice": ["Purchase Invoice Modern with Images", "Purchase Invoice with Item Image"],
-		"POS Invoice": ["POS Invoice Modern with Images", "POS Invoice with Item Image"],
-		"Quotation": ["Quotation Modern with Images", "Quotation with Item Image"],
-		"Request for Quotation": [
-			"Request for Quotation Modern with Images",
-			"Request for Quotation with Item Image",
-		],
-	}
+	doctypes = (
+		"Sales Order",
+		"Sales Invoice",
+		"Delivery Note",
+		"Purchase Order",
+		"Purchase Invoice",
+		"POS Invoice",
+		"Quotation",
+		"Request for Quotation",
+	)
 
-	for doctype, print_formats in default_map.items():
+	for doctype in doctypes:
 		if frappe.get_meta(doctype).default_print_format:
 			continue
 
-		print_format = next((pf for pf in print_formats if frappe.db.exists("Print Format", pf)), None)
-		if not print_format:
+		print_format = f"{doctype} Classic"
+		if not frappe.db.exists("Print Format", print_format):
 			continue
 
 		frappe.make_property_setter(

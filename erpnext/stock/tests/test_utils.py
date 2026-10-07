@@ -78,7 +78,7 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		batch_item = self.make_item(properties={"has_batch_no": 1, "create_new_batch": 1})
 		batch = frappe.get_doc(doctype="Batch", item=batch_item.name).insert()
 
-		batch_scan = scan_barcode(batch.name)
+		batch_scan = scan_barcode(batch.batch_id)
 		self.assertEqual(batch_scan["item_code"], batch_item.name)
 		self.assertEqual(batch_scan["batch_no"], batch.name)
 		self.assertEqual(batch_scan["has_batch_no"], 1)
@@ -92,11 +92,74 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 			company="_Test Company",
 		).insert()
 
-		serial_scan = scan_barcode(serial.name)
+		serial_scan = scan_barcode(serial.serial_no)
 		self.assertEqual(serial_scan["item_code"], serial_item.name)
-		self.assertEqual(serial_scan["serial_no"], serial.name)
+		self.assertEqual(serial_scan["serial_no"], serial.serial_no)
+		self.assertEqual(serial_scan["serial_no_id"], serial.name)
 		self.assertEqual(serial_scan["has_batch_no"], 0)
 		self.assertEqual(serial_scan["has_serial_no"], 1)
+
+	def test_shared_serial_scan_returns_candidates_and_respects_item(self):
+		first = self.make_item(properties={"has_serial_no": 1})
+		second = self.make_item(properties={"has_serial_no": 1})
+		number = f"Scan-{frappe.generate_hash()}"
+		first_serial = frappe.get_doc(
+			doctype="Serial No", item_code=first.name, serial_no=number, company="_Test Company"
+		).insert()
+		self.assertEqual(scan_barcode(number)["serial_no_id"], first_serial.name)
+		second_serial = frappe.get_doc(
+			doctype="Serial No", item_code=second.name, serial_no=number, company="_Test Company"
+		).insert()
+
+		candidates = scan_barcode(number.lower())["candidates"]
+		self.assertEqual({row["item_code"] for row in candidates}, {first.name, second.name})
+		selected = scan_barcode(number, item_code=second.name)
+		self.assertEqual(selected["serial_no_id"], second_serial.name)
+		self.assertEqual(selected["serial_no"], number)
+		self.assertEqual(scan_barcode(first_serial.name), {})
+
+	def test_shared_batch_scan_returns_internal_links(self):
+		items = [self.make_item(properties={"has_batch_no": 1}) for _ in range(2)]
+		number = f"Lot-{frappe.generate_hash()}"
+		batches = [
+			frappe.get_doc(doctype="Batch", item=item.name, batch_id=number).insert() for item in items
+		]
+		candidates = scan_barcode(number.lower())["candidates"]
+		self.assertEqual({row["batch_no"] for row in candidates}, {batch.name for batch in batches})
+		selected = scan_barcode(number, item_code=items[0].name)
+		self.assertEqual(selected["batch_no"], batches[0].name)
+		self.assertEqual(selected["batch_id"], number)
+
+	def test_scan_returns_all_record_types_for_the_same_item(self):
+		item = self.make_item(properties={"has_batch_no": 1, "has_serial_no": 1})
+		number = f"Shared-{frappe.generate_hash()}"
+		batch = frappe.get_doc(doctype="Batch", item=item.name, batch_id=number).insert()
+		frappe.get_doc(
+			doctype="Serial No",
+			item_code=item.name,
+			serial_no=number,
+			batch_no=batch.name,
+			company="_Test Company",
+		).insert()
+		candidates = scan_barcode(number, item_code=item.name)["candidates"]
+		self.assertEqual({row["record_type"] for row in candidates}, {"Serial No", "Batch"})
+
+	def test_item_barcode_does_not_hide_a_matching_serial(self):
+		number = f"Barcode-{frappe.generate_hash()}"
+		barcode_item = self.make_item(properties={"barcodes": [{"barcode": number}]})
+		serial_item = self.make_item(properties={"has_serial_no": 1})
+		frappe.get_doc(
+			doctype="Serial No", item_code=serial_item.name, serial_no=number, company="_Test Company"
+		).insert()
+		candidates = scan_barcode(number)["candidates"]
+		self.assertEqual({row["item_code"] for row in candidates}, {barcode_item.name, serial_item.name})
+
+	def test_unknown_scan_does_not_create_records(self):
+		item = self.make_item(properties={"has_serial_no": 1, "has_batch_no": 1})
+		number = f"Missing-{frappe.generate_hash()}"
+		self.assertEqual(scan_barcode(number, item_code=item.name), {})
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item.name, "serial_no": number}))
+		self.assertFalse(frappe.db.exists("Batch", {"item": item.name, "batch_id": number}))
 
 	def test_barcode_scanning_of_warehouse(self):
 		warehouse = frappe.get_doc(
@@ -182,7 +245,7 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		serial_nos = []
 		for rate in (10, 30):
 			sn = "_TAVG" + random_string(8)
-			frappe.get_doc(
+			serial = frappe.get_doc(
 				{
 					"doctype": "Serial No",
 					"serial_no": sn,
@@ -191,6 +254,6 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 					"purchase_rate": rate,
 				}
 			).insert()
-			serial_nos.append(sn)
+			serial_nos.append(serial.name)
 
 		self.assertEqual(flt(get_avg_purchase_rate("\n".join(serial_nos))), 20.0)

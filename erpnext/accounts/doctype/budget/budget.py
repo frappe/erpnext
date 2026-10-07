@@ -724,11 +724,16 @@ def get_ordered_amount(params):
 		frappe.qb.from_(child)
 		.join(parent)
 		.on(parent.name == child.parent)
-		.select(Coalesce(Sum(child.amount - child.billed_amt), 0).as_("amount"))
+		.select(
+			Coalesce(Sum((child.amount - child.billed_amt) * Coalesce(parent.conversion_rate, 1)), 0).as_(
+				"amount"
+			)
+		)
 		.where(
 			(child.item_code == item_code)
 			& (parent.docstatus == 1)
 			& (child.amount > child.billed_amt)
+			& (child.closed == 0)
 			& (parent.status != "Closed")
 			& Criterion.all(get_other_condition(params, child, parent, "Purchase Order"))
 		)

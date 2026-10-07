@@ -18,6 +18,7 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.mapper import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.exceptions import PartyDisabled
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
@@ -34,6 +35,13 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		rfq.items[0].qty = 1
 		rfq.save()
 		self.assertEqual(rfq.items[0].qty, 1)
+
+	def test_rfq_zero_qty_cannot_be_forced_by_the_client(self):
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+		rfq.has_unit_price_items = 1
+
+		with self.assertRaises(InvalidQtyError):
+			rfq.save()
 
 	def test_rfq_zero_qty(self):
 		"""
@@ -88,6 +96,17 @@ class TestRequestforQuotation(ERPNextTestSuite):
 			do_not_save=True,
 		)
 		self.assertRaises(frappe.ValidationError, rfq.save)
+
+	def test_rfq_blocked_for_disabled_supplier(self):
+		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 1)
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}],
+			do_not_save=True,
+		)
+		self.assertRaises(PartyDisabled, rfq.save)
+
+		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
+		rfq.save()
 
 	def test_rfq_status_lifecycle(self):
 		rfq = make_request_for_quotation()
@@ -188,6 +207,44 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_portal_supplier_quotation_is_built_from_the_rfq_rows(self):
+		make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier 2", "supplier_name": "_Test Supplier 2"}]
+		)
+		rfq = make_request_for_quotation()
+
+		rfq.supplier = "_Test Supplier 2"
+		self.assertRaises(frappe.PermissionError, create_supplier_quotation, rfq)
+
+		rfq.supplier = rfq.suppliers[0].supplier
+		rfq.items[0].item_code = "_Test Item 2"
+		rfq.items[0].conversion_factor = 7
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+
+		self.assertEqual(
+			(supplier_quotation.items[0].item_code, supplier_quotation.items[0].conversion_factor),
+			("_Test Item", 1),
+		)
+
+	def test_missing_item_name_is_filled_from_the_item(self):
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].item_name = None
+		rfq.insert()
+
+		self.assertEqual(rfq.items[0].item_name, frappe.db.get_value("Item", "_Test Item", "item_name"))
+
+	def test_make_duplicate_supplier_quotation_from_portal(self):
+		rfq = make_request_for_quotation()
+		rfq.supplier = rfq.suppliers[0].supplier
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+		supplier_quotation.submit()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			create_supplier_quotation(rfq)
+
+		supplier_quotation.cancel()
+		self.assertTrue(create_supplier_quotation(rfq))
+
 	def test_make_multi_uom_supplier_quotation(self):
 		item_code = "_Test Multi UOM RFQ Item"
 		if not frappe.db.exists("Item", item_code):
@@ -260,6 +317,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 
 		supplier_doc.reload()
 		self.assertTrue(supplier_doc.portal_users[0].user)
+		self.assertIn("Supplier", frappe.get_roles(supplier_doc.portal_users[0].user))
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1})
 	def test_supplier_quotation_from_zero_qty_rfq(self):

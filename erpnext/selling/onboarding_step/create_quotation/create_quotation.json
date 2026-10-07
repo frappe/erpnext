@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Quotation",
+ "creation": "2026-10-04 00:49:20.647664",
+ "description": "Once the customer agrees, turn it into a sales order or an invoice from the quotation itself. See [Quotation](https://docs.frappe.io/erpnext/user/manual/en/quotation).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:34:49.140490",
+ "modified_by": "Administrator",
+ "name": "Create Quotation",
+ "owner": "Administrator",
+ "reference_document": "Quotation",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Quote a price",
+ "validate_action": 1
+}

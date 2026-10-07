@@ -16,6 +16,8 @@ class SerialandBatchEntry(Document):
 
 		batch_no: DF.Link | None
 		delivered_qty: DF.Float
+		fg_batch_no: DF.Link | None
+		fg_serial_no: DF.Link | None
 		incoming_rate: DF.Float
 		is_cancelled: DF.Check
 		is_outward: DF.Check

@@ -37,8 +37,12 @@ class PlaidSettings(Document):
 		return plaid.get_link_token()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_plaid_configuration():
+	# Returns plaid_env and a freshly minted Plaid link_token. Plaid Settings is a System-Manager-only
+	# single doctype and every caller reaches this from its own form, so that is the boundary.
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	if frappe.db.get_single_value("Plaid Settings", "enabled"):
 		plaid_settings = frappe.get_single("Plaid Settings")
 		return {
@@ -52,6 +56,8 @@ def get_plaid_configuration():
 
 @frappe.whitelist(methods=["POST"])
 def add_institution(token: str, response: str | dict):
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	response = frappe.parse_json(response)
 
 	plaid = PlaidConnector()
@@ -81,6 +87,8 @@ def add_institution(token: str, response: str | dict):
 
 @frappe.whitelist(methods=["POST"])
 def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	response = frappe.parse_json(response)
 	bank = frappe.parse_json(bank)
 	result = []
@@ -328,8 +336,10 @@ def automatic_synchronization():
 		enqueue_synchronization()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def enqueue_synchronization():
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	plaid_accounts = frappe.get_all(
 		"Bank Account", filters={"integration_id": ["!=", ""]}, fields=["name", "bank"]
 	)
@@ -342,8 +352,12 @@ def enqueue_synchronization():
 		)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_link_token_for_update(access_token: str):
+	# `access_token` is caller-supplied and is used to mint a link token at Plaid, so this creates
+	# state at the provider even though it writes nothing here.
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	plaid = PlaidConnector(access_token)
 	return plaid.get_link_token(update_mode=True)
 
@@ -362,8 +376,10 @@ def get_company(bank_account_name):
 	frappe.throw(_("Could not detect the Company for updating Bank Accounts"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_bank_account_ids(response: str | dict):
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	data = frappe.parse_json(response)
 	institution_name = data["institution"]["name"]
 	bank = frappe.get_doc("Bank", institution_name).as_dict()

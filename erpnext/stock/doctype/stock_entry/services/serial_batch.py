@@ -2,10 +2,12 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, flt, nowdate
+from frappe.query_builder.functions import Coalesce
+from frappe.utils import cint, cstr, escape_html, flt, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_or_batch_items
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
 from .stock_entry_base import BaseStockEntry
@@ -86,7 +88,7 @@ class StockEntrySABB(BaseStockEntry):
 			frappe.qb.from_(table)
 			.join(child_table)
 			.on(table.name == child_table.parent)
-			.select(child_table.serial_no, child_table.batch_no, child_table.qty)
+			.select(child_table.serial_no, child_table.batch_no, child_table.qty, child_table.delivered_qty)
 			.where((table.docstatus == 1) & (table.voucher_detail_no == scio_detail))
 		)
 
@@ -98,8 +100,9 @@ class StockEntrySABB(BaseStockEntry):
 		for d in query.run(as_dict=True):
 			if d.serial_no and d.serial_no not in serial_nos:
 				serial_nos.append(d.serial_no)
-			if d.batch_no and d.batch_no not in batch_nos:
-				batch_nos[d.batch_no] = d.qty
+			if d.batch_no:
+				qty = d.qty - d.delivered_qty if only_pending else d.qty
+				batch_nos[d.batch_no] = batch_nos.get(d.batch_no, 0) + qty
 
 		return serial_nos, batch_nos
 
@@ -121,7 +124,9 @@ class StockEntrySABB(BaseStockEntry):
 
 					if row.use_serial_batch_fields:
 						if serial_nos_list and not row.serial_no:
-							row.serial_no = "\n".join(serial_nos_list)
+							row.serial_no = "\n".join(
+								SerialBatchIdentity("Serial No").get_numbers(row.item_code, serial_nos_list)
+							)
 						if batch_nos_list and not row.batch_no:
 							row.batch_no = next(iter(batch_nos_list.keys()))
 
@@ -156,9 +161,9 @@ class StockEntrySABB(BaseStockEntry):
 			if d.batch_no:
 				details.batch_no[d.batch_no] += d.qty
 				if d.serial_no:
-					details.batchwise_sn[d.batch_no].extend(d.serial_no.split("\n"))
+					details.batchwise_sn[d.batch_no].append(d.serial_number)
 			elif d.serial_no:
-				details.serial_no.append(d.serial_no)
+				details.serial_no.append(d.serial_number)
 
 		return itemwise_serial_batch_qty
 
@@ -201,6 +206,8 @@ class StockEntrySABB(BaseStockEntry):
 			original_qty = self._distribute_batches_to_item(
 				d, batches, details, new_items_to_add, original_qty
 			)
+			if original_qty > 0 and d.batch_no:
+				self._make_unreserved_row(d, new_items_to_add, original_qty)
 		if details.get("serial_no"):
 			d.serial_no = "\n".join(details.get("serial_no")[: cint(d.qty)])
 
@@ -210,36 +217,31 @@ class StockEntrySABB(BaseStockEntry):
 				break
 			if qty <= 0:
 				continue
+			qty = min(qty, original_qty)
 			if d.batch_no:
-				original_qty, _ = self._make_overflow_batch_row(
-					d, batches, details, new_items_to_add, batch_no, qty, original_qty
-				)
+				self._make_overflow_batch_row(d, batches, details, new_items_to_add, batch_no, qty)
 			else:
 				self._assign_batch_to_item(d, batches, details, batch_no, qty)
+			original_qty -= qty
 		return original_qty
 
-	def _make_overflow_batch_row(self, d, batches, details, new_items_to_add, batch_no, qty, original_qty):
+	def _make_overflow_batch_row(self, d, batches, details, new_items_to_add, batch_no, qty):
 		new_row = frappe.copy_doc(d)
 		new_row.name = None
-		new_row.batch_no = batch_no
-		new_row.qty = qty
-		new_row.idx = d.idx + 1
-		if new_row.batch_no and details.get("batchwise_sn"):
-			new_row.serial_no = "\n".join(details.get("batchwise_sn")[new_row.batch_no][: cint(new_row.qty)])
+		self._assign_batch_to_item(new_row, batches, details, batch_no, qty)
 		new_items_to_add.append(new_row)
-		batches[batch_no] -= qty
-		return original_qty - qty, new_row
+
+	def _make_unreserved_row(self, d, new_items_to_add, qty):
+		new_row = frappe.copy_doc(d)
+		new_row.update({"name": None, "batch_no": None, "serial_no": None, "qty": qty})
+		new_items_to_add.append(new_row)
 
 	def _assign_batch_to_item(self, d, batches, details, batch_no, qty):
-		if qty >= d.qty:
-			d.batch_no = batch_no
-			batches[batch_no] -= d.qty
-		else:
-			d.batch_no = batch_no
-			d.qty = qty
-			batches[batch_no] = 0
-		if d.batch_no and details.get("batchwise_sn"):
-			d.serial_no = "\n".join(details.get("batchwise_sn")[d.batch_no][: cint(d.qty)])
+		d.batch_no = batch_no
+		d.qty = qty
+		batches[batch_no] -= qty
+		if details.get("batchwise_sn"):
+			d.serial_no = "\n".join(details.get("batchwise_sn")[batch_no][: cint(qty)])
 
 	def _sort_and_reindex_items(self):
 		sorted_items = sorted(self.doc.items, key=lambda x: x.item_code)
@@ -327,10 +329,12 @@ def get_batchwise_serial_nos(item_code, row):
 		serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"item_code": item_code, "batch_no": batch_no, "name": ("in", row.serial_nos)},
+			fields=["name", "serial_no"],
 		)
 
 		if serial_nos:
-			batchwise_serial_nos[batch_no] = sorted([serial_no.name for serial_no in serial_nos])
+			serial_nos = sorted(serial_nos, key=lambda serial: serial.serial_no)
+			batchwise_serial_nos[batch_no] = [serial.name for serial in serial_nos]
 
 	return batchwise_serial_nos
 
@@ -371,3 +375,275 @@ def get_expired_batches():
 		expired_batches[row.batch_no] = row
 
 	return expired_batches
+
+
+@frappe.whitelist()
+def get_fg_mapping(stock_entry: str):
+	doc = get_stock_entry_for_fg_mapping(stock_entry, "read")
+
+	return {
+		"fg_values": get_fg_values(doc.name),
+		"raw_materials": get_raw_material_entries(doc.name),
+	}
+
+
+@frappe.whitelist()
+def set_fg_mapping(stock_entry: str, mapping: str | dict):
+	"""Link raw material serial / batch entries to the finished good serial / batch they went into.
+
+	mapping: {raw material Serial and Batch Entry name: target}, where target is
+	{"fg_field": "fg_serial_no" / "fg_batch_no", "value": ...}, or just the value when it is unambiguous
+	"""
+	doc = get_stock_entry_for_fg_mapping(stock_entry, "write")
+	mapping = frappe.parse_json(mapping) or {}
+	if not isinstance(mapping, dict):
+		frappe.throw(_("Mapping must be a dictionary of raw material entries to finished goods"))
+
+	fg_targets = {(row.fg_field, row.value) for row in get_fg_values(doc.name)}
+	if not fg_targets:
+		frappe.throw(_("{0} has no serial / batch tracked finished good").format(doc.name))
+
+	# only bundle rows that belong to this entry can be changed: draft rows before submit, and after submit
+	# only the rows left unmapped, as auto created bundles get their raw material rows on submit
+	# rows are locked after submit, so a mapping saved meanwhile by someone else is seen and reported
+	is_submitted = doc.docstatus == 1
+	raw_materials = {
+		row.name: row
+		for row in get_raw_material_entries(doc.name, draft_only=not is_submitted, for_update=is_submitted)
+	}
+
+	entries_by_fg_target = defaultdict(list)
+	for entry_name, target in mapping.items():
+		row = raw_materials.get(entry_name)
+		if not row:
+			frappe.throw(
+				_("Row {0} is not a raw material serial / batch entry of {1}").format(
+					frappe.bold(escape_html(cstr(entry_name))), doc.name
+				)
+			)
+
+		fg_target = get_fg_target(target, fg_targets, doc.name)
+		if is_submitted:
+			if row.fg_serial_no or row.fg_batch_no:
+				frappe.throw(
+					_(
+						"Raw material {0} is already mapped and can't be changed after {1} is submitted"
+					).format(frappe.bold(row.serial_no or row.batch_no), doc.name)
+				)
+
+			if not fg_target[1]:
+				continue
+
+		entries_by_fg_target[fg_target].append(entry_name)
+
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+	for (fg_field, fg_value), entry_names in entries_by_fg_target.items():
+		query = (
+			frappe.qb.update(sabe)
+			.set(sabe.fg_serial_no, fg_value if fg_field == "fg_serial_no" else None)
+			.set(sabe.fg_batch_no, fg_value if fg_field == "fg_batch_no" else None)
+			.where(sabe.name.isin(entry_names))
+		)
+
+		if is_submitted:
+			query = query.where(
+				(Coalesce(sabe.fg_serial_no, "") == "") & (Coalesce(sabe.fg_batch_no, "") == "")
+			)
+
+		query.run()
+
+
+def set_fg_mapping_on_submit(doc):
+	"""Check the draft mapping and map the remaining raw materials to finished goods, in order.
+
+	Serialized raw materials are spread evenly across the finished goods. A batch raw material is only
+	mapped when there is a single finished good, otherwise it stays linked to all of them. The order based
+	mapping can be turned off in Stock Settings; the mapping entered in draft is always kept.
+	"""
+	if doc.purpose not in ("Manufacture", "Repack"):
+		return
+
+	fg_targets = [(row.fg_field, row.value) for row in get_fg_values(doc.name)]
+	raw_materials = get_raw_material_entries(doc.name)
+	if not fg_targets or not raw_materials:
+		return
+
+	rows_by_item = defaultdict(list)
+	for row in raw_materials:
+		target = ("fg_serial_no", row.fg_serial_no) if row.fg_serial_no else ("fg_batch_no", row.fg_batch_no)
+		if target[1] and target not in fg_targets:
+			frappe.throw(
+				_("Raw material {0} is mapped to {1}, which is not a finished good of this entry").format(
+					frappe.bold(row.serial_no or row.batch_no), frappe.bold(target[1])
+				)
+			)
+
+		row.fg_target = target if target[1] else None
+		rows_by_item[row.item_code].append(row)
+
+	if not frappe.get_single_value("Stock Settings", "auto_map_raw_materials_to_finished_goods"):
+		return
+
+	entries_by_fg_target = defaultdict(list)
+	for rows in rows_by_item.values():
+		per_fg = -(-len(rows) // len(fg_targets))
+		mapped_count = defaultdict(int)
+		for row in rows:
+			if row.fg_target:
+				mapped_count[row.fg_target] += 1
+
+		for row in rows:
+			if row.fg_target or (len(fg_targets) > 1 and not row.serial_no):
+				continue
+
+			target = next((t for t in fg_targets if mapped_count[t] < per_fg), None)
+			if target:
+				mapped_count[target] += 1
+				entries_by_fg_target[target].append(row.name)
+
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+	for (fg_field, fg_value), entry_names in entries_by_fg_target.items():
+		(frappe.qb.update(sabe).set(sabe[fg_field], fg_value).where(sabe.name.isin(entry_names))).run()
+
+
+def get_fg_target(target, fg_targets, stock_entry):
+	"""Resolve a mapping target to (fg_field, value); (None, None) clears the mapping."""
+	if isinstance(target, dict):
+		fg_field, value = target.get("fg_field"), target.get("value")
+	else:
+		fg_field, value = None, target
+
+	if not value:
+		return None, None
+
+	matches = [(field, val) for field, val in fg_targets if val == value and fg_field in (None, field)]
+	if not matches:
+		frappe.throw(
+			_("{0} is not a finished good serial / batch produced by {1}").format(
+				frappe.bold(escape_html(cstr(value))), stock_entry
+			)
+		)
+
+	if len(matches) > 1:
+		frappe.throw(
+			_("{0} is both a finished good serial no and batch no in {1}, please specify which one").format(
+				frappe.bold(escape_html(cstr(value))), stock_entry
+			)
+		)
+
+	return matches[0]
+
+
+def get_stock_entry_for_fg_mapping(stock_entry, permission_type):
+	doc = frappe.get_doc("Stock Entry", stock_entry)
+	doc.check_permission(permission_type)
+
+	if doc.purpose not in ("Manufacture", "Repack"):
+		frappe.throw(_("Finished good mapping is only allowed for Manufacture and Repack entries"))
+
+	# mapped on draft, then fixed on submit; raw materials left unmapped can still be mapped after submit
+	if doc.docstatus == 2:
+		frappe.throw(_("Finished good mapping can't be changed for a cancelled entry"))
+
+	return doc
+
+
+def get_fg_values(stock_entry):
+	"""Serial nos of serialized finished goods and batch nos of the other batch tracked finished goods."""
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	sabb = frappe.qb.DocType("Serial and Batch Bundle")
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+	serial_no = frappe.qb.DocType("Serial No")
+	batch = frappe.qb.DocType("Batch")
+
+	fg_entries = (
+		frappe.qb.from_(sed)
+		.inner_join(sabb)
+		.on(sed.serial_and_batch_bundle == sabb.name)
+		.inner_join(sabe)
+		.on(sabb.name == sabe.parent)
+		.left_join(serial_no)
+		.on(sabe.serial_no == serial_no.name)
+		.left_join(batch)
+		.on(sabe.batch_no == batch.name)
+		.select(
+			sed.name.as_("detail_name"),
+			sed.item_code,
+			sabe.serial_no,
+			sabe.batch_no,
+			serial_no.serial_no.as_("serial_no_label"),
+			batch.batch_id.as_("batch_no_label"),
+		)
+		.where(
+			(sed.parent == stock_entry)
+			& (sed.is_finished_item == 1)
+			& (Coalesce(sed.t_warehouse, "") != "")
+			& get_own_bundle_condition(sabb, stock_entry)
+		)
+		.orderby(sed.idx)
+		.orderby(sabe.idx)
+	).run(as_dict=True)
+
+	serialized_rows = {row.detail_name for row in fg_entries if row.serial_no}
+
+	fg_values = {}
+	for row in fg_entries:
+		if row.detail_name in serialized_rows:
+			value, label, fg_field = row.serial_no, row.serial_no_label, "fg_serial_no"
+		else:
+			value, label, fg_field = row.batch_no, row.batch_no_label, "fg_batch_no"
+
+		# a serial no and a batch no can share a name, so keep them apart
+		# the label is the physical serial / batch number, the name can be a hash
+		if value and (fg_field, value) not in fg_values:
+			fg_values[(fg_field, value)] = frappe._dict(
+				value=value, label=label or value, fg_field=fg_field, item_code=row.item_code
+			)
+
+	return list(fg_values.values())
+
+
+def get_raw_material_entries(stock_entry, draft_only=False, for_update=False):
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	sabb = frappe.qb.DocType("Serial and Batch Bundle")
+	sabe = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = (
+		frappe.qb.from_(sed)
+		.inner_join(sabb)
+		.on(sed.serial_and_batch_bundle == sabb.name)
+		.inner_join(sabe)
+		.on(sabb.name == sabe.parent)
+		.select(
+			sabe.name,
+			sed.item_code,
+			sed.item_name,
+			sabe.serial_no,
+			sabe.batch_no,
+			sabe.qty,
+			sabe.fg_serial_no,
+			sabe.fg_batch_no,
+		)
+		.where(
+			(sed.parent == stock_entry)
+			& (sed.is_finished_item == 0)
+			& (Coalesce(sed.s_warehouse, "") != "")
+			& (Coalesce(sed.t_warehouse, "") == "")
+			& get_own_bundle_condition(sabb, stock_entry)
+		)
+		.orderby(sed.idx)
+		.orderby(sabe.idx)
+	)
+
+	if draft_only:
+		query = query.where((sabb.docstatus == 0) & (sabe.docstatus == 0))
+
+	if for_update:
+		query = query.for_update()
+
+	return query.run(as_dict=True)
+
+
+def get_own_bundle_condition(sabb, stock_entry):
+	"""Bundles of this stock entry; a draft bundle is linked to its voucher only when the voucher is saved."""
+	return (sabb.voucher_type == "Stock Entry") & (Coalesce(sabb.voucher_no, "").isin(["", stock_entry]))

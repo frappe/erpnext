@@ -837,6 +837,7 @@
 		flex-direction: column;
 		padding: var(--padding-lg);
 		padding-top: var(--padding-md);
+		overflow-y: auto;
 
 		> .item-details-header {
 			display: flex;

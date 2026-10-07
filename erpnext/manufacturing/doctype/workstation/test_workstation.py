@@ -3,18 +3,128 @@
 import frappe
 from frappe import _
 
+from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	NotInWorkingHoursError,
+	OverlapError,
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
+	get_raw_materials,
 	update_job_card,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestWorkstation(ERPNextTestSuite):
+	def _make_workstation(self, name, *timings):
+		doc = frappe.new_doc("Workstation", workstation_name=name)
+		for start_time, end_time in timings:
+			doc.append("working_hours", {"start_time": start_time, "end_time": end_time})
+		return doc
+
+	def test_back_to_back_working_hours_do_not_overlap(self):
+		doc = self._make_workstation(
+			"_Test Back To Back Shifts", ("08:00:00", "16:00:00"), ("16:00:00", "23:59:59")
+		)
+		doc.insert()
+
+		# also holds when the touching row is added to an already saved workstation
+		doc.append("working_hours", {"start_time": "05:00:00", "end_time": "08:00:00"})
+		doc.save()
+		self.assertEqual(len(doc.working_hours), 3)
+
+	def test_overlapping_working_hours_raise_error(self):
+		for timing in (
+			("15:00:00", "20:00:00"),  # partial overlap at the end
+			("06:00:00", "09:00:00"),  # partial overlap at the start
+			("10:00:00", "12:00:00"),  # enclosed
+			("07:00:00", "17:00:00"),  # enclosing
+			("08:00:00", "16:00:00"),  # identical
+		):
+			with self.subTest(timing=timing):
+				doc = self._make_workstation("_Test Overlapping Shifts", ("08:00:00", "16:00:00"))
+				doc.insert()
+				doc.append("working_hours", {"start_time": timing[0], "end_time": timing[1]})
+				self.assertRaises(OverlapError, doc.save)
+				doc.delete()
+
+	def test_get_raw_materials_without_items(self):
+		for skip_transfer, backflush_from_wip in ((0, 0), (1, 0), (1, 1)):
+			with self.subTest(skip_transfer=skip_transfer, backflush_from_wip=backflush_from_wip):
+				job_card = frappe.get_doc(
+					{
+						"doctype": "Job Card",
+						"company": "_Test Company",
+						"skip_material_transfer": skip_transfer,
+						"backflush_from_wip_warehouse": backflush_from_wip,
+						"wip_warehouse": "_Test Warehouse 1 - _TC",
+					}
+				).insert(ignore_mandatory=True)
+
+				for method in (get_raw_materials, make_stock_entry):
+					with self.subTest(method=method.__name__):
+						with self.assertRaisesRegex(
+							frappe.ValidationError, "This Job Card has no raw materials to transfer"
+						):
+							method(job_card.name)
+
+				job_card.reload()
+				self.assertFalse(job_card.items)
+				self.assertFalse(frappe.db.exists("Stock Entry", {"job_card": job_card.name}))
+
+	def test_get_raw_materials_availability(self):
+		for skip_transfer, backflush_from_wip, transferred_qty in (
+			(0, 0, 2),
+			(0, 0, 5),
+			(1, 0, 0),
+			(1, 1, 0),
+		):
+			with self.subTest(
+				skip_transfer=skip_transfer,
+				backflush_from_wip=backflush_from_wip,
+				transferred_qty=transferred_qty,
+			):
+				job_card = frappe.get_doc(
+					{
+						"doctype": "Job Card",
+						"company": "_Test Company",
+						"skip_material_transfer": skip_transfer,
+						"backflush_from_wip_warehouse": backflush_from_wip,
+						"wip_warehouse": "_Test Warehouse 1 - _TC",
+						"items": [
+							{
+								"item_code": "_Test Item",
+								"source_warehouse": "_Test Warehouse - _TC",
+								"required_qty": 5,
+								"transferred_qty": transferred_qty,
+							},
+						],
+					}
+				).insert(ignore_mandatory=True)
+
+				materials = get_raw_materials(job_card.name)
+
+				self.assertEqual(len(materials), 1)
+				material = materials[0]
+				warehouse = "_Test Warehouse 1 - _TC" if backflush_from_wip else "_Test Warehouse - _TC"
+				stock_qty = (
+					frappe.db.get_value(
+						"Bin", {"item_code": "_Test Item", "warehouse": warehouse}, "actual_qty"
+					)
+					or 0
+				)
+				self.assertEqual(material.item_code, "_Test Item")
+				self.assertEqual(material.required_qty, 5)
+				self.assertEqual(material.transferred_qty, transferred_qty)
+				self.assertEqual(material.warehouse, warehouse)
+				self.assertEqual(material.stock_qty, stock_qty)
+				self.assertEqual(
+					material.material_availability_status,
+					int(stock_qty >= 5) if skip_transfer else int(transferred_qty >= 5),
+				)
+
 	def test_update_job_card_rejects_disallowed_method(self):
 		# The whitelisted update_job_card endpoint must only run an allowlisted set of Job Card
 		# methods. An arbitrary method name must be rejected (PermissionError) before the document

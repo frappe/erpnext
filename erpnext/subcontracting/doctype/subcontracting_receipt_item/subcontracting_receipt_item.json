@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "hash",
  "creation": "2022-04-13 16:05:55.395695",
  "doctype": "DocType",
@@ -8,7 +9,8 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "is_legacy_scrap_item",
+  "valuation_type",
+  "bom_secondary_item",
   "secondary_item_type",
   "column_break_2",
   "item_name",
@@ -166,12 +168,12 @@
    "label": "Accepted Qty",
    "no_copy": 1,
    "print_width": "100px",
-   "read_only_depends_on": "eval:doc.secondary_item_type || doc.is_legacy_scrap_item",
+   "read_only_depends_on": "eval:doc.secondary_item_type || doc.valuation_type",
    "width": "100px"
   },
   {
    "columns": 1,
-   "depends_on": "eval:!parent.is_return && !doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!parent.is_return && !doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -179,7 +181,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "print_width": "100px",
-   "read_only_depends_on": "eval:doc.secondary_item_type || doc.is_legacy_scrap_item",
+   "read_only_depends_on": "eval:doc.secondary_item_type || doc.valuation_type",
    "width": "100px"
   },
   {
@@ -205,6 +207,7 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -219,9 +222,10 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+   "non_negative": 1,
    "options": "Company:company:default_currency",
    "print_width": "100px",
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.valuation_type != 'Manual'",
    "width": "100px"
   },
   {
@@ -238,7 +242,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "rm_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Raw Material Cost Per Qty",
@@ -248,7 +252,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "service_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Service Cost Per Qty",
@@ -258,7 +262,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "additional_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Additional Cost Per Qty",
@@ -282,7 +286,7 @@
    "width": "100px"
   },
   {
-   "depends_on": "eval: !parent.is_return && !doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval: !parent.is_return && !doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -294,7 +298,7 @@
    "width": "100px"
   },
   {
-   "depends_on": "eval:!doc.__islocal && !doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!doc.__islocal && !doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",
@@ -376,7 +380,7 @@
    "no_copy": 1,
    "options": "BOM",
    "print_hide": 1,
-   "read_only_depends_on": "eval:doc.secondary_item_type || doc.is_legacy_scrap_item"
+   "read_only_depends_on": "eval:doc.secondary_item_type || doc.valuation_type"
   },
   {
    "fetch_from": "item_code.brand",
@@ -503,7 +507,7 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:(doc.use_serial_batch_fields === 0 || doc.docstatus === 1) && !doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:(doc.use_serial_batch_fields === 0 || doc.docstatus === 1) && !doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "rejected_serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Rejected Serial and Batch Bundle",
@@ -586,7 +590,7 @@
    "label": "Add Serial / Batch Bundle"
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0 && !doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 && !doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "add_serial_batch_for_rejected_qty",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No (Rejected Qty)"
@@ -600,7 +604,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:!doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "landed_cost_voucher_amount",
    "fieldtype": "Currency",
    "label": "Landed Cost Voucher Amount",
@@ -628,7 +632,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.secondary_item_type && !doc.is_legacy_scrap_item",
+   "depends_on": "eval:!doc.secondary_item_type && !doc.valuation_type",
    "fieldname": "secondary_items_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Secondary Items Cost Per Qty",
@@ -638,11 +642,18 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "depends_on": "is_legacy_scrap_item",
-   "fieldname": "is_legacy_scrap_item",
-   "fieldtype": "Check",
-   "label": "Is Legacy Scrap Item",
+   "depends_on": "valuation_type",
+   "fieldname": "valuation_type",
+   "fieldtype": "Select",
+   "label": "Valuation Type",
+   "options": "\nValuation Rate\n% of Component Cost\nManual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_secondary_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "BOM Secondary Item",
    "read_only": 1
   },
   {
@@ -657,7 +668,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

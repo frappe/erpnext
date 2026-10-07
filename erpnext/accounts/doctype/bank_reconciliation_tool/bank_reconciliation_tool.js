@@ -68,6 +68,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				frappe.msgprint(__("Please select Bank Account"));
 				return;
 			}
+			frm.events.validate_dates(frm);
 			frappe.call({
 				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.auto_reconcile_vouchers",
 				args: {
@@ -82,7 +83,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		});
 
 		frm.add_custom_button(__("Get Unreconciled Entries"), function () {
-			frm.trigger("make_reconciliation_tool");
+			return frm.trigger("make_reconciliation_tool");
 		});
 		frm.change_custom_button_type(__("Get Unreconciled Entries"), null, "primary");
 
@@ -106,7 +107,24 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frm.trigger("get_account_opening_balance");
 	},
 
+	validate_dates(frm) {
+		const from_date = frm.doc.filter_by_reference_date
+			? frm.doc.from_reference_date
+			: frm.doc.bank_statement_from_date;
+		const to_date = frm.doc.filter_by_reference_date
+			? frm.doc.to_reference_date
+			: frm.doc.bank_statement_to_date;
+		if (from_date && to_date && from_date > to_date) {
+			frappe.throw(
+				frm.doc.filter_by_reference_date
+					? __("From Reference Date cannot be greater than To Reference Date")
+					: __("From Date cannot be greater than To Date")
+			);
+		}
+	},
+
 	make_reconciliation_tool(frm) {
+		frm.events.validate_dates(frm);
 		frm.get_field("reconciliation_tool_cards").$wrapper.empty();
 		if (frm.doc.company && frm.doc.bank_account && frm.doc.bank_statement_to_date) {
 			frm.trigger("get_cleared_balance").then(() => {

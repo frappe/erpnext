@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_register.sales_register import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -250,6 +251,46 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		}
 		result_output = {k: v for k, v in filtered_output[0].items() if k in expected_result}
 		self.assertDictEqual(result_output, expected_result)
+
+	def test_ledger_view_nets_pos_paid_invoice(self):
+		# A POS payment settles the receivable inside the invoice, so the ledger view must credit it
+		# and net to zero instead of showing a phantom outstanding.
+		make_pos_profile()
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			price_list_rate=100,
+			do_not_save=1,
+		)
+		si.is_pos = 1
+		si.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		si = si.save().submit()
+		self.assertEqual(flt(si.outstanding_amount), 0.0)
+
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"include_payments": True,
+				"customer": self.customer,
+			}
+		)
+		rows = execute(filters)[1]
+		inv_row = next(x for x in rows if x.get("voucher_no") == si.name)
+
+		self.assertEqual(flt(inv_row.get("debit")), 100.0)
+		self.assertEqual(flt(inv_row.get("credit")), 100.0)
+
+		# running balance is unchanged by a fully-paid POS invoice
+		idx = rows.index(inv_row)
+		self.assertEqual(flt(inv_row.get("balance")), flt(rows[idx - 1].get("balance")))
 
 	def test_outstanding_currency_conversion(self):
 		foreign_invoice = create_sales_invoice(

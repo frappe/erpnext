@@ -2,6 +2,8 @@
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
@@ -51,3 +53,52 @@ class TestStockSettings(ERPNextTestSuite):
 		)
 
 		item.delete()
+
+	def test_unrelated_change_does_not_update_item_metadata(self):
+		settings = frappe.get_single("Stock Settings")
+		settings.allow_partial_reservation = not settings.allow_partial_reservation
+
+		with (
+			patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series,
+			patch("frappe.make_property_setter") as make_property_setter,
+		):
+			settings.save()
+
+		set_by_naming_series.assert_not_called()
+		make_property_setter.assert_not_called()
+
+	def test_item_metadata_updates_when_related_settings_change(self):
+		settings = frappe.get_single("Stock Settings")
+		settings.item_naming_by = (
+			"Item Code" if settings.item_naming_by == "Naming Series" else "Naming Series"
+		)
+		settings.show_barcode_field = not settings.show_barcode_field
+
+		with (
+			patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series,
+			patch("frappe.make_property_setter") as make_property_setter,
+		):
+			settings.save()
+
+		set_by_naming_series.assert_called_once()
+		self.assertEqual(make_property_setter.call_count, 3)
+
+	def test_cannot_disable_serial_and_batch_with_tracked_items(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Serial Deactivation Item", {"has_serial_no": 1})
+
+		settings = frappe.get_single("Stock Settings")
+		settings.enable_serial_and_batch_no_for_item = 0
+
+		exists = frappe.db.exists
+
+		def exists_without_bundles(doctype, *args, **kwargs):
+			# test data has submitted bundles, which would throw before the item check
+			return doctype != "Serial and Batch Bundle" and exists(doctype, *args, **kwargs)
+
+		with (
+			patch.object(frappe.db, "exists", side_effect=exists_without_bundles),
+			self.assertRaisesRegex(frappe.ValidationError, "items with serial / batch enabled"),
+		):
+			settings.save()

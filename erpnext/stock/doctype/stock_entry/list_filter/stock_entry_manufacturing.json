@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"stock_entry_type\", \"label\": \"Stock Entry Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"work_order\", \"label\": \"Work Order\"}, {\"fieldname\": \"bom_no\", \"label\": \"BOM No\"}, {\"fieldname\": \"fg_completed_qty\", \"label\": \"Finished Good Quantity \"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.872400",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Manufacturing",
+ "filters": "[[\"Stock Entry\", \"docstatus\", \"=\", 1], [\"Stock Entry\", \"purpose\", \"in\", [\"Manufacture\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.872400",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry-Manufacturing",
+ "owner": "Administrator",
+ "reference_doctype": "Stock Entry",
+ "route_signature": "docstatus=1&purpose=[\"in\",[\"Manufacture\",\"Material Transfer for Manufacture\",\"Material Consumption for Manufacture\"]]",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

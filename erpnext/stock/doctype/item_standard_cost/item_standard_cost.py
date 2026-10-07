@@ -4,7 +4,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Max
+from frappe.query_builder import Case
+from frappe.query_builder.functions import IfNull, Max
 from frappe.utils import flt, get_datetime, get_link_to_form, getdate, nowtime, today
 from frappe.utils.caching import request_cache
 
@@ -385,31 +386,48 @@ def get_standard_cost_items(
 	'Standard Cost' — i.e. the item is explicitly Standard Cost, or it has no valuation method of its
 	own and the applicable default (Company, else Stock Settings) is Standard Cost. This mirrors
 	get_valuation_method, so every shown item also passes validate_item."""
+	# the form is the boundary, not Item: Accounts Manager writes this doctype and holds no Item read or select
+	frappe.has_permission("Item Standard Cost", throw=True)
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import (
+		get_allowed_companies,
+		get_restriction_criterion,
+	)
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Item Standard Cost")
 	company = (filters or {}).get("company")
 	if company:
+		# `company` is caller supplied and selects whose default valuation method is applied, so a
+		# caller restricted to particular companies must not ask about the others
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 		default_method = frappe.get_cached_value("Company", company, "valuation_method")
 	else:
 		default_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
 
+	item = frappe.qb.DocType("Item")
 	if default_method == "Standard Cost":
 		# Items with no method of their own inherit the Standard Cost default.
-		valuation_condition = "and ifnull(item.valuation_method, '') in ('', 'Standard Cost')"
+		valuation_condition = IfNull(item.valuation_method, "").isin(["", "Standard Cost"])
 	else:
-		valuation_condition = "and item.valuation_method = 'Standard Cost'"
+		valuation_condition = item.valuation_method == "Standard Cost"
 
-	return frappe.db.sql(  # nosemgrep
-		f"""
-		select item.name, item.item_name
-		from `tabItem` item
-		where item.is_stock_item = 1
-			and item.disabled = 0
-			and item.has_variants = 0
-			{valuation_condition}
-			and ({searchfield} like %(txt)s or item.item_name like %(txt)s)
-		order by
-			(case when item.name like %(txt)s then 0 else 1 end),
-			item.name
-		limit %(page_len)s offset %(start)s
-		""",
-		{"txt": f"%{txt}%", "start": start, "page_len": page_len},
+	search_text = f"%{txt}%"
+	query = (
+		frappe.qb.from_(item)
+		.select(item.name, item.item_name)
+		.where((item.is_stock_item == 1) & (item.disabled == 0) & (item.has_variants == 0))
+		.where(valuation_condition)
+		.where(item[searchfield].like(search_text) | item.item_name.like(search_text))
+		.orderby(Case().when(item.name.like(search_text), 0).else_(1))
+		.orderby(item.name)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	companies = [company] if company else allowed_companies
+	if companies:
+		query = query.where(get_restriction_criterion("Item", companies))
+
+	return query.run()

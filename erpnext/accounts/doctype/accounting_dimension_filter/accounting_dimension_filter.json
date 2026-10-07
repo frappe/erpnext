@@ -3,6 +3,7 @@
  "autoname": "format:{accounting_dimension}-{#####}",
  "creation": "2020-11-08 18:28:11.906146",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounting-dimension-filter",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -99,6 +100,7 @@
    "label": "Fieldname"
   }
  ],
+ "icon": "funnel",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2025-08-08 14:13:22.203011",

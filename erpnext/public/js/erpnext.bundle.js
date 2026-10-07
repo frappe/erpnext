@@ -1,4 +1,3 @@
-import "./conf";
 import "./utils";
 import "./stock_reservation";
 import "./queries";
@@ -18,14 +17,17 @@ import "./controllers/transaction";
 import "./templates/item_selector.html";
 import "./utils/item_selector";
 import "./help_links";
+import "./sidebar_banners";
 import "./templates/item_quick_entry.html";
 import "./utils/contact_address_quick_entry";
 import "./utils/customer_quick_entry";
 import "./utils/supplier_quick_entry";
+import "./utils/item_quick_entry";
 import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
 import "./utils/ledger_preview.js";
 import "./utils/unreconcile.js";
+import "./utils/item_close";
 import "./utils/barcode_scanner";
 import "./telephony";
 import "./templates/call_link.html";
@@ -41,5 +43,7 @@ import "./utils/demo.js";
 import "./financial_statements.js";
 import "./sales_trends_filters.js";
 import "./purchase_trends_filters.js";
+import "./stock_balance_report.js";
+import "./subcontracting_inward_report_filters.js";
 
 // import { sum } from 'frappe/public/utils/util.js'

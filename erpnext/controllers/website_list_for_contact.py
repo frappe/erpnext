@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.modules.utils import get_module_app
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Lower
+from frappe.query_builder.functions import Lower, Max
 from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
 
@@ -186,11 +186,10 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 	party = frappe.qb.DocType(parties_doctype)
 	data = (
 		frappe.qb.from_(party)
-		# creation must be selected: Postgres requires SELECT DISTINCT order-by exprs in the select list
-		.select(party.parent.as_("name"), party.supplier, party.creation)
-		.distinct()
-		.where((party.supplier == parties[0]) & (party.docstatus == 1))
-		.orderby(party.creation, order=frappe.qb.desc)
+		.select(party.parent.as_("name"))
+		.where(party.supplier.isin(parties) & (party.docstatus == 1))
+		.groupby(party.parent)
+		.orderby(Max(party.creation), order=frappe.qb.desc)
 		.limit(limit_page_length)
 		.offset(limit_start)
 	).run(as_dict=True)
@@ -243,7 +242,9 @@ def get_customers_suppliers(doctype, user):
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
 		suppliers = get_parents_for_user("Supplier")
 		customers = get_parents_for_user("Customer")
-	elif frappe.has_permission(doctype, "read", user=user):
+	elif frappe.has_permission(doctype, "read", user=user) and frappe.has_permission(
+		"Customer", "read", user=user
+	):
 		customer_list = frappe.get_list("Customer")
 		customers = suppliers = [customer.name for customer in customer_list]
 

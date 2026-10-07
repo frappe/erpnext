@@ -23,6 +23,7 @@ class StockEntryType(Document):
 		from frappe.types import DF
 
 		add_to_transit: DF.Check
+		batch_split: DF.Check
 		is_standard: DF.Check
 		purpose: DF.Literal[
 			"Material Issue",
@@ -45,6 +46,9 @@ class StockEntryType(Document):
 		self.validate_standard_type()
 		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0
+
+		if self.batch_split and self.purpose != "Repack":
+			self.batch_split = 0
 
 	def validate_standard_type(self):
 		if self.is_standard and self.name not in [
@@ -126,6 +130,7 @@ class ManufactureEntry:
 			if backflush_based_on != "BOM":
 				available_serial_batches = self.get_transferred_serial_batches()
 
+			production_share = self.get_production_share()
 			for item_code, _dict in item_dict.items():
 				_dict.s_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.t_warehouse = ""
@@ -140,10 +145,26 @@ class ManufactureEntry:
 
 					_dict.qty = calculated_qty
 					self.update_available_serial_batches(_dict, available_serial_batches)
-				elif self.skip_material_transfer:
-					set_previous_operation_serial_batch(self.stock_entry, _dict)
+				else:
+					remaining_qty = max(flt(_dict.qty) - flt(_dict.consumed_qty), 0)
+					_dict.qty = min(flt(_dict.qty) * production_share, remaining_qty)
+					if not _dict.qty:
+						continue
+
+					if self.skip_material_transfer:
+						set_previous_operation_serial_batch(self.stock_entry, _dict)
 
 				self.stock_entry.append("items", _dict)
+
+	def get_production_share(self):
+		"""Fraction of the job card's for_quantity this entry accounts for; raw materials are
+		generated proportionally so several partial entries never consume more than required.
+		The job card's required qty covers its pending qty too, so the pending qty stays in the base."""
+		for_quantity = flt(frappe.db.get_value("Job Card", self.job_card, "for_quantity"))
+		if not for_quantity:
+			return 1
+
+		return min(flt(self.for_quantity) / for_quantity, 1)
 
 	def parse_available_serial_batches(self, item_dict, available_serial_batches):
 		key = (item_dict.item_code, item_dict.from_warehouse)

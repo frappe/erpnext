@@ -90,6 +90,21 @@ class TestStockProjectedQty(ERPNextTestSuite):
 		self.assertEqual(row["projected_qty"], 10)
 		self.assertEqual(row["shortage_qty"], 10)  # reorder level 20 - projected 10
 
+	def test_company_filter_excludes_other_company_warehouses(self):
+		item = "_Test Item"
+		make_stock_entry(item_code=item, qty=5, to_warehouse=WAREHOUSE, basic_rate=100)
+		make_stock_entry(
+			item_code=item,
+			qty=7,
+			to_warehouse="Stores - _TC1",
+			company="_Test Company 1",
+			basic_rate=100,
+		)
+
+		warehouses = {row["warehouse"] for row in self.run_report(item)}
+		self.assertIn(WAREHOUSE, warehouses)
+		self.assertNotIn("Stores - _TC1", warehouses)
+
 	def test_item_filter_returns_only_requested_item(self):
 		item_a = "_Test Item"
 		item_b = "_Test Item 2"

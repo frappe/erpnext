@@ -4,6 +4,7 @@
 
 import json
 from collections import defaultdict
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
@@ -29,6 +30,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import (
@@ -204,81 +206,78 @@ class TestDeliveryNote(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		frappe.flags.ignore_serial_batch_bundle_validation = True
-		sn_item = "Old Serial NO Item Return Test - 1"
-		make_item(
-			sn_item,
-			{
-				"has_serial_no": 1,
-				"serial_no_series": "OSN-.####",
-				"is_stock_item": 1,
-			},
-		)
+		with patch.dict(frappe.flags, {"ignore_serial_batch_bundle_validation": True}):
+			sn_item = "Old Serial NO Item Return Test - 1"
+			make_item(
+				sn_item,
+				{
+					"has_serial_no": 1,
+					"serial_no_series": "OSN-.####",
+					"is_stock_item": 1,
+				},
+			)
 
-		serial_nos = [
-			"OSN-1",
-			"OSN-2",
-			"OSN-3",
-			"OSN-4",
-			"OSN-5",
-			"OSN-6",
-			"OSN-7",
-			"OSN-8",
-			"OSN-9",
-			"OSN-10",
-			"OSN-11",
-			"OSN-12",
-		]
+			serial_nos = [
+				"OSN-1",
+				"OSN-2",
+				"OSN-3",
+				"OSN-4",
+				"OSN-5",
+				"OSN-6",
+				"OSN-7",
+				"OSN-8",
+				"OSN-9",
+				"OSN-10",
+				"OSN-11",
+				"OSN-12",
+			]
 
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
+			for sn in serial_nos:
+				if not frappe.db.exists("Serial No", sn):
+					sn_doc = frappe.get_doc(
+						{
+							"doctype": "Serial No",
+							"item_code": sn_item,
+							"serial_no": sn,
+							"company": "_Test Company",
+						}
+					)
+					sn_doc.insert(set_name=sn)
 
-		warehouse = "_Test Warehouse - _TC"
-		company = frappe.db.get_value("Warehouse", warehouse, "company")
-		se_doc = make_stock_entry(
-			item_code=sn_item,
-			company=company,
-			target="_Test Warehouse - _TC",
-			qty=12,
-			basic_rate=100,
-			do_not_submit=1,
-		)
+			warehouse = "_Test Warehouse - _TC"
+			company = frappe.db.get_value("Warehouse", warehouse, "company")
+			se_doc = make_stock_entry(
+				item_code=sn_item,
+				company=company,
+				target="_Test Warehouse - _TC",
+				qty=12,
+				basic_rate=100,
+				do_not_submit=1,
+			)
 
-		se_doc.items[0].serial_no = "\n".join(serial_nos)
+			se_doc.items[0].serial_no = "\n".join(serial_nos)
 
-		frappe.flags.use_serial_and_batch_fields = True
-		se_doc.submit()
+			frappe.flags.use_serial_and_batch_fields = True
+			se_doc.submit()
 
-		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
+			self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
 
-		dn = create_delivery_note(
-			item_code=sn_item,
-			qty=12,
-			rate=500,
-			warehouse=warehouse,
-			company=company,
-			expense_account="Cost of Goods Sold - _TC",
-			cost_center="Main - _TC",
-			do_not_submit=1,
-		)
+			dn = create_delivery_note(
+				item_code=sn_item,
+				qty=12,
+				rate=500,
+				warehouse=warehouse,
+				company=company,
+				expense_account="Cost of Goods Sold - _TC",
+				cost_center="Main - _TC",
+				do_not_submit=1,
+			)
 
-		dn.items[0].serial_no = "\n".join(serial_nos)
-		dn.submit()
-		dn.reload()
+			dn.items[0].serial_no = "\n".join(serial_nos)
+			dn.submit()
+			dn.reload()
 
-		self.assertTrue(dn.items[0].serial_no)
-
-		frappe.flags.ignore_serial_batch_bundle_validation = False
-		frappe.flags.use_serial_and_batch_fields = False
+			self.assertTrue(dn.items[0].serial_no)
 
 		# return entry
 		dn1 = make_sales_return(dn.name)
@@ -894,7 +893,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			target_warehouse=target,
 			ignore_pricing_rule=0,
 			use_serial_batch_fields=1,
-			serial_no="\n".join(serial_nos),
+			serial_no="\n".join(get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle)),
 		)
 
 		for serial_no in serial_nos:
@@ -910,14 +909,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(sn.warehouse, warehouse)
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
-		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
-		customer_name = create_internal_customer(
-			customer_name="_Test Internal Customer 2",
-			represents_company="_Test Company with perpetual inventory",
-			allowed_to_interact_with="_Test Company with perpetual inventory",
-		)
+		customer_name = "_Test Internal Customer 2"
 
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
@@ -1066,6 +1059,117 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_dn_is_completed_when_unbilled_item_is_returned(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		dn = create_delivery_note(do_not_submit=True)
+		dn.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 100,
+				"conversion_factor": 1,
+				"allow_zero_valuation_rate": 1,
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.set("items", [item for item in si.items if item.item_code == "_Test Item"])
+		si.insert()
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 50)
+		self.assertEqual(dn.status, "Partially Billed")
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.set("items", [item for item in return_dn.items if item.item_code == "_Test Item 2"])
+		return_dn.insert()
+		# Mimic the submit request, which reconstructs the document from client data.
+		return_dn = frappe.get_doc(return_dn.as_dict())
+		return_dn.submit()
+
+		dn.reload()
+		self.assertEqual(dn.items[1].returned_qty, 1)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+		return_dn.cancel()
+
+		dn.reload()
+		self.assertEqual(dn.items[1].returned_qty, 0)
+		self.assertEqual(dn.per_billed, 50)
+		self.assertEqual(dn.status, "Partially Billed")
+
+	def test_billing_status_repair_patch(self):
+		"""Returns submitted before #58869 left the original Delivery Note's per_billed stale.
+
+		The repair patch recalculates such notes: a directly invoiced one whose remaining
+		qty was returned becomes Completed, an uninvoiced Sales Order linked one goes back
+		to To Bill.
+		"""
+		from erpnext.patches.v16_0 import recalculate_returned_delivery_note_billing_status as patch
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		# Delivery Note invoiced for 2 of 5 qty, the remaining 3 returned -> fully billed
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		dn = create_delivery_note(qty=5)
+
+		si = make_sales_invoice(dn.name)
+		si.items[0].qty = 2
+		si.insert()
+		si.submit()
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = -3
+		dn_return.insert()
+		# Mimic the submit request, which reconstructs the document from client data.
+		frappe.get_doc(dn_return.as_dict()).submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.items[0].returned_qty, 3)
+		self.assertEqual(dn.per_billed, 100)
+
+		# Sales Order linked Delivery Note, nothing invoiced, partly returned -> unbilled
+		so = make_sales_order(qty=10)
+		so_dn = create_dn_against_so(so.name, delivered_qty=5)
+
+		so_dn_return = make_sales_return(so_dn.name)
+		so_dn_return.items[0].qty = -2
+		so_dn_return.insert()
+		frappe.get_doc(so_dn_return.as_dict()).submit()
+
+		so_dn.load_from_db()
+		self.assertEqual(so_dn.items[0].returned_qty, 2)
+		self.assertEqual(so_dn.per_billed, 0)
+
+		# Mimic the state left behind by a return submitted before the fix
+		for name, per_billed in ((dn.name, 40), (so_dn.name, 50)):
+			frappe.db.set_value(
+				"Delivery Note",
+				name,
+				{"per_billed": per_billed, "status": "Partially Billed"},
+				update_modified=False,
+			)
+
+		patch.execute()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+		so_dn.load_from_db()
+		self.assertEqual(so_dn.per_billed, 0)
+		self.assertEqual(so_dn.status, "To Bill")
+
 	def test_dn_billing_status_case2(self):
 		# SO -> SI and SO -> DN1, DN2
 		from erpnext.selling.doctype.sales_order.mapper import (
@@ -1105,6 +1209,148 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn1.status, "Completed")
 
 		self.assertEqual(dn2.get("items")[0].billed_amt, 300)
+		self.assertEqual(dn2.per_billed, 100)
+		self.assertEqual(dn2.status, "Completed")
+
+	def test_mapping_same_dn_twice_is_idempotent(self):
+		# "Get Items From > Delivery Note" passes the in-progress invoice back as target_doc.
+		# Selecting the same DN again must not append a second row for the same dn_detail.
+		dn = create_delivery_note(qty=5)
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual(len(si.items), 1)
+		self.assertEqual(si.items[0].qty, 5)
+
+		si = make_sales_invoice(dn.name, target_doc=si)
+		self.assertEqual(len(si.items), 1)
+		self.assertEqual(si.items[0].qty, 5)
+
+		# a partly reduced draft row still tops up to the delivered qty
+		si.items[0].qty = 2
+		si = make_sales_invoice(dn.name, target_doc=si)
+		self.assertEqual(len(si.items), 2)
+		self.assertEqual([d.qty for d in si.items], [2, 3])
+
+	def test_dn_billing_falls_back_to_qty_when_amount_is_short(self):
+		# SO -> DN (qty 5 @ 100 => amount 500), invoiced fully but at a lower rate.
+		# The invoiced amount (400) stays below the delivery amount (500), so billing
+		# is measured by quantity and the DN still reaches 100% once fully invoiced.
+		so = make_sales_order(po_no="12345")
+		dn = create_dn_against_so(so.name, delivered_qty=5)
+
+		self.assertEqual(dn.status, "To Bill")
+		self.assertEqual(dn.per_billed, 0)
+
+		# Partial quantity invoiced at a reduced rate -> billed by qty fraction (2 / 5).
+		si1 = make_sales_invoice(dn.name)
+		si1.items[0].qty = 2
+		si1.items[0].rate = 80
+		si1.insert()
+		si1.submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.items[0].billed_amt, 160)
+		self.assertEqual(dn.per_billed, 40)
+		self.assertEqual(dn.status, "Partially Billed")
+
+		# Remaining quantity invoiced; total invoiced amount (400) is still below the
+		# delivery amount (500), yet all 5 qty are billed -> fully billed.
+		si2 = make_sales_invoice(dn.name)
+		si2.items[0].qty = 3
+		si2.items[0].rate = 80
+		si2.insert()
+		si2.submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.items[0].billed_amt, 400)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+	def test_dn_qty_billing_ignores_credit_note_that_does_not_update_dn(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		so = make_sales_order(po_no="12345", qty=5)
+		dn = create_dn_against_so(so.name, delivered_qty=5)
+
+		si = make_sales_invoice(dn.name)
+		si.items[0].rate = 80
+		si.insert()
+		si.submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 100)
+
+		credit_note = make_sales_return(si.name)
+		credit_note.update_billed_amount_in_delivery_note = 0
+		credit_note.items[0].qty = -2
+		credit_note.items[0].stock_qty = -2
+		credit_note.insert()
+		credit_note.submit()
+
+		dn.load_from_db()
+		dn.update_billing_percentage(update_modified=False)
+		dn.load_from_db()
+		self.assertEqual(dn.items[0].billed_amt, 400)
+		self.assertEqual(dn.get_invoiced_qty_map()[dn.items[0].name], 5)
+		self.assertEqual(dn.per_billed, 100)
+
+	def test_dn_billing_falls_back_to_qty_for_so_linked_invoice(self):
+		# SO (qty 5 @ 100) -> two DNs (3 + 2) -> one SI from the SO at a lower rate; the SI
+		# links via so_detail, so invoiced qty is split across the DNs FIFO to 100% each.
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+
+		so = make_sales_order(po_no="12345", qty=5)
+		dn1 = create_dn_against_so(so.name, delivered_qty=3)
+		dn2 = create_dn_against_so(so.name, delivered_qty=2)
+
+		si = make_si_from_so(so.name)
+		for item in si.items:
+			item.rate = 80
+		si.insert()
+		si.submit()
+
+		dn1.load_from_db()
+		dn2.load_from_db()
+
+		# Amount FIFO: dn1 absorbs 300, dn2 gets the remaining 100 of the 400 billed.
+		self.assertEqual(dn1.items[0].billed_amt, 300)
+		self.assertEqual(dn2.items[0].billed_amt, 100)
+
+		# Qty FIFO: dn1 3/3, dn2 2/2 -> both fully billed despite dn2's short amount.
+		self.assertEqual(dn1.per_billed, 100)
+		self.assertEqual(dn1.status, "Completed")
+		self.assertEqual(dn2.per_billed, 100)
+		self.assertEqual(dn2.status, "Completed")
+
+	def test_so_linked_qty_fifo_is_net_of_returns(self):
+		# SO qty 10 -> DN1 5 (2 returned) + DN2 2 -> SI-from-SO for 5 units. DN1's FIFO
+		# capacity must be its net qty (3), so the 5 invoiced units split 3/2 and both
+		# DNs reach 100%; a gross-qty cap would give DN1 all 5 and leave DN2 at 0%.
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(po_no="12345", qty=10)
+		dn1 = create_dn_against_so(so.name, delivered_qty=5)
+
+		ret = make_sales_return(dn1.name)
+		ret.items[0].qty = -2
+		ret.items[0].stock_qty = -2
+		ret.submit()
+		# nudge the is_return status_updater so DN1's returned_qty is set (auto on submit in prod)
+		frappe.get_doc("Delivery Note", ret.name).update_prevdoc_status()
+
+		dn2 = create_dn_against_so(so.name, delivered_qty=2)
+
+		si = make_si_from_so(so.name)
+		si.items[0].qty = 5
+		si.insert()
+		si.submit()
+
+		dn1.load_from_db()
+		dn2.load_from_db()
+		self.assertEqual(dn1.items[0].returned_qty, 2)
+		self.assertEqual(dn1.per_billed, 100)
+		self.assertEqual(dn1.status, "Completed")
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
 
@@ -1557,6 +1803,229 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].rate, rate)
 		self.assertEqual(dn.items[0].net_rate, rate)
 
+	def test_internal_transfer_carries_the_batch_into_transit(self):
+		"""Material sent to an in-transit warehouse keeps the batch it left the source warehouse with."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-TRANSIT-BATCH-.####",
+			}
+		).name
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=item)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		packages = {
+			d.warehouse: d.name
+			for d in frappe.get_all(
+				"Serial and Batch Bundle", filters={"voucher_no": dn.name}, fields=["name", "warehouse"]
+			)
+		}
+		sent_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[warehouse]}, "batch_no"
+		)
+		received_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[transit_warehouse]}, "batch_no"
+		)
+
+		self.assertEqual(received_batch, sent_batch)
+		self.assertEqual(frappe.db.count("Batch", {"item": item}), 1)
+
+	def test_internal_transfer_carries_the_batch_of_a_bundle_component(self):
+		"""A batched component of a product bundle keeps its batch on the way to transit."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		component = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-BUNDLE-BATCH-.####",
+			}
+		).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component], qty=1)
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=component)
+
+		dn = create_delivery_note(
+			item_code=bundle_item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		packages = {
+			d.warehouse: d.name
+			for d in frappe.get_all(
+				"Serial and Batch Bundle", filters={"voucher_no": dn.name}, fields=["name", "warehouse"]
+			)
+		}
+		sent_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[warehouse]}, "batch_no"
+		)
+		received_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[transit_warehouse]}, "batch_no"
+		)
+
+		self.assertEqual(received_batch, sent_batch)
+		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
+
+	def test_internal_transfer_of_a_bundle_with_a_repeated_component(self):
+		"""A component listed twice on a bundle keeps its batch on both packed rows."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		component = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-REPEATED-BATCH-.####",
+			}
+		).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle_item})
+		product_bundle.append("items", {"item_code": component, "qty": 1})
+		product_bundle.append("items", {"item_code": component, "qty": 2})
+		product_bundle.insert()
+		product_bundle.submit()
+
+		make_stock_entry(target=warehouse, qty=20, basic_rate=100, item_code=component)
+		customer = create_internal_customer(represents_company=company)
+
+		dn = create_delivery_note(
+			item_code=bundle_item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		received = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_no": dn.name, "warehouse": transit_warehouse},
+			pluck="total_qty",
+		)
+		self.assertEqual(sorted(received), [5, 10])
+		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
+
+	def test_internal_transfer_return_carries_the_batch_back(self):
+		"""Material coming back from an in-transit warehouse returns under the batch it left with."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-RETURNED-BATCH-.####",
+			}
+		).name
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=item)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		returned = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=-5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+			is_return=1,
+			return_against=dn.name,
+		)
+
+		received_package = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_no": returned.name, "warehouse": warehouse}
+		)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Entry", {"parent": received_package}, "batch_no"),
+			frappe.db.get_value(
+				"Serial and Batch Entry",
+				{
+					"parent": frappe.db.get_value(
+						"Serial and Batch Bundle", {"voucher_no": dn.name, "warehouse": warehouse}
+					)
+				},
+				"batch_no",
+			),
+		)
+		self.assertEqual(frappe.db.count("Batch", {"item": item}), 1)
+
+	def test_internal_transfer_of_an_item_that_cannot_create_batches(self):
+		"""An item whose batches are made by hand travels through an in-transit warehouse."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 0}).name
+		batch = frappe.get_doc({"doctype": "Batch", "batch_id": f"_T-MANUAL-{item}", "item": item}).insert()
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=item, batch_no=batch.name)
+
+		with self.change_settings("Stock Settings", auto_create_serial_and_batch_bundle_for_outward=1):
+			dn = create_delivery_note(
+				item_code=item,
+				company=company,
+				customer=customer,
+				qty=5,
+				rate=100,
+				warehouse=warehouse,
+				target_warehouse=transit_warehouse,
+			)
+
+		received_package = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_no": dn.name, "warehouse": transit_warehouse}
+		)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Entry", {"parent": received_package}, "batch_no"),
+			batch.name,
+		)
+
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
@@ -1878,7 +2347,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 			if row.item_code == serial_item.name:
 				serial_and_batch_bundle = item_details[serial_item.name]
-				row.serial_no = get_serial_nos_from_bundle(serial_and_batch_bundle)[3]
+				row.serial_no = get_serial_numbers_from_bundle(serial_and_batch_bundle)[3]
 				serial_no = row.serial_no
 			else:
 				serial_and_batch_bundle = item_details[batch_item.name]
@@ -1897,72 +2366,71 @@ class TestDeliveryNote(ERPNextTestSuite):
 	def test_delivery_note_legacy_serial_no_valuation(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		frappe.flags.ignore_serial_batch_bundle_validation = True
-		sn_item = "Old Serial NO Item Valuation Test - 2"
-		make_item(
-			sn_item,
-			{
-				"has_serial_no": 1,
-				"serial_no_series": "SN-SOVOSN-.####",
-				"is_stock_item": 1,
-			},
-		)
-
-		serial_nos = [
-			"SN-SOVOSN-1234",
-			"SN-SOVOSN-2234",
-		]
-
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
-
-		warehouse = "_Test Warehouse - _TC"
-		company = frappe.db.get_value("Warehouse", warehouse, "company")
-		se_doc = make_stock_entry(
-			item_code=sn_item,
-			company=company,
-			target="_Test Warehouse - _TC",
-			qty=2,
-			basic_rate=150,
-			do_not_submit=1,
-			use_serial_batch_fields=0,
-		)
-		se_doc.submit()
-
-		se_doc.items[0].db_set("serial_no", "\n".join(serial_nos))
-
-		sle_data = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": se_doc.name, "voucher_type": "Stock Entry"},
-		)[0]
-
-		sle_doc = frappe.get_doc("Stock Ledger Entry", sle_data.name)
-		self.assertFalse(sle_doc.serial_no)
-		sle_doc.db_set("serial_no", "\n".join(serial_nos))
-		sle_doc.reload()
-		self.assertTrue(sle_doc.serial_no)
-		self.assertFalse(sle_doc.is_cancelled)
-
-		for sn in serial_nos:
-			sn_doc = frappe.get_doc("Serial No", sn)
-			sn_doc.db_set(
+		with patch.dict(frappe.flags, {"ignore_serial_batch_bundle_validation": True}):
+			sn_item = "Old Serial NO Item Valuation Test - 2"
+			make_item(
+				sn_item,
 				{
-					"status": "Active",
-					"warehouse": warehouse,
-				}
+					"has_serial_no": 1,
+					"serial_no_series": "SN-SOVOSN-.####",
+					"is_stock_item": 1,
+				},
 			)
 
-		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
-		frappe.flags.ignore_serial_batch_bundle_validation = False
+			serial_nos = [
+				"SN-SOVOSN-1234",
+				"SN-SOVOSN-2234",
+			]
+
+			for sn in serial_nos:
+				if not frappe.db.exists("Serial No", sn):
+					sn_doc = frappe.get_doc(
+						{
+							"doctype": "Serial No",
+							"item_code": sn_item,
+							"serial_no": sn,
+							"company": "_Test Company",
+						}
+					)
+					sn_doc.insert(set_name=sn)
+
+			warehouse = "_Test Warehouse - _TC"
+			company = frappe.db.get_value("Warehouse", warehouse, "company")
+			se_doc = make_stock_entry(
+				item_code=sn_item,
+				company=company,
+				target="_Test Warehouse - _TC",
+				qty=2,
+				basic_rate=150,
+				do_not_submit=1,
+				use_serial_batch_fields=0,
+			)
+			se_doc.submit()
+
+			se_doc.items[0].db_set("serial_no", "\n".join(serial_nos))
+
+			sle_data = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": se_doc.name, "voucher_type": "Stock Entry"},
+			)[0]
+
+			sle_doc = frappe.get_doc("Stock Ledger Entry", sle_data.name)
+			self.assertFalse(sle_doc.serial_no)
+			sle_doc.db_set("serial_no", "\n".join(serial_nos))
+			sle_doc.reload()
+			self.assertTrue(sle_doc.serial_no)
+			self.assertFalse(sle_doc.is_cancelled)
+
+			for sn in serial_nos:
+				sn_doc = frappe.get_doc("Serial No", sn)
+				sn_doc.db_set(
+					{
+						"status": "Active",
+						"warehouse": warehouse,
+					}
+				)
+
+			self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
 
 		se_doc = make_stock_entry(
 			item_code=sn_item,
@@ -1972,7 +2440,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			basic_rate=200,
 		)
 
-		serial_nos.extend(get_serial_nos_from_bundle(se_doc.items[0].serial_and_batch_bundle))
+		serial_nos.extend(get_serial_numbers_from_bundle(se_doc.items[0].serial_and_batch_bundle))
 
 		dn = create_delivery_note(
 			item_code=sn_item,
@@ -2048,6 +2516,38 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn_return.save().submit()
 		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
 		self.assertEqual(batch_no, returned_batch_no)
+
+	def test_sales_return_cannot_return_more_of_a_batch_than_delivered(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(
+			"_Test Batch Return Limit Item",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"batch_number_series": "BRL-DN-.#####",
+			},
+		).name
+		batches = []
+		for rate in (100, 200):
+			se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=rate)
+			batches.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		dn = create_delivery_note(
+			item_code=item, qty=5, rate=1000, batch_no=batches[0], batches={batches[0]: 3, batches[1]: 2}
+		)
+
+		def make_batch_return(qty):
+			sales_return = make_sales_return(dn.name)
+			sales_return.items[0].qty = -qty
+			sales_return.items[0].serial_and_batch_bundle = None
+			sales_return.items[0].use_serial_batch_fields = 1
+			sales_return.items[0].batch_no = batches[0]
+			return sales_return.save()
+
+		make_batch_return(3).submit()
+		self.assertRaises(frappe.ValidationError, make_batch_return(2).submit)
 
 	def test_partial_sales_return_batch_no_for_batched_item_in_dn(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
@@ -2436,7 +2936,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			se = make_stock_entry(
 				item_code=serial_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=rate
 			)
-			serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+			serial_nos.extend(get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle))
 
 		dn = create_delivery_note(
 			item_code=batch_item,
@@ -2705,6 +3205,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned = frappe.get_doc("Delivery Note", dn_return.name)
 		returned.update_prevdoc_status()
+		dn.load_from_db()
+		dn.update_billing_percentage(update_modified=False)
 		dn.load_from_db()
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.per_returned, 100)
@@ -2984,7 +3486,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		).name
 
 		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
-		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle)
 
 		dn = create_delivery_note(
 			item_code=item_code,

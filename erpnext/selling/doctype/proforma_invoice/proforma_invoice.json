@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2026-07-16 00:00:00",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/proforma-invoice",
  "engine": "InnoDB",
  "field_order": [
   "details_section",
@@ -239,6 +240,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "file-text",
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,

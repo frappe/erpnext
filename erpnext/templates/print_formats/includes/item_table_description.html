@@ -5,7 +5,7 @@
 
 {% if doc.in_format_data("image") and doc.get("image") and "image" in display_columns -%}
 <div class="pull-left" style="max-width: 40%; margin-right: 10px;">
-	<img class="print-item-image" src="{{ doc.image }}" alt="">
+	<img class="print-item-image" src="{{ doc.image | e }}" alt="">
 </div>
 {%- endif %}
 
@@ -38,7 +38,7 @@
 		{%- for fieldname in columns -%}
 			{% if doc.get(fieldname) and doc.in_format_data(fieldname) -%}
 			<p>
-				<strong>{{ _(doc.meta.get_label(fieldname)) }}:</strong>
+				<strong>{{ doc.meta.get_translated_label(fieldname) }}:</strong>
 				{{ doc.get_formatted(fieldname, translated=True)  }}
 			</p>
 			{% endif %}

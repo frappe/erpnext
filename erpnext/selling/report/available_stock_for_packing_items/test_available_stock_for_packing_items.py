@@ -106,6 +106,18 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 		self.assertEqual(by_warehouse.get(WAREHOUSE), 4.0)
 		self.assertEqual(by_warehouse.get(other_wh), 2.0)
 
+	def test_repeated_component_uses_total_qty(self):
+		comp_a = self.make_component()
+		parent = self.make_bundle_parent()
+
+		self.set_bin_projected_qty(comp_a, WAREHOUSE, 10)
+		self.make_active_bundle(parent, [(comp_a, 2), (comp_a, 3)])
+
+		rows = self.report_rows_for(parent)
+
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(flt(rows[0][5]), 2.0)
+
 	def test_starved_component_drops_row(self):
 		comp_a = self.make_component()
 		comp_b = self.make_component()

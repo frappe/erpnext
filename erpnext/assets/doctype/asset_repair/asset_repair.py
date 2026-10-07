@@ -67,6 +67,7 @@ class AssetRepair(AccountsController):
 		self.calculate_repair_cost()
 		self.calculate_total_repair_cost()
 		self.check_repair_status()
+		self.set_downtime()
 
 	def validate_asset(self):
 		if self.asset_doc.status in ("Sold", "Scrapped"):
@@ -239,6 +240,13 @@ class AssetRepair(AccountsController):
 		if self.repair_status == "Pending" and self.docstatus == 1:
 			frappe.throw(_("Please update Repair Status."))
 
+	def set_downtime(self):
+		# keep downtime in sync with the entered dates, regardless of edit order
+		if self.repair_status == "Completed" and self.failure_date and self.completion_date:
+			self.downtime = f"{get_downtime(self.failure_date, self.completion_date)} Hrs"
+		else:
+			self.downtime = None
+
 	def update_asset_value(self):
 		total_repair_cost = self.total_repair_cost if self.docstatus == 1 else -1 * self.total_repair_cost
 
@@ -343,6 +351,20 @@ class AssetRepair(AccountsController):
 		add_asset_activity(self.asset, subject)
 
 
+def check_asset_repair_access(company: str | None = None) -> None:
+	"""Both pickers below sit on the Asset Repair form, so that form is the boundary, not Purchase Invoice."""
+	frappe.has_permission("Asset Repair", throw=True)
+
+	if not isinstance(company, str) or not company:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Asset Repair")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_downtime(failure_date: DateTimeLikeObject, completion_date: DateTimeLikeObject):
 	downtime = time_diff_in_hours(completion_date, failure_date)
@@ -363,6 +385,8 @@ def get_purchase_invoice(
 	Get Purchase Invoices that have expense accounts for non-stock items.
 	Only returns invoices with at least one non-stock, non-fixed-asset item with an expense account.
 	"""
+	check_asset_repair_access(filters.get("company") if isinstance(filters, dict) else None)
+
 	pi = DocType("Purchase Invoice")
 	pi_item = DocType("Purchase Invoice Item")
 	item = DocType("Item")
@@ -405,6 +429,8 @@ def get_expense_accounts(
 	Get expense accounts for non-stock (service) items from the purchase invoice.
 	Used as a query function for link fields.
 	"""
+	check_asset_repair_access()
+
 	purchase_invoice = filters.get("purchase_invoice")
 	if not purchase_invoice:
 		return []

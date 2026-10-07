@@ -85,7 +85,7 @@ class SalesOrderStockReservation:
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		packed_items = self._extract_packed_item_details(items_details)
+		packed_items = self._extract_packed_item_details(items_details, from_voucher_type)
 
 		sre_count = 0
 		if items_details != []:
@@ -100,17 +100,28 @@ class SalesOrderStockReservation:
 		if items:
 			self._reserve_packed_items(items, sre_count, notify)
 
-	def _extract_packed_item_details(self, items_details: list[dict] | None) -> list:
-		"""Pull packed-item rows (whose Sales Order Item no longer exists) out of items_details."""
-		packed_items = []
-		if items_details:
-			for item in items_details:
-				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
-					item["qty"] = item.pop("qty_to_reserve")
-					packed_items.append(item)
+	def _extract_packed_item_details(
+		self, items_details: list[dict] | None, from_voucher_type: str | None = None
+	) -> list:
+		"""Pull packed-item rows (whose Sales Order Item no longer exists) out of items_details
+		and rewrite them into the payload StockReservation reads."""
+		if not items_details:
+			return []
 
-			for item in packed_items:
-				items_details.remove(item)
+		packed_items = [
+			item
+			for item in items_details
+			if not frappe.db.exists("Sales Order Item", item.get("sales_order_item"))
+		]
+
+		for item in packed_items:
+			items_details.remove(item)
+			item["qty"] = item.pop("qty_to_reserve")
+			item["from_voucher_type"] = from_voucher_type
+
+			picked_bundle = item.pop("serial_and_batch_bundle", None)
+			if picked_bundle:
+				item["serial_and_batch_bundles"] = [picked_bundle]
 
 		return packed_items
 

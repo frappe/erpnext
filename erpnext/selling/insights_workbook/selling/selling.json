@@ -1,0 +1,1415 @@
+{
+ "charts": {
+  "selling-booked": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "transaction_date",
+     "data_type": "Date",
+     "dimension_name": "transaction_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "base_net_total",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Booked, Year to Date",
+      "measure_name": "Sales Order Value (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "selling-booked",
+   "query": "selling-sales-orders",
+   "sort_order": 1,
+   "title": "Sales Order Value",
+   "workbook": "selling"
+  },
+  "selling-booked-by-item-group": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Sales Order Value (This FY)",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "item_group",
+      "data_type": "String",
+      "dimension_name": "Item Group"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "base_net_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Sales Order Value (This FY)"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "selling-booked-by-item-group",
+   "query": "selling-sales-order-items",
+   "sort_order": 7,
+   "title": "Sales Order Value by Item Group (This FY)",
+   "workbook": "selling"
+  },
+  "selling-booked-by-month": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "series": [
+      {
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(transaction_date >= date_sub(month_start(today()), 12, 'month'), base_net_total)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Sales Order Value"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(transaction_date < date_sub(month_start(today()), 12, 'month'), base_net_total)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Same Month Last Year"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "selling-booked-by-month",
+   "query": "selling-sales-orders-24-months",
+   "sort_order": 5,
+   "title": "Sales Order Value by Month",
+   "workbook": "selling"
+  },
+  "selling-late-deliveries-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Delay (Days)",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": ">",
+       "value": 30
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Amount to Deliver": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Amount to Deliver",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "sales_order",
+      "data_type": "String",
+      "dimension_name": "Sales Order"
+     },
+     {
+      "column_name": "customer",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     }
+    ],
+    "values": [
+     {
+      "data_type": "Date",
+      "expression": {
+       "expression": "min(delivery_date)",
+       "type": "expression"
+      },
+      "measure_name": "Delivery Date"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "days_late",
+      "data_type": "Integer",
+      "measure_name": "Delay (Days)"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "value_to_deliver",
+      "data_type": "Decimal",
+      "format": "currency",
+      "measure_name": "Amount to Deliver"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "selling-late-deliveries-2",
+   "query": "selling-late-deliveries",
+   "sort_order": 8,
+   "title": "Delayed Sales Orders",
+   "workbook": "selling"
+  },
+  "selling-open-quotations-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "base_net_total",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Open Quotations",
+      "measure_name": "Open Quotations"
+     },
+     {
+      "aggregation": "count",
+      "column_name": "quotation",
+      "data_type": "Integer",
+      "id": "Quotations",
+      "measure_name": "Quotation Count"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-open-quotations-2",
+   "query": "selling-open-quotations",
+   "sort_order": 3,
+   "title": "Open Quotations",
+   "workbook": "selling"
+  },
+  "selling-open-quotations-to-chase": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Days Left",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": "<=",
+       "value": 7
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Amount": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Amount",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "quotation",
+      "data_type": "String",
+      "dimension_name": "Quotation"
+     },
+     {
+      "column_name": "customer_name",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     },
+     {
+      "column_name": "transaction_date",
+      "data_type": "Date",
+      "dimension_name": "Quotation Date"
+     },
+     {
+      "column_name": "valid_till",
+      "data_type": "Date",
+      "dimension_name": "Valid Till"
+     }
+    ],
+    "values": [
+     {
+      "aggregation": "sum",
+      "column_name": "base_net_total",
+      "data_type": "Decimal",
+      "format": "currency",
+      "measure_name": "Amount"
+     },
+     {
+      "aggregation": "min",
+      "column_name": "days_left",
+      "data_type": "Integer",
+      "measure_name": "Days Left"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "selling-open-quotations-to-chase",
+   "query": "selling-open-quotations",
+   "sort_order": 9,
+   "title": "Expiring Quotations",
+   "workbook": "selling"
+  },
+  "selling-to-deliver-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "value_to_deliver",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "To Deliver",
+      "measure_name": "Sales Orders to Deliver"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum_if(days_late > 0, value_to_deliver)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Of Which Overdue",
+      "measure_name": "Overdue"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "selling-to-deliver-2",
+   "query": "selling-to-deliver",
+   "sort_order": 2,
+   "title": "Sales Orders to Deliver",
+   "workbook": "selling"
+  },
+  "selling-top-customers": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Sales Order Value (This FY)",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "customer",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(transaction_date.between(fiscal_year_start(today()), today()), base_net_total)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Sales Order Value (This FY)"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(transaction_date.between(date_sub(fiscal_year_start(today()), 1, 'year'), date_sub(today(), 1, 'year')), base_net_total)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Same Period Last FY"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "selling-top-customers",
+   "query": "selling-sales-orders",
+   "sort_order": 6,
+   "title": "Top Customers (This FY)",
+   "workbook": "selling"
+  },
+  "selling-win-rate": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "transaction_date",
+     "data_type": "Date",
+     "dimension_name": "transaction_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "delta",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "count_if(is_in(status, 'Ordered', 'Partially Ordered')) / count_if(is_in(status, 'Ordered', 'Partially Ordered', 'Lost', 'Expired'))",
+       "type": "expression"
+      },
+      "format": "percent",
+      "id": "Win Rate, Year to Date",
+      "measure_name": "Quotation Win Rate (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "selling-win-rate",
+   "query": "selling-quotations",
+   "sort_order": 4,
+   "title": "Quotation Win Rate",
+   "workbook": "selling"
+  }
+ },
+ "creation": "2026-09-26 21:12:07.642921",
+ "dashboards": {
+  "selling": {
+   "items": [
+    {
+     "default_operator": "=",
+     "default_user_key": "Company",
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "selling-booked": "`selling-sales-orders`.`company`",
+      "selling-booked-by-item-group": "`selling-sales-order-items`.`company`",
+      "selling-booked-by-month": "`selling-sales-orders-24-months`.`company`",
+      "selling-late-deliveries-2": "`selling-late-deliveries`.`company`",
+      "selling-open-quotations-2": "`selling-open-quotations`.`company`",
+      "selling-open-quotations-to-chase": "`selling-open-quotations`.`company`",
+      "selling-to-deliver-2": "`selling-to-deliver`.`company`",
+      "selling-top-customers": "`selling-sales-orders`.`company`",
+      "selling-win-rate": "`selling-quotations`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Territory",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-territory",
+      "w": 4,
+      "x": 4,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 10,
+       "y": 0
+      }
+     },
+     "links": {
+      "selling-booked": "`selling-sales-orders`.`territory`",
+      "selling-booked-by-item-group": "`selling-sales-order-items`.`territory`",
+      "selling-booked-by-month": "`selling-sales-orders-24-months`.`territory`",
+      "selling-late-deliveries-2": "`selling-late-deliveries`.`territory`",
+      "selling-open-quotations-2": "`selling-open-quotations`.`territory`",
+      "selling-open-quotations-to-chase": "`selling-open-quotations`.`territory`",
+      "selling-to-deliver-2": "`selling-to-deliver`.`territory`",
+      "selling-top-customers": "`selling-sales-orders`.`territory`",
+      "selling-win-rate": "`selling-quotations`.`territory`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "selling-booked",
+     "layout": {
+      "h": 5,
+      "i": "chart-3gsep0qeat",
+      "w": 5,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-to-deliver-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3gsvghvtd2",
+      "w": 5,
+      "x": 5,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-open-quotations-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3gsra1qoul",
+      "w": 5,
+      "x": 10,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-win-rate",
+     "layout": {
+      "h": 5,
+      "i": "chart-3gsm24506r",
+      "w": 5,
+      "x": 15,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-booked-by-month",
+     "layout": {
+      "h": 17,
+      "i": "chart-3gs9d62p7h",
+      "w": 10,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 13
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-top-customers",
+     "layout": {
+      "h": 17,
+      "i": "chart-3gsgm081js",
+      "w": 10,
+      "x": 10,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 30
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-booked-by-item-group",
+     "layout": {
+      "h": 17,
+      "i": "chart-3gsk2mf3qh",
+      "w": 10,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 49
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-late-deliveries-2",
+     "layout": {
+      "h": 17,
+      "i": "chart-3gse2eal94",
+      "w": 10,
+      "x": 10,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 68
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "selling-open-quotations-to-chase",
+     "layout": {
+      "h": 17,
+      "i": "chart-3gshpkhl4r",
+      "w": 20,
+      "x": 0,
+      "y": 42
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 87
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "selling",
+   "title": "Selling",
+   "vertical_compact_layout": 1,
+   "visible_to_roles": [
+    {
+     "role": "Sales User"
+    },
+    {
+     "role": "Sales Manager"
+    }
+   ],
+   "workbook": "selling"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-28 12:09:41.525572",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "selling",
+ "owner": "Administrator",
+ "queries": {
+  "selling-late-deliveries": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-late-deliveries",
+   "operations": [
+    {
+     "table": {
+      "query_name": "selling-to-deliver",
+      "type": "query",
+      "workbook": "selling"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "days_late",
+        "type": "column"
+       },
+       "operator": ">",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "sales_order",
+      "customer",
+      "delivery_date",
+      "days_late",
+      "value_to_deliver",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Late Deliveries",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-open-quotations": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-open-quotations",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabQuotation",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "is_active",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "status",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Open"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "name",
+      "type": "expression"
+     },
+     "new_name": "quotation",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(valid_till, today(), 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_left",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "quotation",
+      "transaction_date",
+      "valid_till",
+      "days_left",
+      "customer_name",
+      "base_net_total",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Open Quotations",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-quotations": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-quotations",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabQuotation",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "is_active",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "name",
+      "type": "expression"
+     },
+     "new_name": "quotation",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "quotation",
+      "transaction_date",
+      "customer_name",
+      "status",
+      "base_net_total",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Quotations",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-sales-order-items": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-sales-order-items",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "transaction_date",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      },
+      {
+       "column_name": "territory",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "transaction_date.between(fiscal_year_start(today()), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "sales_order",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "sales_order",
+      "item_code",
+      "item_group",
+      "qty",
+      "base_net_amount",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Sales Order Items",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-sales-orders": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-sales-orders",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(fiscal_year_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "name",
+      "type": "expression"
+     },
+     "new_name": "sales_order",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "sales_order",
+      "transaction_date",
+      "customer",
+      "base_net_total",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Sales Orders",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-sales-orders-24-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-sales-orders-24-months",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "expression": {
+        "expression": "transaction_date.between(date_sub(month_start(today()), 24, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "name",
+      "type": "expression"
+     },
+     "new_name": "sales_order",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Date",
+     "expression": {
+      "expression": "if_else(transaction_date >= date_sub(month_start(today()), 12, 'month'), transaction_date, date_add(transaction_date, 1, 'year'))",
+      "type": "expression"
+     },
+     "new_name": "period",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "sales_order",
+      "transaction_date",
+      "period",
+      "customer",
+      "base_net_total",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Sales Orders, 24 Months",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  },
+  "selling-to-deliver": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "selling-to-deliver",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "closed",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "skip_delivery",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "status",
+       "type": "column"
+      },
+      {
+       "column_name": "skip_delivery_note",
+       "type": "column"
+      },
+      {
+       "column_name": "customer",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      },
+      {
+       "column_name": "territory",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Order",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "status",
+        "type": "column"
+       },
+       "operator": "not_in",
+       "value": [
+        "Closed",
+        "On Hold"
+       ]
+      },
+      {
+       "column": {
+        "column_name": "skip_delivery_note",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(qty > delivered_qty, qty - delivered_qty, 0)",
+      "type": "expression"
+     },
+     "new_name": "qty_to_deliver",
+     "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "qty_to_deliver",
+        "type": "column"
+       },
+       "operator": ">",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "qty_to_deliver * base_net_rate",
+      "type": "expression"
+     },
+     "new_name": "value_to_deliver",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), delivery_date, 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_late",
+     "type": "mutate"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "sales_order",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "sales_order",
+      "customer",
+      "item_code",
+      "delivery_date",
+      "days_late",
+      "qty_to_deliver",
+      "value_to_deliver",
+      "company",
+      "territory"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 4,
+   "title": "To Deliver",
+   "use_live_connection": 1,
+   "workbook": "selling"
+  }
+ },
+ "title": "Selling"
+}

@@ -176,6 +176,7 @@ class BootStrapTestData:
 		self.make_item_attribute()
 		self.make_asset_maintenance_team()
 		self.make_asset_category()
+		self.update_stock_settings()
 		self.make_item()
 		self.make_product_bundle()
 		self.make_location()
@@ -185,6 +186,7 @@ class BootStrapTestData:
 		self.make_loyalty_program()
 		self.make_shareholder()
 		self.make_sales_taxes_template()
+		self.make_purchase_taxes_template()
 		self.make_workstation()
 		self.make_operation()
 		self.make_bom()
@@ -204,7 +206,6 @@ class BootStrapTestData:
 		self.make_contact()
 		self.update_support_settings()
 		self.update_selling_settings()
-		self.update_stock_settings()
 
 		frappe.db.commit()  # nosemgrep
 
@@ -2343,6 +2344,29 @@ class BootStrapTestData:
 		]
 		self.make_records(["title", "company"], records)
 
+	def make_purchase_taxes_template(self):
+		records = [
+			{
+				"company": "_Test Company",
+				"doctype": "Purchase Taxes and Charges Template",
+				"title": "_Test Purchase Taxes and Charges Template",
+				"taxes": [
+					{
+						"account_head": "_Test Account VAT - _TC",
+						"add_deduct_tax": "Add",
+						"category": "Total",
+						"charge_type": "On Net Total",
+						"cost_center": "Main - _TC",
+						"description": "VAT",
+						"doctype": "Purchase Taxes and Charges",
+						"parentfield": "taxes",
+						"rate": 6,
+					}
+				],
+			}
+		]
+		self.make_records(["title", "company"], records)
+
 	def make_asset_category(self):
 		records = [
 			{
@@ -2781,68 +2805,68 @@ class BootStrapTestData:
 				}
 			).insert(ignore_permissions=True)
 
-			if not frappe.db.exists("DocType", "Store"):
-				frappe.get_doc(
-					{
-						"doctype": "DocType",
-						"name": "Store",
-						"module": "Stock",
-						"custom": 1,
-						"naming_rule": "By fieldname",
-						"autoname": "field:store_name",
-						"fields": [{"label": "Store Name", "fieldname": "store_name", "fieldtype": "Data"}],
-						"permissions": [
-							{
-								"role": "System Manager",
-								"permlevel": 0,
-								"read": 1,
-								"write": 1,
-								"create": 1,
-								"delete": 1,
-							}
-						],
-					}
-				).insert(ignore_permissions=True)
+		if not frappe.db.exists("DocType", "Store"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Store",
+					"module": "Stock",
+					"custom": 1,
+					"naming_rule": "By fieldname",
+					"autoname": "field:store_name",
+					"fields": [{"label": "Store Name", "fieldname": "store_name", "fieldtype": "Data"}],
+					"permissions": [
+						{
+							"role": "System Manager",
+							"permlevel": 0,
+							"read": 1,
+							"write": 1,
+							"create": 1,
+							"delete": 1,
+						}
+					],
+				}
+			).insert(ignore_permissions=True)
 
-			if not frappe.db.exists("DocType", "Order Assignment"):
-				frappe.get_doc(
-					{
-						"doctype": "DocType",
-						"name": "Order Assignment",
-						"module": "Buying",
-						"custom": 1,
-						"autoname": "field:po",
-						"fields": [
-							{
-								"label": "PO",
-								"fieldname": "po",
-								"fieldtype": "Link",
-								"options": "Purchase Order",
-							},
-							{
-								"label": "Supplier",
-								"fieldname": "supplier",
-								"fieldtype": "Data",
-								"fetch_from": "po.supplier",
-							},
-						],
-						"permissions": [
-							{
-								"create": 1,
-								"delete": 1,
-								"email": 1,
-								"export": 1,
-								"print": 1,
-								"read": 1,
-								"report": 1,
-								"role": "System Manager",
-								"share": 1,
-								"write": 1,
-							},
-							{"read": 1, "role": "Supplier"},
-						],
-					}
-				).insert(ignore_if_duplicate=True)
+		if not frappe.db.exists("DocType", "Order Assignment"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Order Assignment",
+					"module": "Buying",
+					"custom": 1,
+					"autoname": "field:po",
+					"fields": [
+						{
+							"label": "PO",
+							"fieldname": "po",
+							"fieldtype": "Link",
+							"options": "Purchase Order",
+						},
+						{
+							"label": "Supplier",
+							"fieldname": "supplier",
+							"fieldtype": "Data",
+							"fetch_from": "po.supplier",
+						},
+					],
+					"permissions": [
+						{
+							"create": 1,
+							"delete": 1,
+							"email": 1,
+							"export": 1,
+							"print": 1,
+							"read": 1,
+							"report": 1,
+							"role": "System Manager",
+							"share": 1,
+							"write": 1,
+						},
+						{"read": 1, "role": "Supplier"},
+					],
+				}
+			).insert(ignore_if_duplicate=True)
 
 	def make_address(self):
 		records = [
@@ -3083,3 +3107,16 @@ def change_settings(doctype, settings_dict=None, /, **settings) -> None:
 	for key, value in previous_settings.items():
 		setattr(settings, key, value)
 	settings.save(ignore_permissions=True)
+
+
+def make_email_template(subject: str, response: str) -> str:
+	"""Insert a test Email Template and return its name."""
+	template = frappe.get_doc(
+		{
+			"doctype": "Email Template",
+			"name": "_Test Email Template",
+			"subject": subject,
+			"response": response,
+		}
+	).insert()
+	return template.name

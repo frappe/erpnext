@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import DateTimeLikeObject, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -34,11 +34,14 @@ from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.accounts.utils import (
 	get_account_currency,
 	get_fiscal_year,
+	pre_submit_validation,
 	refresh_subscription_status,
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -235,6 +238,9 @@ class PurchaseInvoice(BuyingController):
 				"overflow_type": "billing",
 			}
 		]
+		self.closed_source_links = [
+			("Purchase Invoice Item", "pr_detail", "Purchase Receipt Item", "Purchase Receipt")
+		]
 
 	def onload(self):
 		super().onload()
@@ -279,9 +285,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
-		self.check_for_on_hold_or_closed_status(
-			"Purchase Order", "purchase_order", exclude_if_field="purchase_receipt"
-		)
+		self.check_purchase_order_on_hold_or_close("purchase_order", exclude_if_field="purchase_receipt")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -294,9 +298,26 @@ class PurchaseInvoice(BuyingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
-		BillingValidationService(self).validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
+		buying_settings = frappe.get_cached_doc("Buying Settings")
+		billing_validation = BillingValidationService(self)
+		if buying_settings.set_landed_cost_based_on_purchase_invoice_rate:
+			billing_validation.validate_multiple_billing(
+				"Purchase Receipt",
+				"pr_detail",
+				"qty",
+				reference_field="received_qty"
+				if buying_settings.bill_for_rejected_quantity_in_purchase_invoice
+				else "qty",
+				billing_flag="update_billed_amount_in_purchase_receipt",
+			)
+			billing_validation.validate_multiple_billing(
+				"Purchase Order", "po_detail", "qty", billing_flag="update_billed_amount_in_purchase_order"
+			)
+		else:
+			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
+		self.validate_exchange_rate_with_purchase_receipt()
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_invoice_reference
 		)
@@ -305,6 +326,11 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 		PurchaseTaxWithholding(self).on_validate()
 		self.set_percentage_received()
+
+		if self.on_hold:
+			self.validate_invoice_hold()
+
+		pre_submit_validation(self, check_prev_docstatus=True)
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
@@ -316,6 +342,54 @@ class PurchaseInvoice(BuyingController):
 
 		if total_billed_qty and total_received_qty:
 			self.per_received = total_received_qty / total_billed_qty * 100
+
+	def validate_exchange_rate_with_purchase_receipt(self):
+		if self.is_internal_transfer() or not erpnext.is_perpetual_inventory_enabled(self.company):
+			return
+
+		stock_items = self.get_stock_items()
+		receipts = {
+			item.purchase_receipt
+			for item in self.items
+			if item.purchase_receipt and item.item_code in stock_items
+		}
+		if not receipts:
+			return
+
+		if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"):
+			return
+
+		mismatched = [
+			f"{frappe.bold(row.name)} ({row.conversion_rate})"
+			for row in frappe.get_all(
+				"Purchase Receipt",
+				filters={"name": ("in", list(receipts))},
+				fields=["name", "currency", "conversion_rate"],
+			)
+			if row.currency == self.currency
+			and flt(row.conversion_rate)
+			and flt(row.conversion_rate) != flt(self.conversion_rate)
+		]
+		if not mismatched:
+			return
+
+		frappe.throw(
+			_(
+				"Exchange rate {0} does not match the exchange rate of Purchase Receipt {1}. Use the same exchange rate as the Purchase Receipt or enable {2} in {3} to adjust the landed cost based on this invoice."
+			).format(
+				frappe.bold(self.conversion_rate),
+				", ".join(mismatched),
+				frappe.bold(_("Set Landed Cost Based on Purchase Invoice Rate")),
+				get_link_to_form("Buying Settings", "Buying Settings", _("Buying Settings")),
+			)
+		)
+
+	def validate_invoice_hold(self):
+		if self.is_return:
+			frappe.throw(_("Return Purchase Invoice cannot be held."))
+
+		if self.docstatus < 1:
+			frappe.throw(_("Purchase Invoice can be held after submitting."))
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -361,7 +435,25 @@ class PurchaseInvoice(BuyingController):
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1
 
+		if not for_validate:
+			self.set_transaction_date_exchange_rate()
+
 		super().set_missing_values(for_validate)
+
+	def set_transaction_date_exchange_rate(self):
+		"""Replace the exchange rate mapped from a Purchase Order with the posting date rate."""
+		if not (
+			self.currency
+			and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
+			and any(item.purchase_order for item in self.items)
+			and not any(item.purchase_receipt for item in self.items)
+		):
+			return
+
+		self.use_transaction_date_exchange_rate = 1
+		self.conversion_rate = get_exchange_rate(
+			self.currency, self.company_currency, self.posting_date, "for_buying"
+		)
 
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
@@ -475,7 +567,7 @@ class PurchaseInvoice(BuyingController):
 					throw(msg, title=_("Mandatory Purchase Order"))
 
 	def pr_required(self):
-		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes" and not self.update_stock:
 			stock_and_asset_items = self.get_stock_items()
 			stock_and_asset_items.extend(self.get_asset_items())
 			if frappe.get_value(
@@ -533,6 +625,9 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
 	def update_status_updater_args(self):
+		if is_billed_by_qty():
+			self.set_purchase_order_billing_by_qty()
+
 		if cint(self.update_stock):
 			self.status_updater.append(
 				{
@@ -583,6 +678,13 @@ class PurchaseInvoice(BuyingController):
 					}
 				)
 
+	def set_purchase_order_billing_by_qty(self):
+		"""The status updater keeps billed_amt current; billing % and over-billing follow invoiced qty instead."""
+		for args in self.status_updater:
+			if args.get("overflow_type") == "billing":
+				args.pop("percent_join_field", None)
+				args["validate_overflow"] = False
+
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
 			for item in self.get("items"):
@@ -616,6 +718,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		BillingStatusService(self).update_billing_status_in_po()
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
@@ -722,9 +825,7 @@ class PurchaseInvoice(BuyingController):
 		super().on_cancel()
 		PurchaseTaxWithholding(self).on_cancel()
 
-		self.check_for_on_hold_or_closed_status(
-			"Purchase Order", "purchase_order", exclude_if_field="purchase_receipt"
-		)
+		self.check_purchase_order_on_hold_or_close("purchase_order", exclude_if_field="purchase_receipt")
 
 		if self.is_return and not self.update_billed_amount_in_purchase_order:
 			# NOTE status updating bypassed for is_return
@@ -732,6 +833,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		BillingStatusService(self).update_billing_status_in_po()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
@@ -820,14 +922,38 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
 
-	def block_invoice(self, hold_comment=None, release_date=None):
-		self.db_set("on_hold", 1)
-		self.db_set("hold_comment", cstr(hold_comment))
+	@frappe.whitelist(methods=["POST"])
+	def block_invoice(self, hold_comment: str | None = None, release_date: DateTimeLikeObject | None = None):
+		self.check_permission("write")
+		self.on_hold = 1
+		self.release_date = release_date
+		self.validate_block_invoice()
+
+		self.db_set({"on_hold": 1, "hold_comment": cstr(hold_comment), "release_date": release_date})
+
+	@frappe.whitelist(methods=["POST"])
+	def unblock_invoice(self):
+		self.check_permission("write")
+		self.db_set({"on_hold": 0, "release_date": None})
+
+	@frappe.whitelist(methods=["POST"])
+	def change_release_date(self, release_date: DateTimeLikeObject | None = None):
+		self.check_permission("write")
+
+		if not self.on_hold:
+			frappe.throw(_("Invoice is not blocked. Block the invoice to change the release date."))
+
+		self.release_date = release_date
+		self.validate_block_invoice()
+
 		self.db_set("release_date", release_date)
 
-	def unblock_invoice(self):
-		self.db_set("on_hold", 0)
-		self.db_set("release_date", None)
+	def validate_block_invoice(self):
+		self.validate_invoice_hold()
+		if self.outstanding_amount <= 0:
+			frappe.throw(_("Purchase Invoice without any outstanding amount cannot be held."))
+
+		self.validate_release_date()
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
@@ -925,24 +1051,3 @@ def get_list_context(context=None):
 @erpnext.allow_regional
 def make_regional_gl_entries(gl_entries, doc):
 	return gl_entries
-
-
-@frappe.whitelist()
-def change_release_date(name: str, release_date: str | None = None):
-	pi = frappe.get_lazy_doc("Purchase Invoice", name)
-	pi.check_permission()
-	pi.db_set("release_date", release_date)
-
-
-@frappe.whitelist()
-def unblock_invoice(name: str):
-	if frappe.db.exists("Purchase Invoice", name):
-		pi = frappe.get_lazy_doc("Purchase Invoice", name)
-		pi.unblock_invoice()
-
-
-@frappe.whitelist()
-def block_invoice(name: str, release_date: str, hold_comment: str | None = None):
-	if frappe.db.exists("Purchase Invoice", name):
-		pi = frappe.get_lazy_doc("Purchase Invoice", name)
-		pi.block_invoice(hold_comment, release_date)

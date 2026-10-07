@@ -204,7 +204,7 @@ frappe.ui.form.on("Company", {
 			frm.set_value("reporting_currency", "");
 		}
 
-		erpnext.company.set_chart_of_accounts_options(frm.doc);
+		erpnext.company.set_chart_of_accounts_options(frm);
 	},
 
 	make_default_tax_template: function (frm) {
@@ -219,7 +219,7 @@ frappe.ui.form.on("Company", {
 	},
 
 	country: function (frm) {
-		erpnext.company.set_chart_of_accounts_options(frm.doc);
+		erpnext.company.set_chart_of_accounts_options(frm);
 	},
 
 	delete_company_transactions: function (frm) {
@@ -271,20 +271,20 @@ frappe.ui.form.on("Company", {
 	},
 });
 
-erpnext.company.set_chart_of_accounts_options = function (doc) {
-	var selected_value = doc.chart_of_accounts;
-	if (doc.country) {
+erpnext.company.set_chart_of_accounts_options = function (frm) {
+	var selected_value = frm.doc.chart_of_accounts;
+	if (frm.doc.country) {
 		return frappe.call({
 			method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
 			args: {
-				country: doc.country,
+				country: frm.doc.country,
 				with_standard: true,
 			},
 			callback: function (r) {
 				if (!r.exc) {
 					set_field_options("chart_of_accounts", [""].concat(r.message).join("\n"));
 					if (r.message.includes(selected_value))
-						cur_frm.set_value("chart_of_accounts", selected_value);
+						frm.set_value("chart_of_accounts", selected_value);
 				}
 			},
 		});
@@ -303,12 +303,15 @@ erpnext.company.setup_queries = function (frm) {
 			["round_off_account", { root_type: ["in", ["Expense", "Income"]] }],
 			["round_off_for_opening", { root_type: "Liability", account_type: "Round Off for Opening" }],
 			["write_off_account", { root_type: "Expense" }],
+			["bank_charges_account", { root_type: "Expense" }],
 			["default_deferred_expense_account", {}],
 			["default_deferred_revenue_account", {}],
 			["default_discount_account", {}],
 			["discount_allowed_account", { root_type: "Expense" }],
 			["discount_received_account", { root_type: "Income" }],
 			["exchange_gain_loss_account", { root_type: ["in", ["Expense", "Income"]] }],
+			["exchange_gain_account", { root_type: ["in", ["Expense", "Income"]] }],
+			["exchange_loss_account", { root_type: ["in", ["Expense", "Income"]] }],
 			[
 				"unrealized_exchange_gain_loss_account",
 				{ root_type: ["in", ["Expense", "Income", "Equity", "Liability"]] },

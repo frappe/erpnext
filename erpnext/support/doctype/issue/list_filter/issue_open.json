@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"issue_type\", \"label\": \"Issue Type\"}, {\"fieldname\": \"opening_date\", \"label\": \"Opening Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.976234",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Open",
+ "filters": "[[\"Issue\", \"status\", \"=\", \"Open\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.976234",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Issue-Open",
+ "owner": "Administrator",
+ "reference_doctype": "Issue",
+ "route_signature": "status=Open",
+ "sort_field": "opening_date",
+ "sort_order": "asc"
+}

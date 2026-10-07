@@ -23,6 +23,19 @@ jobs:
       - name: Install and Run Pre-commit
         uses: pre-commit/action@v3.0.1
 
+  js-unit-tests:
+    name: js unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run JS unit tests
+        run: yarn test:js
+
   semgrep:
     name: semgrep
     runs-on: ubuntu-latest

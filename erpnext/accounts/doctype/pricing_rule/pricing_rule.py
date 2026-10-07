@@ -12,6 +12,29 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
+# the transactions the pricing engine is called for, from transaction.js and the POS
+PRICING_TRANSACTION_DOCTYPES = frozenset(
+	{
+		"Quotation",
+		"Sales Order",
+		"Delivery Note",
+		"Sales Invoice",
+		"POS Invoice",
+		"Supplier Quotation",
+		"Purchase Order",
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Material Request",
+		# these three also extend a controller that calls the pricing engine: BOM and BOM Creator
+		# through TransactionController, Request for Quotation through BuyingController
+		"BOM",
+		"BOM Creator",
+		"Request for Quotation",
+		# no client sends this one, but set_transaction_type below still branches on it
+		"Opportunity",
+	}
+)
+
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
 
 other_fields = ["other_item_code", "other_item_group", "other_brand"]
@@ -187,7 +210,10 @@ class PricingRule(Document):
 
 		tocheck = frappe.scrub(self.get("applicable_for", ""))
 		if tocheck and not self.get(tocheck):
-			throw(_("{0} is required").format(_(self.meta.get_label(tocheck))), frappe.MandatoryError)
+			throw(
+				_("{0} is required").format(self.meta.get_translated_label(tocheck)),
+				frappe.MandatoryError,
+			)
 
 		if self.apply_rule_on_other:
 			o_field = "other_" + frappe.scrub(self.apply_rule_on_other)
@@ -363,6 +389,30 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 
 	args = frappe._dict(args)
 
+	# `args` is caller supplied, and what comes back is pricing: matched Pricing Rules, discounts
+	# and rates. The transaction being priced is what decides who may price it, so authorise that
+	# — and the document itself where the caller named an existing one, so User Permissions apply.
+	# an allow-list, not just a type check: `doctype` is caller-chosen, and any doctype the caller can
+	# read would otherwise satisfy has_permission below while the pricing engine still ran
+	transaction_doctype = args.get("doctype")
+	if transaction_doctype not in PRICING_TRANSACTION_DOCTYPES:
+		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
+
+	transaction_name = args.get("name")
+	if not isinstance(transaction_name, str) or not frappe.db.exists(transaction_doctype, transaction_name):
+		transaction_name = None
+
+	frappe.has_permission(transaction_doctype, doc=transaction_name, throw=True)
+
+	# scope by the caller's own Company restrictions, not a Company read: several roles that fill these forms hold none
+	company = args.get("company")
+	if company:
+		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+		allowed_companies = get_allowed_companies(frappe.session.user, transaction_doctype)
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 	set_transaction_type(args)
 
 	# list of dictionaries
@@ -388,6 +438,7 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
+		set_transaction_type(args_copy)
 		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
@@ -722,14 +773,18 @@ def set_transaction_type(pricing_ctx: frappe._dict) -> None:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_item_uoms(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	items = [filters.get("value")]
-	if filters.get("apply_on") != "Item Code":
-		field = frappe.scrub(filters.get("apply_on"))
-		items = [d.name for d in frappe.db.get_all("Item", filters={field: filters.get("value")})]
+	if filters.get("apply_on") == "Item Code":
+		item_filters = [["name", "=", filters.get("value")]]
+	else:
+		item_filters = [[frappe.scrub(filters.get("apply_on")), "=", filters.get("value")]]
+
+	items = frappe.get_list("Item", filters=item_filters, pluck="name")
+	if not items:
+		return []
 
 	return frappe.get_all(
 		"UOM Conversion Detail",
-		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
+		filters={"parent": ("in", items), "parenttype": "Item", "uom": ("like", f"{txt}%")},
 		fields=["uom"],
 		as_list=1,
 		distinct=True,

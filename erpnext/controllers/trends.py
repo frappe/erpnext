@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.utils import DateTimeLikeObject, getdate, today
 
 import erpnext
@@ -90,8 +91,8 @@ def get_data(filters, conditions):
 		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
 			posting_date = "t1." + filters.period_based_on
 
-	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
-		cond = " and " + conditions["based_on_select"][:-1] + " IS Not NULL"
+	if filters.get("based_on") == "Project":
+		cond = " and " + conditions["based_on_select"].split(",")[0] + " != ''"
 
 	if not filters.get("include_closed_orders"):
 		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
@@ -99,6 +100,8 @@ def get_data(filters, conditions):
 
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"
+
+	cond += get_permission_condition(conditions["trans"])
 
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
@@ -249,6 +252,12 @@ def get_data(filters, conditions):
 	return data
 
 
+def get_permission_condition(doctype):
+	if match_conditions := build_match_conditions(doctype):
+		return f" and t1.name in (select name from `tab{doctype}` where {match_conditions})"
+	return ""
+
+
 def calculate_total_row(data, columns, company_currency=None):
 	def wrap_in_quotes(label):
 		return f"'{label}'"
@@ -376,6 +385,43 @@ def get_period_month_ranges(period, fiscal_year):
 	return period_month_ranges
 
 
+def quotation_party_name_expr():
+	"""Resolve a Quotation's party label from its dynamic link, mirroring set_customer_name()."""
+	customer_branch = (
+		"when t1.quotation_to = 'Customer' then "
+		"(select c.customer_name from `tabCustomer` c where c.name = t1.party_name)"
+	)
+	lead_branch = (
+		"when t1.quotation_to = 'Lead' then "
+		"(select coalesce(nullif(l.company_name, ''), l.lead_name) from `tabLead` l "
+		"where l.name = t1.party_name)"
+	)
+	prospect_branch = "when t1.quotation_to = 'Prospect' then t1.party_name"
+	branches = [customer_branch, lead_branch, prospect_branch]
+	# CRM Deal ships with the CRM app; skip the branch when its table is absent
+	if frappe.db.table_exists("CRM Deal"):
+		branches.append(
+			"when t1.quotation_to = 'CRM Deal' then "
+			"(select d.organization from `tabCRM Deal` d where d.name = t1.party_name)"
+		)
+
+	return "case " + " ".join(branches) + " end"
+
+
+def quotation_territory_expr():
+	"""Territory from the party master. CRM Deal has none here: it ships with the CRM app."""
+	return (
+		"case "
+		"when t1.quotation_to = 'Customer' then "
+		"(select c.territory from `tabCustomer` c where c.name = t1.party_name) "
+		"when t1.quotation_to = 'Lead' then "
+		"(select l.territory from `tabLead` l where l.name = t1.party_name) "
+		"when t1.quotation_to = 'Prospect' then "
+		"(select p.territory from `tabProspect` p where p.name = t1.party_name) "
+		"end"
+	)
+
+
 def based_wise_columns_query(based_on, trans):
 	based_on_details = {}
 
@@ -385,12 +431,14 @@ def based_wise_columns_query(based_on, trans):
 			{"label": _("Item"), "fieldtype": "Link", "options": "Item", "width": 120, "fieldname": "item"},
 			{"label": _("Item Name"), "fieldtype": "Data", "width": 120, "fieldname": "item_name"},
 		]
-		# item_name is an editable per-line field, not functionally dependent on item_code, so it
-		# is aggregated (one row per item_code) rather than added to GROUP BY (which would split
-		# the row and change the MariaDB row count). See get_data's group-by query.
-		based_on_details["based_on_select"] = "t2.item_code, Max(t2.item_name) as item_name,"
-		based_on_details["based_on_group_by"] = "t2.item_code"
-		based_on_details["addl_tables"] = ""
+		# item_name is stored per line and editable, so it is not functionally dependent on item_code
+		# and Max() over it is a sort -- which MariaDB and PostgreSQL resolve differently. Read it
+		# from the Item master instead: that IS functionally dependent on the grouped item_code, so
+		# it can be grouped without splitting rows and is identical on both engines by construction.
+		based_on_details["based_on_select"] = "t2.item_code, item_master.item_name as item_name,"
+		based_on_details["based_on_group_by"] = "t2.item_code, item_master.item_name"
+		based_on_details["addl_tables"] = ",`tabItem` item_master"
+		based_on_details["addl_tables_relational_cond"] = " and t2.item_code = item_master.name"
 
 	elif based_on == "Item Group":
 		based_on_details["based_on_cols"] = [
@@ -425,9 +473,17 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
-			based_on_details[
-				"based_on_select"
-			] = "t1.party_name, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
+			# a Quotation's party_name is a dynamic link, so no single master can be joined. Resolve
+			# it through the quotation_to discriminator, mirroring Quotation.set_customer_name, and
+			# group by it too: two parties of different types can share a name, and merging them
+			# under one row was never right. Correlated only on grouped columns, so the query stays
+			# valid under GROUP BY and free of any text sort.
+			based_on_details["based_on_select"] = (
+				f"t1.party_name, {quotation_party_name_expr()} as customer_name, "
+				f"{quotation_territory_expr()} as territory,"
+			)
+			based_on_details["based_on_group_by"] = "t1.party_name, t1.quotation_to"
+			based_on_details["addl_tables"] = ""
 		else:
 			based_on_details["based_on_cols"] = [
 				{
@@ -451,13 +507,19 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
+			# customer_name and territory are stored per transaction and editable, so they are not
+			# functionally dependent on the customer and Max() over them is a text sort, which the
+			# engines resolve differently. The Customer master's values ARE dependent on the grouped
+			# key, so they can be grouped without splitting rows and agree on both engines.
+			based_on_details["based_on_select"] = (
+				"t1.customer, customer_master.customer_name as customer_name, "
+				"customer_master.territory as territory,"
+			)
 			based_on_details[
-				"based_on_select"
-			] = "t1.customer, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
-		# territory (and customer_name) are not functionally dependent on the customer key, so they
-		# are aggregated rather than grouped — one row per customer, matching the prior MariaDB output.
-		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
-		based_on_details["addl_tables"] = ""
+				"based_on_group_by"
+			] = "t1.customer, customer_master.customer_name, customer_master.territory"
+			based_on_details["addl_tables"] = ",`tabCustomer` customer_master"
+			based_on_details["addl_tables_relational_cond"] = " and t1.customer = customer_master.name"
 
 	elif based_on == "Customer Group":
 		based_on_details["based_on_cols"] = [
@@ -490,14 +552,12 @@ def based_wise_columns_query(based_on, trans):
 				"fieldname": "supplier_group",
 			},
 		]
-		# supplier_name is a stored per-transaction field (not functionally dependent on supplier), so
-		# it is aggregated to keep one row per supplier — matching the prior MariaDB output, which grouped
-		# by t1.supplier only. supplier_group comes from the joined master and is FD on supplier, so it
-		# stays in GROUP BY (postgres-valid, no row split).
-		based_on_details[
-			"based_on_select"
-		] = "t1.supplier, Max(t1.supplier_name) as supplier_name, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group"
+		# supplier_name is stored per transaction and editable, so Max() over it is a text sort that
+		# the engines resolve differently. The Supplier master is already joined here as t3 and its
+		# columns are functionally dependent on the grouped supplier, so both can simply be grouped:
+		# no row split, and identical on both engines by construction.
+		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_name, t3.supplier_group,"
+		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_name, t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 

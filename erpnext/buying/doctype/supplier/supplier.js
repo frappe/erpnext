@@ -117,7 +117,7 @@ frappe.ui.form.on("Supplier", {
 		if (frappe.defaults.get_default("supp_master_name") != "Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
-			erpnext.toggle_naming_series();
+			erpnext.toggle_naming_series(frm);
 		}
 
 		if (frm.doc.__islocal) {

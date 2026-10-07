@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"payment_type\", \"label\": \"Payment Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"party\", \"label\": \"Party\"}, {\"fieldname\": \"paid_amount\", \"label\": \"Paid Amount\"}, {\"fieldname\": \"reference_no\", \"label\": \"Cheque/Reference No\"}, {\"fieldname\": \"reference_date\", \"label\": \"Cheque/Reference Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.567128",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Unreconciled",
+ "filters": "[[\"Payment Entry\", \"docstatus\", \"=\", 1], [\"Payment Entry\", \"clearance_date\", \"is\", \"not set\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 6,
+ "modified": "2026-09-30 22:12:48.857587",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Entry-Unreconciled",
+ "owner": "Administrator",
+ "reference_doctype": "Payment Entry",
+ "route_signature": "clearance_date=[\"is\",\"not set\"]&docstatus=1",
+ "sort_field": "posting_date",
+ "sort_order": "asc"
+}

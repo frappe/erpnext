@@ -4,8 +4,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
+ "description": "A customer's confirmed order.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-order",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -113,6 +115,10 @@
   "shipping_address_column",
   "shipping_address_name",
   "shipping_address",
+  "shipping_contact_person",
+  "shipping_contact_display",
+  "shipping_contact_mobile",
+  "shipping_contact_email",
   "column_break_93",
   "dispatch_address_name",
   "dispatch_address",
@@ -218,7 +224,6 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
@@ -308,11 +313,11 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:!doc.skip_delivery_note",
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Delivery Date",
    "no_copy": 1
@@ -323,6 +328,7 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_global_search": 1,
    "label": "Customer's Purchase Order",
    "oldfieldname": "po_no",
    "oldfieldtype": "Data",
@@ -392,7 +398,6 @@
    "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -460,6 +465,46 @@
    "read_only": 1
   },
   {
+   "fieldname": "shipping_contact_person",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.full_name",
+   "fieldname": "shipping_contact_display",
+   "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.mobile_no",
+   "fieldname": "shipping_contact_mobile",
+   "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Mobile No",
+   "options": "Phone",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.email_id",
+   "fieldname": "shipping_contact_email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "hidden": 1,
@@ -480,6 +525,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1435,16 +1481,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.order_type == 'Maintenance';",
-   "fieldname": "skip_delivery_note",
-   "fieldtype": "Check",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Skip Delivery Note",
-   "print_hide": 1
-  },
-  {
-   "default": "0",
    "fetch_from": "customer.is_internal_customer",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
@@ -1665,6 +1701,16 @@
   },
   {
    "default": "0",
+   "fieldname": "skip_delivery_note",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Skip Delivery Note",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
    "fieldname": "has_unit_price_items",
    "fieldtype": "Check",
    "hidden": 1,
@@ -1777,11 +1823,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "shopping-cart",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-24 12:00:00.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1848,6 +1894,14 @@
    "read": 1,
    "role": "Sales Manager",
    "write": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

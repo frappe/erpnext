@@ -5,8 +5,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import DateTimeLikeObject, add_days, add_months, cint, flt, get_last_day, getdate
+from frappe.utils import DateTimeLikeObject, add_days, add_months, cint, cstr, flt, get_last_day, getdate
 
+from erpnext import _refuse
 from erpnext.accounts.party import get_party_account_currency
 
 
@@ -64,7 +65,7 @@ class PaymentScheduleService:
 				if doc.get("payment_terms_template"):
 					doc.ignore_default_payment_terms_template = 1
 			elif doc.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					doc.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -343,6 +344,22 @@ def get_payment_terms(
 	base_grand_total: float | None = None,
 	bill_date: DateTimeLikeObject | None = None,
 ) -> list:
+	if terms_template:
+		terms_template = cstr(terms_template)
+		if not terms_template or not frappe.has_permission(
+			"Payment Terms Template", "read", doc=terms_template
+		):
+			_refuse()
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+def _get_payment_terms(
+	terms_template: str,
+	posting_date: DateTimeLikeObject | None = None,
+	grand_total: float | None = None,
+	base_grand_total: float | None = None,
+	bill_date: DateTimeLikeObject | None = None,
+) -> list:
 	if not terms_template:
 		return
 
@@ -366,7 +383,11 @@ def get_payment_term_details(
 ) -> frappe._dict:
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		if not term or not frappe.has_permission("Payment Term", "select", doc=term):
+			_refuse()
 		term = frappe.get_doc("Payment Term", term)
+	elif not hasattr(term, "payment_term"):
+		_refuse()
 	else:
 		term_details.payment_term = term.payment_term
 

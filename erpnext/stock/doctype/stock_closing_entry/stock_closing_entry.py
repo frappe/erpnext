@@ -7,10 +7,52 @@ import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, get_date_str, get_link_to_form, nowtime, parse_json
+from frappe.utils import add_days, flt, get_date_str, get_link_to_form, getdate, nowtime, parse_json
 from frappe.utils.background_jobs import enqueue
+from frappe.utils.caching import request_cache
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+SCOPE_FIELDS = ("warehouse", "item_code", "item_group", "warehouse_type")
+
+
+def apply_unscoped_filters(filters):
+	meta = frappe.get_meta("Stock Closing Entry")
+	for fieldname in SCOPE_FIELDS:
+		if meta.has_field(fieldname):
+			filters[fieldname] = ("is", "not set")
+
+	return filters
+
+
+def get_closing_entry_for_closed_period(company):
+	closed_upto = frappe.db.get_value(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, [{"MAX": "period_end_date"}]
+	)
+	if not closed_upto:
+		return None
+
+	return _get_completed_closing_entry(company, str(closed_upto))
+
+
+@request_cache
+def _get_completed_closing_entry(company, closed_upto):
+	filters = apply_unscoped_filters(
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": "Completed",
+			"to_date": ("<=", closed_upto),
+		}
+	)
+
+	return frappe.db.get_value(
+		"Stock Closing Entry",
+		filters,
+		["name", "to_date"],
+		order_by="to_date desc",
+		as_dict=True,
+	)
 
 
 class StockClosingEntry(Document):
@@ -27,7 +69,7 @@ class StockClosingEntry(Document):
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
 		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
-		to_date: DF.Date | None
+		to_date: DF.Date
 	# end: auto-generated types
 
 	def on_discard(self):
@@ -48,7 +90,45 @@ class StockClosingEntry(Document):
 			self.db_set("status", self.status)
 
 	def validate(self):
+		self.set_from_date()
 		self.validate_duplicate()
+
+	def set_from_date(self):
+		"""Closing balances are chained, so a closing always starts the day after the previous one
+		ends, or from the first stock ledger entry when it is the company's first closing."""
+
+		if not self.to_date:
+			frappe.throw(_("To Date is mandatory"))
+
+		previous = frappe.db.get_value(
+			"Stock Closing Entry",
+			{"company": self.company, "docstatus": 1, "name": ("!=", self.name)},
+			["name", "to_date"],
+			order_by="to_date desc",
+			as_dict=True,
+		)
+
+		if previous:
+			if getdate(previous.to_date) >= getdate(self.to_date):
+				frappe.throw(
+					_("To Date must be after {0}, the To Date of the last Stock Closing Entry {1}").format(
+						frappe.bold(frappe.format(previous.to_date, "Date")),
+						get_link_to_form("Stock Closing Entry", previous.name),
+					)
+				)
+
+			self.from_date = add_days(previous.to_date, 1)
+			return
+
+		first_posting_date = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"company": self.company, "is_cancelled": 0, "docstatus": 1},
+			[{"MIN": "posting_date"}],
+		)
+
+		self.from_date = first_posting_date or self.to_date
+		if getdate(self.from_date) > getdate(self.to_date):
+			self.from_date = self.to_date
 
 	def validate_duplicate(self):
 		table = frappe.qb.DocType("Stock Closing Entry")
@@ -66,7 +146,7 @@ class StockClosingEntry(Document):
 			)
 		)
 
-		for fieldname in ["warehouse", "item_code", "item_group", "warehouse_type"]:
+		for fieldname in SCOPE_FIELDS:
 			if self.get(fieldname):
 				query = query.where(table[fieldname] == self.get(fieldname))
 
@@ -83,16 +163,60 @@ class StockClosingEntry(Document):
 		self.set_status(save=True)
 		self.enqueue_job()
 
+	def before_cancel(self):
+		self.validate_later_closing_entry()
+
 	def on_cancel(self):
+		self.validate_closed_period_lock()
 		self.set_status(save=True)
 		self.remove_stock_closing()
+
+	def validate_later_closing_entry(self):
+		# A later closing is built on top of this one's balance, so cancelling this one would leave
+		# the later balance resting on figures that no longer exist.
+		later_entry = frappe.db.get_value(
+			"Stock Closing Entry",
+			{
+				"company": self.company,
+				"docstatus": 1,
+				"to_date": (">", self.to_date),
+				"name": ("!=", self.name),
+			},
+			"name",
+			order_by="to_date desc",
+		)
+
+		if later_entry:
+			frappe.throw(
+				_(
+					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def validate_closed_period_lock(self):
+		pcv = frappe.db.get_value(
+			"Period Closing Voucher",
+			{"company": self.company, "docstatus": 1, "period_end_date": (">=", self.to_date)},
+			"name",
+		)
+
+		if pcv:
+			frappe.throw(
+				_(
+					"Stock Closing Entry {0} belongs to a closed accounting period. Cancel the Period Closing Voucher {1} first."
+				).format(self.name, get_link_to_form("Period Closing Voucher", pcv)),
+				title=_("Closed Period"),
+			)
 
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
+		self.check_permission("write")
+
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
 		frappe.msgprint(
@@ -101,8 +225,11 @@ class StockClosingEntry(Document):
 			).format(self.name)
 		)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
+		self.check_permission("write")
+
+		self.validate_closed_period_lock()
 		self.remove_stock_closing()
 		self.enqueue_job()
 
@@ -128,7 +255,7 @@ class StockClosingEntry(Document):
 			new_doc.posting_datetime = get_combine_datetime(self.to_date, new_doc.posting_time)
 			new_doc.stock_closing_entry = self.name
 			new_doc.company = self.company
-			new_doc.save()
+			new_doc.save(ignore_permissions=True)
 
 	def get_prepared_data(self):
 		if attachments := get_attachments(self.doctype, self.name):
@@ -169,20 +296,24 @@ class StockClosing:
 		sl_entries = self.get_sle_entries()
 
 		closing_stock = frappe._dict()
+		counted_sles = set()
 		for row in sl_entries:
 			dimensions_keys = self.get_keys(row)
 			for dimension_key in dimensions_keys:
 				for dimension_fields, dimension_values in dimension_key.items():
 					key = dimension_values
+					value_difference = self.get_value_difference(row, dimension_fields, key, counted_sles)
 
 					if key in closing_stock:
-						actual_qty = row.sabb_qty or row.actual_qty
+						actual_qty = row.sabb_qty if row.sabb_qty is not None else row.actual_qty
 						closing_stock[key].actual_qty += actual_qty
-						closing_stock[key].stock_value_difference += (
-							row.sabb_stock_value_difference or row.stock_value_difference
-						)
+						closing_stock[key].stock_value_difference += value_difference
 
-						if not row.actual_qty and row.qty_after_transaction:
+						if (
+							row.sabb_qty is None
+							and not row.actual_qty
+							and row.qty_after_transaction is not None
+						):
 							closing_stock[key].actual_qty = row.qty_after_transaction
 
 						fifo_queue = closing_stock[key].fifo_queue
@@ -190,10 +321,34 @@ class StockClosing:
 							self.update_fifo_queue(fifo_queue, actual_qty, row.posting_date)
 							closing_stock[key].fifo_queue = fifo_queue
 					else:
-						entries = self.get_initialized_entry(row, dimension_fields)
+						entries = self.get_initialized_entry(row, dimension_fields, value_difference)
 						closing_stock[key] = entries
 
 		return closing_stock
+
+	def get_value_difference(self, row, dimension_fields, key, counted_sles):
+		"""Value `row` contributes to `key`.
+
+		The Serial and Batch Entry join fans a batched Stock Ledger Entry out into one row per batch,
+		so batch and inventory dimension keys are built from those per-batch values. The item +
+		warehouse total instead stays on the Stock Ledger Entry's own `stock_value_difference`, which
+		is the basis an `is_adjustment_entry` write-off is computed against (see
+		`get_stock_value_difference`). Summing per-batch values there would subtract that write-off
+		from a batch total that already nets out and strand a phantom balance value in the closing.
+		"""
+		if dimension_fields != ("item_code", "warehouse"):
+			if row.sabb_stock_value_difference is not None:
+				return flt(row.sabb_stock_value_difference)
+			return flt(row.stock_value_difference)
+
+		# Only the first of an entry's fanned out rows carries the entry level value.
+		if row.name:
+			if (key, row.name) in counted_sles:
+				return 0.0
+
+			counted_sles.add((key, row.name))
+
+		return flt(row.stock_value_difference)
 
 	def update_fifo_queue(self, fifo_queue, actual_qty, posting_date):
 		if actual_qty > 0:
@@ -210,7 +365,7 @@ class StockClosing:
 					remaining_qty += queue[0]
 					fifo_queue.pop(0)
 
-	def get_initialized_entry(self, row, dimension_fields):
+	def get_initialized_entry(self, row, dimension_fields, value_difference):
 		item_details = frappe.get_cached_value(
 			"Item", row.item_code, ["item_group", "item_name", "stock_uom", "has_serial_no"], as_dict=1
 		)
@@ -219,14 +374,19 @@ class StockClosing:
 		if dimension_fields not in [("item_code", "warehouse"), ("item_code", "warehouse", "batch_no")]:
 			inventory_dimension_key = json.dumps(dimension_fields)
 
-		actual_qty = row.sabb_qty or row.actual_qty or row.qty_after_transaction
+		# A carried forward Stock Closing Balance row has no qty_after_transaction, so an item that
+		# closed at zero qty (what an is_adjustment_entry write-off leaves behind) would seed the
+		# entry with None and break the next closing's `actual_qty +=`.
+		actual_qty = flt(
+			row.sabb_qty if row.sabb_qty is not None else row.actual_qty or row.qty_after_transaction
+		)
 
 		entry = frappe._dict(
 			{
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
 				"actual_qty": actual_qty,
-				"stock_value_difference": row.sabb_stock_value_difference or row.stock_value_difference,
+				"stock_value_difference": value_difference,
 				"item_group": item_details.item_group,
 				"item_name": item_details.item_name,
 				"stock_uom": item_details.stock_uom,
@@ -251,15 +411,17 @@ class StockClosing:
 		sl_entries = []
 		if self.last_closing_balance:
 			self.from_date = add_days(self.last_closing_balance.to_date, 1)
-			sl_entries += self.get_entries(
+			closing_balances = self.get_entries(
 				"Stock Closing Balance",
 				fields=[
+					"name",
 					"item_code",
 					"warehouse",
 					"posting_date",
 					"posting_time",
 					"posting_datetime",
 					"batch_no",
+					"inventory_dimension_key",
 					"actual_qty",
 					"valuation_rate",
 					"stock_value",
@@ -271,12 +433,18 @@ class StockClosing:
 				},
 			)
 
+			for row in closing_balances:
+				row.from_closing_balance = True
+
+			sl_entries += closing_balances
+
 		if not self.last_closing_balance:
 			self.from_date = "1900-01-01"
 
 		sl_entries += self.get_entries(
 			"Stock Ledger Entry",
 			fields=[
+				"name",
 				"item_code",
 				"warehouse",
 				"posting_date",
@@ -341,7 +509,12 @@ class StockClosing:
 		entries = frappe.get_all(
 			"Stock Closing Entry",
 			fields=["name", "to_date"],
-			filters={"company": self.company, "to_date": ["<", self.from_date], "docstatus": 1},
+			filters={
+				"company": self.company,
+				"to_date": ["<", self.from_date],
+				"docstatus": 1,
+				"status": "Completed",
+			},
 			order_by="to_date desc, creation desc",
 			limit=1,
 		)
@@ -349,6 +522,19 @@ class StockClosing:
 		return entries[0] if entries else frappe._dict()
 
 	def get_keys(self, row):
+		# A carried forward balance is already a total for exactly one key. Spreading a batch or
+		# inventory dimension row onto the item and warehouse key as well would add it on top of
+		# the item and warehouse row that already includes it.
+		if row.from_closing_balance:
+			if row.inventory_dimension_key:
+				fields = tuple(json.loads(row.inventory_dimension_key))
+			elif row.batch_no:
+				fields = ("item_code", "warehouse", "batch_no")
+			else:
+				fields = ("item_code", "warehouse")
+
+			return [{fields: tuple(row.get(field) for field in fields)}]
+
 		keys = []
 
 		keys.append({("item_code", "warehouse"): (row.item_code, row.warehouse)})

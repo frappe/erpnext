@@ -10,7 +10,7 @@ from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import add_days, add_to_date, date_diff, flt, get_link_to_form, getdate, today
+from frappe.utils import add_days, add_to_date, date_diff, flt, get_datetime, get_link_to_form, getdate, today
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
@@ -82,14 +82,18 @@ class Task(NestedSet):
 			return {"customer_name": customer_name or ""}
 
 	def validate(self):
+		self.validate_parent_project()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
+		self.clear_completion_on_reopen()
 		self.update_depends_on()
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
 		self.validate_parent_is_group()
+		self.validate_parent_not_completed()
+		self.validate_web_form_project_permission()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -110,36 +114,63 @@ class Task(NestedSet):
 			return
 
 		if getdate(self.exp_end_date) > getdate(parent_exp_end_date):
-			frappe.throw(
+			self.report_date_conflict(
 				_(
 					"Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-				).format(format_date(parent_exp_end_date)),
-				frappe.exceptions.InvalidDates,
+				).format(format_date(parent_exp_end_date))
 			)
 
 	def validate_parent_project_dates(self):
 		if not self.project or frappe.in_test:
 			return
 
-		if project_end_date := frappe.db.get_value("Project", self.project, "expected_end_date"):
-			project_end_date = getdate(project_end_date)
-			for fieldname in ("exp_start_date", "exp_end_date", "act_start_date", "act_end_date"):
-				task_date = self.get(fieldname)
-				if task_date and date_diff(project_end_date, getdate(task_date)) < 0:
-					frappe.throw(
-						_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
-							frappe.bold(frappe.get_desk_link("Task", self.name)),
-							_(self.meta.get_label(fieldname)),
-							frappe.bold(frappe.get_desk_link("Project", self.project)),
-						),
-						frappe.exceptions.InvalidDates,
+		project_start_date, project_end_date = frappe.db.get_value(
+			"Project", self.project, ["expected_start_date", "expected_end_date"]
+		)
+
+		for fieldname in ("exp_start_date", "exp_end_date"):
+			task_date = self.get(fieldname)
+			if not task_date:
+				continue
+			task_date = getdate(task_date)
+
+			if project_end_date and date_diff(getdate(project_end_date), task_date) < 0:
+				self.report_date_conflict(
+					_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
+						get_link_to_form("Task", self.name),
+						self.meta.get_translated_label(fieldname),
+						get_link_to_form("Project", self.project),
 					)
+				)
+
+			if project_start_date and date_diff(task_date, getdate(project_start_date)) < 0:
+				self.report_date_conflict(
+					_("{0}'s {1} cannot be before {2}'s Expected Start Date.").format(
+						get_link_to_form("Task", self.name),
+						self.meta.get_translated_label(fieldname),
+						get_link_to_form("Project", self.project),
+					)
+				)
+
+	def report_date_conflict(self, message: str):
+		if not self.flags.rescheduled:
+			frappe.throw(message, frappe.exceptions.InvalidDates)
+
+		frappe.msgprint(
+			_("{0} was moved after the task it depends on. {1}").format(
+				get_link_to_form("Task", self.name), message
+			),
+			title=_("Schedule Conflict"),
+			indicator="orange",
+		)
 
 	def validate_status(self):
 		if self.is_template and self.status != "Template":
 			self.status = "Template"
 		if self.status == "Template" and not self.is_template:
 			self.status = "Open"
+		if self.status == "Overdue" and not self.is_overdue:
+			self.status = "Working" if self.actual_time else "Open"
 		if self.status != self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
@@ -149,14 +180,27 @@ class Task(NestedSet):
 						).format(frappe.bold(self.name), frappe.bold(d.task))
 					)
 
-			close_all_assignments(self.doctype, self.name)
+			# the form asks for it, but the list's bulk action and the Kanban board don't
+			if not self.completed_on:
+				self.completed_on = today()
+
+			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 
 	def validate_progress(self):
-		if flt(self.progress or 0) > 100:
-			frappe.throw(_("Progress % for a task cannot be more than 100."))
+		if not 0 <= flt(self.progress) <= 100:
+			frappe.throw(_("Progress % for a task must be between 0 and 100."))
 
 		if self.status == "Completed":
 			self.progress = 100
+
+	def clear_completion_on_reopen(self):
+		if self.get_value_before_save("status") != "Completed" or self.status in ("Completed", "Cancelled"):
+			return
+
+		self.completed_on = None
+		self.completed_by = None
+		if not self.has_value_changed("progress"):
+			self.progress = 0
 
 	def validate_dependencies_for_template_task(self):
 		if self.is_template:
@@ -196,6 +240,38 @@ class Task(NestedSet):
 					ParentIsGroupError,
 				)
 
+	def validate_parent_project(self):
+		"""Keep a task in its parent task's project."""
+		if not self.parent_task or not (
+			self.has_value_changed("parent_task") or self.has_value_changed("project")
+		):
+			return
+
+		parent_project = frappe.db.get_value("Task", self.parent_task, "project")
+		if not self.project:
+			self.project = parent_project
+		elif self.project != parent_project:
+			frappe.throw(
+				_("Parent Task {0} is not in Project {1}. Pick a group task of the same project.").format(
+					get_link_to_form("Task", self.parent_task), frappe.bold(self.project)
+				),
+				title=_("Invalid Parent Task"),
+			)
+
+	def validate_parent_not_completed(self):
+		if not self.parent_task or self.status in ("Completed", "Cancelled"):
+			return
+
+		if (
+			self.has_value_changed("parent_task")
+			and frappe.db.get_value("Task", self.parent_task, "status") == "Completed"
+		):
+			frappe.throw(
+				_("Cannot add an open task under completed Parent Task {0}.").format(
+					get_link_to_form("Task", self.parent_task)
+				)
+			)
+
 	def update_depends_on(self):
 		depends_on_tasks = ""
 		for d in self.depends_on:
@@ -211,14 +287,16 @@ class Task(NestedSet):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
+		self.update_previous_project()
 		self.unassign_todo()
+		self.remove_from_previous_parent_depends_on()
 		self.populate_depends_on()
 
 	def unassign_todo(self):
 		if self.status == "Completed":
-			close_all_assignments(self.doctype, self.name)
+			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 		if self.status == "Cancelled":
-			clear(self.doctype, self.name)
+			clear(self.doctype, self.name, ignore_permissions=True)
 
 	def update_time_and_costing(self):
 		TimesheetDetail = frappe.qb.DocType("Timesheet Detail")
@@ -244,6 +322,11 @@ class Task(NestedSet):
 	def update_project(self):
 		if self.project and not self.flags.from_project:
 			frappe.get_cached_doc("Project", self.project).update_project()
+
+	def update_previous_project(self):
+		previous_project = self.get_value_before_save("project")
+		if previous_project and previous_project != self.project:
+			frappe.get_cached_doc("Project", previous_project).update_project()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check:
@@ -282,7 +365,7 @@ class Task(NestedSet):
 
 		dependent_parents = frappe.get_all(
 			"Task Depends On",
-			filters={"task": self.name, "project": self.project},
+			filters={"task": self.name, "parent": ["!=", self.parent_task or ""]},
 			pluck="parent",
 		)
 		if not dependent_parents:
@@ -297,13 +380,14 @@ class Task(NestedSet):
 			if (
 				task.exp_start_date
 				and task.exp_end_date
-				and task.exp_start_date < end_date
-				and task.status == "Open"
+				and task.exp_start_date < get_datetime(end_date)
+				and task.status in ("Open", "Working", "Overdue")
 			):
 				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
 				task.exp_start_date = add_days(end_date, 1)
 				task.exp_end_date = add_days(task.exp_start_date, task_duration)
 				task.flags.ignore_recursion_check = True
+				task.flags.rescheduled = True
 				task.save()
 
 	def has_webform_permission(self):
@@ -312,6 +396,23 @@ class Task(NestedSet):
 		)
 		if project_user:
 			return True
+
+	def validate_web_form_project_permission(self):
+		project_unchanged = not self.is_new() and self.project == self.get_db_value("project")
+
+		if (
+			not frappe.flags.in_web_form
+			or not self.project
+			or project_unchanged
+			or frappe.has_permission("Project", "write", doc=self.project)
+			or self.has_webform_permission()
+		):
+			return
+
+		frappe.throw(
+			_("You are not permitted to create a Task for Project {0}").format(self.project),
+			frappe.PermissionError,
+		)
 
 	def populate_depends_on(self):
 		if self.parent_task:
@@ -322,26 +423,44 @@ class Task(NestedSet):
 				)
 				parent.save()
 
+	def remove_from_previous_parent_depends_on(self):
+		previous_parent = self.get_value_before_save("parent_task")
+		if previous_parent != self.parent_task:
+			self.remove_from_parent_depends_on(previous_parent)
+
+	def remove_from_parent_depends_on(self, parent_task: str | None):
+		if not parent_task:
+			return
+
+		parent = frappe.get_doc("Task", parent_task)
+		rows = [row for row in parent.depends_on if row.task != self.name]
+		if len(rows) != len(parent.depends_on):
+			parent.set("depends_on", rows)
+			parent.save(ignore_permissions=True)
+
 	def on_trash(self):
-		if check_if_child_exists(self.name):
+		if frappe.db.exists("Task", {"parent_task": self.name}):
 			throw(_("Child Task exists for this Task. You cannot delete this Task."))
 
+		self.remove_from_parent_depends_on(self.parent_task)
 		self.update_nsm_model()
 
 	def after_delete(self):
 		self.update_project()
 
-	def update_status(self):
-		if self.status not in ("Cancelled", "Completed") and self.exp_end_date:
-			from datetime import datetime
+	@property
+	def is_overdue(self) -> bool:
+		return bool(self.exp_end_date) and getdate(self.exp_end_date) < getdate()
 
-			if self.exp_end_date < datetime.now():
-				self.db_set("status", "Overdue", update_modified=False)
-				self.update_project()
+	def update_status(self):
+		if self.status not in ("Cancelled", "Completed") and self.is_overdue:
+			self.db_set("status", "Overdue", update_modified=False)
+			self.update_project()
 
 
 @frappe.whitelist()
 def check_if_child_exists(name: str):
+	frappe.has_permission("Task", "read", doc=name, throw=True)
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks
@@ -382,7 +501,7 @@ def set_multiple_status(names: str | list, status: str):
 def set_tasks_as_overdue():
 	tasks = frappe.get_all(
 		"Task",
-		filters={"status": ["not in", ["Cancelled", "Completed"]]},
+		filters={"status": ["not in", ["Cancelled", "Completed", "Template"]]},
 		fields=["name", "status", "review_date"],
 	)
 	for task in tasks:
@@ -469,10 +588,14 @@ def add_node():
 
 
 @frappe.whitelist(methods=["POST"])
-def add_multiple_tasks(data: str | list, parent: str):
+def add_multiple_tasks(data: str | list, parent: str, project: str | None = None):
 	data = frappe.parse_json(data)
-	new_doc = {"doctype": "Task", "parent_task": parent if parent != "All Tasks" else ""}
-	new_doc["project"] = frappe.db.get_value("Task", {"name": parent}, "project") or ""
+	is_root = parent in ("All Tasks", project)
+	new_doc = {
+		"doctype": "Task",
+		"parent_task": None if is_root else parent,
+		"project": project if is_root else frappe.db.get_value("Task", parent, "project"),
+	}
 
 	for d in data:
 		if not d.get("subject"):

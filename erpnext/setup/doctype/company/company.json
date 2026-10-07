@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:company_name",
  "creation": "2022-01-25 10:29:55.938239",
- "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.",
+ "description": "A legal entity with its own books, like your business or a subsidiary.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/company-setup",
  "engine": "InnoDB",
  "field_order": [
   "details",
@@ -54,6 +55,7 @@
   "default_receivable_account",
   "default_payable_account",
   "write_off_account",
+  "bank_charges_account",
   "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
@@ -65,6 +67,8 @@
   "default_finance_book",
   "exchange_gain__loss_section",
   "exchange_gain_loss_account",
+  "exchange_gain_account",
+  "exchange_loss_account",
   "column_break_sttp",
   "unrealized_exchange_gain_loss_account",
   "round_off_section",
@@ -390,10 +394,37 @@
   },
   {
    "depends_on": "eval:!doc.__islocal",
+   "fieldname": "bank_charges_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bank Charges Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Exchange Gain / Loss Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_gain_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Gain Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_loss_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Loss Account",
    "no_copy": 1,
    "options": "Account"
   },
@@ -1124,12 +1155,12 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-building",
+ "icon": "building-complex",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-07-26 21:14:52.739814",
+ "modified": "2026-09-06 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -1161,6 +1192,10 @@
   {
    "read": 1,
    "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
   },
   {
    "read": 1,
@@ -1199,6 +1234,10 @@
    "report": 1,
    "role": "HR Manager",
    "write": 1
+  },
+  {
+   "role": "Desk User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

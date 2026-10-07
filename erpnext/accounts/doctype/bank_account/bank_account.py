@@ -11,7 +11,9 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.document import Document
-from frappe.utils import comma_and, get_link_to_form
+from frappe.utils import comma_and, cstr, get_link_to_form
+
+from erpnext import _refuse
 
 
 class BankAccount(Document):
@@ -201,7 +203,13 @@ def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime
 	"""
 	Set the closing balance as per statement for a bank account and date
 	"""
+	bank_account = cstr(bank_account)
+	if not bank_account or not frappe.has_permission("Bank Account", "write", doc=bank_account):
+		_refuse()
+	return _set_closing_balance_as_per_statement(bank_account, date, balance)
 
+
+def _set_closing_balance_as_per_statement(bank_account: str, date: str | datetime.date, balance: float):
 	existing = frappe.db.exists("Bank Account Balance", {"bank_account": bank_account, "date": date})
 
 	if existing:

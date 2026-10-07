@@ -3,8 +3,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Case
-from frappe.utils import flt, get_link_to_form
-from pypika.terms import ValueWrapper
+from frappe.utils import escape_html, flt, get_link_to_form
 
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 
@@ -59,7 +58,9 @@ class SubcontractingInwardController:
 					self.validate_manufacture()
 
 	def validate_material_receipt(self):
+		self.set_scio_detail_for_received_items()
 		rm_item_fg_combo = []
+		scio_details = []
 		for item in self.items:
 			if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item"):
 				frappe.throw(
@@ -68,6 +69,15 @@ class SubcontractingInwardController:
 						get_link_to_form("Item", item.item_code),
 					)
 				)
+
+			if item.scio_detail in scio_details:
+				frappe.throw(
+					_(
+						"Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+			elif item.scio_detail:
+				scio_details.append(item.scio_detail)
 
 			if (
 				item.scio_detail
@@ -108,6 +118,25 @@ class SubcontractingInwardController:
 							"Row #{0}: Please select the Finished Good Item against which this Customer Provided Item will be used."
 						).format(item.idx)
 					)
+
+	def set_scio_detail_for_received_items(self):
+		"""Receive an extra row on the order's existing row for the same item and finished good."""
+		items = [item for item in self.items if not item.scio_detail]
+		if not items:
+			return
+
+		received_items = frappe.get_all(
+			"Subcontracting Inward Order Received Item",
+			filters={
+				"parent": self.subcontracting_inward_order,
+				"docstatus": 1,
+				"reference_name": ["in", [item.against_fg for item in items]],
+			},
+			fields=["name", "rm_item_code", "reference_name"],
+		)
+		row_names = {(row.rm_item_code, row.reference_name): row.name for row in received_items}
+		for item in items:
+			item.scio_detail = row_names.get((item.item_code, item.against_fg))
 
 	def validate_returns(self):
 		for item in self.items:
@@ -243,7 +272,7 @@ class SubcontractingInwardController:
 			for item in self.get("items")
 			if not item.is_finished_item
 			and not item.secondary_item_type
-			and not item.is_legacy_scrap_item
+			and not item.valuation_type
 			and frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
 		]
 
@@ -380,7 +409,7 @@ class SubcontractingInwardController:
 			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return", "Manufacture"]:
 				for item in self.items:
 					if (
-						item.is_finished_item or item.secondary_item_type or item.is_legacy_scrap_item
+						item.is_finished_item or item.secondary_item_type or item.valuation_type
 					) and item.valuation_rate == 0:
 						item.allow_zero_valuation_rate = 1
 
@@ -433,7 +462,14 @@ class SubcontractingInwardController:
 							"Row #{0}: Serial No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Serial No(s)."
 						).format(
 							item.idx,
-							", ".join([get_link_to_form("Serial No", sn) for sn in incorrect_serial_nos]),
+							", ".join(
+								get_link_to_form(
+									"Serial No",
+									sn,
+									escape_html(frappe.get_cached_value("Serial No", sn, "serial_no")),
+								)
+								for sn in incorrect_serial_nos
+							),
 						)
 					)
 				if batch_list and (
@@ -444,7 +480,12 @@ class SubcontractingInwardController:
 							"Row #{0}: Batch No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
 						).format(
 							item.idx,
-							", ".join([get_link_to_form("Batch No", bn) for bn in incorrect_batch_nos]),
+							", ".join(
+								get_link_to_form(
+									"Batch", bn, escape_html(frappe.get_cached_value("Batch", bn, "batch_id"))
+								)
+								for bn in incorrect_batch_nos
+							),
 						)
 					)
 
@@ -480,7 +521,7 @@ class SubcontractingInwardController:
 				self.validate_delivery_on_save()
 			else:
 				for item in self.items:
-					if not item.secondary_item_type and not item.is_legacy_scrap_item:
+					if not item.secondary_item_type and not item.valuation_type:
 						delivered_qty, returned_qty = frappe.get_value(
 							"Subcontracting Inward Order Item",
 							item.scio_detail,
@@ -509,21 +550,13 @@ class SubcontractingInwardController:
 				)
 
 			table = frappe.qb.DocType("Subcontracting Inward Order Item")
+			allowed_qty = table.produced_qty
+			if not allow_delivery_of_overproduced_qty:
+				allowed_qty = Case().when(table.produced_qty < table.qty, table.produced_qty).else_(table.qty)
+
 			query = (
 				frappe.qb.from_(table)
-				.select(
-					(
-						Case()
-						.when(
-							# bool() so the literal renders as true/false; postgres rejects `OR <integer>`
-							(table.produced_qty < table.qty)
-							| ValueWrapper(bool(allow_delivery_of_overproduced_qty)),
-							table.produced_qty,
-						)
-						.else_(table.qty)
-						- table.delivered_qty
-					).as_("max_allowed_qty")
-				)
+				.select((allowed_qty - table.delivered_qty).as_("max_allowed_qty"))
 				.where((table.name == item.scio_detail) & (table.docstatus == 1))
 			)
 			max_allowed_qty = query.run(pluck="max_allowed_qty")
@@ -550,7 +583,7 @@ class SubcontractingInwardController:
 						bold(
 							frappe.get_cached_value(
 								"Subcontracting Inward Order Item"
-								if not item.secondary_item_type and not item.is_legacy_scrap_item
+								if not item.secondary_item_type and not item.valuation_type
 								else "Subcontracting Inward Order Secondary Item",
 								item.scio_detail,
 								"stock_uom",
@@ -602,7 +635,7 @@ class SubcontractingInwardController:
 				)
 
 			for item in [item for item in self.items if not item.is_finished_item]:
-				if item.secondary_item_type or item.is_legacy_scrap_item:
+				if item.secondary_item_type or item.valuation_type:
 					scio_secondary_item = frappe.get_value(
 						"Subcontracting Inward Order Secondary Item",
 						{
@@ -661,7 +694,7 @@ class SubcontractingInwardController:
 			for item in self.items:
 				doctype = (
 					"Subcontracting Inward Order Item"
-					if not item.secondary_item_type and not item.is_legacy_scrap_item
+					if not item.secondary_item_type and not item.valuation_type
 					else "Subcontracting Inward Order Secondary Item"
 				)
 				qty_map[doctype][item.scio_detail] += (
@@ -740,7 +773,7 @@ class SubcontractingInwardController:
 					),
 				)
 				scio_rm.flags.skip_docstatus_validation = True
-				scio_rm.insert()
+				scio_rm.insert(ignore_permissions=True)
 				scio_rm.submit()
 				next_received_idx += 1
 				item.db_set("scio_detail", scio_rm.name)
@@ -802,7 +835,7 @@ class SubcontractingInwardController:
 		items = [
 			item
 			for item in self.items
-			if not item.is_finished_item and not item.secondary_item_type and not item.is_legacy_scrap_item
+			if not item.is_finished_item and not item.secondary_item_type and not item.valuation_type
 		]
 		if not items:
 			return
@@ -906,14 +939,14 @@ class SubcontractingInwardController:
 					is_additional_item=True,
 				)
 				doc.flags.skip_docstatus_validation = True
-				doc.insert()
+				doc.insert(ignore_permissions=True)
 				doc.submit()
 				next_received_idx += 1
 
 	def update_inward_order_secondary_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
 			secondary_items_list = [
-				item for item in self.items if item.secondary_item_type or item.is_legacy_scrap_item
+				item for item in self.items if item.secondary_item_type or item.valuation_type
 			]
 
 			secondary_items = defaultdict(float)
@@ -997,23 +1030,13 @@ class SubcontractingInwardController:
 						),
 					)
 					doc.flags.skip_docstatus_validation = True
-					doc.insert()
+					doc.insert(ignore_permissions=True)
 					doc.submit()
 					next_secondary_idx += 1
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":
-			table = frappe.qb.DocType("Stock Reservation Entry")
-			query = (
-				frappe.qb.from_(table)
-				.select(table.name)
-				.where(
-					(table.docstatus == 1)
-					& (table.voucher_detail_no.isin([item.scio_detail for item in self.items]))
-				)
-			)
-			for sre in query.run(pluck="name"):
-				frappe.get_doc("Stock Reservation Entry", sre).cancel()
+			self.adjust_inward_reservations(release=True)
 
 	def remove_reference_for_additional_items(self):
 		if self.subcontracting_inward_order:
@@ -1063,94 +1086,99 @@ class SubcontractingInwardController:
 
 	def adjust_stock_reservation_entries_for_return(self):
 		if self.purpose == "Return Raw Material to Customer":
-			for item in self.items:
-				serial_list, batch_list = get_serial_batch_list_from_item(item)
+			self.adjust_inward_reservations(release=self._action == "submit")
 
-				if serial_list or batch_list:
-					table = frappe.qb.DocType("Stock Reservation Entry")
-					child_table = frappe.qb.DocType("Serial and Batch Entry")
-					query = (
-						frappe.qb.from_(table)
-						.join(child_table)
-						.on(table.name == child_table.parent)
-						.select(
-							table.name.as_("sre_name"),
-							child_table.name.as_("sbe_name"),
-							child_table.batch_no,
-							child_table.qty,
-						)
-						.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
+	def adjust_inward_reservations(self, release):
+		for item in self.items:
+			serial_list, batch_list = get_serial_batch_list_from_item(item)
+
+			if serial_list or batch_list:
+				table = frappe.qb.DocType("Stock Reservation Entry")
+				child_table = frappe.qb.DocType("Serial and Batch Entry")
+				query = (
+					frappe.qb.from_(table)
+					.join(child_table)
+					.on(table.name == child_table.parent)
+					.select(
+						table.name.as_("sre_name"),
+						child_table.name.as_("sbe_name"),
+						child_table.batch_no,
+						child_table.qty,
+						child_table.delivered_qty,
 					)
+					.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
+				)
+				if serial_list:
+					query = query.where(child_table.serial_no.isin(serial_list))
+				if batch_list:
+					query = query.where(child_table.batch_no.isin(batch_list))
+				result = query.run(as_dict=True)
+
+				qty_to_deliver = {row.sre_name: 0 for row in result}
+				consumed_qty = {batch: 0 for batch in batch_list}
+				for row in result:
 					if serial_list:
-						query = query.where(child_table.serial_no.isin(serial_list))
-					if batch_list:
-						query = query.where(child_table.batch_no.isin(batch_list))
-					result = query.run(as_dict=True)
-
-					qty_to_deliver = {row.sre_name: 0 for row in result}
-					consumed_qty = {batch: 0 for batch in batch_list}
-					for row in result:
-						if serial_list:
-							frappe.get_doc("Serial and Batch Entry", row.sbe_name).db_set(
-								"delivered_qty", 1 if self._action == "submit" else 0
+						frappe.get_doc("Serial and Batch Entry", row.sbe_name).db_set(
+							"delivered_qty", 1 if release else 0
+						)
+						qty_to_deliver[row.sre_name] += row.qty
+					elif batch_list and not serial_list:
+						sabe_qty = abs(
+							frappe.get_value(
+								"Serial and Batch Entry",
+								{"parent": item.serial_and_batch_bundle, "batch_no": row.batch_no},
+								"qty",
 							)
-							qty_to_deliver[row.sre_name] += row.qty
-						elif batch_list and not serial_list:
-							sabe_qty = abs(
-								frappe.get_value(
-									"Serial and Batch Entry",
-									{"parent": item.serial_and_batch_bundle, "batch_no": row.batch_no},
-									"qty",
-								)
-							)
+						)
 
-							qty = min(row.qty, sabe_qty)
-							sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
-							sbe_doc.db_set(
-								"delivered_qty",
-								sbe_doc.delivered_qty + (qty if self._action == "submit" else -qty),
-							)
-							qty_to_deliver[row.sre_name] += qty
-							consumed_qty[row.batch_no] += qty
-
-					for sre_name, qty in qty_to_deliver.items():
-						sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
-						sre_doc.db_set(
+						open_qty = row.qty - row.delivered_qty if release else row.delivered_qty
+						qty = min(open_qty, sabe_qty - consumed_qty[row.batch_no])
+						sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
+						sbe_doc.db_set(
 							"delivered_qty",
-							sre_doc.delivered_qty + (qty if self._action == "submit" else -qty),
+							sbe_doc.delivered_qty + (qty if release else -qty),
 						)
-						sre_doc.update_status()
-						sre_doc.update_reserved_stock_in_bin()
-				else:
-					table = frappe.qb.DocType("Stock Reservation Entry")
-					query = (
-						frappe.qb.from_(table)
-						.select(
-							table.name,
-							(table.reserved_qty - table.delivered_qty).as_("qty"),
-						)
-						.where(
-							(table.docstatus == 1)
-							& (table.voucher_detail_no == item.scio_detail)
-							& (table.delivered_qty < table.reserved_qty)
-						)
-						.orderby(table.creation)
+						qty_to_deliver[row.sre_name] += qty
+						consumed_qty[row.batch_no] += qty
+
+				for sre_name, qty in qty_to_deliver.items():
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+					sre_doc.db_set(
+						"delivered_qty",
+						sre_doc.delivered_qty + (qty if release else -qty),
 					)
-					sre_list = query.run(as_dict=True)
+					sre_doc.update_status()
+					sre_doc.update_reserved_stock_in_bin()
+			else:
+				table = frappe.qb.DocType("Stock Reservation Entry")
+				query = (
+					frappe.qb.from_(table)
+					.select(
+						table.name,
+						(table.reserved_qty - table.delivered_qty).as_("qty"),
+					)
+					.where(
+						(table.docstatus == 1)
+						& (table.voucher_detail_no == item.scio_detail)
+						& (table.delivered_qty < table.reserved_qty)
+					)
+					.orderby(table.creation)
+				)
+				sre_list = query.run(as_dict=True)
 
-					voucher_qty = item.transfer_qty
-					for sre in sre_list:
-						qty = min(sre.qty, voucher_qty)
-						sre_doc = frappe.get_doc("Stock Reservation Entry", sre.name)
-						sre_doc.db_set(
-							"delivered_qty",
-							sre_doc.delivered_qty + (qty if self._action == "submit" else -qty),
-						)
-						sre_doc.update_status()
-						sre_doc.update_reserved_stock_in_bin()
-						voucher_qty -= qty
-						if voucher_qty <= 0:
-							break
+				voucher_qty = item.transfer_qty
+				for sre in sre_list:
+					qty = min(sre.qty, voucher_qty)
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre.name)
+					sre_doc.db_set(
+						"delivered_qty",
+						sre_doc.delivered_qty + (qty if release else -qty),
+					)
+					sre_doc.update_status()
+					sre_doc.update_reserved_stock_in_bin()
+					voucher_qty -= qty
+					if voucher_qty <= 0:
+						break
 
 	def update_inward_order_status(self):
 		if self.subcontracting_inward_order:
@@ -1170,7 +1198,11 @@ def get_fg_reference_names(
 		"Subcontracting Inward Order Item",
 		limit_start=start,
 		limit_page_length=page_len,
-		filters={"parent": filters.get("parent"), "item_code": ("like", f"%{txt}%"), "docstatus": 1},
+		filters={"parent": filters.get("parent"), "docstatus": 1},
+		or_filters=[
+			["name", "like", f"%{txt}%"],
+			["item_code", "like", f"%{txt}%"],
+		],
 		fields=["name", "item_code", "delivery_warehouse"],
 		as_list=True,
 		order_by="idx",

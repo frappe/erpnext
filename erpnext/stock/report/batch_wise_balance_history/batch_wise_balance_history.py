@@ -11,11 +11,18 @@ from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 SLE_COUNT_LIMIT = 100_000
 
 
 def execute(filters=None):
+	data = get_data(filters)
+	return prepare_serial_batch_report(get_columns(filters), data)
+
+
+def get_data(filters=None):
 	if not filters:
 		filters = {}
 
@@ -35,15 +42,16 @@ def execute(filters=None):
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
-	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
+	reserved_stock = get_reserved_stock(filters, iwb_map)
+	batch_numbers = get_batch_numbers(iwb_map)
 
 	data = []
 	for item in sorted(iwb_map):
 		if not filters.get("item") or filters.get("item") == item:
 			for wh in sorted(iwb_map[item]):
-				for batch in sorted(iwb_map[item][wh]):
+				for batch in sorted(iwb_map[item][wh], key=lambda batch: batch_numbers.get(batch, batch)):
 					qty_dict = iwb_map[item][wh][batch]
 					if qty_dict.opening_qty or qty_dict.in_qty or qty_dict.out_qty or qty_dict.bal_qty:
 						data.append(
@@ -63,10 +71,17 @@ def execute(filters=None):
 								),
 								flt(qty_dict.bal_value, float_precision),
 								item_map[item]["stock_uom"],
+								flt(reserved_stock.get((item, wh, batch), 0), float_precision),
 							]
 						)
 
-	return columns, data
+	return data
+
+
+def get_batch_numbers(iwb_map):
+	return SerialBatchIdentity("Batch").get_number_map(
+		{batch for warehouses in iwb_map.values() for batches in warehouses.values() for batch in batches}
+	)
 
 
 def get_columns(filters):
@@ -85,9 +100,46 @@ def get_columns(filters):
 		_("Valuation Rate") + ":Float:120",
 		_("Balance Value") + ":Currency:120",
 		_("UOM") + "::90",
+		_("Reserved Stock (Current)") + ":Float:175",
 	]
 
 	return columns
+
+
+def get_reserved_stock(filters, iwb_map):
+	if not iwb_map:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	warehouses = {warehouse for item in iwb_map.values() for warehouse in item}
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sre.item_code,
+			sre.warehouse,
+			sb_entry.batch_no,
+			fn.Sum(sb_entry.qty - sb_entry.delivered_qty).as_("reserved_qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.reservation_based_on == "Serial and Batch")
+			& (sre.status.notin(["Closed", "Delivered"]))
+			& (sre.item_code.isin(list(iwb_map)))
+			& (sre.warehouse.isin(warehouses))
+			& (sb_entry.batch_no.isnotnull())
+			& (sb_entry.qty > sb_entry.delivered_qty)
+		)
+		.groupby(sre.item_code, sre.warehouse, sb_entry.batch_no)
+	)
+	if filters.get("company"):
+		query = query.where(sre.company == filters.company)
+	if filters.get("batch_no"):
+		query = query.where(sb_entry.batch_no == filters.batch_no)
+
+	return {(row.item_code, row.warehouse, row.batch_no): row.reserved_qty for row in query.run(as_dict=True)}
 
 
 def get_stock_ledger_entries(filters):

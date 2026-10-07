@@ -32,7 +32,6 @@ from erpnext.manufacturing.doctype.production_plan.services.material_request imp
 )
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 	cancel_stock_reservation_entries,
-	get_non_completed_production_plans,
 	get_reserved_qty_for_production_plan,
 	get_reserved_qty_for_sub_assembly,
 	make_stock_reservation_entries,
@@ -47,7 +46,10 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import 
 from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
 	WorkOrderCreationService,
 )
-from erpnext.stock.utils import get_or_make_bin
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
+from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -98,6 +100,7 @@ class ProductionPlan(Document):
 		material_requests: DF.Table[ProductionPlanMaterialRequest]
 		mr_items: DF.Table[MaterialRequestPlanItem]
 		naming_series: DF.Literal["MFG-PP-.YYYY.-"]
+		no_of_shifts: DF.Int
 		po_items: DF.Table[ProductionPlanItem]
 		posting_date: DF.Date
 		prod_plan_references: DF.Table[ProductionPlanItemReference]
@@ -133,6 +136,11 @@ class ProductionPlan(Document):
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
+		if self.docstatus == 1:
+			self.set_onload(
+				"pending_work_order_qty",
+				ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self),
+			)
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
@@ -143,9 +151,12 @@ class ProductionPlan(Document):
 		self.set_status()
 		self._rename_temporary_references()
 		validate_uom_is_integer(self, "stock_uom", "planned_qty")
+		self.validate_data()
 		self.validate_sales_orders()
 		self.validate_material_request_type()
 		self.validate_raw_material_group_warehouse()
+		if self.for_warehouse:
+			validate_warehouse_company(self.for_warehouse, self.company)
 		self.enable_auto_reserve_stock()
 
 	def validate_raw_material_group_warehouse(self):
@@ -153,21 +164,27 @@ class ProductionPlan(Document):
 			return
 
 		group = frappe.db.get_value(
-			"Warehouse", self.raw_material_group_warehouse, ["lft", "rgt", "is_group"], as_dict=True
+			"Warehouse",
+			{"name": self.raw_material_group_warehouse, "is_group": 1, "company": self.company},
+			["lft", "rgt"],
+			as_dict=True,
 		)
-		if not group.is_group:
+		if not group:
 			frappe.throw(
-				_("{0} must be a group warehouse.").format(frappe.bold(_("Raw Material Group Warehouse")))
+				_("{0} must be a group warehouse of company {1}.").format(
+					frappe.bold(_("Raw Material Group Warehouse")), frappe.bold(self.company)
+				)
 			)
 
-		if self.for_warehouse:
-			child = frappe.db.get_value("Warehouse", self.for_warehouse, ["lft", "rgt"], as_dict=True)
-			if not (group.lft <= child.lft and child.rgt <= group.rgt):
-				frappe.throw(
-					_("For Warehouse {0} must be a child of the group warehouse {1}.").format(
-						frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
-					)
+		if self.for_warehouse and not frappe.db.exists(
+			"Warehouse",
+			{"name": self.for_warehouse, "is_group": 0, "lft": (">", group.lft), "rgt": ("<", group.rgt)},
+		):
+			frappe.throw(
+				_("For Warehouse {0} must be a non-group warehouse under {1}.").format(
+					frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
 				)
+			)
 
 	def enable_auto_reserve_stock(self):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
@@ -222,14 +239,20 @@ class ProductionPlan(Document):
 			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
+		validated_boms = set()
 		for d in self.get("po_items"):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
-			else:
+			elif (d.item_code, d.bom_no) not in validated_boms:
 				validate_bom_no(d.item_code, d.bom_no)
+				validated_boms.add((d.item_code, d.bom_no))
 
 			if not flt(d.planned_qty):
-				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
+				frappe.throw(
+					_("Row #{0}: Planned Qty must be greater than 0 for Item {1}.").format(
+						d.idx, frappe.bold(d.item_code)
+					)
+				)
 
 	def _rename_temporary_references(self):
 		"""po_items and sub_assembly_items items are both constructed client side without saving.
@@ -258,8 +281,14 @@ class ProductionPlan(Document):
 				data.db_update()
 
 		self.calculate_total_produced_qty()
+		self.update_status_and_bin_qty()
+
+	def update_status_and_bin_qty(self):
+		previous_status = self.status
 		self.set_status()
 		self.db_set("status", self.status)
+		if previous_status != self.status and "Completed" in (previous_status, self.status):
+			self.update_bin_qty()
 
 	def on_submit(self):
 		self.update_bin_qty()
@@ -270,9 +299,21 @@ class ProductionPlan(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 		self.delete_draft_work_order()
+		self.delete_production_plan_schedule()
 		self.update_bin_qty()
 		self.update_sales_order()
 		self.update_stock_reservation()
+		self.delete_sub_assembly_and_material_rows()
+
+	def delete_production_plan_schedule(self):
+		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
+
+	def delete_sub_assembly_and_material_rows(self):
+		for doctype in ("Production Plan Sub Assembly Item", "Material Request Plan Item"):
+			frappe.db.delete(doctype, {"parent": self.name, "parenttype": "Production Plan"})
+
+		self.set("sub_assembly_items", [])
+		self.set("mr_items", [])
 
 	def update_stock_reservation(self):
 		if not self.reserve_stock:
@@ -341,17 +382,20 @@ class ProductionPlan(Document):
 		return so_wise_planned_qty
 
 	def update_bin_qty(self):
-		for d in self.mr_items:
-			if d.warehouse:
-				bin_name = get_or_make_bin(d.item_code, d.warehouse)
-				bin = frappe.get_doc("Bin", bin_name, for_update=True)
-				bin.update_reserved_qty_for_production_plan()
+		self.update_raw_material_bin_qty()
 
 		for d in self.sub_assembly_items:
 			if d.fg_warehouse and d.type_of_manufacturing == "In House":
 				bin_name = get_or_make_bin(d.production_item, d.fg_warehouse)
 				bin = frappe.get_doc("Bin", bin_name, for_update=True)
 				bin.update_reserved_qty_for_for_sub_assembly()
+
+	def update_raw_material_bin_qty(self, item_codes: set[str] | None = None):
+		for d in self.mr_items:
+			if d.warehouse and (item_codes is None or d.item_code in item_codes):
+				bin_name = get_or_make_bin(d.item_code, d.warehouse)
+				bin = frappe.get_doc("Bin", bin_name, for_update=True)
+				bin.update_reserved_qty_for_production_plan()
 
 	def delete_draft_work_order(self):
 		for d in frappe.get_all(
@@ -361,6 +405,11 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
+		self.check_permission("write")
+
+		if close is None and self.status == "Closed":
+			return
+
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:
@@ -489,26 +538,3 @@ class ProductionPlan(Document):
 
 	def all_items_completed(self):
 		return SubAssemblyService(self).all_items_completed()
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_child_warehouses(
-	doctype: str | None, txt: str, searchfield: str | None, start: int, page_len: int, filters: dict
-):
-	"Leaf warehouses under the given group warehouse, for the For Warehouse link query."
-	bounds = frappe.db.get_value("Warehouse", filters.get("group_warehouse"), ["lft", "rgt"], as_dict=True)
-	if not bounds:
-		return []
-
-	wh = frappe.qb.DocType("Warehouse")
-	query = (
-		frappe.qb.from_(wh)
-		.select(wh.name)
-		.where((wh.is_group == 0) & (wh.lft >= bounds.lft) & (wh.rgt <= bounds.rgt))
-	)
-	if filters.get("company"):
-		query = query.where(wh.company == filters.get("company"))
-	if txt:
-		query = query.where(wh[searchfield].like(f"%{txt}%"))
-	return query.limit(page_len).offset(start).run()

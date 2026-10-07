@@ -4,6 +4,8 @@
 from frappe import _, msgprint, qb
 from frappe.query_builder import Criterion
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	if not filters:
@@ -141,6 +143,9 @@ def get_conditions(dt, st, filters, date_field):
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
 			conditions.append(dt[field].eq(filters.get(field)))
+
+	if condition := get_allowed_companies_condition(dt.company, filters["doc_type"]):
+		conditions.append(condition)
 
 	if filters.get("sales_person"):
 		conditions.append(st["sales_person"].eq(filters.get("sales_person")))

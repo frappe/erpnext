@@ -68,7 +68,13 @@ frappe.ui.form.on("Stock Reconciliation", {
 	refresh: function (frm) {
 		erpnext.toggle_serial_batch_fields(frm);
 
-		if (frm.doc.docstatus < 1) {
+		// an Adjustment Entry's rows are the stock its items are reset to, made from the
+		// Stock Valuation Comparison report, so they are not edited here
+		const is_adjustment_entry = frm.doc.purpose === "Adjustment Entry";
+		frm.set_df_property("items", "read_only", is_adjustment_entry ? 1 : 0);
+		frm.set_df_property("purpose", "read_only", is_adjustment_entry ? 1 : 0);
+
+		if (frm.doc.docstatus < 1 && !is_adjustment_entry) {
 			frm.add_custom_button(__("Fetch Items from Warehouse"), function () {
 				frm.events.get_items(frm);
 			});
@@ -381,4 +387,4 @@ erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.st
 	}
 };
 
-cur_frm.cscript = new erpnext.stock.StockReconciliation({ frm: cur_frm });
+frappe.ui.form.set_controller("Stock Reconciliation", erpnext.stock.StockReconciliation);

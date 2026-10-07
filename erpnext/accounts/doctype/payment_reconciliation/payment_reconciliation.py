@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_rec
 	is_any_doc_running,
 )
 from erpnext.accounts.services.advances import get_advance_payment_entries_for_regional
+from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	create_gain_loss_journal,
@@ -460,10 +461,6 @@ class PaymentReconciliation(Document):
 		return difference_amount
 
 	@frappe.whitelist()
-	def is_auto_process_enabled(self):
-		return frappe.get_single_value("Accounts Settings", "auto_reconcile_payments")
-
-	@frappe.whitelist()
 	def calculate_difference_on_allocation_change(
 		self, payment_entry: list, invoice: list, allocated_amount: float
 	):
@@ -485,8 +482,12 @@ class PaymentReconciliation(Document):
 			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
 		)
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
-		default_exchange_gain_loss_account = frappe.get_cached_value(
-			"Company", self.company, "exchange_gain_loss_account"
+		account_currency = frappe.get_cached_value(
+			"Account", self.receivable_payable_account, "account_currency"
+		)
+		allocated_amount_precision = get_field_precision(
+			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount"),
+			currency=account_currency,
 		)
 
 		entries = []
@@ -495,11 +496,17 @@ class PaymentReconciliation(Document):
 			for inv in args.get("invoices"):
 				if pay.get("amount") >= inv.get("outstanding_amount"):
 					res = self.get_allocated_entry(pay, inv, inv["outstanding_amount"])
-					pay["amount"] = flt(pay.get("amount")) - flt(inv.get("outstanding_amount"))
+					pay["amount"] = flt(
+						flt(pay.get("amount")) - flt(inv.get("outstanding_amount")),
+						allocated_amount_precision,
+					)
 					inv["outstanding_amount"] = 0
 				else:
 					res = self.get_allocated_entry(pay, inv, pay["amount"])
-					inv["outstanding_amount"] = flt(inv.get("outstanding_amount")) - flt(pay.get("amount"))
+					inv["outstanding_amount"] = flt(
+						flt(inv.get("outstanding_amount")) - flt(pay.get("amount")),
+						allocated_amount_precision,
+					)
 					pay["amount"] = 0
 
 				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
@@ -507,7 +514,10 @@ class PaymentReconciliation(Document):
 					pay["exchange_rate"] = invoice_exchange_map.get(pay.get("reference_name"))
 
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
-				res.difference_account = default_exchange_gain_loss_account
+				is_gain = (
+					res.difference_amount > 0 if self.party_type == "Customer" else res.difference_amount < 0
+				)
+				res.difference_account = get_exchange_gain_loss_account(self.company, is_gain)
 				res.exchange_rate = inv.get("exchange_rate")
 				res.update({"gain_loss_posting_date": pay.get("posting_date")})
 				if not pay.get("is_advance"):
@@ -646,7 +656,7 @@ class PaymentReconciliation(Document):
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
 			if not self.get(fieldname):
-				frappe.throw(_("Please select {0} first").format(_(self.meta.get_label(fieldname))))
+				frappe.throw(_("Please select {0} first").format(self.meta.get_translated_label(fieldname)))
 
 	def validate_entries(self):
 		if not self.get("invoices"):
@@ -966,3 +976,8 @@ def get_queries_for_dimension_filters(company: str | None = None):
 		dimensions_with_filters.append({"fieldname": d.fieldname, "filters": filters})
 
 	return dimensions_with_filters
+
+
+@frappe.whitelist()
+def is_auto_process_enabled():
+	return frappe.get_single_value("Accounts Settings", "auto_reconcile_payments")

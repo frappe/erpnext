@@ -31,7 +31,7 @@
                 } %}
 				<span class="pull-right" title="{%= title %}" style="margin-left: 10px;">
 					<span class="indicator {{ color }}">
-						{%= doc.warehouse %}
+						{%= frappe.utils.escape_html(doc.warehouse) %}
 					</span>
 				</span>
 			{% } %}
@@ -42,14 +42,14 @@
                                                 doc.delivered_qty : doc.received_qty;
                                 var pending = flt(doc.qty) - flt(delivered);
                                 %}
-                <span class="indicator {%= pending>0 ? "orange" : "green" %}">{%= doc.item_code %}</span>
+                <span class="indicator {%= pending>0 ? "orange" : "green" %}">{%= frappe.utils.escape_html(doc.item_code) %}</span>
 			{% } else { %}
-                <strong>{%= doc.item_code %}</strong>
+                <strong>{%= frappe.utils.escape_html(doc.item_code) %}</strong>
             {% } %}
 
 			{% if(doc.item_name != doc.item_code && in_list(visible_column_fieldnames, "item_name")) { %}
 				{% if (doc.item_code) { %}<br>{% } %}
-                {%= doc.item_name %}{% } %}
+                {%= frappe.utils.escape_html(doc.item_name) %}{% } %}
 
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 		</div>
@@ -57,7 +57,7 @@
 		<!-- qty -->
 		<div class="col-sm-2 hidden-xs text-right">
 			{%= doc.get_formatted("qty") %}
-            <span class="small">{%= doc.uom || doc.stock_uom %}</span>
+            <span class="small">{%= frappe.utils.escape_html(doc.uom || doc.stock_uom) %}</span>
 		</div>
 
 		<!-- rate -->
@@ -84,7 +84,7 @@
 
 			{% if (frappe.perm.is_visible("rate", doc, frm.perm)) { %}
 			<div class="visible-xs text-muted">
-				{%= doc.get_formatted("qty") %} <small>{%= doc.uom || doc.stock_uom %}</small>
+				{%= doc.get_formatted("qty") %} <small>{%= frappe.utils.escape_html(doc.uom || doc.stock_uom) %}</small>
 				x {%= doc.get_formatted("rate") %}
 			</div>
 			{% } %}

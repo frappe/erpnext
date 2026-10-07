@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:item_code",
  "creation": "2026-07-13 23:00:47.512490",
- "description": "A Product or a Service that is bought, sold or kept in stock.",
+ "description": "A product or service you buy, sell or keep in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -98,6 +99,7 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "use_serial_no_wise_valuation",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -185,6 +187,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
@@ -197,7 +200,6 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
-   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -243,6 +245,7 @@
    "description": "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items.",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select",
@@ -254,6 +257,7 @@
    "description": "Enable for raw material items used in BOM. Uncheck for additional services like 'washing' used in manufacturing.",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Include Item In Manufacturing"
   },
   {
@@ -267,6 +271,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Valuation Rate"
   },
   {
@@ -275,6 +280,7 @@
    "description": "Creates an Item Price automatically when the item is saved",
    "fieldname": "standard_rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Standard Selling Rate"
   },
   {
@@ -283,6 +289,7 @@
    "description": "Enable if this item is a company asset like machinery or furniture.",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Fixed Asset",
    "read_only_depends_on": "eval:doc.is_stock_item"
@@ -292,6 +299,7 @@
    "depends_on": "is_fixed_asset",
    "fieldname": "asset_category",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Asset Category",
    "mandatory_depends_on": "is_fixed_asset",
    "options": "Asset Category"
@@ -320,6 +328,7 @@
   {
    "fieldname": "brand",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Brand",
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
@@ -329,6 +338,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
+   "in_import_template": 1,
    "in_preview": 1,
    "label": "Description",
    "oldfieldname": "description",
@@ -387,6 +397,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
+   "description": "Serialized items are valued at Moving Average once stock transactions exist and Serial No Wise Valuation is disabled.",
    "options": "\nFIFO\nMoving Average\nLIFO\nStandard Cost"
   },
   {
@@ -459,6 +470,7 @@
    "description": "Track this item in batches. Cannot be changed after a stock transaction exists.",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Has Batch No",
    "oldfieldname": "has_batch_no",
    "oldfieldtype": "Select",
@@ -516,6 +528,7 @@
    "description": "Track each unit with a unique serial number for warranty and return tracking. Cannot be changed after a stock transaction exists.",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Has Serial No",
    "oldfieldname": "has_serial_no",
    "oldfieldtype": "Select",
@@ -527,6 +540,15 @@
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
    "label": "Serial Number Series",
+   "show_description_on_click": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.is_stock_item && doc.has_serial_no",
+   "description": "Value every outward movement at each Serial No's own incoming rate. If unchecked, the item is valued at Moving Average once stock transactions exist. Cannot be enabled once Serial Nos exist for this item.",
+   "fieldname": "use_serial_no_wise_valuation",
+   "fieldtype": "Check",
+   "label": "Use Serial No Wise Valuation",
    "show_description_on_click": 1
   },
   {
@@ -575,6 +597,7 @@
    "description": "Allow this item to be used in purchase transactions.",
    "fieldname": "is_purchase_item",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Allow Purchase",
    "read_only_depends_on": "eval: doc.is_customer_provided_item",
    "show_description_on_click": 1
@@ -701,6 +724,7 @@
    "description": "Allow this item to be used in sales transactions.",
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Allow Sales",
    "show_description_on_click": 1
@@ -855,6 +879,7 @@
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
+   "non_negative": 1,
    "oldfieldname": "tolerance",
    "oldfieldtype": "Currency"
   },
@@ -863,7 +888,8 @@
    "description": "Percentage by which over-billing is allowed against a Sales/Purchase Order for this item. If not set, value from Accounts Settings will be used.",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
-   "label": "Over Billing Allowance (%)"
+   "label": "Over Billing Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -1111,12 +1137,12 @@
    "permlevel": 1
   }
  ],
- "icon": "fa fa-tag",
+ "icon": "package",
  "idx": 2,
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-07-28 18:58:43.328497",
+ "modified": "2026-09-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

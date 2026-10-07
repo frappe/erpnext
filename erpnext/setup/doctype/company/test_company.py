@@ -161,12 +161,10 @@ class TestCompany(ERPNextTestSuite):
 			}
 		)
 		secondary.insert()
-		self.addCleanup(secondary.delete)
 
 		primary = frappe.copy_doc(secondary)
 		primary.is_primary_address = 1
 		primary.insert()
-		self.addCleanup(primary.delete)
 
 		self.assertEqual(get_default_company_address(company), primary.name)
 
@@ -236,12 +234,8 @@ class TestCompany(ERPNextTestSuite):
 
 		company = "_Test Company"
 		cd = frappe.qb.DocType("Company")
-		original = frappe.db.get_value("Company", company, "parent_company")
 		# force '' (not NULL) at the SQL layer, bypassing frappe's empty -> NULL doc coercion
 		frappe.qb.update(cd).set(cd.parent_company, "").where(cd.name == company).run()
-		self.addCleanup(
-			lambda: frappe.qb.update(cd).set(cd.parent_company, original).where(cd.name == company).run()
-		)
 
 		roots = {row.value for row in get_children("Company", parent="")}
 		self.assertIn(company, roots)
@@ -262,10 +256,8 @@ class TestCompany(ERPNextTestSuite):
 
 		before = get_all_transactions_annual_history(company).get(key, 0)
 
-		quotation = make_quotation(company=company, transaction_date=txn_date, do_not_submit=True)
-		self.addCleanup(frappe.delete_doc, "Quotation", quotation.name, force=True)
-		sales_order = make_sales_order(company=company, transaction_date=txn_date, do_not_submit=True)
-		self.addCleanup(frappe.delete_doc, "Sales Order", sales_order.name, force=True)
+		make_quotation(company=company, transaction_date=txn_date, do_not_submit=True)
+		make_sales_order(company=company, transaction_date=txn_date, do_not_submit=True)
 
 		after = get_all_transactions_annual_history(company).get(key, 0)
 		self.assertEqual(after - before, 2)

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:user",
  "creation": "2020-12-08 16:52:40.590146",
+ "description": "Your calling preferences, like when you take calls.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -51,6 +52,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "phone-call",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-03-27 13:10:59.080888",

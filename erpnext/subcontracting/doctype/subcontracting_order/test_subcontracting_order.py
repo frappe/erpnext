@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.mapper import get_mapped_subcontracting_order
+from erpnext.controllers.item_variant import create_variant
 from erpnext.controllers.subcontracting_controller import (
 	get_materials_from_supplier,
 	make_rm_stock_entry,
@@ -25,6 +26,10 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost import (
+	execute as recalculate_subcontracting_order_service_cost,
+)
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -112,6 +117,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
 
+	def test_project_is_carried_over_from_purchase_order(self):
+		project = make_project({"project_name": "_Test SCO Project"}).name
+		po = make_subcontracted_purchase_order(project)
+
+		sco = get_mapped_subcontracting_order(source_name=po.name)
+
+		self.assertEqual(sco.project, project)
+		self.assertEqual(sco.items[0].project, project)
+
+	def test_project_cannot_differ_from_purchase_order(self):
+		project = make_project({"project_name": "_Test SCO Project"}).name
+		other_project = make_project({"project_name": "_Test SCO Project 2"}).name
+		po = make_subcontracted_purchase_order(project)
+
+		sco = get_mapped_subcontracting_order(source_name=po.name)
+		sco.items[0].project = other_project
+		self.assertRaises(frappe.ValidationError, sco.save)
+
 	def test_sco_requires_a_subcontracting_purchase_order(self):
 		sco = get_subcontracting_order(do_not_save=1)
 		sco.purchase_order = None
@@ -169,6 +192,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		for item in sco.items:
 			self.assertEqual(item.service_cost_per_qty, expected[item.purchase_order_item])
+
+	def test_variant_without_bom_uses_template_bom(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": variant.name,
+				"fg_item_qty": 10,
+			},
+		]
+
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+
+		self.assertEqual(sco.items[0].bom, template_bom.name)
+		self.assertEqual([d.rm_item_code for d in sco.supplied_items], ["Subcontracted Template RM Item"])
 
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
@@ -942,6 +983,35 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)[:3]:
 			self.assertEqual(status, "Delivered")
 
+	def test_reservation_counts_supplied_qty(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		sco.submit()
+
+		se = frappe.get_doc(make_rm_stock_entry(sco.name))
+		se.items[-1].use_serial_batch_fields = 1
+		se.save()
+		se.submit()
+
+		row = sco.supplied_items[0]
+		make_stock_in_entry(rm_items=[{"item_code": row.rm_item_code, "warehouse": row.reserve_warehouse}])
+		self.assertRaises(
+			frappe.ValidationError,
+			sco.reserve_raw_materials,
+			items=[{"name": row.name, "qty_to_reserve": 1}],
+		)
+
 	def test_stock_reservation_transfer(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_items_for_material_requests,
@@ -1020,6 +1090,101 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(sbe_pp_list, sbe_so_list)
 
+	def test_service_cost_is_converted_to_company_currency(self):
+		sco = make_foreign_currency_subcontracting_order()
+
+		self.assertEqual(sco.supplier_currency, "USD")
+		self.assertEqual(sco.conversion_rate, 80)
+
+		# service items stay in the supplier's currency, as on the Purchase Order
+		self.assertEqual(sco.service_items[0].rate, 500)
+		self.assertEqual(sco.service_items[0].amount, 5000)
+		self.assertEqual(sco.service_items[0].base_rate, 500 * 80)
+		self.assertEqual(sco.service_items[0].base_amount, 5000 * 80)
+
+		# costing fields are in company currency
+		self.assertEqual(sco.items[0].service_cost_per_qty, 500 * 80)
+		self.assertEqual(
+			sco.items[0].rate,
+			sco.items[0].rm_cost_per_qty + sco.items[0].service_cost_per_qty,
+		)
+		self.assertEqual(sco.total, sco.items[0].amount)
+
+	def test_service_cost_backfill_recosts_closed_order(self):
+		sco = make_foreign_currency_subcontracting_order()
+		set_unconverted_service_cost(sco)
+		sco.update_status("Closed")
+
+		recalculate_subcontracting_order_service_cost()
+
+		sco.reload()
+		self.assertEqual(sco.conversion_rate, 80)
+		self.assertEqual(sco.service_items[0].base_amount, 5000 * 80)
+		self.assertEqual(sco.items[0].service_cost_per_qty, 500 * 80)
+		self.assertEqual(sco.items[0].rate, sco.items[0].rm_cost_per_qty + 500 * 80)
+		self.assertEqual(sco.total, sco.items[0].amount)
+
+	def test_service_cost_backfill_recosts_order_without_purchase_order_item(self):
+		sco = make_foreign_currency_subcontracting_order()
+		set_unconverted_service_cost(sco)
+		sco.items[0].db_set("purchase_order_item", None)
+
+		recalculate_subcontracting_order_service_cost()
+
+		sco.reload()
+		self.assertEqual(sco.items[0].service_cost_per_qty, 500 * 80)
+		self.assertEqual(sco.total, sco.items[0].amount)
+
+	def test_service_cost_backfill_updates_draft_receipt(self):
+		sco = make_foreign_currency_subcontracting_order()
+		scr = make_subcontracting_receipt(sco.name).save()
+		set_unconverted_service_cost(sco)
+		frappe.db.set_value("Subcontracting Receipt Item", scr.items[0].name, "service_cost_per_qty", 500)
+
+		recalculate_subcontracting_order_service_cost()
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Receipt Item", scr.items[0].name, "service_cost_per_qty"),
+			500 * 80,
+		)
+
+
+def make_foreign_currency_subcontracting_order():
+	from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 500,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+	]
+	po = create_purchase_order(
+		rm_items=service_items,
+		is_subcontracted=1,
+		supplier="_Test Supplier USD",
+		currency="USD",
+		supplier_warehouse="_Test Warehouse 1 - _TC",
+		do_not_submit=1,
+	)
+	po.conversion_rate = 80
+	po.submit()
+
+	return create_subcontracting_order(po_name=po.name)
+
+
+def set_unconverted_service_cost(sco):
+	frappe.db.set_value("Subcontracting Order", sco.name, {"conversion_rate": 1, "total": 0})
+	frappe.db.set_value(
+		"Subcontracting Order Service Item", sco.service_items[0].name, {"base_rate": 0, "base_amount": 0}
+	)
+	frappe.db.set_value(
+		"Subcontracting Order Item", sco.items[0].name, {"service_cost_per_qty": 500, "rate": 0, "amount": 0}
+	)
+
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)
@@ -1057,3 +1222,51 @@ def create_subcontracting_order(**args):
 			sco.submit()
 
 	return sco
+
+
+def make_subcontracted_variant():
+	template = make_item(
+		"Subcontracted Template Item",
+		{
+			"is_stock_item": 1,
+			"is_sub_contracted_item": 1,
+			"has_variants": 1,
+			"attributes": [{"attribute": "Test Size"}],
+		},
+	)
+	raw_material = make_item("Subcontracted Template RM Item", {"is_stock_item": 1})
+	template_bom = make_bom(item=template.name, raw_materials=[raw_material.name])
+
+	variant = create_variant(template.name, {"Test Size": "Small"})
+	variant.is_sub_contracted_item = 1
+	variant.insert()
+
+	return variant, template_bom
+
+
+def make_subcontracted_purchase_order(project):
+	from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+	]
+	po = create_purchase_order(
+		rm_items=service_items,
+		is_subcontracted=1,
+		supplier_warehouse="_Test Warehouse 1 - _TC",
+		do_not_submit=1,
+	)
+	po.project = project
+	for item in po.items:
+		item.project = project
+	po.save()
+	po.submit()
+
+	return po

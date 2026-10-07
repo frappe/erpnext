@@ -14,6 +14,7 @@ class MaterialReceiptStockEntry(BaseStockEntry):
 		self.validate_warehouse()
 
 	def set_default_warehouse(self):
+		self.doc.from_warehouse = None
 		for row in self.doc.items:
 			row.s_warehouse = None
 			if not row.t_warehouse and self.doc.to_warehouse:
@@ -27,6 +28,7 @@ class MaterialReceiptStockEntry(BaseStockEntry):
 
 class BaseMaterialIssueStockEntry(BaseStockEntry):
 	def set_default_warehouse(self):
+		self.doc.to_warehouse = None
 		for row in self.doc.items:
 			row.t_warehouse = None
 			if not row.s_warehouse and self.doc.from_warehouse:
@@ -38,13 +40,15 @@ class BaseMaterialIssueStockEntry(BaseStockEntry):
 				frappe.throw(_("Source Warehouse is required for item {0}").format(row.item_code))
 
 
-class MaterialIssueStockEntry(BaseMaterialIssueStockEntry):
+class SourceOnlyStockEntry(BaseMaterialIssueStockEntry):
 	def before_validate(self):
 		self.set_default_warehouse()
 
 	def validate(self):
 		self.validate_warehouse()
 
+
+class MaterialIssueStockEntry(SourceOnlyStockEntry):
 	def add_items(self):
 		self.add_raw_materials_based_on_bom()
 

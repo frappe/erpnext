@@ -191,3 +191,33 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 		rpt_output = report[1]
 		self.assertEqual(len(rpt_output), 0)
+
+	def test_03_summary_sales_partner_column(self):
+		partner = "_Test Sales Partner India - 1"
+
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=200,
+			price_list_rate=200,
+			do_not_submit=True,
+		)
+		si.sales_partner = partner
+		si.save().submit()
+
+		filters = {
+			"company": self.company,
+			"customer": self.customer,
+			"posting_date": today(),
+			"range": "30, 60, 90, 120",
+			"sales_partner": partner,
+		}
+
+		rpt_output = execute(filters)[1]
+		self.assertEqual(len(rpt_output), 1)
+		self.assertEqual(rpt_output[0].get("sales_partner"), partner)

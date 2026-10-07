@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from datetime import date, timedelta
 
 import frappe
-from frappe.utils import getdate
+from frappe.utils import get_datetime, getdate
 
 from erpnext.setup.doctype.holiday_list.holiday_list import local_country_name
 from erpnext.tests.utils import ERPNextTestSuite
@@ -44,6 +44,94 @@ class TestHolidayList(ERPNextTestSuite):
 		self.assertIn(date(2023, 2, 19), holidays)
 		self.assertIn(date(2023, 2, 26), holidays)
 		self.assertNotIn(date(2023, 3, 5), holidays)
+
+	def test_total_holidays_includes_half_days(self):
+		holiday_list = make_holiday_list(
+			"test_half_day_holiday_list",
+			from_date="2023-01-01",
+			to_date="2023-01-03",
+			holiday_dates=[
+				{"holiday_date": "2023-01-01", "description": "Full-day holiday"},
+				{
+					"holiday_date": "2023-01-02",
+					"description": "Half-day holiday",
+					"is_half_day": 1,
+				},
+			],
+		)
+
+		self.assertEqual(holiday_list.total_holidays, 1.5)
+		self.assertEqual(frappe.db.get_value("Holiday List", holiday_list.name, "total_holidays"), 1.5)
+
+	def test_weekly_off_updates_total_without_saving(self):
+		holiday_list = frappe.new_doc("Holiday List")
+		holiday_list.from_date = "2023-01-01"
+		holiday_list.to_date = "2023-01-14"
+		holiday_list.weekly_off = "Saturday"
+		holiday_list.is_half_day = 1
+		holiday_list.append("holidays", {"holiday_date": "2023-01-01", "description": "Full day"})
+
+		holiday_list.get_weekly_off_dates()
+		self.assertEqual(len(holiday_list.holidays), 3)
+		self.assertEqual(holiday_list.total_holidays, 2)
+
+		holiday_list.get_weekly_off_dates()
+		self.assertEqual(len(holiday_list.holidays), 3)
+		self.assertEqual(holiday_list.total_holidays, 2)
+
+		holiday_list.clear_table()
+		self.assertEqual(holiday_list.holidays, [])
+		self.assertEqual(holiday_list.total_holidays, 0)
+
+	def test_local_holidays_updates_total_without_saving(self):
+		holiday_list = frappe.new_doc("Holiday List")
+		holiday_list.from_date = "2023-01-01"
+		holiday_list.to_date = "2023-01-02"
+		holiday_list.country = "DE"
+		holiday_list.append(
+			"holidays", {"holiday_date": "2023-01-02", "description": "Half day", "is_half_day": 1}
+		)
+
+		holiday_list.get_local_holidays()
+		self.assertEqual(len(holiday_list.holidays), 2)
+		self.assertEqual(holiday_list.total_holidays, 1.5)
+
+		holiday_list.get_local_holidays()
+		self.assertEqual(len(holiday_list.holidays), 2)
+		self.assertEqual(holiday_list.total_holidays, 1.5)
+
+	def test_recalculate_existing_holiday_list_totals(self):
+		from erpnext.patches.v16_0.recalculate_holiday_list_totals import execute
+
+		cases = (("mixed", [0, 1], 1.5), ("half", [1, 1, 1], 1.5), ("full", [0, 0], 2), ("empty", [], 0))
+		holiday_lists = []
+		for name, half_days, expected in cases:
+			holiday_list = make_holiday_list(
+				f"test_backfill_holidays_{name}",
+				from_date="2023-01-01",
+				to_date="2023-01-03",
+				holiday_dates=[
+					{
+						"holiday_date": date(2023, 1, idx),
+						"description": "Test holiday",
+						"is_half_day": is_half_day,
+					}
+					for idx, is_half_day in enumerate(half_days, start=1)
+				],
+			)
+			# Simulate totals persisted by the old controller, including a stale empty list.
+			holiday_list.db_set("total_holidays", len(half_days) or 1, update_modified=False)
+			holiday_lists.append((holiday_list, expected))
+
+		for _ in range(2):
+			execute()
+			for holiday_list, expected in holiday_lists:
+				with self.subTest(holiday_list=holiday_list.name):
+					total, modified = frappe.db.get_value(
+						"Holiday List", holiday_list.name, ["total_holidays", "modified"]
+					)
+					self.assertEqual(total, expected)
+					self.assertEqual(modified, get_datetime(holiday_list.modified))
 
 	def test_local_holidays(self):
 		holiday_list = frappe.new_doc("Holiday List")

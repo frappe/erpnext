@@ -2,12 +2,14 @@
 # For license information, please see license.txt
 
 from collections import defaultdict
+from typing import NamedTuple
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull
 from frappe.utils import comma_and
-from pypika.terms import Bracket, ExistsCriterion
+from pypika.terms import Bracket, Criterion, ExistsCriterion
 
 RESTRICTABLE_MASTER_DOCTYPES = ("Item", "Customer", "Supplier")
 
@@ -35,6 +37,12 @@ class CompanyRestrictionError(frappe.ValidationError):
 	pass
 
 
+class MasterLink(NamedTuple):
+	fieldname: str
+	doctype: str
+	doctype_fieldname: str | None = None
+
+
 class CompanyRestriction(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -60,6 +68,19 @@ def get_allowed_companies(user, doctype):
 	return get_allowed_docs_for_doctype(user_permissions["Company"], doctype) or None
 
 
+def get_allowed_companies_condition(field, doctype):
+	if allowed_companies := get_allowed_companies(frappe.session.user, doctype):
+		return field.isin(allowed_companies)
+	return None
+
+
+def get_allowed_warehouses_condition(field):
+	warehouse = frappe.qb.DocType("Warehouse")
+	if condition := get_allowed_companies_condition(warehouse.company, "Warehouse"):
+		return field.isin(frappe.qb.from_(warehouse).select(warehouse.name).where(condition))
+	return None
+
+
 def get_permission_query_conditions(user, doctype=None):
 	if not doctype:
 		return None
@@ -69,6 +90,33 @@ def get_permission_query_conditions(user, doctype=None):
 		return None
 
 	return get_restriction_criterion(doctype, allowed_companies)
+
+
+def get_allowed_masters_condition(field, doctype, user=None):
+	if doctype not in RESTRICTABLE_MASTER_DOCTYPES:
+		return None
+
+	allowed_companies = get_allowed_companies(user, doctype)
+	if not allowed_companies or doctype not in get_restricted_master_doctypes():
+		return None
+
+	master = frappe.qb.DocType(doctype)
+	allowed_masters = (
+		frappe.qb.from_(master)
+		.select(master.name)
+		.where(get_restriction_criterion(doctype, allowed_companies))
+	)
+	return field.isin(allowed_masters)
+
+
+def remove_restricted_masters(rows, fieldname, doctype):
+	condition = get_allowed_masters_condition(frappe.qb.DocType(doctype).name, doctype)
+	names = list({row.get(fieldname) for row in rows if row.get(fieldname)})
+	if not condition or not names:
+		return rows
+
+	allowed = set(frappe.get_all(doctype, filters=[{"name": ("in", names)}, condition], pluck="name"))
+	return [row for row in rows if row.get(fieldname) in allowed]
 
 
 def get_restriction_criterion(doctype, companies):
@@ -96,6 +144,84 @@ def has_permission(doc, ptype=None, user=None):
 		return True
 
 	return any(row.company in allowed_companies for row in doc.get("allowed_companies") or [])
+
+
+def get_inherited_permission_query_conditions(user, doctype=None):
+	if not doctype:
+		return None
+
+	links = []
+	for link in get_inherited_master_links(doctype):
+		if allowed_companies := get_allowed_companies(user, link.doctype):
+			links.append((link, allowed_companies))
+
+	restricted_doctypes = get_restricted_master_doctypes() if links else []
+	conditions = [
+		get_linked_master_criterion(doctype, link, allowed_companies)
+		for link, allowed_companies in links
+		if link.doctype in restricted_doctypes
+	]
+	return Criterion.all(conditions) if conditions else None
+
+
+def get_restricted_master_doctypes():
+	return frappe.get_all(
+		"Company Restriction",
+		filters={"parentfield": "allowed_companies", "parenttype": ("in", RESTRICTABLE_MASTER_DOCTYPES)},
+		pluck="parenttype",
+		distinct=True,
+	)
+
+
+def get_linked_master_criterion(doctype, link, companies):
+	table = frappe.qb.DocType(doctype)
+	master = frappe.qb.DocType(link.doctype)
+	blocked_masters = (
+		frappe.qb.from_(master)
+		.select(master.name)
+		.where(get_restriction_criterion(link.doctype, companies).negate())
+	)
+	criterion = (IfNull(table[link.fieldname], "") == "") | table[link.fieldname].notin(blocked_masters)
+	if link.doctype_fieldname:
+		criterion = (IfNull(table[link.doctype_fieldname], "") != link.doctype) | criterion
+
+	return criterion
+
+
+def has_inherited_permission(doc, ptype=None, user=None):
+	if not get_inherited_master_links(doc.doctype):
+		return True
+
+	references = defaultdict(set)
+	collect_master_references([doc], references)
+	for doctype, names in references.items():
+		allowed_companies = get_allowed_companies(user, doctype)
+		if allowed_companies and get_blocked_masters(doctype, names, allowed_companies):
+			return False
+
+	return True
+
+
+def get_inherited_master_links(doctype):
+	meta = frappe.get_meta(doctype)
+	if doctype in RESTRICTABLE_MASTER_DOCTYPES or meta.istable or meta.issingle:
+		return []
+
+	return get_master_links(meta)
+
+
+def get_master_links(meta):
+	links = [
+		MasterLink(field.fieldname, field.options)
+		for field in meta.get_link_fields()
+		if field.options in RESTRICTABLE_MASTER_DOCTYPES
+	]
+	for field in meta.get_dynamic_link_fields():
+		links.extend(
+			MasterLink(field.fieldname, doctype, field.options) for doctype in RESTRICTABLE_MASTER_DOCTYPES
+		)
+
+	return links
 
 
 def validate_allowed_companies(doc, method=None):
@@ -140,16 +266,20 @@ def validate_transaction_company(doc, method=None):
 		return
 
 	for doctype, names in get_master_references(doc).items():
-		if blocked := get_blocked_masters(doctype, names, company):
-			frappe.throw(
-				_("{0} {1} cannot be used with Company {2} because of Company Restrictions").format(
-					_(doctype),
-					comma_and([frappe.bold(name) for name in blocked], add_quotes=False),
-					frappe.bold(company),
-				),
-				CompanyRestrictionError,
-				title=_("Restricted to Other Companies"),
-			)
+		validate_masters_for_company(doctype, names, company)
+
+
+def validate_masters_for_company(doctype, names, company):
+	if blocked := get_blocked_masters(doctype, names, [company]):
+		frappe.throw(
+			_("{0} {1} cannot be used with Company {2} because of Company Restrictions").format(
+				_(doctype),
+				comma_and([frappe.bold(name) for name in blocked], add_quotes=False),
+				frappe.bold(company),
+			),
+			CompanyRestrictionError,
+			title=_("Restricted to Other Companies"),
+		)
 
 
 def get_master_references(doc):
@@ -163,22 +293,16 @@ def get_master_references(doc):
 
 
 def collect_master_references(rows, references):
-	meta = frappe.get_meta(rows[0].doctype)
-	link_fields = [field for field in meta.get_link_fields() if field.options in RESTRICTABLE_MASTER_DOCTYPES]
-	dynamic_link_fields = meta.get_dynamic_link_fields()
-
+	links = get_master_links(frappe.get_meta(rows[0].doctype))
 	for row in rows:
-		for field in link_fields:
-			if value := row.get(field.fieldname):
-				references[field.options].add(value)
-
-		for field in dynamic_link_fields:
-			doctype = row.get(field.options)
-			if doctype in RESTRICTABLE_MASTER_DOCTYPES and (value := row.get(field.fieldname)):
-				references[doctype].add(value)
+		for link in links:
+			if link.doctype_fieldname and row.get(link.doctype_fieldname) != link.doctype:
+				continue
+			if value := row.get(link.fieldname):
+				references[link.doctype].add(value)
 
 
-def get_blocked_masters(doctype, names, company):
+def get_blocked_masters(doctype, names, companies):
 	restricted = frappe.get_all(
 		doctype,
 		filters={"name": ("in", sorted(names)), "restrict_to_companies": 1},
@@ -193,7 +317,7 @@ def get_blocked_masters(doctype, names, company):
 			"parenttype": doctype,
 			"parentfield": "allowed_companies",
 			"parent": ("in", restricted),
-			"company": company,
+			"company": ("in", companies),
 		},
 		pluck="parent",
 	)

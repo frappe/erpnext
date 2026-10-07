@@ -83,46 +83,6 @@ def get_columns():
 	]
 
 
-@frappe.whitelist()
-def irs_1099_print(filters: str | dict):
-	if not filters:
-		frappe._dict(
-			{
-				"company": frappe.db.get_default("Company"),
-				"fiscal_year": frappe.db.get_default("Fiscal Year"),
-			}
-		)
-	else:
-		filters = frappe._dict(frappe.parse_json(filters))
-
-	fiscal_year_doc = get_fiscal_year(fiscal_year=filters.fiscal_year, as_dict=True)
-	fiscal_year = cstr(fiscal_year_doc.year_start_date.year)
-
-	company_address = get_payer_address_html(filters.company)
-	company_tin = frappe.db.get_value("Company", filters.company, "tax_id")
-
-	columns, data = execute(filters)
-	template = frappe.get_doc("Print Format", "IRS 1099 Form").html
-	output = PdfWriter()
-
-	for row in data:
-		row["fiscal_year"] = fiscal_year
-		row["company"] = filters.company
-		row["company_tin"] = company_tin
-		row["payer_street_address"] = company_address
-		row["recipient_street_address"], row["recipient_city_state"] = get_street_address_html(
-			"Supplier", row.supplier
-		)
-		row["payments"] = fmt_money(row["payments"], precision=0, currency="USD")
-		get_pdf(render_template(template, row), output=output if output else None)
-
-	frappe.local.response.filename = (
-		f"{filters.fiscal_year} {filters.company} IRS 1099 Forms{IRS_1099_FORMS_FILE_EXTENSION}"
-	)
-	frappe.local.response.filecontent = read_multi_pdf(output)
-	frappe.local.response.type = "download"
-
-
 def get_payer_address_html(company):
 	address = frappe.qb.DocType("Address")
 	address_list = (

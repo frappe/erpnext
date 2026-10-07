@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2022-01-10 13:03:26.237081",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/currency-exchange-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -101,6 +102,7 @@
    "label": "Use HTTP Protocol"
   }
  ],
+ "icon": "refresh-cw",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],

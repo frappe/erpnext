@@ -13,27 +13,35 @@ from erpnext.setup.setup_wizard.operations import install_fixtures as fixtures
 def get_setup_stages(args=None):  # nosemgrep
 	stages = [
 		{
-			"status": _("Installing presets"),
-			"fail_msg": _("Failed to install presets"),
-			"tasks": [{"fn": stage_fixtures, "args": args, "fail_msg": _("Failed to install presets")}],
+			"status": _("Setting up the basics"),
+			"fail_msg": _("We couldn't set up the basics"),
+			"tasks": [{"fn": stage_fixtures, "args": args, "fail_msg": _("We couldn't set up the basics")}],
 		},
 		{
-			"status": _("Setting up company"),
-			"fail_msg": _("Failed to setup company"),
-			"tasks": [{"fn": setup_company, "args": args, "fail_msg": _("Failed to setup company")}],
+			"status": _("Creating your company"),
+			"fail_msg": _("We couldn't create your company"),
+			"tasks": [{"fn": setup_company, "args": args, "fail_msg": _("We couldn't create your company")}],
 		},
 		{
-			"status": _("Setting defaults"),
-			"fail_msg": _("Failed to set defaults"),
+			"status": _("Applying recommended settings"),
+			"fail_msg": _("We couldn't apply the recommended settings"),
 			"tasks": [
-				{"fn": setup_defaults, "args": args, "fail_msg": _("Failed to setup defaults")},
+				{
+					"fn": setup_defaults,
+					"args": args,
+					"fail_msg": _("We couldn't apply the recommended settings"),
+				},
 			],
 		},
 		{
 			"status": _("Personalizing your setup"),
-			"fail_msg": _("Failed to personalize your setup"),
+			"fail_msg": _("We couldn't personalize your setup"),
 			"tasks": [
-				{"fn": capture_user_persona, "args": args, "fail_msg": _("Failed to personalize your setup")}
+				{
+					"fn": capture_user_persona,
+					"args": args,
+					"fail_msg": _("We couldn't personalize your setup"),
+				}
 			],
 		},
 	]
@@ -41,9 +49,9 @@ def get_setup_stages(args=None):  # nosemgrep
 	if args.get("setup_demo"):
 		stages.append(
 			{
-				"status": _("Creating demo data"),
-				"fail_msg": _("Failed to create demo data"),
-				"tasks": [{"fn": setup_demo, "args": args, "fail_msg": _("Failed to create demo data")}],
+				"status": _("Adding demo data"),
+				"fail_msg": _("We couldn't add the demo data"),
+				"tasks": [{"fn": setup_demo, "args": args, "fail_msg": _("We couldn't add the demo data")}],
 			}
 		)
 
@@ -53,6 +61,10 @@ def get_setup_stages(args=None):  # nosemgrep
 def capture_user_persona(args):  # nosemgrep
 	"""Send the persona answers captured on the setup slide to telemetry."""
 	if not args:
+		return
+
+	if frappe.conf.sk_hrms:
+		# HR-only site, the HRMS app captures its own persona
 		return
 
 	capture(

@@ -558,7 +558,6 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	for gle in gl_entries:
 		group_by_value = gle.get(group_by)
 		gle.voucher_subtype = _(gle.voucher_subtype)
-		gle.against_voucher_type = _(gle.against_voucher_type)
 		gle.remarks = _(gle.remarks)
 		gle.party_type = _(gle.party_type)
 
@@ -757,7 +756,13 @@ def get_columns(filters):
 		]
 
 	columns += [
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": 120,
+		},
 		{
 			"label": _("Voucher Subtype"),
 			"fieldname": "voucher_subtype",
@@ -802,7 +807,13 @@ def get_columns(filters):
 
 	columns.extend(
 		[
-			{"label": _("Against Voucher Type"), "fieldname": "against_voucher_type", "width": 100},
+			{
+				"label": _("Against Voucher Type"),
+				"fieldname": "against_voucher_type",
+				"fieldtype": "Link",
+				"options": "DocType",
+				"width": 100,
+			},
 			{
 				"label": _("Against Voucher"),
 				"fieldname": "against_voucher",

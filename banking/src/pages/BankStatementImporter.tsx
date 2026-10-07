@@ -226,7 +226,7 @@ const StatementImportLog = () => {
             field: "creation",
             order: "desc"
         },
-        limit: 10
+        limit: 20
     }, bankAccount ? undefined : null, {
         revalidateOnFocus: false
     })

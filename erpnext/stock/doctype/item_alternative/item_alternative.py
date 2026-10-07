@@ -56,7 +56,7 @@ class ItemAlternative(Document):
 
 				frappe.msgprint(
 					_("The value of {0} differs between Items {1} and {2}").format(
-						frappe.bold(item_meta.get_label(field)),
+						frappe.bold(item_meta.get_translated_label(field)),
 						frappe.bold(self.alternative_item_code),
 						frappe.bold(self.item_code),
 					),

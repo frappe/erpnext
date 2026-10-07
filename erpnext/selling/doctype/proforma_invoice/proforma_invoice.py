@@ -8,6 +8,8 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, now
 from frappe.utils.file_manager import save_file
 
+from erpnext.utilities.email_template import get_email_subject_and_message
+
 
 class ProformaInvoice(Document):
 	# begin: auto-generated types
@@ -43,7 +45,58 @@ class ProformaInvoice(Document):
 
 	def validate(self) -> None:
 		validate_feature_enabled()
+		self.validate_amended_doc()
+		self.validate_sales_order()
+		self.set_item_values()
 		self.set_total_qty()
+
+	def validate_sales_order(self) -> None:
+		if frappe.db.get_value("Sales Order", self.sales_order, "docstatus") != 1:
+			frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
+
+	def set_item_values(self) -> None:
+		"""Copy each line's item details from its Sales Order line, then set the rate and amount."""
+		so_items = {
+			row.name: row
+			for row in frappe.get_all(
+				"Sales Order Item",
+				filters={"parent": self.sales_order, "parenttype": "Sales Order"},
+				fields=["name", "item_code", "item_name", "description", "uom", "rate"],
+			)
+		}
+		for item in self.items:
+			so_item = so_items.get(item.so_detail)
+			if not so_item:
+				frappe.throw(
+					_("Row #{0}: The line does not belong to Sales Order {1}").format(
+						item.idx, frappe.bold(self.sales_order)
+					)
+				)
+			item.item_code = so_item.item_code
+			item.item_name = so_item.item_name
+			item.uom = so_item.uom
+			item.description = item.description or so_item.description
+			self.set_rate_and_amount(item, so_item.rate)
+
+	def set_rate_and_amount(self, item, sales_order_rate: float) -> None:
+		"""Quantity basis bills at the Sales Order rate; Amount basis derives the rate from the amount."""
+		if flt(item.qty) <= 0:
+			frappe.throw(_("Row #{0}: Qty must be a positive number").format(item.idx))
+		if self.based_on == "Amount":
+			if flt(item.amount) <= 0:
+				frappe.throw(_("Row #{0}: Amount must be a positive number").format(item.idx))
+			item.rate = flt(item.amount) / flt(item.qty)
+		else:
+			item.rate = sales_order_rate
+			item.amount = flt(item.qty) * flt(sales_order_rate)
+
+	def validate_amended_doc(self) -> None:
+		if self.amended_from:
+			frappe.throw(
+				_("Cannot amend {0} {1}, please create a new one instead.").format(
+					self.doctype, frappe.bold(self.amended_from)
+				)
+			)
 
 	def before_submit(self) -> None:
 		self.status = "Issued"
@@ -78,6 +131,7 @@ class ProformaInvoice(Document):
 		for item in sales_order.items:
 			item.qty = lines[item.name].qty
 			item.rate = lines[item.name].rate
+			item.description = lines[item.name].description
 			item.discount_amount = 0
 			item.discount_percentage = 0
 		sales_order.run_method("calculate_taxes_and_totals")
@@ -94,16 +148,27 @@ class ProformaInvoice(Document):
 			letterhead=self.letter_head,
 		)
 
+	def get_email_content(self) -> tuple[str, str]:
+		return get_email_subject_and_message(
+			frappe.db.get_single_value("Selling Settings", "proforma_email_template"),
+			{"doc": self},
+			default_subject=_("Proforma Invoice {0}").format(self.name),
+			default_message=_("Please find attached the proforma invoice {0}.").format(self.name),
+		)
+
 
 @frappe.whitelist()
 def get_sales_order_items(sales_order: str) -> list[dict]:
 	"""Sales Order lines (with already-proformed totals) to drive the create-proforma dialog."""
-	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
+	# this returns line rates and amounts for a caller-named order, so the order itself is what
+	# decides access. check_permission applies User Permissions, which a doctype check would not.
+	sales_order_doc = frappe.get_doc("Sales Order", sales_order, check_permission="read")
 	proformed = get_proformed_totals(sales_order)
 	return [
 		{
 			"item_code": item.item_code,
 			"item_name": item.item_name,
+			"description": item.description,
 			"uom": item.uom,
 			"so_detail": item.name,
 			"qty": flt(item.qty),
@@ -143,37 +208,36 @@ def make_proforma_invoice(
 	print_format: str | None = None,
 	letter_head: str | None = None,
 ) -> str:
-	"""The sole creation path for a Proforma Invoice (the doctype is `in_create`).
+	"""Create and submit a Proforma Invoice from the Sales Order dialog.
 
 	`based_on` decides what the user edited per line: "Quantity" (rate fixed, amount = qty x rate)
 	or "Amount" (both qty and amount entered, rate derived). `hide_item_qty` (Amount basis only)
 	hides the qty and rate on the printed proforma for a clean value-based document.
 	"""
 	validate_feature_enabled()
-	selected = frappe.parse_json(items)
-	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
-	if sales_order_doc.docstatus != 1:
-		frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
-	so_items = {item.name: item for item in sales_order_doc.items}
-
 	proforma = frappe.new_doc("Proforma Invoice")
 	proforma.sales_order = sales_order
 	proforma.based_on = based_on
 	proforma.hide_item_qty = 1 if (based_on == "Amount" and int(hide_item_qty or 0)) else 0
 	if naming_series:
 		proforma.naming_series = naming_series
-	proforma.print_format = print_format or frappe.db.get_single_value(
-		"Selling Settings", "default_proforma_print_format"
+	proforma.print_format = (
+		print_format
+		or frappe.db.get_single_value("Selling Settings", "default_proforma_print_format")
+		or "Proforma Invoice"
 	)
 	proforma.letter_head = letter_head
 
-	for row in selected:
-		so_item = so_items.get(row.get("so_detail"))
-		if not so_item:
-			continue
-		line = _proforma_line(so_item, based_on, row)
-		if line:
-			proforma.append("items", line)
+	for row in frappe.parse_json(items):
+		proforma.append(
+			"items",
+			{
+				"so_detail": row.get("so_detail"),
+				"qty": row.get("qty"),
+				"amount": row.get("amount"),
+				"description": row.get("description"),
+			},
+		)
 
 	if not proforma.items:
 		frappe.throw(_("Please enter a quantity or amount for at least one item."))
@@ -183,35 +247,10 @@ def make_proforma_invoice(
 	return proforma.name
 
 
-def _proforma_line(so_item, based_on: str, row: dict) -> dict | None:
-	if based_on == "Amount":
-		# Amount basis: both qty and amount are user-entered; the rate is derived.
-		qty = flt(row.get("qty"))
-		amount = flt(row.get("amount"))
-		if amount <= 0 or qty <= 0:
-			return None
-		rate = amount / qty
-	else:
-		qty = flt(row.get("qty"))
-		if qty <= 0:
-			return None
-		rate = flt(so_item.rate)
-		amount = qty * rate
-
-	return {
-		"item_code": so_item.item_code,
-		"item_name": so_item.item_name,
-		"uom": so_item.uom,
-		"qty": qty,
-		"rate": rate,
-		"amount": amount,
-		"so_detail": so_item.name,
-	}
-
-
 @frappe.whitelist()
 def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	proforma = frappe.get_doc("Proforma Invoice", proforma_name)
+	proforma.check_permission("email")
 	if proforma.docstatus != 1:
 		frappe.throw(_("Only an issued Proforma Invoice can be emailed."))
 	if not proforma.proforma_pdf:
@@ -220,10 +259,11 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	file_name = frappe.db.get_value("File", {"file_url": proforma.proforma_pdf}, "name")
 	if not file_name:
 		frappe.throw(_("The attached PDF file could not be found."))
+	subject, message = proforma.get_email_content()
 	frappe.sendmail(
 		recipients=[email.strip() for email in recipients.split(",") if email.strip()],
-		subject=_("Proforma Invoice {0}").format(proforma.name),
-		message=_("Please find attached the proforma invoice {0}.").format(proforma.name),
+		subject=subject,
+		message=message,
 		attachments=[{"fid": file_name}],
 	)
 	proforma.db_set("sent_on", now())

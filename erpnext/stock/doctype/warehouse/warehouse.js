@@ -33,6 +33,12 @@ frappe.ui.form.on("Warehouse", {
 		});
 	},
 
+	company: function (frm) {
+		if (frm.doc.account) {
+			frm.set_value("account", "");
+		}
+	},
+
 	refresh: function (frm) {
 		frm.toggle_display("warehouse_name", frm.doc.__islocal);
 		frm.toggle_display(["address_html", "contact_html"], !frm.doc.__islocal);
@@ -57,7 +63,7 @@ frappe.ui.form.on("Warehouse", {
 				);
 			}
 
-			if ("Stock Balance" in frappe.boot.user.all_reports) {
+			if ("Stock Balance" in frappe.boot.allowed_reports) {
 				frm.add_custom_button(
 					__("Stock Balance"),
 					function () {
@@ -76,7 +82,7 @@ frappe.ui.form.on("Warehouse", {
 		if (
 			!frm.doc.is_group &&
 			frm.doc.__onload?.account &&
-			"General Ledger" in frappe.boot.user.all_reports
+			"General Ledger" in frappe.boot.allowed_reports
 		) {
 			frm.add_custom_button(
 				__("General Ledger", null, "Warehouse"),

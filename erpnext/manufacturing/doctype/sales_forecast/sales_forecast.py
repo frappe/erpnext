@@ -35,11 +35,36 @@ class SalesForecast(Document):
 		self.db_set("status", "Cancelled")
 
 	def generate_manual_demand(self):
+		if not self.selected_items:
+			return
+
+		item_details_by_code = {
+			item.name: item
+			for item in frappe.get_all(
+				"Item",
+				filters={"name": ["in", [row.item_code for row in self.selected_items]]},
+				fields=["name", "item_name", "stock_uom as uom"],
+			)
+		}
+		ascii_items_by_lowercase_code = {}
+		if frappe.db.db_type == "mariadb":
+			# Unicode casefold does not always match MariaDB's collation.
+			ascii_items_by_lowercase_code = {
+				code.lower(): item for code, item in item_details_by_code.items() if code.isascii()
+			}
+
 		forecast_demand = []
 		for row in self.selected_items:
-			item_details = frappe.db.get_value(
-				"Item", row.item_code, ["item_name", "stock_uom as uom"], as_dict=True
-			)
+			if row.item_code not in item_details_by_code:
+				matching_item = None
+				if row.item_code.isascii():
+					matching_item = ascii_items_by_lowercase_code.get(row.item_code.lower())
+
+				# Fall back to the database for other collation-equivalent Item codes.
+				item_details_by_code[row.item_code] = matching_item or frappe.db.get_value(
+					"Item", row.item_code, ["item_name", "stock_uom as uom"], as_dict=True
+				)
+			item_details = item_details_by_code[row.item_code]
 
 			for index in range(self.demand_number):
 				if self.frequency == "Monthly":

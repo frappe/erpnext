@@ -7,6 +7,7 @@
  "creation": "2022-02-21 11:54:09.632218",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/employee",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -169,6 +170,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "last_name",
    "fieldtype": "Data",
+   "in_import_template": 1,
    "label": "Last Name"
   },
   {
@@ -353,6 +355,7 @@
   {
    "fieldname": "department",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Department",
@@ -363,7 +366,7 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
-   "in_global_search": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Designation",
    "oldfieldname": "designation",
@@ -375,6 +378,7 @@
    "fieldname": "reports_to",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Reports to",
    "oldfieldname": "reports_to",
    "oldfieldtype": "Link",
@@ -383,6 +387,7 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Branch",
    "oldfieldname": "branch",
@@ -394,6 +399,7 @@
    "fieldname": "holiday_list",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Holiday List",
    "oldfieldname": "holiday_list",
    "oldfieldtype": "Link",
@@ -440,6 +446,8 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Mobile",
    "options": "Phone"
   },
@@ -460,6 +468,8 @@
    "description": "Provide Email Address registered in company",
    "fieldname": "company_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Company Email",
    "oldfieldname": "company_email",
    "oldfieldtype": "Data",
@@ -468,6 +478,8 @@
   {
    "fieldname": "personal_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Personal Email",
    "options": "Email"
   },
@@ -829,12 +841,12 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "user",
  "idx": 24,
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2026-03-23 15:26:05.149280",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
@@ -874,6 +886,46 @@
    "role": "HR Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Fleet Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

@@ -113,6 +113,8 @@ def make_purchase_receipt(
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
 				"reset_value": True,
+				# for POs created in earlier version with tax_withholding_row
+				"condition": lambda doc: not doc.is_tax_withholding_account,
 			},
 		},
 		postprocess=post_process,
@@ -166,5 +168,7 @@ def add_po_items_to_pr(scr_doc, target_doc):
 						"warehouse": item.warehouse,
 						"purchase_order": item.parent,
 						"purchase_order_item": item.name,
+						"project": item.project,
+						"cost_center": item.cost_center,
 					},
 				)

@@ -14,12 +14,10 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 
 		wh = "_Test Warehouse - _TC"
 		wo = make_wo_order_test_record(production_item="_Test FG Item", qty=2, source_warehouse=wh)
-		self.addCleanup(self._cancel_and_delete, "Work Order", wo.name)
 
 		rm = wo.required_items[0].item_code
 		for qty in (3, 4):
-			po = create_purchase_order(item_code=rm, warehouse=wh, qty=qty, rate=10)
-			self.addCleanup(self._cancel_and_delete, "Purchase Order", po.name)
+			create_purchase_order(item_code=rm, warehouse=wh, qty=qty, rate=10)
 
 		filters = {
 			"company": "_Test Company",
@@ -34,14 +32,3 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		self.assertTrue(rm_rows)
 		# both on-order PO lines (3 + 4) are summed, not arbitrary-picked
 		self.assertEqual(rm_rows[0]["arrival_qty"], 7)
-
-	@staticmethod
-	def _cancel_and_delete(doctype, name):
-		import frappe
-
-		if not frappe.db.exists(doctype, name):
-			return
-		doc = frappe.get_doc(doctype, name)
-		if doc.docstatus == 1:
-			doc.cancel()
-		frappe.delete_doc(doctype, name, force=1)

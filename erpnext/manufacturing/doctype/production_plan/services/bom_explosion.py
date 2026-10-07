@@ -4,7 +4,8 @@
 """BOM explosion helpers for Production Plan material planning."""
 
 import frappe
-from frappe.query_builder.functions import IfNull, Max, Min, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
+from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_uom_conversion_factor
 
@@ -21,7 +22,7 @@ def _exploded_items_query(company, bom_no, include_non_stock_items, planned_qty)
 	item = frappe.qb.DocType("Item")
 	item_default = frappe.qb.DocType("Item Default")
 	item_uom = frappe.qb.DocType("UOM Conversion Detail")
-	return (
+	rows = (
 		frappe.qb.from_(bei)
 		.join(bom)
 		.on(bom.name == bei.parent)
@@ -36,19 +37,92 @@ def _exploded_items_query(company, bom_no, include_non_stock_items, planned_qty)
 		.groupby(bei.item_code, bei.stock_uom)
 	).run(as_dict=True)
 
+	_apply_representative_lines(
+		rows, "BOM Explosion Item", bom_no, ("item_code", "stock_uom"), include_non_stock_items
+	)
+	return rows
+
+
+def _apply_representative_lines(rows, doctype, bom_no, keys, include_non_stock_items=True):
+	"""Fill description/source_warehouse from a single real BOM line per group.
+
+	Both describe a line, not an item, so a BOM listing the same item more than once holds
+	several values per group. Aggregating each independently can pair one line's description
+	with another's warehouse, and Max() over text is a sort -- MariaDB folds case, PostgreSQL
+	orders by byte value, so the two engines pick differently. Take the first line by idx.
+
+	Only groups built from more than one line need this. Where a group has a single line, Max() of
+	one value is that value, so the selected columns are already exact and no query is issued --
+	which matters because this runs once per BOM in a recursive explosion.
+	"""
+	repeated = [row for row in rows if (row.pop("line_count", 1) or 1) > 1]
+	if not repeated:
+		return
+
+	representative = _representative_lines(doctype, bom_no, tuple(keys), include_non_stock_items)
+
+	for row in repeated:
+		line = representative.get(tuple(row.get(key) for key in keys))
+		if line:
+			row.description = line.description
+			row.source_warehouse = line.source_warehouse
+
+
+@request_cache
+def _representative_lines(doctype, bom_no, keys, include_non_stock_items):
+	"""Cached per request: the explosion recurses and commonly revisits the same sub-BOM."""
+	# only BOM Item carries is_phantom_item, and only its query ORs the phantom flag into the stock
+	# filter; the explosion table has neither
+	filters_phantom = doctype == "BOM Item"
+	fields = ["item_code", "stock_uom", "description", "source_warehouse"]
+	if filters_phantom:
+		fields.append("is_phantom_item")
+
+	lines = frappe.get_all(
+		doctype,
+		filters={
+			"parent": bom_no,
+			"parenttype": "BOM",
+			"is_sub_assembly_item": 0,
+			"docstatus": ("<", 2),
+		},
+		fields=fields,
+		order_by="idx",
+	)
+
+	# mirror the caller's stock filter: a non-stock line the main query excluded must not become
+	# the representative for a group that only exists because of a phantom line
+	if not include_non_stock_items and filters_phantom and lines:
+		stock_items = set(
+			frappe.get_all(
+				"Item",
+				filters={"name": ("in", list({line.item_code for line in lines})), "is_stock_item": 1},
+				pluck="name",
+			)
+		)
+		lines = [line for line in lines if line.item_code in stock_items or line.is_phantom_item]
+
+	representative = {}
+	for line in lines:
+		representative.setdefault(tuple(line.get(key) for key in keys), line)
+
+	return representative
+
 
 def _exploded_item_columns(bei, bom, item, item_default, item_uom, planned_qty):
-	# only item_code/stock_uom are grouped; the rest are functionally dependent on the grouped item
-	# or arbitrary per BOM Item on MySQL -> Max() keeps the GROUP BY valid on postgres with the same
-	# value MySQL picked.
+	# every column here is functionally dependent on the grouped item_code -- Item, Item Default and
+	# UOM Conversion Detail are joined on it and the BOM is pinned by the filter -- so Max() returns
+	# their single value. The BOM-line columns come from a representative line instead; see
+	# _apply_representative_lines.
 	return [
 		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
 		Max(item.item_name).as_("item_name"),
 		Max(item.name).as_("item_code"),
 		Max(bei.description).as_("description"),
+		Max(bei.source_warehouse).as_("source_warehouse"),
+		Count(bei.name).distinct().as_("line_count"),
 		bei.stock_uom,
 		Max(item.min_order_qty).as_("min_order_qty"),
-		Max(bei.source_warehouse).as_("source_warehouse"),
 		Max(item.default_material_request_type).as_("default_material_request_type"),
 		Max(item.min_order_qty).as_("min_order_qty"),
 		Max(item_default.default_warehouse).as_("default_warehouse"),
@@ -96,7 +170,7 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 	item = frappe.qb.DocType("Item")
 	item_default = frappe.qb.DocType("Item Default")
 	item_uom = frappe.qb.DocType("UOM Conversion Detail")
-	return (
+	rows = (
 		frappe.qb.from_(bom_item)
 		.join(bom)
 		.on(bom.name == bom_item.parent)
@@ -113,6 +187,9 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 		.orderby(Min(bom_item.idx))
 	).run(as_dict=True)
 
+	_apply_representative_lines(rows, "BOM Item", bom_no, ("item_code",), include_non_stock_items)
+	return rows
+
 
 def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty):
 	qty = IfNull(parent_qty * Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)) * planned_qty, 0).as_("qty")
@@ -128,9 +205,10 @@ def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, pl
 		Max(item.item_name).as_("item_name"),
 		qty,
 		Max(item.is_sub_contracted_item).as_("is_sub_contracted"),
-		Max(bom_item.source_warehouse).as_("source_warehouse"),
-		Max(item.default_bom).as_("default_bom"),
 		Max(bom_item.description).as_("description"),
+		Max(bom_item.source_warehouse).as_("source_warehouse"),
+		Count(bom_item.name).distinct().as_("line_count"),
+		Max(item.default_bom).as_("default_bom"),
 		Max(bom_item.stock_uom).as_("stock_uom"),
 		Max(item.min_order_qty).as_("min_order_qty"),
 		Max(item.safety_stock).as_("safety_stock"),

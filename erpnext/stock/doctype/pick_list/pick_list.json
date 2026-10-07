@@ -2,7 +2,9 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
+ "description": "The items and quantities to pick from the warehouse.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pick-list",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -80,7 +82,8 @@
    "fieldname": "work_order",
    "fieldtype": "Link",
    "label": "Work Order",
-   "options": "Work Order"
+   "options": "Work Order",
+   "search_index": 1
   },
   {
    "fieldname": "locations",
@@ -276,9 +279,10 @@
    "show_dashboard": 1
   }
  ],
+ "icon": "list-checks",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-01 14:27:50.617011",
+ "modified": "2026-08-07 10:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

@@ -22,6 +22,7 @@ def get_columns():
 			"width": 150,
 		},
 		{"label": _("Lead Name"), "fieldname": "lead_name", "fieldtype": "Data", "width": 120},
+		{"label": _("Designation"), "fieldname": "job_title", "fieldtype": "Data", "width": 120},
 		{"fieldname": "status", "label": _("Status"), "fieldtype": "Data", "width": 100},
 		{
 			"fieldname": "lead_owner",
@@ -84,6 +85,7 @@ def get_data(filters):
 		.select(
 			lead.name,
 			lead.lead_name,
+			lead.job_title,
 			lead.status,
 			lead.lead_owner,
 			lead.territory,

@@ -4,6 +4,9 @@ from frappe.model.document import Document
 from frappe.utils import cstr, now, today
 from pypika import functions
 
+# pre-sales statuses an event today moves to Open; others (Converted, Lost, ...) are kept
+STATUSES_REOPENED_BY_EVENT = {"Lead": ("Lead", "Replied", "Interested"), "Opportunity": ("Replied",)}
+
 
 def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 	if doc.is_disabled:
@@ -11,32 +14,27 @@ def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 
 
 def update_lead_phone_numbers(contact, method):
-	if contact.phone_nos:
-		contact_lead = contact.get_link_for("Lead")
-		if contact_lead:
-			phone = mobile_no = contact.phone_nos[0].phone
+	"""Copy the contact's primary phone and mobile number to its Lead, including ones cleared on edit."""
+	lead = contact.get_link_for("Lead")
+	numbers = {
+		field: contact.get(field) or ""
+		for field in ("phone", "mobile_no")
+		if contact.get(field) or (not contact.is_new() and contact.has_value_changed(field))
+	}
+	if not (lead and numbers):
+		return
 
-			if len(contact.phone_nos) > 1:
-				# get the default phone number
-				primary_phones = [
-					phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_phone
-				]
-				if primary_phones:
-					phone = primary_phones[0]
-
-				# get the default mobile number
-				primary_mobile_nos = [
-					phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_mobile_no
-				]
-				if primary_mobile_nos:
-					mobile_no = primary_mobile_nos[0]
-
-			lead = frappe.get_doc("Lead", contact_lead)
-			lead.db_set("phone", phone)
-			lead.db_set("mobile_no", mobile_no)
+	current = frappe.db.get_value("Lead", lead, list(numbers), as_dict=True)
+	if changed := {
+		field: number for field, number in numbers.items() if (current.get(field) or "") != number
+	}:
+		frappe.db.set_value("Lead", lead, changed, update_modified=False)
 
 
-def copy_comments(doctype, docname, doc):
+def copy_comments(doctype, docname, doc, ignore_permissions=False):
+	if not can_read_source(doctype, docname, ignore_permissions):
+		return
+
 	comments = frappe.db.get_values(
 		"Comment",
 		filters={"reference_doctype": doctype, "reference_name": docname, "comment_type": "Comment"},
@@ -47,10 +45,13 @@ def copy_comments(doctype, docname, doc):
 		comment.name = None
 		comment.reference_doctype = doc.doctype
 		comment.reference_name = doc.name
-		comment.insert()
+		comment.insert(ignore_permissions=True)
 
 
-def link_communications(doctype, docname, doc):
+def link_communications(doctype, docname, doc, ignore_permissions=False):
+	if not can_read_source(doctype, docname, ignore_permissions):
+		return
+
 	communication_list = get_linked_communication_list(doctype, docname)
 
 	for communication in communication_list:
@@ -130,26 +131,37 @@ def link_events_with_prospect(event, method):
 			event.save()
 
 
-def link_open_tasks(ref_doctype, ref_docname, doc):
+def link_open_tasks(ref_doctype, ref_docname, doc, ignore_permissions=False):
+	if not can_read_source(ref_doctype, ref_docname, ignore_permissions):
+		return
+
 	todos = get_open_todos(ref_doctype, ref_docname)
 
 	for todo in todos:
 		todo_doc = frappe.get_doc("ToDo", todo.name)
 		todo_doc.reference_type = doc.doctype
 		todo_doc.reference_name = doc.name
-		todo_doc.save()
+		todo_doc.save(ignore_permissions=ignore_permissions)
 
 
-def link_open_events(ref_doctype, ref_docname, doc):
+def link_open_events(ref_doctype, ref_docname, doc, ignore_permissions=False):
+	if not can_read_source(ref_doctype, ref_docname, ignore_permissions):
+		return
+
 	events = get_open_events(ref_doctype, ref_docname)
 	for event in events:
 		event_doc = frappe.get_doc("Event", event.name)
 		event_doc.add_participant(doc.doctype, doc.name)
-		event_doc.save()
+		event_doc.save(ignore_permissions=ignore_permissions)
 
 
 @frappe.whitelist()
 def get_open_activities(ref_doctype: str, ref_docname: str):
+	# both arguments are caller supplied and nothing below checked them: the ToDo and Event rows are
+	# read with get_all, so the referenced document is what decides who may see its activities.
+	# doc= applies User Permissions; the desk only asks this for a form the caller has open.
+	frappe.has_permission(ref_doctype, doc=ref_docname, throw=True)
+
 	tasks = get_open_todos(ref_doctype, ref_docname)
 	events = get_open_events(ref_doctype, ref_docname)
 	tasks_history = get_closed_todos(ref_doctype, ref_docname)
@@ -177,6 +189,11 @@ def get_open_events(ref_doctype, ref_docname):
 
 def get_closed_events(ref_doctype, ref_docname):
 	return get_filtered_events(ref_doctype, ref_docname, open=False)
+
+
+def can_read_source(doctype, docname, ignore_permissions=False):
+	# whatever is carried forward belongs to the source document, so its read access decides
+	return bool(ignore_permissions) or frappe.has_permission(doctype, "read", docname)
 
 
 def get_filtered_todos(ref_doctype, ref_docname, status: str | tuple[str, str]):
@@ -244,7 +261,12 @@ def open_leads_opportunities_based_on_todays_event():
 	data = query.run(as_dict=True)
 
 	for d in data:
-		frappe.db.set_value(d.reference_doctype, d.reference_docname, "status", "Open")
+		frappe.db.set_value(
+			d.reference_doctype,
+			{"name": d.reference_docname, "status": ("in", STATUSES_REOPENED_BY_EVENT[d.reference_doctype])},
+			"status",
+			"Open",
+		)
 
 
 class CRMNote(Document):
@@ -256,6 +278,9 @@ class CRMNote(Document):
 
 	@frappe.whitelist()
 	def edit_note(self, note: str, row_id: str):
+		# db_update() skips the write check that save() does in add_note/delete_note
+		self.check_permission("write")
+
 		for d in self.notes:
 			if cstr(d.name) == row_id:
 				d.note = note

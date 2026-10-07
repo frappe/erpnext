@@ -40,7 +40,6 @@ class TestItemAttribute(ERPNextTestSuite):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
 		variant.save()
-		self.addCleanup(frappe.delete_doc_if_exists, "Item", "_Test Variant Item-L", force=1)
 
 		attribute = frappe.get_doc("Item Attribute", "Test Size")
 		attribute.item_attribute_values = []

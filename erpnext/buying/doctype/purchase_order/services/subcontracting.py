@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.stock.get_item_details import get_default_bom
+
 
 class SubcontractingService:
 	def __init__(self, doc):
@@ -29,7 +31,7 @@ class SubcontractingService:
 								item.idx, item.fg_item
 							)
 						)
-					elif not item.bom and not frappe.get_value("Item", item.fg_item, "default_bom"):
+					elif not item.bom and not get_default_bom(item.fg_item):
 						frappe.throw(
 							_("Row #{0}: Default BOM not found for FG Item {1}").format(
 								item.idx, item.fg_item
@@ -51,9 +53,9 @@ class SubcontractingService:
 		if not doc.is_subcontracted:
 			return
 
-		finished_goods_without_service_item = {
-			d.fg_item for d in doc.items if (not d.item_code and d.fg_item)
-		}
+		finished_goods_without_service_item = list(
+			{d.fg_item for d in doc.items if (not d.item_code and d.fg_item)}
+		)
 
 		if subcontracting_boms := get_subcontracting_boms_for_finished_goods(
 			finished_goods_without_service_item

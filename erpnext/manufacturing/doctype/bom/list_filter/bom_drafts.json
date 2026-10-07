@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"item\", \"label\": \"Item to Manufacture\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"total_cost\", \"label\": \"Total Cost\"}, {\"fieldname\": \"owner\", \"label\": \"Created By\"}]",
+ "creation": "2026-09-30 21:12:56.882610",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"BOM\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.882610",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "BOM",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

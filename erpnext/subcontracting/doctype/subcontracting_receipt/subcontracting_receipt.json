@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2022-04-18 11:20:44.226738",
+ "description": "Items received from a subcontractor.",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -674,6 +675,7 @@
    "options": "get_secondary_items"
   }
  ],
+ "icon": "package-check",
  "in_create": 1,
  "is_submittable": 1,
  "links": [],

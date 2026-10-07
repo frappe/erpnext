@@ -6,8 +6,9 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
+from erpnext import _refuse
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
@@ -170,6 +171,10 @@ def make_asset_movement(
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.purpose = purpose
 	for asset in assets:
+		asset["name"] = cstr(asset.get("name"))
+		if not asset["name"] or not frappe.has_permission("Asset", "select", doc=asset["name"]):
+			_refuse()
+
 		asset = frappe.get_doc("Asset", asset.get("name"))
 		asset_movement.company = asset.get("company")
 		asset_movement.append(

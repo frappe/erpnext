@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import cint
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	wo_list = get_work_orders()
@@ -96,9 +98,13 @@ def get_item_list(wo_list, filters):
 
 
 def get_work_orders():
+	work_order_filters = [{"docstatus": 1, "status": ("!=", "Completed")}]
+	if condition := get_allowed_companies_condition(frappe.qb.DocType("Work Order").company, "Work Order"):
+		work_order_filters.append(condition)
+
 	out = frappe.get_all(
 		"Work Order",
-		filters={"docstatus": 1, "status": ("!=", "Completed")},
+		filters=work_order_filters,
 		fields=["name", "status", "bom_no", "qty", "produced_qty"],
 		order_by="name",
 	)

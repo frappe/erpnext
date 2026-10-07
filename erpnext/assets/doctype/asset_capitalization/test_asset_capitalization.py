@@ -397,6 +397,33 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 		self.assertEqual(actual_gle, {})
 
+	def test_grouped_stock_item_rows_split_fifo_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company"
+		warehouse = create_warehouse("_Test Warehouse for Grouped FIFO Rows", company=company)
+		item = create_item(
+			"_Test Grouped FIFO Rows Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=1
+		)
+		target_item = create_fixed_asset_item("_Test Grouped FIFO Rows Target Item")
+
+		make_purchase_receipt(item_code=item.item_code, qty=1, rate=100, company=company, warehouse=warehouse)
+		make_purchase_receipt(item_code=item.item_code, qty=1, rate=200, company=company, warehouse=warehouse)
+
+		asset_capitalization = frappe.new_doc("Asset Capitalization")
+		asset_capitalization.company = company
+		asset_capitalization.target_item_code = target_item.name
+		asset_capitalization.append(
+			"stock_items", {"item_code": item.item_code, "warehouse": warehouse, "stock_qty": 1}
+		)
+		asset_capitalization.append(
+			"stock_items", {"item_code": item.item_code, "warehouse": warehouse, "stock_qty": 1}
+		)
+		asset_capitalization.insert()
+
+		rates = [d.valuation_rate for d in asset_capitalization.stock_items]
+		self.assertEqual(rates, [100, 200])
+
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
@@ -413,7 +440,11 @@ def create_asset_capitalization(**args):
 	target_asset = frappe.get_doc("Asset", args.target_asset) if args.target_asset else frappe._dict()
 	target_item_code = target_asset.item_code or args.target_item_code
 	company = target_asset.company or args.company or "_Test Company"
-	warehouse = args.warehouse or create_warehouse("_Test Warehouse", company=company)
+	warehouse = args.warehouse or (
+		"_Test Warehouse - _TC"
+		if company == "_Test Company"
+		else create_warehouse("_Test Warehouse", company=company)
+	)
 	source_warehouse = args.source_warehouse or warehouse
 
 	asset_capitalization = frappe.new_doc("Asset Capitalization")

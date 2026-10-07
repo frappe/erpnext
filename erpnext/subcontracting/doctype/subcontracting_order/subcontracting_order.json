@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-04-01 22:39:17.662819",
+ "description": "An order for a subcontractor to make items from your materials.",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -14,6 +15,7 @@
   "supplier_name",
   "supplier_warehouse",
   "supplier_currency",
+  "conversion_rate",
   "column_break_7",
   "company",
   "transaction_date",
@@ -473,6 +475,17 @@
    "read_only": 1
   },
   {
+   "default": "1",
+   "fetch_from": "purchase_order.conversion_rate",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Exchange Rate",
+   "no_copy": 1,
+   "precision": "9",
+   "read_only": 1
+  },
+  {
    "default": "0",
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
@@ -489,10 +502,10 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-file-text",
+ "icon": "shopping-bag",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 11:20:14.512336",
+ "modified": "2026-09-23 10:14:28.331204",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",

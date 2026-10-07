@@ -112,6 +112,43 @@ class TestCouponCode(ERPNextTestSuite):
 	def setUp(self):
 		test_create_test_data()
 
+	def test_disabled_pricing_rule_validation(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		rule = frappe.get_doc("Pricing Rule", coupon.pricing_rule)
+		rule.disable = 1
+		rule.save()
+
+		with self.subTest("new coupon cannot select a disabled rule"):
+			new_coupon = frappe.copy_doc(coupon)
+			new_coupon.coupon_name = "Festival Savings"
+			new_coupon.coupon_code = "FESTSAVE"
+			with self.assertRaisesRegex(frappe.ValidationError, "is disabled"):
+				new_coupon.insert()
+
+		with self.subTest("existing coupon can retain a disabled rule"):
+			coupon.description = "Offer paused"
+			coupon.save()
+			coupon.reload()
+			self.assertEqual(coupon.description, "Offer paused")
+			self.assertEqual(coupon.pricing_rule, rule.name)
+
+		with self.subTest("existing coupon cannot switch to a disabled rule"):
+			disabled_rule = frappe.copy_doc(rule)
+			disabled_rule.insert()
+			coupon.reload()
+			coupon.pricing_rule = disabled_rule.name
+			with self.assertRaisesRegex(frappe.ValidationError, "is disabled"):
+				coupon.save()
+			coupon.reload()
+			self.assertEqual(coupon.pricing_rule, rule.name)
+
+	def test_cannot_save_coupon_with_reversed_validity_dates(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		coupon.valid_from = "2026-09-17"
+		coupon.valid_upto = "2026-09-02"
+		with self.assertRaises(frappe.exceptions.InvalidDates):
+			coupon.save()
+
 	def test_sales_order_with_coupon_code(self):
 		frappe.db.set_value("Coupon Code", "SAVE30", "used", 0)
 

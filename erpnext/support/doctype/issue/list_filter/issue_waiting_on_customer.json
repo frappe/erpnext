@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"modified\", \"label\": \"Last Updated On\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.978857",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Waiting on Customer",
+ "filters": "[[\"Issue\", \"status\", \"in\", [\"Replied\", \"On Hold\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.978857",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Issue-Waiting on Customer",
+ "owner": "Administrator",
+ "reference_doctype": "Issue",
+ "route_signature": "status=[\"in\",[\"Replied\",\"On Hold\"]]",
+ "sort_field": "creation",
+ "sort_order": "asc"
+}

@@ -1,15 +1,20 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import importlib
 
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, formatdate
 
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
 from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
 	get_variables,
+)
+from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
+	VariablePathNotFound,
 )
 
 
@@ -41,17 +46,27 @@ class SupplierScorecardPeriod(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_from_to_dates("start_date", "end_date")
+		self.validate_overlapping_period()
 		self.validate_criteria_weights()
 		self.calculate_variables()
 		self.calculate_criteria()
 		self.calculate_score()
+
+	def validate_overlapping_period(self):
+		if has_overlapping_period(self.scorecard, self.start_date, self.end_date):
+			throw(
+				_("Supplier Scorecard {0} already has a submitted period overlapping {1} to {2}").format(
+					self.scorecard, formatdate(self.start_date), formatdate(self.end_date)
+				)
+			)
 
 	def validate_criteria_weights(self):
 		weight = 0
 		for c in self.criteria:
 			weight += c.weight
 
-		if weight != 100:
+		if flt(weight, 2) != 100:
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_variables(self):
@@ -86,7 +101,8 @@ class SupplierScorecardPeriod(Document):
 	def calculate_score(self):
 		myscore = 0
 		for crit in self.criteria:
-			myscore += crit.score * crit.weight / 100.0
+			if crit.max_score:
+				myscore += crit.score * crit.weight / crit.max_score
 		self.total_score = myscore
 
 	def calculate_weighted_score(self, weighing_function):
@@ -118,12 +134,51 @@ class SupplierScorecardPeriod(Document):
 		return my_eval_statement
 
 
+def has_overlapping_period(scorecard, start_date, end_date):
+	return bool(get_overlapping_period_end(scorecard, start_date, end_date))
+
+
+def get_overlapping_period_end(scorecard, start_date, end_date):
+	ends = frappe.get_all(
+		"Supplier Scorecard Period",
+		filters={
+			"scorecard": scorecard,
+			"docstatus": 1,
+			"start_date": ["<=", end_date],
+			"end_date": [">=", start_date],
+		},
+		pluck="end_date",
+		order_by="end_date desc",
+		limit=1,
+	)
+	return ends[0] if ends else None
+
+
 def import_string_path(path):
-	components = path.split(".")
-	mod = __import__(components[0])
-	for comp in components[1:]:
-		mod = getattr(mod, comp)
-	return mod
+	app_name = path.split(".", 1)[0]
+	if app_name not in frappe.get_installed_apps():
+		throw(_("App {0} is not installed").format(app_name), frappe.AppNotInstalledError)
+
+	target, attributes = import_longest_module(path)
+	for attribute in attributes:
+		if not hasattr(target, attribute):
+			throw(_("Could not find path for {0}").format(path), VariablePathNotFound)
+		target = getattr(target, attribute)
+	return target
+
+
+def import_longest_module(path):
+	parts = path.split(".")
+	module = importlib.import_module(parts[0])
+	for index in range(1, len(parts)):
+		module_name = ".".join(parts[: index + 1])
+		try:
+			module = importlib.import_module(module_name)
+		except ModuleNotFoundError as error:
+			if error.name != module_name:
+				raise
+			return module, parts[index:]
+	return module, []
 
 
 def make_supplier_scorecard(source_name, target_doc=None):

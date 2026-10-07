@@ -20,7 +20,6 @@ from erpnext.assets.doctype.asset.test_asset import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
@@ -32,7 +31,6 @@ class TestAssetRepair(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
 		set_depreciation_settings_in_company()
-		create_item("_Test Stock Item")
 
 	def test_asset_status(self):
 		date = nowdate()
@@ -97,6 +95,21 @@ class TestAssetRepair(ERPNextTestSuite):
 	def test_repair_status_after_submit(self):
 		asset_repair = create_asset_repair(submit=1)
 		self.assertNotEqual(asset_repair.repair_status, "Pending")
+
+	def test_downtime_stays_in_sync_with_dates(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(asset=asset)
+
+		asset_repair.failure_date = "2026-07-31 09:00:00"
+		asset_repair.completion_date = "2026-07-31 11:00:00"
+		asset_repair.repair_status = "Completed"
+		asset_repair.save()
+		self.assertEqual(asset_repair.downtime, "2.0 Hrs")
+
+		# editing a date must refresh downtime, not leave a stale value
+		asset_repair.completion_date = "2026-07-31 14:30:00"
+		asset_repair.save()
+		self.assertEqual(asset_repair.downtime, "5.5 Hrs")
 
 	def test_stock_items(self):
 		asset_repair = create_asset_repair(stock_consumption=1)

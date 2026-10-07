@@ -6,6 +6,10 @@ from frappe.core.doctype.user_permission.user_permission import add_user_permiss
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -29,6 +33,27 @@ class TestQueries(ERPNextTestSuite):
 		self.assertGreaterEqual(len(query(txt="_Test Lead")), 4)
 		self.assertEqual(len(query(txt="_Test Lead 4")), 1)
 
+	def test_lead_query_ranking_is_case_insensitive(self):
+		"""A match at the start must rank first whatever its case.
+
+		The filter uses .like(), which frappe renders as ILIKE on PostgreSQL, so both leads match.
+		Ranking used a bare Locate(), which becomes case-sensitive strpos() there: the upper-cased
+		lead scores no match, falls back to 99999 and sorts last, while MariaDB's case-insensitive
+		LOCATE ranks it first. Same query, different order -- and a different page when page_len is
+		small enough to cut between them.
+		"""
+		early, late = "ZZABCD Ranking Lead", "Ranking Lead zzabcd"
+		for lead_name in (early, late):
+			if not frappe.db.exists("Lead", {"lead_name": lead_name}):
+				frappe.get_doc({"doctype": "Lead", "lead_name": lead_name}).insert()
+
+		query = add_default_params(queries.lead_query, "Lead")
+		names = [row[1] for row in query(txt="zzabcd")]
+
+		self.assertIn(early, names)
+		self.assertIn(late, names)
+		self.assertLess(names.index(early), names.index(late))
+
 	def test_item_query(self):
 		query = add_default_params(queries.item_query, "Item")
 
@@ -47,6 +72,18 @@ class TestQueries(ERPNextTestSuite):
 		query(txt="", filters={"customer": ""})
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
+
+	def test_subcontracted_item_query(self):
+		variant, _ = make_subcontracted_variant()
+		item_without_bom = make_item(
+			"Subcontracted Item Without BOM", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		)
+		query = add_default_params(queries.subcontracted_item_query, "Item")
+
+		items = query(txt="Subcontracted", page_len=100)
+
+		self.assert_nested_in(variant.name, items)
+		self.assertNotIn(item_without_bom.name, [row[0] for row in items])
 
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")

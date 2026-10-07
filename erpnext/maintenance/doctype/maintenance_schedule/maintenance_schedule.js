@@ -163,4 +163,4 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({ frm: cur_frm }));
+frappe.ui.form.set_controller("Maintenance Schedule", erpnext.maintenance.MaintenanceSchedule);

@@ -130,6 +130,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
 
 		doc = self.doc
 		tax_service = TaxService(doc)
@@ -213,6 +216,11 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						if doc.is_internal_supplier and item.valuation_rate:
 							credit_amount = flt(item.valuation_rate * item.stock_qty)
 
+						rejected_amount = self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+						credit_amount += rejected_amount
+
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
 							self.get_gl_dict(
@@ -248,6 +256,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							)
 
 					else:
+						self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+
 						if not doc.is_internal_transfer():
 							gl_entries.append(
 								self.get_gl_dict(
@@ -270,25 +282,34 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						if (item.item_code, item.name) in landed_cost_entries:
-							for account, base_amount in landed_cost_entries[
-								(item.item_code, item.name)
-							].items():
-								gl_entries.append(
-									self.get_gl_dict(
-										{
-											"account": account,
-											"against": item.expense_account,
-											"cost_center": item.cost_center,
-											"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
-											"credit": flt(base_amount["base_amount"]),
-											"credit_in_account_currency": flt(base_amount["amount"]),
-											"credit_in_transaction_currency": item.net_amount,
-											"project": item.project or doc.project,
-										},
-										item=item,
-									)
+						for entry in landed_cost_entries.get((item.item_code, item.name), []):
+							if not (entry.amount or entry.base_amount):
+								continue
+
+							lcv_account_currency = get_account_currency(entry.expense_account)
+							credit_in_transaction_currency = (
+								flt(entry.amount)
+								if lcv_account_currency == doc.currency
+								else flt(
+									entry.base_amount / doc.conversion_rate, item.precision("net_amount")
 								)
+							)
+
+							gl_dict = self.get_gl_dict(
+								{
+									"account": entry.expense_account,
+									"against": item.expense_account,
+									"cost_center": entry.dimensions.cost_center or item.cost_center,
+									"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(entry.base_amount),
+									"credit_in_account_currency": flt(entry.amount),
+									"credit_in_transaction_currency": credit_in_transaction_currency,
+									"project": entry.dimensions.project or item.project or doc.project,
+								},
+								item=item,
+							)
+							gl_dict.update(get_custom_dimension_overrides(entry))
+							gl_entries.append(gl_dict)
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -521,8 +542,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 
 	def get_stock_variance_account(self, item):
-		"""For Standard Cost items the purchase-price-vs-standard difference is a Purchase Price
-		Variance; for all other items it keeps the existing behaviour (default expense account)."""
+		"""Return the account for stock valuation difference.
+		Standard Cost items use the Purchase Price Variance account. Other items use
+		the default expense account, falling back to the item expense account for
+		returns and the stock/asset received but not billed account for non-returns."""
 		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
 			get_purchase_price_variance_account,
 		)
@@ -530,7 +553,68 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		if item.item_code and get_valuation_method(item.item_code, self.doc.company) == "Standard Cost":
 			return get_purchase_price_variance_account(item.item_code, self.doc.company)
-		return self.doc.get_company_default("default_expense_account")
+
+		# 1. Primary choice: Company Default Expense / COGS Account
+		default_expense = self.doc.get_company_default("default_expense_account", ignore_validation=True)
+		if default_expense:
+			return default_expense
+
+		# 2. If default_expense_account is NOT set (Unconfigured):
+		# For returns, fall back to item.expense_account
+		if self.doc.is_return and item.expense_account:
+			return item.expense_account
+
+		# For non-returns, fall back to the clearing account used by Purchase Receipts.
+		stock_asset_rbnb = (
+			self.doc.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+			if item.is_fixed_asset
+			else self.doc.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+		)
+
+		return stock_asset_rbnb or item.expense_account
+
+	def make_rejected_warehouse_gl_entry(
+		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
+	) -> float:
+		"""Book the material the invoice moved into the rejected warehouse.
+
+		An internal transfer carries the value credited out of the in-transit warehouse along with
+		the accepted material, so the entry against it is that warehouse, and the caller credits it
+		for both. On an ordinary invoice the supplier entry already holds the cost.
+		"""
+		doc = self.doc
+		if not (item.rejected_warehouse and flt(item.rejected_qty)):
+			return 0.0
+
+		transfers_rejected_material = doc.is_internal_transfer()
+
+		rejected_amount = flt(
+			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
+			item.precision("base_net_amount"),
+		)
+		if not rejected_amount:
+			return 0.0
+
+		rejected_account = doc.get_inventory_account_dict(item, inventory_account_map, "rejected_warehouse")
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": rejected_account["account"],
+					"against": item.expense_account if transfers_rejected_material else doc.supplier,
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+					"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": rejected_amount,
+					"debit_in_transaction_currency": flt(
+						rejected_amount / doc.conversion_rate, item.precision("net_amount")
+					),
+				},
+				rejected_account["account_currency"],
+				item=item,
+			)
+		)
+
+		return rejected_amount if transfers_rejected_material else 0.0
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
@@ -545,16 +629,24 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		if doc.is_return and doc.update_stock and (doc.is_internal_supplier or not doc.return_against):
 			net_rate = item.base_net_amount
 			if item.sales_incoming_rate:
-				net_rate = item.qty * item.sales_incoming_rate
+				# Material of a transfer goes back at the rate it came in with, the rejected
+				# material along with the accepted.
+				net_rate = (flt(item.qty) + flt(item.rejected_qty)) * item.sales_incoming_rate
 
 			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 			warehouse_debit_amount = flt(
 				voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision
 			)
 
-			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
+			# The rejected warehouse carries the rest of what the invoice paid for, and is booked
+			# by its own entry, so it is not a variance.
+			returned_stock_value = warehouse_debit_amount + flt(
+				voucher_wise_stock_value.get((item.name, item.rejected_warehouse)), net_amt_precision
+			)
+
+			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
 				cost_of_goods_sold_account = self.get_stock_variance_account(item)
-				stock_adjustment_amt = stock_amount - warehouse_debit_amount
+				stock_adjustment_amt = stock_amount - returned_stock_value
 
 				gl_entries.append(
 					self.get_gl_dict(

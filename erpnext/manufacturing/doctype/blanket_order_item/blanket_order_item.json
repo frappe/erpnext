@@ -10,8 +10,13 @@
   "party_item_code",
   "column_break_3",
   "qty",
+  "stock_uom",
+  "price_list_rate",
+  "base_price_list_rate",
   "rate",
+  "base_rate",
   "ordered_qty",
+  "closed",
   "section_break_7",
   "terms_and_conditions"
  ],
@@ -42,10 +47,46 @@
    "label": "Quantity"
   },
   {
+   "columns": 1,
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Price List Rate",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Price List Rate (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "label": "Rate (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -54,6 +95,15 @@
    "in_list_view": 1,
    "label": "Ordered Quantity",
    "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "label": "Closed",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -74,7 +124,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:40.083042",
+ "modified": "2026-09-23 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order Item",

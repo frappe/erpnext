@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_validations("Sales Taxes and Charges Template");
 erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
 erpnext.pre_sales.set_as_lost("Quotation");
@@ -10,8 +8,11 @@ erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on("Quotation", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Sales Taxes and Charges";
+
 		(frm.custom_make_buttons = {
 			"Sales Order": "Sales Order",
+			Quotation: "New Version",
 		}),
 			frm.set_query("quotation_to", function () {
 				return {
@@ -126,13 +127,14 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
+				doc.is_active &&
 				frappe.model.can_create("Sales Order") &&
 				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
 					!doc.valid_till ||
 					frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0)
 			) {
 				this.frm.add_custom_button(__("Sales Order"), () => this.make_sales_order(), __("Create"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 				this.frm.add_custom_button(__("Update Items"), () => {
 					erpnext.utils.update_child_items({
 						frm: this.frm,
@@ -144,8 +146,37 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 			if (doc.status !== "Ordered" && this.frm.has_perm("write")) {
 				this.frm.add_custom_button(__("Set as Lost"), () => {
-					this.frm.trigger("set_as_lost_dialog");
+					if (!doc.__onload?.has_versions_to_set_as_lost) {
+						this.frm.trigger("set_as_lost_dialog");
+						return;
+					}
+
+					frappe.confirm(
+						__("The other versions of this Quotation will also be set as Lost. Continue?"),
+						() => this.frm.trigger("set_as_lost_dialog")
+					);
 				});
+			}
+
+			if (frappe.model.can_create("Quotation")) {
+				this.frm.add_custom_button(
+					__("New Version"),
+					() => {
+						if (doc.__onload?.is_latest_version) {
+							this.make_revision();
+							return;
+						}
+
+						frappe.confirm(
+							__(
+								"Newer versions of this Quotation already exist. Create a new version anyway?"
+							),
+							() => this.make_revision()
+						);
+					},
+					__("Create")
+				);
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}
 
@@ -201,10 +232,17 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		}
 	}
 
+	make_revision() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.quotation.mapper.make_revision",
+			frm: this.frm,
+		});
+	}
+
 	set_dynamic_field_label() {
 		if (this.frm.doc.quotation_to == "Customer") {
 			this.frm.set_df_property("party_name", "label", "Customer");
-			this.frm.fields_dict.party_name.get_query = null;
+			this.frm.fields_dict.party_name.get_query = erpnext.queries.customer;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			this.frm.set_df_property("party_name", "label", "Lead");
 			this.frm.fields_dict.party_name.get_query = function () {
@@ -389,7 +427,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 };
 
-cur_frm.script_manager.make(erpnext.selling.QuotationController);
+frappe.ui.form.set_controller("Quotation", erpnext.selling.QuotationController);
 
 frappe.ui.form.on(
 	"Quotation Item",

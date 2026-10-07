@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Campaign", {
 	refresh: function (frm) {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(frm);
 
 		if (frm.is_new()) {
 			frm.toggle_display(

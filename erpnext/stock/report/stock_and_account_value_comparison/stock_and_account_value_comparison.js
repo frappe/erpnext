@@ -27,6 +27,11 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			},
 		},
 		{
+			label: __("From Date"),
+			fieldname: "from_date",
+			fieldtype: "Date",
+		},
+		{
 			label: __("As On Date"),
 			fieldname: "as_on_date",
 			fieldtype: "Date",
@@ -41,8 +46,10 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 	},
 
 	onload(report) {
-		report.page.add_inner_button(__("Create Reposting Entries"), function () {
-			let message = `<div>
+		report.page.add_inner_button(
+			__("Repost Stock & GL Entries"),
+			function () {
+				let message = `<div>
 				<p>
 					${__(
 						"Reposting Entries will change the value of accounts Stock In Hand, and Stock Expenses in the Trial Balance report and will also change the Balance Value in the Stock Balance report."
@@ -51,22 +58,49 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 				<p>${__("Are you sure you want to create Reposting Entries?")}</p>
 				</div>
 			`;
-			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
-			let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
+				let selected_rows = get_selected_rows(__("Reposting Entries"));
 
-			if (!selected_rows.length) {
-				frappe.throw(__("Please select rows to create Reposting Entries"));
-			}
-
-			frappe.confirm(message, () => {
-				frappe.call({
-					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
-					args: {
-						rows: selected_rows,
-						company: frappe.query_report.get_filter_values().company,
-					},
+				frappe.confirm(message, () => {
+					frappe.call({
+						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
+						args: {
+							rows: selected_rows,
+							company: frappe.query_report.get_filter_values().company,
+						},
+					});
 				});
-			});
-		});
+			},
+			__("Create")
+		);
+
+		// Rewriting the General Ledger is left to Accounts Managers; the server enforces the same role.
+		if (frappe.user.has_role("Accounts Manager")) {
+			report.page.add_inner_button(
+				__("Repost GL Entries"),
+				function () {
+					let selected_rows = get_selected_rows(__("GL Reposting Entries"));
+
+					frappe.call({
+						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_gl_reposting_entries",
+						args: {
+							rows: selected_rows,
+							company: frappe.query_report.get_filter_values().company,
+						},
+					});
+				},
+				__("Create")
+			);
+		}
 	},
 };
+
+function get_selected_rows(label) {
+	let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+	let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
+
+	if (!selected_rows.length) {
+		frappe.throw(__("Please select rows to create {0}", [label]));
+	}
+
+	return selected_rows;
+}

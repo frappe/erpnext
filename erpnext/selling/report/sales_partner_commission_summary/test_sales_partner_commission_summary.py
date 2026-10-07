@@ -9,6 +9,9 @@ from frappe.utils.data import comma_or
 from erpnext.selling.report.sales_partner_commission_summary.sales_partner_commission_summary import (
 	SALES_TRANSACTION_DOCTYPES,
 )
+from erpnext.selling.report.sales_partner_transaction_summary.test_utils import (
+	SalesPartnerTransactionSummaryAssertions,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -63,14 +66,15 @@ class SalesPartnerSummaryReportTestMixin(ERPNextTestSuite):
 
 		self.make_transaction_func = make_transaction_funcs[doctype]
 
-		make_stock_entry(
-			item_code="_Test Item 2",
-			qty=10,
-			company="_Test Company",
-			to_warehouse="_Test Warehouse - _TC",
-			purpose="Material Receipt",
-			posting_date="2026-01-01",
-		)
+		if doctype in {"Delivery Note", "POS Invoice"}:
+			make_stock_entry(
+				item_code="_Test Item 2",
+				qty=10,
+				company="_Test Company",
+				to_warehouse="_Test Warehouse - _TC",
+				purpose="Material Receipt",
+				posting_date="2026-01-01",
+			)
 
 		if doctype == "POS Invoice":
 			POSInvoiceTestMixin.setUp(self)
@@ -246,7 +250,9 @@ class SalesPartnerSummaryReportTestMixin(ERPNextTestSuite):
 		self.returned_doc.submit()
 
 
-class TestSalesPartnerCommissionSummary(SalesPartnerSummaryReportTestMixin):
+class TestSalesPartnerSummaryReports(
+	SalesPartnerSummaryReportTestMixin, SalesPartnerTransactionSummaryAssertions
+):
 	def setUp(self):
 		self.filters = {
 			"company": "_Test Company",
@@ -262,29 +268,33 @@ class TestSalesPartnerCommissionSummary(SalesPartnerSummaryReportTestMixin):
 	def test_posting_date_column_label(self):
 		self.assert_posting_date_label()
 
-	def test_sales_order_sp_commission_summary(self):
+	def test_sales_order_sp_summaries(self):
 		self.filters["doctype"] = "Sales Order"
 		self.create_transactions(self.filters["doctype"])
 
 		self.assert_sales_partner_commission_summary_report()
+		self.assert_sales_partner_transaction_summary_report()
 
-	def test_sales_invoice_sp_commission_summary(self):
+	def test_sales_invoice_sp_summaries(self):
 		self.filters["doctype"] = "Sales Invoice"
 		self.create_transactions(self.filters["doctype"])
 
 		self.assert_sales_partner_commission_summary_report()
+		self.assert_sales_partner_transaction_summary_report()
 
-	def test_delivery_note_sp_commission_summary(self):
+	def test_delivery_note_sp_summaries(self):
 		self.filters["doctype"] = "Delivery Note"
 		self.create_transactions(self.filters["doctype"])
 
 		self.assert_sales_partner_commission_summary_report()
+		self.assert_sales_partner_transaction_summary_report()
 
-	def test_pos_invoice_sp_commission_summary(self):
+	def test_pos_invoice_sp_summaries(self):
 		self.filters["doctype"] = "POS Invoice"
 		self.create_transactions(self.filters["doctype"])
 
 		self.assert_sales_partner_commission_summary_report()
+		self.assert_sales_partner_transaction_summary_report()
 
 	def assert_sales_partner_commission_summary_report(self):
 		report_data = run(self.report_name, self.filters)

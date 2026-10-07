@@ -81,6 +81,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 	refresh() {
 		this.frm.disable_save();
+		this.set_party_from_route();
 
 		this.frm.set_df_property("invoices", "cannot_delete_rows", true);
 		this.frm.set_df_property("payments", "cannot_delete_rows", true);
@@ -109,12 +110,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		}
 
 		this.frm.trigger("set_query_for_dimension_filters");
+		this.update_totals();
+		this.bind_totals_on_row_select();
 
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
-			this.frm.call({
-				doc: this.frm.doc,
-				method: "is_auto_process_enabled",
+			frappe.call({
+				method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.is_auto_process_enabled",
 				callback: (r) => {
 					if (r.message) {
 						this.frm
@@ -147,6 +149,14 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 			});
 		}
+	}
+	set_party_from_route() {
+		const { company, party_type, party } = frappe.route_options || {};
+		if (!party) return;
+		frappe.route_options = null;
+		this.frm.set_value({ company, party_type, party }).then(() => {
+			if (this.frm.doc.receivable_payable_account) this.frm.trigger("get_unreconciled_entries");
+		});
 	}
 	set_query_for_dimension_filters() {
 		frappe.call({
@@ -182,7 +192,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.trigger("clear_child_tables");
 
 		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
-			frappe.call({
+			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
 					company: this.frm.doc.company,
@@ -223,6 +233,31 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.clear_table("payments");
 		this.frm.clear_table("allocation");
 		this.frm.refresh_fields();
+		this.update_totals();
+	}
+
+	update_totals() {
+		const sum_outstanding = (rows) => rows.reduce((total, row) => total + flt(row.outstanding_amount), 0);
+		const sum_amount = (rows) => rows.reduce((total, row) => total + flt(row.amount), 0);
+
+		const selected_invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
+		const selected_payments = this.frm.fields_dict.payments.grid.get_selected_children();
+
+		const total_invoice_amount = sum_outstanding(selected_invoices);
+		const total_payment_amount = sum_amount(selected_payments);
+		this.frm.set_value({
+			total_invoice_amount,
+			total_payment_amount,
+			difference_amount: total_invoice_amount - total_payment_amount,
+		});
+	}
+
+	bind_totals_on_row_select() {
+		["invoices", "payments"].forEach((fieldname) => {
+			this.frm.fields_dict[fieldname].grid.wrapper
+				.off("click.pr_totals")
+				.on("click.pr_totals", ".grid-row-check", () => this.update_totals());
+		});
 	}
 
 	get_unreconciled_entries() {
@@ -231,6 +266,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			doc: this.frm.doc,
 			method: "get_unreconciled_entries",
 			callback: () => {
+				this.update_totals();
 				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
 					frappe.throw({
 						message: __("No Unreconciled Invoices and Payments found for this party and account"),
@@ -431,4 +467,4 @@ frappe.ui.form.on("Payment Reconciliation Allocation", {
 	},
 });
 
-extend_cscript(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Payment Reconciliation", erpnext.accounts.PaymentReconciliationController);

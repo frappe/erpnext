@@ -191,9 +191,9 @@ const BankReconciliationStatementView = () => {
 
     const content = _("Below is a list of all entries posted against the bank account {0} which have not been cleared till {1}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formatDate(dates.toDate)}</strong>`])
 
-    return <div className="space-y-4 py-2">
+    return <div className="flex min-h-0 flex-1 flex-col space-y-4 py-2">
 
-        <div>
+        <div className="shrink-0">
             <span className="text-p-sm">
                 <MarkdownRenderer content={content} />
             </span>
@@ -201,16 +201,18 @@ const BankReconciliationStatementView = () => {
 
         {error && <ErrorBanner error={error} />}
 
-        {data && <SummarySection data={data} />}
+        {data && <div className="shrink-0"><SummarySection data={data} /></div>}
 
         {data && data.message.result.length > 0 && (
-            <div className="space-y-2">
-                <p className="text-ink-gray-5 text-sm">{_("Bank Reconciliation Statement")}</p>
+            <div className="flex min-h-0 flex-1 flex-col space-y-2">
+                <p className="shrink-0 text-ink-gray-5 text-sm">{_("Bank Reconciliation Statement")}</p>
                 <ListView
                     data={statementRows}
                     columns={statementColumns}
                     getRowId={(row) => row.payment_entry}
-                    maxHeight="min(70vh, 640px)"
+                    className="min-h-0 flex-1"
+                    maxHeight="none"
+                    scrollAreaClassName="flex-1"
                     emptyState={_("No entries with a payment document in this list.")}
                 />
             </div>

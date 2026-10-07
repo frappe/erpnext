@@ -4,8 +4,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:09",
+ "description": "Items shipped to a customer.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/delivery-note",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -105,6 +107,10 @@
   "shipping_address_section",
   "shipping_address_name",
   "shipping_address",
+  "shipping_contact_person",
+  "shipping_contact_display",
+  "shipping_contact_mobile",
+  "shipping_contact_email",
   "column_break_95",
   "dispatch_address_name",
   "dispatch_address",
@@ -190,7 +196,6 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
@@ -274,6 +279,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -314,6 +320,7 @@
    "allow_on_submit": 1,
    "fieldname": "po_no",
    "fieldtype": "Small Text",
+   "in_global_search": 1,
    "label": "Customer's Purchase Order No",
    "no_copy": 1,
    "oldfieldname": "po_no",
@@ -357,6 +364,38 @@
    "read_only": 1
   },
   {
+   "fieldname": "shipping_contact_person",
+   "fieldtype": "Link",
+   "label": "Shipping Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.full_name",
+   "fieldname": "shipping_contact_display",
+   "fieldtype": "Small Text",
+   "label": "Shipping Contact",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.mobile_no",
+   "fieldname": "shipping_contact_mobile",
+   "fieldtype": "Small Text",
+   "label": "Shipping Contact Mobile No",
+   "options": "Phone",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.email_id",
+   "fieldname": "shipping_contact_email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Shipping Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -366,7 +405,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -427,6 +465,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -496,6 +535,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -900,6 +940,7 @@
   {
    "fieldname": "lr_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Transport Receipt No",
    "oldfieldname": "lr_no",
    "oldfieldtype": "Data",
@@ -1468,11 +1509,11 @@
    "print_hide": 1
   }
  ],
- "icon": "fa fa-truck",
+ "icon": "truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

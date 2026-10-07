@@ -6,10 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.delivery_note.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.delivery_note.services.packing import PackingService
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -118,6 +120,10 @@ class DeliveryNote(SellingController):
 		set_warehouse: DF.Link | None
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
+		shipping_contact_display: DF.SmallText | None
+		shipping_contact_email: DF.Data | None
+		shipping_contact_mobile: DF.SmallText | None
+		shipping_contact_person: DF.Link | None
 		shipping_rule: DF.Link | None
 		status: DF.Literal[
 			"",
@@ -167,6 +173,7 @@ class DeliveryNote(SellingController):
 				"percent_join_field": "against_sales_order",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
+				"exclude_field": "skip_delivery",
 				"second_source_dt": "Sales Invoice Item",
 				"second_source_field": "qty",
 				"second_join_field": "so_detail",
@@ -258,14 +265,6 @@ class DeliveryNote(SellingController):
 
 		super().before_print(settings)
 
-	def set_actual_qty(self):
-		for d in self.get("items"):
-			if d.item_code and d.warehouse:
-				actual_qty = frappe.db.get_value(
-					"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
-				)
-				d.actual_qty = flt(actual_qty) or 0
-
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.get_single_value("Selling Settings", "so_required") == "Yes":
@@ -295,6 +294,7 @@ class DeliveryNote(SellingController):
 
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		pre_submit_validation(self, check_credit_limit=True, check_packed_qty=True)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -373,7 +373,7 @@ class DeliveryNote(SellingController):
 			if missing_label and missing_label != "No Label":
 				errors.append(
 					_("The field {0} in row {1} is not set").format(
-						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+						frappe.bold(_(missing_label, context=item.doctype)), frappe.bold(item.idx)
 					)
 				)
 
@@ -404,28 +404,14 @@ class DeliveryNote(SellingController):
 		if not (self.get("_action") and self._action != "update_after_submit"):
 			return
 
-		warehouse_item_codes = {}
-		for d in self.get("items") + self.get("packed_items"):
-			warehouse_item_codes.setdefault(d.warehouse, set()).add(d.item_code)
-
-		if not warehouse_item_codes:
-			return
-
-		bin_map = {}
-		for warehouse, item_codes in warehouse_item_codes.items():
-			for b in frappe.get_all(
-				"Bin",
-				filters={"item_code": ["in", item_codes], "warehouse": warehouse},
-				fields=["item_code", "actual_qty", "projected_qty"],
-			):
-				bin_map[(b.item_code, warehouse)] = b
+		bin_qty_map = get_bin_qty_map(self.get("items") + self.get("packed_items"))
 
 		for d in self.get("items"):
-			bin_data = bin_map.get((d.item_code, d.warehouse))
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
 			d.actual_qty = bin_data.actual_qty if bin_data else None
 
 		for d in self.get("packed_items"):
-			bin_data = bin_map.get((d.item_code, d.warehouse))
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
 			if bin_data:
 				d.actual_qty = flt(bin_data.actual_qty)
 				d.projected_qty = flt(bin_data.projected_qty)
@@ -480,7 +466,6 @@ class DeliveryNote(SellingController):
 
 	def on_submit(self):
 		self.validate_packed_qty()
-		self.update_pick_list_status()
 
 		# Check for Approving Authority
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
@@ -489,6 +474,7 @@ class DeliveryNote(SellingController):
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
+		self.update_pick_list_status()
 		self.update_billing_status()
 
 		if not self.is_return:
@@ -642,6 +628,9 @@ class DeliveryNote(SellingController):
 	def update_status(self, status):
 		BillingStatusService(self).update_status(status)
 
+	def on_item_close_status_change(self):
+		self.update_billing_percentage()
+
 	def update_billing_status(self, update_modified=True):
 		BillingStatusService(self).update_billing_status(update_modified)
 
@@ -668,4 +657,5 @@ def get_list_context(context=None):
 @frappe.whitelist()
 def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
+	dn.check_permission("submit")
 	dn.update_status(status)

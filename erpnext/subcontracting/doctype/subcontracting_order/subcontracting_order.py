@@ -15,6 +15,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
 
 
 class SubcontractingOrder(SubcontractingController):
@@ -49,6 +50,7 @@ class SubcontractingOrder(SubcontractingController):
 		contact_email: DF.SmallText | None
 		contact_mobile: DF.SmallText | None
 		contact_person: DF.Link | None
+		conversion_rate: DF.Float
 		cost_center: DF.Link | None
 		distribute_additional_costs_based_on: DF.Literal["Qty", "Amount"]
 		items: DF.Table[SubcontractingOrderItem]
@@ -120,6 +122,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_service_items()
 		self.validate_supplied_items()
 		self.set_missing_values()
+		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def on_submit(self):
@@ -130,6 +133,18 @@ class SubcontractingOrder(SubcontractingController):
 	def on_cancel(self):
 		self.update_status()
 		self.update_subcontracted_quantity_in_po(cancel=True)
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
 	def validate_purchase_order_for_subcontracting(self):
 		if self.purchase_order:
@@ -186,11 +201,19 @@ class SubcontractingOrder(SubcontractingController):
 		self.calculate_supplied_items_qty_and_amount()
 		self.calculate_items_qty_and_amount()
 
+	def set_service_item_base_amounts(self):
+		# Service items carry the Purchase Order's currency, so convert them for the costing fields.
+		conversion_rate = flt(self.conversion_rate) or 1.0
+		for item in self.get("service_items"):
+			item.base_rate = flt(item.rate * conversion_rate, item.precision("base_rate"))
+			item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
+
 	def calculate_service_costs(self):
+		self.set_service_item_base_amounts()
 		# Match by purchase_order_item rather than list position: the service_items and items
 		# tables are not guaranteed to stay index-aligned (e.g. a skipped zero-qty service item).
 		service_amount_by_po_item = {
-			service_item.purchase_order_item: service_item.amount
+			service_item.purchase_order_item: service_item.base_amount
 			for service_item in self.get("service_items")
 		}
 		for item in self.items:
@@ -242,10 +265,22 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-				qty, subcontracted_qty, fg_item_qty, production_plan_sub_assembly_item = frappe.db.get_value(
+				(
+					qty,
+					subcontracted_qty,
+					fg_item_qty,
+					production_plan_sub_assembly_item,
+					project,
+				) = frappe.db.get_value(
 					"Purchase Order Item",
 					si.purchase_order_item,
-					["qty", "subcontracted_qty", "fg_item_qty", "production_plan_sub_assembly_item"],
+					[
+						"qty",
+						"subcontracted_qty",
+						"fg_item_qty",
+						"production_plan_sub_assembly_item",
+						"project",
+					],
 				)
 				available_qty = flt(qty) - flt(subcontracted_qty)
 
@@ -259,15 +294,6 @@ class SubcontractingOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
-
 				items.append(
 					{
 						"item_code": item.name,
@@ -277,11 +303,12 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": bom,
+						"bom": get_finished_good_bom(item),
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
 						"production_plan_sub_assembly_item": production_plan_sub_assembly_item,
+						"project": project,
 					}
 				)
 			else:

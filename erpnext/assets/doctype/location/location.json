@@ -5,6 +5,7 @@
  "autoname": "field:location_name",
  "creation": "2018-05-07 12:49:22.595974",
  "default_view": "Tree",
+ "description": "A place where your assets are kept.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -41,6 +42,7 @@
    "fieldname": "parent_location",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Parent Location",
    "options": "Location",
    "search_index": 1
@@ -61,6 +63,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Group"
   },
@@ -141,9 +144,10 @@
    "read_only": 1
   }
  ],
+ "icon": "map-pin",
  "is_tree": 1,
  "links": [],
- "modified": "2025-04-29 13:53:13.488906",
+ "modified": "2026-08-21 23:11:43.994913",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -198,6 +202,10 @@
    "role": "Stock Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,

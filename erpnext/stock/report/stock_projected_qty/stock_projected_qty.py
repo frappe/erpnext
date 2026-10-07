@@ -9,6 +9,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_warehouses_condition
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -27,7 +28,6 @@ def execute(filters=None):
 		item_groups.append(filters.item_group)
 		item_groups.extend(get_descendants_of("Item Group", filters.item_group))
 
-	warehouse_company = {}
 	data = []
 	conversion_factors = []
 	for bin in bin_list:
@@ -37,18 +37,10 @@ def execute(filters=None):
 			# likely an item that has reached its end of life
 			continue
 
-		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
-		company = warehouse_company.setdefault(
-			bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company")
-		)
-
 		if filters.brand and filters.brand != item.brand:
 			continue
 
 		elif item_groups and item.item_group not in item_groups:
-			continue
-
-		elif filters.company and filters.company != company:
 			continue
 
 		re_order_level = re_order_qty = 0
@@ -106,11 +98,11 @@ def get_columns():
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 140,
+			"width": 200,
 			"sticky": "True",
 		},
-		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
-		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Item Name"), "fieldname": "item_name", "width": 200},
+		{"label": _("Description"), "fieldname": "description", "width": 100},
 		{
 			"label": _("Item Group"),
 			"fieldname": "item_group",
@@ -265,6 +257,16 @@ def get_bin_list(filters):
 	if filters.item_code:
 		query = query.where(bin.item_code == filters.item_code)
 
+	if filters.company:
+		wh = frappe.qb.DocType("Warehouse")
+		query = query.where(
+			ExistsCriterion(
+				frappe.qb.from_(wh)
+				.select(wh.name)
+				.where((wh.name == bin.warehouse) & (wh.company == filters.company))
+			)
+		)
+
 	if filters.warehouse:
 		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
 
@@ -281,6 +283,9 @@ def get_bin_list(filters):
 					)
 				)
 			)
+
+	if condition := get_allowed_warehouses_condition(bin.warehouse):
+		query = query.where(condition)
 
 	bin_list = query.run(as_dict=True)
 

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./styles/scroll-fade.css";
 
 @font-face {
   font-family: InterVariable;

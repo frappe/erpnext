@@ -9,6 +9,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -176,6 +177,40 @@ class TestPutawayRule(ERPNextTestSuite):
 		# Since Bag is a whole UOM, 1(out of 2) Bag will be unassigned
 
 		self.assertUnchangedItemsOnResave(pr)
+
+		pr.delete()
+		rule_1.delete()
+		rule_2.delete()
+
+	def test_putaway_rules_skip_undersized_whole_uom_rule(self):
+		item = frappe.get_doc("Item", "_Rice")
+		if not frappe.db.get_value("UOM Conversion Detail", {"parent": item.name, "uom": "Bag"}):
+			item.append("uoms", {"uom": "Bag", "conversion_factor": 1000})
+			item.save()
+
+		frappe.db.set_value("UOM", "Bag", "must_be_whole_number", 1)
+		rule_1 = create_putaway_rule(
+			item_code=item.name, warehouse=self.warehouse_1, capacity=500, uom="Kg", priority=1
+		)
+		rule_2 = create_putaway_rule(
+			item_code=item.name, warehouse=self.warehouse_2, capacity=2000, uom="Kg", priority=2
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=2,
+			uom="Bag",
+			stock_uom="Kg",
+			conversion_factor=1000,
+			apply_putaway_rule=1,
+			do_not_submit=1,
+		)
+
+		self.assertEqual(len(pr.items), 1)
+		self.assertEqual(pr.items[0].warehouse, self.warehouse_2)
+		self.assertEqual(pr.items[0].putaway_rule, rule_2.name)
+		self.assertEqual(pr.items[0].qty, 2)
+		self.assertEqual(pr.items[0].stock_qty, 2000)
 
 		pr.delete()
 		rule_1.delete()
@@ -366,6 +401,7 @@ class TestPutawayRule(ERPNextTestSuite):
 
 		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
 		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+		serial_numbers = get_serial_numbers_from_bundle(pr.items[0].serial_and_batch_bundle)
 
 		stock_entry = make_stock_entry(
 			item_code="Water Bottle",
@@ -384,7 +420,7 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(stock_entry.items[0].qty, 3)
 		self.assertEqual(stock_entry.items[0].putaway_rule, rule_1.name)
 		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_nos[0:3]
+			get_serial_numbers_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_numbers[0:3]
 		)
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle), batch_no)
 
@@ -392,7 +428,7 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(stock_entry.items[1].qty, 2)
 		self.assertEqual(stock_entry.items[1].putaway_rule, rule_2.name)
 		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_nos[3:5]
+			get_serial_numbers_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_numbers[3:5]
 		)
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[1].serial_and_batch_bundle), batch_no)
 

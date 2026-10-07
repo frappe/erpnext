@@ -69,6 +69,13 @@ class CRMSettings(Document):
 			self.allowed_users = []
 
 	def custom_fields_for_frappe_crm_data_sync(self):
+		custom_fields = self.get_frappe_crm_custom_fields()
+
+		if self.enable_frappe_crm_data_synchronization:
+			create_custom_fields(custom_fields, ignore_validate=True)
+
+	@staticmethod
+	def get_frappe_crm_custom_fields():
 		custom_fields = {
 			"Quotation": [
 				{
@@ -88,4 +95,4 @@ class CRMSettings(Document):
 			],
 		}
 
-		create_custom_fields(custom_fields, ignore_validate=True)
+		return custom_fields

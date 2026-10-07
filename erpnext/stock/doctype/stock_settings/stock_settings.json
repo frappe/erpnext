@@ -1,8 +1,9 @@
 {
  "actions": [],
  "creation": "2013-06-24 16:37:54",
- "description": "Default settings for your stock-related transactions",
+ "description": "How items, warehouses and stock transactions work.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-settings",
  "engine": "InnoDB",
  "field_order": [
   "defaults_tab",
@@ -54,6 +55,7 @@
   "auto_bundle_section",
   "auto_create_serial_and_batch_bundle_for_outward",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
+  "auto_map_raw_materials_to_finished_goods",
   "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "naming_series_preview",
   "configure_series",
@@ -125,7 +127,8 @@
    "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
-   "label": "Over Delivery/Receipt Allowance (%)"
+   "label": "Over Delivery/Receipt Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "Stop",
@@ -276,7 +279,8 @@
    "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
    "fieldname": "mr_qty_allowance",
    "fieldtype": "Float",
-   "label": "Over Transfer Allowance (%)"
+   "label": "Over Transfer Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -345,15 +349,16 @@
   },
   {
    "default": "FIFO",
-   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "fieldname": "pick_serial_and_batch_based_on",
    "fieldtype": "Select",
    "label": "Pick Serial / Batch Based On",
-   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "mandatory_depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "options": "FIFO\nLIFO\nExpiry"
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
    "fieldtype": "Check",
    "label": "Auto create Serial and Batch Bundle for outward"
@@ -414,6 +419,7 @@
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
@@ -437,7 +443,8 @@
    "description": "The percentage you are allowed to pick more items in the pick list than the ordered quantity.",
    "fieldname": "over_picking_allowance",
    "fieldtype": "Percent",
-   "label": "Over Picking Allowance (%)"
+   "label": "Over Picking Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "1",
@@ -454,6 +461,7 @@
   },
   {
    "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
@@ -583,14 +591,23 @@
    "fieldname": "use_inline_serial_batch_editor",
    "fieldtype": "Check",
    "label": "Use Inline Serial / Batch Editor"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
+   "description": "On submit of a Manufacture / Repack entry, map the raw material serial / batch nos that were not mapped in draft to the finished goods, in order",
+   "fieldname": "auto_map_raw_materials_to_finished_goods",
+   "fieldtype": "Check",
+   "label": "Auto Map Raw Materials to Finished Goods",
+   "show_description_on_click": 1
   }
  ],
- "icon": "icon-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-16 17:00:00.000000",
+ "modified": "2026-10-01 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

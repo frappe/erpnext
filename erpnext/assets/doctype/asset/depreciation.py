@@ -54,7 +54,7 @@ def book_depreciation_entries(date):
 		(depr_schedule_name, asset_name, sch_start_idx, sch_end_idx) = data
 
 		try:
-			make_depreciation_entry(
+			_make_depreciation_entry(
 				depr_schedule_name,
 				date,
 				sch_start_idx,
@@ -129,7 +129,7 @@ def get_companies_with_frozen_limits():
 def make_depreciation_entry_on_disposal(asset_doc, disposal_date=None):
 	for row in asset_doc.get("finance_books"):
 		depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, "Active", row.finance_book)
-		make_depreciation_entry(depr_schedule_name, disposal_date)
+		_make_depreciation_entry(depr_schedule_name, disposal_date)
 
 
 def get_credit_debit_accounts_for_asset(asset_category, company):
@@ -167,6 +167,22 @@ def get_depr_cost_center_and_series():
 
 @frappe.whitelist()
 def make_depreciation_entry(
+	depr_schedule_name: str,
+	date: DateTimeLikeObject | None = None,
+	sch_start_idx: int | None = None,
+	sch_end_idx: int | None = None,
+	accounting_dimensions: list[dict] | None = None,
+):
+	depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", depr_schedule_name)
+	frappe.has_permission("Asset Depreciation Schedule", "write", depr_schedule_doc, throw=True)
+	frappe.has_permission("Asset", "write", depr_schedule_doc.asset, throw=True)
+
+	return _make_depreciation_entry(
+		depr_schedule_name, date, sch_start_idx, sch_end_idx, accounting_dimensions
+	)
+
+
+def _make_depreciation_entry(
 	depr_schedule_name: str,
 	date: DateTimeLikeObject | None = None,
 	sch_start_idx: int | None = None,
@@ -285,15 +301,15 @@ def get_credit_and_debit_entry(
 	}
 
 	for dimension in dimensions:
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_bs"):
-			credit_entry[dimension["fieldname"]] = asset.get(dimension["fieldname"]) or dimension.get(
-				"default_dimension"
-			)
+		value = asset.get(dimension["fieldname"])
+		# Dimension defaults and mandatory flags are set per company; only the asset's company applies
+		is_asset_company = dimension.get("company") == asset.company
 
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_pl"):
-			debit_entry[dimension["fieldname"]] = asset.get(dimension["fieldname"]) or dimension.get(
-				"default_dimension"
-			)
+		if value or (is_asset_company and dimension.get("mandatory_for_bs")):
+			credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+		if value or (is_asset_company and dimension.get("mandatory_for_pl")):
+			debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 	return credit_entry, debit_entry
 
 

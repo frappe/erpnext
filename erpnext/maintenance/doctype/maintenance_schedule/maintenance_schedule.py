@@ -4,10 +4,13 @@
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
+from frappe.query_builder.functions import Max
+from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 
 
@@ -50,10 +53,15 @@ class MaintenanceSchedule(TransactionBase):
 	def generate_schedule(self):
 		if self.docstatus != 0:
 			return
+		self.validate_serial_no_bundle()
 		self.set("schedules", [])
 		count = 1
 		for d in self.get("items"):
 			self.validate_maintenance_detail()
+			serial_text = d.serial_no
+			if d.serial_and_batch_bundle:
+				serial_ids = get_serial_batch_list_from_item(d)[0]
+				serial_text = "\n".join(SerialBatchIdentity("Serial No").get_numbers(d.item_code, serial_ids))
 			s_list = []
 			s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits, d.sales_person)
 			for i in range(d.no_of_visits):
@@ -61,8 +69,7 @@ class MaintenanceSchedule(TransactionBase):
 				child.item_code = d.item_code
 				child.item_name = d.item_name
 				child.scheduled_date = s_list[i].strftime("%Y-%m-%d")
-				if d.serial_no:
-					child.serial_no = d.serial_no
+				child.serial_no = serial_text
 				child.idx = count
 				count = count + 1
 				child.sales_person = d.sales_person
@@ -74,30 +81,23 @@ class MaintenanceSchedule(TransactionBase):
 		days_in_period = {"Weekly": 7, "Monthly": 30, "Quarterly": 91, "Half Yearly": 182, "Yearly": 365}
 		for item in self.items:
 			if item.periodicity and item.periodicity != "Random" and item.start_date:
+				days = days_in_period[item.periodicity]
 				if not item.end_date:
-					if item.no_of_visits:
-						item.end_date = add_days(
-							item.start_date, item.no_of_visits * days_in_period[item.periodicity]
+					item.end_date = add_days(item.start_date, (item.no_of_visits or 1) * days)
+
+				no_of_visits = round((date_diff(item.end_date, item.start_date) + 1) / days)
+				if not item.no_of_visits:
+					item.no_of_visits = no_of_visits
+				elif item.no_of_visits != no_of_visits:
+					throw(
+						_(
+							"Row {0}: {1} {2} visits need an End Date of {3}. Change the End Date or the Number of Visits."
+						).format(
+							item.idx,
+							item.no_of_visits,
+							_(item.periodicity),
+							formatdate(add_days(item.start_date, item.no_of_visits * days)),
 						)
-					else:
-						item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-
-				diff = date_diff(item.end_date, item.start_date) + 1
-				no_of_visits = cint(diff / days_in_period[item.periodicity])
-
-				if not item.no_of_visits or item.no_of_visits == 0:
-					item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-					diff = date_diff(item.end_date, item.start_date) + 1
-					item.no_of_visits = cint(diff / days_in_period[item.periodicity])
-
-				elif item.no_of_visits > no_of_visits:
-					item.end_date = add_days(
-						item.start_date, item.no_of_visits * days_in_period[item.periodicity]
-					)
-
-				elif item.no_of_visits < no_of_visits:
-					item.end_date = add_days(
-						item.start_date, item.no_of_visits * days_in_period[item.periodicity]
 					)
 
 	def on_submit(self):
@@ -108,14 +108,10 @@ class MaintenanceSchedule(TransactionBase):
 
 		email_map = {}
 		for d in self.get("items"):
-			if d.serial_and_batch_bundle:
-				serial_nos = frappe.get_doc(
-					"Serial and Batch Bundle", d.serial_and_batch_bundle
-				).get_serial_nos()
-
-				if serial_nos:
-					self.validate_serial_no(d.item_code, serial_nos, d.start_date)
-					self.update_amc_date(serial_nos, d.end_date)
+			serial_nos = get_serial_batch_list_from_item(d)[0]
+			if serial_nos:
+				self.validate_serial_no(d.item_code, serial_nos, d.start_date)
+				self.update_amc_date(serial_nos, d.end_date)
 
 			no_email_sp = []
 			if d.sales_person and d.sales_person not in email_map:
@@ -134,7 +130,7 @@ class MaintenanceSchedule(TransactionBase):
 
 			scheduled_date = frappe.db.get_all(
 				"Maintenance Schedule Detail",
-				{"parent": self.name, "item_code": d.item_code},
+				{"parent": self.name, "item_reference": d.name},
 				["scheduled_date"],
 				as_list=False,
 			)
@@ -146,7 +142,6 @@ class MaintenanceSchedule(TransactionBase):
 				event = frappe.get_doc(
 					{
 						"doctype": "Event",
-						"owner": email_map.get(d.sales_person, self.owner),
 						"subject": description,
 						"description": description,
 						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
@@ -154,6 +149,15 @@ class MaintenanceSchedule(TransactionBase):
 					}
 				)
 				event.add_participant(self.doctype, self.name)
+				if email_map.get(d.sales_person):
+					event.append(
+						"event_participants",
+						{
+							"reference_doctype": "Sales Person",
+							"reference_docname": d.sales_person,
+							"email": email_map[d.sales_person],
+						},
+					)
 				event.insert(ignore_permissions=1)
 
 		self.db_set("status", "Submitted")
@@ -169,7 +173,7 @@ class MaintenanceSchedule(TransactionBase):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:
 					schedule_date = self.validate_schedule_date_for_holiday_list(
-						getdate(start_date_copy), sales_person
+						getdate(start_date_copy), sales_person, start_date
 					)
 					if schedule_date > getdate(end_date):
 						schedule_date = getdate(end_date)
@@ -177,27 +181,25 @@ class MaintenanceSchedule(TransactionBase):
 
 		return schedule_list
 
-	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
-		validated = False
-
+	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person, start_date):
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
 		if employee:
-			holiday_list = get_holiday_list_for_employee(employee)
+			holiday_list = get_holiday_list_for_employee(employee, raise_exception=False)
 		else:
 			holiday_list = frappe.get_cached_value("Company", self.company, "default_holiday_list")
 
 		holidays = frappe.get_all("Holiday", filters={"parent": holiday_list}, pluck="holiday_date")
 
-		if not validated and holidays:
-			# max iterations = len(holidays)
-			for _i in range(len(holidays)):
-				if schedule_date in holidays:
-					schedule_date = add_days(schedule_date, -1)
-				else:
-					validated = True
-					break
+		working_date = schedule_date
+		while working_date in holidays:
+			working_date = add_days(working_date, -1)
 
-		return schedule_date
+		if working_date < getdate(start_date):
+			working_date = schedule_date
+			while working_date in holidays:
+				working_date = add_days(working_date, 1)
+
+		return working_date
 
 	def validate_dates_with_periodicity(self):
 		for d in self.get("items"):
@@ -233,6 +235,13 @@ class MaintenanceSchedule(TransactionBase):
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
+			if d.no_of_visits > date_diff(d.end_date, d.start_date):
+				throw(
+					_(
+						"Row {0}: Number of visits can not be more than the {1} days between Start and End Date"
+					).format(d.idx, date_diff(d.end_date, d.start_date))
+				)
+
 	def validate_sales_order(self):
 		ms = frappe.qb.DocType("Maintenance Schedule")
 		msi = frappe.qb.DocType("Maintenance Schedule Item")
@@ -264,6 +273,7 @@ class MaintenanceSchedule(TransactionBase):
 				"sales_person",
 				"no_of_visits",
 				"serial_no",
+				"serial_and_batch_bundle",
 			]
 			for field in fields:
 				b_doc = prev_item.as_dict()
@@ -289,43 +299,82 @@ class MaintenanceSchedule(TransactionBase):
 		if not ids:
 			return
 
-		voucher_nos = frappe.get_all(
-			"Serial and Batch Bundle", fields=["name", "voucher_type"], filters={"name": ("in", ids)}
+		bundles = frappe.get_all(
+			"Serial and Batch Bundle",
+			fields=["name", "voucher_type", "item_code"],
+			filters={"name": ("in", ids)},
 		)
 
-		for row in voucher_nos:
-			if row.voucher_type != "Maintenance Schedule":
+		bundles = {bundle.name: bundle for bundle in bundles}
+		for item in self.items:
+			bundle = bundles.get(item.serial_and_batch_bundle)
+			if not bundle:
+				continue
+			if bundle.voucher_type != "Maintenance Schedule":
 				frappe.throw(
 					_(
 						"Serial and Batch Bundle {0} should have voucher type as 'Maintenance Schedule'"
-					).format(row.name)
+					).format(bundle.name)
+				)
+			if item.item_code != bundle.item_code:
+				frappe.throw(
+					_("Row #{0}: Serial and Batch Bundle does not belong to Item {1}").format(
+						item.idx, escape_html(item.item_code)
+					)
 				)
 
 	def on_update(self):
 		self.db_set("status", "Draft")
 
+	def get_serial_nos_with_row_amc_date(self, item):
+		"""Serials still carrying the AMC date this row set on submit; deleted numbers are skipped."""
+		if item.serial_and_batch_bundle:
+			serial_nos = get_serial_batch_list_from_item(item)[0]
+		else:
+			records = SerialBatchIdentity("Serial No").get_records(
+				item.item_code, get_serial_nos(item.serial_no), ["name"]
+			)
+			serial_nos = [record.name for record in records]
+
+		if not serial_nos or not item.end_date:
+			return []
+		return frappe.get_all(
+			"Serial No",
+			filters={"name": ("in", serial_nos), "amc_expiry_date": item.end_date},
+			pluck="name",
+		)
+
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
 			serial_no_doc = frappe.get_doc("Serial No", serial_no)
 			serial_no_doc.amc_expiry_date = amc_expiry_date
-			serial_no_doc.save()
+			serial_no_doc.save(ignore_permissions=True)
 
 	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
+		delivery_dates = self.get_delivery_dates(item_code, serial_nos)
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value(
 				"Serial No",
 				serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date", "item_code"],
+				[
+					"serial_no",
+					"warranty_expiry_date",
+					"amc_expiry_date",
+					"warehouse",
+					"item_code",
+					"customer",
+				],
 				as_dict=1,
 			)
 
 			if not sr_details:
-				frappe.throw(_("Serial No {0} not found").format(serial_no))
+				frappe.throw(_("A selected Serial No no longer exists. Please select it again."))
+			number = escape_html(sr_details.serial_no)
 
 			if sr_details.get("item_code") != item_code:
 				frappe.throw(
 					_("Serial No {0} does not belong to Item {1}").format(
-						frappe.bold(serial_no), frappe.bold(item_code)
+						frappe.bold(number), frappe.bold(escape_html(item_code))
 					),
 					title=_("Invalid"),
 				)
@@ -335,27 +384,48 @@ class MaintenanceSchedule(TransactionBase):
 			):
 				throw(
 					_("Serial No {0} is under warranty until {1}").format(
-						serial_no, sr_details.warranty_expiry_date
+						number, sr_details.warranty_expiry_date
 					)
 				)
 
 			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(
 					_("Serial No {0} is under maintenance contract until {1}").format(
-						serial_no, sr_details.amc_expiry_date
+						number, sr_details.amc_expiry_date
 					)
 				)
 
-			if (
-				not sr_details.warehouse
-				and sr_details.delivery_date
-				and getdate(sr_details.delivery_date) >= getdate(amc_start_date)
-			):
+			validate_serial_no_for_customer(sr_details, self.customer)
+
+			delivery_date = delivery_dates.get(serial_no)
+			if delivery_date and getdate(delivery_date) >= getdate(amc_start_date):
 				throw(
 					_("Maintenance start date can not be before delivery date for Serial No {0}").format(
-						serial_no
+						number
 					)
 				)
+
+	def get_delivery_dates(self, item_code, serial_nos):
+		"""Latest outward movement per serial, so validation reads them once rather than per row."""
+		if not serial_nos:
+			return {}
+
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		rows = (
+			frappe.qb.from_(entry)
+			.select(entry.serial_no, Max(entry.posting_datetime).as_("posting_datetime"))
+			.where(
+				entry.serial_no.isin(serial_nos)
+				& (entry.item_code == item_code)
+				& (entry.docstatus == 1)
+				& (entry.is_cancelled == 0)
+				& (entry.type_of_transaction == "Outward")
+				& entry.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			)
+			.groupby(entry.serial_no)
+		).run(as_dict=True)
+
+		return {row.serial_no: row.posting_datetime for row in rows}
 
 	def validate_schedule(self):
 		item_lst1 = []
@@ -396,16 +466,38 @@ class MaintenanceSchedule(TransactionBase):
 
 	def on_cancel(self):
 		for d in self.get("items"):
-			if d.serial_and_batch_bundle:
-				serial_nos = frappe.get_doc(
-					"Serial and Batch Bundle", d.serial_and_batch_bundle
-				).get_serial_nos()
-
-				if serial_nos:
-					self.update_amc_date(serial_nos)
+			serial_nos = self.get_serial_nos_with_row_amc_date(d)
+			if serial_nos:
+				expiry_dates = self.get_other_amc_expiry_dates(d.item_code, serial_nos)
+				for serial_no in serial_nos:
+					self.update_amc_date([serial_no], expiry_dates.get(serial_no))
 
 		self.db_set("status", "Cancelled")
 		delete_events(self.doctype, self.name)
+
+	def get_other_amc_expiry_dates(self, item_code, serial_nos):
+		"""Latest end date per serial across the item's other submitted schedules."""
+		rows = frappe.get_all(
+			"Maintenance Schedule Item",
+			filters={"item_code": item_code, "docstatus": 1, "parent": ("!=", self.name)},
+			fields=["serial_no", "serial_and_batch_bundle", "end_date"],
+		)
+		bundles = [row.serial_and_batch_bundle for row in rows if row.serial_and_batch_bundle]
+		bundle_serial_nos = get_serial_nos_from_sle_list(bundles) if bundles else {}
+		names = {
+			number.lower(): name
+			for name, number in SerialBatchIdentity("Serial No").get_number_map(serial_nos).items()
+		}
+
+		expiry_dates = {}
+		for row in rows:
+			if row.serial_and_batch_bundle:
+				row_serial_nos = bundle_serial_nos.get(row.serial_and_batch_bundle, [])
+			else:
+				row_serial_nos = [names.get(number.lower()) for number in get_serial_nos(row.serial_no)]
+			for serial_no in set(row_serial_nos).intersection(serial_nos):
+				expiry_dates[serial_no] = max(row.end_date, expiry_dates.get(serial_no, row.end_date))
+		return expiry_dates
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
@@ -432,22 +524,71 @@ class MaintenanceSchedule(TransactionBase):
 			if not s_date:
 				frappe.throw(_("Scheduled Date is required."))
 			for schedule in self.schedules:
-				if schedule.item_name == item_name and s_date == formatdate(
-					schedule.scheduled_date, "dd-mm-yyyy"
+				if (
+					schedule.item_name == item_name
+					and schedule.completion_status == "Pending"
+					and s_date == formatdate(schedule.scheduled_date, "dd-mm-yyyy")
 				):
 					return schedule.name
 
 
+def validate_serial_no_for_customer(serial, customer):
+	"""Refuse a serial still in stock; warn when it was sold to another customer."""
+	number = frappe.bold(escape_html(serial.serial_no))
+	if serial.warehouse:
+		frappe.throw(
+			_("Serial No {0} is still in stock in Warehouse {1}").format(
+				number, frappe.bold(serial.warehouse)
+			)
+		)
+	if serial.customer and serial.customer != customer:
+		frappe.msgprint(
+			_("Serial No {0} was sold to Customer {1}, not {2}").format(
+				number, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(customer))
+			),
+			title=_("Different Customer"),
+			indicator="orange",
+		)
+
+
 @frappe.whitelist()
 def get_serial_nos_from_schedule(item_code: str, schedule: str):
-	serial_nos = frappe.db.get_value(
-		"Maintenance Schedule Item", {"parent": schedule, "item_code": item_code}, "serial_no"
+	frappe.has_permission("Maintenance Schedule", "read", doc=schedule, throw=True)
+	return get_schedule_serial_ids(item_code, schedule)
+
+
+def get_schedule_serial_ids(item_code, schedule):
+	serial_ids = []
+	for row in frappe.get_all(
+		"Maintenance Schedule Item",
+		filters={"parent": schedule, "item_code": item_code},
+		fields=["item_code", "serial_no", "serial_and_batch_bundle"],
+	):
+		serial_ids.extend(get_serial_batch_list_from_item(row)[0])
+	return list(dict.fromkeys(serial_ids))
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_serial_no_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	if not filters.get("item_code"):
+		return []
+	query_filters = {"item_code": filters["item_code"]}
+	if filters.get("schedule"):
+		frappe.has_permission("Maintenance Schedule", "read", doc=filters["schedule"], throw=True)
+		serial_ids = get_schedule_serial_ids(filters["item_code"], filters["schedule"])
+		if serial_ids:
+			query_filters["name"] = ("in", serial_ids)
+	return frappe.get_list(
+		"Serial No",
+		filters=query_filters,
+		or_filters={"serial_no": ("like", f"%{txt}%"), "name": ("like", f"%{txt}%")},
+		fields=["name", "serial_no"],
+		order_by="serial_no, name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
-
-	if serial_nos:
-		serial_nos = get_serial_nos(serial_nos)
-
-	return serial_nos
 
 
 @frappe.whitelist()
@@ -462,25 +603,22 @@ def make_maintenance_visit(
 	def condition(doc):
 		if s_id:
 			return doc.name == s_id
-		elif item_name:
-			return doc.item_name == item_name
-
-		return True
+		if item_name and doc.item_name != item_name:
+			return False
+		return doc.completion_status != "Fully Completed"
 
 	def update_status_and_detail(source, target, parent):
 		target.maintenance_type = "Scheduled"
 
 	def update_serial(source, target, parent):
+		serial_ids = []
 		if source.item_reference:
-			if sbb := frappe.db.get_value(
-				"Maintenance Schedule Item", source.item_reference, "serial_and_batch_bundle"
-			):
-				serial_nos = frappe.get_doc("Serial and Batch Bundle", sbb).get_serial_nos()
-
-				if len(serial_nos) == 1:
-					target.serial_no = serial_nos[0]
-				else:
-					target.serial_no = ""
+			row = next((item for item in parent.items if item.name == source.item_reference), None)
+			if row:
+				serial_ids = get_serial_batch_list_from_item(row)[0]
+		elif source.serial_no:
+			serial_ids = get_serial_batch_list_from_item(source)[0]
+		target.serial_no = serial_ids[0] if len(serial_ids) == 1 else ""
 
 	doclist = get_mapped_doc(
 		"Maintenance Schedule",

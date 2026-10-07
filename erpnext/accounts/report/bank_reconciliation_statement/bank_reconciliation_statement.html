@@ -28,16 +28,16 @@
 						<br>{%= __("Clearance Date") %}: {%= frappe.datetime.str_to_user(data[i]["clearance_date"]) %}
 					{% } %}
 				</td>
-				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["debit"], data[i]["account_currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["credit"], data[i]["account_currency"]) %}</td>
 			</tr>
 			{% } else { %}
 			<tr>
 				<td></td>
 				<td></td>
 				<td>{%= data[i]["payment_entry"] %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["debit"], data[i]["account_currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["credit"], data[i]["account_currency"]) %}</td>
 			</tr>
 			{% } %}
 		{% } %}

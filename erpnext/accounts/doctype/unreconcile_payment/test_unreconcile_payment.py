@@ -11,6 +11,11 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	make_company_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -541,3 +546,44 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
+
+	def test_unreconcile_selection_fences_the_voucher(self):
+		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
+			create_unreconcile_doc_for_selection,
+		)
+
+		si = self.create_sales_invoice()
+		pe = self.create_payment_entry()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 100},
+		)
+		pe.save().submit()
+
+		def selection(voucher_no):
+			return [
+				{
+					"company": self.company,
+					"voucher_type": "Payment Entry",
+					"voucher_no": voucher_no,
+					"against_voucher_type": si.doctype,
+					"against_voucher_no": si.name,
+				}
+			]
+
+		def selection_kwargs(voucher_no):
+			return {"selections": selection(voucher_no)}
+
+		outside = make_company_fenced_user("unrec-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused_for_names(
+				self, create_unreconcile_doc_for_selection, selection_kwargs, [pe.name], caller_supplied=True
+			)
+		inside = make_company_fenced_user("unrec-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(inside):
+			assert_refused_for_names(
+				self, create_unreconcile_doc_for_selection, selection_kwargs, [], caller_supplied=True
+			)
+			create_unreconcile_doc_for_selection(selection(pe.name))
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 100)

@@ -176,7 +176,7 @@ class VisualPlantFloor {
 				.find(".workstation-image-container")
 				.append(
 					`<div class="workstation-image-cls workstation-abbr" style="margin:6px; height:82px">${frappe.get_abbr(
-						data.name,
+						frappe.utils.escape_html(data.name),
 						2
 					)}</div>`
 				);

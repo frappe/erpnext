@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:parameter",
  "creation": "2020-12-28 17:06:00.254129",
+ "description": "Something an item is checked for, like weight or colour.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -33,6 +34,7 @@
    "options": "Quality Inspection Parameter Group"
   }
  ],
+ "icon": "clipboard-list",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-06-19 10:55:00.000000",

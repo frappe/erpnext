@@ -22,6 +22,7 @@ JOB_CARD_FIELDS = [
 	"total_completed_qty",
 	"for_quantity",
 	"process_loss_qty",
+	"stock_uom",
 	"finished_good",
 	"transferred_qty",
 	"status",
@@ -252,6 +253,7 @@ def submit_quality_inspection(job_card: str, readings: str | None = None):
 	qi.item_code = jc.finished_good or jc.production_item
 	qi.bom_no = jc.bom_no
 	qi.quality_inspection_template = template
+	qi.sample_size = 1
 	qi.inspected_by = frappe.session.user
 	qi.get_item_specification_details()  # load readings from the template
 

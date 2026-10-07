@@ -5,9 +5,11 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
-	if filters.from_date >= filters.to_date:
+	if filters.from_date > filters.to_date:
 		frappe.msgprint(_("To Date must be greater than From Date"))
 
 	columns = get_columns(filters)
@@ -22,6 +24,7 @@ def get_columns(filters):
 			"label": _("Subcontract Order"),
 			"fieldtype": "Link",
 			"fieldname": "subcontract_order",
+			"options": "Subcontracting Order",
 			"width": 200,
 		},
 		{"label": _("Date"), "fieldtype": "Date", "fieldname": "date", "width": 150},
@@ -68,7 +71,12 @@ def get_order_items_to_supply(filters):
 		["Subcontracting Order", "transaction_date", "<=", filters.to_date],
 		["Subcontracting Order", "transaction_date", ">=", filters.from_date],
 		["Subcontracting Order", "docstatus", "=", 1],
+		["Subcontracting Order", "status", "!=", "Closed"],
 	]
+
+	order = frappe.qb.DocType("Subcontracting Order")
+	if condition := get_allowed_companies_condition(order.company, "Subcontracting Order"):
+		record_filters.append(condition)
 
 	return frappe.db.get_all(
 		"Subcontracting Order",

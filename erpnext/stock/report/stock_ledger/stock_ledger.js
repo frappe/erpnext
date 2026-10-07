@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Stock Ledger"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "company",
@@ -88,9 +89,12 @@ frappe.query_reports["Stock Ledger"] = {
 		},
 		{
 			fieldname: "brand",
-			label: __("Brand"),
-			fieldtype: "Link",
+			label: __("Brands"),
+			fieldtype: "MultiSelectList",
 			options: "Brand",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Brand", txt);
+			},
 		},
 		{
 			fieldname: "voucher_no",
@@ -125,7 +129,7 @@ frappe.query_reports["Stock Ledger"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (column.fieldname == "out_qty" && data && data.out_qty < 0) {
 			value = "<span style='color:red'>" + value + "</span>";
 		} else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {

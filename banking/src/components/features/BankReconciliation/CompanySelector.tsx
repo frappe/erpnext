@@ -19,13 +19,22 @@ import {
 import { cn } from "@/lib/utils"
 import _ from "@/lib/translate"
 import { selectedBankAccountAtom } from "./bankRecAtoms"
+import { useFrappeGetDocList } from "frappe-react-sdk"
+import ErrorBanner from "@/components/ui/error-banner"
 
 const CompanySelector = ({ onChange }: { onChange?: (company: string) => void }) => {
     const [open, setOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const options = window.frappe?.boot?.docs?.filter((doc: Record<string, any>) => doc.doctype === ":Company").map((company: Record<string, any>) => company.name) || []
+    const { data: companies, error } = useFrappeGetDocList("Company", {
+        limit: 0,
+        fields: ["name"],
+    }, 'company_list', {
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+    })
+
+    const options = companies?.map((company: { name: string }) => company.name) || []
 
     const setSelectedCompany = useSetAtom(selectedCompanyAtom)
     const setSelectedBankAccount = useSetAtom(selectedBankAccountAtom)
@@ -40,6 +49,10 @@ const CompanySelector = ({ onChange }: { onChange?: (company: string) => void })
             setSelectedBankAccount(null)
             onChange?.(company)
         }
+    }
+
+    if (error) {
+        return <ErrorBanner error={error} />
     }
 
     return (<Popover open={open} onOpenChange={setOpen}>

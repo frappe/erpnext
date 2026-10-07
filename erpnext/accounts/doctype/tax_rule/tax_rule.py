@@ -13,6 +13,7 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
+from erpnext import _refuse, require_party_permission, require_permission
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 from erpnext.setup.doctype.supplier_group.supplier_group import get_parent_supplier_groups
 
@@ -142,9 +143,38 @@ class TaxRule(Document):
 
 @frappe.whitelist()
 def get_party_details(party: str | None, party_type: str, args: dict | None = None):
+	party_type = cstr(party_type)
+	party_doctype = frappe.unscrub(party_type)
+	party = require_party_permission(party_doctype, party)
+	if args:
+		for fieldname in ("billing_address", "shipping_address"):
+			if args.get(fieldname) and not isinstance(args.get(fieldname), str):
+				frappe.throw(_("Invalid address"), frappe.PermissionError)
+		for fieldname in ("billing_address", "shipping_address"):
+			if args.get(fieldname):
+				args[fieldname] = cstr(args[fieldname])
+				if not frappe.has_permission("Address", "read", doc=args[fieldname]):
+					_refuse()
+	else:
+		for address_name in (
+			get_default_address(party_type, party),
+			get_default_address(party_type, party, "is_shipping_address"),
+		):
+			if address_name:
+				require_permission("Address", address_name, "read")
+	return get_tax_rule_party_details(party, party_type, args)
+
+
+def get_tax_rule_party_details(party: str | None, party_type: str, args: dict | None = None):
 	out = {}
 	billing_address, shipping_address = None, None
 	if args:
+		# each of these names a single Address. A dict is read as a filter instead, and `get_doc`
+		# would resolve it to whichever Address happens to match, so only a plain name is accepted
+		for fieldname in ("billing_address", "shipping_address"):
+			if args.get(fieldname) and not isinstance(args.get(fieldname), str):
+				frappe.throw(_("Invalid address"), frappe.PermissionError)
+
 		if args.get("billing_address"):
 			billing_address = frappe.get_doc("Address", args.get("billing_address"))
 		if args.get("shipping_address"):

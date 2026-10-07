@@ -84,6 +84,17 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.item_row = item;
 			this.currency = this.events.get_frm().doc.currency;
 
+			if (item.has_serial_no == null || item.has_batch_no == null) {
+				const r = await frappe.db.get_value("Item", item.item_code, [
+					"has_serial_no",
+					"has_batch_no",
+				]);
+				if (r && r.message) {
+					item.has_serial_no = r.message.has_serial_no;
+					item.has_batch_no = r.message.has_batch_no;
+				}
+			}
+
 			this.current_item = item;
 
 			this.render_dom(item);
@@ -358,22 +369,19 @@ erpnext.PointOfSale.ItemDetails = class {
 		if (this.serial_no_control && this.batch_no_control) {
 			const selected_serial_nos = this.serial_no_control
 				.get_value()
-				.split(`\n`)
-				.filter((s) => s);
+				.split(/[\n,]/)
+				.map((number) => number.trim())
+				.filter(Boolean);
 			if (!selected_serial_nos.length) return;
 
-			// find batch nos of the selected serial no
-			const serials_with_batch_no = await frappe.db.get_list("Serial No", {
-				filters: { name: ["in", selected_serial_nos] },
-				fields: ["batch_no", "name"],
+			const { message: batch_serial_map } = await frappe.call({
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_serials_by_batch",
+				args: {
+					item_code: this.current_item.item_code,
+					serial_nos: selected_serial_nos.join("\n"),
+					pos_profile: this.events.get_frm().doc.pos_profile,
+				},
 			});
-			const batch_serial_map = serials_with_batch_no.reduce((acc, r) => {
-				if (!acc[r.batch_no]) {
-					acc[r.batch_no] = [];
-				}
-				acc[r.batch_no] = [...acc[r.batch_no], r.name];
-				return acc;
-			}, {});
 			// set current item's batch no and serial no
 			const batch_no = Object.keys(batch_serial_map)[0];
 			const batch_serial_nos = batch_serial_map[batch_no].join(`\n`);
@@ -440,6 +448,7 @@ erpnext.PointOfSale.ItemDetails = class {
 					batch_nos: this.current_item.batch_no || "",
 					posting_date: expiry_date,
 					for_doctype: this.frm_doctype,
+					as_numbers: true,
 				},
 			});
 

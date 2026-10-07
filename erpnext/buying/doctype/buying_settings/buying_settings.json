@@ -3,6 +3,7 @@
  "creation": "2013-06-25 11:04:03",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/buying-settings",
  "engine": "InnoDB",
  "field_order": [
   "supplier_and_price_defaults_section",
@@ -138,7 +139,7 @@
   },
   {
    "default": "1",
-   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "description": "If checked, the rejected quantity is billed anywhere in the purchase cycle.",
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for rejected quantity in Purchase Invoice"
@@ -246,7 +247,7 @@
   {
    "default": "0",
    "depends_on": "bill_for_rejected_quantity_in_purchase_invoice",
-   "description": "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt.",
+   "description": "If enabled, the system will generate an accounting entry for material rejected anywhere in the purchase cycle.",
    "fieldname": "set_valuation_rate_for_rejected_materials",
    "fieldtype": "Check",
    "label": "Set valuation rate for rejected Materials"
@@ -345,7 +346,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,

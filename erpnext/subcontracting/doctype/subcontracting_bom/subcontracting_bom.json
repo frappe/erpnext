@@ -4,6 +4,7 @@
  "autoname": "format:SB-{####}",
  "creation": "2023-08-29 12:43:20.417184",
  "default_view": "List",
+ "description": "The materials a subcontractor uses to make an item for you.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -107,6 +108,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -126,9 +128,10 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "list-tree",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:45.904619",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting BOM",

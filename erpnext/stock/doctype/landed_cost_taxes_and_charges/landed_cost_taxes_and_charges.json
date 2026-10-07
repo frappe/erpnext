@@ -17,7 +17,11 @@
   "has_operating_cost",
   "operation_id",
   "qty",
-  "operating_component"
+  "operating_component",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project"
  ],
  "fields": [
   {
@@ -107,13 +111,34 @@
    "label": "Operating Component",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-19 12:21:07.953801",
+ "modified": "2026-08-04 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",

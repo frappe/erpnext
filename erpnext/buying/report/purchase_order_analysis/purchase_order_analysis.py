@@ -9,10 +9,19 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
 
+import erpnext
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	get_invoiced_qty_against_po_items,
+)
+from erpnext.utilities.query import get_match_conditions_qb
+
 
 def execute(filters=None):
 	if not filters:
 		return [], []
+
+	filters = frappe._dict(filters)
+	filters.company = filters.get("company") or erpnext.get_default_company()
 
 	validate_filters(filters)
 
@@ -23,6 +32,7 @@ def execute(filters=None):
 		return [], [], None, []
 
 	update_received_amount(data)
+	update_billed_qty(data)
 
 	data, chart_data = prepare_data(data, filters)
 
@@ -30,6 +40,9 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	if not filters.get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
 
 	if not from_date and to_date:
@@ -37,18 +50,18 @@ def validate_filters(filters):
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
 
+	if filters.get("group_by_po") and filters.get("group_by_item"):
+		frappe.throw(_("Group the report by Purchase Order or by Item, not both."))
+
 
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
-	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
 		frappe.qb.from_(po)
 		.inner_join(po_item)
 		.on(po_item.parent == po.name)
-		.left_join(pi_item)
-		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -57,10 +70,10 @@ def get_data(filters):
 			po.status,
 			po.supplier,
 			po_item.item_code,
+			po_item.uom,
 			po_item.qty,
 			po_item.received_qty,
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
-			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
 			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
@@ -71,14 +84,9 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
-		# the selected po.* columns need the Purchase Order PK grouped on postgres; po.name is 1:1
-		# with the grouped po_item.name, so groups are unchanged.
-		.groupby(po_item.name, po.name)
+		.where(po.company == filters.get("company"))
 		.orderby(po.transaction_date)
 	)
-
-	if filters.get("company"):
-		query = query.where(po.company == filters.get("company"))
 
 	if filters.get("name"):
 		query = query.where(po.name.isin(filters.get("name")))
@@ -92,6 +100,9 @@ def get_data(filters):
 	if filters.get("project"):
 		query = query.where(po_item.project == filters.get("project"))
 
+	for condition in get_match_conditions_qb("Purchase Order", table=po):
+		query = query.where(condition)
+
 	data = query.run(as_dict=True)
 
 	return data
@@ -102,6 +113,13 @@ def update_received_amount(data):
 
 	for row in data:
 		row.received_qty_amount = flt(pr_data.get(row.name))
+
+
+def update_billed_qty(data):
+	billed_qty = get_invoiced_qty_against_po_items([row.name for row in data])
+
+	for row in data:
+		row.billed_qty = flt(billed_qty.get(row.name))
 
 
 def get_received_amount_data(data):
@@ -133,58 +151,78 @@ def get_received_amount_data(data):
 	return frappe._dict(data)
 
 
+AGGREGATED_FIELDS = (
+	"qty",
+	"received_qty",
+	"pending_qty",
+	"billed_qty",
+	"qty_to_bill",
+	"amount",
+	"received_qty_amount",
+	"billed_amount",
+	"pending_amount",
+)
+
+
 def prepare_data(data, filters):
 	completed, pending = 0, 0
-	pending_field = "pending_amount"
-	completed_field = "billed_amount"
-
-	if filters.get("group_by_po"):
-		purchase_order_map = {}
 
 	for row in data:
-		# sum data for chart
-		completed += row[completed_field]
-		pending += row[pending_field]
-
-		# prepare data for report view
 		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		if row["status"] == "Closed":
+			row.update(pending_qty=0, qty_to_bill=0, pending_amount=0)
 
-		if filters.get("group_by_po"):
-			po_name = row["purchase_order"]
-
-			if po_name not in purchase_order_map:
-				# create an entry
-				row_copy = copy.deepcopy(row)
-				purchase_order_map[po_name] = row_copy
-			else:
-				# update existing entry
-				po_row = purchase_order_map[po_name]
-				po_row["required_date"] = min(getdate(po_row["required_date"]), getdate(row["required_date"]))
-
-				# sum numeric columns
-				fields = [
-					"qty",
-					"received_qty",
-					"pending_qty",
-					"billed_qty",
-					"qty_to_bill",
-					"amount",
-					"received_qty_amount",
-					"billed_amount",
-					"pending_amount",
-				]
-				for field in fields:
-					po_row[field] = flt(row[field]) + flt(po_row[field])
+		completed += row["billed_amount"]
+		pending += row["pending_amount"]
 
 	chart_data = prepare_chart_data(pending, completed)
 
 	if filters.get("group_by_po"):
-		data = []
-		for po in purchase_order_map:
-			data.append(purchase_order_map[po])
-		return data, chart_data
+		data = group_by_purchase_order(data)
+	elif filters.get("group_by_item"):
+		data = group_by_item(data)
 
 	return data, chart_data
+
+
+def group_by_purchase_order(data):
+	purchase_order_map = {}
+
+	for row in data:
+		group = purchase_order_map.get(row["purchase_order"])
+		if not group:
+			purchase_order_map[row["purchase_order"]] = copy.deepcopy(row)
+			continue
+
+		group["required_date"] = min(getdate(group["required_date"]), getdate(row["required_date"]))
+		add_aggregated_fields(group, row)
+
+	return list(purchase_order_map.values())
+
+
+def group_by_item(data):
+	"""Group on company and UOM as well as the item.
+
+	Quantities are in the line UOM and amounts are in the company currency, so neither sums
+	across a second UOM of the same item or a second company.
+	"""
+	item_map = {}
+
+	for row in data:
+		key = (row["company"], row["item_code"], row["uom"])
+		group = item_map.get(key)
+		if not group:
+			item_map[key] = copy.deepcopy(row)
+			continue
+
+		add_aggregated_fields(group, row)
+
+	return sorted(item_map.values(), key=lambda row: (row["company"], row["item_code"], row["uom"]))
+
+
+def add_aggregated_fields(group, row):
+	for field in AGGREGATED_FIELDS:
+		group[field] = flt(group[field]) + flt(row[field])
 
 
 def prepare_chart_data(pending, completed):
@@ -198,7 +236,30 @@ def prepare_chart_data(pending, completed):
 
 
 def get_columns(filters):
-	columns = [
+	if filters.get("group_by_item"):
+		return get_grouped_by_item_columns()
+
+	columns = get_purchase_order_columns()
+
+	if not filters.get("group_by_po"):
+		columns.append(get_item_code_column())
+
+	columns += get_quantity_columns() + get_amount_columns()
+	columns += [get_warehouse_column(), get_company_column()]
+
+	return columns
+
+
+def get_grouped_by_item_columns():
+	columns = [get_item_code_column(), get_uom_column()]
+	columns += get_quantity_columns() + get_amount_columns()
+	columns.append(get_company_column())
+
+	return columns
+
+
+def get_purchase_order_columns():
+	return [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Date", "width": 90},
 		{"label": _("Required By"), "fieldname": "required_date", "fieldtype": "Date", "width": 90},
 		{
@@ -225,101 +286,119 @@ def get_columns(filters):
 		},
 	]
 
-	if not filters.get("group_by_po"):
-		columns.append(
-			{
-				"label": _("Item Code"),
-				"fieldname": "item_code",
-				"fieldtype": "Link",
-				"options": "Item",
-				"width": 100,
-			}
-		)
 
-	columns.extend(
-		[
-			{
-				"label": _("Qty"),
-				"fieldname": "qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Received Qty"),
-				"fieldname": "received_qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Pending Qty"),
-				"fieldname": "pending_qty",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Billed Qty"),
-				"fieldname": "billed_qty",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Qty to Bill"),
-				"fieldname": "qty_to_bill",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Amount"),
-				"fieldname": "amount",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Billed Amount"),
-				"fieldname": "billed_amount",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Pending Amount"),
-				"fieldname": "pending_amount",
-				"fieldtype": "Currency",
-				"width": 130,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Received Qty Amount"),
-				"fieldname": "received_qty_amount",
-				"fieldtype": "Currency",
-				"width": 130,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Warehouse"),
-				"fieldname": "warehouse",
-				"fieldtype": "Link",
-				"options": "Warehouse",
-				"width": 100,
-			},
-			{
-				"label": _("Company"),
-				"fieldname": "company",
-				"fieldtype": "Link",
-				"options": "Company",
-				"width": 100,
-			},
-		]
-	)
+def get_item_code_column():
+	return {
+		"label": _("Item Code"),
+		"fieldname": "item_code",
+		"fieldtype": "Link",
+		"options": "Item",
+		"width": 100,
+	}
 
-	return columns
+
+def get_uom_column():
+	return {
+		"label": _("UOM"),
+		"fieldname": "uom",
+		"fieldtype": "Link",
+		"options": "UOM",
+		"width": 100,
+	}
+
+
+def get_quantity_columns():
+	return [
+		{
+			"label": _("Qty"),
+			"fieldname": "qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Received Qty"),
+			"fieldname": "received_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Pending Qty"),
+			"fieldname": "pending_qty",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Billed Qty"),
+			"fieldname": "billed_qty",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Qty to Bill"),
+			"fieldname": "qty_to_bill",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+	]
+
+
+def get_amount_columns():
+	return [
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 110,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Billed Amount"),
+			"fieldname": "billed_amount",
+			"fieldtype": "Currency",
+			"width": 110,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Pending Amount"),
+			"fieldname": "pending_amount",
+			"fieldtype": "Currency",
+			"width": 130,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Received Qty Amount"),
+			"fieldname": "received_qty_amount",
+			"fieldtype": "Currency",
+			"width": 130,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+	]
+
+
+def get_warehouse_column():
+	return {
+		"label": _("Warehouse"),
+		"fieldname": "warehouse",
+		"fieldtype": "Link",
+		"options": "Warehouse",
+		"width": 100,
+	}
+
+
+def get_company_column():
+	return {
+		"label": _("Company"),
+		"fieldname": "company",
+		"fieldtype": "Link",
+		"options": "Company",
+		"width": 100,
+	}
