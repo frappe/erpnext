@@ -964,7 +964,6 @@ frappe.ui.form.on("Sales Order Item", {
 
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
 	setup(doc) {
-		this.setup_accounting_dimension_triggers();
 		super.setup(doc);
 	}
 	onload(doc, dt, dn) {
@@ -1276,20 +1275,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	items_add(doc, cdt, cdn) {
-		const row = frappe.get_doc(cdt, cdn);
-		const field_copy = [];
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			field_copy.push("project");
-		}
 		if (doc.delivery_date) {
 			frappe.model.set_value(cdt, cdn, "delivery_date", doc.delivery_date);
 		} else {
-			field_copy.push("delivery_date");
-		}
-		if (field_copy.length) {
-			this.frm.script_manager.copy_from_first_row("items", row, field_copy);
+			this.frm.script_manager.copy_from_first_row("items", frappe.get_doc(cdt, cdn), ["delivery_date"]);
 		}
 	}
 
