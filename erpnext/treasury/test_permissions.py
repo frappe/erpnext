@@ -79,6 +79,22 @@ class TestTreasuryPermissions(ERPNextTestSuite):
 		self.assertTrue(frappe.db.exists("Financial Institution", "_Test New Bank"))
 		self.assertTrue(frappe.db.exists("Investment Type", "_Test New FD"))
 
+	def test_accounts_manager_can_link_primary_contact_to_issuer(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Shah"}).insert()
+
+		with self.set_user(ACCOUNTS_MANAGER):
+			frappe.get_doc(
+				{
+					"doctype": "Financial Institution",
+					"institution_name": "_Test New Bank",
+					"institution_type": "Bank",
+					"primary_contact": contact.name,
+				}
+			).insert()
+
+		contact.reload()
+		self.assertTrue(contact.has_link("Financial Institution", "_Test New Bank"))
+
 	def test_accounts_manager_can_approve_investment(self):
 		with self.set_user(ACCOUNTS_MANAGER):
 			investment = make_investment(**INVESTMENT_ACCOUNTS).insert()

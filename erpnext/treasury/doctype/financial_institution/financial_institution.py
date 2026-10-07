@@ -37,7 +37,7 @@ class FinancialInstitution(Document):
 		contact = frappe.get_doc("Contact", self.primary_contact)
 		if not contact.has_link(self.doctype, self.name):
 			contact.append("links", {"link_doctype": self.doctype, "link_name": self.name})
-			contact.save(ignore_permissions=True)
+			contact.save()
 
 	def on_trash(self):
 		delete_contact_and_address(self.doctype, self.name)
