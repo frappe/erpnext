@@ -858,7 +858,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				settings, finished_item_qty + manual_qty, outgoing_items_cost, has_consumption_basis
 			)
 
-		return flt((outgoing_items_cost - scrap_items_cost - manual_cost) / finished_item_qty)
+		return flt(max(outgoing_items_cost - scrap_items_cost - manual_cost, 0) / finished_item_qty)
 
 	def _get_rm_cost_for_manufacture(
 		self, settings, finished_item_qty, outgoing_items_cost, has_consumption_basis=False
