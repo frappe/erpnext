@@ -167,7 +167,8 @@ class SalesPipelineAnalytics:
 			conditions.append({"company": self.filters.get("company")})
 
 		if self.filters.get("assigned_to"):
-			conditions.append(["_assign", "like", f'%"{self.filters.get("assigned_to")}"%'])
+			assigned_to = self.filters.get("assigned_to").replace("%", "\\%").replace("_", "\\_")
+			conditions.append(["_assign", "like", f'%"{assigned_to}"%'])
 
 		if self.filters.get("from_date") and self.filters.get("to_date"):
 			conditions.append(

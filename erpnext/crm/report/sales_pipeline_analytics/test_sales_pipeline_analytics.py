@@ -248,6 +248,16 @@ class TestSalesPipelineAnalytics(ERPNextTestSuite):
 
 		self.assertEqual(rows[0]["january_2026"], 1)
 
+	def test_assigned_to_matches_wildcard_characters_literally(self):
+		stage = make_sales_stage()
+		for user in ("a_b@example.com", "axb@example.com"):
+			opportunity = make_stage_opportunity(stage, 100, "2026-01-20")
+			frappe.db.set_value("Opportunity", opportunity.name, "_assign", f'["{user}"]')
+
+		rows = stage_rows(stage, assigned_to="a_b@example.com", from_date="2026-01-01", to_date="2026-01-31")
+
+		self.assertEqual(rows[0]["january_2026"], 1)
+
 	def test_lost_and_closed_left_out_unless_picked(self):
 		stage = make_sales_stage()
 		make_stage_opportunity(stage, 100, "2026-01-20")
