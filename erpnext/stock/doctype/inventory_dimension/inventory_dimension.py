@@ -373,10 +373,10 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 		if parent_doc:
 			evals["parent"] = parent_doc
 
-		if row.condition and frappe.safe_eval(row.condition, evals):
-			filter_dimensions.append(row)
-		else:
-			filter_dimensions.append(row)
+		if row.condition and not frappe.safe_eval(row.condition, evals):
+			continue
+
+		filter_dimensions.append(row)
 
 	return filter_dimensions
 

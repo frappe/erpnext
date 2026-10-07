@@ -13,6 +13,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	CanNotBeDefaultDimension,
 	DoNotChangeError,
 	delete_dimension,
+	get_evaluated_inventory_dimension,
 )
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -252,6 +253,16 @@ class TestInventoryDimension(ERPNextTestSuite):
 		ledger_field = custom_fields["Stock Ledger Entry"][0]
 		self.assertEqual((document_field["fieldname"], document_field["reqd"]), ("pallet_mandatory_new", 1))
 		self.assertEqual(ledger_field["reqd"], 0)
+
+	def test_dimension_condition_limits_rows(self):
+		dimension = frappe._dict(name="Pallet", condition="doc.qty > 100", type_of_transaction="Both")
+		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
+		with patch(f"{module}.get_document_wise_inventory_dimensions", return_value=[dimension]):
+			for qty, expected in ((5, []), (150, [dimension])):
+				row = frappe._dict(doctype="Purchase Receipt Item", docstatus=1, qty=qty)
+				self.assertEqual(
+					get_evaluated_inventory_dimension(row, frappe._dict(actual_qty=qty)), expected
+				)
 
 	def test_check_mandatory_depends_on_dimensions(self):
 		doc = create_inventory_dimension(
