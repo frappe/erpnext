@@ -219,13 +219,14 @@ class ItemTax:
 						tax_amount = item_tax_detail.get("tax_amount", 0) * item_proportion
 				# Actual rows where no item_wise_tax_detail
 				elif charge_type == "Actual":
+					row_proportion = item_proportion
 					if tax_row.get("is_tax_withholding_account"):
 						if not item.get("apply_tds") or not doc.get("base_tax_withholding_net_total"):
-							item_proportion = 0
+							row_proportion = 0
 						else:
-							item_proportion = item.base_net_amount / doc.base_tax_withholding_net_total
+							row_proportion = item.base_net_amount / doc.base_tax_withholding_net_total
 
-					tax_amount = tax_row.base_tax_amount_after_discount_amount * item_proportion
+					tax_amount = tax_row.base_tax_amount_after_discount_amount * row_proportion
 
 				if tax_row.get("add_deduct_tax") == "Deduct":
 					tax_amount *= -1
