@@ -352,6 +352,13 @@ class TestOpportunity(ERPNextTestSuite):
 		self.assertNotIn(opp.name, get_prospect_opportunities(prospect_name))
 		self.assertIn(opp.name, get_prospect_opportunities(other_prospect))
 
+		# a row added by hand on another Prospect stays while the party is unchanged
+		prospect.reload()
+		prospect.append("opportunities", {"opportunity": opp.name})
+		prospect.save(ignore_permissions=True)
+		opp.save()
+		self.assertIn(opp.name, get_prospect_opportunities(prospect_name))
+
 		opp.delete()
 		self.assertNotIn(opp.name, get_prospect_opportunities(other_prospect))
 

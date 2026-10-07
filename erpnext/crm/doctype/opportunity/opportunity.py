@@ -232,13 +232,8 @@ class Opportunity(TransactionBase, CRMNote):
 		self.base_opportunity_amount = flt(self.opportunity_amount) * flt(self.conversion_rate)
 
 	def update_prospect(self):
-		prospect_name = None
-		if self.opportunity_from == "Prospect" and self.party_name:
-			prospect_name = self.party_name
-		elif self.opportunity_from == "Lead":
-			prospect_name = frappe.db.get_value("Prospect Lead", {"lead": self.party_name}, "parent")
-
-		self.remove_from_other_prospects(prospect_name)
+		prospect_name = get_party_prospect(self.opportunity_from, self.party_name)
+		self.remove_from_previous_prospect(prospect_name)
 		if prospect_name:
 			prospect = frappe.get_doc("Prospect", prospect_name)
 
@@ -266,11 +261,18 @@ class Opportunity(TransactionBase, CRMNote):
 				prospect.flags.ignore_mandatory = True
 				prospect.save()
 
-	def remove_from_other_prospects(self, prospect_name: str | None):
-		filters = {"opportunity": self.name, "parenttype": "Prospect"}
-		if prospect_name:
-			filters["parent"] = ("!=", prospect_name)
-		frappe.db.delete("Prospect Opportunity", filters)
+	def remove_from_previous_prospect(self, prospect_name: str | None):
+		"""Remove the row added for the previous party; rows added by hand on other Prospects stay."""
+		previous = self.get_doc_before_save()
+		if not previous:
+			return
+
+		previous_prospect = get_party_prospect(previous.opportunity_from, previous.party_name)
+		if previous_prospect and previous_prospect != prospect_name:
+			frappe.db.delete(
+				"Prospect Opportunity",
+				{"opportunity": self.name, "parenttype": "Prospect", "parent": previous_prospect},
+			)
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
@@ -428,6 +430,13 @@ class Opportunity(TransactionBase, CRMNote):
 			return frappe.db.get_value("User", self.opportunity_owner, "email")
 
 		return None
+
+
+def get_party_prospect(opportunity_from: str, party_name: str | None) -> str | None:
+	if opportunity_from == "Prospect":
+		return party_name
+	if opportunity_from == "Lead":
+		return frappe.db.get_value("Prospect Lead", {"lead": party_name}, "parent")
 
 
 @frappe.whitelist()
