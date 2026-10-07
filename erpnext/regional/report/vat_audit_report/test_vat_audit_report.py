@@ -58,18 +58,20 @@ class TestVATAuditReport(ERPNextTestSuite):
 		other_customer = frappe.get_doc(
 			{"doctype": "Customer", "customer_name": "_Test SA Customer " + frappe.generate_hash(length=6)}
 		).insert()
+		permitted_invoice = make_sa_sales_invoice("_Test SA VAT Item", 200.0)
 		other_invoice = make_sa_sales_invoice("_Test SA VAT Item", 200.0, customer=other_customer.name)
-		other_invoice.append(
-			"taxes",
-			{
-				"charge_type": "On Net Total",
-				"account_head": "VAT - 15% - _TCSV",
-				"cost_center": "Main - _TCSV",
-				"description": "VAT 15%",
-				"rate": 15,
-			},
-		)
-		other_invoice.submit()
+		for invoice in (permitted_invoice, other_invoice):
+			invoice.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": "VAT - 15% - _TCSV",
+					"cost_center": "Main - _TCSV",
+					"description": "VAT 15%",
+					"rate": 15,
+				},
+			)
+			invoice.submit()
 
 		user = frappe.get_doc(
 			{"doctype": "User", "email": "test-sa-vat-audit@example.com", "first_name": "SA VAT Audit"}
@@ -81,6 +83,7 @@ class TestVATAuditReport(ERPNextTestSuite):
 
 		with self.set_user(user):
 			voucher_nos = [row.get("voucher_no") for row in execute(filters)[1]]
+		self.assertIn(permitted_invoice.name, voucher_nos)
 		self.assertNotIn(other_invoice.name, voucher_nos)
 
 		frappe.permissions.add_user_permission("Company", "_Test Company", user)
