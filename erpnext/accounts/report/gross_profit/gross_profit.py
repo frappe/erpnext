@@ -1021,7 +1021,7 @@ class GrossProfitGenerator:
 			frappe.qb.from_(delivery_note_item)
 			.select(
 				Sum(delivery_note_item.stock_qty * delivery_note_item.incoming_rate)
-				/ Sum(delivery_note_item.stock_qty)
+				/ NullIf(Sum(delivery_note_item.stock_qty), 0)
 			)
 			.where(delivery_note_item.docstatus == 1)
 			.where(delivery_note_item.item_code == item_code)

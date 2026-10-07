@@ -1317,6 +1317,22 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
 
+	def test_sales_order_with_fully_returned_delivery_uses_valuation_rate(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = create_item("_Test Gross Profit Returned Delivery Item").name
+		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=2, basic_rate=100)
+		so = make_sales_order(
+			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=2
+		)
+		dnote = make_delivery_note(so.name).submit()
+		make_sales_return(dnote.name).submit()
+		sinv = make_sales_invoice(so.name).submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 200)
+
 	def test_payment_term_group_keeps_invoice_without_schedule(self):
 		item = create_item("_Test Gross Profit No Terms Item", is_stock_item=0).name
 		sinv = create_sales_invoice(
