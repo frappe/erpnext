@@ -540,6 +540,9 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 		else None
 	)
 	linked_sq = getattr(rfq_doc, "supplier_quotation", None) if rfq_doc else None
+	print("linked_sq: ", linked_sq)
+	if rfq_doc:
+		print("doc fields: ", list(rfq_doc.as_dict().keys()))
 
 	conditions = sq_item.request_for_quotation == rfq_name
 	if rfq_item_names:

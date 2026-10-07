@@ -121,19 +121,17 @@
 									const sq = (quotes || []).find(q => q.supplier === sup)?.supplier_quotation;
 								%}
 									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
-										<div class="flex items-center justify-center gap-1 truncate" title="{{ sup }}{% if (sq) { %} : {{ sq }}{% } %}">
+										<div class="flex items-center justify-center gap-1 truncate" title="{{ frappe.utils.escape_html(sup) }}{% if (sq) { %} : {{ frappe.utils.escape_html(sq) }}{% } %}">
 											<div>
 												{{ frappe.utils.escape_html(sup) }}
 											</div>
 											{% if (sq) { %}
 												<span class="whitespace-nowrap">:</span>
-												<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ sq }}">{{ frappe.utils.escape_html(sq) }}</a>
+												<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ frappe.utils.escape_html(sq) }}">{{ frappe.utils.escape_html(sq) }}</a>
 											{% } %}
 										</div>
 									</th>
 								{% } %}
-							{% } else { %}
-								<th class="text-center text-muted" style="min-width: 270px; padding: 14px 16px;">{{ __("Supplier") }}</th>
 							{% } %}
 						</tr>
 					{% } else { %}
@@ -146,8 +144,6 @@
 										{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}
 									</th>
 								{% } %}
-							{% } else { %}
-								<th class="text-center text-muted" style="min-width: 270px; padding: 14px 16px;">{{ __("Item") }}</th>
 							{% } %}
 						</tr>
 					{% } %}
@@ -165,7 +161,7 @@
 								{% for (let s = 0; s < suppliers.length; s++) { %}
 									{%
 										const sup = suppliers[s];
-										const q = quote_map[`${item.item_code}:::${sup}`];
+										const q = quote_map[item.item_code + ":::" + sup];
 										const is_lowest = q && min_rates[item.item_code] !== undefined && q.rate === min_rates[item.item_code];
 									%}
 									{% if (!q) { %}
@@ -175,11 +171,11 @@
 											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
-													<span>{{ q.qty || item.qty || "" }} {{ q.uom || item.uom || "" }}</span>
+													<span>{{ q.qty || item.qty || "" }} {{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-													<span class="{{ is_lowest ? 'text-ink-green-7 font-weight-bold' : '' }}">{{ format_currency(q.rate, q.currency) }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.rate, q.currency) }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
@@ -215,7 +211,7 @@
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 12px 18px; font-size: 13px;">-</td>
 									{% } else { %}
 										<td class="text-right font-weight-bold" style="text-align: right; vertical-align: middle; padding: 12px 18px; font-size: 13px;">
-											<span class="{{ is_cheapest ? 'text-ink-green-7 font-weight-bold' : '' }}">
+											<span class="{% if (is_cheapest) { %}text-ink-green-7 font-weight-bold{% } %}">
 												{{ format_currency(total, curr) }}
 											</span>
 										</td>
@@ -233,21 +229,21 @@
 									{{ idx + 1 }}
 								</td>
 								<td style="width: 200px; min-width: 160px; vertical-align: middle; font-size: 14px;">
-									<div class="flex flex-col gap-1 truncate" title="{{ sup }}{% if (sq) { %} : {{ sq }}{% } %}">
+									<div class="flex flex-col gap-1 truncate" title="{{ frappe.utils.escape_html(sup) }}{% if (sq) { %} : {{ frappe.utils.escape_html(sq) }}{% } %}">
 										<div class="truncate">
 											<span>
 												{{ frappe.utils.escape_html(sup) }}
 											</span>{% if (sq) { %} :{% } %}
 										</div>
 										{% if (sq) { %}
-											<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ sq }}">{{ frappe.utils.escape_html(sq) }}</a>
+											<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ frappe.utils.escape_html(sq) }}">{{ frappe.utils.escape_html(sq) }}</a>
 										{% } %}
 									</div>
 								</td>
 								{% for (let it = 0; it < items.length; it++) { %}
 									{%
 										const item = items[it];
-										const q = quote_map[`${item.item_code}:::${sup}`];
+										const q = quote_map[item.item_code + ":::" + sup];
 										const is_lowest = q && min_rates[item.item_code] !== undefined && q.rate === min_rates[item.item_code];
 									%}
 									{% if (!q) { %}
@@ -257,11 +253,11 @@
 											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
-													<span>{{ q.qty || item.qty || "" }} {{ q.uom || item.uom || "" }}</span>
+													<span>{{ q.qty || item.qty || "" }} {{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-													<span class="{{ is_lowest ? 'text-ink-green-7 font-weight-bold' : '' }}">{{ format_currency(q.rate, q.currency) }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.rate, q.currency) }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
