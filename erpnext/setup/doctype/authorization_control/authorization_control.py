@@ -186,6 +186,7 @@ class AuthorizationControl(TransactionBase):
 				.where(
 					(auth_rule.transaction == doctype_name)
 					& (auth_rule.system_user == session["user"])
+					& auth_rule.based_on.isin(final_based_on)
 					& ((auth_rule.company == company) | (Coalesce(auth_rule.company, "") == ""))
 					& (auth_rule.docstatus != 2)
 				)

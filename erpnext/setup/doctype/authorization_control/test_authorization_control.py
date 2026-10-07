@@ -9,6 +9,22 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_not_applicable_user_rule_does_not_block(self):
+		frappe.get_doc(
+			{
+				"doctype": "Authorization Rule",
+				"transaction": "Sales Order",
+				"based_on": "Not Applicable",
+				"company": "_Test Company",
+				"system_user": "Administrator",
+				"approving_role": "Sales Manager",
+			}
+		).insert()
+		controller = frappe.get_cached_doc("Authorization Control")
+		with patch.object(controller, "bifurcate_based_on_type") as check:
+			controller.validate_approving_authority("Sales Order", "_Test Company", 100)
+			self.assertNotIn("Not Applicable", [call.args[3] for call in check.call_args_list])
+
 	def test_customerwise_rule_preserves_user_and_role_scope(self):
 		controller = frappe.get_cached_doc("Authorization Control")
 		order = frappe._dict(doctype="Sales Order", customer="CUST-001")
