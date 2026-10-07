@@ -185,15 +185,13 @@ class StatusService:
 		return flt(self.doc.qty, precision) > flt(total_qty, precision)
 
 	def _reservation_status(self, status):
-		for row in self.doc.required_items:
-			if not row.stock_reserved_qty:
-				continue
+		if not any(row.stock_reserved_qty for row in self.doc.required_items):
+			return status
 
-			if row.stock_reserved_qty >= row.required_qty:
-				status = "Stock Reserved"
-			else:
-				return "Stock Partially Reserved"
-		return status
+		if any(row.stock_reserved_qty < row.required_qty for row in self.doc.required_items):
+			return "Stock Partially Reserved"
+
+		return "Stock Reserved"
 
 	def update_work_order_qty(self):
 		"""Update Manufactured Qty and Material Transferred for Qty based on Stock Entry"""
