@@ -1388,7 +1388,7 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
+		finished_item_qty = self.get_finished_items_qty()
 		has_consumption_basis = self.has_consumption_basis()
 
 		items = []
@@ -1512,6 +1512,19 @@ class StockEntry(StockController):
 				"batch_no": item.batch_no,
 				"serial_no": item.serial_no,
 			}
+		)
+
+	def get_finished_items_qty(self) -> float:
+		"""Qty of the received finished good rows whose rate is derived from the consumed cost.
+		Manual and zero valued rows take no share, so the others carry the whole cost."""
+		return sum(
+			flt(d.transfer_qty)
+			for d in self.get("items")
+			if d.is_finished_item
+			and d.t_warehouse
+			and not d.s_warehouse
+			and not d.set_basic_rate_manually
+			and not d.allow_zero_valuation_rate
 		)
 
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
@@ -2107,7 +2120,8 @@ class StockEntry(StockController):
 					},
 				)
 
-				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
+				# every finished good row takes its rate from the consumed cost, not only the last one
+				if cstr(d.s_warehouse) or (finished_item_row and d.is_finished_item):
 					sle.recalculate_rate = 1
 
 				allowed_types = [
