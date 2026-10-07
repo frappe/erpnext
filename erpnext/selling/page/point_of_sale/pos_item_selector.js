@@ -37,6 +37,10 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	async load_items_data() {
+		// drop memoized search results so stock qty reflects the latest ledger
+		this.search_index = {};
+		this.cache_epoch = (this.cache_epoch || 0) + 1;
+
 		if (!this.item_group) {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_parent_item_group",
@@ -135,7 +139,9 @@ erpnext.PointOfSale.ItemSelector = class {
 						${frappe.utils.escape_html(frappe.ellipsis(item.item_name, 18))}
 					</div>
 					<div class="item-rate">${
-						format_currency(price_list_rate, item.currency, precision) || 0
+						frappe.utils.escape_html(
+							format_currency(price_list_rate, item.currency, precision)
+						) || 0
 					} / ${frappe.utils.escape_html(uom)}</div>
 				</div>
 			</div>`;
@@ -174,11 +180,10 @@ erpnext.PointOfSale.ItemSelector = class {
 					me.filter_items();
 				},
 				get_query: function () {
-					const doc = me.events.get_frm().doc;
 					return {
 						query: "erpnext.selling.page.point_of_sale.point_of_sale.item_group_query",
 						filters: {
-							pos_profile: doc ? doc.pos_profile : "",
+							pos_profile: me.pos_profile,
 						},
 					};
 				},
@@ -358,10 +363,13 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
+		const epoch = this.cache_epoch;
 		this.get_items({ search_term }).then(({ message }) => {
 			// eslint-disable-next-line no-unused-vars
 			const { items, serial_no, batch_no, barcode } = message;
-			if (search_term && !barcode) {
+			// skip caching if a reload happened while this search was in flight (stale stock qty)
+			if (search_term && !barcode && epoch === this.cache_epoch) {
+				this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
 				this.search_index[selling_price_list][search_term] = items;
 			}
 			this.items = items;
