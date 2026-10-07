@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.workflow import get_workflow_name, get_workflow_state_field
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, getdate
+from frappe.utils import cint, flt, getdate
 
 WORKFLOW_DRAFT_STATES = ("Pending Approval", "Rejected")
 ACCOUNT_FIELDS = (
@@ -153,7 +153,7 @@ class Investment(Document):
 			("custodian", "Financial Institution"),
 		):
 			name = self.get(fieldname)
-			if name and not frappe.db.get_value(doctype, name, "is_active"):
+			if name and not cint(frappe.db.get_value(doctype, name, "is_active")):
 				frappe.throw(_("{0} {1} is inactive").format(_(doctype), frappe.bold(name)))
 
 	def validate_dates(self):

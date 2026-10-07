@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 import erpnext
 from erpnext.treasury.report.utils import add_total_row, get_currency_column
@@ -19,7 +19,7 @@ def execute(filters=None):
 
 def get_data(filters):
 	balances = get_cash_balances(filters.company, filters.as_on_date)
-	if not filters.show_zero_balances:
+	if not cint(filters.show_zero_balances):
 		balances = [row for row in balances if row.balance or row.balance_in_account_currency]
 
 	set_bank_details(balances)

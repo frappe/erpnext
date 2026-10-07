@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import cint, flt, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
@@ -215,7 +215,7 @@ class InvestmentRevaluation(AccountsController):
 	def get_gl_entries(self):
 		gl_entries = []
 		for row in self.investments:
-			if not (row.posts_gl_entry and flt(row.adjustment_amount)):
+			if not (cint(row.posts_to_ledger) and flt(row.adjustment_amount)):
 				continue
 
 			for account, debit, credit in self.get_row_entries(row):

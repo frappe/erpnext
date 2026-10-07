@@ -230,7 +230,7 @@ def get_period_totals(flows, period_ends, filters):
 def get_period_index(date, period_ends, filters):
 	"""Period the date falls in; overdue dates go to the first period when Include Overdue is ticked."""
 	if date < getdate(filters.from_date):
-		return 0 if filters.include_overdue else None
+		return 0 if cint(filters.include_overdue) else None
 
 	return next((i for i, period_end in enumerate(period_ends) if date <= period_end), None)
 
