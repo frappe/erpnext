@@ -2328,6 +2328,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertTrue(pr.use_transaction_date_exchange_rate)
 		self.assertEqual(pr.conversion_rate, 83)
 
+		pr.conversion_rate = 80
+		pr.set_missing_values()
+		self.assertEqual(pr.conversion_rate, 80)
+
 		pi = make_purchase_invoice_from_order(po.name)
 		pi.conversion_rate = 75
 		pi.credit_to = "_Test Payable USD - _TC"
