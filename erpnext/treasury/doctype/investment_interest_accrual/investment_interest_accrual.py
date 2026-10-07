@@ -43,7 +43,12 @@ class InvestmentInterestAccrual(AccountsController):
 	def before_cancel(self):
 		super().before_cancel()
 		self.validate_latest_accrual()
-		validate_interest_not_received(self, _("Interest accrued by this entry has already been received."))
+		validate_interest_not_received(
+			self,
+			_(
+				"Interest accrued by this entry has already been received. Please cancel the Interest Receipt transactions of Investment {0} first."
+			),
+		)
 
 	def on_cancel(self):
 		super().on_cancel()

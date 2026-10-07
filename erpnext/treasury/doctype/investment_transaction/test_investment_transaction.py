@@ -150,7 +150,13 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		accrual = make_accrual_for_today(investment.name, 400)
 		make_transaction(investment.name, "Interest Receipt", interest_amount=400).submit()
 
-		self.assertRaises(frappe.ValidationError, accrual.cancel)
+		with self.assertRaises(frappe.ValidationError) as error:
+			accrual.cancel()
+
+		self.assertIn(
+			f"has already been received. Please cancel the Interest Receipt transactions of Investment <strong>{investment.name}</strong> first.",
+			str(error.exception),
+		)
 
 	def test_gl_voucher_subtype_is_transaction_type(self):
 		investment = make_submitted_investment()

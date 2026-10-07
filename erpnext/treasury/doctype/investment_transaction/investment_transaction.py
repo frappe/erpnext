@@ -274,7 +274,10 @@ class InvestmentTransaction(AccountsController):
 		"""Interest bought with a purchase that a receipt has already collected cannot be taken back."""
 		if flt(self.accrued_interest_in_purchase):
 			validate_interest_not_received(
-				self, _("Interest bought with this purchase has already been received.")
+				self,
+				_(
+					"Interest bought with this purchase has already been received. Please cancel the Interest Receipt transactions of Investment {0} first."
+				),
 			)
 
 	def validate_interest_accrued_before_exit(self):
@@ -550,15 +553,12 @@ def get_unreceived_interest(investment, upto=None, exclude_receipt=None):
 
 
 def validate_interest_not_received(doc, message):
-	"""Interest that a receipt has already collected cannot be taken back by cancelling `doc`."""
+	"""Interest that a receipt has already collected cannot be taken back by cancelling `doc`.
+	`message` is a whole translated sentence with {0} for the investment."""
 	received = get_interest_received(doc.investment)
 	accrued = get_accrued_interest(doc.investment, exclude=doc.name)
 	if received > flt(accrued, doc.precision("interest_amount")):
-		frappe.throw(
-			_("{0} Please cancel the Interest Receipt transactions of Investment {1} first.").format(
-				message, frappe.bold(doc.investment)
-			)
-		)
+		frappe.throw(message.format(frappe.bold(doc.investment)))
 
 
 def get_interest_received(investment, exclude=None):
