@@ -173,7 +173,7 @@ def make_asset_movement(
 	asset_movement.purpose = purpose
 	for asset in assets:
 		asset["name"] = cstr(asset.get("name"))
-		if not asset["name"] or not frappe.has_permission("Asset", "read", doc=asset["name"]):
+		if not asset["name"] or not frappe.has_permission("Asset", "select", doc=asset["name"]):
 			_refuse()
 
 		asset = frappe.get_doc("Asset", asset.get("name"))

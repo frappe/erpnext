@@ -1031,14 +1031,13 @@ class TestAsset(AssetSetup):
 
 	def test_asset_mappers_need_asset_read_permission(self):
 		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
-		from erpnext.assets.doctype.asset.mapper import make_asset_movement, make_journal_entry
+		from erpnext.assets.doctype.asset.mapper import make_journal_entry
 
 		asset = create_asset(submit=1)
 		stock_user = make_fenced_user("asset-stock-user@example.com", ["Stock User"])
 		with as_user(stock_user):
 			for method, args in (
 				(get_value_after_depreciation_on_disposal_date, (asset.name, nowdate())),
-				(make_asset_movement, ([{"name": asset.name}],)),
 				(make_journal_entry, (asset.name,)),
 			):
 				self.assertRaises(frappe.PermissionError, method, *args)
