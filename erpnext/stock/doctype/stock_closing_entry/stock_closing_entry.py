@@ -74,7 +74,7 @@ class StockClosingEntry(Document):
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
-		company: DF.Link | None
+		company: DF.Link
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
 		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]

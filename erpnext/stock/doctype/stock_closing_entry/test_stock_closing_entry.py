@@ -477,3 +477,8 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 		self.assertEqual(sum(slot[0] for slot in row["fifo_queue"]), 18)
 		self.assertEqual(row["average_age"], 44.44)
+
+	def test_company_is_mandatory(self):
+		closing = self.make_closing(add_days(today(), -1))
+		closing.company = None
+		self.assertRaises(frappe.MandatoryError, closing.insert)
