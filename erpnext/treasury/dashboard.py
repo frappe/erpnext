@@ -12,13 +12,13 @@ HELD_STATUSES = ("Active", "Partially Redeemed")
 
 
 @frappe.whitelist()
-def get_realised_gain_loss(filters: str | dict | None = None):
+def get_realised_gain_loss(filters: str | dict | None = None) -> dict:
 	"""Number card: gain (positive) or loss booked on exits in the current fiscal year."""
 	return get_fiscal_year_income(filters, "realised_gain_loss_account")
 
 
 @frappe.whitelist()
-def get_interest_earned(filters: str | dict | None = None):
+def get_interest_earned(filters: str | dict | None = None) -> dict:
 	"""Number card: interest income, including bond amortisation, booked in the current fiscal year."""
 	return get_fiscal_year_income(filters, "interest_income_account")
 

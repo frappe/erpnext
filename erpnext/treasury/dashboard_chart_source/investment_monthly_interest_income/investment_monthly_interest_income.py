@@ -21,7 +21,7 @@ def get(
 	timespan: str | None = None,
 	time_interval: str | None = None,
 	heatmap_year: str | int | None = None,
-):
+) -> dict:
 	"""Interest income, including bond amortisation, booked in each of the last 12 months."""
 	frappe.has_permission("Investment Transaction", throw=True)
 	month_ends = get_month_ends(add_months(nowdate(), -11), 12)

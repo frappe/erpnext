@@ -20,7 +20,7 @@ def get(
 	timespan: str | None = None,
 	time_interval: str | None = None,
 	heatmap_year: str | int | None = None,
-):
+) -> dict:
 	"""Book value next to market value (at the last revaluation) of held investments, per investment type."""
 	types = frappe.get_list(
 		"Investment",

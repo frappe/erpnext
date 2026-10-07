@@ -21,7 +21,7 @@ def get(
 	timespan: str | None = None,
 	time_interval: str | None = None,
 	heatmap_year: str | int | None = None,
-):
+) -> dict:
 	"""Book value of held investments maturing in each of the next 12 months."""
 	month_ends = get_month_ends(nowdate(), 12)
 	investments = frappe.get_list(

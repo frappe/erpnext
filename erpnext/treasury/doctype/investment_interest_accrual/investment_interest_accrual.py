@@ -248,7 +248,7 @@ def get_next_accrual_date(investment, schedule):
 
 
 @frappe.whitelist()
-def get_accrual_defaults(investment: str):
+def get_accrual_defaults(investment: str) -> dict | None:
 	"""From / To Date, Posting Date and the estimate as Interest Amount, to prefill a new accrual."""
 	frappe.get_doc("Investment", investment).check_permission("read")
 

@@ -228,7 +228,7 @@ class InvestmentRenewal(Document):
 
 
 @frappe.whitelist()
-def make_new_investment(source_name: str):
+def make_new_investment(source_name: str) -> Document:
 	"""Unsaved copy of the original investment, re-dated and re-sized for the money being renewed."""
 	renewal = frappe.get_doc("Investment Renewal", source_name)
 	renewal.check_permission("read")
