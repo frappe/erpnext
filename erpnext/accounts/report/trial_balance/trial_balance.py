@@ -10,12 +10,12 @@ from frappe.utils import add_days, cstr, flt, formatdate, getdate
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
+	get_dimension_filter_sql_condition,
 )
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
-	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
@@ -305,11 +305,15 @@ def get_opening_balance(
 
 	if filters.cost_center:
 		opening_balance = opening_balance.where(
-			closing_balance.cost_center.isin(get_cost_centers_with_children(filters.get("cost_center")))
+			get_dimension_filter_condition(
+				closing_balance.cost_center, filters.get("cost_center"), "Cost Center"
+			)
 		)
 
 	if filters.project:
-		opening_balance = opening_balance.where(closing_balance.project.isin(filters.project))
+		opening_balance = opening_balance.where(
+			get_dimension_filter_condition(closing_balance.project, filters.project, "Project")
+		)
 
 	if frappe.db.count("Finance Book"):
 		if filters.get("include_default_book_entries"):
@@ -333,17 +337,13 @@ def get_opening_balance(
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
+				opening_balance = opening_balance.where(
+					get_dimension_filter_condition(
+						closing_balance[dimension.fieldname],
+						filters[dimension.fieldname],
+						dimension.document_type,
 					)
-					opening_balance = opening_balance.where(
-						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
-					)
-				else:
-					opening_balance = opening_balance.where(
-						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
-					)
+				)
 
 	gle = opening_balance.run(as_dict=1)
 
@@ -643,14 +643,12 @@ def _extra_gl_conditions(filters):
 	conditions, params = [], []
 
 	if filters.get("cost_center"):
-		cc = get_cost_centers_with_children(filters.get("cost_center"))
-		conditions.append(f"cost_center IN ({', '.join(['?'] * len(cc))})")
-		params.extend(cc)
+		append_dimension_condition(
+			conditions, params, "cost_center", filters.get("cost_center"), "Cost Center"
+		)
 
 	if filters.get("project"):
-		proj = filters.project if isinstance(filters.project, list) else [filters.project]
-		conditions.append(f"project IN ({', '.join(['?'] * len(proj))})")
-		params.extend(proj)
+		append_dimension_condition(conditions, params, "project", filters.project, "Project")
 
 	if frappe.db.count("Finance Book"):
 		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
@@ -667,19 +665,22 @@ def _extra_gl_conditions(filters):
 
 	for dim in get_accounting_dimensions(as_list=False):
 		if filters.get(dim.fieldname):
-			if frappe.get_cached_value("DocType", dim.document_type, "is_tree"):
-				filters[dim.fieldname] = get_dimension_with_children(
-					dim.document_type, filters.get(dim.fieldname)
-				)
-			vals = (
-				filters[dim.fieldname]
-				if isinstance(filters[dim.fieldname], list)
-				else [filters[dim.fieldname]]
+			append_dimension_condition(
+				conditions,
+				params,
+				dim.fieldname,
+				filters[dim.fieldname],
+				dim.document_type,
 			)
-			conditions.append(f"{dim.fieldname} IN ({', '.join(['?'] * len(vals))})")
-			params.extend(vals)
 
 	return conditions, params
+
+
+def append_dimension_condition(conditions, params, fieldname, selected_values, dimension_doctype):
+	condition, values = get_dimension_filter_sql_condition(fieldname, selected_values, dimension_doctype)
+	if condition:
+		conditions.append(condition)
+		params.extend(values)
 
 
 def _fetch_gl_rows_duckdb(conn, conditions, params):
