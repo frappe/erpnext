@@ -146,6 +146,18 @@ class TestItemAlternative(ERPNextTestSuite):
 		substitute_item(ste, "Test FG A RW 1", unrelated_item)
 		self.assertRaises(frappe.ValidationError, ste.insert)
 
+	def test_item_and_alternative_item_are_mandatory(self):
+		for fieldname in ("item_code", "alternative_item_code"):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Item Alternative",
+					"item_code": "Test FG A RW 1",
+					"alternative_item_code": "Alternate Item For A RW 1",
+				}
+			)
+			doc.set(fieldname, None)
+			self.assertRaises(frappe.MandatoryError, doc.insert)
+
 	def test_alternative_item_for_production_rm(self):
 		create_stock_reconciliation(
 			item_code="Alternate Item For A RW 1", warehouse="_Test Warehouse - _TC", qty=5, rate=2000
