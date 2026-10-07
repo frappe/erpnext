@@ -182,12 +182,27 @@ class AuthorizationControl(TransactionBase):
 		# Check for authorization set for individual user
 		based_on = [
 			x[0]
+<<<<<<< HEAD
 			for x in frappe.db.sql(
 				"""select distinct based_on from `tabAuthorization Rule`
 			where transaction = %s and system_user = %s
 			and (company = %s or ifnull(company,'')='') and docstatus != 2""",
 				(doctype_name, session["user"], company),
 			)
+=======
+			for x in (
+				frappe.qb.from_(auth_rule)
+				.select(auth_rule.based_on)
+				.distinct()
+				.where(
+					(auth_rule.transaction == doctype_name)
+					& (auth_rule.system_user == session["user"])
+					& auth_rule.based_on.isin(final_based_on)
+					& ((auth_rule.company == company) | (Coalesce(auth_rule.company, "") == ""))
+					& (auth_rule.docstatus != 2)
+				)
+			).run()
+>>>>>>> fdc329a (fix(setup): ignore Not Applicable rules for individual users)
 		]
 
 		for d in based_on:
