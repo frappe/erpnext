@@ -160,3 +160,18 @@ def validate_default_price_list_side(price_list, side):
 
 def get_price_list_side_label(side):
 	return _("Selling") if side == "selling" else _("Buying")
+
+
+def validate_price_list_country(price_list, country):
+	if not price_list or not country:
+		return
+
+	countries = frappe.get_all(
+		"Price List Country", filters={"parent": price_list, "parenttype": "Price List"}, pluck="country"
+	)
+	if countries and country not in countries:
+		throw(
+			_("Price List {0} is not applicable for country {1}").format(
+				frappe.bold(price_list), frappe.bold(country)
+			)
+		)

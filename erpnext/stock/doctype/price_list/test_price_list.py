@@ -117,3 +117,24 @@ class TestPriceList(ERPNextTestSuite):
 		price_list.buying = 1
 		self.assertRaises(frappe.ValidationError, price_list.save)
 
+	def test_price_list_restricted_to_other_country_is_refused(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		price_list = self.make_price_list(selling=1)
+		price_list.append("countries", {"country": "United States"})
+		price_list.save()
+
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "_Test Price List Country",
+				"address_line1": "Street 1",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert()
+
+		sales_order = make_sales_order(do_not_save=True, selling_price_list=price_list.name)
+		sales_order.customer_address = address.name
+		self.assertRaises(frappe.ValidationError, sales_order.save)
