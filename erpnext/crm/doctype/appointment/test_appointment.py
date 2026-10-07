@@ -353,6 +353,28 @@ class TestAppointment(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "beginning of an available slot"):
 			self._create_portal_appointment("portal_visitor_off_grid@example.com", time="10:15:00")
 
+	def test_portal_slot_on_any_overlapping_availability_grid(self):
+		self._configure_booking_settings()
+		settings = frappe.get_doc("Appointment Booking Settings")
+		settings.appointment_duration = 60
+		settings.set("availability_of_slots", [])
+		for day in ALL_WEEKDAYS:
+			for from_time, to_time in (("09:00:00", "12:00:00"), ("09:30:00", "12:30:00")):
+				settings.append(
+					"availability_of_slots", {"day_of_week": day, "from_time": from_time, "to_time": to_time}
+				)
+		settings.save()
+
+		booking = frappe.get_doc(
+			{"doctype": "Appointment", "created_through_portal": 1, "scheduled_time": slot_on(7, 9, 30)}
+		)
+		booking.validate_slot_timing()
+
+		booking.scheduled_time = slot_on(7, 9, 45)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "beginning of an available slot", booking.validate_slot_timing
+		)
+
 	def test_portal_checks_holidays_on_the_business_date(self):
 		from zoneinfo import ZoneInfo
 

@@ -121,16 +121,21 @@ class Appointment(Document):
 		)
 		slot_end = slot_start + timedelta(minutes=cint(settings.appointment_duration))
 
-		for slot in settings.availability_of_slots:
-			if slot.day_of_week == day_of_week and slot.from_time <= slot_start and slot_end <= slot.to_time:
-				self.validate_on_slot_grid(slot_start - slot.from_time, slot_end - slot_start)
-				return
+		containing_slots = [
+			slot
+			for slot in settings.availability_of_slots
+			if slot.day_of_week == day_of_week and slot.from_time <= slot_start and slot_end <= slot.to_time
+		]
+		if not containing_slots:
+			frappe.throw(_("Appointment must be scheduled within the available slot timings."))
 
-		frappe.throw(_("Appointment must be scheduled within the available slot timings."))
+		self.validate_on_slot_grid(
+			[slot_start - slot.from_time for slot in containing_slots], slot_end - slot_start
+		)
 
-	def validate_on_slot_grid(self, offset: timedelta, duration: timedelta):
+	def validate_on_slot_grid(self, offsets: list[timedelta], duration: timedelta):
 		"""Portal bookings must start on a slot the portal offers, not between two."""
-		if self.created_through_portal and duration and offset % duration:
+		if self.created_through_portal and duration and all(offset % duration for offset in offsets):
 			frappe.throw(_("Appointment must start at the beginning of an available slot."))
 
 	def validate_available_time_slot(self):
