@@ -3463,6 +3463,10 @@ class TestStockEntry(FrappeTestCase):
 			"items", stock_entry_row(fg_item, 5, t_warehouse="_Test Warehouse 2 - _TC", is_finished_item=1)
 		)
 		entry.calculate_rate_and_amount()
+		self.assertLess(entry.items[1].basic_rate, 0)
+
+		entry.flags.via_repost = True
+		entry.calculate_rate_and_amount()
 		self.assertEqual([row.basic_rate for row in entry.items], [300, 0])
 
 		entry.items[0].basic_rate = 50
