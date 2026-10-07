@@ -168,6 +168,19 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		self.assertAlmostEqual(receivable_change, -profit_change, 2)
 		self.assertAlmostEqual(self.get_change(before, after, "Net Change in Cash"), 0, 2)
 
+	def test_cash_flow_totals_fill_every_company_column(self):
+		filters = {"report": "Cash Flow", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		summary_before = self.get_summary_value("Net Change in Cash", **filters)
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", 100)
+		after = self.run_report(**filters)
+		summary_after = self.get_summary_value("Net Change in Cash", **filters)
+
+		for label in ("Net Cash from Operations", "Net Change in Cash"):
+			for company in (PARENT_COMPANY, CHILD_COMPANY):
+				self.assertAlmostEqual(self.get_change(before, after, label, company), 100, 2)
+		self.assertAlmostEqual(summary_after - summary_before, 100, 2)
+
 	def post_credit_sales(self):
 		self.post_journal_entry(
 			"Debtors - CCI", "Sales - CCI", 100, party_type="Customer", party="_Test Customer"

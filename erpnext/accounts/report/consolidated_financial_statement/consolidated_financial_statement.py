@@ -266,7 +266,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			data.append(account_data)
 			section_data.append(account_data)
 
-		add_total_row_account(
+		add_cash_flow_total_row(
 			data,
 			section_data,
 			cash_flow_account["section_footer"],
@@ -274,16 +274,28 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			company_currency,
 			summary_data,
 			filters,
-			True,
 		)
 
-	add_total_row_account(
-		data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters, True
+	add_cash_flow_total_row(
+		data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters
 	)
 
 	report_summary = get_cash_flow_summary(summary_data, company_currency)
 
 	return data, report_summary
+
+
+def add_cash_flow_total_row(
+	out: list, rows: list, label: str, companies: dict, currency: str, summary_data: dict, filters: dict
+) -> None:
+	"""Total every company column; the summary card shows only the group company when accumulating."""
+	column_filters = frappe._dict(filters, accumulated_in_group_company=0)
+	total_row = add_total_row_account(
+		out, rows, label, companies, currency, summary_data, column_filters, True
+	)
+
+	if filters.get("accumulated_in_group_company"):
+		summary_data[label] = total_row.get(filters.company, 0.0)
 
 
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
