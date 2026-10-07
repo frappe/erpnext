@@ -7,7 +7,16 @@ import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_date_str, get_link_to_form, getdate, nowtime, parse_json
+from frappe.utils import (
+	add_days,
+	flt,
+	get_date_str,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	nowtime,
+	parse_json,
+)
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import request_cache
 
@@ -90,8 +99,13 @@ class StockClosingEntry(Document):
 			self.db_set("status", self.status)
 
 	def validate(self):
+		self.validate_to_date()
 		self.set_from_date()
 		self.validate_duplicate()
+
+	def validate_to_date(self):
+		if self.to_date and getdate(self.to_date) > getdate(nowdate()):
+			frappe.throw(_("To Date cannot be a future date"))
 
 	def set_from_date(self):
 		"""Closing balances are chained, so a closing always starts the day after the previous one

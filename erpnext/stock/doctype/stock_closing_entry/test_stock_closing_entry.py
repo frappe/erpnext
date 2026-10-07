@@ -451,3 +451,6 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 			{"doctype": "Repost Item Valuation", "company": COMPANY, "posting_date": add_days(today(), -1)}
 		)
 		self.assertFalse(repost.get_closing_stock_balance())
+
+	def test_future_to_date_is_rejected(self):
+		self.assertRaises(frappe.ValidationError, self.make_closing(add_days(today(), 30)).insert)
