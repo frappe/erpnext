@@ -3204,14 +3204,14 @@ def get_auto_batch_nos(kwargs):
 	if kwargs.get("is_pick_list"):
 		picked_batches = get_picked_batches(kwargs)
 
-	if stock_ledgers_batches or pos_invoice_batches or sre_reserved_batches or picked_batches:
-		update_available_batches(
-			available_batches,
-			stock_ledgers_batches,
-			pos_invoice_batches,
-			sre_reserved_batches,
-			picked_batches,
-		)
+	update_available_batches(
+		available_batches,
+		stock_ledgers_batches,
+		pos_invoice_batches,
+		sre_reserved_batches,
+		picked_batches,
+		kwargs.get("already_picked_batches"),
+	)
 
 	if not kwargs.ignore_reserved_stock and not kwargs.for_stock_levels:
 		available_batches = remove_reservation_conflict_batches(available_batches, kwargs)
