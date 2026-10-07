@@ -25,6 +25,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 
 PARTY_DOCTYPES = ("Lead", "Customer", "Prospect")
+PARTY_DERIVED_FIELDS = ("territory", "customer_group")
 
 
 class Opportunity(TransactionBase, CRMNote):
@@ -130,6 +131,8 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.validate_party()
+		self.validate_party_contact_and_address()
+		self.refresh_party_fields()
 		self.map_fields()
 		self.validate_qty()
 		self.validate_status()
@@ -400,6 +403,53 @@ class Opportunity(TransactionBase, CRMNote):
 	def validate_party(self) -> None:
 		if self.opportunity_from == "Customer":
 			validate_party_frozen_disabled(self.company, "Customer", self.party_name)
+
+	def validate_party_contact_and_address(self):
+		"""Contact and address must be linked to the party, as the form's filters require."""
+		if not self.party_name:
+			return
+
+		for fieldname, doctype in (("contact_person", "Contact"), ("customer_address", "Address")):
+			value = self.get(fieldname)
+			if not value or not (self.has_value_changed(fieldname) or self.has_party_changed()):
+				continue
+
+			if not self.is_linked_to_party(doctype, value):
+				frappe.throw(
+					_("{0} {1} is not linked to {2} {3}").format(
+						_(doctype), frappe.bold(value), _(self.opportunity_from), frappe.bold(self.party_name)
+					)
+				)
+
+	def is_linked_to_party(self, doctype: str, name: str) -> bool:
+		return bool(
+			frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": doctype,
+					"parent": name,
+					"link_doctype": self.opportunity_from,
+					"link_name": self.party_name,
+				},
+			)
+		)
+
+	def refresh_party_fields(self):
+		"""On a party change, replace the title and party fields still holding the previous party's values."""
+		if self.is_new() or not self.has_party_changed():
+			return
+
+		previous = self.get_doc_before_save()
+		if self.title == previous.customer_name:
+			self.title = self.customer_name
+
+		party_meta = frappe.get_meta(self.opportunity_from)
+		for fieldname in PARTY_DERIVED_FIELDS:
+			if party_meta.has_field(fieldname) and self.get(fieldname) == previous.get(fieldname):
+				self.set(fieldname, frappe.db.get_value(self.opportunity_from, self.party_name, fieldname))
+
+	def has_party_changed(self) -> bool:
+		return self.has_value_changed("party_name") or self.has_value_changed("opportunity_from")
 
 	def validate_cust_name(self):
 		if self.party_name:
