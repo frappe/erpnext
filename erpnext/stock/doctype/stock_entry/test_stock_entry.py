@@ -3,7 +3,7 @@
 
 
 from frappe.permissions import add_user_permission, remove_user_permission
-from frappe.utils import add_days, cstr, flt, get_time, getdate, nowdate, nowtime, today
+from frappe.utils import add_days, cint, cstr, flt, get_time, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -1693,6 +1693,108 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(entry.items[2].basic_rate, 50)
 		self.assertEqual(entry.items[1].basic_rate, 1400)
+
+	def test_manufacture_splits_cost_over_finished_good_rows(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.set_posting_time = 1
+		entry.posting_date = add_days(today(), -5)
+		entry.fg_completed_qty = 10
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		for warehouse in ("_Test Warehouse 1 - _TC", "_Test Warehouse 2 - _TC"):
+			entry.append("items", stock_entry_row(fg_item, 5, t_warehouse=warehouse, is_finished_item=1))
+		entry.insert()
+		entry.submit()
+
+		def assert_finished_good_value(rate):
+			entry.load_from_db()
+			self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+			for row in entry.items[1:]:
+				self.assertEqual(row.basic_rate, rate)
+				sle_value = frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": row.name, "is_cancelled": 0},
+					"stock_value_difference",
+				)
+				self.assertEqual(sle_value, rate * 5)
+
+		assert_finished_good_value(100)
+
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=300,
+			posting_date=add_days(today(), -8),
+		)
+		for repost in frappe.get_all(
+			"Repost Item Valuation", filters={"item_code": rm_item, "docstatus": 1, "status": "Queued"}
+		):
+			repost_sl_entries(frappe.get_doc("Repost Item Valuation", repost.name))
+
+		assert_finished_good_value(200)
+
+	def test_manufacture_gives_zero_valued_finished_good_row_no_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+
+		entry = self.make_split_manufacture_entry(rm_item, fg_item, zero_valued_rows=(1,))
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [0, 200])
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+		self.assertEqual(self.get_finished_good_sle_values(entry), [0, 1000])
+
+		entry = self.make_split_manufacture_entry(rm_item, fg_item, zero_valued_rows=(1, 2))
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [0, 0])
+		self.assertEqual(self.get_finished_good_sle_values(entry), [0, 0])
+
+	def make_split_manufacture_entry(self, rm_item, fg_item, zero_valued_rows):
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.fg_completed_qty = 10
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		for idx, warehouse in enumerate(("_Test Warehouse 1 - _TC", "_Test Warehouse 2 - _TC"), start=1):
+			entry.append(
+				"items",
+				stock_entry_row(
+					fg_item,
+					5,
+					t_warehouse=warehouse,
+					is_finished_item=1,
+					allow_zero_valuation_rate=cint(idx in zero_valued_rows),
+				),
+			)
+		entry.insert()
+		entry.submit()
+		entry.load_from_db()
+		return entry
+
+	def get_finished_good_sle_values(self, entry):
+		return [
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_detail_no": row.name, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			for row in entry.items[1:]
+		]
 
 	def test_valuation_rate_lookup_without_voucher_no(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
