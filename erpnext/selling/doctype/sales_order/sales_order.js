@@ -1088,19 +1088,20 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					// delivery note
-					if (
-						flt(doc.per_delivered) < 100 &&
-						(order_is_a_sale || order_is_a_custom_sale) &&
-						allow_delivery
-					) {
-						if (frappe.model.can_create("Delivery Note")) {
-							this.frm.add_custom_button(
-								__("Delivery Note"),
-								() => this.make_delivery_note_based_on_delivery_date(true),
-								__("Create")
-							);
-						}
+					const is_sale = order_is_a_sale || order_is_a_custom_sale;
+					const can_deliver = flt(doc.per_delivered) < 100 && is_sale && allow_delivery;
+					const can_over_deliver =
+						is_sale && !doc.skip_delivery_note && doc.__onload?.has_over_deliverable_rows;
 
+					if ((can_deliver || can_over_deliver) && frappe.model.can_create("Delivery Note")) {
+						this.frm.add_custom_button(
+							__("Delivery Note"),
+							() => this.make_delivery_note_based_on_delivery_date(true),
+							__("Create")
+						);
+					}
+
+					if (can_deliver) {
 						if (frappe.model.can_create("Work Order") && !doc.is_subcontracted) {
 							this.frm.add_custom_button(
 								__("Work Order"),
