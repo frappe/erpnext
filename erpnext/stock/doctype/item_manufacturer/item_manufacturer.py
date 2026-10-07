@@ -56,13 +56,14 @@ class ItemManufacturer(Document):
 			self.set_item_default(None, None)
 
 	def is_item_default(self):
-		if not self.is_default and not (self.get_doc_before_save() or {}).get("is_default"):
+		previous = self.get_doc_before_save() or self
+		if not self.is_default and not previous.is_default:
 			return False
 
 		item_default = frappe.db.get_value(
 			"Item", self.item_code, ["default_item_manufacturer", "default_manufacturer_part_no"]
 		)
-		return tuple(item_default) == (self.manufacturer, self.manufacturer_part_no)
+		return tuple(item_default) == (previous.manufacturer, previous.manufacturer_part_no)
 
 	def set_item_default(self, manufacturer, manufacturer_part_no):
 		frappe.db.set_value(

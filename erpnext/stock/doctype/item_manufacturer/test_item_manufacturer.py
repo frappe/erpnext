@@ -38,3 +38,11 @@ class TestItemManufacturer(ERPNextTestSuite):
 		other.manufacturer_part_no = "P-1"
 		self.assertRaises(frappe.ValidationError, other.save)
 		self.assertEqual(self.get_item_default(), ("_Test IM Maker 1", "P-1"))
+
+	def test_editing_default_row_clears_old_item_default(self):
+		row = self.make_row("_Test IM Maker 1", "P-1", is_default=1)
+
+		row.update({"manufacturer": "_Test IM Maker 2", "manufacturer_part_no": "Q-9", "is_default": 0})
+		row.save()
+
+		self.assertEqual(self.get_item_default(), (None, None))
