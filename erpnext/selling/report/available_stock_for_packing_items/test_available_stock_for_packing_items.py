@@ -50,7 +50,8 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 		"""
 		name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 		if not name:
-			bin_doc = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
+			company = frappe.db.get_value("Warehouse", warehouse, "company")
+			bin_doc = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse, company=company)
 			bin_doc.flags.ignore_permissions = True
 			bin_doc.insert()
 			name = bin_doc.name
@@ -207,6 +208,26 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 		self.make_active_bundle(parent, [(comp_a, 3)])
 
 		self.assertEqual(self.report_rows_for(parent), [])
+
+	def test_company_filter_scopes_warehouses(self):
+		comp_a = self.make_component()
+		parent = self.make_bundle_parent()
+		other_company_wh = self.make_company_warehouse("_Test Company 1")
+
+		self.set_bin_projected_qty(comp_a, WAREHOUSE, 10)  # _Test Company
+		self.set_bin_projected_qty(comp_a, other_company_wh, 8)  # _Test Company 1
+		self.make_active_bundle(parent, [(comp_a, 2)])
+
+		_columns, data = execute(filters={"company": "_Test Company"})
+		rows = [row for row in data if row and row[0] == parent]
+
+		# only the selected company's warehouse is reported
+		self.assertEqual({row[4] for row in rows}, {WAREHOUSE})
+
+	def make_company_warehouse(self, company):
+		name = f"_Test Pack WH {random_string(6)}"
+		wh = frappe.get_doc({"doctype": "Warehouse", "warehouse_name": name, "company": company}).insert()
+		return wh.name
 
 	def make_secondary_warehouse(self):
 		"""A second leaf warehouse under _Test Company so two warehouses can be asserted."""

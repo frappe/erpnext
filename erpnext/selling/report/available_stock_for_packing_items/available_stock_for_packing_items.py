@@ -18,7 +18,7 @@ def execute(filters=None):
 		filters = {}
 
 	columns = get_columns()
-	iwq_map = get_item_warehouse_quantity_map()
+	iwq_map = get_item_warehouse_quantity_map(filters.get("company"))
 	item_map = get_item_details(list(iwq_map.keys()))
 	data = []
 	for sbom, warehouse in iwq_map.items():
@@ -74,7 +74,7 @@ def get_item_details(item_codes):
 	return item_map
 
 
-def get_item_warehouse_quantity_map():
+def get_item_warehouse_quantity_map(company=None):
 	# Components of every active product bundle: (bundle item code, component item, qty per bundle)
 	pb = frappe.qb.DocType("Product Bundle")
 	pbi = frappe.qb.DocType("Product Bundle Item")
@@ -98,7 +98,7 @@ def get_item_warehouse_quantity_map():
 	component_items = list({c.item_code for c in bundle_components})
 
 	bin_projected = {
-		(b.item_code, b.warehouse): flt(b.projected_qty) for b in get_component_bins(component_items)
+		(b.item_code, b.warehouse): flt(b.projected_qty) for b in get_component_bins(component_items, company)
 	}
 
 	# Only warehouses that hold at least one component can yield a non-zero packable qty; a warehouse
@@ -129,13 +129,16 @@ def get_item_warehouse_quantity_map():
 	return sbom_map
 
 
-def get_component_bins(component_items):
+def get_component_bins(component_items, company=None):
 	bin_table = frappe.qb.DocType("Bin")
 	query = (
 		frappe.qb.from_(bin_table)
 		.select(bin_table.item_code, bin_table.warehouse, bin_table.projected_qty)
 		.where(bin_table.item_code.isin(component_items))
 	)
+
+	if company:
+		query = query.where(bin_table.company == company)
 
 	if condition := get_allowed_warehouses_condition(bin_table.warehouse):
 		query = query.where(condition)
