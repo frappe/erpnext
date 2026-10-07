@@ -3396,6 +3396,28 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(so.items[0].ensure_delivery_based_on_produced_serial_no, 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"auto_reserve_stock": 1,
+		},
+	)
+	def test_reserve_stock_cleared_for_ensure_delivery_by_serial_no(self):
+		so, reserved, _unreserved = make_so_with_reserved_produced_serial_no()
+
+		self.assertEqual(so.items[0].reserve_stock, 0)
+		self.assertEqual(len(reserved), 1)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Reservation Entry",
+				{"voucher_detail_no": so.items[0].name, "docstatus": 1},
+				"from_voucher_type",
+			),
+			"Stock Entry",
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_production_plan_work_order_reserves_stock_for_ensure_delivery_by_serial_no(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
