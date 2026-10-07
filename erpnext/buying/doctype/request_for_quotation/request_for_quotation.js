@@ -5,10 +5,6 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Request for Quotation", {
 	setup: function (frm) {
-		frm.custom_make_buttons = {
-			"Supplier Quotation": "Create",
-		};
-
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
 			return {
@@ -129,13 +125,13 @@ frappe.ui.form.on("Request for Quotation", {
 							var w = window.open(
 								frappe.urllib.get_full_url(
 									"/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?" +
-										new URLSearchParams({
-											name: frm.doc.name,
-											supplier: data.supplier,
-											print_format: data.print_format || "Standard",
-											language: data.language || frappe.boot.lang,
-											letterhead: data.letter_head || frm.doc.letter_head || "",
-										}).toString()
+									new URLSearchParams({
+										name: frm.doc.name,
+										supplier: data.supplier,
+										print_format: data.print_format || "Standard",
+										language: data.language || frappe.boot.lang,
+										letterhead: data.letter_head || frm.doc.letter_head || "",
+									}).toString()
 								)
 							);
 							if (!w) {
@@ -234,29 +230,12 @@ frappe.ui.form.on("Request for Quotation", {
 			const text = $(this).text().trim();
 			const fieldname = $(this).find(".nav-link").attr("data-fieldname");
 			const href = $(this).find(".nav-link").attr("href") || "";
-			return (
-				text === __("Quotations") ||
-				text === "Quotations" ||
-				fieldname === "quotations_tab" ||
-				href.includes("quotations")
-			);
+			return text === __("Quotations") || text === "Quotations" || fieldname === "quotations_tab" || href.includes("quotations");
 		});
-
-		let $dyn_nav = frm.$wrapper.find("#rfq-quotations-tab-nav");
-		let $dyn_pane = frm.$wrapper.find("#rfq-quotations-tab-pane");
 
 		if (!show) {
 			$tab_li.hide().addClass("hide hidden d-none").attr("style", "display: none !important;");
-			if ($dyn_nav.length)
-				$dyn_nav.hide().addClass("hide hidden d-none").attr("style", "display: none !important;");
-			if ($dyn_pane.length) $dyn_pane.hide();
-			frm.$wrapper.find("[data-fieldname='quotations_tab'], [id*='quotations_tab']").hide();
-
-			if (
-				$tab_li.find(".nav-link.active").length ||
-				$tab_li.hasClass("active") ||
-				($dyn_nav.length && $dyn_nav.find(".nav-link.active").length)
-			) {
+			if ($tab_li.find(".nav-link.active").length || $tab_li.hasClass("active")) {
 				if (frm.layout && frm.layout.tabs && frm.layout.tabs[0]) {
 					frm.layout.tabs[0].set_active();
 				} else {
@@ -268,72 +247,11 @@ frappe.ui.form.on("Request for Quotation", {
 
 		if ($tab_li.length) {
 			$tab_li.show().removeClass("hide hidden d-none").attr("style", "");
-			if (
-				frm.fields_dict &&
-				frm.fields_dict.quotations_html &&
-				frm.fields_dict.quotations_html.$wrapper
-			) {
-				frm.events.draw_quotations_comparison_table(
-					frm,
-					frm.fields_dict.quotations_html.$wrapper,
-					quotes
-				);
+			if (frm.fields_dict && frm.fields_dict.quotations_html && frm.fields_dict.quotations_html.$wrapper) {
+				frm.events.draw_quotations_comparison_table(frm, frm.fields_dict.quotations_html.$wrapper, quotes);
 				return;
 			}
 		}
-
-		if (!$dyn_nav.length) {
-			const $details_nav = frm.$wrapper.find(".form-tabs .nav-item").first();
-			$dyn_nav = $(`
-				<li class="nav-item" id="rfq-quotations-tab-nav">
-					<a class="nav-link" id="rfq-quotations-tab-link" data-toggle="tab" href="#rfq-quotations-tab-pane" role="tab" aria-controls="rfq-quotations-tab-pane" aria-selected="false">
-						${__("Quotations")}
-					</a>
-				</li>
-			`);
-			if ($details_nav.length) {
-				$dyn_nav.insertAfter($details_nav);
-			} else {
-				frm.$wrapper.find(".form-tabs").append($dyn_nav);
-			}
-		} else {
-			$dyn_nav.show().removeClass("hide hidden d-none").attr("style", "");
-		}
-
-		if (!$dyn_pane.length) {
-			$dyn_pane = $(`
-				<div class="tab-pane form-tab" id="rfq-quotations-tab-pane" role="tabpanel" aria-labelledby="rfq-quotations-tab-link" style="display: none;">
-					<div class="quotations-tab-wrapper-inner p-3"></div>
-				</div>
-			`);
-			const $tab_content = frm.$wrapper.find(".form-tab-content, .tab-content").first();
-			$tab_content.append($dyn_pane);
-		}
-
-		$dyn_nav
-			.find("a")
-			.off("click")
-			.on("click", function (e) {
-				e.preventDefault();
-				frm.$wrapper
-					.find(".form-tabs .nav-link")
-					.removeClass("active")
-					.attr("aria-selected", "false");
-				$(this).addClass("active").attr("aria-selected", "true");
-				frm.$wrapper.find(".form-tab, .tab-pane").removeClass("active show").hide();
-				$dyn_pane.addClass("active show").show();
-			});
-
-		frm.$wrapper
-			.find(".form-tabs .nav-item:not(#rfq-quotations-tab-nav) .nav-link")
-			.off("click.rfq_quotations")
-			.on("click.rfq_quotations", function () {
-				$dyn_pane.removeClass("active show").hide();
-				$dyn_nav.find("a").removeClass("active").attr("aria-selected", "false");
-			});
-
-		const $wrapper = $dyn_pane.find(".quotations-tab-wrapper-inner");
-		frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
 	},
 
 	render_quotations_tab: function (frm) {
@@ -361,16 +279,10 @@ frappe.ui.form.on("Request for Quotation", {
 			.map((s) => s.supplier)
 			.filter((sup) => sup && quoted_suppliers.has(sup));
 
-		quoted_suppliers.forEach((sup) => {
-			if (!suppliers.includes(sup)) {
-				suppliers.push(sup);
-			}
-		});
-
 		const all_items = frm.doc.items || [];
 		const selected_item = frm.quotations_item_filter || "";
 		const items = selected_item
-			? all_items.filter((i) => i.item_code === selected_item || i.item_name === selected_item)
+			? all_items.filter((i) => i.item_code === selected_item )
 			: all_items;
 
 		const quote_map = {};
