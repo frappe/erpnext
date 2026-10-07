@@ -71,6 +71,9 @@ def execute(filters=None):
 		filters.company,
 		accumulated_values=bool(filters.accumulated_values),
 	)
+	if net_profit_loss:
+		total_keys = get_total_keys(period_list, filters.accumulated_values, filters.company)
+		net_profit_loss["total"] = sum(net_profit_loss[key] for key in total_keys)
 
 	data = []
 	summary_data = {}
@@ -222,8 +225,25 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 
 		data.setdefault(period["key"], amount)
 
-	data["total"] = sum(data[key] for key in get_period_keys_for_total(period_list, accumulated_values))
+	data["total"] = sum(data[key] for key in get_total_keys(period_list, accumulated_values, company))
 	return data
+
+
+def get_total_keys(
+	period_list: list[dict], accumulated_values: bool, company: str, consolidated: bool = False
+) -> list[str]:
+	"""Period keys whose values add up to the total.
+
+	Accumulated values restart every fiscal year, so the last period of each fiscal year
+	(per dimension when grouped) is taken."""
+	if consolidated or not accumulated_values:
+		return get_period_keys_for_total(period_list, accumulated_values, consolidated)
+
+	last_keys = {}
+	for period in period_list:
+		fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
+		last_keys[(period.get("dimension_value"), fiscal_year)] = period.key
+	return list(last_keys.values())
 
 
 def get_account_type_based_gl_data(company, filters=None):
@@ -352,7 +372,9 @@ def add_total_row_account(
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row.get("total", 0.0)
 
-	summary_keys = get_period_keys_for_total(period_list, filters.get("accumulated_values"), consolidated)
+	summary_keys = get_total_keys(
+		period_list, filters.get("accumulated_values"), filters.company, consolidated
+	)
 	summary_data[label] = sum(flt(total_row.get(key)) for key in summary_keys)
 
 	out.append(total_row)

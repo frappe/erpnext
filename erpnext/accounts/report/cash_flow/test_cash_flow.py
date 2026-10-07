@@ -229,3 +229,38 @@ class TestCashFlow(ERPNextTestSuite):
 		opening, closing = opening_and_closing()
 		self.assertEqual(opening - before_opening, 500)
 		self.assertEqual(closing - before_closing, 500)
+
+	def test_accumulated_totals_across_fiscal_years_keep_earlier_years(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		previous_fiscal_year, previous_year_start_date, _end = get_fiscal_year(
+			add_days(year_start_date, -1), company=self.company
+		)
+		filters = frappe._dict(
+			company=self.company,
+			from_fiscal_year=previous_fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=previous_year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Yearly",
+			accumulated_values=1,
+		)
+
+		def investing_card_and_net_change_total():
+			_columns, rows, _message, _chart, summary = execute(filters)
+			card = next(card["value"] for card in summary if card["label"] == "Net Cash from Investing")
+			net_change = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
+			return card, net_change["total"]
+
+		before_card, before_total = investing_card_and_net_change_total()
+		for posting_date in (previous_year_start_date, year_start_date):
+			make_journal_entry(
+				"Office Equipment - _TC", "Cash - _TC", 500, posting_date=posting_date, submit=True
+			)
+			make_journal_entry("Cash - _TC", "Sales - _TC", 300, posting_date=posting_date, submit=True)
+
+		card, total = investing_card_and_net_change_total()
+		self.assertEqual(card - before_card, -1000)
+		self.assertEqual(total - before_total, -400)
