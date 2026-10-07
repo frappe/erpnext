@@ -44,11 +44,20 @@ class StockEntryType(Document):
 
 	def validate(self):
 		self.validate_standard_type()
+		self.validate_add_to_transit()
 		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0
 
 		if self.batch_split and self.purpose != "Repack":
 			self.batch_split = 0
+
+	def validate_add_to_transit(self):
+		if self.is_standard and self.add_to_transit:
+			frappe.throw(
+				_(
+					"Add to Transit cannot be enabled on the standard Stock Entry Type {0}. Create a separate Stock Entry Type for transit transfers."
+				).format(frappe.bold(self.name))
+			)
 
 	def validate_standard_type(self):
 		if self.is_standard and self.name not in [

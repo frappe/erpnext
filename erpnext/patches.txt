@@ -544,3 +544,4 @@ erpnext.patches.v16_0.set_stock_value_in_stock_closing_balance
 erpnext.patches.v16_0.reset_fifo_queue_in_stock_closing_balance
 erpnext.patches.v16_0.remove_invalid_fields_from_copy_fields_to_variants
 erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
+erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types

@@ -33,3 +33,29 @@ class TestStockEntryType(ERPNextTestSuite):
 			"Send to Subcontractor",
 		]:
 			self.assertTrue(frappe.db.get_value("Stock Entry Type", stock_entry_type, "is_standard"))
+
+	def test_add_to_transit_not_allowed_on_standard_type(self):
+		doc = frappe.get_doc("Stock Entry Type", "Material Transfer")
+		doc.add_to_transit = 1
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+	def test_patch_clears_add_to_transit_only_on_standard_types(self):
+		from erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types import execute
+
+		standard_types = ["Material Transfer", "Material Issue"]
+		for name in standard_types:
+			frappe.db.set_value("Stock Entry Type", name, "add_to_transit", 1)
+
+		custom_type = "_Test Custom Transit Type"
+		if not frappe.db.exists("Stock Entry Type", custom_type):
+			frappe.get_doc(
+				{"doctype": "Stock Entry Type", "__newname": custom_type, "purpose": "Material Transfer"}
+			).insert()
+		frappe.db.set_value("Stock Entry Type", custom_type, "add_to_transit", 1)
+
+		execute()
+		execute()
+
+		for name in standard_types:
+			self.assertEqual(frappe.db.get_value("Stock Entry Type", name, "add_to_transit"), 0)
+		self.assertEqual(frappe.db.get_value("Stock Entry Type", custom_type, "add_to_transit"), 1)
