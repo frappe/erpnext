@@ -46,6 +46,19 @@ class TestFinancialRatios(FrappeTestCase):
 
 		self.assertEqual(self.get_total_income(filters), before)
 
+	def test_income_survives_closing_the_selected_year(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+
+		# stands in for the closing voucher's transfer of the year's income to equity
+		closing = self.make_journal_entry("Sales", "Capital Stock", 500)
+		frappe.db.set_value(
+			"GL Entry", {"voucher_no": closing.name}, "voucher_type", "Period Closing Voucher"
+		)
+
+		self.assertEqual(self.get_total_income(filters), before)
+
 	def test_average_debtors_in_company_currency(self):
 		filters = self.get_report_filters()
 		period_key = self.get_period_list(filters)[0].key
@@ -125,3 +138,4 @@ class TestFinancialRatios(FrappeTestCase):
 			)
 		journal_entry.insert()
 		journal_entry.submit()
+		return journal_entry
