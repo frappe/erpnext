@@ -52,6 +52,21 @@ class TestBin(ERPNextTestSuite):
 		)
 		self.assertEqual((bin.actual_qty, bin.projected_qty), (6, 11))
 
+	def test_repost_recomputes_projected_qty(self):
+		from erpnext.stock.stock_balance import repost_stock
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		frappe.db.set_value("Bin", bin_name, {"actual_qty": 7, "projected_qty": 7})
+
+		repost_stock(item_code, warehouse)
+
+		bin = frappe.db.get_value("Bin", bin_name, ["actual_qty", "projected_qty"], as_dict=1)
+		self.assertEqual((bin.actual_qty, bin.projected_qty), (10, 10))
+
 	def test_recalculate_values(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
