@@ -365,7 +365,15 @@ class TestSalesOrder(ERPNextTestSuite):
 		def get_mapped_rows(*selected_rows):
 			return [(row.so_detail, row.qty) for row in deliver(*selected_rows).items]
 
+		def has_over_deliverable_rows():
+			so.load_from_db()
+			so.run_method("onload")
+			return so.get_onload("has_over_deliverable_rows")
+
+		self.assertFalse(has_over_deliverable_rows())
+
 		deliver(first_row).submit()
+		self.assertTrue(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [(second_row, 10)])
 		self.assertEqual(get_mapped_rows(first_row, second_row), [(first_row, 5), (second_row, 10)])
 
@@ -373,9 +381,11 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(get_mapped_rows(), [(first_row, 5), (second_row, 5)])
 
 		deliver(first_row).submit()
+		self.assertTrue(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [(second_row, 5)])
 
 		deliver(second_row).submit()
+		self.assertFalse(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [])
 
 	def test_make_production_plan(self):
