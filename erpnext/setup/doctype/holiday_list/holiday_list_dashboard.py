@@ -1,12 +1,10 @@
 def get_data():
 	return {
 		"fieldname": "holiday_list",
-		"non_standard_fieldnames": {
-			"Company": "default_holiday_list",
-		},
+		"non_standard_fieldnames": {},
 		"transactions": [
 			{
-				"items": ["Company", "Employee", "Workstation"],
+				"items": ["Workstation"],
 			},
 			{"items": ["Service Level Agreement"]},
 		],
