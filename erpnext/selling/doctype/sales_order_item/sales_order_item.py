@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import math
 
 import frappe
 from frappe.model.document import Document
@@ -106,9 +107,13 @@ class SalesOrderItem(Document):
 
 	@property
 	def max_deliverable_qty(self) -> float:
-		"""Ordered qty plus the over delivery allowance."""
+		"""Ordered qty plus the over delivery allowance, in whole units when the UOM needs it."""
 		allowance = flt(get_allowance_for(self.item_code, qty_or_amount="qty")[0])
-		return flt(self.qty) * (100 + allowance) / 100
+		max_qty = flt(flt(self.qty) * (100 + allowance) / 100, self.precision("qty"))
+		if frappe.get_cached_value("UOM", self.uom, "must_be_whole_number"):
+			return math.floor(max_qty)
+
+		return max_qty
 
 
 def on_doctype_update():
