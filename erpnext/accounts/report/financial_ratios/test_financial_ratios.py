@@ -58,6 +58,28 @@ class TestFinancialRatios(ERPNextTestSuite):
 
 		self.assertEqual(self.get_total_income(filters), before)
 
+	def test_income_survives_closing_the_selected_year(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+
+		period_closing_voucher = frappe.new_doc("Period Closing Voucher")
+		period_closing_voucher.update(
+			{
+				"transaction_date": today(),
+				"company": self.company,
+				"fiscal_year": filters.from_fiscal_year,
+				"period_start_date": filters.period_start_date,
+				"period_end_date": filters.period_end_date,
+				"cost_center": f"Main - {self.abbr}",
+				"closing_account_head": f"Capital Stock - {self.abbr}",
+				"remarks": "test",
+			}
+		)
+		period_closing_voucher.submit()
+
+		self.assertEqual(self.get_total_income(filters), before)
+
 	def test_average_debtors_in_company_currency(self):
 		filters = self.get_report_filters()
 		period_key = self.get_period_list(filters)[0].key
@@ -97,9 +119,8 @@ class TestFinancialRatios(ERPNextTestSuite):
 	def get_total_income(self, filters):
 		period_list = self.get_period_list(filters)
 		income = get_gl_data(filters, period_list, [])[2]
-		return next(row for row in income if row.get("account") and not row.get("parent_account"))[
-			period_list[0].key
-		]
+		root = next((row for row in income if row.get("account") and not row.get("parent_account")), {})
+		return root.get(period_list[0].key, 0)
 
 	def get_report_filters(self):
 		active_fy = frappe.db.get_value(
