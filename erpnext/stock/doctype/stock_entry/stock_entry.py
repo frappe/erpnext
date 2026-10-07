@@ -1410,7 +1410,9 @@ class StockEntry(StockController):
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
 						finished_item_qty, outgoing_items_cost, has_consumption_basis
 					)
-					rate_derived_from_consumption = has_consumption_basis
+					rate_derived_from_consumption = (
+						has_consumption_basis or self.has_manually_rated_finished_items()
+					)
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 					# Repack rate comes from consumed source-warehouse rows, not consumption entries
@@ -1528,6 +1530,10 @@ class StockEntry(StockController):
 			and not d.set_basic_rate_manually
 			and not d.allow_zero_valuation_rate
 		)
+
+	def has_manually_rated_finished_items(self) -> bool:
+		"""Whether hand rated finished goods took part of the cost, so a zero left for the rest is real."""
+		return self.get_manually_rated_finished_items()[1] > 0
 
 	def get_manually_rated_finished_items(self) -> tuple[float, float]:
 		"""Qty and value of the received finished good rows whose rate was set by hand."""

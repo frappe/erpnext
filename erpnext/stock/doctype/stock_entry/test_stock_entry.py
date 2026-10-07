@@ -3431,6 +3431,44 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 0])
 		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 0])
 
+	@change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 0}
+	)
+	def test_manufacture_keeps_zero_left_by_manually_rated_row_over_bom_cost(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse 2 - _TC", qty=1, basic_rate=77)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.bom_no = bom.name
+		entry.fg_completed_qty = 10
+		entry.append(
+			"items",
+			stock_entry_row(
+				fg_item,
+				5,
+				t_warehouse="_Test Warehouse 1 - _TC",
+				is_finished_item=1,
+				set_basic_rate_manually=1,
+				basic_rate=300,
+			),
+		)
+		entry.append(
+			"items", stock_entry_row(fg_item, 5, t_warehouse="_Test Warehouse 2 - _TC", is_finished_item=1)
+		)
+		entry.calculate_rate_and_amount()
+		self.assertEqual([row.basic_rate for row in entry.items], [300, 0])
+
+		entry.items[0].basic_rate = 50
+		entry.calculate_rate_and_amount()
+		self.assertEqual([row.basic_rate for row in entry.items], [50, 150])
+
 	def make_manufacture_entry_with_manually_rated_row(self, rm_item, fg_item, posting_date=None):
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = "_Test Company"
