@@ -106,6 +106,33 @@ class TestInventoryDimension(ERPNextTestSuite):
 		with patch.object(type(dimension), "has_stock_ledger", return_value=[frappe._dict(name="SLE")]):
 			self.assertRaises(DoNotChangeError, dimension.on_trash)
 
+	def test_stock_manager_can_create_dimension_fields(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		dimension = create_inventory_dimension(
+			reference_document="Pallet",
+			dimension_name="Pallet Stock Manager",
+			apply_to_all_doctypes=0,
+			document_type="Delivery Note Item",
+			do_not_save=True,
+		)
+		dimension.set_source_and_target_fieldname()
+		user = create_user("test_dimension_manager@example.com", "Stock Manager")
+
+		field_filters = {"dt": "Delivery Note Item", "fieldname": dimension.source_fieldname}
+		frappe.set_user(user.name)
+		try:
+			with patch("frappe.db.updatedb"):
+				dimension.add_custom_fields()
+				self.assertTrue(frappe.db.exists("Custom Field", field_filters))
+
+				dimension.delete_custom_fields()
+				self.assertFalse(frappe.db.exists("Custom Field", field_filters))
+
+			self.assertEqual(frappe.session.user, user.name)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
 		warehouse = "Shelf Warehouse - _TC"
@@ -273,7 +300,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 		doc.set_source_and_target_fieldname()
 
 		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
-		with patch(f"{module}.create_custom_fields") as create_custom_fields:
+		with patch(f"{module}.create_dimension_custom_fields") as create_custom_fields:
 			doc.add_custom_fields()
 
 		custom_fields = create_custom_fields.call_args[0][0]
