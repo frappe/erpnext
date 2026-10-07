@@ -260,26 +260,31 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 	allow_rename_attribute_value = frappe.db.get_single_value(
 		"Item Variant Settings", "allow_rename_attribute_value"
 	)
-	if allow_rename_attribute_value:
-		pass
-	elif attribute_value not in attributes_list:
-		if from_variant:
-			frappe.throw(
-				_("{0} is not a valid Value for Attribute {1} of Item {2}.").format(
-					frappe.bold(attribute_value), frappe.bold(attribute), frappe.bold(item)
-				),
-				InvalidItemAttributeValueError,
-				title=_("Invalid Value"),
-			)
-		else:
-			msg = _("The value {0} is already assigned to an existing Item {1}.").format(
-				frappe.bold(attribute_value), frappe.bold(item)
-			)
-			msg += "<br>" + _(
-				"To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
-			).format(frappe.bold(_("Allow Rename Attribute Value")))
+	if attribute_value in attributes_list or (allow_rename_attribute_value and from_variant):
+		return
 
-			frappe.throw(msg, InvalidItemAttributeValueError, title=_("Edit Not Allowed"))
+	if from_variant:
+		frappe.throw(
+			_("{0} is not a valid Value for Attribute {1} of Item {2}.").format(
+				frappe.bold(attribute_value), frappe.bold(attribute), frappe.bold(item)
+			),
+			InvalidItemAttributeValueError,
+			title=_("Invalid Value"),
+		)
+
+	if allow_rename_attribute_value:
+		msg = _("The value {0} cannot be removed as it is assigned to an existing Item {1}.").format(
+			frappe.bold(attribute_value), frappe.bold(item)
+		)
+	else:
+		msg = _("The value {0} is already assigned to an existing Item {1}.").format(
+			frappe.bold(attribute_value), frappe.bold(item)
+		)
+		msg += "<br>" + _(
+			"To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
+		).format(frappe.bold(_("Allow Rename Attribute Value")))
+
+	frappe.throw(msg, InvalidItemAttributeValueError, title=_("Edit Not Allowed"))
 
 
 def get_attribute_values(item):

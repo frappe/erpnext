@@ -5,6 +5,7 @@
 import frappe
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -96,3 +97,38 @@ class TestItemAttribute(ERPNextTestSuite):
 		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
 		attribute.update({"numeric_values": 1, "from_range": 0, "to_range": 100, "increment": 1})
 		self.assertRaises(frappe.ValidationError, attribute.save)
+
+	@ERPNextTestSuite.change_settings("Item Variant Settings", {"allow_rename_attribute_value": 1})
+	def test_custom_variant_value_does_not_block_attribute_edits(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		variant = create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+		frappe.db.set_value("Item Variant Attribute", variant.attributes[0].name, "attribute_value", "Teal")
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		attribute.append("item_attribute_values", {"attribute_value": "Amber", "abbr": "AMB"})
+		attribute.save()
+
+		self.assertIn("Amber", [d.attribute_value for d in attribute.item_attribute_values])
+
+	@ERPNextTestSuite.change_settings("Item Variant Settings", {"allow_rename_attribute_value": 1})
+	def test_used_value_cannot_be_removed_when_rename_allowed(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		attribute.set(
+			"item_attribute_values",
+			[d for d in attribute.item_attribute_values if d.attribute_value != "Red"],
+		)
+		with assert_raises_with_savepoint(self, frappe.ValidationError):
+			attribute.save()
+
+		attribute.reload()
+		for row in attribute.item_attribute_values:
+			if row.attribute_value == "Red":
+				row.attribute_value = "Crimson"
+		attribute.save()

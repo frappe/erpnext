@@ -80,14 +80,22 @@ class ItemAttribute(Document):
 	def validate_exising_items(self):
 		"""Validate that if there are existing items with attributes, they are valid"""
 		attributes_list = [d.attribute_value for d in self.item_attribute_values]
+		removed_values = self.get_removed_attribute_values(attributes_list)
 
 		for item in self.get_variants_using_attribute():
 			if self.numeric_values:
 				validate_is_incremental(self, self.name, item.value, item.name)
-			else:
+			elif item.value in removed_values:
 				validate_item_attribute_value(
 					attributes_list, self.name, item.value, item.name, from_variant=False
 				)
+
+	def get_removed_attribute_values(self, attributes_list):
+		previous = self.get_doc_before_save()
+		if not previous:
+			return set()
+
+		return {d.attribute_value for d in previous.item_attribute_values} - set(attributes_list)
 
 	def validate_numeric_change(self):
 		if self.is_new() or not self.has_value_changed("numeric_values"):
