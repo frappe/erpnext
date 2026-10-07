@@ -7,6 +7,22 @@ from frappe.model.document import Document
 
 
 class FinancialInstitution(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		country: DF.Link | None
+		institution_name: DF.Data
+		institution_type: DF.Literal["Bank", "AMC", "Corporate Issuer", "Custodian", "Broker", "Government"]
+		is_active: DF.Check
+		primary_contact: DF.Link | None
+		registration_number: DF.Data | None
+	# end: auto-generated types
+
 	def onload(self):
 		load_address_and_contact(self)
 

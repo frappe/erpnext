@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:investment_type",
- "creation": "2026-09-23 00:00:00.000000",
+ "creation": "2026-10-07 14:19:41.915657",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -51,9 +51,8 @@
    "label": "Is Active"
   }
  ],
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-06 14:00:00.000000",
+ "modified": "2026-10-07 14:19:42.051688",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Type",
@@ -71,8 +70,25 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
