@@ -14,6 +14,7 @@ FIELDS_FIXED_AFTER_USE = (
 	"company",
 	"supplier",
 	"tax_withholding_category",
+	"pan_no",
 	"rate",
 	"valid_from",
 	"valid_upto",
@@ -53,7 +54,10 @@ class LowerDeductionCertificate(Document):
 			frappe.throw(_("Cannot delete a certificate that is used in Tax Withholding Entries"))
 
 	def set_pan_from_supplier(self):
-		"""Certificates are matched to invoices by the supplier's tax id, so keep the PAN in line with it."""
+		"""Certificates are matched to invoices by the supplier's tax id, so keep the PAN in line with it.
+		A used certificate keeps its PAN, as its past deductions are recorded against it."""
+		if not self.is_new() and self.is_used():
+			return
 		if tax_id := get_tax_id_for_party("Supplier", self.supplier):
 			self.pan_no = tax_id
 

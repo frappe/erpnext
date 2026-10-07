@@ -97,6 +97,13 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 		certificate.reload()
 		certificate.certificate_limit = 200000
 		certificate.save()
+
+		frappe.db.set_value("Supplier", certificate.supplier, "tax_id", "DDDPD1234D")
+		certificate.save()
+		self.assertEqual(certificate.pan_no, "CCCPC1234C")
+		certificate.pan_no = "DDDPD1234D"
+		self.assertRaises(frappe.ValidationError, certificate.save)
+
 		self.assertRaises(frappe.ValidationError, frappe.delete_doc, certificate.doctype, certificate.name)
 
 
