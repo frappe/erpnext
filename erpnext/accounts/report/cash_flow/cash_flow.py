@@ -393,7 +393,7 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 
 
 def get_opening_balance(company, period_list, filters):
-	"""Balance of the Cash and Bank accounts before the first period."""
+	"""Balance of the Cash and Bank accounts before the first period, plus their opening entries."""
 	gl = frappe.qb.DocType("GL Entry")
 	account = frappe.qb.DocType("Account")
 
@@ -409,9 +409,15 @@ def get_opening_balance(company, period_list, filters):
 		.select(Sum(gl.debit) - Sum(gl.credit))
 		.where(gl.company == company)
 		.where(gl.is_cancelled == 0)
-		.where(gl.posting_date < period_list[0]["from_date"])
 		.where(gl.account.isin(cash_accounts))
 	)
+	before_first_period = gl.posting_date < period_list[0]["from_date"]
+	if frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		query = query.where(before_first_period)
+	else:
+		# opening entries in the report range are left out of the movements, so they belong to the opening
+		opening_entries = (gl.is_opening == "Yes") & (gl.posting_date <= period_list[-1]["to_date"])
+		query = query.where(before_first_period | opening_entries)
 	query = apply_gl_filters(query, gl, company, filters)
 
 	result = query.run()

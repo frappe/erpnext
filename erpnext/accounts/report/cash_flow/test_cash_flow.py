@@ -197,3 +197,35 @@ class TestCashFlow(ERPNextTestSuite):
 		make_journal_entry("Cash - _TC", "Sales - _TC", 500, posting_date=year_start_date, submit=True)
 
 		self.assertEqual(net_change_card() - before, 500)
+
+	def test_opening_cash_entry_on_the_first_day_is_in_the_opening_balance(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		filters = frappe._dict(
+			company=self.company,
+			from_fiscal_year=fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Yearly",
+			show_opening_and_closing_balance=1,
+		)
+
+		def opening_and_closing():
+			rows = execute(filters)[1]
+			opening = next(row for row in rows if row.get("section") == "Opening")["total"]
+			closing = next(row for row in rows if row.get("section") == "Closing (Opening + Total)")["total"]
+			return opening, closing
+
+		before_opening, before_closing = opening_and_closing()
+		opening_entry = make_journal_entry(
+			"Cash - _TC", "Temporary Opening - _TC", 500, posting_date=year_start_date, save=False
+		)
+		opening_entry.is_opening = "Yes"
+		opening_entry.submit()
+
+		opening, closing = opening_and_closing()
+		self.assertEqual(opening - before_opening, 500)
+		self.assertEqual(closing - before_closing, 500)
