@@ -430,3 +430,24 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 		self.submit_closing(self.make_closing("2026-06-30"))
 
 		self.assertRaises(frappe.ValidationError, first.regenerate_closing_balance)
+
+	def test_closing_balance_is_generated_only_for_submitted_entry(self):
+		draft = self.make_closing("2026-03-31")
+		draft.insert()
+		self.assertRaises(frappe.ValidationError, draft.enqueue_job)
+		self.assertRaises(frappe.ValidationError, draft.regenerate_closing_balance)
+
+		closing = self.submit_closing(draft)
+		closing.cancel()
+		self.assertRaises(frappe.ValidationError, closing.regenerate_closing_balance)
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Cancelled")
+
+	def test_reposting_ignores_completed_draft_closing(self):
+		draft = self.make_closing(today())
+		draft.insert()
+		draft.db_set("status", "Completed")
+
+		repost = frappe.get_doc(
+			{"doctype": "Repost Item Valuation", "company": COMPANY, "posting_date": add_days(today(), -1)}
+		)
+		self.assertFalse(repost.get_closing_stock_balance())

@@ -200,6 +200,7 @@ class RepostItemValuation(Document):
 			"company": self.company,
 			"to_date": (">=", self.posting_date),
 			"status": "Completed",
+			"docstatus": 1,
 		}
 
 		return frappe.get_all(

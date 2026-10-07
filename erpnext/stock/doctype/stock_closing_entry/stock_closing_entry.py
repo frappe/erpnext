@@ -219,6 +219,14 @@ class StockClosingEntry(Document):
 				title=_("Closed Period"),
 			)
 
+	def validate_submitted(self):
+		if self.docstatus != 1:
+			frappe.throw(
+				_("Stock Closing Entry {0} must be submitted to generate the closing balance").format(
+					self.name
+				)
+			)
+
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
@@ -226,6 +234,7 @@ class StockClosingEntry(Document):
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
 		self.check_permission("write")
+		self.validate_submitted()
 
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
@@ -238,6 +247,7 @@ class StockClosingEntry(Document):
 	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
 		self.check_permission("write")
+		self.validate_submitted()
 
 		self.validate_closed_period_lock()
 		self.validate_later_closing_entry_for_regenerate()
