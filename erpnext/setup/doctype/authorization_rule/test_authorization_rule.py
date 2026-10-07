@@ -39,3 +39,43 @@ class TestAuthorizationRule(ERPNextTestSuite):
 				self.make_rule(
 					based_on=based_on, value=10, customer_or_item=master_type, master_name=second
 				).insert(ignore_permissions=True)
+
+	def test_discount_limits_are_within_percent_range(self):
+		for based_on in (
+			"Average Discount",
+			"Customerwise Discount",
+			"Itemwise Discount",
+			"Item Group wise Discount",
+		):
+			for value in (-1, 101):
+				with self.subTest(based_on=based_on, value=value):
+					self.assertRaises(
+						frappe.ValidationError,
+						self.make_rule(
+							based_on=based_on,
+							value=value,
+							master_name="_Test Customer" if based_on == "Customerwise Discount" else "",
+						).insert,
+						ignore_permissions=True,
+					)
+
+	def test_master_type_is_derived_from_basis(self):
+		self.assertRaises(
+			frappe.LinkValidationError,
+			self.make_rule(
+				based_on="Customerwise Discount",
+				value=10,
+				customer_or_item="Item",
+				master_name="_Test Item",
+			).insert,
+			ignore_permissions=True,
+		)
+		# An omitted hidden type must be filled before Frappe validates the Dynamic Link.
+		rule = self.make_rule(based_on="Itemwise Discount", value=10, master_name="_Test Item").insert(
+			ignore_permissions=True
+		)
+		self.assertEqual(rule.customer_or_item, "Item")
+
+		rule.customer_or_item = "Customer"
+		rule.save(ignore_permissions=True)
+		self.assertEqual(rule.customer_or_item, "Item")
