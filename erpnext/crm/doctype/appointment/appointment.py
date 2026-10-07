@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
+from frappe.desk.form.assign_to import clear as clear_assignments
 from frappe.model.document import Document
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
@@ -20,6 +21,7 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method -- create_calendar_event persists calendar_event through self.save()
 class Appointment(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -44,11 +46,25 @@ class Appointment(Document):
 		verification_token: DF.Data | None
 	# end: auto-generated types
 
-	def validate(self):
-		self.validate_status_update()
-		if not self.has_value_changed("scheduled_time"):
-			return
+	def check_if_latest(self):
+		# frappe locks this appointment's row here: take the capacity lock first, so concurrent
+		# saves lock in the same order and the overlapping-row locks cannot deadlock
+		lock_booking_capacity()
+		super().check_if_latest()
 
+	def validate(self):
+		self.validate_appointment_with()
+		self.validate_status_update()
+		if self.has_value_changed("scheduled_time"):
+			self.validate_schedule()
+
+		# unverified and closed appointments hold no capacity: check it again when they open
+		if self.has_value_changed("scheduled_time") or (
+			self.status == "Open" and self.has_value_changed("status")
+		):
+			self.validate_available_time_slot()
+
+	def validate_schedule(self):
 		self.validate_backdated_booking()
 
 		if is_appointment_scheduling_enabled():
@@ -56,7 +72,9 @@ class Appointment(Document):
 			self.validate_holiday()
 			self.validate_slot_timing()
 
-		self.validate_available_time_slot()
+	def validate_appointment_with(self):
+		if self.appointment_with and self.appointment_with not in ("Customer", "Lead"):
+			frappe.throw(_("Appointment With must be a Customer or a Lead"))
 
 	def validate_status_update(self):
 		if not self.has_value_changed("status"):
@@ -110,27 +128,38 @@ class Appointment(Document):
 		)
 		slot_end = slot_start + timedelta(minutes=cint(settings.appointment_duration))
 
-		for slot in settings.availability_of_slots:
-			if slot.day_of_week == day_of_week and slot.from_time <= slot_start and slot_end <= slot.to_time:
-				return
+		containing_slots = [
+			slot
+			for slot in settings.availability_of_slots
+			if slot.day_of_week == day_of_week and slot.from_time <= slot_start and slot_end <= slot.to_time
+		]
+		if not containing_slots:
+			frappe.throw(_("Appointment must be scheduled within the available slot timings."))
 
-		frappe.throw(_("Appointment must be scheduled within the available slot timings."))
+		self.validate_on_slot_grid(
+			[slot_start - slot.from_time for slot in containing_slots], slot_end - slot_start
+		)
+
+	def validate_on_slot_grid(self, offsets: list[timedelta], duration: timedelta):
+		"""Portal bookings must start on a slot the portal offers, not between two."""
+		if self.created_through_portal and duration and all(offset % duration for offset in offsets):
+			frappe.throw(_("Appointment must start at the beginning of an available slot."))
 
 	def validate_available_time_slot(self):
-		settings = get_booking_settings()
-		if not cint(settings.number_of_agents):
+		# locking the capacity setting serializes all capacity checks: locking only the Open
+		# rows misses Unverified bookings of the same slot being verified at the same time
+		number_of_agents = lock_booking_capacity()
+		if not number_of_agents:
 			return
 
-		# the locking read serializes concurrent bookings for the same window,
-		# so two simultaneous requests cannot both pass the capacity check
 		booked = count_overlapping_appointments(
 			self.scheduled_time,
-			cint(settings.appointment_duration),
+			cint(get_booking_settings().appointment_duration),
 			exclude_appointment=self.name,
 			for_update=True,
 		)
 
-		if booked >= cint(settings.number_of_agents):
+		if booked >= number_of_agents:
 			frappe.throw(_("Time slot is not available"))
 
 	def before_insert(self):
@@ -213,6 +242,21 @@ class Appointment(Document):
 			self.create_calendar_event()
 
 		self.sync_calendar_event()
+		self.reassign_if_agent_busy()
+
+	def reassign_if_agent_busy(self):
+		"""On reschedule, move the appointment to a free agent if its agent is busy at the new time."""
+		if not (self._assign and self.has_value_changed("scheduled_time")):
+			return
+
+		busy_agents = get_busy_agents(self.scheduled_time, exclude_appointment=self.name)
+		current_agents = frappe.parse_json(self._assign)
+		if not busy_agents.intersection(current_agents):
+			return
+
+		if agent := self.get_free_agent(busy_agents):
+			clear_assignments(self.doctype, self.name, ignore_permissions=True)
+			self.assign_agent(agent)
 
 	def sync_calendar_event(self):
 		if not self.calendar_event or not self.has_value_changed("scheduled_time"):
@@ -251,6 +295,23 @@ class Appointment(Document):
 
 	def find_party_by_email(self, doctype):
 		party = frappe.get_all(doctype, filters={"email_id": self.customer_email}, limit=1, pluck="name")
+		return party[0] if party else self.find_party_by_contact_email(doctype)
+
+	def find_party_by_contact_email(self, doctype: str) -> str | None:
+		contacts = frappe.get_all(
+			"Contact Email",
+			filters={"email_id": self.customer_email, "parenttype": "Contact"},
+			pluck="parent",
+		)
+		if not contacts:
+			return None
+
+		party = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": "Contact", "parent": ("in", contacts), "link_doctype": doctype},
+			pluck="link_name",
+			limit=1,
+		)
 		return party[0] if party else None
 
 	def create_lead_and_link(self):
@@ -283,16 +344,17 @@ class Appointment(Document):
 		if self._assign:
 			return
 
-		if existing_assignee := self.get_assignee_from_latest_opportunity():
-			# assign to whoever handles the party's latest opportunity
-			self.assign_agent(existing_assignee)
-			return
+		if agent := self.get_free_agent(get_busy_agents(self.scheduled_time, exclude_appointment=self.name)):
+			self.assign_agent(agent)
 
-		busy_agents = get_busy_agents(self.scheduled_time)
-		for agent in _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time)):
-			if agent not in busy_agents:
-				self.assign_agent(agent)
-				break
+	def get_free_agent(self, busy_agents: set[str]) -> str | None:
+		"""Whoever handles the party's latest opportunity, else the least loaded agent, if not busy."""
+		existing_assignee = self.get_assignee_from_latest_opportunity()
+		if existing_assignee and existing_assignee not in busy_agents:
+			return existing_assignee
+
+		agents = _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time))
+		return next((agent for agent in agents if agent not in busy_agents), None)
 
 	def get_assignee_from_latest_opportunity(self):
 		if not self.party or not frappe.db.exists("Lead", self.party):
@@ -324,7 +386,7 @@ class Appointment(Document):
 				"subject": f"Appointment with {self.customer_name}",
 				"starts_on": self.scheduled_time,
 				"status": "Open",
-				"type": "Public",
+				"event_type": "Public",
 				"send_reminder": cint(get_booking_settings().email_reminders),
 				"event_participants": self.get_event_participants(),
 			}
@@ -356,6 +418,13 @@ def get_booking_settings():
 	return frappe.get_cached_doc("Appointment Booking Settings")
 
 
+def lock_booking_capacity() -> int:
+	"""Read the number of agents with a row lock, held until commit."""
+	return cint(
+		frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents", for_update=True)
+	)
+
+
 def is_appointment_scheduling_enabled():
 	return bool(cint(get_booking_settings().enable_scheduling))
 
@@ -368,7 +437,7 @@ def get_verification_link_expiry():
 def count_overlapping_appointments(
 	scheduled_time, appointment_duration, exclude_appointment=None, for_update=False
 ):
-	"""Count non-Closed appointments whose duration window overlaps `scheduled_time`.
+	"""Count Open appointments whose duration window overlaps `scheduled_time`.
 	With `for_update`, the range stays locked until commit, serializing concurrent bookings."""
 	# select the rows (not COUNT) so `for_update` stays valid: PostgreSQL
 	# rejects `FOR UPDATE` combined with an aggregate function
@@ -378,7 +447,7 @@ def count_overlapping_appointments(
 		.select(appointment.name)
 		.where(appointment.scheduled_time > add_to_date(scheduled_time, minutes=-appointment_duration))
 		.where(appointment.scheduled_time < add_to_date(scheduled_time, minutes=appointment_duration))
-		.where(appointment.status != "Closed")
+		.where(appointment.status.notin(["Closed", "Unverified"]))
 	)
 
 	if exclude_appointment:
@@ -429,7 +498,7 @@ def _get_agents_sorted_by_asc_workload(date):
 	return [agent for agent, _workload in reversed(workload.most_common())]
 
 
-def get_busy_agents(scheduled_time):
+def get_busy_agents(scheduled_time, exclude_appointment: str | None = None) -> set[str]:
 	"""Agents already assigned to a non-Closed appointment overlapping `scheduled_time`."""
 	duration = _get_appointment_duration()
 	assigns = frappe.get_all(
@@ -438,6 +507,7 @@ def get_busy_agents(scheduled_time):
 			["scheduled_time", ">", add_to_date(scheduled_time, minutes=-duration)],
 			["scheduled_time", "<", add_to_date(scheduled_time, minutes=duration)],
 			["status", "!=", "Closed"],
+			["name", "!=", exclude_appointment or ""],
 		],
 		pluck="_assign",
 	)
@@ -449,13 +519,13 @@ def _check_agent_availability(agent_email, scheduled_time):
 
 
 def get_booked_slot_times(from_time, to_time):
-	"""scheduled_times of non-Closed appointments within (from_time, to_time), for slot availability."""
+	"""scheduled_times of Open appointments within (from_time, to_time), for slot availability."""
 	return frappe.get_all(
 		"Appointment",
 		filters=[
 			["scheduled_time", ">", from_time],
 			["scheduled_time", "<", to_time],
-			["status", "!=", "Closed"],
+			["status", "not in", ["Closed", "Unverified"]],
 		],
 		pluck="scheduled_time",
 	)
