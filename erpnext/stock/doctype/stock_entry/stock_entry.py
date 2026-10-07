@@ -1395,6 +1395,8 @@ class StockEntry(StockController):
 		# Set basic rate for incoming items
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
+				if d.set_basic_rate_manually:
+					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 				continue
 
 			rate_derived_from_consumption = False
