@@ -320,6 +320,55 @@ class TestBatch(ERPNextTestSuite):
 		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
 		self.assertRaises(BatchExpiredError, delivery_note.insert)
 
+	def test_disabled_batch_cannot_be_delivered(self):
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		self.assertRaises(frappe.ValidationError, delivery_note.insert)
+
+	def test_disabled_batch_cannot_be_issued(self):
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=receipt.items[0].item_code,
+			source=receipt.items[0].warehouse,
+			qty=2,
+			batch_no=batch_no,
+			purpose="Material Issue",
+		)
+
+	def test_expired_packed_item_batch_cannot_be_delivered(self):
+		from erpnext.exceptions import BatchExpiredError
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_to_date(getdate(), days=-5))
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		delivery_note.posting_date = getdate()
+		row = delivery_note.items[0]
+		delivery_note.append(
+			"packed_items",
+			{
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"qty": 2,
+				"serial_and_batch_bundle": row.serial_and_batch_bundle,
+			},
+		)
+		row.serial_and_batch_bundle = None
+
+		self.assertRaises(
+			BatchExpiredError, SerialBatchBundleService(delivery_note).validate_outward_bundle_batches
+		)
+
 	def test_batch_negative_stock_error(self):
 		"""Test automatic batch selection for outgoing items"""
 		receipt = self.test_purchase_receipt(100)
