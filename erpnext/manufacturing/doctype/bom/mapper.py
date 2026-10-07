@@ -10,9 +10,11 @@ from frappe import _
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Field
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder import Case, CustomFunction, Field
+from frappe.query_builder.functions import Concat, IfNull, Substring
 from frappe.utils import today
+
+char_length = CustomFunction("CHAR_LENGTH", ["term"])
 
 from erpnext.stock.doctype.item.item import _get_item_details
 
@@ -130,22 +132,35 @@ def item_query(
 ):
 	frappe.has_permission("Item", "read", throw=True)
 
+	item = frappe.qb.DocType("Item")
 	searchfields = frappe.get_meta("Item", cached=True).get_search_fields()
-	fields = ["name", "item_name", "item_group", "description"]
-	fields.extend(f for f in searchfields if f not in ["name", "item_group", "description"])
+	fields = [
+		item.name,
+		item.item_name,
+		item.item_group,
+		(
+			Case()
+			.when(char_length(item.description) > 40, Concat(Substring(item.description, 1, 40), "..."))
+			.else_(item.description)
+		).as_("description"),
+	]
+	for f in searchfields:
+		if f not in ["name", "item_name", "item_group", "description"]:
+			fields.append(item[f])
 
 	query_filters = _item_query_filters(filters)
 	or_filters = _item_query_or_filters(txt, searchfields or ["name"], query_filters)
-	return frappe.get_list(
+
+	return frappe.get_query(
 		"Item",
 		fields=fields,
 		filters=query_filters,
 		or_filters=or_filters,
 		order_by="idx desc, name, item_name",
-		limit_start=start,
-		limit_page_length=page_len,
-		as_list=1,
-	)
+		limit=page_len,
+		offset=start,
+		ignore_permissions=False,
+	).run()
 
 
 def _item_query_filters(filters):
