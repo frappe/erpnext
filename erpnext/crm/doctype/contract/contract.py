@@ -117,8 +117,12 @@ class Contract(Document):
 		if not (previous and previous.is_signed):
 			return
 
-		signature = (self.is_signed, self.signee, get_datetime(self.signed_on))
-		if signature != (previous.is_signed, previous.signee, get_datetime(previous.signed_on)):
+		# details missing on older signed contracts can still be filled in
+		if (
+			not self.is_signed
+			or (previous.signee and self.signee != previous.signee)
+			or (previous.signed_on and get_datetime(self.signed_on) != get_datetime(previous.signed_on))
+		):
 			frappe.throw(
 				_("The signature of a signed contract cannot be changed. Amend the contract instead."),
 				frappe.UpdateAfterSubmitError,

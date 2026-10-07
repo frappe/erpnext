@@ -140,6 +140,19 @@ class TestContract(ERPNextTestSuite):
 		contract.signee = "Someone else"
 		self.assertRaises(frappe.UpdateAfterSubmitError, contract.save)
 
+	def test_missing_signature_details_can_be_filled_after_submit(self):
+		contract = self.make_signed_contract()
+		frappe.db.set_value("Contract", contract.name, {"signee": None, "signed_on": None})
+		contract.reload()
+
+		sign(contract)
+		contract.fulfilment_terms[0].fulfilled = 1
+		contract.save()
+		self.assertEqual(frappe.db.get_value("Contract", contract.name, "signee"), "Test Signee")
+
+		contract.signee = "Someone else"
+		self.assertRaises(frappe.UpdateAfterSubmitError, contract.save)
+
 	def test_cancelled_contract_status(self):
 		contract = self.make_signed_contract()
 		contract.cancel()
