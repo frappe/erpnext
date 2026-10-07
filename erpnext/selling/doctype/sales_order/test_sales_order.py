@@ -388,6 +388,17 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertFalse(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [])
 
+	def test_over_delivery_keeps_whole_number_uom_qty(self):
+		item = make_item(
+			"_Test Over Delivery Whole Item",
+			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 50},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, rate=100)
+		so = make_sales_order(item_code=item, qty=3)
+		make_delivery_note(so.name).submit()
+
+		self.assertEqual([row.qty for row in make_delivery_note(so.name).items], [1])
+
 	def test_make_production_plan(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
