@@ -9,6 +9,7 @@ from frappe.utils import add_days, getdate, today
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
+	execute_repost_item_valuation,
 	get_recipients,
 	in_configured_timeslot,
 )
@@ -38,6 +39,18 @@ class TestStockRepostingSettings(ERPNextTestSuite):
 		)
 
 		self.assertTrue(in_configured_timeslot(settings, "03:00:00"))
+
+	def test_manual_start_outside_timeslot_is_not_reported_as_started(self):
+		module = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation"
+		with (
+			patch(f"{module}.in_configured_timeslot", return_value=False),
+			patch(
+				"frappe.core.doctype.scheduled_job_type.scheduled_job_type.ScheduledJobType.enqueue"
+			) as enqueue,
+		):
+			self.assertFalse(execute_repost_item_valuation())
+
+		enqueue.assert_not_called()
 
 	def test_auto_repost_disabled_does_nothing(self):
 		frappe.db.set_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries", 0)

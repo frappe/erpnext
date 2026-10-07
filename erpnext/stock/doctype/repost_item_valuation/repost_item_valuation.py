@@ -984,6 +984,14 @@ def execute_repost_item_valuation():
 	# Force-enqueues the site-wide reposting job, so it needs the same right as restarting one.
 	frappe.has_permission("Repost Item Valuation", "write", throw=True)
 
+	if not in_configured_timeslot():
+		frappe.msgprint(
+			_("Reposting will start within the timeslot configured in {0}").format(
+				get_link_to_form("Stock Reposting Settings", "Stock Reposting Settings")
+			)
+		)
+		return False
+
 	method = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
 	if frappe.db.get_single_value("Stock Reposting Settings", "enable_parallel_reposting"):
 		method = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.run_parallel_reposting"
@@ -994,6 +1002,8 @@ def execute_repost_item_valuation():
 		"name",
 	):
 		frappe.get_doc("Scheduled Job Type", name).enqueue(force=True)
+
+	return True
 
 
 def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
