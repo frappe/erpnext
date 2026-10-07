@@ -9,6 +9,23 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_customerwise_rule_preserves_user_and_role_scope(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		order = frappe._dict(doctype="Sales Order", customer="CUST-001")
+		with (
+			patch.object(controller, "validate_auth_rule") as check,
+			patch(
+				"erpnext.setup.doctype.authorization_control.authorization_control.frappe.get_roles",
+				return_value=["Sales User"],
+			),
+		):
+			for scope, expected in ((1, "system_user ="), (2, "system_role IN"), (0, "coalesce(system_user")):
+				controller.bifurcate_based_on_type(
+					"Sales Order", 100, 20, "Customerwise Discount", order, scope, "_Test Company"
+				)
+				self.assertIn(expected, check.call_args.args[3])
+				self.assertIn("master_name =", check.call_args.args[3])
+
 	def test_customerwise_uses_customer_id_not_display_name(self):
 		controller = frappe.get_cached_doc("Authorization Control")
 		with patch.object(controller, "validate_auth_rule") as check:
