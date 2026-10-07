@@ -18,6 +18,7 @@ from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
 	set_transaction_type,
+	validate_pricing_context,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -58,6 +59,17 @@ NOT_APPLICABLE_TAX = "N/A"
 
 @frappe.whitelist()
 def get_item_details(
+	args: dict | str,
+	doc: Document | dict | str | None = None,
+	for_validate: bool | str | None = False,
+	overwrite_warehouse: bool | str = True,
+):
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
+	return _get_item_details(args, doc, for_validate, overwrite_warehouse)
+
+
+def _get_item_details(
 	args: dict | str,
 	doc: Document | dict | str | None = None,
 	for_validate: bool | str | None = False,
@@ -304,7 +316,7 @@ def update_stock(ctx, out, doc=None):
 				filter_batches(batches, doc)
 
 			for batch_no, batch_qty in batches.items():
-				rate = get_batch_based_item_price(
+				rate = _get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
@@ -1241,6 +1253,12 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 
 @frappe.whitelist()
 def get_batch_based_item_price(params, item_code) -> float:
+	params = frappe._dict(frappe.parse_json(params))
+	validate_pricing_context(params)
+	return _get_batch_based_item_price(params, item_code)
+
+
+def _get_batch_based_item_price(params, item_code) -> float:
 	if isinstance(params, str):
 		params = parse_json(params)
 
@@ -1560,6 +1578,12 @@ def get_batch_qty(batch_no, warehouse, item_code):
 
 @frappe.whitelist()
 def apply_price_list(args, as_doc=False, doc=None):
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
+	return _apply_price_list(args, as_doc, doc)
+
+
+def _apply_price_list(args, as_doc=False, doc=None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1752,13 +1776,19 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 
 def update_party_blanket_order(args, out):
 	if out["against_blanket_order"]:
-		blanket_order_details = get_blanket_order_details(args)
+		blanket_order_details = _get_blanket_order_details(args)
 		if blanket_order_details:
 			out.update(blanket_order_details)
 
 
 @frappe.whitelist()
 def get_blanket_order_details(args):
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
+	return _get_blanket_order_details(args)
+
+
+def _get_blanket_order_details(args):
 	if isinstance(args, str):
 		args = frappe._dict(json.loads(args))
 
