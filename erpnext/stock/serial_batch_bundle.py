@@ -1365,6 +1365,9 @@ class SerialBatchCreation:
 		if self.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = self.ignore_serial_nos
 
+		if self.get("already_picked_batches"):
+			kwargs["already_picked_batches"] = self.already_picked_batches
+
 		if (
 			self.has_serial_no
 			and self.has_batch_no
