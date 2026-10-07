@@ -719,7 +719,91 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_backdated_issue_cannot_make_later_dimension_balance_negative(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		inv_dimension = create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Inv Site",
+			reference_document="Inv Site",
+			document_type="Inv Site",
+			validate_negative_stock=1,
+		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			make_stock_entry(
+				item_code=item_code, target=warehouse, qty=20, posting_date=add_days(nowdate(), -10)
+			)
+			for qty, days, field in ((10, -5, "to_inv_site"), (-8, -1, "inv_site"), (-5, -3, "inv_site")):
+				kwargs = {"target": warehouse} if qty > 0 else {"source": warehouse}
+				doc = make_stock_entry(
+					item_code=item_code,
+					qty=abs(qty),
+					posting_date=add_days(nowdate(), days),
+					do_not_submit=True,
+					**kwargs,
+				)
+				doc.items[0].set(field, "Site 1")
+				if days == -3:
+					self.assertRaises(InventoryDimensionNegativeStockError, doc.submit)
+				else:
+					doc.submit()
+
+	def test_backdated_transfer_keeping_checked_dimension_is_allowed(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		for dimension_name, validate_negative_stock in (("Inv Site", 1), ("Rack", 0)):
+			create_inventory_dimension(
+				apply_to_all_doctypes=1,
+				dimension_name=dimension_name,
+				reference_document=dimension_name,
+				document_type=dimension_name,
+			).db_set("validate_negative_stock", validate_negative_stock)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			for site in ("Site 1", "Site 2"):
+				receipt = make_stock_entry(
+					item_code=item_code,
+					target=warehouse,
+					qty=10,
+					posting_date=add_days(nowdate(), -10),
+					do_not_submit=True,
+				)
+				receipt.items[0].update({"to_inv_site": site, "to_rack": "Rack 1"})
+				receipt.submit()
+
+			issue = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				qty=10,
+				posting_date=add_days(nowdate(), -1),
+				do_not_submit=True,
+			)
+			issue.items[0].update({"inv_site": "Site 1", "rack": "Rack 1"})
+			issue.submit()
+
+			transfer = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				target=warehouse,
+				qty=5,
+				posting_date=add_days(nowdate(), -5),
+				do_not_submit=True,
+			)
+			transfer.items[0].update(
+				{"inv_site": "Site 1", "to_inv_site": "Site 1", "rack": "Rack 1", "to_rack": "Rack 2"}
+			)
+			transfer.submit()
+
+			self.assertEqual(transfer.docstatus, 1)
+
 	def test_validate_negative_stock_with_multiple_dimension(self):
 		item_code = "Test Negative Multi Inventory Dimension Item"
 		create_item(item_code)
