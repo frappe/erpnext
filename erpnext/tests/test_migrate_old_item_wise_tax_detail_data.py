@@ -40,7 +40,7 @@ class TestMigrateOldItemWiseTaxDetailData(ERPNextTestSuite):
 	def make_invoice(self):
 		invoice = make_purchase_invoice(qty=1, rate=100, do_not_submit=True)
 		second_item = frappe.copy_doc(invoice.items[0])
-		second_item.rate = 300
+		second_item.update({"item_code": "_Test Item 2", "item_name": "_Test Item 2", "rate": 300})
 		invoice.append("items", second_item)
 		invoice.items[0].apply_tds = 1
 		invoice.items[1].apply_tds = 1
