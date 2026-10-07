@@ -265,3 +265,18 @@ class TestItemPrice(ERPNextTestSuite):
 			qty=1,
 		)
 		self.assertEqual(get_price_list_rate_for(ctx, item_code), 700)
+
+	def test_price_falls_back_when_packing_unit_does_not_fit(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		self.make_price(item_code, 100, add_days(today(), -60))
+		self.make_price(item_code, 90, add_days(today(), -5), packing_unit=12)
+
+		ctx = frappe._dict(
+			price_list="_Test Price List",
+			uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+			transaction_date=today(),
+		)
+		self.assertEqual(get_price_list_rate_for(ctx.copy().update(qty=24), item_code), 90)
+		self.assertEqual(get_price_list_rate_for(ctx.copy().update(qty=5), item_code), 100)
