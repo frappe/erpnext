@@ -314,6 +314,32 @@ class TestOpportunity(ERPNextTestSuite):
 		opp.run_method("onload")
 		self.assertNotIn(contact.name, [c.name for c in opp.get("__onload").contact_list])
 
+	def test_contact_and_title_follow_the_party(self):
+		frappe.db.set_value("Customer", "_Test Customer", "territory", "_Test Territory India")
+		frappe.db.set_value("Customer", "_Test Customer 1", "territory", "_Test Territory Rest Of The World")
+		other_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Opportunity Other Buyer",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 1"}],
+			}
+		).insert()
+
+		opp = make_opportunity(with_items=0)
+		opp.contact_person = other_contact.name
+		self.assertRaisesRegex(frappe.ValidationError, "is not linked to", opp.save)
+
+		opp.reload()
+		opp.party_name = "_Test Customer 1"
+		opp.save()
+		self.assertEqual(opp.title, frappe.db.get_value("Customer", "_Test Customer 1", "customer_name"))
+		self.assertEqual(opp.territory, "_Test Territory Rest Of The World")
+
+		opp.contact_person = other_contact.name
+		opp.save()
+		opp.party_name = "_Test Customer"
+		self.assertRaisesRegex(frappe.ValidationError, "is not linked to", opp.save)
+
 	def test_get_item_details(self):
 		details = get_item_details("_Test Item")
 		self.assertEqual(details["item_name"], frappe.db.get_value("Item", "_Test Item", "item_name"))
