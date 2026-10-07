@@ -4,6 +4,9 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
+
+from erpnext.controllers.status_updater import get_allowance_for
 
 
 class SalesOrderItem(Document):
@@ -101,7 +104,11 @@ class SalesOrderItem(Document):
 		work_order_qty: DF.Float
 	# end: auto-generated types
 
-	pass
+	@property
+	def max_deliverable_qty(self) -> float:
+		"""Ordered qty plus the over delivery allowance."""
+		allowance = flt(get_allowance_for(self.item_code, qty_or_amount="qty")[0])
+		return flt(self.qty) * (100 + allowance) / 100
 
 
 def on_doctype_update():

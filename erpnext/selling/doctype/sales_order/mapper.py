@@ -269,7 +269,11 @@ def make_delivery_note(
 	}
 
 	# 0 qty is accepted, as the qty is uncertain for some items
-	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+	has_unit_price_items, per_delivered = frappe.db.get_value(
+		"Sales Order", source_name, ["has_unit_price_items", "per_delivered"]
+	)
+	can_over_deliver_all_rows = flt(per_delivered) >= 100 and not frappe.flags.bulk_transaction
+	selected_rows = set(kwargs.get("filtered_children") or [])
 	use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 	def is_unit_price_row(source):
@@ -323,13 +327,19 @@ def make_delivery_note(
 			(
 				(abs(doc.delivered_qty) + abs(mapped_qty_by_item.get(doc.name, 0)) < abs(doc.qty))
 				or (is_unit_price_row(doc) and doc.name not in mapped_qty_by_item)
+				or remaining_qty(doc) > 0
 			)
 			and doc.delivered_by_supplier != 1
 			and not cint(doc.skip_delivery)
 		)
 
 	def remaining_qty(source):
-		return flt(source.qty) - flt(source.delivered_qty) - flt(mapped_qty_by_item.get(source.name, 0))
+		delivered_qty = flt(source.delivered_qty) + flt(mapped_qty_by_item.get(source.name, 0))
+		can_over_deliver = can_over_deliver_all_rows or source.name in selected_rows
+		if delivered_qty < flt(source.qty) or not can_over_deliver:
+			return flt(source.qty) - delivered_qty
+
+		return flt(source.max_deliverable_qty - delivered_qty, source.precision("qty"))
 
 	def update_item(source, target, source_parent):
 		target.base_amount = remaining_qty(source) * flt(source.base_rate)
