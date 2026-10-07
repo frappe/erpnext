@@ -299,7 +299,7 @@ class TestJobCard(ERPNextTestSuite):
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 200}
 	)
 	def test_work_order_job_cards_are_paged_and_searched(self):
-		"The Work Order list loads one page at a time and searches only the visible columns."
+		"The Work Order list pages in operation order and searches only the visible columns."
 		work_order = self.work_order.name
 		operation = self.work_order.operations[0]
 		for _ in range(2):
@@ -307,10 +307,14 @@ class TestJobCard(ERPNextTestSuite):
 				work_order,
 				[{"name": operation.name, "operation": operation.operation, "qty": 1, "pending_qty": 1}],
 			)
-		names = frappe.get_all(
-			"Job Card", {"work_order": work_order}, pluck="name", order_by="creation desc, name desc"
+		oldest, middle, newest = frappe.get_all(
+			"Job Card", {"work_order": work_order}, pluck="name", order_by="creation asc, name asc"
 		)
-		self.assertEqual(len(names), 3)
+		# the newest card runs the earliest operation, so it must page first despite its age
+		frappe.db.set_value("Job Card", newest, "sequence_id", 1)
+		for name in (oldest, middle):
+			frappe.db.set_value("Job Card", name, "sequence_id", 2)
+		names = [newest, oldest, middle]
 
 		def page(**kwargs):
 			return [row["name"] for row in get_work_order_job_cards(work_order, **kwargs)]
@@ -405,6 +409,25 @@ class TestJobCard(ERPNextTestSuite):
 		# the open log still counts towards elapsed time, as in the form, so the display keeps ticking
 		self.assertAlmostEqual(row["elapsed_seconds"], 3 * 3600, delta=60)
 		self.assertEqual(row["open_log_count"], 1)
+
+	def test_repeated_start_is_refused(self):
+		"A second Start for an employee already on the Job Card opens no second time log."
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		operator = make_employee("job-card-operator@example.com", company=self.work_order.company)
+		helper = make_employee("job-card-helper@example.com", company=self.work_order.company)
+
+		job_card.start_timer(start_time=now(), employees=operator)
+		job_card.reload()
+		self.assertRaises(frappe.ValidationError, job_card.start_timer, start_time=now(), employees=operator)
+
+		# another employee can still join the running job
+		job_card.reload()
+		job_card.start_timer(start_time=now(), employees=helper)
+		job_card.reload()
+		open_logs = sorted(log.employee for log in job_card.time_logs if not log.to_time)
+		self.assertEqual(open_logs, sorted([operator, helper]))
 
 	def test_job_card_timer_action_edge_cases(self):
 		def timer(**overrides):

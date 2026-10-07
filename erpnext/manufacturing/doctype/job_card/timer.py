@@ -36,6 +36,10 @@ SEARCH_FIELDS = ["name", "operation", "workstation", "status"]
 # upper bound on one page, so a caller cannot ask for every Job Card at once
 MAX_PAGE_LENGTH = 100
 
+# Operation order. Pages load from the start, so the loaded rows are always a prefix of this
+# order and the first startable one among them is the Work Order's next card to start.
+OPERATION_ORDER = "sequence_id asc, creation asc, name asc"
+
 
 @frappe.whitelist()
 def get_work_order_job_cards(
@@ -71,7 +75,7 @@ def get_timer_rows(
 		filters=filters,
 		or_filters=or_filters,
 		fields=[*LIST_FIELDS, *TIMER_FIELDS],
-		order_by="creation desc, name desc",
+		order_by=OPERATION_ORDER,
 		start=start,
 		page_length=page_length,
 	)

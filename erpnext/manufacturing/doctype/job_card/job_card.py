@@ -1740,8 +1740,32 @@ class JobCard(Document):
 		if isinstance(kwargs.employees, str):
 			kwargs.employees = [{"employee": kwargs.employees}]
 
+		self.validate_not_already_started(kwargs.employees)
+
 		if kwargs.start_time:
 			self.add_time_logs(from_time=kwargs.start_time, employees=kwargs.employees)
+
+	def validate_not_already_started(self, employees: list | None) -> None:
+		"""Refuse a repeated Start (double click, retry, another screen) that would open a second
+		time log for an employee already working on this Job Card.
+
+		Simultaneous requests are caught by the save's modified-timestamp check; this covers a
+		repeat that arrives after the first Start was saved. Other employees may still join.
+		"""
+		started_employees = {log.employee for log in self.time_logs if log.from_time and not log.to_time}
+		requested_employees = {row.get("employee") for row in employees or []}
+		already_started = (
+			started_employees & requested_employees if requested_employees else started_employees
+		)
+
+		if already_started:
+			frappe.throw(
+				_("Job Card {0} is already started for {1}.").format(
+					bold(self.name),
+					", ".join(bold(employee or _("an operator")) for employee in already_started),
+				),
+				title=_("Already Started"),
+			)
 
 	@frappe.whitelist()
 	def complete_job_card(self, **kwargs):

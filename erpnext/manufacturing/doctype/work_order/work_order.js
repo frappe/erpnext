@@ -1580,7 +1580,14 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 					get_page: (args) => erpnext.work_order.get_job_card_page(this.frm, args),
 					after_render() {
 						erpnext.work_order.bind_job_card_timer_actions(this);
-						erpnext.work_order.start_job_card_ticker(this);
+						// render() skips render_more when no rows are left, e.g. an empty search
+						if (!this.data.length) erpnext.work_order.sync_job_card_rows(this);
+					},
+					// Every render appends rows here, including Load More (which skips
+					// after_render) and the re-render after a row is removed.
+					render_more() {
+						this.constructor.prototype.render_more.call(this);
+						erpnext.work_order.sync_job_card_rows(this);
 					},
 				},
 				columns: [
@@ -1751,7 +1758,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 
 	// Lists are rebuilt on every form refresh; stop the old ones' timers so they don't leak.
 	stop_timers() {
-		Object.values(this.lists).forEach((list) => clearInterval(list.timer_interval));
+		Object.values(this.lists).forEach((list) => erpnext.work_order.stop_job_card_ticker(list));
 	}
 };
 
@@ -1815,7 +1822,8 @@ erpnext.work_order.job_card_time_html = function (row) {
 	)}</span>`;
 };
 
-// The row's timer buttons, shown on row hover.
+// The row's timer buttons, revealed on hover; show_persistent_job_card_actions keeps them
+// visible on the cards an operator should notice.
 erpnext.work_order.job_card_actions_html = function (row) {
 	const name = frappe.utils.escape_html(row.name);
 	const buttons = erpnext.work_order
@@ -1832,7 +1840,31 @@ erpnext.work_order.job_card_actions_html = function (row) {
 		})
 		.join("");
 
-	return `<span class="embedded-list-hover-reveal" style="display: inline-flex; gap: var(--padding-xs);">${buttons}</span>`;
+	return `<span class="job-card-actions embedded-list-hover-reveal" data-job-card="${name}"
+		style="display: inline-flex; gap: var(--padding-xs);">${buttons}</span>`;
+};
+
+// Keeps the buttons visible, without hover, where the operator should act: on cards in
+// progress (running or paused), or when none is, on the next card to start. The rest stay
+// on hover so the list stays quiet.
+erpnext.work_order.show_persistent_job_card_actions = function (list) {
+	const persistent = erpnext.work_order.get_persistent_job_cards(list.data);
+	list.$wrapper.find(".job-card-actions").each((_, element) => {
+		const $actions = $(element);
+		$actions.toggleClass("embedded-list-hover-reveal", !persistent.has($actions.attr("data-job-card")));
+	});
+};
+
+erpnext.work_order.get_persistent_job_cards = function (rows) {
+	const in_progress = rows.filter((row) => ["pause", "resume"].includes(row.timer_action));
+	if (in_progress.length) {
+		return new Set(in_progress.map((row) => row.name));
+	}
+
+	// The server orders rows by operation sequence and pages load from the start, so the
+	// first startable loaded row is the Work Order's next card; none loaded means no hint.
+	const next = rows.find((row) => row.timer_action === "start");
+	return new Set(next ? [next.name] : []);
 };
 
 erpnext.work_order.format_job_card_elapsed = function (row) {
@@ -1851,8 +1883,32 @@ erpnext.work_order.bind_job_card_timer_actions = function (list) {
 		e.stopPropagation();
 		const $button = $(e.currentTarget);
 		const row = list.data.find((r) => r.name === $button.attr("data-job-card"));
-		row && erpnext.work_order.run_job_card_timer_action(list, row, $button.attr("data-timer-action"));
+		if (!row) return;
+
+		erpnext.work_order.run_once_per_job_card(list, row.name, () =>
+			erpnext.work_order.run_job_card_timer_action(list, row, $button.attr("data-timer-action"))
+		);
 	});
+};
+
+// Ignores further clicks on a Job Card's buttons until its action finishes, so a double
+// click cannot send a second Start; the server refuses repeats as well.
+erpnext.work_order.run_once_per_job_card = function (list, job_card, run) {
+	list.pending_job_cards = list.pending_job_cards || new Set();
+	if (list.pending_job_cards.has(job_card)) return;
+
+	list.pending_job_cards.add(job_card);
+	const $buttons = list.$wrapper
+		.find(`[data-timer-action][data-job-card="${CSS.escape(job_card)}"]`)
+		.prop("disabled", true);
+
+	Promise.resolve()
+		.then(run)
+		.finally(() => {
+			list.pending_job_cards.delete(job_card);
+			// on success the row is re-rendered with fresh buttons; this re-enables them after a failure
+			$buttons.prop("disabled", false);
+		});
 };
 
 erpnext.work_order.run_job_card_timer_action = function (list, row, action) {
@@ -1869,19 +1925,37 @@ erpnext.work_order.run_job_card_timer_action = function (list, row, action) {
 	return erpnext.work_order.update_job_card(list, row.name, "resume_job", { start_time: now });
 };
 
-// One interval per list updates every timer with an open log. It reads the list's current
-// rows on each tick, so rows added by Load More, a re-render or a row swap tick without re-arming.
-erpnext.work_order.start_job_card_ticker = function (list) {
+// Brings what depends on the loaded rows up to date: which cards keep their buttons
+// visible, and whether any timer needs to tick.
+erpnext.work_order.sync_job_card_rows = function (list) {
+	erpnext.work_order.show_persistent_job_card_actions(list);
+	erpnext.work_order.sync_job_card_ticker(list);
+};
+
+// Runs one interval per list, only while a loaded row has an open log, and updates just
+// those rows. The elapsed time is worked out from the fetch time, so skipping ticks while
+// the list is hidden loses nothing.
+erpnext.work_order.sync_job_card_ticker = function (list) {
+	list.ticking_rows = list.data.filter((row) => row.open_log_count > 0);
+	if (!list.ticking_rows.length) {
+		erpnext.work_order.stop_job_card_ticker(list);
+		return;
+	}
 	if (list.timer_interval) return;
 
 	list.timer_interval = setInterval(() => {
-		list.data.forEach((row) => {
-			if (!row.open_log_count) return;
+		if (document.hidden || !list.$wrapper.is(":visible")) return;
+		list.ticking_rows.forEach((row) => {
 			list.$wrapper
 				.find(`.job-card-timer[data-job-card="${CSS.escape(row.name)}"]`)
 				.text(erpnext.work_order.format_job_card_elapsed(row));
 		});
 	}, 1000);
+};
+
+erpnext.work_order.stop_job_card_ticker = function (list) {
+	clearInterval(list.timer_interval);
+	list.timer_interval = null;
 };
 
 erpnext.work_order.start_job_card = function (list, row) {
@@ -1896,19 +1970,25 @@ erpnext.work_order.start_job_card = function (list, row) {
 	}
 
 	// Same prompt as the Job Card form; the start time is taken on submit so picking
-	// the operator is not counted as worked time.
-	frappe.prompt(
-		{
-			fieldtype: "Table MultiSelect",
-			label: __("Select Employees"),
-			options: "Job Card Time Log",
-			fieldname: "employees",
-			reqd: 1,
-			filters: { status: "Active" },
-		},
-		(values) => start(values.employees),
-		__("Assign Job to Employee")
-	);
+	// the operator is not counted as worked time. Resolves once the prompt is cancelled or
+	// its Start has finished, so the card's buttons stay locked until then.
+	return new Promise((resolve) => {
+		let request = null;
+		const dialog = frappe.prompt(
+			{
+				fieldtype: "Table MultiSelect",
+				label: __("Select Employees"),
+				options: "Job Card Time Log",
+				fieldname: "employees",
+				reqd: 1,
+				filters: { status: "Active" },
+			},
+			(values) => (request = start(values.employees)),
+			__("Assign Job to Employee")
+		);
+		// onhide fires inside hide(), before the submit callback runs; wait a tick for it
+		dialog.onhide = () => setTimeout(() => resolve(request));
+	});
 };
 
 // Runs the timer action, then re-renders only that Job Card's row instead of the whole form.
@@ -1940,6 +2020,8 @@ erpnext.work_order.replace_job_card_row = function (list, row) {
 	list.data[index] = row;
 	list._all_data[index] = row;
 	list.$wrapper.find(`tr[data-row-idx="${index}"]`).replaceWith(list.build_row_html(row, index));
+	// starting or pausing a card changes which cards show buttons and which timers tick
+	erpnext.work_order.sync_job_card_rows(list);
 };
 
 // Re-renders the loaded rows without the removed one; render() shows one page, so the
