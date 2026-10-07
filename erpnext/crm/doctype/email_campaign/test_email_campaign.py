@@ -139,6 +139,17 @@ class TestEmailCampaign(ERPNextTestSuite):
 		self.assertEqual(getdate(email_campaign.end_date), add_days(getdate(today()), 5))
 		self.assertEqual(len(self.send_campaign_mails(lead.email_id, on_date=add_days(today(), 5))), 1)
 
+	def test_step_added_after_the_end_date_is_sent_before_the_status_job_runs(self):
+		lead = self.make_lead()
+		email_campaign = self.make_lead_email_campaign(lead, schedules=[0, 2])
+		campaign = frappe.get_doc("Campaign", email_campaign.campaign_name)
+		campaign.append(
+			"campaign_schedules", {"send_after_days": 3, "email_template": self.make_email_template()}
+		)
+		campaign.save()
+
+		self.assertEqual(len(self.send_campaign_mails(lead.email_id, on_date=add_days(today(), 3))), 1)
+
 	def test_start_date_cannot_be_in_the_past(self):
 		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
 		self.assertRaises(frappe.ValidationError, doc.set_date)

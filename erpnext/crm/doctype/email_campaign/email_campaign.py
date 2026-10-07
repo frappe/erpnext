@@ -132,7 +132,8 @@ class EmailCampaign(Document):
 def send_email_to_leads_or_contacts():
 	today_date = getdate(today())
 
-	# Select by date, not status: the daily status job may run after this one
+	# Refresh end dates first, so steps added to a Campaign since the last status run are not missed
+	set_email_campaign_status()
 	email_campaigns = frappe.get_all(
 		"Email Campaign",
 		filters={
