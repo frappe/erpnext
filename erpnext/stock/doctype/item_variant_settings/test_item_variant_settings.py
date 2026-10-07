@@ -39,3 +39,9 @@ class TestItemVariantSettings(ERPNextTestSuite):
 		variant.reload()
 		self.assertEqual(variant.stock_uom, "Kg")
 		self.assertEqual([row.uom for row in variant.uoms], ["Kg"])
+
+	def test_unsafe_fields_cannot_be_copied_to_variants(self):
+		for fieldname in ("attributes", "has_variants", "variant_of"):
+			settings = frappe.get_doc("Item Variant Settings")
+			settings.append("fields", {"field_name": fieldname})
+			self.assertRaises(frappe.ValidationError, settings.save)
