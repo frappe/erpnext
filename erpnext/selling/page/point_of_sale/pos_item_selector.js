@@ -139,9 +139,7 @@ erpnext.PointOfSale.ItemSelector = class {
 						${frappe.utils.escape_html(frappe.ellipsis(item.item_name, 18))}
 					</div>
 					<div class="item-rate">${
-						frappe.utils.escape_html(
-							format_currency(price_list_rate, item.currency, precision)
-						) || 0
+						format_currency(price_list_rate, item.currency, precision) || 0
 					} / ${frappe.utils.escape_html(uom)}</div>
 				</div>
 			</div>`;
@@ -367,8 +365,9 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.get_items({ search_term }).then(({ message }) => {
 			// eslint-disable-next-line no-unused-vars
 			const { items, serial_no, batch_no, barcode } = message;
-			// skip caching if a reload happened while this search was in flight (stale stock qty)
-			if (search_term && !barcode && epoch === this.cache_epoch) {
+			// a reload happened while this search was in flight; drop its stale stock qty
+			if (epoch !== this.cache_epoch) return;
+			if (search_term && !barcode) {
 				this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
 				this.search_index[selling_price_list][search_term] = items;
 			}
