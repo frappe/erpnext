@@ -158,6 +158,7 @@ class BOMCreator(Document):
 
 	def before_submit(self):
 		self.validate_fields()
+		self.validate_operations_have_routing()
 		self.set_status()
 
 	def set_reference_id(self):
@@ -239,6 +240,15 @@ class BOMCreator(Document):
 		for field, label in fields.items():
 			if not self.get(field):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
+
+	def validate_operations_have_routing(self):
+		if self.is_phantom or self.routing or not self.has_operations():
+			return
+
+		frappe.throw(
+			_("A Routing is required to create BOMs for items with operations"),
+			title=_("Routing Required"),
+		)
 
 	def on_submit(self):
 		self.enqueue_bom_creation()
