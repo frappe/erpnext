@@ -7,6 +7,19 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import cint, now
 
+DEFAULT_PRICE_LIST_SETTINGS = {
+	"selling": ("Selling Settings", "selling_price_list"),
+	"buying": ("Buying Settings", "buying_price_list"),
+}
+DEFAULT_PRICE_LIST_HOLDERS = {
+	"selling": (
+		("Customer", "default_price_list"),
+		("Customer Group", "default_price_list"),
+		("POS Profile", "selling_price_list"),
+	),
+	"buying": (("Supplier", "default_price_list"),),
+}
+
 
 class PriceList(Document):
 	# begin: auto-generated types
@@ -33,6 +46,28 @@ class PriceList(Document):
 			throw(_("Price List must be applicable for Buying or Selling"))
 
 		self.validate_currency_change()
+		self.validate_side_not_used_as_default("selling")
+		self.validate_side_not_used_as_default("buying")
+
+	def validate_side_not_used_as_default(self, side):
+		if self.is_new() or cint(self.get(side)) or not cint(self.get_doc_before_save().get(side)):
+			return
+
+		if used_in := self.get_doctype_using_as_default(side):
+			throw(
+				_("Price List {0} is the default in {1}, so it must stay applicable for {2}").format(
+					frappe.bold(self.name), _(used_in), get_price_list_side_label(side)
+				)
+			)
+
+	def get_doctype_using_as_default(self, side):
+		settings, fieldname = DEFAULT_PRICE_LIST_SETTINGS[side]
+		if frappe.db.get_single_value(settings, fieldname) == self.name:
+			return settings
+
+		for doctype, holder_field in DEFAULT_PRICE_LIST_HOLDERS[side]:
+			if frappe.db.exists(doctype, {holder_field: self.name}):
+				return doctype
 
 	def validate_currency_change(self):
 		if self.is_new() or not self.has_value_changed("currency"):
@@ -112,3 +147,16 @@ def get_price_list_details(price_list):
 
 def is_price_list_enabled(price_list: str | None) -> bool:
 	return bool(price_list) and bool(frappe.get_cached_value("Price List", price_list, "enabled"))
+
+
+def validate_default_price_list_side(price_list, side):
+	if price_list and not cint(frappe.get_cached_value("Price List", price_list, side)):
+		throw(
+			_("Default Price List {0} is not applicable for {1}").format(
+				frappe.bold(price_list), get_price_list_side_label(side)
+			)
+		)
+
+
+def get_price_list_side_label(side):
+	return _("Selling") if side == "selling" else _("Buying")

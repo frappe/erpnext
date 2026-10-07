@@ -89,3 +89,31 @@ class TestPriceList(ERPNextTestSuite):
 		empty_price_list = self.make_price_list(currency="INR")
 		empty_price_list.currency = "USD"
 		empty_price_list.save()
+
+	def test_buying_list_cannot_be_customer_default(self):
+		price_list = self.make_price_list(buying=1, selling=0)
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.default_price_list = price_list.name
+		self.assertRaises(frappe.ValidationError, customer.save)
+
+	def test_selling_cannot_be_removed_while_customer_default(self):
+		price_list = self.make_price_list(buying=0, selling=1)
+		frappe.db.set_value("Customer", "_Test Customer", "default_price_list", price_list.name)
+
+		price_list.selling = 0
+		price_list.buying = 1
+		self.assertRaises(frappe.ValidationError, price_list.save)
+
+	def test_selling_cannot_be_removed_while_pos_profile_default(self):
+		price_list = self.make_price_list(buying=0, selling=1)
+		pos_profile = frappe.get_all("POS Profile", pluck="name", limit=1)
+		if not pos_profile:
+			from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+
+			pos_profile = [make_pos_profile().name]
+		frappe.db.set_value("POS Profile", pos_profile[0], "selling_price_list", price_list.name)
+
+		price_list.selling = 0
+		price_list.buying = 1
+		self.assertRaises(frappe.ValidationError, price_list.save)
+
