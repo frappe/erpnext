@@ -1632,7 +1632,10 @@ class TestStockEntry(FrappeTestCase):
 			},
 		)
 
-		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		receipt = make_stock_entry(
+			item_code=item.name, target="_Test Warehouse - _TC", qty=50, basic_rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
 
 		ste = frappe.new_doc("Stock Entry")
 		ste.purpose = "Material Issue"
@@ -1643,6 +1646,8 @@ class TestStockEntry(FrappeTestCase):
 				{
 					"item_code": item.name,
 					"s_warehouse": "_Test Warehouse - _TC",
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
 					"qty": qty,
 					"uom": item.stock_uom,
 					"stock_uom": item.stock_uom,
