@@ -32,7 +32,7 @@ class TestPriceList(ERPNextTestSuite):
 			}
 		).insert()
 
-	def test_update_item_price_propagates_currency_and_flags(self):
+	def test_update_item_price_propagates_flags(self):
 		# Price List starts in INR, applicable for both buying and selling.
 		price_list = self.make_price_list(currency="INR", buying=1, selling=1)
 
@@ -46,17 +46,16 @@ class TestPriceList(ERPNextTestSuite):
 			self.assertEqual(row.buying, 1)
 			self.assertEqual(row.selling, 1)
 
-		# Change the Price List's currency and flip the buying flag off.
+		# Flip the buying flag off.
 		# on_update -> update_item_price() should bulk-UPDATE every Item Price
 		# linked to this Price List.
-		price_list.currency = "USD"
 		price_list.buying = 0
 		price_list.selling = 1
 		price_list.save()
 
 		for ip in (ip1, ip2):
 			row = frappe.db.get_value("Item Price", ip.name, ["currency", "buying", "selling"], as_dict=True)
-			self.assertEqual(row.currency, "USD")
+			self.assertEqual(row.currency, "INR")
 			self.assertEqual(row.buying, 0)
 			self.assertEqual(row.selling, 1)
 
@@ -69,15 +68,24 @@ class TestPriceList(ERPNextTestSuite):
 		ip_a = self.make_item_price(pl_a.name, item_code="_Test Item", rate=100)
 		ip_b = self.make_item_price(pl_b.name, item_code="_Test Item", rate=100)
 
-		pl_a.currency = "USD"
 		pl_a.buying = 0
 		pl_a.save()
 
 		row_a = frappe.db.get_value("Item Price", ip_a.name, ["currency", "buying"], as_dict=True)
-		self.assertEqual(row_a.currency, "USD")
 		self.assertEqual(row_a.buying, 0)
 
 		# pl_b was untouched, so its Item Price must keep the original values.
 		row_b = frappe.db.get_value("Item Price", ip_b.name, ["currency", "buying"], as_dict=True)
 		self.assertEqual(row_b.currency, "INR")
 		self.assertEqual(row_b.buying, 1)
+
+	def test_currency_cannot_change_while_list_has_prices(self):
+		price_list = self.make_price_list(currency="INR")
+		self.make_item_price(price_list.name, rate=1000)
+
+		price_list.currency = "USD"
+		self.assertRaises(frappe.ValidationError, price_list.save)
+
+		empty_price_list = self.make_price_list(currency="INR")
+		empty_price_list.currency = "USD"
+		empty_price_list.save()
