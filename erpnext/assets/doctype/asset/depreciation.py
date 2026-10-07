@@ -756,7 +756,9 @@ def get_gross_asset_value(asset, finance_book: str | None = None) -> float:
 	)
 
 	return flt(
-		flt(asset.net_purchase_amount) + flt(asset.additional_asset_cost) + sum(map(flt, value_adjustments)),
+		flt(asset.net_purchase_amount)
+		+ flt(asset.additional_asset_cost)
+		+ sum(flt(amount) for amount in value_adjustments),
 		asset.precision("net_purchase_amount"),
 	)
 
