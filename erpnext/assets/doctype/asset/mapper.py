@@ -307,6 +307,7 @@ def reschedule_depr_for_updated_asset(existing_asset, new_asset, fb_row, scaling
 
 	update_depreciation_terms(new_depr_schedule_doc, scaling_factor)
 	add_depr_schedule_notes(new_depr_schedule_doc, existing_asset, new_asset, is_new_asset)
+	new_depr_schedule_doc.flags.is_rescheduled = True
 
 	if not is_new_asset:
 		current_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True

@@ -9,6 +9,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	_make_depreciation_entry,
 	post_depreciation_entries,
 )
+from erpnext.assets.doctype.asset.mapper import split_asset
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -1300,6 +1301,14 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		schedule = get_depr_schedule(asset.name, "Active")
 		pending = [d.depreciation_amount for d in schedule if not d.journal_entry]
 		self.assertEqual(flt(sum(pending), 2), flt(current_value - 10, 2))
+
+	def test_manual_asset_split_with_rounded_rows(self):
+		asset = create_monthly_asset(depreciation_method="Manual", asset_quantity=3)
+
+		new_asset = split_asset(asset.name, 1)
+
+		schedule = get_depr_schedule(new_asset.name, "Active")
+		self.assertEqual(schedule[0].depreciation_amount, 33.33)
 
 	def test_active_schedule_is_cancelled_only_with_asset(self):
 		asset = create_monthly_asset()
