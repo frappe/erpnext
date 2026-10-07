@@ -162,8 +162,8 @@ class AuthorizationControl(TransactionBase):
 				if d.base_price_list_rate or d.base_rate:
 					price_list_rate += (flt(d.base_price_list_rate) or flt(d.base_rate)) * flt(d.qty)
 					base_rate += flt(d.base_rate) * flt(d.qty)
-			if doc_obj.get("discount_amount"):
-				base_rate -= flt(doc_obj.discount_amount)
+			if doc_obj.get("base_discount_amount"):
+				base_rate -= flt(doc_obj.base_discount_amount)
 
 			if price_list_rate:
 				av_dis = 100 - flt(base_rate * 100 / price_list_rate)
