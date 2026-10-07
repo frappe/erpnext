@@ -1956,6 +1956,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		already_picked_serial_nos = []
+		already_picked_batches = frappe._dict()
 
 		for row in self.items:
 			if row.use_serial_batch_fields:
@@ -1978,6 +1979,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"serial_and_batch_bundle": row.serial_and_batch_bundle,
 						"type_of_transaction": "Outward",
 						"ignore_serial_nos": already_picked_serial_nos,
+						"already_picked_batches": already_picked_batches,
 						"qty": row.transfer_qty * -1,
 					}
 				).update_serial_and_batch_entries(
@@ -1995,6 +1997,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"voucher_detail_no": row.name,
 						"qty": row.transfer_qty * -1,
 						"ignore_serial_nos": already_picked_serial_nos,
+						"already_picked_batches": already_picked_batches,
 						"type_of_transaction": "Outward",
 						"company": self.company,
 						"do_not_submit": True,
@@ -2007,10 +2010,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue
 
 			for entry in bundle_doc.entries:
-				if not entry.serial_no:
-					continue
-
-				already_picked_serial_nos.append(entry.serial_no)
+				if entry.serial_no:
+					already_picked_serial_nos.append(entry.serial_no)
+				if entry.batch_no:
+					key = (entry.batch_no, bundle_doc.warehouse)
+					picked = already_picked_batches.setdefault(
+						key, frappe._dict(batch_no=entry.batch_no, warehouse=bundle_doc.warehouse, qty=0)
+					)
+					picked.qty += entry.qty
 
 			row.serial_and_batch_bundle = bundle_doc.name
 
