@@ -68,6 +68,16 @@ class TestIRS1099(ERPNextTestSuite):
 
 		self.assertEqual(get_total_payments(supplier), 550)
 
+	def test_payments_made_on_paid_invoices(self):
+		supplier = make_1099_supplier()
+		pi = make_us_purchase_invoice(supplier, qty=10, rate=100, is_paid=1, cash_bank_account="Cash - _TC1")
+
+		debit_note = make_return_doc("Purchase Invoice", pi.name)
+		debit_note.items[0].qty = -2
+		debit_note.submit()
+
+		self.assertEqual(get_total_payments(supplier), 800)
+
 	def test_total_payments_in_company_currency(self):
 		supplier = make_1099_supplier(currency="EUR", payable_account=make_eur_payable_account())
 		pi = make_us_purchase_invoice(supplier, currency="EUR", conversion_rate=1.1, qty=10, rate=100)
