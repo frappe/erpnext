@@ -331,7 +331,7 @@ class Task(NestedSet):
 				parent.save()
 
 	def on_trash(self):
-		if check_if_child_exists(self.name):
+		if frappe.db.exists("Task", {"parent_task": self.name}):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
 		self.update_nsm_model()
@@ -350,6 +350,7 @@ class Task(NestedSet):
 
 @frappe.whitelist()
 def check_if_child_exists(name):
+	frappe.has_permission("Task", "read", doc=name, throw=True)
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks
