@@ -32,7 +32,7 @@ class TestQuickStockBalance(ERPNextTestSuite):
 	def test_past_date_balance_covers_whole_day(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		posting_date = add_days(today(), -1)
-		for qty, posting_time in ((10, "00:00:01"), (5, "23:59:58")):
+		for qty, posting_time in ((10, "00:00:01"), (5, "23:59:58"), (2, "23:59:59.500000")):
 			make_stock_entry(
 				item_code=item,
 				target="_Test Warehouse - _TC",
@@ -44,6 +44,17 @@ class TestQuickStockBalance(ERPNextTestSuite):
 			)
 
 		details = get_stock_item_details("_Test Warehouse - _TC", posting_date, item)
+
+		self.assertEqual((details["qty"], details["value"]), (17, 1700))
+
+	def test_group_warehouse_balance_sums_children(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		group = self.make_warehouse("_Test QSB Group", "All Warehouses - _TC", is_group=1)
+		for name, qty in (("_Test QSB Child 1", 10), ("_Test QSB Child 2", 5)):
+			warehouse = self.make_warehouse(name, group)
+			make_stock_entry(item_code=item, target=warehouse, qty=qty, rate=100)
+
+		details = get_stock_item_details(group, today(), item)
 
 		self.assertEqual((details["qty"], details["value"]), (15, 1500))
 

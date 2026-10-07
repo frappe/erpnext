@@ -6,10 +6,13 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.permissions import has_user_permission
-from frappe.utils import cstr
+from frappe.query_builder import Order
+from frappe.query_builder.functions import Sum
+from frappe.utils import cstr, flt
+from pypika import analytics as an
 
 from erpnext import _refuse, require_user_permission
-from erpnext.stock.utils import _get_stock_balance, get_stock_value_on
+from erpnext.stock.utils import get_stock_value_on
 
 
 class QuickStockBalance(Document):
@@ -60,7 +63,40 @@ def get_stock_item_details(warehouse: str, date: str, item: str | None = None, b
 	barcodes = frappe.db.get_values("Item Barcode", filters={"parent": out["item"]}, fieldname=["barcode"])
 
 	out["barcodes"] = [x[0] for x in barcodes]
-	out["qty"] = _get_stock_balance(out["item"], warehouse, date, "23:59:59")
+	out["qty"] = get_balance_qty(out["item"], warehouse, date)
 	out["value"] = get_stock_value_on(warehouse, date, out["item"])
 	out["image"] = frappe.db.get_value("Item", filters={"name": out["item"]}, fieldname=["image"])
 	return out
+
+
+def get_balance_qty(item_code, warehouse, date):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	latest_first = (
+		an.RowNumber()
+		.over(sle.warehouse)
+		.orderby(sle.posting_datetime, order=Order.desc)
+		.orderby(sle.creation, order=Order.desc)
+	)
+	ranked = (
+		frappe.qb.from_(sle)
+		.select(sle.qty_after_transaction, latest_first.as_("row_no"))
+		.where(
+			(sle.item_code == item_code)
+			& (sle.is_cancelled == 0)
+			& (sle.posting_date <= date)
+			& (sle.warehouse.isin(get_leaf_warehouses(warehouse)))
+		)
+	).as_("ranked")
+
+	result = frappe.qb.from_(ranked).select(Sum(ranked.qty_after_transaction)).where(ranked.row_no == 1).run()
+	return flt(result[0][0]) if result else 0.0
+
+
+def get_leaf_warehouses(warehouse):
+	if not frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		return [warehouse]
+
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	return frappe.get_all(
+		"Warehouse", filters={"lft": (">", lft), "rgt": ("<", rgt), "is_group": 0}, pluck="name"
+	) or [warehouse]
