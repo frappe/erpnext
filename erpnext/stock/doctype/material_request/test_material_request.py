@@ -207,6 +207,53 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(se.doctype, "Stock Entry")
 		self.assertEqual(len(se.get("items")), len(mr.get("items")))
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"validate_material_transfer_warehouses": 1})
+	def test_material_request_transfer_warehouses(self):
+		from unittest.mock import patch
+
+		mr = make_material_request(material_request_type="Material Transfer")
+		se = make_stock_entry(mr.name)
+		se.items[0].s_warehouse = se.items[0].t_warehouse
+
+		with patch(
+			"erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			return_value=[],
+		):
+			with self.assertRaisesRegex(
+				frappe.ValidationError, "Source and Target Warehouse cannot be the same"
+			):
+				se.save()
+
+			with self.change_settings("Stock Settings", {"validate_material_transfer_warehouses": 0}):
+				se.save()
+
+			se.items[0].s_warehouse = "_Test Warehouse 1 - _TC"
+			se.save()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"validate_material_transfer_warehouses": 1})
+	def test_material_request_transfer_inventory_dimensions(self):
+		from unittest.mock import patch
+
+		mr = make_material_request(material_request_type="Material Transfer")
+		se = make_stock_entry(mr.name)
+		se.items[0].s_warehouse = se.items[0].t_warehouse
+		with patch(
+			"erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			return_value=[frappe._dict(source_fieldname="rack")],
+		):
+			for source, target in ((None, None), ("A", None), (None, "B"), ("A", "A")):
+				with self.subTest(source=source, target=target):
+					se.items[0].rack = source
+					se.items[0].to_rack = target
+					with self.assertRaisesRegex(
+						frappe.ValidationError, "Inventory Dimensions cannot be the exact same"
+					):
+						se.validate_same_source_target_warehouse_during_material_transfer()
+
+			se.items[0].rack = "A"
+			se.items[0].to_rack = "B"
+			se.validate_same_source_target_warehouse_during_material_transfer()
+
 	def test_partial_make_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as _make_stock_entry
 

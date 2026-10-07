@@ -1,13 +1,13 @@
-# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import today
+from frappe.utils import getdate, today
 
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.report.cash_flow.cash_flow import execute
+from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -35,7 +35,54 @@ class TestCashFlow(ERPNextTestSuite):
 		rows = self.run_report(**extra)
 		return next(row for row in rows if label in str(row.get("section_name") or row.get("account_name")))
 
+	def net_change_in_cash(self):
+		"""Run the report for the current fiscal year and return the Net Change in Cash total."""
+		rows = self.run_report()
+		row = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
+		return row["total"]
+
+	def test_report_executes(self):
+		# Smoke-guards the raw-SQL -> query-builder port: the report query must compile and run on
+		# both MariaDB and postgres.
+		company = frappe.db.get_value("Company", {}, "name")
+		fy = frappe.db.get_value("Fiscal Year", {}, "name", order_by="year_start_date desc")
+		columns, *_rest = execute(
+			frappe._dict(
+				{
+					"company": company,
+					"from_fiscal_year": fy,
+					"to_fiscal_year": fy,
+					"filter_based_on": "Fiscal Year",
+					"periodicity": "Yearly",
+				}
+			)
+		)
+		self.assertTrue(columns)
+
+	def test_cash_sale_increases_net_change_in_cash(self):
+		"""A cash sale (debit Cash, credit Income) increases net change in cash by the amount."""
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		before = self.net_change_in_cash()
+		make_journal_entry("Cash - _TC", "Sales - _TC", 500, posting_date=today(), submit=True)
+
+		self.assertEqual(self.net_change_in_cash() - before, 500)
+
+	def test_cash_purchase_of_asset_is_investing_outflow(self):
+		"""Buying a fixed asset for cash is an investing outflow that reduces net change in cash."""
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		asset_account = "Office Equipment - _TC"
+
+		before = self.net_change_in_cash()
+		# debit the fixed asset, credit cash -> cash goes out
+		make_journal_entry(asset_account, "Cash - _TC", 800, posting_date=today(), submit=True)
+
+		self.assertEqual(self.net_change_in_cash() - before, -800)
+
 	def test_presentation_currency_converts_account_type_rows(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
 		make_journal_entry("Office Equipment - _TC", "Cash - _TC", 4000, posting_date=today(), submit=True)
 
 		with patch("erpnext.accounts.report.utils.get_rate_as_at", return_value=80):
@@ -43,3 +90,45 @@ class TestCashFlow(ERPNextTestSuite):
 
 		self.assertEqual(row["total"], self.get_row("Net Change in Fixed Asset")["total"] / 80)
 		self.assertEqual(row["currency"], "USD")
+
+	def test_group_by_dimension(self):
+		"""Cash movements must land in their own cost center's column, not just the overall total."""
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		cc1, cc2 = "_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"
+
+		filters = frappe._dict(
+			company=self.company,
+			period_start_date=getdate(),
+			period_end_date=getdate(),
+			filter_based_on="Date Range",
+			periodicity="Yearly",
+			accumulated_values=False,
+			group_by_dimension="Cost Center",
+		)
+
+		period_list = build_period_list(filters)
+		self.assertTrue(is_dimension_grouped(period_list))
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		def net_change_row():
+			rows = execute(filters)[1]
+			return next((row for row in rows if row.get("section") == "'Net Change in Cash'"), {})
+
+		before = net_change_row()
+
+		# cash sales: 400 via cc1, 200 via cc2
+		make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 400, cost_center=cc1, posting_date=today(), submit=True
+		)
+		make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 200, cost_center=cc2, posting_date=today(), submit=True
+		)
+
+		after = net_change_row()
+
+		self.assertEqual(after.get(key_for(cc1), 0) - before.get(key_for(cc1), 0), 400)
+		self.assertEqual(after.get(key_for(cc2), 0) - before.get(key_for(cc2), 0), 200)
+		self.assertEqual(after.get("total", 0) - before.get("total", 0), 600)
