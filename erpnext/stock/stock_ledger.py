@@ -158,10 +158,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists, invalidate_future_sle_cache
 
 	if sl_entries:
-		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
-		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
-			sle_processing_gate(*pair)
-
+		acquire_sle_processing_gates(sl_entries)
 		validate_stock_frozen_by_closing_entry(sl_entries)
 
 		cancelled = sl_entries[0].get("is_cancelled")
@@ -335,6 +332,12 @@ def repost_gate(item_code, warehouse):
 		# Tuple key: a colon in item_code/warehouse can't collide two distinct pairs onto one lock.
 		return frappe.db.advisory_lock(("stock_repost", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 	return nullcontext()
+
+
+def acquire_sle_processing_gates(sl_entries):
+	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order."""
+	for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+		sle_processing_gate(*pair)
 
 
 def sle_processing_gate(item_code, warehouse):
@@ -1461,6 +1464,7 @@ class update_entries_after:
 			outward_value = self.get_outward_leg_value(sle)
 			if outward_value is not None:
 				amount = outward_value
+				sle.incoming_rate = outward_value / flt(sle.actual_qty)
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
@@ -1802,20 +1806,8 @@ class update_entries_after:
 		self.recalculated_stock_entries.discard(sle.voucher_no)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no or self.is_manufacture_entry_with_sabb(sle):
+		if not self.args.get("sle_id") and not sle.dependant_sle_voucher_detail_no:
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
-
-	def is_manufacture_entry_with_sabb(self, sle):
-		if (
-			self.args.get("sle_id")
-			and sle.serial_and_batch_bundle
-			and sle.auto_created_serial_and_batch_bundle
-		):
-			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
-			if purpose in ["Manufacture", "Repack"]:
-				return True
-
-		return False
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
 		"""Skipped while every incoming row of a transfer is saved and no outgoing rate changed since."""
