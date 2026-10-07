@@ -64,6 +64,23 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(sum(row.estimated_interest for row in schedule), 7300)
 		self.assertEqual({row.status for row in schedule}, {"Pending"})
 
+	def test_schedule_has_one_row_per_period_of_the_tenure(self):
+		two_years_quarterly = make_fd({**FD_TERMS, "maturity_date": "2028-01-01"})
+		three_years_half_yearly = make_fd(
+			{**FD_TERMS, "maturity_date": "2029-01-01", "payout_frequency": "Semi-Annual"}
+		)
+
+		self.assertEqual(len(two_years_quarterly.interest_schedule), 8)
+		self.assertEqual(len(three_years_half_yearly.interest_schedule), 6)
+
+	def test_rebuilt_schedule_replaces_old_rows(self):
+		investment = make_fd(FD_TERMS)
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1790).submit()
+
+		schedule = get_investment(investment.name).interest_schedule
+		self.assertEqual(len(schedule), 4)
+		self.assertEqual(frappe.db.count("Investment Interest Schedule", {"parent": investment.name}), 4)
+
 	def test_cumulative_deposit_compounds(self):
 		investment = make_fd(CUMULATIVE_FD_TERMS)
 

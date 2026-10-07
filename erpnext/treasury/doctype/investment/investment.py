@@ -286,13 +286,8 @@ class Investment(Document):
 
 	def set_interest_schedule(self, rows, accrued_upto):
 		"""Replace the Interest Schedule rows of this submitted investment; see interest_schedule.py."""
-		frappe.db.delete(
-			"Investment Interest Schedule",
-			{"parent": self.name, "parenttype": self.doctype, "parentfield": "interest_schedule"},
-		)
 		self.set("interest_schedule", rows)
-		for row in self.interest_schedule:
-			row.db_insert()
+		self.update_child_table("interest_schedule")
 
 		self.db_set("accrued_upto", accrued_upto)
 
