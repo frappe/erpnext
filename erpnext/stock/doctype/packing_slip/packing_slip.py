@@ -116,6 +116,7 @@ class PackingSlip(StatusUpdater):
 				)
 
 	def validate_items(self):
+		references = {}
 		for item in self.items:
 			if item.qty <= 0:
 				frappe.throw(_("Row {0}: Qty must be greater than 0.").format(item.idx))
@@ -130,6 +131,24 @@ class PackingSlip(StatusUpdater):
 			reference = self.get_reference_row(item)
 			self.validate_reference_row(item, reference)
 			self.validate_remaining_qty(item, flt(reference.qty) - flt(reference.packed_qty))
+			references[item.dn_detail or item.pi_detail] = reference
+
+		self.validate_total_qty_per_reference(references)
+
+	def validate_total_qty_per_reference(self, references):
+		qty_by_reference = {}
+		for item in self.items:
+			key = item.dn_detail or item.pi_detail
+			qty_by_reference[key] = qty_by_reference.get(key, 0) + flt(item.qty)
+
+			reference = references[key]
+			remaining_qty = flt(reference.qty) - flt(reference.packed_qty)
+			if qty_by_reference[key] > remaining_qty:
+				frappe.throw(
+					_("Row {0}: Total packed qty cannot be greater than {1} for the Item {2}.").format(
+						item.idx, frappe.bold(remaining_qty), frappe.bold(item.item_code)
+					)
+				)
 
 	def get_reference_row(self, item):
 		return frappe.db.get_value(

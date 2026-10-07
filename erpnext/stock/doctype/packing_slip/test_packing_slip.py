@@ -169,3 +169,11 @@ class TestPackingSlipReferences(ERPNextTestSuite):
 		slip = make_packing_slip(dn_a.name)
 		slip.items[0].item_code = dn_b.items[0].item_code
 		self.assertRaises(frappe.ValidationError, slip.insert)
+
+	def test_rows_for_same_reference_are_checked_together(self):
+		delivery_note = self.make_draft_delivery_note(qty=5)
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.items[0].qty = 4
+		slip.append("items", slip.items[0].as_dict().copy().update({"name": None, "idx": 2}))
+		self.assertRaises(frappe.ValidationError, slip.insert)
