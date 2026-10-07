@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import os
+
 import frappe
 from frappe.utils import add_days, getdate, today
 
@@ -30,6 +32,38 @@ class TestCashFlow(ERPNextTestSuite):
 		rows = execute(filters)[1]
 		row = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
 		return row["total"]
+
+	def ifrs_template_totals(self, *lines):
+		"""Run the shipped IFRS cash flow template for the current fiscal year and return the given lines."""
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		filters = frappe._dict(
+			company=self.company,
+			report_template=self.shipped_ifrs_template(),
+			from_fiscal_year=fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Yearly",
+			accumulated_values=0,
+		)
+		rows = execute(filters)[1]
+		return [next(row for row in rows if row.get("account") == line)["total"] for line in lines]
+
+	def shipped_ifrs_template(self):
+		"""Insert a copy of the template file, since sites keep the copy synced when they were set up."""
+		name = "_Test Standard Cash Flow Statement (IFRS)"
+		if frappe.db.exists("Financial Report Template", name):
+			return name
+
+		template_path = frappe.get_module_path(
+			"Accounts", "financial_report_template", "standard_cash_flow_statement_(ifrs)"
+		)
+		with open(os.path.join(template_path, "standard_cash_flow_statement_(ifrs).json")) as template_file:
+			template = frappe.parse_json(template_file.read())
+
+		template.update(name=None, template_name=name, module=None)
+		return frappe.get_doc(template).insert().name
 
 	def test_report_executes(self):
 		# Smoke-guards the raw-SQL -> query-builder port: the report query must compile and run on
@@ -272,3 +306,25 @@ class TestCashFlow(ERPNextTestSuite):
 		card, total = investing_card_and_net_change_total()
 		self.assertEqual(card - before_card, -1000)
 		self.assertEqual(total - before_total, -400)
+
+	def test_ifrs_template_counts_short_term_borrowings_once(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		overdraft_account = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Bank Overdraft",
+			parent_account="Current Liabilities - _TC",
+			company=self.company,
+			account_category="Short-term Borrowings",
+		).insert()
+		lines = (
+			"Increase/(decrease) in other current liabilities",
+			"Proceeds from / Repayment of borrowings",
+			"NET INCREASE/(DECREASE) IN CASH AND CASH EQUIVALENTS",
+		)
+
+		before = self.ifrs_template_totals(*lines)
+		make_journal_entry("Cash - _TC", overdraft_account.name, 1000, posting_date=today(), submit=True)
+		after = self.ifrs_template_totals(*lines)
+
+		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [0, 1000, 1000])

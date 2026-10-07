@@ -253,7 +253,7 @@
    "advanced_filtering": 0,
    "balance_type": "Period Movement (Debits - Credits)",
    "bold_text": 0,
-   "calculation_formula": "[\"account_category\", \"in\", [\"Other Payables\", \"Current Tax Liabilities\", \"Short-term Borrowings\", \"Short-term Provisions\", \"Other Current Liabilities\"]]",
+   "calculation_formula": "[\"account_category\", \"in\", [\"Other Payables\", \"Current Tax Liabilities\", \"Short-term Provisions\", \"Other Current Liabilities\"]]",
    "color": "",
    "data_source": "Account Data",
    "display_name": "Increase/(decrease) in other current liabilities",
