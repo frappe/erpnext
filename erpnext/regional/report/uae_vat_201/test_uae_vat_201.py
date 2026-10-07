@@ -261,7 +261,10 @@ class TestUaeVat201(ERPNextTestSuite):
 
 	def test_uae_vat_201_standard_rated_expenses_exclude_lines_without_vat(self):
 		pi = make_uae_purchase_invoice(qty=10, rate=100)
-		pi.append("items", {**pi.items[0].as_dict(), "name": None, "qty": 5})
+		pi.append(
+			"items",
+			{**pi.items[0].as_dict(), "name": None, "item_code": "_Test UAE VAT Zero Rated Item", "qty": 5},
+		)
 		pi.items[1].item_tax_template = make_zero_vat_template()
 		pi.recoverable_standard_rated_expenses = 50
 		pi.submit()
