@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Aagnya Mistry and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # See license.txt
 
 """Runs as Accounts User and Accounts Manager, not Administrator, to catch missing permissions."""

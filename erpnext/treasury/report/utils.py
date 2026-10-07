@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Aagnya Mistry and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 """Building blocks shared by the Treasury reports. All amounts are in company currency."""

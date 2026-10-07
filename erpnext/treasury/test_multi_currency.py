@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Aagnya Mistry and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # See license.txt
 
 """USD investments in an INR company: vouchers hold USD, the ledger gets USD times the Exchange Rate."""

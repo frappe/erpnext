@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Aagnya Mistry and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # See license.txt
 
 from unittest.mock import patch

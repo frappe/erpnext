@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Aagnya Mistry and contributors
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 """Estimated vs actual interest per period, so the user sees where the bank paid a different amount."""
