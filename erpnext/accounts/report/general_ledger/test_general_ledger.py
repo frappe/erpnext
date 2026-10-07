@@ -417,16 +417,20 @@ class TestGeneralLedger(ERPNextTestSuite):
 
 	def test_categorize_by_party_separates_party_types(self):
 		self.clear_old_entries()
-		party = "_Test Customer"
-		if not frappe.db.exists("Supplier", party):
-			frappe.get_doc(
-				doctype="Supplier", supplier_name=party, supplier_group="_Test Supplier Group"
-			).insert()
+		customer = "_Test Customer"
+		supplier = (
+			frappe.db.exists("Supplier", customer)
+			or frappe.get_doc(
+				doctype="Supplier", supplier_name=customer, supplier_group="_Test Supplier Group"
+			)
+			.insert()
+			.name
+		)
 		opening_date, period_date = add_days(today(), -60), today()
-		self.make_party_journal_entry("Debtors - _TC", "Customer", party, 1000, opening_date)
-		self.make_party_journal_entry("Debtors - _TC", "Customer", party, 200, period_date)
-		self.make_party_journal_entry("Creditors - _TC", "Supplier", party, -400, opening_date)
-		self.make_party_journal_entry("Creditors - _TC", "Supplier", party, -50, period_date)
+		self.make_party_journal_entry("Debtors - _TC", "Customer", customer, 1000, opening_date)
+		self.make_party_journal_entry("Debtors - _TC", "Customer", customer, 200, period_date)
+		self.make_party_journal_entry("Creditors - _TC", "Supplier", supplier, -400, opening_date)
+		self.make_party_journal_entry("Creditors - _TC", "Supplier", supplier, -50, period_date)
 
 		filters = frappe._dict(
 			company=self.company,
