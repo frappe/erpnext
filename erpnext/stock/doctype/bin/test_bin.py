@@ -67,6 +67,26 @@ class TestBin(ERPNextTestSuite):
 		bin = frappe.db.get_value("Bin", bin_name, ["actual_qty", "projected_qty"], as_dict=1)
 		self.assertEqual((bin.actual_qty, bin.projected_qty), (10, 10))
 
+	def test_stock_manager_can_recalculate_values(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin.db_set("actual_qty", 0)
+
+		user = create_user("test_bin_recalculate@example.com", "Stock Manager")
+		frappe.set_user(user.name)
+		try:
+			bin.reload()
+			bin.recalculate_values()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Bin", bin.name, "actual_qty"), 10)
+
 	def test_recalculate_values(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 

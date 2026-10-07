@@ -45,8 +45,10 @@ class Bin(Document):
 		warehouse: DF.Link
 	# end: auto-generated types
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def recalculate_values(self):
+		frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 		from erpnext.stock.stock_balance import (
 			get_indented_qty,
@@ -77,7 +79,7 @@ class Bin(Document):
 		self.update_reserved_qty_for_sub_contracting(update_qty=False)
 		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True, update_qty=False)
 		self.set_projected_qty()
-		self.save()
+		self.save(ignore_permissions=True)
 
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
