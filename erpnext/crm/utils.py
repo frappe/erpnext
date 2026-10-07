@@ -14,14 +14,20 @@ def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 
 
 def update_lead_phone_numbers(contact, method):
-	"""Copy the contact's primary phone and mobile number to its Lead."""
+	"""Copy the contact's primary phone and mobile number to its Lead, including ones cleared on edit."""
 	lead = contact.get_link_for("Lead")
-	numbers = {field: contact.get(field) for field in ("phone", "mobile_no") if contact.get(field)}
+	numbers = {
+		field: contact.get(field) or ""
+		for field in ("phone", "mobile_no")
+		if contact.get(field) or (not contact.is_new() and contact.has_value_changed(field))
+	}
 	if not (lead and numbers):
 		return
 
 	current = frappe.db.get_value("Lead", lead, list(numbers), as_dict=True)
-	if changed := {field: number for field, number in numbers.items() if current.get(field) != number}:
+	if changed := {
+		field: number for field, number in numbers.items() if (current.get(field) or "") != number
+	}:
 		frappe.db.set_value("Lead", lead, changed, update_modified=False)
 
 

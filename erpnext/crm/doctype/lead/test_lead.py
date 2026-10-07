@@ -286,6 +286,11 @@ class TestLead(unittest.TestCase):
 		contact.save()
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
 
+		contact.phone_nos = [row for row in contact.phone_nos if row.is_primary_mobile_no]
+		contact.save()
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
+
 	def test_copy_events_from_lead_to_prospect(self):
 		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
 		frappe.db.sql("delete from `tabProspect` where name='Prospect Company'")
