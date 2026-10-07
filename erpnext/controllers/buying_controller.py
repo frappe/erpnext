@@ -163,9 +163,6 @@ class BuyingController(SubcontractingController):
 		super().set_missing_values(for_validate)
 
 		self.set_supplier_from_item_default()
-		if not for_validate:
-			self.set_transaction_date_exchange_rate()
-
 		self.set_price_list_currency("Buying")
 
 		# set contact and address details for supplier, if they are not mentioned
@@ -196,10 +193,8 @@ class BuyingController(SubcontractingController):
 	def set_transaction_date_exchange_rate(self):
 		"""Replace the exchange rate mapped from a Purchase Order with the posting date rate."""
 		if not (
-			self.meta.has_field("use_transaction_date_exchange_rate")
-			and self.currency
+			self.currency
 			and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
-			and any(item.purchase_order for item in self.items)
 			and not any(item.get("purchase_receipt") or item.get("purchase_invoice") for item in self.items)
 		):
 			return
