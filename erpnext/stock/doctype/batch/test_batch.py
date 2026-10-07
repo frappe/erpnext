@@ -698,6 +698,29 @@ class TestBatch(ERPNextTestSuite):
 
 		self.assertEqual(getdate(batch.expiry_date), getdate(expiry_date))
 
+	def test_auto_created_batch_expiry_counts_from_receipt_date(self):
+		item_code = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"has_expiry_date": 1,
+				"shelf_life_in_days": 10,
+				"batch_number_series": "BEXPRD-.###",
+			}
+		).name
+		posting_date = add_to_date(getdate(), days=-30)
+
+		receipt = make_purchase_receipt(item_code=item_code, qty=5, posting_date=posting_date)
+
+		batch = frappe.db.get_value(
+			"Batch",
+			get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			["manufacturing_date", "expiry_date"],
+			as_dict=True,
+		)
+		self.assertEqual(batch.manufacturing_date, posting_date)
+		self.assertEqual(batch.expiry_date, add_to_date(posting_date, days=10))
+
 	def test_autocreation_of_batches(self):
 		"""
 		Test if auto created Serial No excludes existing serial numbers

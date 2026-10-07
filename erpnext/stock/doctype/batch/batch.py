@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import cint, cstr, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -199,7 +199,23 @@ class Batch(Document):
 			self.use_batchwise_valuation = 1
 
 	def before_save(self):
+		self.set_manufacturing_date()
 		self.set_expiry_date()
+
+	def set_manufacturing_date(self):
+		if self.manufacturing_date:
+			return
+
+		if (
+			self.reference_doctype
+			and self.reference_name
+			and frappe.get_meta(self.reference_doctype).has_field("posting_date")
+		):
+			self.manufacturing_date = frappe.db.get_value(
+				self.reference_doctype, self.reference_name, "posting_date"
+			)
+
+		self.manufacturing_date = self.manufacturing_date or today()
 
 	def set_expiry_date(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value(
@@ -207,17 +223,7 @@ class Batch(Document):
 		)
 
 		if not self.expiry_date and has_expiry_date and shelf_life_in_days:
-			if (
-				not self.manufacturing_date
-				and self.reference_doctype in ["Stock Entry", "Purchase Receipt", "Purchase Invoice"]
-				and self.reference_name
-			):
-				self.manufacturing_date = frappe.db.get_value(
-					self.reference_doctype, self.reference_name, "posting_date"
-				)
-
-			if self.manufacturing_date:
-				self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
+			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
 			frappe.throw(
