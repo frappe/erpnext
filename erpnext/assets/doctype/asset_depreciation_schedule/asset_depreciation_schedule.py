@@ -86,7 +86,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 				)
 
 	def validate_manual_schedule(self):
-		if self.depreciation_method != "Manual" or self.docstatus != 0:
+		if self.depreciation_method != "Manual" or self.flags.is_rescheduled:
 			return
 
 		available_for_use_date = frappe.db.get_value("Asset", self.asset, "available_for_use_date")
@@ -259,6 +259,7 @@ def reschedule_depreciation(asset_doc, notes, disposal_date=None):
 
 		new_schedule.create_depreciation_schedule(row, disposal_date)
 		new_schedule.notes = notes
+		new_schedule.flags.is_rescheduled = True
 
 		if current_schedule and current_schedule.docstatus == 1:
 			current_schedule.flags.should_not_cancel_depreciation_entries = True

@@ -1232,6 +1232,24 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 			[100, 250, 300],
 		)
 
+	def test_manual_schedule_is_validated_on_submit(self):
+		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
+		schedule = get_asset_depr_schedule_doc(asset.name, "Draft")
+		schedule.depreciation_schedule[1].db_set("depreciation_amount", 500)
+
+		asset.reload()
+		self.assertRaises(frappe.ValidationError, asset.submit)
+
+		schedule.depreciation_schedule[1].db_set("depreciation_amount", 100)
+		asset.reload()
+		asset.submit()
+
+		post_depreciation_entries(getdate("2023-03-31"))
+		create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=500, posting_date=getdate("2023-05-15")
+		)
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
 	def test_wdv_requires_rate_or_salvage_value(self):
 		args = {
 			"depreciation_method": "Written Down Value",
