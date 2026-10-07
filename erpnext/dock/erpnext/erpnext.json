@@ -24,6 +24,14 @@
   {
    "added": 0,
    "hidden": 0,
+   "icon": "landmark",
+   "link_to": "Treasury",
+   "link_type": "Sidebar",
+   "title": "Treasury"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
    "icon": "storefront-duotone",
    "link_to": "Selling",
    "link_type": "Sidebar",
@@ -102,7 +110,7 @@
    "title": "Portal"
   }
  ],
- "modified": "2026-10-04 13:00:00.000000",
+ "modified": "2026-10-07 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",
