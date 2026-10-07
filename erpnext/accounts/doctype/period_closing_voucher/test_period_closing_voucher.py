@@ -499,10 +499,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertEqual(result["difference"], -5)
 		self.assertTrue(result["within_tolerance"])
 
-		pcv.reload()
-		pcv.stock_value_difference = -5
-		self.assertRaisesRegex(frappe.ValidationError, "Create a Stock Closing Entry", pcv.submit)
-
 		frappe.db.set_value(
 			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 100
 		)
@@ -513,6 +509,19 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 		pcv.stock_value_difference = result["difference"]
 		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 5
+		)
+		self.make_completed_stock_closing_entry(pcv.period_start_date, pcv.period_end_date)
+
+		pcv.reload()
+		pcv.stock_value_difference = -5
+		pcv.submit()
+
+		pcv.reload()
+		self.assertEqual(pcv.docstatus, 1)
+		self.assertEqual(pcv.stock_value_difference, -5)
 
 	def test_batch_valuation_seeded_from_stock_closing_after_period_closing(self):
 		from erpnext.stock.doctype.item.test_item import make_item
