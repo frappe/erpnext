@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -23,7 +24,17 @@ class QualityInspectionTemplate(Document):
 		quality_inspection_template_name: DF.Data
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		for row in self.item_quality_inspection_parameter:
+			self.validate_acceptance_formula(row)
+
+	def validate_acceptance_formula(self, row):
+		if row.formula_based_criteria and not row.acceptance_formula:
+			frappe.throw(
+				_("Row #{0}: Acceptance Criteria Formula is required for parameter {1}").format(
+					row.idx, frappe.bold(row.specification)
+				)
+			)
 
 
 def get_template_details(template):
