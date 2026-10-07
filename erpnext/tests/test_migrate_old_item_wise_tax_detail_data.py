@@ -37,6 +37,31 @@ class TestMigrateOldItemWiseTaxDetailData(ERPNextTestSuite):
 		self.assertEqual(doc.base_tax_withholding_net_total, 100)
 		self.assertEqual(self.allocated_amounts(doc), [-40.0, 0.0])
 
+	def test_withholding_share_is_not_reused_by_later_actual_rows(self):
+		"""An Actual row after the TDS row is still spread by each item's share of the net total."""
+		invoice = self.make_invoice()
+		frappe.db.set_value("Purchase Invoice Item", invoice.items[1].name, "apply_tds", 0)
+		freight_row = frappe._dict(
+			name="freight-row",
+			parent=invoice.name,
+			parenttype="Purchase Invoice",
+			docstatus=1,
+			charge_type="Actual",
+			account_head="_Test Account Shipping Charges - _TC",
+			rate=0,
+			base_tax_amount_after_discount_amount=20,
+			add_deduct_tax="Add",
+		)
+		doc = self.compile_invoice(invoice, removed_columns={PARENT_COLUMN}, extra_taxes=[freight_row])
+		details = ItemTax().get_item_wise_tax_details(doc)
+
+		amounts = {(row.tax_row, row.item_row): row.amount for row in details}
+		first_item, second_item = (item.name for item in invoice.items)
+		self.assertEqual(amounts[("tds-row", first_item)], -40.0)
+		self.assertEqual(amounts[("tds-row", second_item)], 0.0)
+		self.assertEqual(amounts[("freight-row", first_item)], 5.0)
+		self.assertEqual(amounts[("freight-row", second_item)], 15.0)
+
 	def make_invoice(self):
 		invoice = make_purchase_invoice(qty=1, rate=100, do_not_submit=True)
 		second_item = frappe.copy_doc(invoice.items[0])
@@ -47,7 +72,7 @@ class TestMigrateOldItemWiseTaxDetailData(ERPNextTestSuite):
 		invoice.submit()
 		return invoice
 
-	def compile_invoice(self, invoice, removed_columns):
+	def compile_invoice(self, invoice, removed_columns, extra_taxes=()):
 		has_column = frappe.db.has_column
 		with patch.object(
 			frappe.db,
@@ -71,7 +96,11 @@ class TestMigrateOldItemWiseTaxDetailData(ERPNextTestSuite):
 			is_tax_withholding_account=1,
 		)
 		return next(
-			iter(compile_docs(doc_info, [tds_row], items, "Purchase Invoice", "Purchase Taxes and Charges"))
+			iter(
+				compile_docs(
+					doc_info, [tds_row, *extra_taxes], items, "Purchase Invoice", "Purchase Taxes and Charges"
+				)
+			)
 		)
 
 	def allocated_amounts(self, doc):
