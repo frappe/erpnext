@@ -10,6 +10,9 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.utils import cint, flt, getdate
 
+import erpnext
+from erpnext.setup.utils import get_exchange_rate
+
 
 def execute(filters=None):
 	return SalesPipelineAnalytics(filters).run()
@@ -102,7 +105,14 @@ class SalesPipelineAnalytics:
 			self.query_result = frappe.db.get_list(
 				"Opportunity",
 				filters=self.get_conditions(),
-				fields=[self.based_on, self.data_based_on, *self.period_fields, "conversion_rate"],
+				fields=[
+					self.based_on,
+					self.data_based_on,
+					*self.period_fields,
+					"conversion_rate",
+					"currency",
+					"transaction_date",
+				],
 			)
 
 			self.set_row_periods()
@@ -269,5 +279,14 @@ class SalesPipelineAnalytics:
 			self.data.append(row)
 
 	def convert_to_base_currency(self):
-		for data in self.query_result:
-			data["amount"] = flt(data["amount"]) * (flt(data["conversion_rate"]) or 1)
+		company_currency = erpnext.get_company_currency(self.filters.company)
+		for row in self.query_result:
+			row["amount"] = flt(row["amount"]) * self.get_conversion_rate(row, company_currency)
+
+	def get_conversion_rate(self, row: dict, company_currency: str) -> float:
+		if flt(row.conversion_rate):
+			return flt(row.conversion_rate)
+		if not row.currency or row.currency == company_currency:
+			return 1.0
+		# opportunities saved while no exchange rate was available
+		return flt(get_exchange_rate(row.currency, company_currency, row.transaction_date))
