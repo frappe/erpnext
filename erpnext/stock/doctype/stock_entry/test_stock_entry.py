@@ -675,7 +675,25 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(self.get_batch_rates(bundle), [110, 210])
 
-	def make_auto_picked_batch_transfer(self):
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
+	def test_additional_cost_follows_auto_picked_transfer_rows(self):
+		transfer = self.make_auto_picked_batch_transfer(rates=(100, 300), row_qtys=(1, 1), additional_cost=40)
+
+		self.assertEqual([d.amount for d in transfer.items], [110, 330])
+		inward_values = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": transfer.name, "actual_qty": (">", 0), "is_cancelled": 0},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		self.assertEqual(inward_values, {d.name: d.amount for d in transfer.items})
+
+	def make_auto_picked_batch_transfer(self, rates=(100, 200, 300), row_qtys=(2,), additional_cost=20):
 		item_code = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -685,7 +703,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"valuation_method": "Moving Average",
 			}
 		).name
-		for rate in (100, 200, 300):
+		for rate in rates:
 			make_stock_entry(
 				item_code=item_code,
 				target="_Test Warehouse - _TC",
@@ -698,16 +716,18 @@ class TestStockEntry(ERPNextTestSuite):
 			item_code=item_code,
 			source="_Test Warehouse - _TC",
 			target="_Test Warehouse 1 - _TC",
-			qty=2,
+			qty=row_qtys[0],
 			use_serial_batch_fields=1,
 			do_not_save=True,
 		)
+		for qty in row_qtys[1:]:
+			transfer.append("items", {**transfer.items[0].as_dict(no_default_fields=True), "qty": qty})
 		transfer.append(
 			"additional_costs",
 			{
 				"expense_account": frappe.get_value("Company", transfer.company, "default_expense_account"),
 				"description": "Freight",
-				"amount": 20,
+				"amount": additional_cost,
 			},
 		)
 		transfer.insert()
