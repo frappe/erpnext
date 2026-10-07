@@ -100,8 +100,12 @@ def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
 					opening_balance.get(company)
 				)
 
-		unclosed["total"] = opening_balance.get(company)
+		unclosed["total"] = sum(opening_balance.values())
+		set_group_company_total(unclosed, filters)
 		data.append(unclosed)
+
+	set_group_company_total(provisional_profit_loss, filters)
+	set_group_company_total(total_credit, filters)
 
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
@@ -201,6 +205,7 @@ def get_income_expense_data(companies, fiscal_year, filters):
 		consolidated=True,
 		accumulated_values=bool(filters.accumulated_values),
 	)
+	set_group_company_total(net_profit_loss, filters)
 
 	return income, expense, net_profit_loss
 
@@ -278,8 +283,7 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	filters.end_date = fiscal_year.year_end_date
 
 	for company in companies:
-		filters.company = company
-		amount = get_account_type_based_gl_data(company, filters)
+		amount = get_account_type_based_gl_data(company, frappe._dict(filters, company=company))
 
 		if amount and account_type == "Depreciation":
 			amount *= -1
@@ -288,7 +292,35 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 		data.setdefault(company, amount)
 
 	data["total"] = total
+
+	if filters.get("accumulated_in_group_company"):
+		own_amounts = data.copy()
+		for company in companies:
+			data[company] = get_accumulated_amount(company, companies[company], own_amounts, filters)
+
+	set_group_company_total(data, filters)
 	return data
+
+
+def get_accumulated_amount(company, subsidiaries, own_amounts, filters):
+	"""The company's amount plus its subsidiaries', converted to the company's currency."""
+	company_currency = erpnext.get_company_currency(company)
+
+	accumulated_amount = 0
+	for subsidiary in subsidiaries:
+		amount = own_amounts[subsidiary]
+		subsidiary_currency = erpnext.get_company_currency(subsidiary)
+		if (
+			amount
+			and subsidiary != company
+			and not filters.get("presentation_currency")
+			and subsidiary_currency != company_currency
+		):
+			amount = convert(amount, company_currency, subsidiary_currency, filters.end_date)
+
+		accumulated_amount += amount
+
+	return accumulated_amount
 
 
 def get_company_columns(companies, filters):
@@ -418,7 +450,7 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters
 						or (filters.get("accumulated_in_group_company"))
 						and entry.company in companies.get(company)
 					):
-						parent_company_currency = erpnext.get_company_currency(d.company)
+						parent_company_currency = erpnext.get_company_currency(company)
 						child_company_currency = erpnext.get_company_currency(entry.company)
 
 						debit, credit = flt(entry.debit), flt(entry.credit)
@@ -590,10 +622,17 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 
 		row["has_value"] = has_value
 		row["total"] = total
+		set_group_company_total(row, filters)
 
 		data.append(row)
 
 	return data
+
+
+def set_group_company_total(row, filters):
+	"""The group company column already includes its subsidiaries; summing every column double-counts."""
+	if row and filters.get("accumulated_in_group_company"):
+		row["total"] = flt(row.get(filters.company, 0.0), 3)
 
 
 def set_gl_entries_by_account(

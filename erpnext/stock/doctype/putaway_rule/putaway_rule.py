@@ -4,7 +4,6 @@
 
 import copy
 import json
-from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -121,7 +120,7 @@ def apply_putaway_rule(
 		items = json.loads(items)
 
 	items_not_accomodated, updated_table = [], []
-	item_wise_rules = defaultdict(list)
+	item_wise_rules = {}
 
 	for item in items:
 		if isinstance(item, dict):
@@ -135,7 +134,7 @@ def apply_putaway_rule(
 		item.conversion_factor = flt(item.conversion_factor) or 1.0
 		pending_qty, item_code = flt(item.qty), item.item_code
 		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
-		uom_must_be_whole_number = frappe.db.get_value("UOM", item.uom, "must_be_whole_number")
+		uom_must_be_whole_number = frappe.get_cached_value("UOM", item.uom, "must_be_whole_number")
 
 		if not pending_qty or not item_code:
 			updated_table = add_row(
@@ -143,7 +142,12 @@ def apply_putaway_rule(
 			)
 			continue
 
-		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
+		key = (item_code, source_warehouse)
+		if key not in item_wise_rules:
+			item_wise_rules[key] = get_ordered_putaway_rules(
+				item_code, company, source_warehouse=source_warehouse
+			)
+		at_capacity, rules = item_wise_rules[key]
 
 		if not rules:
 			warehouse = (
@@ -159,16 +163,7 @@ def apply_putaway_rule(
 				updated_table = add_row(item, pending_qty, warehouse, updated_table, serial_nos=serial_nos)
 			continue
 
-		# maintain item/item-warehouse wise rules, to handle if item is entered twice
-		# in the table, due to different price, etc.
-		key = item_code
-		if doctype == "Stock Entry" and purpose == "Material Transfer" and source_warehouse:
-			key = (item_code, source_warehouse)
-
-		if not item_wise_rules[key]:
-			item_wise_rules[key] = rules
-
-		for rule in item_wise_rules[key]:
+		for rule in rules:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = (
 					flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty

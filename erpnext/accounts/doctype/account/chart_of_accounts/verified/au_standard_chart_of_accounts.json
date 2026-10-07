@@ -59,7 +59,7 @@
 					"Prepayments": {
 						"account_number": "14010"
 					},
-					"Provisional Tax Paid": {
+					"PAYG Instalments Paid": {
 						"account_number": "14020"
 					},
 					"account_number": "140",
@@ -151,7 +151,7 @@
 					"account_number": "175",
 					"is_group": 1
 				},
-				"Intagible Assets": {
+				"Intangible Assets": {
 					"Goodwill": {
 						"account_number": "18010"
 					},
@@ -422,7 +422,7 @@
 						"account_number": "52040",
 						"account_type": "Stock Adjustment"
 					},
-					"Stock Wirte Off": {
+					"Stock Write Off": {
 						"account_number": "52050",
 						"account_type": "Stock Adjustment"
 					},
@@ -542,7 +542,7 @@
 			},
 			"Operating Expenses": {
 				"General and Administrative Expenses": {
-					"Low Value Assets less than $300": {
+					"Low Value Assets": {
 						"account_number": "64010"
 					},
 					"Office Supplies": {
