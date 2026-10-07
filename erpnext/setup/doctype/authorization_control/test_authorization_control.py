@@ -9,6 +9,70 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAuthorizationControl(ERPNextTestSuite):
+	def test_direct_rate_discount_is_checked_for_item_and_group(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		order = frappe.get_doc(
+			doctype="Sales Order",
+			items=[
+				frappe._dict(
+					price_list_rate=4200,
+					rate=2100,
+					discount_percentage=0,
+					item_code="_Test Item",
+					item_group="Products",
+				)
+			],
+		)
+		with patch.object(controller, "validate_auth_rule") as check:
+			for basis, master_name in (
+				("Itemwise Discount", "_Test Item"),
+				("Item Group wise Discount", "Products"),
+			):
+				controller.bifurcate_based_on_type("Sales Order", 2100, 0, basis, order, 0, "_Test Company")
+				self.assertEqual(check.call_args.args[1], 50)
+				self.assertEqual(check.call_args.args[-1], master_name)
+
+	def test_item_discount_approval_with_margin_and_exact_threshold(self):
+		controller = frappe.get_cached_doc("Authorization Control")
+		for basis in ("Itemwise Discount", "Item Group wise Discount"):
+			frappe.get_doc(
+				doctype="Authorization Rule",
+				transaction="Sales Order",
+				based_on=basis,
+				company="_Test Company",
+				value=10,
+				approving_user="Administrator",
+			).insert()
+			for price_list_rate, rate, discount_percentage in (
+				(1000, 990, 10),
+				(100, 90, 0),
+				(0, 90, 10),
+				(100, 0, 0),
+			):
+				with self.subTest(basis=basis, rates=(price_list_rate, rate, discount_percentage)):
+					order = frappe.get_doc(
+						doctype="Sales Order",
+						items=[
+							{
+								"price_list_rate": price_list_rate,
+								"rate": rate,
+								"discount_percentage": discount_percentage,
+								"item_code": "_Test Item",
+								"item_group": "Products",
+							}
+						],
+					)
+					controller.bifurcate_based_on_type(
+						"Sales Order", rate, 0, basis, order, 0, "_Test Company"
+					)
+					with self.set_user("Guest"), self.assertRaises(frappe.ValidationError):
+						controller.bifurcate_based_on_type(
+							"Sales Order", rate, 0, basis, order, 0, "_Test Company"
+						)
+			order.items[0].update({"price_list_rate": 100, "rate": 90.01, "discount_percentage": 0})
+			with self.set_user("Guest"):
+				controller.bifurcate_based_on_type("Sales Order", 90.01, 0, basis, order, 0, "_Test Company")
+
 	def test_foreign_currency_additional_discount_uses_base_amount(self):
 		frappe.get_doc(
 			{

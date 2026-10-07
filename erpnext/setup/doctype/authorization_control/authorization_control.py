@@ -136,18 +136,20 @@ class AuthorizationControl(TransactionBase):
 				else:
 					customer = doc_obj.customer_name
 				add_cond = f" and master_name = {frappe.db.escape(customer)}"
-		if based_on == "Itemwise Discount":
+		if based_on in ("Itemwise Discount", "Item Group wise Discount"):
 			if doc_obj:
 				for t in doc_obj.get("items"):
-					self.validate_auth_rule(
-						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_code
-					)
-		elif based_on == "Item Group wise Discount":
-			if doc_obj:
-				for t in doc_obj.get("items"):
-					self.validate_auth_rule(
-						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_group
-					)
+					discount = flt(t.discount_percentage)
+					if flt(t.price_list_rate):
+						discount = max(
+							discount,
+							flt(
+								100 * (1 - flt(t.rate) / flt(t.price_list_rate)),
+								t.precision("discount_percentage"),
+							),
+						)
+					master_name = t.item_code if based_on == "Itemwise Discount" else t.item_group
+					self.validate_auth_rule(doctype_name, discount, based_on, add_cond, company, master_name)
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
 
