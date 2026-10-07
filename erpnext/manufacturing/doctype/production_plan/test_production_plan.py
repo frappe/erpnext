@@ -3689,6 +3689,68 @@ class TestProductionPlan(ERPNextTestSuite):
 		wo.cancel()
 		self.assertEqual(batch_delivered_qty(), {row.name: 0 for row in source_entries})
 
+	def test_cancelling_work_order_reverses_only_its_own_shared_batch_qty(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+			reserve_stock_for_production_plan,
+		)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = "Shared Batch RM For SR Cancel"
+		parent_bom = create_nested_bom({"Shared Batch FG For SR Cancel": {rm_item: {}}}, prefix="")
+		item = frappe.get_doc("Item", rm_item)
+		item.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BCH-SR-CNCL-.#####"})
+		item.save()
+
+		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+		plan.submit()
+
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=6, basic_rate=100, batch_no=batch_no)
+		reserve_stock_for_production_plan(plan, table_name="mr_items")
+		first_source, second_source = (
+			row.name for row in StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+		)
+
+		def make_work_order(qty):
+			plan.make_work_order()
+			wo = frappe.get_last_doc("Work Order", {"production_plan": plan.name, "docstatus": 0})
+			wo.qty = qty
+			wo.source_warehouse = wo.wip_warehouse = wo.fg_warehouse = warehouse
+			wo.submit()
+			return wo
+
+		def batch_delivered_qty():
+			return {
+				name: frappe.db.get_value(
+					"Serial and Batch Entry", {"parent": name, "batch_no": batch_no}, "delivered_qty"
+				)
+				for name in (first_source, second_source)
+			}
+
+		# The first Work Order takes 4 from the first reservation and 1 from the second, the next takes 5
+		first_wo = make_work_order(5)
+		make_work_order(5)
+		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 6})
+
+		first_wo.cancel()
+		self.assertEqual(batch_delivered_qty(), {first_source: 0, second_source: 5})
+
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom

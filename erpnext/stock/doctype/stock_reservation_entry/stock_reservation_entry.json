@@ -31,6 +31,7 @@
   "from_voucher_type",
   "from_voucher_no",
   "from_voucher_detail_no",
+  "source_batch_qty",
   "production_section",
   "transferred_qty",
   "column_break_qdwj",
@@ -314,6 +315,16 @@
    "search_index": 1
   },
   {
+   "fieldname": "source_batch_qty",
+   "fieldtype": "JSON",
+   "hidden": 1,
+   "label": "Source Batch Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
    "fieldname": "production_section",
    "fieldtype": "Section Break"
   },
@@ -344,7 +355,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-05 11:46:28.992976",
+ "modified": "2026-10-07 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

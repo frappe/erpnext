@@ -49,6 +49,7 @@ class StockReservationEntry(Document):
 		reservation_based_on: DF.Literal["Qty", "Serial and Batch"]
 		reserved_qty: DF.Float
 		sb_entries: DF.Table[SerialandBatchEntry]
+		source_batch_qty: DF.JSON | None
 		status: DF.Literal[
 			"Draft",
 			"Partially Reserved",
@@ -166,6 +167,7 @@ class StockReservationEntry(Document):
 			).run(as_list=True)[0][0] or 0
 
 			serial_batch_data = self.get_serial_batch_entries()
+			source_batch_qty = frappe.parse_json(self.source_batch_qty or "{}")
 			sres = self.get_from_voucher_reservation_entries()
 			for row in sres:
 				if delivered_qty < 0.0:
@@ -175,7 +177,7 @@ class StockReservationEntry(Document):
 
 				if self.has_batch_no or self.has_serial_no:
 					update_serial_batch_delivered_qty(
-						split_serial_batch_to_reverse(serial_batch_data, row.name),
+						get_serial_batch_to_reverse(serial_batch_data, source_batch_qty, row.name),
 						row.name,
 						is_cancelled=True,
 					)
@@ -1554,6 +1556,7 @@ class StockReservation:
 		sre.reservation_based_on = against_row.reservation_based_on
 		sre.has_serial_no = against_row.has_serial_no
 		sre.has_batch_no = against_row.has_batch_no
+		sre.source_batch_qty = row.get("sre_batches") or None
 
 		if row.serial_nos:
 			for serial_no in row.serial_nos:
@@ -2043,19 +2046,16 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 			query.run()
 
 
-def split_serial_batch_to_reverse(serial_batch_data: frappe._dict, sre_name: str) -> frappe._dict:
-	"""Take this source SRE's share of the batch qty to reverse, capped at its own delivered qty."""
-	delivered_qty_by_batch = defaultdict(float)
-	for entry in frappe.get_all(
-		"Serial and Batch Entry",
-		filters={"parent": sre_name, "parenttype": "Stock Reservation Entry"},
-		fields=["batch_no", "delivered_qty"],
-	):
-		delivered_qty_by_batch[entry.batch_no] += entry.delivered_qty
+def get_serial_batch_to_reverse(
+	serial_batch_data: frappe._dict, source_batch_qty: dict, sre_name: str
+) -> frappe._dict:
+	"""Batch qty this transfer took from the source SRE, limited to what the target has not used."""
+	if not source_batch_qty:
+		return serial_batch_data
 
 	batches = {}
-	for batch_no, qty in serial_batch_data.batches.items():
-		qty_to_reverse = min(qty, delivered_qty_by_batch[batch_no])
+	for batch_no, qty in source_batch_qty.get(sre_name, {}).items():
+		qty_to_reverse = min(qty, serial_batch_data.batches.get(batch_no, 0))
 		if qty_to_reverse > 0:
 			batches[batch_no] = qty_to_reverse
 			serial_batch_data.batches[batch_no] -= qty_to_reverse
