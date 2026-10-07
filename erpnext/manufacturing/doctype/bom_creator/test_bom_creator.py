@@ -298,6 +298,19 @@ class TestBOMCreator(ERPNextTestSuite):
 			docname="non-existent-row",
 		)
 
+	def make_unsaved_creator(self, operation=None, **kwargs):
+		doc = frappe.new_doc("BOM Creator", item_code="_Test Item", **kwargs)
+		doc.append("items", {"item_code": "_Test Item Home Desktop 100", "qty": 1, "operation": operation})
+		return doc
+
+	def test_submit_rejects_item_operation_without_routing(self):
+		doc = self.make_unsaved_creator(operation="_Test Operation 1")
+		self.assertRaises(frappe.ValidationError, doc.before_submit)
+
+	def test_submit_allows_item_operation_with_routing_or_without_operations(self):
+		self.make_unsaved_creator(operation="_Test Operation 1", routing="_Test Routing 1").before_submit()
+		self.make_unsaved_creator().before_submit()
+
 
 def create_items():
 	raw_materials = [
