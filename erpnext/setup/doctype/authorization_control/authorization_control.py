@@ -137,7 +137,7 @@ class AuthorizationControl(TransactionBase):
 					customer = doc_obj.get("customer")
 				if not customer:
 					return
-				add_cond = f" and master_name = {frappe.db.escape(customer)}"
+				add_cond += f" and master_name = {frappe.db.escape(customer)}"
 		if based_on in ("Itemwise Discount", "Item Group wise Discount"):
 			if doc_obj:
 				for t in doc_obj.get("items"):
