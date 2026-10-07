@@ -589,6 +589,43 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 		return receipt, transfer
 
+	@change_settings(
+		"Stock Settings",
+		{
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"do_not_use_batchwise_valuation": 0,
+			"allow_negative_stock": 0,
+		},
+	)
+	def test_auto_picked_batches_differ_across_rows(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PABR-.#####",
+			}
+		).name
+		for _ in range(3):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, rate=100)
+
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			do_not_save=True,
+		)
+		for _ in range(2):
+			transfer.append("items", transfer.items[0].as_dict(no_default_fields=True))
+		for row in transfer.items:
+			row.use_serial_batch_fields = 0
+		transfer.insert()
+		transfer.submit()
+
+		picked = [get_batch_from_bundle(row.serial_and_batch_bundle) for row in transfer.items]
+		self.assertEqual(len(set(picked)), 3)
+
 	def test_repack_multiple_fg(self):
 		"Test `is_finished_item` for one item repacked into two items."
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=100)
