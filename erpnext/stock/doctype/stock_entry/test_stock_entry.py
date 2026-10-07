@@ -3357,6 +3357,9 @@ class TestStockEntry(FrappeTestCase):
 			entry.append("items", stock_entry_row(fg_item, 5, t_warehouse=warehouse, is_finished_item=1))
 		entry.insert()
 		entry.submit()
+		frappe.db.set_value(
+			"Stock Ledger Entry", {"voucher_detail_no": entry.items[1].name}, "recalculate_rate", 0
+		)
 
 		def assert_finished_good_value(rate):
 			entry.load_from_db()
@@ -3385,6 +3388,39 @@ class TestStockEntry(FrappeTestCase):
 			repost_sl_entries(frappe.get_doc("Repost Item Valuation", repost.name))
 
 		assert_finished_good_value(200)
+
+	def test_manufacture_takes_manually_rated_finished_good_value_out_of_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.fg_completed_qty = 10
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		entry.append(
+			"items",
+			stock_entry_row(
+				fg_item,
+				5,
+				t_warehouse="_Test Warehouse 1 - _TC",
+				is_finished_item=1,
+				set_basic_rate_manually=1,
+				basic_rate=50,
+			),
+		)
+		entry.append(
+			"items", stock_entry_row(fg_item, 5, t_warehouse="_Test Warehouse 2 - _TC", is_finished_item=1)
+		)
+		entry.insert()
+		entry.submit()
+		entry.load_from_db()
+
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 150])
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 750])
 
 	def test_manufacture_gives_zero_valued_finished_good_row_no_cost(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
