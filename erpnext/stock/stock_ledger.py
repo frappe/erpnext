@@ -655,7 +655,11 @@ def get_reposting_data(file_path) -> dict:
 	)
 
 	if not file_name:
-		return frappe._dict()
+		frappe.throw(
+			_(
+				"The reposting data file {0} is missing. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	attached_file = frappe.get_doc("File", file_name)
 
@@ -664,11 +668,13 @@ def get_reposting_data(file_path) -> dict:
 		content = content.encode("utf-8")
 
 	try:
-		data = gzip.decompress(content)
+		data = json.loads(gzip.decompress(content).decode("utf-8"))
 	except Exception:
-		return frappe._dict()
-
-	data = json.loads(data.decode("utf-8"))
+		frappe.throw(
+			_(
+				"The reposting data file {0} is corrupted. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	return parse_json(data)
 
@@ -1149,7 +1155,12 @@ class update_entries_after:
 				).format(bold(sle.item_code), bold(self.company), bold(sle.posting_date))
 			)
 
-		if sle.voucher_type == "Stock Reconciliation" and sle.get("qty_after_transaction") is not None:
+		# an adjustment entry moves stock rather than setting a balance
+		if (
+			sle.voucher_type == "Stock Reconciliation"
+			and sle.get("qty_after_transaction") is not None
+			and not sle.is_adjustment_entry
+		):
 			self.wh_data.qty_after_transaction = flt(sle.qty_after_transaction)
 		else:
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -2082,6 +2093,8 @@ class update_entries_after:
 			self.allow_zero_rate,
 			currency=erpnext.get_company_currency(sle.company),
 			company=sle.company,
+			posting_datetime=sle.posting_datetime,
+			creation=sle.creation,
 		)
 
 	def get_sle_before_datetime(self, args):
@@ -2611,32 +2624,37 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
 
 
-def get_stock_reco_qty_shift(args):
+def get_stock_reco_qty_shift(kwargs):
 	stock_reco_qty_shift = 0
-	if args.get("is_cancelled"):
-		if args.get("previous_qty_after_transaction"):
-			if args.get("serial_and_batch_bundle"):
-				return args.get("previous_qty_after_transaction")
+	if kwargs.get("is_adjustment_entry") and not kwargs.get("is_cancelled"):
+		# an adjustment entry moves stock rather than setting a balance, which the reset of an
+		# Adjustment Entry does in several entries of one voucher
+		return flt(kwargs.actual_qty)
+
+	if kwargs.get("is_cancelled"):
+		if kwargs.get("previous_qty_after_transaction"):
+			if kwargs.get("serial_and_batch_bundle"):
+				return kwargs.get("previous_qty_after_transaction")
 
 			# get qty (balance) that was set at submission
-			last_balance = args.get("previous_qty_after_transaction")
-			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
+			last_balance = kwargs.get("previous_qty_after_transaction")
+			stock_reco_qty_shift = flt(kwargs.qty_after_transaction) - flt(last_balance)
 		else:
-			stock_reco_qty_shift = flt(args.actual_qty)
+			stock_reco_qty_shift = flt(kwargs.actual_qty)
 
-	elif args.get("serial_and_batch_bundle"):
-		stock_reco_qty_shift = flt(args.actual_qty)
+	elif kwargs.get("serial_and_batch_bundle"):
+		stock_reco_qty_shift = flt(kwargs.actual_qty)
 
 	else:
 		# reco is being submitted
-		last_balance = get_previous_sle_of_current_voucher(args, "<=", exclude_current_voucher=True).get(
+		last_balance = get_previous_sle_of_current_voucher(kwargs, "<=", exclude_current_voucher=True).get(
 			"qty_after_transaction"
 		)
 
 		if last_balance is not None:
-			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
+			stock_reco_qty_shift = flt(kwargs.qty_after_transaction) - flt(last_balance)
 		else:
-			stock_reco_qty_shift = args.qty_after_transaction
+			stock_reco_qty_shift = kwargs.qty_after_transaction
 
 	return stock_reco_qty_shift
 

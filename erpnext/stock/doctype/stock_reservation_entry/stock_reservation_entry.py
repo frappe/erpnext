@@ -152,11 +152,12 @@ class StockReservationEntry(Document):
 
 		if self.from_voucher_type and self.from_voucher_detail_no:
 			sre = frappe.qb.DocType("Stock Reservation Entry")
+			used_qty = sre.delivered_qty + sre.transferred_qty + sre.consumed_qty
 			delivered_qty = (
 				frappe.qb.from_(sre)
-				.select(Sum(sre.reserved_qty))
+				.select(Sum(Case().when(sre.docstatus == 1, sre.reserved_qty).else_(used_qty)))
 				.where(
-					(sre.docstatus == 1)
+					(sre.docstatus.isin([1, 2]))
 					& (sre.item_code == self.item_code)
 					& (sre.from_voucher_type == self.from_voucher_type)
 					& (sre.from_voucher_no == self.from_voucher_no)
@@ -197,9 +198,10 @@ class StockReservationEntry(Document):
 		batches = defaultdict(float)
 		for entry in self.sb_entries:
 			if entry.serial_no:
-				serial_nos.append(entry.serial_no)
+				if not flt(entry.delivered_qty):
+					serial_nos.append(entry.serial_no)
 			elif entry.batch_no:
-				batches[entry.batch_no] += entry.qty
+				batches[entry.batch_no] += flt(entry.qty) - flt(entry.delivered_qty)
 
 		return frappe._dict(
 			{

@@ -2,35 +2,68 @@
 # For license information, please see license.txt
 
 
-from frappe.utils import add_days, flt, nowdate
+import frappe
+from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+	create_pr_against_po,
+	create_purchase_order,
+)
+from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.mapper import make_purchase_order
+from erpnext.stock.doctype.material_request.test_material_request import (
+	make_material_request,
+	make_material_request_for_items,
+)
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice_from_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProcurementTracker(ERPNextTestSuite):
-	def test_report_executes_and_lists_po(self):
-		# get_po_entries returns one representative line per (Purchase Order, material_request_item);
-		# this exercises that query so the report stays valid on Postgres.
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-		from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
+	def run_report(self, **filters):
+		return execute({"company": "_Test Company", **filters})[1]
 
+	def test_report_executes_and_lists_po(self):
 		po = create_purchase_order(company="_Test Company")
 
-		columns, data = execute({"company": "_Test Company"})
+		self.assertIn(po.name, {row.get("purchase_order") for row in self.run_report()})
 
-		self.assertTrue(columns)
-		self.assertIn(po.name, {row.get("purchase_order") for row in data})
+	def make_priced_request(self):
+		mr = make_material_request(do_not_submit=True)
+		mr.items[0].update({"rate": 90, "amount": 900})
+		mr.submit()
+		return mr
 
-	def test_multi_line_po_stays_one_coherent_row(self):
-		# Lines sharing the same (blank) material_request_item collapse to ONE row, matching the
-		# pre-effort MariaDB row count — and that row must be a real PO line, not a per-column
-		# Max() chimera mixing one line's item_code with another line's qty/amount.
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-		from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
-		from erpnext.stock.doctype.item.test_item import make_item
+	def test_request_item_ordered_on_two_lines_is_estimated_once(self):
+		mr = self.make_priced_request()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 4
+		po.append("items", {**po.items[0].as_dict(no_default_fields=True), "qty": 6})
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			po.submit()
 
+		rows = [row for row in self.run_report() if row.get("purchase_order") == po.name]
+		self.assertCountEqual([row["estimated_cost"] for row in rows], [360, 540])
+		self.assertEqual(sum(row["estimated_cost"] for row in rows), mr.items[0].amount)
+
+	def test_filtered_out_order_keeps_its_share_of_the_estimate(self):
+		mr = self.make_priced_request()
+		for qty, transaction_date in ((4, add_days(nowdate(), -1)), (6, nowdate())):
+			po = make_purchase_order(mr.name)
+			po.update({"supplier": "_Test Supplier", "transaction_date": transaction_date})
+			po.items[0].qty = qty
+			po.submit()
+
+		data = self.run_report(from_date=nowdate(), to_date=nowdate())
+		rows = [row for row in data if row.get("material_request_no") == mr.name]
+		self.assertEqual([(row["purchase_order"], row["estimated_cost"]) for row in rows], [(po.name, 540)])
+
+	def test_each_po_line_is_a_row(self):
 		second_item = make_item("_Test Procurement Tracker Item", {"is_stock_item": 1}).name
-		po = create_purchase_order(company="_Test Company", do_not_submit=True)
+		po = create_purchase_order(do_not_submit=True)
 		po.append(
 			"items",
 			{
@@ -41,29 +74,93 @@ class TestProcurementTracker(ERPNextTestSuite):
 				"schedule_date": add_days(nowdate(), 1),
 			},
 		)
-		po.save()
 		po.submit()
 
-		columns, data = execute({"company": "_Test Company"})
-
-		po_rows = [row for row in data if row.get("purchase_order") == po.name]
-		self.assertEqual(len(po_rows), 1)
-
-		real_lines = {(d.item_code, flt(d.qty), flt(d.amount)) for d in po.items}
-		row = po_rows[0]
-		self.assertIn(
-			(row.get("item_code"), flt(row.get("quantity")), flt(row.get("purchase_order_amt"))),
-			real_lines,
+		rows = [row for row in self.run_report() if row.get("purchase_order") == po.name]
+		self.assertCountEqual(
+			[(row["item_code"], row["quantity"]) for row in rows],
+			[(item.item_code, item.qty) for item in po.items],
 		)
 
-	def test_uninvoiced_actual_cost_is_in_company_currency(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-		from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
+	def test_actual_cost_adds_up_every_invoice(self):
+		po = create_purchase_order(qty=10, rate=90)
+		for qty in (4, 3):
+			invoice = make_purchase_invoice(po.name)
+			invoice.items[0].qty = qty
+			invoice.submit()
 
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_cost"], 630)
+
+	def test_unordered_rows_of_a_partly_ordered_request_are_listed(self):
+		mr = make_material_request_for_items(["_Test Item", "_Test Item Home Desktop 100"])
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items = po.items[:1]
+		po.submit()
+
+		rows = [row for row in self.run_report() if row.get("material_request_no") == mr.name]
+		self.assertCountEqual(
+			[(row["item_code"], row.get("purchase_order")) for row in rows],
+			[("_Test Item", po.name), ("_Test Item Home Desktop 100", None)],
+		)
+
+	def test_billed_receipt_keeps_actual_delivery_date(self):
+		po = create_purchase_order(qty=10)
+		receipt = create_pr_against_po(po.name, received_qty=5)
+		make_invoice_from_receipt(receipt.name).submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_delivery_date"], getdate(receipt.posting_date))
+
+	def test_cost_center_and_project_filters_both_apply(self):
+		project = frappe.get_doc(
+			{"doctype": "Project", "project_name": "_Test Procurement Tracker", "company": "_Test Company"}
+		).insert()
+		with_project = create_purchase_order(do_not_submit=True)
+		with_project.items[0].project = project.name
+		with_project.submit()
+		without_project = create_purchase_order()
+
+		rows = self.run_report(cost_center=with_project.items[0].cost_center, project=project.name)
+		orders = {row.get("purchase_order") for row in rows}
+		self.assertIn(with_project.name, orders)
+		self.assertNotIn(without_project.name, orders)
+
+	def test_transfer_request_is_not_listed(self):
+		mr = make_material_request(
+			material_request_type="Material Transfer", from_warehouse="_Test Warehouse 1 - _TC"
+		)
+
+		self.assertNotIn(mr.name, {row.get("material_request_no") for row in self.run_report()})
+
+	def test_quantity_is_shown_in_its_order_unit(self):
+		po = create_purchase_order(do_not_submit=True)
+		po.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 10})
+		po.submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual((row["quantity"], row["unit_of_measurement"]), (10, "_Test UOM 1"))
+
+	def test_completed_and_closed_orders_are_shown_on_request(self):
+		completed = create_purchase_order(qty=10)
+		create_pr_against_po(completed.name, received_qty=10)
+		make_purchase_invoice(completed.name).submit()
+		closed = create_purchase_order()
+		closed.update_status("Closed")
+
+		orders = {row.get("purchase_order") for row in self.run_report()}
+		self.assertNotIn(completed.name, orders)
+		self.assertNotIn(closed.name, orders)
+
+		rows = {row.get("purchase_order"): row for row in self.run_report(show_completed_orders=1)}
+		self.assertEqual(rows[completed.name]["actual_cost"], 5000)
+		self.assertEqual(rows[closed.name]["actual_cost"], 0)
+
+	def test_uninvoiced_actual_cost_is_in_company_currency(self):
 		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD", rate=10, do_not_submit=1)
 		po.conversion_rate = 80
 		po.submit()
 
-		data = execute({"company": "_Test Company"})[1]
-		row = next(row for row in data if row.get("purchase_order") == po.name)
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_cost"], 8000)

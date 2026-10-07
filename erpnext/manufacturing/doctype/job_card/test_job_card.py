@@ -2091,6 +2091,8 @@ class TestJobCard(ERPNextTestSuite):
 		manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
 		finished_item = next(row for row in manufacturing_entry.items if row.is_finished_item)
 		self.assertEqual(flt(finished_item.qty), 2)
+		raw_material = next(row for row in manufacturing_entry.items if row.item_code == rm)
+		self.assertEqual(flt(raw_material.qty), 2)
 		manufacturing_entry.submit()
 
 		job_card.reload()
@@ -3538,6 +3540,65 @@ class TestJobCard(ERPNextTestSuite):
 		matching.job_card = job_card
 		matching.append("items", {"item_code": finished_good, "is_finished_item": 1, "qty": 1})
 		matching.validate_job_card_fg_item()
+
+	def test_lowered_overproduction_allowance_checks_only_job_card_operation(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		item = create_item("Lowered Allowance FG").name
+		bom = frappe.new_doc("BOM", company="_Test Company", item=item, quantity=1, with_operations=1)
+		bom.append("items", {"item_code": "_Test Item", "qty": 1})
+		for operation in ("Lowered Allowance Op A", "Lowered Allowance Op B"):
+			make_operation(operation=operation, workstation="_Test Workstation 1")
+			bom.append(
+				"operations",
+				{"operation": operation, "workstation": "_Test Workstation 1", "time_in_mins": 1},
+			)
+		bom.insert()
+		bom.submit()
+
+		def complete(job_card, qty, hours):
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date(now(), hours=hours),
+					"to_time": add_to_date(now(), hours=hours + 1),
+					"completed_qty": qty,
+				},
+			)
+
+		with self.change_settings(
+			"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
+		):
+			work_order = make_wo_order_test_record(item=item, qty=2, bom_no=bom.name, skip_transfer=1)
+			job_card_a = frappe.get_last_doc(
+				"Job Card", {"work_order": work_order.name, "operation": "Lowered Allowance Op A"}
+			)
+			job_card_a.for_quantity = 4
+			complete(job_card_a, 4, 1)
+			job_card_a.submit()
+
+		with self.change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 0}):
+			job_card_b = frappe.get_last_doc(
+				"Job Card", {"work_order": work_order.name, "operation": "Lowered Allowance Op B"}
+			)
+			complete(job_card_b, 2, 3)
+			job_card_b.submit()
+
+			operation_a = work_order.operations[0]
+			make_job_card(
+				work_order.name,
+				[{"name": operation_a.name, "operation": operation_a.operation, "qty": 1, "pending_qty": 1}],
+			)
+			extra_job_card_a = frappe.get_last_doc(
+				"Job Card", {"operation_id": operation_a.name, "docstatus": 0}
+			)
+			complete(extra_job_card_a, 1, 5)
+			self.assertRaisesRegex(
+				frappe.ValidationError, "Completed Qty cannot be greater", extra_job_card_a.submit
+			)
+
+		work_order.reload()
+		self.assertEqual([row.status for row in work_order.operations], ["Completed", "Completed"])
 
 
 def create_bom_with_multiple_operations():

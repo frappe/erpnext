@@ -709,6 +709,44 @@ class TestStockEntry(ERPNextTestSuite):
 			frappe.db.exists("GL Entry", {"voucher_type": "Stock Entry", "voucher_no": repack.name})
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
+	def test_transfer_values_batches_picked_on_submit(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "POSB-.#####",
+				"valuation_method": "Moving Average",
+			}
+		).name
+		for rate in (100, 200, 300):
+			make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=1,
+				rate=rate,
+				use_serial_batch_fields=1,
+			)
+
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=2,
+			do_not_save=True,
+		)
+		transfer.items[0].use_serial_batch_fields = 0
+		transfer.insert()
+		transfer.submit()
+		transfer.reload()
+
+		self.assertEqual((transfer.items[0].basic_rate, transfer.items[0].amount), (150, 300))
+		self.assertEqual((transfer.total_outgoing_value, transfer.total_incoming_value), (300, 300))
+
 	def test_batch_split_stock_entry_type(self):
 		original_value = frappe.db.get_single_value(
 			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
@@ -5040,6 +5078,13 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 			self.assertEqual(se.process_loss_qty, 10)
 			self.assertEqual(se.process_loss_percentage, 10)
+
+	def test_from_bom_entry_rejects_finished_good_qty_above_fg_completed_qty(self):
+		for purpose in ("Manufacture", "Repack"):
+			se = self.make_process_loss_entry(purpose)
+			self.get_finished_good_row(se).qty = 101
+
+			self.assertRaisesRegex(FinishedGoodError, "more than the Finished Good Quantity", se.save)
 
 	def test_process_loss_counts_variant_of_bom_item(self):
 		make_item_variant()

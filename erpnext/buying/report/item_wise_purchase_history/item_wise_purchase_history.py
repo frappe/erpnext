@@ -6,10 +6,12 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.utilities.query import get_match_conditions_qb
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	if filters.from_date > filters.to_date:
+	if filters.from_date and filters.to_date and filters.from_date > filters.to_date:
 		frappe.throw(_("From Date cannot be greater than To Date"))
 
 	columns = get_columns(filters)
@@ -231,9 +233,12 @@ def get_purchase_order_details(company_list, filters):
 		.where(db_po.company.isin(tuple(company_list)))
 	)
 
-	for field in ("item_code", "item_group"):
-		if filters.get(field):
-			query = query.where(db_po_item[field] == filters[field])
+	if filters.get("item_code"):
+		query = query.where(db_po_item.item_code == filters.item_code)
+
+	if filters.get("item_group"):
+		item_groups = [filters.item_group, *get_descendants_of("Item Group", filters.item_group)]
+		query = query.where(db_po_item.item_group.isin(item_groups))
 
 	if filters.get("from_date"):
 		query = query.where(db_po.transaction_date >= filters.from_date)
@@ -243,6 +248,9 @@ def get_purchase_order_details(company_list, filters):
 
 	if filters.get("supplier"):
 		query = query.where(db_po.supplier == filters.supplier)
+
+	for condition in get_match_conditions_qb("Purchase Order", table=db_po):
+		query = query.where(condition)
 
 	return query.run(as_dict=1)
 
