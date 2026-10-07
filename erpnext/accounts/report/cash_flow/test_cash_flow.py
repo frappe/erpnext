@@ -328,3 +328,20 @@ class TestCashFlow(ERPNextTestSuite):
 		after = self.ifrs_template_totals(*lines)
 
 		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [0, 1000, 1000])
+
+	def test_ifrs_template_profit_before_tax_includes_accounts_without_category(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		expense_account = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Uncategorised Fees",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		).insert()
+		lines = ("Profit before tax", "NET INCREASE/(DECREASE) IN CASH AND CASH EQUIVALENTS")
+
+		before = self.ifrs_template_totals(*lines)
+		make_journal_entry(expense_account.name, "Cash - _TC", 100, posting_date=today(), submit=True)
+		after = self.ifrs_template_totals(*lines)
+
+		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [-100, -100])
