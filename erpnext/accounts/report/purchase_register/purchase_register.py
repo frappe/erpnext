@@ -149,7 +149,7 @@ def _execute(filters=None, additional_table_columns=None):
 			row.update(
 				{
 					"debit": get_in_invoice_payable_debit(inv),
-					"credit": inv.base_grand_total,
+					"credit": get_payable_credit(inv),
 					"outstanding_amount": flt(
 						get_outstanding_in_company_currency(inv, company_currency), outstanding_precision
 					),
@@ -176,6 +176,14 @@ def get_outstanding_in_company_currency(inv, company_currency):
 		return flt(inv.outstanding_amount)
 
 	return flt(inv.outstanding_amount) * (inv.conversion_rate or 1)
+
+
+def get_payable_credit(inv):
+	"""Amount the invoice credits to its payable, rounded like its GL entry."""
+	if inv.base_rounding_adjustment and inv.base_rounded_total:
+		return inv.base_rounded_total
+
+	return inv.base_grand_total
 
 
 def get_in_invoice_payable_debit(inv):
@@ -455,6 +463,7 @@ def get_invoices(filters, additional_query_columns):
 			pi.is_paid,
 			pi.base_paid_amount,
 			pi.base_write_off_amount,
+			pi.base_rounding_adjustment,
 		)
 		.where(pi.docstatus == 1)
 	)

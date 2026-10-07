@@ -195,6 +195,23 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(debit[unpaid.name], 100)
 		self.assertEqual(debit[paid.name], 1100)
 
+	def test_paid_rounded_invoice_leaves_nothing_owed(self):
+		pi = make_purchase_invoice(
+			{
+				"disable_rounded_total": 0,
+				"is_paid": 1,
+				"cash_bank_account": "Cash - _TC6",
+				"paid_amount": 1100,
+			},
+			rate=1000.4,
+		)
+		self.assertEqual(pi.base_rounded_total, 1100)
+
+		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
+		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == pi.name)
+
+		self.assertEqual(row["debit"], row["credit"])
+
 	def test_ledger_view_needs_access_to_the_supplier(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
@@ -305,7 +322,7 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(rows[0].supplier_group, supplier_group)
 
 
-def make_purchase_invoice(values: dict | None = None):
+def make_purchase_invoice(values: dict | None = None, rate: float = 1000):
 	from erpnext.accounts.doctype.account.test_account import create_account
 	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -319,13 +336,13 @@ def make_purchase_invoice(values: dict | None = None):
 	)
 	create_warehouse(warehouse_name="_Test Warehouse - _TC6", company="_Test Company 6")
 	create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company 6")
-	pi = create_purchase_invoice_with_taxes()
+	pi = create_purchase_invoice_with_taxes(rate)
 	pi.update(values or {})
 	pi.submit()
 	return pi
 
 
-def create_purchase_invoice_with_taxes():
+def create_purchase_invoice_with_taxes(rate: float = 1000):
 	return frappe.get_doc(
 		{
 			"doctype": "Purchase Invoice",
@@ -342,7 +359,7 @@ def create_purchase_invoice_with_taxes():
 					"cost_center": "_Test Cost Center - _TC6",
 					"item_code": "_Test Item",
 					"qty": 1,
-					"rate": 1000,
+					"rate": rate,
 					"expense_account": "Stock Received But Not Billed - _TC6",
 				}
 			],
