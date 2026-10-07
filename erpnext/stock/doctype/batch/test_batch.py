@@ -403,6 +403,28 @@ class TestBatch(ERPNextTestSuite):
 		self.assertEqual(get_batch_qty(batch_no, receipt.items[0].warehouse), 78)
 		self.assertEqual(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
 
+	def test_split_batch_keeps_source_dates_and_parent(self):
+		from erpnext.stock.doctype.batch.batch import split_batch
+
+		receipt = self.test_purchase_receipt()
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value(
+			"Batch",
+			batch_no,
+			{
+				"manufacturing_date": add_to_date(getdate(), days=-60),
+				"expiry_date": add_to_date(getdate(), days=5),
+			},
+		)
+
+		new_batch = split_batch(batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 4)
+
+		fields = ["manufacturing_date", "expiry_date"]
+		self.assertEqual(
+			frappe.db.get_value("Batch", new_batch, fields), frappe.db.get_value("Batch", batch_no, fields)
+		)
+		self.assertEqual(frappe.db.get_value("Batch", new_batch, "parent_batch"), batch_no)
+
 	def test_get_batch_qty(self):
 		"""Test getting batch quantities by batch_numbers, item_code or warehouse"""
 		self.make_batch_item("ITEM-BATCH-2")

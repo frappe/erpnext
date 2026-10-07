@@ -335,7 +335,7 @@ def get_batches_by_oldest(item_code: str, warehouse: str):
 @frappe.whitelist(methods=["POST"])
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
-	batch = frappe.get_doc(doctype="Batch", item=item_code, batch_id=new_batch_id).insert()
+	batch = make_split_batch(batch_no, item_code, new_batch_id)
 	qty = flt(qty)
 
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
@@ -377,6 +377,19 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 	stock_entry.submit()
 
 	return batch.name
+
+
+def make_split_batch(batch_no, item_code, new_batch_id=None):
+	source_batch = frappe.db.get_value(
+		"Batch",
+		batch_no,
+		["manufacturing_date", "expiry_date", "supplier", "use_batchwise_valuation"],
+		as_dict=True,
+	)
+
+	return frappe.get_doc(
+		doctype="Batch", item=item_code, batch_id=new_batch_id, parent_batch=batch_no, **source_batch
+	).insert()
 
 
 def make_batch_bundle(
