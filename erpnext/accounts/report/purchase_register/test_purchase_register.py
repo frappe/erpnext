@@ -182,6 +182,19 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.credit, 0)
 		self.assertEqual(first_row.balance, -500)
 
+	def test_write_off_settles_the_payable_of_paid_and_unpaid_invoices(self):
+		write_off = {"write_off_amount": 100, "write_off_account": "Write Off - _TC6"}
+		unpaid = make_purchase_invoice(write_off)
+		paid = make_purchase_invoice(
+			{"is_paid": 1, "cash_bank_account": "Cash - _TC6", "paid_amount": 1000, **write_off}
+		)
+
+		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
+		debit = {row.get("voucher_no"): row.get("debit") for row in execute(filters)[1]}
+
+		self.assertEqual(debit[unpaid.name], 100)
+		self.assertEqual(debit[paid.name], 1100)
+
 	def test_ledger_view_needs_access_to_the_supplier(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
@@ -292,7 +305,7 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(rows[0].supplier_group, supplier_group)
 
 
-def make_purchase_invoice():
+def make_purchase_invoice(values: dict | None = None):
 	from erpnext.accounts.doctype.account.test_account import create_account
 	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -307,6 +320,7 @@ def make_purchase_invoice():
 	create_warehouse(warehouse_name="_Test Warehouse - _TC6", company="_Test Company 6")
 	create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company 6")
 	pi = create_purchase_invoice_with_taxes()
+	pi.update(values or {})
 	pi.submit()
 	return pi
 

@@ -179,11 +179,12 @@ def get_outstanding_in_company_currency(inv, company_currency):
 
 
 def get_in_invoice_payable_debit(inv):
-	"""Amount a paid invoice settles against its own payable, as in its GL entries."""
-	if not inv.is_paid:
-		return 0.0
+	"""Amount the invoice settles against its own payable, as in its GL entries."""
+	debit = flt(inv.base_write_off_amount)
+	if inv.is_paid:
+		debit += flt(inv.base_paid_amount)
 
-	return flt(inv.base_paid_amount) + flt(inv.base_write_off_amount)
+	return debit
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
