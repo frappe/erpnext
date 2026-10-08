@@ -36,6 +36,25 @@ class TestShipment(ERPNextTestSuite):
 		self.assertEqual(len(shipment.shipment_delivery_note), 1)
 		self.assertEqual(shipment.shipment_delivery_note[0].grand_total, delivery_note.base_grand_total)
 
+	def test_delivery_note_rows_are_validated(self):
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+
+		shipment = create_test_shipment([delivery_note], do_not_insert=True)
+		shipment.shipment_delivery_note[0].grand_total = 250000
+		shipment.insert()
+		self.assertEqual(shipment.value_of_goods, delivery_note.base_grand_total)
+		shipment.submit()
+
+		duplicate_row = create_test_shipment([delivery_note, delivery_note], do_not_insert=True)
+		self.assertRaises(frappe.ValidationError, duplicate_row.insert)
+
+		second_shipment = create_test_shipment([delivery_note], do_not_insert=True)
+		self.assertRaises(frappe.ValidationError, second_shipment.insert)
+
+		draft_note = create_test_delivery_note()
+		self.assertRaises(frappe.ValidationError, create_test_shipment, [draft_note])
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(
@@ -78,7 +97,7 @@ def create_test_delivery_note(do_not_insert=False):
 	return delivery_note
 
 
-def create_test_shipment(delivery_notes=None):
+def create_test_shipment(delivery_notes=None, do_not_insert=False):
 	company = get_shipment_company()
 	company_address = get_shipment_company_address(company.name)
 	customer = get_shipment_customer()
@@ -105,7 +124,8 @@ def create_test_shipment(delivery_notes=None):
 	for delivery_note in delivery_notes:
 		shipment.append("shipment_delivery_note", {"delivery_note": delivery_note.name})
 	shipment.append("shipment_parcel", {"length": 5, "width": 5, "height": 5, "weight": 5, "count": 5})
-	shipment.insert()
+	if not do_not_insert:
+		shipment.insert()
 	return shipment
 
 

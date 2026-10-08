@@ -3,10 +3,10 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.document import Document
-from frappe.utils import flt, get_time
+from frappe.utils import flt, get_link_to_form, get_time
 
 from erpnext.accounts.party import get_party_shipping_address
 
@@ -76,6 +76,7 @@ class Shipment(Document):
 	def validate(self):
 		self.validate_weight()
 		self.validate_pickup_time()
+		self.validate_delivery_notes()
 		self.set_value_of_goods()
 		self.set_total_weight()
 		if self.docstatus == 0:
@@ -106,11 +107,76 @@ class Shipment(Document):
 		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) < get_time(self.pickup_from):
 			frappe.throw(_("Pickup To time should be greater than Pickup From time"))
 
+	def validate_delivery_notes(self):
+		delivery_notes = set()
+		for row in self.get("shipment_delivery_note"):
+			if row.delivery_note in delivery_notes:
+				frappe.throw(
+					_("Row #{0}: Delivery Note {1} is added more than once").format(
+						row.idx, bold(row.delivery_note)
+					)
+				)
+
+			delivery_notes.add(row.delivery_note)
+			self.validate_delivery_note_row(row)
+
+	def validate_delivery_note_row(self, row):
+		lock = self.docstatus == 1
+		delivery_note = frappe.db.get_value(
+			"Delivery Note",
+			row.delivery_note,
+			["docstatus", "customer", "base_grand_total"],
+			as_dict=True,
+			for_update=lock,
+		)
+		if delivery_note.docstatus != 1:
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} must be submitted").format(row.idx, bold(row.delivery_note))
+			)
+
+		if self.delivery_to_type == "Customer" and delivery_note.customer != self.delivery_customer:
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} belongs to Customer {2}").format(
+					row.idx, bold(row.delivery_note), bold(delivery_note.customer)
+				)
+			)
+
+		if shipment := get_other_shipment(row.delivery_note, self.name, for_update=lock):
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} is already in Shipment {2}").format(
+					row.idx, bold(row.delivery_note), get_link_to_form("Shipment", shipment)
+				)
+			)
+
+		row.grand_total = delivery_note.base_grand_total
+
 	def set_value_of_goods(self):
 		value_of_goods = 0
 		for entry in self.get("shipment_delivery_note"):
 			value_of_goods += flt(entry.get("grand_total"))
 		self.value_of_goods = value_of_goods if value_of_goods else self.value_of_goods
+
+
+def get_other_shipment(delivery_note, shipment_name, for_update=False):
+	shipment = frappe.qb.DocType("Shipment")
+	row = frappe.qb.DocType("Shipment Delivery Note")
+	query = (
+		frappe.qb.from_(row)
+		.join(shipment)
+		.on(shipment.name == row.parent)
+		.select(shipment.name)
+		.where(
+			(row.delivery_note == delivery_note)
+			& (shipment.docstatus == 1)
+			& (shipment.name != shipment_name)
+		)
+		.limit(1)
+	)
+	if for_update:
+		query = query.for_update()
+
+	result = query.run()
+	return result[0][0] if result else None
 
 
 @frappe.whitelist()
