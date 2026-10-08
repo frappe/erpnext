@@ -406,6 +406,23 @@ class TestCompany(ERPNextTestSuite):
 
 		self.assertEqual(get_account_currency(company.default_cash_account), "USD")
 
+	def test_provisional_field_stays_visible_if_another_company_uses_it(self):
+		company = get_test_company()
+		with (
+			patch("erpnext.setup.doctype.company.company.make_property_setter") as setter,
+			patch("frappe.db.exists", return_value="Other Company"),
+		):
+			company.enable_provisional_accounting_for_non_stock_items = 0
+			company.validate_provisional_account_for_non_stock_items()
+			self.assertFalse(setter.call_args.args[3])
+
+		with (
+			patch("erpnext.setup.doctype.company.company.make_property_setter") as setter,
+			patch("frappe.db.exists", return_value=None),
+		):
+			company.set_provisional_expense_visibility(False)
+			self.assertTrue(setter.call_args.args[3])
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
