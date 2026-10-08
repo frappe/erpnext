@@ -42,8 +42,9 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		base_repeat = base_bucket["repeat"][0]
 		base_repeat_rev = base_bucket["repeat"][1]
 
-		# Two submitted invoices for the SAME customer in the SAME month:
-		# the earlier one is the customer's FIRST invoice -> "new", the later -> "repeat".
+		# Two submitted invoices for the SAME customer in the SAME month: the customer is
+		# acquired that month, so they count once as "new" and never as "repeat"; both
+		# invoices' revenue lands in the new bucket.
 		si1 = create_sales_invoice(
 			customer=customer.name, company="_Test Company", posting_date=first_date, rate=100
 		)
@@ -55,14 +56,14 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		bucket = stats.get(month_key)
 		self.assertIsNotNone(bucket, "expected a bucket for posting month " + month_key)
 
-		# Exactly one NEW and one REPEAT were added for this customer's activity.
+		# One NEW customer, no REPEAT: a second invoice in the acquisition month does not
+		# turn one customer into two.
 		self.assertEqual(bucket["new"][0] - base_new, 1)
-		self.assertEqual(bucket["repeat"][0] - base_repeat, 1)
+		self.assertEqual(bucket["repeat"][0] - base_repeat, 0)
 
-		# Revenue is attributed by base_grand_total of the corresponding invoice:
-		# the first (new) invoice carries si1's total, the second (repeat) carries si2's.
-		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si1.base_grand_total)
-		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, si2.base_grand_total)
+		# Both invoices' revenue is attributed to the new bucket; repeat is untouched.
+		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si1.base_grand_total + si2.base_grand_total)
+		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, 0.0)
 
 	def test_territory_tree_view_classification(self):
 		# Covers the tree_view=True path of get_customer_stats, where buckets are keyed
@@ -97,7 +98,8 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		base_repeat_rev = base_bucket["repeat"][1]
 
 		# get_party_details copies the customer's territory onto the invoice, so both
-		# invoices land in the "_Test Territory" bucket: first -> "new", second -> "repeat".
+		# invoices land in the "_Test Territory" bucket, which is the customer's acquisition
+		# territory: they count once as "new" with both invoices' revenue.
 		si1 = create_sales_invoice(
 			customer=customer.name, company="_Test Company", posting_date=first_date, rate=100
 		)
@@ -112,10 +114,10 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		bucket = stats.get(territory)
 		self.assertIsNotNone(bucket, "expected a bucket keyed by territory " + territory)
 
-		# Exactly one NEW and one REPEAT attributable to this customer in the bucket.
+		# One NEW customer, no REPEAT, in the acquisition territory bucket.
 		self.assertEqual(bucket["new"][0] - base_new, 1)
-		self.assertEqual(bucket["repeat"][0] - base_repeat, 1)
+		self.assertEqual(bucket["repeat"][0] - base_repeat, 0)
 
-		# Revenue follows base_grand_total of the corresponding invoice.
-		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si1.base_grand_total)
-		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, si2.base_grand_total)
+		# Both invoices' revenue follows into the new bucket; repeat is untouched.
+		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si1.base_grand_total + si2.base_grand_total)
+		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, 0.0)
