@@ -1896,7 +1896,7 @@ class StockController(AccountsController):
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled
 		# and if rule was applied on the transaction, validate it.
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import get_available_putaway_capacity
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _get_available_putaway_capacity
 
 		valid_doctype = self.doctype in (
 			"Purchase Receipt",
@@ -1940,7 +1940,7 @@ class StockController(AccountsController):
 						rule_map[rule_name]["capacity"] = (
 							rule.stock_capacity
 							if self.doctype == "Stock Reconciliation"
-							else get_available_putaway_capacity(rule_name)
+							else _get_available_putaway_capacity(rule_name)
 						)
 					rule_map[rule_name]["qty_put"] += flt(stock_qty)
 
