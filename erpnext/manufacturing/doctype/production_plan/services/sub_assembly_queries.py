@@ -10,6 +10,7 @@ from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	aggregate_bin_details,
 	get_bin_details,
 	get_uom_conversion_factor,
 )
@@ -91,38 +92,32 @@ def _add_sub_assembly_child(
 def _resolve_available_sub_assembly(
 	d, stock_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
 ):
-	if skip_available and d.item_code not in sub_assembly_items:
-		bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
-		return _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details)
+	if warehouse and d.item_code not in bin_details:
+		bins = get_bin_details(d, company, for_warehouse=warehouse)
+		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
-	if warehouse:
-		bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+	if skip_available and d.item_code not in sub_assembly_items:
+		return _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details)
 	return stock_qty
 
 
 def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
-	for _bin_dict in bin_details[d.item_code]:
-		_bin_dict.original_projected_qty = _bin_dict.projected_qty
-		if _bin_dict.original_projected_qty <= 0:
-			continue
+	projected_qty = bin_details[d.item_code].projected_qty
+	if projected_qty <= 0:
+		return stock_qty
 
-		if _bin_dict.original_projected_qty >= stock_qty:
-			_bin_dict.original_projected_qty -= stock_qty
-			stock_qty = 0
-			continue
+	if projected_qty >= stock_qty:
+		return 0
 
-		stock_qty -= _bin_dict.original_projected_qty
-		sub_assembly_items.append(d.item_code)
-	return stock_qty
+	sub_assembly_items.append(d.item_code)
+	return stock_qty - projected_qty
 
 
 def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision):
-	bins = bin_details.get(d.item_code)
-	actual_qty = bins[0].get("actual_qty", 0) if bins else 0
-	projected_qty = bins[0].get("projected_qty", 0) if bins else 0
+	bin_dict = bin_details.get(d.item_code) or {}
 	return frappe._dict(
 		{
-			"actual_qty": actual_qty,
+			"actual_qty": bin_dict.get("actual_qty", 0),
 			"parent_item_code": parent_item_code,
 			"description": d.description,
 			"production_item": d.item_code,
@@ -135,7 +130,7 @@ def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, requi
 			"indent": indent,
 			"stock_qty": flt(stock_qty, precision),
 			"required_qty": flt(required_qty, precision),
-			"projected_qty": projected_qty,
+			"projected_qty": bin_dict.get("projected_qty", 0),
 			"main_bom": bom_no,
 		}
 	)
