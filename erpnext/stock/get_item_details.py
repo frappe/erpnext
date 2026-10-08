@@ -985,6 +985,7 @@ def get_default_discount_account(args, item, item_group, brand):
 def get_default_deferred_account(args, item, fieldname=None):
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		return (
+<<<<<<< HEAD
 			frappe.get_cached_value(
 				"Item Default",
 				{"parent": args.item_code, "company": args.get("company")},
@@ -992,6 +993,13 @@ def get_default_deferred_account(args, item, fieldname=None):
 			)
 			or args.get(fieldname)
 			or frappe.get_cached_value("Company", args.company, "default_" + fieldname)
+=======
+			get_item_defaults(ctx.item_code, ctx.company).get(fieldname)
+			or get_item_group_defaults(ctx.item_code, ctx.company).get(fieldname)
+			or get_brand_defaults(ctx.item_code, ctx.company).get(fieldname)
+			or ctx.get(fieldname)
+			or frappe.get_cached_value("Company", ctx.company, "default_" + fieldname)
+>>>>>>> c185a7b (fix(stock): propagate brand and group defaults for deferred and variance accounts)
 		)
 	else:
 		return None
