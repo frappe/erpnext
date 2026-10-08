@@ -36,6 +36,36 @@ class ItemStandardCost(Document):
 		self.validate_rate()
 		self.warn_backdated_transactions_will_be_blocked()
 
+	def before_submit(self):
+		self.validate_no_negative_stock()
+
+	def validate_no_negative_stock(self):
+		resulting_qty = self.get_source_reconciliation_qty()
+		negative = [
+			row.warehouse
+			for row in self.get_warehouse_wise_balance()
+			if flt(resulting_qty.get(row.warehouse, row.actual_qty)) < 0
+		]
+		if negative:
+			frappe.throw(
+				_(
+					"Item {0} has negative stock in {1}. Bring the stock to zero or above before setting a new Standard Valuation Rate."
+				).format(
+					get_link_to_form("Item", self.item_code), ", ".join(frappe.bold(wh) for wh in negative)
+				)
+			)
+
+	def get_source_reconciliation_qty(self):
+		if not self.revaluation_entry:
+			return {}
+
+		rows = frappe.get_all(
+			"Stock Reconciliation Item",
+			filters={"parent": self.revaluation_entry, "item_code": self.item_code},
+			fields=["warehouse", "qty"],
+		)
+		return {row.warehouse: row.qty for row in rows}
+
 	def warn_backdated_transactions_will_be_blocked(self):
 		# Heads-up while creating (R2 enforces it later on every stock voucher): once this rate is
 		# effective, the item's stock transactions cannot be dated before the effective date.

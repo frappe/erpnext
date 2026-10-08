@@ -630,6 +630,24 @@ class TestItemStandardCost(ERPNextTestSuite):
 		isc = create_item_standard_cost(item.name, rate=110, effective_date=today(), submit=False)
 		self.assertRaisesRegex(frappe.ValidationError, "negative stock", isc.submit)
 
+	def test_source_reconciliation_can_correct_negative_stock_with_new_rate(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item(allow_negative_stock=1)
+		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -30))
+		make_stock_entry(
+			item_code=item.name, source=TEST_WAREHOUSE, qty=3, posting_date=add_days(today(), -20)
+		)
+
+		reco = create_stock_reconciliation(item_code=item.name, warehouse=TEST_WAREHOUSE, qty=5, rate=120)
+
+		self.assertEqual(reco.docstatus, 1)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "actual_qty"), 5
+		)
+
 	def test_backdated_transaction_blocked(self):
 		item = create_standard_cost_item()
 		create_item_standard_cost(item.name, rate=100, effective_date=today())
