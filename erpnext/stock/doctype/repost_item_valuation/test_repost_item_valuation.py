@@ -91,6 +91,34 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 				msg=f"Exepcted false from : {case}",
 			)
 
+	def make_queued_item_repost(self, item_code, posting_date):
+		repost = frappe.new_doc("Repost Item Valuation")
+		repost.update(
+			{
+				"based_on": "Item and Warehouse",
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"posting_date": posting_date,
+				"posting_time": "00:00:00",
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
+		return repost
+
+	def test_repost_queued_after_start_is_not_skipped(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		queued_during_run = self.make_queued_item_repost(item_code, add_days(today(), -8))
+
+		running.deduplicate_similar_repost()
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
 	def test_clear_old_logs(self):
 		# create 10 logs
 		for i in range(1, 20):

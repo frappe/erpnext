@@ -368,8 +368,12 @@ class RepostItemValuation(Document):
 				& (riv.docstatus == 1)
 				& (riv.status == "Queued")
 				& (riv.based_on == "Item and Warehouse")
+				& (riv.creation <= self.get_repost_started_at())
 			)
 		).run()
+
+	def get_repost_started_at(self):
+		return self.flags.repost_started_at or now()
 
 	def skip_reposts_covered_by_dependents(self):
 		if self.repost_only_accounting_ledgers:
@@ -380,11 +384,11 @@ class RepostItemValuation(Document):
 			return
 
 		source_datetime = get_combine_datetime(self.posting_date, self.posting_time)
-		mark_covered_item_reposts(self.name, coverage, source_datetime)
+		mark_covered_item_reposts(self.name, coverage, source_datetime, self.get_repost_started_at())
 
 		affected = get_affected_transactions(self)
 		if affected:
-			mark_covered_transaction_reposts(self, coverage, affected)
+			mark_covered_transaction_reposts(self, coverage, affected, self.get_repost_started_at())
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
@@ -428,10 +432,11 @@ def repost_coverage_cache_key(name):
 	return f"riv_dependent_coverage::{name}"
 
 
-def get_queued_item_reposts(source_name, item_codes):
+def get_queued_item_reposts(source_name, item_codes, started_at=None):
 	return frappe.get_all(
 		"Repost Item Valuation",
 		filters={
+			"creation": ("<=", started_at or now()),
 			"name": ("!=", source_name),
 			"based_on": "Item and Warehouse",
 			"status": "Queued",
@@ -445,10 +450,10 @@ def get_queued_item_reposts(source_name, item_codes):
 	)
 
 
-def mark_covered_item_reposts(source_name, coverage, source_datetime):
+def mark_covered_item_reposts(source_name, coverage, source_datetime, started_at=None):
 	item_codes = {item_code for item_code, _ in coverage}
 
-	for row in get_queued_item_reposts(source_name, list(item_codes)):
+	for row in get_queued_item_reposts(source_name, list(item_codes), started_at):
 		from_datetime = coverage.get((row.item_code, row.warehouse))
 		if not from_datetime:
 			continue
@@ -461,10 +466,11 @@ def mark_covered_item_reposts(source_name, coverage, source_datetime):
 			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
 
 
-def get_queued_transaction_reposts(source_name, voucher_nos):
+def get_queued_transaction_reposts(source_name, voucher_nos, started_at=None):
 	return frappe.get_all(
 		"Repost Item Valuation",
 		filters={
+			"creation": ("<=", started_at or now()),
 			"name": ("!=", source_name),
 			"based_on": "Transaction",
 			"status": "Queued",
@@ -526,11 +532,11 @@ def is_transaction_repost_covered(items, acc, row_datetime):
 	return True
 
 
-def mark_covered_transaction_reposts(source, coverage, affected):
+def mark_covered_transaction_reposts(source, coverage, affected, started_at=None):
 	source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
 	voucher_nos = {voucher_no for _, voucher_no in affected}
 
-	rows = get_queued_transaction_reposts(source.name, voucher_nos)
+	rows = get_queued_transaction_reposts(source.name, voucher_nos, started_at)
 	items_by_voucher = get_repost_items_by_voucher(rows)
 
 	for row in rows:
@@ -562,6 +568,7 @@ def repost(doc):
 		# This is to avoid TooManyWritesError in case of large reposts
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
+		doc.flags.repost_started_at = now()
 		doc.set_status("In Progress")
 		if not frappe.in_test:
 			frappe.db.commit()
