@@ -326,8 +326,6 @@ class LandedCostVoucher(Document):
 	def set_applicable_charges_on_item(self):
 		if self.get("taxes") and self.distribute_charges_based_on != "Distribute Manually":
 			items = self.get("items")
-			total_charges = 0.0
-			item_count = 0
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
 			total_item_cost = sum(flt(item.get(based_on_field)) for item in items)
@@ -342,18 +340,16 @@ class LandedCostVoucher(Document):
 					)
 				)
 
-			for item in self.get("items"):
-				item.applicable_charges = flt(
-					flt(item.get(based_on_field))
-					* (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
-					item.precision("applicable_charges"),
-				)
-				total_charges += item.applicable_charges
-				item_count += 1
+			self.distribute_charges(items, based_on_field, total_item_cost)
 
-			if total_charges != self.total_taxes_and_charges:
-				diff = self.total_taxes_and_charges - total_charges
-				self.get("items")[item_count - 1].applicable_charges += diff
+	def distribute_charges(self, items, based_on_field, total_item_cost):
+		precision = items[0].precision("applicable_charges")
+		charges_per_unit = flt(self.total_taxes_and_charges) / flt(total_item_cost)
+		for item in items:
+			item.applicable_charges = flt(flt(item.get(based_on_field)) * charges_per_unit, precision)
+
+		diff = flt(self.total_taxes_and_charges) - sum(flt(item.applicable_charges) for item in items)
+		absorb_rounding_difference(items, flt(diff, precision), precision, self.total_taxes_and_charges)
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
@@ -381,14 +377,30 @@ class LandedCostVoucher(Document):
 		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
 
-		if abs(diff) < (2.0 / (10**precision)):
-			self.items[-1].applicable_charges += diff
-		else:
+		if abs(diff) >= (2.0 / (10**precision)):
 			frappe.throw(
 				_(
 					"Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"
 				)
 			)
+
+		absorb_rounding_difference(self.items, diff, precision, self.total_taxes_and_charges)
+		self.validate_charges_follow_total_sign()
+
+	def validate_charges_follow_total_sign(self):
+		sign = -1 if flt(self.total_taxes_and_charges) < 0 else 1
+		for row in self.get("items"):
+			if flt(row.applicable_charges) * sign >= 0:
+				continue
+
+			message = (
+				_("Row {0}: Applicable Charges for Item {1} cannot be negative")
+				if sign > 0
+				else _(
+					"Row {0}: Applicable Charges for Item {1} cannot be positive when Total Taxes and Charges are negative"
+				)
+			)
+			frappe.throw(message.format(row.idx, frappe.bold(row.item_code)))
 
 	@frappe.whitelist()
 	def get_receipt_document_details(self, receipt_document_type: str, receipt_document: str):
@@ -638,6 +650,18 @@ def get_vendor_invoices(
 		query = query.limit(page_len).offset(start)
 
 	return query.run(as_list=True)
+
+
+def absorb_rounding_difference(items, diff, precision, total):
+	sign = -1 if flt(total) < 0 else 1
+	for item in reversed(items):
+		if not diff:
+			break
+
+		share = flt(item.applicable_charges) * sign
+		adjustment = diff if diff * sign > 0 else sign * max(diff * sign, -share)
+		item.applicable_charges = flt(flt(item.applicable_charges) + adjustment, precision)
+		diff = flt(diff - adjustment, precision)
 
 
 def get_claimed_landed_cost(vendor_invoice, exclude_voucher=None, for_update=False):

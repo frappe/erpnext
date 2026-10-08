@@ -185,6 +185,72 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, lcv.insert)
 
+	def test_manual_distribution_refuses_negative_charges(self):
+		receipt = make_purchase_receipt(qty=10, rate=100, do_not_save=True)
+		receipt.append(
+			"items",
+			receipt.items[0]
+			.as_dict()
+			.copy()
+			.update({"name": None, "qty": 1, "received_qty": 1, "stock_qty": 1}),
+		)
+		receipt.insert()
+		receipt.submit()
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 300
+		lcv.items[1].applicable_charges = -200
+		lcv.insert()
+		self.assertRaises(frappe.ValidationError, lcv.submit)
+
+	def make_receipt_with_rows(self, row_count):
+		receipt = make_purchase_receipt(qty=1, rate=100, do_not_save=True)
+		for _i in range(row_count - 1):
+			receipt.append("items", receipt.items[0].as_dict().copy().update({"name": None}))
+		receipt.insert()
+		receipt.submit()
+		return receipt
+
+	def test_small_charge_distribution_has_no_negative_share(self):
+		receipt = self.make_receipt_with_rows(7)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=0.04,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.insert()
+		lcv.submit()
+
+		shares = [flt(row.applicable_charges) for row in lcv.items]
+		self.assertTrue(all(share >= 0 for share in shares))
+		self.assertEqual(flt(sum(shares), 2), 0.04)
+
+	def test_manual_rounding_difference_keeps_shares_non_negative(self):
+		receipt = self.make_receipt_with_rows(2)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 100.01
+		lcv.items[1].applicable_charges = 0
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual([flt(row.applicable_charges) for row in lcv.items], [100.0, 0.0])
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
