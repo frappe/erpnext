@@ -1129,8 +1129,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
 		stock_ledger.make_sl_entries(source_entries, allow_negative_stock, via_landed_cost_voucher)
 		if self.recalculate_for_bundles_picked_while_posting():
-			target_entries = []
-			self.get_sle_for_target_warehouse(target_entries, self.get_finished_item_row())
+			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
+			for sle in target_entries:
+				sle.incoming_rate = valuation_rates[sle.voucher_detail_no]
 
 		self.make_sl_entries(
 			target_entries,
