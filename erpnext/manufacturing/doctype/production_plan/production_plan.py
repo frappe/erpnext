@@ -2199,11 +2199,14 @@ def get_sub_assembly_items(
 				bin_details[d.item_code] = frappe._dict(_aggregate_bin_details(bins))
 
 			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
-				projected_qty = bin_details[d.item_code].projected_qty
-				if projected_qty >= stock_qty:
+				bin_dict = bin_details[d.item_code]
+				available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
+				if available_qty >= stock_qty:
+					bin_dict.available_qty = available_qty - stock_qty
 					stock_qty = 0
-				elif projected_qty > 0:
-					stock_qty -= projected_qty
+				elif available_qty > 0:
+					bin_dict.available_qty = 0
+					stock_qty -= available_qty
 					sub_assembly_items.append(d.item_code)
 
 			if not d.is_phantom_item:
