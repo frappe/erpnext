@@ -349,7 +349,13 @@ def execute_snapshot_report(filters):
 	equity = _get_data_duckdb(conn, filters, "Equity", "Credit", period_list)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(
-		asset, liability, equity, period_list, filters.company, currency
+		asset,
+		liability,
+		equity,
+		period_list,
+		filters.company,
+		currency,
+		accumulated_values=filters.accumulated_values,
 	)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity, period_list)
