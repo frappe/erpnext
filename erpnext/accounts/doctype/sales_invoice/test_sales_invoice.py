@@ -5556,6 +5556,42 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.update_stock = 1
 		self.assertRaises(frappe.ValidationError, si.save)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings",
+		{
+			"maintain_same_sales_rate": 1,
+			"maintain_same_rate_action": "Stop",
+			"role_to_override_stop_action": "",
+		},
+	)
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": ""}
+	)
+	def test_debit_note_against_delivery_note_skips_rate_and_overbilling_checks(self):
+		"""A rate adjustment debit note against a fully billed Delivery Note should be allowed."""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		dn = create_delivery_note(rate=450)
+		si = make_sales_invoice(dn.name)
+		si.submit()
+
+		debit_note = frappe.copy_doc(si)
+		debit_note.is_debit_note = 1
+		debit_note.return_against = si.name
+		for item in debit_note.items:
+			item.rate = item.price_list_rate = 50
+			item.discount_percentage = item.discount_amount = 0
+		debit_note.submit()
+
+		self.assertEqual(debit_note.grand_total, 50)
+		self.assertEqual(debit_note.items[0].dn_detail, dn.items[0].name)
+
+		# a regular invoice at a different rate is still blocked
+		invoice = frappe.copy_doc(debit_note)
+		invoice.is_debit_note = 0
+		invoice.return_against = None
+		self.assertRaises(frappe.ValidationError, invoice.save)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item

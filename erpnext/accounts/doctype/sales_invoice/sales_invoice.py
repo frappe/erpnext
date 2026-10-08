@@ -362,9 +362,10 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			TimesheetBillingService(self).validate_time_sheets_are_submitted()
 
-		from erpnext.accounts.services.billing_validation import BillingValidationService
+		if not self.is_debit_note:
+			from erpnext.accounts.services.billing_validation import BillingValidationService
 
-		BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", "amount")
+			BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 
 		if self.is_return and self.return_against:
 			for row in self.timesheets:
@@ -837,6 +838,7 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
+			and not self.is_debit_note
 			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
