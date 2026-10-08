@@ -323,6 +323,31 @@ class StockReconciliation(StockController):
 						).format(item.idx, get_link_to_form("Item", item.item_code))
 					)
 
+		for item_code, rate in rates.items():
+			self.validate_rate_change_covers_stocked_warehouses(item_code, rate)
+
+	def validate_rate_change_covers_stocked_warehouses(self, item_code, rate):
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_item_standard_rate,
+			has_item_standard_cost,
+		)
+
+		if not has_item_standard_cost(item_code, self.company):
+			return
+
+		standard_rate = get_item_standard_rate(item_code, self.company, self.posting_date)
+		if flt(rate) == flt(standard_rate):
+			return
+
+		reco_warehouses = {row.warehouse for row in self.items if row.item_code == item_code}
+		missing = [wh for wh in get_stocked_warehouses(item_code, self.company) if wh not in reco_warehouses]
+		if missing:
+			frappe.throw(
+				_(
+					"The Standard Cost of Item {0} applies to the whole company. Add rows for warehouses {1} that hold its stock, or change the rate through Item Standard Cost."
+				).format(get_link_to_form("Item", item_code), ", ".join(frappe.bold(wh) for wh in missing))
+			)
+
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
 		for item in self.items:
@@ -1459,6 +1484,21 @@ class StockReconciliation(StockController):
 			self.queue_action("cancel", timeout=2000)
 		else:
 			self._cancel()
+
+
+def get_stocked_warehouses(item_code, company):
+	bin_table = frappe.qb.DocType("Bin")
+	warehouse = frappe.qb.DocType("Warehouse")
+	return (
+		frappe.qb.from_(bin_table)
+		.inner_join(warehouse)
+		.on(bin_table.warehouse == warehouse.name)
+		.select(bin_table.warehouse)
+		.where(
+			(bin_table.item_code == item_code) & (warehouse.company == company) & (bin_table.actual_qty != 0)
+		)
+		.run(pluck=True)
+	)
 
 
 def is_standard_cost_item(item_code, company):

@@ -517,6 +517,27 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, receipt.cancel)
 
+	def test_reconciliation_rate_change_must_cover_all_stocked_warehouses(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -30))
+		for warehouse in (TEST_WAREHOUSE, "_Test Warehouse 1 - _TC"):
+			make_stock_entry(
+				item_code=item.name,
+				target=warehouse,
+				qty=10,
+				basic_rate=100,
+				posting_date=add_days(today(), -20),
+			)
+
+		reco = create_stock_reconciliation(
+			item_code=item.name, warehouse=TEST_WAREHOUSE, qty=10, rate=150, do_not_save=True
+		)
+		self.assertRaises(frappe.ValidationError, reco.insert)
+
 	def test_backdated_transaction_blocked(self):
 		item = create_standard_cost_item()
 		create_item_standard_cost(item.name, rate=100, effective_date=today())
