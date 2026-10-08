@@ -152,30 +152,42 @@ def get_data_by_territory(filters, common_columns):
 
 
 def get_customer_stats(filters, tree_view=False):
-	"""Calculates number of new and repeated customers and revenue."""
-	company_condition = ""
+	"""Count distinct new and repeat customers and their revenue per period."""
+	si = frappe.qb.DocType("Sales Invoice")
+	query = (
+		frappe.qb.from_(si)
+		.select(si.territory, si.posting_date, si.customer, si.base_grand_total)
+		.where((si.docstatus == 1) & (si.posting_date <= filters.get("to_date")))
+		# name tie-break makes the first-seen-per-customer classification deterministic across engines
+		.orderby(si.posting_date)
+		.orderby(si.name)
+	)
 	if filters.get("company"):
-		company_condition = " and company=%(company)s"
+		query = query.where(si.company == filters.get("company"))
 
-	customers = []
+	from_date = getdate(filters.get("from_date"))
+	acquisition = {}  # customer -> (key, date) of their first invoice
+	counted = {}  # key -> {"new": set of customers, "repeat": set of customers}
 	customers_in = {}
 
-	for si in frappe.db.sql(
-		f"""select territory, posting_date, customer, base_grand_total from `tabSales Invoice`
-		where docstatus=1 and posting_date <= %(to_date)s
-		{company_condition} order by posting_date""",
-		filters,
-		as_dict=1,
-	):
-		key = si.territory if tree_view else si.posting_date.strftime("%Y-%m")
-		new_or_repeat = "new" if si.customer not in customers else "repeat"
-		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})
+	for row in query.run(as_dict=True):
+		posting_date = getdate(row.posting_date)
+		key = row.territory if tree_view else posting_date.strftime("%Y-%m")
+		acquisition.setdefault(row.customer, (key, posting_date))
 
-		# if filters.from_date <= si.posting_date.strftime('%Y-%m-%d'):
-		if getdate(filters.from_date) <= getdate(si.posting_date):
+		if posting_date < from_date:
+			continue
+
+		acq_key, acq_date = acquisition[row.customer]
+		new_or_repeat = "new" if key == acq_key and acq_date >= from_date else "repeat"
+
+		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})
+		counted.setdefault(key, {"new": set(), "repeat": set()})
+
+		# count each customer once per period, not once per invoice
+		if row.customer not in counted[key][new_or_repeat]:
+			counted[key][new_or_repeat].add(row.customer)
 			customers_in[key][new_or_repeat][0] += 1
-			customers_in[key][new_or_repeat][1] += si.base_grand_total
-		if new_or_repeat == "new":
-			customers.append(si.customer)
+		customers_in[key][new_or_repeat][1] += row.base_grand_total
 
 	return customers_in
