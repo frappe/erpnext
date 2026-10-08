@@ -210,3 +210,16 @@ class TestPackingSlipReferences(ERPNextTestSuite):
 		delivery_note.save()
 
 		self.assertEqual([row.name for row in delivery_note.packed_items], packed_item_names)
+
+	def test_slip_cannot_be_cancelled_after_delivery_note_submit(self):
+		delivery_note = self.make_draft_delivery_note(qty=5)
+		slip = make_packing_slip(delivery_note.name)
+		slip.submit()
+		delivery_note.reload()
+		delivery_note.submit()
+
+		slip.reload()
+		self.assertRaises(frappe.ValidationError, slip.cancel)
+
+		delivery_note.cancel()
+		self.assertEqual(frappe.db.get_value("Packing Slip", slip.name, "docstatus"), 2)

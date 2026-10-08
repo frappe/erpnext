@@ -72,6 +72,17 @@ class PackingSlip(StatusUpdater):
 	def on_submit(self):
 		self.update_prevdoc_status()
 
+	def before_cancel(self):
+		if self.flags.cancelled_by_delivery_note:
+			return
+
+		if cint(frappe.db.get_value("Delivery Note", self.delivery_note, "docstatus")) == 1:
+			frappe.throw(
+				_("Packing Slip cannot be cancelled as Delivery Note {0} is already submitted.").format(
+					frappe.bold(self.delivery_note)
+				)
+			)
+
 	def on_cancel(self):
 		self.update_prevdoc_status()
 
