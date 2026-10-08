@@ -321,6 +321,13 @@ class TestCompany(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
+	def test_cannot_disable_perpetual_inventory_with_stock(self):
+		company = get_test_company()
+		create_stock_item_with_inventory()
+		company.enable_perpetual_inventory = 0
+		with self.assertRaisesRegex(frappe.ValidationError, "Cannot disable perpetual inventory"):
+			company.save()
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
