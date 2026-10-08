@@ -266,7 +266,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.set_serial_batch_from_reserved_entry()
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_validate"):
 			self.purpose_cls(self).before_validate()
@@ -276,7 +276,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
 		if self.get("items") and apply_rule:
-			if items := apply_putaway_rule(
+			if items := _apply_putaway_rule(
 				self.doctype, self.get("items"), self.company, purpose=self.purpose
 			):
 				self.items = items

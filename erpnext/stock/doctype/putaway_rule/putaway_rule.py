@@ -9,10 +9,12 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.utils import cint, cstr, floor, flt, nowdate
 
+from erpnext import _refuse
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance
+from erpnext.stock.utils import _get_stock_balance
 
 
 class PutawayRule(Document):
@@ -72,7 +74,7 @@ class PutawayRule(Document):
 
 	def validate_capacity(self):
 		stock_uom = frappe.db.get_value("Item", self.item_code, "stock_uom")
-		balance_qty = get_stock_balance(self.item_code, self.warehouse, nowdate())
+		balance_qty = _get_stock_balance(self.item_code, self.warehouse, nowdate())
 
 		if flt(self.stock_capacity) < flt(balance_qty):
 			frappe.throw(
@@ -89,18 +91,34 @@ class PutawayRule(Document):
 		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
 
 
-@frappe.whitelist()
 def get_available_putaway_capacity(rule: str):
 	stock_capacity, item_code, warehouse = frappe.db.get_value(
 		"Putaway Rule", rule, ["stock_capacity", "item_code", "warehouse"]
 	)
-	balance_qty = get_stock_balance(item_code, warehouse, nowdate())
+	balance_qty = _get_stock_balance(item_code, warehouse, nowdate())
 	free_space = flt(stock_capacity) - flt(balance_qty)
 	return free_space if free_space > 0 else 0
 
 
 @frappe.whitelist()
 def apply_putaway_rule(
+	doctype: str, items: list | str, company: str, sync: str | bool | None = None, purpose: str | None = None
+):
+	if doctype not in ("Purchase Receipt", "Stock Entry"):
+		_refuse()
+	frappe.has_permission(doctype, "write", throw=True)
+	allowed_companies = get_allowed_docs_for_doctype(
+		get_user_permissions(frappe.session.user).get("Company", []), doctype
+	)
+	if allowed_companies and company not in allowed_companies:
+		_refuse()
+	if not frappe.has_permission("Item", "read"):
+		return
+
+	return _apply_putaway_rule(doctype, items, company, sync, purpose)
+
+
+def _apply_putaway_rule(
 	doctype: str, items: list | str, company: str, sync: str | bool | None = None, purpose: str | None = None
 ):
 	"""Applies Putaway Rule on line items.
@@ -255,7 +273,7 @@ def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 
 	vacant_rules = []
 	for rule in rules:
-		balance_qty = get_stock_balance(rule.item_code, rule.warehouse, nowdate())
+		balance_qty = _get_stock_balance(rule.item_code, rule.warehouse, nowdate())
 		free_space = flt(rule.stock_capacity) - flt(balance_qty)
 		if free_space > 0:
 			rule["free_space"] = free_space

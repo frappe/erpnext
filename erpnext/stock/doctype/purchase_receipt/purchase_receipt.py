@@ -243,10 +243,10 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
-			if items := apply_putaway_rule(self.doctype, self.get("items"), self.company):
+			if items := _apply_putaway_rule(self.doctype, self.get("items"), self.company):
 				self.items = items
 
 	def validate(self):
