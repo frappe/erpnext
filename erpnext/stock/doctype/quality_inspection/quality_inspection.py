@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
 
@@ -112,10 +113,14 @@ class QualityInspection(Document):
 		child_doc = frappe.qb.DocType(doctype)
 		qi_doc = frappe.qb.DocType("Quality Inspection")
 
-		child_row_references = (
+		query = (
 			frappe.qb.from_(child_doc)
 			.left_join(qi_doc)
-			.on(child_doc.name == qi_doc.child_row_reference)
+			.on(
+				(child_doc.name == qi_doc.child_row_reference)
+				& (qi_doc.docstatus < 2)
+				& (qi_doc.name != self.name)
+			)
 			.select(child_doc.name)
 			.where(
 				(child_doc.item_code == self.item_code)
@@ -124,10 +129,26 @@ class QualityInspection(Document):
 				& (qi_doc.name.isnull())
 			)
 			.orderby(child_doc.idx)
-		).run(pluck=True)
+		)
 
-		if len(child_row_references):
+		if child_row_references := query.run(pluck=True):
 			self.child_row_reference = child_row_references[0]
+		elif frappe.get_meta(doctype).has_field("quality_inspection") and self.has_inspected_rows(doctype):
+			frappe.throw(
+				_("Every row of Item {0} in {1} {2} already has a Quality Inspection").format(
+					frappe.bold(self.item_code), _(self.reference_type), frappe.bold(self.reference_name)
+				)
+			)
+
+	def has_inspected_rows(self, doctype):
+		return frappe.db.exists(
+			doctype,
+			{
+				"parent": self.reference_name,
+				"item_code": self.item_code,
+				"quality_inspection": ("not in", ["", self.name]),
+			},
+		)
 
 	def validate_inspection_required(self):
 		if frappe.db.get_single_value(
@@ -254,8 +275,10 @@ class QualityInspection(Document):
 				if self.batch_no and self.docstatus < 2:
 					query = query.where(child_doc.batch_no == self.batch_no)
 
-				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
+				if self.docstatus == 2 or remove_reference:
 					query = query.where(child_doc.quality_inspection == self.name)
+				else:
+					query = query.where(IfNull(child_doc.quality_inspection, "").isin(["", self.name]))
 
 				if self.child_row_reference:
 					query = query.where(child_doc.name == self.child_row_reference)
