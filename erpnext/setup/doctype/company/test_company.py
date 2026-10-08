@@ -370,6 +370,14 @@ class TestCompany(ERPNextTestSuite):
 		self.assertEqual(get_exchange_gain_loss_account(company.name, True), company.default_expense_account)
 		self.assertEqual(get_exchange_gain_loss_account(company.name, False), company.default_expense_account)
 
+	def test_tax_setup_requires_manager_role(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		with patch("frappe.only_for", side_effect=frappe.PermissionError):
+			with patch("erpnext.setup.doctype.company.company.setup_taxes_and_charges") as setup:
+				with self.assertRaises(frappe.PermissionError):
+					company.create_default_tax_template()
+				setup.assert_not_called()
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
