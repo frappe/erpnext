@@ -324,11 +324,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.submit()
 		first_item_of_po = po.get("items")[0]
 
-		stock_settings_default = frappe.db.get_single_value("Stock Settings", "default_warehouse")
-		frappe.db.set_single_value("Stock Settings", "default_warehouse", None)
-		self.addCleanup(
-			frappe.db.set_single_value, "Stock Settings", "default_warehouse", stock_settings_default
-		)
+		frappe.db.set_value("Company", po.company, "default_warehouse", None)
 
 		def get_trans_items(item_code):
 			return json.dumps(
@@ -541,13 +537,11 @@ class TestPurchaseOrder(ERPNextTestSuite):
 					"item_code": item,
 					"rate": 100,
 					"qty": 1,
-					"warehouse": po.items[0].warehouse,
 				},  # added item whose tax account head already exists in PO
 				{
 					"item_code": new_item_with_tax.name,
 					"rate": 100,
 					"qty": 1,
-					"warehouse": po.items[0].warehouse,
 				},  # added item whose tax account head  is missing in PO
 			]
 		)
