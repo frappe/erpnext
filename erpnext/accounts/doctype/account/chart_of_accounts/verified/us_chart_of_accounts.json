@@ -5,7 +5,12 @@
 		"Assets": {
 			"Current Assets": {
 				"Cash and Cash Equivalents": {
-					"Cash on Hand": {
+					"Cash Accounts": {
+						"Cash on Hand": {
+							"account_number": "11111",
+							"account_type": "Cash",
+							"account_category": "Cash and Cash Equivalents"
+						},
 						"account_number": "11110",
 						"account_type": "Cash",
 						"account_category": "Cash and Cash Equivalents"
