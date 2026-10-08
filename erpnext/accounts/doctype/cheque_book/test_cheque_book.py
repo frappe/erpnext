@@ -713,6 +713,15 @@ class TestChequeBook(ERPNextTestSuite):
 		frappe.db.rollback(save_point="duplicate_cheque_usage")
 		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_type, "Payment Entry")
 
+	def test_cancelled_cheque_ids_use_naming_series(self):
+		cancelled = cancel_cheque(self.book.name, "000101", submit=False)
+		other = cancel_cheque(self.book.name, "000102", submit=False)
+		self.assertRegex(cancelled.name, r"^CHQ-CAN-\d{4}-\d{5}$")
+		self.assertRegex(other.name, r"^CHQ-CAN-\d{4}-\d{5}$")
+		self.assertEqual(int(other.name.rsplit("-", 1)[-1]), int(cancelled.name.rsplit("-", 1)[-1]) + 1)
+		cancelled.submit()
+		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, cancelled.name)
+
 	def test_draft_cancellation_claims_the_cheque_only_on_submit(self):
 		cancelled = cancel_cheque(self.book.name, "101", submit=False)
 		cancelled.reason = "Lost"

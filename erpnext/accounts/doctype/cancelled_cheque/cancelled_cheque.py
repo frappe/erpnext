@@ -26,6 +26,7 @@ class CancelledCheque(Document):
 		amended_from: DF.Link | None
 		cheque_book: DF.Link
 		cheque_no: DF.Data
+		naming_series: DF.Literal["CHQ-CAN-.YYYY.-"]
 		payment_entry: DF.Link | None
 		reason: DF.Autocomplete
 		remarks: DF.SmallText | None
