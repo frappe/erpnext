@@ -7,7 +7,16 @@ import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_date_str, get_link_to_form, getdate, nowtime, parse_json
+from frappe.utils import (
+	add_days,
+	flt,
+	get_date_str,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	nowtime,
+	parse_json,
+)
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import request_cache
 
@@ -65,7 +74,7 @@ class StockClosingEntry(Document):
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
-		company: DF.Link | None
+		company: DF.Link
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
 		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
@@ -90,8 +99,13 @@ class StockClosingEntry(Document):
 			self.db_set("status", self.status)
 
 	def validate(self):
+		self.validate_to_date()
 		self.set_from_date()
 		self.validate_duplicate()
+
+	def validate_to_date(self):
+		if self.to_date and getdate(self.to_date) > getdate(nowdate()):
+			frappe.throw(_("To Date cannot be a future date"))
 
 	def set_from_date(self):
 		"""Closing balances are chained, so a closing always starts the day after the previous one
@@ -174,7 +188,25 @@ class StockClosingEntry(Document):
 	def validate_later_closing_entry(self):
 		# A later closing is built on top of this one's balance, so cancelling this one would leave
 		# the later balance resting on figures that no longer exist.
-		later_entry = frappe.db.get_value(
+		if later_entry := self.get_later_closing_entry():
+			frappe.throw(
+				_(
+					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def validate_later_closing_entry_for_regenerate(self):
+		if later_entry := self.get_later_closing_entry():
+			frappe.throw(
+				_(
+					"Cannot regenerate Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def get_later_closing_entry(self):
+		return frappe.db.get_value(
 			"Stock Closing Entry",
 			{
 				"company": self.company,
@@ -185,14 +217,6 @@ class StockClosingEntry(Document):
 			"name",
 			order_by="to_date desc",
 		)
-
-		if later_entry:
-			frappe.throw(
-				_(
-					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
-				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
-				title=_("Later Stock Closing Entry Exists"),
-			)
 
 	def validate_closed_period_lock(self):
 		pcv = frappe.db.get_value(
@@ -209,6 +233,14 @@ class StockClosingEntry(Document):
 				title=_("Closed Period"),
 			)
 
+	def validate_submitted(self):
+		if self.docstatus != 1:
+			frappe.throw(
+				_("Stock Closing Entry {0} must be submitted to generate the closing balance").format(
+					self.name
+				)
+			)
+
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
@@ -216,6 +248,7 @@ class StockClosingEntry(Document):
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
 		self.check_permission("write")
+		self.validate_submitted()
 
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
@@ -228,8 +261,10 @@ class StockClosingEntry(Document):
 	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
 		self.check_permission("write")
+		self.validate_submitted()
 
 		self.validate_closed_period_lock()
+		self.validate_later_closing_entry_for_regenerate()
 		self.remove_stock_closing()
 		self.enqueue_job()
 
@@ -277,16 +312,28 @@ def set_stock_value_and_valuation_rate(row):
 
 
 def prepare_closing_stock_balance(name):
+	if not is_submitted_closing_entry(name):
+		return
+
 	doc = frappe.get_doc("Stock Closing Entry", name)
 	doc.db_set("status", "In Progress")
 
 	try:
 		doc.create_stock_closing_balance_entries()
+		if not is_submitted_closing_entry(name, for_update=True):
+			doc.remove_stock_closing()
+			doc.db_set("status", "Cancelled")
+			return
+
 		doc.db_set("status", "Completed")
 	except Exception:
 		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
+
+
+def is_submitted_closing_entry(name, for_update=False):
+	return frappe.db.get_value("Stock Closing Entry", name, "docstatus", for_update=for_update) == 1
 
 
 class StockClosing:
