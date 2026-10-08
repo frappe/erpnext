@@ -7,8 +7,6 @@ from frappe import _
 from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 
-from erpnext.accounts.utils import validate_field_number
-
 
 class CostCenter(NestedSet):
 	# begin: auto-generated types
@@ -145,22 +143,9 @@ class CostCenter(NestedSet):
 				"Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1
 			)
 
-			# exclude company abbr
-			new_parts = newdn.split(" - ")[:-1]
-			# update cost center number and remove from parts
-			if new_parts[0][0].isdigit():
-				if len(new_parts) == 1:
-					new_parts = newdn.split(" ")
-				if new_cost_center.cost_center_number != new_parts[0]:
-					validate_field_number(
-						"Cost Center", self.name, new_parts[0], self.company, "cost_center_number"
-					)
-					self.cost_center_number = new_parts[0]
-					self.db_set("cost_center_number", new_parts[0])
-				new_parts = new_parts[1:]
-
-			# update cost center name
-			cost_center_name = " - ".join(new_parts)
+			cost_center_name = newdn.rsplit(" - ", 1)[0]
+			if new_cost_center.cost_center_number:
+				cost_center_name = cost_center_name.removeprefix(f"{new_cost_center.cost_center_number} - ")
 			if new_cost_center.cost_center_name != cost_center_name:
 				self.cost_center_name = cost_center_name
 				self.db_set("cost_center_name", cost_center_name)
@@ -171,6 +156,6 @@ def on_doctype_update():
 
 
 def get_name_with_number(new_account, account_number):
-	if account_number and not new_account[0].isdigit():
+	if account_number and not new_account.startswith(f"{account_number} - "):
 		new_account = account_number + " - " + new_account
 	return new_account
