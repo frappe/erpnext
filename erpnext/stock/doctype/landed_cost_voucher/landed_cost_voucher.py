@@ -92,6 +92,7 @@ class LandedCostVoucher(Document):
 
 		self.set_applicable_charges_on_item()
 		self.set_total_vendor_invoices_cost()
+		self.validate_vendor_invoice_claims()
 		# Runs last: needs the items table populated by get_items_from_purchase_receipts
 		self.validate_mandatory_dimensions()
 
@@ -404,13 +405,34 @@ class LandedCostVoucher(Document):
 		self.update_claimed_landed_cost()
 
 	def update_claimed_landed_cost(self):
-		for row in self.vendor_invoices:
+		for vendor_invoice in {row.vendor_invoice for row in self.vendor_invoices}:
 			frappe.db.set_value(
 				"Purchase Invoice",
-				row.vendor_invoice,
+				vendor_invoice,
 				"claimed_landed_cost_amount",
-				flt(row.amount, row.precision("amount")) if self.docstatus == 1 else 0.0,
+				get_claimed_landed_cost(vendor_invoice),
 			)
+
+	def validate_vendor_invoice_claims(self):
+		claimed_by_invoice = {}
+		for row in self.vendor_invoices:
+			claimed_by_invoice[row.vendor_invoice] = claimed_by_invoice.get(row.vendor_invoice, 0) + flt(
+				row.amount
+			)
+
+		for vendor_invoice, amount in claimed_by_invoice.items():
+			invoice_total = frappe.db.get_value(
+				"Purchase Invoice", vendor_invoice, "base_total", for_update=True
+			)
+			unclaimed_amount = flt(invoice_total) - flt(
+				get_claimed_landed_cost(vendor_invoice, exclude_voucher=self.name, for_update=True)
+			)
+			if flt(amount, 2) > flt(unclaimed_amount, 2):
+				frappe.throw(
+					_("Claimed amount {0} for Vendor Invoice {1} exceeds its unclaimed amount {2}").format(
+						frappe.bold(amount), frappe.bold(vendor_invoice), frappe.bold(unclaimed_amount)
+					)
+				)
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -599,6 +621,22 @@ def get_vendor_invoices(
 		query = query.limit(page_len).offset(start)
 
 	return query.run(as_list=True)
+
+
+def get_claimed_landed_cost(vendor_invoice, exclude_voucher=None, for_update=False):
+	vendor_invoice_row = frappe.qb.DocType("Landed Cost Vendor Invoice")
+	query = (
+		frappe.qb.from_(vendor_invoice_row)
+		.select(vendor_invoice_row.amount)
+		.where((vendor_invoice_row.vendor_invoice == vendor_invoice) & (vendor_invoice_row.docstatus == 1))
+	)
+	if exclude_voucher:
+		query = query.where(vendor_invoice_row.parent != exclude_voucher)
+
+	if for_update:
+		query = query.for_update()
+
+	return sum(flt(amount) for amount in query.run(pluck=True))
 
 
 def get_vendor_invoice_query(filters):

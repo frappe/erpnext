@@ -137,6 +137,39 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertTrue(any(r[0] == pi.name for r in rows))
 
+	def make_claiming_voucher(self, receipt, vendor_invoice, amount):
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=amount,
+			do_not_save=True,
+		)
+		lcv.append("vendor_invoices", {"vendor_invoice": vendor_invoice, "amount": amount})
+		return lcv
+
+	def test_vendor_invoice_claims_add_up_and_are_capped(self):
+		receipt = make_purchase_receipt(qty=10, rate=100)
+		vendor_invoice = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=1000).name
+
+		first = self.make_claiming_voucher(receipt, vendor_invoice, 400)
+		first.insert()
+		first.submit()
+		second = self.make_claiming_voucher(receipt, vendor_invoice, 600)
+		second.insert()
+		second.submit()
+		self.assertEqual(
+			frappe.db.get_value("Purchase Invoice", vendor_invoice, "claimed_landed_cost_amount"), 1000
+		)
+
+		first.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Purchase Invoice", vendor_invoice, "claimed_landed_cost_amount"), 600
+		)
+
+		self.assertRaises(
+			frappe.ValidationError, self.make_claiming_voucher(receipt, vendor_invoice, 5000).insert
+		)
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
