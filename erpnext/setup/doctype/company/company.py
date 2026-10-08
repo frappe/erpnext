@@ -728,14 +728,24 @@ class Company(NestedSet):
 					)
 				)
 
-			make_property_setter(
-				"Purchase Receipt",
-				"provisional_expense_account",
-				"hidden",
-				not self.enable_provisional_accounting_for_non_stock_items,
-				"Check",
-				validate_fields_for_doctype=False,
-			)
+			self.set_provisional_expense_visibility(self.enable_provisional_accounting_for_non_stock_items)
+
+	def set_provisional_expense_visibility(self, enabled):
+		other_company_enabled = frappe.db.exists(
+			"Company",
+			{
+				"name": ["!=", self.name],
+				"enable_provisional_accounting_for_non_stock_items": 1,
+			},
+		)
+		make_property_setter(
+			"Purchase Receipt",
+			"provisional_expense_account",
+			"hidden",
+			not (enabled or other_company_enabled),
+			"Check",
+			validate_fields_for_doctype=False,
+		)
 
 	def check_country_change(self):
 		frappe.flags.country_change = False
@@ -1010,6 +1020,9 @@ class Company(NestedSet):
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value("GL Entry", {"company": self.name}):
 			frappe.db.delete("Process Deferred Accounting", {"company": self.name})
+
+		if self.enable_provisional_accounting_for_non_stock_items:
+			self.set_provisional_expense_visibility(False)
 
 	def check_parent_changed(self):
 		frappe.flags.parent_company_changed = False
