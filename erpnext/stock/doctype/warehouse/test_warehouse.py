@@ -204,6 +204,14 @@ class TestWarehouse(ERPNextTestSuite):
 		doc.disabled = 1
 		self.assertRaises(frappe.ValidationError, doc.save)
 
+	def test_default_in_transit_warehouse_must_be_transit_ledger(self):
+		doc = frappe.get_doc("Warehouse", create_warehouse("_Test Transit Default WH"))
+		group = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
+
+		for transit_warehouse in ("_Test Warehouse - _TC", group):
+			doc.default_in_transit_warehouse = transit_warehouse
+			self.assertRaises(frappe.ValidationError, doc.save)
+
 	def test_get_children(self):
 		company = "_Test Company"
 

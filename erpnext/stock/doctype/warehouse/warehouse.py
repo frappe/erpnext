@@ -77,7 +77,25 @@ class Warehouse(NestedSet):
 		self.validate_company_change()
 		self.validate_parent_warehouse()
 		self.validate_disable_with_stock()
+		self.validate_default_in_transit_warehouse()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_default_in_transit_warehouse(self):
+		if not self.default_in_transit_warehouse:
+			return
+
+		transit = frappe.db.get_value(
+			"Warehouse",
+			self.default_in_transit_warehouse,
+			["warehouse_type", "is_group", "company"],
+			as_dict=True,
+		)
+		if transit.warehouse_type != "Transit" or transit.is_group or transit.company != self.company:
+			throw(
+				_(
+					"Default In-Transit Warehouse {0} must be a Transit ledger warehouse of Company {1}"
+				).format(frappe.bold(self.default_in_transit_warehouse), frappe.bold(self.company))
+			)
 
 	def validate_disable_with_stock(self):
 		if not self.disabled or self.is_new() or not self.has_value_changed("disabled"):
