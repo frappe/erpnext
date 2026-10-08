@@ -102,3 +102,60 @@ class TestStockSettings(ERPNextTestSuite):
 			self.assertRaisesRegex(frappe.ValidationError, "items with serial / batch enabled"),
 		):
 			settings.save()
+
+	def test_company_valuation_method_drives_reposting(self):
+		from frappe.utils import add_days, today
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		frappe.db.set_single_value("Stock Settings", "valuation_method", "Standard Cost")
+		frappe.db.set_value("Company", "_Test Company", "valuation_method", "FIFO")
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": ""}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item, target=warehouse, qty=10, rate=100)
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5)
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=200, posting_date=add_days(today(), -1)
+		)
+
+		issue_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(issue_value, -1000)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": item, "warehouse": warehouse}, "stock_value"), 2000
+		)
+
+	def test_split_batch_uses_warehouse_company_valuation(self):
+		from erpnext.stock.doctype.batch.batch import split_batch
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		frappe.db.set_single_value(
+			"Stock Settings", {"do_not_use_batchwise_valuation": 1, "valuation_method": "Moving Average"}
+		)
+		frappe.db.set_value("Company", "_Test Company 1", "valuation_method", "FIFO")
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SPLITCO-.####",
+				"valuation_method": "",
+			}
+		).name
+		warehouse = "Stores - _TC1"
+		receipt = make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=100, company="_Test Company 1"
+		)
+
+		new_batch = split_batch(
+			get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle), item, warehouse, 4
+		)
+
+		self.assertEqual(frappe.db.get_value("Batch", new_batch, "use_batchwise_valuation"), 1)
