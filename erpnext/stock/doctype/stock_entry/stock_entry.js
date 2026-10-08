@@ -65,26 +65,6 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
-		frappe.db.get_value("Company", frm.doc.company, "sample_retention_warehouse", (r) => {
-			if (r.sample_retention_warehouse) {
-				let filters = [
-					["Warehouse", "company", "=", frm.doc.company],
-					["Warehouse", "is_group", "=", 0],
-					["Warehouse", "name", "!=", r.sample_retention_warehouse],
-				];
-				frm.set_query("from_warehouse", function () {
-					return {
-						filters: filters,
-					};
-				});
-				frm.set_query("s_warehouse", "items", function () {
-					return {
-						filters: filters,
-					};
-				});
-			}
-		});
-
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
 
@@ -1413,6 +1393,27 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		this.frm.set_query("to_warehouse", transit_warehouse_query);
 		this.frm.set_query("t_warehouse", "items", transit_warehouse_query);
+		this.set_source_warehouse_query();
+	}
+
+	set_source_warehouse_query() {
+		const company = this.frm.doc.company;
+		if (!company) return;
+
+		frappe.db.get_value("Company", company, "sample_retention_warehouse", (r) => {
+			if (this.frm.doc.company !== company) return;
+
+			const source_warehouse_query = () => {
+				const query = erpnext.queries.warehouse(this.frm.doc);
+				if (r?.sample_retention_warehouse) {
+					query.filters.push(["Warehouse", "name", "!=", r.sample_retention_warehouse]);
+				}
+				return query;
+			};
+
+			this.frm.set_query("from_warehouse", source_warehouse_query);
+			this.frm.set_query("s_warehouse", "items", source_warehouse_query);
+		});
 	}
 
 	setup() {
@@ -1612,6 +1613,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				this.frm.set_value("letter_head", company_doc.default_letter_head);
 			}
 			this.frm.trigger("toggle_display_account_head");
+			this.set_source_warehouse_query();
 
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 
