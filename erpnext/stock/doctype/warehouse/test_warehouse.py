@@ -163,6 +163,23 @@ class TestWarehouse(ERPNextTestSuite):
 		doc.parent_warehouse = None
 		self.assertRaisesRegex(frappe.ValidationError, "child warehouses", doc.save)
 
+	def test_warehouse_account_must_be_stock_ledger(self):
+		income_account = frappe.db.get_value(
+			"Account", {"company": "_Test Company", "root_type": "Income", "is_group": 0}, "name"
+		)
+		group_stock_account = get_group_stock_account("_Test Company")
+
+		for account in (income_account, group_stock_account):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "_Test Wrong Account WH",
+					"company": "_Test Company",
+					"account": account,
+				}
+			)
+			self.assertRaises(frappe.ValidationError, doc.insert)
+
 	def test_get_children(self):
 		company = "_Test Company"
 

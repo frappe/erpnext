@@ -120,14 +120,23 @@ class Warehouse(NestedSet):
 			throw(_("Warehouses with child nodes cannot be converted to ledger"))
 
 	def validate_warehouse_account(self):
-		if self.account and self.company:
-			account_company = frappe.get_cached_value("Account", self.account, "company")
-			if account_company and account_company != self.company:
-				frappe.throw(
-					_("Account {0} does not belong to Company {1}").format(
-						frappe.bold(self.account), frappe.bold(self.company)
-					)
+		if not self.account:
+			return
+
+		account = frappe.get_cached_value(
+			"Account", self.account, ["company", "account_type", "is_group"], as_dict=True
+		)
+		if self.company and account.company and account.company != self.company:
+			frappe.throw(
+				_("Account {0} does not belong to Company {1}").format(
+					frappe.bold(self.account), frappe.bold(self.company)
 				)
+			)
+
+		if account.is_group or account.account_type != "Stock":
+			frappe.throw(
+				_("Account {0} must be a non-group account of type Stock").format(frappe.bold(self.account))
+			)
 
 	def validate_inventory_account(self):
 		if (
