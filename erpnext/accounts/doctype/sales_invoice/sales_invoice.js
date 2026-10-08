@@ -27,6 +27,22 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 		this.frm.clear_table("tax_withholding_entries");
 	}
+	cost_center(doc, cdt, cdn) {
+		if (cdt !== doc.doctype) {
+			return super.cost_center(doc, cdt, cdn);
+		}
+
+		if (!doc.cost_center) {
+			return;
+		}
+
+		return frappe.run_serially(
+			(doc.items || []).map(
+				(item) => () =>
+					frappe.model.set_value(item.doctype, item.name, "cost_center", doc.cost_center)
+			)
+		);
+	}
 	onload() {
 		var me = this;
 		super.onload();
