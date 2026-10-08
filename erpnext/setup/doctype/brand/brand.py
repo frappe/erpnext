@@ -23,7 +23,10 @@ class Brand(Document):
 		image: DF.AttachImage | None
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		from erpnext.stock.doctype.item.item import validate_item_defaults
+
+		validate_item_defaults(self.brand_defaults)
 
 
 def get_brand_defaults(item, company):

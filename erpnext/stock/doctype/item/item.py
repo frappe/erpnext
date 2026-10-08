@@ -845,12 +845,7 @@ class Item(Document):
 			).run()
 
 	def validate_item_defaults(self):
-		companies = {row.company for row in self.item_defaults}
-
-		if len(companies) != len(self.item_defaults):
-			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
-
-		validate_item_default_company_links(self.item_defaults)
+		validate_item_defaults(self.item_defaults)
 
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
@@ -1808,15 +1803,27 @@ def update_variants(variants, template, publish_progress=True):
 			frappe.publish_progress(count / total * 100, title=_("Updating Variants..."))
 
 
+def validate_item_defaults(item_defaults: list[ItemDefault]) -> None:
+	companies = {row.company for row in item_defaults}
+	if len(companies) != len(item_defaults):
+		frappe.throw(_("Cannot set multiple Item Defaults for a company."))
+
+	validate_item_default_company_links(item_defaults)
+
+
 def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> None:
+	links = [
+		("Warehouse", "default_warehouse"),
+		("Cost Center", "buying_cost_center"),
+		("Cost Center", "selling_cost_center"),
+	]
+	links += [
+		("Account", field.fieldname)
+		for field in frappe.get_meta("Item Default").fields
+		if field.fieldtype == "Link" and field.options == "Account"
+	]
 	for item_default in item_defaults:
-		for doctype, field in [
-			["Warehouse", "default_warehouse"],
-			["Cost Center", "buying_cost_center"],
-			["Cost Center", "selling_cost_center"],
-			["Account", "expense_account"],
-			["Account", "income_account"],
-		]:
+		for doctype, field in links:
 			if item_default.get(field):
 				company = frappe.db.get_value(doctype, item_default.get(field), "company", cache=True)
 				if company and company != item_default.company:
@@ -1832,6 +1839,12 @@ def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> Non
 						),
 						title=_("Invalid Item Defaults"),
 					)
+		if (
+			item_default.default_inventory_account
+			and frappe.get_cached_value("Account", item_default.default_inventory_account, "account_type")
+			!= "Stock"
+		):
+			frappe.throw(_("Row #{0}: Inventory Account must be a Stock account.").format(item_default.idx))
 
 
 @frappe.whitelist()
