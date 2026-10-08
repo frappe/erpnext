@@ -236,6 +236,36 @@ class QualityInspection(Document):
 		):
 			self.update_qc_reference()
 
+	def before_cancel(self):
+		self.validate_not_used_by_submitted_document()
+
+	def validate_not_used_by_submitted_document(self):
+		if not (self.reference_type and self.reference_name) or frappe.db.get_single_value(
+			"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+		):
+			return
+
+		if frappe.db.get_value(self.reference_type, self.reference_name, "docstatus") != 1:
+			return
+
+		if self.is_linked_on_reference():
+			frappe.throw(
+				_("Quality Inspection {0} is used by {1} {2}. Cancel {2} first.").format(
+					frappe.bold(self.name),
+					_(self.reference_type),
+					get_link_to_form(self.reference_type, self.reference_name),
+				)
+			)
+
+	def is_linked_on_reference(self):
+		if self.reference_type == "Job Card":
+			return frappe.db.get_value("Job Card", self.reference_name, "quality_inspection") == self.name
+
+		doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		return frappe.db.exists(doctype, {"parent": self.reference_name, "quality_inspection": self.name})
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "Serial and Batch Bundle"
 
