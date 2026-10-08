@@ -128,6 +128,20 @@ class TestWarehouse(ERPNextTestSuite):
 		doc.is_group = 0
 		self.assertRaises(frappe.ValidationError, doc.save)
 
+	def test_convert_to_group_refused_with_open_orders_or_item_default(self):
+		warehouse = create_warehouse("_Test Open Order WH")
+		item = create_item("_Test Open Order Item")
+		frappe.get_doc(
+			{"doctype": "Bin", "item_code": item.name, "warehouse": warehouse, "ordered_qty": 10}
+		).insert()
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse)
+
+		frappe.db.delete("Bin", {"warehouse": warehouse})
+		item.reload()
+		item.item_defaults[0].default_warehouse = warehouse
+		item.save()
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse)
+
 	def test_get_children(self):
 		company = "_Test Company"
 

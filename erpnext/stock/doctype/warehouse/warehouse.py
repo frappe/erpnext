@@ -83,6 +83,20 @@ class Warehouse(NestedSet):
 		if self.is_group and self.check_if_sle_exists():
 			throw(_("Warehouses with existing transaction can not be converted to group."))
 
+		if self.is_group and (bin_with_qty := self.get_bin_with_quantity()):
+			throw(
+				_("Warehouse {0} can not be converted to group as quantity exists for Item {1}").format(
+					self.name, bin_with_qty.item_code
+				)
+			)
+
+		if self.is_group and frappe.db.exists("Item Default", {"default_warehouse": self.name}):
+			throw(
+				_("Warehouse {0} can not be converted to group as it is an Item's default warehouse").format(
+					self.name
+				)
+			)
+
 		if not self.is_group and self.check_if_child_exists():
 			throw(_("Warehouses with child nodes cannot be converted to ledger"))
 
@@ -122,22 +136,12 @@ class Warehouse(NestedSet):
 		frappe.utils.nestedset.update_nsm(self)
 
 	def on_trash(self):
-		# delete bin
-		bins = frappe.get_all("Bin", fields="*", filters={"warehouse": self.name})
-		for d in bins:
-			if (
-				d["actual_qty"]
-				or d["reserved_qty"]
-				or d["ordered_qty"]
-				or d["indented_qty"]
-				or d["projected_qty"]
-				or d["planned_qty"]
-			):
-				throw(
-					_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(
-						self.name, d["item_code"]
-					)
+		if bin_with_qty := self.get_bin_with_quantity():
+			throw(
+				_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(
+					self.name, bin_with_qty.item_code
 				)
+			)
 
 		if self.check_if_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
@@ -148,6 +152,19 @@ class Warehouse(NestedSet):
 		frappe.db.delete("Bin", filters={"warehouse": self.name})
 		self.update_nsm_model()
 		self.unlink_from_items()
+
+	def get_bin_with_quantity(self):
+		qty_fields = (
+			"actual_qty",
+			"reserved_qty",
+			"ordered_qty",
+			"indented_qty",
+			"projected_qty",
+			"planned_qty",
+		)
+		for d in frappe.get_all("Bin", fields=["item_code", *qty_fields], filters={"warehouse": self.name}):
+			if any(d.get(field) for field in qty_fields):
+				return d
 
 	def warn_about_multiple_warehouse_account(self):
 		"If Warehouse value is split across multiple accounts, warn."
