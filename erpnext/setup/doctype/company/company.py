@@ -156,6 +156,11 @@ class Company(NestedSet):
 
 	@frappe.whitelist()
 	def check_if_transactions_exist(self):
+		if frappe.db.exists("GL Entry", {"company": self.name, "is_cancelled": 0}) or frappe.db.exists(
+			"Stock Ledger Entry", {"company": self.name, "is_cancelled": 0}
+		):
+			return True
+
 		exists = False
 		for doctype in [
 			"Sales Invoice",
@@ -455,15 +460,17 @@ class Company(NestedSet):
 					)
 
 	def validate_currency(self):
+		self.previous_default_currency = None
+		self.currency_changed = False
 		if self.is_new():
 			return
 		self.previous_default_currency = frappe.get_cached_value("Company", self.name, "default_currency")
-		if (
+		self.currency_changed = bool(
 			self.default_currency
 			and self.previous_default_currency
 			and self.default_currency != self.previous_default_currency
-			and self.check_if_transactions_exist()
-		):
+		)
+		if self.currency_changed and self.check_if_transactions_exist():
 			frappe.throw(
 				_(
 					"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
@@ -472,6 +479,16 @@ class Company(NestedSet):
 
 	def on_update(self):
 		NestedSet.on_update(self)
+		if self.currency_changed:
+			frappe.db.set_value(
+				"Account",
+				{"company": self.name, "account_currency": self.previous_default_currency},
+				"account_currency",
+				self.default_currency,
+				update_modified=False,
+			)
+			frappe.local.cache.pop("account_currency", None)
+
 		if not frappe.db.exists("Account", {"company": self.name, "docstatus": ["<", 2]}):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
