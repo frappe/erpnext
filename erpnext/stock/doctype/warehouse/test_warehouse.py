@@ -195,6 +195,15 @@ class TestWarehouse(ERPNextTestSuite):
 			)
 			self.assertRaises(frappe.ValidationError, doc.insert)
 
+	def test_warehouse_with_stock_cannot_be_disabled(self):
+		item = create_item("_Test Disable WH Item")
+		warehouse = create_warehouse("_Test Disable Stock WH")
+		make_stock_entry(item_code=item.name, target=warehouse, qty=5, basic_rate=100)
+
+		doc = frappe.get_doc("Warehouse", warehouse)
+		doc.disabled = 1
+		self.assertRaises(frappe.ValidationError, doc.save)
+
 	def test_get_children(self):
 		company = "_Test Company"
 

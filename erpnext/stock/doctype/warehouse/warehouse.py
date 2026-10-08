@@ -76,7 +76,21 @@ class Warehouse(NestedSet):
 		self.validate_group_conversion()
 		self.validate_company_change()
 		self.validate_parent_warehouse()
+		self.validate_disable_with_stock()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_disable_with_stock(self):
+		if not self.disabled or self.is_new() or not self.has_value_changed("disabled"):
+			return
+
+		if item_code := frappe.db.get_value(
+			"Bin", {"warehouse": self.name, "actual_qty": ("!=", 0)}, "item_code"
+		):
+			throw(
+				_("Warehouse {0} cannot be disabled as stock exists for Item {1}").format(
+					frappe.bold(self.name), frappe.bold(item_code)
+				)
+			)
 
 	def validate_parent_warehouse(self):
 		if not self.parent_warehouse:
