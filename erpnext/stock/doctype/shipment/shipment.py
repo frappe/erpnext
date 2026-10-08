@@ -193,7 +193,7 @@ def get_contact_name(ref_doctype: str, docname: str):
 
 @frappe.whitelist()
 def get_company_contact(user: str):
-	frappe.has_permission("User", "read", throw=True)
+	frappe.has_permission("Shipment", "write", throw=True)
 
 	contact = frappe.db.get_value(
 		"User",
@@ -204,7 +204,6 @@ def get_company_contact(user: str):
 			"email",
 			"phone",
 			"mobile_no",
-			"gender",
 		],
 		as_dict=1,
 	)

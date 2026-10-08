@@ -55,6 +55,20 @@ class TestShipment(ERPNextTestSuite):
 		draft_note = create_test_delivery_note()
 		self.assertRaises(frappe.ValidationError, create_test_shipment, [draft_note])
 
+	def test_company_contact_needs_shipment_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.shipment.shipment import get_company_contact
+
+		user = create_user("test_shipment_contact@example.com", "Website Manager")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, get_company_contact, "Administrator")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertNotIn("gender", get_company_contact("Administrator"))
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(
