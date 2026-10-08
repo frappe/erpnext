@@ -602,6 +602,38 @@ class TestQualityInspection(ERPNextTestSuite):
 			first.name,
 		)
 
+	def test_batch_qi_links_to_its_batch_row(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "inspection_required_before_purchase": 1}
+		).name
+		batches = [
+			frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": f"{item}-QI-{i}"}).insert().name
+			for i in range(2)
+		]
+
+		receipt = make_purchase_receipt(item_code=item, qty=1, do_not_save=True, use_serial_batch_fields=1)
+		receipt.items[0].batch_no = batches[0]
+		second_row = receipt.items[0].as_dict().copy()
+		second_row.update({"name": None, "batch_no": batches[1]})
+		receipt.append("items", second_row)
+		receipt.insert()
+
+		qa = create_quality_inspection(
+			item_code=item,
+			reference_type="Purchase Receipt",
+			reference_name=receipt.name,
+			inspection_type="Incoming",
+			do_not_submit=True,
+			do_not_save=True,
+		)
+		qa.batch_no = batches[1]
+		qa.save()
+
+		self.assertEqual(qa.child_row_reference, receipt.items[1].name)
+
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of

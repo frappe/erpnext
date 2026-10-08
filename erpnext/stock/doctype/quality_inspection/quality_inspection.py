@@ -130,6 +130,8 @@ class QualityInspection(Document):
 			)
 			.orderby(child_doc.idx)
 		)
+		if self.batch_no and frappe.get_meta(doctype).has_field("batch_no"):
+			query = query.where(child_doc.batch_no == self.batch_no)
 
 		if child_row_references := query.run(pluck=True):
 			self.child_row_reference = child_row_references[0]
