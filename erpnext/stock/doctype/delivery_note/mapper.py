@@ -11,14 +11,18 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Abs, Sum
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
-from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_bundle_version_for_row,
+	get_product_bundle_items_by_name,
+	is_product_bundle,
+)
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -82,6 +86,7 @@ def make_sales_invoice(
 		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
+		set_invoice_update_stock(target)
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
@@ -172,8 +177,6 @@ def make_sales_invoice(
 		set_missing_values,
 	)
 
-	from frappe.utils import cint
-
 	automatically_fetch_payment_terms = cint(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
@@ -206,6 +209,35 @@ def make_sales_invoice(
 			ps.set_payment_schedule()
 
 	return doc
+
+
+def set_invoice_update_stock(invoice: Document) -> None:
+	if not any(item.delivery_note for item in invoice.items):
+		return
+	if cint(invoice.update_stock):
+		for item in invoice.items:
+			if not item.delivery_note and _item_updates_stock(item):
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} is not linked to a Delivery Note. "
+						"Create a separate stock-updating Sales Invoice or a Delivery Note for this item "
+						"before fetching Delivery Note items."
+					).format(item.idx, frappe.bold(item.item_code)),
+					title=_("Cannot Combine Stock Updates with Delivery Notes"),
+				)
+	# Delivery Notes have already posted stock; override even a customized invoice default.
+	invoice.update_stock = 0
+
+
+def _item_updates_stock(item: Document) -> bool:
+	if frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+		return True
+	if bundle := get_bundle_version_for_row(item):
+		return any(
+			frappe.get_cached_value("Item", component.item_code, "is_stock_item")
+			for component in get_product_bundle_items_by_name(bundle)
+		)
+	return False
 
 
 @frappe.whitelist()
