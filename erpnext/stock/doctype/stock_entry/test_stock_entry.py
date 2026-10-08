@@ -1260,7 +1260,10 @@ class TestStockEntry(ERPNextTestSuite):
 			},
 		)
 
-		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		receipt = make_stock_entry(
+			item_code=item.name, target="_Test Warehouse - _TC", qty=50, basic_rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
 
 		ste = frappe.new_doc("Stock Entry")
 		ste.purpose = "Material Issue"
@@ -1271,6 +1274,8 @@ class TestStockEntry(ERPNextTestSuite):
 				{
 					"item_code": item.name,
 					"s_warehouse": "_Test Warehouse - _TC",
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
 					"qty": qty,
 					"uom": item.stock_uom,
 					"stock_uom": item.stock_uom,
@@ -2723,6 +2728,43 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(se.items[0].expense_account, "_Test Account Cost for Goods Sold - _TC")
 		self.assertEqual(se.items[1].expense_account, "_Test Account Cost for Goods Sold - _TC")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"do_not_use_batchwise_valuation": 0,
+			"allow_negative_stock": 0,
+		},
+	)
+	def test_auto_picked_batches_differ_across_rows(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PABR-.#####",
+			}
+		).name
+		for _ in range(3):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, rate=100)
+
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			do_not_save=True,
+		)
+		for _ in range(2):
+			transfer.append("items", transfer.items[0].as_dict(no_default_fields=True))
+		for row in transfer.items:
+			row.use_serial_batch_fields = 0
+		transfer.insert()
+		transfer.submit()
+
+		picked = [get_batch_from_bundle(row.serial_and_batch_bundle) for row in transfer.items]
+		self.assertEqual(len(set(picked)), 3)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
@@ -4220,12 +4262,12 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, se.save)
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
-	)
 	def test_sample_retention_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
 
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
 		warehouse = "_Test Warehouse - _TC"
 		retain_sample_item = make_item(
 			"Retain Sample Item",
@@ -4454,6 +4496,60 @@ class TestStockEntry(ERPNextTestSuite):
 			# zero Finished Good Quantity must not skip the check
 			se.fg_completed_qty = 0
 			self.assertRaises(FinishedGoodError, se.validate_finished_good_qty_against_fg_completed_qty)
+
+	def test_validate_sample_quantity_raises_when_company_has_no_retention_warehouse(self):
+		"""Item.retain_sample only needs *some* company configured, so the transaction company may not be."""
+		from erpnext.stock.doctype.stock_entry.stock_entry import validate_sample_quantity
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+		frappe.db.set_value("Company", "_Test Company 1", "sample_retention_warehouse", None)
+		item = make_item(
+			"_Sample Qty No Retention Item",
+			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2, "has_batch_no": 1},
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			validate_sample_quantity,
+			item.name,
+			1,
+			5,
+			"_Test Company 1",
+			"_Sample Batch",
+		)
+
+	def test_sample_retention_warehouse_denied_for_other_company(self):
+		"""`company` comes from whitelisted callers, so it must not read another company's stock."""
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_sample_retention_warehouse
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+
+		user = "test_sample_retention_perm@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sample Retention",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Stock User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
 	def test_process_loss_percentage_resyncs_from_qty(self):
 		# changing fg qty recomputes process_loss_qty

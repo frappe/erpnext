@@ -827,6 +827,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_return: cint(me.frm.doc.is_return),
+							return_against: me.frm.doc.return_against,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 							doctype: me.frm.doc.doctype,
@@ -1496,7 +1497,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (
 			this.frm.doc.currency &&
 			this.frm.doc.currency !== company_currency &&
-			(!this.frm.doc.__onload?.load_after_mapping || inter_company_reference)
+			(!this.frm.doc.__onload?.load_after_mapping ||
+				inter_company_reference ||
+				this.frm.doc.use_transaction_date_exchange_rate)
 		) {
 			this.get_exchange_rate(
 				transaction_date,
@@ -2234,6 +2237,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			doctype: me.frm.doc.doctype,
 			name: me.frm.doc.name,
 			is_return: cint(me.frm.doc.is_return),
+			return_against: me.frm.doc.return_against,
 			update_stock: ["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)
 				? cint(me.frm.doc.update_stock)
 				: 0,

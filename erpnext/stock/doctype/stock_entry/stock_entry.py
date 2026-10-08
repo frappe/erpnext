@@ -1997,6 +1997,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		already_picked_serial_nos = []
+		already_picked_batches = frappe._dict()
 
 		for row in self.items:
 			if row.use_serial_batch_fields:
@@ -2019,6 +2020,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"serial_and_batch_bundle": row.serial_and_batch_bundle,
 						"type_of_transaction": "Outward",
 						"ignore_serial_nos": already_picked_serial_nos,
+						"already_picked_batches": already_picked_batches,
 						"qty": row.transfer_qty * -1,
 					}
 				).update_serial_and_batch_entries(
@@ -2036,6 +2038,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"voucher_detail_no": row.name,
 						"qty": row.transfer_qty * -1,
 						"ignore_serial_nos": already_picked_serial_nos,
+						"already_picked_batches": already_picked_batches,
 						"type_of_transaction": "Outward",
 						"company": self.company,
 						"do_not_submit": True,
@@ -2048,10 +2051,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue
 
 			for entry in bundle_doc.entries:
-				if not entry.serial_no:
-					continue
-
-				already_picked_serial_nos.append(entry.serial_no)
+				if entry.serial_no:
+					already_picked_serial_nos.append(entry.serial_no)
+				if entry.batch_no:
+					key = (entry.batch_no, bundle_doc.warehouse)
+					picked = already_picked_batches.setdefault(
+						key, frappe._dict(batch_no=entry.batch_no, warehouse=bundle_doc.warehouse, qty=0)
+					)
+					picked.qty += entry.qty
 
 			row.serial_and_batch_bundle = bundle_doc.name
 
@@ -4521,7 +4528,7 @@ def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, str):
 		items = json.loads(items)
 
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.company = company
 	stock_entry.purpose = "Material Transfer"
@@ -4547,6 +4554,7 @@ def move_sample_to_retention_warehouse(company, items):
 					item.get("item_code"),
 					item.get("sample_quantity"),
 					item.get("transfer_qty") or item.get("qty"),
+					company,
 					batch_no,
 				)
 
@@ -4889,12 +4897,12 @@ def get_warehouse_details(args):
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
+def validate_sample_quantity(item_code, sample_quantity, qty, company, batch_no=None):
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
 		)
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	retainted_qty = 0
 	if batch_no:
 		retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code)
@@ -4917,6 +4925,21 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
 		)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+
+def get_sample_retention_warehouse(company: str) -> str:
+	# `company` arrives from whitelisted callers, so it decides which company's stock gets read.
+	frappe.has_permission("Company", "read", company, throw=True)
+
+	warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	if not warehouse:
+		frappe.throw(
+			_("Please set {0} in Company {1} to retain samples.").format(
+				bold(_("Sample Retention Warehouse")), bold(company)
+			),
+			title=_("Sample Retention Warehouse Missing"),
+		)
+	return warehouse
 
 
 def get_supplied_items(

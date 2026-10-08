@@ -955,11 +955,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 		existing_item = so.get("items")[0]
 
-		stock_settings_default = frappe.db.get_single_value("Stock Settings", "default_warehouse")
-		frappe.db.set_single_value("Stock Settings", "default_warehouse", None)
-		self.addCleanup(
-			frappe.db.set_single_value, "Stock Settings", "default_warehouse", stock_settings_default
-		)
+		# a company gets a default warehouse when its warehouses are created
+		frappe.db.set_value("Company", so.company, "default_warehouse", None)
 
 		def get_trans_items(warehouse=None):
 			new_row = {"item_code": item_code, "rate": 200, "qty": 7}
@@ -978,7 +975,7 @@ class TestSalesOrder(ERPNextTestSuite):
 				]
 			)
 
-		# no default in the Item Master, Item Group, Brand or Stock Settings
+		# no default in the Item Master, Item Group, Brand or Company
 		self.assertRaisesRegex(
 			frappe.ValidationError,
 			"Cannot find a default warehouse",
@@ -1386,8 +1383,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[0].tax_amount, 10)
 		self.assertEqual(so.taxes[0].total, 110)
 
-		old_stock_settings_value = frappe.db.get_single_value("Stock Settings", "default_warehouse")
-		frappe.db.set_single_value("Stock Settings", "default_warehouse", "_Test Warehouse - _TC")
+		old_default_warehouse = frappe.db.get_value("Company", "_Test Company", "default_warehouse")
+		frappe.db.set_value("Company", "_Test Company", "default_warehouse", "_Test Warehouse - _TC")
 
 		items = json.dumps(
 			[
@@ -1423,7 +1420,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.delete()
 		new_item_with_tax.delete()
 		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
-		frappe.db.set_single_value("Stock Settings", "default_warehouse", old_stock_settings_value)
+		frappe.db.set_value("Company", "_Test Company", "default_warehouse", old_default_warehouse)
 
 	def test_warehouse_user(self):
 		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")

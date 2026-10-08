@@ -612,6 +612,34 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"use_transaction_date_exchange_rate": 1, "set_landed_cost_based_on_purchase_invoice_rate": 0},
+	)
+	def test_transaction_date_exchange_rate_applies_only_when_mapping_from_purchase_order(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as create_purchase_invoice,
+		)
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			currency="USD",
+			conversion_rate=70,
+		)
+		pi = create_purchase_invoice(pr.name)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 70)
+
+		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD")
+		pi = make_pi_from_po(po.name)
+		self.assertTrue(pi.use_transaction_date_exchange_rate)
+		pi.conversion_rate = 75
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 75)
+
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][1])
 		pi.insert()
