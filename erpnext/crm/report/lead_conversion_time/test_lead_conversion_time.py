@@ -74,6 +74,26 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		# from the earliest REAL contact (22 days ago, not the NULL-dated one) to the posting date
 		self.assertEqual(row[2], 20.0)
 
+	def test_first_contact_matches_whole_addresses(self):
+		email = "ann_lct@example.com"
+		lead = make_lead("_Test Lead Conv Overlap", email)
+		make_opportunity(lead, email)
+		make_submitted_invoice(email)
+		make_communication(email, f"jo{email}", -30)
+		make_communication(email, f"Ann <{email}>", -22)
+
+		self.assertEqual(get_report_rows(lead.lead_name)[0][2], 20.0)
+
+	def test_lead_converted_through_a_later_opportunity(self):
+		email = "_test_lead_conv_later@example.com"
+		lead = make_lead("_Test Lead Conv Later", email)
+		make_opportunity(lead, None)
+		make_opportunity(lead, email)
+		make_submitted_invoice(email)
+		make_communication(email, email, -22)
+
+		self.assertEqual(len(get_report_rows(lead.lead_name)), 1)
+
 	def test_sales_user_can_run_the_report(self):
 		frappe.reload_doc("crm", "report", "lead_conversion_time", force=True)
 		user = create_user("lead_conversion_sales_user@example.com", "Sales User")
@@ -81,3 +101,50 @@ class TestLeadConversionTime(ERPNextTestSuite):
 
 		with self.set_user(user.name):
 			self.assertIn("result", run("Lead Conversion Time", filters=filters))
+
+
+def make_lead(lead_name: str, email: str):
+	return frappe.get_doc({"doctype": "Lead", "lead_name": lead_name, "email_id": email}).insert(
+		ignore_permissions=True
+	)
+
+
+def make_opportunity(lead, contact_email: str | None):
+	return frappe.get_doc(
+		{
+			"doctype": "Opportunity",
+			"opportunity_from": "Lead",
+			"party_name": lead.name,
+			"company": "_Test Company",
+			"currency": "INR",
+			"conversion_rate": 1,
+			"contact_email": contact_email,
+			"customer_name": lead.lead_name,
+		}
+	).insert(ignore_permissions=True)
+
+
+def make_submitted_invoice(email: str):
+	si = create_sales_invoice(do_not_save=1)
+	si.contact_email = email
+	si.set_posting_time = 1
+	si.posting_date = add_days(nowdate(), -2)
+	return si.submit()
+
+
+def make_communication(sender: str, recipients: str, days: int):
+	communication = frappe.get_doc(
+		{"doctype": "Communication", "subject": "lead", "sender": sender, "recipients": recipients}
+	).insert(ignore_permissions=True)
+	frappe.db.set_value(
+		"Communication",
+		communication.name,
+		"communication_date",
+		add_days(nowdate(), days),
+		update_modified=False,
+	)
+
+
+def get_report_rows(customer_name: str) -> list:
+	filters = frappe._dict({"from_date": add_days(nowdate(), -30), "to_date": nowdate()})
+	return [row for row in execute(filters)[1] if row[0] == customer_name]

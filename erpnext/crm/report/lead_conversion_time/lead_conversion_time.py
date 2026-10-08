@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, msgprint
 from frappe.query_builder.functions import Count, Date
-from frappe.utils import date_diff, flt
+from frappe.utils import date_diff, flt, parse_addr, split_emails
 
 
 def execute(filters=None):
@@ -75,76 +75,84 @@ def get_columns():
 
 
 def get_communication_details(filters):
-	communication_count = None
 	communication_list = []
-	opportunities = get_first_opportunity_of_each_lead()
-
-	si = frappe.qb.DocType("Sales Invoice")
-	comm = frappe.qb.DocType("Communication")
-
-	for d in opportunities:
-		invoice = (
-			frappe.qb.from_(si)
-			.select(si.posting_date)
-			.where(
-				(si.contact_email == d.contact_email)
-				& si.posting_date.between(filters.from_date, filters.to_date)
-				& (si.docstatus == 1)
-			)
-			.orderby(si.posting_date)
-			.limit(1)
-			.run()
-		)
-
-		if not invoice:
+	converted_leads = set()
+	for opportunity in get_lead_opportunities():
+		if opportunity.party_name in converted_leads:
 			continue
-
-		invoice_date = invoice[0][0]
-
-		communication_count = (
-			frappe.qb.from_(comm)
-			.select(Count("*"))
-			.where((comm.sender == d.contact_email) & (Date(comm.communication_date) <= invoice_date))
-			.run()
-		)[0][0]
-
-		if not communication_count:
-			continue
-
-		first_contact = (
-			frappe.qb.from_(comm)
-			.select(Date(comm.communication_date))
-			.where(comm.recipients.like(f"%{d.contact_email}%") & comm.communication_date.isnotnull())
-			.orderby(comm.communication_date)
-			.limit(1)
-			.run()
-		)
-		first_contact = first_contact[0][0] if first_contact else None
-		if not first_contact:
-			continue
-
-		duration = flt(date_diff(invoice_date, first_contact))
-
-		support_tickets = len(frappe.db.get_all("Issue", {"raised_by": d.contact_email}))
-		communication_list.append(
-			{
-				"customer": d.customer_name,
-				"interactions": communication_count,
-				"duration": duration,
-				"support_tickets": support_tickets,
-			}
-		)
+		row = get_conversion_details(opportunity, filters)
+		if row:
+			converted_leads.add(opportunity.party_name)
+			communication_list.append(row)
 	return communication_list
 
 
-def get_first_opportunity_of_each_lead() -> list[dict]:
-	opportunities = {}
-	for opportunity in frappe.get_list(
+def get_lead_opportunities() -> list[dict]:
+	return frappe.get_list(
 		"Opportunity",
 		filters={"opportunity_from": "Lead"},
 		fields=["party_name", "customer_name", "contact_email"],
 		order_by="creation",
-	):
-		opportunities.setdefault(opportunity.party_name, opportunity)
+	)
 
-	return list(opportunities.values())
+
+def get_conversion_details(d: dict, filters: dict) -> dict | None:
+	si = frappe.qb.DocType("Sales Invoice")
+	comm = frappe.qb.DocType("Communication")
+
+	invoice = (
+		frappe.qb.from_(si)
+		.select(si.posting_date)
+		.where(
+			(si.contact_email == d.contact_email)
+			& si.posting_date.between(filters.from_date, filters.to_date)
+			& (si.docstatus == 1)
+		)
+		.orderby(si.posting_date)
+		.limit(1)
+		.run()
+	)
+
+	if not invoice:
+		return
+
+	invoice_date = invoice[0][0]
+
+	communication_count = (
+		frappe.qb.from_(comm)
+		.select(Count("*"))
+		.where((comm.sender == d.contact_email) & (Date(comm.communication_date) <= invoice_date))
+		.run()
+	)[0][0]
+
+	if not communication_count:
+		return
+
+	first_contact = get_first_contact_date(d.contact_email)
+	if not first_contact:
+		return
+
+	return {
+		"customer": d.customer_name,
+		"interactions": communication_count,
+		"duration": flt(date_diff(invoice_date, first_contact)),
+		"support_tickets": len(frappe.db.get_all("Issue", {"raised_by": d.contact_email})),
+	}
+
+
+def get_first_contact_date(email: str):
+	comm = frappe.qb.DocType("Communication")
+	communications = (
+		frappe.qb.from_(comm)
+		.select(comm.recipients, Date(comm.communication_date))
+		.where(comm.recipients.like(f"%{email}%") & comm.communication_date.isnotnull())
+		.orderby(comm.communication_date)
+		.run()
+	)
+	for recipients, communication_date in communications:
+		if is_recipient(email, recipients):
+			return communication_date
+
+
+def is_recipient(email: str, recipients: str) -> bool:
+	return any(parse_addr(recipient)[1].lower() == email.lower() for recipient in split_emails(recipients))
