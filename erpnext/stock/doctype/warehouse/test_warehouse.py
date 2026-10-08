@@ -7,7 +7,11 @@ import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
+from erpnext.stock.doctype.warehouse.warehouse import (
+	convert_to_group_or_ledger,
+	get_children,
+	get_warehouses_based_on_account,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -87,6 +91,26 @@ class TestWarehouse(ERPNextTestSuite):
 		make_stock_entry(item_code="_Test Item", target=warehouse.name, qty=1)
 		# SLE exists
 		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse.name)
+
+	def test_warehouses_based_on_account_follow_effective_account(self):
+		company = "_Test Company"
+		default_account = get_warehouse_account("_Test Default Inventory", company)
+		frappe.db.set_value("Company", company, "default_inventory_account", default_account)
+		inheriting = create_warehouse("_Test Default Account WH", {"account": None}, company=company)
+		explicit = create_warehouse(
+			"_Test Explicit Default WH", {"account": default_account}, company=company
+		)
+		disabled = create_warehouse(
+			"_Test Disabled Default WH", {"account": default_account}, company=company
+		)
+		frappe.db.set_value("Warehouse", disabled, "disabled", 1)
+		other = create_warehouse("_Test Other Account WH", company=company)
+
+		warehouses = get_warehouses_based_on_account(default_account, company)
+
+		self.assertTrue({inheriting, explicit, disabled} <= set(warehouses))
+		self.assertNotIn(other, warehouses)
+		self.assertNotIn("_Test Warehouse - _TC1", warehouses)
 
 	def test_get_children(self):
 		company = "_Test Company"
