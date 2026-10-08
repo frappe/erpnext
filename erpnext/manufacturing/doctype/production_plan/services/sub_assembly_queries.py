@@ -102,15 +102,18 @@ def _resolve_available_sub_assembly(
 
 
 def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
-	projected_qty = bin_details[d.item_code].projected_qty
-	if projected_qty <= 0:
+	bin_dict = bin_details[d.item_code]
+	available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
+	if available_qty <= 0:
 		return stock_qty
 
-	if projected_qty >= stock_qty:
+	if available_qty >= stock_qty:
+		bin_dict.available_qty = available_qty - stock_qty
 		return 0
 
+	bin_dict.available_qty = 0
 	sub_assembly_items.append(d.item_code)
-	return stock_qty - projected_qty
+	return stock_qty - available_qty
 
 
 def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision):
