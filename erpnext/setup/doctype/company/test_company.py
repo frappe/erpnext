@@ -423,6 +423,32 @@ class TestCompany(ERPNextTestSuite):
 			company.set_provisional_expense_visibility(False)
 			self.assertTrue(setter.call_args.args[3])
 
+	def test_opening_invoice_does_not_count_as_monthly_sales(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.setup.doctype.company.company import (
+			update_company_current_month_sales,
+			update_company_monthly_sales,
+		)
+
+		invoice = create_sales_invoice()
+		update_company_current_month_sales(invoice.company)
+		update_company_monthly_sales(invoice.company)
+		before = frappe.db.get_value(
+			"Company", invoice.company, ["total_monthly_sales", "sales_monthly_history"], as_dict=True
+		)
+		invoice.db_set("is_opening", "Yes")
+		update_company_current_month_sales(invoice.company)
+		update_company_monthly_sales(invoice.company)
+		after = frappe.db.get_value(
+			"Company", invoice.company, ["total_monthly_sales", "sales_monthly_history"], as_dict=True
+		)
+		self.assertEqual(before.total_monthly_sales - after.total_monthly_sales, invoice.base_grand_total)
+		self.assertEqual(
+			sum(json.loads(before.sales_monthly_history).values())
+			- sum(json.loads(after.sales_monthly_history).values()),
+			invoice.base_grand_total,
+		)
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
