@@ -801,6 +801,35 @@ class TestItemStandardCost(ERPNextTestSuite):
 		# The submit must have invalidated the cache, so this reads the freshly submitted rate.
 		self.assertEqual(flt(get_item_standard_rate(item.name, TEST_COMPANY)), 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_invoice_rate_change_reposts_standard_cost_receipt_gl(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		ppv_account = ensure_ppv_account(PI_COMPANY)
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, company=PI_COMPANY)
+
+		receipt = make_purchase_receipt(
+			item_code=item.name, company=PI_COMPANY, warehouse=PI_STORES, qty=10, rate=120
+		)
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.items[0].rate = 130
+		invoice.insert()
+		invoice.submit()
+
+		ppv = sum(
+			flt(row.debit) - flt(row.credit)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": receipt.name, "account": ppv_account, "is_cancelled": 0},
+				fields=["debit", "credit"],
+			)
+		)
+		self.assertEqual(ppv, 300)
+
 	def test_pr_books_variance_to_ppv_account(self):
 		# Receiving a Standard Cost item at a rate above the standard must book the difference to the
 		# Purchase Price Variance account, not the default expense (COGS) account.

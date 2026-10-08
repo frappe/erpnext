@@ -968,6 +968,23 @@ def create_item_wise_repost_entries(
 	return repost_entries
 
 
+def create_accounting_repost_entry(voucher_type, voucher_no):
+	repost_entry = frappe.new_doc("Repost Item Valuation")
+	repost_entry.based_on = "Transaction"
+	repost_entry.voucher_type = voucher_type
+	repost_entry.voucher_no = voucher_no
+	repost_entry.update(
+		frappe.db.get_value(
+			voucher_type, voucher_no, ["company", "posting_date", "posting_time"], as_dict=True
+		)
+	)
+	repost_entry.repost_only_accounting_ledgers = 1
+	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
+	repost_entry.submit()
+	return repost_entry
+
+
 def make_bundle_for_material_transfer(**kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
