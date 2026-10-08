@@ -502,6 +502,17 @@ class TestCompany(ERPNextTestSuite):
 		self.assertEqual(before.total_monthly_sales, after.total_monthly_sales)
 		self.assertEqual(json.loads(before.sales_monthly_history), json.loads(after.sales_monthly_history))
 
+	def test_invalid_default_warehouses(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.default_in_transit_warehouse = company.default_warehouse
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_in_transit_warehouse = None
+		frappe.db.set_value("Warehouse", company.default_warehouse, "disabled", 1)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
 	def test_clear_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, read_data_file_using_hooks
 
