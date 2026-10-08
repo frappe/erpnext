@@ -322,28 +322,10 @@ class PurchaseReceipt(BuyingController):
 					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def validate_items_quality_inspection(self):
+		from erpnext.stock.services.quality_inspection_service import validate_qi_reference
+
 		for item in self.get("items"):
-			if item.quality_inspection:
-				qi = frappe.db.get_value(
-					"Quality Inspection",
-					item.quality_inspection,
-					["reference_type", "reference_name", "item_code"],
-					as_dict=True,
-				)
-
-				if qi.reference_type != self.doctype or qi.reference_name != self.name:
-					frappe.throw(
-						_(
-							"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
-						).format(item.idx, frappe.bold(self.doctype), frappe.bold(self.name))
-					)
-
-				if qi.item_code != item.item_code:
-					frappe.throw(
-						_("Row #{0}: Please select a valid Quality Inspection with Item Code {1}.").format(
-							item.idx, frappe.bold(item.item_code)
-						)
-					)
+			validate_qi_reference(self, item)
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.get_all(

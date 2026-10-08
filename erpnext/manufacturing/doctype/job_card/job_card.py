@@ -872,6 +872,10 @@ class JobCard(Document):
 				).format(get_link_to_form("Item", self.finished_good), bold(self.name))
 			)
 
+		from erpnext.stock.services.quality_inspection_service import validate_qi_reference
+
+		validate_qi_reference(self, self, item_code=self.production_item)
+
 		action_submit, action_reject = frappe.get_single_value(
 			"Stock Settings",
 			["action_if_quality_inspection_is_not_submitted", "action_if_quality_inspection_is_rejected"],
