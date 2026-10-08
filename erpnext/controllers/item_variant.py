@@ -487,7 +487,7 @@ def get_fields_excluded_from_variant_copy(item, variant):
 		exclude_fields += ["manufacturer", "manufacturer_part_no"]
 
 	if not variant.is_new() and frappe.get_single_value("Item Variant Settings", "allow_different_uom"):
-		exclude_fields += ["stock_uom", "uoms"]
+		exclude_fields += ["stock_uom", "uoms", "sales_uom", "purchase_uom"]
 
 	return exclude_fields
 
