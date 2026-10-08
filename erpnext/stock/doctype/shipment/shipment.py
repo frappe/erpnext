@@ -85,8 +85,8 @@ class Shipment(Document):
 	def on_submit(self):
 		if not self.shipment_parcel:
 			frappe.throw(_("Please enter Shipment Parcel information"))
-		if self.value_of_goods == 0:
-			frappe.throw(_("Value of goods cannot be 0"))
+		if flt(self.value_of_goods) <= 0:
+			frappe.throw(_("Value of goods must be greater than 0"))
 		self.db_set("status", "Submitted")
 
 	def on_cancel(self):

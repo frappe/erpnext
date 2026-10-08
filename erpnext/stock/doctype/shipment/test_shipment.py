@@ -69,6 +69,16 @@ class TestShipment(ERPNextTestSuite):
 
 		self.assertNotIn("gender", get_company_contact("Administrator"))
 
+	def test_return_delivery_note_cannot_be_shipped(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+		return_note = make_sales_return(delivery_note.name)
+		return_note.submit()
+
+		self.assertRaises(frappe.ValidationError, make_shipment, return_note.name)
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(
