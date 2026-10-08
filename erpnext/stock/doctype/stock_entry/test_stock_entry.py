@@ -635,9 +635,30 @@ class TestStockEntry(ERPNextTestSuite):
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
 	)
 	def test_additional_cost_follows_auto_picked_transfer_rows(self):
-		transfer = self.make_auto_picked_batch_transfer(rates=(100, 300), row_qtys=(1, 1), additional_cost=40)
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+		create_cost_center(
+			cost_center_name="_Test APBT Cost Center", company="_Test Company with perpetual inventory"
+		)
+		cost_centers = ("Main - TCP1", "_Test APBT Cost Center - TCP1")
+		transfer = self.make_auto_picked_batch_transfer(
+			rates=(100, 300), row_qtys=(1, 1), additional_cost=40, cost_centers=cost_centers
+		)
 
 		self.assertEqual([d.amount for d in transfer.items], [110, 330])
+		freight = dict(
+			frappe.get_all(
+				"GL Entry",
+				filters={
+					"voucher_no": transfer.name,
+					"account": transfer.additional_costs[0].expense_account,
+					"is_cancelled": 0,
+				},
+				fields=["cost_center", "credit"],
+				as_list=True,
+			)
+		)
+		self.assertEqual(freight, dict(zip(cost_centers, (10, 30), strict=True)))
 		inward_values = dict(
 			frappe.get_all(
 				"Stock Ledger Entry",
@@ -648,7 +669,47 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 		self.assertEqual(inward_values, {d.name: d.amount for d in transfer.items})
 
-	def make_auto_picked_batch_transfer(self, rates=(100, 200, 300), row_qtys=(2,), additional_cost=20):
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
+	def test_auto_picked_repack_values_finished_good_at_consumed_cost(self):
+		raw_material = self.make_batches_at_rates((100, 200, 600), "_Test Warehouse - _TC")
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		repack = make_stock_entry(
+			item_code=raw_material,
+			source="_Test Warehouse - _TC",
+			qty=2,
+			purpose="Repack",
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{
+				"item_code": finished_good,
+				"t_warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"conversion_factor": 1,
+				"is_finished_item": 1,
+			},
+		)
+		repack.insert()
+		repack.submit()
+		repack.reload()
+
+		finished_good_row = repack.items[1]
+		self.assertEqual(finished_good_row.amount, 300)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_detail_no": finished_good_row.name, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			300,
+		)
+
+	def make_batches_at_rates(self, rates, warehouse):
 		item_code = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -660,23 +721,27 @@ class TestStockEntry(ERPNextTestSuite):
 		).name
 		for rate in rates:
 			make_stock_entry(
-				item_code=item_code,
-				target="_Test Warehouse - _TC",
-				qty=1,
-				rate=rate,
-				use_serial_batch_fields=1,
+				item_code=item_code, target=warehouse, qty=1, rate=rate, use_serial_batch_fields=1
 			)
 
+		return item_code
+
+	def make_auto_picked_batch_transfer(
+		self, rates=(100, 200, 300), row_qtys=(2,), additional_cost=20, cost_centers=()
+	):
+		item_code = self.make_batches_at_rates(rates, "Stores - TCP1")
 		transfer = make_stock_entry(
 			item_code=item_code,
-			source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC",
+			source="Stores - TCP1",
+			target="Finished Goods - TCP1",
 			qty=row_qtys[0],
 			use_serial_batch_fields=1,
 			do_not_save=True,
 		)
 		for qty in row_qtys[1:]:
 			transfer.append("items", {**transfer.items[0].as_dict(no_default_fields=True), "qty": qty})
+		for row, cost_center in zip(transfer.items, cost_centers, strict=False):
+			row.cost_center = cost_center
 		transfer.append(
 			"additional_costs",
 			{
