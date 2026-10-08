@@ -2958,10 +2958,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-	@ERPNextTestSuite.change_settings(
-		"Accounts Settings",
-		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
-	)
 	def test_on_recurring_keeps_terms_and_shifts_service_dates(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 
@@ -3006,6 +3002,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(getdate(new_invoice.items[0].service_start_date), getdate("2025-02-01"))
 		self.assertEqual(getdate(new_invoice.items[0].service_end_date), getdate("2025-02-28"))
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
+	)
 	def test_deferred_revenue(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",
