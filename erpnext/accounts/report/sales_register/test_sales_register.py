@@ -187,6 +187,41 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		report_output = {k: v for k, v in report[1][0].items() if k in expected_result}
 		self.assertDictEqual(report_output, expected_result)
 
+	def test_customer_group_filter_includes_child_groups(self):
+		si = self.create_sales_invoice()
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"customer_group": "All Customer Groups",
+			}
+		)
+		self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
+
+	def test_group_filters_need_no_access_to_the_tree(self):
+		si = self.create_sales_invoice()
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "_test_sr_accounts_manager@example.com",
+				"first_name": "Accounts Manager",
+			}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles("Accounts Manager")
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			customer_group="All Customer Groups",
+		)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_sales_register_ignores_tax_rows_from_other_doctype(self):
 		si = self.create_sales_invoice(rate=98)
 
@@ -328,7 +363,7 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		self.assertDictEqual(result_output, expected_result)
 
 	def test_ledger_view_matches_party_gl(self):
-		self.create_sales_invoice(rate=100)
+		invoice = self.create_sales_invoice(rate=99.6)
 		receipt = self.make_customer_payment("Receive", 60)
 		refund = self.make_customer_payment("Pay", 10)
 		bank_entry = self.make_party_journal("Bank Entry", credit=20)
@@ -336,6 +371,7 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
 		expected = {
+			invoice.name: (invoice.base_rounded_total, 0),
 			receipt.name: (0, 60),
 			refund.name: (10, 0),
 			bank_entry.name: (0, 20),
@@ -347,6 +383,15 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		closing_balance = list(rows.values())[-1]["balance"]
 		self.assertEqual(flt(closing_balance), self.get_customer_gl_balance())
+
+	def test_ledger_view_debits_grand_total_without_rounding_adjustment(self):
+		# older invoices can carry a rounded total without having posted a rounding adjustment
+		invoice = self.create_sales_invoice(rate=99.6)
+		invoice.db_set("base_rounding_adjustment", 0)
+
+		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
+
+		self.assertEqual(rows[invoice.name]["debit"], invoice.base_grand_total)
 
 	def test_ledger_view_nets_pos_paid_invoice(self):
 		# A POS payment settles the receivable inside the invoice, so the ledger view must credit it
@@ -397,15 +442,22 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		)
 		foreign_invoice.db_set("currency", "USD")
 		foreign_invoice.db_set("conversion_rate", 80)
+		foreign_invoice.db_set("party_account_currency", "USD")
 		foreign_invoice.db_set("outstanding_amount", 100.236)
 		make_customer("_Test Customer2")
 		local_invoice = create_sales_invoice(
 			customer="_Test Customer2", currency="INR", conversion_rate=1, qty=1, rate=200
 		)
 		local_invoice.db_set("outstanding_amount", 200.456)
+		# foreign currency invoice on a company currency receivable: outstanding is already in INR
+		foreign_invoice_on_local_receivable = create_sales_invoice(customer="_Test Customer2", qty=1, rate=10)
+		foreign_invoice_on_local_receivable.db_set("currency", "USD")
+		foreign_invoice_on_local_receivable.db_set("conversion_rate", 80)
+		foreign_invoice_on_local_receivable.db_set("outstanding_amount", 800)
 		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
 		outstanding_precision = 2
 
 		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
 		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
 		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
+		self.assertEqual(data_by_name.get(foreign_invoice_on_local_receivable.name), 800)
