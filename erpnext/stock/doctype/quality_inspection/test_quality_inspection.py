@@ -672,6 +672,35 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.cancel()
 		self.assertEqual(qa.docstatus, 2)
 
+	def test_item_query_for_job_card_respects_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import item_query
+
+		job_card = make_minimal_job_card(production_item="_Test Item")
+		args = ("Item", "", "name", 0, 20)
+
+		self.assertFalse(item_query(*args, {"reference_doctype": "Job Card"}))
+		self.assertEqual(
+			[
+				row[0]
+				for row in item_query(*args, {"reference_doctype": "Job Card", "reference_name": job_card})
+			],
+			["_Test Item"],
+		)
+
+		user = create_user("test_qi_item_query@example.com", "Website Manager")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				item_query,
+				*args,
+				{"reference_doctype": "Job Card", "reference_name": job_card},
+			)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of

@@ -487,10 +487,12 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 	if not reference_doctype:
 		return []
 	elif reference_doctype == "Job Card":
-		production_item, item_name = frappe.get_value(
-			"Job Card", filters.get("reference_name"), ["production_item", "item_name"]
+		return frappe.get_list(
+			"Job Card",
+			filters={"name": filters.get("reference_name")},
+			fields=["production_item", "item_name"],
+			as_list=True,
 		)
-		return ((production_item, item_name),)
 	else:
 		my_filters = [
 			["items.parent", "=", filters.get("reference_name")],
