@@ -142,6 +142,27 @@ class TestWarehouse(ERPNextTestSuite):
 		item.save()
 		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse)
 
+	def test_company_cannot_change_with_stock(self):
+		item = create_item("_Test Company Change Item")
+		warehouse = create_warehouse("_Test Company Change WH")
+		make_stock_entry(item_code=item.name, target=warehouse, qty=3, basic_rate=100)
+
+		doc = frappe.get_doc("Warehouse", warehouse)
+		doc.company = "_Test Company 1"
+		doc.account = None
+		doc.parent_warehouse = None
+		self.assertRaisesRegex(frappe.ValidationError, "stock transactions", doc.save)
+
+	def test_company_cannot_change_on_group_with_children(self):
+		group = create_warehouse("_Test Company Change Group", properties={"is_group": 1})
+		create_warehouse("_Test Company Change Child", properties={"parent_warehouse": group})
+
+		doc = frappe.get_doc("Warehouse", group)
+		doc.company = "_Test Company 1"
+		doc.account = None
+		doc.parent_warehouse = None
+		self.assertRaisesRegex(frappe.ValidationError, "child warehouses", doc.save)
+
 	def test_get_children(self):
 		company = "_Test Company"
 

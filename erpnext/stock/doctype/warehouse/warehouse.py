@@ -74,7 +74,26 @@ class Warehouse(NestedSet):
 		self.validate_warehouse_account()
 		self.validate_inventory_account()
 		self.validate_group_conversion()
+		self.validate_company_change()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_company_change(self):
+		if self.is_new() or not self.has_value_changed("company"):
+			return
+
+		if self.check_if_sle_exists() or frappe.db.exists("Bin", {"warehouse": self.name}):
+			throw(
+				_("Company cannot be changed for Warehouse {0} as it has stock transactions").format(
+					frappe.bold(self.name)
+				)
+			)
+
+		if self.check_if_child_exists():
+			throw(
+				_("Company cannot be changed for Warehouse {0} as it has child warehouses").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def validate_group_conversion(self):
 		if self.is_new() or not self.has_value_changed("is_group"):
