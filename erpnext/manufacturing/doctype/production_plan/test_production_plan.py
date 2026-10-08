@@ -1,5 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
@@ -28,6 +30,158 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProductionPlan(ERPNextTestSuite):
+	def test_sales_order_line_unplanned_quantity(self):
+		for second_item in ("Subassembly Item 1", "Raw Material Item 1"):
+			with self.subTest(second_item=second_item):
+				so = make_sales_order(
+					item_list=[
+						{"item_code": "Test Production Item 1", "qty": 10, "rate": 100},
+						{"item_code": second_item, "qty": 5, "rate": 100},
+					]
+				)
+				first = create_production_plan(
+					sales_order=so,
+					get_items_from="Sales Order",
+					do_not_submit=True,
+					skip_getting_mr_items=True,
+				)
+				stale = frappe.copy_doc(first).insert()
+				first.set(
+					"po_items",
+					[next(row for row in first.po_items if row.sales_order_item == so.items[0].name)],
+				)
+				first.po_items[0].planned_qty = 6
+				first.submit()
+				with self.assertRaisesRegex(frappe.ValidationError, "exceeds the unplanned quantity"):
+					stale.submit()
+
+				second = create_production_plan(
+					sales_order=so,
+					get_items_from="Sales Order",
+					do_not_submit=True,
+					skip_getting_mr_items=True,
+				)
+				second.set(
+					"po_items",
+					[next(row for row in second.po_items if row.sales_order_item == so.items[0].name)],
+				)
+				self.assertEqual(second.po_items[0].planned_qty, 4)
+				second.submit()
+				so.reload()
+				self.assertEqual(so.items[0].production_plan_qty, 10)
+
+				remaining = frappe.new_doc("Production Plan")
+				remaining.company = so.company
+				remaining.get_items_from = "Sales Order"
+				remaining.append("sales_orders", {"sales_order": so.name})
+				remaining.get_so_items()
+				self.assertNotIn(so.items[0].name, [row.sales_order_item for row in remaining.po_items])
+				second.cancel()
+				remaining.set("po_items", [])
+				remaining.get_so_items()
+				self.assertEqual(
+					next(
+						row.planned_qty
+						for row in remaining.po_items
+						if row.sales_order_item == so.items[0].name
+					),
+					4,
+				)
+
+	def test_sales_order_planning_uses_stock_uom_and_combined_references(self):
+		from erpnext.patches.v16_0.recalculate_sales_order_production_plan_qty import execute
+
+		item = frappe.get_doc("Item", "Test Production Item 1")
+		box = next((row for row in item.uoms if row.uom == "Box"), None)
+		if box:
+			box.conversion_factor = 10
+		else:
+			item.append("uoms", {"uom": "Box", "conversion_factor": 10})
+		item.save()
+		so = make_sales_order(item_code=item.name, qty=2, uom="Box")
+		first = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_submit=True, skip_getting_mr_items=True
+		)
+		first.po_items[0].planned_qty = 12
+		first.submit()
+		other = make_sales_order(item_code=item.name, qty=3)
+		for combine_after_fetch in (False, True):
+			with self.subTest(combine_after_fetch=combine_after_fetch):
+				second = create_production_plan(
+					sales_order=so,
+					get_items_from="Sales Order",
+					do_not_submit=True,
+					skip_getting_mr_items=True,
+				)
+				self.assertEqual(second.po_items[0].planned_qty, 8)
+				second.append("sales_orders", {"sales_order": other.name})
+				second.get_items()
+				second.combine_items = 1
+				if combine_after_fetch:
+					second.combine_so_items()
+				else:
+					second.get_items()
+				self.assertEqual(len(second.po_items), 1)
+				self.assertEqual(second.po_items[0].planned_qty, 11)
+				self.assertEqual(
+					{row.sales_order_item for row in second.prod_plan_references},
+					{so.items[0].name, other.items[0].name},
+				)
+				for qty in (4, 80):
+					second.po_items[0].planned_qty = qty
+					with self.assertRaisesRegex(
+						frappe.ValidationError, "must match their Sales Order references"
+					):
+						second.before_submit()
+				second.po_items[0].planned_qty = 11
+				reference = second.prod_plan_references[0]
+				sales_order_item = reference.sales_order_item
+				reference.sales_order_item = None
+				with self.assertRaisesRegex(
+					frappe.ValidationError, "Invalid combined Sales Order references"
+				):
+					second.before_submit()
+				reference.sales_order_item = sales_order_item
+				stale = frappe.copy_doc(second)
+				with patch.object(
+					type(second), "get_so_wise_planned_qty", side_effect=AssertionError("Runtime rollup")
+				):
+					second.submit()
+
+				# Reproduce counters left by combined plans submitted before this fix.
+				so.items[0].db_set("production_plan_qty", 12)
+				other.items[0].db_set("production_plan_qty", 0)
+				execute()
+				execute()  # The migration must be idempotent.
+				with self.assertRaisesRegex(frappe.ValidationError, "exceeds the unplanned quantity"):
+					stale.before_submit()
+				remaining = frappe.new_doc("Production Plan")
+				remaining.company = so.company
+				remaining.get_items_from = "Sales Order"
+				remaining.append("sales_orders", {"sales_order": so.name})
+				remaining.get_so_items()
+				self.assertFalse(remaining.po_items)
+				so.reload()
+				other.reload()
+				self.assertEqual(so.items[0].production_plan_qty, 20)
+				self.assertEqual(other.items[0].production_plan_qty, 3)
+				with patch.object(
+					type(second), "get_so_wise_planned_qty", side_effect=AssertionError("Runtime rollup")
+				):
+					second.cancel()
+				so.reload()
+				other.reload()
+				self.assertEqual(so.items[0].production_plan_qty, 12)
+				self.assertEqual(other.items[0].production_plan_qty, 0)
+
+		# Older versions allowed negative planned quantities; those plans must remain cancellable.
+		first.po_items[0].db_set("planned_qty", -12)
+		so.items[0].db_set("production_plan_qty", -12)
+		first.reload()
+		first.cancel()
+		so.reload()
+		self.assertEqual(so.items[0].production_plan_qty, 0)
+
 	def setUp(self):
 		for item in [
 			"Test Production Item 1",
