@@ -356,6 +356,20 @@ class TestCompany(ERPNextTestSuite):
 			with self.assertRaisesRegex(frappe.ValidationError, "BOM"):
 				company.on_trash()
 
+	def test_exchange_accounts_can_be_cleared(self):
+		from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
+
+		company = get_test_company()
+		company.exchange_gain_loss_account = company.default_expense_account
+		company.exchange_gain_account = None
+		company.exchange_loss_account = None
+		company.save()
+		company.reload()
+		self.assertFalse(company.exchange_gain_account)
+		self.assertFalse(company.exchange_loss_account)
+		self.assertEqual(get_exchange_gain_loss_account(company.name, True), company.default_expense_account)
+		self.assertEqual(get_exchange_gain_loss_account(company.name, False), company.default_expense_account)
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 

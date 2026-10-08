@@ -777,6 +777,9 @@ class Company(NestedSet):
 			for default_account in default_accounts:
 				self._set_default_account(default_account, default_accounts.get(default_account))
 
+		if not self.update_default_account:
+			return
+
 		if not self.default_income_account:
 			income_account = frappe.db.get_all(
 				"Account",
