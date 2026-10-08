@@ -157,15 +157,11 @@ def _get_fiscal_years(company=None):
 
 		if company:
 			FYC = DocType("Fiscal Year Company")
+			company_years = frappe.qb.from_(FYC).select(FYC.parent).where(FYC.company == company)
 			query = query.where(
 				ExistsCriterion(frappe.qb.from_(FYC).select(FYC.name).where(FYC.parent == FY.name)).negate()
-				| ExistsCriterion(
-					frappe.qb.from_(FYC)
-					.select(FYC.company)
-					.where(FYC.parent == FY.name)
-					.where(FYC.company == company)
-				)
-			)
+				| FY.name.isin(company_years)
+			).orderby(Case().when(FY.name.isin(company_years), 0).else_(1))
 
 		query = query.orderby(FY.year_start_date, order=Order.desc)
 		fiscal_years = query.run(as_dict=True)
