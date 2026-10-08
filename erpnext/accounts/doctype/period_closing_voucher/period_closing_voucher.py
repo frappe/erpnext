@@ -22,6 +22,8 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import apply_unscoped_filters
 from erpnext.stock.utils import get_stock_value_on
 
+STOCK_VALUE_TOLERANCE_PERCENT = 1
+
 
 class PeriodClosingVoucher(AccountsController):
 	# begin: auto-generated types
@@ -41,6 +43,7 @@ class PeriodClosingVoucher(AccountsController):
 		period_end_date: DF.Date
 		period_start_date: DF.Date
 		remarks: DF.SmallText
+		stock_value_difference: DF.Currency
 		transaction_date: DF.Date | None
 	# end: auto-generated types
 
@@ -165,13 +168,12 @@ class PeriodClosingVoucher(AccountsController):
 		)
 
 	def validate_stock_accounts_balance(self):
-		precision = frappe.get_precision("GL Entry", "debit")
-		account_balance = flt(self.get_stock_accounts_balance(), precision)
-		stock_value = flt(
-			get_stock_value_on(posting_date=self.period_end_date, company=self.company), precision
-		)
+		account_balance, stock_value, difference = self.get_stock_value_mismatch()
+		if not difference:
+			self.stock_value_difference = 0
+			return
 
-		if account_balance == stock_value:
+		if self.is_stock_value_difference_accepted(stock_value, difference):
 			return
 
 		currency = frappe.get_cached_value("Company", self.company, "default_currency")
@@ -185,6 +187,35 @@ class PeriodClosingVoucher(AccountsController):
 			),
 			title=_("Stock Value Mismatch"),
 		)
+
+	def is_stock_value_difference_accepted(self, stock_value, difference):
+		precision = frappe.get_precision("GL Entry", "debit")
+		return is_within_stock_value_tolerance(stock_value, difference) and (
+			flt(self.stock_value_difference, precision) == difference
+		)
+
+	def get_stock_value_mismatch(self):
+		precision = frappe.get_precision("GL Entry", "debit")
+		account_balance = flt(self.get_stock_accounts_balance(), precision)
+		stock_value = flt(
+			get_stock_value_on(posting_date=self.period_end_date, company=self.company), precision
+		)
+
+		return account_balance, stock_value, flt(account_balance - stock_value, precision)
+
+	@frappe.whitelist()
+	def get_stock_value_difference(self) -> dict:
+		if not self.has_stock_transactions():
+			return {}
+
+		account_balance, stock_value, difference = self.get_stock_value_mismatch()
+		return {
+			"account_balance": account_balance,
+			"stock_value": stock_value,
+			"difference": difference,
+			"tolerance": STOCK_VALUE_TOLERANCE_PERCENT,
+			"within_tolerance": bool(difference) and is_within_stock_value_tolerance(stock_value, difference),
+		}
 
 	def get_stock_accounts_balance(self):
 		gle = frappe.qb.DocType("GL Entry")
@@ -667,3 +698,126 @@ def get_previous_closed_period_in_current_year(fiscal_year, company):
 		order_by="period_end_date desc",
 	)
 	return prev_closed_period_end_date
+<<<<<<< HEAD
+=======
+
+
+def process_date_range(val):
+	start_date = val.from_date
+	end_date = val.to_date
+	pcv = val.pcv
+	report_type = val.report_type
+	balance_type = val.balance_type
+	company = frappe.db.get_value("Period Closing Voucher", pcv, "company")
+	dimensions = get_dimensions()
+
+	accounts = frappe.db.get_all(
+		"Account", filters={"company": company, "report_type": report_type}, pluck="name"
+	)
+
+	gle = qb.DocType("GL Entry")
+	query = qb.from_(gle).select(gle.account)
+	for dim in dimensions:
+		query = query.select(gle[dim])
+	query = query.select(
+		Sum(gle.debit).as_("debit"),
+		Sum(gle.credit).as_("credit"),
+		Sum(gle.debit_in_account_currency).as_("debit_in_account_currency"),
+		Sum(gle.credit_in_account_currency).as_("credit_in_account_currency"),
+		# account_currency is constant per grouped account -> Max() keeps the GROUP BY postgres-valid
+		Max(gle.account_currency).as_("account_currency"),
+		ConstantColumn(balance_type).as_("balance_type"),
+		ConstantColumn(report_type).as_("report_type"),
+	).where(
+		(gle.company.eq(company))
+		& (gle.is_cancelled.eq(0))
+		& (gle.posting_date.between(start_date, end_date))
+		& (gle.account.isin(accounts))
+	)
+
+	if balance_type == "Opening Balance":
+		query = query.where(gle.is_opening.eq("Yes"))
+	else:
+		# Keep balances aligned with legacy PCV logic (non-opening transactions only)
+		query = query.where(gle.is_opening.eq("No"))
+
+	query = query.groupby(gle.account)
+	for dim in dimensions:
+		query = query.groupby(gle[dim])
+
+	res = query.run(as_dict=True)
+	return res
+
+
+def aggregate_partial_result(final, partial_res):
+	if final is None:
+		final = []
+
+	if partial_res:
+		final.extend([frappe._dict(x) for x in partial_res])
+
+	return final
+
+
+def get_dimensions():
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+		get_accounting_dimensions,
+	)
+
+	default_dimensions = ["cost_center", "finance_book", "project"]
+	dimensions = default_dimensions + get_accounting_dimensions()
+	return dimensions
+
+
+def summarize_and_post_ledger(result, ref_dt, ref_dn):
+	pcv = frappe.get_doc(ref_dt, ref_dn)
+
+	from erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher import (
+		build_dimension_wise_balance_dict,
+		get_bs_closing_entries,
+		get_closing_account_closing_entry,
+		get_gle_for_closing_account,
+		get_gle_for_pl_account,
+		get_p_l_closing_entries,
+	)
+
+	result = [frappe._dict(x) for x in result]
+
+	# generate and post closing entries for P&L accounts
+	pl_entries = [x for x in result if x.report_type == "Profit and Loss"]
+	pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(pl_entries)
+
+	# build gl map
+	pl_accounts_reverse_gle = []
+	closing_account_gle = []
+
+	for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
+		for acc, balances in account_balances.items():
+			balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
+			if balance_in_company_currency:
+				pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+
+		closing_account_gle.append(get_gle_for_closing_account(pcv, account_balances["balances"], dimensions))
+
+	gl_entries = pl_accounts_reverse_gle + closing_account_gle
+	if gl_entries:
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		make_gl_entries(gl_entries, merge_entries=False)
+
+	# generate and post account closing balance for balance sheet accounts
+	bs_entries = [x for x in result if x.report_type == "Balance Sheet"]
+	bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(bs_entries)
+	pl_closing_entries = get_p_l_closing_entries(pl_accounts_reverse_gle, pcv)
+	bs_closing_entries = get_bs_closing_entries(bs_dimension_wise_acc_balance, pcv)
+	closing_entries_for_closing_account = get_closing_account_closing_entry(closing_account_gle, pcv)
+	closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
+
+	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
+
+	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
+
+
+def is_within_stock_value_tolerance(stock_value, difference):
+	return abs(difference) <= abs(stock_value) * STOCK_VALUE_TOLERANCE_PERCENT / 100
+>>>>>>> 8d793e9 (feat(pcv): allow submit with confirmed stock value difference within 1% (#60170))
