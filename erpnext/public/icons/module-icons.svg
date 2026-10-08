@@ -354,4 +354,76 @@
 		<rect x="3" y="4.8" width="18" height="2.4" rx="1.2" style="fill: var(--duotone-light, var(--ink-gray-3))" /><rect x="3" y="10.8" width="18" height="2.4" rx="1.2" style="fill: var(--duotone-light, var(--ink-gray-3))" /><rect x="3" y="16.8" width="18" height="2.4" rx="1.2" style="fill: var(--duotone-light, var(--ink-gray-3))" />
 		<g><circle class="sliders-knob" cx="8" cy="6" r="2.9" style="fill: var(--duotone-dark, light-dark(var(--ink-gray-5), var(--ink-gray-6)))" /><circle class="sliders-knob" cx="15.5" cy="12" r="2.9" style="fill: var(--duotone-dark, light-dark(var(--ink-gray-5), var(--ink-gray-6)))" /><circle class="sliders-knob" cx="10" cy="18" r="2.9" style="fill: var(--duotone-dark, light-dark(var(--ink-gray-5), var(--ink-gray-6)))" /></g>
 	</symbol>
+
+	<!-- Soft module icons: drawn in the holder's currentColor, tuned by the soft-stroke, soft-tint and soft-accent custom properties. -->
+	<symbol id="icon-sliders-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M4 7h3m4 0h9M4 12h9m4 0h3M4 17h1.5m4 0h10.5" style="fill:none"/>
+		<circle cx="9" cy="7" r="2" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<circle cx="15" cy="12" r="2" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+		<path d="M17 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" style="fill:none"/>
+		<circle cx="7.5" cy="17" r="2" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+	</symbol>
+	<symbol id="icon-calculator-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<rect x="5" y="2.5" width="14" height="19" rx="2.5" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<rect x="8" y="5.5" width="8" height="3.5" rx="1" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+		<path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 16h.01M12 16h.01M8.5 19h.01M12 19h.01M15.5 16v3" style="fill:none"/>
+	</symbol>
+	<symbol id="icon-storefront-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M4.5 11v7.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V11" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M5 3.5h14l2 5v.25a2.25 2.25 0 0 1-4.5 0 2.25 2.25 0 0 1-4.5 0 2.25 2.25 0 0 1-4.5 0 2.25 2.25 0 0 1-4.5 0V8.5Z" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<rect x="10" y="15" width="4" height="5.5" rx="1" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+	</symbol>
+	<symbol id="icon-shopping-cart-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M2.5 3.5h1.6a1 1 0 0 1 .98.8L5.5 7" style="fill:none"/>
+		<path d="M5.5 7H21l-1.85 8.15A2 2 0 0 1 17.2 16.7H8.6a2 2 0 0 1-1.96-1.6Z" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M9.38 7L9.85 16.7M13.25 7L12.83 16.7M17.12 7L15.81 16.7M6.18 11.85H19.9" style="fill:none;stroke-opacity:var(--soft-accent,0.5)"/>
+		<circle cx="9" cy="20" r="1.5" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<circle cx="17" cy="20" r="1.5" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+	</symbol>
+	<symbol id="icon-shelf-rack-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<rect x="6.5" y="5.5" width="4" height="5" rx="1" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<rect x="13" y="7" width="4.5" height="3.5" rx="1" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<rect x="6.5" y="14" width="4" height="4" rx="1" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<rect x="12.5" y="13" width="5.5" height="5" rx="1" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+		<path d="M4 3v18M20 3v18M4 10.5h16M4 18h16" style="fill:none"/>
+	</symbol>
+	<symbol id="icon-factory-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M21 19.5v-12l-5 3v-3l-5 3v-3l-5.5 3.3V4a1 1 0 0 0-1-1h-.5a1 1 0 0 0-1 1v15.5Z" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M9.5 15.5h1.5m3 0h1.5" style="fill:none;stroke-opacity:var(--soft-accent,0.5)"/>
+	</symbol>
+	<symbol id="icon-gantt-chart-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M3.5 3.5v14a2 2 0 0 0 2 2h15" style="fill:none"/>
+		<rect x="8.5" y="3" width="10.5" height="4" rx="1.5" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+		<rect x="12.5" y="8.5" width="8.5" height="4" rx="1.5" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+		<rect x="10" y="14" width="8" height="3.5" rx="1.5" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+	</symbol>
+	<symbol id="icon-asset-hand-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<rect x="11" y="3" width="8.5" height="7.5" rx="1.5" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M13.75 3v3h3V3" style="fill:none;stroke-opacity:var(--soft-accent,0.5)"/>
+		<rect x="2.5" y="12.5" width="3" height="8" rx="1" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M5.5 14h4a2 2 0 0 1 2 2l4.7-2.2a1.75 1.75 0 0 1 1.8 3l-5.3 3.4a3 3 0 0 1-1.6.3H5.5" style="fill:none"/>
+	</symbol>
+	<symbol id="icon-quality-seal-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M8.5 14.5 7 21l5-2.5 5 2.5-1.5-6.5" style="fill:none"/>
+		<circle cx="12" cy="9.5" r="6.5" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="m9.5 9.5 1.75 1.75 3.25-3.5" style="fill:none;stroke-opacity:var(--soft-accent,0.5)"/>
+	</symbol>
+	<symbol id="icon-handshake-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M 3.9 5.1 3 15 h 2.25 l 1.57-9Z" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1);stroke:none"/>
+		<path d="M 20.1 5.1 l 0.9 9.9 h-2.25 L 16.95 6.45Z" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1);stroke:none"/>
+		<path d="m 13.8 15 2.25 2.25 a 0.9 0.9 0 1 0 2.7-2.7 l-3.49-3.49 a 2.7 2.7 0 0 0-3.82 0 l-0.79 0.79 a 0.9 0.9 0 1 1-2.7-2.7 l 2.53-2.53 a 5.21 5.21 0 0 1 6.35-0.78 l 0.42 0.25 a 1.8 1.8 0 0 0 1.28 0.23 L 20.1 6" style="fill:none"/>
+		<path d="m 20.1 5.1 0.9 9.9 h-1.8 M 3.9 5.1 3 15 l 5.85 5.85 a 0.9 0.9 0 1 0 2.7-2.7 M 3.9 6 h 7.2" style="fill:none"/>
+		<path d="m 11.1 17.7 1.8 1.8 a 0.9 0.9 0 1 0 2.7-2.7" style="fill:none;stroke-opacity:var(--soft-accent,0.5)"/>
+	</symbol>
+	<symbol id="icon-headset-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<path d="M4 14.5V12a8 8 0 0 1 16 0v2.5" style="fill:none"/>
+		<rect x="3.5" y="13" width="4" height="6" rx="1.75" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<rect x="16.5" y="13" width="4" height="6" rx="1.75" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M18.5 19v.25a2.25 2.25 0 0 1-2.25 2.25H13" style="fill:none;stroke-opacity:var(--soft-accent,0.5)"/>
+	</symbol>
+	<symbol id="icon-portal-user-soft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width:var(--soft-stroke,1.5)">
+		<rect x="3" y="4" width="18" height="16" rx="2.5" style="fill:currentColor;fill-opacity:var(--soft-tint,0.1)"/>
+		<path d="M3 8.5h18M7.5 19a4.5 4 0 0 1 9 0" style="fill:none"/>
+		<circle cx="12" cy="11.5" r="2" style="fill:currentColor;fill-opacity:var(--soft-accent,0.5);stroke:none"/>
+	</symbol>
 </svg>
