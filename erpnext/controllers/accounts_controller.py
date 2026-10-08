@@ -4615,7 +4615,7 @@ def update_gl_dict_with_app_based_fields(doc, gl_dict):
 
 
 @frappe.whitelist()
-def get_missing_company_details(doctype, docname):
+def get_missing_company_details(doctype: str, docname: str):
 	from frappe.contacts.doctype.address.address import get_address_display_list
 
 	company = frappe.db.get_value(doctype, docname, "company")
