@@ -920,8 +920,12 @@ class Company(NestedSet):
 			)
 
 		NestedSet.validate_if_child_exists(self)
+		for doctype in ("BOM", "Employee"):
+			if frappe.db.exists(doctype, {"company": self.name}):
+				frappe.throw(_("Cannot delete {0} while {1} records exist").format(self.name, doctype))
 		frappe.utils.nestedset.update_nsm(self)
 
+		warehouses = frappe.get_all("Warehouse", filters={"company": self.name}, pluck="name")
 		if not frappe.db.exists("GL Entry", {"company": self.name}):
 			budgets = frappe.get_all("Budget", filters={"company": self.name}, pluck="name")
 			if budgets:
@@ -931,16 +935,16 @@ class Company(NestedSet):
 				frappe.db.delete(doctype, {"company": self.name})
 
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
+			if warehouses:
+				frappe.db.delete("Item Reorder", {"warehouse": ["in", warehouses]})
+				frappe.db.set_value(
+					"Item Reorder", {"warehouse_group": ["in", warehouses]}, "warehouse_group", None
+				)
 			frappe.db.delete("Warehouse", {"company": self.name})
 
 		frappe.defaults.clear_default("company", value=self.name)
 		for doctype in ["Mode of Payment Account", "Item Default"]:
 			frappe.db.delete(doctype, {"company": self.name})
-
-		# clear default accounts, warehouses from item
-		warehouses = frappe.get_all("Warehouse", filters={"company": self.name}, pluck="name")
-		if warehouses:
-			frappe.db.delete("Item Reorder", {"warehouse": ["in", warehouses]})
 
 		# reset default company
 		singles = frappe.qb.DocType("Singles")
@@ -965,22 +969,22 @@ class Company(NestedSet):
 			)
 		).run()
 
-		# delete BOMs
-		boms = frappe.get_all("BOM", filters={"company": self.name}, pluck="name")
-		if boms:
-			frappe.db.delete("BOM", {"company": self.name})
-			for dt in ("BOM Operation", "BOM Item", "BOM Secondary Item", "BOM Explosion Item"):
-				frappe.db.delete(dt, {"parent": ["in", boms]})
-
-		frappe.db.delete("Employee", {"company": self.name})
 		frappe.db.delete("Department", {"company": self.name})
 		frappe.db.delete("Tax Withholding Account", {"company": self.name})
 		frappe.db.delete("Transaction Deletion Record", {"company": self.name})
 
-		# delete tax templates
-		frappe.db.delete("Sales Taxes and Charges Template", {"company": self.name})
-		frappe.db.delete("Purchase Taxes and Charges Template", {"company": self.name})
-		frappe.db.delete("Item Tax Template", {"company": self.name})
+		# Delete template details and item links with their parent templates.
+		for template, child in (
+			("Sales Taxes and Charges Template", "Sales Taxes and Charges"),
+			("Purchase Taxes and Charges Template", "Purchase Taxes and Charges"),
+			("Item Tax Template", "Item Tax Template Detail"),
+		):
+			names = frappe.get_all(template, filters={"company": self.name}, pluck="name")
+			if names:
+				if template == "Item Tax Template":
+					frappe.db.delete("Item Tax", {"item_tax_template": ["in", names]})
+				frappe.db.delete(child, {"parent": ["in", names], "parenttype": template})
+				frappe.db.delete(template, {"name": ["in", names]})
 
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value("GL Entry", {"company": self.name}):

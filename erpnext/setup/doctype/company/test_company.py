@@ -328,6 +328,34 @@ class TestCompany(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "Cannot disable perpetual inventory"):
 			company.save()
 
+	def test_company_deletion_clears_item_reorder_rows(self):
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Reorder Cleanup Test",
+				"abbr": "RCT",
+				"country": "Nepal",
+				"default_currency": "INR",
+			}
+		).insert()
+		item = make_item("Reorder Cleanup Item")
+		item.append("reorder_levels", {"warehouse": company.default_warehouse, "warehouse_reorder_level": 10})
+		item.save()
+		frappe.delete_doc("Company", company.name)
+		self.assertFalse(frappe.db.exists("Item Reorder", {"warehouse": company.default_warehouse}))
+
+	def test_cannot_delete_company_with_bom(self):
+		company = get_test_company()
+		exists = frappe.db.exists
+		with patch(
+			"frappe.db.exists",
+			side_effect=lambda doctype, *args, **kwargs: (
+				"BOM-1" if doctype == "BOM" else exists(doctype, *args, **kwargs)
+			),
+		):
+			with self.assertRaisesRegex(frappe.ValidationError, "BOM"):
+				company.on_trash()
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
