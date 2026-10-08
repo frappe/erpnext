@@ -719,6 +719,35 @@ class TestStockEntry(ERPNextTestSuite):
 		"Stock Settings",
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
 	)
+	def test_transfer_with_picked_and_auto_picked_rows_keeps_batch_qty(self):
+		item_code = self.make_batches_at_rates((100, 300), "_Test Warehouse - _TC")
+		batches = frappe.get_all("Batch", filters={"item": item_code}, pluck="name", order_by="creation")
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			batch_no=batches[0],
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		transfer.append("items", {**transfer.items[0].as_dict(no_default_fields=True), "batch_no": None})
+		transfer.insert()
+		transfer.submit()
+
+		self.assertEqual(
+			frappe.db.count(
+				"Serial and Batch Bundle",
+				{"voucher_no": transfer.name, "type_of_transaction": "Inward", "is_cancelled": 0},
+			),
+			2,
+		)
+		self.assertEqual([frappe.db.get_value("Batch", batch, "batch_qty") for batch in batches], [1, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
 	def test_auto_picked_repack_values_finished_good_at_consumed_cost(self):
 		raw_material = self.make_batches_at_rates((100, 200, 600), "_Test Warehouse - _TC")
 		finished_good = make_item(properties={"is_stock_item": 1}).name
