@@ -88,6 +88,10 @@ class TestShipment(ERPNextTestSuite):
 			shipment.shipment_parcel[0].update(parcel)
 			self.assertRaises(frappe.ValidationError, shipment.insert)
 
+	def test_delivery_contact_optional_for_company_destination(self):
+		field = frappe.get_meta("Shipment").get_field("delivery_contact_name")
+		self.assertEqual(field.mandatory_depends_on, "eval: doc.delivery_to_type !== 'Company'")
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(

@@ -203,7 +203,7 @@
    "fieldname": "delivery_contact_name",
    "fieldtype": "Link",
    "label": "Contact",
-   "mandatory_depends_on": "eval: doc.delivery_from_type !== 'Company'",
+   "mandatory_depends_on": "eval: doc.delivery_to_type !== 'Company'",
    "options": "Contact"
   },
   {
@@ -444,7 +444,7 @@
  "icon": "truck",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-16 14:59:28.547953",
+ "modified": "2026-10-08 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",
