@@ -160,7 +160,7 @@ def _execute(filters, additional_table_columns=None):
 		if inv.doctype == "Sales Invoice":
 			row.update(
 				{
-					"debit": inv.base_rounded_total or inv.base_grand_total,
+					"debit": get_receivable_debit(inv),
 					# credits the invoice itself posts to the receivable (mirrors its GL)
 					"credit": get_in_invoice_receivable_credit(inv),
 					"outstanding_amount": flt(
@@ -181,6 +181,14 @@ def _execute(filters, additional_table_columns=None):
 			res[row].update({"balance": running_balance})
 
 	return columns, res, None, None, None, include_payments
+
+
+def get_receivable_debit(inv):
+	"""Amount the invoice debits to its receivable, rounded like its GL entry."""
+	if inv.base_rounding_adjustment and inv.base_rounded_total:
+		return inv.base_rounded_total
+
+	return inv.base_grand_total
 
 
 def get_outstanding_in_company_currency(inv, company_currency):
@@ -478,6 +486,7 @@ def get_invoices(filters, additional_query_columns):
 			si.base_net_total,
 			si.base_grand_total,
 			si.base_rounded_total,
+			si.base_rounding_adjustment,
 			si.is_pos,
 			si.base_paid_amount,
 			si.base_change_amount,

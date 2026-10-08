@@ -384,6 +384,15 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		closing_balance = list(rows.values())[-1]["balance"]
 		self.assertEqual(flt(closing_balance), self.get_customer_gl_balance())
 
+	def test_ledger_view_debits_grand_total_without_rounding_adjustment(self):
+		# older invoices can carry a rounded total without having posted a rounding adjustment
+		invoice = self.create_sales_invoice(rate=99.6)
+		invoice.db_set("base_rounding_adjustment", 0)
+
+		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
+
+		self.assertEqual(rows[invoice.name]["debit"], invoice.base_grand_total)
+
 	def test_ledger_view_nets_pos_paid_invoice(self):
 		# A POS payment settles the receivable inside the invoice, so the ledger view must credit it
 		# and net to zero instead of showing a phantom outstanding.
