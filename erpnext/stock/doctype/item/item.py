@@ -182,9 +182,19 @@ class Item(Document):
 	def after_insert(self):
 		"""set opening stock and item price"""
 		if self.standard_rate and not self.has_variants:
+			from erpnext.setup.doctype.brand.brand import get_brand_defaults
+			from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
+			group_rows = frappe.get_cached_doc("Item Group", self.item_group).item_group_defaults
+			brand_rows = frappe.get_cached_doc("Brand", self.brand).brand_defaults if self.brand else []
+			companies = {row.company for row in (*self.item_defaults, *group_rows, *brand_rows)}
 			price_lists = {
-				self.get_selling_price_list(default.default_price_list)
-				for default in self.item_defaults or [frappe._dict()]
+				self.get_selling_price_list(
+					get_item_defaults(self.name, company).get("default_price_list")
+					or get_item_group_defaults(self.name, company).get("default_price_list")
+					or get_brand_defaults(self.name, company).get("default_price_list")
+				)
+				for company in companies or {None}
 			}
 			if [price_list for price_list in price_lists if self.add_price(price_list)]:
 				frappe.msgprint(
