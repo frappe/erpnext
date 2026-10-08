@@ -20,6 +20,22 @@ class TestShipment(ERPNextTestSuite):
 		self.assertEqual(len(second_shipment.shipment_delivery_note), 1)
 		self.assertEqual(second_shipment.shipment_delivery_note[0].delivery_note, delivery_note.name)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_shipment_from_multi_item_delivery_note(self):
+		delivery_note = create_test_delivery_note(do_not_insert=True)
+		company = get_shipment_company()
+		create_material_receipt(get_shipment_item(company.name), company.name)
+		item = delivery_note.items[0].as_dict().copy()
+		item.update({"name": None, "qty": 3})
+		delivery_note.append("items", item)
+		delivery_note.insert()
+		delivery_note.submit()
+
+		shipment = make_shipment(delivery_note.name)
+
+		self.assertEqual(len(shipment.shipment_delivery_note), 1)
+		self.assertEqual(shipment.shipment_delivery_note[0].grand_total, delivery_note.base_grand_total)
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(
@@ -32,7 +48,7 @@ class TestShipment(ERPNextTestSuite):
 		self.assertEqual(shipment.get_total_weight(), 35)
 
 
-def create_test_delivery_note():
+def create_test_delivery_note(do_not_insert=False):
 	company = get_shipment_company()
 	customer = get_shipment_customer()
 	item = get_shipment_item(company.name)
@@ -57,7 +73,8 @@ def create_test_delivery_note():
 			"cost_center": "Main - _TC",
 		},
 	)
-	delivery_note.insert()
+	if not do_not_insert:
+		delivery_note.insert()
 	return delivery_note
 
 

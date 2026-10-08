@@ -333,6 +333,10 @@ def make_packing_slip(source_name: str, target_doc: str | dict | Document | None
 @frappe.whitelist()
 def make_shipment(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, target):
+		target.append(
+			"shipment_delivery_note", {"delivery_note": source.name, "grand_total": source.base_grand_total}
+		)
+
 		user = frappe.db.get_value(
 			"User", frappe.session.user, ["email", "full_name", "phone", "mobile_no"], as_dict=1
 		)
@@ -393,15 +397,6 @@ def make_shipment(source_name: str, target_doc: str | dict | Document | None = N
 					"contact_email": "delivery_contact_email",
 				},
 				"validation": {"docstatus": ["=", 1]},
-			},
-			"Delivery Note Item": {
-				"doctype": "Shipment Delivery Note",
-				"field_map": {
-					"name": "prevdoc_detail_docname",
-					"parent": "prevdoc_docname",
-					"parenttype": "prevdoc_doctype",
-					"base_amount": "grand_total",
-				},
 			},
 		},
 		target_doc,
