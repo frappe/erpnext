@@ -114,6 +114,29 @@
 				"account_number": "11000"
 			},
 			"Non-current Assets": {
+				"Intangible Assets": {
+					"Goodwill": {
+						"account_number": "12210",
+						"account_category": "Intangible Assets"
+					},
+					"Software and Licenses": {
+						"account_number": "12220",
+						"account_type": "Fixed Asset",
+						"account_category": "Intangible Assets"
+					},
+					"Patents and Trademarks": {
+						"account_number": "12230",
+						"account_type": "Fixed Asset",
+						"account_category": "Intangible Assets"
+					},
+					"Accumulated Amortization": {
+						"account_number": "12290",
+						"account_type": "Accumulated Depreciation",
+						"account_category": "Intangible Assets"
+					},
+					"account_number": "12200",
+					"account_category": "Intangible Assets"
+				},
 				"Fixed Assets": {
 					"Land": {
 						"account_number": "12110",
@@ -157,26 +180,6 @@
 					},
 					"account_number": "12100",
 					"account_category": "Tangible Assets"
-				},
-				"Intangible Assets": {
-					"Goodwill": {
-						"account_number": "12210",
-						"account_category": "Intangible Assets"
-					},
-					"Software and Licenses": {
-						"account_number": "12220",
-						"account_category": "Intangible Assets"
-					},
-					"Patents and Trademarks": {
-						"account_number": "12230",
-						"account_category": "Intangible Assets"
-					},
-					"Accumulated Amortization": {
-						"account_number": "12290",
-						"account_category": "Intangible Assets"
-					},
-					"account_number": "12200",
-					"account_category": "Intangible Assets"
 				},
 				"Other Non-current Assets": {
 					"Operating Lease Right-of-Use Asset": {
