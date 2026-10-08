@@ -3253,6 +3253,66 @@ class TestProductionPlan(ERPNextTestSuite):
 			self.assertEqual(row.production_item, sf_item)
 			self.assertEqual(row.qty, 5.0)
 
+	def test_group_sub_assembly_warehouse_pools_child_stock(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_make_bin
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		sf_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		create_nested_bom({fg_item: {sf_item: {rm_item: {}}}}, prefix="")
+
+		make_stock_entry(item_code=sf_item, qty=300, target=create_warehouse("Sub Assembly Pool A"), rate=100)
+		short_bin = get_or_make_bin(sf_item, create_warehouse("Sub Assembly Pool B"))
+		frappe.db.set_value("Bin", short_bin, "projected_qty", -100)
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			planned_qty=400,
+			warehouse="_Test Warehouse - _TC",
+			sub_assembly_warehouse="_Test Warehouse Group - _TC",
+			skip_available_sub_assembly_item=1,
+			do_not_submit=1,
+			skip_getting_mr_items=1,
+		)
+		pln.get_sub_assembly_items()
+
+		row = pln.sub_assembly_items[0]
+		self.assertEqual(row.qty, 200)
+		self.assertEqual(row.actual_qty, 300)
+		self.assertEqual(row.projected_qty, 200)
+
+	def test_pooled_sub_assembly_stock_consumed_once_across_branches(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		shared_item = make_item(properties={"is_stock_item": 1}).name
+		branch_a = make_item(properties={"is_stock_item": 1}).name
+		branch_b = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=shared_item, raw_materials=[rm_item])
+		make_bom(item=branch_a, raw_materials=[shared_item])
+		make_bom(item=branch_b, raw_materials=[shared_item])
+		make_bom(item=fg_item, raw_materials=[branch_a, branch_b])
+
+		for warehouse, qty in (("Sub Assembly Pool A", 60), ("Sub Assembly Pool B", 90)):
+			make_stock_entry(item_code=shared_item, qty=qty, target=create_warehouse(warehouse), rate=100)
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			planned_qty=100,
+			warehouse="_Test Warehouse - _TC",
+			sub_assembly_warehouse="_Test Warehouse Group - _TC",
+			skip_available_sub_assembly_item=1,
+			do_not_submit=1,
+			skip_getting_mr_items=1,
+		)
+		pln.get_sub_assembly_items()
+
+		shared_rows = [row for row in pln.sub_assembly_items if row.production_item == shared_item]
+		self.assertEqual([row.qty for row in shared_rows], [0, 50])
+
 	def test_calculation_of_sub_assembly_items(self):
 		make_item("Sub Assembly Item ", properties={"is_stock_item": 1})
 		make_item("Sub Assembly Item 2", properties={"is_stock_item": 1})
