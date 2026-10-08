@@ -634,6 +634,26 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		self.assertEqual(qa.child_row_reference, receipt.items[1].name)
 
+	def test_status_follows_cancellation(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_purchase", 1)
+		receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Purchase Receipt",
+			reference_name=receipt.name,
+			inspection_type="Incoming",
+			do_not_submit=True,
+		)
+		qa.status = "Cancelled"
+		qa.manual_inspection = 1
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		qa.reload()
+		qa.submit()
+		qa.cancel()
+		self.assertEqual(frappe.db.get_value("Quality Inspection", qa.name, "status"), "Cancelled")
+
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of

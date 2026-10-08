@@ -153,7 +153,7 @@ class QualityInspectionService:
 		action = frappe.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
 		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
 
-		if qa_status == "Rejected":
+		if qa_status != "Accepted":
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = _("Row #{0}: Quality Inspection {1} was rejected for item {2}").format(
 				row.idx, link, row.item_code

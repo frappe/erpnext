@@ -90,8 +90,13 @@ class QualityInspection(Document):
 			self.inspect_and_set_status()
 
 		self.validate_inspection_required()
+		self.validate_status()
 		self.set_child_row_reference()
 		self.set_company()
+
+	def validate_status(self):
+		if self.status == "Cancelled" and self.docstatus < 2:
+			frappe.throw(_("Status Cancelled can only be set by cancelling the Quality Inspection"))
 
 	def set_company(self):
 		if self.reference_type and self.reference_name:
@@ -235,6 +240,7 @@ class QualityInspection(Document):
 		self.ignore_linked_doctypes = "Serial and Batch Bundle"
 
 		self.update_qc_reference()
+		self.db_set("status", "Cancelled")
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
