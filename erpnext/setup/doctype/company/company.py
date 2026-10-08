@@ -1085,6 +1085,7 @@ def update_company_current_month_sales(company):
 		.where(
 			(si.docstatus == 1)
 			& (si.company == company)
+			& (si.is_opening != "Yes")
 			& (si.posting_date >= start_date)
 			& (si.posting_date <= end_date)
 		)
@@ -1104,7 +1105,7 @@ def update_company_monthly_sales(company):
 	"""Cache past year monthly sales of every company based on sales invoices"""
 	from frappe.utils.goal import get_monthly_results
 
-	filter_dict = {"company": company, "status": ["!=", "Draft"], "docstatus": 1}
+	filter_dict = {"company": company, "status": ["!=", "Draft"], "docstatus": 1, "is_opening": ["!=", "Yes"]}
 	month_to_value_dict = get_monthly_results(
 		"Sales Invoice", "base_grand_total", "posting_date", filter_dict, "sum"
 	)
