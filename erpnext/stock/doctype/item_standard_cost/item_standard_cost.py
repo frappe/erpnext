@@ -193,6 +193,7 @@ class ItemStandardCost(Document):
 			reco = frappe.get_doc("Stock Reconciliation", self.revaluation_entry)
 			if reco.docstatus == 1:
 				reco.flags.via_item_standard_cost = True
+				reco.flags.ignore_permissions = True
 				reco.cancel()
 
 	def create_revaluation_entry(self):
@@ -222,8 +223,7 @@ class ItemStandardCost(Document):
 			)
 
 		reco.flags.via_item_standard_cost = True
-		reco.insert()
-		reco.submit()
+		submit_as_system_entry(reco)
 
 		self.db_set("revaluation_entry", reco.name)
 
@@ -301,6 +301,12 @@ class ItemStandardCost(Document):
 				{"item_code": self.item_code, "company": self.company, "is_cancelled": 0},
 			)
 		)
+
+
+def submit_as_system_entry(doc):
+	doc.flags.ignore_permissions = True
+	doc.insert()
+	doc.submit()
 
 
 @request_cache

@@ -727,7 +727,7 @@ class StockReconciliation(StockController):
 							dimension.get("fieldname")
 						)
 
-			item_dict = get_stock_balance_for(
+			item_dict = _get_stock_balance_for(
 				item.item_code,
 				item.warehouse,
 				self.posting_date,
@@ -1745,6 +1745,30 @@ def get_stock_balance_for(
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
+	return _get_stock_balance_for(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		batch_no=batch_no,
+		with_valuation_rate=with_valuation_rate,
+		inventory_dimensions_dict=inventory_dimensions_dict,
+		row=row,
+		company=company,
+	)
+
+
+def _get_stock_balance_for(
+	item_code,
+	warehouse,
+	posting_date,
+	posting_time,
+	batch_no=None,
+	with_valuation_rate=True,
+	inventory_dimensions_dict=None,
+	row=None,
+	company=None,
+):
 	item_dict = frappe.get_cached_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
 
 	row = frappe.parse_json(row)
