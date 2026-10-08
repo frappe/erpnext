@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_register.sales_register import execute
@@ -56,6 +57,80 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		if not do_not_submit:
 			si = si.submit()
 		return si
+
+	def make_party_journal(self, voucher_type, debit=0, credit=0):
+		return frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": voucher_type,
+				"company": self.company,
+				"posting_date": getdate(),
+				"cheque_no": "REF-1",
+				"cheque_date": getdate(),
+				"accounts": [
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"debit_in_account_currency": debit,
+						"credit_in_account_currency": credit,
+						"cost_center": self.cost_center,
+					},
+					{
+						"account": self.cash,
+						"debit_in_account_currency": credit,
+						"credit_in_account_currency": debit,
+						"cost_center": self.cost_center,
+					},
+				],
+			}
+		).submit()
+
+	def make_customer_payment(self, payment_type, amount):
+		paid_from, paid_to = (
+			(self.debit_to, self.cash) if payment_type == "Receive" else (self.cash, self.debit_to)
+		)
+		return create_payment_entry(
+			company=self.company,
+			payment_type=payment_type,
+			party_type="Customer",
+			party=self.customer,
+			paid_from=paid_from,
+			paid_to=paid_to,
+			paid_amount=amount,
+			save=1,
+			submit=1,
+		)
+
+	def get_ledger_view(self):
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"include_payments": True,
+				"customer": self.customer,
+			}
+		)
+		return execute(filters)[1]
+
+	def get_customer_gl_balance(self):
+		balance = frappe.get_all(
+			"GL Entry",
+			filters={
+				"party_type": "Customer",
+				"party": self.customer,
+				"account": self.debit_to,
+				"company": self.company,
+				"is_cancelled": 0,
+				"posting_date": ["<=", today()],
+			},
+			fields=[
+				{"SUM": "debit_in_account_currency", "as": "debit"},
+				{"SUM": "credit_in_account_currency", "as": "credit"},
+			],
+		)[0]
+		return flt(balance.debit) - flt(balance.credit)
 
 	def _ensure_income_account(self, account_name):
 		name = f"{account_name} - _TC"
@@ -251,6 +326,27 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		}
 		result_output = {k: v for k, v in filtered_output[0].items() if k in expected_result}
 		self.assertDictEqual(result_output, expected_result)
+
+	def test_ledger_view_matches_party_gl(self):
+		self.create_sales_invoice(rate=100)
+		receipt = self.make_customer_payment("Receive", 60)
+		refund = self.make_customer_payment("Pay", 10)
+		bank_entry = self.make_party_journal("Bank Entry", credit=20)
+		debit_journal = self.make_party_journal("Journal Entry", debit=5)
+
+		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
+		expected = {
+			receipt.name: (0, 60),
+			refund.name: (10, 0),
+			bank_entry.name: (0, 20),
+			debit_journal.name: (5, 0),
+		}
+		for voucher_no, (debit, credit) in expected.items():
+			self.assertEqual((rows[voucher_no]["debit"], rows[voucher_no]["credit"]), (debit, credit))
+		self.assertEqual(rows[bank_entry.name]["voucher_type"], "Journal Entry")
+
+		closing_balance = list(rows.values())[-1]["balance"]
+		self.assertEqual(flt(closing_balance), self.get_customer_gl_balance())
 
 	def test_ledger_view_nets_pos_paid_invoice(self):
 		# A POS payment settles the receivable inside the invoice, so the ledger view must credit it

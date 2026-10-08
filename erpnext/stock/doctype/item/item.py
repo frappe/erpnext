@@ -1658,41 +1658,38 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	if inverse_match and inverse_match.value:
 		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
-	# This attempts to try and get conversion from intermediate UOM.
+	return _get_conv_factor_via_intermediate_uom(from_uom, to_uom)
+
+
+def _get_conv_factor_via_intermediate_uom(from_uom, to_uom):
 	# case:
 	# 			 g -> mg = 1000
 	# 			 g -> kg = 0.001
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
+	value = _get_conv_factor_via_shared_uom("from_uom", "to_uom", to_uom, from_uom)
+	if value is None:
+		value = _get_conv_factor_via_shared_uom("to_uom", "from_uom", from_uom, to_uom)
+
+	if value is not None:
+		return flt(value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+
+def _get_conv_factor_via_shared_uom(shared_field, other_field, first_uom, second_uom):
 	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
 	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
 	# Conversion pairs are not unique, so document names provide stable tie-breakers.
-	shared_source_match = (
+	match = (
 		frappe.qb.from_(first)
 		.join(second)
-		.on(first.from_uom == second.from_uom)
+		.on((first[shared_field] == second[shared_field]) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first.to_uom == to_uom) & (second.to_uom == from_uom) & (second.value != 0))
+		.where((first[other_field] == first_uom) & (second[other_field] == second_uom) & (second.value != 0))
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
 	)
 
-	if shared_source_match:
-		return flt(shared_source_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
-
-	shared_target_match = (
-		frappe.qb.from_(first)
-		.join(second)
-		.on(first.to_uom == second.to_uom)
-		.select((first.value / second.value).as_("value"))
-		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
-		.orderby(first.name, second.name)
-		.limit(1)
-		.run(as_dict=1)
-	)
-
-	if shared_target_match:
-		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+	return match[0].value if match else None
 
 
 def get_allowed_uoms(items: list) -> dict[str, dict[str, float]]:

@@ -26,6 +26,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock import stock_ledger
 from erpnext.stock.get_item_details import (
 	get_barcode_data,
 	get_bin_details,
@@ -347,6 +348,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_purpose_for_stock_entry()
 		sbb.clean_serial_nos()
 		self.remove_fg_completed_qty()
+		if self.docstatus == 1:
+			StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
+
 		sbb.validate_serialized_batch()
 		self.calculate_rate_and_amount()
 		validate_putaway_capacity(self)
@@ -358,8 +362,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.fg_completed_qty = 0.0
 
 	def before_submit(self):
-		StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
-
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):
 			self.purpose_cls(self).before_submit()
 
@@ -652,15 +654,22 @@ class StockEntry(StockController, SubcontractingInwardController):
 	):
 		has_derived_rate = False
 
-		if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
+		# a zero valued finished good takes no share of the cost, even before it has a rate
+		if (
+			d.allow_zero_valuation_rate
+			and (d.basic_rate or d.is_finished_item)
+			and self.purpose != "Receive from Customer"
+		):
+			if d.basic_rate:
+				zero_valuation_items.append(d.item_code)
 			d.basic_rate = 0.0
-			zero_valuation_items.append(d.item_code)
 		elif d.is_finished_item:
 			if self.purpose == "Manufacture":
+				# the cost is split over every finished good row, so a split row is not given all of it
 				d.basic_rate = self.get_basic_rate_for_manufactured_item(
-					d.transfer_qty, outgoing_items_cost, has_consumption_basis
+					self.get_finished_items_qty(), outgoing_items_cost, has_consumption_basis
 				)
-				has_derived_rate = has_consumption_basis
+				has_derived_rate = has_consumption_basis or self.has_manually_rated_finished_items()
 			elif self.purpose == "Repack":
 				d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 				# Repack rate comes from consumed source-warehouse rows, not consumption entries
@@ -764,6 +773,35 @@ class StockEntry(StockController, SubcontractingInwardController):
 			}
 		)
 
+	def get_finished_items_qty(self) -> float:
+		"""Qty of the received finished good rows whose rate is derived from the consumed cost.
+		Manual and zero valued rows take no share, so the others carry the whole cost."""
+		return sum(
+			flt(d.transfer_qty)
+			for d in self.get("items")
+			if d.is_finished_item
+			and d.t_warehouse
+			and not d.s_warehouse
+			and not d.set_basic_rate_manually
+			and not d.allow_zero_valuation_rate
+		)
+
+	def has_manually_rated_finished_items(self) -> bool:
+		"""Whether hand rated finished goods took part of the cost, so a zero left for the rest is real."""
+		return self.get_manually_rated_finished_items()[1] > 0
+
+	def get_manually_rated_finished_items(self) -> tuple[float, float]:
+		"""Qty and value of the received finished good rows whose rate was set by hand."""
+		rows = [
+			d
+			for d in self.get("items")
+			if d.is_finished_item and d.t_warehouse and not d.s_warehouse and d.set_basic_rate_manually
+		]
+		return (
+			sum(flt(d.transfer_qty) for d in rows),
+			sum(flt(d.transfer_qty) * flt(d.basic_rate) for d in rows),
+		)
+
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
 		outgoing_items_cost -= self.get_costed_out_items_cost()
 
@@ -819,13 +857,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
 		scrap_items_cost = self.get_costed_out_items_cost()
+		manual_qty, manual_cost = self.get_manually_rated_finished_items()
 
 		if settings.material_consumption:
 			outgoing_items_cost = self._get_rm_cost_for_manufacture(
-				settings, finished_item_qty, outgoing_items_cost, has_consumption_basis
+				settings, finished_item_qty + manual_qty, outgoing_items_cost, has_consumption_basis
 			)
 
-		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
+		cost_left = outgoing_items_cost - scrap_items_cost - manual_cost
+		if self.flags.via_repost:
+			cost_left = max(cost_left, 0)
+
+		return flt(cost_left / finished_item_qty)
 
 	def _get_rm_cost_for_manufacture(
 		self, settings, finished_item_qty, outgoing_items_cost, has_consumption_basis=False
@@ -1067,24 +1110,53 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
-		sl_entries = []
+		"""On submit, post the source legs, recalculate once for bundles picked while posting them,
+		then post the target legs. All gates are taken first to keep their sorted order, and only
+		the second call updates batch qty, for the whole voucher."""
+		source_entries, target_entries = [], []
 		finished_item_row = self.get_finished_item_row()
+		self.get_sle_for_source_warehouse(source_entries, finished_item_row)
+		self.get_sle_for_target_warehouse(target_entries, finished_item_row)
 
-		# make sl entries for source warehouse first
-		self.get_sle_for_source_warehouse(sl_entries, finished_item_row)
-
-		# SLE for target warehouse
-		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-
-		# reverse sl entries if cancel
 		if self.docstatus == 2:
-			sl_entries.reverse()
+			self.make_sl_entries(
+				(source_entries + target_entries)[::-1],
+				allow_negative_stock=allow_negative_stock,
+				via_landed_cost_voucher=via_landed_cost_voucher,
+			)
+			return
+
+		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
+		stock_ledger.make_sl_entries(source_entries, allow_negative_stock, via_landed_cost_voucher)
+		if self.recalculate_for_bundles_picked_while_posting():
+			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
+			for sle in target_entries:
+				sle.incoming_rate = valuation_rates[sle.voucher_detail_no]
 
 		self.make_sl_entries(
-			sl_entries,
+			target_entries,
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
+
+	def recalculate_for_bundles_picked_while_posting(self) -> bool:
+		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""
+		if not frappe.db.exists(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"actual_qty": ("<", 0),
+				"auto_created_serial_and_batch_bundle": 1,
+				"is_cancelled": 0,
+			},
+		):
+			return False
+
+		self.reload()
+		self.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		self.db_update_all()
+		return True
 
 	def get_finished_item_row(self):
 		finished_item_row = None
@@ -1180,7 +1252,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					},
 				)
 
-				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
+				# every finished good row takes its rate from the consumed cost, not only the last one
+				if cstr(d.s_warehouse) or (finished_item_row and d.is_finished_item):
 					sle.recalculate_rate = 1
 
 				allowed_types = [

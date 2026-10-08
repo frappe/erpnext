@@ -158,10 +158,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists, invalidate_future_sle_cache
 
 	if sl_entries:
-		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
-		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
-			sle_processing_gate(*pair)
-
+		acquire_sle_processing_gates(sl_entries)
 		validate_stock_frozen_by_closing_entry(sl_entries)
 
 		cancelled = sl_entries[0].get("is_cancelled")
@@ -335,6 +332,12 @@ def repost_gate(item_code, warehouse):
 		# Tuple key: a colon in item_code/warehouse can't collide two distinct pairs onto one lock.
 		return frappe.db.advisory_lock(("stock_repost", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 	return nullcontext()
+
+
+def acquire_sle_processing_gates(sl_entries):
+	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order."""
+	for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+		sle_processing_gate(*pair)
 
 
 def sle_processing_gate(item_code, warehouse):
@@ -655,7 +658,11 @@ def get_reposting_data(file_path) -> dict:
 	)
 
 	if not file_name:
-		return frappe._dict()
+		frappe.throw(
+			_(
+				"The reposting data file {0} is missing. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	attached_file = frappe.get_doc("File", file_name)
 
@@ -664,11 +671,13 @@ def get_reposting_data(file_path) -> dict:
 		content = content.encode("utf-8")
 
 	try:
-		data = gzip.decompress(content)
+		data = json.loads(gzip.decompress(content).decode("utf-8"))
 	except Exception:
-		return frappe._dict()
-
-	data = json.loads(data.decode("utf-8"))
+		frappe.throw(
+			_(
+				"The reposting data file {0} is corrupted. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	return parse_json(data)
 
@@ -730,6 +739,7 @@ class update_entries_after:
 
 		self.new_items_found = False
 		self.reposted_dependant_item_wh = {}
+		self.recalculated_stock_entries = set()
 		self.reserved_stock = self.get_reserved_stock()
 
 		self.data = frappe._dict()
@@ -955,8 +965,10 @@ class update_entries_after:
 			sle.voucher_no
 		)
 
-		if sle.voucher_type == "Stock Entry" and is_repack_entry(sle.voucher_no):
-			dependant_sles = self.get_sles_for_repack(sle)
+		# the consumed cost is split over all the entry's outputs, so all of them are reposted,
+		# not only the finished good row the consumed row points at
+		if produced_by_manufacture:
+			dependant_sles = self.get_incoming_sles_of_entry(sle)
 		else:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
@@ -1059,7 +1071,7 @@ class update_entries_after:
 			kwargs, ">=", "asc", check_serial_no=False, fields=REPOST_SLE_QUEUE_FIELDS
 		)
 
-	def get_sles_for_repack(self, sle):
+	def get_incoming_sles_of_entry(self, sle):
 		return (
 			frappe.get_all(
 				"Stock Ledger Entry",
@@ -1452,6 +1464,7 @@ class update_entries_after:
 			outward_value = self.get_outward_leg_value(sle)
 			if outward_value is not None:
 				amount = outward_value
+				sle.incoming_rate = outward_value / flt(sle.actual_qty)
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
@@ -1577,6 +1590,7 @@ class update_entries_after:
 			sle.recalculate_rate
 			or self.has_landed_cost_based_on_pi(sle)
 			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
+			or is_manufactured_finished_good(sle)
 			or (self.repost_doc and self.repost_doc.get("recalculate_valuation_rate"))
 		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
@@ -1789,25 +1803,19 @@ class update_entries_after:
 
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
+		self.recalculated_stock_entries.discard(sle.voucher_no)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no or self.is_manufacture_entry_with_sabb(sle):
+		if not self.args.get("sle_id") and not sle.dependant_sle_voucher_detail_no:
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
 
-	def is_manufacture_entry_with_sabb(self, sle):
-		if (
-			self.args.get("sle_id")
-			and sle.serial_and_batch_bundle
-			and sle.auto_created_serial_and_batch_bundle
-		):
-			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
-			if purpose in ["Manufacture", "Repack"]:
-				return True
-
-		return False
-
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
+		"""Skipped while every incoming row of a transfer is saved and no outgoing rate changed since."""
+		if voucher_no in self.recalculated_stock_entries:
+			return
+
 		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
+		stock_entry.flags.via_repost = True
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		update_additional_cost_rows = bool(stock_entry.get("additional_costs"))
@@ -1820,6 +1828,9 @@ class update_entries_after:
 				or (update_additional_cost_rows and d.t_warehouse)
 			):
 				d.db_update()
+
+		if update_additional_cost_rows and all(d.s_warehouse for d in stock_entry.items if d.t_warehouse):
+			self.recalculated_stock_entries.add(voucher_no)
 
 	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):
 		# Update item's incoming rate on transaction
@@ -2087,6 +2098,8 @@ class update_entries_after:
 			self.allow_zero_rate,
 			currency=erpnext.get_company_currency(sle.company),
 			company=sle.company,
+			posting_datetime=sle.posting_datetime,
+			creation=sle.creation,
 		)
 
 	def get_sle_before_datetime(self, args):
@@ -2966,6 +2979,15 @@ def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
 @frappe.request_cache
 def is_repack_entry(stock_entry_id):
 	return frappe.get_cached_value("Stock Entry", stock_entry_id, "purpose") == "Repack"
+
+
+def is_manufactured_finished_good(sle):
+	return bool(
+		sle.voucher_type == "Stock Entry"
+		and flt(sle.actual_qty) > 0
+		and frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose") == "Manufacture"
+		and frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "is_finished_item", cache=True)
+	)
 
 
 def is_manufacture_or_repack_entry(stock_entry_id):

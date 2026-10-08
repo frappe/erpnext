@@ -46,9 +46,7 @@ from erpnext.controllers.print_settings import (
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.get_item_details import (
-	get_item_details,
-)
+from erpnext.stock.get_item_details import _get_item_details
 from erpnext.utilities.regional import temporary_flag
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -829,7 +827,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						ctx.is_subcontracted = self.is_subcontracted
 
-					ret = get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
+					ret = _get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -1711,10 +1709,8 @@ def get_missing_company_details(doctype: str, docname: str):
 	from frappe.contacts.doctype.address.address import get_address_display_list
 
 	company = frappe.db.get_value(doctype, docname, "company")
-	if doctype in ["Purchase Order", "Purchase Invoice"]:
+	if doctype in ["Purchase Order", "Purchase Invoice", "Request for Quotation"]:
 		company_address = frappe.db.get_value(doctype, docname, "billing_address")
-	elif doctype in ["Request for Quotation"]:
-		company_address = frappe.db.get_value(doctype, docname, "shipping_address")
 	else:
 		company_address = frappe.db.get_value(doctype, docname, "company_address")
 
@@ -1843,7 +1839,7 @@ def update_doc_company_address(current_doctype, docname, company_address, detail
 		"Delivery Note": ("company_address", "company_address_display"),
 		"POS Invoice": ("company_address", "company_address_display"),
 		"Quotation": ("company_address", "company_address_display"),
-		"Request for Quotation": ("shipping_address", "shipping_address_display"),
+		"Request for Quotation": ("billing_address", "billing_address_display"),
 	}
 
 	address_field, display_field = address_field_map.get(

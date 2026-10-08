@@ -105,14 +105,15 @@ class StockBalanceReport:
 					"item_name": entry.item_name,
 					"opening_qty": entry.actual_qty,
 					"opening_val": entry.stock_value_difference,
-					"opening_fifo_queue": json.loads(entry.fifo_queue) if entry.fifo_queue else [],
 					"in_qty": 0.0,
 					"in_val": 0.0,
 					"out_qty": 0.0,
 					"out_val": 0.0,
 					"bal_qty": entry.actual_qty,
 					"bal_val": entry.stock_value_difference,
-					"val_rate": 0.0,
+					"val_rate": flt(entry.stock_value_difference / entry.actual_qty)
+					if entry.actual_qty
+					else 0.0,
 				}
 			)
 
@@ -128,37 +129,42 @@ class StockBalanceReport:
 
 		self.start_from = add_days(stk_cl_obj.last_closing_balance.to_date, 1)
 
-		query_filters = {}
-		dimenion_keys = []
-		for field in self.filter_fields():
-			if not self.filters.get(field):
-				continue
-
-			if field in self.inventory_dimensions:
-				dimenion_keys.append(field)
-
-			query_filters[field] = self.filters.get(field)
-
-		if dimenion_keys:
-			query_filters["inventory_dimension_key"] = json.dumps(("item_code", "warehouse", *dimenion_keys))
-		else:
-			query_filters["inventory_dimension_key"] = ("is", "not set")
-
-		opening_entries = stk_cl_obj.get_stock_closing_balance(query_filters)
-		if not opening_entries:
-			return []
+		closing_entry = stk_cl_obj.last_closing_balance.name
+		opening_entries = self.get_closing_balance_query(closing_entry).run(as_dict=True)
 
 		# Batch wise rows carry no inventory dimension key either, but they share the item and
 		# warehouse group key with the item level row and would overwrite its opening.
 		return [d for d in opening_entries if not d.batch_no]
 
-	def filter_fields(self) -> list[str]:
-		fields = ["item_code", "warehouse"]
+	def get_closing_balance_query(self, stock_closing_entry):
+		closing = frappe.qb.DocType("Stock Closing Balance")
+		item_table = frappe.qb.DocType("Item")
 
+		query = (
+			frappe.qb.from_(closing)
+			.inner_join(item_table)
+			.on(closing.item_code == item_table.name)
+			.select(closing.star)
+			.where(closing.stock_closing_entry == stock_closing_entry)
+		)
+
+		query = self.apply_closing_dimension_filters(query, closing)
+		query = self.apply_warehouse_filters(query, closing)
+		return self.apply_items_filters(query, item_table)
+
+	def apply_closing_dimension_filters(self, query, closing):
+		dimension_keys = []
 		for field in self.inventory_dimensions:
-			fields.append(field)
+			if values := self.filters.get(field):
+				dimension_keys.append(field)
+				query = query.where(closing[field].isin(values if isinstance(values, list) else [values]))
 
-		return fields
+		if dimension_keys:
+			return query.where(
+				closing.inventory_dimension_key == json.dumps(("item_code", "warehouse", *dimension_keys))
+			)
+
+		return query.where(closing.inventory_dimension_key.isnull() | (closing.inventory_dimension_key == ""))
 
 	def prepare_sle_query(self):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -318,21 +324,7 @@ class StockBalanceReport:
 				report_data.update(variant_data)
 
 			if self.filters.get("show_stock_ageing_data"):
-				opening_fifo_queue = self.get_opening_fifo_queue(report_data) or []
-
-				fifo_queue = []
-				if fifo_queue := item_wise_fifo_queue.get((report_data.item_code, report_data.warehouse)):
-					fifo_queue = fifo_queue.get("fifo_queue")
-
-				if fifo_queue:
-					opening_fifo_queue.extend(fifo_queue)
-
-				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
-
-				if opening_fifo_queue:
-					stock_ageing_data.update(get_stock_ageing_data(opening_fifo_queue, self.to_date))
-
-				report_data.update(stock_ageing_data)
+				report_data.update(self.get_row_stock_ageing_data(report_data, item_wise_fifo_queue))
 
 			report_data.update(
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
@@ -423,7 +415,6 @@ class StockBalanceReport:
 				"item_name": entry.item_name,
 				"opening_qty": 0.0,
 				"opening_val": 0.0,
-				"opening_fifo_queue": [],
 				"in_qty": 0.0,
 				"in_val": 0.0,
 				"out_qty": 0.0,
@@ -800,13 +791,16 @@ class StockBalanceReport:
 	def get_inventory_dimension_fields():
 		return [dimension.fieldname for dimension in get_inventory_dimensions()]
 
-	@staticmethod
-	def get_opening_fifo_queue(report_data):
-		opening_fifo_queue = report_data.get("opening_fifo_queue") or []
-		for row in opening_fifo_queue:
-			row[1] = getdate(row[1])
+	def get_row_stock_ageing_data(self, report_data, item_wise_fifo_queue):
+		fifo_queue = (item_wise_fifo_queue.get((report_data.item_code, report_data.warehouse)) or {}).get(
+			"fifo_queue"
+		)
 
-		return opening_fifo_queue
+		stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
+		if fifo_queue:
+			stock_ageing_data.update(get_stock_ageing_data(fifo_queue, self.to_date))
+
+		return stock_ageing_data
 
 
 def get_stock_ageing_data(fifo_queue: list, to_date: str) -> dict:
@@ -844,7 +838,6 @@ def filter_items_with_no_transactions(
 				"project",
 				"stock_uom",
 				"company",
-				"opening_fifo_queue",
 			]:
 				continue
 
