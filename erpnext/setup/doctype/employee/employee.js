@@ -98,6 +98,10 @@ frappe.ui.form.on("Employee", {
 		frm.trigger("add_anniversary_indicator");
 	},
 
+	company: function (frm) {
+		frm.set_value("salary_currency", erpnext.get_currency(frm.doc.company));
+	},
+
 	create_user_automatically: function (frm) {
 		if (frm.doc.create_user_automatically) {
 			frm.set_value("user_id", "");

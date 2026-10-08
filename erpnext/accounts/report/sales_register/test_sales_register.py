@@ -379,6 +379,7 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		}
 		for voucher_no, (debit, credit) in expected.items():
 			self.assertEqual((rows[voucher_no]["debit"], rows[voucher_no]["credit"]), (debit, credit))
+		self.assertEqual(rows[bank_entry.name]["voucher_type"], "Journal Entry")
 
 		closing_balance = list(rows.values())[-1]["balance"]
 		self.assertEqual(flt(closing_balance), self.get_customer_gl_balance())

@@ -3,13 +3,15 @@
 
 """Stock reservation for Production Plan (extracted from production_plan.py)."""
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, parse_json
 
+from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
 _RESERVATION_TABLES = {
@@ -57,9 +59,15 @@ def _get_remaining_reserved_qty(plan_qty_by_warehouse, work_order_qty_by_warehou
 
 
 def _get_plan_reservations(item_code):
+	return _group_by_plan_and_warehouse(
+		_get_material_request_plan_query(item_code), _get_sub_assembly_plan_query(item_code)
+	)
+
+
+def _get_material_request_plan_query(item_code):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
-	query = (
+	return (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
@@ -68,14 +76,34 @@ def _get_plan_reservations(item_code):
 			child.warehouse,
 			Sum(child.required_bom_qty).as_("reserved_qty"),
 		)
-		.where(
-			(table.docstatus == 1)
-			& (child.item_code == item_code)
-			& (table.status.notin(["Completed", "Closed"]))
-		)
+		.where(_is_open_plan(table) & (child.item_code == item_code))
 		.groupby(table.name, child.warehouse)
 	)
-	return _group_by_plan_and_warehouse(query)
+
+
+def _get_sub_assembly_plan_query(item_code):
+	table = frappe.qb.DocType("Production Plan")
+	child = frappe.qb.DocType("Production Plan Sub Assembly Item")
+	return (
+		frappe.qb.from_(table)
+		.inner_join(child)
+		.on(table.name == child.parent)
+		.select(
+			table.name.as_("production_plan"),
+			child.fg_warehouse.as_("warehouse"),
+			Sum(child.required_qty).as_("reserved_qty"),
+		)
+		.where(
+			_is_open_plan(table)
+			& (child.production_item == item_code)
+			& (child.type_of_manufacturing == "In House")
+		)
+		.groupby(table.name, child.fg_warehouse)
+	)
+
+
+def _is_open_plan(table):
+	return (table.docstatus == 1) & table.status.notin(["Completed", "Closed"])
 
 
 def _get_work_order_reservations(item_code, plan_names):
@@ -101,41 +129,22 @@ def _get_work_order_reservations(item_code, plan_names):
 	return _group_by_plan_and_warehouse(query)
 
 
-def _group_by_plan_and_warehouse(query):
-	reservations = {}
-	for row in query.run(as_dict=True):
-		reservations.setdefault(row.production_plan, {})[row.warehouse] = flt(row.reserved_qty)
+def _group_by_plan_and_warehouse(*queries):
+	reservations = defaultdict(lambda: defaultdict(float))
+	for query in queries:
+		for row in query.run(as_dict=True):
+			reservations[row.production_plan][row.warehouse] += flt(row.reserved_qty)
 	return reservations
 
 
+@deprecated(
+	f"{__name__}.get_reserved_qty_for_sub_assembly",
+	"2026-10-07",
+	"v18",
+	"Use get_reserved_qty_for_production_plan, which also counts sub-assembly items.",
+)
 def get_reserved_qty_for_sub_assembly(item_code, warehouse):
-	table = frappe.qb.DocType("Production Plan")
-	child = frappe.qb.DocType("Production Plan Sub Assembly Item")
-	qty_field = Case().when(child.qty > 0, child.qty).else_(child.required_qty) - IfNull(
-		child.wo_produced_qty, 0
-	)
-	result = (
-		frappe.qb.from_(table)
-		.inner_join(child)
-		.on(table.name == child.parent)
-		.select(Sum(qty_field))
-		.where(_sub_assembly_reserved_filter(table, child, item_code, warehouse))
-	).run()
-
-	if not result or result[0][0] is None:
-		return None
-
-	qty = flt(result[0][0])
-	return qty if qty > 0 else 0.0
-
-
-def _sub_assembly_reserved_filter(table, child, item_code, warehouse):
-	return (
-		(table.docstatus == 1)
-		& (child.production_item == item_code)
-		& (child.fg_warehouse == warehouse)
-		& (table.status.notin(["Completed", "Closed"]))
-	)
+	return get_reserved_qty_for_production_plan(item_code, warehouse)
 
 
 class ProductionPlanStockReservation:

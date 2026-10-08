@@ -16,7 +16,6 @@ from frappe.utils import (
 	flt,
 	get_link_to_form,
 	getdate,
-	nowdate,
 	today,
 )
 
@@ -47,9 +46,7 @@ from erpnext.controllers.print_settings import (
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.get_item_details import (
-	get_item_details,
-)
+from erpnext.stock.get_item_details import _get_item_details
 from erpnext.utilities.regional import temporary_flag
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -152,23 +149,34 @@ class AccountsController(TransactionBase):
 			self.remove_serial_and_batch_bundle()
 
 	def ensure_supplier_is_not_blocked(self):
-		is_supplier_payment = self.doctype == "Payment Entry" and self.party_type == "Supplier"
-		is_buying_invoice = self.doctype in ["Purchase Invoice", "Purchase Order"]
-		supplier_name = self.supplier if is_buying_invoice else self.party if is_supplier_payment else None
-		supplier = None
+		if self.get("is_return"):
+			return
 
-		if supplier_name:
-			supplier = frappe.get_lazy_doc("Supplier", supplier_name)
+		hold_type, suppliers = self.get_supplier_hold_scope()
+		for supplier in {supplier for supplier in suppliers if supplier}:
+			if frappe.get_lazy_doc("Supplier", supplier).is_blocked_for(hold_type):
+				frappe.msgprint(
+					_("{0} is blocked so this transaction cannot proceed").format(supplier),
+					raise_exception=1,
+				)
 
-		if supplier and supplier.on_hold:
-			if (is_buying_invoice and supplier.hold_type in ["All", "Invoices"]) or (
-				is_supplier_payment and supplier.hold_type in ["All", "Payments"]
-			):
-				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
-					frappe.msgprint(
-						_("{0} is blocked so this transaction cannot proceed").format(supplier_name),
-						raise_exception=1,
-					)
+	def get_supplier_hold_scope(self) -> tuple[str | None, list[str]]:
+		"""Return the Hold Type that blocks this document and the suppliers it applies to."""
+		if self.doctype in ("Purchase Order", "Purchase Invoice"):
+			return "Invoices", [self.supplier]
+		if self.doctype in ("Purchase Receipt", "Supplier Quotation"):
+			return "All", [self.supplier]
+		if self.doctype == "Request for Quotation":
+			return "All", [row.supplier for row in self.suppliers]
+		if self.doctype == "Payment Entry" and self.party_type == "Supplier":
+			return "Payments", [self.party]
+		if self.doctype == "Journal Entry" and any(
+			flt(row.credit_in_account_currency) > 0
+			and frappe.get_cached_value("Account", row.account, "account_type") in ("Bank", "Cash")
+			for row in self.accounts
+		):
+			return "Payments", [row.party for row in self.accounts if row.party_type == "Supplier"]
+		return None, []
 
 	def validate_against_voucher_outstanding(self):
 		from frappe.model.meta import get_meta
@@ -773,17 +781,6 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
-			if (
-				self.currency
-				and buying_or_selling == "Buying"
-				and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
-				and self.doctype == "Purchase Invoice"
-			):
-				self.use_transaction_date_exchange_rate = True
-				self.conversion_rate = get_exchange_rate(
-					self.currency, self.company_currency, transaction_date, args
-				)
-
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -830,7 +827,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						ctx.is_subcontracted = self.is_subcontracted
 
-					ret = get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
+					ret = _get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -1712,10 +1709,8 @@ def get_missing_company_details(doctype: str, docname: str):
 	from frappe.contacts.doctype.address.address import get_address_display_list
 
 	company = frappe.db.get_value(doctype, docname, "company")
-	if doctype in ["Purchase Order", "Purchase Invoice"]:
+	if doctype in ["Purchase Order", "Purchase Invoice", "Request for Quotation"]:
 		company_address = frappe.db.get_value(doctype, docname, "billing_address")
-	elif doctype in ["Request for Quotation"]:
-		company_address = frappe.db.get_value(doctype, docname, "shipping_address")
 	else:
 		company_address = frappe.db.get_value(doctype, docname, "company_address")
 
@@ -1844,7 +1839,7 @@ def update_doc_company_address(current_doctype, docname, company_address, detail
 		"Delivery Note": ("company_address", "company_address_display"),
 		"POS Invoice": ("company_address", "company_address_display"),
 		"Quotation": ("company_address", "company_address_display"),
-		"Request for Quotation": ("shipping_address", "shipping_address_display"),
+		"Request for Quotation": ("billing_address", "billing_address_display"),
 	}
 
 	address_field, display_field = address_field_map.get(

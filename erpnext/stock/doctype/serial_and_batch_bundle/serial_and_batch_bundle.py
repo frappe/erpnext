@@ -936,11 +936,15 @@ class SerialandBatchBundle(Document):
 			# over the accepted quantity does not belong to it.
 			rate = flt(self.get_transit_rate(row)) or rate
 
+		transfer_rates = self.get_transfer_rates()
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
 			fifo_batch_wise_val = True
 			if valuation_method == "FIFO" and d.batch_no in batches:
 				fifo_batch_wise_val = False
+
+			if (d.serial_no, d.batch_no) in transfer_rates:
+				rate = transfer_rates[d.serial_no, d.batch_no]
 
 			if self.is_rejected and not values_rejected_material:
 				rate = 0.0
@@ -1043,7 +1047,14 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
 
 	def check_future_entries_exists(self, is_cancelled=False):
+		from erpnext.stock.valuation_adjustment import is_adjustment_voucher
+
 		if self.flags and self.flags.via_landed_cost_voucher:
+			return
+
+		# an Adjustment Entry counts out and back in the same serial and batch nos, so what moves
+		# them later is untouched by it, and backdated entries before it are blocked
+		if is_adjustment_voucher(self.voucher_type, self.voucher_no):
 			return
 
 		serial_nos = []
@@ -1250,6 +1261,42 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				f"Total quantity {total_qty} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {set_qty} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
+
+	def get_transfer_rates(self) -> dict:
+		"""Rate of each serial/batch where the same Stock Entry row took it out, plus the row's additional cost."""
+		from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
+
+		if (
+			self.voucher_type != "Stock Entry"
+			or not self.voucher_detail_no
+			or is_serial_no_wise_valuation_disabled(self.item_code)
+		):
+			return {}
+
+		outward_bundle = frappe.db.get_value(
+			"Serial and Batch Bundle",
+			{
+				"voucher_type": self.voucher_type,
+				"voucher_detail_no": self.voucher_detail_no,
+				"type_of_transaction": "Outward",
+				"is_cancelled": 0,
+			},
+		)
+		if not outward_bundle:
+			return {}
+
+		additional_cost, transfer_qty = frappe.db.get_value(
+			"Stock Entry Detail", self.voucher_detail_no, ["additional_cost", "transfer_qty"]
+		)
+		additional_cost_per_unit = flt(additional_cost) / flt(transfer_qty)
+		return {
+			(d.serial_no, d.batch_no): flt(d.incoming_rate) + additional_cost_per_unit
+			for d in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": outward_bundle},
+				fields=["serial_no", "batch_no", "incoming_rate"],
+			)
+		}
 
 	def get_transit_rate(self, row) -> float:
 		"""What the material was worth on its way into the in-transit warehouse."""
@@ -3197,14 +3244,14 @@ def get_auto_batch_nos(kwargs):
 	if kwargs.get("is_pick_list"):
 		picked_batches = get_picked_batches(kwargs)
 
-	if stock_ledgers_batches or pos_invoice_batches or sre_reserved_batches or picked_batches:
-		update_available_batches(
-			available_batches,
-			stock_ledgers_batches,
-			pos_invoice_batches,
-			sre_reserved_batches,
-			picked_batches,
-		)
+	update_available_batches(
+		available_batches,
+		stock_ledgers_batches,
+		pos_invoice_batches,
+		sre_reserved_batches,
+		picked_batches,
+		kwargs.get("already_picked_batches"),
+	)
 
 	if not kwargs.ignore_reserved_stock and not kwargs.for_stock_levels:
 		available_batches = remove_reservation_conflict_batches(available_batches, kwargs)
