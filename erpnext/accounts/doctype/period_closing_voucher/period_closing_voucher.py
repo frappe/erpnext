@@ -698,3 +698,7 @@ def get_previous_closed_period_in_current_year(fiscal_year, company):
 		order_by="period_end_date desc",
 	)
 	return prev_closed_period_end_date
+
+
+def is_within_stock_value_tolerance(stock_value, difference):
+	return abs(difference) <= abs(stock_value) * STOCK_VALUE_TOLERANCE_PERCENT / 100
