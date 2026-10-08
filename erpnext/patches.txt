@@ -541,3 +541,4 @@ erpnext.patches.v16_0.set_user_on_timesheets
 erpnext.patches.v16_0.replace_legacy_print_formats_with_classic
 erpnext.patches.v16_0.set_stock_value_in_stock_closing_balance
 erpnext.patches.v16_0.reset_fifo_queue_in_stock_closing_balance
+erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas

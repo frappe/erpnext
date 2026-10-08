@@ -345,3 +345,33 @@ class TestCashFlow(ERPNextTestSuite):
 		after = self.ifrs_template_totals(*lines)
 
 		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [-100, -100])
+
+	def test_patch_fixes_only_unchanged_ifrs_formulas(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+			sync_financial_report_templates,
+		)
+		from erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas import FORMULAS, TEMPLATE, execute
+
+		sync_financial_report_templates()
+		rows = {
+			code: frappe.db.get_value(
+				"Financial Report Row", {"parent": TEMPLATE, "reference_code": code}, "name"
+			)
+			for code in FORMULAS
+		}
+		custom_formula = '["account_category", "in", ["Other Payables"]]'
+		frappe.db.set_value(
+			"Financial Report Row", rows["CF_OP100"], "calculation_formula", FORMULAS["CF_OP100"][0]
+		)
+		frappe.db.set_value("Financial Report Row", rows["CF_WC500"], "calculation_formula", custom_formula)
+
+		execute()
+
+		self.assertEqual(
+			frappe.db.get_value("Financial Report Row", rows["CF_OP100"], "calculation_formula"),
+			FORMULAS["CF_OP100"][1],
+		)
+		self.assertEqual(
+			frappe.db.get_value("Financial Report Row", rows["CF_WC500"], "calculation_formula"),
+			custom_formula,
+		)
