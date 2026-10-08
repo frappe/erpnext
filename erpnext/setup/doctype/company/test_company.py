@@ -449,6 +449,17 @@ class TestCompany(ERPNextTestSuite):
 			invoice.base_grand_total,
 		)
 
+	def test_invalid_default_warehouses(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.default_in_transit_warehouse = company.default_warehouse
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_in_transit_warehouse = None
+		frappe.db.set_value("Warehouse", company.default_warehouse, "disabled", 1)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 

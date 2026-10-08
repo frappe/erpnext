@@ -323,7 +323,9 @@ class Company(NestedSet):
 			if not warehouse:
 				continue
 
-			details = frappe.db.get_value("Warehouse", warehouse, ["is_group", "company"], as_dict=True)
+			details = frappe.db.get_value(
+				"Warehouse", warehouse, ["is_group", "company", "disabled", "warehouse_type"], as_dict=True
+			)
 			if not details:
 				continue
 
@@ -344,6 +346,12 @@ class Company(NestedSet):
 					),
 					title=_("Incorrect Warehouse"),
 				)
+
+			if details.disabled:
+				frappe.throw(_("{0} {1} is disabled").format(bold(label), bold(warehouse)))
+
+			if fieldname == "default_in_transit_warehouse" and details.warehouse_type != "Transit":
+				frappe.throw(_("{0} must be a Transit Warehouse").format(bold(label)))
 
 	def validate_abbr(self):
 		if not self.abbr:
