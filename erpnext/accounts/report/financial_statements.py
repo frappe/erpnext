@@ -422,6 +422,14 @@ def calculate_values(
 					title="Error",
 					raise_exception=1,
 				)
+
+			amount = flt(entry.debit) - flt(entry.credit)
+
+			# Balance Sheet only: opening balance is kept per column, so each dimension gets its own
+			before_year_start = entry.posting_date < year_start_date
+			if before_year_start:
+				opening_balance = account_row.setdefault("opening_balance", {})
+
 			for period in period_list:
 				if grouped_by_dimension and entry.get(period.dimension_field) != period.dimension_value:
 					continue
@@ -431,16 +439,10 @@ def calculate_values(
 						not ignore_accumulated_values_for_fy
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
-						account_row[period.key] = (
-							account_row.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
-						)
+						account_row[period.key] = account_row.get(period.key, 0.0) + amount
 
-				# Balance Sheet only: pre-year entries, per column so each dimension keeps its own
-				if entry.posting_date < year_start_date:
-					opening_balance = account_row.setdefault("opening_balance", {})
-					opening_balance[period.key] = (
-						opening_balance.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
-					)
+				if before_year_start:
+					opening_balance[period.key] = opening_balance.get(period.key, 0.0) + amount
 
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
@@ -555,7 +557,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 			total_row["opening_balance"][key] = total_row["opening_balance"].get(key, 0.0) + value
 
 	if "total" in total_row:
-		# not shown in the report; only the total row keeps it, for check_opening_balance
+		# rows don't need opening_balance anymore; the total row keeps it for the Balance Sheet
 		for row in out:
 			row.pop("opening_balance", None)
 
