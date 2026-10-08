@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import today
 
 from erpnext.crm.report.opportunity_summary_by_sales_stage.opportunity_summary_by_sales_stage import (
+	NO_SALES_STAGE,
 	execute,
 )
 from erpnext.crm.report.sales_pipeline_analytics.test_sales_pipeline_analytics import (
@@ -102,18 +103,23 @@ class TestOpportunitySummaryBySalesStage(ERPNextTestSuite):
 		self.assertEqual(type_row(opportunity_type, data_based_on="Amount")["Prospecting"], 8500)
 
 	def test_opportunity_without_sales_stage(self):
+		if not frappe.db.exists("Sales Stage", "Not Set"):
+			frappe.get_doc({"doctype": "Sales Stage", "stage_name": "Not Set"}).insert()
 		opportunity_type = make_opportunity_type()
-		make_typed_opportunity(opportunity_type, 1000)
+		make_typed_opportunity(opportunity_type, 1000, sales_stage="Not Set")
 		without_stage = make_typed_opportunity(opportunity_type, 500)
 		frappe.db.set_value("Opportunity", without_stage.name, "sales_stage", None)
 
-		columns, data = execute(
+		columns, data, _message, chart = execute(
 			{"based_on": "Opportunity Type", "data_based_on": "Amount", "company": "Best Test"}
-		)[:2]
+		)
 
-		self.assertIn("Not Set", [column["fieldname"] for column in columns])
-		self.assertEqual(type_row(opportunity_type)["Not Set"], 1)
-		self.assertEqual(type_row(opportunity_type, data_based_on="Amount")["Not Set"], 500)
+		fieldnames = [column["fieldname"] for column in columns]
+		self.assertEqual(len(fieldnames), len(set(fieldnames)))
+		self.assertEqual(len(chart["data"]["labels"]), len(fieldnames) - 1)
+		self.assertEqual(type_row(opportunity_type)[NO_SALES_STAGE], 1)
+		amounts = type_row(opportunity_type, data_based_on="Amount")
+		self.assertEqual((amounts["Not Set"], amounts[NO_SALES_STAGE]), (1000, 500))
 
 
 def make_opportunity_type() -> str:

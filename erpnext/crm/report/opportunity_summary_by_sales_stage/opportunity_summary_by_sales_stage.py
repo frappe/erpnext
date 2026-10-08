@@ -10,7 +10,8 @@ from frappe.utils import flt
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
 
-NO_SALES_STAGE = "Not Set"
+# internal key for opportunities without a sales stage, distinct from any real stage name
+NO_SALES_STAGE = "__no_sales_stage"
 
 
 def execute(filters=None):
@@ -66,13 +67,26 @@ class OpportunitySummaryBySalesStage:
 		for sales_stage in self.sales_stage_list:
 			if self.filters.get("data_based_on") == "Number":
 				self.columns.append(
-					{"label": _(sales_stage), "fieldname": sales_stage, "fieldtype": "Int", "width": 150}
+					{
+						"label": self.get_sales_stage_label(sales_stage),
+						"fieldname": sales_stage,
+						"fieldtype": "Int",
+						"width": 150,
+					}
 				)
 
 			elif self.filters.get("data_based_on") == "Amount":
 				self.columns.append(
-					{"label": _(sales_stage), "fieldname": sales_stage, "fieldtype": "Currency", "width": 150}
+					{
+						"label": self.get_sales_stage_label(sales_stage),
+						"fieldname": sales_stage,
+						"fieldtype": "Currency",
+						"width": 150,
+					}
 				)
+
+	def get_sales_stage_label(self, sales_stage: str) -> str:
+		return _("Not Set") if sales_stage == NO_SALES_STAGE else _(sales_stage)
 
 	def get_data(self):
 		self.data = []
@@ -239,7 +253,8 @@ class OpportunitySummaryBySalesStage:
 					values[count] = values[count] + data[options]
 
 		datasets.append({"name": options, "values": values})
-		self.chart = {"data": {"labels": self.sales_stage_list, "datasets": datasets}, "type": "line"}
+		labels = [_("Not Set") if stage == NO_SALES_STAGE else stage for stage in self.sales_stage_list]
+		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
 	def convert_to_base_currency(self):
 		company_currency = erpnext.get_company_currency(self.filters.company)
