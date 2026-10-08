@@ -378,6 +378,34 @@ class TestCompany(ERPNextTestSuite):
 					company.create_default_tax_template()
 				setup.assert_not_called()
 
+	def test_currency_change_checks_ledger_entries(self):
+		company = get_test_company()
+		create_stock_item_with_inventory()
+		self.assertTrue(company.check_if_transactions_exist())
+		company.default_currency = "USD"
+		with self.assertRaisesRegex(frappe.ValidationError, "existing transactions"):
+			company.save()
+
+	def test_currency_change_without_transactions_updates_chart(self):
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Currency Change Test",
+				"abbr": "CCT",
+				"country": "Nepal",
+				"default_currency": "INR",
+			}
+		).insert()
+		self.assertTrue(company.default_cash_account)
+		company.default_currency = "USD"
+		company.save()
+		self.assertEqual(
+			frappe.db.get_value("Account", company.default_cash_account, "account_currency"), "USD"
+		)
+		from erpnext.accounts.doctype.account.account import get_account_currency
+
+		self.assertEqual(get_account_currency(company.default_cash_account), "USD")
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
