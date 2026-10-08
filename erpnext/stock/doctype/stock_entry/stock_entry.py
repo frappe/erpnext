@@ -2392,14 +2392,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		make_sl_entries(source_entries, allow_negative_stock, via_landed_cost_voucher)
-		self.recalculate_for_bundles_picked_while_posting()
+		if self.recalculate_for_bundles_picked_while_posting():
+			target_entries = []
+			self.get_sle_for_target_warehouse(target_entries, self.get_finished_item_row())
+
 		self.make_sl_entries(
 			target_entries,
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-	def recalculate_for_bundles_picked_while_posting(self):
+	def recalculate_for_bundles_picked_while_posting(self) -> bool:
+		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""
 		if not frappe.db.exists(
 			"Stock Ledger Entry",
 			{
@@ -2410,11 +2414,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 				"is_cancelled": 0,
 			},
 		):
-			return
+			return False
 
-		stock_entry = frappe.get_doc(self.doctype, self.name)
-		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
-		stock_entry.db_update_all()
+		self.reload()
+		self.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		self.db_update_all()
+		return True
 
 	def get_finished_item_row(self):
 		finished_item_row = None
