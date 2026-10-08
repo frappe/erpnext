@@ -529,5 +529,9 @@ def set_default_accounts(company):
 	)
 
 	company.save()
+	company.update_default_account = True
+	company.set_default_accounts()
+	if company.default_cash_account:
+		company.set_mode_of_payment_account()
 	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()
