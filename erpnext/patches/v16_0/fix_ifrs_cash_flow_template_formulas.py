@@ -15,9 +15,17 @@ FORMULAS = {
 }
 
 
+# short-term borrowings stay counted in financing activities only while this row is as shipped
+FINANCING_ROW = ("CF_FIN200", '["account_category", "in", ["Long-term Borrowings", "Short-term Borrowings"]]')
+
+
 def execute():
 	"""Fix the shipped IFRS cash flow formulas on sites whose copy still has them unchanged."""
-	for reference_code, (shipped_formula, fixed_formula) in FORMULAS.items():
+	formulas = dict(FORMULAS)
+	if not has_formula(*FINANCING_ROW):
+		formulas.pop("CF_WC500")
+
+	for reference_code, (shipped_formula, fixed_formula) in formulas.items():
 		frappe.db.set_value(
 			"Financial Report Row",
 			{
@@ -30,3 +38,17 @@ def execute():
 			fixed_formula,
 			update_modified=False,
 		)
+
+
+def has_formula(reference_code: str, formula: str) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Financial Report Row",
+			{
+				"parenttype": "Financial Report Template",
+				"parent": TEMPLATE,
+				"reference_code": reference_code,
+				"calculation_formula": formula,
+			},
+		)
+	)

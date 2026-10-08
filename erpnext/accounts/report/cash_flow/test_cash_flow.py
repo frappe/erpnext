@@ -395,3 +395,33 @@ class TestCashFlow(ERPNextTestSuite):
 			frappe.db.get_value("Financial Report Row", rows["CF_WC500"], "calculation_formula"),
 			custom_formula,
 		)
+
+	def test_patch_keeps_borrowings_when_financing_row_was_changed(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+			sync_financial_report_templates,
+		)
+		from erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas import FORMULAS, TEMPLATE, execute
+
+		sync_financial_report_templates()
+
+		def row(code):
+			return frappe.db.get_value(
+				"Financial Report Row", {"parent": TEMPLATE, "reference_code": code}, "name"
+			)
+
+		frappe.db.set_value(
+			"Financial Report Row",
+			row("CF_FIN200"),
+			"calculation_formula",
+			'["account_category", "in", ["Long-term Borrowings"]]',
+		)
+		frappe.db.set_value(
+			"Financial Report Row", row("CF_WC500"), "calculation_formula", FORMULAS["CF_WC500"][0]
+		)
+
+		execute()
+
+		self.assertEqual(
+			frappe.db.get_value("Financial Report Row", row("CF_WC500"), "calculation_formula"),
+			FORMULAS["CF_WC500"][0],
+		)
