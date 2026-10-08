@@ -88,7 +88,6 @@ class StockSettings(Document):
 		self.update_item_naming_settings()
 		self.update_barcode_field_visibility()
 
-		self.validate_over_delivery_receipt_allowance()
 		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
@@ -123,10 +122,6 @@ class StockSettings(Document):
 				{"fieldname": name, "property": "hidden", "value": 0 if self.show_barcode_field else 1},
 				validate_fields_for_doctype=False,
 			)
-
-	def validate_over_delivery_receipt_allowance(self):
-		if not self.over_delivery_receipt_allowance:
-			self.role_allowed_to_over_deliver_receive = None
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
