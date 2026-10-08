@@ -182,8 +182,8 @@ def get_provisional_profit_loss(
 
 def check_opening_balance(asset, liability, equity, period_list):
 	# Check if previous year balance sheet closed
-	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 	opening_balance = {}
+	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	# get_data() output: [...account rows..., total_row, {}] -> total row is [-2], blank is [-1]
 	for section, sign in ((asset, 1), (liability, -1), (equity, -1)):
@@ -195,14 +195,14 @@ def check_opening_balance(asset, liability, equity, period_list):
 
 	opening_balance = {key: flt(value, float_precision) for key, value in opening_balance.items()}
 
-	# Unclosed or not is a company-wide question; columns only decide how it is split
-	if flt(get_company_wide_opening_balance(opening_balance, period_list), float_precision):
+	# check the total across all dimensions, not each column
+	if flt(get_total_opening_balance(opening_balance, period_list), float_precision):
 		return _("Previous Financial Year is not closed"), opening_balance
 	return None, None
 
 
-def get_company_wide_opening_balance(opening_balance, period_list):
-	"""Opening repeats across a dimension's periods, so count one period per dimension."""
+def get_total_opening_balance(opening_balance, period_list):
+	"""A dimension's opening is the same in all its columns, so add it once per dimension."""
 	per_dimension = {
 		period.get("dimension_value"): flt(opening_balance.get(period.key)) for period in period_list
 	}
@@ -218,7 +218,7 @@ def add_unclosed_fiscal_years_row(
 	currency,
 	accumulated_values,
 ):
-	# Opening balance is a position, not movement: it only belongs in accumulated columns
+	# without Accumulated Values, each column shows only its own period's change, not past years' profit/loss
 	if not opening_balance or not accumulated_values:
 		return
 
@@ -236,7 +236,7 @@ def add_unclosed_fiscal_years_row(
 		if provisional_profit_loss:
 			provisional_profit_loss[period.key] = provisional_profit_loss[period.key] - amount
 
-	unclosed["total"] = get_company_wide_opening_balance(opening_balance, period_list)
+	unclosed["total"] = get_total_opening_balance(opening_balance, period_list)
 
 	# the Total cell was summed before this row existed, so it needs the same adjustment
 	if provisional_profit_loss:
