@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
 	StockClosing,
+	StockClosingEntry,
 	prepare_closing_stock_balance,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -441,6 +442,35 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 		closing.cancel()
 		self.assertRaises(frappe.ValidationError, closing.regenerate_closing_balance)
 		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Cancelled")
+
+	def test_queued_job_skips_cancelled_closing(self):
+		item = make_item("_Test SCE Cancelled Job Item", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-15")
+
+		closing = self.submit_closing(self.make_closing("2026-03-31"))
+		closing.cancel()
+		prepare_closing_stock_balance(closing.name)
+
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Cancelled")
+		self.assertFalse(frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": closing.name}))
+
+	def test_closing_cancelled_while_job_runs_is_not_completed(self):
+		item = make_item("_Test SCE Cancelled Job Item", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-15")
+
+		closing = self.submit_closing(self.make_closing("2026-03-31"))
+		build_balance = StockClosingEntry.create_stock_closing_balance_entries
+
+		def build_then_cancel(doc):
+			build_balance(doc)
+			self.assertTrue(frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": doc.name}))
+			frappe.db.set_value("Stock Closing Entry", doc.name, "docstatus", 2)
+
+		with patch.object(StockClosingEntry, "create_stock_closing_balance_entries", build_then_cancel):
+			prepare_closing_stock_balance(closing.name)
+
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Cancelled")
+		self.assertFalse(frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": closing.name}))
 
 	def test_reposting_ignores_completed_draft_closing(self):
 		draft = self.make_closing(today())

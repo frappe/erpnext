@@ -306,16 +306,28 @@ class StockClosingEntry(Document):
 
 
 def prepare_closing_stock_balance(name):
+	if not is_submitted_closing_entry(name):
+		return
+
 	doc = frappe.get_doc("Stock Closing Entry", name)
 	doc.db_set("status", "In Progress")
 
 	try:
 		doc.create_stock_closing_balance_entries()
+		if not is_submitted_closing_entry(name, for_update=True):
+			doc.remove_stock_closing()
+			doc.db_set("status", "Cancelled")
+			return
+
 		doc.db_set("status", "Completed")
 	except Exception:
 		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
+
+
+def is_submitted_closing_entry(name, for_update=False):
+	return frappe.db.get_value("Stock Closing Entry", name, "docstatus", for_update=for_update) == 1
 
 
 class StockClosing:
