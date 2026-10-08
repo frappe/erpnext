@@ -354,6 +354,7 @@ class Company(NestedSet):
 
 	@frappe.whitelist()
 	def create_default_tax_template(self):
+		frappe.only_for(("System Manager", "Accounts Manager"))
 		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
@@ -483,7 +484,7 @@ class Company(NestedSet):
 
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name, self.country)
-			self.create_default_tax_template()
+			setup_taxes_and_charges(self.name, self.country)
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			self.create_default_departments()
