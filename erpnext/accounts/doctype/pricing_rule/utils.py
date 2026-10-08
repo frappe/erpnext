@@ -202,7 +202,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 				frappe.throw(_("Invalid {0}").format(group))
 			while group and group not in parent_groups:
 				parent_groups.append(group)
-				group = frappe.db.get_value(parenttype, group, "parent_item_group")
+				group = frappe.db.get_value(parenttype, group, "parent_item_group", cache=True)
 		else:
 			try:
 				lft, rgt = frappe.db.get_value(parenttype, args.get(field), ["lft", "rgt"])

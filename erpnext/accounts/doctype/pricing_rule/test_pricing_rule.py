@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, today
 
@@ -221,6 +223,48 @@ class TestPricingRule(ERPNextTestSuite):
 				{"lft": original_bounds[0], "rgt": original_bounds[1]},
 				update_modified=False,
 			)
+			frappe.flags.tree_conditions = {}
+
+	def test_item_group_parent_lookup_is_cached_for_siblings(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import _get_tree_conditions
+
+		parent = frappe.get_doc(
+			doctype="Item Group",
+			item_group_name="_Test Pricing Rule Shared Parent",
+			parent_item_group="All Item Groups",
+			is_group=1,
+		).insert()
+		children = [
+			frappe.get_doc(
+				doctype="Item Group",
+				item_group_name=f"_Test Pricing Rule Child {index}",
+				parent_item_group=parent.name,
+				is_group=0,
+			).insert()
+			for index in (1, 2)
+		]
+
+		frappe.flags.tree_conditions = {}
+		frappe.db.value_cache["Item Group"][parent.name].pop("parent_item_group", None)
+		try:
+			with patch.object(frappe.qb, "get_query", wraps=frappe.qb.get_query) as get_query:
+				for child in children:
+					_get_tree_conditions(
+						frappe._dict(item_group=child.name),
+						"Item Group",
+						"`tabPricing Rule Item Group`",
+						False,
+					)
+
+			parent_queries = [
+				call
+				for call in get_query.call_args_list
+				if call.kwargs.get("table") == "Item Group"
+				and call.kwargs.get("filters") == parent.name
+				and call.kwargs.get("fields") == "parent_item_group"
+			]
+			self.assertEqual(len(parent_queries), 1)
+		finally:
 			frappe.flags.tree_conditions = {}
 
 	def test_mixed_conditions_for_item_group(self):
