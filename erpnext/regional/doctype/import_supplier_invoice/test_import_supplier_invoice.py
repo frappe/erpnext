@@ -6,7 +6,7 @@ import zipfile
 
 import frappe
 from bs4 import BeautifulSoup
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.regional.doctype.import_supplier_invoice.import_supplier_invoice import (
 	get_payment_terms_from_file,
@@ -24,6 +24,7 @@ class TestImportSupplierInvoice(FrappeTestCase):
 		terms = get_payment_terms_from_file(BeautifulSoup(xml, "xml"))
 		self.assertEqual(terms[0]["mode_of_payment_code"], "MP05-Bonifico")
 
+	@change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_each_line_has_its_own_qty_and_uom(self):
 		lines = [
 			make_line("Bolts", "10.00", "50.00", qty="5.00", uom="_Test ISI KG"),
@@ -59,6 +60,7 @@ class TestImportSupplierInvoice(FrappeTestCase):
 		self.assertEqual(self.get_invoice("ISI-AFTER-DAMAGED").grand_total, 10)
 		self.assertEqual((doc.file_count, doc.purchase_invoices_count), (2, 1))
 
+	@change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_credit_notes_are_imported_as_returns(self):
 		negative = [make_line("Return one", "-50.00", "-50.00"), make_line("Return two", "-30.00", "-30.00")]
 		positive = [make_line("Return one", "50.00", "50.00"), make_line("Return two", "30.00", "30.00")]
@@ -75,6 +77,7 @@ class TestImportSupplierInvoice(FrappeTestCase):
 			self.assertEqual([row.qty for row in invoice.items], [-1, -1])
 			self.assertEqual(invoice.grand_total, -97.60)
 
+	@change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_line_surcharges_and_amount_discounts(self):
 		surcharge = (
 			"<ScontoMaggiorazione><Tipo>MG</Tipo><Percentuale>10.00</Percentuale></ScontoMaggiorazione>"
