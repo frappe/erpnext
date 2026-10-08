@@ -180,6 +180,21 @@ class TestWarehouse(ERPNextTestSuite):
 			)
 			self.assertRaises(frappe.ValidationError, doc.insert)
 
+	def test_parent_warehouse_must_be_group_of_same_company(self):
+		other_company_group = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company 1", "is_group": 1}, "name"
+		)
+		for parent in ("_Test Warehouse - _TC", other_company_group):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "_Test Wrong Parent WH",
+					"company": "_Test Company",
+					"parent_warehouse": parent,
+				}
+			)
+			self.assertRaises(frappe.ValidationError, doc.insert)
+
 	def test_get_children(self):
 		company = "_Test Company"
 
@@ -419,7 +434,7 @@ def create_warehouse(warehouse_name, properties=None, company=None):
 	if not frappe.db.exists("Warehouse", warehouse_id):
 		w = frappe.new_doc("Warehouse")
 		w.warehouse_name = warehouse_name
-		w.parent_warehouse = "_Test Warehouse Group - _TC"
+		w.parent_warehouse = get_test_parent_warehouse(company)
 		w.company = company
 		w.account = get_warehouse_account(warehouse_name, company)
 		if properties:
@@ -428,6 +443,15 @@ def create_warehouse(warehouse_name, properties=None, company=None):
 		return w.name
 	else:
 		return warehouse_id
+
+
+def get_test_parent_warehouse(company):
+	if company == "_Test Company":
+		return "_Test Warehouse Group - _TC"
+
+	return frappe.db.get_value(
+		"Warehouse", {"company": company, "is_group": 1, "parent_warehouse": ("is", "not set")}, "name"
+	)
 
 
 def get_warehouse(**args):

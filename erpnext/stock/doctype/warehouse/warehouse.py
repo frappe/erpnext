@@ -75,7 +75,22 @@ class Warehouse(NestedSet):
 		self.validate_inventory_account()
 		self.validate_group_conversion()
 		self.validate_company_change()
+		self.validate_parent_warehouse()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_parent_warehouse(self):
+		if not self.parent_warehouse:
+			return
+
+		parent = frappe.db.get_value(
+			"Warehouse", self.parent_warehouse, ["is_group", "company"], as_dict=True
+		)
+		if not parent.is_group or (parent.company and parent.company != self.company):
+			throw(
+				_("Parent Warehouse {0} must be a group warehouse of Company {1}").format(
+					frappe.bold(self.parent_warehouse), frappe.bold(self.company)
+				)
+			)
 
 	def validate_company_change(self):
 		if self.is_new() or not self.has_value_changed("company"):
