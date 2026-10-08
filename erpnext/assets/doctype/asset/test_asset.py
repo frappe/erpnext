@@ -1065,6 +1065,34 @@ class TestAsset(AssetSetup):
 
 		self.assertTrue(frappe.db.get_value("Asset", asset.name, "booked_fixed_asset"))
 
+	def test_cwip_daily_run_continues_after_a_failing_asset(self):
+		from unittest.mock import patch
+
+		from erpnext.assets.doctype.asset.asset import Asset, make_post_gl_entry
+
+		assets = []
+		for _i in range(2):
+			pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=5000, location="Test Location")
+			asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
+			asset.available_for_use_date = add_days(nowdate(), 5)
+			asset.submit()
+			asset.db_set("available_for_use_date", add_days(nowdate(), -1))
+			assets.append(asset.name)
+
+		original_make_gl_entries = Asset.make_gl_entries
+
+		def fail_for_first_asset(doc):
+			if doc.name == assets[0]:
+				frappe.throw("Posting date is in a closed accounting period")
+			return original_make_gl_entries(doc)
+
+		with patch.object(Asset, "make_gl_entries", fail_for_first_asset):
+			make_post_gl_entry()
+
+		self.assertFalse(frappe.db.get_value("Asset", assets[0], "booked_fixed_asset"))
+		self.assertTrue(frappe.db.get_value("Asset", assets[1], "booked_fixed_asset"))
+		self.assertTrue(frappe.db.exists("Error Log", {"reference_name": assets[0]}))
+
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
 			draft_asset = create_asset(

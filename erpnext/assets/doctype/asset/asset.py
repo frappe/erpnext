@@ -1133,9 +1133,23 @@ def make_post_gl_entry():
 			)
 
 			for asset in assets:
-				doc = frappe.get_doc("Asset", asset)
-				if doc.validate_make_gl_entry():
-					doc.make_gl_entries()
+				post_cwip_gl_entry(asset)
+
+
+def post_cwip_gl_entry(asset_name: str) -> None:
+	"""Move an asset out of CWIP; a failure is logged so that the other assets are still posted."""
+	frappe.db.savepoint("cwip_gl_entry")
+	try:
+		asset = frappe.get_doc("Asset", asset_name)
+		if asset.validate_make_gl_entry():
+			asset.make_gl_entries()
+	except Exception:
+		frappe.db.rollback(save_point="cwip_gl_entry")
+		frappe.log_error(
+			title=_("Could not move asset {0} out of CWIP").format(asset_name),
+			reference_doctype="Asset",
+			reference_name=asset_name,
+		)
 
 
 def get_asset_naming_series():
