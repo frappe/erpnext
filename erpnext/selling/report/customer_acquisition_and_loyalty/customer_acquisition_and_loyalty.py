@@ -156,7 +156,7 @@ def get_customer_stats(filters, tree_view=False):
 	si = frappe.qb.DocType("Sales Invoice")
 	query = (
 		frappe.qb.from_(si)
-		.select(si.territory, si.posting_date, si.customer, si.base_grand_total)
+		.select(si.territory, si.posting_date, si.customer, si.base_grand_total, si.is_return)
 		.where((si.docstatus == 1) & (si.posting_date <= filters.get("to_date")))
 		# name tie-break makes the first-seen-per-customer classification deterministic across engines
 		.orderby(si.posting_date)
@@ -173,19 +173,23 @@ def get_customer_stats(filters, tree_view=False):
 	for row in query.run(as_dict=True):
 		posting_date = getdate(row.posting_date)
 		key = row.territory if tree_view else posting_date.strftime("%Y-%m")
-		acquisition.setdefault(row.customer, (key, posting_date))
+
+		# a return never acquires a customer; it only nets revenue
+		if not row.is_return and row.customer not in acquisition:
+			acquisition[row.customer] = (key, posting_date)
 
 		if posting_date < from_date:
 			continue
 
-		acq_key, acq_date = acquisition[row.customer]
-		new_or_repeat = "new" if key == acq_key and acq_date >= from_date else "repeat"
+		acq = acquisition.get(row.customer)
+		# without an acquiring sale (e.g. a standalone credit note) the customer is never "new"
+		new_or_repeat = "new" if acq and key == acq[0] and acq[1] >= from_date else "repeat"
 
 		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})
 		counted.setdefault(key, {"new": set(), "repeat": set()})
 
-		# count each customer once per period, not once per invoice
-		if row.customer not in counted[key][new_or_repeat]:
+		# count each customer once per period; returns net revenue but not the headcount
+		if not row.is_return and row.customer not in counted[key][new_or_repeat]:
 			counted[key][new_or_repeat].add(row.customer)
 			customers_in[key][new_or_repeat][0] += 1
 		customers_in[key][new_or_repeat][1] += row.base_grand_total
