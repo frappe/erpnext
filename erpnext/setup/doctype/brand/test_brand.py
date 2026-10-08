@@ -111,3 +111,34 @@ class TestBrand(ERPNextTestSuite):
 			["_Test Price List"],
 		)
 
+	def test_same_named_item_group_does_not_use_unrelated_brand_defaults(self):
+		from erpnext.controllers.buying_controller import get_purchase_expense_account
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.services.base_stock_gl_composer import get_expenses_added_to_stock_accounts
+
+		name = "Test Brand Group Collision " + frappe.generate_hash(length=8)
+		frappe.get_doc(
+			{"doctype": "Item Group", "item_group_name": name, "parent_item_group": "_Test Item Group"}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Brand",
+				"brand": name,
+				"brand_defaults": [
+					{
+						"company": "_Test Company",
+						"default_warehouse": "_Test Warehouse - _TC",
+						"purchase_expense_account": "_Test Account Stock Expenses - _TC",
+						"expenses_added_to_stock_account": "_Test Account Stock Expenses - _TC",
+					}
+				],
+			}
+		).insert()
+		other_brand = frappe.get_doc({"doctype": "Brand", "brand": name + " Other"}).insert()
+		item = make_item(properties={"item_group": name, "brand": other_brand.name})
+
+		self.assertFalse(get_purchase_expense_account(item.name, "_Test Company").purchase_expense_account)
+		self.assertNotEqual(
+			get_expenses_added_to_stock_accounts(item.name, "_Test Company").expenses_added_to_stock_account,
+			"_Test Account Stock Expenses - _TC",
+		)
