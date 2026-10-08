@@ -251,6 +251,25 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 		self.assertEqual([flt(row.applicable_charges) for row in lcv.items], [100.0, 0.0])
 
+	def test_receipt_reads_need_document_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		vendor_invoice = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=1000).name
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+
+		self.assertRaises(frappe.ValidationError, lcv.get_receipt_document_details, "Sales Invoice", "X")
+
+		user = create_user("test_lcv_reader@example.com", "Stock Manager")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError, lcv.get_receipt_document_details, "Purchase Invoice", vendor_invoice
+			)
+			self.assertRaises(frappe.PermissionError, lcv.get_vendor_invoice_amount, vendor_invoice)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 

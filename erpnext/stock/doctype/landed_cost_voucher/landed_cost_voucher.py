@@ -23,6 +23,9 @@ class IncorrectCompanyValidationError(frappe.ValidationError):
 	pass
 
 
+RECEIPT_DOCUMENT_TYPES = ("Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt", "Stock Entry")
+
+
 class LandedCostVoucher(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -404,6 +407,10 @@ class LandedCostVoucher(Document):
 
 	@frappe.whitelist()
 	def get_receipt_document_details(self, receipt_document_type: str, receipt_document: str):
+		if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
+			frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
+
+		frappe.has_permission(receipt_document_type, "read", receipt_document, throw=True)
 		if receipt_document_type in [
 			"Purchase Invoice",
 			"Purchase Receipt",
@@ -562,6 +569,7 @@ class LandedCostVoucher(Document):
 
 	@frappe.whitelist()
 	def get_vendor_invoice_amount(self, vendor_invoice: str):
+		frappe.has_permission("Purchase Invoice", "read", vendor_invoice, throw=True)
 		filters = frappe._dict(
 			{
 				"name": vendor_invoice,
