@@ -80,8 +80,10 @@ class TestStockSettings(ERPNextTestSuite):
 		):
 			settings.save()
 
+		from erpnext.stock.doctype.stock_settings.stock_settings import get_transaction_barcode_fields
+
 		set_by_naming_series.assert_called_once()
-		self.assertEqual(make_property_setter.call_count, 3)
+		self.assertEqual(make_property_setter.call_count, len(get_transaction_barcode_fields()))
 
 	def test_cannot_disable_serial_and_batch_with_tracked_items(self):
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -218,3 +220,21 @@ class TestStockSettings(ERPNextTestSuite):
 			frappe.db.get_single_value("Stock Settings", "role_allowed_to_over_deliver_receive"),
 			"Stock Manager",
 		)
+
+	def test_hiding_barcode_field_keeps_item_barcodes(self):
+		settings = frappe.get_doc("Stock Settings")
+		settings.show_barcode_field = 1
+		settings.save()
+		settings.show_barcode_field = 0
+		settings.save()
+
+		def is_hidden(doctype, fieldname):
+			return frappe.db.get_value(
+				"Property Setter",
+				{"doc_type": doctype, "field_name": fieldname, "property": "hidden"},
+				"value",
+			)
+
+		self.assertEqual(is_hidden("Delivery Note", "scan_barcode"), "1")
+		self.assertNotEqual(is_hidden("Item", "barcodes"), "1")
+		self.assertNotEqual(is_hidden("Job Card", "barcode"), "1")
