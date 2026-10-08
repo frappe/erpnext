@@ -2962,6 +2962,50 @@ class TestSalesInvoice(ERPNextTestSuite):
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
 	)
+	def test_on_recurring_keeps_terms_and_shifts_service_dates(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		deferred_account = create_account(
+			account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC",
+			company="_Test Company",
+		)
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.item_defaults[0].deferred_revenue_account = deferred_account
+		item.save()
+
+		reference = create_sales_invoice(item=item.name, posting_date="2025-01-01", do_not_save=True)
+		reference.set_posting_time = 1
+		reference.payment_terms_template = "Test Receivable Template"
+		reference.po_no = "PO-0001"
+		reference.from_date = "2025-01-01"
+		reference.to_date = "2025-01-31"
+		reference.items[0].enable_deferred_revenue = 1
+		reference.items[0].deferred_revenue_account = deferred_account
+		reference.items[0].service_start_date = "2025-01-01"
+		reference.items[0].service_end_date = "2025-01-31"
+		reference.insert()
+
+		# Same steps as Auto Repeat: copy without no_copy fields, set dates and period, call on_recurring
+		new_invoice = frappe.copy_doc(reference, ignore_no_copy=False)
+		new_invoice.set_posting_time = 1
+		new_invoice.posting_date = "2025-02-01"
+		new_invoice.from_date = "2025-02-01"
+		new_invoice.to_date = "2025-02-28"
+		new_invoice.run_method("on_recurring", reference_doc=reference, auto_repeat_doc=None)
+		new_invoice.insert()
+
+		self.assertEqual(new_invoice.po_no, "PO-0001")
+		self.assertEqual(new_invoice.payment_terms_template, "Test Receivable Template")
+		self.assertEqual(
+			[getdate(row.due_date) for row in new_invoice.payment_schedule],
+			[getdate("2025-02-02"), getdate("2025-02-03")],
+		)
+		self.assertEqual(getdate(new_invoice.items[0].service_start_date), getdate("2025-02-01"))
+		self.assertEqual(getdate(new_invoice.items[0].service_end_date), getdate("2025-02-28"))
+
 	def test_deferred_revenue(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",

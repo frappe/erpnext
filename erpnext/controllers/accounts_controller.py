@@ -11,8 +11,10 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
+	add_days,
 	cint,
 	comma_and,
+	date_diff,
 	flt,
 	get_link_to_form,
 	getdate,
@@ -607,6 +609,20 @@ class AccountsController(TransactionBase):
 	def validate_auto_repeat_subscription_dates(self):
 		if self.get("from_date") and self.get("to_date") and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
+
+	def shift_service_dates(self, reference_doc):
+		"""Move item service dates by the same offset as the invoice period (used by Auto Repeat)."""
+		if not (self.from_date and self.to_date and reference_doc.from_date and reference_doc.to_date):
+			return
+
+		# Separate offsets keep month ends aligned, e.g. 1-31 Jan becomes 1-28 Feb.
+		start_offset = date_diff(self.from_date, reference_doc.from_date)
+		end_offset = date_diff(self.to_date, reference_doc.to_date)
+		for item, reference_item in zip(self.items, reference_doc.items, strict=True):
+			if reference_item.service_start_date:
+				item.service_start_date = add_days(reference_item.service_start_date, start_offset)
+			if reference_item.service_end_date:
+				item.service_end_date = add_days(reference_item.service_end_date, end_offset)
 
 	def before_print(self, settings=None):
 		self.set_missing_terms()

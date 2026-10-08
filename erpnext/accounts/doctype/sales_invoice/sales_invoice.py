@@ -1142,7 +1142,11 @@ class SalesInvoice(SellingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
+		self.po_no = reference_doc.po_no
+		# The payment schedule is rebuilt from the template, relative to the new posting date.
+		self.payment_terms_template = reference_doc.payment_terms_template
 		self.due_date = None
+		self.shift_service_dates(reference_doc)
 
 	def update_project(self):
 		unique_projects = list(set([d.project for d in self.get("items") if d.project]))
