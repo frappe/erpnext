@@ -79,6 +79,15 @@ class TestShipment(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_shipment, return_note.name)
 
+	def test_parcel_count_and_dimensions_are_validated(self):
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+
+		for parcel in ({"count": 0}, {"count": -3}, {"length": -10}):
+			shipment = create_test_shipment([delivery_note], do_not_insert=True)
+			shipment.shipment_parcel[0].update(parcel)
+			self.assertRaises(frappe.ValidationError, shipment.insert)
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(

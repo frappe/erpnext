@@ -6,7 +6,7 @@ import frappe
 from frappe import _, bold
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.document import Document
-from frappe.utils import flt, get_link_to_form, get_time
+from frappe.utils import cint, flt, get_link_to_form, get_time
 
 from erpnext.accounts.party import get_party_shipping_address
 
@@ -96,6 +96,17 @@ class Shipment(Document):
 		for parcel in self.shipment_parcel:
 			if flt(parcel.weight) <= 0:
 				frappe.throw(_("Parcel weight cannot be 0"))
+
+			if cint(parcel.count) < 1:
+				frappe.throw(_("Row #{0}: Parcel count must be at least 1").format(parcel.idx))
+
+			for fieldname in ("length", "width", "height"):
+				if flt(parcel.get(fieldname)) < 0:
+					frappe.throw(
+						_("Row #{0}: Parcel {1} cannot be negative").format(
+							parcel.idx, _(parcel.meta.get_label(fieldname))
+						)
+					)
 
 	def set_total_weight(self):
 		self.total_weight = self.get_total_weight()
