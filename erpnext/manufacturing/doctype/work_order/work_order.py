@@ -1326,21 +1326,10 @@ class WorkOrder(Document):
 		if self.track_semi_finished_goods:
 			return
 
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_reserved_qty_for_sub_assembly,
-		)
-
-		qty_dict = {"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)}
-
-		if self.production_plan_sub_assembly_item and self.production_plan:
-			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
-				self.production_item, self.fg_warehouse
-			)
-
 		update_bin_qty(
 			self.production_item,
 			self.fg_warehouse,
-			qty_dict,
+			{"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)},
 		)
 
 		if self.material_request:
@@ -1402,7 +1391,7 @@ class WorkOrder(Document):
 			doc = frappe.get_doc("Production Plan", self.production_plan)
 			doc.flags.ignore_permissions = True
 			doc.update_status_and_bin_qty()
-			doc.update_raw_material_bin_qty({d.item_code for d in self.required_items})
+			doc.update_bin_qty({d.item_code for d in self.required_items})
 
 	def update_work_order_qty_in_so(self):
 		if (not self.sales_order and not self.sales_order_item) or self.production_plan_sub_assembly_item:
@@ -3210,7 +3199,7 @@ def _set_material_request_item(source, target, source_parent):
 
 
 @frappe.whitelist()
-def make_stock_return_entry(work_order):
+def make_stock_return_entry(work_order: str):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
 
 	non_consumed_items = get_available_materials(work_order)
@@ -3223,6 +3212,7 @@ def make_stock_return_entry(work_order):
 	stock_entry.from_bom = 1
 	stock_entry.is_return = 1
 	stock_entry.work_order = work_order
+	stock_entry.company = wo_doc.company
 	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.bom_no = wo_doc.bom_no
 	stock_entry.add_transfered_raw_materials_in_items()

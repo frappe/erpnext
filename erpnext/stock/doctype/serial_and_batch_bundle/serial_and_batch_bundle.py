@@ -3209,14 +3209,14 @@ def get_auto_batch_nos(kwargs):
 	if kwargs.get("is_pick_list"):
 		picked_batches = get_picked_batches(kwargs)
 
-	if stock_ledgers_batches or pos_invoice_batches or sre_reserved_batches or picked_batches:
-		update_available_batches(
-			available_batches,
-			stock_ledgers_batches,
-			pos_invoice_batches,
-			sre_reserved_batches,
-			picked_batches,
-		)
+	update_available_batches(
+		available_batches,
+		stock_ledgers_batches,
+		pos_invoice_batches,
+		sre_reserved_batches,
+		picked_batches,
+		kwargs.get("already_picked_batches"),
+	)
 
 	if kwargs.based_on == "Expiry":
 		available_batches = sorted(available_batches, key=lambda x: x.expiry_date or getdate("9999-12-31"))

@@ -1595,15 +1595,22 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			has_derived_rate = False
 
-			if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
+			# a zero valued finished good takes no share of the cost, even before it has a rate
+			if (
+				d.allow_zero_valuation_rate
+				and (d.basic_rate or d.is_finished_item)
+				and self.purpose != "Receive from Customer"
+			):
+				if d.basic_rate:
+					items.append(d.item_code)
 				d.basic_rate = 0.0
-				items.append(d.item_code)
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
+					# the cost is split over every finished good row, so a split row is not given all of it
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
-						d.transfer_qty, outgoing_items_cost, has_consumption_basis
+						self.get_finished_items_qty(), outgoing_items_cost, has_consumption_basis
 					)
-					has_derived_rate = has_consumption_basis
+					has_derived_rate = has_consumption_basis or self.has_manually_rated_finished_items()
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 					# Repack rate comes from consumed source-warehouse rows, not consumption entries
@@ -1740,6 +1747,35 @@ class StockEntry(StockController, SubcontractingInwardController):
 			}
 		)
 
+	def get_finished_items_qty(self) -> float:
+		"""Qty of the received finished good rows whose rate is derived from the consumed cost.
+		Manual and zero valued rows take no share, so the others carry the whole cost."""
+		return sum(
+			flt(d.transfer_qty)
+			for d in self.get("items")
+			if d.is_finished_item
+			and d.t_warehouse
+			and not d.s_warehouse
+			and not d.set_basic_rate_manually
+			and not d.allow_zero_valuation_rate
+		)
+
+	def has_manually_rated_finished_items(self) -> bool:
+		"""Whether hand rated finished goods took part of the cost, so a zero left for the rest is real."""
+		return self.get_manually_rated_finished_items()[1] > 0
+
+	def get_manually_rated_finished_items(self) -> tuple[float, float]:
+		"""Qty and value of the received finished good rows whose rate was set by hand."""
+		rows = [
+			d
+			for d in self.get("items")
+			if d.is_finished_item and d.t_warehouse and not d.s_warehouse and d.set_basic_rate_manually
+		]
+		return (
+			sum(flt(d.transfer_qty) for d in rows),
+			sum(flt(d.transfer_qty) * flt(d.basic_rate) for d in rows),
+		)
+
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
 		outgoing_items_cost -= self.get_costed_out_items_cost()
 
@@ -1825,6 +1861,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
 		scrap_items_cost = self.get_costed_out_items_cost()
+		manual_qty, manual_cost = self.get_manually_rated_finished_items()
 
 		if settings.material_consumption:
 			if settings.get_rm_cost_from_consumption_entry and self.work_order:
@@ -1870,10 +1907,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 			# Estimate from the BOM only when nothing was consumed. A consumed cost of zero is a
 			# real cost, so substituting BOM rates would value free inputs as output.
 			elif not outgoing_items_cost and not has_consumption_basis:
-				bom_items = self.get_bom_raw_materials(finished_item_qty)
+				bom_items = self.get_bom_raw_materials(finished_item_qty + manual_qty)
 				outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
 
-		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
+		cost_left = outgoing_items_cost - scrap_items_cost - manual_cost
+		if self.flags.via_repost:
+			cost_left = max(cost_left, 0)
+
+		return flt(cost_left / finished_item_qty)
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
@@ -1956,6 +1997,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		already_picked_serial_nos = []
+		already_picked_batches = frappe._dict()
 
 		for row in self.items:
 			if row.use_serial_batch_fields:
@@ -1978,6 +2020,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"serial_and_batch_bundle": row.serial_and_batch_bundle,
 						"type_of_transaction": "Outward",
 						"ignore_serial_nos": already_picked_serial_nos,
+						"already_picked_batches": already_picked_batches,
 						"qty": row.transfer_qty * -1,
 					}
 				).update_serial_and_batch_entries(
@@ -1995,6 +2038,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"voucher_detail_no": row.name,
 						"qty": row.transfer_qty * -1,
 						"ignore_serial_nos": already_picked_serial_nos,
+						"already_picked_batches": already_picked_batches,
 						"type_of_transaction": "Outward",
 						"company": self.company,
 						"do_not_submit": True,
@@ -2007,10 +2051,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue
 
 			for entry in bundle_doc.entries:
-				if not entry.serial_no:
-					continue
-
-				already_picked_serial_nos.append(entry.serial_no)
+				if entry.serial_no:
+					already_picked_serial_nos.append(entry.serial_no)
+				if entry.batch_no:
+					key = (entry.batch_no, bundle_doc.warehouse)
+					picked = already_picked_batches.setdefault(
+						key, frappe._dict(batch_no=entry.batch_no, warehouse=bundle_doc.warehouse, qty=0)
+					)
+					picked.qty += entry.qty
 
 			row.serial_and_batch_bundle = bundle_doc.name
 
@@ -2436,7 +2484,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					},
 				)
 
-				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
+				# every finished good row takes its rate from the consumed cost, not only the last one
+				if cstr(d.s_warehouse) or (finished_item_row and d.is_finished_item):
 					sle.recalculate_rate = 1
 
 				allowed_types = [
@@ -4479,7 +4528,7 @@ def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, str):
 		items = json.loads(items)
 
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.company = company
 	stock_entry.purpose = "Material Transfer"
@@ -4505,6 +4554,7 @@ def move_sample_to_retention_warehouse(company, items):
 					item.get("item_code"),
 					item.get("sample_quantity"),
 					item.get("transfer_qty") or item.get("qty"),
+					company,
 					batch_no,
 				)
 
@@ -4847,12 +4897,12 @@ def get_warehouse_details(args):
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
+def validate_sample_quantity(item_code, sample_quantity, qty, company, batch_no=None):
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
 		)
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	retainted_qty = 0
 	if batch_no:
 		retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code)
@@ -4875,6 +4925,21 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
 		)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+
+def get_sample_retention_warehouse(company: str) -> str:
+	# `company` arrives from whitelisted callers, so it decides which company's stock gets read.
+	frappe.has_permission("Company", "read", company, throw=True)
+
+	warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	if not warehouse:
+		frappe.throw(
+			_("Please set {0} in Company {1} to retain samples.").format(
+				bold(_("Sample Retention Warehouse")), bold(company)
+			),
+			title=_("Sample Retention Warehouse Missing"),
+		)
+	return warehouse
 
 
 def get_supplied_items(
