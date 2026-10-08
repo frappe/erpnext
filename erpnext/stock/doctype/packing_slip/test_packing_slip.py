@@ -195,3 +195,18 @@ class TestPackingSlipReferences(ERPNextTestSuite):
 		slip.insert()
 
 		self.assertEqual(slip.net_weight_pkg, 24)
+
+	def test_packed_item_names_survive_delivery_note_edit(self):
+		items = create_items()
+		make_product_bundle(items[0], items[1:], 2)
+		delivery_note = create_delivery_note(item_code=items[0], qty=2, do_not_submit=True)
+		packed_item_names = [row.name for row in delivery_note.packed_items]
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.submit()
+
+		delivery_note.reload()
+		delivery_note.append("items", {"item_code": items[1], "warehouse": "_Test Warehouse - _TC", "qty": 1})
+		delivery_note.save()
+
+		self.assertEqual([row.name for row in delivery_note.packed_items], packed_item_names)
