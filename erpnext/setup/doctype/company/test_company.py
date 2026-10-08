@@ -300,6 +300,27 @@ class TestCompany(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
+	def test_invalid_default_accounts_and_cost_centers(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		original_inventory = company.default_inventory_account
+		company.default_inventory_account = frappe.db.get_value(
+			"Account", {"company": company.name, "root_type": "Expense", "is_group": 0}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_inventory_account = original_inventory
+		company.default_operating_cost_account = frappe.db.get_value(
+			"Account", {"company": company.name, "root_type": "Asset", "is_group": 0}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_operating_cost_account = None
+		company.cost_center = frappe.db.get_value("Cost Center", {"company": company.name, "is_group": 1})
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
