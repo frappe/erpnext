@@ -186,8 +186,26 @@ class Item(Document):
 	def after_insert(self):
 		"""set opening stock and item price"""
 		if self.standard_rate:
-			for default in self.item_defaults or [frappe._dict()]:
-				self.add_price(default.default_price_list)
+			from erpnext.setup.doctype.brand.brand import get_brand_defaults
+			from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
+			group_rows = frappe.get_cached_doc("Item Group", self.item_group).item_group_defaults
+			brand_rows = frappe.get_cached_doc("Brand", self.brand).brand_defaults if self.brand else []
+			companies = {row.company for row in (*self.item_defaults, *group_rows, *brand_rows)}
+			price_lists = {
+				get_item_defaults(self.name, company).get("default_price_list")
+				or get_item_group_defaults(self.name, company).get("default_price_list")
+				or get_brand_defaults(self.name, company).get("default_price_list")
+				for company in companies
+			}
+			if any(not price_list for price_list in price_lists):
+				default_price_list = frappe.get_single_value(
+					"Selling Settings", "selling_price_list"
+				) or frappe.db.get_value("Price List", "Standard Selling")
+				price_lists = {price_list or default_price_list for price_list in price_lists}
+
+			for price_list in price_lists or {None}:
+				self.add_price(price_list)
 
 			frappe.msgprint(
 				_("Item Price created at rate {0}").format(
