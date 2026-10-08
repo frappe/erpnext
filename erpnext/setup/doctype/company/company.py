@@ -180,9 +180,8 @@ class Company(NestedSet):
 			self.update_default_account = True
 
 		self.validate_abbr()
-		self.validate_default_accounts()
 		self.validate_currency()
-		self.validate_advance_account_currency()
+		self.validate_default_accounts()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.validate_provisional_account_for_non_stock_items()
@@ -358,83 +357,101 @@ class Company(NestedSet):
 		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
-		accounts = [
-			["Default Bank Account", "default_bank_account"],
-			["Default Cash Account", "default_cash_account"],
-			["Default Receivable Account", "default_receivable_account"],
-			["Default Payable Account", "default_payable_account"],
-			["Default Expense Account", "default_expense_account"],
-			["Default Income Account", "default_income_account"],
-			["Stock Received But Not Billed Account", "stock_received_but_not_billed"],
-			["Stock Delivered But Not Billed Account", "stock_delivered_but_not_billed"],
-			["Stock Adjustment Account", "stock_adjustment_account"],
-			["Write Off Account", "write_off_account"],
-			["Bank Charges Account", "bank_charges_account"],
-			["Default Payment Discount Account", "default_discount_account"],
-			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
-			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
-			["Exchange Gain Account", "exchange_gain_account"],
-			["Exchange Loss Account", "exchange_loss_account"],
-			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
-			["Round Off Account", "round_off_account"],
-			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
-			["Default Deferred Expense Account", "default_deferred_expense_account"],
-			["Accumulated Depreciation Account", "accumulated_depreciation_account"],
-			["Depreciation Expense Account", "depreciation_expense_account"],
-			["Gain/Loss Account on Asset Disposal", "disposal_account"],
-		]
-
-		for account in accounts:
-			if self.get(account[1]):
-				for_company, is_group, disabled = frappe.db.get_value(
-					"Account", self.get(account[1]), ["company", "is_group", "disabled"]
+		account_filters = {
+			"default_bank_account": {"account_type": "Bank"},
+			"default_cash_account": {"account_type": "Cash"},
+			"default_receivable_account": {"root_type": "Asset", "account_type": "Receivable"},
+			"default_payable_account": {"root_type": "Liability", "account_type": "Payable"},
+			"default_expense_account": {"root_type": "Expense"},
+			"default_income_account": {"root_type": "Income"},
+			"round_off_account": {"root_type": ("Expense", "Income")},
+			"round_off_for_opening": {"root_type": "Liability", "account_type": "Round Off for Opening"},
+			"write_off_account": {"root_type": "Expense"},
+			"bank_charges_account": {"root_type": "Expense"},
+			"exchange_gain_loss_account": {"root_type": ("Expense", "Income")},
+			"exchange_gain_account": {"root_type": ("Expense", "Income")},
+			"exchange_loss_account": {"root_type": ("Expense", "Income")},
+			"unrealized_exchange_gain_loss_account": {
+				"root_type": ("Expense", "Income", "Equity", "Liability")
+			},
+			"accumulated_depreciation_account": {
+				"root_type": "Asset",
+				"account_type": "Accumulated Depreciation",
+			},
+			"depreciation_expense_account": {"root_type": "Expense", "account_type": "Depreciation"},
+			"disposal_account": {"report_type": "Profit and Loss"},
+			"default_inventory_account": {"account_type": "Stock"},
+			"stock_adjustment_account": {"root_type": "Expense", "account_type": "Stock Adjustment"},
+			"stock_received_but_not_billed": {
+				"root_type": "Liability",
+				"account_type": "Stock Received But Not Billed",
+			},
+			"stock_delivered_but_not_billed": {
+				"root_type": "Asset",
+				"account_type": "Stock Delivered But Not Billed",
+			},
+			"capital_work_in_progress_account": {"account_type": "Capital Work in Progress"},
+			"asset_received_but_not_billed": {"account_type": "Asset Received But Not Billed"},
+			"unrealized_profit_loss_account": {"root_type": ("Liability", "Asset")},
+			"default_provisional_account": {"root_type": ("Liability", "Asset")},
+			"default_advance_received_account": {"root_type": "Liability", "account_type": "Receivable"},
+			"default_advance_paid_account": {"root_type": "Asset", "account_type": "Payable"},
+			"purchase_expense_account": {"root_type": "Expense"},
+			"purchase_expense_contra_account": {"root_type": "Expense"},
+			"service_expense_account": {"root_type": "Expense"},
+			"expenses_added_to_stock_account": {"root_type": "Expense"},
+			"expenses_added_to_stock_contra_account": {"root_type": "Expense"},
+			"default_operating_cost_account": {"root_type": "Expense"},
+			"default_purchase_price_variance_account": {},
+			"default_manufacturing_variance_account": {},
+			"default_discount_account": {},
+			"default_deferred_revenue_account": {},
+			"default_deferred_expense_account": {},
+		}
+		for fieldname, filters in account_filters.items():
+			if account := self.get(fieldname):
+				label = self.meta.get_translated_label(fieldname)
+				details = frappe.db.get_value(
+					"Account",
+					account,
+					["company", "is_group", "disabled", "root_type", "account_type", "report_type"],
+					as_dict=True,
 				)
 
-				if disabled:
-					frappe.throw(_("Account {0} is disabled.").format(frappe.bold(self.get(account[1]))))
+				if details.disabled:
+					frappe.throw(_("Account {0} is disabled.").format(bold(account)))
 
-				if is_group:
+				if details.is_group:
+					frappe.throw(_("{0}: {1} is a group account.").format(bold(label), bold(account)))
+
+				if details.company != self.name:
+					frappe.throw(_("Account {0} does not belong to company: {1}").format(account, self.name))
+
+				for key, expected in filters.items():
+					if details.get(key) not in (expected if isinstance(expected, tuple) else (expected,)):
+						frappe.throw(_("{0}: {1} has an invalid {2}").format(label, account, key))
+
+				if get_account_currency(account) not in {
+					self.default_currency,
+					self.previous_default_currency
+					if getattr(self, "currency_changed", False)
+					else self.default_currency,
+				}:
 					frappe.throw(
-						_("{0}: {1} is a group account.").format(
-							frappe.bold(account[0]), frappe.bold(self.get(account[1]))
-						)
+						_(
+							"{0} currency must be same as company's default currency. Please select another account."
+						).format(bold(label))
 					)
 
-				if for_company != self.name:
+		for fieldname in ("cost_center", "round_off_cost_center", "depreciation_cost_center"):
+			if cost_center := self.get(fieldname):
+				company, is_group = frappe.db.get_value("Cost Center", cost_center, ["company", "is_group"])
+				if company != self.name or is_group:
 					frappe.throw(
-						_("Account {0} does not belong to company: {1}").format(
-							self.get(account[1]), self.name
+						_("{0} must be a non-group Cost Center of {1}").format(
+							self.meta.get_translated_label(fieldname), self.name
 						)
 					)
-
-				if get_account_currency(self.get(account[1])) != self.default_currency:
-					error_message = _(
-						"{0} currency must be same as company's default currency. Please select another account."
-					).format(frappe.bold(account[0]))
-					frappe.throw(error_message)
-
-	def validate_advance_account_currency(self):
-		if (
-			self.default_advance_received_account
-			and frappe.get_cached_value("Account", self.default_advance_received_account, "account_currency")
-			!= self.default_currency
-		):
-			frappe.throw(
-				_("'{0}' should be in company currency {1}.").format(
-					frappe.bold(_("Default Advance Received Account")), frappe.bold(self.default_currency)
-				)
-			)
-
-		if (
-			self.default_advance_paid_account
-			and frappe.get_cached_value("Account", self.default_advance_paid_account, "account_currency")
-			!= self.default_currency
-		):
-			frappe.throw(
-				_("'{0}' should be in company currency {1}.").format(
-					frappe.bold(_("Default Advance Paid Account")), frappe.bold(self.default_currency)
-				)
-			)
 
 	def validate_currency(self):
 		if self.is_new():
