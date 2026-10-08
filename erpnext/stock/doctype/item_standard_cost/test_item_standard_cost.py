@@ -478,6 +478,45 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Item Standard Cost", isc_name, "docstatus"), 2)
 		self.assertEqual(flt(get_item_standard_rate(item.name, PI_COMPANY)), 100)
 
+	def test_entries_before_revaluation_time_and_their_cancellation_blocked(self):
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -60))
+		receipt = make_stock_entry(
+			item_code=item.name,
+			target=TEST_WAREHOUSE,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -20),
+		)
+		make_stock_entry(
+			item_code=item.name,
+			target=TEST_WAREHOUSE,
+			qty=5,
+			basic_rate=100,
+			posting_date=add_days(today(), -1),
+			posting_time="10:00:00",
+		)
+		create_item_standard_cost(item.name, rate=110, effective_date=add_days(today(), -1))
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			source=TEST_WAREHOUSE,
+			qty=4,
+			posting_date=add_days(today(), -1),
+			posting_time="00:00:05",
+			do_not_submit=True,
+		)
+		self.assertRaises(frappe.ValidationError, issue.submit)
+		self.assertRaises(frappe.ValidationError, receipt.cancel)
+
+	def test_cancelling_movement_at_revaluation_time_is_blocked(self):
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -30))
+		receipt = make_stock_entry(item_code=item.name, target=TEST_WAREHOUSE, qty=10, basic_rate=100)
+		create_item_standard_cost(item.name, rate=110, effective_date=today())
+
+		self.assertRaises(frappe.ValidationError, receipt.cancel)
+
 	def test_backdated_transaction_blocked(self):
 		item = create_standard_cost_item()
 		create_item_standard_cost(item.name, rate=100, effective_date=today())
