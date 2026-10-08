@@ -100,6 +100,7 @@ class SalesOrderSourcingService:
 
 		items = [self._combined_so_item(row) for row in self.doc.po_items]
 		self.doc.set("po_items", [])
+		self.doc.set("prod_plan_references", [])
 		self.add_items(items)
 
 	@staticmethod
@@ -107,10 +108,11 @@ class SalesOrderSourcingService:
 		return frappe._dict(
 			{
 				"parent": row.sales_order,
+				"name": row.sales_order_item,
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
-				"qty": row.pending_qty,
-				"pending_qty": row.pending_qty,
+				"qty": row.planned_qty,
+				"pending_qty": row.planned_qty,
 				"conversion_factor": 1.0,
 				"description": row.description,
 				"bom_no": row.bom_no,
@@ -119,6 +121,7 @@ class SalesOrderSourcingService:
 
 	def get_items(self):
 		self.doc.set("po_items", [])
+		self.doc.set("prod_plan_references", [])
 		if self.doc.get_items_from == "Sales Order":
 			self.get_so_items()
 		elif self.doc.get_items_from == "Material Request":
@@ -220,12 +223,14 @@ class SalesOrderSourcingService:
 				continue
 
 			item_details = get_item_details(data.item_code, throw=False)
-			if self.doc.combine_items:
-				self._add_combine_ref(refs, data, item_details)
-
 			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
 			if not bom_no:
 				continue
+			if self.doc.combine_items:
+				already_combined = bom_no in refs
+				self._add_combine_ref(refs, data, item_details)
+				if already_combined:
+					continue
 			self._append_po_item(data, item_details, bom_no)
 
 		if refs:
@@ -297,6 +302,8 @@ def _so_item_columns(so_item):
 		so_item.warehouse,
 		(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
 		so_item.work_order_qty,
+		so_item.stock_qty,
+		so_item.production_plan_qty,
 		so_item.delivered_qty,
 		so_item.conversion_factor,
 		so_item.description,
@@ -310,13 +317,18 @@ def _so_items_filter(so_item, so_list):
 		(so_item.parent.isin(so_list))
 		& (so_item.docstatus == 1)
 		& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
+		& (so_item.stock_qty > so_item.production_plan_qty)
 	)
 
 
 def _set_so_item_pending_qty(items):
 	for item in items:
-		item.pending_qty = flt(item.qty) - max(
-			item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
+		item.pending_qty = max(
+			0,
+			min(
+				flt(item.qty) - max(item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0),
+				flt(item.stock_qty) - flt(item.production_plan_qty),
+			),
 		)
 
 

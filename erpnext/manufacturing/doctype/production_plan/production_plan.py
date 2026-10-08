@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -247,7 +248,7 @@ class ProductionPlan(Document):
 				validate_bom_no(d.item_code, d.bom_no)
 				validated_boms.add((d.item_code, d.bom_no))
 
-			if not flt(d.planned_qty):
+			if flt(d.planned_qty) <= 0:
 				frappe.throw(
 					_("Row #{0}: Planned Qty must be greater than 0 for Item {1}.").format(
 						d.idx, frappe.bold(d.item_code)
@@ -289,6 +290,96 @@ class ProductionPlan(Document):
 		self.db_set("status", self.status)
 		if previous_status != self.status and "Completed" in (previous_status, self.status):
 			self.update_bin_qty()
+
+	def before_submit(self):
+		self.validate_combined_sales_order_quantities()
+		quantities = self.get_sales_order_plan_quantities()
+		items = self.lock_sales_order_items(quantities)
+		precision = frappe.get_precision("Sales Order Item", "stock_qty")
+		allowance = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+		)
+		for key, qty in quantities.items():
+			item = items[key]
+			if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+				continue
+			remaining = flt(
+				flt(item.stock_qty) * (1 + allowance / 100) - flt(item.production_plan_qty), precision
+			)
+			if flt(qty, precision) > remaining:
+				frappe.throw(
+					_(
+						"Item {0} in Sales Order {1}: Planned Qty {2} exceeds the unplanned quantity {3}."
+					).format(item.item_code, key[0], qty, max(0, remaining)),
+					title=_("Sales Order Quantity Exceeded"),
+				)
+
+	def before_cancel(self):
+		self.lock_sales_order_items(self.get_sales_order_plan_quantities())
+
+	def validate_combined_sales_order_quantities(self):
+		if not self.combine_items or self.get_items_from != "Sales Order":
+			return
+
+		reference_quantities = {}
+		for row in self.prod_plan_references:
+			if not (row.sales_order and row.sales_order_item and row.item_reference) or flt(row.qty) <= 0:
+				frappe.throw(_("Invalid combined Sales Order references. Please fetch items again."))
+			reference_quantities[row.item_reference] = reference_quantities.get(row.item_reference, 0) + flt(
+				row.qty
+			)
+
+		planned_quantities = {}
+		for row in self.po_items:
+			if row.sales_order_item:
+				planned_quantities[row.sales_order_item] = planned_quantities.get(
+					row.sales_order_item, 0
+				) + flt(row.planned_qty)
+
+		precision = frappe.get_precision("Sales Order Item", "stock_qty")
+		if reference_quantities.keys() != planned_quantities.keys() or any(
+			flt(qty, precision) != flt(planned_quantities[key], precision)
+			for key, qty in reference_quantities.items()
+		):
+			frappe.throw(
+				_(
+					"Combined planned quantities must match their Sales Order references. Please fetch items again."
+				),
+				title=_("Combined Quantity Mismatch"),
+			)
+
+	def get_sales_order_plan_quantities(self):
+		quantities = {}
+		combined = self.combine_items and self.prod_plan_references
+		rows = self.prod_plan_references if combined else self.po_items
+		for row in rows:
+			if row.sales_order and row.sales_order_item:
+				key = (row.sales_order, row.sales_order_item)
+				qty = row.qty if combined else row.planned_qty
+				quantities[key] = quantities.get(key, 0) + flt(qty)
+		return quantities
+
+	def lock_sales_order_items(self, quantities):
+		items = {}
+		# Plans for different lines of one order must also serialize their quantity rollups.
+		for sales_order in sorted({key[0] for key in quantities}):
+			company = frappe.db.get_value("Sales Order", sales_order, "company", for_update=True)
+			if company != self.company:
+				frappe.throw(
+					_("Sales Order {0} must belong to Company {1}.").format(sales_order, self.company)
+				)
+		for sales_order, item_name in sorted(quantities):
+			item = frappe.db.get_value(
+				"Sales Order Item",
+				{"name": item_name, "parent": sales_order},
+				["item_code", "stock_qty", "production_plan_qty"],
+				as_dict=True,
+				for_update=True,
+			)
+			if not item:
+				frappe.throw(_("Invalid Sales Order item reference {0}.").format(item_name))
+			items[sales_order, item_name] = item
+		return items
 
 	def on_submit(self):
 		self.update_bin_qty()
@@ -345,39 +436,70 @@ class ProductionPlan(Document):
 				)
 
 	def update_sales_order(self):
-		sales_orders = [row.sales_order for row in self.po_items if row.sales_order]
-		if sales_orders:
-			so_wise_planned_qty = self.get_so_wise_planned_qty(sales_orders)
-
-			for row in self.po_items:
-				if not row.sales_order and not row.sales_order_item:
-					continue
-
-				key = (row.sales_order, row.sales_order_item)
-				frappe.db.set_value(
-					"Sales Order Item",
-					row.sales_order_item,
-					"production_plan_qty",
-					flt(so_wise_planned_qty.get(key)),
+		quantities = self.get_sales_order_plan_quantities()
+		so_item = frappe.qb.DocType("Sales Order Item")
+		item = frappe.qb.DocType("Item")
+		stock_items = frappe.qb.from_(item).select(item.name).where(item.is_stock_item == 1)
+		for (sales_order, item_name), qty in quantities.items():
+			# The submit/cancel hooks hold the order locks. Avoid locking other plans' children.
+			change = qty if self.docstatus == 1 else -qty
+			planned_qty = IfNull(so_item.production_plan_qty, 0) + change
+			if self.docstatus == 2:
+				planned_qty = frappe.qb.terms.Case().when(planned_qty < 0, 0).else_(planned_qty)
+			(
+				frappe.qb.update(so_item)
+				.set(so_item.production_plan_qty, planned_qty)
+				# Packed-component quantities are not in the parent bundle's UOM.
+				.where(
+					(so_item.name == item_name)
+					& (so_item.parent == sales_order)
+					& so_item.item_code.isin(stock_items)
 				)
+			).run()
 
 	@staticmethod
 	def get_so_wise_planned_qty(sales_orders):
 		so_wise_planned_qty = frappe._dict()
-		data = frappe.get_all(
-			"Production Plan Item",
-			fields=["sales_order", "sales_order_item", {"SUM": "planned_qty", "as": "qty"}],
-			filters={
-				"sales_order": ("in", sales_orders),
-				"docstatus": 1,
-				"sales_order_item": ("is", "set"),
-			},
-			group_by="sales_order, sales_order_item",
+		if not sales_orders:
+			return so_wise_planned_qty
+
+		so_item = frappe.qb.DocType("Sales Order Item")
+		item = frappe.qb.DocType("Item")
+		stock_order_items = (
+			frappe.qb.from_(so_item)
+			.inner_join(item)
+			.on(so_item.item_code == item.name)
+			.select(so_item.name)
+			.where((so_item.parent.isin(sales_orders)) & (item.is_stock_item == 1))
 		)
 
-		for row in data:
-			key = (row.sales_order, row.sales_order_item)
-			so_wise_planned_qty[key] = row.qty
+		for doctype, qty_field in (
+			("Production Plan Item", "planned_qty"),
+			("Production Plan Item Reference", "qty"),
+		):
+			row_table = frappe.qb.DocType(doctype)
+			plan = frappe.qb.DocType("Production Plan")
+			query = (
+				frappe.qb.from_(row_table)
+				.inner_join(plan)
+				.on(row_table.parent == plan.name)
+				.select(
+					row_table.sales_order, row_table.sales_order_item, Sum(row_table[qty_field]).as_("qty")
+				)
+				.where(
+					(row_table.sales_order.isin(sales_orders))
+					& (row_table.docstatus == 1)
+					& (plan.docstatus == 1)
+					& row_table.sales_order_item.isin(stock_order_items)
+				)
+				.groupby(row_table.sales_order, row_table.sales_order_item)
+			)
+			if doctype == "Production Plan Item Reference":
+				query = query.where(plan.combine_items == 1)
+			data = query.run(as_dict=True)
+			for row in data:
+				key = (row.sales_order, row.sales_order_item)
+				so_wise_planned_qty[key] = so_wise_planned_qty.get(key, 0) + flt(row.qty)
 
 		return so_wise_planned_qty
 
