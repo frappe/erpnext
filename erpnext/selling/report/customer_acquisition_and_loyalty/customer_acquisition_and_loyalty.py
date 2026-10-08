@@ -165,25 +165,29 @@ def get_customer_stats(filters, tree_view=False):
 	for si in frappe.get_all(
 		"Sales Invoice",
 		filters=si_filters,
-		fields=["territory", "posting_date", "customer", "base_grand_total"],
+		fields=["territory", "posting_date", "customer", "base_grand_total", "is_return"],
 		# name tie-break makes the first-seen-per-customer classification deterministic across engines
 		order_by="posting_date, name",
 	):
 		posting_date = getdate(si.posting_date)
 		key = si.territory if tree_view else posting_date.strftime("%Y-%m")
-		acquisition.setdefault(si.customer, (key, posting_date))
+
+		# a return never acquires a customer; it only nets revenue
+		if not si.is_return and si.customer not in acquisition:
+			acquisition[si.customer] = (key, posting_date)
 
 		if posting_date < from_date:
 			continue
 
-		acq_key, acq_date = acquisition[si.customer]
-		new_or_repeat = "new" if key == acq_key and acq_date >= from_date else "repeat"
+		acq = acquisition.get(si.customer)
+		# without an acquiring sale (e.g. a standalone credit note) the customer is never "new"
+		new_or_repeat = "new" if acq and key == acq[0] and acq[1] >= from_date else "repeat"
 
 		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})
 		counted.setdefault(key, {"new": set(), "repeat": set()})
 
-		# count each customer once per period, not once per invoice
-		if si.customer not in counted[key][new_or_repeat]:
+		# count each customer once per period; returns net revenue but not the headcount
+		if not si.is_return and si.customer not in counted[key][new_or_repeat]:
 			counted[key][new_or_repeat].add(si.customer)
 			customers_in[key][new_or_repeat][0] += 1
 		customers_in[key][new_or_repeat][1] += si.base_grand_total

@@ -121,3 +121,52 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		# Both invoices' revenue follows into the new bucket; repeat is untouched.
 		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si1.base_grand_total + si2.base_grand_total)
 		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, 0.0)
+
+	def test_credit_note_nets_revenue_without_counting(self):
+		# A credit note must not add a customer to the headcount, but its (negative) amount
+		# should still net down that customer's revenue for the period.
+		first_date = "2017-06-05"
+		return_date = "2017-06-20"
+		month_key = getdate(first_date).strftime("%Y-%m")
+		filters = frappe._dict(
+			{"from_date": "2017-01-01", "to_date": "2017-06-30", "company": "_Test Company"}
+		)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test CAL Return Customer " + random_string(8),
+				"customer_group": "_Test Customer Group",
+				"customer_type": "Individual",
+				"territory": "_Test Territory",
+			}
+		).insert()
+
+		base = get_customer_stats(filters)
+		base_bucket = base.get(month_key, {"new": [0, 0.0], "repeat": [0, 0.0]})
+		base_new, base_new_rev = base_bucket["new"]
+		base_repeat, base_repeat_rev = base_bucket["repeat"]
+
+		si = create_sales_invoice(
+			customer=customer.name, company="_Test Company", posting_date=first_date, rate=100
+		)
+		cn = create_sales_invoice(
+			customer=customer.name,
+			company="_Test Company",
+			posting_date=return_date,
+			qty=-1,
+			rate=100,
+			is_return=1,
+			return_against=si.name,
+		)
+
+		bucket = get_customer_stats(filters).get(month_key)
+		self.assertIsNotNone(bucket, "expected a bucket for posting month " + month_key)
+
+		# One new customer, no repeat added by the credit note.
+		self.assertEqual(bucket["new"][0] - base_new, 1)
+		self.assertEqual(bucket["repeat"][0] - base_repeat, 0)
+
+		# Revenue is the sale netted by the credit note, all in the new bucket.
+		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si.base_grand_total + cn.base_grand_total)
+		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, 0.0)
