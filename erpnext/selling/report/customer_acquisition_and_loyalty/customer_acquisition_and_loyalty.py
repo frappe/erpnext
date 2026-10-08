@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.permissions import get_user_permissions
 from frappe.utils import cint, cstr, formatdate, getdate
 
 
@@ -157,6 +158,12 @@ def get_customer_stats(filters, tree_view=False):
 	if filters.get("company"):
 		si_filters["company"] = filters.get("company")
 
+	# scope to the user's permitted customers; the report serves roles without Sales
+	# Invoice read, so apply the Customer restriction directly instead of via get_list
+	permitted_customers = get_permitted_customers()
+	if permitted_customers is not None:
+		si_filters["customer"] = ["in", permitted_customers]
+
 	from_date = getdate(filters.get("from_date"))
 	acquisition = {}  # customer -> (key, date) of their first invoice
 	counted = {}  # key -> {"new": set of customers, "repeat": set of customers}
@@ -193,3 +200,14 @@ def get_customer_stats(filters, tree_view=False):
 		customers_in[key][new_or_repeat][1] += si.base_grand_total
 
 	return customers_in
+
+
+def get_permitted_customers():
+	"""Customers the current user is restricted to, or None when unrestricted."""
+	customer_perms = get_user_permissions(frappe.session.user).get("Customer") or []
+	allowed = [
+		perm.get("doc")
+		for perm in customer_perms
+		if not perm.get("applicable_for") or perm.get("applicable_for") == "Sales Invoice"
+	]
+	return allowed or None
