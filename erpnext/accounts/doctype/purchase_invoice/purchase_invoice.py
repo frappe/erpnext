@@ -40,7 +40,6 @@ from erpnext.accounts.utils import (
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
 
 
@@ -435,25 +434,7 @@ class PurchaseInvoice(BuyingController):
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1
 
-		if not for_validate:
-			self.set_transaction_date_exchange_rate()
-
 		super().set_missing_values(for_validate)
-
-	def set_transaction_date_exchange_rate(self):
-		"""Replace the exchange rate mapped from a Purchase Order with the posting date rate."""
-		if not (
-			self.currency
-			and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
-			and any(item.purchase_order for item in self.items)
-			and not any(item.purchase_receipt for item in self.items)
-		):
-			return
-
-		self.use_transaction_date_exchange_rate = 1
-		self.conversion_rate = get_exchange_rate(
-			self.currency, self.company_currency, self.posting_date, "for_buying"
-		)
 
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
@@ -658,7 +639,13 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
 					"source_field": "stock_qty",
+					"second_source_dt": "Purchase Receipt Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "material_request_item",
+					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 					"percent_join_field": "material_request",
+					"validate_qty": False,
 				}
 			)
 			if cint(self.is_return):

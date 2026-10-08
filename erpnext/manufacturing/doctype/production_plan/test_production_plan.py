@@ -1709,6 +1709,8 @@ class TestProductionPlan(ERPNextTestSuite):
 			"Work Order", {"production_plan": plan.name, "production_item": sub_assembly.production_item}
 		)
 		sub_assembly_work_order.wip_warehouse = "_Test Warehouse 2 - _TC"
+		for item in sub_assembly_work_order.required_items:
+			item.source_warehouse = None
 		sub_assembly_work_order.submit()
 
 		make_stock_entry(
@@ -1716,8 +1718,9 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		frappe.get_doc(make_se_from_wo(work_order.name, "Material Transfer for Manufacture", 5)).submit()
 		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 5)).submit()
+		raw_material = plan.mr_items[0]
 		bin = frappe.get_doc(
-			"Bin", {"item_code": sub_assembly.production_item, "warehouse": sub_assembly.fg_warehouse}
+			"Bin", {"item_code": raw_material.item_code, "warehouse": raw_material.warehouse}
 		)
 		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
 
@@ -1725,6 +1728,44 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Completed")
 		bin.reload()
 		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
+
+	def test_plan_reserves_sub_assembly_taken_from_stock(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_assembly_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		make_bom(item=sub_assembly_item, raw_materials=[rm_item], source_warehouse=warehouse)
+		make_bom(item=fg_item, raw_materials=[sub_assembly_item], source_warehouse=warehouse)
+		make_stock_entry(item_code=sub_assembly_item, qty=5, rate=10, target=warehouse)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			warehouse=warehouse,
+			sub_assembly_warehouse=warehouse,
+			skip_available_sub_assembly_item=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		plan.submit()
+		self.assertEqual(plan.sub_assembly_items[0].qty, 5)
+		bin = frappe.get_doc("Bin", {"item_code": sub_assembly_item, "warehouse": warehouse})
+		self.assertEqual(bin.reserved_qty_for_production_plan, 10)
+		self.assertEqual(bin.projected_qty, -5)
+
+		plan.make_work_order()
+		for production_item in (fg_item, sub_assembly_item):
+			work_order = frappe.get_doc(
+				"Work Order", {"production_plan": plan.name, "production_item": production_item}
+			)
+			work_order.wip_warehouse = "_Test Warehouse 2 - _TC"
+			work_order.submit()
+
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production, 10)
+		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
+		self.assertEqual(bin.projected_qty, 0)
 
 	def test_closed_plan_stays_closed_on_production(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
@@ -2845,6 +2886,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			item_code=parent_bom.item,
 			planned_qty=2,
 			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
 			do_not_submit=1,
 			skip_available_sub_assembly_item=1,
 			warehouse=warehouse,
@@ -3210,6 +3252,66 @@ class TestProductionPlan(ERPNextTestSuite):
 			self.assertFalse(row.fg_warehouse)
 			self.assertEqual(row.production_item, sf_item)
 			self.assertEqual(row.qty, 5.0)
+
+	def test_group_sub_assembly_warehouse_pools_child_stock(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_make_bin
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		sf_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		create_nested_bom({fg_item: {sf_item: {rm_item: {}}}}, prefix="")
+
+		make_stock_entry(item_code=sf_item, qty=300, target=create_warehouse("Sub Assembly Pool A"), rate=100)
+		short_bin = get_or_make_bin(sf_item, create_warehouse("Sub Assembly Pool B"))
+		frappe.db.set_value("Bin", short_bin, "projected_qty", -100)
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			planned_qty=400,
+			warehouse="_Test Warehouse - _TC",
+			sub_assembly_warehouse="_Test Warehouse Group - _TC",
+			skip_available_sub_assembly_item=1,
+			do_not_submit=1,
+			skip_getting_mr_items=1,
+		)
+		pln.get_sub_assembly_items()
+
+		row = pln.sub_assembly_items[0]
+		self.assertEqual(row.qty, 200)
+		self.assertEqual(row.actual_qty, 300)
+		self.assertEqual(row.projected_qty, 200)
+
+	def test_pooled_sub_assembly_stock_consumed_once_across_branches(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		shared_item = make_item(properties={"is_stock_item": 1}).name
+		branch_a = make_item(properties={"is_stock_item": 1}).name
+		branch_b = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=shared_item, raw_materials=[rm_item])
+		make_bom(item=branch_a, raw_materials=[shared_item])
+		make_bom(item=branch_b, raw_materials=[shared_item])
+		make_bom(item=fg_item, raw_materials=[branch_a, branch_b])
+
+		for warehouse, qty in (("Sub Assembly Pool A", 60), ("Sub Assembly Pool B", 90)):
+			make_stock_entry(item_code=shared_item, qty=qty, target=create_warehouse(warehouse), rate=100)
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			planned_qty=100,
+			warehouse="_Test Warehouse - _TC",
+			sub_assembly_warehouse="_Test Warehouse Group - _TC",
+			skip_available_sub_assembly_item=1,
+			do_not_submit=1,
+			skip_getting_mr_items=1,
+		)
+		pln.get_sub_assembly_items()
+
+		shared_rows = [row for row in pln.sub_assembly_items if row.production_item == shared_item]
+		self.assertEqual([row.qty for row in shared_rows], [0, 50])
 
 	def test_calculation_of_sub_assembly_items(self):
 		make_item("Sub Assembly Item ", properties={"is_stock_item": 1})

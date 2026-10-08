@@ -26,6 +26,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock import stock_ledger
 from erpnext.stock.get_item_details import (
 	get_barcode_data,
 	get_bin_details,
@@ -1109,24 +1110,53 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
-		sl_entries = []
+		"""On submit, post the source legs, recalculate once for bundles picked while posting them,
+		then post the target legs. All gates are taken first to keep their sorted order, and only
+		the second call updates batch qty, for the whole voucher."""
+		source_entries, target_entries = [], []
 		finished_item_row = self.get_finished_item_row()
+		self.get_sle_for_source_warehouse(source_entries, finished_item_row)
+		self.get_sle_for_target_warehouse(target_entries, finished_item_row)
 
-		# make sl entries for source warehouse first
-		self.get_sle_for_source_warehouse(sl_entries, finished_item_row)
-
-		# SLE for target warehouse
-		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-
-		# reverse sl entries if cancel
 		if self.docstatus == 2:
-			sl_entries.reverse()
+			self.make_sl_entries(
+				(source_entries + target_entries)[::-1],
+				allow_negative_stock=allow_negative_stock,
+				via_landed_cost_voucher=via_landed_cost_voucher,
+			)
+			return
+
+		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
+		stock_ledger.make_sl_entries(source_entries, allow_negative_stock, via_landed_cost_voucher)
+		if self.recalculate_for_bundles_picked_while_posting():
+			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
+			for sle in target_entries:
+				sle.incoming_rate = valuation_rates[sle.voucher_detail_no]
 
 		self.make_sl_entries(
-			sl_entries,
+			target_entries,
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
+
+	def recalculate_for_bundles_picked_while_posting(self) -> bool:
+		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""
+		if not frappe.db.exists(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"actual_qty": ("<", 0),
+				"auto_created_serial_and_batch_bundle": 1,
+				"is_cancelled": 0,
+			},
+		):
+			return False
+
+		self.reload()
+		self.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		self.db_update_all()
+		return True
 
 	def get_finished_item_row(self):
 		finished_item_row = None

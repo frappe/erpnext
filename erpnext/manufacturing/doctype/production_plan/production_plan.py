@@ -381,19 +381,16 @@ class ProductionPlan(Document):
 
 		return so_wise_planned_qty
 
-	def update_bin_qty(self):
-		self.update_raw_material_bin_qty()
-
-		for d in self.sub_assembly_items:
-			if d.fg_warehouse and d.type_of_manufacturing == "In House":
-				bin_name = get_or_make_bin(d.production_item, d.fg_warehouse)
-				bin = frappe.get_doc("Bin", bin_name, for_update=True)
-				bin.update_reserved_qty_for_for_sub_assembly()
-
-	def update_raw_material_bin_qty(self, item_codes: set[str] | None = None):
-		for d in self.mr_items:
-			if d.warehouse and (item_codes is None or d.item_code in item_codes):
-				bin_name = get_or_make_bin(d.item_code, d.warehouse)
+	def update_bin_qty(self, item_codes: set[str] | None = None):
+		rows = [(d.item_code, d.warehouse) for d in self.mr_items]
+		rows += [
+			(d.production_item, d.fg_warehouse)
+			for d in self.sub_assembly_items
+			if d.type_of_manufacturing == "In House"
+		]
+		for item_code, warehouse in rows:
+			if warehouse and (item_codes is None or item_code in item_codes):
+				bin_name = get_or_make_bin(item_code, warehouse)
 				bin = frappe.get_doc("Bin", bin_name, for_update=True)
 				bin.update_reserved_qty_for_production_plan()
 

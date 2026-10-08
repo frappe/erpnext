@@ -371,23 +371,15 @@ class StatusService:
 		if self.doc.track_semi_finished_goods:
 			return
 
-		update_bin_qty(self.doc.production_item, self.doc.fg_warehouse, self._planned_qty_dict())
+		update_bin_qty(
+			self.doc.production_item,
+			self.doc.fg_warehouse,
+			{"planned_qty": get_planned_qty(self.doc.production_item, self.doc.fg_warehouse)},
+		)
 
 		if self.doc.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.doc.material_request)
 			mr_obj.update_requested_qty([self.doc.material_request_item])
-
-	def _planned_qty_dict(self):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_reserved_qty_for_sub_assembly,
-		)
-
-		qty_dict = {"planned_qty": get_planned_qty(self.doc.production_item, self.doc.fg_warehouse)}
-		if self.doc.production_plan_sub_assembly_item and self.doc.production_plan:
-			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
-				self.doc.production_item, self.doc.fg_warehouse
-			)
-		return qty_dict
 
 	def set_produced_qty_for_sub_assembly_item(self):
 		produced_qty = self._sub_assembly_produced_qty()
@@ -428,7 +420,7 @@ class StatusService:
 		doc = frappe.get_doc("Production Plan", self.doc.production_plan)
 		doc.flags.ignore_permissions = True
 		doc.update_status_and_bin_qty()
-		doc.update_raw_material_bin_qty({d.item_code for d in self.doc.required_items})
+		doc.update_bin_qty({d.item_code for d in self.doc.required_items})
 
 	def _production_plan_ordered_qty(self):
 		table = frappe.qb.DocType("Work Order")
