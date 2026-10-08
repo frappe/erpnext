@@ -690,11 +690,7 @@ class Company(NestedSet):
 		if not doc_before_save:
 			return
 
-		if (
-			doc_before_save.enable_perpetual_inventory
-			and not self.enable_perpetual_inventory
-			and doc_before_save.enable_item_wise_inventory_account != self.enable_item_wise_inventory_account
-		):
+		if doc_before_save.enable_perpetual_inventory and not self.enable_perpetual_inventory:
 			if frappe.db.get_value("Stock Ledger Entry", {"is_cancelled": 0, "company": self.name}, "name"):
 				frappe.throw(
 					_(
