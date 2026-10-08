@@ -170,6 +170,21 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			frappe.ValidationError, self.make_claiming_voucher(receipt, vendor_invoice, 5000).insert
 		)
 
+	def test_stock_account_cannot_be_charge_account(self):
+		receipt = make_purchase_receipt(qty=10, rate=100)
+		stock_account = frappe.db.get_value(
+			"Account", {"company": receipt.company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			expense_account=stock_account,
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, lcv.insert)
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
