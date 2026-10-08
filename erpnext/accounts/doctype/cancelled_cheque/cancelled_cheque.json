@@ -28,7 +28,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque No",
-   "length": 6,
    "reqd": 1
   },
   {
@@ -70,7 +69,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-06 12:00:00.000000",
+ "modified": "2026-10-08 20:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancelled Cheque",

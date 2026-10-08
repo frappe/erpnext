@@ -10,26 +10,32 @@ frappe.ui.form.on("Cheque Book", {
 	},
 
 	onload_post_render(frm) {
-		// the cheque numbers are Data fields, so keep them digits only
-		["cheque_start_no", "cheque_end_no", "no_of_cheques"].forEach((fieldname) =>
-			frm.fields_dict[fieldname].$input?.on("input", (e) => {
-				e.target.value = e.target.value
-					.replace(/\D/g, "")
-					.slice(0, fieldname === "no_of_cheques" ? 10 : 6);
-			})
+		// Keep numeric input as text so the displayed leading zeros are preserved.
+		["cheque_start_no", "cheque_end_no"].forEach((fieldname) =>
+			frm.fields_dict[fieldname].$input
+				?.attr({ inputmode: "numeric", pattern: "[0-9]*" })
+				.off(".cheque_range")
+				.on("input.cheque_range", (e) => {
+					e.target.value = e.target.value.replace(/\D/g, "");
+				})
+				.on("blur.cheque_range", (e) => {
+					if (/^\d+$/.test(e.target.value)) {
+						return frm.set_value(fieldname, BigInt(e.target.value).toString().padStart(6, "0"));
+					}
+				})
 		);
 	},
 
 	cheque_start_no(frm) {
-		set_missing_range_value(frm, "cheque_start_no");
+		return set_missing_range_value(frm, "cheque_start_no");
 	},
 
 	cheque_end_no(frm) {
-		set_missing_range_value(frm, "cheque_end_no");
+		return set_missing_range_value(frm, "cheque_end_no");
 	},
 
 	no_of_cheques(frm) {
-		set_missing_range_value(frm, "no_of_cheques");
+		return set_missing_range_value(frm, "no_of_cheques");
 	},
 
 	refresh(frm) {
@@ -80,6 +86,7 @@ async function show_cheques(frm) {
 		empty_message: __("No cheque of this book is issued yet."),
 		// the badge column reads a fieldname, and a stored value is searchable too
 		before_render() {
+			this._all_data.sort((a, b) => compare_cheque_nos(a.reference_no, b.reference_no));
 			this._all_data.forEach((row) => (row.cheque_status = __(get_cheque_status(row))));
 		},
 		columns: [
@@ -111,6 +118,9 @@ async function show_cheques(frm) {
 		fields: ["name", "cheque_no", "creation", "reason", "remarks", "payment_entry", "owner"],
 		order_by: "cheque_no asc",
 		empty_message: __("No cheque of this book is cancelled."),
+		before_render() {
+			this._all_data.sort((a, b) => compare_cheque_nos(a.cheque_no, b.cheque_no));
+		},
 		columns: [
 			{ label: __("Cheque No"), fieldname: "cheque_no" },
 			{ label: __("Cancelled On"), render: (row) => frappe.datetime.str_to_user(row.creation) },
@@ -131,7 +141,7 @@ async function show_cheques(frm) {
 
 	await Promise.all([frm.issued_cheques.refresh(), frm.cancelled_cheques.refresh()]);
 
-	const total = Number(frm.doc.cheque_end_no) - Number(frm.doc.cheque_start_no) + 1;
+	const total = frm.doc.no_of_cheques;
 	const issued = frm.issued_cheques.data.length;
 	const cancelled = frm.cancelled_cheques.data.length;
 	// Use the loaded rows for the same numeric free-count rule as the server, without another request.
@@ -141,7 +151,7 @@ async function show_cheques(frm) {
 			...frm.cancelled_cheques.data.map((row) => row.cheque_no),
 		]
 			.filter((no) => /^\d+$/.test(no || ""))
-			.map(Number)
+			.map((no) => BigInt(no).toString())
 	).size;
 	frm.dashboard.set_headline(
 		__("Total: {0} · Issued: {1} · Cancelled: {2} · Free: {3}", [
@@ -167,31 +177,32 @@ function make_list(frm, fieldname, options) {
 	return new frappe.ui.EmbeddedList({ wrapper, ...options });
 }
 
-// any two of start no, end no and number of cheques give the third
-function set_missing_range_value(frm, changed) {
+async function set_missing_range_value(frm, changed) {
+	if (frm.updating_cheque_range) return;
 	const { cheque_start_no: start, cheque_end_no: end, no_of_cheques: count } = frm.doc;
-	if (["cheque_start_no", "cheque_end_no"].includes(changed)) {
-		const value = frm.doc[changed];
-		if (/^\d{1,6}$/.test(value) && value.length < 6) {
-			frm.set_value(changed, value.padStart(6, "0"));
-			return;
+	if ((start && !/^\d+$/.test(start)) || (end && !/^\d+$/.test(end))) return;
+	const values = {};
+	if (changed !== "no_of_cheques" && start && end) {
+		const total = BigInt(end) - BigInt(start) + 1n;
+		if (total < 1n || total > 2147483647n) return;
+		values.no_of_cheques = Number(total);
+	} else if (Number.isInteger(count) && count > 0) {
+		if (start) {
+			values.cheque_end_no = (BigInt(start) + BigInt(count) - 1n).toString().padStart(6, "0");
+		} else if (end) {
+			const first = BigInt(end) - BigInt(count) + 1n;
+			if (first < 0n) return;
+			values.cheque_start_no = first.toString().padStart(6, "0");
 		}
 	}
-
-	if (changed !== "no_of_cheques" && start && end) {
-		if (!/^\d+$/.test(start) || !/^\d+$/.test(end)) return;
-		const total = Number(end) - Number(start) + 1;
-		if (total > 0) frm.set_value("no_of_cheques", total);
-	} else if (changed !== "cheque_end_no" && start && count) {
-		if (!/^\d+$/.test(start)) return;
-		frm.set_value("cheque_end_no", pad(Number(start) + Number(count) - 1));
-	} else if (changed !== "cheque_start_no" && end && count) {
-		if (!/^\d+$/.test(end)) return;
-		frm.set_value("cheque_start_no", pad(Number(end) - Number(count) + 1));
+	frm.updating_cheque_range = true;
+	try {
+		await frm.set_value(values);
+	} finally {
+		frm.updating_cheque_range = false;
 	}
 }
 
-function pad(value) {
-	// leave an invalid range to the server, which explains what is wrong
-	return value < 0 || value > 999999 ? "" : String(value).padStart(6, "0");
+function compare_cheque_nos(a, b) {
+	return BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0;
 }

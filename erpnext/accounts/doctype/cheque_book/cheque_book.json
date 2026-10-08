@@ -1,15 +1,16 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "format:{bank_account}-{cheque_book_no}",
+ "autoname": "naming_series:",
  "creation": "2026-09-17 12:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "details_tab",
+  "title",
+  "naming_series",
   "bank_account",
   "current_account",
-  "account",
   "company",
   "column_break_bank",
   "cheque_book_no",
@@ -33,6 +34,24 @@
    "label": "Details"
   },
   {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "options": "{bank_account}-{cheque_book_no}",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CHQ-BK-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
    "fieldname": "bank_account",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -48,15 +67,6 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Account",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "bank_account.account",
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Original Account",
-   "options": "Account",
    "read_only": 1
   },
   {
@@ -98,12 +108,11 @@
    "label": "Cheque Range"
   },
   {
-   "description": "Enter up to six digits. Short numbers are padded with leading zeros, e.g. 101 becomes 000101.",
    "fieldname": "cheque_start_no",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque Start No",
-   "length": 6
+   "reqd": 1
   },
   {
    "fieldname": "column_break_range",
@@ -114,7 +123,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque End No",
-   "length": 6
+   "reqd": 1
   },
   {
    "description": "Enter any two of Cheque Start No, Cheque End No and Number of Cheques",
@@ -130,7 +139,6 @@
    "fieldname": "next_cheque_no",
    "fieldtype": "Data",
    "label": "Next Cheque No",
-   "length": 7,
    "read_only": 1
   },
   {
@@ -168,11 +176,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-06 14:00:00.000000",
+ "modified": "2026-10-08 20:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Book",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -221,5 +229,6 @@
    "color": "Gray",
    "title": "Disabled"
   }
- ]
+ ],
+ "title_field": "title"
 }

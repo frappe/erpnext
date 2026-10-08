@@ -8,7 +8,7 @@ from frappe.utils import cint, get_link_to_form
 
 from erpnext.accounts.doctype.cheque_usage.cheque_usage import claim_cheque, get_cheque_usage
 
-MAX_DIGITS = 6
+CHEQUE_NO_WIDTH = 6
 
 
 class ChequeBook(Document):
@@ -20,16 +20,17 @@ class ChequeBook(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		account: DF.Link | None
 		amended_from: DF.Link | None
 		bank_account: DF.Link
 		cheque_book_no: DF.Data
-		cheque_end_no: DF.Data | None
-		cheque_start_no: DF.Data | None
+		cheque_end_no: DF.Data
+		cheque_start_no: DF.Data
 		company: DF.Link | None
+		naming_series: DF.Literal["CHQ-BK-.YYYY.-"]
 		next_cheque_no: DF.Data | None
 		no_of_cheques: DF.Int
 		status: DF.Literal["Draft", "Submitted", "Finished", "Disabled", "Cancelled"]
+		title: DF.Data | None
 	# end: auto-generated types
 
 	@property
@@ -49,6 +50,21 @@ class ChequeBook(Document):
 
 	def validate(self):
 		self.validate_bank_account()
+		if not self.amended_from and frappe.db.get_value(
+			"Cheque Book",
+			{
+				"bank_account": self.bank_account,
+				"cheque_book_no": self.cheque_book_no,
+				"name": ("!=", self.name or ""),
+			},
+			"name",
+			for_update=True,
+		):
+			frappe.throw(
+				_("Cheque Book No {0} already exists for Bank Account {1}").format(
+					frappe.bold(self.cheque_book_no), frappe.bold(self.bank_account)
+				)
+			)
 		self.validate_cheque_range()
 		self.validate_overlapping_range()
 
@@ -83,45 +99,31 @@ class ChequeBook(Document):
 
 		for fieldname in ("cheque_start_no", "cheque_end_no"):
 			value = self.get(fieldname)
-			if value and not (value.isdigit() and len(value) <= MAX_DIGITS):
-				frappe.throw(
-					_("{0} must be a number of at most {1} digits").format(
-						_(self.meta.get_label(fieldname)), MAX_DIGITS
-					)
-				)
+			if value and not (value.isascii() and value.isdigit()):
+				frappe.throw(_("{0} must contain digits only").format(_(self.meta.get_label(fieldname))))
 
-		self.set_missing_range_value()
-		if len(self.cheque_start_no) > MAX_DIGITS or len(self.cheque_end_no) > MAX_DIGITS:
-			frappe.throw(_("Cheque numbers must have at most {0} digits").format(MAX_DIGITS))
-		self.cheque_start_no = self.cheque_start_no.zfill(MAX_DIGITS)
-		self.cheque_end_no = self.cheque_end_no.zfill(MAX_DIGITS)
-
-		if int(self.cheque_end_no) < int(self.cheque_start_no):
-			frappe.throw(_("Cheque End No cannot be less than Cheque Start No"))
-
-	def set_missing_range_value(self):
-		"""Any two of start no, end no and number of cheques give the third"""
 		self.no_of_cheques = cint(self.no_of_cheques)
-		if self.no_of_cheques < 0 or (
-			self.no_of_cheques == 0 and not (self.cheque_start_no and self.cheque_end_no)
-		):
-			frappe.throw(_("Number of Cheques must be at least 1"))
-
 		if self.cheque_start_no and self.cheque_end_no:
 			self.no_of_cheques = int(self.cheque_end_no) - int(self.cheque_start_no) + 1
-
-		elif self.cheque_start_no and self.no_of_cheques:
-			end_no = int(self.cheque_start_no) + self.no_of_cheques - 1
-			self.cheque_end_no = str(end_no)
-
-		elif self.cheque_end_no and self.no_of_cheques:
+		elif self.cheque_start_no and self.no_of_cheques > 0:
+			self.cheque_end_no = str(int(self.cheque_start_no) + self.no_of_cheques - 1)
+		elif self.cheque_end_no and self.no_of_cheques > 0:
 			start_no = int(self.cheque_end_no) - self.no_of_cheques + 1
 			if start_no < 0:
 				frappe.throw(_("Number of Cheques cannot be more than Cheque End No"))
 			self.cheque_start_no = str(start_no)
-
 		else:
-			frappe.throw(_("Enter any two of Cheque Start No, Cheque End No and Number of Cheques"))
+			frappe.throw(
+				_("Enter any two of Cheque Start No, Cheque End No and Number of Cheques"),
+				frappe.MandatoryError,
+			)
+
+		if int(self.cheque_end_no) < int(self.cheque_start_no):
+			frappe.throw(_("Cheque End No cannot be less than Cheque Start No"))
+		if self.no_of_cheques > 2147483647:
+			frappe.throw(_("Number of Cheques cannot exceed {0}").format(2147483647))
+		self.cheque_start_no = self.format_cheque_no(self.cheque_start_no)
+		self.cheque_end_no = self.format_cheque_no(self.cheque_end_no)
 
 	def validate_overlapping_range(self):
 		# The account lock serializes creation; this locking read sees newly committed ranges.
@@ -164,19 +166,23 @@ class ChequeBook(Document):
 
 	@staticmethod
 	def format_cheque_no(cheque_no):
-		"""Normalize a typed number to six digits."""
+		"""Normalize a typed number, padding shorter numbers to six digits."""
 		cheque_no = (cheque_no or "").strip()
-		return cheque_no.zfill(MAX_DIGITS) if cheque_no.isdigit() else cheque_no
+		return (
+			str(int(cheque_no)).zfill(CHEQUE_NO_WIDTH)
+			if cheque_no.isascii() and cheque_no.isdigit()
+			else cheque_no
+		)
 
 	def is_in_range(self, cheque_no):
 		return (
-			cheque_no.isdigit()
-			and len(cheque_no) == MAX_DIGITS
+			cheque_no.isascii()
+			and cheque_no.isdigit()
 			and int(self.cheque_start_no) <= int(cheque_no) <= int(self.cheque_end_no)
 		)
 
 	def next_no_after(self, cheque_no):
-		return str(int(cheque_no) + 1).zfill(MAX_DIGITS)
+		return str(int(cheque_no) + 1).zfill(CHEQUE_NO_WIDTH)
 
 	def is_used(self, cheque_no):
 		return bool(get_cheque_usage(self.name, cheque_no, for_update=True))
@@ -213,8 +219,6 @@ class ChequeBook(Document):
 
 def get_occupied_cheque_nos(book, from_no=None, for_update=False):
 	filters = {"cheque_book": book.name}
-	if from_no:
-		filters["cheque_no"] = (">=", from_no)
 
 	numbers = frappe.db.get_values(
 		"Cheque Usage",
@@ -224,6 +228,9 @@ def get_occupied_cheque_nos(book, from_no=None, for_update=False):
 		for_update=for_update,
 	)
 	start, end = int(book.cheque_start_no), int(book.cheque_end_no)
+	if from_no:
+		# Cheque numbers can have different widths, so compare numerically.
+		start = max(start, int(from_no))
 	return {int(no) for no in numbers if no and no.isdigit() and start <= int(no) <= end}
 
 
@@ -235,7 +242,7 @@ def count_free_cheques(book, for_update=False):
 def get_next_cheque_book_no(bank_account: str) -> str:
 	"""Suggest the number after the highest numbered cheque book of the bank account, else 01.
 
-	Cancelled books count too, because the cheque book no is part of the name.
+	Cancelled books count too, so their book numbers are not reused.
 	"""
 	frappe.has_permission("Cheque Book", throw=True)
 	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)

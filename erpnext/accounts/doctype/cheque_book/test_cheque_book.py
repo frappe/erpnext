@@ -46,7 +46,11 @@ class TestChequeBook(ERPNextTestSuite):
 			(
 				("110", "100", None),
 				("10a", "120", None),
-				("1000000", "1000001", None),
+				("-100", "120", None),
+				("100.5", "120", None),
+				("1e2", "120", None),
+				("²", "120", None),
+				("0", "2147483647", None),
 				(None, None, 5),
 				("000201", None, 0),
 				(None, "000005", 10),
@@ -63,15 +67,25 @@ class TestChequeBook(ERPNextTestSuite):
 					no_of_cheques=no_of_cheques,
 				)
 
-	def test_third_range_value_is_calculated(self):
-		book = make_cheque_book(self.bank_account, "CB-A", "000201", "000205")
+	def test_any_two_range_values_calculate_the_third(self):
+		book = make_cheque_book(self.bank_account, "CB-A", "000201", "000205", no_of_cheques=99)
 		self.assertEqual(book.no_of_cheques, 5)
 
-		book = make_cheque_book(self.bank_account, "CB-B", "000301", None, no_of_cheques=25)
-		self.assertEqual(book.cheque_end_no, "000325")
+		book = make_cheque_book(self.bank_account, "CB-B", "000301", "000301")
+		self.assertEqual(book.no_of_cheques, 1)
+		book = make_cheque_book(self.bank_account, "CB-C", "401", None, no_of_cheques=5)
+		self.assertEqual((book.cheque_start_no, book.cheque_end_no), ("000401", "000405"))
+		book = make_cheque_book(self.bank_account, "CB-D", None, "505", no_of_cheques=5)
+		self.assertEqual((book.cheque_start_no, book.cheque_end_no), ("000501", "000505"))
+		book = make_cheque_book(self.bank_account, "CB-E", " ", "605", no_of_cheques=5)
+		self.assertEqual((book.cheque_start_no, book.cheque_end_no), ("000601", "000605"))
 
-		book = make_cheque_book(self.bank_account, "CB-C", None, "000425", no_of_cheques=25)
-		self.assertEqual(book.cheque_start_no, "000401")
+	def test_ids_use_naming_series(self):
+		self.assertRegex(self.book.name, r"^CHQ-BK-\d{4}-\d{5}$")
+		other = make_cheque_book(self.bank_account, "CB-2", "000201", "000205")
+		self.assertRegex(other.name, r"^CHQ-BK-\d{4}-\d{5}$")
+		self.assertEqual(int(other.name.rsplit("-", 1)[-1]), int(self.book.name.rsplit("-", 1)[-1]) + 1)
+		self.assertNotEqual(self.book.title, other.title)
 
 	def test_six_digit_cheque_numbers_are_exact(self):
 		book = make_cheque_book(self.bank_account, "CB-6", "987650", "987655")
@@ -81,9 +95,13 @@ class TestChequeBook(ERPNextTestSuite):
 		book.reload()
 		self.assertEqual(book.next_cheque_no, "987651")
 
-	def test_derived_seven_digit_end_is_rejected_clearly(self):
-		with self.assertRaisesRegex(frappe.ValidationError, "at most 6 digits"):
-			make_cheque_book(self.bank_account, "CB-OVERFLOW", "999999", None, no_of_cheques=2)
+	def test_at_least_two_range_values_are_required(self):
+		for start, end, count in (("000201", None, None), (None, "000205", None), (None, None, 5)):
+			with self.subTest(start=start, end=end):
+				with self.assertRaises(frappe.MandatoryError):
+					make_cheque_book(self.bank_account, "CB-MISSING", start, end, no_of_cheques=count)
+		self.assertTrue(self.book.meta.get_field("cheque_start_no").reqd)
+		self.assertTrue(self.book.meta.get_field("cheque_end_no").reqd)
 
 	def test_mixed_width_range_is_padded_to_six_digits(self):
 		book = make_cheque_book(self.bank_account, "CB-MIXED", "0200", "205")
@@ -97,11 +115,39 @@ class TestChequeBook(ERPNextTestSuite):
 		book.reload()
 		self.assertEqual((book.next_cheque_no, book.status), ("1000000", "Finished"))
 
-	def test_seven_digit_payment_and_cancelled_cheque_numbers_are_rejected(self):
+	def test_longer_out_of_range_cheque_numbers_are_rejected(self):
 		with self.assertRaises(frappe.ValidationError):
-			self.make_cheque_payment("0000101")
+			self.make_cheque_payment("1000101")
 		with self.assertRaises(frappe.ValidationError):
-			cancel_cheque(self.book.name, "0000102")
+			cancel_cheque(self.book.name, "1000102")
+
+	def test_long_cheque_numbers_work_for_payments_and_cancellations(self):
+		book = make_cheque_book(self.bank_account, "CB-LONG", "9007199254740992", None, no_of_cheques=3)
+		self.assertEqual(book.cheque_end_no, "9007199254740994")
+		self.make_cheque_payment("9007199254740992", cheque_book=book.name)
+		cancel_cheque(book.name, "9007199254740993")
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name, include_free=True)["free"], 1)
+		self.make_cheque_payment("9007199254740994", cheque_book=book.name)
+		book.reload()
+		self.assertEqual((book.next_cheque_no, book.status), ("9007199254740995", "Finished"))
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name), {})
+
+	def test_bookmark_skips_occupied_cheques_across_digit_widths(self):
+		book = make_cheque_book(self.bank_account, "CB-WIDTH", "999998", "1000002")
+		self.make_cheque_payment("1000000", cheque_book=book.name)
+		cancel_cheque(book.name, "999999")
+		self.make_cheque_payment("999998", cheque_book=book.name)
+		book.reload()
+		self.assertEqual(book.next_cheque_no, "1000001")
+		self.assertEqual(get_occupied_cheque_nos(book, from_no="999999"), {999999, 1000000})
+
+	def test_extra_leading_zeros_do_not_create_distinct_cheque_numbers(self):
+		pe = self.make_cheque_payment("0000101")
+		self.assertEqual(pe.reference_no, "000101")
+		with self.assertRaises(frappe.ValidationError):
+			self.make_cheque_payment("101")
+		cancelled = cancel_cheque(self.book.name, "0000102")
+		self.assertEqual(cancelled.cheque_no, "000102")
 
 	def test_overlapping_range_is_rejected(self):
 		self.assertRaises(
@@ -151,7 +197,7 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertIsNone(get_cheque_usage(self.book.name, "000101"))
 
 	def test_next_cheque_book_no_is_suggested(self):
-		# the only book of this account is named CB-1, so there is no number to follow
+		# the only book number is CB-1, so there is no numeric number to follow
 		self.assertEqual(get_next_cheque_book_no(self.bank_account), "01")
 
 		make_cheque_book(self.bank_account, "07", "000201", "000205")
@@ -164,10 +210,8 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertEqual(get_next_cheque_book_no(self.bank_account), "10")
 
 	def test_duplicate_cheque_book_no_is_rejected(self):
-		# the name is {bank_account}-{cheque_book_no}, so a duplicate cannot be inserted
-		self.assertRaises(
-			frappe.DuplicateEntryError, make_cheque_book, self.bank_account, "CB-1", "000201", "000205"
-		)
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			make_cheque_book(self.bank_account, "CB-1", "000201", "000205")
 
 	def test_disabled_book_is_not_used(self):
 		self.book.db_set("status", "Disabled")
@@ -401,7 +445,7 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertTrue(frappe.db.exists("Cancelled Cheque", cancelled.name))
 
 	def test_next_book_is_used_when_one_is_finished(self):
-		make_cheque_book(self.bank_account, "CB-NEXT", "000300", "000300")
+		next_book = make_cheque_book(self.bank_account, "CB-NEXT", "000300", "000300")
 		for cheque_no in ("000101", "000102", "000103", "000104", "000105"):
 			cancel_cheque(self.book.name, cheque_no)
 
@@ -409,7 +453,7 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertEqual(self.book.status, "Finished")
 
 		pe = self.make_cheque_payment()
-		self.assertEqual((pe.cheque_book, pe.reference_no), (f"{self.bank_account}-CB-NEXT", "000300"))
+		self.assertEqual((pe.cheque_book, pe.reference_no), (next_book.name, "000300"))
 
 	def test_finished_book_still_accepts_an_amended_payment(self):
 		book = make_cheque_book(self.bank_account, "CB-ONE", "000201", "000201")
@@ -480,7 +524,6 @@ class TestChequeBook(ERPNextTestSuite):
 		book_modified = frappe.db.get_value("Cheque Book", self.book.name, "modified")
 		ledger = self.change_bank_ledger()
 		self.book.reload()
-		self.assertEqual(self.book.account, BANK_LEDGER)
 		self.assertEqual(self.book.current_account, ledger)
 		self.assertEqual(self.book.as_dict().current_account, ledger)
 		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "modified"), book_modified)
@@ -499,7 +542,6 @@ class TestChequeBook(ERPNextTestSuite):
 		self.book.reload()
 		self.book.status = "Disabled"
 		self.book.save()
-		self.assertEqual(self.book.account, BANK_LEDGER)
 		self.assertEqual(self.book.as_dict().current_account, ledger)
 
 	def test_cheque_bank_account_must_belong_to_payment_company(self):
@@ -826,7 +868,9 @@ class TestChequeBook(ERPNextTestSuite):
 			"_Test Other Cheque Bank", "_Test Other Cheque Account"
 		)
 		other_book = make_cheque_book(other_bank_account, "CB-OTHER", "000101", "000105")
-		pe = self.make_cheque_payment("000101", cheque_book=other_book.name, paid_from=other_book.account)
+		pe = self.make_cheque_payment(
+			"000101", cheque_book=other_book.name, paid_from=other_book.current_account
+		)
 		pe.cancel()
 
 		with self.assertRaisesRegex(frappe.ValidationError, "must be cancelled and use"):
@@ -866,6 +910,23 @@ class TestChequeBook(ERPNextTestSuite):
 		amended.cheque_end_no = "000110"
 		amended.submit()
 		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_book"], amended.name)
+
+	def test_title_stays_the_same_across_amendments(self):
+		expected_title = f"{self.bank_account}-CB-1"
+		book = self.book
+		original_name = book.name
+		self.assertEqual(book.get_title(), expected_title)
+		for amendment in range(1, 4):
+			book.cancel()
+			amended = frappe.copy_doc(book, ignore_no_copy=False)
+			amended.docstatus = 0
+			amended.amended_from = book.name
+			amended.submit()
+			self.assertNotEqual(amended.name, book.name)
+			self.assertEqual(amended.name, f"{original_name}-{amendment}")
+			self.assertEqual(amended.amended_from, book.name)
+			self.assertEqual(amended.get_title(), expected_title)
+			book = amended
 
 	def test_amended_book_is_submitted_and_keeps_its_place(self):
 		self.book.db_set("status", "Disabled")
