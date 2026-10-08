@@ -155,6 +155,74 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(details.get("margin_type"), "Percentage")
 		self.assertEqual(details.get("margin_rate_or_amount"), 10)
 
+	def test_item_group_rule_follows_parent_links_when_tree_bounds_overlap(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import _get_pricing_rules
+
+		rfm = frappe.get_doc(
+			doctype="Item Group",
+			item_group_name="_Test Pricing Rule RFM",
+			parent_item_group="All Item Groups",
+			is_group=1,
+		).insert()
+		selecta = frappe.get_doc(
+			doctype="Item Group",
+			item_group_name="_Test Pricing Rule SELECTA",
+			parent_item_group=rfm.name,
+			is_group=0,
+		).insert()
+		valiant = frappe.get_doc(
+			doctype="Item Group",
+			item_group_name="_Test Pricing Rule VALIANT",
+			parent_item_group="All Item Groups",
+			is_group=1,
+		).insert()
+
+		def make_group_rule(group):
+			return frappe.get_doc(
+				doctype="Pricing Rule",
+				title=f"_Test Pricing Rule for {group}",
+				company="_Test Company",
+				apply_on="Item Group",
+				item_groups=[{"item_group": group}],
+				selling=1,
+				currency="INR",
+				price_or_product_discount="Price",
+				rate_or_discount="Discount Percentage",
+				discount_percentage=5,
+			).insert()
+
+		rfm_rule = make_group_rule(rfm.name)
+		valiant_rule = make_group_rule(valiant.name)
+		original_bounds = frappe.db.get_value("Item Group", valiant.name, ["lft", "rgt"])
+		selecta_lft, selecta_rgt = frappe.db.get_value("Item Group", selecta.name, ["lft", "rgt"])
+		frappe.db.set_value(
+			"Item Group",
+			valiant.name,
+			{"lft": selecta_lft - 1, "rgt": selecta_rgt + 1},
+			update_modified=False,
+		)
+
+		try:
+			frappe.flags.tree_conditions = {}
+			args = frappe._dict(
+				item_group=selecta.name,
+				transaction_type="selling",
+				company="_Test Company",
+				price_list="_Test Price List",
+				doctype="Sales Order",
+			)
+			matched_rules = {rule.name for rule in _get_pricing_rules("Item Group", args, {})}
+			self.assertIn(rfm_rule.name, matched_rules)
+			self.assertNotIn(valiant_rule.name, matched_rules)
+		finally:
+			frappe.db.set_value(
+				"Item Group",
+				valiant.name,
+				{"lft": original_bounds[0], "rgt": original_bounds[1]},
+				update_modified=False,
+			)
+			frappe.flags.tree_conditions = {}
+
 	def test_mixed_conditions_for_item_group(self):
 		for item in ["Mixed Cond Item 1", "Mixed Cond Item 2"]:
 			make_item(item, {"item_group": "Products"})

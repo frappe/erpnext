@@ -194,14 +194,24 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 		if key in frappe.flags.tree_conditions:
 			return frappe.flags.tree_conditions[key]
 
-		try:
-			lft, rgt = frappe.db.get_value(parenttype, args.get(field), ["lft", "rgt"])
-		except TypeError:
-			frappe.throw(_("Invalid {0}").format(args.get(field)))
+		if parenttype == "Item Group":
+			# Pricing must follow the parent links even if the nested set is stale.
+			parent_groups = []
+			group = args.get(field)
+			if not frappe.db.exists(parenttype, group):
+				frappe.throw(_("Invalid {0}").format(group))
+			while group and group not in parent_groups:
+				parent_groups.append(group)
+				group = frappe.db.get_value(parenttype, group, "parent_item_group")
+		else:
+			try:
+				lft, rgt = frappe.db.get_value(parenttype, args.get(field), ["lft", "rgt"])
+			except TypeError:
+				frappe.throw(_("Invalid {0}").format(args.get(field)))
 
-		parent_groups = frappe.get_all(
-			parenttype, filters={"lft": ["<=", lft], "rgt": [">=", rgt]}, pluck="name"
-		)
+			parent_groups = frappe.get_all(
+				parenttype, filters={"lft": ["<=", lft], "rgt": [">=", rgt]}, pluck="name"
+			)
 
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:
 			parent_field = f"parent_{frappe.scrub(parenttype)}"
