@@ -120,7 +120,22 @@ class ItemStandardCost(Document):
 		self.create_revaluation_entry()
 
 	def before_cancel(self):
+		self.validate_revaluation_entry_is_own()
 		self.validate_no_stock_activity_on_or_after_effective_date()
+
+	def validate_revaluation_entry_is_own(self):
+		if not self.revaluation_entry or self.flags.from_source_reconciliation:
+			return
+
+		reco_creation = frappe.db.get_value("Stock Reconciliation", self.revaluation_entry, "creation")
+		if reco_creation and get_datetime(reco_creation) < get_datetime(self.creation):
+			frappe.throw(
+				_(
+					"Item Standard Cost {0} was created by Stock Reconciliation {1}. Cancel the Stock Reconciliation instead."
+				).format(
+					frappe.bold(self.name), get_link_to_form("Stock Reconciliation", self.revaluation_entry)
+				)
+			)
 
 	def has_stock_activity_on_or_after_effective_date(self):
 		"""Is there any live stock transaction for this item on or after the effective date, other than

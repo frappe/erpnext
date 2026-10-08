@@ -538,6 +538,26 @@ class TestItemStandardCost(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, reco.insert)
 
+	def test_reconciliation_created_standard_cost_cannot_be_cancelled_directly(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -30))
+		make_stock_entry(
+			item_code=item.name,
+			target=TEST_WAREHOUSE,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -20),
+		)
+		reco = create_stock_reconciliation(item_code=item.name, warehouse=TEST_WAREHOUSE, qty=10, rate=150)
+
+		isc = frappe.get_doc("Item Standard Cost", {"revaluation_entry": reco.name, "docstatus": 1})
+		self.assertRaises(frappe.ValidationError, isc.cancel)
+		self.assertEqual(frappe.db.get_value("Stock Reconciliation", reco.name, "docstatus"), 1)
+
 	def test_backdated_transaction_blocked(self):
 		item = create_standard_cost_item()
 		create_item_standard_cost(item.name, rate=100, effective_date=today())
