@@ -82,6 +82,7 @@ def make_sales_invoice(
 		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
+		target.update_stock = 0
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
