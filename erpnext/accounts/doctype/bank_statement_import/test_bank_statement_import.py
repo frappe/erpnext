@@ -380,6 +380,7 @@ class TestBankStatementImport(ERPNextTestSuite):
 				"import_file": file.file_url,
 			}
 		).insert()
+		self.addCleanup(delete_imported_statement, data_import.name, file.name, tag)
 
 		template_options = json.dumps(
 			{
@@ -401,3 +402,19 @@ class TestBankStatementImport(ERPNextTestSuite):
 			frappe.db.count("Bank Transaction", {"description": ["like", f"BSI {tag}%"]}),
 			2,
 		)
+
+
+def delete_imported_statement(data_import_name, file_name, tag):
+	"""The importer commits row by row, so the rollback in tearDown leaves these behind."""
+	for name in frappe.get_all(
+		"Bank Transaction", filters={"description": ["like", f"BSI {tag}%"]}, pluck="name"
+	):
+		transaction = frappe.get_doc("Bank Transaction", name)
+		if transaction.docstatus == 1:
+			transaction.cancel()
+		frappe.delete_doc("Bank Transaction", name, force=1)
+	for log in frappe.get_all("Data Import Log", filters={"data_import": data_import_name}, pluck="name"):
+		frappe.delete_doc("Data Import Log", log, force=1)
+	frappe.delete_doc_if_exists("Bank Statement Import", data_import_name, force=1)
+	frappe.delete_doc_if_exists("File", file_name, force=1)
+	frappe.db.commit()  # nosemgrep
