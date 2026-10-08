@@ -316,8 +316,8 @@ class TestCompany(ERPNextTestSuite):
 	def test_disable_sdbnb_with_outstanding_delivery_note_fails(self):
 		company = get_test_company()
 
-		item_code = create_stock_item_with_inventory()
-		create_outstanding_delivery_note(item_code)
+		item_code = create_stock_item_with_inventory(company)
+		create_outstanding_delivery_note(item_code, company)
 
 		company.enable_stock_delivered_but_not_billed = 0
 
@@ -327,13 +327,15 @@ class TestCompany(ERPNextTestSuite):
 	def test_cannot_change_sdbnb_account_with_outstanding_delivery_note(self):
 		company = get_test_company()
 
-		item_code = create_stock_item_with_inventory()
-		create_outstanding_delivery_note(item_code)
+		item_code = create_stock_item_with_inventory(company)
+		create_outstanding_delivery_note(item_code, company)
 
 		new_account = create_account(
 			account_name="Stock Delivered But Not Billed - New",
 			account_type="Stock Delivered But Not Billed",
-			parent_account="Stock Assets - _TSDBNB",
+			parent_account=frappe.db.get_value(
+				"Account", company.stock_delivered_but_not_billed, "parent_account"
+			),
 			company=company.name,
 		)
 
@@ -361,6 +363,13 @@ class TestCompany(ERPNextTestSuite):
 		company.default_operating_cost_account = None
 		company.cost_center = frappe.db.get_value("Cost Center", {"company": company.name, "is_group": 1})
 		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_cannot_disable_perpetual_inventory_with_stock(self):
+		company = get_test_company()
+		create_stock_item_with_inventory(company)
+		company.enable_perpetual_inventory = 0
+		with self.assertRaisesRegex(frappe.ValidationError, "Cannot disable perpetual inventory"):
 			company.save()
 
 	def test_clear_demo_data(self):
@@ -435,14 +444,12 @@ def create_test_lead_in_company(company):
 
 
 def get_test_company():
-	if frappe.db.exists("Company", "_Test SDBNB Company"):
-		return frappe.get_doc("Company", "_Test SDBNB Company")
-
+	abbr = random_string(6)
 	return frappe.get_doc(
 		{
 			"doctype": "Company",
-			"company_name": "_Test SDBNB Company",
-			"abbr": "_TSDBNB",
+			"company_name": f"_Test SDBNB Company {abbr}",
+			"abbr": abbr,
 			"country": "India",
 			"default_currency": "INR",
 			"enable_perpetual_inventory": 1,
@@ -451,7 +458,7 @@ def get_test_company():
 	).insert()
 
 
-def create_stock_item_with_inventory():
+def create_stock_item_with_inventory(company):
 	item_code = make_item(
 		"SDBNB Test Item",
 		properties={"is_stock_item": 1},
@@ -459,22 +466,23 @@ def create_stock_item_with_inventory():
 
 	make_stock_entry(
 		item_code=item_code,
-		target="Stores - _TSDBNB",
+		target=f"Stores - {company.abbr}",
 		qty=10,
 		basic_rate=100,
-		company="_Test SDBNB Company",
+		company=company.name,
+		expense_account=company.stock_adjustment_account,
 	)
 
 	return item_code
 
 
-def create_outstanding_delivery_note(item_code):
+def create_outstanding_delivery_note(item_code, company):
 	return create_delivery_note(
 		item_code=item_code,
 		qty=5,
 		rate=150,
-		company="_Test SDBNB Company",
-		warehouse="Stores - _TSDBNB",
-		cost_center="Main - _TSDBNB",
-		expense_account="Stock Delivered But Not Billed - _TSDBNB",
+		company=company.name,
+		warehouse=f"Stores - {company.abbr}",
+		cost_center=company.cost_center,
+		expense_account=company.stock_delivered_but_not_billed,
 	)
