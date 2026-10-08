@@ -2958,6 +2958,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_on_recurring_keeps_terms_and_shifts_service_dates(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 
@@ -2982,6 +2983,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 		reference.items[0].deferred_revenue_account = deferred_account
 		reference.items[0].service_start_date = "2025-01-01"
 		reference.items[0].service_end_date = "2025-01-31"
+		for service_start_date, service_end_date in [
+			("2025-01-29", "2025-01-31"),
+			("2025-01-10", "2025-01-20"),
+		]:
+			row = reference.append("items", reference.items[0].as_dict(no_default_fields=True))
+			row.service_start_date = service_start_date
+			row.service_end_date = service_end_date
 		reference.insert()
 
 		# Same steps as Auto Repeat: copy without no_copy fields, set dates and period, call on_recurring
@@ -2990,7 +2998,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 		new_invoice.posting_date = "2025-02-01"
 		new_invoice.from_date = "2025-02-01"
 		new_invoice.to_date = "2025-02-28"
-		new_invoice.run_method("on_recurring", reference_doc=reference, auto_repeat_doc=None)
+		auto_repeat = frappe._dict(frequency="Monthly")
+		new_invoice.run_method("on_recurring", reference_doc=reference, auto_repeat_doc=auto_repeat)
 		new_invoice.insert()
 
 		self.assertEqual(new_invoice.po_no, "PO-0001")
@@ -2999,8 +3008,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 			[getdate(row.due_date) for row in new_invoice.payment_schedule],
 			[getdate("2025-02-02"), getdate("2025-02-03")],
 		)
-		self.assertEqual(getdate(new_invoice.items[0].service_start_date), getdate("2025-02-01"))
-		self.assertEqual(getdate(new_invoice.items[0].service_end_date), getdate("2025-02-28"))
+		self.assertEqual(
+			[(getdate(row.service_start_date), getdate(row.service_end_date)) for row in new_invoice.items],
+			[
+				(getdate("2025-02-01"), getdate("2025-02-28")),
+				(getdate("2025-02-28"), getdate("2025-02-28")),
+				(getdate("2025-02-10"), getdate("2025-02-20")),
+			],
+		)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",

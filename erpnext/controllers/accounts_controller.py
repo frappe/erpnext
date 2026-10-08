@@ -7,11 +7,13 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
+from frappe.automation.doctype.auto_repeat.auto_repeat import month_map
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
+	add_months,
 	cint,
 	comma_and,
 	date_diff,
@@ -610,19 +612,31 @@ class AccountsController(TransactionBase):
 		if self.get("from_date") and self.get("to_date") and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
 
-	def shift_service_dates(self, reference_doc):
-		"""Move item service dates by the same offset as the invoice period (used by Auto Repeat)."""
+	def shift_service_dates(self, reference_doc, auto_repeat_doc):
+		"""Move item service dates into the new invoice period (used by Auto Repeat)."""
 		if not (self.from_date and self.to_date and reference_doc.from_date and reference_doc.to_date):
 			return
 
-		# Separate offsets keep month ends aligned, e.g. 1-31 Jan becomes 1-28 Feb.
-		start_offset = date_diff(self.from_date, reference_doc.from_date)
-		end_offset = date_diff(self.to_date, reference_doc.to_date)
+		from_date = getdate(self.from_date)
+		reference_from_date = getdate(reference_doc.from_date)
+		months = (
+			(from_date.year - reference_from_date.year) * 12 + from_date.month - reference_from_date.month
+		)
+		days = date_diff(from_date, reference_from_date)
+		shift_by_months = auto_repeat_doc.frequency in month_map
+
+		def shift(date):
+			# Keep the period end aligned, e.g. 1-28 Feb becomes 1-31 Mar.
+			if getdate(date) == getdate(reference_doc.to_date):
+				return self.to_date
+			# Whole months never reverse a period, e.g. 29-31 Jan becomes 28-28 Feb.
+			return add_months(date, months) if shift_by_months else add_days(date, days)
+
 		for item, reference_item in zip(self.items, reference_doc.items, strict=True):
 			if reference_item.service_start_date:
-				item.service_start_date = add_days(reference_item.service_start_date, start_offset)
+				item.service_start_date = shift(reference_item.service_start_date)
 			if reference_item.service_end_date:
-				item.service_end_date = add_days(reference_item.service_end_date, end_offset)
+				item.service_end_date = shift(reference_item.service_end_date)
 
 	def before_print(self, settings=None):
 		self.set_missing_terms()
