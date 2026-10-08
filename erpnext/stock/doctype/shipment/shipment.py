@@ -6,7 +6,7 @@ import frappe
 from frappe import _, bold
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.document import Document
-from frappe.utils import cint, flt, get_link_to_form, get_time
+from frappe.utils import cint, flt, get_link_to_form, get_time, getdate
 
 from erpnext.accounts.party import get_party_shipping_address
 
@@ -76,11 +76,15 @@ class Shipment(Document):
 	def validate(self):
 		self.validate_weight()
 		self.validate_pickup_time()
+		self.validate_parties()
 		self.validate_delivery_notes()
 		self.set_value_of_goods()
 		self.set_total_weight()
 		if self.docstatus == 0:
 			self.status = "Draft"
+
+	def before_update_after_submit(self):
+		self.validate_pickup_time()
 
 	def on_submit(self):
 		if not self.shipment_parcel:
@@ -115,8 +119,41 @@ class Shipment(Document):
 		return sum(flt(parcel.weight) * parcel.count for parcel in self.shipment_parcel if parcel.count > 0)
 
 	def validate_pickup_time(self):
-		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) < get_time(self.pickup_from):
+		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) <= get_time(self.pickup_from):
 			frappe.throw(_("Pickup To time should be greater than Pickup From time"))
+
+		if (self.is_new() or self.has_value_changed("pickup_date")) and getdate(self.pickup_date) < getdate():
+			frappe.throw(_("Pickup Date cannot be before today"))
+
+	def validate_parties(self):
+		for side, party_type in (("pickup", self.pickup_from_type), ("delivery", self.delivery_to_type)):
+			party = self.get(f"{side}_{frappe.scrub(party_type)}")
+			if not party:
+				frappe.throw(_("{0} is required for the {1} party").format(_(party_type), _(side.title())))
+
+			for other_type in ("Company", "Customer", "Supplier"):
+				if other_type != party_type:
+					self.set(f"{side}_{frappe.scrub(other_type)}", None)
+
+			self.set("pickup" if side == "pickup" else "delivery_to", party)
+			if self.is_new() or self.has_party_details_changed(side):
+				self.validate_party_links(side, party_type, party)
+
+	def has_party_details_changed(self, side):
+		return any(
+			self.has_value_changed(f"{side}_{fieldname}")
+			for fieldname in ("company", "customer", "supplier", "address_name", "contact_name")
+		)
+
+	def validate_party_links(self, side, party_type, party):
+		for doctype, fieldname in (("Address", f"{side}_address_name"), ("Contact", f"{side}_contact_name")):
+			name = self.get(fieldname)
+			if name and not is_linked_to_party(doctype, name, party_type, party):
+				frappe.throw(
+					_("{0} {1} is not linked to {2} {3}").format(
+						_(doctype), bold(name), _(party_type), bold(party)
+					)
+				)
 
 	def validate_delivery_notes(self):
 		delivery_notes = set()
@@ -166,6 +203,15 @@ class Shipment(Document):
 		for entry in self.get("shipment_delivery_note"):
 			value_of_goods += flt(entry.get("grand_total"))
 		self.value_of_goods = value_of_goods if value_of_goods else self.value_of_goods
+
+
+def is_linked_to_party(doctype, name, party_type, party):
+	return bool(
+		frappe.db.exists(
+			"Dynamic Link",
+			{"parenttype": doctype, "parent": name, "link_doctype": party_type, "link_name": party},
+		)
+	)
 
 
 def get_other_shipment(delivery_note, shipment_name, for_update=False):
