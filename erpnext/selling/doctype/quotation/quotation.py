@@ -10,6 +10,7 @@ from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
 
 from .mapper import (
 	get_ordered_items,
@@ -171,6 +172,7 @@ class Quotation(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_valid_till()
 		self.validate_revision()
+		self.validate_lead()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -188,6 +190,10 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_lead(self):
+		if self.quotation_to == "Lead" and self.party_name and self.is_new() and not self.amended_from:
+			validate_lead_is_enabled(self.party_name, self.doctype)
 
 	def validate_revision(self):
 		if not self.revision_of:
