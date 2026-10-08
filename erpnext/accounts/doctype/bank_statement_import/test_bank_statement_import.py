@@ -1,12 +1,17 @@
 # Copyright (c) 2020, Frappe Technologies and Contributors
 # See license.txt
 
+import json
+
+import frappe
 import mt940
+from frappe.utils import random_string
 
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
 	get_transaction_reference,
 	is_mt940_format,
 	preprocess_mt940_content,
+	start_import,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -338,3 +343,61 @@ class TestBankStatementImport(ERPNextTestSuite):
 		mt940_content = "   :28C:167619/1\n"
 		result = preprocess_mt940_content(mt940_content)
 		self.assertEqual(result, mt940_content)  # Should remain unchanged
+
+	def test_csv_import_creates_bank_transactions(self):
+		"""Bank Statement Import has no payload_count column; the shared Importer must not write it"""
+		frappe.get_doc({"doctype": "Bank", "bank_name": "_Test BSI Bank"}).insert(ignore_if_duplicate=True)
+		bank_account = frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": "_Test BSI Account",
+				"bank": "_Test BSI Bank",
+				"account": "_Test Bank - _TC",
+				"is_company_account": 1,
+				"company": "_Test Company",
+			}
+		).insert(ignore_if_duplicate=True)
+
+		# The importer commits per row, so keep this run's rows distinguishable.
+		tag = random_string(8)
+		content = (
+			"Date,Deposit,Withdrawal,Description,Reference Number\n"
+			f"2026-10-01,100,0,BSI {tag} credit,{tag}-1\n"
+			f"2026-10-02,0,40,BSI {tag} debit,{tag}-2\n"
+		)
+		file = frappe.get_doc(
+			{"doctype": "File", "file_name": f"bsi-{tag}.csv", "content": content, "is_private": 1}
+		).insert()
+
+		data_import = frappe.get_doc(
+			{
+				"doctype": "Bank Statement Import",
+				"company": "_Test Company",
+				"bank_account": bank_account.name,
+				"bank": "_Test BSI Bank",
+				"reference_doctype": "Bank Transaction",
+				"import_type": "Insert New Records",
+				"import_file": file.file_url,
+			}
+		).insert()
+
+		template_options = json.dumps(
+			{
+				"column_to_field_map": {
+					"Date": "date",
+					"Deposit": "deposit",
+					"Withdrawal": "withdrawal",
+					"Description": "description",
+					"Reference Number": "reference_number",
+				}
+			}
+		)
+		start_import(
+			data_import.name, bank_account.name, file.file_url, None, "_Test BSI Bank", template_options
+		)
+
+		self.assertEqual(frappe.db.get_value("Bank Statement Import", data_import.name, "status"), "Success")
+		self.assertEqual(
+			frappe.db.count("Bank Transaction", {"description": ["like", f"BSI {tag}%"]}),
+			2,
+		)
