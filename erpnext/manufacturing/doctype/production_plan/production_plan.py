@@ -2194,29 +2194,23 @@ def get_sub_assembly_items(
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 			required_qty = stock_qty
 
-			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
-				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+			if warehouse and d.item_code not in bin_details:
+				bins = get_bin_details(d, company, for_warehouse=warehouse)
+				bin_details[d.item_code] = frappe._dict(_aggregate_bin_details(bins))
 
-				for _bin_dict in bin_details[d.item_code]:
-					_bin_dict.original_projected_qty = _bin_dict.projected_qty
-					if _bin_dict.original_projected_qty > 0:
-						if _bin_dict.original_projected_qty >= stock_qty:
-							_bin_dict.original_projected_qty -= stock_qty
-							stock_qty = 0
-							continue
-						else:
-							stock_qty = stock_qty - _bin_dict.original_projected_qty
-							sub_assembly_items.append(d.item_code)
-			elif warehouse:
-				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
+				projected_qty = bin_details[d.item_code].projected_qty
+				if projected_qty >= stock_qty:
+					stock_qty = 0
+				elif projected_qty > 0:
+					stock_qty -= projected_qty
+					sub_assembly_items.append(d.item_code)
 
 			if not d.is_phantom_item:
 				bom_data.append(
 					frappe._dict(
 						{
-							"actual_qty": bin_details[d.item_code][0].get("actual_qty", 0)
-							if bin_details.get(d.item_code)
-							else 0,
+							"actual_qty": bin_details.get(d.item_code, {}).get("actual_qty", 0),
 							"parent_item_code": parent_item_code,
 							"description": d.description,
 							"production_item": d.item_code,
@@ -2229,9 +2223,7 @@ def get_sub_assembly_items(
 							"indent": indent,
 							"stock_qty": flt(stock_qty, precision),
 							"required_qty": flt(required_qty, precision),
-							"projected_qty": bin_details[d.item_code][0].get("projected_qty", 0)
-							if bin_details.get(d.item_code)
-							else 0,
+							"projected_qty": bin_details.get(d.item_code, {}).get("projected_qty", 0),
 							"main_bom": bom_no,
 						}
 					)
