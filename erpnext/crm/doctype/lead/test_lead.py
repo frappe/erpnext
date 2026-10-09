@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import random_string, today
 
 from erpnext.crm.doctype.lead.mapper import make_opportunity
-from erpnext.crm.utils import get_linked_prospect
+from erpnext.crm.utils import get_linked_prospect, open_leads_opportunities_based_on_todays_event
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -39,6 +39,60 @@ class TestLead(ERPNextTestSuite):
 		if contact:
 			contact_doc = frappe.get_doc("Contact", contact)
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
+
+	def test_lead_converts_to_one_customer_only(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		lead = make_lead()
+		make_customer(lead.name).insert()
+		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
+
+	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		quotation = make_quotation(do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.insert()
+		quotation.submit()
+
+		customer = make_customer(lead.name).insert()
+
+		self.assertEqual(
+			frappe.db.get_value("Quotation", quotation.name, ["quotation_to", "party_name"]),
+			("Customer", customer.name),
+		)
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", opportunity.name, ["opportunity_from", "party_name"]),
+			("Customer", customer.name),
+		)
+
+	def test_customer_from_lead_keeps_records_the_user_cannot_write(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		customer = make_customer(lead.name)
+
+		with self.set_user(make_user("_test_lead_master_manager@example.com", "Sales Master Manager")):
+			customer.insert()
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "opportunity_from"), "Lead")
+
+	def test_customer_from_lead_without_contact_gets_one(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 0)
+		lead = make_lead()
+		customer = make_customer(lead.name).insert()
+
+		contact = frappe.db.get_value("Customer", customer.name, "customer_primary_contact")
+		self.assertEqual(frappe.db.get_value("Contact", contact, "email_id"), lead.email_id)
 
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
@@ -131,6 +185,119 @@ class TestLead(ERPNextTestSuite):
 			frappe.db.get_value("ToDo", {"reference_type": "Opportunity", "reference_name": opportunity.name})
 		)
 
+	def test_lead_status_follows_its_opportunity(self):
+		lost_reason = "_Test Lead Lost Reason"
+		if not frappe.db.exists("Opportunity Lost Reason", lost_reason):
+			frappe.get_doc({"doctype": "Opportunity Lost Reason", "lost_reason": lost_reason}).insert()
+
+		lead = make_lead()
+		opportunity = make_opportunity(lead.name)
+		opportunity.company = "_Test Company"
+		opportunity.save()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Opportunity")
+
+		opportunity.declare_enquiry_lost([{"lost_reason": lost_reason}], [])
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Open")
+
+		second = make_opportunity(lead.name)
+		second.company = "_Test Company"
+		second.save()
+		second.delete()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Open")
+
+	def test_todays_event_reopens_only_pre_sales_leads(self):
+		statuses = ("Replied", "Converted", "Do Not Contact")
+		leads = [make_lead() for _ in statuses]
+		for lead, status in zip(leads, statuses, strict=True):
+			lead.db_set("status", status)
+			create_event("Follow up", today(), "Lead", lead.name)
+
+		open_leads_opportunities_based_on_todays_event()
+		self.assertEqual(
+			[frappe.db.get_value("Lead", lead.name, "status") for lead in leads],
+			["Open", "Converted", "Do Not Contact"],
+		)
+
+	def test_sales_manager_deletes_a_lead_created_by_another_user(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 1)
+		sales_user = make_user("_test_lead_sales_user@example.com", "Sales User")
+		sales_manager = make_user("_test_lead_sales_manager@example.com", "Sales Manager")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(sales_user)
+		lead = make_lead()
+		contact = frappe.db.get_value(
+			"Dynamic Link", {"link_doctype": "Lead", "link_name": lead.name}, "parent"
+		)
+		self.assertTrue(contact)
+
+		frappe.set_user(sales_manager)
+		frappe.delete_doc("Lead", lead.name)
+		self.assertFalse(frappe.db.exists("Contact", contact))
+
+	def test_lead_with_one_phone_number_can_be_saved_again(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 1)
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "lead_name": "_Test Phone Lead", "phone": "0221234567"}
+		).insert()
+
+		self.assertIsNone(frappe.db.get_value("Lead", lead.name, "mobile_no"))
+		lead.save()
+
+		contact_name = frappe.db.get_value(
+			"Dynamic Link",
+			{"parenttype": "Contact", "link_doctype": "Lead", "link_name": lead.name},
+			"parent",
+		)
+		contact = frappe.get_doc("Contact", contact_name)
+		contact.add_phone("9800011111", is_primary_mobile_no=1)
+		contact.save()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
+
+		contact.phone_nos = [row for row in contact.phone_nos if row.is_primary_mobile_no]
+		contact.save()
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
+
+	def test_do_not_contact_is_kept_on_a_lead_with_an_opportunity(self):
+		lead = make_lead()
+		opportunity = make_opportunity(lead.name)
+		opportunity.company = "_Test Company"
+		opportunity.save()
+
+		lead.reload()
+		lead.status = "Do Not Contact"
+		lead.save()
+		self.assertEqual(lead.status, "Do Not Contact")
+
+		opportunity.reload()
+		opportunity.status = "Replied"
+		opportunity.save()
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Do Not Contact")
+
+	def test_contact_created_from_the_opportunity_dialog_is_linked_to_the_lead(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 0)
+		lead = make_lead()
+		lead.create_prospect_and_contact({"create_contact": 1})
+
+		self.assertTrue(
+			frappe.db.exists(
+				"Dynamic Link", {"parenttype": "Contact", "link_doctype": "Lead", "link_name": lead.name}
+			)
+		)
+
+	def test_prospect_from_lead_needs_prospect_create_permission(self):
+		sales_user = make_user("_test_lead_sales_user@example.com", "Sales User")
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(sales_user)
+		lead = make_lead()
+
+		self.assertRaises(
+			frappe.PermissionError,
+			lead.create_prospect_and_contact,
+			{"create_prospect": 1, "prospect_name": "_Test Prospect From Lead"},
+		)
+
 	def test_copy_events_from_lead_to_prospect(self):
 		lead = make_lead(
 			first_name="Rahul",
@@ -189,9 +356,10 @@ class TestLead(ERPNextTestSuite):
 		lead.save()
 		self.assertEqual(frappe.db.get_value("Prospect Lead", {"lead": lead.name}, "mobile_no"), "9999999999")
 
-		# deleting the only lead of a prospect removes the prospect
+		# deleting the only lead of a prospect keeps the prospect, without the lead
 		lead.delete()
-		self.assertFalse(frappe.db.exists("Prospect", prospect_name))
+		self.assertFalse(frappe.db.exists("Prospect Lead", {"parent": prospect_name}))
+		self.assertTrue(frappe.db.exists("Prospect", prospect_name))
 
 	def test_set_lead_name_fallbacks(self):
 		# organization name is used when there is no person name
@@ -241,6 +409,16 @@ def create_todo(description, reference_type, reference_name):
 	todo.reference_name = reference_name
 	todo.insert()
 	return todo
+
+
+def make_user(email, role):
+	if not frappe.db.exists("User", email):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": role, "send_welcome_email": 0}
+		)
+		user.append("roles", {"role": role})
+		user.insert(ignore_permissions=True)
+	return email
 
 
 def make_lead(**args):

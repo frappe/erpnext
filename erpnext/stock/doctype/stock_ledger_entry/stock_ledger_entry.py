@@ -18,6 +18,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.valuation_adjustment import validate_no_later_adjustment_entry
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -103,6 +104,7 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
+		validate_no_later_adjustment_entry(self)
 		self.validate_inventory_dimension_negative_stock()
 		self.validate_serial_no_inventory_dimension()
 
@@ -268,7 +270,8 @@ class StockLedgerEntry(Document):
 		if frappe.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
 			return
 
-		if self.is_adjustment_entry:
+		# a write-off moves no serial no or batch; the reset of an Adjustment Entry does
+		if self.is_adjustment_entry and not self.serial_and_batch_bundle:
 			return
 
 		if not self.get("via_landed_cost_voucher"):

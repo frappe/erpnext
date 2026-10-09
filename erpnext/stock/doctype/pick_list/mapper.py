@@ -32,7 +32,7 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 def create_delivery(
 	source_name: str, target_doc: str | dict | Document | None = None, target: str | None = None
 ):
-	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list = frappe.get_doc("Pick List", source_name, check_permission=True)
 	target = target or (frappe.flags.args or {}).get("target") or "Delivery Note"
 	validate_item_locations(pick_list)
 	sales_dict = dict()
@@ -120,7 +120,7 @@ def create_dn_for_pick_lists(
 		kwargs = {}
 	kwargs = frappe.parse_json(kwargs)
 
-	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list = frappe.get_doc("Pick List", source_name, check_permission=True)
 	validate_item_locations(pick_list)
 
 	sales_order_arg = kwargs.get("sales_order")

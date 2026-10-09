@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import formatdate, get_link_to_form
+from frappe.utils import flt, formatdate, get_link_to_form
 
 from erpnext import get_region
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_details_query
@@ -23,6 +23,8 @@ class VATAuditReport:
 
 	def run(self):
 		self.validate_company_region()
+		if self.filters.company:
+			frappe.has_permission("Company", doc=self.filters.company, throw=True)
 		self.get_sa_vat_accounts()
 		self.get_columns()
 		for doctype in self.doctypes:
@@ -55,37 +57,35 @@ class VATAuditReport:
 
 	def get_invoice_data(self, doctype):
 		self.invoices = frappe._dict()
-		invoice_doctype = frappe.qb.DocType(doctype)
-		party_field = invoice_doctype.supplier if doctype == "Purchase Invoice" else invoice_doctype.customer
-		account_field = (
-			invoice_doctype.credit_to if doctype == "Purchase Invoice" else invoice_doctype.debit_to
+		party_field = "supplier" if doctype == "Purchase Invoice" else "customer"
+		account_field = "credit_to" if doctype == "Purchase Invoice" else "debit_to"
+
+		invoice_data = frappe.get_list(
+			doctype,
+			filters=self.get_invoice_filters(),
+			fields=[
+				"name as voucher_no",
+				"posting_date",
+				"remarks",
+				f"{party_field} as party",
+				f"{account_field} as account",
+			],
+			order_by="posting_date desc",
+			limit_page_length=0,
 		)
-
-		query = (
-			frappe.qb.from_(invoice_doctype)
-			.select(
-				invoice_doctype.name.as_("voucher_no"),
-				invoice_doctype.posting_date,
-				invoice_doctype.remarks,
-				party_field.as_("party"),
-				account_field.as_("account"),
-			)
-			.where(invoice_doctype.docstatus == 1)
-			.where(invoice_doctype.is_opening == "No")
-			.orderby(invoice_doctype.posting_date, order=frappe.qb.desc)
-		)
-
-		if self.filters.get("company"):
-			query = query.where(invoice_doctype.company == self.filters.company)
-		if self.filters.get("from_date"):
-			query = query.where(invoice_doctype.posting_date >= self.filters.from_date)
-		if self.filters.get("to_date"):
-			query = query.where(invoice_doctype.posting_date <= self.filters.to_date)
-
-		invoice_data = query.run(as_dict=True)
 
 		for row in invoice_data:
 			self.invoices.setdefault(row.voucher_no, row)
+
+	def get_invoice_filters(self):
+		filters = [["docstatus", "=", 1], ["is_opening", "=", "No"]]
+		if self.filters.get("company"):
+			filters.append(["company", "=", self.filters.company])
+		if self.filters.get("from_date"):
+			filters.append(["posting_date", ">=", self.filters.from_date])
+		if self.filters.get("to_date"):
+			filters.append(["posting_date", "<=", self.filters.to_date])
+		return filters
 
 	def get_invoice_items(self, doctype):
 		self.invoice_items = frappe._dict()
@@ -114,15 +114,19 @@ class VATAuditReport:
 
 		tax_details = (
 			get_tax_details_query(doctype, self.tax_doctype)
+			.select(item_wise_tax.tax_row)
 			.where(item_wise_tax.parent.isin(invoice_names))
 			.where(taxes_and_charges.account_head.isin(self.sa_vat_accounts))
 			.run(as_dict=True)
 		)
+		actual_tax_rates = get_actual_tax_rates(tax_details)
 
 		for row in tax_details:
 			parent = row.parent
 			item = row.item_row
 			is_zero_rated = self.invoice_items.get(item)
+			if row.charge_type == "Actual":
+				row.rate = actual_tax_rates.get(row.tax_row, 0)
 			if row.rate == 0 and not is_zero_rated:
 				continue
 
@@ -237,3 +241,18 @@ class VATAuditReport:
 			{"fieldname": "tax_amount", "label": "Tax Amount", "fieldtype": "Currency", "width": 130},
 			{"fieldname": "gross_amount", "label": "Gross Amount", "fieldtype": "Currency", "width": 130},
 		]
+
+
+def get_actual_tax_rates(tax_details: list[dict]) -> dict[str, float]:
+	"""Rate of each Actual tax row on its whole taxable amount, so its items aren't split by rounding."""
+	totals = {}
+	for row in tax_details:
+		if row.charge_type == "Actual":
+			amount, taxable_amount = totals.get(row.tax_row, (0.0, 0.0))
+			totals[row.tax_row] = (amount + flt(row.amount), taxable_amount + flt(row.taxable_amount))
+
+	return {
+		tax_row: flt(amount / taxable_amount * 100, 2)
+		for tax_row, (amount, taxable_amount) in totals.items()
+		if taxable_amount
+	}

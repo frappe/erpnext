@@ -10,10 +10,15 @@ import frappe
 from bs4 import BeautifulSoup as bs
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_datetime_str, today
+from frappe.model.naming import append_number_if_name_exists
+from frappe.utils import flt, get_datetime_str, getdate, today
 from frappe.utils.data import format_datetime
 
 import erpnext
+from erpnext.regional.italy import mode_of_payment_codes
+
+# TD04 credit note, TD08 simplified credit note
+RETURN_DOCUMENT_TYPES = ("TD04", "TD08")
 
 
 class ImportSupplierInvoice(Document):
@@ -41,65 +46,79 @@ class ImportSupplierInvoice(Document):
 
 	def autoname(self):
 		if not self.name:
-			self.name = "Import Invoice on " + format_datetime(self.creation)
+			self.name = append_number_if_name_exists(
+				self.doctype, "Import Invoice on " + format_datetime(self.creation)
+			)
 
 	def import_xml_data(self):
-		zip_file = frappe.get_doc(
-			"File",
-			{"file_url": self.zip_file, "attached_to_doctype": self.doctype, "attached_to_name": self.name},
-		)
-
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
 
 		self.file_count = 0
 		self.purchase_invoices_count = 0
 		self.default_uom = frappe.db.get_value("Stock Settings", fieldname="stock_uom")
 
-		with zipfile.ZipFile(zip_file.get_full_path()) as zf:
-			for file_name in zf.namelist():
-				content = get_file_content(file_name, zf)
-				file_content = bs(content, "xml")
-				self.prepare_data_for_import(file_content, file_name, content)
-
-		if self.purchase_invoices_count == self.file_count:
-			self.status = "File Import Completed"
-			self.publish("File Import", _("XML Files Processed"), 2, 3)
+		try:
+			self.import_zip_file()
+		except Exception:
+			frappe.log_error(
+				"Unable to import the zip file", reference_doctype=self.doctype, reference_name=self.name
+			)
+			self.status = "Error"
 		else:
-			self.status = "Partially Completed - Check Error Log"
-			self.publish("File Import", _("XML Files Processed"), 2, 3)
+			if self.purchase_invoices_count == self.file_count:
+				self.status = "File Import Completed"
+			else:
+				self.status = "Partially Completed - Check Error Log"
 
+		self.publish("File Import", _("XML Files Processed"), 2, 3)
 		self.save()
 		self.publish("File Import", _("XML Files Processed"), 3, 3)
 
+	def import_zip_file(self):
+		zip_file = frappe.get_doc(
+			"File",
+			{"file_url": self.zip_file, "attached_to_doctype": self.doctype, "attached_to_name": self.name},
+		)
+
+		with zipfile.ZipFile(zip_file.get_full_path()) as zf:
+			for file_name in zf.namelist():
+				if file_name.lower().endswith(".p7m"):
+					self.log_signed_file(file_name)
+					continue
+
+				try:
+					content = get_file_content(file_name, zf)
+				except Exception:
+					self.log_unreadable_file(file_name)
+					continue
+
+				file_content = bs(content, "xml")
+				self.prepare_data_for_import(file_content, file_name, content)
+
+	def log_unreadable_file(self, file_name: str) -> None:
+		self.file_count += 1
+		frappe.log_error(
+			title=_("Unable to read file {0}").format(file_name),
+			reference_doctype=self.doctype,
+			reference_name=self.name,
+		)
+
+	def log_signed_file(self, file_name: str) -> None:
+		self.file_count += 1
+		frappe.log_error(
+			title=_("Unable to import a signed file"),
+			message=_("Signed file {0} is not supported, import the XML file instead").format(file_name),
+			reference_doctype=self.doctype,
+			reference_name=self.name,
+		)
+
 	def prepare_data_for_import(self, file_content, file_name, encoded_content):
 		for line in file_content.find_all("DatiGeneraliDocumento"):
-			invoices_args = {
-				"company": self.company,
-				"naming_series": self.invoice_series,
-				"document_type": line.TipoDocumento.text,
-				"bill_date": get_datetime_str(line.Data.text),
-				"bill_no": line.Numero.text,
-				"total_discount": 0,
-				"items": [],
-				"buying_price_list": self.default_buying_price_list,
-			}
-
-			if not invoices_args.get("bill_no", ""):
-				frappe.throw(_("Numero has not been set in the XML file"))
-
-			supp_dict = get_supplier_details(file_content)
-			invoices_args["destination_code"] = get_destination_code_from_file(file_content)
-			self.prepare_items_for_invoice(file_content, invoices_args)
-			invoices_args["taxes"] = get_taxes_from_file(file_content, self.tax_account)
-			invoices_args["terms"] = get_payment_terms_from_file(file_content)
-
-			supplier_name = create_supplier(self.supplier_group, supp_dict)
-			create_address(supplier_name, supp_dict)
 			self.file_count += 1
-
 			frappe.db.savepoint("import_invoice")
 			try:
-				pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
+				pi_name = self.create_invoice_from_file(line, file_content, file_name)
+				attach_file_to_invoice(pi_name, file_name, encoded_content)
 			except Exception:
 				frappe.db.rollback(save_point="import_invoice")
 				frappe.log_error(
@@ -107,64 +126,69 @@ class ImportSupplierInvoice(Document):
 					reference_doctype=self.doctype,
 					reference_name=self.name,
 				)
-				self.db_set("status", "Error", commit=True)
 				continue
 
 			self.purchase_invoices_count += 1
 
-			file_doc = frappe.new_doc("File")
-			file_doc.file_name = file_name
-			file_doc.attached_to_doctype = "Purchase Invoice"
-			file_doc.attached_to_name = pi_name
-			file_doc.content = encoded_content
-			file_doc.decode = False
-			file_doc.is_private = False
-			file_doc.insert(ignore_permissions=True)
+	def create_invoice_from_file(self, line, file_content, file_name):
+		invoices_args = {
+			"company": self.company,
+			"naming_series": self.invoice_series,
+			"document_type": line.TipoDocumento.text,
+			"bill_date": get_datetime_str(line.Data.text),
+			"bill_no": line.Numero.text,
+			"is_return": line.TipoDocumento.text in RETURN_DOCUMENT_TYPES,
+			"items": [],
+			"buying_price_list": self.default_buying_price_list,
+		}
+
+		if not invoices_args.get("bill_no", ""):
+			frappe.throw(_("Numero has not been set in the XML file"))
+
+		supp_dict = get_supplier_details(file_content)
+		invoices_args["destination_code"] = get_destination_code_from_file(file_content)
+		self.prepare_items_for_invoice(file_content, invoices_args)
+		invoices_args["taxes"] = get_taxes_from_file(
+			file_content, self.tax_account, invoices_args["is_return"]
+		)
+		invoices_args["terms"] = get_payment_terms_from_file(file_content)
+
+		supplier_name = create_supplier(self.supplier_group, supp_dict)
+		create_address(supplier_name, supp_dict)
+		validate_invoice_not_imported(supplier_name, invoices_args)
+		return create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
-		qty = 1
-		rate, tax_rate = [0, 0]
-		uom = self.default_uom
-
-		# read file for item information
 		for line in file_content.find_all("DettaglioLinee"):
 			if line.find("PrezzoUnitario") and line.find("PrezzoTotale"):
-				rate = flt(line.PrezzoUnitario.text) or 0
-				line_total = flt(line.PrezzoTotale.text) or 0
+				self.append_item(line, invoices_args)
 
-				if rate and flt(line_total) / rate != 1.0 and line.find("Quantita"):
-					qty = flt(line.Quantita.text) or 0
-					if line.find("UnitaMisura"):
-						uom = create_uom(line.UnitaMisura.text)
+	def append_item(self, line, invoices_args):
+		rate = flt(line.PrezzoUnitario.text)
+		line_total = flt(line.PrezzoTotale.text)
+		qty = flt(line.Quantita.text) if line.find("Quantita") else 1
+		uom = create_uom(line.UnitaMisura.text) if line.find("UnitaMisura") else self.default_uom
 
-				if rate < 0 and line_total < 0:
-					qty *= -1
-					invoices_args["return_invoice"] = 1
+		if invoices_args["is_return"] or (rate < 0 and line_total < 0):
+			qty = -abs(qty)
 
-				if line.find("AliquotaIVA"):
-					tax_rate = flt(line.AliquotaIVA.text)
+		# PrezzoTotale already includes the line's discounts (SC) and surcharges (MG)
+		if line.find("ScontoMaggiorazione") and qty:
+			rate = line_total / qty
 
-				line_str = re.sub("[^A-Za-z0-9]+", "-", line.Descrizione.text)
-				item_name = line_str[0:140]
-
-				invoices_args["items"].append(
-					{
-						"item_code": self.item_code,
-						"item_name": item_name,
-						"description": line_str,
-						"qty": qty,
-						"uom": uom,
-						"rate": abs(rate),
-						"conversion_factor": 1.0,
-						"tax_rate": tax_rate,
-					}
-				)
-
-				for disc_line in line.find_all("ScontoMaggiorazione"):
-					if disc_line.find("Percentuale"):
-						invoices_args["total_discount"] += flt(
-							(flt(disc_line.Percentuale.text) / 100) * (rate * qty)
-						)
+		line_str = re.sub("[^A-Za-z0-9]+", "-", line.Descrizione.text)
+		invoices_args["items"].append(
+			{
+				"item_code": self.item_code,
+				"item_name": line_str[0:140],
+				"description": line_str,
+				"qty": qty,
+				"uom": uom,
+				"rate": abs(rate),
+				"conversion_factor": 1.0,
+				"tax_rate": flt(line.AliquotaIVA.text) if line.find("AliquotaIVA") else 0,
+			}
+		)
 
 	@frappe.whitelist()
 	def process_file_data(self):
@@ -179,6 +203,17 @@ class ImportSupplierInvoice(Document):
 			{"title": title, "message": message, "count": count, "total": total},
 			user=self.modified_by,
 		)
+
+
+def attach_file_to_invoice(pi_name, file_name, encoded_content):
+	file_doc = frappe.new_doc("File")
+	file_doc.file_name = file_name
+	file_doc.attached_to_doctype = "Purchase Invoice"
+	file_doc.attached_to_name = pi_name
+	file_doc.content = encoded_content
+	file_doc.decode = False
+	file_doc.is_private = False
+	file_doc.insert(ignore_permissions=True)
 
 
 def get_file_content(file_name, zip_file_object):
@@ -219,13 +254,13 @@ def get_supplier_details(file_content):
 		if line.find("Provincia"):
 			supplier_info["province"] = line.Sede.Provincia.text
 
-		supplier_info["pin_code"] = line.Sede.CAP.text
+		supplier_info["pincode"] = line.Sede.CAP.text
 		supplier_info["country"] = get_country(line.Sede.Nazione.text)
 
 		return supplier_info
 
 
-def get_taxes_from_file(file_content, tax_account):
+def get_taxes_from_file(file_content, tax_account, is_return: bool = False):
 	taxes = []
 	# read file for taxes information
 	for line in file_content.find_all("DatiRiepilogo"):
@@ -234,13 +269,14 @@ def get_taxes_from_file(file_content, tax_account):
 				descr = line.EsigibilitaIVA.text
 			else:
 				descr = "None"
+			tax_amount = flt(line.Imposta.text) if line.find("Imposta") else 0
 			taxes.append(
 				{
 					"charge_type": "Actual",
 					"account_head": tax_account,
 					"tax_rate": flt(line.AliquotaIVA.text) or 0,
 					"description": descr,
-					"tax_amount": flt(line.Imposta.text) if len(line.find("Imposta")) != 0 else 0,
+					"tax_amount": -abs(tax_amount) if is_return else tax_amount,
 				}
 			)
 
@@ -249,13 +285,11 @@ def get_taxes_from_file(file_content, tax_account):
 
 def get_payment_terms_from_file(file_content):
 	terms = []
-	# Get mode of payment dict from setup
-	mop_options = frappe.get_meta("Mode of Payment").fields[4].options
-	mop_str = re.sub("\n", ",", mop_options)
-	mop_dict = dict(item.split("-") for item in mop_str.split(","))
+	mop_dict = dict(code.split("-", 1) for code in mode_of_payment_codes)
 	# read file for payment information
 	for line in file_content.find_all("DettaglioPagamento"):
-		mop_code = line.ModalitaPagamento.text + "-" + mop_dict.get(line.ModalitaPagamento.text)
+		code = line.ModalitaPagamento.text
+		mop_code = f"{code}-{mop_dict[code]}" if code in mop_dict else ""
 		if line.find("DataScadenzaPagamento"):
 			due_date = dateutil.parser.parse(line.DataScadenzaPagamento.text).strftime("%Y-%m-%d")
 		else:
@@ -287,24 +321,17 @@ def create_supplier(supplier_group, args):
 		"Supplier", filters={"tax_id": args.tax_id}, fieldname="name"
 	)
 	if existing_supplier_name:
-		pass
-	else:
-		existing_supplier_name = frappe.db.get_value(
-			"Supplier", filters={"name": args.supplier}, fieldname="name"
-		)
-
-	if existing_supplier_name:
 		filters = [
 			["Dynamic Link", "link_doctype", "=", "Supplier"],
-			["Dynamic Link", "link_name", "=", args.existing_supplier_name],
+			["Dynamic Link", "link_name", "=", existing_supplier_name],
 			["Dynamic Link", "parenttype", "=", "Contact"],
 		]
 
-		if not frappe.get_list("Contact", filters):
+		if not frappe.get_all("Contact", filters):
 			new_contact = frappe.new_doc("Contact")
 			new_contact.first_name = args.supplier[:30]
 			new_contact.append("links", {"link_doctype": "Supplier", "link_name": existing_supplier_name})
-			new_contact.insert(ignore_mandatory=True)
+			new_contact.insert(ignore_mandatory=True, ignore_permissions=True)
 
 		return existing_supplier_name
 	else:
@@ -314,15 +341,22 @@ def create_supplier(supplier_group, args):
 		new_supplier.tax_id = args.tax_id
 		new_supplier.fiscal_code = args.fiscal_code
 		new_supplier.fiscal_regime = args.fiscal_regime
-		new_supplier.save()
+		new_supplier.insert(
+			set_name=get_unique_supplier_name(new_supplier.supplier_name), ignore_permissions=True
+		)
 
 		new_contact = frappe.new_doc("Contact")
 		new_contact.first_name = args.supplier[:30]
 		new_contact.append("links", {"link_doctype": "Supplier", "link_name": new_supplier.name})
 
-		new_contact.insert(ignore_mandatory=True)
+		new_contact.insert(ignore_mandatory=True, ignore_permissions=True)
 
 		return new_supplier.name
+
+
+def get_unique_supplier_name(supplier_name: str) -> str | None:
+	if frappe.db.exists("Supplier", supplier_name):
+		return append_number_if_name_exists("Supplier", supplier_name)
 
 
 def create_address(supplier_name, args):
@@ -334,7 +368,7 @@ def create_address(supplier_name, args):
 		["Dynamic Link", "parenttype", "=", "Address"],
 	]
 
-	existing_address = frappe.get_list("Address", filters)
+	existing_address = frappe.get_all("Address", filters)
 
 	if args.address_line1:
 		new_address_doc = frappe.new_doc("Address")
@@ -359,10 +393,30 @@ def create_address(supplier_name, args):
 
 		new_address_doc.append("links", {"link_doctype": "Supplier", "link_name": supplier_name})
 		new_address_doc.address_type = "Billing"
-		new_address_doc.insert(ignore_mandatory=True)
+		new_address_doc.insert(ignore_mandatory=True, ignore_permissions=True)
 		return new_address_doc.name
 	else:
 		return None
+
+
+def validate_invoice_not_imported(supplier_name: str, args: dict) -> None:
+	existing_invoice = frappe.db.exists(
+		"Purchase Invoice",
+		{
+			"company": args["company"],
+			"supplier": supplier_name,
+			"is_return": args["is_return"],
+			"bill_no": args["bill_no"],
+			"bill_date": getdate(args["bill_date"]),
+			"docstatus": ["!=", 2],
+		},
+	)
+	if existing_invoice:
+		frappe.throw(
+			_("Supplier Invoice {0} is already imported in Purchase Invoice {1}").format(
+				args["bill_no"], existing_invoice
+			)
+		)
 
 
 def create_purchase_invoice(supplier_name, file_name, args, name):
@@ -390,11 +444,6 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 	pi.set_missing_values()
 	pi.insert(ignore_mandatory=True)
 
-	# if discount exists in file, apply any discount on grand total
-	if args.total_discount > 0:
-		pi.apply_discount_on = "Grand Total"
-		pi.discount_amount = args.total_discount
-		pi.save()
 	# adjust payment amount to match with grand total calculated
 	calc_total = 0
 	adj = 0
@@ -434,5 +483,5 @@ def create_uom(uom):
 	else:
 		new_uom = frappe.new_doc("UOM")
 		new_uom.uom_name = uom
-		new_uom.save()
+		new_uom.insert(ignore_permissions=True)
 		return new_uom.uom_name

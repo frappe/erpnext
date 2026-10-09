@@ -63,6 +63,18 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+	def test_salary_currency_set_from_company(self):
+		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
+		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")
+
+	def test_salary_currency_not_overridden_if_set(self):
+		employee = make_employee(
+			"test_emp_salary_currency_set@company.com",
+			company="_Test Company 1",
+			salary_currency="EUR",
+		)
+		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "EUR")
+
 	def test_create_user_automatically(self):
 		def get_new_employee(email: str, create_user_permission: int):
 			return frappe.get_doc(
