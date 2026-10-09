@@ -625,12 +625,21 @@ class AccountsController(TransactionBase):
 		days = date_diff(from_date, reference_from_date)
 		shift_by_months = auto_repeat_doc.frequency in month_map
 
+		reference_to_date = getdate(reference_doc.to_date)
+		to_date = getdate(self.to_date)
+
 		def shift(date):
 			# Keep the period end aligned, e.g. 1-28 Feb becomes 1-31 Mar.
-			if getdate(date) == getdate(reference_doc.to_date):
-				return self.to_date
+			if getdate(date) == reference_to_date:
+				return to_date
+			if not shift_by_months:
+				return add_days(date, days)
 			# Whole months never reverse a period, e.g. 29-31 Jan becomes 28-28 Feb.
-			return add_months(date, months) if shift_by_months else add_days(date, days)
+			shifted_date = getdate(add_months(date, months))
+			# Dates inside the reference period stay inside the new period, which can end earlier in the month.
+			if getdate(date) < reference_to_date:
+				return min(shifted_date, to_date)
+			return shifted_date
 
 		for item, reference_item in zip(self.items, reference_doc.items, strict=True):
 			if reference_item.service_start_date:
