@@ -377,6 +377,17 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		)
 		self.assertEqual(getdate(ms.items[0].end_date), getdate("2027-03-31"))
 
+	def test_short_calendar_period_fits_one_visit(self):
+		for periodicity, start_date, end_date in (
+			("Monthly", "2027-02-01", "2027-02-28"),
+			("Monthly", "2028-02-01", "2028-02-29"),
+			("Quarterly", "2027-02-01", "2027-04-30"),
+		):
+			ms = make_maintenance_schedule(
+				start_date=start_date, end_date=end_date, periodicity=periodicity, no_of_visits=1
+			)
+			self.assertEqual(len(ms.schedules), 1)
+
 	def test_serial_in_stock_is_refused(self):
 		item_code = "_Test Serial Item"
 		make_serial_item_with_serial(self, item_code)
