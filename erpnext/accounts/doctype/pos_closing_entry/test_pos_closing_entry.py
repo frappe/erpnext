@@ -32,6 +32,8 @@ class TestPOSClosingEntry(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		frappe.db.sql("delete from `tabPOS Profile`")
+		if card_mode := getattr(self, "card_mode", None):
+			frappe.delete_doc("Mode of Payment", card_mode, force=True)
 
 	def test_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
@@ -292,30 +294,33 @@ class TestPOSClosingEntry(unittest.TestCase):
 	def test_change_is_taken_once_with_zero_value_card_payment(self):
 		test_user, pos_profile = init_user_and_profile()
 		frappe.set_user("Administrator")
+		self.card_mode = f"_Test Card {frappe.generate_hash(length=8)}"
 		frappe.get_doc(
 			{
 				"doctype": "Mode of Payment",
-				"mode_of_payment": "_Test Card",
+				"mode_of_payment": self.card_mode,
 				"type": "General",
 				"accounts": [{"company": "_Test Company", "default_account": "Cash - _TC"}],
 			}
 		).insert()
-		pos_profile.append("payments", {"mode_of_payment": "_Test Card"})
+		pos_profile.append("payments", {"mode_of_payment": self.card_mode})
 		pos_profile.save()
 		frappe.set_user(test_user.name)
 
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 		pos_invoice = create_pos_invoice(rate=90, pos_profile=pos_profile.name, do_not_save=1)
-		pos_invoice.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		pos_invoice.set("payments", [])
 		pos_invoice.append(
-			"payments", {"mode_of_payment": "_Test Card", "account": "Cash - _TC", "amount": 0}
+			"payments", {"mode_of_payment": self.card_mode, "account": "Cash - _TC", "amount": 0}
 		)
+		pos_invoice.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 		pos_invoice.insert()
 		pos_invoice.submit()
+		self.assertEqual([row.mode_of_payment for row in pos_invoice.payments], [self.card_mode, "Cash"])
 
 		closing_entry = make_closing_entry_from_opening(opening_entry)
 		expected = {row.mode_of_payment: row.expected_amount for row in closing_entry.payment_reconciliation}
-		self.assertEqual(expected, {"Cash": 90, "_Test Card": 0})
+		self.assertEqual(expected, {"Cash": 90, self.card_mode: 0})
 
 
 def init_user_and_profile(**args):
