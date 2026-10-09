@@ -11,7 +11,7 @@ SALES_DOCTYPES = ("Sales Invoice", "Sales Order", "Delivery Note", "POS Invoice"
 
 
 def execute(filters=None):
-	return get_columns(), get_data()
+	return get_columns(), get_data(filters)
 
 
 def get_columns():
@@ -41,7 +41,12 @@ def get_columns():
 	]
 
 
-def get_data():
+def get_data(filters=None):
+	company = (filters or {}).get("company")
+	if company:
+		# the filter is client-side only, so enforce company access on the server
+		frappe.has_permission("Company", doc=company, throw=True)
+
 	customer = frappe.qb.DocType("Customer")
 	query = frappe.qb.from_(customer).select(
 		customer.name.as_("customer"),
@@ -50,7 +55,7 @@ def get_data():
 		customer.customer_group,
 	)
 	for doctype in SALES_DOCTYPES:
-		query = query.where(ExistsCriterion(get_submitted_sales(customer, doctype)).negate())
+		query = query.where(ExistsCriterion(get_submitted_sales(customer, doctype, company)).negate())
 
 	if condition := get_allowed_masters_condition(customer.name, "Customer"):
 		query = query.where(condition)
@@ -58,10 +63,13 @@ def get_data():
 	return query.run(as_dict=True)
 
 
-def get_submitted_sales(customer, doctype):
+def get_submitted_sales(customer, doctype, company=None):
 	sales = frappe.qb.DocType(doctype)
-	return (
+	query = (
 		frappe.qb.from_(sales)
 		.select(sales.name)
 		.where((sales.customer == customer.name) & (sales.docstatus == 1))
 	)
+	if company:
+		query = query.where(sales.company == company)
+	return query
