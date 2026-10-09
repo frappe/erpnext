@@ -198,9 +198,6 @@ class PurchaseOrder(BuyingController):
 		self.set_has_unit_price_items()
 		self.flags.allow_zero_qty = self.has_unit_price_items
 
-		if self.is_subcontracted:
-			self.status_updater[0]["source_field"] = "fg_item_qty"
-
 	def validate(self):
 		super().validate()
 
@@ -283,7 +280,7 @@ class PurchaseOrder(BuyingController):
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, "prevent_pos")
 		if prevent_po:
-			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, "status")
+			standing = frappe.db.get_value("Supplier Scorecard", {"supplier": self.supplier}, "status")
 			if standing:
 				frappe.throw(
 					_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(
@@ -293,7 +290,7 @@ class PurchaseOrder(BuyingController):
 
 		warn_po = frappe.db.get_value("Supplier", self.supplier, "warn_pos")
 		if warn_po:
-			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, "status")
+			standing = frappe.db.get_value("Supplier Scorecard", {"supplier": self.supplier}, "status")
 			frappe.msgprint(
 				_(
 					"{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
@@ -420,6 +417,9 @@ class PurchaseOrder(BuyingController):
 		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
 
 	def update_prevdoc_status(self):
+		if self.is_subcontracted:
+			self.status_updater[0]["source_field"] = "fg_item_qty"
+
 		super().update_prevdoc_status()
 
 		for supplier_quotation in {item.supplier_quotation for item in self.items}:
@@ -479,6 +479,7 @@ class PurchaseOrder(BuyingController):
 		if drop_ship_service.has_drop_ship_item():
 			drop_ship_service.set_received_qty_to_zero_for_drop_ship_items()
 			self.update_receiving_percentage()
+			drop_ship_service.update_delivered_qty_in_sales_order()
 
 		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
 
@@ -657,6 +658,12 @@ def get_list_context(context=None):
 
 @frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
+	if status not in ("Draft", "Submitted", "On Hold", "Closed"):
+		frappe.throw(_("Cannot set the status of a Purchase Order to {0}.").format(status))
+
 	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
+	if po.docstatus != 1:
+		frappe.throw(_("Only a submitted Purchase Order can be held, closed or re-opened."))
+
 	po.update_status(status)
 	DropShipService(po).update_delivered_qty_in_sales_order()

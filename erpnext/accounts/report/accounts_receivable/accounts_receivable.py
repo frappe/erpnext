@@ -809,7 +809,8 @@ class ReceivablePayableReport:
 			# when ageing viewed by due date
 			entry_date = row.due_date or row.posting_date
 		elif self.filters.ageing_based_on == "Supplier Invoice Date":
-			entry_date = row.bill_date
+			# advances, journal entries and invoices without a bill date have none
+			entry_date = row.bill_date or row.posting_date
 		else:
 			entry_date = row.posting_date
 

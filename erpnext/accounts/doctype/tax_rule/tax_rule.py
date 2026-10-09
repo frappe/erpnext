@@ -157,12 +157,12 @@ def get_party_details(party: str | None, party_type: str, args: dict | None = No
 					_refuse()
 	else:
 		for address_name in (
-			get_default_address(party_type, party),
-			get_default_address(party_type, party, "is_shipping_address"),
+			get_default_address(party_doctype, party),
+			get_default_address(party_doctype, party, "is_shipping_address"),
 		):
 			if address_name:
 				require_permission("Address", address_name, "read")
-	return get_tax_rule_party_details(party, party_type, args)
+	return get_tax_rule_party_details(party, party_doctype, args)
 
 
 def get_tax_rule_party_details(party: str | None, party_type: str, args: dict | None = None):

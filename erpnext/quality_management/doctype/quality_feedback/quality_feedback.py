@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -27,12 +28,33 @@ class QualityFeedback(Document):
 
 	@frappe.whitelist()
 	def set_parameters(self):
-		if self.template and not getattr(self, "parameters", []):
-			for d in frappe.get_doc("Quality Feedback Template", self.template).parameters:
-				self.append("parameters", dict(parameter=d.parameter, rating=1))
+		if not self.template:
+			return
+
+		self.set("parameters", [])
+		for d in frappe.get_doc("Quality Feedback Template", self.template).parameters:
+			self.append("parameters", dict(parameter=d.parameter))
 
 	def validate(self):
 		if not self.document_name:
 			self.document_type = "User"
 			self.document_name = frappe.session.user
-		self.set_parameters()
+
+		if not self.parameters:
+			self.set_parameters()
+		elif self.has_value_changed("template"):
+			self.validate_parameters()
+
+	def validate_parameters(self):
+		parameters = frappe.get_all(
+			"Quality Feedback Template Parameter",
+			filters={"parent": self.template, "parenttype": "Quality Feedback Template"},
+			pluck="parameter",
+		)
+		for d in self.parameters:
+			if d.parameter not in parameters:
+				frappe.throw(
+					_("Row #{0}: Parameter {1} is not part of Quality Feedback Template {2}").format(
+						d.idx, frappe.bold(d.parameter), frappe.bold(self.template)
+					)
+				)

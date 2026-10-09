@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
 from datetime import timedelta
 
 import frappe
@@ -25,10 +26,11 @@ from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item i
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
+	_get_stock_balance,
 	check_warehouse_company,
-	get_stock_balance,
 	get_valuation_method,
 )
+from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -61,7 +63,7 @@ class StockReconciliation(StockController):
 		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
 		posting_date: DF.Date
 		posting_time: DF.Time
-		purpose: DF.Literal["", "Opening Stock", "Stock Reconciliation"]
+		purpose: DF.Literal["", "Opening Stock", "Stock Reconciliation", "Adjustment Entry"]
 		scan_barcode: DF.Data | None
 		scan_mode: DF.Check
 		set_posting_time: DF.Check
@@ -75,6 +77,10 @@ class StockReconciliation(StockController):
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		if self.purpose == ADJUSTMENT_ENTRY:
+			self.validate_adjustment_entry()
+			return
 
 		sbb = SerialBatchBundleService(self)
 
@@ -105,6 +111,23 @@ class StockReconciliation(StockController):
 		if self._action == "submit":
 			self.validate_reserved_stock()
 
+	def validate_adjustment_entry(self):
+		"""An Adjustment Entry resets each item-warehouse to its rows (erpnext.stock.valuation_adjustment),
+		so none of the counting a reconciliation does applies to it."""
+		if not self.expense_account:
+			self.expense_account = frappe.get_cached_value(
+				"Company", self.company, "stock_adjustment_account"
+			)
+		if not self.cost_center:
+			self.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
+
+		self.validate_posting_time()
+		self.validate_expense_account()
+		AdjustmentEntry(self).validate()
+
+		if self._action == "submit":
+			self.validate_reserved_stock()
+
 	def on_update(self):
 		super().on_update()
 		self.set_serial_and_batch_bundle(ignore_validate=True)
@@ -121,6 +144,12 @@ class StockReconciliation(StockController):
 					)
 
 	def on_submit(self):
+		if self.purpose == ADJUSTMENT_ENTRY:
+			AdjustmentEntry(self).post()
+			self.make_gl_entries()
+			self.repost_future_sle_and_gle()
+			return
+
 		self.set_standard_cost_from_reconciliation()
 		self.make_bundle_for_current_qty()
 		self.make_bundle_using_old_serial_batch_fields()
@@ -189,7 +218,6 @@ class StockReconciliation(StockController):
 			isc.cancel()
 
 	def on_cancel(self):
-		self.validate_reserved_stock()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
@@ -197,6 +225,15 @@ class StockReconciliation(StockController):
 			"Serial and Batch Bundle",
 			"Item Standard Cost",
 		)
+
+		if self.purpose == ADJUSTMENT_ENTRY:
+			self.validate_reserved_stock()
+			AdjustmentEntry(self).cancel()
+			self.make_gl_entries_on_cancel()
+			self.repost_future_sle_and_gle()
+			return
+
+		self.validate_reserved_stock()
 
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
@@ -797,7 +834,7 @@ class StockReconciliation(StockController):
 				)
 
 			if row.qty and row.valuation_rate in ["", None]:
-				row.valuation_rate = get_stock_balance(
+				row.valuation_rate = _get_stock_balance(
 					row.item_code,
 					row.warehouse,
 					self.posting_date,
@@ -871,12 +908,9 @@ class StockReconciliation(StockController):
 		)
 
 		item_code_list, warehouse_list = [], []
-		for item in self.items:
-			if item.qty == item.current_qty:
-				continue
-
-			item_code_list.append(item.item_code)
-			warehouse_list.append(item.warehouse)
+		for item_code, warehouse in self.get_item_warehouses_changing_qty():
+			item_code_list.append(item_code)
+			warehouse_list.append(warehouse)
 
 		sre_reserved_qty_details = get_sre_reserved_qty_details(item_code_list, warehouse_list)
 
@@ -906,10 +940,29 @@ class StockReconciliation(StockController):
 				title=_("Stock Reservation"),
 			)
 
+	def get_item_warehouses_changing_qty(self) -> list[tuple[str, str]]:
+		if self.purpose != ADJUSTMENT_ENTRY:
+			return [(item.item_code, item.warehouse) for item in self.items if item.qty != item.current_qty]
+
+		# an Adjustment Entry spreads an item-warehouse over several rows, with the qty the ledger
+		# held on the first one
+		qty_change = defaultdict(float)
+		for item in self.items:
+			qty_change[(item.item_code, item.warehouse)] += flt(item.qty) - flt(item.current_qty)
+
+		return [key for key, change in qty_change.items() if abs(change) > 1e-9]
+
 	def update_stock_ledger(self, allow_negative_stock=False):
 		"""find difference between current and expected entries
 		and create stock ledger entries based on the difference"""
 		from erpnext.stock.stock_ledger import get_previous_sle
+
+		if self.purpose == ADJUSTMENT_ENTRY:
+			if self.docstatus == 2:
+				AdjustmentEntry(self).cancel()
+			else:
+				AdjustmentEntry(self).post()
+			return
 
 		if self.docstatus == 2:
 			self.make_sle_on_cancel(allow_negative_stock)
@@ -1237,6 +1290,10 @@ class StockReconciliation(StockController):
 		that no longer match the GL entries. Anchoring ``amount_difference`` to the row's summed
 		``stock_value_difference`` keeps the document and the GL consistent by construction.
 		"""
+		if self.purpose == ADJUSTMENT_ENTRY:
+			AdjustmentEntry(self).set_difference_amount_from_ledger()
+			return
+
 		difference_amount = 0.0
 
 		for row in self.items:
@@ -1417,6 +1474,13 @@ def get_items(
 	item_code: str | None = None,
 	ignore_empty_stock: bool | str | int = False,
 ):
+	frappe.has_permission("Stock Reconciliation", "write", throw=True)
+	frappe.has_permission("Item", "read", throw=True)
+	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		for child_warehouse in frappe.db.get_descendants("Warehouse", warehouse):
+			frappe.has_permission("Warehouse", "read", doc=child_warehouse, throw=True)
+
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
 	if item_code and warehouse:
@@ -1437,7 +1501,7 @@ def get_items(
 				args = get_item_data(row, row.qty, row.valuation_rate)
 				res.append(args)
 		else:
-			stock_bal = get_stock_balance(
+			stock_bal = _get_stock_balance(
 				d.item_code,
 				d.warehouse,
 				posting_date,
@@ -1675,7 +1739,7 @@ def get_stock_balance_for(
 			"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 		}
 
-	data = get_stock_balance(
+	data = _get_stock_balance(
 		item_code,
 		warehouse,
 		posting_date,
@@ -1763,7 +1827,7 @@ def get_stock_balance_for(
 
 @frappe.whitelist()
 def get_difference_account(purpose: str, company: str):
-	if purpose == "Stock Reconciliation":
+	if purpose in ("Stock Reconciliation", ADJUSTMENT_ENTRY):
 		account = get_company_default(company, "stock_adjustment_account")
 	else:
 		account = frappe.db.get_value(
@@ -1771,3 +1835,9 @@ def get_difference_account(purpose: str, company: str):
 		)
 
 	return account
+
+
+def on_doctype_update():
+	# Adjustment Entries are few among many reconciliations, and every stock ledger entry looks for
+	# a later one of its item (erpnext.stock.valuation_adjustment.validate_no_later_adjustment_entry)
+	frappe.db.add_index("Stock Reconciliation", ["purpose", "posting_date"])

@@ -2,6 +2,7 @@
 # See license.txt
 
 
+import gzip
 from unittest.mock import MagicMock, call, patch
 
 import frappe
@@ -678,6 +679,55 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(detail_additional_cost, 2), flt(transfer.total_additional_costs, 2))
 		self.assertEqual(flt(net_added_to_stock, 2), flt(transfer.total_additional_costs, 2))
 
+	def test_repost_recalculates_transfer_with_additional_cost_once(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		source, target = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=source, qty=10, rate=100, posting_date=add_days(today(), -2))
+
+		transfer = make_stock_entry(company="_Test Company", purpose="Material Transfer", do_not_save=True)
+		transfer.items = []
+		for _ in range(5):
+			transfer.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"s_warehouse": source,
+					"t_warehouse": target,
+					"uom": "Nos",
+					"conversion_factor": 1,
+				},
+			)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "freight",
+				"amount": 50,
+			},
+		)
+		transfer.insert()
+		transfer.submit()
+
+		with patch.object(
+			StockEntry,
+			"calculate_rate_and_amount",
+			autospec=True,
+			side_effect=StockEntry.calculate_rate_and_amount,
+		) as calculate:
+			make_stock_entry(
+				item_code=item, target=source, qty=10, rate=200, posting_date=add_days(today(), -1)
+			)
+
+		transfer_calls = [c for c in calculate.call_args_list if c.args[0].name == transfer.name]
+		self.assertEqual(len(transfer_calls), 1)
+
+		transfer.load_from_db()
+		self.assertEqual([row.valuation_rate for row in transfer.items], [160] * 5)
+		self.assertSLEs(transfer, [{"incoming_rate": 160}] * 5, sle_filters={"warehouse": target})
+
 	def test_repost_multi_line_moving_average_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
@@ -983,6 +1033,39 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 						"name",
 					)
 				)
+
+	def test_missing_or_corrupt_reposting_data_file_fails_loudly(self):
+		from erpnext.stock.stock_ledger import get_reposting_data
+
+		self.assertRaises(
+			frappe.ValidationError, get_reposting_data, "/files/non-existent-repost-data.json.gz"
+		)
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		for index, content in enumerate(("not gzip content", gzip.compress(b"not json"))):
+			attached = frappe.get_doc(
+				{
+					"doctype": "File",
+					"file_name": f"corrupt_repost_data_{index}.json.gz",
+					"content": content,
+					"attached_to_doctype": riv.doctype,
+					"attached_to_name": riv.name,
+					"attached_to_field": "reposting_data_file",
+				}
+			).insert(ignore_permissions=True)
+
+			with self.assertRaisesRegex(frappe.ValidationError, "is corrupted"):
+				get_reposting_data(attached.file_url)
 
 	def test_clear_attachment_skips_referenced_data_file(self):
 		riv = frappe.get_doc(

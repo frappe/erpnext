@@ -214,8 +214,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				) {
 					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 				}
-
-				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, "items");
 			},
 		});
 
@@ -843,6 +841,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_return: cint(me.frm.doc.is_return),
+							return_against: me.frm.doc.return_against,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 							doctype: me.frm.doc.doctype,
@@ -1407,10 +1406,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.refresh_field("payment_schedule");
 	}
 
-	cost_center(doc, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
-	}
-
 	due_date(doc, cdt, cdn) {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
@@ -1511,7 +1506,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (
 			this.frm.doc.currency &&
 			this.frm.doc.currency !== company_currency &&
-			(!this.frm.doc.__onload?.load_after_mapping || inter_company_reference)
+			(!this.frm.doc.__onload?.load_after_mapping ||
+				inter_company_reference ||
+				this.frm.doc.use_transaction_date_exchange_rate)
 		) {
 			this.get_exchange_rate(
 				transaction_date,
@@ -2305,6 +2302,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			doctype: me.frm.doc.doctype,
 			name: me.frm.doc.name,
 			is_return: cint(me.frm.doc.is_return),
+			return_against: me.frm.doc.return_against,
 			update_stock: ["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)
 				? cint(me.frm.doc.update_stock)
 				: 0,
@@ -3349,22 +3347,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => (this.frm._last_coupon_code = this.frm.doc.coupon_code),
 			]);
 		}
-	}
-
-	setup_accounting_dimension_triggers() {
-		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
-			callback: (r) => {
-				if (r.message && r.message[0]) {
-					let dimensions = r.message[0].map((d) => d.fieldname);
-					dimensions.forEach((dim) => {
-						this.frm.cscript[dim] = function (doc, cdt, cdn) {
-							erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", dim);
-						};
-					});
-				}
-			},
-		});
 	}
 };
 
