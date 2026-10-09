@@ -279,6 +279,7 @@ frappe.ui.form.on("Job Card", {
 		if (frm.doc.pending_qty > 0) {
 			pending_qty = frm.doc.pending_qty;
 		}
+		const completed_qty = get_completable_qty(frm, pending_qty);
 
 		const fields = [
 			{
@@ -290,8 +291,10 @@ frappe.ui.form.on("Job Card", {
 				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const dialog = frm.job_completion_dialog;
-					dialog.set_value("completed_qty", dialog.get_value("for_quantity"));
-					dialog.set_value("pending_qty", 0);
+					const for_quantity = dialog.get_value("for_quantity");
+					const completed_qty = get_completable_qty(frm, for_quantity);
+					dialog.set_value("completed_qty", completed_qty);
+					dialog.set_value("pending_qty", for_quantity - completed_qty);
 					dialog.set_value("process_loss_qty", 0);
 				},
 			},
@@ -299,7 +302,7 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Completed Quantity"),
 				fieldname: "completed_qty",
-				default: pending_qty,
+				default: completed_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
 					const remaining =
@@ -327,7 +330,7 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
-				default: 0.0,
+				default: pending_qty - completed_qty,
 				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const dialog = frm.job_completion_dialog;
@@ -937,6 +940,15 @@ function get_last_completed_row(time_logs) {
 
 function get_last_row(time_logs) {
 	return time_logs[time_logs.length - 1] || {};
+}
+
+function get_completable_qty(frm, qty) {
+	const max_completable_qty = frm.doc.__onload?.max_completable_qty;
+	if (max_completable_qty > 0) {
+		return Math.min(flt(qty), max_completable_qty);
+	}
+
+	return qty;
 }
 
 function get_qty_with_uom(qty, stock_uom) {
