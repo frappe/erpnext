@@ -1083,7 +1083,7 @@ class TestAsset(AssetSetup):
 
 		def fail_for_first_asset(doc):
 			if doc.name == assets[0]:
-				frappe.throw("Posting date is in a closed accounting period")
+				raise frappe.ValidationError("Posting date is in a closed accounting period")
 			return original_make_gl_entries(doc)
 
 		with patch.object(Asset, "make_gl_entries", fail_for_first_asset):
