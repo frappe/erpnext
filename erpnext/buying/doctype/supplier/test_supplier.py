@@ -200,6 +200,12 @@ class TestSupplier(ERPNextTestSuite):
 		make_supplier_entry("_Test Account Cost for Goods Sold - _TC").insert()
 		make_supplier_entry("_Test Bank - _TC", amount=-100).insert()
 
+		negative_bank_debit = make_supplier_entry("_Test Bank - _TC")
+		negative_bank_debit.accounts[1].update(
+			{"credit_in_account_currency": 0, "debit_in_account_currency": -100}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is blocked", negative_bank_debit.insert)
+
 	def test_hold_payments_ignores_is_return_on_payment_entry(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order

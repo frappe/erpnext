@@ -175,7 +175,7 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Payment Entry" and self.party_type == "Supplier":
 			return "Payments", [self.party]
 		if self.doctype == "Journal Entry" and any(
-			flt(row.credit_in_account_currency) > 0
+			flt(row.credit_in_account_currency) - flt(row.debit_in_account_currency) > 0
 			and frappe.get_cached_value("Account", row.account, "account_type") in ("Bank", "Cash")
 			for row in self.accounts
 		):
