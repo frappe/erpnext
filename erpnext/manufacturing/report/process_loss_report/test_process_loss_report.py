@@ -4,8 +4,8 @@
 import frappe
 from frappe.utils import nowdate
 
-from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from erpnext.manufacturing.report.process_loss_report.process_loss_report import execute
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
