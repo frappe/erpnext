@@ -224,7 +224,7 @@ def get():
 				_("Bank Charges"): {"account_number": "5221", "account_category": "Finance Costs"},
 				_("Gain/Loss on Asset Disposal"): {
 					"account_number": "5222",
-					"account_category": "Other Operating Income",
+					"account_category": "Operating Expenses",
 				},
 				_("Miscellaneous Expenses"): {
 					"account_type": "Chargeable",

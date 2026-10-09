@@ -135,7 +135,7 @@ def get():
 				_("Exchange Gain/Loss"): {"account_category": "Operating Expenses"},
 				_("Interest Expense"): {"account_category": "Finance Costs"},
 				_("Bank Charges"): {"account_category": "Finance Costs"},
-				_("Gain/Loss on Asset Disposal"): {"account_category": "Other Operating Income"},
+				_("Gain/Loss on Asset Disposal"): {"account_category": "Operating Expenses"},
 				_("Impairment"): {"account_category": "Operating Expenses"},
 				_("Tax Expense"): {"account_category": "Tax Expense"},
 				_("Exchange Loss"): {"account_category": "Operating Expenses"},

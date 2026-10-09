@@ -173,9 +173,13 @@ class Account(NestedSet):
 			if par.root_type:
 				self.root_type = par.root_type
 
+		self.validate_account_category()
+
 		if cint(self.is_group):
 			db_value = self.get_doc_before_save()
 			if db_value:
+				# Tree bounds can change without updating the document's modified timestamp.
+				self.lft, self.rgt = db_value.lft, db_value.rgt
 				Account = frappe.qb.DocType("Account")
 				query = frappe.qb.update(Account).where((Account.lft > self.lft) & (Account.rgt < self.rgt))
 
@@ -184,6 +188,7 @@ class Account(NestedSet):
 					query = query.set(Account.report_type, self.report_type)
 					updated = True
 				if self.root_type != db_value.root_type:
+					self.validate_descendant_account_categories()
 					query = query.set(Account.root_type, self.root_type)
 					updated = True
 
@@ -193,6 +198,41 @@ class Account(NestedSet):
 		if self.root_type and not self.report_type:
 			self.report_type = (
 				"Balance Sheet" if self.root_type in ("Asset", "Liability", "Equity") else "Profit and Loss"
+			)
+
+	def validate_account_category(self):
+		if not self.account_category:
+			return
+
+		category_root_type = frappe.get_cached_value("Account Category", self.account_category, "root_type")
+		if category_root_type and category_root_type != self.root_type:
+			frappe.throw(
+				_("Account Category {0} has Root Type {1}, but account {2} has Root Type {3}.").format(
+					self.account_category, _(category_root_type), self.name, _(self.root_type)
+				)
+			)
+
+	def validate_descendant_account_categories(self):
+		account = frappe.qb.DocType("Account")
+		category = frappe.qb.DocType("Account Category")
+		invalid_accounts = (
+			frappe.qb.from_(account)
+			.join(category)
+			.on(account.account_category == category.name)
+			.select(account.name, account.account_category)
+			.where(
+				(account.lft > self.lft)
+				& (account.rgt < self.rgt)
+				& category.root_type.notin(["", self.root_type])
+			)
+			.limit(1)
+			.run(as_dict=True)
+		)
+		if invalid_accounts:
+			frappe.throw(
+				_("Account {0} has Account Category {1}, which is incompatible with Root Type {2}.").format(
+					invalid_accounts[0].name, invalid_accounts[0].account_category, _(self.root_type)
+				)
 			)
 
 	def validate_receivable_payable_account_type(self):

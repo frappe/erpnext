@@ -175,7 +175,7 @@
                     "account_category": "Operating Expenses"
                 },
                 "Gain/Loss on Asset Disposal": {
-                    "account_category": "Other Operating Income"
+                    "account_category": "Operating Expenses"
                 },
                 "Impairment": {
                     "account_category": "Operating Expenses"
@@ -209,17 +209,6 @@
             "root_type": "Income"
         },
         "Source of Funds (Liabilities)": {
-            "Capital Account": {
-                "Reserves and Surplus": {
-                    "account_category": "Reserves and Surplus"
-                },
-                "Shareholders Funds": {
-                    "account_category": "Share Capital"
-                },
-                "Revaluation Surplus": {
-                    "account_category": "Reserves and Surplus"
-                }
-            },
             "Current Liabilities": {
                 "Accounts Payable": {
                     "Creditors": {
@@ -258,6 +247,20 @@
                 }
             },
             "root_type": "Liability"
+        },
+        "Equity": {
+            "Capital Account": {
+                "Reserves and Surplus": {
+                    "account_category": "Reserves and Surplus"
+                },
+                "Shareholders Funds": {
+                    "account_category": "Share Capital"
+                },
+                "Revaluation Surplus": {
+                    "account_category": "Reserves and Surplus"
+                }
+            },
+            "root_type": "Equity"
         }
     }
 }
