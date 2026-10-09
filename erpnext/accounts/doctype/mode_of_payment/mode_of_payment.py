@@ -53,7 +53,7 @@ class ModeofPayment(Document):
 	def validate_pos_mode_of_payment(self):
 		if not self.enabled:
 			pos_profiles = frappe.get_all(
-				"Sales Invoice Payment",
+				"POS Payment Method",
 				filters={"parenttype": "POS Profile", "mode_of_payment": self.name},
 				pluck="parent",
 			)
