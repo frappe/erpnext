@@ -100,6 +100,7 @@
   },
   {
    "default": "1",
+   "description": "Must be positive. If the unit rate would change the opening amount through rounding, the invoice uses quantity 1 and records this quantity in the description.",
    "fieldname": "qty",
    "fieldtype": "Data",
    "label": "Quantity"

@@ -2,9 +2,12 @@
 # For license information, please see license.txt
 
 
+from math import isfinite
+
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
+from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, Sum
 from frappe.utils import escape_html, flt, nowdate
@@ -111,7 +114,9 @@ class OpeningInvoiceCreationTool(Document):
 			frappe.throw(_("Please select the Company"))
 
 	def set_missing_values(self, row):
-		row.qty = row.qty or 1.0
+		row.qty = 1.0 if row.qty in (None, "") else flt(row.qty)
+		if not isfinite(row.qty) or row.qty <= 0:
+			frappe.throw(_("Row #{0}: Quantity must be a positive number").format(row.idx))
 		row.currency = row.currency or frappe.get_cached_value("Company", self.company, "default_currency")
 		row.temporary_opening_account = row.temporary_opening_account or get_temporary_opening_account(
 			self.company
@@ -226,16 +231,27 @@ class OpeningInvoiceCreationTool(Document):
 				"income_account" if row.party_type == "Customer" else "expense_account"
 			)
 			default_uom = get_default_stock_uom()
-			rate = flt(row.outstanding_amount) / flt(row.qty)
+			qty = row.qty
+			description = row.item_name or _("Opening Invoice Item")
+			item_meta = frappe.get_meta(f"{self.invoice_type} Invoice Item")
+			qty_precision = get_field_precision(item_meta.get_field("qty"))
+			rate_precision = get_field_precision(item_meta.get_field("rate"), currency=row.currency)
+			amount_precision = get_field_precision(item_meta.get_field("amount"), currency=row.currency)
+			amount = flt(row.outstanding_amount, amount_precision)
+			rate = flt(amount / qty, rate_precision)
+			if flt(qty, qty_precision) != qty or flt(rate * qty, amount_precision) != amount:
+				# Opening balances must retain the exact amount, even when the unit rate cannot.
+				description += "<br>" + _("Original Quantity: {0}").format(qty)
+				qty, rate = 1, amount
 
 			item_dict = frappe._dict(
 				{
 					"uom": default_uom,
 					"rate": rate or 0.0,
-					"qty": row.qty,
+					"qty": qty,
 					"conversion_factor": 1.0,
 					"item_name": row.item_name or "Opening Invoice Item",
-					"description": row.item_name or "Opening Invoice Item",
+					"description": description,
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
 					"project": row.get("project") or self.get("project"),
