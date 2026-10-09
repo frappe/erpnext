@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:company",
+ "creation": "2026-10-09 11:51:49.696160",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "steps_tab",
+  "company",
+  "column_break_header",
+  "status",
+  "steps_section",
+  "onboarding_html",
+  "steps",
+  "accounts_tab",
+  "chart_of_accounts_source",
+  "opening_balances_section",
+  "opening_balances"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:doc.__islocal",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_header",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "In Progress",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "In Progress\nLive",
+   "read_only": 1
+  },
+  {
+   "fieldname": "steps_tab",
+   "fieldtype": "Tab Break",
+   "label": "Steps"
+  },
+  {
+   "fieldname": "steps",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Steps",
+   "options": "Company Onboarding Step"
+  },
+  {
+   "fieldname": "accounts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts"
+  },
+  {
+   "description": "The opening balances from your old system. Nothing is posted until you press Post.",
+   "fieldname": "opening_balances_section",
+   "fieldtype": "Section Break",
+   "label": "Opening Balances"
+  },
+  {
+   "fieldname": "opening_balances",
+   "fieldtype": "Table",
+   "label": "Opening Balances",
+   "options": "Company Onboarding Opening Balance"
+  },
+  {
+   "fieldname": "onboarding_html",
+   "fieldtype": "HTML",
+   "label": "Onboarding"
+  },
+  {
+   "description": "Whether the company keeps the chart made during setup or imports its own.",
+   "fieldname": "chart_of_accounts_source",
+   "fieldtype": "Select",
+   "label": "Chart of Accounts",
+   "options": "\nExisting\nImported",
+   "read_only": 1
+  },
+  {
+   "fieldname": "steps_section",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-09 18:30:37.450356",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Company Onboarding",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "company"
+}

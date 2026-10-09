@@ -452,6 +452,11 @@ class Company(NestedSet):
 				)
 			)
 
+	def after_insert(self):
+		from erpnext.setup.doctype.company_onboarding.company_onboarding import create_company_onboarding
+
+		create_company_onboarding(self.name)
+
 	def on_update(self):
 		NestedSet.on_update(self)
 		if not frappe.db.exists("Account", {"company": self.name, "docstatus": ["<", 2]}):
@@ -908,6 +913,8 @@ class Company(NestedSet):
 
 		NestedSet.validate_if_child_exists(self)
 		frappe.utils.nestedset.update_nsm(self)
+
+		frappe.delete_doc_if_exists("Company Onboarding", self.name)
 
 		if not frappe.db.exists("GL Entry", {"company": self.name}):
 			budgets = frappe.get_all("Budget", filters={"company": self.name}, pluck="name")

@@ -91,6 +91,15 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 
+# Steps on Company Onboarding. Every app lists its steps here the same way, with "before" or
+# "after" to place them; see company_onboarding_steps.py for the rules.
+company_onboarding_steps = [
+	"erpnext.setup.doctype.company_onboarding.company_onboarding_steps.chart_of_accounts",
+	"erpnext.setup.doctype.company_onboarding.company_onboarding_steps.opening_balances",
+	"erpnext.setup.doctype.company_onboarding.company_onboarding_steps.review",
+	"erpnext.setup.doctype.company_onboarding.company_onboarding_steps.go_live",
+]
+
 after_install = "erpnext.setup.install.after_install"
 
 after_app_install = "erpnext.setup.install.after_app_install"
