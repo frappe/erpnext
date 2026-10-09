@@ -5,6 +5,7 @@ import zoneinfo
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
+from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -180,6 +181,10 @@ def get_booked_slot_times_for(timeslots, appointment_duration):
 
 
 def is_slot_available(timeslot, booked_times, settings):
+	# no agents means unlimited capacity, as in Appointment.validate_available_time_slot
+	if not cint(settings.number_of_agents):
+		return True
+
 	# mirror the server capacity check: count non-Closed appointments whose
 	# duration window overlaps this slot, without a per-slot query
 	duration = datetime.timedelta(minutes=settings.appointment_duration)
