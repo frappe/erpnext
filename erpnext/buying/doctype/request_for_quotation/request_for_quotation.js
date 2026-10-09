@@ -125,13 +125,13 @@ frappe.ui.form.on("Request for Quotation", {
 							var w = window.open(
 								frappe.urllib.get_full_url(
 									"/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?" +
-									new URLSearchParams({
-										name: frm.doc.name,
-										supplier: data.supplier,
-										print_format: data.print_format || "Standard",
-										language: data.language || frappe.boot.lang,
-										letterhead: data.letter_head || frm.doc.letter_head || "",
-									}).toString()
+										new URLSearchParams({
+											name: frm.doc.name,
+											supplier: data.supplier,
+											print_format: data.print_format || "Standard",
+											language: data.language || frappe.boot.lang,
+											letterhead: data.letter_head || frm.doc.letter_head || "",
+										}).toString()
 								)
 							);
 							if (!w) {
@@ -230,7 +230,12 @@ frappe.ui.form.on("Request for Quotation", {
 			const text = $(this).text().trim();
 			const fieldname = $(this).find(".nav-link").attr("data-fieldname");
 			const href = $(this).find(".nav-link").attr("href") || "";
-			return text === __("Quotations") || text === "Quotations" || fieldname === "quotations_tab" || href.includes("quotations");
+			return (
+				text === __("Quotations") ||
+				text === "Quotations" ||
+				fieldname === "quotations_tab" ||
+				href.includes("quotations")
+			);
 		});
 
 		if (!show) {
@@ -247,8 +252,16 @@ frappe.ui.form.on("Request for Quotation", {
 
 		if ($tab_li.length) {
 			$tab_li.show().removeClass("hide hidden d-none").attr("style", "");
-			if (frm.fields_dict && frm.fields_dict.quotations_html && frm.fields_dict.quotations_html.$wrapper) {
-				frm.events.draw_quotations_comparison_table(frm, frm.fields_dict.quotations_html.$wrapper, quotes);
+			if (
+				frm.fields_dict &&
+				frm.fields_dict.quotations_html &&
+				frm.fields_dict.quotations_html.$wrapper
+			) {
+				frm.events.draw_quotations_comparison_table(
+					frm,
+					frm.fields_dict.quotations_html.$wrapper,
+					quotes
+				);
 				return;
 			}
 		}
@@ -274,6 +287,11 @@ frappe.ui.form.on("Request for Quotation", {
 	draw_quotations_comparison_table: function (frm, $wrapper, quotes) {
 		$wrapper.empty();
 
+		const company_currency =
+			(frm.doc.company && erpnext.get_currency(frm.doc.company)) ||
+			frappe.boot.sysdefaults.currency ||
+			"";
+
 		const quoted_suppliers = new Set((quotes || []).map((q) => q.supplier).filter(Boolean));
 		const suppliers = (frm.doc.suppliers || [])
 			.map((s) => s.supplier)
@@ -281,9 +299,7 @@ frappe.ui.form.on("Request for Quotation", {
 
 		const all_items = frm.doc.items || [];
 		const selected_item = frm.quotations_item_filter || "";
-		const items = selected_item
-			? all_items.filter((i) => i.item_code === selected_item )
-			: all_items;
+		const items = selected_item ? all_items.filter((i) => i.item_code === selected_item) : all_items;
 
 		const quote_map = {};
 		(quotes || []).forEach((q) => {
@@ -291,33 +307,58 @@ frappe.ui.form.on("Request for Quotation", {
 			quote_map[key] = q;
 		});
 
+		// Normalize rates and amounts to RFQ item UOM and company currency
+		all_items.forEach((item) => {
+			const rfq_item_conv = flt(item.conversion_factor) || 1.0;
+			const rfq_qty = flt(item.qty);
+
+			suppliers.forEach((sup) => {
+				const q = quote_map[`${item.item_code}:::${sup}`];
+				if (q) {
+					console.log("q: ", q);
+					const sq_conv = flt(q.conversion_factor) || 1.0;
+					const sq_base_rate = flt(q.base_rate) || flt(q.rate) * (flt(q.conversion_rate) || 1.0);
+					const sq_base_amount =
+						flt(q.base_amount) || flt(q.amount) * (flt(q.conversion_rate) || 1.0);
+
+					// Price per Stock UOM in Base Currency
+					const base_price_per_stock_unit =
+						q.stock_qty && flt(q.stock_qty) > 0
+							? sq_base_amount / flt(q.stock_qty)
+							: sq_base_rate / sq_conv;
+
+					// Rate normalized to RFQ Item's requested UOM in Company Base Currency
+					q.converted_rate = base_price_per_stock_unit * rfq_item_conv;
+
+					// Total Amount normalized for RFQ requested Quantity in Company Base Currency
+					q.converted_amount = rfq_qty > 0 ? q.converted_rate * rfq_qty : sq_base_amount;
+				}
+			});
+		});
+
 		const min_rates = {};
 		all_items.forEach((item) => {
 			const rates = suppliers
-				.map((sup) => quote_map[`${item.item_code}:::${sup}`]?.rate)
-				.filter((r) => r !== undefined && r > 0);
+				.map((sup) => quote_map[`${item.item_code}:::${sup}`]?.converted_rate)
+				.filter((r) => r !== undefined && r !== null && r > 0);
 			if (rates.length > 0) {
 				min_rates[item.item_code] = Math.min(...rates);
 			}
 		});
 
 		const supplier_totals = {};
-		const supplier_currencies = {};
 		suppliers.forEach((sup) => {
 			let total = 0;
-			let curr = "";
 			let has_any = false;
 			items.forEach((item) => {
 				const q = quote_map[`${item.item_code}:::${sup}`];
-				if (q && q.amount !== undefined && q.amount !== null) {
-					total += flt(q.amount);
-					curr = q.currency || curr;
+				if (q && q.converted_amount !== undefined && q.converted_amount !== null) {
+					total += flt(q.converted_amount);
 					has_any = true;
 				}
 			});
 			if (has_any) {
 				supplier_totals[sup] = total;
-				supplier_currencies[sup] = curr;
 			}
 		});
 
@@ -329,6 +370,7 @@ frappe.ui.form.on("Request for Quotation", {
 
 		const context = {
 			docstatus: frm.doc.docstatus,
+			company_currency: company_currency,
 			suppliers: suppliers,
 			all_items: all_items,
 			items: items,
@@ -338,7 +380,6 @@ frappe.ui.form.on("Request for Quotation", {
 			quote_map: quote_map,
 			min_rates: min_rates,
 			supplier_totals: supplier_totals,
-			supplier_currencies: supplier_currencies,
 			min_supplier_total: min_supplier_total,
 			has_quotes: has_quotes,
 		};
