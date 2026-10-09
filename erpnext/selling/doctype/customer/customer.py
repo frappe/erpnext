@@ -361,7 +361,9 @@ class Customer(TransactionBase):
 		if not self.lead_name:
 			return
 
-		frappe.get_doc("Lead", self.lead_name).set_status(update=True)
+		lead = frappe.get_doc("Lead", self.lead_name)
+		lead.db_set("status", "Converted")
+		lead.update_prospect()
 		for doctype, party_type_field in (("Quotation", "quotation_to"), ("Opportunity", "opportunity_from")):
 			self.link_lead_records(doctype, party_type_field)
 

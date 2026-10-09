@@ -135,6 +135,21 @@ class TestProspect(ERPNextTestSuite):
 		customer.insert()
 		self.assertEqual(lead_row_status(lead.name), "Converted")
 
+	def test_do_not_contact_lead_is_converted_with_its_customer(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		lead = make_lead()
+		lead.db_set("status", "Do Not Contact")
+		prospect = make_prospect(company="_Test Company")
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.insert()
+
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Converted")
+		self.assertEqual(lead_row_status(lead.name), "Converted")
+
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
 		prospect = frappe.new_doc("Prospect")
