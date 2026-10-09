@@ -148,11 +148,17 @@ erpnext.accounts.dimensions = {
 	set_dimensions_in_new_row(frm, row, fieldnames) {
 		const first_row = frm.doc[row.parentfield][0];
 		fieldnames
-			.filter((fieldname) => frappe.meta.has_field(row.doctype, fieldname) && !row[fieldname])
+			.filter((fieldname) => frappe.meta.has_field(row.doctype, fieldname))
+			.filter((fieldname) => !this.has_own_value(frm, row, fieldname))
 			.forEach((fieldname) => {
 				const value = frm.doc[fieldname] || (first_row !== row && first_row[fieldname]);
 				if (value) frappe.model.set_value(row.doctype, row.name, fieldname, value);
 			});
+	},
+
+	has_own_value(frm, row, fieldname) {
+		const df = frappe.meta.get_docfield(row.doctype, fieldname);
+		return row[fieldname] && row[fieldname] !== frappe.model.get_default_value(df, row, frm.doc);
 	},
 
 	copy_header_to_rows(frm, fieldname) {
