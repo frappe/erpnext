@@ -482,6 +482,15 @@ def get_attachments(delivery_stop):
 def get_driver_email(driver: str):
 	frappe.has_permission("Driver", "read", doc=driver, throw=True)
 
-	employee = frappe.db.get_value("Driver", driver, "employee")
-	email = frappe.db.get_value("Employee", employee, "prefered_email")
+	driver_data = frappe.db.get_value("Driver", driver, ["user", "employee"], as_dict=True)
+	email = driver_data.user
+	if (
+		not email
+		and driver_data.employee
+		and frappe.has_permission("Employee", "read", doc=driver_data.employee)
+	):
+		employee = frappe.db.get_value(
+			"Employee", driver_data.employee, ["company_email", "prefered_email"], as_dict=True
+		)
+		email = employee.company_email or employee.prefered_email
 	return {"email": email}
