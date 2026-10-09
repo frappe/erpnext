@@ -3,9 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Max, Sum
-from pypika.terms import Bracket, LiteralValue
 
 
 def execute(filters=None):
@@ -78,6 +76,4 @@ def apply_filters(query, filters, gle):
 		query = query.where(gle.posting_date >= filters.from_date)
 	if filters.get("to_date"):
 		query = query.where(gle.posting_date <= filters.to_date)
-	if match_conditions := build_match_conditions("GL Entry"):
-		query = query.where(Bracket(LiteralValue(match_conditions)))
 	return query

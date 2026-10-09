@@ -62,28 +62,5 @@ class TestVoucherWiseBalance(ERPNextTestSuite):
 			row.get("debit"), row.get("credit"), msg="Flagged rows must have debit != credit."
 		)
 
-	def test_company_is_mandatory_and_user_permissions_apply(self):
+	def test_company_is_mandatory(self):
 		self.assertRaises(frappe.ValidationError, execute, frappe._dict(from_date="2026-01-01"))
-
-		jv = make_journal_entry(
-			"Sales - _TC", "_Test Bank - _TC", 1000, submit=True, posting_date="2026-06-01"
-		)
-		frappe.db.set_value("GL Entry", {"voucher_no": jv.name, "debit": [">", 0]}, "debit", 400)
-		user = self.user_restricted_to("_Test Company 1")
-
-		frappe.set_user(user)
-		try:
-			self.assertIsNone(self.find_row(self.run_report(), jv.name))
-		finally:
-			frappe.set_user("Administrator")
-
-	def user_restricted_to(self, company):
-		user = "test_voucher_wise_balance@example.com"
-		if not frappe.db.exists("User", user):
-			doc = frappe.new_doc("User")
-			doc.email = user
-			doc.first_name = "Voucher-wise Balance"
-			doc.append("roles", {"role": "Accounts User"})
-			doc.insert()
-		frappe.permissions.add_user_permission("Company", company, user)
-		return user
