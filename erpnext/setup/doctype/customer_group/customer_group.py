@@ -39,6 +39,8 @@ class CustomerGroup(NestedSet):
 	def validate(self):
 		if not self.parent_customer_group:
 			self.parent_customer_group = get_root_of("Customer Group")
+		if frappe.db.exists("Customer", self.name):
+			frappe.throw(_("A Customer exists with the same name: {0}").format(self.name), frappe.NameError)
 		validate_party_accounts(self)
 		self.validate_currency_for_receivable_and_advance_account()
 		validate_default_price_list_side(self.default_price_list, "selling")
@@ -72,6 +74,12 @@ class CustomerGroup(NestedSet):
 						frappe.bold(x.company),
 					)
 				)
+
+	def before_rename(self, olddn, newdn, merge=False):
+		super().before_rename(olddn, newdn, merge)
+		newdn = newdn.strip()
+		if frappe.db.exists("Customer", newdn):
+			frappe.throw(_("A Customer exists with the same name: {0}").format(newdn), frappe.NameError)
 
 	def on_update(self):
 		super().on_update()
