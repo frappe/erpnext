@@ -543,6 +543,19 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(get_actual_gle_dict(asset_capitalization.name)[target_account], 800)
 		self.assertEqual(target_asset.db_get("gross_purchase_amount"), 800)
 
+		target_asset.reload()
+		target_asset.submit()
+		self.assertRaises(
+			frappe.ValidationError,
+			make_purchase_receipt,
+			qty=5,
+			rate=300,
+			posting_date=add_days(today(), -4),
+			**receipt_args,
+		)
+		self.assertEqual(target_asset.db_get("gross_purchase_amount"), 800)
+		self.assertEqual(asset_capitalization.db_get("total_value"), 800)
+
 	def test_cancel_is_refused_after_the_target_asset_is_submitted(self):
 		target_asset = create_asset(is_composite_asset=1, warehouse="Stores - _TC")
 		asset_capitalization = create_asset_capitalization(
