@@ -32,8 +32,18 @@ def update_lead_phone_numbers(contact, method):
 					mobile_no = primary_mobile_nos[0]
 
 			lead = frappe.get_doc("Lead", contact_lead)
+			numbers_changed = (lead.phone, lead.mobile_no) != (phone, mobile_no)
 			lead.db_set("phone", phone)
 			lead.db_set("mobile_no", mobile_no)
+			if numbers_changed:
+				link_existing_conversations_of_lead(lead)
+
+
+def link_existing_conversations_of_lead(lead: Document):
+	# db_set does not run the Lead's on_update hook that links past calls
+	from erpnext.telephony.doctype.call_log.call_log import link_existing_conversations
+
+	link_existing_conversations(lead, "on_update")
 
 
 def copy_comments(doctype, docname, doc, ignore_permissions=False):
