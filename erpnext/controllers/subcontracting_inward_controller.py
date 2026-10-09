@@ -816,7 +816,9 @@ class SubcontractingInwardController:
 				)
 
 				if not d.required_qty and not d.received_qty:
-					frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
+					frappe.delete_doc(
+						"Subcontracting Inward Order Received Item", d.name, ignore_permissions=True
+					)
 				else:
 					doc_updates[d.name] = {"received_qty": d.received_qty, "rate": d.rate}
 
@@ -896,7 +898,9 @@ class SubcontractingInwardController:
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
 					doc_updates[d.name] = {"consumed_qty": qty}
 				else:
-					frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
+					frappe.delete_doc(
+						"Subcontracting Inward Order Received Item", d.name, ignore_permissions=True
+					)
 
 			if doc_updates:
 				frappe.db.bulk_update(
@@ -989,7 +993,11 @@ class SubcontractingInwardController:
 							self._action == "cancel"
 							and value.produced_qty - abs(secondary_items.get(key)) == 0
 						):
-							frappe.delete_doc("Subcontracting Inward Order Secondary Item", value.name)
+							frappe.delete_doc(
+								"Subcontracting Inward Order Secondary Item",
+								value.name,
+								ignore_permissions=True,
+							)
 						else:
 							doc_updates[value.name] = {
 								"produced_qty": value.produced_qty + secondary_items.get(key)

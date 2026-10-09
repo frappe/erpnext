@@ -198,6 +198,33 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			next((item for item in scio.received_items if item.rm_item_code == "Basic RM 2"), None)
 		)
 
+	def test_stock_user_can_cancel_receipt_of_extra_customer_provided_item(self):
+		so, scio = create_so_scio()
+		stock_user = make_fenced_user("scio-extra-cancel@example.com", ["Stock User"])
+
+		with as_user(stock_user):
+			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			for item in rm_in.items:
+				item.basic_rate = 10
+			rm_in.append(
+				"items",
+				{
+					"item_code": "Basic RM 2",
+					"qty": 5,
+					"t_warehouse": rm_in.items[0].t_warehouse,
+					"basic_rate": 10,
+					"against_fg": scio.items[0].name,
+				},
+			)
+			rm_in.insert()
+			rm_in.submit()
+			rm_in.cancel()
+
+		scio.reload()
+		self.assertFalse(
+			next((item for item in scio.received_items if item.rm_item_code == "Basic RM 2"), None)
+		)
+
 	def test_manufacturing_user_can_manufacture_with_extra_own_item(self):
 		make_stock_entry(
 			item_code="Self RM 2", qty=5, to_warehouse="Stores - _TC", purpose="Material Receipt"
