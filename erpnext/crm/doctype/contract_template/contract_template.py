@@ -59,4 +59,5 @@ def render_contract_terms(terms: str, context: dict) -> str:
 	# a trailing newline keeps it content and Jinja drops that newline from the output
 	if guess_is_path(terms):
 		terms += "\n"
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti -- reviewed: terms are written only by System Managers, checked by validate_template and rendered in the sandbox with restricted globals
 	return frappe.render_template(terms, context, restrict_globals=True)
