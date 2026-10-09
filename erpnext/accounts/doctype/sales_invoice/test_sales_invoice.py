@@ -2816,20 +2816,37 @@ class TestSalesInvoice(ERPNextTestSuite):
 			)
 
 	def test_on_recurring_keeps_service_dates_after_period_end_ordered(self):
-		# Auto Repeat moves the period 31 Jan-27 Feb to 28 Feb-30 Mar
+		# Auto Repeat moves the period 30 Jan-26 Feb to 27 Feb-29 Mar
 		reference = make_recurring_reference_invoice(
-			"2025-01-31", "2025-02-27", [("2025-02-27", "2025-02-28")]
+			"2025-01-30", "2025-02-26", [("2025-02-26", "2025-02-27")]
 		)
 		reference.insert()
 
-		new_invoice = make_recurring_invoice(reference, "2025-02-28", "2025-03-30")
+		new_invoice = make_recurring_invoice(reference, "2025-02-27", "2025-03-29")
 
 		self.assertEqual(
 			(
 				getdate(new_invoice.items[0].service_start_date),
 				getdate(new_invoice.items[0].service_end_date),
 			),
-			(getdate("2025-03-30"), getdate("2025-03-31")),
+			(getdate("2025-03-29"), getdate("2025-03-30")),
+		)
+
+	def test_on_recurring_keeps_short_service_range_after_period_end(self):
+		# Auto Repeat builds the full next month after a half-month period
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-15", [("2025-01-20", "2025-01-25")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-02-20"), getdate("2025-02-25")),
 		)
 
 	def test_on_recurring_keeps_service_end_at_month_end(self):
