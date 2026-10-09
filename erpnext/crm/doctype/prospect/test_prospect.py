@@ -150,6 +150,32 @@ class TestProspect(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "status"), "Converted")
 		self.assertEqual(lead_row_status(lead.name), "Converted")
 
+	def test_conversion_errors_hide_records_the_user_cannot_read(self):
+		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+		lead = make_lead()
+		prospect = make_prospect(company="_Test Company")
+		add_lead_to_prospect(lead.name, prospect.name)
+		customer = make_customer_from_prospect(prospect.name)
+		customer.customer_name = f"Converted {prospect.name}"
+		customer.insert()
+
+		sales_user = create_user("test_prospect_restricted_sales_user@example.com", "Sales User").name
+		frappe.permissions.add_user_permission("Customer", "_Test Customer", sales_user)
+		frappe.permissions.add_user_permission(
+			"Prospect", make_prospect(company="_Test Company").name, sales_user
+		)
+		duplicate_customer = frappe.new_doc("Customer", prospect_name=prospect.name)
+		other_prospect = frappe.new_doc("Prospect", leads=[{"lead": lead.name}])
+		with self.set_user(sales_user):
+			with self.assertRaises(frappe.DuplicateEntryError) as customer_error:
+				duplicate_customer.validate_prospect_not_converted()
+			with self.assertRaises(frappe.ValidationError) as prospect_error:
+				other_prospect.validate_leads()
+
+		self.assertNotIn(customer.name, str(customer_error.exception))
+		self.assertNotIn(prospect.name, str(prospect_error.exception))
+
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
 		prospect = frappe.new_doc("Prospect")

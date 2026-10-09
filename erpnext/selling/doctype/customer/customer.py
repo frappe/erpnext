@@ -433,13 +433,16 @@ class Customer(TransactionBase):
 		if not (self.is_new() and self.prospect_name):
 			return
 
-		if customer := frappe.db.exists("Customer", {"prospect_name": self.prospect_name}):
-			frappe.throw(
-				_("Prospect {0} is already converted to Customer {1}").format(
-					frappe.bold(self.prospect_name), get_link_to_form("Customer", customer)
-				),
-				frappe.DuplicateEntryError,
+		customer = frappe.db.exists("Customer", {"prospect_name": self.prospect_name})
+		if not customer:
+			return
+
+		message = _("Prospect {0} is already converted to a Customer").format(frappe.bold(self.prospect_name))
+		if frappe.has_permission("Customer", "read", customer):
+			message = _("Prospect {0} is already converted to Customer {1}").format(
+				frappe.bold(self.prospect_name), get_link_to_form("Customer", customer)
 			)
+		frappe.throw(message, frappe.DuplicateEntryError)
 
 	def validate_customer_group(self):
 		if not self.customer_group:

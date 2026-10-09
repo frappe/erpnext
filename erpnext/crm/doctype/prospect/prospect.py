@@ -57,9 +57,13 @@ class Prospect(CRMNote):
 			if other := frappe.db.get_value(
 				"Prospect Lead", {"lead": lead, "parent": ["!=", self.name]}, "parent"
 			):
-				frappe.throw(
-					_("Lead {0} is already in Prospect {1}").format(frappe.bold(lead), frappe.bold(other))
-				)
+				self.throw_lead_in_other_prospect(lead, other)
+
+	def throw_lead_in_other_prospect(self, lead: str, other: str):
+		message = _("Lead {0} is already in another Prospect").format(frappe.bold(lead))
+		if frappe.has_permission("Prospect", "read", other):
+			message = _("Lead {0} is already in Prospect {1}").format(frappe.bold(lead), frappe.bold(other))
+		frappe.throw(message)
 
 	def on_update(self):
 		self.link_with_lead_contact_and_address()
