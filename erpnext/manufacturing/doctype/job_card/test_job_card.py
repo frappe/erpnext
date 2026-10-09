@@ -651,6 +651,29 @@ class TestJobCard(ERPNextTestSuite):
 			{1: {}, 2: {raw_a: 2}, 3: {raw_b: 2}, 4: {raw_a: 4}},
 		)
 
+	def test_reordered_and_copied_operations_keep_bom_operation_row(self):
+		finished_good_bom, raw_a, raw_b = create_bom_with_repeated_cutting()
+		work_order = make_wo_order_test_record(
+			item=frappe.db.get_value("BOM", finished_good_bom, "item"),
+			bom_no=finished_good_bom,
+			qty=2,
+			transfer_material_against="Job Card",
+			do_not_save=1,
+		)
+		cutting, stitching, last_cutting = work_order.operations
+		copied_cutting = frappe.copy_doc(cutting)
+		copied_cutting.bom = cutting.bom
+		copied_cutting.bom_operation = cutting.bom_operation
+		work_order.operations = [stitching, cutting, last_cutting, copied_cutting]
+		for idx, operation in enumerate(work_order.operations, start=1):
+			operation.idx = idx
+		work_order.submit()
+
+		self.assertEqual(
+			get_job_card_items_by_operation_row(work_order.name),
+			{1: {raw_b: 2}, 2: {raw_a: 2}, 3: {raw_a: 4}, 4: {}},
+		)
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
