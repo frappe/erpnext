@@ -71,6 +71,19 @@ class TestLead(ERPNextTestSuite):
 			("Customer", customer.name),
 		)
 
+	def test_customer_from_lead_keeps_records_the_user_cannot_write(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		customer = make_customer(lead.name)
+
+		with self.set_user(make_user("_test_lead_master_manager@example.com", "Sales Master Manager")):
+			customer.insert()
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "opportunity_from"), "Lead")
+
 	def test_customer_from_lead_without_contact_gets_one(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
 
