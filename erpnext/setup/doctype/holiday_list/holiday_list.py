@@ -165,14 +165,15 @@ class HolidayList(Document):
 	def validate_duplicate_date(self):
 		unique_dates = []
 		for row in self.holidays:
-			if row.holiday_date in unique_dates:
+			holiday_date = getdate(row.holiday_date)
+			if holiday_date in unique_dates:
 				frappe.throw(
 					_("Holiday Date {0} added multiple times").format(
 						frappe.bold(formatdate(row.holiday_date))
 					)
 				)
 
-			unique_dates.append(row.holiday_date)
+			unique_dates.append(holiday_date)
 
 
 @frappe.whitelist()
