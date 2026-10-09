@@ -22,6 +22,10 @@ class TestInactiveCustomers(ERPNextTestSuite):
 		so.submit()
 		self.sales_order = so
 
+	def get_customer_row(self, data, customer=None):
+		customer = customer or self.customer.name
+		return next((row for row in data if row.customer == customer), None)
+
 	def test_invalid_doctype_is_rejected(self):
 		self.assertRaises(
 			frappe.ValidationError,
@@ -29,17 +33,15 @@ class TestInactiveCustomers(ERPNextTestSuite):
 			{"doctype": "Purchase Order", "days_since_last_order": 30},
 		)
 
-	def test_inactive_customer_is_listed_with_expected_columns(self):
-		columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 30})
+	def test_inactive_customer_is_listed_with_expected_values(self):
+		_columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 30})
 
 		row = self.get_customer_row(data)
 		self.assertIsNotNone(row, "Inactive customer should be present in the report")
-
-		# Column contract: the report relies on positional access.
-		self.assertEqual(row[0], self.customer.name)
-		self.assertEqual(row[7], 1000)  # Last Order Amount inserted at index 7 (5 * 200)
-		self.assertEqual(getdate(row[8]), getdate(self.last_order_date))  # Last Order Date
-		self.assertGreaterEqual(row[9], 30)  # Days Since Last Order
+		self.assertEqual(row.num_of_order, 1)
+		self.assertEqual(row.last_order_amount, 1000)  # 5 * 200
+		self.assertEqual(getdate(row.last_order_date), getdate(self.last_order_date))
+		self.assertGreaterEqual(row.days_since_last_order, 30)
 
 	def test_recent_customer_is_excluded(self):
 		_columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 200})
@@ -47,6 +49,3 @@ class TestInactiveCustomers(ERPNextTestSuite):
 			self.get_customer_row(data),
 			"Customer ordering within the threshold must be excluded",
 		)
-
-	def get_customer_row(self, data):
-		return next((row for row in data if row[0] == self.customer.name), None)
