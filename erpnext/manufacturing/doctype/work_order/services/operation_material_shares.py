@@ -27,7 +27,7 @@ class OperationMaterialShares:
 
 		present = set(owners.values()) | {(bom, 0) for bom, _row in owners.values()}
 		consumed_by_row = {owners[row.name], (row.bom, 0)}
-		material_qty = get_material_qty_by_owner(self.work_order.bom_no)
+		material_qty = get_material_qty_by_owner(self.work_order.bom_no, self.work_order.use_multi_level_bom)
 		unedited = self.get_unedited_required_items(material_qty)
 		qty_by_owner = defaultdict(dict)
 		for (item_code, operation, owner), qty in material_qty.items():
@@ -84,15 +84,17 @@ def get_bom_operation_rows(names: tuple[str, ...]) -> dict[str, frappe._dict]:
 
 
 @request_cache
-def get_material_qty_by_owner(bom_no: str) -> dict[tuple[str, str, tuple[str, int]], float]:
+def get_material_qty_by_owner(bom_no: str, explode: bool) -> dict[tuple[str, str, tuple[str, int]], float]:
 	"""Qty per unit of `bom_no`, keyed by (item_code, operation, (BOM, operation row) that consumes it)."""
-	return BOMMaterialOwners(bom_no).get_material_qty(bom_no)
+	return BOMMaterialOwners(bom_no, explode).get_material_qty(bom_no)
 
 
 class BOMMaterialOwners:
-	"""Traces the materials of a BOM tree to the BOM operation row that consumes them."""
+	"""Traces the materials of a BOM tree to the BOM operation row that consumes them. Without
+	`explode`, only phantom sub-assemblies are traced into, as in a single-level Work Order."""
 
-	def __init__(self, bom_no: str):
+	def __init__(self, bom_no: str, explode: bool):
+		self.explode = explode
 		self.load_bom_tree(bom_no)
 
 	def load_bom_tree(self, bom_no: str):
@@ -101,12 +103,20 @@ class BOMMaterialOwners:
 			items = frappe.get_all(
 				"BOM Item",
 				filters={"parent": ["in", list(pending)], "parenttype": "BOM"},
-				fields=["parent", "item_code", "bom_no", "operation", "operation_row_id", "stock_qty"],
+				fields=[
+					"parent",
+					"item_code",
+					"bom_no",
+					"is_phantom_item",
+					"operation",
+					"operation_row_id",
+					"stock_qty",
+				],
 			)
 			self.items_by_bom.update({bom: [] for bom in pending})
 			for item in items:
 				self.items_by_bom[item.parent].append(item)
-			pending = {item.bom_no for item in items if item.bom_no} - self.items_by_bom.keys()
+			pending = {item.bom_no for item in items if self.is_traced(item)} - self.items_by_bom.keys()
 
 		self.bom_quantity = dict(
 			frappe.get_all(
@@ -127,7 +137,7 @@ class BOMMaterialOwners:
 		for item in self.items_by_bom[bom_no]:
 			qty = flt(item.stock_qty) / flt(self.bom_quantity[bom_no])
 			owner = (bom_no, cint(item.operation_row_id))
-			if not item.bom_no:
+			if not self.is_traced(item):
 				material_qty[(item.item_code, item.operation, owner)] += qty
 				continue
 
@@ -136,3 +146,6 @@ class BOMMaterialOwners:
 				material_qty[key] += qty * child_qty
 
 		return material_qty
+
+	def is_traced(self, item) -> bool:
+		return bool(item.bom_no) and (self.explode or item.is_phantom_item)
