@@ -117,6 +117,7 @@ class TestOpportunity(ERPNextTestSuite):
 
 		prospect = make_prospect(company="_Test Company")
 		prospect.add_comment("Comment", text="Prospect Comment")
+		create_communication("Prospect", prospect.name, "prospect@example.com")
 		opportunity = frappe.get_doc(
 			{
 				"doctype": "Opportunity",
@@ -129,6 +130,7 @@ class TestOpportunity(ERPNextTestSuite):
 
 		lead = make_lead()
 		lead.add_comment("Comment", text="Lead Comment")
+		create_communication("Lead", lead.name, "lead@example.com")
 		quotation = make_quotation_for_lead(party_name=lead.name, do_not_save=1)
 		quotation.quotation_to = "Lead"
 		quotation.insert()
@@ -137,6 +139,7 @@ class TestOpportunity(ERPNextTestSuite):
 			self.assertEqual(
 				frappe.db.count("Comment", {"reference_doctype": doc.doctype, "reference_name": doc.name}), 1
 			)
+			self.assertEqual(len(get_linked_communication_list(doc.doctype, doc.name)), 1)
 
 	def test_get_notification_email(self):
 		admin_email = frappe.db.get_value("User", "Administrator", "email")
