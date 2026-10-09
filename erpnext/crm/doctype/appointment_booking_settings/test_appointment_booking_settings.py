@@ -125,10 +125,12 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents"), 1)
 
 	def test_appointment_duration_must_be_positive(self):
-		settings = self.get_valid_scheduling_settings()
 		for duration in (0, -60):
-			settings.appointment_duration = duration
-			self.assert_invalid(settings)
+			with self.subTest(duration=duration):
+				settings = self.get_valid_scheduling_settings()
+				settings.appointment_duration = duration
+				with self.assertRaisesRegex(frappe.ValidationError, "must be greater than 0 minutes"):
+					settings.save()
 
 	def test_overlapping_slots_for_a_day_are_refused(self):
 		settings = self.get_valid_scheduling_settings()
