@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cint, get_datetime, get_link_to_form
+from frappe.utils import cint, get_datetime, get_link_to_form, getdate
 
 
 class DeliveryTrip(Document):
@@ -58,8 +58,17 @@ class DeliveryTrip(Document):
 	def validate(self):
 		if self._action == "submit" and not self.driver:
 			frappe.throw(_("A driver must be set to submit."))
+		if self._action == "submit":
+			self.validate_driver()
 
 		self.validate_stop_addresses()
+
+	def validate_driver(self):
+		status, expiry_date = frappe.db.get_value("Driver", self.driver, ["status", "expiry_date"])
+		if status != "Active":
+			frappe.throw(_("The driver must be active to submit a Delivery Trip."))
+		if expiry_date and getdate(expiry_date) < getdate(self.departure_time):
+			frappe.throw(_("The driver's licence must be valid on the departure date."))
 
 	def on_submit(self):
 		self.update_status()
