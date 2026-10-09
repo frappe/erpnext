@@ -2433,7 +2433,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"parent",
 			)
 
-		target_doc.inter_company_invoice_reference = source_doc.name
+		_, reference_field = get_inter_company_counterpart(target_doc.doctype)
+		target_doc.set(reference_field, source_doc.name)
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
 			target_doc.company = details.get("company")
