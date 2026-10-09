@@ -89,11 +89,12 @@ class IssueAnalytics:
 		self.get_rows()
 
 	def get_period(self, date):
+		if self.filters.range == "Weekly":
+			return self.get_week(date)
+
 		months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-		if self.filters.range == "Weekly":
-			period = "Week " + str(date.isocalendar()[1])
-		elif self.filters.range == "Monthly":
+		if self.filters.range == "Monthly":
 			period = str(months[date.month - 1])
 		elif self.filters.range == "Quarterly":
 			period = "Quarter " + str(((date.month - 1) // 3) + 1)
@@ -108,6 +109,13 @@ class IssueAnalytics:
 			period += " " + str(date.year)
 
 		return period
+
+	def get_week(self, date) -> str:
+		"""ISO week label, with the ISO week-year when the periods span more than one."""
+		iso_year, week = date.isocalendar()[:2]
+		if self.weeks_span_years:
+			return f"Week {week} {iso_year}"
+		return f"Week {week}"
 
 	def get_period_date_ranges(self):
 		from dateutil.relativedelta import MO, relativedelta
@@ -140,6 +148,8 @@ class IssueAnalytics:
 			from_date = add_days(period_end_date, 1)
 			if period_end_date == to_date:
 				break
+
+		self.weeks_span_years = len({date.isocalendar()[0] for date in self.periodic_daterange}) > 1
 
 	def get_issues(self):
 		filters = self.get_common_filters()
