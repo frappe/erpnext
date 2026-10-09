@@ -29,6 +29,16 @@ class TestTimesheet(ERPNextTestSuite):
 		with patch("frappe.get_list", side_effect=[["TS-0001"], []]):
 			self.assertEqual(get_projectwise_timesheet_data(), [])
 
+	def test_time_log_with_empty_project_and_sales_invoice_is_unbilled(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+		time_log = timesheet.time_logs[0].name
+		frappe.db.set_value("Timesheet Detail", time_log, {"project": "", "sales_invoice": ""})
+
+		self.assertEqual(
+			[log.name for log in get_projectwise_timesheet_data(parent=timesheet.name)], [time_log]
+		)
+
 	def test_timesheet_post_update(self):
 		frappe.get_doc(
 			{
