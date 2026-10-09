@@ -207,6 +207,8 @@ def link_existing_conversations(doc, state):
 			for log in logs:
 				call_log = frappe.get_doc("Call Log", log)
 				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
+				if doc.doctype == "Contact" and not call_log.customer:
+					call_log.link_customer_of_contact(doc.name)
 				call_log.save(ignore_permissions=True)
 	except Exception:
 		frappe.db.rollback(save_point="link_call_logs")

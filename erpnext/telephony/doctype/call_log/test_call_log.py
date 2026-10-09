@@ -231,3 +231,29 @@ class TestCallLog(ERPNextTestSuite):
 		)
 		self.assertIn(("Lead", lead.name), links)
 		self.assertIn(("Contact", self.contact.name), links)
+
+	def test_new_contact_number_links_past_calls_to_customer_and_lead_of_contact(self):
+		number = "95" + "".join(random.choices(string.digits, k=8))
+		call_log = self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+		lead = frappe.get_doc({"doctype": "Lead", "first_name": f"_Test Caller {number}"}).insert(
+			ignore_permissions=True
+		)
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Customer Caller {number}",
+				"links": [
+					{"link_doctype": "Customer", "link_name": "_Test Customer"},
+					{"link_doctype": "Lead", "link_name": lead.name},
+				],
+			}
+		).insert(ignore_permissions=True)
+
+		contact.append("phone_nos", {"phone": f"+91{number}", "is_primary_phone": 1})
+		contact.save(ignore_permissions=True)
+
+		call_log = frappe.get_doc("Call Log", call_log)
+		links = [(d.link_doctype, d.link_name) for d in call_log.links]
+		self.assertEqual(call_log.customer, "_Test Customer")
+		self.assertIn(("Customer", "_Test Customer"), links)
+		self.assertIn(("Lead", lead.name), links)
