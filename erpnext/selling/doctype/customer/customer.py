@@ -329,9 +329,20 @@ class Customer(TransactionBase):
 
 		frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 		for doctype, party_type_field in (("Quotation", "quotation_to"), ("Opportunity", "opportunity_from")):
+			self.link_lead_records(doctype, party_type_field)
+
+	def link_lead_records(self, doctype: str, party_type_field: str):
+		names = [
+			name
+			for name in frappe.get_all(
+				doctype, {party_type_field: "Lead", "party_name": self.lead_name}, pluck="name"
+			)
+			if frappe.has_permission(doctype, "write", name)
+		]
+		if names:
 			frappe.db.set_value(
 				doctype,
-				{party_type_field: "Lead", "party_name": self.lead_name},
+				{"name": ("in", names)},
 				{party_type_field: "Customer", "party_name": self.name},
 			)
 
