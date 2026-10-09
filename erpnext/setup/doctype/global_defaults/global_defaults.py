@@ -66,7 +66,8 @@ class GlobalDefaults(Document):
 
 		self.toggle_rounded_total()
 		self.toggle_in_words()
-		self.set_disable_rounded_total_on_pos_profiles()
+		if self.has_value_changed("disable_rounded_total"):
+			self.set_disable_rounded_total_on_pos_profiles()
 
 		frappe.clear_cache()
 
