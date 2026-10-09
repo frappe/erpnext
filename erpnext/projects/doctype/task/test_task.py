@@ -330,6 +330,26 @@ class TestTask(ERPNextTestSuite):
 		).insert()
 		self.assertEqual(child_without_project.project, other_project.name)
 
+	def test_group_with_children_cannot_move_to_another_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		group = create_task("_Test Group Moving Project", is_group=1)
+		create_task("_Test Child Of Group Moving Project", parent_task=group.name)
+		group.reload()
+
+		group.project = make_project({"project_name": "_Test Project Group Target"}).name
+		self.assertRaises(frappe.ValidationError, group.save)
+
+		group_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Group Without Project", is_group=1
+		).insert()
+		frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group_without_project.name
+		).insert()
+		group_without_project.reload()
+		group_without_project.project = group.project
+		self.assertRaises(frappe.ValidationError, group_without_project.save)
+
 	def test_open_task_under_completed_parent(self):
 		parent = create_task("_Test Completed Parent", is_group=1)
 		parent.status = "Completed"

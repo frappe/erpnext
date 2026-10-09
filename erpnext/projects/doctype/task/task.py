@@ -83,6 +83,7 @@ class Task(NestedSet):
 
 	def validate(self):
 		self.validate_parent_project()
+		self.validate_children_project()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -256,6 +257,21 @@ class Task(NestedSet):
 					get_link_to_form("Task", self.parent_task), frappe.bold(self.project)
 				),
 				title=_("Invalid Parent Task"),
+			)
+
+	def validate_children_project(self):
+		if self.is_new() or not self.has_value_changed("project"):
+			return
+
+		child_projects = frappe.get_all(
+			"Task", filters={"parent_task": self.name}, pluck="project", distinct=True
+		)
+		if any((project or None) != (self.project or None) for project in child_projects):
+			frappe.throw(
+				_("Task {0} has child tasks in another project. Move them out of this group first.").format(
+					get_link_to_form("Task", self.name)
+				),
+				title=_("Invalid Project"),
 			)
 
 	def validate_parent_not_completed(self):
