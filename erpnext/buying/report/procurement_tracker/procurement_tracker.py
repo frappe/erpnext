@@ -151,10 +151,11 @@ def apply_filters_on_query(filters, parent, child, query):
 
 def get_data(filters):
 	purchase_order_entry = get_po_entries(filters)
-	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters)
+	request_items = {po.material_request_item for po in purchase_order_entry if po.material_request_item}
+	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters, request_items)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records(filters)
-	ordered_stock_qty = get_ordered_stock_qty_by_request_item(purchase_order_entry)
+	ordered_stock_qty = get_ordered_stock_qty_by_request_item(request_items)
 
 	procurement_record = []
 	if procurement_record_against_mr:
@@ -191,8 +192,7 @@ def get_data(filters):
 	return procurement_record
 
 
-def get_ordered_stock_qty_by_request_item(purchase_order_entry):
-	request_items = {po.material_request_item for po in purchase_order_entry if po.material_request_item}
+def get_ordered_stock_qty_by_request_item(request_items):
 	if not request_items:
 		return {}
 
@@ -222,8 +222,7 @@ def get_estimated_cost(po, mr_record, ordered_stock_qty):
 	return flt(mr_record.get("amount")) * (flt(po.stock_qty) / request_item_stock_qty)
 
 
-def get_mapped_mr_details(filters):
-	mr_records = {}
+def get_mapped_mr_details(filters, request_items):
 	parent = frappe.qb.DocType("Material Request")
 	child = frappe.qb.DocType("Material Request Item")
 
@@ -251,33 +250,33 @@ def get_mapped_mr_details(filters):
 			& (parent.material_request_type.isin(("Purchase", "Subcontracting")))
 		)
 	)
-	query = apply_filters_on_query(filters, parent, child, query)
 	if condition := get_allowed_companies_condition(parent.company, "Material Request"):
 		query = query.where(condition)
 
-	mr_details = query.run(as_dict=True)
+	mr_records = {}
+	if request_items:
+		for record in query.where(child.name.isin(list(request_items))).run(as_dict=True):
+			mr_records.setdefault(record.name, []).append(record)
 
+	unordered_query = apply_filters_on_query(filters, parent, child, query).where(child.ordered_qty == 0)
 	procurement_record_against_mr = []
-	for record in mr_details:
-		if record.ordered_qty:
-			mr_records.setdefault(record.name, []).append(frappe._dict(record))
-		else:
-			procurement_record_details = dict(
-				material_request_date=record.transaction_date,
-				material_request_no=record.parent,
-				requestor=record.owner,
-				item_code=record.item_code,
-				estimated_cost=flt(record.amount),
-				quantity=flt(record.qty),
-				unit_of_measurement=record.uom,
-				status=record.status,
-				actual_cost=0,
-				purchase_order_amt=0,
-				purchase_order_amt_in_company_currency=0,
-				project=record.project,
-				cost_center=record.cost_center,
-			)
-			procurement_record_against_mr.append(procurement_record_details)
+	for record in unordered_query.run(as_dict=True):
+		procurement_record_details = dict(
+			material_request_date=record.transaction_date,
+			material_request_no=record.parent,
+			requestor=record.owner,
+			item_code=record.item_code,
+			estimated_cost=flt(record.amount),
+			quantity=flt(record.qty),
+			unit_of_measurement=record.uom,
+			status=record.status,
+			actual_cost=0,
+			purchase_order_amt=0,
+			purchase_order_amt_in_company_currency=0,
+			project=record.project,
+			cost_center=record.cost_center,
+		)
+		procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
 
 
