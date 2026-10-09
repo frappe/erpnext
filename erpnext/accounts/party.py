@@ -703,7 +703,7 @@ def validate_party_accounts(doc):
 				account.idx, account.advance_account, account.company, _("Debtor/Creditor Advance")
 			)
 
-		validate_party_account_type(doc.doctype, account)
+		validate_party_account_type("Customer" if doc.doctype == "Customer Group" else doc.doctype, account)
 
 
 def validate_party_account_type(party_type, row):

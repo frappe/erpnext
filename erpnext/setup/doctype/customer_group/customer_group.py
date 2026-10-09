@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+from erpnext.accounts.party import validate_party_accounts
+
 
 class CustomerGroup(NestedSet):
 	# begin: auto-generated types
@@ -36,6 +38,7 @@ class CustomerGroup(NestedSet):
 	def validate(self):
 		if not self.parent_customer_group:
 			self.parent_customer_group = get_root_of("Customer Group")
+		validate_party_accounts(self)
 		self.validate_currency_for_receivable_and_advance_account()
 
 	def validate_currency_for_receivable_and_advance_account(self):
