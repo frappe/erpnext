@@ -49,3 +49,11 @@ class TestInactiveCustomers(ERPNextTestSuite):
 			self.get_customer_row(data),
 			"Customer ordering within the threshold must be excluded",
 		)
+
+	def test_closed_order_considered_pro_rata(self):
+		frappe.db.set_value("Sales Order", self.sales_order.name, {"status": "Closed", "per_delivered": 50})
+		_columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 30})
+
+		row = self.get_customer_row(data)
+		self.assertEqual(row.total_order_value, 1000)
+		self.assertEqual(row.total_order_considered, 500)

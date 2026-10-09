@@ -45,9 +45,10 @@ def get_sales_details(doctype):
 
 	if doctype == "Sales Order":
 		date_col = sales.transaction_date
+		# a Closed order is only partially fulfilled, so count it pro rata by delivery
 		considered = Sum(
 			Case()
-			.when(sales.status == "Stopped", sales.base_net_total * sales.per_delivered / 100)
+			.when(sales.status == "Closed", sales.base_net_total * sales.per_delivered / 100)
 			.else_(sales.base_net_total)
 		)
 	else:
