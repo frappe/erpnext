@@ -486,6 +486,40 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(additional_costs, 40)
 
+	def test_return_takes_back_additional_costs_that_net_to_zero(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		for description, amount in (("Freight", 100), ("Rebate", -100)):
+			scr.append(
+				"additional_costs",
+				{
+					"expense_account": "Expenses Included In Valuation - TCP1",
+					"description": description,
+					"amount": amount,
+					"base_amount": amount,
+				},
+			)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(
+			scr_name=scr.name, supplier_warehouse=scr.supplier_warehouse
+		)
+
+		self.assertEqual([row.amount for row in scr_return.additional_costs], [-100, 100])
+
 	def test_return_takes_back_additional_costs_allocated_by_amount(self):
 		service_items = [
 			{
@@ -542,7 +576,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(additional_costs, flt(scr.items[0].additional_cost_per_qty * 5, 2))
 
-	def test_multi_row_return_keeps_original_additional_cost_per_qty(self):
+	def make_amount_distributed_receipt_with_rejected_qty(self):
 		service_items = [
 			{
 				"warehouse": "Stores - TCP1",
@@ -587,6 +621,24 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		scr.save()
 		scr.submit()
+		return scr
+
+	def test_partial_return_of_amount_distributed_receipt_balances_the_ledger(self):
+		scr = self.make_amount_distributed_receipt_with_rejected_qty()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items = [scr_return.items[1]]
+		scr_return.save()
+		scr_return.submit()
+
+		original_row = scr.items[1]
+		self.assertEqual(
+			flt(scr_return.total_additional_costs, 2),
+			flt(-1 * original_row.qty * original_row.additional_cost_per_qty, 2),
+		)
+
+	def test_multi_row_return_keeps_original_additional_cost_per_qty(self):
+		scr = self.make_amount_distributed_receipt_with_rejected_qty()
 
 		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
 		scr_return.save()

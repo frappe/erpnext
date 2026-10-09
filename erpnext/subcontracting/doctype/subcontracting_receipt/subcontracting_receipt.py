@@ -554,18 +554,25 @@ class SubcontractingReceipt(SubcontractingController):
 		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
 		original = frappe.get_doc("Subcontracting Receipt", self.return_against, check_permission="read")
 		original_rows = {row.name: row for row in original.items if row.bom}
-		returned_cost = 0.0
+		basis = "amount" if original.distribute_additional_costs_based_on == "Amount" else "qty"
+		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
+		total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in original_rows.values())
+		returned_basis = returned_cost = 0.0
 		for row in self.items:
 			original_row = original_rows.get(row.subcontracting_receipt_item)
 			if not original_row:
 				continue
 
 			row.additional_cost_per_qty = 0.0
-			if row.warehouse and row.warehouse != original_row.rejected_warehouse:
+			if flt(original_row.qty) and row.warehouse and row.warehouse != original_row.rejected_warehouse:
 				row.additional_cost_per_qty = flt(original_row.additional_cost_per_qty)
 				returned_cost += flt(row.qty) * row.additional_cost_per_qty
-		total_cost = flt(original.total_additional_costs)
-		ratio = returned_cost / total_cost if total_cost else 0.0
+				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
+
+		if total_cost:
+			ratio = returned_cost / total_cost
+		else:
+			ratio = returned_basis / total_basis if total_basis else 0.0
 
 		self.set("additional_costs", [])
 		for row in original.additional_costs:
