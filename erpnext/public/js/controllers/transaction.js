@@ -214,8 +214,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				) {
 					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 				}
-
-				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, "items");
 			},
 		});
 
@@ -1391,10 +1389,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			row[field] = "";
 		});
 		this.frm.refresh_field("payment_schedule");
-	}
-
-	cost_center(doc, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 	}
 
 	due_date(doc, cdt, cdn) {
@@ -3278,23 +3272,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => (this.frm._last_coupon_code = this.frm.doc.coupon_code),
 			]);
 		}
-	}
-
-	setup_accounting_dimension_triggers() {
-		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
-			callback: function (r) {
-				if (r.message && r.message[0]) {
-					let dimensions = r.message[0].map((d) => d.fieldname);
-					dimensions.forEach((dim) => {
-						// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
-						cur_frm.cscript[dim] = function (doc, cdt, cdn) {
-							erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", dim);
-						};
-					});
-				}
-			},
-		});
 	}
 };
 

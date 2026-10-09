@@ -456,8 +456,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 			}
 		}
 		this.frm.cscript.update_totals(doc);
-
-		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "accounts");
 	}
 };
 
