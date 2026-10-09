@@ -142,7 +142,7 @@ class MaintenanceVisit(TransactionBase):
 		if not self.maintenance_schedule:
 			for d in self.get("purposes"):
 				if d.prevdoc_docname and d.prevdoc_doctype == "Warranty Claim":
-					if flag == 1 and self.is_superseded_by_completed_visit(d.prevdoc_docname):
+					if self.is_superseded_by_completed_visit(d.prevdoc_docname):
 						continue
 					if flag == 1:
 						mntc_date = self.mntc_date
@@ -196,7 +196,7 @@ class MaintenanceVisit(TransactionBase):
 					wc_doc.db_update()
 
 	def is_superseded_by_completed_visit(self, warranty_claim: str) -> bool:
-		"""A visit submitted after the claim was fully completed must not reopen it."""
+		"""Submitting or cancelling a non-final visit must not reopen a claim closed by a completed visit."""
 		if self.completion_status == "Fully Completed":
 			return False
 

@@ -121,11 +121,13 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		self.assertFalse(claim.resolved_by)
 		claim.save()
 
-	def test_partial_visit_submitted_after_completion_keeps_claim_closed(self):
+	def test_partial_visit_submitted_or_cancelled_after_completion_keeps_claim_closed(self):
 		claim = self.make_warranty_claim()
 		self.make_maintenance_visit_for_claim(claim, "Fully Completed")
-		self.make_maintenance_visit_for_claim(claim, "Partially Completed")
+		partial_visit = self.make_maintenance_visit_for_claim(claim, "Partially Completed")
+		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
 
+		partial_visit.cancel()
 		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
 
 	def test_reopening_clears_resolution(self):
