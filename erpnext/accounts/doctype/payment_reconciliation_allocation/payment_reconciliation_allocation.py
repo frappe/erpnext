@@ -29,12 +29,14 @@ class PaymentReconciliationAllocation(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		to_pay_account: DF.Link | None
+		to_pay_exchange_rate: DF.Float
 		to_pay_party: DF.DynamicLink | None
 		to_pay_party_type: DF.Link | None
 		to_pay_voucher_no: DF.DynamicLink
 		to_pay_voucher_row: DF.Data | None
 		to_pay_voucher_type: DF.Link
 		to_receive_account: DF.Link | None
+		to_receive_exchange_rate: DF.Float
 		to_receive_party: DF.DynamicLink | None
 		to_receive_party_type: DF.Link | None
 		to_receive_voucher_no: DF.DynamicLink

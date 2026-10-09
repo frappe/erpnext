@@ -875,7 +875,7 @@ class JournalEntry(AccountsController):
 
 		return JournalEntryGLComposer(self).compose()
 
-	def make_gl_entries(self, cancel: int = 0, adv_adj: int = 0) -> None:
+	def make_gl_entries(self, cancel: int = 0, adv_adj: int = 0, from_repost: bool = False) -> None:
 		from erpnext.accounts.general_ledger import make_gl_entries
 
 		merge_entries = frappe.get_single_value("Accounts Settings", "merge_similar_account_heads")
@@ -895,7 +895,7 @@ class JournalEntry(AccountsController):
 				update_outstanding=update_outstanding,
 			)
 			frappe.flags.party_not_required = False
-			if cancel:
+			if cancel and not from_repost:
 				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 
 	@frappe.whitelist()

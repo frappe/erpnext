@@ -11,7 +11,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
-from frappe.model.naming import determine_consecutive_week_number
+from frappe.model.naming import determine_consecutive_week_number, set_new_name
 from frappe.query_builder import AliasedQuery, Case, Criterion, Field, Table
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Round, Sum
@@ -24,6 +24,7 @@ from frappe.utils import (
 	flt,
 	formatdate,
 	get_datetime,
+	get_link_to_form,
 	get_number_format_info,
 	getdate,
 	now,
@@ -774,6 +775,8 @@ def update_reference_in_payment_entry(
 			existing_row.allocated_amount -= d.allocated_amount
 
 			new_row = payment_entry.append("references")
+			# named now: the FX journal booked below keys on it before save
+			set_new_name(new_row)
 			new_row.docstatus = 1
 			for field in list(reference_details):
 				new_row.set(field, reference_details[field])
@@ -786,6 +789,7 @@ def update_reference_in_payment_entry(
 
 	else:
 		new_row = payment_entry.append("references")
+		set_new_name(new_row)
 		new_row.docstatus = 1
 		new_row.update(reference_details)
 		row = new_row
@@ -873,13 +877,79 @@ def cancel_exchange_gain_loss_journal(
 CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE = "Reconciliation Journal"
 
 
-def _unwind_cross_account_bridge(bridge: str) -> None:
+def _unwind_cross_account_bridge(bridge: str, unlink: bool = True, cancelling: str | None = None) -> None:
 	"""Cancel a cross-account bridge JE. Its on_cancel cascades to the linked FX JE
-	and unlinks all referencing vouchers (always, regardless of Accounts Settings).
-	"""
+	and unlinks every voucher that points at it. `cancelling` is the voucher whose
+	cancel got here: it reverses its own ledger rows next, so they stay as booked."""
+	# like a directly linked payment, a live one blocks the cancel when unlinking is off
+	if not unlink and (linked := _vouchers_referencing_bridge(bridge)):
+		frappe.throw(
+			_(
+				"{0} is reconciled through {1}. Unreconcile it first, or enable Unlink Payment on "
+				"Cancellation of Invoice in Accounts Settings."
+			).format(", ".join(linked), get_link_to_form("Journal Entry", bridge))
+		)
+
 	bridge_doc = frappe.get_doc("Journal Entry", bridge)
 	bridge_doc.flags.ignore_links = True
+	bridge_doc.flags.keep_ledger_of = cancelling
 	bridge_doc.cancel()
+
+
+def _vouchers_referencing_bridge(bridge: str) -> list:
+	"""Submitted user vouchers (PE references, non-system JE lines) pointing at `bridge`."""
+	payments = frappe.get_all(
+		"Payment Entry",
+		filters=[
+			["Payment Entry Reference", "reference_doctype", "=", "Journal Entry"],
+			["Payment Entry Reference", "reference_name", "=", bridge],
+			["docstatus", "=", 1],
+		],
+		pluck="name",
+		distinct=True,
+	)
+	journals = frappe.get_all(
+		"Journal Entry",
+		filters=[
+			["Journal Entry Account", "reference_type", "=", "Journal Entry"],
+			["Journal Entry Account", "reference_name", "=", bridge],
+			["docstatus", "=", 1],
+			["is_system_generated", "=", 0],
+		],
+		pluck="name",
+		distinct=True,
+	)
+	return payments + journals
+
+
+def _linked_bridges(ref_doc: object, payment_name: str | None) -> list:
+	"""Submitted system bridges tied to `ref_doc`. With `payment_name` (unreconcile of
+	one pair) only that pair's bridges count; without it, every bridge the doc touches:
+	the ones it points at and the ones pointing at it.
+	"""
+	if payment_name:
+		names = [ref_doc.name, payment_name]
+	else:
+		rows = ref_doc.get("references") or ref_doc.get("accounts") or []
+		names = [
+			row.reference_name
+			for row in rows
+			if (row.get("reference_doctype") or row.get("reference_type")) == "Journal Entry"
+		]
+		names += get_linked_system_journals(ref_doc.doctype, ref_doc.name, CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
+
+	if not names:
+		return []
+	return frappe.get_all(
+		"Journal Entry",
+		filters={
+			"name": ("in", names),
+			"voucher_type": CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
+			"is_system_generated": 1,
+			"docstatus": 1,
+		},
+		pluck="name",
+	)
 
 
 def unwind_reconciliation(
@@ -894,73 +964,32 @@ def unwind_reconciliation(
 	Unreconcile tool (`on_submit`, per allocation, scoped by `payment_name`) and
 	document cancellation (`on_cancel`, whole-document). Runs, in order:
 
-	  1. unwind any cross-account bridge JE linking the doc (see below),
+	  1. cancel the cross-account bridge JEs tied to the doc (see `_linked_bridges`),
 	  2. cancel its linked Exchange Gain/Loss journal,
 	  3. cancel a linked common-party journal (document cancel only, `cancel_common_party`),
 	  4. unlink the payment references (`unlink`).
 
 	Order matters: steps 2-3 locate their journals through the JEA references that
-	step 4 strips, so the cancellations must run before the unlink. (`on_submit`'s
-	unlink is scoped by `payment_name` to a single pair, so it never touches those
-	journals regardless of order.)
+	step 4 strips, so the cancellations must run before the unlink.
 
-	Bridge unwind (step 1) — cancel the cross-account bridge JE(s) linked to the doc,
-	whole, since each is a real GL transfer (its on_cancel cascade reopens both
-	vouchers and cancels the linked FX JE). A bridge can sit on any side of the
-	relationship, so all directions are resolved in one query:
-	  - it references the doc            → JEA(reference == ref) → parent
-	  - the doc / payment IS the bridge   → `ref_no` / `payment_name`
-	  - the doc references it             → JEA(parent == ref_no) → reference_name (JE),
-	                                        or Payment Entry Reference(parent == ref_no) (PE)
-	`payment_name` scopes the first direction to a single pair (unreconcile); omit it
-	to act on every linked bridge (document cancel). The `docstatus == 1` filter stops
-	the bridge's own on_cancel cascade from re-entering.
+	Each bridge is cancelled whole, since it is a real GL transfer: its own on_cancel
+	reopens both vouchers and cancels the linked FX JE. A cancelled bridge always
+	releases the vouchers pointing at it, whatever `unlink` says.
 	"""
-	ref_type, ref_no = ref_doc.doctype, ref_doc.name
+	if ref_doc.get("voucher_type") == CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE and ref_doc.get(
+		"is_system_generated"
+	):
+		unlink = True
 
-	je = qb.DocType("Journal Entry")
-	jea = qb.DocType("Journal Entry Account")
-	per = qb.DocType("Payment Entry Reference")
-
-	referencing = get_linked_system_journals(ref_type, ref_no, CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE, docstatus=1)
-	if payment_name:
-		referencing = [b for b in referencing if b == payment_name]
-
-	self_names = [ref_no, payment_name] if payment_name else [ref_no]
-
-	# Resolve "the doc IS the bridge" (self_names) and "the doc references the bridge" in
-	# one pass: the reference is recorded on JEA rows when the writable voucher is a JE,
-	# and on Payment Entry Reference rows when it is a PE — left-join both so cancelling
-	# either kind of writable-side voucher resolves the bridge it points at.
-	bridges = (
-		qb.from_(je)
-		.left_join(jea)
-		.on(
-			(jea.parent == ref_no) & (jea.reference_type == "Journal Entry") & (jea.reference_name == je.name)
-		)
-		.left_join(per)
-		.on(
-			(per.parent == ref_no)
-			& (per.reference_doctype == "Journal Entry")
-			& (per.reference_name == je.name)
-		)
-		.select(je.name)
-		.distinct()
-		.where(
-			(je.voucher_type == CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
-			& (je.docstatus == 1)
-			& (je.name.isin(self_names) | jea.name.isnotnull() | per.name.isnotnull())
-		)
-		.run(pluck=True)
-	)
-	for bridge in set(bridges) | set(referencing):
-		_unwind_cross_account_bridge(bridge)
+	cancelling = ref_doc.name if ref_doc.docstatus == 2 else None
+	for bridge in _linked_bridges(ref_doc, payment_name):
+		_unwind_cross_account_bridge(bridge, unlink, cancelling)
 
 	cancel_exchange_gain_loss_journal(ref_doc, referenced_dt, referenced_dn)
 	if cancel_common_party:
 		cancel_common_party_journal(ref_doc)
 	if unlink:
-		unlink_ref_doc_from_payment_entries(ref_doc, payment_name)
+		unlink_ref_doc_from_payment_entries(ref_doc, payment_name, ref_doc.flags.keep_ledger_of)
 
 
 def get_linked_system_journals(
@@ -1032,7 +1061,10 @@ def cancel_common_party_journal(self):
 
 
 def update_accounting_ledgers_after_reference_removal(
-	ref_type: str | None = None, ref_no: str | None = None, payment_name: str | None = None
+	ref_type: str | None = None,
+	ref_no: str | None = None,
+	payment_name: str | None = None,
+	keep_ledger_of: str | None = None,
 ):
 	# General Ledger
 	gle = qb.DocType("GL Entry")
@@ -1047,6 +1079,8 @@ def update_accounting_ledgers_after_reference_removal(
 
 	if payment_name:
 		gle_update_query = gle_update_query.where(gle.voucher_no == payment_name)
+	if keep_ledger_of:
+		gle_update_query = gle_update_query.where(gle.voucher_no != keep_ledger_of)
 	gle_update_query.run()
 
 	# Payment Ledger
@@ -1064,6 +1098,8 @@ def update_accounting_ledgers_after_reference_removal(
 
 	if payment_name:
 		ple_update_query = ple_update_query.where(ple.voucher_no == payment_name)
+	if keep_ledger_of:
+		ple_update_query = ple_update_query.where(ple.voucher_no != keep_ledger_of)
 	ple_update_query.run()
 
 	# Advance Payment
@@ -1102,10 +1138,14 @@ def remove_ref_from_advance_section(ref_doc: object = None, payment_name: str | 
 		frappe.db.delete(child_table, {"name": ("in", row_names)})
 
 
-def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str | None = None):
+def unlink_ref_doc_from_payment_entries(
+	ref_doc: object = None, payment_name: str | None = None, keep_ledger_of: str | None = None
+):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
 	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name, payment_name)
-	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name, payment_name)
+	update_accounting_ledgers_after_reference_removal(
+		ref_doc.doctype, ref_doc.name, payment_name, keep_ledger_of
+	)
 	remove_ref_from_advance_section(ref_doc, payment_name)
 
 
@@ -2594,9 +2634,9 @@ class QueryPaymentLedger:
 
 		elif self.exclude_zero_outstanding:
 			self.cte_query_voucher_amount_and_outstanding = (
-				self.cte_query_voucher_amount_and_outstanding.having(
-					(qb.Field("outstanding_in_account_currency").notnull())
-					& (qb.Field("outstanding_in_account_currency") != 0)
+				self.cte_query_voucher_amount_and_outstanding.where(
+					Table("outstanding").amount_in_account_currency.notnull()
+					& (Table("outstanding").amount_in_account_currency != 0)
 				)
 			)
 

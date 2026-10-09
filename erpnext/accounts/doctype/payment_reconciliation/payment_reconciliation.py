@@ -7,7 +7,7 @@ from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import IfNull
 from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
@@ -27,6 +27,23 @@ from erpnext.accounts.utils import (
 
 RECEIVABLE = "Receivable"
 PAYABLE = "Payable"
+INVOICE_DOCTYPES = ("Sales Invoice", "Purchase Invoice")
+
+
+def payment_side(party_type) -> str:
+	"""Table holding the party's own payments: `to_pay` for receivable parties, else `to_receive`."""
+	return "to_pay" if erpnext.get_party_account_type(party_type) == RECEIVABLE else "to_receive"
+
+
+def amount_precision(currency) -> int:
+	"""Decimal places for amounts in this currency."""
+	df = frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
+	return get_field_precision(df, currency=currency)
+
+
+def is_cash_pair(recv, pay) -> bool:
+	"""Neither side is an invoice: a payment settled against a refund."""
+	return recv.voucher_type not in INVOICE_DOCTYPES and pay.voucher_type not in INVOICE_DOCTYPES
 
 
 def classify(account_type: str, amount: float) -> str:
@@ -55,23 +72,13 @@ def _fifo_key(r):
 	)
 
 
-_WRITABLE_VOUCHER_TYPES = {"Payment Entry", "Journal Entry"}
-
-
-def link_strategy(recv, pay) -> str:
-	"""`voucher_mutation` if either side is PE/JE; else `bridge_je`."""
-	if recv.voucher_type in _WRITABLE_VOUCHER_TYPES or pay.voucher_type in _WRITABLE_VOUCHER_TYPES:
-		return "voucher_mutation"
-	return "bridge_je"
-
-
 def pick_voucher_side(recv, pay, party_type=None) -> str | None:
 	"""Return `"receive"`/`"pay"` — the side owning the `voucher_no` slot in
 	`reconcile_against_document` — or `None` if neither side has a mutable voucher
 	(pair must be bridged). Priority: PE on the party's natural payment side
-	(to_pay for Customer, to_receive for Supplier), else a JE (`to_pay` preferred).
+	(see `payment_side`), else a JE (`to_pay` preferred).
 	"""
-	natural = "pay" if party_type == "Customer" else "receive"
+	natural = payment_side(party_type).removeprefix("to_")
 	side_row = {"receive": recv, "pay": pay}
 
 	if side_row[natural].voucher_type == "Payment Entry":
@@ -129,12 +136,13 @@ class OpenBalanceFetcher:
 	4. filter by amount (min/max + zero-drop)
 	"""
 
-	def __init__(self, pr):
+	def __init__(self, pr, vouchers=None):
 		self.pr = pr
 		self.company = pr.company
 		self.party_type = pr.party_type
 		self.party = pr.party
 		self.dimension_filter = DimensionFilter(pr)
+		self.vouchers = vouchers
 
 	def fetch(self):
 		accounts = self._get_party_accounts()
@@ -147,7 +155,7 @@ class OpenBalanceFetcher:
 
 		rows = self._split_pe_by_references(rows)
 		self._enrich_voucher_metadata(rows)
-		return [r for r in rows if self._passes_amount_filter(r)]
+		return [r for r in rows if self._passes_amount_filter(r) and self._in_date_range(r)]
 
 	def _get_party_accounts(self):
 		"""Single-account when `receivable_payable_account` is set; else all
@@ -172,14 +180,14 @@ class OpenBalanceFetcher:
 		if self.pr.receivable_payable_account:
 			accounts.add(self.pr.receivable_payable_account)
 		else:
-			natural_root = "Asset" if self.party_type == "Customer" else "Liability"
+			natural_root = "Asset" if payment_side(self.party_type) == "to_pay" else "Liability"
 			normal_accounts = rows.where(account.root_type == natural_root).run(as_dict=True)
 			accounts.update([r.account for r in normal_accounts])
 
 		if self.pr.default_advance_account:
 			accounts.add(self.pr.default_advance_account)
 		else:
-			opposite_root = "Liability" if self.party_type == "Customer" else "Asset"
+			opposite_root = "Liability" if payment_side(self.party_type) == "to_pay" else "Asset"
 			advance_accounts = rows.where(account.root_type == opposite_root).run(as_dict=True)
 			accounts.update([r.account for r in advance_accounts])
 
@@ -204,6 +212,9 @@ class OpenBalanceFetcher:
 			posting_date_filter.append(ple.posting_date.lte(self.pr.to_date))
 
 		dimension_filter = self.dimension_filter.conditions(ple, "Payment Ledger Entry")
+		# payments must also pass Payment Entry's own permissions
+		if pe_only := self.dimension_filter.conditions(ple, "Payment Entry"):
+			dimension_filter.append((ple.voucher_type != "Payment Entry") | Criterion.all(pe_only))
 
 		return common_filter, posting_date_filter, dimension_filter
 
@@ -212,8 +223,19 @@ class OpenBalanceFetcher:
 		ple = qb.DocType("Payment Ledger Entry")
 		common_filter.append(ple.against_voucher_type != "Journal Entry")
 
+		vouchers = None
+		if self.vouchers is not None:
+			vouchers = [
+				frappe._dict(voucher_type=vtype, voucher_no=name)
+				for vtype, name in self.vouchers
+				if vtype != "Journal Entry"
+			]
+			if not vouchers:
+				return []
+
 		ple_query = QueryPaymentLedger()
 		raw = ple_query.get_voucher_outstandings(
+			vouchers=vouchers,
 			common_filter=common_filter,
 			posting_date=posting_date_filter,
 			accounting_dimensions=dimension_filter,
@@ -241,6 +263,13 @@ class OpenBalanceFetcher:
 			return False
 
 		return True
+
+	def _in_date_range(self, r):
+		# PE rows carry the PE's own date, the ledger filter can't see it
+		posting_date = getdate(r.get("posting_date"))
+		if self.pr.from_date and posting_date < getdate(self.pr.from_date):
+			return False
+		return not (self.pr.to_date and posting_date > getdate(self.pr.to_date))
 
 	def _split_pe_by_references(self, rows):
 		"""Split a PE's single PLE row into a free slice (voucher_row=None) plus
@@ -270,9 +299,10 @@ class OpenBalanceFetcher:
 
 			sign = -1 if flt(r.outstanding_amount) < 0 else 1
 
+			precision = amount_precision(r.currency)
 			bound_total = sum(flt(ref.allocated_amount) for ref in refs)
 			free = frappe._dict(r.copy())
-			free.outstanding_amount = flt(r.outstanding_amount) - sign * bound_total
+			free.outstanding_amount = flt(flt(r.outstanding_amount) - sign * bound_total, precision)
 			free.amount = free.outstanding_amount
 			free.reference_doctype = None
 			free.reference_name = None
@@ -318,12 +348,15 @@ class OpenBalanceFetcher:
 		jea = qb.DocType("Journal Entry Account")
 		account_dt = qb.DocType("Account")
 
-		# Sign convention: positive = balance in account's natural direction
-		# (Dr-Cr for Receivable accounts, Cr-Dr for Payable).
-		if erpnext.get_party_account_type(self.party_type) == "Receivable":
-			signed_amount = jea.debit_in_account_currency - jea.credit_in_account_currency
-		else:
-			signed_amount = jea.credit_in_account_currency - jea.debit_in_account_currency
+		# positive = balance in the line account's natural direction, as in the ledger
+		signed_amount = (
+			Case()
+			.when(
+				account_dt.account_type == RECEIVABLE,
+				jea.debit_in_account_currency - jea.credit_in_account_currency,
+			)
+			.else_(jea.credit_in_account_currency - jea.debit_in_account_currency)
+		)
 
 		conditions = [
 			je.docstatus == 1,
@@ -344,6 +377,11 @@ class OpenBalanceFetcher:
 			conditions.append(je.posting_date.lte(self.pr.to_date))
 		if self.pr.currency_filter:
 			conditions.append(jea.account_currency == self.pr.currency_filter)
+		if self.vouchers is not None:
+			names = [name for vtype, name in self.vouchers if vtype == "Journal Entry"]
+			if not names:
+				return []
+			conditions.append(je.name.isin(names))
 		conditions += self.dimension_filter.conditions(jea, "Journal Entry Account")
 
 		query = (
@@ -373,6 +411,8 @@ class OpenBalanceFetcher:
 			)
 			.where(Criterion.all(conditions))
 			.orderby(je.posting_date)
+			.orderby(je.name)
+			.orderby(jea.idx)
 		)
 
 		raw = query.run(as_dict=True)
@@ -414,6 +454,8 @@ class OpenBalanceFetcher:
 				qb.from_(jea)
 				.inner_join(je)
 				.on(jea.parent == je.name)
+				.inner_join(account_dt)
+				.on(account_dt.name == jea.account)
 				.select(jea.parent.as_("je_name"), jea.account, Sum(signed_amount).as_("settled"))
 				.where(
 					(je.docstatus == 1)
@@ -430,15 +472,24 @@ class OpenBalanceFetcher:
 				key = (s.je_name, s.account)
 				alloc_by_key[key] = alloc_by_key.get(key, 0) + flt(s.settled)
 
-			for r in rows:
-				alloc = alloc_by_key.get((r.voucher_no, r.account), 0)
-				if alloc:
-					r.outstanding_amount = flt(r.outstanding_amount) + alloc
-					r.amount = r.outstanding_amount
-
-			rows = [r for r in rows if flt(r.outstanding_amount) != 0]
+			self._apply_settlements(rows, alloc_by_key)
+			rows = [r for r in rows if r.outstanding_amount]
 
 		return rows
+
+	@staticmethod
+	def _apply_settlements(rows, settled):
+		"""Settlements are known per journal and account, not per line: spend each on
+		the lines of the opposite sign, oldest first, never pushing a line past zero."""
+		for r in rows:
+			key = (r.voucher_no, r.account)
+			left = settled.get(key, 0)
+			balance = flt(r.outstanding_amount)
+			if left and (left > 0) != (balance > 0):
+				used = min(abs(left), abs(balance)) * (1 if left > 0 else -1)
+				settled[key] = left - used
+				balance += used
+			r.outstanding_amount = r.amount = flt(balance, amount_precision(r.currency))
 
 	def _enrich_voucher_metadata(self, rows):
 		"""Adds is_return, is_advance, and exchange_rate etc. to the PLE rows"""
@@ -461,7 +512,7 @@ class OpenBalanceFetcher:
 					)
 
 		# PE Receive uses source_exchange_rate; PE Pay uses target_exchange_rate.
-		pe_meta: dict[str, tuple[int, float]] = {}
+		pe_meta: dict[str, tuple] = {}
 		if "Payment Entry" in by_type:
 			for p in frappe.db.get_all(
 				"Payment Entry",
@@ -469,6 +520,7 @@ class OpenBalanceFetcher:
 				fields=[
 					"name",
 					"payment_type",
+					"posting_date",
 					"book_advance_payments_in_separate_party_account",
 					"source_exchange_rate",
 					"target_exchange_rate",
@@ -478,6 +530,7 @@ class OpenBalanceFetcher:
 				pe_meta[p.name] = (
 					int(bool(p.book_advance_payments_in_separate_party_account)),
 					flt(exch) or 1.0,
+					p.posting_date,
 				)
 
 		for r in rows:
@@ -488,10 +541,12 @@ class OpenBalanceFetcher:
 				r.exchange_rate = exch
 			elif r.voucher_type == "Payment Entry":
 				if r.voucher_no in pe_meta:
-					adv, exch = pe_meta[r.voucher_no]
+					adv, exch, posting_date = pe_meta[r.voucher_no]
 					r.is_return = 0
 					r.is_advance = adv
 					r.exchange_rate = exch
+					# later reconcile-effect ledger rows move the ledger's date, the PE's own doesn't
+					r.posting_date = posting_date
 			elif r.voucher_type == "Journal Entry":
 				continue  # already enriched in _query_je_outstanding
 			else:
@@ -550,7 +605,7 @@ class Allocator:
 		allocations = []
 		recv_remaining = [flt(r.outstanding_amount) for r in receivables]
 		pay_remaining = [flt(p.outstanding_amount) for p in payables]
-		precision = self._amount_precision(receivables[0].currency)
+		precision = amount_precision(receivables[0].currency)
 
 		# Drain same-account counterparties first, then cross-account. Avoids minting
 		# a bridge JE when a same-account match exists. FIFO preserved within each tier.
@@ -574,27 +629,25 @@ class Allocator:
 
 		return allocations
 
-	@staticmethod
-	def _amount_precision(currency):
-		df = frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
-		return get_field_precision(df, currency=currency)
-
-	def _difference_account(self, difference_amount):
+	def _difference_account(self, recv, pay, difference_amount):
 		if not difference_amount:
 			return None
-		is_gain = difference_amount > 0 if self.party_type == "Customer" else difference_amount < 0
+		# same sign rule as `_fx_difference`: only supplier invoice pairs read inverted
+		inverted = recv.account_type == PAYABLE and not is_cash_pair(recv, pay)
+		is_gain = difference_amount < 0 if inverted else difference_amount > 0
 		return get_exchange_gain_loss_account(self.company, is_gain)
 
 	def _make_allocation(self, recv, pay, allocated_amount):
 		difference_amount = self._fx_difference(recv, pay, allocated_amount)
-		gain_loss_posting_date = self._gain_loss_posting_date(recv, pay)
+		payment, invoice = (pay, recv) if payment_side(self.party_type) == "to_pay" else (recv, pay)
+		gain_loss_posting_date = self._gain_loss_posting_date(payment, invoice)
 		is_cross_account = recv.account != pay.account
 
 		# Pairs with no mutable voucher are bridged at reconcile time; for preview
-		# metadata fall back to the party_type convention.
+		# metadata fall back to the party's payment side.
 		side = pick_voucher_side(recv, pay, self.party_type)
 		if side is None:
-			side = "pay" if self.party_type == "Customer" else "receive"
+			side = payment_side(self.party_type).removeprefix("to_")
 		mutated_row = pay if side == "pay" else recv
 		referenced_row = recv if side == "pay" else pay
 
@@ -620,12 +673,14 @@ class Allocator:
 				# `exchange_rate` must be the AGAINST side's rate; the voucher-side rate
 				# would zero out the FX gain/loss and skip the FX JE.
 				"difference_amount": difference_amount,
-				"difference_account": self._difference_account(difference_amount),
+				"difference_account": self._difference_account(recv, pay, difference_amount),
 				"gain_loss_posting_date": gain_loss_posting_date,
 				"exchange_rate": flt(referenced_row.exchange_rate) or 1.0,
+				# each side's own rate, so a bridge can book FX on the right leg
+				"to_receive_exchange_rate": flt(recv.exchange_rate) or 1.0,
+				"to_pay_exchange_rate": flt(pay.exchange_rate) or 1.0,
 				"currency": mutated_row.currency,
-				# TODO: is opp of voucher side relevant here? Depends on how it's used
-				"cost_center": pay.cost_center or recv.cost_center,
+				"cost_center": payment.cost_center or invoice.cost_center,
 			}
 		)
 
@@ -654,8 +709,7 @@ class Allocator:
 		amt_in_recv_rate = flt(recv_rate * flt(allocated_amount), self.diff_precision)
 
 		# Cash-event pair (no invoice side): Receivable-style formula for both parties.
-		invoice_doctypes = ("Sales Invoice", "Purchase Invoice")
-		if recv.voucher_type not in invoice_doctypes and pay.voucher_type not in invoice_doctypes:
+		if is_cash_pair(recv, pay):
 			return amt_in_pay_rate - amt_in_recv_rate
 
 		# SI/PI ↔ PE: invert sign for Payable accounts (Supplier).
@@ -663,13 +717,12 @@ class Allocator:
 			return amt_in_recv_rate - amt_in_pay_rate
 		return amt_in_pay_rate - amt_in_recv_rate
 
-	def _gain_loss_posting_date(self, recv, pay):
-		date = pay.posting_date
-		# TODO: should this be based on the voucher side instead?
-		if pay.is_advance:
+	def _gain_loss_posting_date(self, payment, invoice):
+		date = payment.posting_date
+		if payment.is_advance:
 			return date
 		if self.exc_gain_loss_posting_date_setting == "Invoice":
-			date = recv.posting_date
+			date = invoice.posting_date
 		elif self.exc_gain_loss_posting_date_setting == "Reconciliation Date":
 			date = nowdate()
 		return date
@@ -705,10 +758,12 @@ class ReconcileRouter:
 
 	def _bridge_cross_account(self, row):
 		"""Re-express the pair as two same-account rows against a minted transfer JE,
-		each pairing an original voucher with the matching bridge leg. FX rides on
-		the to_pay sub-row (transfer legs are rate-matched).
+		each pairing an original voucher with the matching bridge leg. The legs are
+		booked at the allocation's rate, so each sub-row carries the FX between its
+		own original voucher and that rate.
 		"""
 		bridge = _post_cross_account_transfer(row, self.company, self.pr.dimensions)
+		diff_r, diff_p = self._leg_differences(row)
 
 		# accounts[0] = credit leg (to_receive account); accounts[1] = debit leg (to_pay account).
 		recv_leg, pay_leg = bridge.accounts[0], bridge.accounts[1]
@@ -722,12 +777,11 @@ class ReconcileRouter:
 				"to_pay_account": row.to_receive_account,
 				"to_pay_party_type": row.to_receive_party_type,
 				"to_pay_party": row.to_receive_party,
-				"difference_amount": 0,
-				"difference_account": None,
+				"difference_amount": diff_r,
+				"difference_account": row.difference_account if diff_r else None,
 			}
 		)
 
-		# Keeps difference_amount/difference_account so the FX JE is booked on this leg.
 		row_p = frappe._dict(row.as_dict())
 		row_p.update(
 			{
@@ -737,10 +791,32 @@ class ReconcileRouter:
 				"to_receive_account": row.to_pay_account,
 				"to_receive_party_type": row.to_pay_party_type,
 				"to_receive_party": row.to_pay_party,
+				"difference_amount": diff_p,
+				"difference_account": row.difference_account if diff_p else None,
 			}
 		)
 
 		return [row_r, row_p]
+
+	def _leg_differences(self, row):
+		"""FX for (original to_receive, bridge leg) and (bridge leg, original to_pay)."""
+		allocator = Allocator(self.pr)
+		allocated = flt(row.allocated_amount)
+
+		def voucher(side, voucher_type=None, rate=None):
+			return frappe._dict(
+				voucher_type=voucher_type or row.get(f"{side}_voucher_type"),
+				exchange_rate=rate or row.get(f"{side}_exchange_rate"),
+				currency=row.currency,
+				account_type=frappe.get_cached_value("Account", row.get(f"{side}_account"), "account_type"),
+			)
+
+		# legs are booked at `exchange_rate`, on the counterpart's account
+		pay_leg = voucher("to_receive", "Journal Entry", row.exchange_rate)
+		recv_leg = voucher("to_pay", "Journal Entry", row.exchange_rate)
+		diff_r = allocator._fx_difference(voucher("to_receive"), pay_leg, allocated)
+		diff_p = allocator._fx_difference(recv_leg, voucher("to_pay"), allocated)
+		return diff_r, diff_p
 
 	@staticmethod
 	def _voucher_fields(row, side):
@@ -766,7 +842,7 @@ class ReconcileRouter:
 			pay = frappe._dict(voucher_type=row.to_pay_voucher_type)
 			return pick_voucher_side(recv, pay, self.party_type) is None
 
-		natural = "to_pay" if self.party_type == "Customer" else "to_receive"
+		natural = payment_side(self.party_type)
 		if row.get(f"{natural}_voucher_type") == "Payment Entry" and frappe.db.get_value(
 			"Payment Entry",
 			row.get(f"{natural}_voucher_no"),
@@ -799,6 +875,11 @@ class ReconcileRouter:
 				else "debit_in_account_currency"
 			)
 
+		party_type = writable.party_type or self.party_type
+		difference_amount = flt(row.get("difference_amount"))
+		if writable.voucher_type == "Journal Entry" and party_type != "Customer" and is_cash_pair(recv, pay):
+			difference_amount = -difference_amount
+
 		args = frappe._dict(
 			{
 				"writable_voucher_type": writable.voucher_type,
@@ -808,14 +889,14 @@ class ReconcileRouter:
 				"non_writable_voucher_no": non_writable.voucher_no,
 				"account": account or self.pr.receivable_payable_account,
 				"exchange_rate": row.get("exchange_rate"),
-				"party_type": writable.party_type or self.party_type,
+				"party_type": party_type,
 				"party": writable.party or self.pr.party,
 				"is_advance": row.get("is_advance"),
 				"dr_or_cr": dr_or_cr,
 				"unreconciled_amount": flt(row.get("unreconciled_amount")),
 				"unadjusted_amount": flt(row.get("amount")),
 				"allocated_amount": flt(row.get("allocated_amount")),
-				"difference_amount": flt(row.get("difference_amount")),
+				"difference_amount": difference_amount,
 				"difference_account": row.get("difference_account"),
 				"difference_posting_date": row.get("gain_loss_posting_date"),
 				"cost_center": row.get("cost_center"),
@@ -1042,21 +1123,32 @@ class PaymentReconciliation(Document):
 		self.get_unreconciled_entries()
 
 	def validate_allocation(self):
-		"""Per-row checks: both sides set, allocated ≤ each side's outstanding,
-		matching currency and party. Guards manual edits (Allocator already
-		prevents cross-currency).
+		"""Per-row checks against open balances fetched fresh from the ledger, not the
+		browser's copy: both sides still open, allocated ≤ each side's outstanding
+		(summed across rows), matching currency and party. Each row is then rebuilt
+		from the ledger, keeping only what the user may change.
 		"""
-		recv_index = {
-			(r.voucher_type, r.voucher_no, r.voucher_row or ""): r for r in self.get("to_receive") or []
-		}
-		pay_index = {(r.voucher_type, r.voucher_no, r.voucher_row or ""): r for r in self.get("to_pay") or []}
+		rows = [
+			row
+			for row in self.get("allocation") or []
+			if row.allocated_amount and row.to_receive_voucher_no and row.to_pay_voucher_no
+		]
+		if not rows:
+			frappe.throw(_("No records found in Allocation table"))
 
-		any_valid = False
-		for row in self.get("allocation") or []:
-			if not (row.allocated_amount and row.to_receive_voucher_no and row.to_pay_voucher_no):
-				continue
-			any_valid = True
+		recv_index, pay_index = self._fresh_open_balances(rows)
+		allocator = Allocator(self)
+		user_fields = (
+			"allocated_amount",
+			"difference_account",
+			"gain_loss_posting_date",
+			"debit_or_credit_note_posting_date",
+			"cost_center",
+			*(dim.fieldname for dim in self.dimensions),
+		)
+		used = {}
 
+		for row in rows:
 			recv_key = (
 				row.to_receive_voucher_type,
 				row.to_receive_voucher_no,
@@ -1066,20 +1158,31 @@ class PaymentReconciliation(Document):
 
 			recv_src = recv_index.get(recv_key)
 			pay_src = pay_index.get(pay_key)
-			recv_outs = flt(recv_src.outstanding_amount) if recv_src else 0
-			pay_outs = flt(pay_src.outstanding_amount) if pay_src else 0
-			allocated = flt(row.allocated_amount)
+			for key, src in ((recv_key, recv_src), (pay_key, pay_src)):
+				if not src:
+					frappe.throw(
+						_(
+							"Row {0}: {1} {2} is no longer open for this party. Please fetch the entries again."
+						).format(row.idx, key[0], key[1])
+					)
 
-			if recv_outs and allocated - recv_outs > 0.009:
+			# one voucher can feed several rows, so check the total used so far
+			allocated = flt(row.allocated_amount)
+			used[recv_key] = used.get(recv_key, 0) + allocated
+			used[pay_key] = used.get(pay_key, 0) + allocated
+			recv_outs = flt(recv_src.outstanding_amount)
+			pay_outs = flt(pay_src.outstanding_amount)
+
+			if used[recv_key] - recv_outs > 0.009:
 				frappe.throw(
 					_("Row {0}: Allocated amount {1} exceeds receivable outstanding {2} for {3}").format(
-						row.idx, allocated, recv_outs, row.to_receive_voucher_no
+						row.idx, used[recv_key], recv_outs, row.to_receive_voucher_no
 					)
 				)
-			if pay_outs and allocated - pay_outs > 0.009:
+			if used[pay_key] - pay_outs > 0.009:
 				frappe.throw(
 					_("Row {0}: Allocated amount {1} exceeds payable outstanding {2} for {3}").format(
-						row.idx, allocated, pay_outs, row.to_pay_voucher_no
+						row.idx, used[pay_key], pay_outs, row.to_pay_voucher_no
 					)
 				)
 
@@ -1118,8 +1221,26 @@ class PaymentReconciliation(Document):
 					)
 				)
 
-		if not any_valid:
-			frappe.throw(_("No records found in Allocation table"))
+			# rebuild from the ledger, keeping what the user may change
+			kept = {field: row.get(field) for field in user_fields if row.get(field)}
+			row.update(allocator._make_allocation(recv_src, pay_src, allocated))
+			row.update(kept)
+
+	def _fresh_open_balances(self, rows):
+		"""Open rows of the allocated vouchers, fetched again from the ledger."""
+		vouchers = {
+			(row.get(f"{side}_voucher_type"), row.get(f"{side}_voucher_no"))
+			for row in rows
+			for side in ("to_receive", "to_pay")
+		}
+		self.set("to_receive", [])
+		self.set("to_pay", [])
+		self._classify_and_populate(OpenBalanceFetcher(self, vouchers=sorted(vouchers)).fetch())
+
+		def index(table):
+			return {(r.voucher_type, r.voucher_no, r.voucher_row or ""): r for r in self.get(table)}
+
+		return index("to_receive"), index("to_pay")
 
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party"]:
@@ -1187,24 +1308,33 @@ def _post_cross_account_transfer(row, company, active_dimensions=None):
 		leg(row.to_pay_account, row.to_pay_party_type, row.to_pay_party, "debit_in_account_currency"),
 	]
 
-	# Posting date follows `reconciliation_takes_effect_on`
-	invoice_types = ("Sales Invoice", "Purchase Invoice")
-	if row.to_pay_voucher_type in invoice_types:
+	return _make_system_journal(
+		company=company,
+		voucher_type=CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
+		posting_date=_bridge_posting_date(row, company),
+		multi_currency=1 if row.currency != company_currency else 0,
+		accounts=accounts,
+	)
+
+
+def _bridge_posting_date(row, company):
+	# a date the user picked wins, e.g. to stay out of a closed period
+	if row.get("debit_or_credit_note_posting_date"):
+		return row.debit_or_credit_note_posting_date
+
+	# invoice vs note: posted today, like the credit/debit note journal it replaces
+	if row.to_receive_voucher_type in INVOICE_DOCTYPES and row.to_pay_voucher_type in INVOICE_DOCTYPES:
+		return today()
+
+	# payment vs invoice: follows `reconciliation_takes_effect_on`
+	if row.to_pay_voucher_type in INVOICE_DOCTYPES:
 		invoice_type, invoice_no = row.to_pay_voucher_type, row.to_pay_voucher_no
 		pay_type, pay_no = row.to_receive_voucher_type, row.to_receive_voucher_no
 	else:
 		invoice_type, invoice_no = row.to_receive_voucher_type, row.to_receive_voucher_no
 		pay_type, pay_no = row.to_pay_voucher_type, row.to_pay_voucher_no
 	pay_date = frappe.db.get_value(pay_type, pay_no, "posting_date") or today()
-	posting_date = get_reconciliation_effect_date(invoice_type, invoice_no, company, pay_date)
-
-	return _make_system_journal(
-		company=company,
-		voucher_type=CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
-		posting_date=posting_date,
-		multi_currency=1 if row.currency != company_currency else 0,
-		accounts=accounts,
-	)
+	return get_reconciliation_effect_date(invoice_type, invoice_no, company, pay_date)
 
 
 @erpnext.allow_regional

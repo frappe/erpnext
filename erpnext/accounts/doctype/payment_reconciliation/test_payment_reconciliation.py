@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, add_years, cint, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
@@ -13,6 +14,9 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import classify
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+	update_repost_settings,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_fiscal_year
@@ -1552,6 +1556,34 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			"allow_multi_currency_invoices_against_single_party_account": 1,
 		},
 	)
+	def test_payment_follows_payment_entry_permissions(self):
+		"""A cost center restricted only for Payment Entry hides other payments, as upstream's
+		payment query did; invoices, not restricted, stay visible."""
+		test_user = "test@example.com"
+		allowed, restricted = "_Test Cost Center - _TC", "_Test Write Off Cost Center - _TC"
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		si.cost_center = restricted
+		for row in si.items:
+			row.cost_center = restricted
+		si.submit()
+		payments = {}
+		for cost_center in (allowed, restricted):
+			pe = self.create_payment_entry(amount=100)
+			pe.cost_center = cost_center
+			payments[cost_center] = pe.save().submit().name
+		frappe.permissions.add_user_permission(
+			"Cost Center", allowed, test_user, applicable_for="Payment Entry"
+		)
+
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.get_unreconciled_entries()
+
+		self.assertIn(si.name, [r.voucher_no for r in pr.to_receive])
+		paid = [r.voucher_no for r in pr.to_pay]
+		self.assertIn(payments[allowed], paid)
+		self.assertNotIn(payments[restricted], paid)
+
 	def test_no_difference_amount_for_base_currency_accounts(self):
 		# Make Sale Invoice
 		si = self.create_sales_invoice(
@@ -3220,11 +3252,12 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		buckets. Auto-Match's bucketing prevents this; the validator guards manual
 		edits / future cross-party flows that might assemble rows from different
 		buckets."""
+		from unittest.mock import patch
+
 		pr = self.create_payment_reconciliation()
 
-		# Hand-roll mismatched-currency rows. validate_allocation looks up source
-		# rows by (voucher_type, voucher_no, voucher_row); the voucher_no values
-		# don't have to be real submitted docs because we only exercise validate.
+		# Hand-roll mismatched-currency rows and use them in place of the fresh
+		# ledger fetch, so the voucher_no values need not be real docs.
 		pr.append(
 			"to_receive",
 			{
@@ -3264,9 +3297,384 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			},
 		)
 
-		with self.assertRaises(frappe.ValidationError) as cm:
+		recv_index = {(r.voucher_type, r.voucher_no, ""): r for r in pr.to_receive}
+		pay_index = {(r.voucher_type, r.voucher_no, ""): r for r in pr.to_pay}
+		with (
+			patch.object(pr, "_fresh_open_balances", return_value=(recv_index, pay_index)),
+			self.assertRaises(frappe.ValidationError) as cm,
+		):
 			pr.validate_allocation()
 		self.assertIn("Cross-currency", str(cm.exception))
+
+	def test_reconcile_rejects_voucher_not_open_for_party(self):
+		"""The browser's allocation is not trusted: another party's payment is refused."""
+		si = self.create_sales_invoice(qty=1, rate=100)
+		own_pe = self.create_payment_entry(amount=100).save().submit()
+		other_pe = self.create_payment_entry(amount=100, customer="_Test Customer 1").save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no == si.name],
+			to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no == own_pe.name],
+		)
+		pr.allocation[0].to_pay_voucher_no = other_pe.name
+
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pr.reconcile()
+		self.assertIn("no longer open", str(cm.exception))
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 100)
+
+	def test_reconcile_rejects_total_above_outstanding_across_rows(self):
+		"""Two allocation rows on one invoice may not add up to more than it owes."""
+		si = self.create_sales_invoice(qty=1, rate=100)
+		pe1 = self.create_payment_entry(amount=100).save().submit()
+		pe2 = self.create_payment_entry(amount=100).save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no == si.name],
+			to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no in (pe1.name, pe2.name)],
+		)
+		self.assertEqual(len(pr.allocation), 1)
+		extra = pr.append("allocation", pr.allocation[0].as_dict(no_default_fields=True))
+		extra.to_pay_voucher_no = pe2.name if pr.allocation[0].to_pay_voucher_no == pe1.name else pe1.name
+
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pr.reconcile()
+		self.assertIn("exceeds receivable outstanding", str(cm.exception))
+
+	def make_usd_journal(self, party_type, party, account, usd, rate, party_side):
+		# one USD party leg, the bank takes the other side in INR
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = nowdate()
+		je.multi_currency = 1
+		other_side = "credit" if party_side == "debit" else "debit"
+		je.append(
+			"accounts",
+			{
+				"account": account,
+				"party_type": party_type,
+				"party": party,
+				"exchange_rate": rate,
+				"cost_center": self.cost_center,
+				f"{party_side}_in_account_currency": usd,
+				party_side: usd * rate,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.bank,
+				"exchange_rate": 1,
+				"cost_center": self.cost_center,
+				f"{other_side}_in_account_currency": usd * rate,
+				other_side: usd * rate,
+			},
+		)
+		return je.save().submit()
+
+	def party_gl_by_account(self, party, vouchers):
+		"""Base and account-currency GL balance per account, for these vouchers and the
+		system journals the reconcile created."""
+		jea = frappe.qb.DocType("Journal Entry Account")
+		je = frappe.qb.DocType("Journal Entry")
+		system = (
+			frappe.qb.from_(jea)
+			.inner_join(je)
+			.on(je.name == jea.parent)
+			.select(jea.parent)
+			.distinct()
+			.where((je.is_system_generated == 1) & (je.docstatus == 1) & jea.reference_name.isin(vouchers))
+		).run(pluck=True)
+		# FX journals may point at a bridge rather than the originals
+		system += (
+			frappe.qb.from_(jea)
+			.inner_join(je)
+			.on(je.name == jea.parent)
+			.select(jea.parent)
+			.distinct()
+			.where(
+				(je.is_system_generated == 1) & (je.docstatus == 1) & jea.reference_name.isin(system or [""])
+			)
+		).run(pluck=True)
+		gle = frappe.qb.DocType("GL Entry")
+		rows = (
+			frappe.qb.from_(gle)
+			.select(
+				gle.account,
+				Sum(gle.debit - gle.credit),
+				Sum(gle.debit_in_account_currency - gle.credit_in_account_currency),
+			)
+			.where(
+				(gle.is_cancelled == 0) & (gle.party == party) & gle.voucher_no.isin(list(vouchers) + system)
+			)
+			.groupby(gle.account)
+		).run()
+		return {account: (flt(base, 2), flt(in_account, 2)) for account, base, in_account in rows}
+
+	def repost(self, *docs):
+		update_repost_settings()
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.company = self.company
+		for doc in docs:
+			ral.append("vouchers", {"voucher_type": doc.doctype, "voucher_no": doc.name})
+		ral.save().submit()
+		self.assertEqual(frappe.db.get_value(ral.doctype, ral.name, "status"), "Completed")
+
+	def live_fx_journals(self):
+		return frappe.get_all(
+			"Journal Entry",
+			filters={"voucher_type": "Exchange Gain Or Loss", "docstatus": 1, "company": self.company},
+			pluck="name",
+			order_by="name",
+		)
+
+	def reconcile_only(self, party_type, party, account, vouchers):
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = party_type
+		pr.party = party
+		pr.receivable_payable_account = account
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no in vouchers],
+			to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no in vouchers],
+		)
+		allocation = [row.as_dict() for row in pr.allocation]
+		pr.reconcile()
+		return allocation
+
+	def test_journal_settlements_only_reduce_opposite_lines(self):
+		"""Settlements are known per journal and account, not per line. A JE with Dr 100
+		and Cr 160 reconciled against itself leaves 60 open, not 160."""
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = nowdate()
+		for debit, credit, party in ((100, 0, True), (0, 160, True), (60, 0, False)):
+			row = {"account": self.debit_to if party else self.bank, "cost_center": self.cost_center}
+			row.update(debit_in_account_currency=debit, credit_in_account_currency=credit)
+			if party:
+				row.update(party_type="Customer", party=self.customer)
+			je.append("accounts", row)
+		je.save().submit()
+
+		self.reconcile_only("Customer", self.customer, self.debit_to, {je.name})
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		self.assertEqual([r.voucher_no for r in pr.to_receive if r.voucher_no == je.name], [])
+		self.assertEqual([r.outstanding_amount for r in pr.to_pay if r.voucher_no == je.name], [60])
+
+	def test_payment_against_two_line_journal_leaves_true_balance(self):
+		"""A PE of 700 against a JE with two debit lines (500, 300) leaves 100 receivable,
+		not phantom credits of 200 and 400."""
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = nowdate()
+		for debit, credit, party in ((500, 0, True), (300, 0, True), (0, 800, False)):
+			row = {"account": self.debit_to if party else self.bank, "cost_center": self.cost_center}
+			row.update(debit_in_account_currency=debit, credit_in_account_currency=credit)
+			if party:
+				row.update(party_type="Customer", party=self.customer)
+			je.append("accounts", row)
+		je.save().submit()
+		pe = self.create_payment_entry(amount=700).save().submit()
+
+		self.reconcile_only("Customer", self.customer, self.debit_to, {je.name, pe.name})
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		self.assertEqual([r.outstanding_amount for r in pr.to_receive if r.voucher_no == je.name], [100])
+		self.assertEqual([r for r in pr.to_pay if r.voucher_no == je.name], [])
+
+	def test_bridged_debit_note_refund_books_gain_on_supplier_account(self):
+		"""Supplier DN at 80 settled by a refund received at 83 is bridged. The FX (a
+		300 gain) must be booked on the leg that carries it, leaving the supplier
+		account at zero in both currencies."""
+		gain_account, _loss_account = self.setup_split_exchange_accounts()
+		self.supplier = "_Test Supplier USD"
+		debit_note = make_purchase_invoice(
+			qty=-1,
+			rate=100,
+			company=self.company,
+			supplier=self.supplier,
+			currency="USD",
+			conversion_rate=80,
+			credit_to=self.creditors_usd,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			expense_account=self.expense_account,
+			is_return=1,
+			do_not_save=True,
+		)
+		debit_note.save().submit()
+		refund = self.make_usd_journal("Supplier", self.supplier, self.creditors_usd, 100, 83, "credit")
+
+		self.reconcile_only("Supplier", self.supplier, self.creditors_usd, {debit_note.name, refund.name})
+
+		balances = self.party_gl_by_account(self.supplier, [debit_note.name, refund.name])
+		self.assertEqual(balances, {self.creditors_usd: (0.0, 0.0)})
+		gain = frappe.db.get_all(
+			"GL Entry", {"account": gain_account, "is_cancelled": 0}, ["credit", "debit"]
+		)
+		self.assertEqual([(flt(x.credit), flt(x.debit)) for x in gain], [(300.0, 0.0)])
+
+	def test_cross_account_bridge_books_fx_on_the_right_account(self):
+		"""Supplier PI at 85 on one USD account, paid by a JE at 80 on another: the FX
+		belongs to the account whose voucher differs from the bridge's rate, so each
+		account ends at zero."""
+		self.setup_split_exchange_accounts()
+		self.supplier = "_Test Supplier USD"
+		second = self._make_account("Payable USD 2", "Accounts Payable - _TC", "Payable", currency="USD")
+		invoice = make_purchase_invoice(
+			qty=1,
+			rate=100,
+			company=self.company,
+			supplier=self.supplier,
+			currency="USD",
+			conversion_rate=85,
+			credit_to=self.creditors_usd,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			expense_account=self.expense_account,
+		)
+		payment = self.make_usd_journal("Supplier", self.supplier, second, 100, 80, "debit")
+
+		self.reconcile_only("Supplier", self.supplier, None, {invoice.name, payment.name})
+
+		balances = self.party_gl_by_account(self.supplier, [invoice.name, payment.name])
+		self.assertEqual(balances, {self.creditors_usd: (0.0, 0.0), second: (0.0, 0.0)})
+
+	def test_supplier_gain_loss_date_follows_the_payment(self):
+		"""With "Payment" as the gain/loss posting date, a supplier's FX is dated on the
+		payment, which sits on to_receive for suppliers."""
+		frappe.db.set_single_value("Accounts Settings", "exchange_gain_loss_posting_date", "Payment")
+		self.supplier = "_Test Supplier USD"
+		invoice = make_purchase_invoice(
+			qty=1,
+			rate=100,
+			company=self.company,
+			supplier=self.supplier,
+			currency="USD",
+			conversion_rate=80,
+			credit_to=self.creditors_usd,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			expense_account=self.expense_account,
+			do_not_save=True,
+		)
+		invoice.set_posting_time = 1
+		invoice.posting_date = add_days(nowdate(), -10)
+		invoice.save().submit()
+		payment = self.make_usd_journal("Supplier", self.supplier, self.creditors_usd, 100, 83, "debit")
+		self.assertNotEqual(getdate(invoice.posting_date), getdate(payment.posting_date))
+
+		allocation = self.reconcile_only(
+			"Supplier", self.supplier, self.creditors_usd, {invoice.name, payment.name}
+		)
+		self.assertEqual(getdate(allocation[0].gain_loss_posting_date), getdate(payment.posting_date))
+
+	def test_payment_reconciled_twice_books_fx_once(self):
+		"""The FX journal keys on the reference row's name: a later reconcile of the
+		same PE must not book the first invoice's FX again."""
+		self.customer = self.customer_usd
+		pe = self.create_payment_entry(amount=200, customer=self.customer)
+		pe.paid_from = self.debtors_usd
+		pe.paid_from_account_currency = "USD"
+		pe.source_exchange_rate = 85
+		pe.paid_to_account_currency = "INR"
+		pe.received_amount = 17000
+		pe = pe.save().submit()
+		first = self.create_foreign_currency_sales_invoice(conversion_rate=80)
+		self.reconcile_only("Customer", self.customer, self.debtors_usd, {first.name, pe.name})
+		second = self.create_foreign_currency_sales_invoice(conversion_rate=80)
+		self.reconcile_only("Customer", self.customer, self.debtors_usd, {second.name, pe.name})
+
+		fx_for_first = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"reference_name": first.name, "docstatus": 1},
+			pluck="parent",
+		)
+		fx_for_first = [
+			x
+			for x in fx_for_first
+			if frappe.db.get_value("Journal Entry", x, "voucher_type") == "Exchange Gain Or Loss"
+		]
+		self.assertEqual(len(fx_for_first), 1)
+
+	def test_cancel_blocked_when_unlink_is_off_and_bridge_is_referenced(self):
+		"""Like a directly linked payment, a payment reconciled through a bridge blocks
+		the invoice's cancel when unlinking is off, instead of pointing at a cancelled
+		bridge."""
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 0)
+		other_debtors = self._make_account("Debtors Bridge Test", "Accounts Receivable - _TC", "Receivable")
+		si = self.create_sales_invoice(qty=1, rate=100)
+		pe = self.create_payment_entry(amount=100)
+		pe.paid_from = other_debtors
+		pe = pe.save().submit()
+		self.reconcile_only("Customer", self.customer, None, {si.name, pe.name})
+
+		si.reload()
+		with self.assertRaises(frappe.ValidationError) as cm:
+			si.cancel()
+		self.assertIn("is reconciled through", str(cm.exception))
+
+	def test_cancel_payment_reconciled_through_bridge_leaves_no_live_ledger(self):
+		"""Cancelling the payment cancels its bridge first. The bridge's unlink used to
+		point the payment's own ledger row back at the payment, so the payment's reversal
+		missed it and the cancelled payment kept a live 100 advance."""
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
+		other_debtors = self._make_account("Debtors Bridge Test", "Accounts Receivable - _TC", "Receivable")
+		si = self.create_sales_invoice(qty=1, rate=100)
+		pe = self.create_payment_entry(amount=100)
+		pe.paid_from = other_debtors
+		pe = pe.save().submit()
+		self.reconcile_only("Customer", self.customer, None, {si.name, pe.name})
+
+		pe.reload()
+		pe.cancel()
+
+		self.assertEqual(frappe.db.count("Payment Ledger Entry", {"voucher_no": pe.name, "delinked": 0}), 0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 100)
+
+	def test_supplier_refund_journal_books_exchange_gain(self):
+		"""Supplier paid USD 100 at 90 by journal, refunded at 100 by journal: a 1000 gain.
+		The journal branch reads supplier differences inverted, so the router flips
+		payment-vs-refund pairs; without it the loss account was hit and 2000 was left
+		on the supplier's account."""
+		gain_account, _loss_account = self.setup_split_exchange_accounts()
+		self.supplier = "_Test Supplier USD"
+		payment = self.make_usd_journal("Supplier", self.supplier, self.creditors_usd, 100, 90, "debit")
+		refund = self.make_usd_journal("Supplier", self.supplier, self.creditors_usd, 100, 100, "credit")
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.receivable_payable_account = self.creditors_usd
+		pr.get_unreconciled_entries()
+		mine = (payment.name, refund.name)
+		pr.allocate_entries(
+			to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no in mine],
+			to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no in mine],
+		)
+		self.assertEqual(pr.allocation[0].difference_account, gain_account)
+		pr.reconcile()
+
+		ple = frappe.qb.DocType("Payment Ledger Entry")
+		net = (
+			frappe.qb.from_(ple)
+			.select(Sum(ple.amount), Sum(ple.amount_in_account_currency))
+			.where((ple.delinked == 0) & ple.against_voucher_no.isin(mine))
+		).run()[0]
+		self.assertEqual((flt(net[0]), flt(net[1])), (0.0, 0.0))
+
+		gain_line = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"account": gain_account, "docstatus": 1},
+			fields=["credit", "debit"],
+		)
+		self.assertEqual([(flt(x.credit), flt(x.debit)) for x in gain_line], [(1000.0, 0.0)])
 
 	def test_je_split_into_both_tables(self):
 		"""Single Journal Entry with one Dr-to-Debtors row AND one Cr-to-Debtors
@@ -3900,8 +4308,8 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 	def test_cancel_fx_je_unwinds_bridge_and_reopens(self):
 		"""Opposite direction: cancelling the Exchange Gain/Loss JE directly must
-		unwind the bridge it references (`remove_ref_doc_link_from_jv` reverse-lookup
-		walks from the FX JE's JEA to the bridge) and reopen both vouchers."""
+		unwind the bridge it references (`_linked_bridges` walks from the FX JE's
+		JEA to the bridge) and reopen both vouchers."""
 		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
 		dn, pe, bridge, fx = self._reconcile_cross_account_with_fx()
 
@@ -3914,6 +4322,41 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			"bridge must unwind when its linked FX JE is cancelled",
 		)
 		self._assert_cross_account_pair_reopened(dn, pe)
+
+	def test_repost_keeps_the_bridge_and_its_exchange_journal(self):
+		"""A repost only rebuilds GL; the reconciliation stays, so its FX journal stays.
+		It used to cancel the FX, which undid the bridge and failed the repost."""
+		dn, pe, bridge, fx = self._reconcile_cross_account_with_fx()
+
+		self.repost(frappe.get_doc("Journal Entry", bridge), pe, frappe.get_doc("Purchase Invoice", dn.name))
+
+		self.assertEqual(self.live_fx_journals(), [fx])
+		self.assertEqual(frappe.db.get_value("Journal Entry", bridge, "docstatus"), 1)
+		balances = self.party_gl_by_account(self.supplier, [dn.name, pe.name])
+		self.assertEqual(sum(base for base, _in_account in balances.values()), 0)
+
+	def test_repost_keeps_exchange_gain_loss_journals(self):
+		"""A journal books its FX only when reconciled, so a repost that cancelled it lost
+		it for good (500 left on the customer); a payment booked a new copy each time."""
+		journal = self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=85)
+		payment = self.create_payment_entry(amount=100, customer=self.customer_usd)
+		payment.paid_from = self.debtors_usd
+		payment.paid_from_account_currency = "USD"
+		payment.source_exchange_rate = 90
+		payment.received_amount = 9000
+		payment.save().submit()
+		vouchers = []
+		for voucher in (journal, payment):
+			si = self.create_foreign_currency_sales_invoice(conversion_rate=80)
+			self.reconcile_only("Customer", self.customer_usd, self.debtors_usd, {si.name, voucher.name})
+			vouchers += [si.name, voucher.name]
+		fx = self.live_fx_journals()
+		self.assertEqual(len(fx), 2)
+
+		self.repost(journal, payment)
+
+		self.assertEqual(self.live_fx_journals(), fx)
+		self.assertEqual(self.party_gl_by_account(self.customer_usd, vouchers), {self.debtors_usd: (0, 0)})
 
 	def test_cr_note_against_reverse_payment_entry(self):
 		"""A customer credit note (return) reconciled against a REVERSE (Pay) Payment
@@ -6223,99 +6666,56 @@ class TestLinkStrategy(unittest.TestCase):
 
 	def _pair(self, recv_type, pay_type):
 		from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
-			link_strategy,
 			pick_voucher_side,
 		)
 
 		return (
 			frappe._dict(voucher_type=recv_type),
 			frappe._dict(voucher_type=pay_type),
-			link_strategy,
 			pick_voucher_side,
 		)
-
-	# link_strategy — voucher_mutation when at least one side is PE/JE
-	def test_si_pe_is_voucher_mutation(self):
-		recv, pay, strategy, _ = self._pair("Sales Invoice", "Payment Entry")
-		self.assertEqual(strategy(recv, pay), "voucher_mutation")
-
-	def test_pi_pe_is_voucher_mutation(self):
-		recv, pay, strategy, _ = self._pair("Payment Entry", "Purchase Invoice")
-		self.assertEqual(strategy(recv, pay), "voucher_mutation")
-
-	def test_je_pe_is_voucher_mutation(self):
-		recv, pay, strategy, _ = self._pair("Journal Entry", "Payment Entry")
-		self.assertEqual(strategy(recv, pay), "voucher_mutation")
-
-	def test_pe_pe_is_voucher_mutation(self):
-		recv, pay, strategy, _ = self._pair("Payment Entry", "Payment Entry")
-		self.assertEqual(strategy(recv, pay), "voucher_mutation")
-
-	def test_je_je_is_voucher_mutation(self):
-		recv, pay, strategy, _ = self._pair("Journal Entry", "Journal Entry")
-		self.assertEqual(strategy(recv, pay), "voucher_mutation")
-
-	def test_si_je_is_voucher_mutation(self):
-		recv, pay, strategy, _ = self._pair("Sales Invoice", "Journal Entry")
-		self.assertEqual(strategy(recv, pay), "voucher_mutation")
-
-	# link_strategy — bridge_je only when neither side has writable refs
-	def test_si_si_cn_is_bridge_je(self):
-		# Customer SI x CN: regular SI on receive, CN (also Sales Invoice) on pay
-		recv, pay, strategy, _ = self._pair("Sales Invoice", "Sales Invoice")
-		self.assertEqual(strategy(recv, pay), "bridge_je")
-
-	def test_pi_pi_dn_is_bridge_je(self):
-		# Supplier PI x DN: regular PI on pay, DN (also Purchase Invoice) on receive
-		recv, pay, strategy, _ = self._pair("Purchase Invoice", "Purchase Invoice")
-		self.assertEqual(strategy(recv, pay), "bridge_je")
-
-	def test_si_pi_is_bridge_je(self):
-		# Cross-doctype invoice pair (would only arise via cross-party Common Party)
-		recv, pay, strategy, _ = self._pair("Sales Invoice", "Purchase Invoice")
-		self.assertEqual(strategy(recv, pay), "bridge_je")
 
 	# pick_voucher_side — natural-side PE > JE (either side) > opposite-side PE.
 	# Natural payment side: to_pay for Customer, to_receive for Supplier.
 	def test_pick_natural_pe_wins_customer(self):
 		# Customer: PE on the natural (to_pay) side is the voucher.
-		recv, pay, _, pick = self._pair("Sales Invoice", "Payment Entry")
+		recv, pay, pick = self._pair("Sales Invoice", "Payment Entry")
 		self.assertEqual(pick(recv, pay, "Customer"), "pay")
 
 	def test_pick_natural_pe_wins_supplier(self):
 		# Supplier: natural side is to_receive; PE there is the voucher.
-		recv, pay, _, pick = self._pair("Payment Entry", "Purchase Invoice")
+		recv, pay, pick = self._pair("Payment Entry", "Purchase Invoice")
 		self.assertEqual(pick(recv, pay, "Supplier"), "receive")
 
 	def test_pick_natural_je_beats_opposite_pe(self):
 		# Customer: a JE on the natural (to_pay) side beats a reverse PE on the
 		# opposite (to_receive) side. Reverse PEs are never the voucher.
-		recv, pay, _, pick = self._pair("Payment Entry", "Journal Entry")
+		recv, pay, pick = self._pair("Payment Entry", "Journal Entry")
 		self.assertEqual(pick(recv, pay, "Customer"), "pay")
 
 	def test_pick_natural_pe_beats_opposite_je(self):
 		# Customer: PE on natural (to_pay) side wins over a JE on the opposite side.
-		recv, pay, _, pick = self._pair("Journal Entry", "Payment Entry")
+		recv, pay, pick = self._pair("Journal Entry", "Payment Entry")
 		self.assertEqual(pick(recv, pay, "Customer"), "pay")
 
 	def test_pick_je_when_no_pe(self):
-		recv, pay, _, pick = self._pair("Sales Invoice", "Journal Entry")
+		recv, pay, pick = self._pair("Sales Invoice", "Journal Entry")
 		self.assertEqual(pick(recv, pay, "Customer"), "pay")
 
 	def test_pick_je_on_receive_when_no_pe(self):
 		# Customer: JE only on the opposite (to_receive) side, natural side a note.
-		recv, pay, _, pick = self._pair("Journal Entry", "Sales Invoice")
+		recv, pay, pick = self._pair("Journal Entry", "Sales Invoice")
 		self.assertEqual(pick(recv, pay, "Customer"), "receive")
 
 	def test_pick_reverse_pe_never_voucher(self):
 		# Customer: a reverse PE on the opposite (to_receive) side is NEVER the
 		# voucher. With no JE present, `pick_voucher_side` returns None — such
 		# pairs must be routed to a bridge JE before reaching here.
-		recv, pay, _, pick = self._pair("Payment Entry", "Sales Invoice")
+		recv, pay, pick = self._pair("Payment Entry", "Sales Invoice")
 		self.assertIsNone(pick(recv, pay, "Customer"))
 
 	def test_pick_bridge_je_pair_asserts(self):
-		recv, pay, _, pick = self._pair("Sales Invoice", "Sales Invoice")
+		recv, pay, pick = self._pair("Sales Invoice", "Sales Invoice")
 		# An SIxSI (bridge) pair has no mutable voucher, so `pick_voucher_side`
 		# returns None — the caller routes it to a bridge JE.
 		self.assertIsNone(pick(recv, pay))
@@ -6344,18 +6744,11 @@ class TestReconcileRouterArgs(unittest.TestCase):
 		return ReconcileRouter(pr)
 
 	def _router_args(self, alloc_row, party_type="Customer"):
-		from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
-			link_strategy,
-		)
-
 		router = self._router(party_type)
-		recv = frappe._dict(voucher_type=alloc_row["to_receive_voucher_type"])
-		pay = frappe._dict(voucher_type=alloc_row["to_pay_voucher_type"])
-		strategy = link_strategy(recv, pay)
-		return router._build_payment_args(frappe._dict(alloc_row)), strategy
+		return router._build_payment_args(frappe._dict(alloc_row))
 
 	def test_args_si_pe_customer(self):
-		args, strategy = self._router_args(
+		args = self._router_args(
 			{
 				"to_receive_voucher_type": "Sales Invoice",
 				"to_receive_voucher_no": "SI-1",
@@ -6369,7 +6762,6 @@ class TestReconcileRouterArgs(unittest.TestCase):
 				"exchange_rate": 1,
 			}
 		)
-		self.assertEqual(strategy, "voucher_mutation")
 		# PE wins voucher slot
 		self.assertEqual(args.writable_voucher_type, "Payment Entry")
 		self.assertEqual(args.writable_voucher_no, "PE-1")
@@ -6377,7 +6769,7 @@ class TestReconcileRouterArgs(unittest.TestCase):
 		self.assertEqual(args.non_writable_voucher_no, "SI-1")
 
 	def test_args_pi_pe_supplier(self):
-		args, strategy = self._router_args(
+		args = self._router_args(
 			{
 				"to_receive_voucher_type": "Payment Entry",
 				"to_receive_voucher_no": "PE-1",
@@ -6392,14 +6784,13 @@ class TestReconcileRouterArgs(unittest.TestCase):
 			},
 			party_type="Supplier",
 		)
-		self.assertEqual(strategy, "voucher_mutation")
 		# PE on receive side wins
 		self.assertEqual(args.writable_voucher_no, "PE-1")
 		self.assertEqual(args.non_writable_voucher_no, "PI-1")
 
 	def test_args_je_pe_customer_pe_wins(self):
 		"""PR-B regression: PE > JE in `pick_voucher_side`."""
-		args, strategy = self._router_args(
+		args = self._router_args(
 			{
 				"to_receive_voucher_type": "Journal Entry",
 				"to_receive_voucher_no": "JE-1",
@@ -6413,7 +6804,6 @@ class TestReconcileRouterArgs(unittest.TestCase):
 				"exchange_rate": 1,
 			}
 		)
-		self.assertEqual(strategy, "voucher_mutation")
 		self.assertEqual(args.writable_voucher_no, "PE-1")
 		self.assertEqual(args.non_writable_voucher_no, "JE-1")
 
@@ -6423,20 +6813,20 @@ class TestReconcileRouterArgs(unittest.TestCase):
 		`_build_payment_args` on the raw pair has no PE/JE slot to pick, so the
 		`None`-side guard raises — it must never be reached un-bridged."""
 		from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
-			link_strategy,
+			pick_voucher_side,
 		)
 
 		recv = frappe._dict(voucher_type="Sales Invoice")
 		pay = frappe._dict(voucher_type="Sales Invoice")  # CN
-		self.assertEqual(link_strategy(recv, pay), "bridge_je")
+		self.assertIsNone(pick_voucher_side(recv, pay, "Customer"))
 
 	def test_args_pi_dn_supplier_bridge_must_be_bridged_first(self):
 		"""Supplier counterpart of the above: a PIxDN pair is bridged before
 		`_build_payment_args`"""
 		from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
-			link_strategy,
+			pick_voucher_side,
 		)
 
 		recv = frappe._dict(voucher_type="Purchase Invoice")  # DN
 		pay = frappe._dict(voucher_type="Purchase Invoice")
-		self.assertEqual(link_strategy(recv, pay), "bridge_je")
+		self.assertIsNone(pick_voucher_side(recv, pay, "Supplier"))

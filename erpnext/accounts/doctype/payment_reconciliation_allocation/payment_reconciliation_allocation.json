@@ -26,6 +26,8 @@
   "column_break_7",
   "difference_account",
   "exchange_rate",
+  "to_receive_exchange_rate",
+  "to_pay_exchange_rate",
   "currency",
   "accounts_section",
   "to_receive_account",
@@ -181,6 +183,22 @@
    "read_only": 1
   },
   {
+   "fieldname": "to_receive_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "To Receive Exchange Rate",
+   "precision": "9",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_pay_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "To Pay Exchange Rate",
+   "precision": "9",
+   "read_only": 1
+  },
+  {
    "fieldname": "currency",
    "fieldtype": "Link",
    "hidden": 1,
@@ -268,7 +286,7 @@
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-29 13:24:38.209453",
+ "modified": "2026-09-30 12:57:58.752286",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",

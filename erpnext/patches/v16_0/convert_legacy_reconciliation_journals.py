@@ -18,12 +18,24 @@ def execute():
 	look at submitted rows.
 	"""
 	je = frappe.qb.DocType("Journal Entry")
-	(
-		frappe.qb.update(je)
-		.set(je.voucher_type, "Reconciliation Journal")
+	legacy = (
+		frappe.qb.from_(je)
+		.select(je.name)
 		.where(
 			(je.is_system_generated == 1)
 			& (je.docstatus == 1)
 			& (je.voucher_type.isin(["Credit Note", "Debit Note"]))
 		)
+	).run(pluck=True)
+	if not legacy:
+		return
+
+	frappe.qb.update(je).set(je.voucher_type, "Reconciliation Journal").where(je.name.isin(legacy)).run()
+
+	# GL rows copy the journal's type into voucher_subtype; keep them in step
+	gle = frappe.qb.DocType("GL Entry")
+	(
+		frappe.qb.update(gle)
+		.set(gle.voucher_subtype, "Reconciliation Journal")
+		.where((gle.voucher_type == "Journal Entry") & gle.voucher_no.isin(legacy))
 	).run()

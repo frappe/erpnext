@@ -423,7 +423,7 @@ def _repost_purchase_receipt(receipt_doc, delete_cancelled_entries):
 
 def _repost_pe_je(entry_doc, delete_cancelled_entries):
 	if not delete_cancelled_entries:
-		entry_doc.make_gl_entries(cancel=1)
+		entry_doc.make_gl_entries(cancel=1, from_repost=True)
 	entry_doc.make_gl_entries()
 
 

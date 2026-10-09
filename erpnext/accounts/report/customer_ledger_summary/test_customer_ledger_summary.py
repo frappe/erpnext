@@ -183,8 +183,8 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 			fields=["name"],
 		)
 		self.assertEqual(len(system_generated_journal), 1)
-		# Without ignore_cr_dr_notes the bridge's two debtor legs surface as +100 invoiced
-		# and +100 paid (a wash — closing is unchanged).
+		# the bridge moves balance between the party's own entries, so it is neither
+		# invoiced nor paid
 		expected = {
 			"party": "_Test Customer",
 			"customer_name": "_Test Customer",
@@ -192,8 +192,8 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 			"territory": "_Test Territory",
 			"party_name": "_Test Customer",
 			"opening_balance": 0,
-			"invoiced_amount": 200.0,
-			"paid_amount": 100.0,
+			"invoiced_amount": 100.0,
+			"paid_amount": 0.0,
 			"return_amount": 100.0,
 			"closing_balance": 0.0,
 			"currency": "INR",

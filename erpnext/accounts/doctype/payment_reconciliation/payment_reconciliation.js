@@ -220,14 +220,14 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	update_totals() {
-		const sum_selected = (fieldname) =>
-			this.frm.fields_dict[fieldname].grid
-				.get_selected_children()
-				.reduce((total, row) => total + flt(row.outstanding_amount), 0);
+		const to_receive = this.frm.fields_dict.to_receive.grid.get_selected_children();
+		const to_pay = this.frm.fields_dict.to_pay.grid.get_selected_children();
+		const sum = (rows) => rows.reduce((total, row) => total + flt(row.outstanding_amount), 0);
+		const total_invoice_amount = sum(to_receive);
+		const total_payment_amount = sum(to_pay);
 
-		const total_invoice_amount = sum_selected("to_receive");
-		const total_payment_amount = sum_selected("to_pay");
 		this.frm.set_value({
+			currency: [...to_receive, ...to_pay][0]?.currency || this.frm.doc.currency,
 			total_invoice_amount,
 			total_payment_amount,
 			difference_amount: total_invoice_amount - total_payment_amount,
@@ -309,7 +309,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							},
 							{
 								fieldtype: "Data",
-								fieldname: "to_pay_voucher_no",
+								fieldname: "voucher_no",
 								label: __("Voucher No"),
 								in_list_view: 1,
 								read_only: 1,
@@ -377,11 +377,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				primary_action_label: __("Reconcile Entries"),
 			});
 
+			const paid_side =
+				frappe.boot.party_account_types[this.frm.doc.party_type] === "Receivable" ? "to_pay" : "to_receive";
 			this.frm.doc.allocation.forEach((d) => {
 				if (d.difference_amount) {
 					dialog.fields_dict.allocation.df.data.push({
 						docname: d.name,
-						to_pay_voucher_no: d.to_pay_voucher_no,
+						voucher_no: d[`${paid_side}_voucher_no`],
 						difference_amount: d.difference_amount,
 						difference_account: d.difference_account,
 						gain_loss_posting_date: d.gain_loss_posting_date,
@@ -412,8 +414,12 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 frappe.ui.form.on("Payment Reconciliation Allocation", {
 	allocated_amount: function (frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		const recv = (frm.doc.to_receive || []).filter((x) => x.voucher_no == row.to_receive_voucher_no);
-		const pay = (frm.doc.to_pay || []).filter((x) => x.voucher_no == row.to_pay_voucher_no);
+		const same_row = (x, side) =>
+			x.voucher_type == row[`${side}_voucher_type`] &&
+			x.voucher_no == row[`${side}_voucher_no`] &&
+			(x.voucher_row || "") == (row[`${side}_voucher_row`] || "");
+		const recv = (frm.doc.to_receive || []).filter((x) => same_row(x, "to_receive"));
+		const pay = (frm.doc.to_pay || []).filter((x) => same_row(x, "to_pay"));
 		if (!recv.length || !pay.length) return;
 
 		frm.call({

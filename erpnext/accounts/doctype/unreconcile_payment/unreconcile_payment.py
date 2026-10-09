@@ -129,14 +129,15 @@ def _linked_bridge_allocations(company: str | None, doctype: str, docname: str) 
 		.inner_join(je)
 		.on(je.name == ple.voucher_no)
 		.select(
-			ple.company,
+			# grouped by voucher and account; the rest is the same on every row, Max() for strict GROUP BY
+			Max(ple.company).as_("company"),
 			ple.account,
-			ple.party_type,
-			ple.party,
-			ple.voucher_type.as_("reference_doctype"),
+			Max(ple.party_type).as_("party_type"),
+			Max(ple.party).as_("party"),
+			Max(ple.voucher_type).as_("reference_doctype"),
 			ple.voucher_no.as_("reference_name"),
 			Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
-			ple.account_currency,
+			Max(ple.account_currency).as_("account_currency"),
 		)
 		.where(
 			(ple.against_voucher_no == docname)

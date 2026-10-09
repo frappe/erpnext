@@ -153,11 +153,15 @@ def make_exchange_gain_loss_journal(
 					.run()
 				)
 
+		# journals key on the reference row's `name`; ones booked before upgrading used its idx
+		booked_rows = set(booked)
+
 		for d in gain_loss_to_book:
-			# Filter out References for which Gain/Loss is already booked.
-			# Key on the PE.references row's stable `name`, not the volatile
-			# `idx` (renumbered by `clear_unallocated_reference_document_rows`).
-			if d.exchange_gain_loss and ((d.reference_doctype, d.reference_name, d.name) not in booked):
+			keys = {
+				(d.reference_doctype, d.reference_name, d.name),
+				(d.reference_doctype, d.reference_name, str(d.idx)),
+			}
+			if d.exchange_gain_loss and not keys & booked_rows:
 				if doc.book_advance_payments_in_separate_party_account:
 					party_account = d.account
 				else:
