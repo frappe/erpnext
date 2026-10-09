@@ -355,6 +355,7 @@ class TestStockBalancePermissions(ERPNextTestSuite, StockTestMixin):
 
 		with as_user(self.user("Desk User")):
 			self.assertRaises(frappe.PermissionError, get_items, *args)
+			self.assertRaises(frappe.PermissionError, get_available_putaway_capacity, rule)
 			self.assertRaises(frappe.PermissionError, get_data, item_code=self.item)
 			has_permission = frappe.has_permission
 			with patch.object(
@@ -372,7 +373,8 @@ class TestStockBalancePermissions(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(get_available_putaway_capacity(rule), 3)
 			self.assertEqual(get_data(item_code=self.item)[0]["actual_qty"], 7)
 
-		self.assertNotIn(get_available_putaway_capacity, frappe.whitelisted)
+		with as_user(self.user("Stock User", [("Warehouse", OTHER_WAREHOUSE)])):
+			self.assertRaises(frappe.PermissionError, get_available_putaway_capacity, rule)
 
 		with as_user(self.user("Stock Manager", [("Warehouse", OTHER_WAREHOUSE)])):
 			self.assertRaises(frappe.PermissionError, get_items, *args)

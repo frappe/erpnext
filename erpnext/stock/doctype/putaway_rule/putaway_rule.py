@@ -91,7 +91,14 @@ class PutawayRule(Document):
 		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
 
 
+@frappe.whitelist()
 def get_available_putaway_capacity(rule: str):
+	frappe.has_permission("Putaway Rule", "read", doc=rule, throw=True)
+
+	return _get_available_putaway_capacity(rule)
+
+
+def _get_available_putaway_capacity(rule: str):
 	stock_capacity, item_code, warehouse = frappe.db.get_value(
 		"Putaway Rule", rule, ["stock_capacity", "item_code", "warehouse"]
 	)
@@ -394,7 +401,7 @@ def validate_putaway_capacity(doc):
 					rule_map[rule_name]["capacity"] = (
 						rule.stock_capacity
 						if doc.doctype == "Stock Reconciliation"
-						else get_available_putaway_capacity(rule_name)
+						else _get_available_putaway_capacity(rule_name)
 					)
 				rule_map[rule_name]["qty_put"] += flt(stock_qty)
 
