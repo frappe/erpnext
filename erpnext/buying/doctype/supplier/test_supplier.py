@@ -200,6 +200,24 @@ class TestSupplier(ERPNextTestSuite):
 		make_supplier_entry("_Test Account Cost for Goods Sold - _TC").insert()
 		make_supplier_entry("_Test Bank - _TC", amount=-100).insert()
 
+	def test_hold_payments_ignores_is_return_on_payment_entry(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		supplier = create_supplier()
+		payment_entry = get_payment_entry(
+			"Purchase Order",
+			create_purchase_order(supplier=supplier.name).name,
+			bank_account="_Test Bank - _TC",
+		)
+		supplier.update({"on_hold": 1, "hold_type": "Payments"})
+		supplier.save()
+
+		payment_entry.update(
+			{"references": [], "reference_no": "1", "reference_date": nowdate(), "is_return": 1}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is blocked", payment_entry.insert)
+
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType
 		supplier = frappe.get_doc("Supplier", "_Test Supplier with Country")

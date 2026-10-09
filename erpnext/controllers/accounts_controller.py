@@ -153,7 +153,7 @@ class AccountsController(TransactionBase):
 			self.remove_serial_and_batch_bundle()
 
 	def ensure_supplier_is_not_blocked(self):
-		if self.get("is_return"):
+		if self.meta.has_field("is_return") and self.is_return:
 			return
 
 		hold_type, suppliers = self.get_supplier_hold_scope()
