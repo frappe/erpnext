@@ -42,6 +42,34 @@ class TestLead(unittest.TestCase):
 			contact_doc = frappe.get_doc("Contact", contact)
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
+	def test_customer_from_lead_keeps_records_the_user_cannot_write(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		user = "_test_lead_master_manager@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sales Master Manager",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Sales Master Manager"}],
+				}
+			).insert(ignore_permissions=True)
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+
+		frappe.set_user(user)
+		try:
+			customer.insert()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "opportunity_from"), "Lead")
+
 	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
