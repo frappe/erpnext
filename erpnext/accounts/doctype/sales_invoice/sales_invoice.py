@@ -479,8 +479,9 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.check_credit_limit()
-			self.check_overdue_billing_threshold()
+			if self.is_opening != "Yes":
+				self.check_credit_limit()
+				self.check_overdue_billing_threshold()
 
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
