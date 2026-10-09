@@ -72,8 +72,10 @@ class AssetService:
 				if asset.calculate_depreciation:
 					self.update_journal_entry_link_on_depr_schedule(asset, d)
 					self.update_value_after_depreciation(asset, d.debit)
+					asset.sync_value_after_depreciation()
+				else:
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 
-				asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 				asset.set_status()
 				asset.set_total_booked_depreciations()
 
@@ -148,10 +150,13 @@ class AssetService:
 		"""Add the depreciation amount back to the asset and unlink its schedule row."""
 		asset = frappe.get_doc("Asset", d.reference_name)
 
-		if asset.calculate_depreciation and not self._restore_scheduled_depreciation(asset, d.debit):
-			self._restore_finance_book_value(asset, d.debit)
+		if asset.calculate_depreciation:
+			if not self._restore_scheduled_depreciation(asset, d.debit):
+				self._restore_finance_book_value(asset, d.debit)
+			asset.sync_value_after_depreciation()
+		else:
+			asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 
-		asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 		asset.set_status()
 		asset.set_total_booked_depreciations()
 
