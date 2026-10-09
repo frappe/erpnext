@@ -2028,6 +2028,44 @@ class TestPurchaseOrder(ERPNextTestSuite):
 				order.submit()
 				self.assertEqual(order.inter_company_order_reference, source.name)
 
+	def test_cancelling_one_partial_internal_order_keeps_source_linked_to_the_other(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		po = make_internal_purchase_order()
+		so = make_sales_order(
+			company=po.company,
+			customer="_Test Internal Customer 2",
+			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			selling_price_list=po.buying_price_list,
+			qty=2,
+			rate=1,
+		)
+
+		for source, make_order in (
+			(po, make_inter_company_sales_order),
+			(so, make_inter_company_purchase_order),
+		):
+			orders = []
+			for _ in range(2):
+				order = make_order(source.name)
+				order.items[0].qty = 1
+				order.items[0].delivery_date = order.items[0].schedule_date = today()
+				order.submit()
+				orders.append(order)
+
+			orders[0].cancel()
+			self.assertEqual(source.get_db_value("inter_company_order_reference"), orders[1].name)
+
+			order = make_order(source.name)
+			order.items[0].delivery_date = order.items[0].schedule_date = today()
+			order.submit()
+			order.cancel()
+			self.assertEqual(source.get_db_value("inter_company_order_reference"), orders[1].name)
+
+			orders[1].cancel()
+			self.assertFalse(source.get_db_value("inter_company_order_reference"))
+
 	def test_repeat_internal_order_converts_ordered_qty_to_source_uom(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

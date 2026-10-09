@@ -81,6 +81,12 @@ def update_linked_doc(doctype: str, name: str, inter_company_reference: str | No
 
 def unlink_inter_company_doc(doctype: str, name: str, inter_company_reference: str | None) -> None:
 	ref_doc, ref_field = get_inter_company_counterpart(doctype)
-	if inter_company_reference:
-		frappe.db.set_value(doctype, name, ref_field, "")
-		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, "")
+	if not inter_company_reference:
+		return
+
+	frappe.db.set_value(doctype, name, ref_field, "")
+	if frappe.db.get_value(ref_doc, inter_company_reference, ref_field) != name:
+		return
+
+	remaining_counterpart = frappe.db.get_value(doctype, {ref_field: inter_company_reference, "docstatus": 1})
+	frappe.db.set_value(ref_doc, inter_company_reference, ref_field, remaining_counterpart or "")
