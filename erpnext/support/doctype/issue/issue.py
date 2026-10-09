@@ -194,6 +194,8 @@ class Issue(Document):
 		replicated_issue.resolution_time = None
 		replicated_issue.user_resolution_time = None
 		replicated_issue.sla_resolution_date = None
+		replicated_issue.on_hold_since = None
+		replicated_issue.total_hold_time = None
 
 		# Reset SLA
 		if replicated_issue.service_level_agreement:

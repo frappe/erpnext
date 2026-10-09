@@ -281,6 +281,33 @@ class TestIssue(TestSetUp):
 		self.assertFalse(split.sla_resolution_date)
 		self.assertFalse(split.resolution_time)
 
+	def test_split_of_issue_on_hold_starts_without_hold_time(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		for current_time, status in (("13:00", "Replied"), ("14:00", "Open"), ("15:00", "Replied")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {current_time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+		self.assertEqual(issue.total_hold_time, 3600)
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"sent_or_received": "Sent",
+				"subject": "Split",
+				"sender": "test@example.com",
+				"reference_doctype": "Issue",
+				"reference_name": issue.name,
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", issue.name)
+		split = frappe.get_doc("Issue", issue.split_issue("Split issue", communication.name))
+
+		self.assertFalse(split.on_hold_since)
+		self.assertFalse(split.total_hold_time)
+		self.assertTrue(split.sla_resolution_by)
+
 	def test_issue_from_secondary_email_of_contact_gets_customer(self):
 		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Secondary Email"})
 		contact.append("email_ids", {"email_id": "primary@secondary-email.example", "is_primary": 1})
