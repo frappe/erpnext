@@ -47,6 +47,30 @@ class TestLead(ERPNextTestSuite):
 		make_customer(lead.name).insert()
 		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
 
+	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		quotation = make_quotation(do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.insert()
+		quotation.submit()
+
+		customer = make_customer(lead.name).insert()
+
+		self.assertEqual(
+			frappe.db.get_value("Quotation", quotation.name, ["quotation_to", "party_name"]),
+			("Customer", customer.name),
+		)
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", opportunity.name, ["opportunity_from", "party_name"]),
+			("Customer", customer.name),
+		)
+
 	def test_customer_from_lead_without_contact_gets_one(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
 
