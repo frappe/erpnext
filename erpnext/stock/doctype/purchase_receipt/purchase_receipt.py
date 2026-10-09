@@ -7,10 +7,15 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
+<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Abs, CombineDatetime, Sum
 from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 from pypika import functions as fn
+=======
+from frappe.model.document import Document
+from frappe.utils import cint, flt, getdate, now, nowdate
+>>>>>>> c1d078c (fix(stock): allow stock users to submit linked purchase receipts)
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -424,6 +429,13 @@ class PurchaseReceipt(BuyingController):
 			result = subquery.run(as_dict=True)
 			if result:
 				result = [item.production_plan_sub_assembly_item for item in result]
+				production_plan_names = set(
+					frappe.db.get_all(
+						"Production Plan Sub Assembly Item",
+						filters={"name": ("in", result)},
+						pluck="parent",
+					)
+				)
 				query = (
 					frappe.qb.from_(table)
 					.select(
@@ -434,12 +446,21 @@ class PurchaseReceipt(BuyingController):
 					.groupby(table.production_plan_sub_assembly_item)
 				)
 				for row in query.run(as_dict=True):
-					frappe.set_value(
+					frappe.db.set_value(
 						"Production Plan Sub Assembly Item",
 						row.production_plan_sub_assembly_item,
 						"received_qty",
 						row.received_qty,
 					)
+
+				for production_plan_name in production_plan_names:
+					if production_plan_name:
+						frappe.db.set_value(
+							"Production Plan",
+							production_plan_name,
+							{"modified": now(), "modified_by": frappe.session.user},
+							update_modified=False,
+						)
 
 	def on_cancel(self):
 		super().on_cancel()
