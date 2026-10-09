@@ -2539,10 +2539,7 @@ class TestSalesInvoice(FrappeTestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-<<<<<<< HEAD
-	@change_settings(
-=======
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	@change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_on_recurring_keeps_terms_and_shifts_service_dates(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 
@@ -2590,8 +2587,7 @@ class TestSalesInvoice(FrappeTestCase):
 				(getdate(from_date), getdate(to_date)),
 			)
 
-	@ERPNextTestSuite.change_settings(
->>>>>>> f6dfd43 (fix: keep payment terms, PO no and service dates on auto-repeated invoices (#60256))
+	@change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
 	)
