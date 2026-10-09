@@ -6,6 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cstr, flt, formatdate
 
+DISPOSAL_VALUE_FIELDS = {
+	"Sold": "value_of_sold_asset",
+	"Scrapped": "value_of_scrapped_asset",
+	"Capitalized": "value_of_capitalized_asset",
+}
+
 
 def execute(filters=None):
 	filters.day_before_from_date = add_days(filters.from_date, -1)
@@ -31,12 +37,7 @@ def get_group_by_asset_category_data(filters):
 		row = frappe._dict()
 		row.update(asset_category)
 
-		adjustments = asset_value_adjustment_map.get(asset_category.get("asset_category"), {})
-		row.adjustment_before_from_date = flt(adjustments.get("adjustment_before_from_date", 0))
-		row.adjustment_till_to_date = flt(adjustments.get("adjustment_till_to_date", 0))
-		row.adjustment_during_period = row.adjustment_till_to_date - row.adjustment_before_from_date
-
-		row.value_as_on_from_date += row.adjustment_before_from_date
+		apply_value_adjustments(row, asset_value_adjustment_map.get(asset_category.get("asset_category"), {}))
 		row.value_as_on_to_date = (
 			flt(row.value_as_on_from_date)
 			+ flt(row.value_of_new_purchase)
@@ -251,26 +252,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 		f"""
 		SELECT
 			a.asset_category AS asset_category,
-			IFNULL(
-				SUM(
-					CASE
-						WHEN gle.posting_date < %(from_date)s
-								AND (a.disposal_date IS NULL OR a.disposal_date >= %(from_date)s)
-						THEN gle.debit - gle.credit
-						ELSE 0
-					END
-				),
-			0) AS value_adjustment_before_from_date,
-			IFNULL(
-				SUM(
-					CASE
-						WHEN gle.posting_date <= %(to_date)s
-								AND (a.disposal_date IS NULL OR a.disposal_date > %(to_date)s)
-						THEN gle.debit - gle.credit
-						ELSE 0
-					END
-				),
-			0) AS value_adjustment_till_to_date
+			{get_value_adjustment_columns()}
 
 		FROM `tabGL Entry` gle
 		JOIN `tabAsset` a ON gle.against_voucher = a.name
@@ -290,15 +272,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 		as_dict=1,
 	)
 
-	category_value_adjustment_map = {}
-
-	for r in asset_value_adjustments:
-		category_value_adjustment_map[r["asset_category"]] = {
-			"adjustment_before_from_date": flt(r.get("value_adjustment_before_from_date", 0)),
-			"adjustment_till_to_date": flt(r.get("value_adjustment_till_to_date", 0)),
-		}
-
-	return category_value_adjustment_map
+	return {row.pop("asset_category"): row for row in asset_value_adjustments}
 
 
 def get_group_by_asset_data(filters):
@@ -313,19 +287,7 @@ def get_group_by_asset_data(filters):
 		row.update(asset_detail)
 
 		row.update(next(asset for asset in assets if asset["asset"] == asset_detail.get("name", "")))
-		adjustments = asset_value_adjustment_map.get(
-			asset_detail.get("name", ""),
-			{
-				"adjustment_before_from_date": 0.0,
-				"adjustment_till_to_date": 0.0,
-			},
-		)
-		row.adjustment_before_from_date = adjustments["adjustment_before_from_date"]
-		row.adjustment_till_to_date = adjustments["adjustment_till_to_date"]
-		row.adjustment_during_period = flt(row.adjustment_till_to_date) - flt(row.adjustment_before_from_date)
-
-		row.value_as_on_from_date += row.adjustment_before_from_date
-
+		apply_value_adjustments(row, asset_value_adjustment_map.get(asset_detail.get("name", ""), {}))
 		row.value_as_on_to_date = (
 			flt(row.value_as_on_from_date)
 			+ flt(row.value_of_new_purchase)
@@ -536,26 +498,7 @@ def get_asset_value_adjustment_map(filters):
 		f"""
 		SELECT
 			a.name AS asset,
-			IFNULL(
-				SUM(
-					CASE
-						WHEN gle.posting_date < %(from_date)s
-								AND (a.disposal_date IS NULL OR a.disposal_date >= %(from_date)s)
-						THEN gle.debit - gle.credit
-						ELSE 0
-					END
-				),
-			0) AS value_adjustment_before_from_date,
-			IFNULL(
-				SUM(
-					CASE
-						WHEN gle.posting_date <= %(to_date)s
-								AND (a.disposal_date IS NULL OR a.disposal_date > %(to_date)s)
-						THEN gle.debit - gle.credit
-						ELSE 0
-					END
-				),
-			0) AS value_adjustment_till_to_date
+			{get_value_adjustment_columns()}
 
 		FROM `tabGL Entry` gle
 		JOIN `tabAsset` a ON gle.against_voucher = a.name
@@ -575,15 +518,47 @@ def get_asset_value_adjustment_map(filters):
 		as_dict=1,
 	)
 
-	asset_value_adjustment_map = {}
+	return {row.pop("asset"): row for row in asset_with_value_adjustments}
 
-	for r in asset_with_value_adjustments:
-		asset_value_adjustment_map[r["asset"]] = {
-			"adjustment_before_from_date": flt(r.get("value_adjustment_before_from_date", 0)),
-			"adjustment_till_to_date": flt(r.get("value_adjustment_till_to_date", 0)),
-		}
 
-	return asset_value_adjustment_map
+def get_value_adjustment_columns() -> str:
+	"""Fixed asset GL rows other than the disposal entry, summed before the period, till its end and,
+	for assets disposed in the period, till its end by how they were disposed."""
+	is_adjustment = (
+		"gle.voucher_type not in ('Sales Invoice', 'Asset Capitalization')"
+		" and gle.voucher_no != ifnull(a.journal_entry_for_scrap, '')"
+	)
+	held_in_period = "(a.disposal_date is null or a.disposal_date >= %(from_date)s)"
+	till_to_date = f"{is_adjustment} and {held_in_period} and gle.posting_date <= %(to_date)s"
+	disposed_in_period = "a.disposal_date is not null and a.disposal_date <= %(to_date)s"
+
+	columns = [
+		get_adjustment_sum(
+			f"{held_in_period} and gle.posting_date < %(from_date)s", "adjustment_before_from_date"
+		),
+		get_adjustment_sum(till_to_date, "adjustment_till_to_date"),
+	]
+	columns += [
+		get_adjustment_sum(
+			f"{till_to_date} and {disposed_in_period} and a.status = '{status}'", f"adjustment_of_{fieldname}"
+		)
+		for status, fieldname in DISPOSAL_VALUE_FIELDS.items()
+	]
+	return ",\n".join(columns)
+
+
+def get_adjustment_sum(condition: str, alias: str) -> str:
+	return f"ifnull(sum(case when {condition} then gle.debit - gle.credit else 0 end), 0) as {alias}"
+
+
+def apply_value_adjustments(row, adjustments: dict) -> None:
+	"""Add value adjustments to the opening value, to the period, and to the value of assets disposed in it."""
+	row.adjustment_during_period = flt(adjustments.get("adjustment_till_to_date")) - flt(
+		adjustments.get("adjustment_before_from_date")
+	)
+	row.value_as_on_from_date += flt(adjustments.get("adjustment_before_from_date"))
+	for fieldname in DISPOSAL_VALUE_FIELDS.values():
+		row[fieldname] = flt(row[fieldname]) + flt(adjustments.get(f"adjustment_of_{fieldname}"))
 
 
 def get_columns(filters):
