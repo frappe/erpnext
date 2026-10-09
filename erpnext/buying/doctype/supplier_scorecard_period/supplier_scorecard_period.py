@@ -46,6 +46,7 @@ class SupplierScorecardPeriod(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.supplier = frappe.db.get_value("Supplier Scorecard", self.scorecard, "supplier")
 		self.validate_from_to_dates("start_date", "end_date")
 		self.validate_overlapping_period()
 		self.validate_criteria_weights()
