@@ -7,6 +7,7 @@ from frappe import _, qb
 from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
+from frappe.query_builder.terms import ValueWrapper
 from frappe.utils import getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
@@ -177,11 +178,8 @@ def get_conditions(filters):
 
 def get_allowed_parties(party_type: str) -> list[str] | None:
 	"""Parties the user is restricted to; the party is a dynamic link, which match conditions skip."""
-	user_permissions = get_user_permissions()
-	if party_type not in user_permissions:
-		return None
-
-	return get_allowed_docs_for_doctype(user_permissions[party_type], party_type) or [""]
+	party_permissions = get_user_permissions().get(party_type, [])
+	return get_allowed_docs_for_doctype(party_permissions, "Payment Ledger Entry") or None
 
 
 def get_entries(filters):
@@ -203,8 +201,55 @@ def get_entries(filters):
 		)
 		.where(Criterion.all(conditions))
 	)
-	res = query.run(as_dict=True)
-	return res
+	return query.run(as_dict=True) + get_paid_invoice_entries(filters)
+
+
+def get_paid_invoice_entries(filters) -> list[dict]:
+	"""Payments recorded on the invoice itself: POS sales invoices and paid purchase invoices."""
+	if filters.payment_type == _("Outgoing"):
+		doctype, party_type = "Purchase Invoice", "Supplier"
+		invoice = qb.DocType(doctype)
+		party, paid_amount = invoice.supplier, invoice.base_paid_amount
+		conditions = [invoice.is_paid.eq(1)]
+	else:
+		doctype, party_type = "Sales Invoice", "Customer"
+		invoice = qb.DocType(doctype)
+		party, paid_amount = invoice.customer, invoice.base_paid_amount - invoice.base_change_amount
+		conditions = [invoice.is_pos.eq(1)]
+
+	conditions += [invoice.docstatus.eq(1), invoice.company.eq(filters.get("company")), paid_amount.ne(0)]
+	if filters.party:
+		conditions.append(party.eq(filters.party))
+	if filters.get("from_date"):
+		conditions.append(invoice.posting_date.gte(filters.get("from_date")))
+	if filters.get("to_date"):
+		conditions.append(invoice.posting_date.lte(filters.get("to_date")))
+	conditions.extend(build_qb_match_conditions(doctype))
+
+	entries = (
+		qb.from_(invoice)
+		.select(
+			ValueWrapper(doctype).as_("voucher_type"),
+			invoice.name.as_("voucher_no"),
+			ValueWrapper(party_type).as_("party_type"),
+			party.as_("party"),
+			invoice.posting_date,
+			paid_amount.as_("amount"),
+			invoice.remarks,
+			invoice.name.as_("against_voucher_no"),
+			invoice.is_return,
+			invoice.return_against,
+			invoice.update_outstanding_for_self,
+		)
+		.where(Criterion.all(conditions))
+		.run(as_dict=True)
+	)
+	for entry in entries:
+		# returns settle against the original invoice, as in the ledger
+		if entry.is_return and entry.return_against and not entry.update_outstanding_for_self:
+			entry.against_voucher_no = entry.return_against
+
+	return entries
 
 
 def get_invoice_posting_date_map(filters):
