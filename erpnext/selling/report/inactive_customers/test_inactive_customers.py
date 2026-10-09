@@ -27,6 +27,13 @@ class TestInactiveCustomers(ERPNextTestSuite):
 		customer = customer or self.customer.name
 		return next((row for row in data if row.customer == customer), None)
 
+	def make_territory(self, name):
+		if not frappe.db.exists("Territory", name):
+			frappe.get_doc(
+				doctype="Territory", territory_name=name, parent_territory="All Territories", is_group=0
+			).insert()
+		return name
+
 	def test_invalid_doctype_is_rejected(self):
 		self.assertRaises(
 			frappe.ValidationError,
@@ -80,3 +87,38 @@ class TestInactiveCustomers(ERPNextTestSuite):
 		self.assertEqual(row.num_of_order, 1)  # the return is not an order
 		self.assertEqual(row.last_order_amount, 1000)  # not the -1000 credit note
 		self.assertEqual(getdate(row.last_order_date), getdate(self.last_order_date))
+
+	def test_territory_user_permission_restricts_customers(self):
+		self.make_territory("_Test Inactive Territory A")
+		self.make_territory("_Test Inactive Territory B")
+		visible = frappe.get_doc(
+			doctype="Customer",
+			customer_name="_Test Inactive In Territory",
+			territory="_Test Inactive Territory A",
+		).insert()
+		hidden = frappe.get_doc(
+			doctype="Customer",
+			customer_name="_Test Inactive Other Territory",
+			territory="_Test Inactive Territory B",
+		).insert()
+		for cust in (visible.name, hidden.name):
+			make_sales_order(customer=cust, transaction_date=self.last_order_date, qty=1, rate=100).submit()
+
+		user = "_test_inactive_territory@example.com"
+		if not frappe.db.exists("User", user):
+			restricted = frappe.new_doc("User")
+			restricted.email = user
+			restricted.first_name = "Inactive Territory"
+			restricted.append("roles", {"role": "Sales User"})
+			restricted.insert()
+		frappe.permissions.add_user_permission("Territory", "_Test Inactive Territory A", user)
+
+		frappe.set_user(user)
+		try:
+			_columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 30})
+			listed = {row.customer for row in data}
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIn(visible.name, listed)
+		self.assertNotIn(hidden.name, listed)

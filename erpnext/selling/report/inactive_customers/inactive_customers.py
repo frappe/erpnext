@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.permissions import get_user_permissions
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, CurDate, DateDiff, Max, Sum
 from frappe.utils import cint
@@ -83,6 +84,10 @@ def get_sales_details(doctype):
 		.orderby(days_since_last_order, order=Order.desc)
 	)
 
+	permitted = get_permitted_customers()
+	if permitted is not None:
+		query = query.where(customer.name.isin(permitted))
+
 	if condition := get_allowed_companies_condition(sales.company, doctype):
 		query = query.where(condition)
 
@@ -113,6 +118,20 @@ def get_last_order_amounts(doctype, customers):
 	)
 
 	return {customer: amount for customer, amount in result}
+
+
+def get_permitted_customers():
+	# None when unrestricted; get_list applies User Permissions on linked fields (Territory, Customer Group)
+	user_permissions = get_user_permissions(frappe.session.user)
+	if not user_permissions:
+		return None
+
+	gating = {df.options for df in frappe.get_meta("Customer").get_link_fields()}
+	gating.add("Customer")
+	if not gating.intersection(user_permissions):
+		return None
+
+	return frappe.get_list("Customer", pluck="name", limit_page_length=0)
 
 
 def get_columns(doctype):
