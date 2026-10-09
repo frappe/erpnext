@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.utils.user import is_website_user
 
 
 def get_context(context):
@@ -116,7 +117,8 @@ def get_attachments(project):
 
 def validate_and_get_project_user(project: str):
 	project_doc = frappe.get_doc("Project", project)
-	project_doc.check_permission()
+	if not (is_website_user() and frappe.has_website_permission(project_doc)):
+		project_doc.check_permission()
 
 	project_user = next((d for d in project_doc.users if d.user == frappe.session.user), None)
 

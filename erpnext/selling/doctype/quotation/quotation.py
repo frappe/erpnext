@@ -566,13 +566,14 @@ def set_expired_status():
 	)
 
 	# expire submitted, non-expired/lost quotations whose validity has ended and that have no SO
-	(
-		frappe.qb.update(quotation)
-		.set(quotation.status, "Expired")
-		.where(
-			(quotation.docstatus == 1)
-			& (quotation.status.notin(["Expired", "Lost"]))
-			& (quotation.valid_till < nowdate())
-			& ExistsCriterion(so_against_quo).negate()
-		)
-	).run()
+	expiring = (
+		(quotation.docstatus == 1)
+		& (quotation.status.notin(["Expired", "Lost"]))
+		& (quotation.valid_till < nowdate())
+		& ExistsCriterion(so_against_quo).negate()
+	)
+	expired_quotations = frappe.qb.from_(quotation).select(quotation.name).where(expiring).run(pluck=True)
+	frappe.qb.update(quotation).set(quotation.status, "Expired").where(expiring).run()
+
+	for name in expired_quotations:
+		frappe.get_doc("Quotation", name).update_opportunity(None)

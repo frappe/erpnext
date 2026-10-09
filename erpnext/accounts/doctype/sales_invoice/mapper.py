@@ -190,7 +190,11 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
-		received_items = {}
+		received_items = (
+			get_received_items(source_name, "Sales Order", "purchase_order_item")
+			if doctype == "Purchase Order"
+			else {}
+		)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -232,7 +236,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
+		"condition": lambda doc: not doc.get("closed") and doc.qty - received_items.get(doc.name, 0.0) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -263,6 +267,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		{
 			doctype: {
 				"doctype": target_doctype,
+				"validation": {"docstatus": ["=", 1]},
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
 				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse", "cost_center"],
@@ -273,12 +278,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		set_missing_values,
 	)
 	if not doclist.get("items"):
-		frappe.throw(
-			_(
+		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
+			message = _(
 				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
 				"Please check the existing linked {2}s."
-			).format(target_doctype, doctype, target_doctype)
-		)
+			)
+		else:
+			message = _(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully ordered. "
+				"Please check the existing linked {2}s."
+			)
+		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
 
@@ -376,11 +386,12 @@ def _apply_sales_party_details(target_doc, source_doc, details):
 
 @frappe.whitelist()
 def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
-	# The only two targets this resolves a reference field for. Stating them rejects a caller
+	# The targets this resolves a reference field for. Stating them rejects a caller
 	# supplied doctype that would otherwise be filtered on a column it does not have.
 	reference_fields = {
 		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
 		"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+		"Sales Order": ("inter_company_order_reference", "Purchase Order"),
 	}
 	if doctype not in reference_fields:
 		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
