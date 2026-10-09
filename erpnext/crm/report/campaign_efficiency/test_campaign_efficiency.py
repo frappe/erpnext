@@ -58,6 +58,30 @@ class TestCampaignEfficiency(FrappeTestCase):
 		self.assertEqual(row["lead_count"], 1)
 		self.assertEqual(row["quot_count"], 0)
 
+	def test_converted_customer_limited_to_user_permissions(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+
+		campaign = make_campaign("_Test Campaign Eff Customer Permissions")
+		lead = make_campaign_lead(campaign, company_name="_Test Campaign Eff Hidden Customer")
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.territory = "_Test Territory"
+		customer.insert()
+		quotation = make_lead_quotation(lead.name)
+		quotation.quotation_to = "Customer"
+		quotation.party_name = customer.name
+		quotation.save()
+		quotation.submit()
+
+		user = make_sales_user("campaign_eff_customer@example.com")
+		frappe.permissions.add_user_permission("Customer", "_Test Customer", user)
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+		row = campaign_row(campaign)
+
+		self.assertEqual(row["lead_count"], 1)
+		self.assertEqual(row["quot_count"], 0)
+
 
 def make_sales_user(email: str) -> str:
 	if not frappe.db.exists("User", email):

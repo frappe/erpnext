@@ -65,7 +65,7 @@ def get_lead_data(filters, based_on):
 
 
 def get_converted_customers(leads):
-	return frappe.get_all("Customer", filters={"lead_name": ["in", leads]}, pluck="name")
+	return frappe.get_list("Customer", filters={"lead_name": ["in", leads]}, pluck="name")
 
 
 def get_lead_quotation_count(leads, customers):
