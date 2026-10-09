@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.utils import add_days, flt, now_datetime, nowdate
+from frappe.utils import add_days, flt, getdate, now_datetime, nowdate
 
 import erpnext
 from erpnext.stock.doctype.delivery_note.mapper import make_delivery_trip
@@ -82,6 +82,23 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		self.assertEqual(len(route_list), 2)
 		self.assertEqual(len(route_list[0]), 2)  # [home_address, locked_stop]
 		self.assertEqual(len(route_list[1]), 3)  # [locked_stop, second_stop, home_address]
+
+	def test_unfit_driver_cannot_submit(self):
+		for status, expiry_date in (("Left", None), ("Suspended", None), ("Active", add_days(nowdate(), -1))):
+			with self.subTest(status=status, expiry_date=expiry_date):
+				frappe.db.set_value(
+					"Driver", self.delivery_trip.driver, {"status": status, "expiry_date": expiry_date}
+				)
+				with self.assertRaises(frappe.ValidationError):
+					self.delivery_trip.submit()
+				self.delivery_trip.reload()
+
+	def test_license_valid_on_departure_date_can_submit(self):
+		frappe.db.set_value(
+			"Driver", self.delivery_trip.driver, "expiry_date", getdate(self.delivery_trip.departure_time)
+		)
+		self.delivery_trip.submit()
+		self.assertEqual(self.delivery_trip.docstatus, 1)
 
 	def test_delivery_trip_status_draft(self):
 		self.assertEqual(self.delivery_trip.status, "Draft")
@@ -230,6 +247,7 @@ def create_driver():
 			{
 				"doctype": "Driver",
 				"full_name": "Newton Scmander",
+				"status": "Active",
 				"cell_number": "98343424242",
 				"license_number": "B809",
 			}
