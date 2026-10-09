@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 
-import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, nowdate
 
@@ -12,6 +11,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 )
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -118,10 +118,11 @@ class TestProcurementTracker(FrappeTestCase):
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_delivery_date"], getdate(receipt.posting_date))
 
+	def make_project(self):
+		return make_project({"project_name": "_Test Procurement Tracker"})
+
 	def test_cost_center_and_project_filters_both_apply(self):
-		project = frappe.get_doc(
-			{"doctype": "Project", "project_name": "_Test Procurement Tracker", "company": "_Test Company"}
-		).insert()
+		project = self.make_project()
 		with_project = create_purchase_order(do_not_submit=True)
 		with_project.items[0].project = project.name
 		with_project.submit()
@@ -131,6 +132,18 @@ class TestProcurementTracker(FrappeTestCase):
 		orders = {row.get("purchase_order") for row in rows}
 		self.assertIn(with_project.name, orders)
 		self.assertNotIn(without_project.name, orders)
+
+	def test_filters_do_not_drop_the_estimate_of_a_linked_request(self):
+		project = self.make_project()
+		mr = self.make_priced_request()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].update({"cost_center": "_Test Cost Center 2 - _TC", "project": project.name})
+		po.submit()
+
+		rows = self.run_report(cost_center="_Test Cost Center 2 - _TC", project=project.name)
+		row = next(row for row in rows if row.get("purchase_order") == po.name)
+		self.assertEqual(row["estimated_cost"], 900)
 
 	def test_transfer_request_is_not_listed(self):
 		mr = make_material_request(
