@@ -21,6 +21,36 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCompany(ERPNextTestSuite):
+	def test_chart_account_categories_match_root_types(self):
+		for index, chart in enumerate(("Standard", "Standard with Numbers", "India - Chart of Accounts")):
+			with self.subTest(chart=chart):
+				company = frappe.get_doc(
+					doctype="Company",
+					company_name=f"_Test Chart Categories {index}",
+					abbr=f"TCC{index}",
+					default_currency="INR",
+					country="India",
+					chart_of_accounts=chart,
+					create_chart_of_accounts_based_on="Standard Template",
+				).insert()
+				account = frappe.get_doc(
+					"Account", {"company": company.name, "account_name": "Gain/Loss on Asset Disposal"}
+				)
+				self.assertEqual(account.root_type, "Expense")
+				self.assertEqual(account.account_category, "Operating Expenses")
+				if chart == "India - Chart of Accounts":
+					for account_name, category in (
+						("Reserves and Surplus", "Reserves and Surplus"),
+						("Shareholders Funds", "Share Capital"),
+						("Revaluation Surplus", "Reserves and Surplus"),
+					):
+						capital_account = frappe.get_doc(
+							"Account", {"company": company.name, "account_name": account_name}
+						)
+						self.assertEqual(capital_account.root_type, "Equity")
+						self.assertEqual(capital_account.report_type, "Balance Sheet")
+						self.assertEqual(capital_account.account_category, category)
+
 	def test_coa_based_on_existing_company(self):
 		company = frappe.new_doc("Company")
 		company.company_name = "COA from Existing Company"

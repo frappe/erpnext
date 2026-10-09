@@ -14,6 +14,114 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccount(ERPNextTestSuite):
+	def test_account_category_root_type(self):
+		category = frappe.get_doc(
+			doctype="Account Category", account_category_name="_Test Asset Category", root_type="Asset"
+		).insert()
+		account = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Categorized Account",
+			company="_Test Company",
+			parent_account="Indirect Expenses - _TC",
+			account_category=category.name,
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "Account Category"):
+			account.insert()
+
+		account.parent_account = "Current Assets - _TC"
+		account.insert()
+		self.assertEqual(account.root_type, "Asset")
+
+		category.root_type = ""
+		category.save()
+		account.parent_account = "Indirect Expenses - _TC"
+		account.save()
+		self.assertEqual(account.root_type, "Expense")
+
+	def test_group_move_validates_descendant_account_categories(self):
+		category = frappe.get_doc(
+			doctype="Account Category",
+			account_category_name="_Test Descendant Asset Category",
+			root_type="Asset",
+		).insert()
+		group = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Categorized Group",
+			company="_Test Company",
+			parent_account="Current Assets - _TC",
+			is_group=1,
+		).insert()
+		child = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Categorized Child",
+			company="_Test Company",
+			parent_account=group.name,
+			account_category=category.name,
+		).insert()
+		group.reload()
+		group.parent_account = "Indirect Expenses - _TC"
+		with self.assertRaisesRegex(frappe.ValidationError, "Account Category"):
+			group.save()
+		child.reload()
+		self.assertEqual(child.root_type, "Asset")
+
+	def test_group_move_uses_current_tree_bounds(self):
+		for category_location in ("sibling", "descendant"):
+			with self.subTest(category_location=category_location):
+				category = frappe.get_doc(
+					doctype="Account Category",
+					account_category_name=f"_Test Stale {category_location} Category",
+					root_type="Asset",
+				).insert()
+				preceding_group = frappe.get_doc(
+					doctype="Account",
+					account_name=f"_Test Preceding {category_location} Group",
+					company="_Test Company",
+					parent_account="Current Assets - _TC",
+					is_group=1,
+				).insert()
+				group = frappe.get_doc(
+					doctype="Account",
+					account_name=f"_Test Moving {category_location} Group",
+					company="_Test Company",
+					parent_account="Current Assets - _TC",
+					is_group=1,
+				).insert()
+				child = frappe.get_doc(
+					doctype="Account",
+					account_name=f"_Test Moving {category_location} Child",
+					company="_Test Company",
+					parent_account=group.name,
+					account_category=category.name if category_location == "descendant" else None,
+				).insert()
+				group.reload()
+
+				# Insert into an earlier branch after the moving group has been loaded.
+				for index in range(2):
+					sibling = frappe.get_doc(
+						doctype="Account",
+						account_name=f"_Test Earlier {category_location} Account {index}",
+						company="_Test Company",
+						parent_account=preceding_group.name,
+						account_category=category.name if category_location == "sibling" else None,
+					).insert()
+
+				self.assertNotEqual(group.lft, frappe.db.get_value("Account", group.name, "lft"))
+				self.assertEqual(group.modified, frappe.db.get_value("Account", group.name, "modified"))
+				group.parent_account = "Indirect Expenses - _TC"
+				if category_location == "descendant":
+					with self.assertRaisesRegex(frappe.ValidationError, "Account Category"):
+						group.save()
+					self.assertEqual(child.reload().root_type, "Asset")
+				else:
+					group.save()
+					self.assertEqual(child.reload().root_type, "Expense")
+					self.assertEqual(child.report_type, "Profit and Loss")
+					self.assertLess(group.lft, child.lft)
+					self.assertGreater(group.rgt, child.rgt)
+				self.assertEqual(sibling.reload().root_type, "Asset")
+				self.assertEqual(sibling.report_type, "Balance Sheet")
+
 	def test_rename_account(self):
 		if not frappe.db.exists("Account", "1210 - Debtors - _TC"):
 			acc = frappe.new_doc("Account")
