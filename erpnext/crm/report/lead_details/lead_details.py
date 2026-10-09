@@ -129,6 +129,7 @@ def get_first_address(lead):
 			(dynamic_link.parenttype == "Address")
 			& (dynamic_link.link_doctype == "Lead")
 			& (dynamic_link.link_name == lead.name)
+			& (IfNull(address.disabled, 0) == 0)
 		)
 		.orderby(address.is_primary_address, order=Order.desc)
 		.orderby(address.creation)

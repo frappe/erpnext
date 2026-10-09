@@ -56,6 +56,25 @@ class TestLeadDetailsReport(ERPNextTestSuite):
 		rows = [row for row in get_data(make_filters()) if row.name == lead.name]
 		self.assertEqual([row.city for row in rows], ["Hubballi"])
 
+	def test_disabled_primary_address_is_skipped(self):
+		lead = make_lead()
+		for city, disabled in (("Mysuru", 1), ("Hubballi", 0)):
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": city,
+					"address_line1": "1 Main Road",
+					"city": city,
+					"country": "India",
+					"is_primary_address": city == "Mysuru",
+					"disabled": disabled,
+					"links": [{"link_doctype": "Lead", "link_name": lead.name}],
+				}
+			).insert()
+
+		rows = [row for row in get_data(make_filters()) if row.name == lead.name]
+		self.assertEqual([row.city for row in rows], ["Hubballi"])
+
 	def test_lead_without_company_is_listed(self):
 		lead = make_lead(company=None)
 
