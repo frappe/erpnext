@@ -408,6 +408,8 @@ class ProductionPlan(Document):
 				so_item.warehouse,
 				(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
 				so_item.work_order_qty,
+				so_item.stock_qty,
+				so_item.production_plan_qty,
 				so_item.delivered_qty,
 				so_item.conversion_factor,
 				so_item.description,
@@ -419,6 +421,7 @@ class ProductionPlan(Document):
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
 				& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
+				& (so_item.stock_qty > so_item.production_plan_qty)
 			)
 		)
 
@@ -433,9 +436,10 @@ class ProductionPlan(Document):
 		items = items_query.run(as_dict=True)
 
 		for item in items:
-			item.pending_qty = flt(item.qty) - max(
+			pending_qty = flt(item.qty) - max(
 				item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
 			)
+			item.pending_qty = min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty))
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -1675,7 +1679,7 @@ def get_sales_orders(self):
 			& (so.docstatus == 1)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == self.company)
-			& (so_item.qty > so_item.production_plan_qty)
+			& (so_item.stock_qty > so_item.production_plan_qty)
 		)
 	)
 
@@ -2482,7 +2486,7 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 		.on(table.parent == so_table.name)
 		.select(table.parent)
 		.distinct()
-		.where((table.qty > table.production_plan_qty) & (table.docstatus == 1))
+		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
 	)
 
 	if filters.get("company"):
