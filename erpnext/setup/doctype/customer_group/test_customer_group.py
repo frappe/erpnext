@@ -27,6 +27,19 @@ class TestCustomerGroup(ERPNextTestSuite):
 		with self.assertRaises(frappe.NameError):
 			frappe.rename_doc("Customer Group", group.name, customer.name)
 
+	def test_duplicate_credit_limit_company(self):
+		group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Duplicate Group Limits",
+				"is_group": 0,
+			}
+		)
+		group.append("credit_limits", {"company": "_Test Company", "credit_limit": 100})
+		group.append("credit_limits", {"company": "_Test Company", "credit_limit": 100000})
+		with self.assertRaises(frappe.ValidationError):
+			group.insert()
+
 	def test_buying_price_list_cannot_be_group_default(self):
 		group = frappe.get_doc(
 			{

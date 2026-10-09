@@ -49,6 +49,11 @@ class CustomerGroup(NestedSet):
 			frappe.throw(_("Cannot make Customer Group {0} a group while it has customers").format(self.name))
 		validate_party_accounts(self)
 		validate_customer_default_price_list(self)
+		companies = set()
+		for limit in self.credit_limits:
+			if limit.company in companies:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company))
+			companies.add(limit.company)
 		self.validate_currency_for_receivable_and_advance_account()
 
 	def validate_currency_for_receivable_and_advance_account(self):
