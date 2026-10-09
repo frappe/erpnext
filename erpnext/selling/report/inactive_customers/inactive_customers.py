@@ -7,114 +7,165 @@ from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, CurDate, DateDiff, Max, Sum
 from frappe.utils import cint
+from pypika import Order
+from pypika.analytics import RowNumber
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
-	if not filters:
-		filters = {}
+	filters = filters or {}
 
-	days_since_last_order = filters.get("days_since_last_order")
 	doctype = filters.get("doctype")
-
 	if doctype not in {"Sales Order", "Sales Invoice"}:
 		frappe.throw(_("Invalid value {0} for 'Doctype'").format(doctype))
 
-	if cint(days_since_last_order) <= 0:
+	days_since_last_order = cint(filters.get("days_since_last_order"))
+	if days_since_last_order <= 0:
 		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
 
-	columns = get_columns()
-	customers = get_sales_details(doctype)
+	return get_columns(doctype), get_data(doctype, days_since_last_order)
 
-	data = []
-	for row in customers:
-		if cint(row[8]) >= cint(days_since_last_order):
-			row.insert(7, get_last_sales_amt(row[0], doctype))
-			data.append(row)
-	return columns, data
+
+def get_data(doctype, days_since_last_order):
+	rows = [
+		row for row in get_sales_details(doctype) if cint(row.days_since_last_order) >= days_since_last_order
+	]
+
+	last_amounts = get_last_order_amounts(doctype, [row.customer for row in rows]) if rows else {}
+	for row in rows:
+		row.last_order_amount = last_amounts.get(row.customer, 0)
+
+	return rows
 
 
 def get_sales_details(doctype):
 	customer = frappe.qb.DocType("Customer")
-	sales_doctype = frappe.qb.DocType(doctype)
+	sales = frappe.qb.DocType(doctype)
 
 	if doctype == "Sales Order":
-		total_considered = Sum(
+		date_col = sales.transaction_date
+		considered = Sum(
 			Case()
-			.when(
-				sales_doctype.status == "Stopped",
-				sales_doctype.base_net_total * sales_doctype.per_delivered / 100,
-			)
-			.else_(sales_doctype.base_net_total)
+			.when(sales.status == "Stopped", sales.base_net_total * sales.per_delivered / 100)
+			.else_(sales.base_net_total)
 		)
-		date_col = sales_doctype.transaction_date
 	else:
-		total_considered = Sum(sales_doctype.base_net_total)
-		date_col = sales_doctype.posting_date
+		date_col = sales.posting_date
+		considered = Sum(sales.base_net_total)
 
 	last_order_date = Max(date_col)
-	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
-	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
 	days_since_last_order = DateDiff(CurDate(), last_order_date)
 
 	query = (
 		frappe.qb.from_(customer)
-		.inner_join(sales_doctype)
-		.on(customer.name == sales_doctype.customer)
+		.inner_join(sales)
+		.on(customer.name == sales.customer)
 		.select(
-			customer.name,
+			customer.name.as_("customer"),
 			customer.customer_name,
 			customer.territory,
 			customer.customer_group,
-			Count(sales_doctype.name).distinct().as_("num_of_order"),
-			Sum(sales_doctype.base_net_total).as_("total_order_value"),
-			total_considered.as_("total_order_considered"),
+			Count(sales.name).distinct().as_("num_of_order"),
+			Sum(sales.base_net_total).as_("total_order_value"),
+			considered.as_("total_order_considered"),
 			last_order_date.as_("last_order_date"),
 			days_since_last_order.as_("days_since_last_order"),
 		)
-		.where(sales_doctype.docstatus == 1)
+		.where(sales.docstatus == 1)
 		.groupby(customer.name)
-		.orderby(days_since_last_order, order=frappe.qb.desc)
+		.orderby(days_since_last_order, order=Order.desc)
 	)
 
-	if condition := get_allowed_companies_condition(sales_doctype.company, doctype):
+	if condition := get_allowed_companies_condition(sales.company, doctype):
 		query = query.where(condition)
 
-	return query.run(as_list=True)
+	return query.run(as_dict=True)
 
 
-def get_last_sales_amt(customer, doctype):
-	sales_doctype = frappe.qb.DocType(doctype)
-	date_col = sales_doctype.transaction_date if doctype == "Sales Order" else sales_doctype.posting_date
+def get_last_order_amounts(doctype, customers):
+	sales = frappe.qb.DocType(doctype)
+	date_col = sales.transaction_date if doctype == "Sales Order" else sales.posting_date
 
-	query = (
-		frappe.qb.from_(sales_doctype)
-		.select(sales_doctype.base_net_total)
-		.where((sales_doctype.customer == customer) & (sales_doctype.docstatus == 1))
-		.orderby(date_col, order=frappe.qb.desc)
-		.orderby(sales_doctype.name, order=frappe.qb.desc)
-		.limit(1)
+	ranked = (
+		frappe.qb.from_(sales)
+		.select(
+			sales.customer,
+			sales.base_net_total,
+			RowNumber().over(sales.customer).orderby(date_col, sales.name, order=Order.desc).as_("rn"),
+		)
+		.where((sales.docstatus == 1) & sales.customer.isin(customers))
+	)
+	if condition := get_allowed_companies_condition(sales.company, doctype):
+		ranked = ranked.where(condition)
+
+	ranked = ranked.as_("ranked")
+	result = (
+		frappe.qb.from_(ranked).select(ranked.customer, ranked.base_net_total).where(ranked.rn == 1).run()
 	)
 
-	if condition := get_allowed_companies_condition(sales_doctype.company, doctype):
-		query = query.where(condition)
-
-	res = query.run()
-
-	return res and res[0][0] or 0
+	return {customer: amount for customer, amount in result}
 
 
-def get_columns():
+def get_columns(doctype):
+	noun = "Order" if doctype == "Sales Order" else "Invoice"
 	return [
-		_("Customer") + ":Link/Customer:120",
-		_("Customer Name") + ":Data:120",
-		_("Territory") + "::120",
-		_("Customer Group") + "::120",
-		_("Number of Order") + "::120",
-		_("Total Order Value") + ":Currency:120",
-		_("Total Order Considered") + ":Currency:160",
-		_("Last Order Amount") + ":Currency:160",
-		_("Last Order Date") + ":Date:160",
-		_("Days Since Last Order") + "::160",
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 120,
+		},
+		{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
+		{
+			"label": _("Territory"),
+			"fieldname": "territory",
+			"fieldtype": "Link",
+			"options": "Territory",
+			"width": 120,
+		},
+		{
+			"label": _("Customer Group"),
+			"fieldname": "customer_group",
+			"fieldtype": "Link",
+			"options": "Customer Group",
+			"width": 120,
+		},
+		{
+			"label": _("Number of {0}s").format(_(noun)),
+			"fieldname": "num_of_order",
+			"fieldtype": "Int",
+			"width": 120,
+		},
+		{
+			"label": _("Total {0} Value").format(_(noun)),
+			"fieldname": "total_order_value",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
+			"label": _("Total {0} Considered").format(_(noun)),
+			"fieldname": "total_order_considered",
+			"fieldtype": "Currency",
+			"width": 160,
+		},
+		{
+			"label": _("Last {0} Amount").format(_(noun)),
+			"fieldname": "last_order_amount",
+			"fieldtype": "Currency",
+			"width": 160,
+		},
+		{
+			"label": _("Last {0} Date").format(_(noun)),
+			"fieldname": "last_order_date",
+			"fieldtype": "Date",
+			"width": 140,
+		},
+		{
+			"label": _("Days Since Last {0}").format(_(noun)),
+			"fieldname": "days_since_last_order",
+			"fieldtype": "Int",
+			"width": 160,
+		},
 	]
