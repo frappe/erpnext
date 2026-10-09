@@ -242,17 +242,21 @@ def make_closing_entry_from_opening(opening_entry):
 					frappe._dict({"account_head": t.account_head, "rate": t.rate, "amount": t.tax_amount})
 				)
 
+		change_payment_row = get_change_payment_row(d.payments, d.account_for_change_amount)
 		for p in d.payments:
+			amount = flt(p.amount)
+			if p is change_payment_row:
+				amount -= flt(d.change_amount)
 			existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
 			if existing_pay:
-				existing_pay[0].expected_amount += flt(p.amount)
+				existing_pay[0].expected_amount += amount
 			else:
 				payments.append(
 					frappe._dict(
 						{
 							"mode_of_payment": p.mode_of_payment,
 							"opening_amount": 0,
-							"expected_amount": p.amount,
+							"expected_amount": amount,
 						}
 					)
 				)
@@ -262,3 +266,13 @@ def make_closing_entry_from_opening(opening_entry):
 	closing_entry.set("taxes", taxes)
 
 	return closing_entry
+
+
+def get_change_payment_row(rows, change_account):
+	"""Choose the payment row that supplied change for this invoice."""
+	change_account_rows = [row for row in rows if row.account == change_account]
+	return (
+		next((row for row in change_account_rows if row.type == "Cash"), None)
+		or next(iter(change_account_rows), None)
+		or next((row for row in rows if row.type == "Cash"), None)
+	)
