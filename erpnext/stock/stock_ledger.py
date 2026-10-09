@@ -39,11 +39,11 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_serial_nos_details,
 )
 from erpnext.stock.utils import (
+	_get_stock_balance,
 	get_combine_datetime,
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
 	get_serial_nos_data,
-	get_stock_balance,
 	get_valuation_method,
 	is_serial_no_wise_valuation_disabled,
 )
@@ -2655,7 +2655,7 @@ def get_future_sle_with_negative_batch_qty(sle_args):
 def validate_reserved_stock(kwargs):
 	# Qty based validation for non-serial-batch items OR SRE with Reservation Based On Qty.
 	precision = cint(frappe.db.get_default("float_precision")) or 2
-	balance_qty = get_stock_balance(kwargs.item_code, kwargs.warehouse)
+	balance_qty = _get_stock_balance(kwargs.item_code, kwargs.warehouse)
 
 	diff = flt(balance_qty - kwargs.get("reserved_stock", 0), precision)
 	if diff < 0 and abs(diff) > 0.0001:
