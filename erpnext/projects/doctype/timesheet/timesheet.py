@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Date
+from frappe.query_builder.functions import Coalesce, Date
 from frappe.utils import cstr, flt, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
 
@@ -334,15 +334,15 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 			(tsd.parenttype == "Timesheet")
 			& (tsd.docstatus == 1)
 			& (tsd.is_billable == 1)
-			& tsd.sales_invoice.isnull()
+			& (Coalesce(tsd.sales_invoice, "") == "")
 			& (tsd.parent.isin(allowed_timesheets))
 		)
 	)
 
 	if allowed_projects:
-		query = query.where((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
+		query = query.where((tsd.project.isin(allowed_projects)) | (Coalesce(tsd.project, "") == ""))
 	else:
-		query = query.where(tsd.project.isnull())
+		query = query.where(Coalesce(tsd.project, "") == "")
 
 	if project:
 		query = query.where(tsd.project == project)
