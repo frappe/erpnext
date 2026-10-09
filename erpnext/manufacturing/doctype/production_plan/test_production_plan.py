@@ -3707,6 +3707,35 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(batch_delivered_qty(), {row.name: 0 for row in source_entries})
 
 	def test_cancelling_work_order_reverses_only_its_own_shared_batch_qty(self):
+		(
+			first_source,
+			second_source,
+			first_wo,
+			_second_wo,
+			batch_delivered_qty,
+		) = self.make_work_orders_sharing_a_batch("CNCL")
+		first_wo.cancel()
+		self.assertEqual(batch_delivered_qty(), {first_source: 0, second_source: 5})
+
+	def test_cancelling_legacy_work_order_keeps_other_transfers_batch_qty(self):
+		(
+			first_source,
+			second_source,
+			first_wo,
+			_second_wo,
+			batch_delivered_qty,
+		) = self.make_work_orders_sharing_a_batch("LGCY")
+		targets = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": "Work Order", "voucher_no": first_wo.name},
+			pluck="name",
+		)
+		frappe.db.delete("Stock Reservation Source", {"parent": ("in", targets)})
+
+		first_wo.cancel()
+		self.assertEqual(batch_delivered_qty(), {first_source: 0, second_source: 5})
+
+	def make_work_orders_sharing_a_batch(self, suffix):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 			reserve_stock_for_production_plan,
@@ -3714,10 +3743,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 		warehouse = "_Test Warehouse - _TC"
-		rm_item = "Shared Batch RM For SR Cancel"
-		parent_bom = create_nested_bom({"Shared Batch FG For SR Cancel": {rm_item: {}}}, prefix="")
+		rm_item = f"Shared Batch RM For SR {suffix}"
+		parent_bom = create_nested_bom({f"Shared Batch FG For SR {suffix}": {rm_item: {}}}, prefix="")
 		item = frappe.get_doc("Item", rm_item)
-		item.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BCH-SR-CNCL-.#####"})
+		item.update(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": f"BCH-SR-{suffix}-.#####"}
+		)
 		item.save()
 
 		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
@@ -3762,11 +3793,9 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		# The first Work Order takes 4 from the first reservation and 1 from the second, the next takes 5
 		first_wo = make_work_order(5)
-		make_work_order(5)
+		second_wo = make_work_order(5)
 		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 6})
-
-		first_wo.cancel()
-		self.assertEqual(batch_delivered_qty(), {first_source: 0, second_source: 5})
+		return first_source, second_source, first_wo, second_wo, batch_delivered_qty
 
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt

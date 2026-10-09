@@ -2067,10 +2067,13 @@ def get_serial_batch_to_reverse(
 ) -> frappe._dict:
 	"""Batch qty this transfer took from the source SRE, limited to what the target has not used.
 
-	Targets created before the source split was stored are capped at the source's delivered batch qty.
+	Targets created before the source split was stored are capped at the source's delivered batch qty
+	that no other active transfer has recorded as its own.
 	"""
 	batch_qty_taken = (
-		source_batch_qty.get(sre_name, {}) if source_batch_qty else get_delivered_batch_qty(sre_name)
+		source_batch_qty.get(sre_name, {})
+		if source_batch_qty
+		else get_untracked_delivered_batch_qty(sre_name)
 	)
 
 	batches = {}
@@ -2083,7 +2086,7 @@ def get_serial_batch_to_reverse(
 	return frappe._dict(serial_nos=serial_batch_data.serial_nos, batches=batches)
 
 
-def get_delivered_batch_qty(sre_name: str) -> dict:
+def get_untracked_delivered_batch_qty(sre_name: str) -> dict:
 	delivered_qty_by_batch = defaultdict(float)
 	for entry in frappe.get_all(
 		"Serial and Batch Entry",
@@ -2091,6 +2094,13 @@ def get_delivered_batch_qty(sre_name: str) -> dict:
 		fields=["batch_no", "delivered_qty"],
 	):
 		delivered_qty_by_batch[entry.batch_no] += flt(entry.delivered_qty)
+
+	for entry in frappe.get_all(
+		"Stock Reservation Source",
+		filters={"source_reservation_entry": sre_name, "docstatus": 1},
+		fields=["batch_no", "qty"],
+	):
+		delivered_qty_by_batch[entry.batch_no] -= flt(entry.qty)
 
 	return delivered_qty_by_batch
 
