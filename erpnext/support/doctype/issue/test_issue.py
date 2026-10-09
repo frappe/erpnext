@@ -338,7 +338,7 @@ class TestIssue(TestSetUp):
 				"sent_or_received": "Sent",
 				"subject": "Follow up",
 				"sender": "agent@example.com",
-				"recipients": "customer@example.com",
+				"recipients": '"Doe, Jane" <customer@example.com>, other@example.com',
 				"content": "Your order is delayed",
 			}
 		).insert(ignore_permissions=True)

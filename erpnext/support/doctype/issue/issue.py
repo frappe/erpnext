@@ -14,7 +14,15 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import date_diff, get_datetime, getdate, now_datetime, time_diff_in_seconds
+from frappe.utils import (
+	date_diff,
+	get_datetime,
+	getdate,
+	now_datetime,
+	parse_addr,
+	split_emails,
+	time_diff_in_seconds,
+)
 from frappe.utils.user import is_website_user
 
 
@@ -370,7 +378,8 @@ def make_issue_from_communication(communication: str, ignore_communication_links
 def get_customer_email(communication) -> str:
 	"""The sender of a received mail, or the first recipient of a sent one."""
 	if communication.sent_or_received == "Sent":
-		return (communication.recipients or "").split(",")[0].strip()
+		recipients = split_emails(communication.recipients)
+		return parse_addr(recipients[0])[1] if recipients else ""
 	return communication.sender or ""
 
 
