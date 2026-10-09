@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
@@ -155,7 +156,7 @@ def get_data(filters):
 	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters, request_items)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records(filters)
-	ordered_stock_qty = get_ordered_stock_qty_by_request_item(request_items)
+	ordered_qty_by_request_item = get_ordered_qty_by_request_item(request_items)
 
 	procurement_record = []
 	if procurement_record_against_mr:
@@ -180,7 +181,7 @@ def get_data(filters):
 				"purchase_order_date": po.transaction_date,
 				"purchase_order": po.parent,
 				"supplier": po.supplier,
-				"estimated_cost": get_estimated_cost(po, mr_record, ordered_stock_qty),
+				"estimated_cost": get_estimated_cost(po, mr_record, ordered_qty_by_request_item),
 				"actual_cost": get_actual_cost(po, pi_records),
 				"purchase_order_amt": flt(po.amount),
 				"purchase_order_amt_in_company_currency": flt(po.base_amount),
@@ -192,19 +193,26 @@ def get_data(filters):
 	return procurement_record
 
 
-def get_ordered_stock_qty_by_request_item(request_items):
+def get_ordered_qty_by_request_item(request_items):
 	if not request_items:
 		return {}
 
+	parent = frappe.qb.DocType("Purchase Order")
+	child = frappe.qb.DocType("Purchase Order Item")
 	return dict(
-		frappe.get_all(
-			"Purchase Order Item",
-			filters={"docstatus": 1, "material_request_item": ("in", list(request_items))},
-			fields=["material_request_item", {"SUM": "stock_qty"}],
-			group_by="material_request_item",
-			as_list=True,
-		)
+		frappe.qb.from_(child)
+		.inner_join(parent)
+		.on(child.parent == parent.name)
+		.select(child.material_request_item, Sum(get_request_qty_column(parent, child)))
+		.where((child.docstatus == 1) & (child.material_request_item.isin(list(request_items))))
+		.groupby(child.material_request_item)
+		.run()
 	)
+
+
+def get_request_qty_column(parent, child):
+	"""Order line quantity in its request's unit: finished goods for subcontracting."""
+	return Case().when(parent.is_subcontracted == 1, child.fg_item_qty).else_(child.stock_qty)
 
 
 def get_actual_cost(po, pi_records):
@@ -214,12 +222,12 @@ def get_actual_cost(po, pi_records):
 	return 0.0 if po.status == "Closed" else flt(po.base_amount)
 
 
-def get_estimated_cost(po, mr_record, ordered_stock_qty):
-	"""Request item amount shared across all its submitted Purchase Order lines by stock qty."""
-	request_item_stock_qty = flt(ordered_stock_qty.get(po.material_request_item))
-	if not request_item_stock_qty:
+def get_estimated_cost(po, mr_record, ordered_qty_by_request_item):
+	"""Request item amount shared across all its submitted Purchase Order lines by ordered qty."""
+	ordered_qty = flt(ordered_qty_by_request_item.get(po.material_request_item))
+	if not ordered_qty:
 		return flt(mr_record.get("amount"))
-	return flt(mr_record.get("amount")) * (flt(po.stock_qty) / request_item_stock_qty)
+	return flt(mr_record.get("amount")) * (flt(po.request_qty) / ordered_qty)
 
 
 def get_mapped_mr_details(filters, request_items):
@@ -344,7 +352,7 @@ def get_po_entries(filters):
 			child.qty,
 			child.amount,
 			child.base_amount,
-			child.stock_qty,
+			get_request_qty_column(parent, child).as_("request_qty"),
 			child.schedule_date,
 			parent.transaction_date,
 			parent.supplier,

@@ -11,6 +11,12 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 )
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
+from erpnext.controllers.tests.test_subcontracting_controller import (
+	make_bom_for_subcontracted_items,
+	make_raw_materials,
+	make_service_items,
+	make_subcontracted_items,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import (
@@ -30,8 +36,8 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		self.assertIn(po.name, {row.get("purchase_order") for row in self.run_report()})
 
-	def make_priced_request(self):
-		mr = make_material_request(do_not_submit=True)
+	def make_priced_request(self, **args):
+		mr = make_material_request(do_not_submit=True, **args)
 		mr.items[0].update({"rate": 90, "amount": 900})
 		mr.submit()
 		return mr
@@ -48,6 +54,37 @@ class TestProcurementTracker(ERPNextTestSuite):
 		rows = [row for row in self.run_report() if row.get("purchase_order") == po.name]
 		self.assertCountEqual([row["estimated_cost"] for row in rows], [360, 540])
 		self.assertEqual(sum(row["estimated_cost"] for row in rows), mr.items[0].amount)
+
+	def test_subcontracted_estimate_is_shared_by_finished_good_qty(self):
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		mr = self.make_priced_request(
+			material_request_type="Subcontracting", item_code="Subcontracted Item SA7"
+		)
+		orders = [
+			create_purchase_order(
+				is_subcontracted=1,
+				supplier_warehouse="_Test Warehouse 1 - _TC",
+				rm_items=[
+					{
+						"item_code": "Subcontracted Service Item 7",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 1,
+						"rate": 100,
+						"fg_item": "Subcontracted Item SA7",
+						"fg_item_qty": fg_item_qty,
+						"material_request": mr.name,
+						"material_request_item": mr.items[0].name,
+					}
+				],
+			).name
+			for fg_item_qty in (4, 6)
+		]
+
+		rows = {row.get("purchase_order"): row["estimated_cost"] for row in self.run_report()}
+		self.assertEqual([rows[order] for order in orders], [360, 540])
 
 	def test_filtered_out_order_keeps_its_share_of_the_estimate(self):
 		mr = self.make_priced_request()
