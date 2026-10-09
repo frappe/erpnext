@@ -15,6 +15,7 @@
   "amended_from",
   "column_break1",
   "closing_account_head",
+  "stock_value_difference",
   "gle_processing_status",
   "remarks",
   "error_message"
@@ -75,6 +76,17 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.stock_value_difference",
+   "description": "Difference between the Stock Asset accounts balance and the Stock Balance value accepted while submitting",
+   "fieldname": "stock_value_difference",
+   "fieldtype": "Currency",
+   "label": "Accepted Stock Value Difference",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks",
@@ -116,7 +128,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-30 17:22:45.291628",
+ "modified": "2026-10-07 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Period Closing Voucher",

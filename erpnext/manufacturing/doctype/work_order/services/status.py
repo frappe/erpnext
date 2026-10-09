@@ -111,6 +111,9 @@ class StatusService:
 		"""Return the status based on stock entries against this work order"""
 		status = status or self.doc.status
 
+		if self.doc.docstatus == 1 and status == "Closed":
+			return status
+
 		if self.doc.docstatus == 0:
 			status = "Draft"
 		elif self.doc.docstatus == 1:
@@ -174,22 +177,21 @@ class StatusService:
 		return flt(qty) > 0
 
 	def _is_partial_skip_transfer(self):
-		return bool(
-			self.doc.skip_transfer
-			and self.doc.produced_qty
-			and self.doc.qty > (flt(self.doc.produced_qty) + flt(self.doc.process_loss_qty))
-		)
+		if not (self.doc.skip_transfer and self.doc.produced_qty):
+			return False
+
+		precision = frappe.get_precision("Work Order", "produced_qty")
+		total_qty = flt(self.doc.produced_qty, precision) + flt(self.doc.process_loss_qty, precision)
+		return flt(self.doc.qty, precision) > flt(total_qty, precision)
 
 	def _reservation_status(self, status):
-		for row in self.doc.required_items:
-			if not row.stock_reserved_qty:
-				continue
+		if not any(row.stock_reserved_qty for row in self.doc.required_items):
+			return status
 
-			if row.stock_reserved_qty >= row.required_qty:
-				status = "Stock Reserved"
-			else:
-				return "Stock Partially Reserved"
-		return status
+		if any(row.stock_reserved_qty < row.required_qty for row in self.doc.required_items):
+			return "Stock Partially Reserved"
+
+		return "Stock Reserved"
 
 	def update_work_order_qty(self):
 		"""Update Manufactured Qty and Material Transferred for Qty based on Stock Entry"""
@@ -367,23 +369,15 @@ class StatusService:
 		if self.doc.track_semi_finished_goods:
 			return
 
-		update_bin_qty(self.doc.production_item, self.doc.fg_warehouse, self._planned_qty_dict())
+		update_bin_qty(
+			self.doc.production_item,
+			self.doc.fg_warehouse,
+			{"planned_qty": get_planned_qty(self.doc.production_item, self.doc.fg_warehouse)},
+		)
 
 		if self.doc.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.doc.material_request)
 			mr_obj.update_requested_qty([self.doc.material_request_item])
-
-	def _planned_qty_dict(self):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_reserved_qty_for_sub_assembly,
-		)
-
-		qty_dict = {"planned_qty": get_planned_qty(self.doc.production_item, self.doc.fg_warehouse)}
-		if self.doc.production_plan_sub_assembly_item and self.doc.production_plan:
-			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
-				self.doc.production_item, self.doc.fg_warehouse
-			)
-		return qty_dict
 
 	def set_produced_qty_for_sub_assembly_item(self):
 		produced_qty = self._sub_assembly_produced_qty()
@@ -424,7 +418,7 @@ class StatusService:
 		doc = frappe.get_doc("Production Plan", self.doc.production_plan)
 		doc.flags.ignore_permissions = True
 		doc.update_status_and_bin_qty()
-		doc.update_raw_material_bin_qty({d.item_code for d in self.doc.required_items})
+		doc.update_bin_qty({d.item_code for d in self.doc.required_items})
 
 	def _production_plan_ordered_qty(self):
 		table = frappe.qb.DocType("Work Order")

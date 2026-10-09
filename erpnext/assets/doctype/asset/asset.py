@@ -125,6 +125,7 @@ class Asset(AccountsController):
 		self.validate_linked_purchase_documents()
 		self.set_purchase_doc_row_item()
 		self.validate_asset_values()
+		self.validate_opening_accumulated_depreciation()
 		self.validate_asset_and_reference()
 		self.validate_item()
 		self.validate_cost_center()
@@ -220,10 +221,12 @@ class Asset(AccountsController):
 		if self.split_from:
 			return
 
-		self.value_after_depreciation = (
+		self.db_set(
+			"value_after_depreciation",
 			flt(self.net_purchase_amount)
 			- flt(self.opening_accumulated_depreciation)
-			+ flt(self.additional_asset_cost)
+			+ flt(self.additional_asset_cost),
+			update_modified=False,
 		)
 		if self.calculate_depreciation:
 			self.set_depreciation_rate()
@@ -495,6 +498,19 @@ class Asset(AccountsController):
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
+
+	def validate_opening_accumulated_depreciation(self):
+		if self.asset_type != "Existing Asset":
+			self.opening_accumulated_depreciation = 0
+			self.opening_number_of_booked_depreciations = 0
+		elif not self.calculate_depreciation and flt(self.opening_accumulated_depreciation) > flt(
+			self.net_purchase_amount
+		):
+			frappe.throw(
+				_("Opening Accumulated Depreciation must be less than or equal to {0}").format(
+					self.net_purchase_amount
+				)
+			)
 
 	def validate_linked_purchase_documents(self):
 		if self.flags.is_split_asset:
@@ -794,6 +810,8 @@ class Asset(AccountsController):
 
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
+			elif self.is_sold():
+				status = "Sold"
 			else:
 				expected_value_after_useful_life = 0
 				value_after_depreciation = self.value_after_depreciation
@@ -814,6 +832,22 @@ class Asset(AccountsController):
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
+
+	def is_sold(self) -> bool:
+		if not self.disposal_date:
+			return False
+
+		return bool(
+			frappe.get_all(
+				"Sales Invoice",
+				filters=[
+					["Sales Invoice Item", "asset", "=", self.name],
+					["docstatus", "=", 1],
+					["is_return", "=", 0],
+				],
+				limit=1,
+			)
+		)
 
 	def get_value_after_depreciation(self, finance_book=None):
 		if not self.calculate_depreciation:
@@ -1092,15 +1126,30 @@ def make_post_gl_entry():
 				filters={
 					"asset_category": asset_category.name,
 					"booked_fixed_asset": 0,
-					"available_for_use_date": nowdate(),
+					"available_for_use_date": ("<=", nowdate()),
 					"docstatus": 1,
 				},
 				pluck="name",
 			)
 
 			for asset in assets:
-				doc = frappe.get_doc("Asset", asset)
-				doc.make_gl_entries()
+				post_cwip_gl_entry(asset)
+
+
+def post_cwip_gl_entry(asset_name: str) -> None:
+	"""Move an asset out of CWIP; a failure is logged so that the other assets are still posted."""
+	frappe.db.savepoint("cwip_gl_entry")
+	try:
+		asset = frappe.get_doc("Asset", asset_name)
+		if asset.validate_make_gl_entry():
+			asset.make_gl_entries()
+	except Exception:
+		frappe.db.rollback(save_point="cwip_gl_entry")
+		frappe.log_error(
+			title=_("Could not move asset {0} out of CWIP").format(asset_name),
+			reference_doctype="Asset",
+			reference_name=asset_name,
+		)
 
 
 def get_asset_naming_series():

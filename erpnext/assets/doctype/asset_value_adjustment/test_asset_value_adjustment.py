@@ -6,6 +6,7 @@ from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.test_asset import set_mandatory_dimension_default_for_other_company
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
@@ -126,6 +127,84 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 		]
 
 		self.assertEqual(schedules, expected_schedules)
+
+	def test_adjustment_ignores_dimension_defaults_of_other_companies(self):
+		"""The adjustment's Journal Entry must only take dimension defaults of its own company."""
+		other_company_department = set_mandatory_dimension_default_for_other_company()
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+		asset_doc = frappe.get_doc("Asset", frappe.db.get_value("Asset", {"purchase_receipt": pr.name}))
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
+		asset_doc.append(
+			"finance_books",
+			{
+				"expected_value_after_useful_life": 200,
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": "2023-01-31",
+			},
+		)
+		asset_doc.submit()
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			current_asset_value=get_asset_value_after_depreciation(asset_doc.name),
+			new_asset_value=50000.0,
+			date="2023-01-20",
+		)
+		adjustment.submit()
+
+		departments = frappe.get_all(
+			"Journal Entry Account", {"parent": adjustment.journal_entry}, pluck="department"
+		)
+		self.assertNotIn(other_company_department, departments)
+
+	def test_adjustment_keeps_explicit_dimension_mandatory_only_in_other_company(self):
+		"""An explicit dimension on the adjustment must reach its Journal Entry even when only
+		another company marks that dimension mandatory."""
+		set_mandatory_dimension_default_for_other_company()
+		department = frappe.get_doc(
+			{
+				"doctype": "Department",
+				"department_name": "_Test Adjustment Department",
+				"company": "_Test Company",
+				"parent_department": "All Departments",
+			}
+		).insert(ignore_if_duplicate=True)
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+		asset_doc = frappe.get_doc("Asset", frappe.db.get_value("Asset", {"purchase_receipt": pr.name}))
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
+		asset_doc.append(
+			"finance_books",
+			{
+				"expected_value_after_useful_life": 200,
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": "2023-01-31",
+			},
+		)
+		asset_doc.submit()
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			current_asset_value=get_asset_value_after_depreciation(asset_doc.name),
+			new_asset_value=50000.0,
+			date="2023-01-20",
+		)
+		adjustment.department = department.name
+		adjustment.save()
+		adjustment.submit()
+
+		departments = frappe.get_all(
+			"Journal Entry Account", {"parent": adjustment.journal_entry}, pluck="department"
+		)
+		self.assertIn(department.name, departments)
 
 	def test_depreciation_after_cancelling_asset_repair(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")

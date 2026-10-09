@@ -21,6 +21,7 @@ class StockEntrySABB(BaseStockEntry):
 
 		serial_nos, batch_nos = self.get_serial_batch_fields_for_subcontracting_inward()
 		already_picked_serial_nos = []
+		already_picked_batches = frappe._dict()
 
 		for row in self.doc.items:
 			if row.use_serial_batch_fields or not row.s_warehouse:
@@ -29,18 +30,28 @@ class StockEntrySABB(BaseStockEntry):
 				continue
 
 			bundle_doc = self._create_or_update_bundle_for_row(
-				row, serial_nos, batch_nos, already_picked_serial_nos
+				row, serial_nos, batch_nos, already_picked_serial_nos, already_picked_batches
 			)
 			if not bundle_doc:
 				continue
 
-			for entry in bundle_doc.entries:
-				if entry.serial_no:
-					already_picked_serial_nos.append(entry.serial_no)
-
+			self.add_picked_entries(bundle_doc, already_picked_serial_nos, already_picked_batches)
 			row.serial_and_batch_bundle = bundle_doc.name
 
-	def _create_or_update_bundle_for_row(self, row, serial_nos, batch_nos, already_picked_serial_nos):
+	def add_picked_entries(self, bundle_doc, already_picked_serial_nos, already_picked_batches):
+		for entry in bundle_doc.entries:
+			if entry.serial_no:
+				already_picked_serial_nos.append(entry.serial_no)
+			if entry.batch_no:
+				key = (entry.batch_no, bundle_doc.warehouse)
+				picked = already_picked_batches.setdefault(
+					key, frappe._dict(batch_no=entry.batch_no, warehouse=bundle_doc.warehouse, qty=0)
+				)
+				picked.qty += entry.qty
+
+	def _create_or_update_bundle_for_row(
+		self, row, serial_nos, batch_nos, already_picked_serial_nos, already_picked_batches
+	):
 		if row.serial_and_batch_bundle and abs(row.transfer_qty) != abs(
 			frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
 		):
@@ -51,6 +62,7 @@ class StockEntrySABB(BaseStockEntry):
 					"serial_and_batch_bundle": row.serial_and_batch_bundle,
 					"type_of_transaction": "Outward",
 					"ignore_serial_nos": already_picked_serial_nos,
+					"already_picked_batches": already_picked_batches,
 					"qty": row.transfer_qty * -1,
 				}
 			).update_serial_and_batch_entries(
@@ -69,6 +81,7 @@ class StockEntrySABB(BaseStockEntry):
 					"voucher_detail_no": row.name,
 					"qty": row.transfer_qty * -1,
 					"ignore_serial_nos": already_picked_serial_nos,
+					"already_picked_batches": already_picked_batches,
 					"type_of_transaction": "Outward",
 					"company": self.doc.company,
 					"do_not_submit": True,
@@ -88,7 +101,7 @@ class StockEntrySABB(BaseStockEntry):
 			frappe.qb.from_(table)
 			.join(child_table)
 			.on(table.name == child_table.parent)
-			.select(child_table.serial_no, child_table.batch_no, child_table.qty)
+			.select(child_table.serial_no, child_table.batch_no, child_table.qty, child_table.delivered_qty)
 			.where((table.docstatus == 1) & (table.voucher_detail_no == scio_detail))
 		)
 
@@ -100,8 +113,9 @@ class StockEntrySABB(BaseStockEntry):
 		for d in query.run(as_dict=True):
 			if d.serial_no and d.serial_no not in serial_nos:
 				serial_nos.append(d.serial_no)
-			if d.batch_no and d.batch_no not in batch_nos:
-				batch_nos[d.batch_no] = d.qty
+			if d.batch_no:
+				qty = d.qty - d.delivered_qty if only_pending else d.qty
+				batch_nos[d.batch_no] = batch_nos.get(d.batch_no, 0) + qty
 
 		return serial_nos, batch_nos
 
