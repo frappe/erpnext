@@ -388,7 +388,7 @@ class Task(NestedSet):
 				task.exp_end_date = add_days(task.exp_start_date, task_duration)
 				task.flags.ignore_recursion_check = True
 				task.flags.rescheduled = True
-				task.save()
+				task.save(ignore_permissions=self.flags.ignore_permissions)
 
 	def has_webform_permission(self):
 		project_user = frappe.db.get_value(
