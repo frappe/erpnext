@@ -217,8 +217,8 @@ def get_request_qty_column(parent, child):
 
 def get_actual_cost(po, pi_records):
 	"""Invoiced amount, or the line amount while the order can still be billed."""
-	if invoiced := flt(pi_records.get(po.name)):
-		return invoiced
+	if po.name in pi_records:
+		return flt(pi_records[po.name])
 	return 0.0 if po.status == "Closed" else flt(po.base_amount)
 
 

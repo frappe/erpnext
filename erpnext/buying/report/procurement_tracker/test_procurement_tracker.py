@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
@@ -128,6 +129,16 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_cost"], 630)
+
+	def test_fully_returned_invoice_shows_zero_actual_cost(self):
+		po = create_purchase_order(qty=10, rate=90)
+		invoice = make_purchase_invoice(po.name)
+		invoice.items[0].qty = 4
+		invoice.submit()
+		make_debit_note(invoice.name).submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_cost"], 0)
 
 	def test_unordered_rows_of_a_partly_ordered_request_are_listed(self):
 		mr = make_material_request_for_items(["_Test Item", "_Test Item Home Desktop 100"])
