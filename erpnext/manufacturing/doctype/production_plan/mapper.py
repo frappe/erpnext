@@ -37,7 +37,7 @@ def sales_order_query(
 		.on(table.parent == so_table.name)
 		.select(table.parent)
 		.distinct()
-		.where((table.qty > table.production_plan_qty) & (table.docstatus == 1))
+		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
 	)
 	query = _apply_sales_order_filters(query, so_table, table, filters, txt)
 	query = _paginate(query, start, page_len)
