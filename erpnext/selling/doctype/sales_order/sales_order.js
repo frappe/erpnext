@@ -964,7 +964,6 @@ frappe.ui.form.on("Sales Order Item", {
 
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
 	setup(doc) {
-		this.setup_accounting_dimension_triggers();
 		super.setup(doc);
 	}
 	onload(doc, dt, dn) {
@@ -1088,19 +1087,20 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					// delivery note
-					if (
-						flt(doc.per_delivered) < 100 &&
-						(order_is_a_sale || order_is_a_custom_sale) &&
-						allow_delivery
-					) {
-						if (frappe.model.can_create("Delivery Note")) {
-							this.frm.add_custom_button(
-								__("Delivery Note"),
-								() => this.make_delivery_note_based_on_delivery_date(true),
-								__("Create")
-							);
-						}
+					const is_sale = order_is_a_sale || order_is_a_custom_sale;
+					const can_deliver = flt(doc.per_delivered) < 100 && is_sale && allow_delivery;
+					const can_over_deliver =
+						is_sale && !doc.skip_delivery_note && doc.__onload?.has_over_deliverable_rows;
 
+					if ((can_deliver || can_over_deliver) && frappe.model.can_create("Delivery Note")) {
+						this.frm.add_custom_button(
+							__("Delivery Note"),
+							() => this.make_delivery_note_based_on_delivery_date(true),
+							__("Create")
+						);
+					}
+
+					if (can_deliver) {
 						if (frappe.model.can_create("Work Order") && !doc.is_subcontracted) {
 							this.frm.add_custom_button(
 								__("Work Order"),
@@ -1275,20 +1275,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	items_add(doc, cdt, cdn) {
-		const row = frappe.get_doc(cdt, cdn);
-		const field_copy = [];
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			field_copy.push("project");
-		}
 		if (doc.delivery_date) {
 			frappe.model.set_value(cdt, cdn, "delivery_date", doc.delivery_date);
 		} else {
-			field_copy.push("delivery_date");
-		}
-		if (field_copy.length) {
-			this.frm.script_manager.copy_from_first_row("items", row, field_copy);
+			this.frm.script_manager.copy_from_first_row("items", frappe.get_doc(cdt, cdn), ["delivery_date"]);
 		}
 	}
 

@@ -50,6 +50,22 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
 		self.assertGreater(held_advisory_locks(), before)
 
+	def test_negative_stock_fallback_rate_ignores_later_entries(self):
+		item = make_item(properties={"allow_negative_stock": 1, "valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=300, posting_date=add_days(today(), -5)
+		)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5, posting_date=add_days(today(), -10))
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -400)
+
 	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
 		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
 		serial transferred to another company. posting_date alone is non-total, so two same-date SLEs

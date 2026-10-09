@@ -11,6 +11,7 @@ from frappe.permissions import (
 from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
+import erpnext
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -124,6 +125,7 @@ class Employee(NestedSet):
 
 		self.employee = self.name
 		self.set_employee_name()
+		self.set_salary_currency()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
@@ -149,6 +151,12 @@ class Employee(NestedSet):
 			filter(lambda x: x, [self.first_name, self.middle_name, self.last_name])
 		)
 
+	def set_salary_currency(self):
+		if self.salary_currency:
+			return
+
+		self.salary_currency = erpnext.get_company_currency(self.company)
+
 	def validate_user_details(self):
 		if not self.user_id:
 			return
@@ -171,7 +179,6 @@ class Employee(NestedSet):
 
 	def on_update(self):
 		self.update_nsm_model()
-		frappe.clear_cache()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -345,8 +352,7 @@ class Employee(NestedSet):
 		cell_number = cstr(self.get("cell_number"))
 		prev_number = cstr(prev_doc.get("cell_number"))
 		if cell_number != prev_number or self.get("user_id") != prev_doc.get("user_id"):
-			frappe.cache().hdel("employees_with_number", cell_number)
-			frappe.cache().hdel("employees_with_number", prev_number)
+			frappe.cache().delete_value("employees_with_number")
 
 
 def validate_employee_role(doc, method=None, ignore_emp_check=False):

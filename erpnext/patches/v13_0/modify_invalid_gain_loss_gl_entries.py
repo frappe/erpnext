@@ -45,7 +45,7 @@ def execute():
 			message=json.dumps(purchase_invoices + sales_invoices, indent=2),
 		)
 
-	acc_frozen_upto = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
+	acc_frozen_upto = _acc_frozen_upto()
 	if acc_frozen_upto:
 		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
@@ -66,3 +66,9 @@ def execute():
 
 	if acc_frozen_upto:
 		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", acc_frozen_upto)
+
+
+def _acc_frozen_upto():
+	if not frappe.get_meta("Accounts Settings").has_field("acc_frozen_upto"):
+		return None  # freezing settings moved to Company in v16
+	return frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
