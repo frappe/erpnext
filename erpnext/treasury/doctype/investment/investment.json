@@ -1,0 +1,655 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-10-07 15:58:36.060129",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "details_section",
+  "naming_series",
+  "investment_type",
+  "instrument_class",
+  "issuer",
+  "company",
+  "purchase_date",
+  "column_break_details",
+  "currency",
+  "company_currency",
+  "maturity_date",
+  "status",
+  "instrument_id",
+  "custodian",
+  "investment_renewal",
+  "amended_from",
+  "approval_section",
+  "approved_amount",
+  "investment_rationale",
+  "column_break_approval",
+  "approval_reference",
+  "approved_by",
+  "terms_tab",
+  "deposit_section",
+  "principal_amount",
+  "mutual_fund_section",
+  "scheme_name",
+  "bond_section",
+  "face_value",
+  "coupon_rate",
+  "coupon_frequency",
+  "interest_section",
+  "rate_of_interest",
+  "interest_payout_type",
+  "column_break_interest",
+  "compounding_frequency",
+  "payout_frequency",
+  "day_count_convention",
+  "position_tab",
+  "position_section",
+  "total_cost",
+  "units_held",
+  "accrued_interest",
+  "unamortised_premium_discount",
+  "column_break_position",
+  "market_value",
+  "unrealised_gain_loss",
+  "interest_schedule_tab",
+  "interest_schedule_section",
+  "accrued_upto",
+  "interest_schedule",
+  "accounts_tab",
+  "accounting_section",
+  "measurement_category",
+  "investment_account",
+  "column_break_accounting",
+  "cost_center",
+  "charges_account",
+  "accounts_section",
+  "interest_income_account",
+  "accrued_interest_account",
+  "dividend_income_account",
+  "column_break_accounts",
+  "tax_withheld_receivable_account",
+  "gain_loss_section",
+  "realised_gain_loss_account",
+  "unrealised_gain_loss_account",
+  "column_break_gain_loss",
+  "fair_value_adjustment_account",
+  "connections_tab"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "INV-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "INV-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "investment_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Investment Type",
+   "options": "Investment Type",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "investment_type.instrument_class",
+   "fieldname": "instrument_class",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Instrument Class",
+   "read_only": 1
+  },
+  {
+   "description": "The bank, fund house or company that issued this investment",
+   "fieldname": "issuer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Issuer",
+   "options": "Financial Institution",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "purchase_date",
+   "fieldtype": "Date",
+   "label": "Purchase Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fetch_if_empty": 1,
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fieldname": "company_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "maturity_date",
+   "fieldtype": "Date",
+   "label": "Maturity Date",
+   "mandatory_depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nPending Approval\nRejected\nActive\nPartially Redeemed\nMatured\nRedeemed\nCancelled",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "instrument_id",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Instrument ID"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "description": "The broker or bank that holds this investment for you",
+   "fieldname": "custodian",
+   "fieldtype": "Link",
+   "label": "Custodian",
+   "options": "Financial Institution"
+  },
+  {
+   "fieldname": "investment_renewal",
+   "fieldtype": "Link",
+   "label": "Investment Renewal",
+   "no_copy": 1,
+   "options": "Investment Renewal",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Investment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "approval_section",
+   "fieldtype": "Section Break",
+   "label": "Approval"
+  },
+  {
+   "fieldname": "approved_amount",
+   "fieldtype": "Currency",
+   "label": "Approved Amount",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "investment_rationale",
+   "fieldtype": "Small Text",
+   "label": "Investment Rationale",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_approval",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approval_reference",
+   "fieldtype": "Attach",
+   "label": "Approval Reference"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Deposit'",
+   "fieldname": "deposit_section",
+   "fieldtype": "Section Break",
+   "label": "Deposit Details"
+  },
+  {
+   "fieldname": "principal_amount",
+   "fieldtype": "Currency",
+   "label": "Principal Amount",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Deposit'",
+   "options": "currency"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Units'",
+   "fieldname": "mutual_fund_section",
+   "fieldtype": "Section Break",
+   "label": "Mutual Fund Details"
+  },
+  {
+   "fieldname": "scheme_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Scheme Name",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Units'"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Bond'",
+   "fieldname": "bond_section",
+   "fieldtype": "Section Break",
+   "label": "Bond Details"
+  },
+  {
+   "description": "Face value of one bond unit",
+   "fieldname": "face_value",
+   "fieldtype": "Currency",
+   "label": "Face Value",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Bond'",
+   "options": "currency"
+  },
+  {
+   "fieldname": "coupon_rate",
+   "fieldtype": "Percent",
+   "label": "Coupon Rate",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Bond'"
+  },
+  {
+   "fieldname": "coupon_frequency",
+   "fieldtype": "Select",
+   "label": "Coupon Frequency",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Bond'",
+   "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual\nAt Maturity"
+  },
+  {
+   "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "interest_section",
+   "fieldtype": "Section Break",
+   "label": "Interest Terms"
+  },
+  {
+   "fieldname": "rate_of_interest",
+   "fieldtype": "Percent",
+   "label": "Rate of Interest",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Deposit'"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Deposit'",
+   "fieldname": "interest_payout_type",
+   "fieldtype": "Select",
+   "label": "Interest Payout Type",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Deposit'",
+   "options": "Cumulative\nNon-Cumulative"
+  },
+  {
+   "fieldname": "column_break_interest",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Deposit' && doc.interest_payout_type=='Cumulative'",
+   "fieldname": "compounding_frequency",
+   "fieldtype": "Select",
+   "label": "Compounding Frequency",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Deposit' && doc.interest_payout_type=='Cumulative'",
+   "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual\nAt Maturity"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Deposit' && doc.interest_payout_type=='Non-Cumulative'",
+   "fieldname": "payout_frequency",
+   "fieldtype": "Select",
+   "label": "Payout Frequency",
+   "mandatory_depends_on": "eval:doc.instrument_class=='Deposit' && doc.interest_payout_type=='Non-Cumulative'",
+   "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual\nAt Maturity"
+  },
+  {
+   "default": "Actual/365",
+   "fieldname": "day_count_convention",
+   "fieldtype": "Select",
+   "label": "Day Count Convention",
+   "options": "Actual/365\nActual/360\n30/360\nActual/Actual (ICMA)"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "position_tab",
+   "fieldtype": "Tab Break",
+   "label": "Position"
+  },
+  {
+   "fieldname": "position_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cost",
+   "no_copy": 1,
+   "options": "company_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.instrument_class=='Units'",
+   "fieldname": "units_held",
+   "fieldtype": "Float",
+   "label": "Units Held",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "accrued_interest",
+   "fieldtype": "Currency",
+   "label": "Accrued Interest",
+   "no_copy": 1,
+   "options": "company_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.instrument_class=='Bond'",
+   "fieldname": "unamortised_premium_discount",
+   "fieldtype": "Currency",
+   "label": "Unamortised Premium / Discount",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_position",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "market_value",
+   "fieldtype": "Currency",
+   "label": "Market Value",
+   "no_copy": 1,
+   "options": "company_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "fieldname": "unrealised_gain_loss",
+   "fieldtype": "Currency",
+   "label": "Unrealised Gain / Loss",
+   "no_copy": 1,
+   "options": "company_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1 && in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "interest_schedule_tab",
+   "fieldtype": "Tab Break",
+   "label": "Interest Schedule"
+  },
+  {
+   "fieldname": "interest_schedule_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "accrued_upto",
+   "fieldtype": "Date",
+   "label": "Accrued Upto",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "interest_schedule",
+   "fieldtype": "Table",
+   "label": "Interest Schedule",
+   "no_copy": 1,
+   "options": "Investment Interest Schedule",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "description": "Decides whether market revaluations are posted to the ledger (FVOCI, FVTPL) or only shown (Amortized Cost)",
+   "fieldname": "measurement_category",
+   "fieldtype": "Select",
+   "label": "Measurement Category",
+   "mandatory_depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "options": "Amortized Cost\nFVOCI\nFVTPL"
+  },
+  {
+   "fieldname": "investment_account",
+   "fieldtype": "Link",
+   "label": "Investment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_accounting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "description": "Brokerage, fees and premature-withdrawal penalty",
+   "fieldname": "charges_account",
+   "fieldtype": "Link",
+   "label": "Charges Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Income Accounts"
+  },
+  {
+   "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "interest_income_account",
+   "fieldtype": "Link",
+   "label": "Interest Income Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "accrued_interest_account",
+   "fieldtype": "Link",
+   "label": "Accrued Interest Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Units'",
+   "fieldname": "dividend_income_account",
+   "fieldtype": "Link",
+   "label": "Dividend Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_accounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_withheld_receivable_account",
+   "fieldtype": "Link",
+   "label": "Tax Withheld Receivable Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "fieldname": "gain_loss_section",
+   "fieldtype": "Section Break",
+   "label": "Gain / Loss Accounts"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "fieldname": "realised_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Realised Gain / Loss Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category!='Amortized Cost'",
+   "fieldname": "unrealised_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealised Gain / Loss Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_gain_loss",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category!='Amortized Cost'",
+   "fieldname": "fair_value_adjustment_account",
+   "fieldtype": "Link",
+   "label": "Fair Value Adjustment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Transactions",
+   "link_doctype": "Investment Transaction",
+   "link_fieldname": "investment"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Investment Interest Accrual",
+   "link_fieldname": "investment"
+  },
+  {
+   "group": "Revaluation",
+   "is_child_table": 1,
+   "link_doctype": "Investment Revaluation",
+   "link_fieldname": "investment",
+   "parent_doctype": "Investment Revaluation",
+   "table_fieldname": "investments"
+  },
+  {
+   "group": "Renewal",
+   "link_doctype": "Investment Renewal",
+   "link_fieldname": "original_investment"
+  }
+ ],
+ "modified": "2026-10-07 15:58:36.516234",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "investment_type,issuer,instrument_id",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

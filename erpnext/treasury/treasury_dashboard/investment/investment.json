@@ -1,0 +1,53 @@
+{
+ "cards": [
+  {
+   "card": "Total Invested"
+  },
+  {
+   "card": "Unrealised Gain or Loss"
+  },
+  {
+   "card": "Realised Gain or Loss (This Year)"
+  },
+  {
+   "card": "Interest Earned (This Year)"
+  },
+  {
+   "card": "Accrued Interest Receivable"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Exposure by Issuer",
+   "width": "Half"
+  },
+  {
+   "chart": "Book vs Market Value by Investment Type",
+   "width": "Half"
+  },
+  {
+   "chart": "Maturity Ladder",
+   "width": "Full"
+  },
+  {
+   "chart": "Revaluation Gain and Loss",
+   "width": "Full"
+  },
+  {
+   "chart": "Monthly Interest Income",
+   "width": "Full"
+  }
+ ],
+ "creation": "2026-10-07 15:28:36.717265",
+ "dashboard_name": "Investment",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2026-10-07 15:28:36.748525",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment",
+ "owner": "Administrator"
+}

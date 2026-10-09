@@ -56,6 +56,10 @@ def get():
 					"account_number": "1670",
 					"account_category": "Short-term Investments",
 				},
+				_("Accrued Interest Receivable"): {
+					"account_number": "1680",
+					"account_category": "Other Current Assets",
+				},
 				_("Stock Assets"): {
 					_("Stock In Hand"): {
 						"account_type": "Stock",
@@ -72,6 +76,10 @@ def get():
 					"account_category": "Stock Assets",
 				},
 				_("Tax Assets"): {
+					_("Tax Withheld Receivable"): {
+						"account_number": "1510",
+						"account_category": "Other Current Assets",
+					},
 					"is_group": 1,
 					"account_number": "1500",
 					"account_category": "Other Current Assets",
@@ -127,6 +135,14 @@ def get():
 				"account_number": "1700",
 			},
 			_("Investments"): {
+				_("Investments at Cost"): {
+					"account_number": "1810",
+					"account_category": "Long-term Investments",
+				},
+				_("Fair Value Adjustment"): {
+					"account_number": "1820",
+					"account_category": "Long-term Investments",
+				},
 				"is_group": 1,
 				"account_number": "1800",
 				"account_category": "Long-term Investments",
@@ -234,6 +250,7 @@ def get():
 				_("Impairment"): {"account_number": "5224", "account_category": "Operating Expenses"},
 				_("Tax Expense"): {"account_number": "5225", "account_category": "Tax Expense"},
 				_("Exchange Loss"): {"account_number": "5226", "account_category": "Operating Expenses"},
+				_("Investment Charges"): {"account_number": "5227", "account_category": "Finance Costs"},
 				"account_number": "5200",
 			},
 			"root_type": "Expense",
@@ -254,6 +271,15 @@ def get():
 				_("Exchange Gain"): {
 					"account_number": "4230",
 					"account_category": "Other Operating Income",
+				},
+				_("Dividend Income"): {"account_number": "4240", "account_category": "Investment Income"},
+				_("Realised Gain/Loss on Investments"): {
+					"account_number": "4250",
+					"account_category": "Investment Income",
+				},
+				_("Unrealised Gain/Loss on Investments"): {
+					"account_number": "4260",
+					"account_category": "Investment Income",
 				},
 				"is_group": 1,
 				"account_number": "4200",

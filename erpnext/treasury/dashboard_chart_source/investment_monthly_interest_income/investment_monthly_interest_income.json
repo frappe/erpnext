@@ -1,0 +1,13 @@
+{
+ "creation": "2026-10-07 15:28:35.002247",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2026-10-07 15:30:23.466572",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Monthly Interest Income",
+ "owner": "Administrator",
+ "source_name": "Investment Monthly Interest Income",
+ "timeseries": 0
+}

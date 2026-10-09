@@ -32,6 +32,9 @@
                         "account_category": "Other Current Assets"
                     }
                 },
+                "Accrued Interest Receivable": {
+                    "account_category": "Other Current Assets"
+                },
                 "Stock Assets": {
                     "Stock In Hand": {
                         "account_type": "Stock",
@@ -45,6 +48,9 @@
                     "account_category": "Stock Assets"
                 },
                 "Tax Assets": {
+                    "TDS Receivable": {
+                        "account_category": "Other Current Assets"
+                    },
                     "is_group": 1,
                     "account_category": "Other Current Assets"
                 }
@@ -80,6 +86,12 @@
                 }
             },
             "Investments": {
+                "Investments at Cost": {
+                    "account_category": "Long-term Investments"
+                },
+                "Fair Value Adjustment": {
+                    "account_category": "Long-term Investments"
+                },
                 "is_group": 1,
                 "account_category": "Long-term Investments"
             },
@@ -182,6 +194,9 @@
                 },
                 "Exchange Loss": {
                     "account_category": "Operating Expenses"
+                },
+                "Investment Charges": {
+                    "account_category": "Finance Costs"
                 }
             },
             "root_type": "Expense"
@@ -202,6 +217,22 @@
                 "Exchange Gain": {
                     "account_type": "Income Account",
                     "account_category": "Other Operating Income"
+                },
+                "Interest Income": {
+                    "account_type": "Income Account",
+                    "account_category": "Investment Income"
+                },
+                "Dividend Income": {
+                    "account_type": "Income Account",
+                    "account_category": "Investment Income"
+                },
+                "Realised Gain/Loss on Investments": {
+                    "account_type": "Income Account",
+                    "account_category": "Investment Income"
+                },
+                "Unrealised Gain/Loss on Investments": {
+                    "account_type": "Income Account",
+                    "account_category": "Investment Income"
                 },
                 "account_type": "Income Account",
                 "is_group": 1

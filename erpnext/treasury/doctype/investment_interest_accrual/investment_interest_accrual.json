@@ -1,0 +1,282 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-10-07 15:28:31.843596",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "details_section",
+  "naming_series",
+  "investment",
+  "instrument_class",
+  "posting_date",
+  "column_break_details",
+  "company",
+  "currency",
+  "conversion_rate",
+  "accrual_period_section",
+  "from_date",
+  "column_break_accrual_period",
+  "to_date",
+  "interest_section",
+  "interest_amount",
+  "estimated_interest",
+  "column_break_interest",
+  "variance",
+  "amortisation_amount",
+  "accounts_tab",
+  "accounting_section",
+  "cost_center",
+  "more_info_tab",
+  "reference_section",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "INV-ACCR-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "INV-ACCR-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "investment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Investment",
+   "options": "Investment",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "investment.instrument_class",
+   "fieldname": "instrument_class",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Instrument Class",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "investment.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "investment.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accrual_period_section",
+   "fieldtype": "Section Break",
+   "label": "Accrual Period"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_accrual_period",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "interest_section",
+   "fieldtype": "Section Break",
+   "label": "Interest"
+  },
+  {
+   "description": "As credited or reported by the bank / issuer",
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Interest Amount",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "estimated_interest",
+   "fieldtype": "Currency",
+   "label": "Estimated Interest",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_interest",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Interest Amount minus Estimated Interest",
+   "fieldname": "variance",
+   "fieldtype": "Currency",
+   "label": "Variance",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.instrument_class=='Bond'",
+   "description": "Bond discount earned (positive) or premium written off (negative), by the effective interest method",
+   "fieldname": "amortisation_amount",
+   "fieldtype": "Currency",
+   "label": "Amortisation Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "investment.cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Investment Interest Accrual",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-07 15:28:32.128616",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Interest Accrual",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "investment,from_date,to_date",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

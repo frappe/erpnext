@@ -1,6 +1,6 @@
 {
  "app": "erpnext",
- "creation": "2026-08-26 23:30:00",
+ "creation": "2026-10-07 15:29:47.365783",
  "docstatus": 0,
  "doctype": "Dock",
  "idx": 0,
@@ -20,6 +20,14 @@
    "link_to": "Accounts",
    "link_type": "Sidebar",
    "title": "Accounts"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "landmark",
+   "link_to": "Treasury",
+   "link_type": "Sidebar",
+   "title": "Treasury"
   },
   {
    "added": 0,
@@ -102,7 +110,7 @@
    "title": "Portal"
   }
  ],
- "modified": "2026-10-04 13:00:00.000000",
+ "modified": "2026-10-07 15:29:47.900951",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",
