@@ -34,6 +34,17 @@ class TestDepartment(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "must be a group"):
 			new_department("Child Under Leaf", "_Test Company", leaf.name).insert()
 
+	def test_company_is_immutable_and_rename_keeps_suffix(self):
+		doc = create_department("Rename Department", company="_Test Company")
+		doc.company = "_Test Company 1"
+		with self.assertRaisesRegex(frappe.ValidationError, "company cannot be changed"):
+			doc.save()
+
+		abbr = frappe.get_cached_value("Company", "_Test Company", "abbr")
+		name = frappe.rename_doc("Department", doc.name, f"Team {abbr}X")
+		self.assertEqual(name, f"Team {abbr}X - {abbr}")
+		self.assertEqual(frappe.get_doc("Department", name).company, "_Test Company")
+
 
 def create_department(department_name, parent_department=None, company=None):
 	doc = frappe.get_doc(

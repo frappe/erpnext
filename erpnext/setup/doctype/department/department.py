@@ -39,6 +39,9 @@ class Department(NestedSet):
 			self.name = self.department_name
 
 	def validate(self):
+		if not self.is_new() and self.has_value_changed("company"):
+			frappe.throw(_("Department company cannot be changed"))
+
 		if not self.parent_department:
 			root = get_root_of("Department")
 			if root:
@@ -55,7 +58,7 @@ class Department(NestedSet):
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
-		if frappe.get_cached_value("Company", self.company, "abbr") not in new:
+		if not new.endswith(f" - {frappe.get_cached_value('Company', self.company, 'abbr')}"):
 			new = get_abbreviated_name(new, self.company)
 
 		return new
