@@ -257,6 +257,9 @@ class AssetRepair(AccountsController):
 	def after_delete(self):
 		frappe.get_lazy_doc("Asset", self.asset).set_status()
 
+	def on_discard(self):
+		frappe.get_lazy_doc("Asset", self.asset).set_status()
+
 	def check_repair_status(self):
 		if self.repair_status != "Completed" and self.docstatus == 1:
 			frappe.throw(_("Only an Asset Repair with Repair Status Completed can be submitted."))

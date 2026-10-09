@@ -457,6 +457,18 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset.set_status()
 		self.assertEqual(asset.db_get("status"), "Out of Order")
 
+	def test_discarded_repair_does_not_keep_asset_out_of_order(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(asset=asset)
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+		asset_repair.discard()
+		self.assertNotEqual(asset.db_get("status"), "Out of Order")
+
+		asset.reload()
+		asset.set_status()
+		self.assertNotEqual(asset.db_get("status"), "Out of Order")
+
 	def test_capitalized_repair_raises_value_of_asset_without_depreciation(self):
 		asset = create_asset(submit=1)
 		asset_repair = create_asset_repair(
