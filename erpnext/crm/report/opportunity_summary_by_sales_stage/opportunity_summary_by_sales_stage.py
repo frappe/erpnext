@@ -51,7 +51,7 @@ class OpportunitySummaryBySalesStage:
 		self.set_sales_stage_columns()
 
 	def set_sales_stage_columns(self):
-		self.sales_stage_list = frappe.get_all("Sales Stage", pluck="name")
+		self.sales_stage_list = frappe.db.get_list("Sales Stage", pluck="name")
 
 		for sales_stage in self.sales_stage_list:
 			if self.filters.get("data_based_on") == "Number":
