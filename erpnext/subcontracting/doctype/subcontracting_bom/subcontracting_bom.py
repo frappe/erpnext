@@ -128,8 +128,26 @@ def finished_good_bom_query(
 	return bom(doctype, txt, searchfield, start, page_len, filters)
 
 
+LOOKUP_FIELDS = [
+	"finished_good",
+	"finished_good_qty",
+	"finished_good_uom",
+	"service_item",
+	"service_item_qty",
+	"service_item_uom",
+	"conversion_factor",
+]
+
+
+def check_order_read_permission():
+	"""Subcontracting BOMs are looked up from Purchase and Sales Orders."""
+	if not (frappe.has_permission("Purchase Order", "read") or frappe.has_permission("Sales Order", "read")):
+		frappe.throw_permission_error()
+
+
 @frappe.whitelist()
 def get_subcontracting_boms_for_finished_goods(fg_items: str | list):
+	check_order_read_permission()
 	if fg_items:
 		filters = {"is_active": 1}
 
@@ -138,7 +156,7 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list):
 		else:
 			filters["finished_good"] = fg_items
 
-		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=["*"]):
+		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=LOOKUP_FIELDS):
 			if isinstance(fg_items, list):
 				return {d.finished_good: d for d in subcontracting_boms}
 			else:
@@ -149,9 +167,10 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list):
 
 @frappe.whitelist()
 def get_subcontracting_boms_for_service_item(service_item: str) -> dict:
+	check_order_read_permission()
 	if service_item:
 		filters = {"is_active": 1, "service_item": service_item}
-		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=["*"])
+		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=LOOKUP_FIELDS)
 
 		if Subcontracting_boms:
 			return {d.finished_good: d for d in Subcontracting_boms}

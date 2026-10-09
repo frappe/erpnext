@@ -3,7 +3,9 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint, get_last_day
 
 
 class QualityReview(Document):
@@ -28,16 +30,34 @@ class QualityReview(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		# fetch targets from goal
 		if not self.reviews:
-			for d in frappe.get_doc("Quality Goal", self.goal).objectives:
-				self.append("reviews", dict(objective=d.objective, target=d.target, uom=d.uom))
+			self.set_objectives()
+		elif self.has_value_changed("goal"):
+			self.validate_objectives()
 
 		self.set_status()
 
+	def set_objectives(self):
+		for d in frappe.get_doc("Quality Goal", self.goal).objectives:
+			self.append("reviews", dict(objective=d.objective, target=d.target, uom=d.uom, status="Open"))
+
+	def validate_objectives(self):
+		objectives = frappe.get_all(
+			"Quality Goal Objective",
+			filters={"parent": self.goal, "parenttype": "Quality Goal"},
+			pluck="objective",
+		)
+		for d in self.reviews:
+			if d.objective not in objectives:
+				frappe.throw(
+					_("Row #{0}: Objective {1} is not part of Quality Goal {2}").format(
+						d.idx, frappe.bold(d.objective), frappe.bold(self.goal)
+					)
+				)
+
 	def set_status(self):
 		# if any child item is failed, fail the parent
-		if not len(self.reviews or []) or any([d.status == "Open" for d in self.reviews]):
+		if not self.reviews or any(d.status not in ("Passed", "Failed") for d in self.reviews):
 			self.status = "Open"
 		elif any([d.status == "Failed" for d in self.reviews]):
 			self.status = "Failed"
@@ -46,9 +66,9 @@ class QualityReview(Document):
 
 
 def review():
-	day = frappe.utils.getdate().day
-	weekday = frappe.utils.getdate().strftime("%A")
-	month = frappe.utils.getdate().strftime("%B")
+	today = frappe.utils.getdate()
+	weekday = today.strftime("%A")
+	month = today.strftime("%B")
 
 	for goal in frappe.get_list("Quality Goal", fields=["name", "frequency", "date", "weekday"]):
 		if goal.frequency == "Daily":
@@ -57,17 +77,23 @@ def review():
 		elif goal.frequency == "Weekly" and goal.weekday == weekday:
 			create_review(goal.name)
 
-		elif goal.frequency == "Monthly" and goal.date == str(day):
+		elif goal.frequency == "Monthly" and is_review_date(goal.date, today):
 			create_review(goal.name)
 
-		elif goal.frequency == "Quarterly" and day == 1 and get_quarter(month):
+		elif goal.frequency == "Quarterly" and is_review_date(goal.date, today) and get_quarter(month):
 			create_review(goal.name)
+
+
+def is_review_date(goal_date, today):
+	return min(cint(goal_date), get_last_day(today).day) == today.day
 
 
 def create_review(goal):
-	goal = frappe.get_doc("Quality Goal", goal)
+	date = frappe.utils.getdate()
+	if frappe.db.exists("Quality Review", {"goal": goal, "date": date}):
+		return
 
-	review = frappe.get_doc({"doctype": "Quality Review", "goal": goal.name, "date": frappe.utils.getdate()})
+	review = frappe.get_doc({"doctype": "Quality Review", "goal": goal, "date": date})
 
 	review.insert(ignore_permissions=True)
 

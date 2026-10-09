@@ -39,7 +39,7 @@ def get_lead_data(filters, based_on):
 		# date(creation) <= to_date, i.e. anything created before the next day
 		lead_filters.append(["creation", "<", add_days(filters.to_date, 1)])
 
-	lead_details = frappe.get_all("Lead", filters=lead_filters, fields=[based_on_field, "name"])
+	lead_details = frappe.get_list("Lead", filters=lead_filters, fields=[based_on_field, "name"])
 
 	lead_map = frappe._dict()
 	for d in lead_details:
@@ -48,10 +48,11 @@ def get_lead_data(filters, based_on):
 	data = []
 	for based_on_value, leads in lead_map.items():
 		row = {based_on_field: based_on_value, "lead_count": len(leads)}
-		row["quot_count"] = get_lead_quotation_count(leads)
-		row["opp_count"] = get_lead_opp_count(leads)
-		row["order_count"] = get_quotation_ordered_count(leads)
-		row["order_value"] = get_order_amount(leads) or 0
+		customers = get_converted_customers(leads)
+		row["quot_count"] = get_lead_quotation_count(leads, customers)
+		row["opp_count"] = get_lead_opp_count(leads, customers)
+		row["order_count"] = get_quotation_ordered_count(leads, customers)
+		row["order_value"] = get_order_amount(leads, customers) or 0
 
 		row["opp_lead"] = flt(row["opp_count"]) / flt(row["lead_count"] or 1.0) * 100.0
 		row["quot_lead"] = flt(row["quot_count"]) / flt(row["lead_count"] or 1.0) * 100.0
@@ -63,35 +64,51 @@ def get_lead_data(filters, based_on):
 	return data
 
 
-def get_lead_quotation_count(leads):
-	return frappe.db.count("Quotation", {"quotation_to": "Lead", "party_name": ["in", leads]})
+def get_converted_customers(leads):
+	return frappe.get_list("Customer", filters={"lead_name": ["in", leads]}, pluck="name")
 
 
-def get_lead_opp_count(leads):
-	return frappe.db.count("Opportunity", {"opportunity_from": "Lead", "party_name": ["in", leads]})
+def get_lead_quotation_count(leads, customers):
+	return count_by_party("Quotation", "quotation_to", leads, customers)
 
 
-def get_quotation_ordered_count(leads):
-	return frappe.db.count(
-		"Quotation", {"status": "Ordered", "quotation_to": "Lead", "party_name": ["in", leads]}
+def get_lead_opp_count(leads, customers):
+	return count_by_party("Opportunity", "opportunity_from", leads, customers)
+
+
+def get_quotation_ordered_count(leads, customers):
+	return count_by_party(
+		"Quotation",
+		"quotation_to",
+		leads,
+		customers,
+		{"status": ["in", ["Ordered", "Partially Ordered"]]},
 	)
 
 
-def get_order_amount(leads):
+def count_by_party(doctype, party_type_field, leads, customers, filters=None):
+	"""Count documents made for the leads, or for the customers they were converted to."""
+	count = 0
+	for party_type, parties in (("Lead", leads), ("Customer", customers)):
+		if parties:
+			party_filters = {party_type_field: party_type, "party_name": ["in", parties]}
+			count += frappe.db.count(doctype, {**(filters or {}), **party_filters})
+	return count
+
+
+def get_order_amount(leads, customers):
 	so_item = frappe.qb.DocType("Sales Order Item")
 	quotation = frappe.qb.DocType("Quotation")
+	party_condition = (quotation.quotation_to == "Lead") & quotation.party_name.isin(leads)
+	if customers:
+		party_condition |= (quotation.quotation_to == "Customer") & quotation.party_name.isin(customers)
+
 	return (
 		frappe.qb.from_(so_item)
 		.select(Sum(so_item.base_net_amount))
 		.where(
 			so_item.prevdoc_docname.isin(
-				frappe.qb.from_(quotation)
-				.select(quotation.name)
-				.where(
-					(quotation.status == "Ordered")
-					& (quotation.quotation_to == "Lead")
-					& quotation.party_name.isin(leads)
-				)
+				frappe.qb.from_(quotation).select(quotation.name).where(party_condition)
 			)
 		)
 		.run()

@@ -290,7 +290,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-08-21 23:11:51.906705",
+ "modified": "2026-10-09 05:32:49.882340",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -316,6 +316,13 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager"
   },
   {
    "email": 1,
