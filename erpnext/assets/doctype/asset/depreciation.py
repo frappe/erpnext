@@ -382,6 +382,7 @@ def get_message_for_depr_entry_posting_error(asset_links, error_log_links):
 @frappe.whitelist()
 def scrap_asset(asset_name: str, scrap_date: DateTimeLikeObject | None = None):
 	frappe.has_permission("Asset", "write", asset_name, throw=True)
+	frappe.has_permission("Journal Entry", "submit", throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 	scrap_date = getdate(scrap_date) or getdate(today())
 	asset.db_set("disposal_date", scrap_date)
@@ -473,6 +474,9 @@ def create_journal_entry_for_scrap(asset, scrap_date):
 def restore_asset(asset_name: str):
 	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.journal_entry_for_scrap:
+		frappe.throw(_("Asset {0} cannot be restored, as it is not scrapped").format(asset_name))
+
 	reverse_depreciation_entry_made_on_disposal(asset)
 	reset_depreciation_schedule(asset, get_note_for_restore(asset))
 	cancel_journal_entry_for_scrap(asset)
@@ -613,14 +617,15 @@ def get_gl_entries_on_asset_regain(
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
+		gross_asset_value,
 	) = get_asset_details(asset, finance_book)
 
 	gl_entries = [
 		asset.get_gl_dict(
 			{
 				"account": fixed_asset_account,
-				"debit_in_account_currency": asset.net_purchase_amount,
-				"debit": asset.net_purchase_amount,
+				"debit_in_account_currency": gross_asset_value,
+				"debit": gross_asset_value,
 				"cost_center": depreciation_cost_center,
 				"posting_date": date,
 			},
@@ -666,14 +671,15 @@ def get_gl_entries_on_asset_disposal(
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
+		gross_asset_value,
 	) = get_asset_details(asset, finance_book)
 
 	gl_entries = [
 		asset.get_gl_dict(
 			{
 				"account": fixed_asset_account,
-				"credit_in_account_currency": asset.net_purchase_amount,
-				"credit": asset.net_purchase_amount,
+				"credit_in_account_currency": gross_asset_value,
+				"credit": gross_asset_value,
 				"cost_center": depreciation_cost_center,
 				"posting_date": date,
 			},
@@ -711,7 +717,10 @@ def get_gl_entries_on_asset_disposal(
 
 def get_asset_details(asset, finance_book=None):
 	value_after_depreciation = asset.get_value_after_depreciation(finance_book)
-	accumulated_depr_amount = flt(asset.net_purchase_amount) - flt(value_after_depreciation)
+	gross_asset_value = get_gross_asset_value(asset, finance_book)
+	accumulated_depr_amount = flt(
+		gross_asset_value - flt(value_after_depreciation), asset.precision("net_purchase_amount")
+	)
 
 	fixed_asset_account, accumulated_depr_account, _ = get_depreciation_accounts(
 		asset.asset_category, asset.company
@@ -727,6 +736,30 @@ def get_asset_details(asset, finance_book=None):
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
+		gross_asset_value,
+	)
+
+
+def get_gross_asset_value(asset, finance_book: str | None = None) -> float:
+	"""Value carried in the fixed asset account: cost, capitalised additions and revaluations."""
+	if not finance_book and asset.calculate_depreciation and asset.get("finance_books"):
+		finance_book = asset.finance_books[0].finance_book
+
+	value_adjustments = frappe.get_all(
+		"Asset Value Adjustment",
+		filters={
+			"asset": asset.name,
+			"docstatus": 1,
+			"finance_book": finance_book or ("is", "not set"),
+		},
+		pluck="difference_amount",
+	)
+
+	return flt(
+		flt(asset.net_purchase_amount)
+		+ flt(asset.additional_asset_cost)
+		+ sum(flt(amount) for amount in value_adjustments),
+		asset.precision("net_purchase_amount"),
 	)
 
 
@@ -817,6 +850,15 @@ def get_value_after_depreciation_on_disposal_date(
 	disposal_date: DateTimeLikeObject,
 	finance_book: str | None = None,
 ):
+	frappe.has_permission("Asset", "read", asset, throw=True)
+	return calculate_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book)
+
+
+def calculate_value_after_depreciation_on_disposal_date(
+	asset: str,
+	disposal_date: DateTimeLikeObject,
+	finance_book: str | None = None,
+) -> float:
 	asset_doc = frappe.get_doc("Asset", asset)
 
 	if asset_doc.asset_type == "Composite Component":

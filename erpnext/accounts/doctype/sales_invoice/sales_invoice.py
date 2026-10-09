@@ -468,9 +468,14 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		FixedAssetService(self).split_asset_based_on_sale_qty()
-		FixedAssetService(self).process_asset_depreciation()
+		if not self.is_return:
+			FixedAssetService(self).process_asset_depreciation()
 
 		self.make_gl_entries()
+
+		if self.is_return:
+			# the regain entries need the asset value before the disposal depreciation is reversed
+			FixedAssetService(self).process_asset_depreciation()
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
