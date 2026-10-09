@@ -482,6 +482,11 @@ class TestQuotation(ERPNextTestSuite):
 		quotation.valid_till = add_days(quotation.transaction_date, -1)
 		self.assertRaises(frappe.ValidationError, quotation.validate)
 
+	@ERPNextTestSuite.change_settings("CRM Settings", {"default_valid_till": "30"})
+	def test_default_validity_days_set_on_server(self):
+		quotation = make_quotation(do_not_submit=1)
+		self.assertEqual(getdate(quotation.valid_till), getdate(add_days(quotation.transaction_date, 30)))
+
 	def test_so_from_expired_quotation(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 

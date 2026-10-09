@@ -91,7 +91,7 @@ def link_communications_with_prospect(communication, method):
 
 
 def update_modified_timestamp(communication, method):
-	if communication.reference_doctype and communication.reference_name:
+	if communication.reference_doctype in ("Lead", "Opportunity") and communication.reference_name:
 		if communication.sent_or_received == "Received" and frappe.db.get_single_value(
 			"CRM Settings", "update_timestamp_on_new_communication"
 		):
