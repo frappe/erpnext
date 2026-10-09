@@ -5,6 +5,7 @@ import random
 
 import frappe
 
+from erpnext.manufacturing.doctype.routing.test_routing import create_routing
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -298,18 +299,45 @@ class TestBOMCreator(ERPNextTestSuite):
 			docname="non-existent-row",
 		)
 
-	def make_unsaved_creator(self, operation=None, **kwargs):
-		doc = frappe.new_doc("BOM Creator", item_code="_Test Item", **kwargs)
-		doc.append("items", {"item_code": "_Test Item Home Desktop 100", "qty": 1, "operation": operation})
+	def make_creator_with_item(self, operation=None, **kwargs):
+		doc = make_bom_creator(
+			name="Routing Check BOM Creator",
+			company="_Test Company",
+			item_code="_Test Item",
+			qty=1,
+			currency="INR",
+			conversion_rate=1,
+			plc_conversion_rate=1,
+			**kwargs,
+		)
+		doc.add_item(
+			fg_item="_Test Item",
+			fg_reference_id=doc.name,
+			item_code="_Test Item Home Desktop 100",
+			qty=1,
+			operation=operation,
+		)
 		return doc
 
 	def test_submit_rejects_item_operation_without_routing(self):
-		doc = self.make_unsaved_creator(operation="_Test Operation 1")
-		self.assertRaises(frappe.ValidationError, doc.before_submit)
+		doc = self.make_creator_with_item(operation="_Test Operation 1")
+		self.assertRaisesRegex(frappe.ValidationError, "Set a Routing", doc.submit)
 
-	def test_submit_allows_item_operation_with_routing_or_without_operations(self):
-		self.make_unsaved_creator(operation="_Test Operation 1", routing="_Test Routing 1").before_submit()
-		self.make_unsaved_creator().before_submit()
+	def test_submit_allows_item_operation_with_routing(self):
+		routing = create_routing(
+			routing_name="BOM Creator Routing",
+			operations=[
+				{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 10}
+			],
+		)
+		doc = self.make_creator_with_item(operation="_Test Operation 1", routing=routing.name)
+		doc.submit()
+		self.assertEqual(doc.docstatus, 1)
+
+	def test_submit_allows_items_without_operation(self):
+		doc = self.make_creator_with_item()
+		doc.submit()
+		self.assertEqual(doc.docstatus, 1)
 
 
 def create_items():
