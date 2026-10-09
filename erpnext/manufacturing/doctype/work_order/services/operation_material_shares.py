@@ -40,22 +40,20 @@ class OperationMaterialShares:
 		}
 
 	def get_operation_row_owners(self, operation: str) -> dict[str, tuple[str, int]]:
-		"""(BOM, BOM operation row) of each Work Order row of `operation`, from the row's position
-		among the rows of its BOM. Row 0 when that position no longer holds the operation, as for
-		rows added on the Work Order."""
-		bom_operations = get_bom_operations(
-			tuple(sorted({op.bom for op in self.work_order.operations if op.bom}))
+		"""(BOM, BOM operation row) of each Work Order row of `operation`, from the BOM Operation it
+		was fetched from. Row 0 for rows added or copied on the Work Order."""
+		bom_rows = get_bom_operation_rows(
+			tuple(sorted({op.bom_operation for op in self.work_order.operations if op.bom_operation}))
 		)
-		position, owners = defaultdict(int), {}
+		owners, claimed = {}, set()
 		for op in self.work_order.operations:
-			operations = bom_operations.get(op.bom)
-			bom_row = position[op.bom] % len(operations) + 1 if operations else 0
-			position[op.bom] += 1
-			if op.operation == operation:
-				owners[op.name] = (
-					op.bom,
-					bom_row if operations and operations[bom_row - 1] == operation else 0,
-				)
+			if op.operation != operation:
+				continue
+
+			bom_row = bom_rows.get(op.bom_operation)
+			is_source = bom_row and (bom_row.parent, bom_row.operation) == (op.bom, operation)
+			owners[op.name] = (op.bom, bom_row.idx if is_source and op.bom_operation not in claimed else 0)
+			claimed.add(op.bom_operation)
 
 		return owners
 
@@ -75,18 +73,14 @@ class OperationMaterialShares:
 
 
 @request_cache
-def get_bom_operations(bom_nos: tuple[str, ...]) -> dict[str, list[str]]:
-	"""Operation names of each BOM, in row order."""
-	bom_operations = defaultdict(list)
-	for row in frappe.get_all(
+def get_bom_operation_rows(names: tuple[str, ...]) -> dict[str, frappe._dict]:
+	"""BOM, row number and operation of each BOM Operation row."""
+	rows = frappe.get_all(
 		"BOM Operation",
-		filters={"parent": ["in", bom_nos], "parenttype": "BOM"},
-		fields=["parent", "operation"],
-		order_by="idx",
-	):
-		bom_operations[row.parent].append(row.operation)
-
-	return bom_operations
+		filters={"name": ["in", names], "parenttype": "BOM"},
+		fields=["name", "parent", "idx", "operation"],
+	)
+	return {row.name: row for row in rows}
 
 
 @request_cache
