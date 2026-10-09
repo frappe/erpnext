@@ -138,7 +138,12 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		)
 		self.assert_invalid(settings)
 
-		settings.availability_of_slots[-1].update({"from_time": "17:00:00", "to_time": "18:00:00"})
+		# the failed save bumped the in-memory timestamp, so start from a fresh copy
+		settings = self.get_valid_scheduling_settings()
+		settings.append(
+			"availability_of_slots",
+			{"day_of_week": "Monday", "from_time": "17:00:00", "to_time": "18:00:00"},
+		)
 		settings.append(
 			"availability_of_slots",
 			{"day_of_week": "Tuesday", "from_time": "09:00:00", "to_time": "17:00:00"},
