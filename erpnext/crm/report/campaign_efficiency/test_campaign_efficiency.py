@@ -45,6 +45,28 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		self.assertEqual(row["quot_count"], 0)
 		self.assertEqual(row["order_count"], 0)
 
+		# both date filters cleared
+		row = next(r for r in execute({})[1] if r.get("utm_campaign") == campaign)
+		self.assertEqual(row["lead_count"], 2)
+
+	def test_cancelled_and_draft_documents_left_out(self):
+		campaign = make_campaign("_Test Campaign Eff Orders")
+		lead = make_campaign_lead(campaign)
+		quotation = make_lead_quotation(lead.name)
+		quotation.submit()
+
+		make_sales_order_for(quotation.name).cancel()
+		make_sales_order_for(quotation.name)
+		make_lead_quotation(lead.name)
+		cancelled_quotation = make_lead_quotation(lead.name)
+		cancelled_quotation.submit()
+		cancelled_quotation.cancel()
+
+		row = campaign_row(campaign)
+		self.assertEqual(row["quot_count"], 1)
+		self.assertEqual(row["order_count"], 1)
+		self.assertEqual(row["order_value"], 1000)
+
 	def test_partly_ordered_quotation_counts_as_ordered(self):
 		campaign = make_campaign("_Test Campaign Eff Partly Ordered")
 		lead = make_campaign_lead(campaign)

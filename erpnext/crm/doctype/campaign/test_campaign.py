@@ -68,3 +68,34 @@ class TestCampaign(ERPNextTestSuite):
 		second_mirror = frappe.db.get_value("UTM Campaign", {"crm_campaign": second.name})
 		self.assertTrue(second_mirror)
 		self.assertNotEqual(second_mirror, "_Test Shared Mirror")
+
+	def test_deleting_keeps_the_utm_campaign_unlinked(self):
+		campaign = self.make_campaign()
+		utm = frappe.db.get_value("UTM Campaign", {"crm_campaign": campaign.name})
+
+		campaign.delete()
+
+		self.assertFalse(frappe.db.exists("Campaign", campaign.name))
+		self.assertIsNone(frappe.db.get_value("UTM Campaign", utm, "crm_campaign"))
+
+	def test_sales_user_gets_the_utm_campaign_of_a_readable_campaign(self):
+		from erpnext.crm.doctype.campaign.campaign import get_utm_campaign
+
+		campaign = self.make_campaign()
+		mirror = frappe.db.get_value("UTM Campaign", {"crm_campaign": campaign.name})
+		sales_user = make_user("_test_campaign_sales@example.com", "Sales User")
+		accounts_user = make_user("_test_campaign_accounts@example.com", "Accounts User")
+
+		frappe.set_user(sales_user)
+		self.assertEqual(get_utm_campaign(campaign.name), mirror)
+
+		frappe.set_user(accounts_user)
+		self.assertRaises(frappe.PermissionError, get_utm_campaign, campaign.name)
+
+
+def make_user(email: str, role: str) -> str:
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": "Campaign", "roles": [{"role": role}]}
+		).insert()
+	return email
