@@ -536,7 +536,6 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 		pluck="name",
 	)
 
-
 	conditions = sq_item.request_for_quotation == rfq_name
 	if rfq_item_names:
 		conditions = conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
@@ -553,11 +552,16 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 			sq_item.qty,
 			sq_item.uom,
 			sq_item.stock_uom,
+			sq_item.conversion_factor,
+			sq_item.stock_qty,
 			sq_item.rate,
 			sq_item.amount,
+			sq_item.base_rate,
+			sq_item.base_amount,
 			sq_item.lead_time_days,
 			sq.valid_till,
 			sq.currency,
+			sq.conversion_rate,
 			sq.status,
 			sq.docstatus,
 		)
