@@ -135,7 +135,7 @@ class MaintenanceVisit(TransactionBase):
 				)
 			)
 		for purpose in self.purposes:
-			row_item = items.get(purpose.maintenance_schedule_detail)
+			row_item = items.get(self.maintenance_schedule_detail or purpose.maintenance_schedule_detail)
 			if row_item and row_item != purpose.item_code:
 				frappe.throw(
 					_("Row #{0}: Item {1} does not match the item of its schedule row").format(
