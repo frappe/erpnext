@@ -120,7 +120,18 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 			posting_date=year_start,
 		)
 
-		def cash_closing(from_date):
+		usd_expenses_in_inr = sum(
+			frappe.get_all(
+				"GL Entry",
+				filters={"account": "Marketing Expenses - CCU", "is_cancelled": 0},
+				pluck="debit_in_reporting_currency",
+			)
+		)
+		# Cash: 100000 INR plus 1100 USD at the closing rate of 85
+		expected_cash_credit = 100000 + 1100 * 85
+		expected_reserve_debit = expected_cash_credit - (100000 + usd_expenses_in_inr)
+
+		for from_date in (year_start, add_days(year_start, 1)):
 			filters = frappe._dict(
 				{
 					"company": ["Parent Group Company India", "Child Company US"],
@@ -128,12 +139,11 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 					"from_date": from_date,
 				}
 			)
-			data = execute(filters)[1]
-			return next(
-				row["closing_debit"] - row["closing_credit"] for row in data if row.get("acc_name") == "Cash"
-			)
+			rows = {row.get("acc_name") or row.get("account"): row for row in execute(filters)[1]}
+			cash, reserve = rows["Cash"], rows[_("Foreign Currency Translation Reserve")]
 
-		self.assertEqual(cash_closing(add_days(year_start, 1)), cash_closing(year_start))
+			self.assertEqual(cash["closing_credit"] - cash["closing_debit"], expected_cash_credit)
+			self.assertEqual(reserve["closing_debit"] - reserve["closing_credit"], expected_reserve_debit)
 
 
 def create_journal_entry(**args):
