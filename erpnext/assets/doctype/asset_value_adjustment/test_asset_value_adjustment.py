@@ -376,6 +376,15 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 		asset.reload()
 		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 12000)
 
+		adjustment = make_asset_value_adjustment(asset=asset.name, new_asset_value=0, date="2023-01-15")
+		adjustment.submit()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 0)
+
+		adjustment.cancel()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 12000)
+
 	def test_adjustment_before_the_last_booked_depreciation_is_refused(self):
 		asset = create_asset_for_value_adjustment()
 		post_depreciation_entries(getdate("2023-03-31"))
@@ -387,6 +396,24 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			new_asset_value=100000,
 			date="2023-02-15",
 		)
+
+	def test_last_booked_depreciation_of_another_finance_book_is_ignored(self):
+		yearly_book = {
+			"finance_book": "Test Finance Book 2",
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 2,
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2023-01-31",
+		}
+		asset = create_asset_for_value_adjustment(
+			extra_finance_books=[yearly_book], finance_book="Test Finance Book 1"
+		)
+		post_depreciation_entries(getdate("2023-03-31"))
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset.name, finance_book="Test Finance Book 2", new_asset_value=100000, date="2023-02-15"
+		)
+		self.assertEqual(getdate(adjustment.date), getdate("2023-02-15"))
 
 	def test_negative_new_asset_value_is_refused(self):
 		asset = create_asset_for_value_adjustment()
@@ -430,6 +457,7 @@ def make_asset_value_adjustment(**args):
 			"doctype": "Asset Value Adjustment",
 			"company": args.company or "_Test Company",
 			"asset": args.asset,
+			"finance_book": args.finance_book,
 			"date": args.date or nowdate(),
 			"new_asset_value": args.new_asset_value,
 			"current_asset_value": args.current_asset_value,
@@ -455,7 +483,7 @@ def make_difference_account(**args):
 		return account
 
 
-def create_asset_for_value_adjustment(**finance_book):
+def create_asset_for_value_adjustment(extra_finance_books: list | None = None, **finance_book):
 	pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
 	asset = frappe.get_doc("Asset", frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name"))
 	asset.calculate_depreciation = 1
@@ -471,5 +499,7 @@ def create_asset_for_value_adjustment(**finance_book):
 			**finance_book,
 		},
 	)
+	for row in extra_finance_books or []:
+		asset.append("finance_books", row)
 	asset.submit()
 	return asset

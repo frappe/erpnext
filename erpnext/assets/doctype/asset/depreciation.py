@@ -418,11 +418,11 @@ def validate_scrap_date(asset, scrap_date):
 			frappe.throw(_("Asset cannot be scrapped before the last depreciation entry."))
 
 
-def get_last_depreciation_date(asset_name):
+def get_last_depreciation_date(asset_name, finance_book: str | None = None):
 	depreciation = frappe.qb.DocType("Asset Depreciation Schedule")
 	depreciation_schedule = frappe.qb.DocType("Depreciation Schedule")
 
-	last_depreciation_date = (
+	query = (
 		frappe.qb.from_(depreciation)
 		.join(depreciation_schedule)
 		.on(depreciation.name == depreciation_schedule.parent)
@@ -432,9 +432,11 @@ def get_last_depreciation_date(asset_name):
 		.where(depreciation_schedule.journal_entry != "")
 		.orderby(depreciation_schedule.schedule_date, order=Order.desc)
 		.limit(1)
-		.run()
 	)
+	if finance_book:
+		query = query.where(depreciation.finance_book == finance_book)
 
+	last_depreciation_date = query.run()
 	return last_depreciation_date[0][0] if last_depreciation_date else None
 
 

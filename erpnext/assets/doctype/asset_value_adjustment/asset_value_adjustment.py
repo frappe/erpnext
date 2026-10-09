@@ -75,7 +75,7 @@ class AssetValueAdjustment(Document):
 				title=_("Incorrect Date"),
 			)
 
-		last_depreciation_date = get_last_depreciation_date(self.asset)
+		last_depreciation_date = get_last_depreciation_date(self.asset, self.finance_book)
 		if last_depreciation_date and getdate(self.date) < last_depreciation_date:
 			frappe.throw(
 				_(
@@ -241,9 +241,7 @@ class AssetValueAdjustment(Document):
 		if asset.calculate_depreciation:
 			for row in asset.finance_books:
 				if cstr(row.finance_book) == cstr(self.finance_book):
-					salvage_value_adjustment = (
-						self.get_adjusted_salvage_value_amount(row, difference_amount) or 0
-					)
+					salvage_value_adjustment = self.get_adjusted_salvage_value_amount(row, difference_amount)
 					row.expected_value_after_useful_life += salvage_value_adjustment
 					row.value_after_depreciation = row.value_after_depreciation + flt(difference_amount)
 					row.db_update()
@@ -253,8 +251,7 @@ class AssetValueAdjustment(Document):
 		return asset
 
 	def get_adjusted_salvage_value_amount(self, row, difference_amount):
-		if row.expected_value_after_useful_life:
-			return flt((difference_amount * row.salvage_value_percentage) / 100)
+		return flt((difference_amount * row.salvage_value_percentage) / 100)
 
 	def get_adjustment_note(self):
 		if self.docstatus == 1:
