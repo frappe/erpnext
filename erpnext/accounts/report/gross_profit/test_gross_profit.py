@@ -374,6 +374,28 @@ class TestGrossProfit(ERPNextTestSuite):
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name or x.sales_invoice == sinv.name]
 		self.assertEqual(len(gp_entry), 0)
 
+	def test_full_qty_return_at_different_rate_is_shown(self):
+		sinv = self.create_sales_invoice(qty=10, rate=100, posting_date=nowdate())
+
+		cr_note = make_sales_return(sinv.name)
+		cr_note.items[0].rate = 50
+		cr_note = cr_note.save().submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+		)
+
+		columns, data = execute(filters=filters)
+		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
+		self.assertEqual(len(gp_entry), 1)
+		self.assertEqual(gp_entry[0].qty, 0.0)
+		self.assertEqual(gp_entry[0].selling_amount, 500.0)
+		self.assertEqual(gp_entry[0].gross_profit, 500.0)
+
+		invoice_row = [x for x in data if x.sales_invoice == sinv.name]
+		self.assertEqual(len(invoice_row), 1)
+		self.assertEqual(invoice_row[0].selling_amount, 500.0)
+
 	def test_standalone_cr_notes(self):
 		"""
 		Standalone cr notes will be reported as usual
