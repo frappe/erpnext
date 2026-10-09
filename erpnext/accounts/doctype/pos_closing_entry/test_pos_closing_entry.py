@@ -22,7 +22,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPOSClosingEntry(ERPNextTestSuite):
 	def setUp(self):
-		init_user_and_profile()
+		self.test_user, self.pos_profile = init_user_and_profile()
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 
