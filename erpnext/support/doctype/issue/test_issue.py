@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+import calendar
+
 import frappe
 from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
@@ -332,6 +334,33 @@ class TestIssue(TestSetUp):
 		self.assertEqual(
 			frappe.db.get_value("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, "status"),
 			"Closed",
+		)
+
+	def test_closed_assignments_stay_closed_with_assignment_rule(self):
+		from frappe.cache_manager import clear_doctype_map
+
+		create_user("test@admin.com")
+		frappe.get_doc(
+			{
+				"doctype": "Assignment Rule",
+				"name": "_Test Issue Assignment Rule",
+				"document_type": "Issue",
+				"assign_condition": "status == 'Open'",
+				"rule": "Round Robin",
+				"users": [{"user": "test@admin.com"}],
+				"assignment_days": [{"day": day} for day in calendar.day_name],
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(clear_doctype_map, "Assignment Rule", "Issue")
+
+		issue = make_issue(index=1)
+		issue.reload()
+		issue.status = "Closed"
+		issue.save()
+
+		self.assertEqual(
+			frappe.get_all("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, pluck="status"),
+			["Closed"],
 		)
 
 	def test_recording_of_assignment_on_first_reponse_failure(self):

@@ -81,6 +81,8 @@ class Issue(Document):
 			self.create_communication()
 			self.flags.communication_created = None
 
+	def on_change(self):
+		# after the on_update hooks, so an Assignment Rule without a close condition can't reopen them
 		if self.status in ("Resolved", "Closed") and self.has_value_changed("status"):
 			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
 
