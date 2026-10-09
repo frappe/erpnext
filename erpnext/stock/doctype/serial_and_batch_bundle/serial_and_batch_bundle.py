@@ -3041,6 +3041,7 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 		.where(
 			(sre.docstatus == 1)
 			& (sre.item_code == kwargs.item_code)
+			& (sre.status != "Closed")
 			& (sre.delivered_qty < sre.reserved_qty)
 			& (sb_entry.delivered_qty < sb_entry.qty)
 			& (sre.reservation_based_on == "Serial and Batch")

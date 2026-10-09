@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import os
 from itertools import pairwise
 from unittest.mock import patch
 
@@ -41,6 +42,38 @@ class TestCashFlow(ERPNextTestSuite):
 		rows = self.run_report()
 		row = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
 		return row["total"]
+
+	def ifrs_template_totals(self, *lines):
+		"""Run the shipped IFRS cash flow template for the current fiscal year and return the given lines."""
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		filters = frappe._dict(
+			company=self.company,
+			report_template=self.shipped_ifrs_template(),
+			from_fiscal_year=fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Yearly",
+			accumulated_values=0,
+		)
+		rows = execute(filters)[1]
+		return [next(row for row in rows if row.get("account") == line)["total"] for line in lines]
+
+	def shipped_ifrs_template(self):
+		"""Insert a copy of the template file, since sites keep the copy synced when they were set up."""
+		name = "_Test Standard Cash Flow Statement (IFRS)"
+		if frappe.db.exists("Financial Report Template", name):
+			return name
+
+		template_path = frappe.get_module_path(
+			"Accounts", "financial_report_template", "standard_cash_flow_statement_(ifrs)"
+		)
+		with open(os.path.join(template_path, "standard_cash_flow_statement_(ifrs).json")) as template_file:
+			template = frappe.parse_json(template_file.read())
+
+		template.update(name=None, template_name=name, module=None)
+		return frappe.get_doc(template).insert().name
 
 	def test_report_executes(self):
 		# Smoke-guards the raw-SQL -> query-builder port: the report query must compile and run on
@@ -367,3 +400,102 @@ class TestCashFlow(ERPNextTestSuite):
 		for cost_center in (cc1, cc2):
 			for previous, current in pairwise(keys_for(cost_center)):
 				self.assertEqual(opening[current], closing[previous])
+
+	def test_ifrs_template_profit_before_tax_includes_accounts_without_category(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		expense_account = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Uncategorised Fees",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		).insert()
+		lines = ("Profit before tax", "NET INCREASE/(DECREASE) IN CASH AND CASH EQUIVALENTS")
+
+		before = self.ifrs_template_totals(*lines)
+		make_journal_entry(expense_account.name, "Cash - _TC", 100, posting_date=today(), submit=True)
+		after = self.ifrs_template_totals(*lines)
+
+		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [-100, -100])
+
+	def test_patch_fixes_only_unchanged_ifrs_formulas(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+			sync_financial_report_templates,
+		)
+		from erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas import FORMULAS, TEMPLATE, execute
+
+		sync_financial_report_templates()
+		rows = {
+			code: frappe.db.get_value(
+				"Financial Report Row", {"parent": TEMPLATE, "reference_code": code}, "name"
+			)
+			for code in FORMULAS
+		}
+		custom_formula = '["account_category", "in", ["Other Payables"]]'
+		frappe.db.set_value(
+			"Financial Report Row", rows["CF_OP100"], "calculation_formula", FORMULAS["CF_OP100"][0]
+		)
+		frappe.db.set_value("Financial Report Row", rows["CF_WC500"], "calculation_formula", custom_formula)
+
+		execute()
+
+		self.assertEqual(
+			frappe.db.get_value("Financial Report Row", rows["CF_OP100"], "calculation_formula"),
+			FORMULAS["CF_OP100"][1],
+		)
+		self.assertEqual(
+			frappe.db.get_value("Financial Report Row", rows["CF_WC500"], "calculation_formula"),
+			custom_formula,
+		)
+
+	def test_patch_keeps_borrowings_when_financing_row_was_changed(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
+			sync_financial_report_templates,
+		)
+		from erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas import FORMULAS, TEMPLATE, execute
+
+		sync_financial_report_templates()
+
+		def row(code):
+			return frappe.db.get_value(
+				"Financial Report Row", {"parent": TEMPLATE, "reference_code": code}, "name"
+			)
+
+		frappe.db.set_value(
+			"Financial Report Row",
+			row("CF_FIN200"),
+			"calculation_formula",
+			'["account_category", "in", ["Long-term Borrowings"]]',
+		)
+		frappe.db.set_value(
+			"Financial Report Row", row("CF_WC500"), "calculation_formula", FORMULAS["CF_WC500"][0]
+		)
+
+		execute()
+
+		self.assertEqual(
+			frappe.db.get_value("Financial Report Row", row("CF_WC500"), "calculation_formula"),
+			FORMULAS["CF_WC500"][0],
+		)
+
+	def test_ifrs_template_counts_short_term_borrowings_once(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		overdraft_account = frappe.get_doc(
+			doctype="Account",
+			account_name="_Test Bank Overdraft",
+			parent_account="Current Liabilities - _TC",
+			company=self.company,
+			account_category="Short-term Borrowings",
+		).insert()
+		lines = (
+			"Increase/(decrease) in other current liabilities",
+			"Proceeds from / Repayment of borrowings",
+			"NET INCREASE/(DECREASE) IN CASH AND CASH EQUIVALENTS",
+		)
+
+		before = self.ifrs_template_totals(*lines)
+		make_journal_entry("Cash - _TC", overdraft_account.name, 1000, posting_date=today(), submit=True)
+		after = self.ifrs_template_totals(*lines)
+
+		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [0, 1000, 1000])
