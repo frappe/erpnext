@@ -4228,6 +4228,41 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
 	)
+	def test_unreserved_component_keeps_partially_reserved_status(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		production_item = "Test Unreserved Component FG"
+		reserved_rm, unreserved_rm = "Test Reserved Component RM", "Test Unreserved Component RM"
+		source_warehouse = "Stores - _TC"
+
+		for item in (production_item, reserved_rm, unreserved_rm):
+			make_item(item, {"is_stock_item": 1})
+
+		make_bom(
+			item=production_item,
+			source_warehouse=source_warehouse,
+			raw_materials=[reserved_rm, unreserved_rm],
+		)
+		make_stock_entry_test_record(item_code=reserved_rm, target=source_warehouse, qty=10, basic_rate=100)
+
+		wo = make_wo_order_test_record(
+			item=production_item, qty=10, reserve_stock=1, source_warehouse=source_warehouse
+		)
+		wo.reload()
+		self.assertEqual(wo.status, "Stock Partially Reserved")
+
+		make_stock_entry_test_record(item_code=unreserved_rm, target=source_warehouse, qty=10, basic_rate=100)
+		make_stock_reservation_entries(wo, items=get_unreserved_items(wo), is_transfer=0)
+
+		wo.reload()
+		self.assertEqual(wo.status, "Stock Reserved")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
 	def test_partial_reservation_records_full_voucher_qty(self):
 		# Regression: a short reservation must keep voucher_qty as the full requirement.
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
