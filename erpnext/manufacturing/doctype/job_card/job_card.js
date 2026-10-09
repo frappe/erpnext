@@ -944,11 +944,11 @@ function get_last_row(time_logs) {
 
 function get_completable_qty(frm, qty) {
 	const max_completable_qty = frm.doc.__onload?.max_completable_qty;
-	if (max_completable_qty > 0) {
-		return Math.min(flt(qty), max_completable_qty);
+	if (max_completable_qty == null) {
+		return qty;
 	}
 
-	return qty;
+	return Math.min(flt(qty), Math.max(flt(max_completable_qty), 0));
 }
 
 function get_qty_with_uom(qty, stock_uom) {
