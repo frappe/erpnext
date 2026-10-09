@@ -739,6 +739,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
 		self.assertEqual(reserved_qty[basic_rm.name], 3)
 
+	def test_cancel_closed_work_order_releases_inward_allocation_once(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		close_work_order(wo.name, "Closed")
+		wo.reload()
+		wo.cancel()
+
+		scio.reload()
+		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
+		self.assertEqual(basic_rm.work_order_qty, 0)
+
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
