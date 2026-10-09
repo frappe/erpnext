@@ -26,8 +26,8 @@ from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item i
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
+	_get_stock_balance,
 	check_warehouse_company,
-	get_stock_balance,
 	get_valuation_method,
 )
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
@@ -834,7 +834,7 @@ class StockReconciliation(StockController):
 				)
 
 			if row.qty and row.valuation_rate in ["", None]:
-				row.valuation_rate = get_stock_balance(
+				row.valuation_rate = _get_stock_balance(
 					row.item_code,
 					row.warehouse,
 					self.posting_date,
@@ -1474,6 +1474,13 @@ def get_items(
 	item_code: str | None = None,
 	ignore_empty_stock: bool | str | int = False,
 ):
+	frappe.has_permission("Stock Reconciliation", "write", throw=True)
+	frappe.has_permission("Item", "read", throw=True)
+	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		for child_warehouse in frappe.db.get_descendants("Warehouse", warehouse):
+			frappe.has_permission("Warehouse", "read", doc=child_warehouse, throw=True)
+
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
 	if item_code and warehouse:
@@ -1494,7 +1501,7 @@ def get_items(
 				args = get_item_data(row, row.qty, row.valuation_rate)
 				res.append(args)
 		else:
-			stock_bal = get_stock_balance(
+			stock_bal = _get_stock_balance(
 				d.item_code,
 				d.warehouse,
 				posting_date,
@@ -1732,7 +1739,7 @@ def get_stock_balance_for(
 			"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 		}
 
-	data = get_stock_balance(
+	data = _get_stock_balance(
 		item_code,
 		warehouse,
 		posting_date,

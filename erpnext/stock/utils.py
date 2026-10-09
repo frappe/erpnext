@@ -14,6 +14,7 @@ from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
+from erpnext import require_user_permission
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -115,6 +116,31 @@ def check_warehouse_company(warehouse: str | None) -> None:
 
 @frappe.whitelist()
 def get_stock_balance(
+	item_code: str,
+	warehouse: str | None,
+	posting_date: DateTimeLikeObject | None = None,
+	posting_time: DateTimeLikeObject | datetime.timedelta | None = None,
+	with_valuation_rate: bool = False,
+	with_serial_no: bool = False,
+	inventory_dimensions_dict: dict | None = None,
+):
+	frappe.has_permission("Item", "read", throw=True)
+	require_user_permission("Item", item_code)
+	require_user_permission("Warehouse", warehouse)
+	check_warehouse_company(warehouse)
+
+	return _get_stock_balance(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		with_valuation_rate,
+		with_serial_no,
+		inventory_dimensions_dict,
+	)
+
+
+def _get_stock_balance(
 	item_code: str,
 	warehouse: str | None,
 	posting_date: DateTimeLikeObject | None = None,
