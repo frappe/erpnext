@@ -285,11 +285,11 @@ class Task(NestedSet):
 	def on_update(self):
 		self.update_nsm_model()
 		self.check_recursion()
+		self.remove_from_previous_parent_depends_on()
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.update_previous_project()
 		self.unassign_todo()
-		self.remove_from_previous_parent_depends_on()
 		self.populate_depends_on()
 
 	def unassign_todo(self):

@@ -445,6 +445,29 @@ class TestTask(ERPNextTestSuite):
 			frappe.get_all("Task Depends On", filters={"parent": new_parent.name}, pluck="task"), [child.name]
 		)
 
+	def test_moving_child_out_does_not_reschedule_old_parent(self):
+		group = create_task("_Test Group Left By Child", nowdate(), add_days(nowdate(), 19), is_group=1)
+		child = create_task(
+			"_Test Child Leaving Group",
+			add_days(nowdate(), 4),
+			add_days(nowdate(), 9),
+			parent_task=group.name,
+		)
+		dependent = create_task(
+			"_Test Task After Left Group", add_days(nowdate(), 20), add_days(nowdate(), 21), group.name
+		)
+
+		child.parent_task = None
+		child.save()
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", group.name, "exp_end_date")), getdate(add_days(nowdate(), 19))
+		)
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 20)),
+		)
+
 	def test_child_task_registers_in_parent_depends_on(self):
 		parent = create_task("_Test Parent Depends On", is_group=1)
 		child = create_task("_Test Child Depends On", parent_task=parent.name)
