@@ -506,9 +506,19 @@ class AssetCapitalization(StockController):
 		if not difference:
 			return
 
+		target_asset_status = frappe.db.get_value("Asset", self.target_asset, "docstatus")
+		if target_asset_status == 1:
+			frappe.throw(
+				_(
+					"The cost of items consumed in Asset Capitalization {0} has changed, but its Target Asset {1} is already submitted. Cancel the Target Asset and this Asset Capitalization, then repost."
+				).format(
+					get_link_to_form(self.doctype, self.name), get_link_to_form("Asset", self.target_asset)
+				)
+			)
+
 		row.db_update()
 		self.db_update()
-		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 0:
+		if target_asset_status == 0:
 			self.add_to_target_asset_cost(difference)
 
 	def dispose_consumed_assets(self):
