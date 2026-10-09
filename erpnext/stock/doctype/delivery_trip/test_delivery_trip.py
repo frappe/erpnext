@@ -7,9 +7,11 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, now_datetime, nowdate
 
 import erpnext
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.delivery_note.delivery_note import make_delivery_trip
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
+	get_driver_email,
 	notify_customers,
 )
 from erpnext.tests.utils import create_test_contact_and_address
@@ -93,6 +95,26 @@ class TestDeliveryTrip(FrappeTestCase):
 		)
 		self.delivery_trip.submit()
 		self.assertEqual(self.delivery_trip.docstatus, 1)
+
+	def test_driver_email_respects_employee_access(self):
+		user = f"driver-{frappe.generate_hash(length=10)}@example.com"
+		employee = make_employee(user, company="_Test Company")
+		driver = self.delivery_trip.driver
+		frappe.db.set_value("Driver", driver, "employee", employee)
+		frappe.db.set_value(
+			"Employee", employee, {"company_email": None, "prefered_email": "private@example.com"}
+		)
+
+		reader = f"delivery-{frappe.generate_hash(length=10)}@example.com"
+		frappe.get_doc(
+			{"doctype": "User", "email": reader, "first_name": "Delivery", "send_welcome_email": 0}
+		).insert().add_roles("Delivery User")
+		with self.set_user(reader):
+			self.assertFalse(frappe.has_permission("Employee", "read", doc=employee))
+			self.assertEqual(get_driver_email(driver), {"email": None})
+		self.assertEqual(get_driver_email(driver), {"email": "private@example.com"})
+		frappe.db.set_value("Employee", employee, "company_email", user)
+		self.assertEqual(get_driver_email(driver), {"email": user})
 
 	def test_delivery_trip_status_scheduled(self):
 		self.delivery_trip.submit()

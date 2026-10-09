@@ -460,5 +460,10 @@ def get_driver_email(driver: str):
 	frappe.has_permission("Driver", "read", doc=driver, throw=True)
 
 	employee = frappe.db.get_value("Driver", driver, "employee")
-	email = frappe.db.get_value("Employee", employee, "prefered_email")
+	email = None
+	if employee and frappe.has_permission("Employee", "read", doc=employee):
+		employee_data = frappe.db.get_value(
+			"Employee", employee, ["company_email", "prefered_email"], as_dict=True
+		)
+		email = employee_data.company_email or employee_data.prefered_email
 	return {"email": email}
