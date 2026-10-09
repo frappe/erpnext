@@ -5,6 +5,8 @@
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, Sum
 from frappe.utils import escape_html, flt, nowdate
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 
@@ -70,20 +72,31 @@ class OpeningInvoiceCreationTool(Document):
 
 		invoices_summary = {}
 		max_count = {}
-		fields = [
-			"company",
-			{"COUNT": "*", "as": "total_invoices"},
-			{"SUM": "outstanding_amount", "as": "outstanding_amount"},
-		]
 		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])
 		if not companies:
 			return None, None
 
 		company_wise_currency = {row.company: row.currency for row in companies}
 		for doctype in ["Sales Invoice", "Purchase Invoice"]:
-			invoices = frappe.get_all(
-				doctype, filters=dict(is_opening="Yes", docstatus=1), fields=fields, group_by="company"
+			invoice = frappe.qb.DocType(doctype)
+			company = frappe.qb.DocType("Company")
+			outstanding = (
+				Case()
+				.when(invoice.party_account_currency == company.default_currency, invoice.outstanding_amount)
+				.else_(invoice.outstanding_amount * invoice.conversion_rate)
 			)
+			invoices = (
+				frappe.qb.from_(invoice)
+				.join(company)
+				.on(invoice.company == company.name)
+				.select(
+					invoice.company,
+					Count(invoice.name).as_("total_invoices"),
+					Sum(outstanding).as_("outstanding_amount"),
+				)
+				.where((invoice.is_opening == "Yes") & (invoice.docstatus == 1))
+				.groupby(invoice.company)
+			).run(as_dict=True)
 			prepare_invoice_summary(doctype, invoices)
 
 		invoices_summary_companies = list(invoices_summary.keys())
@@ -99,6 +112,7 @@ class OpeningInvoiceCreationTool(Document):
 
 	def set_missing_values(self, row):
 		row.qty = row.qty or 1.0
+		row.currency = row.currency or frappe.get_cached_value("Company", self.company, "default_currency")
 		row.temporary_opening_account = row.temporary_opening_account or get_temporary_opening_account(
 			self.company
 		)
@@ -159,12 +173,10 @@ class OpeningInvoiceCreationTool(Document):
 				or {}
 			)
 
-			default_currency = frappe.db.get_value(row.party_type, row.party, "default_currency")
-
 			if company_details:
 				invoice.update(
 					{
-						"currency": default_currency or company_details.get("default_currency"),
+						"currency": row.currency,
 						"letter_head": company_details.get("default_letter_head"),
 					}
 				)
