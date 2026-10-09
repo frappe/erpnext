@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import random_string
 
 from erpnext.crm.doctype.lead.lead import add_lead_to_prospect
@@ -52,6 +53,24 @@ class TestProspect(ERPNextTestSuite):
 		customer.insert()
 
 		self.assertRaises(frappe.ValidationError, make_customer_from_prospect, "_Test Prospect")
+
+	def test_make_customer_checks_permissions_first(self):
+		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+		prospect = make_prospect(company="_Test Company")
+		customer = make_customer_from_prospect(prospect.name)
+		customer.customer_name = f"Converted {prospect.name}"
+		customer.insert()
+
+		with self.set_user(create_user("test_prospect_no_access@example.com", "Accounts User").name):
+			self.assertRaises(frappe.PermissionError, make_customer_from_prospect, prospect.name)
+
+		sales_user = create_user("test_prospect_sales_user@example.com", "Sales User").name
+		frappe.permissions.add_user_permission("Customer", "_Test Customer", sales_user)
+		with self.set_user(sales_user):
+			with self.assertRaises(frappe.ValidationError) as error:
+				make_customer_from_prospect(prospect.name)
+		self.assertNotIn(customer.name, str(error.exception))
 
 	def test_make_customer_converts_the_prospects_lead(self):
 		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect

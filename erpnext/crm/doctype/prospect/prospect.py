@@ -115,12 +115,7 @@ class Prospect(CRMNote):
 
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
-	if customer := frappe.db.exists("Customer", {"prospect_name": source_name}):
-		frappe.throw(
-			_("Prospect {0} is already converted to Customer {1}").format(
-				frappe.bold(source_name), frappe.bold(customer)
-			)
-		)
+	validate_not_converted(source_name)
 
 	def set_missing_values(source, target):
 		target.customer_type = "Company"
@@ -145,6 +140,22 @@ def make_customer(source_name: str, target_doc: str | dict | Document | None = N
 	)
 
 	return doclist
+
+
+def validate_not_converted(prospect: str) -> None:
+	frappe.has_permission("Prospect", "read", prospect, throw=True)
+	frappe.has_permission("Customer", "create", throw=True)
+
+	customer = frappe.db.exists("Customer", {"prospect_name": prospect})
+	if not customer:
+		return
+
+	message = _("Prospect {0} is already converted to a Customer").format(frappe.bold(prospect))
+	if frappe.has_permission("Customer", "read", customer):
+		message = _("Prospect {0} is already converted to Customer {1}").format(
+			frappe.bold(prospect), frappe.bold(customer)
+		)
+	frappe.throw(message)
 
 
 @frappe.whitelist()
