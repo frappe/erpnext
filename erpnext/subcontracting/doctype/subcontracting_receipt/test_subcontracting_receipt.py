@@ -653,6 +653,58 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				flt(return_row.additional_cost_per_qty, 2), flt(original_row.additional_cost_per_qty, 2)
 			)
 
+	def test_return_of_accepted_qty_values_goods_at_receipt_rate(self):
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.save()
+		scr.submit()
+
+		combined_return = make_return_doc("Subcontracting Receipt", scr.name)
+		combined_return.items[0].rejected_qty = -2
+		combined_return.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		combined_return.save()
+		self.assertLessEqual(abs(combined_return.items[0].amount), scr.items[0].amount)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual(flt(scr_return.items[0].amount, 2), flt(-1 * scr.items[0].amount, 2))
+		stock_adjustment_account = frappe.get_cached_value("Company", scr.company, "stock_adjustment_account")
+		self.assertFalse(
+			[
+				gle
+				for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
+				if gle.account == stock_adjustment_account
+			]
+		)
+
 	def test_ledger_preview(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
