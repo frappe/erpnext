@@ -5,7 +5,7 @@ import frappe
 
 from erpnext.projects.doctype.project.project import get_project_list
 from erpnext.projects.doctype.project.test_project import make_project
-from erpnext.templates.pages.projects import validate_and_get_project_user
+from erpnext.templates.pages.projects import get_timesheet_html, validate_and_get_project_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -85,6 +85,18 @@ class TestProjectsPage(ERPNextTestSuite):
 		with self.set_user(portal_user):
 			self.assertIsNone(validate_and_get_project_user(own.name))
 			self.assertRaises(frappe.PermissionError, validate_and_get_project_user, other.name)
+
+	def test_customer_portal_user_not_in_project_users_cannot_load_timesheets(self):
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", portal_user).add_roles("Customer")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		project = make_project({"project_name": f"_Test Portal Timesheets {frappe.generate_hash(length=6)}"})
+		project.db_set("customer", "_Test Customer")
+
+		with self.set_user(portal_user):
+			self.assertRaises(frappe.PermissionError, get_timesheet_html, project.name)
 
 	def test_project_list_loads_for_member_without_customer_role(self):
 		member = self._create_user(f"member_{frappe.generate_hash(length=6)}@example.com")
