@@ -8,7 +8,17 @@ from pathlib import Path
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import add_days, nowdate
 
+from erpnext.buying.doctype.supplier_scorecard.test_supplier_scorecard import (
+	create_test_supplier,
+)
+from erpnext.buying.doctype.supplier_scorecard.test_supplier_scorecard import (
+	make_supplier_scorecard as make_scorecard,
+)
+from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+	make_supplier_scorecard,
+)
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 )
@@ -70,11 +80,48 @@ class TestSupplierScorecardPeriod(ERPNextTestSuite):
 		# 80 * 0.25 + 40 * 0.75 = 50
 		self.assertEqual(period.total_score, 50)
 
+	def test_period_score_is_normalised_by_max_score(self):
+		period = make_period(
+			criteria=[
+				{"criteria_name": "C1", "formula": "10", "max_score": 10, "weight": 50},
+				{"criteria_name": "C2", "formula": "50", "max_score": 200, "weight": 50},
+			]
+		)
+		period.calculate_criteria()
+		period.calculate_score()
+
+		self.assertEqual(period.total_score, 62.5)
+
 	def test_criteria_weights_must_total_100(self):
 		period = make_period(
 			criteria=[{"criteria_name": "C1", "formula": "100", "max_score": 100, "weight": 60}]
 		)
 		self.assertRaises(frappe.ValidationError, period.validate_criteria_weights)
+
+	def test_manual_period_is_validated_against_its_scorecard(self):
+		supplier = create_test_supplier("_Test Supplier SC Manual Period")
+		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+		scorecard = make_scorecard()
+		scorecard.supplier = supplier
+		scorecard.insert()
+		existing = frappe.get_all(
+			"Supplier Scorecard Period",
+			filters={"scorecard": scorecard.name, "docstatus": 1},
+			fields=["start_date", "end_date"],
+			limit=1,
+		)[0]
+
+		for start_date, end_date in (
+			(add_days(nowdate(), 10), add_days(nowdate(), 5)),
+			(existing.start_date, existing.end_date),
+		):
+			with self.subTest(start_date=start_date, end_date=end_date):
+				period = make_manual_period(scorecard.name, start_date, end_date)
+				self.assertRaises(frappe.ValidationError, period.insert)
+
+		period = make_manual_period(scorecard.name, add_days(nowdate(), 5), add_days(nowdate(), 10))
+		period.insert()
+		self.assertEqual(period.supplier, supplier)
 
 	def test_custom_variable_path_in_unimported_module(self):
 		for attribute in ("get_value", "Metrics.get_value"):
@@ -125,6 +172,12 @@ def unimported_custom_app():
 			patch.object(frappe, "get_installed_apps", return_value=installed_apps),
 		):
 			yield
+
+
+def make_manual_period(scorecard, start_date, end_date):
+	period = make_supplier_scorecard(scorecard)
+	period.update({"supplier": "_Test Supplier", "start_date": start_date, "end_date": end_date})
+	return period
 
 
 def make_variable(path):

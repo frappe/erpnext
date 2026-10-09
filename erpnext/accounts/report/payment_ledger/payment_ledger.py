@@ -6,6 +6,8 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
+from frappe.query_builder.functions import IfNull
+from pypika.terms import Bracket, LiteralValue
 
 
 class PaymentLedger:
@@ -122,19 +124,45 @@ class PaymentLedger:
 		if self.filters.party:
 			self.conditions.append(self.ple.party.isin(self.filters.party))
 
+		# Party is a dynamic link, so match conditions cannot auto-apply Customer/Supplier user permissions
+		from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+		from frappe.permissions import get_allowed_docs_for_doctype
+
+		user_permissions = get_user_permissions()
+		if not user_permissions:
+			return
+
+		strict = frappe.get_system_settings("apply_strict_user_permissions")
+		for party_type in frappe.db.get_all("Party Type", pluck="name"):
+			if party_type not in user_permissions:
+				continue
+
+			allowed_parties = get_allowed_docs_for_doctype(
+				user_permissions[party_type], "Payment Ledger Entry"
+			)
+			if not allowed_parties:
+				continue
+
+			condition = (IfNull(self.ple.party_type, "") != party_type) | self.ple.party.isin(allowed_parties)
+			if not strict:
+				condition |= IfNull(self.ple.party, "") == ""
+
+			self.conditions.append(condition)
+
 	def get_data(self):
 		ple = self.ple
 
 		self.build_conditions()
 
 		# fetch data from table
-		self.voucher_amount = (
-			qb.from_(ple)
-			.select(ple.star)
-			.where(ple.delinked == 0)
-			.where(Criterion.all(self.conditions))
-			.run(as_dict=True)
-		)
+		query = qb.from_(ple).select(ple.star).where(ple.delinked == 0).where(Criterion.all(self.conditions))
+
+		from frappe.desk.reportview import build_match_conditions
+
+		if match_conditions := build_match_conditions("Payment Ledger Entry"):
+			query = query.where(Bracket(LiteralValue(match_conditions)))
+
+		self.voucher_amount = query.run(as_dict=True)
 
 	def get_columns(self):
 		options = None
@@ -162,7 +190,13 @@ class PaymentLedger:
 			)
 		)
 		self.columns.append(
-			dict(label=_("Party"), fieldname="party", fieldtype="data", options=options, width="100")
+			dict(
+				label=_("Party"),
+				fieldname="party",
+				fieldtype="Dynamic Link",
+				options="party_type",
+				width="100",
+			)
 		)
 		self.columns.append(
 			dict(

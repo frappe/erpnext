@@ -12,7 +12,7 @@ from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import cint, flt, get_datetime, now_datetime, nowdate, nowtime, parse_json
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import get_combine_datetime, get_or_make_bin, get_stock_balance
+from erpnext.stock.utils import _get_stock_balance, get_combine_datetime, get_or_make_bin
 
 
 class StockReservationEntry(Document):
@@ -152,11 +152,12 @@ class StockReservationEntry(Document):
 
 		if self.from_voucher_type and self.from_voucher_detail_no:
 			sre = frappe.qb.DocType("Stock Reservation Entry")
+			used_qty = sre.delivered_qty + sre.transferred_qty + sre.consumed_qty
 			delivered_qty = (
 				frappe.qb.from_(sre)
-				.select(Sum(sre.reserved_qty))
+				.select(Sum(Case().when(sre.docstatus == 1, sre.reserved_qty).else_(used_qty)))
 				.where(
-					(sre.docstatus == 1)
+					(sre.docstatus.isin([1, 2]))
 					& (sre.item_code == self.item_code)
 					& (sre.from_voucher_type == self.from_voucher_type)
 					& (sre.from_voucher_no == self.from_voucher_no)
@@ -197,9 +198,10 @@ class StockReservationEntry(Document):
 		batches = defaultdict(float)
 		for entry in self.sb_entries:
 			if entry.serial_no:
-				serial_nos.append(entry.serial_no)
+				if not flt(entry.delivered_qty):
+					serial_nos.append(entry.serial_no)
 			elif entry.batch_no:
-				batches[entry.batch_no] += entry.qty
+				batches[entry.batch_no] += flt(entry.qty) - flt(entry.delivered_qty)
 
 		return frappe._dict(
 			{
@@ -650,7 +652,7 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 		if qty_to_be_reserved > allowed_qty:
-			actual_qty = get_stock_balance(self.item_code, self.warehouse)
+			actual_qty = _get_stock_balance(self.item_code, self.warehouse)
 			msg = _(
 				"Cannot reserve more than Allowed Qty {0} {1} for Item {2} against {3} {4}.<br /><br />"
 				"The <b>Allowed Qty</b> is calculated as follows:<br />"
@@ -733,7 +735,7 @@ class StockReservationEntry(Document):
 					entry.delivered_qty = flt(1)
 					data.serial_nos.remove(entry.serial_no)
 
-				elif entry.batch_no in data.batch_nos:
+				elif not entry.serial_no and entry.batch_no in data.batch_nos:
 					entry.delivered_qty = min(flt(entry.qty), data.batch_nos[entry.batch_no])
 					data.batch_nos[entry.batch_no] -= entry.delivered_qty
 
@@ -774,7 +776,7 @@ def get_available_qty_to_reserve(
 			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=[ignore_sre]
 		)
 
-	available_qty = get_stock_balance(item_code, warehouse)
+	available_qty = _get_stock_balance(item_code, warehouse)
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -1356,7 +1358,7 @@ class StockReservation:
 		frappe.msgprint(msg, title=_("Stock Reservation"), indicator="orange")
 
 	def get_available_qty_to_reserve(self, item_code, warehouse, ignore_sre=None):
-		available_qty = get_stock_balance(item_code, warehouse)
+		available_qty = _get_stock_balance(item_code, warehouse)
 
 		if available_qty:
 			sre = frappe.qb.DocType("Stock Reservation Entry")

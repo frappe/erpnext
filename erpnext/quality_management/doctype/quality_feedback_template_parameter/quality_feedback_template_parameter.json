@@ -12,12 +12,13 @@
    "fieldname": "parameter",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Parameter"
+   "label": "Parameter",
+   "reqd": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:28.289038",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Template Parameter",

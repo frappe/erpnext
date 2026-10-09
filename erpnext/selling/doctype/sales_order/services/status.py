@@ -6,6 +6,7 @@
 import frappe
 from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt
 
 from erpnext.controllers.item_close import validate_parent_reopen
@@ -101,19 +102,25 @@ class StatusService:
 				continue
 
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.get_all(
-					"Purchase Order Item",
-					{"sales_order_item": item.name, "docstatus": 1},
-					[{"SUM": "received_qty", "AS": "received_qty"}],
-					pluck="received_qty",
-				)[0]
-				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
+				item.db_set("delivered_qty", self.get_drop_ship_delivered_qty(item), update_modified=False)
 
 			delivered_qty += min(item.delivered_qty, item.qty)
 			tot_qty += item.qty
 
 		if tot_qty != 0:
 			doc.db_set("per_delivered", flt(delivered_qty / tot_qty) * 100, update_modified=False)
+
+	def get_drop_ship_delivered_qty(self, item) -> float:
+		"""Qty received against the drop-ship Purchase Orders of `item`, in the Sales Order UOM."""
+		po_item = frappe.qb.DocType("Purchase Order Item")
+		received_stock_qty = (
+			frappe.qb.from_(po_item)
+			.select(Sum(po_item.received_qty * po_item.conversion_factor))
+			.where((po_item.sales_order_item == item.name) & (po_item.docstatus == 1))
+		).run()[0][0]
+		return flt(
+			flt(received_stock_qty) / flt(item.conversion_factor or 1), item.precision("delivered_qty")
+		)
 
 	def update_picking_status(self) -> None:
 		doc = self.doc

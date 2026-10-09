@@ -153,7 +153,8 @@ class TestSerialBatchServices(ERPNextTestSuite):
 					schedule.validate_serial_no(self.item.name, [self.serial.name], add_days(nowdate(), -3))
 				schedule.validate_serial_no(self.item.name, [self.serial.name], nowdate())
 				delivery.cancel()
-				schedule.validate_serial_no(self.item.name, [self.serial.name], add_days(nowdate(), -3))
+				with self.assertRaisesRegex(frappe.ValidationError, "Service-001.*still in stock"):
+					schedule.validate_serial_no(self.item.name, [self.serial.name], add_days(nowdate(), -3))
 
 	def test_service_links_reject_a_serial_from_another_item(self):
 		visit = frappe.get_doc(
