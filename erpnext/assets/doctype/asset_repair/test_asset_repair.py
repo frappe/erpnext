@@ -475,6 +475,19 @@ class TestAssetRepair(ERPNextTestSuite):
 			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
 		)
 		self.assertEqual(asset.db_get("value_after_depreciation"), 100000 + asset_repair.repair_cost)
+		self.assertTrue(asset_repair.db_get("asset_value_updated"))
+
+		asset_repair.cancel()
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
+
+	def test_cancelling_old_repair_does_not_lower_value_of_asset_without_depreciation(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		# simulate a repair submitted before its cost was added to the value after depreciation
+		asset_repair.db_set("asset_value_updated", 0)
+		asset.db_set("value_after_depreciation", 100000)
 
 		asset_repair.cancel()
 		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)

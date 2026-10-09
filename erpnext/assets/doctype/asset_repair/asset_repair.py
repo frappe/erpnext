@@ -47,6 +47,7 @@ class AssetRepair(AccountsController):
 		amended_from: DF.Link | None
 		asset: DF.Link
 		asset_name: DF.ReadOnly | None
+		asset_value_updated: DF.Check
 		capitalize_repair_cost: DF.Check
 		company: DF.Link | None
 		completion_date: DF.Datetime | None
@@ -281,10 +282,19 @@ class AssetRepair(AccountsController):
 			for row in self.asset_doc.finance_books:
 				row.value_after_depreciation += flt(total_repair_cost)
 		else:
-			self.asset_doc.value_after_depreciation += flt(total_repair_cost)
+			self.update_value_after_depreciation(total_repair_cost)
 
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.save()
+
+	def update_value_after_depreciation(self, total_repair_cost: float):
+		# repairs submitted before asset_value_updated existed never raised the value, so don't lower it
+		if self.docstatus == 2 and not self.asset_value_updated:
+			return
+
+		self.asset_doc.value_after_depreciation += flt(total_repair_cost)
+		if self.docstatus == 1:
+			self.db_set("asset_value_updated", 1)
 
 	def get_total_value_of_stock_consumed(self):
 		return sum([flt(item.total_value) for item in self.get("stock_items")])
