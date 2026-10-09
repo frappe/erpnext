@@ -68,6 +68,18 @@ class TestCustomer(ERPNextTestSuite):
 		self.assertNotEqual(flt(quotation.conversion_rate), 0.0)
 		self.assertEqual(flt(quotation.conversion_rate), rate)
 
+	def test_buying_price_list_cannot_be_customer_default(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Buying Price Customer",
+				"customer_type": "Individual",
+				"default_price_list": "Standard Buying",
+			}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			customer.insert()
+
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"
