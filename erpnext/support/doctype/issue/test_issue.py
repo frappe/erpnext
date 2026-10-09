@@ -528,6 +528,22 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.total_hold_time, 7200)
 		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
 
+	def test_resetting_sla_of_resolved_issue_recalculates_deadlines(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		issue.status = "Closed"
+		issue.save()
+		old_response_by = issue.response_by
+
+		reset_service_level_agreement("Issue", issue.name, "customer asked")
+		issue.reload()
+		self.assertGreater(get_datetime(issue.response_by), get_datetime(old_response_by))
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
