@@ -31,6 +31,7 @@ ROUNDED_TOTAL_DOCTYPES = (
 	"Purchase Invoice",
 	"Purchase Receipt",
 )
+IN_WORDS_DOCTYPES = (*ROUNDED_TOTAL_DOCTYPES, "Payment Entry", "Subcontracting Receipt")
 
 from frappe.model.document import Document
 
@@ -116,7 +117,7 @@ class GlobalDefaults(Document):
 
 	def toggle_in_words(self):
 		# Make property setters to hide in words fields
-		for doctype in ROUNDED_TOTAL_DOCTYPES:
+		for doctype in IN_WORDS_DOCTYPES:
 			make_property_setter(
 				doctype,
 				"in_words",
