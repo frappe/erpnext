@@ -6,6 +6,7 @@ import os
 import frappe
 from frappe import _
 from frappe.model.document import Document, bulk_insert
+from frappe.query_builder.functions import IfNull
 
 DOCTYPE = "Account Category"
 
@@ -54,6 +55,44 @@ class AccountCategory(Document):
 			frappe.msgprint(
 				_("Updated {0} Financial Report Row(s) with new category name").format(len(updated_formulas))
 			)
+
+
+def get_allowed_account_categories(user=None):
+	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+	user_permissions = get_user_permissions(user or frappe.session.user)
+	if DOCTYPE not in user_permissions:
+		return None
+	return get_allowed_docs_for_doctype(user_permissions[DOCTYPE], "Account") or None
+
+
+def get_permission_query_conditions(user, doctype=None):
+	if not doctype:
+		return None
+
+	allowed_categories = get_allowed_account_categories(user)
+	if not allowed_categories:
+		return None
+
+	account = frappe.qb.DocType("Account")
+	condition = account.account_category.isin(allowed_categories)
+	if not frappe.get_system_settings("apply_strict_user_permissions"):
+		condition = (IfNull(account.account_category, "") == "") | condition
+
+	allowed_accounts = frappe.qb.from_(account).select(account.name).where(condition)
+	return frappe.qb.DocType(doctype).account.isin(allowed_accounts)
+
+
+def has_permission(doc, ptype=None, user=None):
+	allowed_categories = get_allowed_account_categories(user)
+	if not allowed_categories or not doc.get("account"):
+		return True
+
+	account_category = frappe.get_cached_value("Account", doc.account, "account_category")
+	if not account_category:
+		return not frappe.get_system_settings("apply_strict_user_permissions")
+
+	return account_category in allowed_categories
 
 
 def import_account_categories(template_path: str):
