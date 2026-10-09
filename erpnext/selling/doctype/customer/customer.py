@@ -232,8 +232,8 @@ class Customer(TransactionBase):
 		self.payment_terms = self.default_price_list = ""
 
 		tables = [
-			["accounts", ["account"]],
-			["credit_limits", ["credit_limit", "overdue_billing_threshold"]],
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold", "bypass_credit_limit_check"]],
 		]
 		fields = ["payment_terms", "default_price_list"]
 
