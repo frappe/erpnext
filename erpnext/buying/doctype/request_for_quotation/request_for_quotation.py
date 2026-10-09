@@ -525,6 +525,8 @@ def get_rfq_containing_supplier(
 @frappe.whitelist()
 def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 	"""Returns supplier quotation items linked to the RFQ"""
+	frappe.has_permission("Request for Quotation", "read", doc=rfq_name, throw=True)
+
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 	sq = frappe.qb.DocType("Supplier Quotation")
 
