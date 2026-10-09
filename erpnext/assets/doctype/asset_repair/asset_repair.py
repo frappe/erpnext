@@ -343,9 +343,13 @@ class AssetRepair(AccountsController):
 			stock_item.total_value = stock_entry_item.amount
 			stock_item.db_update()
 
-		self.consumed_items_cost = self.get_total_value_of_stock_consumed()
-		self.calculate_total_repair_cost()
-		self.db_update()
+		consumed_items_cost = self.get_total_value_of_stock_consumed()
+		self.db_set(
+			{
+				"consumed_items_cost": consumed_items_cost,
+				"total_repair_cost": flt(self.repair_cost) + consumed_items_cost,
+			}
+		)
 
 	def validate_serial_no(self, stock_item):
 		if not stock_item.serial_and_batch_bundle and frappe.get_cached_value(
