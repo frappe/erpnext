@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -19,3 +20,21 @@ class TestDriver(ERPNextTestSuite):
 		)
 		with self.assertRaises(frappe.ValidationError):
 			driver.insert()
+
+	def test_employee_user_sync_and_manual_user(self):
+		user = f"driver-{frappe.generate_hash(length=10)}@example.com"
+		employee = make_employee(user)
+		driver = frappe.get_doc(
+			{"doctype": "Driver", "full_name": "Test Driver", "status": "Active", "employee": employee}
+		).insert()
+		self.assertEqual(driver.user, user)
+
+		driver.employee = None
+		driver.save()
+		self.assertFalse(driver.user)
+
+		frappe.db.set_value("Employee", employee, "user_id", None)
+		driver.user = "Administrator"
+		driver.employee = employee
+		driver.save()
+		self.assertEqual(driver.user, "Administrator")

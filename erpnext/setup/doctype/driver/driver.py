@@ -38,4 +38,6 @@ class Driver(Document):
 			frappe.throw("The licence expiry date cannot precede its issuing date.")
 
 		if self.employee:
-			self.user = frappe.get_value("Employee", self.employee, "user_id")
+			self.user = frappe.get_value("Employee", self.employee, "user_id") or self.user
+		elif (previous := self.get_doc_before_save()) and previous.employee:
+			self.user = None
