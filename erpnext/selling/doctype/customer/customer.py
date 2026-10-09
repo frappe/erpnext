@@ -375,7 +375,7 @@ class Customer(TransactionBase):
 		if names:
 			frappe.db.set_value(
 				doctype,
-				{"name": ("in", names)},
+				{"name": ("in", names), party_type_field: "Lead", "party_name": self.lead_name},
 				{party_type_field: "Customer", "party_name": self.name},
 			)
 
