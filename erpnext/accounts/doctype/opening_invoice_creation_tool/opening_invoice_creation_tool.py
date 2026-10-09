@@ -185,6 +185,18 @@ class OpeningInvoiceCreationTool(Document):
 		return invoices
 
 	def add_party(self, party_type, party):
+		parties = frappe.get_list(
+			party_type, filters={scrub(party_type) + "_name": party}, pluck="name", limit_page_length=2
+		)
+		if len(parties) > 1:
+			frappe.throw(
+				_("Multiple {0} records match {1}. Please select the Party ID.").format(
+					party_type, frappe.bold(party)
+				)
+			)
+		if parties:
+			return parties[0]
+
 		party_doc = frappe.new_doc(party_type)
 		if party_type == "Customer":
 			party_doc.customer_name = party
@@ -197,7 +209,7 @@ class OpeningInvoiceCreationTool(Document):
 			party_doc.supplier_group = supplier_group
 
 		party_doc.flags.ignore_mandatory = True
-		party_doc.save(ignore_permissions=True)
+		party_doc.save()
 		return party_doc.name
 
 	def get_invoice_dict(self, row=None):
