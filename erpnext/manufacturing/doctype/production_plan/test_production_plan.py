@@ -1693,6 +1693,37 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln.reload()
 		self.assertEqual(pln.po_items[0].pending_qty, 1)
 
+	def test_sales_order_items_fetch_unplanned_qty(self):
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "Test Production Item 1", "qty": 10, "rate": 100},
+				{"item_code": "Subassembly Item 1", "qty": 5, "rate": 100},
+			]
+		)
+		plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_submit=True, skip_getting_mr_items=True
+		)
+		plan.set("po_items", [row for row in plan.po_items if row.item_code == "Test Production Item 1"])
+		plan.po_items[0].planned_qty = 6
+		plan.submit()
+
+		plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_save=True, skip_getting_mr_items=True
+		)
+		self.assertEqual(
+			{row.item_code: row.planned_qty for row in plan.po_items},
+			{"Test Production Item 1": 4, "Subassembly Item 1": 5},
+		)
+
+		plan.set("po_items", [row for row in plan.po_items if row.item_code == "Test Production Item 1"])
+		plan.insert()
+		plan.submit()
+
+		plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_save=True, skip_getting_mr_items=True
+		)
+		self.assertEqual([row.item_code for row in plan.po_items], ["Subassembly Item 1"])
+
 	def test_production_plan_pending_qty_independent_items(self):
 		"Test Prod Plan impact if items are added independently (no from SO or MR)."
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
