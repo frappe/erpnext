@@ -196,6 +196,7 @@
    "bold": 1,
    "fieldname": "basic_rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Basic Rate (as per Stock UOM)",
    "non_negative": 1,

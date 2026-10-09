@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
+ "description": "A customer's confirmed order.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-order",
@@ -316,6 +317,7 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Delivery Date",
    "no_copy": 1

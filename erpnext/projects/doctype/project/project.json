@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 11:55:07",
+ "description": "A piece of work with tasks, time and costs.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
@@ -22,28 +23,40 @@
   "percent_complete",
   "section_break_18",
   "expected_start_date",
-  "actual_start_date",
-  "actual_time",
-  "column_break_20",
   "expected_end_date",
+  "column_break_20",
+  "actual_start_date",
   "actual_end_date",
+  "actual_time",
+  "tasks_tab",
+  "tasks_html",
+  "more_info_tab",
+  "customer_details",
+  "customer",
+  "column_break_14",
+  "sales_order",
+  "section_break0",
+  "notes",
   "costing_tab",
+  "accounting_section",
+  "company",
+  "column_break_accounting",
+  "cost_center",
   "project_details",
   "estimated_costing",
   "total_costing_amount",
   "total_purchase_cost",
-  "company",
   "column_break_28",
   "total_sales_amount",
   "total_billable_amount",
   "total_billed_amount",
   "total_consumed_material_cost",
-  "cost_center",
   "margin",
   "gross_margin",
   "column_break_37",
   "per_gross_margin",
   "monitor_progress_tab",
+  "section_break_sjmx",
   "collect_progress",
   "holiday_list",
   "frequency",
@@ -57,16 +70,10 @@
   "column_break_45",
   "subject",
   "message",
-  "more_info_tab",
-  "customer_details",
-  "customer",
-  "column_break_14",
-  "sales_order",
+  "users_tab",
   "users_section",
   "users",
   "copied_from",
-  "section_break0",
-  "notes",
   "connections_tab"
  ],
  "fields": [
@@ -83,6 +90,7 @@
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
@@ -94,6 +102,7 @@
   {
    "fieldname": "project_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Project Type",
@@ -141,8 +150,9 @@
    "bold": 1,
    "fieldname": "expected_start_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "in_list_view": 1,
-   "label": "Expected Start Date",
+   "label": "Expected Start date",
    "oldfieldname": "project_start_date",
    "oldfieldtype": "Date"
   },
@@ -150,19 +160,21 @@
    "bold": 1,
    "fieldname": "expected_end_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "in_list_view": 1,
-   "label": "Expected End Date",
+   "label": "Expected End date",
    "oldfieldname": "completion_date",
    "oldfieldtype": "Date"
   },
   {
+   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Priority",
    "oldfieldname": "priority",
    "oldfieldtype": "Select",
-   "options": "Medium\nLow\nHigh"
+   "options": "Low\nMedium\nHigh"
   },
   {
    "fieldname": "department",
@@ -171,10 +183,8 @@
    "options": "Department"
   },
   {
-   "collapsible": 1,
    "fieldname": "customer_details",
    "fieldtype": "Section Break",
-   "label": "Customer Details",
    "oldfieldtype": "Section Break",
    "options": "fa fa-user"
   },
@@ -182,6 +192,9 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_import_template": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "no_copy": 1,
    "oldfieldname": "customer",
@@ -202,10 +215,8 @@
    "options": "Sales Order"
   },
   {
-   "collapsible": 1,
    "fieldname": "users_section",
-   "fieldtype": "Section Break",
-   "label": "Users"
+   "fieldtype": "Section Break"
   },
   {
    "description": "Project will be accessible on the website to these users",
@@ -239,7 +250,6 @@
    "oldfieldtype": "Text Editor"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_18",
    "fieldtype": "Section Break",
    "label": "Timeline"
@@ -247,13 +257,13 @@
   {
    "fieldname": "actual_start_date",
    "fieldtype": "Date",
-   "label": "Actual Start Date (via Timesheet)",
+   "label": "Actual Start date (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time in Hours (via Timesheet)",
+   "label": "Actual Time in hours (via Timesheet)",
    "read_only": 1
   },
   {
@@ -263,7 +273,7 @@
   {
    "fieldname": "actual_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date (via Timesheet)",
+   "label": "Actual End date (via Timesheet)",
    "oldfieldname": "act_completion_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -299,6 +309,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
@@ -311,25 +322,25 @@
   {
    "fieldname": "total_sales_amount",
    "fieldtype": "Currency",
-   "label": "Total Sales Amount (via Sales Order)",
+   "label": "Total Sales amount (via Sales Order)",
    "read_only": 1
   },
   {
    "fieldname": "total_billable_amount",
    "fieldtype": "Currency",
-   "label": "Total Billable Amount (via Timesheet)",
+   "label": "Total Billable amount (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "total_billed_amount",
    "fieldtype": "Currency",
-   "label": "Total Billed Amount (via Sales Invoice)",
+   "label": "Total Billed amount (via Sales Invoice)",
    "read_only": 1
   },
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
-   "label": "Total Consumed Material Cost (via Stock Entry)",
+   "label": "Total consumed Material cost (via Stock Entry)",
    "read_only": 1
   },
   {
@@ -368,9 +379,10 @@
   },
   {
    "default": "0",
+   "description": "Emails the users in Portal users on the schedule below, asking for a status update. Needs email accounts set up for sending and receiving.",
    "fieldname": "collect_progress",
    "fieldtype": "Check",
-   "label": "Collect Progress",
+   "label": "Email users for progress updates",
    "search_index": 1
   },
   {
@@ -384,38 +396,38 @@
    "depends_on": "eval:doc.collect_progress == true",
    "fieldname": "frequency",
    "fieldtype": "Select",
-   "label": "Frequency To Collect Progress",
+   "label": "Frequency to collect progress",
    "options": "Hourly\nTwice Daily\nDaily\nWeekly"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Hourly\" && doc.collect_progress)",
    "fieldname": "from_time",
    "fieldtype": "Time",
-   "label": "From Time"
+   "label": "From time"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Hourly\" && doc.collect_progress)",
    "fieldname": "to_time",
    "fieldtype": "Time",
-   "label": "To Time"
+   "label": "To time"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Twice Daily\" && doc.collect_progress == true)\n\n",
    "fieldname": "first_email",
    "fieldtype": "Time",
-   "label": "First Email"
+   "label": "First email"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Twice Daily\" && doc.collect_progress == true)",
    "fieldname": "second_email",
    "fieldtype": "Time",
-   "label": "Second Email"
+   "label": "Second email"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Daily\" && doc.collect_progress == true)",
    "fieldname": "daily_time_to_send",
    "fieldtype": "Time",
-   "label": "Daily Time to send"
+   "label": "Daily time to send"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Weekly\" && doc.collect_progress == true)",
@@ -428,7 +440,7 @@
    "depends_on": "eval:(doc.frequency == \"Weekly\" && doc.collect_progress == true)",
    "fieldname": "weekly_time_to_send",
    "fieldtype": "Time",
-   "label": "Weekly Time to send"
+   "label": "Weekly time to send"
   },
   {
    "fieldname": "column_break_45",
@@ -467,26 +479,53 @@
   {
    "fieldname": "monitor_progress_tab",
    "fieldtype": "Tab Break",
-   "label": "Progress"
+   "label": "Progress updates"
   },
   {
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
-   "label": "More Info"
+   "label": "Customer"
   },
   {
    "fieldname": "connections_tab",
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "users_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "tasks_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tasks"
+  },
+  {
+   "fieldname": "tasks_html",
+   "fieldtype": "HTML",
+   "label": "Tasks"
+  },
+  {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "column_break_accounting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_sjmx",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "folder-kanban",
  "idx": 29,
- "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-05 12:07:33.920918",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

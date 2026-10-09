@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.naming import make_autoname
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import (
@@ -67,6 +68,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -695,9 +697,10 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			WorkOrderStockReservation(self).update_stock_reservation()
 
-		self.update_subcontracting_inward_order_received_items()
+		self.update_subcontracting_inward_order_received_items(release=True)
 
 	def set_qty_change(self):
+		"""Excess received qty to move into this Work Order's reservation on submit."""
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			self.qty_change = frappe._dict()
 
@@ -718,13 +721,12 @@ class WorkOrder(Document):
 
 				if (
 					wo_item
-					and (d.work_order_qty + (wo_item.required_qty if self._action == "submit" else 0))
-					== d.bom_qty
+					and d.work_order_qty + wo_item.required_qty == d.bom_qty
 					and d.received_qty > d.bom_qty
 				):
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
-	def update_subcontracting_inward_order_received_items(self):
+	def update_subcontracting_inward_order_received_items(self, release=False):
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			scio_rm_data = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
@@ -736,8 +738,10 @@ class WorkOrder(Document):
 				fields=["name", "rm_item_code"],
 			)
 
-			required_qty = {
-				wo_item.item_code: wo_item.required_qty
+			qty_change = {
+				wo_item.item_code: wo_item.consumed_qty - wo_item.required_qty
+				if release
+				else wo_item.required_qty
 				for wo_item in self.get("required_items")
 				if wo_item.item_code in [d.rm_item_code for d in scio_rm_data]
 			}
@@ -747,12 +751,7 @@ class WorkOrder(Document):
 			for item in scio_rm_data:
 				case_expr = case_expr.when(
 					table.rm_item_code == item.rm_item_code,
-					table.work_order_qty
-					+ (
-						required_qty[item.rm_item_code]
-						if self._action == "submit"
-						else -required_qty[item.rm_item_code]
-					),
+					table.work_order_qty + qty_change[item.rm_item_code],
 				)
 
 			frappe.qb.update(table).set(table.work_order_qty, case_expr).where(
@@ -830,7 +829,9 @@ class WorkOrder(Document):
 
 		serial_nos = []
 		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
+			serial_nos = get_available_serial_nos(
+				item_details.serial_no_series, self.qty, self.production_item
+			)
 
 		if not serial_nos:
 			return
@@ -853,7 +854,8 @@ class WorkOrder(Document):
 
 		serial_nos_details = []
 		index = 0
-		for serial_no in serial_nos:
+		serial_ids = SerialBatchIdentity("Serial No").get_new_names(len(serial_nos))
+		for serial_id, serial_no in zip(serial_ids, serial_nos, strict=True):
 			index += 1
 			batch_no = None
 			if batches and self.batch_size:
@@ -864,7 +866,7 @@ class WorkOrder(Document):
 
 			serial_nos_details.append(
 				(
-					serial_no,
+					serial_id,
 					serial_no,
 					now(),
 					now(),
@@ -880,7 +882,17 @@ class WorkOrder(Document):
 				)
 			)
 
-		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		try:
+			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		except Exception as error:
+			SerialBatchIdentity("Serial No").raise_duplicate(
+				error,
+				self.production_item,
+				message=_(
+					"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
+				).format(frappe.bold(self.production_item)),
+			)
+			raise
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -998,8 +1010,8 @@ class WorkOrder(Document):
 	def set_operation_warehouses(self):
 		return OperationsService(self).set_operation_warehouses()
 
-	def update_operation_status(self):
-		return OperationsService(self).update_operation_status()
+	def update_operation_status(self, operation_id=None):
+		return OperationsService(self).update_operation_status(operation_id)
 
 	def set_actual_dates(self):
 		return OperationsService(self).set_actual_dates()
@@ -1185,6 +1197,9 @@ def close_work_order(work_order: str, status: str):
 
 	# doctype level above, record level here — see stop_unstop()
 	work_order = frappe.get_doc("Work Order", work_order, check_permission="write")
+	if work_order.status == "Closed":
+		frappe.throw(_("Work Order {0} is already Closed").format(work_order.name))
+
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",

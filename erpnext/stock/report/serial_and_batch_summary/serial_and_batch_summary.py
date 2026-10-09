@@ -6,12 +6,15 @@ from typing import Any
 import frappe
 from frappe import _
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
 
 def execute(filters=None):
 	data = get_data(filters)
 	columns = get_columns(filters, data)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_data(filters):
@@ -161,7 +164,13 @@ def get_columns(filters, data):
 	if not item_details or item_details.get("has_batch_no"):
 		columns.extend(
 			[
-				{"label": _("Batch No"), "fieldname": "batch_no", "fieldtype": "Data", "width": 120},
+				{
+					"label": _("Batch No"),
+					"fieldname": "batch_no",
+					"fieldtype": "Link",
+					"options": "Batch",
+					"width": 120,
+				},
 				{"label": _("Batch Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 120},
 			]
 		)
@@ -200,58 +209,46 @@ def get_voucher_type(doctype: Any, txt: str, searchfield: Any, start: int, page_
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_serial_nos(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
-	query_filters = {}
-
-	if txt:
-		query_filters["serial_no"] = ["like", f"%{txt}%"]
-
-	if filters.get("voucher_no"):
-		serial_batch_bundle = frappe.get_cached_value(
-			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
-			"name",
-		)
-
-		query_filters["parent"] = serial_batch_bundle
-		if not txt:
-			query_filters["serial_no"] = ("is", "set")
-
-		return frappe.get_all(
-			"Serial and Batch Entry", filters=query_filters, fields=["serial_no"], as_list=True
-		)
-
-	else:
-		query_filters["item_code"] = filters.get("item_code")
-		return frappe.get_all("Serial No", filters=query_filters, as_list=True)
+def get_serial_nos(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	return get_serial_batch_options("Serial No", txt, start, page_len, filters)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_batch_nos(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
-	query_filters = {}
+def get_batch_nos(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	return get_serial_batch_options("Batch", txt, start, page_len, filters)
 
-	if filters.get("voucher_no") and txt:
-		query_filters["batch_no"] = ["like", f"%{txt}%"]
 
+def get_serial_batch_options(doctype, txt, start, page_len, filters):
+	if not filters.get("item_code") and not filters.get("voucher_no"):
+		return []
+
+	identity = SerialBatchIdentity(doctype)
+	query = frappe.qb.get_query(
+		doctype,
+		fields=["name", identity.number_field, identity.item_field],
+		filters={identity.item_field: filters["item_code"]} if filters.get("item_code") else {},
+		or_filters={
+			"name": ("like", f"%{txt}%"),
+			identity.number_field: ("like", f"%{txt}%"),
+		},
+		order_by=f"{identity.number_field} asc, name asc",
+		limit=page_len,
+		offset=start,
+	)
 	if filters.get("voucher_no"):
-		serial_batch_bundle = frappe.get_cached_value(
+		bundle_filters = {
+			"voucher_no": ("in", filters["voucher_no"]),
+			"docstatus": 1,
+			"is_cancelled": 0,
+		}
+		if filters.get("voucher_type"):
+			bundle_filters["voucher_type"] = filters["voucher_type"]
+		entry_field = "serial_no" if doctype == "Serial No" else "batch_no"
+		used_ids = frappe.qb.get_query(
 			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
-			"name",
+			fields=[f"entries.{entry_field}"],
+			filters=bundle_filters,
 		)
-
-		query_filters["parent"] = serial_batch_bundle
-		if not txt:
-			query_filters["batch_no"] = ("is", "set")
-
-		return frappe.get_all(
-			"Serial and Batch Entry", filters=query_filters, fields=["batch_no"], as_list=True
-		)
-
-	else:
-		if txt:
-			query_filters["name"] = ["like", f"%{txt}%"]
-
-		query_filters["item"] = filters.get("item_code")
-		return frappe.get_all("Batch", filters=query_filters, as_list=True)
+		query = query.where(frappe.qb.DocType(doctype).name.isin(used_ids))
+	return query.run(as_list=True)

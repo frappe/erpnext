@@ -133,6 +133,7 @@
    "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Item",
    "oldfieldname": "item_code",

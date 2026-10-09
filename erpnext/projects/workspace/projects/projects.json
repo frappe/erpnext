@@ -6,7 +6,7 @@
    "label": "Project Summary"
   }
  ],
- "content": "[{\"id\": \"7da431fdc9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Project Summary\", \"col\": 12}}, {\"id\": \"e8d82ebeb8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Projects\", \"col\": 4}}, {\"id\": \"69ce81d0bd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Non Completed Tasks\", \"col\": 4}}, {\"id\": \"c7432e7d92\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Timesheet Working Hours\", \"col\": 4}}]",
+ "content": "[{\"id\": \"a26c8edf16\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Projects Onboarding\", \"col\": 12}}, {\"id\": \"7da431fdc9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Project Summary\", \"col\": 12}}, {\"id\": \"e8d82ebeb8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Projects\", \"col\": 4}}, {\"id\": \"69ce81d0bd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Non Completed Tasks\", \"col\": 4}}, {\"id\": \"c7432e7d92\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Timesheet Working Hours\", \"col\": 4}}, {\"id\": \"prjcard000\", \"type\": \"card\", \"data\": {\"card_name\": \"Project Reports\", \"col\": 4}}]",
  "creation": "2020-03-02 15:46:04.874669",
  "custom_blocks": [],
  "docstatus": 0,
@@ -17,8 +17,67 @@
  "idx": 1,
  "is_hidden": 0,
  "label": "Projects",
- "links": [],
- "modified": "2026-08-26 18:34:03.000000",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project Reports",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Project Summary",
+   "link_count": 0,
+   "link_to": "Project Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Timesheet Billing Summary",
+   "link_count": 0,
+   "link_to": "Timesheet Billing Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily Timesheet Summary",
+   "link_count": 0,
+   "link_to": "Daily Timesheet Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Delayed Tasks Summary",
+   "link_count": 0,
+   "link_to": "Delayed Tasks Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Project wise Stock Tracking",
+   "link_count": 0,
+   "link_to": "Project wise Stock Tracking",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-10-04 23:30:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",

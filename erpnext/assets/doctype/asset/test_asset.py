@@ -37,6 +37,12 @@ from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -903,6 +909,46 @@ class TestAsset(AssetSetup):
 					},
 				)
 
+	def test_make_asset_movement_fences_each_asset(self):
+		from erpnext.assets.doctype.asset.mapper import make_asset_movement
+
+		asset = create_asset(item_code="Macbook Pro", company="_Test Company")
+
+		def movement_kwargs(name):
+			return {"assets": [{"name": name}]}
+
+		outside = make_company_fenced_user(
+			"asset-fenced@example.com", ["Accounts Manager"], "_Test Company 1"
+		)
+		with as_user(outside):
+			assert_refused_for_names(
+				self, make_asset_movement, movement_kwargs, [asset.name], caller_supplied=True
+			)
+		inside = make_company_fenced_user("asset-fenced@example.com", ["Accounts Manager"], "_Test Company")
+		with as_user(inside):
+			movement = make_asset_movement([{"name": asset.name}])
+		self.assertEqual(movement["assets"][0]["asset"], asset.name)
+		system_manager = make_fenced_user("asset-sm@example.com", ["System Manager"])
+		with as_user(system_manager):
+			self.assertEqual(make_asset_movement([{"name": asset.name}])["assets"][0]["asset"], asset.name)
+
+	def test_get_values_from_purchase_doc_needs_read_on_the_purchase_doc(self):
+		from erpnext.assets.doctype.asset.asset import get_values_from_purchase_doc
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
+		pi = make_purchase_invoice(item_code="Macbook Pro", qty=1, rate=100000.0)
+
+		quality_manager = make_fenced_user("asset-qm@example.com", ["Quality Manager"])
+		accounts_user = make_fenced_user("asset-au@example.com", ["Accounts User"])
+		for doctype, name in (("Purchase Receipt", pr.name), ("Purchase Invoice", pi.name)):
+			with as_user(quality_manager):
+				with self.assertRaises(frappe.PermissionError):
+					get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			with as_user(accounts_user):
+				values = get_values_from_purchase_doc(name, "Macbook Pro", doctype)
+			self.assertEqual(values["company"], "_Test Company")
+			self.assertEqual(values["asset_quantity"], 1)
+
 
 class TestDepreciationMethods(AssetSetup):
 	def setUp(self):
@@ -1454,6 +1500,31 @@ class TestDepreciationBasics(AssetSetup):
 		asset.calculate_depreciation = 1
 
 		self.assertRaises(frappe.ValidationError, asset.save)
+
+	def test_depreciation_ignores_dimension_defaults_of_other_companies(self):
+		"""A dimension default that is mandatory for another company must not be stamped on this
+		company's depreciation entry, or every scheduled posting fails company validation."""
+		other_company_department = set_mandatory_dimension_default_for_other_company()
+
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			available_for_use_date="2019-12-31",
+			depreciation_start_date="2020-12-31",
+			frequency_of_depreciation=12,
+			total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000,
+			submit=1,
+		)
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		journal_entry = get_depr_schedule(asset.name, "Active")[0].journal_entry
+		self.assertNotEqual(asset.depr_entry_posting_status, "Failed")
+		self.assertTrue(journal_entry)
+		departments = frappe.get_all("Journal Entry Account", {"parent": journal_entry}, pluck="department")
+		self.assertNotIn(other_company_department, departments)
 
 	def test_post_depreciation_entries(self):
 		"""Tests if post_depreciation_entries() works as expected."""
@@ -2077,6 +2148,31 @@ def create_asset(**args):
 		asset.submit()
 
 	return asset
+
+
+def set_mandatory_dimension_default_for_other_company():
+	"""Make Department mandatory for P&L in _Test Company 1 with a default that belongs to it."""
+	department = frappe.get_doc(
+		{
+			"doctype": "Department",
+			"department_name": "_Test Asset Dimension Department",
+			"company": "_Test Company 1",
+			"parent_department": "All Departments",
+		}
+	).insert(ignore_if_duplicate=True)
+
+	dimension = frappe.get_doc("Accounting Dimension", "Department")
+	dimension.append(
+		"dimension_defaults",
+		{
+			"company": "_Test Company 1",
+			"reference_document": "Department",
+			"default_dimension": department.name,
+			"mandatory_for_pl": 1,
+		},
+	)
+	dimension.save()
+	return department.name
 
 
 def create_asset_category(enable_cwip=1):

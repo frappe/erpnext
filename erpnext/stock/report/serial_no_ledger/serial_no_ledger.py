@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_bundle import get_serial_no_status
 from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
@@ -17,7 +18,7 @@ SELLING_VOUCHER_TYPES = ["Sales Invoice", "Delivery Note"]
 def execute(filters=None):
 	columns = get_columns(filters)
 	data = get_data(filters)
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_columns(filters):

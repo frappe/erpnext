@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "ACC-TAX-RULE-.YYYY.-.#####",
  "creation": "2015-08-07 02:33:52.670866",
+ "description": "Applies a tax template automatically when its conditions match.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-rule",

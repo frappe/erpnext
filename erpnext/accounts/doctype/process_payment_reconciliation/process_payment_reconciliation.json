@@ -3,6 +3,7 @@
  "autoname": "format:ACC-PPR-{#####}",
  "creation": "2023-03-30 21:28:39.793927",
  "default_view": "List",
+ "description": "Matches payments to invoices in the background.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

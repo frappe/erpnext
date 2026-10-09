@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "Prompt",
  "creation": "2019-05-21 15:27:06.514511",
+ "description": "A grouping of warehouses, like transit or store.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

@@ -16,26 +16,33 @@ add_to_apps_screen = [
 		"logo": "/assets/erpnext/images/erpnext-logo.svg",
 		"title": app_title,
 		"route": app_home,
+		"setup_wizard_text": "Let's give your business a home.",
 		"has_permission": "erpnext.check_app_permission",
 		"sequence_id": 1,
 	}
 ]
 
-# Modules that are a folder of code and nothing else. Their doctypes, reports and controllers stay
-# where they are; what they no longer own is navigation, which now sits in the sidebar named beside
-# each. Left in the dock, each would carry an entry of its own for two to four records. See
-# `frappe.utils.modules.get_code_only_modules`.
-#
-# The value names the modules that inherited that navigation, so a Call Log or a Code List resolves
-# to a sidebar the user can actually navigate to instead of dead-ending in a module the dock never
-# shows.
+# Modules that are only accessible via code and not via the UI. These modules are not shown in the sidebar or in the modules list.
 code_only_modules = {
-	"Telephony": ["ERPNext Integrations"],
+	# Integrations and Utilities are a handful of settings and tools each, so they sit in the Setup
+	# sidebar with the rest of the configuration rather than taking two places in the dock.
+	"ERPNext Integrations": ["Setup"],
+	"Utilities": ["Setup"],
+	"Telephony": ["Setup"],
 	# Its one doctype, Communication Medium, describes how a call reaches someone, so it sits in
-	# the Telephony section beside the call settings rather than in a shell of its own.
-	"Communication": ["ERPNext Integrations"],
-	"EDI": ["Utilities"],
-	"Bulk Transaction": ["Utilities"],
+	# the Integrations section beside the call settings rather than in a shell of its own.
+	"Communication": ["Setup"],
+	"EDI": ["Setup"],
+	"Bulk Transaction": ["Setup"],
+	# Subcontracting is sending work out to be manufactured, so its orders and receipts live in the
+	# Manufacturing sidebar.
+	"Subcontracting": ["Manufacturing"],
+	# Its records are country-specific tax settings and returns, so they sit with the rest of the
+	# tax setup and reports in Accounts.
+	"Regional": ["Accounts"],
+	# Maintenance schedules and visits are after-sales upkeep of what was sold, so they live in a
+	# Maintenance section of the Quality sidebar.
+	"Maintenance": ["Quality Management"],
 }
 
 develop_version = "17.x.x-develop"
@@ -56,6 +63,7 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Customer": "public/js/customer_overview.js",
 	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
@@ -334,6 +342,7 @@ sounds = [
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
 permission_query_conditions = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",

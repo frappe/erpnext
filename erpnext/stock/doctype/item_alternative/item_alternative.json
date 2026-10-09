@@ -1,6 +1,7 @@
 {
  "actions": [],
  "creation": "2018-02-26 17:39:11.249778",
+ "description": "An item you can use in place of another.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-alternative",
  "editable_grid": 1,

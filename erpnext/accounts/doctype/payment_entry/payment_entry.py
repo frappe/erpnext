@@ -51,7 +51,6 @@ from erpnext.accounts.utils import (
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
-	get_supplier_block_status,
 	validate_taxes_and_charges,
 )
 from erpnext.setup.utils import get_exchange_rate
@@ -384,11 +383,15 @@ class PaymentEntry(AccountsController):
 
 		fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 		for d in self.get("references"):
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(d.outstanding_amount):
+			precision = d.precision("allocated_amount")
+			allocated_amount = flt(d.allocated_amount, precision)
+			outstanding_amount = flt(d.outstanding_amount, precision)
+
+			if allocated_amount > 0 and allocated_amount > outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
+			if allocated_amount < 0 and allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 	def validate_allocated_amount_as_per_payment_request(self):
@@ -489,12 +492,16 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
+			precision = d.precision("allocated_amount")
+			allocated_amount = flt(d.allocated_amount, precision)
+			outstanding_amount = flt(latest.outstanding_amount, precision)
+
 			if (
 				d.payment_term
 				and (
-					(flt(d.allocated_amount)) > 0
+					allocated_amount > 0
 					and latest.payment_term_outstanding
-					and (flt(d.allocated_amount) > flt(latest.payment_term_outstanding))
+					and (allocated_amount > flt(latest.payment_term_outstanding, precision))
 				)
 				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
@@ -504,11 +511,11 @@ class PaymentEntry(AccountsController):
 					).format(d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term)
 				)
 
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+			if allocated_amount > 0 and allocated_amount > outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
+			if allocated_amount < 0 and allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
@@ -2057,18 +2064,10 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	accounting_dimensions_filter = []
 	posting_and_due_date = []
 
-	# confirm that Supplier is not blocked
-	if args.get("party_type") == "Supplier":
-		supplier_status = get_supplier_block_status(args["party"])
-		if supplier_status["on_hold"]:
-			if supplier_status["hold_type"] == "All":
-				return []
-			elif supplier_status["hold_type"] == "Payments":
-				if (
-					not supplier_status["release_date"]
-					or getdate(nowdate()) <= supplier_status["release_date"]
-				):
-					return []
+	if args.get("party_type") == "Supplier" and frappe.get_lazy_doc("Supplier", args["party"]).is_blocked_for(
+		"Payments"
+	):
+		return []
 
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.get_cached_value("Company", args.get("company"), "default_currency")
@@ -2497,6 +2496,7 @@ def get_account_details(account: str, date: str | date, cost_center: str | None 
 
 @frappe.whitelist()
 def get_company_defaults(company: str):
+	frappe.has_permission("Company", doc=company, throw=True)
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 

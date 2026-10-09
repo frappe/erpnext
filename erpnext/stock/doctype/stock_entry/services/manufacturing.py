@@ -17,6 +17,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_empty_batches_based_work_order,
 	get_serial_nos_from_bundle,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.utils import get_combine_datetime
 
 from .serial_batch import create_serial_and_batch_bundle
@@ -123,7 +124,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					row.qty * row.get("process_loss_per") / 100, self.doc.precision("fg_completed_qty")
 				)
 
-			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.uom)
+			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
 			self.doc.append("items", item_args)
 
@@ -244,7 +245,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
-		for batch_no, batch_qty in sorted(batches.items(), key=lambda x: x[0]):
+		numbers = SerialBatchIdentity("Batch").get_number_map(list(batches))
+		for batch_no, batch_qty in sorted(batches.items(), key=lambda x: numbers.get(x[0], x[0])):
 			if qty_to_be_consumed <= 0 or batch_qty <= 0:
 				continue
 			batch_qty = min(batch_qty, qty_to_be_consumed)
@@ -310,12 +312,25 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
 		if self.wo_doc.has_serial_no:
 			serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
+			if serial_nos:
+				try:
+					serial_nos = SerialBatchIdentity("Serial No").resolve(
+						row.item_code, serial_nos, ignore_permissions=True
+					)
+				except SerialBatchNotFoundError:
+					if not frappe.flags.mute_messages:
+						frappe.clear_last_message()
+					return True
 			if not serial_nos and row.serial_and_batch_bundle:
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 			if serial_nos:
 				valid_serial_nos = frappe.get_all(
 					"Serial No",
-					filters={"name": ("in", serial_nos), "work_order": self.doc.work_order},
+					filters={
+						"name": ("in", serial_nos),
+						"item_code": row.item_code,
+						"work_order": self.doc.work_order,
+					},
 					pluck="name",
 				)
 				return bool(set(serial_nos) - set(valid_serial_nos))
@@ -722,7 +737,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _append_with_serial_nos(self, item_args, row, qty):
 		if serial_nos := row.serial_nos[: cint(qty)]:
-			item_args["serial_no"] = "\n".join(serial_nos)
+			item_args["serial_no"] = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(item_args["item_code"], serial_nos)
+			)
 		if not item_args.get("uom"):
 			item_args["uom"] = row.stock_uom
 		item_args["use_serial_batch_fields"] = 1
@@ -1275,18 +1292,14 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 		return query.select(
 			doctype.name,
 			doctype.cost_allocation_per,
-			doctype.uom,
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
 			doctype.valuation_type,
-			doctype.conversion_factor,
 			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
 	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
-		return query.select(
-			doctype.allow_alternative_item, doctype.uom, doctype.conversion_factor, doctype.bom_no
-		)
+		return query.select(doctype.allow_alternative_item, doctype.bom_no)
 	return query
 
 
@@ -1691,9 +1704,10 @@ def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty,
 
 
 def _warn_max_retained(retainted_qty, batch_no, item_code):
+	batch_label = SerialBatchIdentity("Batch").get_label(batch_no)
 	frappe.msgprint(
 		_("Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.").format(
-			retainted_qty, batch_no, item_code, batch_no
+			retainted_qty, batch_label, item_code, batch_label
 		),
 		alert=True,
 	)
@@ -1704,7 +1718,7 @@ def _cap_sample_quantity(sample_quantity, max_retain_qty, retainted_qty, batch_n
 	if cint(sample_quantity) > cint(qty_diff):
 		if batch_no:
 			message = _("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
-				max_retain_qty, batch_no, item_code
+				max_retain_qty, SerialBatchIdentity("Batch").get_label(batch_no), item_code
 			)
 		else:
 			message = _("Maximum Samples - {0} can be retained for Item {1}.").format(

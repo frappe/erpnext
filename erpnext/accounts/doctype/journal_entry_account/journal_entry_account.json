@@ -86,6 +86,7 @@
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Party Type",
    "options": "DocType",
@@ -95,6 +96,7 @@
    "columns": 2,
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Party",
    "options": "party_type"
@@ -133,6 +135,7 @@
    "columns": 2,
    "fieldname": "debit_in_account_currency",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Debit",
    "options": "account_currency",
@@ -159,6 +162,7 @@
    "columns": 2,
    "fieldname": "credit_in_account_currency",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Credit",
    "options": "account_currency",

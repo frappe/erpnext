@@ -647,6 +647,25 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		new_item_with_tax.delete()
 		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"disable_last_purchase_rate": 1})
+	def test_update_items_keeps_last_purchase_rate_when_disabled(self):
+		item = make_item("_Test Update Items Last Purchase Rate", {"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item, rate=77)
+
+		trans_item = json.dumps([{"item_code": item, "rate": 55, "qty": 10, "docname": po.items[0].name}])
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_same_item_from_different_material_requests(self):
+		po = make_purchase_order(make_material_request(qty=5).name)
+		po = make_purchase_order(make_material_request(qty=5).name, target_doc=po)
+		po.supplier = "_Test Supplier"
+		po.insert()
+
+		self.assertEqual(len({row.material_request for row in po.items}), 2)
+
 	def test_update_qty(self):
 		po = create_purchase_order()
 
@@ -949,7 +968,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_po_for_blocked_supplier_payments_with_today_date(self):
+	def test_po_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.release_date = nowdate()
@@ -958,13 +977,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		po = create_purchase_order()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Order",
-			dn=po.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Order", dn=po.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()

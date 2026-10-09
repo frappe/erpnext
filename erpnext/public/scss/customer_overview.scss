@@ -1,0 +1,148 @@
+.customer-overview {
+	.co-period,
+	.co-subtitle,
+	.co-note,
+	.co-empty {
+		color: var(--ink-gray-5);
+	}
+
+	.co-head {
+		margin-bottom: var(--margin-md);
+	}
+
+	.co-head-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--margin-sm);
+	}
+
+	.co-title {
+		font-size: var(--text-base);
+		font-weight: var(--weight-regular);
+		color: var(--ink-gray-8);
+	}
+
+	.co-section > .co-head .co-title {
+		font-weight: var(--weight-semibold);
+	}
+
+	.co-subtitle {
+		margin-top: 2px;
+		font-size: var(--text-sm);
+	}
+
+	.co-head-action {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		height: 1lh;
+		font-size: var(--text-base);
+	}
+
+	.co-two-col {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 16px;
+		align-items: stretch;
+	}
+
+	.co-panel .co-note {
+		margin-top: auto;
+		padding-top: var(--margin-md);
+	}
+
+	.co-panel {
+		border: 1px solid var(--outline-gray-1);
+		background: var(--surface-base);
+		display: flex;
+		flex-direction: column;
+		padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+		border-radius: var(--radius-lg);
+	}
+
+	.co-note {
+		margin-top: var(--margin-md);
+		font-size: var(--text-sm);
+	}
+
+	.co-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--margin-sm);
+		margin-bottom: var(--margin-lg);
+	}
+
+	.co-header-controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--margin-sm);
+	}
+
+	.co-period {
+		font-size: var(--text-sm);
+	}
+
+	.co-filter {
+		width: 180px;
+	}
+
+	.co-section {
+		margin-top: var(--margin-lg);
+	}
+
+	.co-kpis {
+		margin-top: 0;
+	}
+
+	.co-chart {
+		margin: 0 calc(-1 * var(--padding-sm));
+	}
+
+	.co-panel .co-chart,
+	.co-panel .co-age-chart {
+		padding-top: var(--margin-md);
+	}
+
+	.co-age-chart {
+		margin-top: var(--margin-sm);
+	}
+
+	.co-loading .co-chart,
+	.co-loading .co-note {
+		opacity: 0.4;
+		transition: opacity 150ms ease-in-out;
+	}
+
+	.co-placeholder {
+		margin-top: var(--margin-md);
+	}
+
+	.co-error {
+		color: var(--ink-red-7);
+	}
+
+	.co-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: var(--text-sm);
+	}
+
+	.co-empty-state {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.co-list .embedded-list-table {
+		table-layout: auto;
+
+		th:nth-last-child(-n + 2) {
+			text-align: right;
+		}
+	}
+}

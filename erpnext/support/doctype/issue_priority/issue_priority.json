@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "Prompt",
  "creation": "2019-05-20 15:14:21.604447",
+ "description": "How urgent an issue is.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

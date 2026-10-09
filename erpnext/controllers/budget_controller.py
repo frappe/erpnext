@@ -230,7 +230,11 @@ class BudgetValidation:
 				qb.from_(po)
 				.inner_join(poi)
 				.on(po.name == poi.parent)
-				.select(Sum(IfNull(poi.amount, 0) - IfNull(poi.billed_amt, 0)).as_("amount"))
+				.select(
+					Sum(
+						(IfNull(poi.amount, 0) - IfNull(poi.billed_amt, 0)) * IfNull(po.conversion_rate, 1)
+					).as_("amount")
+				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
 			):

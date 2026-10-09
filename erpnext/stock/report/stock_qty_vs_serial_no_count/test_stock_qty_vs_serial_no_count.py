@@ -66,7 +66,7 @@ class TestStockQtyVsSerialNoCount(ERPNextTestSuite):
 			item_code=item,
 			warehouse=warehouse,
 			qty=1,
-			serial_no=serial_no,
+			serial_no=frappe.db.get_value("Serial No", serial_no, "serial_no"),
 			use_serial_batch_fields=1,
 		)
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Delivered")

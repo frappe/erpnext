@@ -40,22 +40,14 @@ frappe.ui.form.on("Production Plan", {
 		});
 
 		frm.set_query("for_warehouse", function (doc) {
-			// when a group is chosen, For Warehouse must be one of its child warehouses
+			const filters = [
+				["Warehouse", "company", "=", doc.company],
+				["Warehouse", "is_group", "=", 0],
+			];
 			if (doc.raw_material_group_warehouse) {
-				return {
-					query: "erpnext.manufacturing.doctype.production_plan.production_plan.get_child_warehouses",
-					filters: {
-						group_warehouse: doc.raw_material_group_warehouse,
-						company: doc.company,
-					},
-				};
+				filters.push(["Warehouse", "name", "descendants of", doc.raw_material_group_warehouse]);
 			}
-			return {
-				filters: [
-					["Warehouse", "company", "=", doc.company],
-					["Warehouse", "is_group", "=", 0],
-				],
-			};
+			return { filters };
 		});
 
 		frm.set_query("raw_material_group_warehouse", function (doc) {
@@ -123,7 +115,7 @@ frappe.ui.form.on("Production Plan", {
 
 	raw_material_group_warehouse(frm) {
 		// For Warehouse must sit inside the chosen group, so drop a stale selection
-		if (frm.doc.for_warehouse) {
+		if (frm.doc.raw_material_group_warehouse && frm.doc.for_warehouse) {
 			frm.set_value("for_warehouse", null);
 		}
 	},

@@ -6,14 +6,16 @@ from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import get_link_to_form
 
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.get_item_details import get_conversion_factor
 
 
 @frappe.whitelist()
 def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
-		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+		from erpnext.accounts.services.taxes import _get_default_taxes_and_charges
 
 		quotation = frappe.get_doc(target)
 
@@ -29,7 +31,7 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 		quotation.conversion_rate = exchange_rate
 
 		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
+		taxes = _get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
 		if taxes.get("taxes"):
 			quotation.update(taxes)
 
@@ -66,7 +68,7 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1.0
+		target.conversion_factor = get_conversion_factor(obj.item_code, obj.uom)["conversion_factor"]
 
 	doclist = get_mapped_doc(
 		"Opportunity",
@@ -88,6 +90,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
+		validate_no_customer_exists(source)
 		target.opportunity_name = source.name
 
 		if source.opportunity_from == "Lead":
@@ -107,6 +110,22 @@ def make_customer(source_name: str, target_doc: str | dict | Document | None = N
 	)
 
 	return doclist
+
+
+def validate_no_customer_exists(opportunity: Document):
+	if opportunity.opportunity_from == "Customer":
+		frappe.throw(_("Opportunity {0} is already for a Customer").format(frappe.bold(opportunity.name)))
+
+	or_filters = {"opportunity_name": opportunity.name}
+	if opportunity.opportunity_from == "Lead":
+		or_filters["lead_name"] = opportunity.party_name
+
+	if customer := frappe.get_all("Customer", or_filters=or_filters, pluck="name", limit=1):
+		frappe.throw(
+			_("Customer {0} already exists for this Opportunity").format(
+				get_link_to_form("Customer", customer[0])
+			)
+		)
 
 
 @frappe.whitelist()
@@ -136,6 +155,8 @@ def make_opportunity_from_communication(
 	frappe.has_permission("Communication", doc=communication, throw=True)
 
 	doc = frappe.get_doc("Communication", communication)
+	if doc.reference_doctype == "Opportunity" and doc.reference_name:
+		return doc.reference_name
 
 	# make_lead_from_communication() carries its own check, but it is skipped entirely when the
 	# email already references a Lead, so this cannot rely on it.

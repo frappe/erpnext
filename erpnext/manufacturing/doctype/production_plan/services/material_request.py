@@ -24,6 +24,7 @@ from erpnext.manufacturing.doctype.production_plan.services.bom_explosion import
 	get_subitems,
 )
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	aggregate_bin_details,
 	get_bin_details,
 	get_item_data,
 	get_sales_orders,
@@ -154,7 +155,7 @@ def get_items_for_material_requests(
 	doc = _normalize_mr_doc(doc)
 	_authorize_mr_request(doc, warehouses)
 	_validate_group_warehouse_target(doc)
-	warehouses = _filter_warehouses(doc, warehouses, get_parent_warehouse_data)
+	warehouses = _filter_warehouses(doc, warehouses)
 	doc["mr_items"] = []
 
 	po_items = _collect_po_items(doc)
@@ -162,11 +163,10 @@ def get_items_for_material_requests(
 
 	ignore_ordered_qty = _effective_ignore_ordered_qty(doc, po_items)
 	so_item_details = _collect_item_details(doc, po_items)
+	is_transfer = bool((ignore_ordered_qty or get_parent_warehouse_data) and warehouses)
 
-	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty)
-	mr_items = _apply_other_locations(
-		doc, mr_items, warehouses, ignore_ordered_qty, get_parent_warehouse_data
-	)
+	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer)
+	mr_items = _apply_other_locations(doc, mr_items, warehouses, is_transfer)
 	_set_default_suppliers(mr_items, doc.get("company"))
 	if doc.get("consider_minimum_order_qty"):
 		_apply_minimum_order_qty(mr_items)
@@ -242,14 +242,13 @@ def _validate_group_warehouse_target(doc):
 		)
 
 
-def _filter_warehouses(doc, warehouses, get_parent_warehouse_data):
+def _filter_warehouses(doc, warehouses):
 	if not warehouses:
 		return warehouses
 
 	warehouses = list(set(get_warehouse_list(warehouses)))
-	for_warehouse = doc.get("for_warehouse")
-	if for_warehouse and not get_parent_warehouse_data and for_warehouse in warehouses:
-		warehouses.remove(for_warehouse)
+	if doc.get("for_warehouse") in warehouses:
+		warehouses.remove(doc.get("for_warehouse"))
 	return warehouses
 
 
@@ -431,7 +430,7 @@ def _accumulate_so_items(so_item_details, sales_order, item_details, qty_precisi
 			so_item_details[sales_order][key] = details
 
 
-def _build_mr_items(doc, so_item_details, ignore_ordered_qty):
+def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
 	mr_items = []
 	consumed_qty = defaultdict(float)
 	# raw_material_group_warehouse (optional, group) only widens the availability
@@ -456,6 +455,7 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty):
 				scope_warehouse,
 				target_warehouse,
 				consumed_qty,
+				is_transfer,
 			)
 			if row:
 				mr_items.append(row)
@@ -472,12 +472,19 @@ def _mr_item_for_details(
 	warehouse,
 	target_warehouse,
 	consumed_qty,
+	is_transfer,
 ):
+	"""When transferring, size the shortage on For Warehouse alone so group stock is not counted twice."""
 	# get_bin_details scopes to the warehouse's descendants, returning one row per
 	# child warehouse; sum them so a group warehouse reflects combined child stock.
-	bin_dict = _aggregate_bin_details(get_bin_details(details, doc.company, warehouse))
+	bins = get_bin_details(details, doc.company, warehouse)
+	bin_dict = aggregate_bin_details(bins)
 	if details.qty <= 0:
 		return None
+	shortage_warehouse, shortage_bin = warehouse, bin_dict
+	if is_transfer and warehouse != target_warehouse:
+		shortage_warehouse = target_warehouse
+		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
 	return get_material_request_items(
 		doc,
 		details,
@@ -485,30 +492,16 @@ def _mr_item_for_details(
 		company,
 		ignore_ordered_qty,
 		include_safety_stock,
-		warehouse,
+		shortage_warehouse,
 		target_warehouse,
 		bin_dict,
 		consumed_qty,
+		shortage_bin,
 	)
 
 
-def _aggregate_bin_details(bin_list):
-	qty_fields = (
-		"projected_qty",
-		"actual_qty",
-		"ordered_qty",
-		"reserved_qty_for_production",
-		"planned_qty",
-	)
-	aggregated = {field: 0 for field in qty_fields}
-	for row in bin_list or []:
-		for field in qty_fields:
-			aggregated[field] += flt(row.get(field))
-	return aggregated
-
-
-def _apply_other_locations(doc, mr_items, warehouses, ignore_ordered_qty, get_parent_warehouse_data):
-	if not ((ignore_ordered_qty or get_parent_warehouse_data) and warehouses):
+def _apply_other_locations(doc, mr_items, warehouses, is_transfer):
+	if not is_transfer:
 		return mr_items
 
 	new_mr_items = []
@@ -621,9 +614,10 @@ def get_material_request_items(
 	target_warehouse,
 	bin_dict,
 	consumed_qty,
+	shortage_bin,
 ):
 	required_qty = _required_qty_for_mr(
-		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+		row, ignore_existing_ordered_qty, warehouse, shortage_bin, consumed_qty, include_safety_stock
 	)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 	conversion_factor = _mr_purchase_conversion_factor(row)

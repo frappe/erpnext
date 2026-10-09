@@ -34,6 +34,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
@@ -765,7 +766,7 @@ def make_quality_inspections(
 				"item_code": item.get("item_code"),
 				"description": item.get("description"),
 				"sample_size": flt(item.get("sample_size")),
-				"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+				"item_serial_no": get_first_serial_id(item),
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),
 			}
@@ -774,6 +775,18 @@ def make_quality_inspections(
 		inspections.append(quality_inspection.name)
 
 	return inspections
+
+
+def get_first_serial_id(item):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serial_numbers = get_serial_nos(item.get("serial_no"))
+	if not serial_numbers:
+		return None
+	records = SerialBatchIdentity("Serial No").get_records(
+		item.get("item_code"), serial_numbers[:1], ["name"]
+	)
+	return records[0].name if records else None
 
 
 def is_reposting_pending():

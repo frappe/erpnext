@@ -7,6 +7,7 @@ from frappe.utils import add_to_date, flt, today
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 from erpnext.stock.report.stock_ledger.stock_ledger import execute as stock_ledger_execute
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters: dict | None = None):
@@ -19,7 +20,7 @@ def execute(filters: dict | None = None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_columns() -> list[dict]:

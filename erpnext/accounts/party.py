@@ -703,6 +703,20 @@ def validate_party_accounts(doc):
 				account.idx, account.advance_account, account.company, _("Debtor/Creditor Advance")
 			)
 
+		validate_party_account_type(doc.doctype, account)
+
+
+def validate_party_account_type(party_type, row):
+	account_type = erpnext.get_party_account_type(party_type)
+	for account in (row.account, row.advance_account):
+		if account and frappe.get_cached_value("Account", account, "account_type") != account_type:
+			frappe.throw(
+				_("Row {0}: Account {1} must be a {2} account").format(
+					row.idx, frappe.bold(account), _(account_type)
+				),
+				title=_("Invalid Account"),
+			)
+
 
 @frappe.whitelist()
 def get_due_date(
@@ -823,7 +837,7 @@ def set_taxes(
 	shipping_address: str | None = None,
 	use_for_shopping_cart: int | None = None,
 ):
-	from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details, get_tax_template
+	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_rule_party_details, get_tax_template
 
 	args = {frappe.scrub(party_type): party, "company": company}
 
@@ -838,12 +852,12 @@ def set_taxes(
 
 	if billing_address or shipping_address:
 		args.update(
-			get_party_details(
+			get_tax_rule_party_details(
 				party, party_type, {"billing_address": billing_address, "shipping_address": shipping_address}
 			)
 		)
 	else:
-		args.update(get_party_details(party, party_type))
+		args.update(get_tax_rule_party_details(party, party_type))
 
 	if party_type in ("Customer", "Lead", "Prospect", "CRM Deal"):
 		args.update({"tax_type": "Sales"})

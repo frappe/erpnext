@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:quality_inspection_template_name",
  "creation": "2018-01-24 16:23:41.691127",
+ "description": "The parameters to check an item for.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

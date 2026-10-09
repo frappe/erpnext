@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:item_code",
  "creation": "2025-08-21 12:46:54.727571",
+ "description": "How long it takes to get or make an item.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

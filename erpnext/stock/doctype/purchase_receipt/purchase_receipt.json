@@ -5,6 +5,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2026-04-06 14:10:33.384946",
+ "description": "Items received from a supplier.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/purchase-receipt",
@@ -34,6 +35,7 @@
   "currency_and_price_list",
   "currency",
   "conversion_rate",
+  "use_transaction_date_exchange_rate",
   "column_break2",
   "buying_price_list",
   "price_list_currency",
@@ -261,6 +263,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -392,6 +395,14 @@
    "reqd": 1
   },
   {
+   "default": "0",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break2",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -439,6 +450,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Accepted Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -1294,7 +1306,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-07 20:56:49.769456",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

@@ -7,50 +7,18 @@ frappe.ui.form.on("Maintenance Visit", {
 		frm.set_query("contact_person", erpnext.queries.contact_query);
 		frm.set_query("customer_address", erpnext.queries.address_query);
 		frm.set_query("customer", erpnext.queries.customer);
+		frm.set_query("serial_no", "purposes", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				query: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_no_query",
+				filters: {
+					item_code: row.item_code,
+					schedule: doc.maintenance_type === "Scheduled" ? doc.maintenance_schedule : undefined,
+				},
+			};
+		});
 	},
 	onload: function (frm) {
-		// filters for serial no based on item code
-		if (frm.doc.maintenance_type === "Scheduled") {
-			let item_code = frm.doc.purposes[0].item_code;
-			if (!item_code) {
-				return;
-			}
-			frappe
-				.call({
-					method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_nos_from_schedule",
-					args: {
-						schedule: frm.doc.maintenance_schedule,
-						item_code: item_code,
-					},
-				})
-				.then((r) => {
-					let serial_nos = r.message;
-					frm.set_query("serial_no", "purposes", () => {
-						if (serial_nos.length > 0) {
-							return {
-								filters: {
-									item_code: item_code,
-									name: ["in", serial_nos],
-								},
-							};
-						}
-						return {
-							filters: {
-								item_code: item_code,
-							},
-						};
-					});
-				});
-		} else {
-			frm.set_query("serial_no", "purposes", (frm, cdt, cdn) => {
-				let row = locals[cdt][cdn];
-				return {
-					filters: {
-						item_code: row.item_code,
-					},
-				};
-			});
-		}
 		if (!frm.doc.status) {
 			frm.set_value({ status: "Draft" });
 		}

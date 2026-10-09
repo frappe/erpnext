@@ -101,6 +101,15 @@ class TestBlanketOrder(ERPNextTestSuite):
 		frappe.db.set_single_value("Buying Settings", "blanket_order_allowance", 10)
 		po.submit()
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 10})
+	def test_blanket_order_allowance_applies_to_blanket_order_qty(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		orders = [make_purchase_order_against(bo, qty=qty) for qty in (90, 15, 10)]
+		orders[0].submit()
+		orders[1].submit()
+
+		self.assertRaises(frappe.ValidationError, orders[2].submit)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"blanket_order_allowance": 0})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	@ERPNextTestSuite.change_settings(

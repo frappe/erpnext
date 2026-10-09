@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-05-16 11:42:29.632528",
+ "description": "How much a cost center or project may spend over a fiscal year.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/budgeting",
  "editable_grid": 1,

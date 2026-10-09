@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2022-01-18 02:26:55.975005",
+ "description": "Something your business owns and uses over time, like a machine or a laptop.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset",
@@ -231,6 +232,7 @@
   {
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Available for Use Date",
    "mandatory_depends_on": "eval:(!(doc.asset_type == \"Composite Component\" || doc.asset_type == \"Composite Asset\") || doc.docstatus==1)"
   },
@@ -238,6 +240,7 @@
    "default": "0",
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Calculate Depreciation",
    "read_only_depends_on": "eval:(doc.asset_type == \"Composite Asset\" && !doc.net_purchase_amount) || doc.asset_type == \"Composite Component\""
   },
@@ -245,6 +248,7 @@
    "depends_on": "eval:(doc.asset_type == \"Existing Asset\")",
    "fieldname": "opening_accumulated_depreciation",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Opening Accumulated Depreciation",
    "options": "Company:company:default_currency"
   },
@@ -264,6 +268,7 @@
   {
    "fieldname": "depreciation_method",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "label": "Depreciation Method",
    "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual"
   },
@@ -278,6 +283,7 @@
   {
    "fieldname": "total_number_of_depreciations",
    "fieldtype": "Int",
+   "in_import_template": 1,
    "label": "Total Number of Depreciations"
   },
   {
@@ -287,6 +293,7 @@
   {
    "fieldname": "frequency_of_depreciation",
    "fieldtype": "Int",
+   "in_import_template": 1,
    "label": "Frequency of Depreciation (Months)"
   },
   {
@@ -490,6 +497,7 @@
    "depends_on": "eval:(doc.asset_type == \"Existing Asset\")",
    "fieldname": "opening_number_of_booked_depreciations",
    "fieldtype": "Int",
+   "in_import_template": 1,
    "label": "Opening Number of Booked Depreciations"
   },
   {
@@ -534,6 +542,7 @@
   {
    "fieldname": "net_purchase_amount",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Net Purchase Amount",
    "mandatory_depends_on": "eval:(doc.asset_type != \"Composite Asset\" || doc.docstatus==1)",
    "options": "currency",
@@ -542,6 +551,7 @@
   {
    "fieldname": "asset_type",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "label": "Asset Type",
    "options": "\nExisting Asset\nComposite Asset\nComposite Component"
   },
@@ -630,7 +640,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-01 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -689,6 +699,14 @@
   },
   {
    "role": "Stock User",
+   "select": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "System Manager",
    "select": 1
   }
  ],

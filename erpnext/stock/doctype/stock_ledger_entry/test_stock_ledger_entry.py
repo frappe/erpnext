@@ -50,6 +50,22 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
 		self.assertGreater(held_advisory_locks(), before)
 
+	def test_negative_stock_fallback_rate_ignores_later_entries(self):
+		item = make_item(properties={"allow_negative_stock": 1, "valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=300, posting_date=add_days(today(), -5)
+		)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5, posting_date=add_days(today(), -10))
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -400)
+
 	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
 		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
 		serial transferred to another company. posting_date alone is non-total, so two same-date SLEs
@@ -62,7 +78,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		company_a, company_b = "_Test Company", "_Test Company 1"
 		if frappe.db.exists("Serial No", serial):
 			frappe.delete_doc("Serial No", serial, force=1)
-		frappe.get_doc(
+		serial_doc = frappe.get_doc(
 			{"doctype": "Serial No", "serial_no": serial, "item_code": item, "company": company_b}
 		).insert(ignore_permissions=True)
 
@@ -80,7 +96,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 					"actual_qty": 1,
 					"incoming_rate": rate,
 					"is_cancelled": 0,
-					"serial_no": serial,
+					"serial_no": serial_doc.name,
 					"voucher_type": "Stock Entry",
 					"voucher_no": "TEST-TIE",
 				}
@@ -93,7 +109,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		mk_sle("MAT-SLE-TIE-B", 200)  # later/larger name -> deterministic winner
 
 		value = update_entries_after.get_incoming_value_for_serial_nos(
-			frappe._dict(company=company_a), [serial]
+			frappe._dict(company=company_a), [serial_doc.name]
 		)
 		# the latest (creation/name desc) same-date SLE wins -> 200 on both engines
 		self.assertEqual(value, 200.0)
@@ -1188,6 +1204,35 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
 
+	def test_repost_does_not_revive_entry_cancelled_midway(self):
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		item_code = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+		second = make_stock_entry(item_code=item_code, target=warehouse, qty=5, rate=120)
+		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": second.name, "is_cancelled": 0})
+
+		process_sle = update_entries_after.process_sle
+
+		def cancel_while_reposting(obj, sle):
+			# the repost has already read this entry as active; the user cancels it now
+			if sle.name == sle_name:
+				frappe.db.set_value("Stock Ledger Entry", sle_name, "is_cancelled", 1)
+			return process_sle(obj, sle)
+
+		with patch.object(update_entries_after, "process_sle", cancel_while_reposting):
+			update_entries_after(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"posting_date": "1900-01-01",
+					"posting_time": "00:01",
+				}
+			)
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_name, "is_cancelled"), 1)
+
 	def test_timestamp_clash(self):
 		item = make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -1978,7 +2023,9 @@ def setup_item_valuation_test(
 	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
 
 	for i, batch_id in enumerate(batches):
-		if not frappe.db.exists("Batch", batch_id):
+		if batch_name := frappe.db.get_value("Batch", {"item": item.item_code, "batch_id": batch_id}, "name"):
+			batches[i] = batch_name
+		else:
 			ubw = use_batchwise_valuation
 			if isinstance(use_batchwise_valuation, list | tuple):
 				ubw = use_batchwise_valuation[i]
@@ -1989,6 +2036,7 @@ def setup_item_valuation_test(
 			).insert()
 			batch.use_batchwise_valuation = ubw
 			batch.db_update()
+			batches[i] = batch.name
 
 	return item.item_code, warehouses, batches
 

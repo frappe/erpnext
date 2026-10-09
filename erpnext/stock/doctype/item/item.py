@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold
@@ -11,6 +12,7 @@ from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import (
 	cint,
 	cstr,
+	escape_html,
 	flt,
 	formatdate,
 	get_link_to_form,
@@ -33,6 +35,7 @@ from erpnext.controllers.item_variant import (
 from erpnext.stock.doctype.item.item_search import queue_item
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_valuation_method
 
 
@@ -240,6 +243,7 @@ class Item(Document):
 		self.clear_retain_sample()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_default_uoms()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
 		self.validate_item_defaults()
@@ -665,6 +669,7 @@ class Item(Document):
 
 		if merge:
 			self.validate_properties_before_merge(new_name)
+			self.validate_shared_serial_batch_numbers_before_merge(old_name, new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
 			self.delete_old_bins(old_name)
 
@@ -729,6 +734,17 @@ class Item(Document):
 			msg = _("To merge, following properties must be same for both items")
 			msg += ": \n" + ", ".join([self.meta.get_translated_label(fld) for fld in field_list])
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_shared_serial_batch_numbers_before_merge(self, old_name, new_name):
+		for doctype in ("Serial No", "Batch"):
+			if shared := SerialBatchIdentity(doctype).get_shared_numbers(old_name, new_name):
+				frappe.throw(
+					_("Cannot merge because both items have {0} {1}").format(
+						_(doctype), ", ".join(escape_html(number) for number in shared)
+					),
+					title=_("Cannot Merge"),
+					exc=DataValidationError,
+				)
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
 		"Block merge if both old and new items have product bundles."
@@ -1061,6 +1077,24 @@ class Item(Document):
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
 				if value:
 					d.conversion_factor = value
+
+	def validate_default_uoms(self):
+		if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+			return
+
+		allowed_uoms = get_allowed_uoms([self])[self.name]
+		for fieldname in ("sales_uom", "purchase_uom"):
+			uom = self.get(fieldname)
+			if uom and uom not in allowed_uoms:
+				frappe.throw(
+					_(
+						"{0} {1} has no conversion factor in this Item. Add it to the UOMs table, or disable {2} in Stock Settings."
+					).format(
+						_(self.meta.get_label(fieldname)),
+						bold(uom),
+						bold(_("Allow UOM with conversion rate defined in Item")),
+					)
+				)
 
 	def validate_attributes(self):
 		if not (self.has_variants or self.variant_of):
@@ -1623,41 +1657,102 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	if inverse_match and inverse_match.value:
 		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
-	# This attempts to try and get conversion from intermediate UOM.
+	return _get_conv_factor_via_intermediate_uom(from_uom, to_uom)
+
+
+def _get_conv_factor_via_intermediate_uom(from_uom, to_uom):
 	# case:
 	# 			 g -> mg = 1000
 	# 			 g -> kg = 0.001
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
+	value = _get_conv_factor_via_shared_uom("from_uom", "to_uom", to_uom, from_uom)
+	if value is None:
+		value = _get_conv_factor_via_shared_uom("to_uom", "from_uom", from_uom, to_uom)
+
+	if value is not None:
+		return flt(value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+
+def _get_conv_factor_via_shared_uom(shared_field, other_field, first_uom, second_uom):
 	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
 	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
 	# Conversion pairs are not unique, so document names provide stable tie-breakers.
-	shared_source_match = (
+	match = (
 		frappe.qb.from_(first)
 		.join(second)
-		.on(first.from_uom == second.from_uom)
+		.on((first[shared_field] == second[shared_field]) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first.to_uom == to_uom) & (second.to_uom == from_uom) & (second.value != 0))
+		.where((first[other_field] == first_uom) & (second[other_field] == second_uom) & (second.value != 0))
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
 	)
 
-	if shared_source_match:
-		return flt(shared_source_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+	return match[0].value if match else None
 
-	shared_target_match = (
-		frappe.qb.from_(first)
-		.join(second)
-		.on(first.to_uom == second.to_uom)
-		.select((first.value / second.value).as_("value"))
-		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
-		.orderby(first.name, second.name)
-		.limit(1)
-		.run(as_dict=1)
+
+def get_allowed_uoms(items: list) -> dict[str, dict[str, float]]:
+	"""Map items to the UOMs Stock Settings allows them, with conversion factors: the stock UOM, the
+	template's UOM conversions when both share a stock UOM, and the item's own. An Item document's own
+	conversions come from its unsaved rows."""
+	conversions = get_uom_conversions({item.name for item in items} | {item.variant_of for item in items})
+	allowed_uoms = {}
+	for item in items:
+		own = item.uoms if isinstance(item, Document) else conversions[item.name]
+		inherited = [row for row in conversions[item.variant_of] if row.stock_uom == item.stock_uom]
+		allowed_uoms[item.name] = {item.stock_uom: 1.0} | {
+			row.uom: row.conversion_factor for row in inherited + own if flt(row.conversion_factor) > 0
+		}
+
+	return allowed_uoms
+
+
+def get_uom_conversions(item_codes: set) -> defaultdict[str, list]:
+	item = frappe.qb.DocType("Item")
+	detail = frappe.qb.DocType("UOM Conversion Detail")
+	rows = (
+		frappe.qb.from_(detail)
+		.join(item)
+		.on(item.name == detail.parent)
+		.select(detail.parent, detail.uom, detail.conversion_factor, item.stock_uom)
+		.where((detail.parenttype == "Item") & detail.parent.isin(list(item_codes - {None})))
+		.orderby(detail.idx)
+		.run(as_dict=True)
 	)
 
-	if shared_target_match:
-		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+	conversions = defaultdict(list)
+	for row in rows:
+		conversions[row.parent].append(row)
+
+	return conversions
+
+
+def validate_item_uoms(rows: list) -> None:
+	if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+		return
+
+	rows = [row for row in rows if row.item_code and row.uom]
+	if not rows:
+		return
+
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ["in", list({row.item_code for row in rows})]},
+		fields=["name", "stock_uom", "variant_of"],
+	)
+	allowed_uoms = get_allowed_uoms(items)
+	for row in rows:
+		if row.uom not in allowed_uoms.get(row.item_code, {}):
+			frappe.throw(
+				_(
+					"Row #{0}: UOM {1} has no conversion factor in Item {2}. Add it to the Item's UOMs table, or disable {3} in Stock Settings."
+				).format(
+					row.idx,
+					bold(row.uom),
+					bold(row.item_code),
+					bold(_("Allow UOM with conversion rate defined in Item")),
+				)
+			)
 
 
 @frappe.whitelist()

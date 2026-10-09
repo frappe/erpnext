@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:{account_name} merger on {creation}",
  "creation": "2021-12-09 15:38:04.556584",
+ "description": "Combine two or more accounts into one.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

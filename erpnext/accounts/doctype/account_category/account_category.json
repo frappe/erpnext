@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:account_category_name",
  "creation": "2025-08-02 06:22:31.835063",
+ "description": "Groups accounts into the lines your financial statements show.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

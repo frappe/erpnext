@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:user",
  "creation": "2020-12-08 16:52:40.590146",
+ "description": "Your calling preferences, like when you take calls.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

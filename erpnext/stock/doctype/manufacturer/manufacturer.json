@@ -4,7 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:short_name",
  "creation": "2016-01-17 11:04:52.761731",
- "description": "Manufacturers used in Items",
+ "description": "A company that makes the items you buy or sell.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/manufacturer",

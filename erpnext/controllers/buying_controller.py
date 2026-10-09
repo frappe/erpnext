@@ -14,20 +14,23 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
+from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
 	is_rejected_material_valued,
 )
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	get_conversion_factor,
 	get_item_defaults,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_incoming_rate, is_serial_no_wise_valuation_disabled
 
 
@@ -51,6 +54,7 @@ class BuyingController(SubcontractingController):
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
 		self.validate_items()
+		validate_item_uoms(self.get("items"))
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
@@ -310,7 +314,9 @@ class BuyingController(SubcontractingController):
 				pluck="serial_no",
 			)
 
-		return get_serial_nos(row.get("rejected_serial_no"))
+		return SerialBatchIdentity("Serial No").resolve(
+			row.item_code, get_serial_nos(row.get("rejected_serial_no")), ignore_permissions=True
+		)
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
@@ -364,9 +370,23 @@ class BuyingController(SubcontractingController):
 
 		if self.meta.get_field("taxes"):
 			if self.get("taxes_and_charges") and not self.get("taxes") and not for_validate:
-				taxes = get_taxes_and_charges("Purchase Taxes and Charges Template", self.taxes_and_charges)
+				taxes = _get_taxes_and_charges("Purchase Taxes and Charges Template", self.taxes_and_charges)
 				for tax in taxes:
 					self.append("taxes", tax)
+
+	def set_transaction_date_exchange_rate(self):
+		"""Replace the exchange rate mapped from a Purchase Order with the posting date rate."""
+		if not (
+			self.currency
+			and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
+			and not any(item.get("purchase_receipt") or item.get("purchase_invoice") for item in self.items)
+		):
+			return
+
+		self.use_transaction_date_exchange_rate = 1
+		self.conversion_rate = get_exchange_rate(
+			self.currency, self.company_currency, self.posting_date, "for_buying"
+		)
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
@@ -1205,11 +1225,7 @@ class BuyingController(SubcontractingController):
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			self.process_fixed_asset()
 
-		if self.doctype in [
-			"Purchase Order",
-			"Purchase Receipt",
-			"Purchase Invoice",
-		] and not frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+		if self.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
@@ -1218,11 +1234,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.doctype in [
-			"Purchase Order",
-			"Purchase Receipt",
-			"Purchase Invoice",
-		] and not frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+		if self.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 			update_last_purchase_rate(self, is_submit=0)
 
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:

@@ -1,6 +1,9 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import Counter
+from graphlib import TopologicalSorter
+
 import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
@@ -53,7 +56,7 @@ class Project(Document):
 		per_gross_margin: DF.Percent
 		percent_complete: DF.Percent
 		percent_complete_method: DF.Literal["Manual", "Task Completion", "Task Progress", "Task Weight"]
-		priority: DF.Literal["Medium", "Low", "High"]
+		priority: DF.Literal["Low", "Medium", "High"]
 		project_name: DF.Data
 		project_template: DF.Link | None
 		project_type: DF.Link | None
@@ -88,8 +91,8 @@ class Project(Document):
 		self.onload()
 
 	def validate(self):
+		self.validate_project_template()
 		if not self.is_new():
-			self.copy_from_template()
 			self.control_access_for_project_users()
 		self.send_welcome_email()
 		self.update_costing()
@@ -97,7 +100,15 @@ class Project(Document):
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
-	def copy_from_template(self, trigger=None):
+	def validate_project_template(self):
+		if (
+			self.project_template
+			and self.has_value_changed("project_template")
+			and frappe.db.get_value("Project Template", self.project_template, "disabled")
+		):
+			frappe.throw(_("Project Template {0} is disabled").format(frappe.bold(self.project_template)))
+
+	def copy_from_template(self):
 		"""
 		Copy tasks from template
 		"""
@@ -106,15 +117,13 @@ class Project(Document):
 			if not self.expected_start_date:
 				# project starts today
 				self.expected_start_date = today()
-				if trigger == "after_insert":
-					self.db_set("expected_start_date", self.expected_start_date)
+				self.db_set("expected_start_date", self.expected_start_date)
 
 			template = frappe.get_doc("Project Template", self.project_template)
 
 			if not self.project_type:
 				self.project_type = template.project_type
-				if trigger == "after_insert":
-					self.db_set("project_type", self.project_type)
+				self.db_set("project_type", self.project_type)
 
 			# create tasks from template
 			project_tasks = []
@@ -155,7 +164,9 @@ class Project(Document):
 		return self.update_if_holiday(self.end_date)
 
 	def update_if_holiday(self, date):
-		holiday_list = self.holiday_list or get_holiday_list(self.company)
+		holiday_list = self.holiday_list or frappe.get_cached_value(
+			"Company", self.company, "default_holiday_list"
+		)
 		while is_holiday(holiday_list, date):
 			date = add_days(date, 1)
 		return date
@@ -238,7 +249,7 @@ class Project(Document):
 		self.db_update()
 
 	def after_insert(self):
-		self.copy_from_template("after_insert")
+		self.copy_from_template()
 		self.link_with_sales_order()
 		self.control_access_for_project_users()
 
@@ -263,6 +274,8 @@ class Project(Document):
 			return
 
 		frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+		self.update_sales_amount()
+		self.db_set("total_sales_amount", self.total_sales_amount)
 
 	def on_trash(self):
 		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
@@ -295,31 +308,43 @@ class Project(Document):
 				)
 				self.percent_complete = flt(flt(completed) / total * 100, 2)
 
-			if self.percent_complete_method == "Task Progress" and total > 0:
-				task = frappe.qb.DocType("Task")
-				progress = (
-					frappe.qb.from_(task).select(Sum(task.progress)).where(task.project == self.name).run()
-				)[0][0]
-				self.percent_complete = flt(flt(progress) / total, 2)
-
-			if self.percent_complete_method == "Task Weight" and total > 0:
-				task = frappe.qb.DocType("Task")
-				weight_sum = (
-					frappe.qb.from_(task).select(Sum(task.task_weight)).where(task.project == self.name).run()
-				)[0][0]
-				weighted_progress = frappe.get_all(
-					"Task", filters={"project": self.name}, fields=["progress", "task_weight"]
-				)
-				pct_complete = 0
-				for row in weighted_progress:
-					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
-				self.percent_complete = flt(flt(pct_complete), 2)
+			if self.percent_complete_method in ("Task Progress", "Task Weight") and total > 0:
+				self.percent_complete = flt(self.get_task_progress(), 2)
 
 		# don't update status if it is manually set to cancelled or on hold
 		if self.status in ("Cancelled", "On hold"):
 			return
 
+		self.validate_completed_status()
 		self.status = "Completed" if self.percent_complete == 100 else "Open"
+
+	def validate_completed_status(self):
+		"""Refuse a status set to Completed by hand while the tasks are not all done."""
+		previous = self.get_doc_before_save()
+		if not previous or previous.status == "Completed" or self.status != "Completed":
+			return
+
+		if flt(self.percent_complete) < 100:
+			frappe.throw(
+				_("Project {0} is only {1} complete. Complete or cancel its tasks first.").format(
+					frappe.bold(self.name), frappe.format(self.percent_complete, {"fieldtype": "Percent"})
+				),
+				title=_("Cannot set Project to Completed"),
+			)
+
+	def get_task_progress(self) -> float:
+		"""Average task progress, weighted for Task Weight. Completed and cancelled tasks count as done."""
+		tasks = frappe.get_all(
+			"Task", filters={"project": self.name}, fields=["status", "progress", "task_weight"]
+		)
+		weights = [flt(task.task_weight) for task in tasks]
+		if self.percent_complete_method != "Task Weight" or not sum(weights):
+			weights = [1] * len(tasks)
+
+		progress = [
+			100 if task.status in ("Completed", "Cancelled") else flt(task.progress) for task in tasks
+		]
+		return sum(p * w for p, w in zip(progress, weights, strict=True)) / sum(weights)
 
 	def update_costing(self):
 		from frappe.query_builder.functions import Max, Min, Sum
@@ -596,6 +621,7 @@ def get_users_for_project(doctype: str, txt: str, searchfield: str, start: int, 
 
 @frappe.whitelist()
 def get_cost_center_name(project: str):
+	frappe.has_permission("Project", "select", project, throw=True)
 	return frappe.db.get_value("Project", project, "cost_center")
 
 
@@ -604,10 +630,16 @@ def hourly_reminder():
 	projects = get_projects_for_collect_progress("Hourly", fields)
 
 	for project in projects:
-		if get_time(nowtime()) >= get_time(project.from_time) or get_time(nowtime()) <= get_time(
-			project.to_time
-		):
+		if is_now_between(project.from_time, project.to_time):
 			send_project_update_email_to_users(project.name)
+
+
+def is_now_between(from_time, to_time) -> bool:
+	"""Whether the current time is in the window, which may cross midnight."""
+	now, from_time, to_time = get_time(nowtime()), get_time(from_time), get_time(to_time)
+	if from_time <= to_time:
+		return from_time <= now <= to_time
+	return now >= from_time or now <= to_time
 
 
 def project_status_update_reminder():
@@ -621,19 +653,16 @@ def daily_reminder():
 	projects = get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.get("daily_time_to_send"), "Daily"):
+		if allow_to_make_project_update(project.name, project.daily_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
 def twice_daily_reminder():
-	fields = ["first_email", "second_email"]
-	projects = get_projects_for_collect_progress("Twice Daily", fields)
-	fields.remove("name")
+	projects = get_projects_for_collect_progress("Twice Daily", ["first_email", "second_email"])
 
 	for project in projects:
-		for d in fields:
-			if allow_to_make_project_update(project.name, project.get(d), "Twicely"):
-				send_project_update_email_to_users(project.name)
+		if allow_to_make_project_update(project.name, project.first_email, project.second_email):
+			send_project_update_email_to_users(project.name)
 
 
 def weekly_reminder():
@@ -645,19 +674,15 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if allow_to_make_project_update(project.name, project.get("weekly_time_to_send"), "Weekly"):
+		if allow_to_make_project_update(project.name, project.weekly_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
-def allow_to_make_project_update(project, time, frequency):
-	data = frappe.get_all("Project Update", filters={"project": project, "date": today()}, pluck="name")
-
-	# len(data) > 1 condition is checked for twicely frequency
-	if data and (frequency in ["Daily", "Weekly"] or len(data) > 1):
-		return False
-
-	if get_time(nowtime()) >= get_time(time):
-		return True
+def allow_to_make_project_update(project, *times):
+	"""Whether fewer updates were made today than there are send times already passed."""
+	now = get_time(nowtime())
+	times_passed = sum(now >= get_time(time) for time in times)
+	return frappe.db.count("Project Update", {"project": project, "date": today()}) < times_passed
 
 
 @frappe.whitelist(methods=["POST"])
@@ -667,11 +692,14 @@ def create_duplicate_project(prev_doc: str | dict, project_name: str):
 
 	prev_doc = frappe.parse_json(prev_doc)
 
-	# prev_doc is caller-supplied, but the tasks below are read from the db by name
-	if source_name := prev_doc.get("name"):
-		frappe.has_permission("Project", "read", source_name, throw=True)
+	source_name = prev_doc.get("name")
+	if not source_name:
+		frappe.throw(_("Save the Project before duplicating it"))
 
-	if project_name == prev_doc.get("name"):
+	# prev_doc is caller-supplied, but the tasks below are read from the db by name
+	frappe.has_permission("Project", "read", source_name, throw=True)
+
+	if project_name == source_name:
 		frappe.throw(_("Use a name that is different from previous project name"))
 
 	# change the copied doc name to new project name
@@ -681,17 +709,35 @@ def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	project.project_name = project_name
 	project.insert()
 
-	# fetch all the task linked with the old project
-	task_list = frappe.get_all("Task", filters={"project": prev_doc.get("name")}, fields=["name"])
-
-	# Create duplicate task for all the task
-	for task in task_list:
-		task = frappe.get_doc("Task", task)
-		new_task = frappe.copy_doc(task)
-		new_task.project = project.name
-		new_task.insert()
+	copy_tasks(source_name, project.name)
 
 	project.db_set("project_template", prev_doc.get("project_template"))
+
+
+def copy_tasks(source_project: str, target_project: str):
+	"""Copy the tasks of a project, pointing parent tasks and dependencies at the copies."""
+	source_tasks = [
+		frappe.get_doc("Task", name)
+		for name in frappe.get_all("Task", filters={"project": source_project}, order_by="lft", pluck="name")
+	]
+
+	copied_names = {}
+	for source_task in source_tasks:
+		task = frappe.copy_doc(source_task)
+		task.project = target_project
+		task.parent_task = copied_names.get(task.parent_task)
+		task.set("depends_on", [])
+		copied_names[source_task.name] = task.insert().name
+
+	for source_task in source_tasks:
+		if not source_task.depends_on:
+			continue
+
+		task = frappe.get_doc("Task", copied_names[source_task.name])
+		task.set(
+			"depends_on", [{"task": copied_names.get(row.task, row.task)} for row in source_task.depends_on]
+		)
+		task.save()
 
 
 def get_projects_for_collect_progress(frequency, fields):
@@ -737,37 +783,58 @@ def send_project_update_email_to_users(project):
 
 def collect_project_status():
 	for data in frappe.get_all("Project Update", {"date": today(), "sent": 0}):
-		replies = frappe.get_all(
-			"Communication",
-			fields=["content", "text_content", "sender"],
-			filters=dict(
-				reference_doctype="Project Update",
-				reference_name=data.name,
-				communication_type="Communication",
-				sent_or_received="Received",
-			),
-			order_by="creation asc",
-		)
-
-		for d in replies:
-			doc = frappe.get_doc("Project Update", data.name)
-			user_data = frappe.db.get_values(
-				"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
-			)[0]
-
-			doc.append(
-				"users",
-				{
-					"user": user_data.name,
-					"full_name": user_data.full_name,
-					"image": user_data.user_image,
-					"project_status": frappe.utils.md_to_html(
-						EmailReplyParser.parse_reply(d.text_content) or d.content
-					),
-				},
-			)
-
+		doc = frappe.get_doc("Project Update", data.name)
+		new_replies = get_uncollected_replies(doc)
+		if new_replies:
+			for reply in new_replies:
+				doc.append("users", reply)
 			doc.save(ignore_permissions=True)
+
+
+def get_uncollected_replies(project_update):
+	collected = Counter((row.user, row.project_status) for row in project_update.users)
+	new_replies = []
+	for reply in get_project_update_replies(project_update.name):
+		key = (reply["user"], reply["project_status"])
+		if collected[key]:
+			collected[key] -= 1
+		else:
+			new_replies.append(reply)
+	return new_replies
+
+
+def get_project_update_replies(project_update):
+	replies = frappe.get_all(
+		"Communication",
+		fields=["content", "text_content", "sender"],
+		filters=dict(
+			reference_doctype="Project Update",
+			reference_name=project_update,
+			communication_type="Communication",
+			sent_or_received="Received",
+		),
+		order_by="creation asc",
+	)
+
+	users = []
+	for d in replies:
+		user_data = frappe.db.get_value(
+			"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
+		)
+		if not user_data:
+			continue
+
+		users.append(
+			{
+				"user": user_data.name,
+				"full_name": user_data.full_name,
+				"image": user_data.user_image,
+				"project_status": frappe.utils.md_to_html(
+					EmailReplyParser.parse_reply(d.text_content) or d.content
+				),
+			}
+		)
+	return users
 
 
 def send_project_status_email_to_users():
@@ -809,6 +876,7 @@ def create_kanban_board_if_not_exists(project: str):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
 	project = frappe.get_doc("Project", project)
+	project.check_permission("read")
 	if not frappe.db.exists("Kanban Board", project.project_name):
 		quick_kanban_board("Task", project.project_name, "status", project.name)
 
@@ -826,11 +894,28 @@ def set_project_status(project: str, status: str):
 	project = frappe.get_doc("Project", project)
 	project.check_permission("write")
 
-	for task in frappe.get_all("Task", dict(project=project.name)):
-		frappe.db.set_value("Task", task.name, "status", status)
+	for task_name in get_tasks_in_dependency_order(project.name, status):
+		task = frappe.get_doc("Task", task_name)
+		task.status = status
+		task.save(ignore_permissions=True)
 
 	project.status = status
 	project.save()
+
+
+def get_tasks_in_dependency_order(project: str, status: str) -> list[str]:
+	"""Project tasks not in `status`, each after the tasks it depends on."""
+	tasks = frappe.get_all("Task", filters={"project": project, "status": ["!=", status]}, pluck="name")
+	if not tasks:
+		return []
+
+	dependencies = {task: set() for task in tasks}
+	for row in frappe.get_all(
+		"Task Depends On", filters={"parenttype": "Task", "parent": ["in", tasks]}, fields=["parent", "task"]
+	):
+		dependencies[row.parent].add(row.task)
+
+	return [task for task in TopologicalSorter(dependencies).static_order() if task in dependencies]
 
 
 def get_holiday_list(company: str | None = None) -> str:

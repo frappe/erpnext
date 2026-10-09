@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:plan_name",
  "creation": "2018-02-24 11:31:23.066506",
+ "description": "What a subscription bills for, and at what price.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/subscription-plan",
  "editable_grid": 1,

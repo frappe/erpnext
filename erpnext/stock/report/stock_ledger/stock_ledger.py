@@ -13,6 +13,7 @@ from pypika.analytics import RowNumber
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -24,6 +25,9 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
 	items = get_items(filters)
+	if items == []:
+		return columns, []
+
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
 
@@ -132,7 +136,7 @@ def execute(filters=None):
 			conversion_factors.append(item_detail.conversion_factor)
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
-	return columns, data
+	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no",))
 
 
 def set_opening_row_for_inv_dimension(
@@ -521,14 +525,15 @@ def get_items(filters):
 
 	else:
 		if brand := filters.get("brand"):
-			conditions.append(item.brand == brand)
+			condition = item.brand.isin(brand) if isinstance(brand, list) else item.brand == brand
+			conditions.append(condition)
 
 		if filters.get("item_group") and (
 			condition := get_item_group_condition(filters.get("item_group"), item)
 		):
 			conditions.append(condition)
 
-	items = []
+	items = None
 	if conditions:
 		for condition in conditions:
 			query = query.where(condition)

@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
+ "description": "A bill to a customer for what you sold.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-invoice",
  "engine": "InnoDB",
@@ -414,6 +415,7 @@
    "fieldtype": "Check",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -422,6 +424,7 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Payment Due Date",
    "no_copy": 1,

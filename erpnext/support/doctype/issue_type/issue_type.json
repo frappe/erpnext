@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2017-10-06 12:53:34.714153",
+ "description": "A grouping of issues, like billing or technical.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/issue-type-and-priority",

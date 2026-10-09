@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:quality_procedure_name",
  "creation": "2018-10-06 00:06:29.756804",
+ "description": "The steps of a process you follow to keep quality in check.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_procedure",
  "editable_grid": 1,
@@ -118,7 +119,7 @@
    "link_fieldname": "procedure"
   }
  ],
- "modified": "2024-03-27 13:10:29.849511",
+ "modified": "2026-10-05 14:52:56.725983",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",
@@ -145,9 +146,15 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Desk User",
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Desk User"
   }
  ],
  "sort_field": "creation",

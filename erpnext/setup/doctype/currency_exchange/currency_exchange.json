@@ -6,7 +6,7 @@
  "beta": 0, 
  "creation": "2013-06-20 15:40:29", 
  "custom": 0, 
- "description": "Specify Exchange Rate to convert one currency into another", 
+ "description": "The rate to convert one currency into another.",
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 

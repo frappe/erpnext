@@ -77,7 +77,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 		).insert()
 
 		# create batch
-		frappe.get_doc(
+		batch = frappe.get_doc(
 			{
 				"doctype": "Batch",
 				"batch_id": "BATCH01",
@@ -92,7 +92,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 				"price_list": "Standard Selling",
 				"item_code": item.item_code,
 				"price_list_rate": 50,
-				"batch_no": "BATCH01",
+				"batch_no": batch.name,
 			}
 		).insert()
 
@@ -104,7 +104,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 			qty=100,
 			rate=100,
-			batch_no="BATCH01",
+			batch_no=batch.name,
 		)
 
 		# creating sales order just to create delivery note from it
@@ -122,7 +122,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		# Test 2 : On saving the DN, item's batch will be fetched and rate will be updated from Item Price
 		dn.save()
-		self.assertEqual(dn.items[0].batch_no, "BATCH01")
+		self.assertEqual(dn.items[0].batch_no, batch.name)
 		self.assertEqual(dn.items[0].rate, 50)
 
 	def test_maintain_same_rate_keeps_source_rate_on_refetch(self):
@@ -616,7 +616,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 	def test_serial_nos_picked_across_batches_when_no_batch_covers_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_serial_nos_from_bundle,
+			get_serial_numbers_from_bundle,
 		)
 
 		item_code, batches = self.make_batched_item_with_stock(
@@ -637,7 +637,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 			)
 			dn.reload()
 			self.assertEqual(
-				get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
+				get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
 			)
 
 	def test_same_document_rows_reduce_batch_by_stock_qty(self):
@@ -652,3 +652,80 @@ class TestGetItemDetail(ERPNextTestSuite):
 		):
 			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
 			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
+
+	def test_price_not_uom_dependent_is_applied_to_item_rows(self):
+		"""An Item Price saved for the stock UOM is scaled to the row UOM unless the Price List
+		is marked Price Not UOM Dependent."""
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100)
+
+		for not_uom_dependent, expected_rate in ((0, 1000), (1, 100)):
+			with self.subTest(price_not_uom_dependent=not_uom_dependent):
+				price_list.price_not_uom_dependent = not_uom_dependent
+				price_list.save()
+				details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
+				self.assertEqual(details.price_list_rate, expected_rate)
+
+	def test_fallback_price_list_uses_its_own_uom_setting(self):
+		item_code = self.make_multi_uom_item()
+		selected_list = self.make_selling_price_list("_Test UOM Price List", not_uom_dependent=1)
+		default_list = self.make_selling_price_list("_Test UOM Default Price List", not_uom_dependent=0)
+		self.make_item_price(item_code, default_list.name, 100)
+
+		with self.change_settings(
+			"Selling Settings",
+			{"fallback_to_default_price_list": 1, "selling_price_list": default_list.name},
+		):
+			details = get_item_details(self.get_uom_rate_context(item_code, selected_list.name))
+
+		self.assertEqual(details.price_list_rate, 1000)
+
+	def make_multi_uom_item(self) -> str:
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		return make_item(
+			properties={
+				"stock_uom": "_Test UOM",
+				"uoms": [
+					{"uom": "_Test UOM", "conversion_factor": 1},
+					{"uom": "_Test UOM 1", "conversion_factor": 10},
+				],
+			}
+		).name
+
+	def make_selling_price_list(self, name: str, not_uom_dependent: int = 0):
+		price_list = frappe.get_doc(
+			{"doctype": "Price List", "price_list_name": name, "currency": "INR", "selling": 1}
+		).insert(ignore_if_duplicate=True)
+		price_list.price_not_uom_dependent = not_uom_dependent
+		return price_list.save()
+
+	def make_item_price(self, item_code: str, price_list: str, rate: float) -> None:
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": price_list,
+				"price_list_rate": rate,
+			}
+		).insert()
+
+	def get_uom_rate_context(self, item_code: str, price_list: str) -> frappe._dict:
+		return frappe._dict(
+			{
+				"item_code": item_code,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"price_list": price_list,
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"doctype": "Sales Order",
+				"uom": "_Test UOM 1",
+				"conversion_factor": 10,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)

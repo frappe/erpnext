@@ -14,10 +14,13 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
-from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.accounts.services.taxes import _get_taxes_and_charges
+from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def get_invoiced_qty_map(delivery_note: str) -> dict:
@@ -79,6 +82,7 @@ def make_sales_invoice(
 		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
+		target.update_stock = 0
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
@@ -243,7 +247,9 @@ def make_installation_note(
 ):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
-		target.serial_no = obj.serial_no
+		serial_ids = get_serial_batch_list_from_item(obj)[0]
+		target.serial_no = "\n".join(SerialBatchIdentity("Serial No").get_numbers(obj.item_code, serial_ids))
+		target.serial_and_batch_bundle = None
 
 	doclist = get_mapped_doc(
 		"Delivery Note",
@@ -451,7 +457,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 			master_doctype = "Sales Taxes and Charges Template"
 
 		if not target.get("taxes") and target.get("taxes_and_charges"):
-			for tax in get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
+			for tax in _get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
 				target.append("taxes", tax)
 
 		if not target.get("items"):

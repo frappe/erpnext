@@ -147,6 +147,7 @@ class PurchaseReceipt(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transporter_name: DF.Data | None
+		use_transaction_date_exchange_rate: DF.Check
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -178,6 +179,11 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_field": "per_received",
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
+				"second_source_dt": "Purchase Invoice Item",
+				"second_source_field": "stock_qty",
+				"second_join_field": "material_request_item",
+				"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 				"percent_join_field": "material_request",
 				"validate_qty": False,
 			},
@@ -237,10 +243,10 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
-			if items := apply_putaway_rule(self.doctype, self.get("items"), self.company):
+			if items := _apply_putaway_rule(self.doctype, self.get("items"), self.company):
 				self.items = items
 
 	def validate(self):
@@ -313,6 +319,7 @@ class PurchaseReceipt(BuyingController):
 	def po_required(self):
 		if (
 			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_return
 			and not self.is_internal_transfer()
 		):
 			for d in self.get("items"):

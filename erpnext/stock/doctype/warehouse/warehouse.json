@@ -3,7 +3,7 @@
  "allow_import": 1,
  "creation": "2023-05-29 13:02:17.121296",
  "default_view": "Tree",
- "description": "A logical Warehouse against which stock entries are made.",
+ "description": "A place where you keep stock.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/warehouse",
@@ -65,6 +65,7 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Group Warehouse"
   },
@@ -202,6 +203,7 @@
    "fieldname": "parent_warehouse",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Parent Warehouse",
    "options": "Warehouse",
    "search_index": 1
@@ -233,6 +235,7 @@
    "depends_on": "eval:(!doc.is_group);",
    "fieldname": "warehouse_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Warehouse Type",
    "options": "Warehouse Type"
   },
@@ -287,7 +290,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-08-21 23:11:51.906705",
+ "modified": "2026-10-09 05:32:49.882340",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -313,6 +316,13 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager"
   },
   {
    "email": 1,

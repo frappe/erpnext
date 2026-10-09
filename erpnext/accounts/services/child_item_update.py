@@ -10,6 +10,7 @@ from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.buying.utils import update_last_purchase_rate
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	get_bin_details,
@@ -47,6 +48,7 @@ class ChildItemUpdater:
 		any_conversion_factor_changed = False
 
 		self._check_permissions("write")
+		self._validate_changed_uoms(data)
 
 		if self.parent_doctype == "Quotation":
 			self._transacted_stock_qty = get_ordered_items(self.parent.name)
@@ -200,6 +202,10 @@ class ChildItemUpdater:
 			parent.update_prevdoc_status("submit")
 			parent.update_delivery_status()
 
+		elif self.parent_doctype == "Supplier Quotation":
+			parent.update_rfq_supplier_status(parent.docstatus.is_submitted())
+			parent.set_status(update=True)
+
 		parent.reload()
 		self._validate_workflow()
 
@@ -255,6 +261,12 @@ class ChildItemUpdater:
 				),
 				title=_("Insufficient Permissions"),
 			)
+
+	def _validate_changed_uoms(self, data: list) -> None:
+		current_uoms = {row.name: row.uom for row in self.parent.get(self.child_docname)}
+		validate_item_uoms(
+			[frappe._dict(d) for d in data if d.get("uom") != current_uoms.get(d.get("docname"))]
+		)
 
 	def _get_new_child_item(self, item_row) -> "frappe.model.document.Document":
 		child_doctype = self.parent_doctype + " Item"

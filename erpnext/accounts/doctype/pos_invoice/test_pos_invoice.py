@@ -4,7 +4,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date
+from frappe.utils import add_days, add_to_date, nowdate
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -19,6 +19,13 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_not_found,
+	assert_refused,
+	assert_refused_for_names,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -413,6 +420,54 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(pos_inv.status, "Paid")
 
 		set_allow_partial_payment(self.pos_profile, 0)
+
+	def test_discounted_invoice_status(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos_inv = create_pos_invoice(
+			pos_profile=self.pos_profile.name, rate=100, is_discounted=1, do_not_save=1
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 90})
+		pos_inv.insert()
+
+		# Seed the lookup records because Invoice Discounting only accepts Sales Invoice links.
+		discounting = frappe.get_doc(
+			doctype="Invoice Discounting",
+			name=frappe.generate_hash(length=10),
+			company=pos_inv.company,
+			docstatus=1,
+			status="Disbursed",
+		)
+		discounting.db_insert()
+		frappe.get_doc(
+			doctype="Discounted Invoice",
+			parent=discounting.name,
+			parenttype=discounting.doctype,
+			parentfield="invoices",
+			sales_invoice=pos_inv.name,
+			docstatus=1,
+		).db_insert()
+
+		pos_inv.submit()
+		pos_inv.reload()
+		self.assertEqual(pos_inv.docstatus, 1)
+		self.assertEqual(pos_inv.outstanding_amount, 10)
+		self.assertEqual(pos_inv.status, "Partly Paid and Discounted")
+
+		for outstanding_amount, due_date, expected_status in (
+			(10, add_days(nowdate(), -1), "Overdue"),
+			(10, nowdate(), "Partly Paid"),
+			(100, nowdate(), "Unpaid"),
+		):
+			with self.subTest(status=expected_status):
+				pos_inv.outstanding_amount = outstanding_amount
+				pos_inv.due_date = due_date
+				discounting.db_set("status", "Disbursed")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, f"{expected_status} and Discounted")
+
+				discounting.db_set("status", "Settled")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, expected_status)
 
 	def test_multi_payment_for_partly_paid_invoices(self):
 		set_allow_partial_payment(self.pos_profile, 1)
@@ -818,7 +873,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
+		batch_no = create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
 		item = frappe.get_doc("Item", "_BATCH ITEM")
 
 		se = make_stock_entry(
@@ -826,12 +881,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			item_code="_BATCH ITEM",
 			qty=2,
 			basic_rate=100,
-			batch_no="TestBatch 01",
+			batch_no=batch_no,
 		)
 
-		pos_inv1 = create_pos_invoice(
-			item=item.name, rate=300, qty=1, do_not_submit=1, batch_no="TestBatch 01"
-		)
+		pos_inv1 = create_pos_invoice(item=item.name, rate=300, qty=1, do_not_submit=1, batch_no=batch_no)
 		pos_inv1.append(
 			"payments",
 			{"mode_of_payment": "Cash", "amount": 300},
@@ -849,7 +902,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 				"voucher_no": pos_inv2.name,
 				"qty": 2,
 				"avg_rate": 300,
-				"batches": frappe._dict({"TestBatch 01": 2}),
+				"batches": frappe._dict({batch_no: 2}),
 				"type_of_transaction": "Outward",
 				"company": pos_inv2.company,
 			}
@@ -1007,6 +1060,37 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
 
 		frappe.set_user("test@example.com")
+
+	def test_make_merge_log_refuses_empty_and_malformed_names(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
+
+		with as_user(make_fenced_user("pos-names@example.com", ["Sales User"])):
+			for value in ("", None):
+				assert_refused(self, make_merge_log, [{"name": value}])
+			for value in (0, False, {"name": ["like", "%"]}, ["like", "%"]):
+				assert_not_found(self, make_merge_log, [{"name": value}])
+
+	def test_make_merge_log_fences_each_invoice(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
+
+		invoice = create_pos_invoice(rate=100, do_not_submit=1)
+		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		invoice.save()
+
+		def merge_log_kwargs(name):
+			return {"invoices": [{"name": name}]}
+
+		outside = make_fenced_user(
+			"pos-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer 1")]
+		)
+		with as_user(outside):
+			assert_refused_for_names(
+				self, make_merge_log, merge_log_kwargs, [invoice.name], caller_supplied=True
+			)
+		inside = make_fenced_user("pos-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer")])
+		with as_user(inside):
+			merge_log = make_merge_log([{"name": invoice.name}])
+		self.assertEqual(merge_log["pos_invoices"][0]["pos_invoice"], invoice.name)
 
 
 def create_pos_invoice(**args):

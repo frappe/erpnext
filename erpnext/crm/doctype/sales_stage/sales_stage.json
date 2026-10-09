@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:stage_name",
  "creation": "2018-10-01 09:28:16.399518",
+ "description": "A step in your sales process, like qualification or negotiation.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales_stage",
  "editable_grid": 1,

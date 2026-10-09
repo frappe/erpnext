@@ -18,6 +18,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def get_invoiced_qty_map(purchase_receipt: str) -> dict:
@@ -199,7 +200,9 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 		if source_doc.serial_and_batch_bundle:
 			serial_nos = get_serial_nos_from_bundle(source_doc.serial_and_batch_bundle)
 			if serial_nos:
-				serial_nos = "\n".join(serial_nos)
+				serial_nos = "\n".join(
+					SerialBatchIdentity("Serial No").get_numbers(source_doc.item_code, serial_nos)
+				)
 
 			batches = get_batches_from_bundle(source_doc.serial_and_batch_bundle)
 			if batches:

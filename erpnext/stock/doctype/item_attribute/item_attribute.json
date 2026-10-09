@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:attribute_name",
  "creation": "2014-09-26 03:49:54.899170",
+ "description": "A property item variants differ by, like size or colour.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-attribute",

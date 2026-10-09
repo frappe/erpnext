@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
+ "description": "Settings for a point of sale, like its warehouse, price list and payment methods.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pos-profile",
  "engine": "InnoDB",

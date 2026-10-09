@@ -4,9 +4,11 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters=None):
-	return get_columns(filters), get_data(filters)
+	return prepare_serial_batch_report(get_columns(filters), get_data(filters))
 
 
 def get_data(report_filters):
@@ -62,7 +64,7 @@ def append_filters(query, report_filters, operations, job_card):
 	):
 		if report_filters.get(field):
 			if field == "serial_no":
-				query = query.where(job_card[field].like(f"%{report_filters.get(field)}%"))
+				query = filter_by_serial_no(query, job_card, report_filters.get(field))
 			elif field == "operation":
 				query = query.where(job_card[field].isin(operations))
 			else:
@@ -78,6 +80,14 @@ def append_filters(query, report_filters, operations, job_card):
 			query = query.where(job_card_time_log.to_time <= report_filters.get("to_date"))
 
 	return query
+
+
+def filter_by_serial_no(query, job_card, serial_id):
+	serial = frappe.db.get_value("Serial No", serial_id, ["serial_no", "item_code"], as_dict=True)
+	serial = serial or frappe._dict()
+	return query.where(job_card.serial_no.like(f"%{serial.serial_no}%")).where(
+		job_card.production_item == serial.item_code
+	)
 
 
 def get_columns(filters):
@@ -112,7 +122,13 @@ def get_columns(filters):
 			"width": "100",
 		},
 		{"label": _("Serial No"), "fieldtype": "Data", "fieldname": "serial_no", "width": "100"},
-		{"label": _("Batch No"), "fieldtype": "Data", "fieldname": "batch_no", "width": "100"},
+		{
+			"label": _("Batch No"),
+			"fieldtype": "Link",
+			"fieldname": "batch_no",
+			"options": "Batch",
+			"width": "100",
+		},
 		{
 			"label": _("Workstation"),
 			"fieldtype": "Link",

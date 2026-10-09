@@ -37,6 +37,7 @@ class StockSettings(Document):
 		auto_create_serial_and_batch_bundle_for_outward: DF.Check
 		auto_indent: DF.Check
 		auto_insert_price_list_rate_if_missing: DF.Check
+		auto_map_raw_materials_to_finished_goods: DF.Check
 		auto_reserve_serial_and_batch: DF.Check
 		auto_reserve_stock: DF.Check
 		auto_reserve_stock_for_sales_order_on_purchase: DF.Check

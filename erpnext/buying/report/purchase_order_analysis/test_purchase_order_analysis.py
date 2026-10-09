@@ -4,8 +4,11 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
@@ -56,9 +59,6 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 		return [row for row in data if row["item_code"] == ITEM_CODE]
 
 	def test_report_executes_and_lists_po(self):
-		# get_data groups by (Purchase Order Item, Purchase Order) while selecting other parent
-		# columns; this exercises that GROUP BY so the report stays valid on Postgres (which rejects
-		# selecting non-grouped columns).
 		po = create_purchase_order(company="_Test Company")
 
 		result = execute(self.get_filters())
@@ -99,6 +99,29 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 		fieldnames = [column["fieldname"] for column in columns]
 		self.assertIn("uom", fieldnames)
 		self.assertNotIn("purchase_order", fieldnames)
+
+	def test_billed_qty_leaves_out_debit_notes_that_keep_the_order_billed(self):
+		po = self.make_purchase_order(qty=10)
+		pi = make_purchase_invoice(po.name)
+		pi.items[0].qty = 6
+		pi.insert().submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -2
+		debit_note.insert().submit()
+
+		row = next(row for row in execute(self.get_filters())[1] if row["purchase_order"] == po.name)
+		self.assertEqual(row["billed_qty"], 6)
+		self.assertEqual(row["billed_amount"], 3000)
+
+	def test_closed_order_has_nothing_pending(self):
+		po = self.make_purchase_order(qty=10)
+		create_pr_against_po(po.name, received_qty=4)
+		po.reload()
+		po.update_status("Closed")
+
+		row = next(row for row in execute(self.get_filters())[1] if row["purchase_order"] == po.name)
+		self.assertEqual((row["pending_qty"], row["qty_to_bill"], row["pending_amount"]), (0, 0, 0))
 
 	def test_group_by_item_keeps_each_uom_apart(self):
 		self.make_purchase_order(qty=10)
@@ -148,3 +171,19 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 	def test_company_is_mandatory_without_a_default(self):
 		with patch("erpnext.get_default_company", return_value=None):
 			self.assertRaises(frappe.ValidationError, execute, self.get_filters(company=None))
+
+	def test_restricted_user_sees_only_permitted_suppliers(self):
+		create_item(ITEM_CODE)
+		permitted = create_purchase_order(item_code=ITEM_CODE, supplier="_Test Supplier", qty=10, rate=100)
+		other = create_purchase_order(item_code=ITEM_CODE, supplier="_Test Supplier 1", qty=4, rate=250)
+		user = create_user("po_analysis_restricted@example.com", "Purchase User").name
+		add_user_permission("Supplier", "_Test Supplier", user)
+
+		with self.set_user(user):
+			_columns, data, _message, chart = execute(
+				self.get_filters(group_by_item=1, name=[permitted.name, other.name])
+			)
+
+		row = self.get_item_rows(data)[0]
+		self.assertEqual((row["qty"], row["amount"]), (10, 1000))
+		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), 1000)

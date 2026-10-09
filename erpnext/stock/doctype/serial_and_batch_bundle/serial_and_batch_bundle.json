@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "hash",
  "creation": "2023-08-11 17:22:12.907518",
+ "description": "The serial numbers and batches moved in a transaction.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/serial-and-batch-bundle",
  "editable_grid": 1,
@@ -254,7 +255,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:49.103080",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
@@ -405,6 +406,10 @@
   },
   {
    "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
    "select": 1
   }
  ],

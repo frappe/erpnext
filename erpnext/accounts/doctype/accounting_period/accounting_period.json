@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:period_name",
  "creation": "2018-04-13 18:50:14.672323",
+ "description": "A date range you can close so no one posts into it.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounting-period",
  "editable_grid": 1,

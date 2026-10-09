@@ -28,7 +28,7 @@ class PartyImportProvider(ImportProvider):
 				{
 					"fieldname": "contacts",
 					"label": _("Contact"),
-					"fields": _doctype_docfields("Contact"),
+					"fields": _contact_docfields(),
 				},
 				{
 					"fieldname": "addresses",
@@ -200,6 +200,18 @@ def _doctype_docfields(doctype: str) -> list[dict]:
 		if df.fieldname in ("lft", "rgt") or df.get("is_virtual"):
 			continue
 		fields.append(df.as_dict())
+	return fields
+
+
+def _contact_docfields() -> list[dict]:
+	"""Contact's fields, with email and mobile ticked in the template by default.
+
+	A Contact keeps these in child tables and clears the fields on save, so the Contact DocType
+	can't flag them; this import turns them into those rows, so here they are worth a column."""
+	fields = _doctype_docfields("Contact")
+	for df in fields:
+		if df["fieldname"] in ("email_id", "mobile_no"):
+			df["in_import_template"] = 1
 	return fields
 
 
