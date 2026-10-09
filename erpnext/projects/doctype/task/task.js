@@ -43,6 +43,8 @@ frappe.ui.form.on("Task", {
 	},
 
 	is_group: function (frm) {
+		if (frm.is_new()) return;
+
 		frappe.call({
 			method: "erpnext.projects.doctype.task.task.check_if_child_exists",
 			args: {

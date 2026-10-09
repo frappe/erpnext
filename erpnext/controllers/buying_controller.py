@@ -22,6 +22,7 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import (
@@ -372,6 +373,20 @@ class BuyingController(SubcontractingController):
 				taxes = _get_taxes_and_charges("Purchase Taxes and Charges Template", self.taxes_and_charges)
 				for tax in taxes:
 					self.append("taxes", tax)
+
+	def set_transaction_date_exchange_rate(self):
+		"""Replace the exchange rate mapped from a Purchase Order with the posting date rate."""
+		if not (
+			self.currency
+			and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
+			and not any(item.get("purchase_receipt") or item.get("purchase_invoice") for item in self.items)
+		):
+			return
+
+		self.use_transaction_date_exchange_rate = 1
+		self.conversion_rate = get_exchange_rate(
+			self.currency, self.company_currency, self.posting_date, "for_buying"
+		)
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
@@ -1210,11 +1225,7 @@ class BuyingController(SubcontractingController):
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			self.process_fixed_asset()
 
-		if self.doctype in [
-			"Purchase Order",
-			"Purchase Receipt",
-			"Purchase Invoice",
-		] and not frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+		if self.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
@@ -1223,11 +1234,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.doctype in [
-			"Purchase Order",
-			"Purchase Receipt",
-			"Purchase Invoice",
-		] and not frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+		if self.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 			update_last_purchase_rate(self, is_submit=0)
 
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:

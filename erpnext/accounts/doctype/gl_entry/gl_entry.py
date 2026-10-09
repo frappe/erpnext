@@ -303,6 +303,9 @@ class GLEntry(Document):
 		default_currency, reporting_currency = frappe.get_cached_value(
 			"Company", self.company, ["default_currency", "reporting_currency"]
 		)
+		if not reporting_currency:
+			return
+
 		transaction_date = self.transaction_date or self.posting_date
 		self.reporting_currency_exchange_rate = get_exchange_rate(
 			default_currency, reporting_currency, transaction_date

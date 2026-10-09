@@ -10,7 +10,7 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
-from frappe.utils import get_link_to_form
+from frappe.utils import get_link_to_form, getdate, nowdate
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
@@ -100,6 +100,14 @@ class Supplier(TransactionBase):
 		elif self.on_hold and not self.hold_type:
 			self.hold_type = "All"
 
+	def is_blocked_for(self, hold_type: str) -> bool:
+		"""Whether transactions of `hold_type` ("Invoices", "Payments" or "All") are on hold today."""
+		return bool(
+			self.on_hold
+			and self.hold_type in ("All", hold_type)
+			and (not self.release_date or getdate(nowdate()) < getdate(self.release_date))
+		)
+
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
 		self.set_onload("dashboard_info", info)
@@ -152,8 +160,33 @@ class Supplier(TransactionBase):
 
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
+		self.validate_primary_contact_and_address()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+
+	def validate_primary_contact_and_address(self):
+		for fieldname, link_doctype in (
+			("supplier_primary_contact", "Contact"),
+			("supplier_primary_address", "Address"),
+		):
+			name = self.get(fieldname)
+			if not name or not self.has_value_changed(fieldname):
+				continue
+
+			if not frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": link_doctype,
+					"parent": name,
+					"link_doctype": "Supplier",
+					"link_name": self.name,
+				},
+			):
+				frappe.throw(
+					_("{0} {1} is not linked to Supplier {2}").format(
+						_(link_doctype), frappe.bold(name), frappe.bold(self.name)
+					)
+				)
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
@@ -174,11 +207,15 @@ class Supplier(TransactionBase):
 		if not self.is_internal_supplier:
 			self.represents_company = ""
 
+		if self.disabled:
+			return
+
 		internal_supplier = frappe.db.get_value(
 			"Supplier",
 			{
 				"is_internal_supplier": 1,
 				"represents_company": self.represents_company,
+				"disabled": 0,
 				"name": ("!=", self.name),
 			},
 			"name",

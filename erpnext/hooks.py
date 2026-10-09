@@ -342,6 +342,7 @@ sounds = [
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
 permission_query_conditions = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
@@ -445,6 +446,9 @@ doc_events = {
 	},
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
+	},
+	"Company": {
+		"after_rename": "erpnext.regional.rename_vat_settings",
 	},
 	"Address": {
 		"validate": [
