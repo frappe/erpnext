@@ -123,6 +123,7 @@ class TestAssetDepreciationsAndBalancesReport(ERPNextTestSuite):
 		)
 		post_depreciation_entries(date="2021-01-01")
 		scrap_asset(asset.name, "2021-06-30")
+
 		restore_asset(asset.name)
 
 		row = get_asset_row(asset.name, add_days(today(), 1), add_days(today(), 30))
@@ -162,6 +163,43 @@ class TestAssetDepreciationsAndBalancesReport(ERPNextTestSuite):
 			sum(sign * row[fieldname] for sign, fieldname in zip(signs, cost_columns, strict=True)),
 			row.value_as_on_to_date,
 		)
+
+	def test_value_adjustment_of_asset_disposed_in_the_period_is_shown(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-01-01",
+			depreciation_start_date="2020-12-31",
+			total_number_of_depreciations=10,
+			submit=1,
+		)
+		post_depreciation_entries(date="2021-01-01")
+		make_asset_value_adjustment(
+			asset=asset.name, date="2021-01-15", current_asset_value=90000, new_asset_value=100000
+		).submit()
+		category_row = get_category_row("2021-01-01", "2021-06-30")
+		scrap_asset(asset.name, "2021-06-30")
+
+		row = get_asset_row(asset.name, "2021-01-01", "2021-06-30")
+		self.assertEqual(row.adjustment_during_period, 10000)
+		self.assertEqual(row.value_of_scrapped_asset, 110000)
+		self.assertEqual(row.value_as_on_to_date, 0)
+
+		scrapped_category_row = get_category_row("2021-01-01", "2021-06-30")
+		self.assertEqual(
+			scrapped_category_row.adjustment_during_period, category_row.adjustment_during_period
+		)
+		self.assertEqual(scrapped_category_row.value_as_on_to_date, category_row.value_as_on_to_date - 110000)
+
+
+def get_category_row(from_date: str, to_date: str) -> frappe._dict:
+	filters = frappe._dict(
+		company="_Test Company",
+		from_date=from_date,
+		to_date=to_date,
+		group_by="Asset Category",
+		asset_category="Computers",
+	)
+	return execute(filters)[1][0]
 
 
 def get_asset_row(asset: str, from_date: str, to_date: str, **filters) -> frappe._dict:
