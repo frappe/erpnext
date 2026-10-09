@@ -162,7 +162,7 @@
 									{%
 										const sup = suppliers[s];
 										const q = quote_map[item.item_code + ":::" + sup];
-										const is_lowest = q && min_rates[item.item_code] !== undefined && q.rate === min_rates[item.item_code];
+										const is_lowest = q && min_rates[item.item_code] !== undefined && Math.abs(q.converted_rate - min_rates[item.item_code]) < 0.0001;
 									%}
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
@@ -171,15 +171,19 @@
 											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
-													<span>{{ q.qty || item.qty || "" }} {{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
+													<span>{{ item.qty || q.qty || "" }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
+													<span>{{ frappe.utils.escape_html(item.uom || q.uom || "") }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.rate, q.currency) }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
-													<span>{{ format_currency(q.amount, q.currency) }}</span>
+													<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
@@ -204,15 +208,14 @@
 									{%
 										const sup = suppliers[s];
 										const total = supplier_totals && supplier_totals[sup];
-										const curr = supplier_currencies && supplier_currencies[sup];
-										const is_cheapest = total !== undefined && min_supplier_total !== null && total === min_supplier_total;
+										const is_cheapest = total !== undefined && min_supplier_total !== null && Math.abs(total - min_supplier_total) < 0.0001;
 									%}
 									{% if (total === undefined) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 12px 18px; font-size: 13px;">-</td>
 									{% } else { %}
 										<td class="text-right font-weight-bold" style="text-align: right; vertical-align: middle; padding: 12px 18px; font-size: 13px;">
 											<span class="{% if (is_cheapest) { %}text-ink-green-7 font-weight-bold{% } %}">
-												{{ format_currency(total, curr) }}
+												{{ format_currency(total, company_currency) }}
 											</span>
 										</td>
 									{% } %}
@@ -244,7 +247,7 @@
 									{%
 										const item = items[it];
 										const q = quote_map[item.item_code + ":::" + sup];
-										const is_lowest = q && min_rates[item.item_code] !== undefined && q.rate === min_rates[item.item_code];
+										const is_lowest = q && min_rates[item.item_code] !== undefined && Math.abs(q.converted_rate - min_rates[item.item_code]) < 0.0001;
 									%}
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
@@ -253,15 +256,19 @@
 											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
-													<span>{{ q.qty || item.qty || "" }} {{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
+													<span>{{ item.qty || q.qty || "" }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
+													<span>{{ frappe.utils.escape_html(item.uom || q.uom || "") }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.rate, q.currency) }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
-													<span>{{ format_currency(q.amount, q.currency) }}</span>
+													<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
 												</div>
 												<div class="flex justify-between items-center mb-2">
 													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
