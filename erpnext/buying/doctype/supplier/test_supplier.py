@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.utils import nowdate
 
 from erpnext.accounts.party import get_due_date
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
@@ -102,6 +103,102 @@ class TestSupplier(ERPNextTestSuite):
 		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
 
 		po.save()
+
+	def test_disabled_internal_supplier_does_not_block_new_one(self):
+		def make_internal_supplier():
+			supplier = frappe.new_doc("Supplier")
+			supplier.update(
+				{
+					"supplier_name": frappe.generate_hash(),
+					"supplier_group": "Services",
+					"is_internal_supplier": 1,
+					"represents_company": "_Test Company 7",
+					"companies": [{"company": "_Test Company 7"}],
+				}
+			)
+			return supplier.insert()
+
+		old_supplier = make_internal_supplier()
+		self.assertRaises(frappe.ValidationError, make_internal_supplier)
+
+		old_supplier.disabled = 1
+		old_supplier.save()
+		make_internal_supplier()
+		old_supplier.save()
+
+	def test_primary_contact_must_be_linked_to_supplier(self):
+		other_supplier = create_supplier()
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": frappe.generate_hash(),
+				"links": [{"link_doctype": "Supplier", "link_name": other_supplier.name}],
+			}
+		).insert()
+
+		supplier = create_supplier()
+		supplier.supplier_primary_contact = contact.name
+		self.assertRaises(frappe.ValidationError, supplier.save)
+
+		contact.append("links", {"link_doctype": "Supplier", "link_name": supplier.name})
+		contact.save()
+		supplier.reload()
+		supplier.supplier_primary_contact = contact.name
+		supplier.save()
+
+	def test_party_account_must_be_payable(self):
+		self.assertRaises(frappe.ValidationError, create_supplier, party_account="Debtors - _TC")
+		create_supplier(party_account="Creditors - _TC")
+
+	def test_hold_all_blocks_receipts_and_quotations(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		supplier = create_supplier()
+		receipt = make_purchase_receipt(supplier=supplier.name)
+		supplier.update({"on_hold": 1, "hold_type": "All"})
+		supplier.save()
+
+		quotation = {"company": "_Test Company", "transaction_date": nowdate()}
+		item = {"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+		rfq_item = {**item, "uom": "_Test UOM", "conversion_factor": 1, "schedule_date": nowdate()}
+		documents = [
+			lambda: make_purchase_receipt(supplier=supplier.name),
+			frappe.get_doc(
+				{"doctype": "Supplier Quotation", "supplier": supplier.name, "items": [item], **quotation}
+			).insert,
+			frappe.get_doc(
+				{
+					"doctype": "Request for Quotation",
+					"message_for_supplier": "Please quote",
+					"suppliers": [{"supplier": supplier.name}],
+					"items": [rfq_item],
+					**quotation,
+				}
+			).insert,
+		]
+		for make_document in documents:
+			self.assertRaisesRegex(frappe.ValidationError, "is blocked", make_document)
+
+		make_purchase_return(receipt.name).submit()
+
+	def test_hold_payments_blocks_bank_and_cash_journal_entries(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		supplier = create_supplier()
+		supplier.update({"on_hold": 1, "hold_type": "Payments"})
+		supplier.save()
+
+		def make_supplier_entry(contra_account, amount=100):
+			journal_entry = make_journal_entry("Creditors - _TC", contra_account, amount, save=False)
+			journal_entry.accounts[0].update({"party_type": "Supplier", "party": supplier.name})
+			return journal_entry
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is blocked", make_supplier_entry("_Test Bank - _TC").insert
+		)
+		make_supplier_entry("_Test Account Cost for Goods Sold - _TC").insert()
+		make_supplier_entry("_Test Bank - _TC", amount=-100).insert()
 
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType

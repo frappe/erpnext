@@ -7,7 +7,7 @@
 				{{ product_image(d.image) }}
 			{% else %}
 				<div class="website-image h-100 w-100" style="background-color:var(--gray-100);text-align: center;line-height: 3.6;">
-					{{ frappe.utils.get_abbr(d.item_name)}}
+					{{ frappe.utils.get_abbr(d.item_name or d.item_code) }}
 				</div>
 			{% endif %}
 		</div>

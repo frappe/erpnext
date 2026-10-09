@@ -3,7 +3,7 @@
 
 import frappe
 
-from erpnext.templates.utils import get_customer_from_contact_email
+from erpnext.templates.utils import get_customer_from_contact_email, send_message
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -39,3 +39,18 @@ class TestTemplateUtils(ERPNextTestSuite):
 		matched = get_customer_from_contact_email("case.test@example.com")
 		self.assertTrue(matched, "Contact email lookup found no Customer for a case-differing sender")
 		self.assertEqual(matched[0][0], customer_name)
+
+	def test_contact_us_lead_from_a_named_guest_sender(self):
+		frappe.db.set_single_value("CRM Settings", "enable_opportunity_creation_from_contact_us", 1)
+		self.addCleanup(frappe.db.set_default, "company", frappe.db.get_default("company"))
+		frappe.db.set_default("company", "_Test Company")
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user("Guest")
+		send_message("Ravi Kumar <_test_contact_us_ravi@example.com>", "Need a quote")
+		frappe.set_user("Administrator")
+
+		lead = frappe.db.get_value(
+			"Lead", {"email_id": "_test_contact_us_ravi@example.com"}, ["name", "lead_owner"], as_dict=True
+		)
+		self.assertTrue(lead)
+		self.assertFalse(lead.lead_owner)

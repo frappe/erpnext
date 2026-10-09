@@ -47,16 +47,17 @@ def get_timezones():
 	return zoneinfo.available_timezones()
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; returns free slots only, booking must be enabled
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date: str, timezone: str):
 	# Convert query to local timezones
 	handle_appointment_booking_disabled()
-	format_string = "%Y-%m-%d %H:%M:%S"
-	query_start_time = datetime.datetime.strptime(date + " 00:00:00", format_string)
-	query_end_time = datetime.datetime.strptime(date + " 23:59:59", format_string)
+	validate_timezone(timezone)
+	query_start_time = parse_datetime(date, "00:00:00")
+	query_end_time = parse_datetime(date, "23:59:59")
 	query_start_time = convert_to_system_timezone(timezone, query_start_time)
 	query_end_time = convert_to_system_timezone(timezone, query_end_time)
-	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
+	now = convert_to_guest_timezone(timezone, frappe.utils.now_datetime())
 
 	# Database queries
 	settings = frappe.get_single_value(
@@ -74,7 +75,8 @@ def get_appointment_slots(date: str, timezone: str):
 	for timeslot in timeslots:
 		converted_timeslot = convert_to_guest_timezone(timezone, timeslot)
 		# Check if holiday
-		if _is_holiday(converted_timeslot.date(), holiday_list):
+		# holidays are business dates: check the slot's system-time date
+		if _is_holiday(timeslot.date(), holiday_list):
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
 			continue
 		# Check availability
@@ -82,7 +84,7 @@ def get_appointment_slots(date: str, timezone: str):
 			converted_timeslots.append(dict(time=converted_timeslot, availability=True))
 		else:
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
-	date_required = datetime.datetime.strptime(date + " 00:00:00", format_string).date()
+	date_required = parse_datetime(date, "00:00:00").date()
 	converted_timeslots = filter_timeslots(date_required, converted_timeslots)
 	return converted_timeslots
 
@@ -104,12 +106,13 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 	return timeslots
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; rate limited, slot and capacity validated, unverified until confirmed by email
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=300)
 def create_appointment(date: str, time: str, tz: str, contact: str | dict):
 	handle_appointment_booking_disabled()
-	format_string = "%Y-%m-%d %H:%M:%S"
-	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
+	validate_timezone(tz)
+	scheduled_time = parse_datetime(date, time)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
 	scheduled_time = scheduled_time.replace(tzinfo=None)
 	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
@@ -129,6 +132,20 @@ def create_appointment(date: str, time: str, tz: str, contact: str | dict):
 
 
 # Helper Functions
+def validate_timezone(timezone: str):
+	try:
+		zoneinfo.ZoneInfo(timezone)
+	except (zoneinfo.ZoneInfoNotFoundError, ValueError):
+		frappe.throw(_("{0} is not a valid time zone").format(timezone))
+
+
+def parse_datetime(date: str, time: str) -> datetime.datetime:
+	try:
+		return datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
+	except ValueError:
+		frappe.throw(_("{0} {1} is not a valid date and time").format(date, time))
+
+
 def filter_timeslots(date, timeslots):
 	filtered_timeslots = []
 	for timeslot in timeslots:
@@ -177,10 +194,8 @@ def is_slot_available(timeslot, booked_times, settings):
 
 
 def _is_holiday(date, holiday_list):
-	for holiday in holiday_list.holidays:
-		if holiday.holiday_date == date:
-			return True
-	return False
+	# half-day holidays still take appointments, as the server allows them
+	return any(h.holiday_date == date and not h.is_half_day for h in holiday_list.holidays)
 
 
 def _get_records(start_time, end_time, settings):
