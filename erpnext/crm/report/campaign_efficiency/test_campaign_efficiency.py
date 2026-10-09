@@ -95,6 +95,29 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		self.assertEqual(row["lead_count"], 1)
 		self.assertEqual(row["quot_count"], 0)
 
+	def test_converted_customer_limited_to_user_permissions(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+		from erpnext.crm.doctype.lead.mapper import make_customer
+
+		campaign = make_campaign("_Test Campaign Eff Customer Permissions")
+		lead = make_campaign_lead(campaign, company_name="_Test Campaign Eff Hidden Customer")
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.territory = "_Test Territory"
+		customer.insert()
+		quotation = make_lead_quotation(lead.name)
+		quotation.quotation_to = "Customer"
+		quotation.party_name = customer.name
+		quotation.save()
+
+		user = create_user_with_roles("campaign_eff_customer@example.com", "Sales User")
+		frappe.permissions.add_user_permission("Customer", "_Test Customer", user.name)
+		with self.set_user(user.name):
+			row = campaign_row(campaign)
+
+		self.assertEqual(row["lead_count"], 1)
+		self.assertEqual(row["quot_count"], 0)
+
 
 def make_campaign(campaign: str) -> str:
 	if not frappe.db.exists("UTM Campaign", campaign):
