@@ -543,7 +543,7 @@ class ReceivablePayableReport:
 		# build payment_terms for row
 		si = frappe.qb.DocType(row.voucher_type)
 		ps = frappe.qb.DocType("Payment Schedule")
-		payment_terms_details = (
+		query = (
 			frappe.qb.from_(si)
 			.inner_join(ps)
 			.on(si.name == ps.parent)
@@ -563,10 +563,10 @@ class ReceivablePayableReport:
 				ps.discounted_amount,
 			)
 			.where((ps.parenttype == row.voucher_type) & (si.name == row.voucher_no) & (si.is_return == 0))
-			.orderby(ps.paid_amount, order=frappe.qb.desc)
-			.orderby(ps.due_date)
-			.run(as_dict=1)
 		)
+		if not self.is_historical_report():
+			query = query.orderby(ps.paid_amount, order=frappe.qb.desc)
+		payment_terms_details = query.orderby(ps.due_date).run(as_dict=1)
 
 		original_row = frappe._dict(row)
 		row.payment_terms = []
@@ -619,9 +619,10 @@ class ReceivablePayableReport:
 			invoiced = d.payment_amount
 			paid_amount = d.paid_amount
 
-		if self.filters.report_date < getdate(nowdate()):
-			# the schedule's paid amounts are as of today, so spread only what was paid up to the report date
-			paid_amount = 0.0
+		discounted_amount = d.discounted_amount
+		if self.is_historical_report():
+			# the schedule's paid and discounted amounts are as of today, so spread only the ledger up to the report date
+			paid_amount = discounted_amount = 0.0
 
 		row.payment_terms.append(
 			term.update(
@@ -630,15 +631,18 @@ class ReceivablePayableReport:
 					"invoiced": invoiced,
 					"invoice_grand_total": row.invoiced,
 					"payment_term": d.description or d.payment_term,
-					"paid": paid_amount + d.discounted_amount,
+					"paid": paid_amount + discounted_amount,
 					"credit_note": 0.0,
-					"outstanding": invoiced - paid_amount - d.discounted_amount,
+					"outstanding": invoiced - paid_amount - discounted_amount,
 				}
 			)
 		)
 
 		if paid_amount:
-			row["paid"] -= paid_amount + d.discounted_amount
+			row["paid"] -= paid_amount + discounted_amount
+
+	def is_historical_report(self) -> bool:
+		return self.filters.report_date < getdate(nowdate())
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:

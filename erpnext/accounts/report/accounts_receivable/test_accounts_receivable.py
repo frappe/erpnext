@@ -1420,6 +1420,83 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		expected = [schedule.payment_amount for schedule in si.payment_schedule]
 		self.assertEqual([row.outstanding for row in rows], expected)
 
+	def test_payment_terms_as_of_a_date_allocate_earlier_payments_by_due_date(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		terms = ("Basic Amount Receivable", "Tax Receivable")
+		si = self.create_backdated_invoice_with_terms(
+			dict(
+				payment_term=terms[0], due_date=add_days(today(), -30), invoice_portion=50, payment_amount=50
+			),
+			dict(
+				payment_term=terms[1], due_date=add_days(today(), -10), invoice_portion=50, payment_amount=50
+			),
+		)
+		for days, term, amount in ((-25, terms[0], 20), (-5, terms[1], 50)):
+			pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash, party_amount=amount)
+			pe.posting_date = add_days(today(), days)
+			pe.references[0].payment_term = term
+			pe.references[0].allocated_amount = amount
+			pe.save().submit()
+		self.assertEqual(
+			frappe.get_all("Payment Schedule", {"parent": si.name}, pluck="paid_amount", order_by="idx"),
+			[20, 50],
+		)
+
+		self.assertEqual(self.get_term_outstandings(si, add_days(today(), -20)), [30.0, 50.0])
+
+	def test_payment_terms_as_of_a_date_ignore_later_discounts(self):
+		term = frappe.get_doc(
+			{
+				"doctype": "Payment Term",
+				"payment_term_name": frappe.generate_hash(length=10),
+				"discount_type": "Amount",
+				"discount": 10,
+			}
+		).insert()
+		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		si = self.create_backdated_invoice_with_terms(
+			dict(
+				payment_term=term.name,
+				due_date=add_days(today(), -3),
+				invoice_portion=100,
+				payment_amount=100,
+				discount_date=add_days(today(), -4),
+			)
+		)
+		pe = get_payment_entry(
+			si.doctype, si.name, bank_account=self.cash, reference_date=add_days(today(), -5)
+		)
+		pe.posting_date = add_days(today(), -5)
+		pe.references[0].payment_term = term.name
+		pe.save().submit()
+		self.assertEqual(
+			frappe.db.get_value("Payment Schedule", {"parent": si.name}, "discounted_amount"), 10
+		)
+
+		self.assertEqual(self.get_term_outstandings(si, add_days(today(), -20)), [100.0])
+
+	def create_backdated_invoice_with_terms(self, *terms):
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.posting_date = add_days(today(), -40)
+		si.set_posting_time = 1
+		si.payment_schedule = []
+		for term in terms:
+			si.append("payment_schedule", term)
+		return si.save().submit()
+
+	def get_term_outstandings(self, si, report_date):
+		filters = {
+			"company": self.company,
+			"report_date": report_date,
+			"range": "30, 60, 90, 120",
+			"based_on_payment_terms": 1,
+			"party_type": "Customer",
+			"party": [self.customer],
+		}
+		return [row.outstanding for row in execute(filters)[1] if row.voucher_no == si.name]
+
 	def test_accounts_receivable_output_for_minor_outstanding(self):
 		"""
 		AR/AP should report miniscule outstanding of 0.01. Or else there will be slight difference with General Ledger/Trial Balance
