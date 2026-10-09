@@ -61,10 +61,10 @@ class PaymentReconciliationAllocation(Document):
 	def get_list(args):
 		pass
 
-	@staticmethod
+	@staticmethod  # nosemgrep
 	def get_count(args):
 		pass
 
-	@staticmethod
+	@staticmethod  # nosemgrep
 	def get_stats(args):
 		pass

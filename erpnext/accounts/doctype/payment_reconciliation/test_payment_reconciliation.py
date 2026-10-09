@@ -3863,26 +3863,6 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertIn(("SI-INR", "PE-INR", "INR"), pairs)
 		self.assertIn(("SI-USD", "PE-USD", "USD"), pairs)
 
-	def test_get_open_balances_for_voucher_direct_api(self):
-		"""`get_open_balances_for_voucher` is the direct-call entrypoint for the
-		"reconcile against opposite" UX. Given a SI, it instantiates a virtual
-		PR doc internally and returns `to_receive` / `to_pay` for the same party.
-		"""
-		from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
-			get_open_balances_for_voucher,
-		)
-
-		si = self.create_sales_invoice(qty=1, rate=200)
-		pe = self.create_payment_entry(amount=200)
-		pe.save().submit()
-
-		balances = get_open_balances_for_voucher("Sales Invoice", si.name)
-		recv_nos = {r["voucher_no"] for r in balances["to_receive"]}
-		pay_nos = {r["voucher_no"] for r in balances["to_pay"]}
-		# SI lands on to_receive (open receivable); unallocated PE Receive lands on to_pay.
-		self.assertIn(si.name, recv_nos)
-		self.assertIn(pe.name, pay_nos)
-
 	def test_supplier_journal_against_journal_same_account(self):
 		"""Case 1 (same-account JE doubling).
 

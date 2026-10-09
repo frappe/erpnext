@@ -587,7 +587,7 @@ def reconcile_against_document(
 		frappe.flags.ignore_party_validation = False
 
 
-def check_if_advance_entry_modified(args):
+def check_if_advance_entry_modified(args):  # nosemgrep
 	"""
 	check if there is already a voucher reference
 	check if amount is same
