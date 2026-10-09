@@ -2028,6 +2028,24 @@ class TestPurchaseOrder(ERPNextTestSuite):
 				order.submit()
 				self.assertEqual(order.inter_company_order_reference, source.name)
 
+	def test_received_items_reads_only_the_order_link_column(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.accounts.doctype.sales_invoice.mapper import get_received_items
+
+		po = make_internal_purchase_order()
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		with self.set_user(create_user("received_items_buyer@example.com", "Purchase User").name):
+			self.assertEqual(
+				get_received_items(po.name, "Sales Order", "purchase_order_item"), {po.items[0].name: 2}
+			)
+			self.assertRaises(
+				frappe.PermissionError, get_received_items, po.name, "Sales Order", "gross_profit"
+			)
+
 	def test_update_status_accepts_only_hold_close_and_reopen_on_submitted_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 

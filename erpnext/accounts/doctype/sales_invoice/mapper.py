@@ -391,14 +391,14 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 	# The targets this resolves a reference field for. Stating them rejects a caller
 	# supplied doctype that would otherwise be filtered on a column it does not have.
 	reference_fields = {
-		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
-		"Purchase Order": ("inter_company_order_reference", "Sales Order"),
-		"Sales Order": ("inter_company_order_reference", "Purchase Order"),
+		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice", "sales_invoice_item"),
+		"Purchase Order": ("inter_company_order_reference", "Sales Order", "sales_order_item"),
+		"Sales Order": ("inter_company_order_reference", "Purchase Order", "purchase_order_item"),
 	}
 	if doctype not in reference_fields:
 		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
 
-	reference_field, source_doctype = reference_fields[doctype]
+	reference_field, source_doctype, item_reference_field = reference_fields[doctype]
 
 	# `reference_name` is the caller's own document. The targets belong to the counterpart company
 	# and the caller legitimately may not be able to read them, so the source is what decides
@@ -407,7 +407,7 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 
 	# `reference_fieldname` is selected as a column below and its value becomes the result key,
 	# so an unchecked one returns any field of the item table to the caller.
-	if not frappe.get_meta(doctype + " Item").has_field(reference_fieldname):
+	if reference_fieldname != item_reference_field:
 		frappe.throw(_("Invalid field {0}").format(reference_fieldname), frappe.PermissionError)
 
 	filters = {
