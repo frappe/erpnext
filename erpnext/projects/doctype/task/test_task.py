@@ -527,6 +527,20 @@ class TestTask(ERPNextTestSuite):
 		with self.set_user(user.name):
 			self.assertRaises(frappe.PermissionError, check_if_child_exists, group.name)
 
+	def test_root_tasks_are_not_listed_as_children_of_an_empty_name(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+		from erpnext.projects.doctype.task.task import check_if_child_exists
+
+		create_task("_Test Root Hidden From User")
+		user = create_user("test_task_root_lister@example.com", "Projects User")
+		other_project = make_project({"project_name": "_Test Project Root Lister"}).name
+		frappe.permissions.add_user_permission("Project", other_project, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.DoesNotExistError, check_if_child_exists, "")
+
 
 def create_task(
 	subject,

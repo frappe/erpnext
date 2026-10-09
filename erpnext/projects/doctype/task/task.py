@@ -476,7 +476,7 @@ class Task(NestedSet):
 
 @frappe.whitelist()
 def check_if_child_exists(name: str):
-	frappe.has_permission("Task", "read", doc=name, throw=True)
+	frappe.get_doc("Task", name).check_permission("read")
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks
