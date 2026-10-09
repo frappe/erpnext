@@ -5,6 +5,7 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 from erpnext.utilities.transaction_base import delete_events
@@ -42,6 +43,15 @@ class Department(NestedSet):
 			root = get_root_of("Department")
 			if root:
 				self.parent_department = root
+
+		if self.parent_department:
+			parent = frappe.db.get_value(
+				"Department", self.parent_department, ["company", "is_group"], as_dict=True
+			)
+			if parent and not parent.is_group:
+				frappe.throw(_("Parent Department must be a group"))
+			if parent and parent.company and parent.company != self.company:
+				frappe.throw(_("Parent Department must belong to the same company"))
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
