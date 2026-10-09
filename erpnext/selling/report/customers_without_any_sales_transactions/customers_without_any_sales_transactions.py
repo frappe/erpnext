@@ -7,6 +7,8 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
+SALES_DOCTYPES = ("Sales Invoice", "Sales Order", "Delivery Note", "POS Invoice")
+
 
 def execute(filters=None):
 	return get_columns(), get_data()
@@ -41,17 +43,14 @@ def get_columns():
 
 def get_data():
 	customer = frappe.qb.DocType("Customer")
-	query = (
-		frappe.qb.from_(customer)
-		.select(
-			customer.name.as_("customer"),
-			customer.customer_name,
-			customer.territory,
-			customer.customer_group,
-		)
-		.where(ExistsCriterion(get_submitted_sales(customer, "Sales Invoice")).negate())
-		.where(ExistsCriterion(get_submitted_sales(customer, "Sales Order")).negate())
+	query = frappe.qb.from_(customer).select(
+		customer.name.as_("customer"),
+		customer.customer_name,
+		customer.territory,
+		customer.customer_group,
 	)
+	for doctype in SALES_DOCTYPES:
+		query = query.where(ExistsCriterion(get_submitted_sales(customer, doctype)).negate())
 
 	if condition := get_allowed_masters_condition(customer.name, "Customer"):
 		query = query.where(condition)
