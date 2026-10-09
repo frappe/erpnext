@@ -156,6 +156,13 @@ class SubcontractingOrder(SubcontractingController):
 			if po.docstatus != 1:
 				frappe.throw(_("Please submit Purchase Order {0} before proceeding.").format(po.name))
 
+			if po.status in ("Closed", "On Hold"):
+				frappe.throw(
+					_(
+						"Cannot create a Subcontracting Order against Purchase Order {0} because it is {1}."
+					).format(po.name, _(po.status))
+				)
+
 			if po.per_received == 100:
 				frappe.throw(
 					_("Cannot create more Subcontracting Orders against the Purchase Order {0}.").format(

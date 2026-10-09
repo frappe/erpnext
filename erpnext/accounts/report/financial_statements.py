@@ -427,7 +427,7 @@ def calculate_values(
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
-						not ignore_accumulated_values_for_fy
+						not (accumulated_values and ignore_accumulated_values_for_fy)
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)

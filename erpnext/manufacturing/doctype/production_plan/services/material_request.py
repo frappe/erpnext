@@ -24,6 +24,7 @@ from erpnext.manufacturing.doctype.production_plan.services.bom_explosion import
 	get_subitems,
 )
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	aggregate_bin_details,
 	get_bin_details,
 	get_item_data,
 	get_sales_orders,
@@ -477,13 +478,13 @@ def _mr_item_for_details(
 	# get_bin_details scopes to the warehouse's descendants, returning one row per
 	# child warehouse; sum them so a group warehouse reflects combined child stock.
 	bins = get_bin_details(details, doc.company, warehouse)
-	bin_dict = _aggregate_bin_details(bins)
+	bin_dict = aggregate_bin_details(bins)
 	if details.qty <= 0:
 		return None
 	shortage_warehouse, shortage_bin = warehouse, bin_dict
 	if is_transfer and warehouse != target_warehouse:
 		shortage_warehouse = target_warehouse
-		shortage_bin = _aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
+		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
 	return get_material_request_items(
 		doc,
 		details,
@@ -497,21 +498,6 @@ def _mr_item_for_details(
 		consumed_qty,
 		shortage_bin,
 	)
-
-
-def _aggregate_bin_details(bin_list):
-	qty_fields = (
-		"projected_qty",
-		"actual_qty",
-		"ordered_qty",
-		"reserved_qty_for_production",
-		"planned_qty",
-	)
-	aggregated = {field: 0 for field in qty_fields}
-	for row in bin_list or []:
-		for field in qty_fields:
-			aggregated[field] += flt(row.get(field))
-	return aggregated
 
 
 def _apply_other_locations(doc, mr_items, warehouses, is_transfer):

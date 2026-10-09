@@ -63,24 +63,24 @@ def _validate_internal_party_company(partytype: str, party: str, company: str) -
 		)
 
 
+def get_inter_company_counterpart(doctype: str) -> tuple[str, str]:
+	"""Return the counterpart doctype and the field both documents use to reference each other."""
+	if doctype in ["Sales Invoice", "Purchase Invoice"]:
+		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
+		return ref_doc, "inter_company_invoice_reference"
+
+	ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
+	return ref_doc, "inter_company_order_reference"
+
+
 def update_linked_doc(doctype: str, name: str, inter_company_reference: str | None) -> None:
-	ref_field = (
-		"inter_company_invoice_reference"
-		if doctype in ["Sales Invoice", "Purchase Invoice"]
-		else "inter_company_order_reference"
-	)
+	ref_doc, ref_field = get_inter_company_counterpart(doctype)
 	if inter_company_reference:
-		frappe.db.set_value(doctype, inter_company_reference, ref_field, name)
+		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, name)
 
 
 def unlink_inter_company_doc(doctype: str, name: str, inter_company_reference: str | None) -> None:
-	if doctype in ["Sales Invoice", "Purchase Invoice"]:
-		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
-		ref_field = "inter_company_invoice_reference"
-	else:
-		ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
-		ref_field = "inter_company_order_reference"
-
+	ref_doc, ref_field = get_inter_company_counterpart(doctype)
 	if inter_company_reference:
 		frappe.db.set_value(doctype, name, ref_field, "")
 		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, "")

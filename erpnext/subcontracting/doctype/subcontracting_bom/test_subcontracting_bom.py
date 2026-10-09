@@ -8,10 +8,12 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	finished_good_bom_query,
 	get_subcontracting_boms_for_finished_goods,
+	get_subcontracting_boms_for_service_item,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -25,7 +27,29 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 		)
 
 		subcontracting_bom = get_subcontracting_boms_for_finished_goods(variant.name)
-		self.assertEqual(subcontracting_bom.finished_good_bom, template_bom.name)
+		self.assertEqual(subcontracting_bom.service_item, service_item.name)
+
+	def test_lookups_need_order_read_permission(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=template_bom.name, service_item=service_item.name
+		)
+		purchase_user = make_fenced_user("subcontracting-bom-purchase@example.com", ["Purchase User"])
+		website_user = make_fenced_user("subcontracting-bom-website@example.com", [])
+
+		with as_user(purchase_user):
+			subcontracting_bom = get_subcontracting_boms_for_finished_goods(variant.name)
+		self.assertEqual(subcontracting_bom.service_item, service_item.name)
+		self.assertNotIn("owner", subcontracting_bom)
+
+		with as_user(website_user):
+			self.assertRaises(
+				frappe.PermissionError, get_subcontracting_boms_for_finished_goods, variant.name
+			)
+			self.assertRaises(
+				frappe.PermissionError, get_subcontracting_boms_for_service_item, service_item.name
+			)
 
 	def test_finished_good_bom_must_belong_to_finished_good(self):
 		variant, _ = make_subcontracted_variant()
