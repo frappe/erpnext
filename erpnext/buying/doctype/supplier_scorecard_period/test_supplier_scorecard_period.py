@@ -34,6 +34,10 @@ class TestSupplierScorecardPeriod(ERPNextTestSuite):
 		period.insert()
 		self.assertEqual(period.supplier, scorecard.supplier)
 
+		period.supplier = "_Test Supplier"
+		period.submit()
+		self.assertEqual(frappe.db.get_value(period.doctype, period.name, "supplier"), scorecard.supplier)
+
 	def test_period_score_is_normalised_by_max_score(self):
 		period = make_period(
 			criteria=[
