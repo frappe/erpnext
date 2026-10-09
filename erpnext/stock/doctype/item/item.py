@@ -1063,14 +1063,12 @@ class Item(Document):
 					)
 
 	def validate_uom_conversion_factor(self):
-		if self.uoms:
-			for d in self.uoms:
-				if d.conversion_factor:
-					continue
+		for d in self.get("uoms"):
+			if not d.conversion_factor:
+				d.conversion_factor = get_uom_conv_factor(d.uom, self.stock_uom)
 
-				value = get_uom_conv_factor(d.uom, self.stock_uom)
-				if value:
-					d.conversion_factor = value
+			if flt(d.conversion_factor) <= 0:
+				frappe.throw(_("Row {0}: Conversion Factor must be greater than zero.").format(d.idx))
 
 	def validate_attributes(self):
 		if not (self.has_variants or self.variant_of):
@@ -1238,6 +1236,7 @@ class Item(Document):
 				"Sales Order Item",
 				"Purchase Order Item",
 				"Material Request Item",
+				"Work Order Item",
 				"Product Bundle",
 				"BOM",
 			]
