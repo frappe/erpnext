@@ -2470,6 +2470,36 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
+	def test_return_of_rows_sharing_a_raw_material(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		service_items = []
+		for service_item, qty in (("Subcontracted Service Item 1", 3), ("Subcontracted Service Item 2", 2)):
+			fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+			make_bom(item=fg_item, raw_materials=[rm_item])
+			service_items.append(
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": qty,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": qty,
+				}
+			)
+
+		make_stock_entry(item_code=rm_item, qty=5, target="_Test Warehouse 1 - _TC", basic_rate=100)
+		sco = get_subcontracting_order(service_items=service_items)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -5)
+
 	def test_bom_required_qty_validation_based_on_transfer(self):
 		from erpnext.controllers.subcontracting_controller import (
 			make_rm_stock_entry as make_subcontract_transfer_entry,
