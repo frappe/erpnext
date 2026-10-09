@@ -48,8 +48,8 @@ class IssueAnalytics:
 				{
 					"label": _("User"),
 					"fieldname": "user",
-					"fieldtype": "Link",
-					"options": "User",
+					"fieldtype": "Dynamic Link",
+					"options": "user_doctype",
 					"width": 200,
 				}
 			)
@@ -187,7 +187,8 @@ class IssueAnalytics:
 			if self.filters.based_on == "Customer":
 				row = {"customer": entity}
 			elif self.filters.based_on == "Assigned To":
-				row = {"user": entity}
+				# unassigned row has no doctype, so it shows as plain text instead of a User link
+				row = {"user": entity, "user_doctype": None if entity == _("Not Assigned") else "User"}
 			elif self.filters.based_on == "Issue Type":
 				row = {"issue_type": entity}
 			elif self.filters.based_on == "Issue Priority":

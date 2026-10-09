@@ -106,8 +106,20 @@ class TestIssueAnalytics(ERPNextTestSuite):
 		report = execute(filters)
 
 		expected_data = [
-			{"user": "test@example.com", self.last_month: 1.0, self.current_month: 1.0, "total": 2.0},
-			{"user": "test1@example.com", self.last_month: 2.0, self.current_month: 1.0, "total": 3.0},
+			{
+				"user": "test@example.com",
+				"user_doctype": "User",
+				self.last_month: 1.0,
+				self.current_month: 1.0,
+				"total": 2.0,
+			},
+			{
+				"user": "test1@example.com",
+				"user_doctype": "User",
+				self.last_month: 2.0,
+				self.current_month: 1.0,
+				"total": 3.0,
+			},
 		]
 
 		self.assertEqual(expected_data, report[1])  # rows
@@ -200,8 +212,10 @@ class TestIssueAnalytics(ERPNextTestSuite):
 			"to_date": "2026-05-31",
 			"range": "Monthly",
 		}
-		rows = {row["user"]: row["total"] for row in execute(filters)[1]}
-		self.assertEqual(rows.get("Not Assigned"), 1)
+		rows = {row["user"]: row for row in execute(filters)[1]}
+		self.assertEqual(rows["Not Assigned"]["total"], 1)
+		self.assertIsNone(rows["Not Assigned"]["user_doctype"])
+		self.assertEqual(rows["test@example.com"]["user_doctype"], "User")
 
 		filters["assigned_to"] = "test@example.com"
 		rows = {row["user"]: row["total"] for row in execute(filters)[1]}
