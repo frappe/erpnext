@@ -750,15 +750,11 @@ class WorkOrder(Document):
 				status = "In Process"
 
 		if status == "Not Started" and self.reserve_stock:
-			for row in self.required_items:
-				if not row.stock_reserved_qty:
-					continue
-
-				if row.stock_reserved_qty >= row.required_qty:
-					status = "Stock Reserved"
-				else:
+			if any(row.stock_reserved_qty for row in self.required_items):
+				if any(row.stock_reserved_qty < row.required_qty for row in self.required_items):
 					status = "Stock Partially Reserved"
-					break
+				else:
+					status = "Stock Reserved"
 
 		return status
 
