@@ -113,7 +113,7 @@ def validate_returned_items(doc):
 			fields=["item_code", "qty", "serial_no", "batch_no"],
 			limit_page_length=0,  # all packed-item rows are needed (no default 20 cap)
 		):
-			valid_items = get_ref_item_dict(valid_items, d)
+			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, stock_qty=d.qty))
 
 	already_returned_items = get_already_returned_items(doc)
 
@@ -193,6 +193,69 @@ def validate_returned_items(doc):
 
 	if not items_returned:
 		frappe.throw(_("At least one item should be entered with negative quantity in return document"))
+
+	if doc.doctype == "Delivery Note":
+		validate_returned_bundle_components(doc, valid_items, already_returned_items)
+
+
+def validate_returned_bundle_components(doc, valid_items, already_returned_items):
+	"""Hold the components of returned bundles to what is left of each delivered component."""
+	from erpnext.stock.doctype.packed_item.packed_item import (
+		get_bundle_version_for_row,
+		get_product_bundle_items_by_name,
+	)
+
+	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
+	bundle_items = set(
+		frappe.get_all(
+			"Product Bundle",
+			filters={"new_item_code": ["in", {row.item_code for row in returned_rows}], "docstatus": 1},
+			pluck="new_item_code",
+		)
+	)
+	bundles, components = {}, {}
+	for row in returned_rows:
+		if row.item_code not in bundle_items:
+			continue
+
+		bundle_key = (row.item_code, row.get("product_bundle"))
+		if bundle_key not in bundles:
+			bundles[bundle_key] = get_bundle_version_for_row(row)
+		bundle = bundles[bundle_key]
+		if not bundle:
+			continue
+
+		if bundle not in components:
+			components[bundle] = get_product_bundle_items_by_name(bundle)
+
+		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
+		if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
+		for component in components[bundle]:
+			ref = valid_items.get(component.item_code)
+			if not ref:
+				continue
+
+			returned = already_returned_items.setdefault(
+				component.item_code, frappe._dict(qty=0, stock_qty=0)
+			)
+			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
+			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * flt(component.qty)
+			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
+				ref.stock_qty, row.precision("stock_qty")
+			):
+				frappe.throw(
+					_(
+						"Row # {0}: Cannot return {1}, only {2} {3} of its component {4} is left to return"
+					).format(
+						row.idx,
+						frappe.bold(row.item_code),
+						flt(remaining, row.precision("stock_qty")),
+						frappe.get_cached_value("Item", component.item_code, "stock_uom"),
+						frappe.bold(component.item_code),
+					),
+					StockOverReturnError,
+				)
 
 
 def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
@@ -352,7 +415,7 @@ def get_already_returned_items(doc):
 
 	items = {}
 	if doc.doctype == "Delivery Note":
-		for d in data:
+		for d in data + get_returned_packed_items(doc.return_against):
 			item_total = items.setdefault(d.item_code, frappe._dict(qty=0, stock_qty=0))
 			item_total.qty += flt(d.qty)
 			item_total.stock_qty += flt(d.stock_qty)
@@ -371,6 +434,29 @@ def get_already_returned_items(doc):
 		)
 
 	return items
+
+
+def get_returned_packed_items(delivery_note: str) -> list[dict]:
+	packed_item = DocType("Packed Item")
+	parent = DocType("Delivery Note")
+	return (
+		frappe.qb.from_(packed_item)
+		.inner_join(parent)
+		.on(packed_item.parent == parent.name)
+		.select(
+			packed_item.item_code,
+			Sum(Abs(packed_item.qty)).as_("qty"),
+			Sum(Abs(packed_item.qty)).as_("stock_qty"),
+		)
+		.where(
+			(packed_item.parenttype == "Delivery Note")
+			& (parent.docstatus == 1)
+			& (parent.is_return == 1)
+			& (parent.return_against == delivery_note)
+		)
+		.groupby(packed_item.item_code)
+		.run(as_dict=True)
+	)
 
 
 def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, doctype):
