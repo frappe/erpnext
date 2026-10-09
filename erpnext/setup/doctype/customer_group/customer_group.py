@@ -6,6 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.party import validate_party_accounts
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
+
+>>>>>>> 981737c (fix(customer group): validate party accounts before saving)
 
 class CustomerGroup(NestedSet):
 	# begin: auto-generated types
@@ -38,6 +44,7 @@ class CustomerGroup(NestedSet):
 	def validate(self):
 		if not self.parent_customer_group:
 			self.parent_customer_group = get_root_of("Customer Group")
+		validate_party_accounts(self)
 		self.validate_currency_for_receivable_and_advance_account()
 
 	def validate_currency_for_receivable_and_advance_account(self):
