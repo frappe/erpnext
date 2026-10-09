@@ -22,9 +22,11 @@ def execute(filters=None):
 	if doctype not in {"Sales Order", "Sales Invoice"}:
 		frappe.throw(_("Invalid value {0} for 'Doctype'").format(doctype))
 
+	check_doctype_access(doctype)
+
 	days_since_last_order = cint(filters.get("days_since_last_order"))
 	if days_since_last_order <= 0:
-		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
+		frappe.throw(_("'Days Since Last Order' must be greater than zero"))
 
 	return get_columns(doctype), get_data(doctype, days_since_last_order)
 
@@ -92,8 +94,7 @@ def get_sales_details(doctype):
 	if condition := get_allowed_companies_condition(sales.company, doctype):
 		query = query.where(condition)
 
-	# honour permissions scoped to the sales doctype (e.g. applicable_for Sales Order), which
-	# the Customer-based filter above cannot see
+	# also apply permissions scoped to the sales doctype (applicable_for), which the Customer filter misses
 	for condition in get_match_conditions_qb(doctype, table=sales):
 		query = query.where(condition)
 
@@ -127,6 +128,15 @@ def get_last_order_amounts(doctype, customers):
 	)
 
 	return {customer: amount for customer, amount in result}
+
+
+def check_doctype_access(doctype):
+	# roles fit Sales Order, but the report also offers Sales Invoice: block a mode the role cannot read
+	if not (frappe.has_permission(doctype, "select") or frappe.has_permission(doctype, "read")):
+		frappe.throw(
+			_("User {0} has no read or select permission on {1}").format(frappe.session.user, _(doctype)),
+			frappe.PermissionError,
+		)
 
 
 def get_permitted_customers():

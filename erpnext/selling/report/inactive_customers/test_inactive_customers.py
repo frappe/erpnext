@@ -41,6 +41,13 @@ class TestInactiveCustomers(ERPNextTestSuite):
 			{"doctype": "Purchase Order", "days_since_last_order": 30},
 		)
 
+	def test_zero_days_is_rejected(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			execute,
+			{"doctype": "Sales Order", "days_since_last_order": 0},
+		)
+
 	def test_inactive_customer_is_listed_with_expected_values(self):
 		_columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 30})
 
@@ -161,3 +168,24 @@ class TestInactiveCustomers(ERPNextTestSuite):
 
 		self.assertIn(visible.name, listed)
 		self.assertNotIn(hidden.name, listed)
+
+	def test_sales_invoice_mode_denied_without_invoice_read(self):
+		# the report's Sales roles lack read on Sales Invoice, so picking that mode must raise a
+		# clear permission error instead of exposing invoice totals
+		user = "_test_inactive_si_denied@example.com"
+		if not frappe.db.exists("User", user):
+			restricted = frappe.new_doc("User")
+			restricted.email = user
+			restricted.first_name = "Inactive SI Denied"
+			restricted.append("roles", {"role": "Sales User"})
+			restricted.insert()
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				execute,
+				{"doctype": "Sales Invoice", "days_since_last_order": 30},
+			)
+		finally:
+			frappe.set_user("Administrator")
