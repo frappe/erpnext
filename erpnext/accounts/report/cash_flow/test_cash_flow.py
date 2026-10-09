@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from itertools import pairwise
 from unittest.mock import patch
 
 import frappe
@@ -293,3 +294,76 @@ class TestCashFlow(ERPNextTestSuite):
 		card, total = investing_card_and_net_change_total()
 		self.assertEqual(card - before_card, -1000)
 		self.assertEqual(total - before_total, -400)
+
+	def test_opening_and_closing_balance_by_dimension(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		cc1, cc2 = "_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"
+		fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		filters = frappe._dict(
+			company=self.company,
+			from_fiscal_year=fiscal_year,
+			to_fiscal_year=fiscal_year,
+			period_start_date=year_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Fiscal Year",
+			periodicity="Quarterly",
+			accumulated_values=0,
+			group_by_dimension="Cost Center",
+			show_opening_and_closing_balance=1,
+		)
+		period_list = build_period_list(filters)
+
+		def book_cash_sale(cost_center, amount, posting_date):
+			make_journal_entry(
+				"Cash - _TC",
+				"Sales - _TC",
+				amount,
+				cost_center=cost_center,
+				posting_date=posting_date,
+				submit=True,
+			)
+
+		def keys_for(cost_center):
+			return [p.key for p in period_list if p.dimension_value == cost_center]
+
+		def opening_and_closing_rows():
+			rows = execute(filters)[1]
+			opening = next(row for row in rows if row.get("section") == "Opening")
+			closing = next(row for row in rows if row.get("section") == "Closing (Opening + Total)")
+			return opening, closing
+
+		def balances():
+			"""(opening, closing) for each cost center and for the Total column."""
+			opening, closing = opening_and_closing_rows()
+			result = {"total": (opening["total"], closing["total"])}
+			for cost_center in (cc1, cc2):
+				keys = keys_for(cost_center)
+				result[cost_center] = (opening[keys[0]], closing[keys[-1]])
+			return result
+
+		before = balances()
+
+		# last year: 300 cash in cc1, 500 in cc2 -> their opening cash
+		last_year = add_days(year_start_date, -10)
+		book_cash_sale(cc1, 300, last_year)
+		book_cash_sale(cc2, 500, last_year)
+
+		# this year: 100 more cash in cc1
+		book_cash_sale(cc1, 100, today())
+
+		after = balances()
+
+		def change(name):
+			return tuple(a - b for a, b in zip(after[name], before[name], strict=True))
+
+		# (opening, closing)
+		self.assertEqual(change(cc1), (300, 400))
+		self.assertEqual(change(cc2), (500, 500))  # its own opening, not cc1's closing
+		self.assertEqual(change("total"), (800, 900))
+
+		# within a cost center, each quarter opens with the previous quarter's closing
+		opening, closing = opening_and_closing_rows()
+		for cost_center in (cc1, cc2):
+			for previous, current in pairwise(keys_for(cost_center)):
+				self.assertEqual(opening[current], closing[previous])
