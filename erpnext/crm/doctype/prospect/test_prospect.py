@@ -54,6 +54,16 @@ class TestProspect(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_customer_from_prospect, "_Test Prospect")
 
+	def test_two_customer_drafts_from_one_prospect(self):
+		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+		prospect = make_prospect(company="_Test Company")
+		first = make_customer_from_prospect(prospect.name)
+		second = make_customer_from_prospect(prospect.name)
+
+		first.insert()
+		self.assertRaises(frappe.DuplicateEntryError, second.insert)
+
 	def test_make_customer_checks_permissions_first(self):
 		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
 

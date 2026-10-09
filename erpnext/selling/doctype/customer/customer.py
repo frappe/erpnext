@@ -196,6 +196,7 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.validate_prospect_not_converted()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
 
@@ -383,6 +384,18 @@ class Customer(TransactionBase):
 					"A Customer Group exists with the same name. Please change the Customer name or rename the Customer Group"
 				),
 				frappe.NameError,
+			)
+
+	def validate_prospect_not_converted(self):
+		if not (self.is_new() and self.prospect_name):
+			return
+
+		if customer := frappe.db.exists("Customer", {"prospect_name": self.prospect_name}):
+			frappe.throw(
+				_("Prospect {0} is already converted to Customer {1}").format(
+					frappe.bold(self.prospect_name), get_link_to_form("Customer", customer)
+				),
+				frappe.DuplicateEntryError,
 			)
 
 	def validate_customer_group(self):
