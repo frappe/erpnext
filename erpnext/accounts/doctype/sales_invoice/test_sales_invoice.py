@@ -3195,6 +3195,40 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_repeat_inter_company_pi_converts_invoiced_qty_to_sales_invoice_uom(self):
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=20,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		accounts = {"expense_account": "Cost of Goods Sold - _TC1", "cost_center": "Main - _TC1"}
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update({"qty": 1, "uom": "_Test UOM 1", "conversion_factor": 10, **accounts})
+		pi.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		self.assertEqual(pi.items[0].qty, 10)
+		pi.items[0].update(accounts)
+		pi.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been fully invoiced",
+			make_inter_company_transaction,
+			"Sales Invoice",
+			si.name,
+		)
+
 	def test_restrict_inter_company_pi_when_sales_invoice_qty_fully_consumed(self):
 		item_code_1 = "_Test IC Item 1"
 		item_code_2 = "_Test IC Item 2"

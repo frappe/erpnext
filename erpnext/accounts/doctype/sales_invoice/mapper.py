@@ -212,8 +212,16 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		else:
 			_apply_sales_party_details(target_doc, source_doc, details)
 
+	def get_pending_qty(row):
+		received_stock_qty = received_items.get(row.name, 0.0)
+		if not received_stock_qty:
+			return flt(row.qty)
+
+		pending_stock_qty = flt(flt(row.stock_qty) - received_stock_qty, row.precision("stock_qty"))
+		return flt(max(pending_stock_qty, 0) / (flt(row.conversion_factor) or 1), row.precision("qty"))
+
 	def update_item(source, target, source_parent):
-		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
+		target.qty = get_pending_qty(source)
 		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
 			target.purchase_order = source.parent
 			target.purchase_order_item = source.name
@@ -238,7 +246,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: not doc.get("closed") and doc.qty - received_items.get(doc.name, 0.0) > 0,
+		"condition": lambda doc: not doc.get("closed") and get_pending_qty(doc) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -425,12 +433,12 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
-			fields=[reference_fieldname, "qty"],
+			fields=[reference_fieldname, "stock_qty"],
 		)
 		for item in received_items_data:
 			key = item.get(reference_fieldname)
 			if key:
-				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
 
 	return received_items_map
 
