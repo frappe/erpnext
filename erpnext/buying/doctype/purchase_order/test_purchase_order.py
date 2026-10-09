@@ -1698,6 +1698,40 @@ class TestPurchaseOrder(FrappeTestCase):
 				order.submit()
 				self.assertEqual(order.inter_company_order_reference, source.name)
 
+	def test_repeat_internal_order_converts_ordered_qty_to_source_uom(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		po = make_internal_purchase_order(do_not_submit=True)
+		po.items[0].qty = 20
+		po.submit()
+		so = make_sales_order(
+			company=po.company,
+			customer="_Test Internal Customer 2",
+			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			selling_price_list=po.buying_price_list,
+			qty=20,
+			rate=1,
+		)
+
+		for source, make_order in (
+			(po, make_inter_company_sales_order),
+			(so, make_inter_company_purchase_order),
+		):
+			order = make_order(source.name)
+			set_missing_warehouse(order)
+			order.items[0].update({"qty": 1, "uom": "_Test UOM 1", "conversion_factor": 10})
+			order.items[0].delivery_date = order.items[0].schedule_date = today()
+			order.submit()
+
+			order = make_order(source.name)
+			set_missing_warehouse(order)
+			self.assertEqual(order.items[0].qty, 10)
+			order.items[0].delivery_date = order.items[0].schedule_date = today()
+			order.submit()
+
+			self.assertRaisesRegex(frappe.ValidationError, "fully ordered", make_order, source.name)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
