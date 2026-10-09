@@ -335,12 +335,11 @@ def get_payment_entries(filters, args):
 			.run()
 		)
 		for d in payment_entries:
-			base_amount = (
-				d.base_paid_amount_after_tax
-				if d.payment_type == "Receive"
-				else d.base_received_amount_after_tax
-			)
-			d.base_grand_total = flt(base_amount) + flt(deduction_totals.get(d.name))
+			deductions = flt(deduction_totals.get(d.name))
+			if d.payment_type == "Receive":
+				d.base_grand_total = flt(d.base_paid_amount_after_tax) + deductions
+			else:
+				d.base_grand_total = flt(d.base_received_amount_after_tax) - deductions
 
 	return payment_entries
 
