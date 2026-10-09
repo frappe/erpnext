@@ -42,7 +42,7 @@ class QualityFeedback(Document):
 
 		if not self.parameters:
 			self.set_parameters()
-		elif self.has_value_changed("template"):
+		else:
 			self.validate_parameters()
 
 	def validate_parameters(self):
@@ -51,10 +51,17 @@ class QualityFeedback(Document):
 			filters={"parent": self.template, "parenttype": "Quality Feedback Template"},
 			pluck="parameter",
 		)
-		for d in self.parameters:
+		for d in self.get_parameters_to_validate():
 			if d.parameter not in parameters:
 				frappe.throw(
 					_("Row #{0}: Parameter {1} is not part of Quality Feedback Template {2}").format(
 						d.idx, frappe.bold(d.parameter), frappe.bold(self.template)
 					)
 				)
+
+	def get_parameters_to_validate(self):
+		if self.has_value_changed("template"):
+			return self.parameters
+
+		previous = {d.name: d.parameter for d in self.get_doc_before_save().parameters}
+		return [d for d in self.parameters if d.name not in previous or previous[d.name] != d.parameter]
