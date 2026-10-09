@@ -28,3 +28,12 @@ class TestGlobalDefaults(ERPNextTestSuite):
 			defaults.disable_rounded_total = 1 - int(defaults.disable_rounded_total)
 			defaults.on_update()
 			update_profiles.assert_called_once_with()
+
+	def test_disable_in_words_covers_visible_payment_and_subcontracting_fields(self):
+		for disabled in (1, 0):
+			with self.subTest(disabled=disabled):
+				with self.change_settings("Global Defaults", disable_in_words=disabled):
+					for doctype in ("Payment Entry", "Subcontracting Receipt"):
+						field = frappe.get_meta(doctype).get_field("in_words")
+						self.assertEqual(field.hidden, disabled)
+						self.assertEqual(field.print_hide, disabled)
