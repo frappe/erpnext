@@ -18,6 +18,7 @@ from frappe.utils import (
 	comma_and,
 	date_diff,
 	flt,
+	get_last_day,
 	get_link_to_form,
 	getdate,
 	today,
@@ -636,6 +637,9 @@ class AccountsController(TransactionBase):
 				return add_days(date, days)
 			# Whole months never reverse a period, e.g. 29-31 Jan becomes 28-28 Feb.
 			shifted_date = getdate(add_months(date, months))
+			# Month ends stay month ends, e.g. 1-28 Feb becomes 1-31 Mar.
+			if getdate(date) == get_last_day(date):
+				shifted_date = get_last_day(shifted_date)
 			# Dates inside the reference period stay inside the new period, which can end earlier in the month.
 			if getdate(date) < reference_to_date:
 				return min(shifted_date, to_date)
