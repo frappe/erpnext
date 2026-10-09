@@ -1492,6 +1492,7 @@ class WorkOrder(Document):
 					"base_hour_rate as hour_rate",
 					"time_in_mins",
 					"parent as bom",
+					"name as bom_operation",
 					"bom_no",
 					"batch_size",
 					"sequence_id",
