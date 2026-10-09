@@ -88,6 +88,7 @@ class CustomerGroup(NestedSet):
 
 	def before_rename(self, olddn, newdn, merge=False):
 		super().before_rename(olddn, newdn, merge)
+		newdn = newdn.strip()
 		if frappe.db.exists("Customer", newdn):
 			frappe.throw(_("A Customer exists with the same name: {0}").format(newdn), frappe.NameError)
 

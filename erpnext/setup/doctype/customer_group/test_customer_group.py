@@ -22,10 +22,13 @@ class TestCustomerGroup(ERPNextTestSuite):
 		with self.assertRaises(frappe.NameError):
 			group.insert()
 
-		group.customer_group_name = "_Test Group To Rename"
-		group.insert()
+		group = frappe.get_doc(
+			{"doctype": "Customer Group", "customer_group_name": "_Test Group To Rename", "is_group": 0}
+		).insert()
 		with self.assertRaises(frappe.NameError):
 			frappe.rename_doc("Customer Group", group.name, customer.name)
+		with self.assertRaises(frappe.NameError):
+			frappe.rename_doc("Customer Group", group.name, f"  {customer.name}  ")
 
 	def test_duplicate_credit_limit_company(self):
 		group = frappe.get_doc(
