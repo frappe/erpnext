@@ -9,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import flt, get_link_to_form, getdate
 
+from erpnext.accounts.doctype.sales_invoice.services.inter_company import get_inter_company_counterpart
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
 
 
@@ -204,7 +205,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		set_purchase_references(target)
 
 	def update_details(source_doc, target_doc, source_parent):
-		target_doc.inter_company_invoice_reference = source_doc.name
+		_, reference_field = get_inter_company_counterpart(target_doc.doctype)
+		target_doc.set(reference_field, source_doc.name)
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			_apply_purchase_party_details(target_doc, source_doc, details)
 		else:

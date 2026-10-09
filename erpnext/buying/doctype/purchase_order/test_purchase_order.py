@@ -2003,6 +2003,31 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			frappe.ValidationError, "fully ordered", make_inter_company_sales_order, po.name
 		)
 
+	def test_second_partial_internal_order_links_to_its_own_source(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		po = make_internal_purchase_order()
+		so = make_sales_order(
+			company=po.company,
+			customer="_Test Internal Customer 2",
+			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			selling_price_list=po.buying_price_list,
+			qty=2,
+			rate=1,
+		)
+
+		for source, make_order in (
+			(po, make_inter_company_sales_order),
+			(so, make_inter_company_purchase_order),
+		):
+			for _ in range(2):
+				order = make_order(source.name)
+				order.items[0].qty = 1
+				order.items[0].delivery_date = order.items[0].schedule_date = today()
+				order.submit()
+				self.assertEqual(order.inter_company_order_reference, source.name)
+
 	def test_update_status_accepts_only_hold_close_and_reopen_on_submitted_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
