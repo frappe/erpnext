@@ -8,6 +8,25 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomerGroup(ERPNextTestSuite):
+	def test_group_name_cannot_match_customer_on_insert_or_rename(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Group Name Collision",
+				"customer_type": "Individual",
+			}
+		).insert()
+		group = frappe.get_doc(
+			{"doctype": "Customer Group", "customer_group_name": customer.name, "is_group": 0}
+		)
+		with self.assertRaises(frappe.NameError):
+			group.insert()
+
+		group.customer_group_name = "_Test Group To Rename"
+		group.insert()
+		with self.assertRaises(frappe.NameError):
+			frappe.rename_doc("Customer Group", group.name, customer.name)
+
 	def test_invalid_party_accounts(self):
 		group = frappe.new_doc("Customer Group")
 		group.customer_group_name = "_Test Invalid Group Accounts"
