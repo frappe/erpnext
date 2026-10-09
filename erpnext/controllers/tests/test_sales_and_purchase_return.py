@@ -249,6 +249,55 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, return_pr.insert)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_purchase_receipt_multi_row_mixed_uom_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [
+					{"uom": "Nos", "conversion_factor": 1},
+					{"uom": "Box", "conversion_factor": 10},
+				],
+			}
+		).name
+
+		pr = make_purchase_receipt(
+			item_code=item_code, qty=1, uom="Nos", stock_uom="Nos", conversion_factor=1, do_not_submit=True
+		)
+		pr.append(
+			"items",
+			dict(
+				pr.items[0].as_dict(no_default_fields=True),
+				uom="Box",
+				qty=1,
+				received_qty=1,
+				conversion_factor=10,
+				stock_qty=10,
+			),
+		)
+		pr.submit()
+
+		# Return the Box row (10 stock units); should succeed against total 11 stock units
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items.pop(0)
+		return_pr.items[0].received_qty = -1
+		return_pr.insert()
+		return_pr.submit()
+		self.assertEqual(return_pr.docstatus, 1)
+
+		# Returning more than remaining 1 stock unit must be rejected
+		return_pr2 = make_return_doc("Purchase Receipt", pr.name)
+		return_pr2.items = [return_pr2.items[0]]
+		return_pr2.items[0].purchase_receipt_item = None
+		return_pr2.items[0].qty = -2
+		return_pr2.items[0].received_qty = -2
+		self.assertRaises(frappe.ValidationError, return_pr2.insert)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

@@ -293,7 +293,10 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	key = ref_item_row.item_code
-	if ref_item_row.get("name"):
+	is_aggregate = not ref_item_row.get("name")
+	conversion_factor = flt(ref_item_row.get("conversion_factor") or 1)
+
+	if not is_aggregate:
 		key = (ref_item_row.item_code, ref_item_row.name)
 
 	valid_items.setdefault(
@@ -306,7 +309,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 				"rejected_qty": 0,
 				"received_qty": 0,
 				"serial_no": [],
-				"conversion_factor": ref_item_row.get("conversion_factor", 1),
+				"conversion_factor": 1.0 if is_aggregate else conversion_factor,
 				"batch_no": [],
 			}
 		),
@@ -318,8 +321,12 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		item_dict["rate"] = ref_item_row.get("rate", 0)
 
 	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-		item_dict["received_qty"] += ref_item_row.received_qty
-		item_dict["rejected_qty"] += ref_item_row.rejected_qty
+		if is_aggregate:
+			item_dict["received_qty"] += flt(ref_item_row.received_qty) * conversion_factor
+			item_dict["rejected_qty"] += flt(ref_item_row.rejected_qty) * conversion_factor
+		else:
+			item_dict["received_qty"] += ref_item_row.received_qty
+			item_dict["rejected_qty"] += ref_item_row.rejected_qty
 
 	if ref_item_row.get("serial_no"):
 		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
