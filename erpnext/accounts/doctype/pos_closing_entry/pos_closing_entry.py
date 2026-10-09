@@ -323,17 +323,7 @@ def get_payment_rows_by_invoice(invoices):
 		)
 		.where(
 			(SalesInvoicePayment.parenttype.isin(["Sales Invoice", "POS Invoice"]))
-<<<<<<< HEAD
-			& (SalesInvoicePayment.parent.isin(invoices_name))
-		)
-		.groupby(SalesInvoicePayment.mode_of_payment)
-		.select(
-			SalesInvoicePayment.mode_of_payment,
-			SalesInvoicePayment.account,
-			fn.Sum(SalesInvoicePayment.amount).as_("amount"),
-=======
 			& (SalesInvoicePayment.parent.isin([d.name for d in invoices]))
->>>>>>> 83904a6 (fix(accounts): take POS change off one payment row per invoice (#59514))
 		)
 		.orderby(SalesInvoicePayment.idx)
 		.run(as_dict=True)
