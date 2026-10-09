@@ -360,3 +360,50 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(flt(pe_row.get("credit")), flt(gl_entry.credit))
 		self.assertEqual(flt(pe_row.get("debit")), 75000.0)
 		self.assertEqual(flt(pe_row.get("credit")), 0.0)
+
+	def test_refund_payment_entry_with_deduction(self):
+		pe = frappe.new_doc("Payment Entry")
+		pe.company = self.company
+		pe.payment_type = "Pay"
+		pe.party_type = "Customer"
+		pe.party = self.customer
+		pe.paid_from = self.cash
+		pe.paid_to = self.debit_to
+		pe.paid_amount = 1000
+		pe.received_amount = 1000
+		pe.reference_no = "Test002"
+		pe.reference_date = today()
+		pe.append(
+			"deductions",
+			{"account": "_Test Write Off - _TC", "cost_center": self.cost_center, "amount": 100},
+		)
+		pe.setup_party_account_field()
+		pe.set_missing_values()
+		pe.set_exchange_rate()
+		pe.set_amounts()
+		pe.insert()
+		pe.submit()
+
+		gl_entry = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pe.name, "account": self.debit_to, "is_cancelled": 0},
+			["debit", "credit"],
+			as_dict=True,
+		)
+
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"include_payments": True,
+				"customer": self.customer,
+			}
+		)
+		rows = execute(filters)[1]
+		pe_row = next(x for x in rows if x.get("voucher_no") == pe.name)
+
+		self.assertEqual(flt(pe_row.get("debit")), flt(gl_entry.debit))
+		self.assertEqual(flt(pe_row.get("credit")), flt(gl_entry.credit))
+		self.assertEqual(flt(pe_row.get("debit")), 900.0)
+		self.assertEqual(flt(pe_row.get("credit")), 0.0)

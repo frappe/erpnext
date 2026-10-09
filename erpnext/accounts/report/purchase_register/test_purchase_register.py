@@ -220,6 +220,53 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(flt(pe_row.get("debit")), 75000.0)
 		self.assertEqual(flt(pe_row.get("credit")), 0.0)
 
+	def test_payment_entry_with_deduction(self):
+		payable = "Creditors - _TC"
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.company = "_Test Company"
+		pe.payment_type = "Pay"
+		pe.party_type = "Supplier"
+		pe.party = "_Test Supplier"
+		pe.paid_from = "Cash - _TC"
+		pe.paid_to = payable
+		pe.paid_amount = 1000
+		pe.received_amount = 1000
+		pe.reference_no = "Test002"
+		pe.reference_date = today()
+		pe.append(
+			"deductions",
+			{"account": "_Test Write Off - _TC", "cost_center": "Main - _TC", "amount": 100},
+		)
+		pe.setup_party_account_field()
+		pe.set_missing_values()
+		pe.set_exchange_rate()
+		pe.set_amounts()
+		pe.insert()
+		pe.submit()
+
+		gl_entry = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pe.name, "account": payable, "is_cancelled": 0},
+			["debit", "credit"],
+			as_dict=True,
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier="_Test Supplier",
+		)
+		rows = execute(filters)[1]
+		pe_row = next(x for x in rows if x.get("voucher_no") == pe.name)
+
+		self.assertEqual(flt(pe_row.get("credit")), flt(gl_entry.debit))
+		self.assertEqual(flt(pe_row.get("debit")), flt(gl_entry.credit))
+		self.assertEqual(flt(pe_row.get("credit")), 900.0)
+		self.assertEqual(flt(pe_row.get("debit")), 0.0)
+
 
 def make_purchase_invoice():
 	from erpnext.accounts.doctype.account.test_account import create_account
