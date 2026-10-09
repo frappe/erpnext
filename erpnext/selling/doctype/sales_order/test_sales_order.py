@@ -1239,8 +1239,10 @@ class TestSalesOrder(ERPNextTestSuite):
 
 	def test_unconfigured_uom_rejected_when_uoms_are_restricted(self):
 		item = make_item(
-			uoms=[{"uom": "Box", "conversion_factor": 12}, {"uom": "Kg", "conversion_factor": 0}]
+			uoms=[{"uom": "Box", "conversion_factor": 12}, {"uom": "Kg", "conversion_factor": 1}]
 		)
+		# Simulate a legacy conversion factor that Item validation no longer permits.
+		item.uoms[1].db_set("conversion_factor", 0)
 
 		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
 			for uom in ("Pair", "Kg"):
