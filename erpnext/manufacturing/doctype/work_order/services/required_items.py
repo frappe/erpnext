@@ -22,7 +22,7 @@ from erpnext.manufacturing.doctype.work_order.services.reservation import (
 )
 from erpnext.manufacturing.doctype.work_order.services.status import StatusService
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.utils import get_bin, get_latest_stock_qty
+from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items
 
 
 class RequiredItemsService:
@@ -64,12 +64,23 @@ class RequiredItemsService:
 		return check_if_scrap_warehouse_mandatory(self.doc.bom_no)
 
 	def set_available_qty(self):
+		items_by_warehouse = {}
+		for d in self.doc.get("required_items"):
+			for warehouse in (d.source_warehouse, self.doc.wip_warehouse):
+				if warehouse:
+					items_by_warehouse.setdefault(warehouse, set()).add(d.item_code)
+
+		available_qty = get_latest_stock_qty_for_items(items_by_warehouse)
 		for d in self.doc.get("required_items"):
 			if d.source_warehouse:
-				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				d.available_qty_at_source_warehouse = available_qty.get(
+					(d.item_code, d.source_warehouse), 0.0
+				)
 
 			if self.doc.wip_warehouse:
-				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.doc.wip_warehouse)
+				d.available_qty_at_wip_warehouse = available_qty.get(
+					(d.item_code, self.doc.wip_warehouse), 0.0
+				)
 
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
 		"""set required_items for production to keep track of reserved qty"""
