@@ -113,7 +113,11 @@ def get_shareholder_condition(share_transfer, shareholder: str):
 	condition = (share_transfer.to_shareholder == shareholder) | (
 		share_transfer.from_shareholder == shareholder
 	)
-	is_company, company = frappe.db.get_value("Shareholder", shareholder, ["is_company", "company"])
+	shareholder_details = frappe.db.get_value("Shareholder", shareholder, ["is_company", "company"])
+	if not shareholder_details:
+		return condition
+
+	is_company, company = shareholder_details
 	if is_company:
 		condition |= (share_transfer.company == company) & share_transfer.transfer_type.isin(
 			["Issue", "Purchase"]

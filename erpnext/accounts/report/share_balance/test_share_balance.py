@@ -23,6 +23,14 @@ class TestShareBalanceReport(ERPNextTestSuite):
 		self.assertEqual(data, [])
 		self.assertEqual(len(columns), 5)
 
+	def test_missing_shareholder_returns_empty_data(self):
+		_columns, data = execute(
+			frappe._dict(
+				{"date": "2026-06-01", "company": COMPANY, "shareholder": "_Test Missing Shareholder"}
+			)
+		)
+		self.assertEqual(data, [])
+
 	def test_balance_after_issue(self):
 		create_share_transfer(
 			transfer_type="Issue",
