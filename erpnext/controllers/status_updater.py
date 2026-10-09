@@ -315,6 +315,7 @@ class StatusUpdater(Document):
 
 		sl = status_map[self.doctype][:]
 		sl.reverse()
+		doc_dict = self.as_dict()
 
 		for s in sl:
 			if not s[1]:
@@ -324,7 +325,7 @@ class StatusUpdater(Document):
 					s[1][5:],
 					None,
 					{
-						"self": self.as_dict(),
+						"self": doc_dict,
 						"getdate": getdate,
 						"nowdate": nowdate,
 						"get_value": frappe.db.get_value,
