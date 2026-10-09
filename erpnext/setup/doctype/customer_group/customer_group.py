@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
-from erpnext.accounts.party import validate_party_accounts
+from erpnext.accounts.party import validate_customer_default_price_list, validate_party_accounts
 
 
 class CustomerGroup(NestedSet):
@@ -48,6 +48,7 @@ class CustomerGroup(NestedSet):
 		):
 			frappe.throw(_("Cannot make Customer Group {0} a group while it has customers").format(self.name))
 		validate_party_accounts(self)
+		validate_customer_default_price_list(self)
 		self.validate_currency_for_receivable_and_advance_account()
 
 	def validate_currency_for_receivable_and_advance_account(self):

@@ -27,6 +27,18 @@ class TestCustomerGroup(ERPNextTestSuite):
 		with self.assertRaises(frappe.NameError):
 			frappe.rename_doc("Customer Group", group.name, customer.name)
 
+	def test_buying_price_list_cannot_be_group_default(self):
+		group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Buying Price Group",
+				"is_group": 0,
+				"default_price_list": "Standard Buying",
+			}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			group.insert()
+
 	def test_leaf_with_customers_cannot_become_group(self):
 		group = frappe.get_doc(
 			{"doctype": "Customer Group", "customer_group_name": "_Test Leaf With Customer", "is_group": 0}
