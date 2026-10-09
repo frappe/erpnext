@@ -19,3 +19,11 @@ class TestDriver(unittest.TestCase):
 		)
 		with self.assertRaises(frappe.ValidationError):
 			driver.insert()
+
+	def test_fleet_manager_can_maintain_drivers(self):
+		user = f"fleet-{frappe.generate_hash(length=10)}@example.com"
+		frappe.get_doc(
+			{"doctype": "User", "email": user, "first_name": "Fleet", "send_welcome_email": 0}
+		).insert().add_roles("Fleet Manager")
+		for permission in ("create", "write", "delete"):
+			self.assertTrue(frappe.has_permission("Driver", permission, user=user))
