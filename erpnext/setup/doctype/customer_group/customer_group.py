@@ -40,6 +40,13 @@ class CustomerGroup(NestedSet):
 			self.parent_customer_group = get_root_of("Customer Group")
 		if frappe.db.exists("Customer", self.name):
 			frappe.throw(_("A Customer exists with the same name: {0}").format(self.name), frappe.NameError)
+		if (
+			self.is_group
+			and not self.is_new()
+			and not frappe.db.get_value("Customer Group", self.name, "is_group")
+			and frappe.db.exists("Customer", {"customer_group": self.name})
+		):
+			frappe.throw(_("Cannot make Customer Group {0} a group while it has customers").format(self.name))
 		validate_party_accounts(self)
 		self.validate_currency_for_receivable_and_advance_account()
 

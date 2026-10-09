@@ -27,6 +27,22 @@ class TestCustomerGroup(ERPNextTestSuite):
 		with self.assertRaises(frappe.NameError):
 			frappe.rename_doc("Customer Group", group.name, customer.name)
 
+	def test_leaf_with_customers_cannot_become_group(self):
+		group = frappe.get_doc(
+			{"doctype": "Customer Group", "customer_group_name": "_Test Leaf With Customer", "is_group": 0}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Customer In Leaf",
+				"customer_type": "Individual",
+				"customer_group": group.name,
+			}
+		).insert()
+		group.is_group = 1
+		with self.assertRaises(frappe.ValidationError):
+			group.save()
+
 	def test_invalid_party_accounts(self):
 		group = frappe.new_doc("Customer Group")
 		group.customer_group_name = "_Test Invalid Group Accounts"
