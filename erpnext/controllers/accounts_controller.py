@@ -4238,6 +4238,7 @@ def update_child_qty_rate(
 	any_conversion_factor_changed = False
 
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+	rfqs_before_update = set()
 
 	check_doc_permissions(parent, "write")
 
@@ -4245,6 +4246,7 @@ def update_child_qty_rate(
 		ordered_items = get_ordered_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, ordered_items)
 	elif parent_doctype == "Supplier Quotation":
+		rfqs_before_update = parent.get_request_for_quotations()
 		purchased_items = get_purchased_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, purchased_items)
 	else:
@@ -4469,7 +4471,7 @@ def update_child_qty_rate(
 		parent.update_delivery_status()
 
 	elif parent_doctype == "Supplier Quotation":
-		parent.update_rfq_supplier_status(parent.docstatus.is_submitted())
+		parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), rfqs_before_update)
 
 	parent.reload()
 	validate_workflow_conditions(parent)
