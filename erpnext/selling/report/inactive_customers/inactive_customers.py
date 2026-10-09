@@ -51,11 +51,16 @@ def get_sales_details(doctype):
 			.when(sales.status == "Closed", sales.base_net_total * sales.per_delivered / 100)
 			.else_(sales.base_net_total)
 		)
+		num_of_order = Count(sales.name).distinct()
+		last_order_date = Max(date_col)
 	else:
 		date_col = sales.posting_date
 		considered = Sum(sales.base_net_total)
+		# a credit note is not an order: keep it out of the count and the recency
+		not_return = sales.is_return == 0
+		num_of_order = Count(Case().when(not_return, sales.name)).distinct()
+		last_order_date = Max(Case().when(not_return, date_col))
 
-	last_order_date = Max(date_col)
 	days_since_last_order = DateDiff(CurDate(), last_order_date)
 
 	query = (
@@ -67,7 +72,7 @@ def get_sales_details(doctype):
 			customer.customer_name,
 			customer.territory,
 			customer.customer_group,
-			Count(sales.name).distinct().as_("num_of_order"),
+			num_of_order.as_("num_of_order"),
 			Sum(sales.base_net_total).as_("total_order_value"),
 			considered.as_("total_order_considered"),
 			last_order_date.as_("last_order_date"),
@@ -97,6 +102,8 @@ def get_last_order_amounts(doctype, customers):
 		)
 		.where((sales.docstatus == 1) & sales.customer.isin(customers))
 	)
+	if doctype == "Sales Invoice":
+		ranked = ranked.where(sales.is_return == 0)
 	if condition := get_allowed_companies_condition(sales.company, doctype):
 		ranked = ranked.where(condition)
 

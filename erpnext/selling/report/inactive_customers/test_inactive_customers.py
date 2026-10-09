@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.inactive_customers.inactive_customers import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -57,3 +58,25 @@ class TestInactiveCustomers(ERPNextTestSuite):
 		row = self.get_customer_row(data)
 		self.assertEqual(row.total_order_value, 1000)
 		self.assertEqual(row.total_order_considered, 500)
+
+	def test_credit_note_does_not_reset_recency(self):
+		customer = frappe.get_doc(doctype="Customer", customer_name="_Test Inactive SI Customer").insert()
+		invoice = create_sales_invoice(
+			customer=customer.name, posting_date=self.last_order_date, qty=1, rate=1000
+		)
+		create_sales_invoice(
+			customer=customer.name,
+			posting_date=today(),
+			qty=-1,
+			rate=1000,
+			is_return=1,
+			return_against=invoice.name,
+		)
+
+		_columns, data = execute({"doctype": "Sales Invoice", "days_since_last_order": 30})
+		row = self.get_customer_row(data, customer.name)
+
+		self.assertIsNotNone(row, "Credit note must not drop the customer from the inactive list")
+		self.assertEqual(row.num_of_order, 1)  # the return is not an order
+		self.assertEqual(row.last_order_amount, 1000)  # not the -1000 credit note
+		self.assertEqual(getdate(row.last_order_date), getdate(self.last_order_date))
