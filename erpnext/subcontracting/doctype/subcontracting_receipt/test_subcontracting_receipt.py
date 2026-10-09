@@ -542,6 +542,65 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(additional_costs, flt(scr.items[0].additional_cost_per_qty * 5, 2))
 
+	def test_multi_row_return_keeps_original_additional_cost_per_qty(self):
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": rate,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for service_item, fg_item, rate in (
+				("Subcontracted Service Item 7", "Subcontracted Item SA7", 100),
+				("Subcontracted Service Item 8", "Subcontracted Item SA8", 300),
+			)
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "Test Additional Costs",
+				"amount": 3000,
+				"base_amount": 3000,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		costs_after_save = [row.additional_cost_per_qty for row in scr_return.items]
+		scr_return.get_secondary_items(recalculate_rate=True)
+
+		for return_row, original_row, cost_after_save in zip(
+			scr_return.items, scr.items, costs_after_save, strict=True
+		):
+			self.assertEqual(flt(cost_after_save, 2), flt(original_row.additional_cost_per_qty, 2))
+			self.assertEqual(
+				flt(return_row.additional_cost_per_qty, 2), flt(original_row.additional_cost_per_qty, 2)
+			)
+
 	def test_ledger_preview(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
