@@ -32,14 +32,26 @@ def get_scheduled_employees_for_popup(communication_medium):
 	)
 
 	available_employee_groups = tuple([emp.employee_group for emp in available_employee_groups])
+<<<<<<< HEAD
+=======
+	if not available_employee_groups and medium and medium.catch_all:
+		available_employee_groups = (medium.catch_all,)
+	if not available_employee_groups:
+		return set()
+>>>>>>> e302a8a (fix(employee-group): resolve current active call recipients)
 
-	employees = frappe.get_all(
-		"Employee Group Table", filters={"parent": ["in", available_employee_groups]}, fields=["user_id"]
+	member = frappe.qb.DocType("Employee Group Table")
+	employee = frappe.qb.DocType("Employee")
+	return set(
+		frappe.qb.from_(member)
+		.join(employee)
+		.on(member.employee == employee.name)
+		.select(employee.user_id)
+		.where(member.parent.isin(available_employee_groups))
+		.where(employee.status == "Active")
+		.where(employee.user_id.isnotnull() & (employee.user_id != ""))
+		.run(pluck=True)
 	)
-
-	employee_emails = set([employee.user_id for employee in employees])
-
-	return employee_emails
 
 
 def strip_number(number):
