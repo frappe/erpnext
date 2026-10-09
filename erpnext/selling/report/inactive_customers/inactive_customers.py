@@ -23,7 +23,7 @@ def execute(filters=None):
 
 	days_since_last_order = cint(filters.get("days_since_last_order"))
 	if days_since_last_order <= 0:
-		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
+		frappe.throw(_("'Days Since Last Order' must be greater than zero"))
 
 	return get_columns(doctype), get_data(doctype, days_since_last_order)
 
