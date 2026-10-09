@@ -242,13 +242,17 @@ class BOMCreator(Document):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
 
 	def validate_operations_have_routing(self):
-		if self.is_phantom or self.routing or not self.has_operations():
+		if self.is_phantom or self.routing:
 			return
 
-		frappe.throw(
-			_("A Routing is required to create BOMs for items with operations"),
-			title=_("Routing Required"),
-		)
+		for row in self.items:
+			if row.operation:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} has Operation {2}. Set a Routing to create BOMs with operations."
+					).format(row.idx, bold(row.item_code), bold(row.operation)),
+					title=_("Routing Required"),
+				)
 
 	def on_submit(self):
 		self.enqueue_bom_creation()
