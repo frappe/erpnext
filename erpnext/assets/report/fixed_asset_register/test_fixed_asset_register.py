@@ -281,3 +281,18 @@ class TestFixedAssetRegister(AssetSetup):
 		row = self.report_row(asset.name)
 		self.assertEqual(row["depreciated_amount"], 30000)
 		self.assertEqual(row["asset_value"], 70000)
+
+	def test_asset_disposed_after_period_keeps_its_value(self):
+		period = dict(
+			filter_based_on="Date Range",
+			from_date="2015-01-01",
+			to_date="2020-12-31",
+			date_based_on="Purchase Date",
+		)
+		asset = create_asset(item_code="Macbook Pro", net_purchase_amount=100000, submit=True)
+		group_value = self.run_report(group_by="Asset Category", **period)[0]["asset_value"]
+		scrap_asset(asset.name, "2021-06-30")
+
+		self.assertEqual(self.report_row(asset.name, **period)["asset_value"], 100000)
+		self.assertEqual(self.run_report(group_by="Asset Category", **period)[0]["asset_value"], group_value)
+		self.assertEqual(self.report_row(asset.name, **dict(period, to_date="2021-12-31"))["asset_value"], 0)

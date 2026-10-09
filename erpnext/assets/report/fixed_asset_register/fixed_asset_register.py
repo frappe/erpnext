@@ -53,10 +53,16 @@ def get_data(filters):
 	revaluation_amount_map = get_asset_value_adjustment_map(filters, finance_book)
 
 	group_by = frappe.scrub(filters.get("group_by"))
+	end_date = get_report_end_date(filters)
 
 	if group_by in ("asset_category", "location"):
 		data = get_group_by_data(
-			group_by, conditions, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map
+			group_by,
+			conditions,
+			assets_linked_to_fb,
+			depreciation_amount_map,
+			revaluation_amount_map,
+			end_date,
 		)
 		return data
 
@@ -76,6 +82,7 @@ def get_data(filters):
 		"available_for_use_date",
 		"purchase_invoice",
 		"opening_accumulated_depreciation",
+		"disposal_date",
 	]
 	assets_record = frappe.get_list("Asset", filters=conditions, fields=fields)
 
@@ -85,7 +92,7 @@ def get_data(filters):
 
 		depreciation_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
 		revaluation_amount = revaluation_amount_map.get(asset.asset_id, 0.0)
-		asset_value = get_asset_value(asset, depreciation_amount, revaluation_amount)
+		asset_value = get_asset_value(asset, depreciation_amount, revaluation_amount, end_date)
 
 		row = {
 			"asset_id": asset.asset_id,
@@ -110,9 +117,9 @@ def get_data(filters):
 	return data
 
 
-def get_asset_value(asset, depreciation_amount: float, revaluation_amount: float) -> float:
-	"""A disposed asset is no longer in the books, so it carries no value."""
-	if asset.status in ("Sold", "Scrapped", "Capitalized"):
+def get_asset_value(asset, depreciation_amount: float, revaluation_amount: float, end_date=None) -> float:
+	"""An asset disposed by the end of the period is no longer in the books, so it carries no value."""
+	if is_disposed_by(asset, end_date):
 		return 0.0
 
 	return (
@@ -121,6 +128,20 @@ def get_asset_value(asset, depreciation_amount: float, revaluation_amount: float
 		- depreciation_amount
 		+ revaluation_amount
 	)
+
+
+def is_disposed_by(asset, end_date) -> bool:
+	if asset.status not in ("Sold", "Scrapped", "Capitalized"):
+		return False
+
+	return not (end_date and asset.disposal_date) or getdate(asset.disposal_date) <= getdate(end_date)
+
+
+def get_report_end_date(filters):
+	if filters.filter_based_on == "Date Range":
+		return filters.to_date
+	if filters.filter_based_on == "Fiscal Year":
+		return filters.year_end_date
 
 
 def get_conditions(filters):
@@ -357,7 +378,7 @@ def get_asset_value_adjustment_map(filters, finance_book):
 
 
 def get_group_by_data(
-	group_by, conditions, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map
+	group_by, conditions, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map, end_date
 ):
 	fields = [
 		group_by,
@@ -366,6 +387,7 @@ def get_group_by_data(
 		"opening_accumulated_depreciation",
 		"calculate_depreciation",
 		"status",
+		"disposal_date",
 	]
 	assets = frappe.get_list("Asset", filters=conditions, fields=fields)
 
@@ -377,11 +399,12 @@ def get_group_by_data(
 
 		a["depreciated_amount"] = depreciation_amount_map.get(a["name"], 0.0)
 		a["revaluation_amount"] = revaluation_amount_map.get(a["name"], 0.0)
-		a["asset_value"] = get_asset_value(a, a["depreciated_amount"], a["revaluation_amount"])
+		a["asset_value"] = get_asset_value(a, a["depreciated_amount"], a["revaluation_amount"], end_date)
 
 		del a["name"]
 		del a["calculate_depreciation"]
 		del a["status"]
+		del a["disposal_date"]
 
 		idx = ([i for i, d in enumerate(data) if a[group_by] == d[group_by]] or [None])[0]
 		if idx is None:
