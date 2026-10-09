@@ -65,3 +65,10 @@ class Campaign(Document):
 			self.name = self.campaign_name
 		else:
 			set_name_by_naming_series(self)
+
+
+@frappe.whitelist()
+def get_utm_campaign(campaign: str) -> str:
+	"""UTM Campaign that the campaign's leads link to, for users who can read the campaign."""
+	frappe.has_permission("Campaign", "read", campaign, throw=True)
+	return frappe.db.get_value("UTM Campaign", {"crm_campaign": campaign}) or campaign

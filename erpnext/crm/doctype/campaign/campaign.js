@@ -15,10 +15,12 @@ frappe.ui.form.on("Campaign", {
 				__("View Leads"),
 				function () {
 					// leads link to the UTM Campaign mirror, named after campaign_name
-					frappe.db
-						.get_value("UTM Campaign", { crm_campaign: frm.doc.name }, "name")
+					frappe
+						.call("erpnext.crm.doctype.campaign.campaign.get_utm_campaign", {
+							campaign: frm.doc.name,
+						})
 						.then(({ message }) => {
-							frappe.route_options = { utm_campaign: message?.name || frm.doc.name };
+							frappe.route_options = { utm_campaign: message };
 							frappe.set_route("List", "Lead");
 						});
 				},
