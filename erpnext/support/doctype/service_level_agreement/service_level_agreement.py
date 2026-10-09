@@ -547,7 +547,10 @@ def stays_resolved(doc) -> bool:
 	"""A document that remains resolved keeps the SLA outcome it was resolved with."""
 	if doc.is_new() or not doc.get("service_level_agreement"):
 		return False
-	if doc.has_value_changed("service_level_agreement") or doc.has_value_changed("priority"):
+	if any(
+		doc.has_value_changed(field)
+		for field in ("service_level_agreement", "priority", "service_level_agreement_creation")
+	):
 		return False
 
 	fulfillment_statuses = get_fulfillment_statuses(doc.service_level_agreement)

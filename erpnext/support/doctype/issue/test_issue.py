@@ -393,6 +393,22 @@ class TestIssue(TestSetUp):
 		update_agreement_status_on_custom_status(issue)
 		self.assertEqual(issue.agreement_status, "Resolution Due")
 
+	def test_resetting_sla_of_resolved_issue_recalculates_deadlines(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		issue.status = "Closed"
+		issue.save()
+		old_response_by = issue.response_by
+
+		reset_service_level_agreement("Issue", issue.name, "customer asked")
+		issue.reload()
+		self.assertGreater(get_datetime(issue.response_by), get_datetime(old_response_by))
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
