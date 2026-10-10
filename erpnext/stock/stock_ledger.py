@@ -2024,7 +2024,7 @@ class update_entries_after:
 				[0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate]
 			)
 
-		if self.wh_data.qty_after_transaction:
+		if flt(self.wh_data.qty_after_transaction, self.flt_precision):
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def is_return_purchase_entry(self, sle):
