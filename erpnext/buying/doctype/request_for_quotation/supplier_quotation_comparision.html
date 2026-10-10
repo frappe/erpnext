@@ -1,0 +1,292 @@
+<style>
+	.quotations-table {
+		width: auto;
+		min-width: 0;
+		border-collapse: separate;
+		border-spacing: 0;
+		border: 1px solid var(--border-color);
+		border-radius: var(--radius-md, 8px);
+		overflow: hidden;
+		margin: 0;
+		background: transparent;
+	}
+	.quotations-table thead th {
+		background-color: #F3F3F3;
+		color: #171717;
+		border-color: var(--border-color);
+		border-top: none;
+		font-weight: 600;
+		vertical-align: middle;
+	}
+	.quotations-table thead tr:first-child th:first-child {
+		border-top-left-radius: var(--radius-md, 8px);
+	}
+	.quotations-table thead tr:first-child th:last-child {
+		border-top-right-radius: var(--radius-md, 8px);
+	}
+	.quotations-table tbody tr:last-child td:first-child {
+		border-bottom-left-radius: var(--radius-md, 8px);
+	}
+	.quotations-table tbody tr:last-child td:last-child {
+		border-bottom-right-radius: var(--radius-md, 8px);
+	}
+	.quotations-table th a,
+	.quotations-table td a.supplier-link,
+	.quotations-table td a.quotation-link {
+		color: #171717;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.quotations-table .supplier-link {
+		font-weight: 600;
+	}
+	.quotations-table .quotation-link {
+		font-weight: 400;
+	}
+
+	.quotations-filters-bar .frappe-control {
+		position: relative;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		width: 100%;
+	}
+	.quotations-filters-bar select.form-control,
+	.quotations-filters-bar select.input-with-feedback {
+		height: 28px;
+		min-height: 28px;
+		padding: 4px 28px 4px 12px;
+		background-color: var(--control-bg, var(--surface-gray-2, #f4f5f6));
+		border: 1px solid transparent;
+		border-radius: var(--radius-sm, 6px);
+		color: var(--text-color, #171717);
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.4;
+		cursor: pointer;
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		width: 100%;
+	}
+	.quotations-filters-bar select.form-control:hover,
+	.quotations-filters-bar select.input-with-feedback:hover {
+		background-color: var(--control-bg-on-gray, var(--surface-gray-3, #ebebeb));
+	}
+	.quotations-filters-bar select.form-control:focus,
+	.quotations-filters-bar select.input-with-feedback:focus {
+		background-color: var(--card-bg, #ffffff);
+		border-color: var(--outline-gray-3, #c7c7c7);
+		box-shadow: var(--focus-default);
+	}
+	.quotations-filters-bar .select-icon {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		pointer-events: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+		padding: 0;
+		line-height: 1;
+	}
+	.quotations-filters-bar .select-icon svg,
+	.quotations-filters-bar .select-icon .icon {
+		width: 12px;
+		height: 12px;
+		display: block;
+		stroke: var(--text-muted, #7c7c7c);
+	}
+</style>
+<div class="quotations-tab-wrapper my-2 w-full">
+	<div class="flex justify-end items-center w-full mb-3 gap-2.5 quotations-filters-bar">
+		<div class="item-filter-container" style="min-width: 180px; max-width: 240px;"></div>
+		<div class="categorize-by-filter-container" style="min-width: 200px; max-width: 240px;"></div>
+	</div>
+
+	<div class="quotations-tab-container">
+		<div class="table-responsive">
+			<table class="table table-bordered quotations-table mb-0">
+				<thead>
+					{% if (categorize_by === "Supplier") { %}
+						<tr>
+							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
+							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Item") }}</th>
+							{% if (suppliers && suppliers.length) { %}
+								{% for (let s = 0; s < suppliers.length; s++) {
+									const sup = suppliers[s];
+									const sq = (quotes || []).find(q => q.supplier === sup)?.supplier_quotation;
+								%}
+									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
+										<div class="flex items-center justify-center gap-1 truncate" title="{{ frappe.utils.escape_html(sup) }}{% if (sq) { %} : {{ frappe.utils.escape_html(sq) }}{% } %}">
+											<div>
+												{{ frappe.utils.escape_html(sup) }}
+											</div>
+											{% if (sq) { %}
+												<span class="whitespace-nowrap">:</span>
+												<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ frappe.utils.escape_html(sq) }}">{{ frappe.utils.escape_html(sq) }}</a>
+											{% } %}
+										</div>
+									</th>
+								{% } %}
+							{% } %}
+						</tr>
+					{% } else { %}
+						<tr>
+							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
+							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Supplier") }}</th>
+							{% if (items && items.length) { %}
+								{% for (let it = 0; it < items.length; it++) { const itm = items[it]; %}
+									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
+										{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}
+									</th>
+								{% } %}
+							{% } %}
+						</tr>
+					{% } %}
+				</thead>
+				<tbody>
+					{% if (categorize_by === "Supplier") { %}
+						{% for (let idx = 0; idx < items.length; idx++) { const item = items[idx]; %}
+							<tr>
+								<td style="width: 50px; text-align: center; vertical-align: middle;">
+									{{ idx + 1 }}
+								</td>
+								<td style="width: 200px; min-width: 160px; vertical-align: middle; font-size: 14px;">
+									{{ frappe.utils.escape_html(item.item_name || item.item_code) }}
+								</td>
+								{% for (let s = 0; s < suppliers.length; s++) { %}
+									{%
+										const sup = suppliers[s];
+										const q = quote_map[item.item_code + ":::" + sup];
+										const is_lowest = q && min_rates[item.item_code] !== undefined && Math.abs(q.converted_rate - min_rates[item.item_code]) < 0.0001;
+									%}
+									{% if (!q) { %}
+										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
+									{% } else { %}
+										<td style="vertical-align: middle; padding: 6px;">
+											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
+													<span>{{ item.qty || q.qty || "" }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
+													<span>{{ frappe.utils.escape_html(item.uom || q.uom || "") }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
+													<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
+													<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+												</div>
+												<div class="flex justify-between items-center">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
+													<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
+												</div>
+											</div>
+										</td>
+									{% } %}
+								{% } %}
+							</tr>
+						{% } %}
+						{% if (items && items.length) { %}
+							<tr style="background-color: var(--card-bg, #ffffff);">
+								<td colspan="2" class="text-center font-weight-bold" style="vertical-align: middle; padding: 12px 16px; font-weight: 600; font-size: 13px; color: #171717;">
+									{{ __("Total Price") }}
+								</td>
+								{% for (let s = 0; s < suppliers.length; s++) { %}
+									{%
+										const sup = suppliers[s];
+										const total = supplier_totals && supplier_totals[sup];
+										const is_cheapest = total !== undefined && min_supplier_total !== null && Math.abs(total - min_supplier_total) < 0.0001;
+									%}
+									{% if (total === undefined) { %}
+										<td class="text-center text-muted" style="vertical-align: middle; padding: 12px 18px; font-size: 13px;">-</td>
+									{% } else { %}
+										<td class="text-right font-weight-bold" style="text-align: right; vertical-align: middle; padding: 12px 18px; font-size: 13px;">
+											<span class="{% if (is_cheapest) { %}text-ink-green-7 font-weight-bold{% } %}">
+												{{ format_currency(total, company_currency) }}
+											</span>
+										</td>
+									{% } %}
+								{% } %}
+							</tr>
+						{% } %}
+					{% } else { %}
+						{% for (let idx = 0; idx < suppliers.length; idx++) {
+							const sup = suppliers[idx];
+							const sq = (quotes || []).find(q => q.supplier === sup)?.supplier_quotation;
+						%}
+							<tr>
+								<td style="width: 50px; text-align: center; vertical-align: middle;">
+									{{ idx + 1 }}
+								</td>
+								<td style="width: 200px; min-width: 160px; vertical-align: middle; font-size: 14px;">
+									<div class="flex flex-col gap-1 truncate" title="{{ frappe.utils.escape_html(sup) }}{% if (sq) { %} : {{ frappe.utils.escape_html(sq) }}{% } %}">
+										<div class="truncate">
+											<span>
+												{{ frappe.utils.escape_html(sup) }}
+											</span>{% if (sq) { %} :{% } %}
+										</div>
+										{% if (sq) { %}
+											<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" title="{{ frappe.utils.escape_html(sq) }}">{{ frappe.utils.escape_html(sq) }}</a>
+										{% } %}
+									</div>
+								</td>
+								{% for (let it = 0; it < items.length; it++) { %}
+									{%
+										const item = items[it];
+										const q = quote_map[item.item_code + ":::" + sup];
+										const is_lowest = q && min_rates[item.item_code] !== undefined && Math.abs(q.converted_rate - min_rates[item.item_code]) < 0.0001;
+									%}
+									{% if (!q) { %}
+										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
+									{% } else { %}
+										<td style="vertical-align: middle; padding: 6px;">
+											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
+													<span>{{ item.qty || q.qty || "" }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
+													<span>{{ frappe.utils.escape_html(item.uom || q.uom || "") }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
+													<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
+													<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+												</div>
+												<div class="flex justify-between items-center">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
+													<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
+												</div>
+											</div>
+										</td>
+									{% } %}
+								{% } %}
+							</tr>
+						{% } %}
+					{% } %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

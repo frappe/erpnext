@@ -5,10 +5,6 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Request for Quotation", {
 	setup: function (frm) {
-		frm.custom_make_buttons = {
-			"Supplier Quotation": "Create",
-		};
-
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
 			return {
@@ -34,6 +30,8 @@ frappe.ui.form.on("Request for Quotation", {
 	},
 
 	refresh: function (frm, cdt, cdn) {
+		frm.trigger("render_quotations_tab");
+
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__("Supplier Quotation"),
@@ -150,13 +148,13 @@ frappe.ui.form.on("Request for Quotation", {
 
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 
-			frm.add_custom_button(
-				__("Supplier Quotation Comparison"),
-				function () {
-					frm.trigger("show_supplier_quotation_comparison");
-				},
-				__("View")
-			);
+			// frm.add_custom_button(
+			// 	__("Supplier Quotation Comparison"),
+			// 	function () {
+			// 		frm.trigger("show_supplier_quotation_comparison");
+			// 	},
+			// 	__("View")
+			// );
 		}
 
 		if (frm.doc.docstatus === 0) {
@@ -225,6 +223,249 @@ frappe.ui.form.on("Request for Quotation", {
 		});
 
 		dialog.show();
+	},
+
+	toggle_quotations_tab: function (frm, show, quotes) {
+		const $tab_li = frm.$wrapper.find(".form-tabs .nav-item").filter(function () {
+			const text = $(this).text().trim();
+			const fieldname = $(this).find(".nav-link").attr("data-fieldname");
+			const href = $(this).find(".nav-link").attr("href") || "";
+			return (
+				text === __("Quotations") ||
+				text === "Quotations" ||
+				fieldname === "quotations_tab" ||
+				href.includes("quotations")
+			);
+		});
+
+		if (!show) {
+			$tab_li.hide().addClass("hide hidden d-none").attr("style", "display: none !important;");
+			if ($tab_li.find(".nav-link.active").length || $tab_li.hasClass("active")) {
+				if (frm.layout && frm.layout.tabs && frm.layout.tabs[0]) {
+					frm.layout.tabs[0].set_active();
+				} else {
+					frm.$wrapper.find(".form-tabs .nav-link").first().trigger("click");
+				}
+			}
+			return;
+		}
+
+		if ($tab_li.length) {
+			$tab_li.show().removeClass("hide hidden d-none").attr("style", "");
+			if (
+				frm.fields_dict &&
+				frm.fields_dict.quotations_html &&
+				frm.fields_dict.quotations_html.$wrapper
+			) {
+				frm.events.draw_quotations_comparison_table(
+					frm,
+					frm.fields_dict.quotations_html.$wrapper,
+					quotes
+				);
+				return;
+			}
+		}
+	},
+
+	render_quotations_tab: function (frm) {
+		if (frm.is_new()) {
+			frm.events.toggle_quotations_tab(frm, false);
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_quotations_data",
+			args: { rfq_name: frm.doc.name },
+			callback: function (r) {
+				const quotes = r.message || [];
+				const has_quotes = Boolean(quotes && quotes.length > 0);
+				frm.events.toggle_quotations_tab(frm, has_quotes, quotes);
+			},
+		});
+	},
+
+	draw_quotations_comparison_table: function (frm, $wrapper, quotes) {
+		$wrapper.empty();
+
+		const company_currency =
+			(frm.doc.company && erpnext.get_currency(frm.doc.company)) ||
+			frappe.boot.sysdefaults.currency ||
+			"";
+
+		const quoted_suppliers = new Set((quotes || []).map((q) => q.supplier).filter(Boolean));
+		const suppliers = (frm.doc.suppliers || [])
+			.map((s) => s.supplier)
+			.filter((sup) => sup && quoted_suppliers.has(sup));
+
+		const all_items = frm.doc.items || [];
+		const selected_item = frm.quotations_item_filter || "";
+		const items = selected_item ? all_items.filter((i) => i.item_code === selected_item) : all_items;
+
+		const quote_map = {};
+		(quotes || []).forEach((q) => {
+			const key = `${q.item_code}:::${q.supplier}`;
+			quote_map[key] = q;
+		});
+
+		// Normalize rates and amounts to RFQ item UOM and company currency
+		all_items.forEach((item) => {
+			const rfq_item_conv = flt(item.conversion_factor) || 1.0;
+			const rfq_qty = flt(item.qty);
+
+			suppliers.forEach((sup) => {
+				const q = quote_map[`${item.item_code}:::${sup}`];
+				if (q) {
+					console.log("q: ", q);
+					const sq_conv = flt(q.conversion_factor) || 1.0;
+					const sq_base_rate = flt(q.base_rate) || flt(q.rate) * (flt(q.conversion_rate) || 1.0);
+					const sq_base_amount =
+						flt(q.base_amount) || flt(q.amount) * (flt(q.conversion_rate) || 1.0);
+
+					// Price per Stock UOM in Base Currency
+					const base_price_per_stock_unit =
+						q.stock_qty && flt(q.stock_qty) > 0
+							? sq_base_amount / flt(q.stock_qty)
+							: sq_base_rate / sq_conv;
+
+					// Rate normalized to RFQ Item's requested UOM in Company Base Currency
+					q.converted_rate = base_price_per_stock_unit * rfq_item_conv;
+
+					// Total Amount normalized for RFQ requested Quantity in Company Base Currency
+					q.converted_amount = rfq_qty > 0 ? q.converted_rate * rfq_qty : sq_base_amount;
+				}
+			});
+		});
+
+		const min_rates = {};
+		all_items.forEach((item) => {
+			const rates = suppliers
+				.map((sup) => quote_map[`${item.item_code}:::${sup}`]?.converted_rate)
+				.filter((r) => r !== undefined && r !== null && r > 0);
+			if (rates.length > 0) {
+				min_rates[item.item_code] = Math.min(...rates);
+			}
+		});
+
+		const supplier_totals = {};
+		suppliers.forEach((sup) => {
+			let total = 0;
+			let has_any = false;
+			items.forEach((item) => {
+				const q = quote_map[`${item.item_code}:::${sup}`];
+				if (q && q.converted_amount !== undefined && q.converted_amount !== null) {
+					total += flt(q.converted_amount);
+					has_any = true;
+				}
+			});
+			if (has_any) {
+				supplier_totals[sup] = total;
+			}
+		});
+
+		const total_values = Object.values(supplier_totals).filter((t) => t > 0);
+		const min_supplier_total = total_values.length > 0 ? Math.min(...total_values) : null;
+
+		const categorize_by = frm.quotations_categorize_by || "Supplier";
+		const has_quotes = quotes && quotes.length > 0;
+
+		const context = {
+			docstatus: frm.doc.docstatus,
+			company_currency: company_currency,
+			suppliers: suppliers,
+			all_items: all_items,
+			items: items,
+			selected_item: selected_item,
+			categorize_by: categorize_by,
+			quotes: quotes || [],
+			quote_map: quote_map,
+			min_rates: min_rates,
+			supplier_totals: supplier_totals,
+			min_supplier_total: min_supplier_total,
+			has_quotes: has_quotes,
+		};
+
+		const html = frappe.render_template("supplier_quotation_comparision", context);
+		const $container = $(html).appendTo($wrapper);
+
+		// Item Filter Control using Frappe UI Control
+		if ($container.find(".item-filter-container").length) {
+			const item_options = [
+				{ label: __("All Items"), value: "" },
+				...all_items.map((itm) => {
+					const label =
+						itm.item_name && itm.item_name !== itm.item_code
+							? `${itm.item_name} (${itm.item_code})`
+							: itm.item_name || itm.item_code;
+					return { label: label, value: itm.item_code };
+				}),
+			];
+
+			const item_control = frappe.ui.form.make_control({
+				df: {
+					fieldtype: "Select",
+					fieldname: "quotations_item_filter",
+					options: item_options,
+					input_class: "input-sm",
+					change: function () {
+						const val = item_control.get_value() || "";
+						if (val !== (frm.quotations_item_filter || "")) {
+							frm.quotations_item_filter = val;
+							frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
+						}
+					},
+				},
+				parent: $container.find(".item-filter-container"),
+				only_input: true,
+			});
+			item_control.set_value(selected_item || "");
+			item_control.refresh();
+			$(item_control.wrapper).css({ position: "relative", width: "100%", margin: "0" });
+			$(item_control.wrapper).find(".select-icon").css({
+				position: "absolute",
+				right: "10px",
+				top: "50%",
+				transform: "translateY(-50%)",
+				"pointer-events": "none",
+			});
+		}
+
+		// Categorize By Control using Frappe UI Control
+		if ($container.find(".categorize-by-filter-container").length) {
+			const categorize_control = frappe.ui.form.make_control({
+				df: {
+					fieldtype: "Select",
+					fieldname: "quotations_categorize_by",
+					options: [
+						{ label: __("Categorize by Supplier"), value: "Supplier" },
+						{ label: __("Categorize by Item"), value: "Item" },
+					],
+					input_class: "input-sm",
+					change: function () {
+						const val = categorize_control.get_value() || "Supplier";
+						if (val !== (frm.quotations_categorize_by || "Supplier")) {
+							frm.quotations_categorize_by = val;
+							frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
+						}
+					},
+				},
+				parent: $container.find(".categorize-by-filter-container"),
+				only_input: true,
+			});
+			categorize_control.set_value(categorize_by || "Supplier");
+			categorize_control.refresh();
+			$(categorize_control.wrapper).css({ position: "relative", width: "100%", margin: "0" });
+			$(categorize_control.wrapper).find(".select-icon").css({
+				position: "absolute",
+				right: "10px",
+				top: "50%",
+				transform: "translateY(-50%)",
+				"pointer-events": "none",
+			});
+		}
+
+		$container.find(".btn-new-supplier-quotation").on("click", function () {
+			frm.trigger("make_supplier_quotation");
+		});
 	},
 
 	schedule_date(frm) {
