@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+from erpnext.accounts.party import validate_customer_default_price_list, validate_party_accounts
+
 
 class CustomerGroup(NestedSet):
 	# begin: auto-generated types
@@ -36,6 +38,22 @@ class CustomerGroup(NestedSet):
 	def validate(self):
 		if not self.parent_customer_group:
 			self.parent_customer_group = get_root_of("Customer Group")
+		if frappe.db.exists("Customer", self.name):
+			frappe.throw(_("A Customer exists with the same name: {0}").format(self.name), frappe.NameError)
+		if (
+			self.is_group
+			and not self.is_new()
+			and not frappe.db.get_value("Customer Group", self.name, "is_group")
+			and frappe.db.exists("Customer", {"customer_group": self.name})
+		):
+			frappe.throw(_("Cannot make Customer Group {0} a group while it has customers").format(self.name))
+		validate_party_accounts(self)
+		validate_customer_default_price_list(self)
+		companies = set()
+		for limit in self.credit_limits:
+			if limit.company in companies:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company))
+			companies.add(limit.company)
 		self.validate_currency_for_receivable_and_advance_account()
 
 	def validate_currency_for_receivable_and_advance_account(self):
@@ -67,6 +85,12 @@ class CustomerGroup(NestedSet):
 						frappe.bold(x.company),
 					)
 				)
+
+	def before_rename(self, olddn, newdn, merge=False):
+		super().before_rename(olddn, newdn, merge)
+		newdn = newdn.strip()
+		if frappe.db.exists("Customer", newdn):
+			frappe.throw(_("A Customer exists with the same name: {0}").format(newdn), frappe.NameError)
 
 	def on_update(self):
 		super().on_update()

@@ -21,6 +21,7 @@ from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
+	validate_customer_default_price_list,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
@@ -192,6 +193,7 @@ class Customer(TransactionBase):
 		self.validate_customer_group()
 		self.validate_lead_not_converted()
 		validate_party_accounts(self)
+		validate_customer_default_price_list(self)
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
@@ -231,8 +233,8 @@ class Customer(TransactionBase):
 		self.payment_terms = self.default_price_list = ""
 
 		tables = [
-			["accounts", ["account"]],
-			["credit_limits", ["credit_limit", "overdue_billing_threshold"]],
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold", "bypass_credit_limit_check"]],
 		]
 		fields = ["payment_terms", "default_price_list"]
 

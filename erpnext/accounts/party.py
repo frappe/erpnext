@@ -395,6 +395,15 @@ def set_other_values(party_details, party, party_type):
 			party_details[f] = party.get("default_" + f)
 
 
+def validate_customer_default_price_list(doc):
+	if doc.default_price_list and not frappe.get_cached_value(
+		"Price List", doc.default_price_list, "selling"
+	):
+		frappe.throw(
+			_("Price List {0} cannot be used on a selling transaction").format(doc.default_price_list)
+		)
+
+
 def get_default_price_list(party):
 	"""Return the first enabled default price list for party (Document object)"""
 	price_list = party.get("default_price_list")
@@ -703,7 +712,7 @@ def validate_party_accounts(doc):
 				account.idx, account.advance_account, account.company, _("Debtor/Creditor Advance")
 			)
 
-		validate_party_account_type(doc.doctype, account)
+		validate_party_account_type("Customer" if doc.doctype == "Customer Group" else doc.doctype, account)
 
 
 def validate_party_account_type(party_type, row):
