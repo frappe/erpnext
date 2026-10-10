@@ -103,8 +103,7 @@ def validate_returned_items(doc):
 		limit_page_length=0,  # all item rows of the reference document are needed (no default 20 cap)
 	):
 		valid_items = get_ref_item_dict(valid_items, d)
-		if doc.doctype == "Delivery Note":
-			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
+		valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.get_all(
@@ -146,8 +145,7 @@ def validate_returned_items(doc):
 			else:
 				ref = valid_items.get(key, frappe._dict())
 				validate_quantity(doc, key, d, ref, valid_items, already_returned_items)
-				if doc.doctype == "Delivery Note":
-					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
+				validate_return_item_qty(doc, key, d, valid_items, already_returned_items)
 
 				if (
 					ref.rate
@@ -263,26 +261,42 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 				)
 
 
-def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
-	"""Hold all returns of an item, with or without dn_detail and across rows, to its total delivered qty."""
-	if key != row.item_code:
+def validate_return_item_qty(doc, key, row, valid_items, already_returned_items):
+	"""Hold all returns of an item, with or without reference item link and across rows, to its total reference qty."""
+	if key != row.item_code and row.item_code in valid_items:
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
 
 	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+	if doc.doctype == "Delivery Note" and frappe.get_single_value(
+		"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+	):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
+
+	conversion_factor = flt(row.conversion_factor or 1)
+	rejected_qty = abs(flt(row.get("rejected_qty") or 0)) * conversion_factor
+	received_qty = abs(flt(row.get("received_qty") or 0)) * conversion_factor
+
 	for returned_key in {key, row.item_code}:
-		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
+		returned = already_returned_items.setdefault(
+			returned_key, frappe._dict(qty=0, stock_qty=0, received_qty=0, rejected_qty=0)
+		)
 		returned.qty = flt(returned.qty) + abs(flt(row.qty))
 		returned.stock_qty = flt(returned.stock_qty) + stock_qty
+		if rejected_qty:
+			returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+		if received_qty:
+			returned.received_qty = flt(returned.received_qty) + received_qty
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	key = ref_item_row.item_code
-	if ref_item_row.get("name"):
+	is_aggregate = not ref_item_row.get("name")
+	conversion_factor = flt(ref_item_row.get("conversion_factor") or 1)
+
+	if not is_aggregate:
 		key = (ref_item_row.item_code, ref_item_row.name)
 
 	valid_items.setdefault(
@@ -295,7 +309,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 				"rejected_qty": 0,
 				"received_qty": 0,
 				"serial_no": [],
-				"conversion_factor": ref_item_row.get("conversion_factor", 1),
+				"conversion_factor": 1.0 if is_aggregate else conversion_factor,
 				"batch_no": [],
 			}
 		),
@@ -307,8 +321,12 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		item_dict["rate"] = ref_item_row.get("rate", 0)
 
 	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-		item_dict["received_qty"] += ref_item_row.received_qty
-		item_dict["rejected_qty"] += ref_item_row.rejected_qty
+		if is_aggregate:
+			item_dict["received_qty"] += flt(ref_item_row.received_qty) * conversion_factor
+			item_dict["rejected_qty"] += flt(ref_item_row.rejected_qty) * conversion_factor
+		else:
+			item_dict["received_qty"] += ref_item_row.received_qty
+			item_dict["rejected_qty"] += ref_item_row.rejected_qty
 
 	if ref_item_row.get("serial_no"):
 		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
@@ -351,11 +369,16 @@ def get_already_returned_items(doc):
 	data = query.run(as_dict=1)
 
 	items = {}
-	if doc.doctype == "Delivery Note":
-		for d in data:
-			item_total = items.setdefault(d.item_code, frappe._dict(qty=0, stock_qty=0))
-			item_total.qty += flt(d.qty)
-			item_total.stock_qty += flt(d.stock_qty)
+	for d in data:
+		item_total = items.setdefault(
+			d.item_code,
+			frappe._dict(qty=0, stock_qty=0, received_qty=0, rejected_qty=0),
+		)
+		item_total.qty += flt(d.qty)
+		item_total.stock_qty += flt(d.stock_qty)
+		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
+			item_total.received_qty += flt(d.get("received_qty"))
+			item_total.rejected_qty += flt(d.get("rejected_qty"))
 
 	for d in data:
 		items.setdefault(
