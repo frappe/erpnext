@@ -5,7 +5,15 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form
+
+ACCOUNT_FIELDS = (
+	"fixed_asset_account",
+	"accumulated_depreciation_account",
+	"depreciation_expense_account",
+	"capital_work_in_progress_account",
+)
+DISPOSED_ASSET_STATUSES = ("Sold", "Scrapped", "Capitalized")
 
 
 class AssetCategory(Document):
@@ -28,10 +36,26 @@ class AssetCategory(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_non_depreciable_category()
 		self.validate_finance_books()
 		self.validate_account_types()
 		self.validate_account_currency()
 		self.validate_accounts()
+		self.validate_account_change_for_existing_assets()
+
+	def validate_non_depreciable_category(self):
+		if self.non_depreciable_category and frappe.db.exists(
+			"Asset",
+			{
+				"asset_category": self.name,
+				"calculate_depreciation": 1,
+				"docstatus": 1,
+				"status": ["in", ("Submitted", "Partially Depreciated")],
+			},
+		):
+			frappe.throw(
+				_("Cannot mark the category as Non Depreciable since it has assets being depreciated")
+			)
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
@@ -41,17 +65,16 @@ class AssetCategory(Document):
 						_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError
 					)
 
+			if not 0 <= flt(d.salvage_value_percentage) <= 100:
+				frappe.throw(_("Row {0}: Salvage Value Percentage must be between 0 and 100").format(d.idx))
+			if flt(d.rate_of_depreciation) < 0:
+				frappe.throw(_("Row {0}: Rate of Depreciation cannot be negative").format(d.idx))
+
 	def validate_account_currency(self):
-		account_types = [
-			"fixed_asset_account",
-			"accumulated_depreciation_account",
-			"depreciation_expense_account",
-			"capital_work_in_progress_account",
-		]
 		invalid_accounts = []
 		for d in self.accounts:
 			company_currency = frappe.get_value("Company", d.get("company_name"), "default_currency")
-			for type_of_account in account_types:
+			for type_of_account in ACCOUNT_FIELDS:
 				if d.get(type_of_account):
 					account_currency = frappe.get_value("Account", d.get(type_of_account), "account_currency")
 					if account_currency != company_currency:
@@ -96,6 +119,25 @@ class AssetCategory(Document):
 							),
 							title=_("Invalid Account"),
 						)
+					self.validate_account_details(d, selected_account)
+
+	def validate_account_details(self, row, account: str):
+		company, is_group, disabled = frappe.db.get_value(
+			"Account", account, ["company", "is_group", "disabled"]
+		)
+		if company != row.company_name:
+			error = _("Row #{0}: Account {1} does not belong to company {2}.")
+		elif is_group:
+			error = _("Row #{0}: Account {1} is a group account.")
+		elif disabled:
+			error = _("Row #{0}: Account {1} is disabled.")
+		else:
+			return
+
+		frappe.throw(
+			error.format(row.idx, frappe.bold(account), frappe.bold(row.company_name)),
+			title=_("Invalid Account"),
+		)
 
 	def validate_accounts(self):
 		self.validate_duplicate_rows()
@@ -190,6 +232,48 @@ class AssetCategory(Document):
 			msg += "<br>".join(error_msg)
 
 			frappe.throw(msg, title=_("Missing Accounts"))
+
+	def validate_account_change_for_existing_assets(self):
+		previous_doc = self.get_doc_before_save()
+		if not previous_doc:
+			return
+
+		current_rows = {row.company_name: row for row in self.accounts}
+		for previous_row in previous_doc.accounts:
+			current_row = current_rows.get(previous_row.company_name) or {}
+			changed_fields = [
+				fieldname
+				for fieldname in ACCOUNT_FIELDS
+				if previous_row.get(fieldname) and current_row.get(fieldname) != previous_row.get(fieldname)
+			]
+			if changed_fields and self.has_active_assets(previous_row.company_name):
+				frappe.throw(
+					_("Cannot change {0} for company {1} since it has active assets in this category").format(
+						", ".join(frappe.bold(_(frappe.unscrub(fieldname))) for fieldname in changed_fields),
+						frappe.bold(previous_row.company_name),
+					),
+					title=_("Invalid Account"),
+				)
+
+	def has_active_assets(self, company: str) -> bool:
+		"""Submitted assets not disposed of, or draft assets whose purchase is already booked."""
+		return bool(
+			frappe.get_all(
+				"Asset",
+				filters={
+					"asset_category": self.name,
+					"company": company,
+					"docstatus": ["<", 2],
+					"status": ["not in", DISPOSED_ASSET_STATUSES],
+				},
+				or_filters={
+					"docstatus": 1,
+					"purchase_receipt": ["is", "set"],
+					"purchase_invoice": ["is", "set"],
+				},
+				limit=1,
+			)
+		)
 
 
 def get_asset_category_account(
