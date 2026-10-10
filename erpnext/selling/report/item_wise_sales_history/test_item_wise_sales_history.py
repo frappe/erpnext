@@ -121,3 +121,9 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 		self.assertIn("_Test Item", labels)
 		# 2*100 + 3*100 aggregated for the item
 		self.assertEqual(values[labels.index("_Test Item")], 500)
+
+	def test_report_runs_without_dates(self):
+		so = make_sales_order(transaction_date="2026-06-01")
+
+		data = execute(frappe._dict({"company": "_Test Company"}))[1]
+		self.assertIn(so.name, {row["sales_order"] for row in data})
