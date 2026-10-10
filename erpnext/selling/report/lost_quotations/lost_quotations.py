@@ -16,7 +16,8 @@ def execute(filters=None):
 	lost_quotations = get_lost_quotations(filters.get("company"), from_date, to_date)
 	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 	data = get_data(lost_quotations, filters.get("group_by"), currency)
-	return columns, data
+	report_summary = get_report_summary(lost_quotations, currency)
+	return columns, data, None, None, report_summary
 
 
 def get_columns(group_by: Literal["Lost Reason", "Competitor"]):
@@ -36,7 +37,7 @@ def get_columns(group_by: Literal["Lost Reason", "Competitor"]):
 		},
 		{
 			"fieldname": "lost_quotations_pct",
-			"label": _("Lost Quotations %"),
+			"label": _("% of Lost Quotations"),
 			"fieldtype": "Percent",
 			"width": 200,
 		},
@@ -143,3 +144,29 @@ def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Compe
 	)
 
 	return [(*row, currency) for row in query.run()]
+
+
+def get_report_summary(lost_quotations: list[str], currency: str):
+	# surface the denominator so the per-reason percentages are readable
+	total_value = 0
+	if lost_quotations:
+		q = frappe.qb.DocType("Quotation")
+		total_value = (
+			frappe.qb.from_(q).where(q.name.isin(lost_quotations)).select(Sum(q.base_net_total)).run()
+		)[0][0] or 0
+
+	return [
+		{
+			"label": _("Total Lost Quotations"),
+			"value": len(lost_quotations),
+			"datatype": "Int",
+			"indicator": "Blue",
+		},
+		{
+			"label": _("Total Lost Value"),
+			"value": total_value,
+			"datatype": "Currency",
+			"currency": currency,
+			"indicator": "Red",
+		},
+	]
