@@ -4,7 +4,6 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
-from frappe.query_builder.custom import ConstantColumn
 
 
 def execute(filters: dict | None = None):
@@ -50,23 +49,22 @@ def get_data(filters) -> list[list]:
 
 
 def identify_cancelled_vouchers(active_vouchers: list[dict] | list | None = None) -> list[dict]:
-	cancelled_vouchers = []
-	if active_vouchers:
-		# Group by voucher types and use single query to identify cancelled vouchers
-		vtypes = set([x.voucher_type for x in active_vouchers])
+	"""Return vouchers with active ledger rows that are not submitted or no longer exist."""
+	invalid_vouchers = []
+	for voucher_type in {x.voucher_type for x in active_vouchers or []}:
+		names = {x.voucher_no for x in active_vouchers if x.voucher_type == voucher_type}
+		submitted = get_submitted_vouchers(voucher_type, names)
+		invalid_vouchers.extend(
+			frappe._dict(voucher_type=voucher_type, voucher_no=name) for name in sorted(names - submitted)
+		)
+	return invalid_vouchers
 
-		for _t in vtypes:
-			_names = [x.voucher_no for x in active_vouchers if x.voucher_type == _t]
-			dt = qb.DocType(_t)
-			non_active_vouchers = (
-				qb.from_(dt)
-				.select(ConstantColumn(_t).as_("voucher_type"), dt.name.as_("voucher_no"))
-				.where(dt.docstatus.ne(1) & dt.name.isin(_names))
-				.run(as_dict=True)
-			)
-			if non_active_vouchers:
-				cancelled_vouchers.extend(non_active_vouchers)
-	return cancelled_vouchers
+
+def get_submitted_vouchers(voucher_type: str, names: set) -> set:
+	dt = qb.DocType(voucher_type)
+	return set(
+		qb.from_(dt).select(dt.name).where(dt.docstatus.eq(1) & dt.name.isin(list(names))).run(pluck=True)
+	)
 
 
 def validate_filters(filters: dict | None = None):
@@ -94,45 +92,37 @@ def build_query_filters(filters: dict | None = None) -> list:
 
 
 def get_active_vouchers_for_period(filters: dict | None = None) -> list[dict]:
-	uniq_vouchers = []
+	if not filters:
+		return []
 
-	if filters:
-		gle = qb.DocType("GL Entry")
-		ple = qb.DocType("Payment Ledger Entry")
+	gle = qb.DocType("GL Entry")
+	ple = qb.DocType("Payment Ledger Entry")
+	gl_active = gle.is_cancelled.eq(0)
+	pl_active = ple.delinked.eq(0)
 
-		qb_filters = build_query_filters(filters)
+	return (
+		get_ledger_vouchers(gle, gl_active, gle.voucher_type, gle.voucher_no, filters)
+		+ get_ledger_vouchers(gle, gl_active, gle.against_voucher_type, gle.against_voucher, filters)
+		+ get_ledger_vouchers(ple, pl_active, ple.voucher_type, ple.voucher_no, filters)
+		+ get_ledger_vouchers(ple, pl_active, ple.against_voucher_type, ple.against_voucher_no, filters)
+	)
 
-		gl_vouchers = (
-			qb.from_(gle)
-			.select(gle.voucher_type)
-			.distinct()
-			.select(gle.voucher_no)
-			.distinct()
-			.where(
-				gle.is_cancelled.eq(0)
-				& gle.company.eq(filters.company)
-				& gle.posting_date[filters.from_date : filters.to_date]
-			)
-			.where(Criterion.all(qb_filters))
-			.run(as_dict=True)
+
+def get_ledger_vouchers(ledger, is_active, voucher_type, voucher_no, filters: dict) -> list[dict]:
+	"""Return distinct vouchers referenced by the given type/number fields of active ledger rows."""
+	return (
+		qb.from_(ledger)
+		.select(voucher_type.as_("voucher_type"), voucher_no.as_("voucher_no"))
+		.distinct()
+		.where(
+			is_active
+			& ledger.company.eq(filters.company)
+			& ledger.posting_date[filters.from_date : filters.to_date]
+			& voucher_type.notnull()
+			& voucher_type.ne("")
+			& voucher_no.notnull()
+			& voucher_no.ne("")
 		)
-
-		pl_vouchers = (
-			qb.from_(ple)
-			.select(ple.voucher_type)
-			.distinct()
-			.select(ple.voucher_no)
-			.distinct()
-			.where(
-				ple.delinked.eq(0)
-				& ple.company.eq(filters.company)
-				& ple.posting_date[filters.from_date : filters.to_date]
-			)
-			.where(Criterion.all(qb_filters))
-			.run(as_dict=True)
-		)
-
-		uniq_vouchers.extend(gl_vouchers)
-		uniq_vouchers.extend(pl_vouchers)
-
-	return uniq_vouchers
+		.where(Criterion.all(build_query_filters(filters)))
+		.run(as_dict=True)
+	)

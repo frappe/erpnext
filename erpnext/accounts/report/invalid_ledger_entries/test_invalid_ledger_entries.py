@@ -5,6 +5,8 @@ import frappe
 from frappe import qb
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.invalid_ledger_entries.invalid_ledger_entries import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -82,6 +84,31 @@ class TestInvalidLedgerEntries(ERPNextTestSuite):
 		self.assertEqual(len(matching), 1, "Orphaned voucher should be flagged exactly once")
 		self.assertEqual(matching[0]["voucher_type"], "Journal Entry")
 		self.assertEqual(matching[0]["voucher_no"], jv.name)
+
+	def test_payment_allocated_to_cancelled_invoice_flagged(self):
+		"""A payment's ledger row still allocated to a cancelled invoice flags the invoice."""
+		invoice = create_sales_invoice(posting_date=self.posting_date, rate=500)
+		payment = get_payment_entry("Sales Invoice", invoice.name)
+		payment.posting_date = self.posting_date
+		payment.reference_no, payment.reference_date = "ILE-1", self.posting_date
+		payment.submit()
+
+		frappe.db.set_value("Sales Invoice", invoice.name, "docstatus", 2, update_modified=False)
+		frappe.db.set_value("GL Entry", {"voucher_no": invoice.name}, "is_cancelled", 1)
+		frappe.db.set_value("Payment Ledger Entry", {"voucher_no": invoice.name}, "delinked", 1)
+
+		flagged = {row.get("voucher_no") for row in self.run_report()}
+		self.assertIn(invoice.name, flagged)
+		self.assertNotIn(payment.name, flagged)
+
+	def test_gl_entries_of_deleted_voucher_flagged(self):
+		"""Active GL rows whose voucher no longer exists are flagged."""
+		jv = self.make_submitted_jv()
+		frappe.db.delete("Journal Entry Account", {"parent": jv.name})
+		frappe.db.delete("Journal Entry", {"name": jv.name})
+
+		flagged = {(row.voucher_type, row.voucher_no) for row in self.run_report()}
+		self.assertIn(("Journal Entry", jv.name), flagged)
 
 	def test_voucher_no_filter_scopes_scan(self):
 		"""The voucher_no filter must restrict the scan to that voucher only."""
