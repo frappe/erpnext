@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
@@ -534,3 +535,95 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		]
 
 		self.assertEqual(actual_values, expected_values)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_actual_tax_with_zero_net_total(self):
+		self.doc.items[0].rate = 0
+		self.doc.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 0,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"tax_amount": 10,
+			},
+		)
+		self.doc.save()
+
+		self.assertEqual(self.doc.net_total, 0)
+		self.assertEqual(self.doc.taxes[0].tax_amount, 10)
+		self.assertEqual(self.doc.grand_total, 10)
+
+		# the whole amount lands on the last item row
+		self.assertEqual([row.taxable_amount for row in self.doc.item_wise_tax_details], [0, 0])
+		self.assertEqual([row.amount for row in self.doc.item_wise_tax_details], [0, 10])
+
+		tax_breakup = get_itemised_tax_breakup_data(self.doc)
+		self.assertEqual(tax_breakup[0]["VAT"].tax_amount, 10)
+
+	def make_doc_with_exempt_last_item(self, rates):
+		template = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test VAT Not Applicable",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account VAT - _TC", "tax_rate": 0, "not_applicable": 1}],
+			}
+		).insert(ignore_if_duplicate=True)
+
+		self.doc.items[0].rate = rates[0]
+		self.doc.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": rates[1],
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"item_tax_template": template.name,
+			},
+		)
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"tax_amount": 10,
+			},
+		)
+		self.doc.save()
+		return self.doc
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_actual_tax_skips_not_applicable_item(self):
+		doc = self.make_doc_with_exempt_last_item([100, 100])
+
+		self.assertEqual(doc.taxes[0].tax_amount, 10)
+		self.assertEqual(len(doc.item_wise_tax_details), 1)
+		self.assertEqual(doc.item_wise_tax_details[0].item_row, doc.items[0].name)
+		self.assertEqual(doc.item_wise_tax_details[0].amount, 10)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_actual_tax_with_zero_value_items_and_not_applicable_item(self):
+		doc = self.make_doc_with_exempt_last_item([0, 0])
+
+		self.assertEqual(doc.net_total, 0)
+		self.assertEqual(doc.grand_total, 10)
+		self.assertEqual(len(doc.item_wise_tax_details), 1)
+		self.assertEqual(doc.item_wise_tax_details[0].item_row, doc.items[0].name)
+		self.assertEqual(doc.item_wise_tax_details[0].amount, 10)
