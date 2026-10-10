@@ -469,7 +469,7 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 
 
 def get_country(code):
-	existing_country_name = frappe.db.get_value("Country", filters={"code": code}, fieldname="name")
+	existing_country_name = frappe.db.get_value("Country", filters={"code": code.lower()}, fieldname="name")
 	if existing_country_name:
 		return existing_country_name
 	else:
