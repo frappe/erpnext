@@ -103,6 +103,32 @@ class TestStockBalance(ERPNextTestSuite):
 		)
 		self.assertInvariants(rows)
 
+	def test_dimension_wise_stock_of_an_opening_reconciliation(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.update({"purpose": "Opening Stock", "company": "_Test Company"})
+		for plant, qty in ((plant_a, 5), (plant_b, 3)):
+			sr.append(
+				"items",
+				{
+					"item_code": self.item.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": qty,
+					"valuation_rate": 100,
+					"id_plant": plant,
+				},
+			)
+		sr.insert()
+		sr.submit()
+
+		rows = stock_balance(_dict(self.filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (5, 500), plant_b: (3, 300)},
+		)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 3})
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
