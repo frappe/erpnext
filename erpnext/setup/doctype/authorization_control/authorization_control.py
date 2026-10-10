@@ -131,23 +131,21 @@ class AuthorizationControl(TransactionBase):
 			auth_value = total
 		elif based_on == "Customerwise Discount":
 			if doc_obj:
-				if doc_obj.doctype == "Sales Invoice":
-					customer = doc_obj.customer
+				if doc_obj.doctype == "Quotation":
+					customer = doc_obj.party_name if doc_obj.quotation_to == "Customer" else None
 				else:
-					customer = doc_obj.customer_name
-				add_cond = f" and master_name = {frappe.db.escape(customer)}"
-		if based_on == "Itemwise Discount":
+					customer = doc_obj.customer
+				add_cond += f" and master_name = {frappe.db.escape(customer)}"
+		if based_on in ("Itemwise Discount", "Item Group wise Discount"):
 			if doc_obj:
 				for t in doc_obj.get("items"):
-					self.validate_auth_rule(
-						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_code
+					discount = (
+						100 * (1 - flt(t.rate) / flt(t.price_list_rate))
+						if flt(t.price_list_rate)
+						else t.discount_percentage
 					)
-		elif based_on == "Item Group wise Discount":
-			if doc_obj:
-				for t in doc_obj.get("items"):
-					self.validate_auth_rule(
-						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_group
-					)
+					master_name = t.item_code if based_on == "Itemwise Discount" else t.item_group
+					self.validate_auth_rule(doctype_name, discount, based_on, add_cond, company, master_name)
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
 
@@ -159,11 +157,11 @@ class AuthorizationControl(TransactionBase):
 		if doc_obj:
 			price_list_rate, base_rate = 0, 0
 			for d in doc_obj.get("items"):
-				if d.base_rate:
+				if d.base_price_list_rate or d.base_rate:
 					price_list_rate += (flt(d.base_price_list_rate) or flt(d.base_rate)) * flt(d.qty)
 					base_rate += flt(d.base_rate) * flt(d.qty)
-			if doc_obj.get("discount_amount"):
-				base_rate -= flt(doc_obj.discount_amount)
+			if doc_obj.get("base_discount_amount"):
+				base_rate -= flt(doc_obj.base_discount_amount)
 
 			if price_list_rate:
 				av_dis = 100 - flt(base_rate * 100 / price_list_rate)
@@ -188,6 +186,7 @@ class AuthorizationControl(TransactionBase):
 				.where(
 					(auth_rule.transaction == doctype_name)
 					& (auth_rule.system_user == session["user"])
+					& auth_rule.based_on.isin(final_based_on)
 					& ((auth_rule.company == company) | (Coalesce(auth_rule.company, "") == ""))
 					& (auth_rule.docstatus != 2)
 				)

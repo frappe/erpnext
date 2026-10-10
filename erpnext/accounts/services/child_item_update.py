@@ -150,7 +150,7 @@ class ChildItemUpdater:
 			parent.set_gross_profit()
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-			parent.doctype, parent.company, parent.base_grand_total
+			parent.doctype, parent.company, parent.base_grand_total, parent
 		)
 
 		if self.parent_doctype != "Supplier Quotation":
