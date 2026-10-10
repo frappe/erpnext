@@ -818,6 +818,7 @@ def get_rate_for_return(
 		item_code,
 		return_against_item_field,
 		item_row,
+		warehouse=sle.get("warehouse") if sle else None,
 	)
 
 	if voucher_type in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
@@ -900,6 +901,7 @@ def get_filters(
 	item_code,
 	return_against_item_field,
 	item_row,
+	warehouse=None,
 ):
 	filters = {"voucher_type": voucher_type, "voucher_no": return_against, "item_code": item_code}
 
@@ -914,17 +916,19 @@ def get_filters(
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
 	warehouses = []
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row:
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and (item_row or warehouse):
 		if reference_voucher_detail_no:
 			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
 
-		# A row that accepted nothing goes back at the rate the rejected warehouse received it at.
-		warehouse_field = "warehouse"
-		if not flt(item_row.get("qty")) and flt(item_row.get("rejected_qty")):
-			warehouse_field = "rejected_warehouse"
+		if item_row:
+			# A row that accepted nothing goes back at the rate the rejected warehouse received it at.
+			warehouse_field = "warehouse"
+			if not flt(item_row.get("qty")) and flt(item_row.get("rejected_qty")):
+				warehouse_field = "rejected_warehouse"
+			warehouse = item_row.get(warehouse_field)
 
-		if item_row.get(warehouse_field) and item_row.get(warehouse_field) in warehouses:
-			filters["warehouse"] = item_row.get(warehouse_field)
+		if warehouse and warehouse in warehouses:
+			filters["warehouse"] = warehouse
 
 	return filters
 
