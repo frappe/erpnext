@@ -80,8 +80,8 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 					)
 
 					service_cost = flt(
-						item.service_cost_per_qty, item.precision("service_cost_per_qty")
-					) * flt(item.qty, item.precision("qty"))
+						flt(item.service_cost_per_qty) * flt(item.qty), item.precision("amount")
+					)
 
 					self.add_gl_entry(
 						gl_entries=gl_entries,
