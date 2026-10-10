@@ -148,6 +148,14 @@ class TestCodeListImport(ERPNextTestSuite):
 
 			self.assert_import_response(import_result)
 
+	def test_import_genericode_refuses_files_without_required_elements(self):
+		for element in (
+			b"<ShortName>Test Code List</ShortName>",
+			b"<CanonicalVersionUri>test-code-list-v1</CanonicalVersionUri>",
+		):
+			with self.upload_context(content=SAMPLE_GENERICODE.replace(element, b"")):
+				self.assertRaises(frappe.ValidationError, code_list_import.import_genericode)
+
 	@staticmethod
 	@contextmanager
 	def upload_context(
