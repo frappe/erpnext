@@ -675,7 +675,8 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			}
 		)
 
-		self.assertRaises(frappe.ValidationError, riv.save)
+		riv.save()
+		self.assertFalse(riv.get_closing_stock_balance())
 		doc.cancel()
 
 	def test_recalculate_valuation_rate_for_purchase_receipt(self):

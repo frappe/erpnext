@@ -26,6 +26,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.services.gl_validator import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import get_closing_entry_for_closed_period
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
@@ -267,16 +268,11 @@ class RepostItemValuation(Document):
 			self.recreate_stock_ledgers = 0
 
 	def get_closing_stock_balance(self):
-		filters = {
-			"company": self.company,
-			"to_date": (">=", self.posting_date),
-			"status": "Completed",
-			"docstatus": 1,
-		}
+		closing_entry = get_closing_entry_for_closed_period(self.company)
+		if not closing_entry or getdate(self.posting_date) > getdate(closing_entry.to_date):
+			return []
 
-		return frappe.get_all(
-			"Stock Closing Entry", fields=["name", "to_date as posting_date"], filters=filters, limit=1
-		)
+		return [frappe._dict(name=closing_entry.name, posting_date=closing_entry.to_date)]
 
 	@staticmethod
 	def get_max_period_closing_date(company):
