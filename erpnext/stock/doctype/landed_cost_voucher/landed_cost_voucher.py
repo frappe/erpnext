@@ -290,7 +290,6 @@ class LandedCostVoucher(Document):
 		if self.get("taxes") and self.distribute_charges_based_on != "Distribute Manually":
 			items = self.get("items")
 			total_charges = 0.0
-			item_count = 0
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
 			total_item_cost = sum(flt(item.get(based_on_field)) for item in items)
@@ -305,18 +304,17 @@ class LandedCostVoucher(Document):
 					)
 				)
 
-			for item in self.get("items"):
+			precision = items[0].precision("applicable_charges")
+			for item in items:
 				item.applicable_charges = flt(
 					flt(item.get(based_on_field))
 					* (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
-					item.precision("applicable_charges"),
+					precision,
 				)
 				total_charges += item.applicable_charges
-				item_count += 1
 
-			if total_charges != self.total_taxes_and_charges:
-				diff = self.total_taxes_and_charges - total_charges
-				self.get("items")[item_count - 1].applicable_charges += diff
+			diff = flt(self.total_taxes_and_charges - total_charges, precision)
+			absorb_rounding_difference(items, diff, precision, self.total_taxes_and_charges)
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
@@ -630,3 +628,15 @@ def get_custom_dimension_overrides(entry):
 		for dimension, value in (entry.dimensions or {}).items()
 		if value and dimension not in ("cost_center", "project")
 	}
+
+
+def absorb_rounding_difference(items, diff, precision, total):
+	sign = -1 if flt(total) < 0 else 1
+	for item in reversed(items):
+		if not diff:
+			break
+
+		share = flt(item.applicable_charges) * sign
+		adjustment = diff if diff * sign > 0 else sign * max(diff * sign, -share)
+		item.applicable_charges = flt(flt(item.applicable_charges) + adjustment, precision)
+		diff = flt(diff - adjustment, precision)
