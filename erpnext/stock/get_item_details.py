@@ -149,6 +149,7 @@ def _get_item_details(
 		):
 			fallback_args = args.copy()
 			fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			fallback_args.price_list_uom_dependant = None
 			out.update(get_price_list_rate(fallback_args, item))
 
 	args.customer = current_customer
@@ -1055,7 +1056,17 @@ def get_price_list_rate(args, item_doc, out=None):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
+<<<<<<< HEAD
 		price_list_rate = get_price_list_rate_for(args, item_doc.name)
+=======
+		# Transactions have no field for this flag, so item rows must read it from the Price List
+		if ctx.get("price_list_uom_dependant") is None and ctx.price_list:
+			ctx.price_list_uom_dependant = frappe.get_cached_value(
+				"Price List", ctx.price_list, "price_not_uom_dependent"
+			)
+
+		price_list_rate = get_price_list_rate_for(ctx, item_doc.name)
+>>>>>>> ea10434 (fix(stock): honour Price Not UOM Dependent in transactions)
 
 		# variant
 		if price_list_rate is None and item_doc.variant_of:
@@ -1673,7 +1684,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_details = get_price_list_details(args.price_list)
 
 	price_list_currency = price_list_details.get("currency")
-	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+	price_list_uom_dependant = price_list_details.get("price_not_uom_dependent")
 
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)
