@@ -1134,10 +1134,24 @@ def update_maintenance_status():
 		asset = frappe.get_doc("Asset", asset.name)
 		if frappe.db.exists("Asset Repair", {"asset_name": asset.name, "repair_status": "Pending"}):
 			asset.set_status("Out of Order")
-		elif frappe.db.exists("Asset Maintenance Task", {"parent": asset.name, "next_due_date": today()}):
+		elif has_due_maintenance(asset.name):
 			asset.set_status("In Maintenance")
 		else:
 			asset.set_status()
+
+
+def has_due_maintenance(asset_name: str) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Asset Maintenance Log",
+			{
+				"asset_name": asset_name,
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+				"due_date": ("<=", today()),
+			},
+		)
+	)
 
 
 def make_post_gl_entry():

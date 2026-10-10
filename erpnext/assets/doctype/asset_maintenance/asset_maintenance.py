@@ -34,23 +34,74 @@ class AssetMaintenance(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_asset()
+		team_members = frappe.get_all(
+			"Maintenance Team Member", filters={"parent": self.maintenance_team}, pluck="team_member"
+		)
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
-			if getdate(task.next_due_date) < getdate(nowdate()):
-				task.maintenance_status = "Overdue"
+			if not task.next_due_date and task.periodicity:
+				task.next_due_date = (
+					calculate_next_due_date(
+						task.periodicity, task.start_date, task.end_date, task.last_completion_date
+					)
+					or None
+				)
+			if task.next_due_date and getdate(task.next_due_date) < getdate(task.start_date):
+				throw(_("Row #{0}: Next Due Date cannot be before the Start Date").format(task.idx))
+			self.set_task_status(task)
 			if not task.assign_to and self.docstatus == 0:
 				throw(_("Row #{}: Please assign task to a member.").format(task.idx))
+			if task.assign_to and task.assign_to not in team_members:
+				throw(
+					_("Row #{0}: {1} is not a member of the maintenance team {2}").format(
+						task.idx, task.assign_to, self.maintenance_team
+					)
+				)
+
+	def validate_asset(self):
+		if frappe.db.get_value("Asset", self.asset_name, "docstatus") != 1:
+			throw(_("Asset {0} must be submitted").format(self.asset_name))
+
+	def set_task_status(self, task):
+		if getdate(task.next_due_date) < getdate(nowdate()):
+			task.maintenance_status = "Overdue"
+		elif task.maintenance_status == "Overdue":
+			task.maintenance_status = "Planned"
 
 	def on_update(self):
 		for task in self.get("asset_maintenance_tasks"):
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
+		self.close_unassigned_todos()
 		self.sync_maintenance_tasks()
+
+	def on_trash(self):
+		draft_logs = frappe.get_all(
+			"Asset Maintenance Log", filters={"asset_maintenance": self.name, "docstatus": 0}, pluck="name"
+		)
+		for log in draft_logs:
+			frappe.delete_doc("Asset Maintenance Log", log, ignore_permissions=True)
 
 	def after_delete(self):
 		asset = frappe.get_doc("Asset", self.asset_name)
 		if asset.status == "In Maintenance":
 			asset.set_status()
+
+	def close_unassigned_todos(self):
+		assignees = [task.assign_to for task in self.asset_maintenance_tasks]
+		unassigned_users = frappe.get_all(
+			"ToDo",
+			filters={
+				"reference_type": self.doctype,
+				"reference_name": self.name,
+				"status": "Open",
+				"allocated_to": ("not in", assignees or [""]),
+			},
+			pluck="allocated_to",
+		)
+		for user in unassigned_users:
+			assign_to.remove(self.doctype, self.name, user)
 
 	def sync_maintenance_tasks(self):
 		tasks_names = []
@@ -62,7 +113,12 @@ class AssetMaintenance(Document):
 		asset_maintenance_logs = frappe.get_all(
 			"Asset Maintenance Log",
 			fields=["name"],
-			filters={"asset_maintenance": self.name, "task": ("not in", tasks_names)},
+			filters={
+				"asset_maintenance": self.name,
+				"task": ("not in", tasks_names),
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+			},
 		)
 		if asset_maintenance_logs:
 			for asset_maintenance_log in asset_maintenance_logs:
@@ -71,10 +127,9 @@ class AssetMaintenance(Document):
 
 
 def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
-	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
 		"doctype": "Asset Maintenance",
-		"assign_to": team_member,
+		"assign_to": assign_to_member,
 		"name": asset_maintenance_name,
 		"description": maintenance_task,
 		"date": next_due_date,
@@ -85,7 +140,7 @@ def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, nex
 			"reference_type": args["doctype"],
 			"reference_name": args["name"],
 			"status": "Open",
-			"owner": args["assign_to"],
+			"allocated_to": args["assign_to"],
 		},
 	):
 		# assign_to function expects a list
@@ -123,9 +178,9 @@ def calculate_next_due_date(
 	if periodicity == "3 Yearly":
 		next_due_date = add_years(start_date, 3)
 	if end_date and (
-		(start_date and start_date >= end_date)
-		or (last_completion_date and last_completion_date >= end_date)
-		or next_due_date
+		(start_date and getdate(start_date) >= getdate(end_date))
+		or (last_completion_date and getdate(last_completion_date) >= getdate(end_date))
+		or (next_due_date and getdate(next_due_date) > getdate(end_date))
 	):
 		next_due_date = ""
 	return next_due_date
@@ -159,7 +214,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 				"due_date": task.next_due_date,
 			}
 		)
-		asset_maintenance_log.insert()
+		asset_maintenance_log.insert(ignore_permissions=True)
 	else:
 		maintenance_log = frappe.get_doc("Asset Maintenance Log", asset_maintenance_log)
 		maintenance_log.assign_to_name = task.assign_to_name
@@ -168,7 +223,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 		maintenance_log.periodicity = str(task.periodicity)
 		maintenance_log.maintenance_type = task.maintenance_type
 		maintenance_log.due_date = task.next_due_date
-		maintenance_log.save()
+		maintenance_log.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
@@ -181,16 +236,19 @@ def get_team_members(
 	page_len: int,
 	filters: dict[str, Any],
 ) -> list[tuple[str]]:
-	return frappe.db.get_values(
+	team = filters.get("maintenance_team")
+	frappe.has_permission("Asset Maintenance Team", "read", team, throw=True)
+	return frappe.get_all(
 		"Maintenance Team Member",
-		{"parent": filters.get("maintenance_team")},
-		"team_member",
+		filters={"parent": team, "parenttype": "Asset Maintenance Team", "team_member": ("like", f"%{txt}%")},
+		fields=["team_member"],
+		as_list=True,
 	)
 
 
 @frappe.whitelist()
 def get_maintenance_log(asset_name: str):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Asset Maintenance Log",
 		filters={"asset_name": asset_name},
 		fields=["maintenance_status", {"COUNT": "asset_name", "as": "count"}, "asset_name"],
