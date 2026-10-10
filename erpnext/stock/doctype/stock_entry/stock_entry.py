@@ -2357,7 +2357,7 @@ class StockEntry(StockController):
 			pro_doc.run_method("update_disassembled_qty", self.fg_completed_qty, is_cancel)
 
 	@frappe.whitelist()
-	def get_item_details(self, args=None, for_update=False):
+	def get_item_details(self, args: dict | None = None, for_update: bool = False):
 		item = frappe.qb.DocType("Item")
 		item_default = frappe.qb.DocType("Item Default")
 
