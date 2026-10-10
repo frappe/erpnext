@@ -9,6 +9,7 @@ from erpnext.selling.doctype.product_bundle.test_product_bundle import make_prod
 from erpnext.stock.doctype.delivery_note.mapper import make_packing_slip
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -156,6 +157,8 @@ class TestPackingSlipValidation(ERPNextTestSuite):
 class TestPackingSlipReferences(ERPNextTestSuite):
 	def make_draft_delivery_note(self, qty=5, **kwargs):
 		item_code = make_item(properties={"is_stock_item": 1, **kwargs}).name
+		if frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
 		return create_delivery_note(item_code=item_code, qty=qty, do_not_submit=True)
 
 	def test_row_must_belong_to_slip_delivery_note_and_item(self):
