@@ -5497,6 +5497,77 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture.insert()
 		manufacture.submit()
 
+	def test_alternative_item_split_keeps_operation_wise_rows(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.doctype.stock_entry import stock_entry as stock_entry_module
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.work_order = "_Test Alternative Split WO"
+		item_dict = {
+			("_Test RM A", "_Test Op 1"): frappe._dict(item_code="_Test RM A", qty=4, conversion_factor=1),
+			("_Test RM A", "_Test Op 2"): frappe._dict(item_code="_Test RM A", qty=6, conversion_factor=1),
+		}
+		materials = [
+			frappe._dict(item_code="_Test RM A", original_item=None, available_qty=5, transferred_qty=5),
+			frappe._dict(
+				item_code="_Test RM B",
+				original_item="_Test RM A",
+				item_name="_Test RM B",
+				description="_Test RM B",
+				stock_uom="Nos",
+				available_qty=5,
+				transferred_qty=5,
+			),
+		]
+
+		with patch.object(
+			stock_entry_module, "get_alternative_items_for_work_order", return_value={"_Test RM A": materials}
+		):
+			stock_entry.split_alternative_items(item_dict)
+
+		qty_by_operation = {(row.item_code, key[-1]): row.qty for key, row in item_dict.items()}
+		self.assertEqual(
+			qty_by_operation,
+			{
+				("_Test RM A", "_Test Op 1"): 2,
+				("_Test RM B", "_Test Op 1"): 2,
+				("_Test RM A", "_Test Op 2"): 3,
+				("_Test RM B", "_Test Op 2"): 3,
+			},
+		)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"validate_components_quantities_per_bom": 1})
+	def test_bom_quantity_check_compares_alternatives_in_stock_uom(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.update({"purpose": "Manufacture", "fg_completed_qty": 1, "bom_no": "_Test BOM"})
+		for item_code, qty, conversion_factor, original_item in (
+			("_Test RM A", 5, 10, None),
+			("_Test RM B", 50, 1, "_Test RM A"),
+		):
+			stock_entry.append(
+				"items",
+				{
+					"item_code": item_code,
+					"original_item": original_item,
+					"s_warehouse": "Stores - _TC",
+					"qty": qty,
+					"conversion_factor": conversion_factor,
+					"transfer_qty": qty * conversion_factor,
+				},
+			)
+
+		raw_materials = {"_Test RM A": frappe._dict(item_code="_Test RM A", qty=10, conversion_factor=10)}
+		with patch.object(StockEntry, "get_bom_raw_materials", return_value=raw_materials):
+			stock_entry.validate_component_and_quantities()
+
+			stock_entry.items[1].transfer_qty = 40
+			self.assertRaises(frappe.ValidationError, stock_entry.validate_component_and_quantities)
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
