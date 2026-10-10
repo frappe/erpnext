@@ -31,6 +31,7 @@ ROUNDED_TOTAL_DOCTYPES = (
 	"Purchase Invoice",
 	"Purchase Receipt",
 )
+IN_WORDS_DOCTYPES = (*ROUNDED_TOTAL_DOCTYPES, "Payment Entry", "Subcontracting Receipt")
 
 from frappe.model.document import Document
 
@@ -66,7 +67,8 @@ class GlobalDefaults(Document):
 
 		self.toggle_rounded_total()
 		self.toggle_in_words()
-		self.set_disable_rounded_total_on_pos_profiles()
+		if self.has_value_changed("disable_rounded_total"):
+			self.set_disable_rounded_total_on_pos_profiles()
 
 		frappe.clear_cache()
 
@@ -115,7 +117,7 @@ class GlobalDefaults(Document):
 
 	def toggle_in_words(self):
 		# Make property setters to hide in words fields
-		for doctype in ROUNDED_TOTAL_DOCTYPES:
+		for doctype in IN_WORDS_DOCTYPES:
 			make_property_setter(
 				doctype,
 				"in_words",
