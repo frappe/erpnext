@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import timeout
@@ -2772,6 +2773,14 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertTrue(row.t_warehouse)
 
 		stock_entry.submit()
+
+	def test_disassembled_qty_sums_without_float_noise(self):
+		wo = frappe.new_doc("Work Order")
+		wo.update({"docstatus": 1, "produced_qty": 0.3, "disassembled_qty": 0.1})
+		with patch.object(wo, "db_set"):
+			wo.update_disassembled_qty(0.2)
+
+		self.assertEqual(wo.disassembled_qty, 0.3)
 
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
