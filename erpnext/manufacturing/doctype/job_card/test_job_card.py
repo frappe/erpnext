@@ -3,6 +3,7 @@
 
 
 from typing import Literal
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import flt, random_string
@@ -19,6 +20,12 @@ from erpnext.manufacturing.doctype.job_card.mapper import (
 )
 from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_stock_entry as make_stock_entry_from_jc,
+)
+from erpnext.manufacturing.doctype.job_card.timer import (
+	JobCardTimer,
+	get_job_card_timer,
+	get_work_order_job_cards,
+	get_writable_job_cards,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import (
@@ -245,6 +252,221 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		doc.is_paused = 1
 		self.assertRaises(frappe.ValidationError, doc.submit)
+
+	def test_work_order_job_card_timers(self):
+		"Elapsed time and the Start / Pause / Resume action follow the Job Card through its timer cycle."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
+
+		def timer_row():
+			rows = get_work_order_job_cards(self.work_order.name)
+			return next(row for row in rows if row["name"] == job_card.name)
+
+		row = timer_row()
+		self.assertEqual(
+			(row["timer_action"], row["is_running"], row["elapsed_seconds"]), ("start", False, 0)
+		)
+
+		job_card.start_timer(start_time=add_to_date(now(), hours=-1), employees=employee)
+		row = timer_row()
+		self.assertEqual((row["timer_action"], row["is_running"]), ("pause", True))
+		self.assertAlmostEqual(row["elapsed_seconds"], 3600, delta=60)
+		self.assertEqual(row["employees"], [employee])
+
+		job_card.reload()
+		job_card.pause_job(end_time=now())
+		row = timer_row()
+		self.assertEqual((row["timer_action"], row["is_running"]), ("resume", False))
+		self.assertAlmostEqual(row["elapsed_seconds"], 3600, delta=60)
+		self.assertRaises(frappe.ValidationError, job_card.pause_job, end_time=now())
+
+		job_card.reload()
+		job_card.resume_job(start_time=now())
+		self.assertEqual(get_job_card_timer(job_card.name)["timer_action"], "pause")
+		self.assertRaises(frappe.ValidationError, job_card.resume_job, start_time=now())
+
+	def test_no_timer_action_when_work_order_closed_or_stopped(self):
+		"A draft Job Card offers no Start / Resume once its Work Order rejects Job Card changes."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		self.assertEqual(get_job_card_timer(job_card.name)["timer_action"], "start")
+
+		for status in ("Closed", "Stopped"):
+			frappe.db.set_value("Work Order", self.work_order.name, "status", status)
+			self.assertIsNone(get_job_card_timer(job_card.name)["timer_action"], status)
+			self.assertRaises(frappe.ValidationError, job_card.save)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 200}
+	)
+	def test_work_order_job_cards_are_paged_and_searched(self):
+		"The Work Order list pages in operation order and searches only the visible columns."
+		work_order = self.work_order.name
+		operation = self.work_order.operations[0]
+		for _ in range(2):
+			make_job_card(
+				work_order,
+				[{"name": operation.name, "operation": operation.operation, "qty": 1, "pending_qty": 1}],
+			)
+		oldest, middle, newest = frappe.get_all(
+			"Job Card", {"work_order": work_order}, pluck="name", order_by="creation asc, name asc"
+		)
+		# the newest card runs the earliest operation, so it must page first despite its age
+		frappe.db.set_value("Job Card", newest, "sequence_id", 1)
+		for name in (oldest, middle):
+			frappe.db.set_value("Job Card", name, "sequence_id", 2)
+		names = [newest, oldest, middle]
+
+		def page(**kwargs):
+			return [row["name"] for row in get_work_order_job_cards(work_order, **kwargs)]
+
+		self.assertEqual(page(start=0, page_length=2), names[:2])
+		self.assertEqual(page(start=2, page_length=2), names[2:])
+		# a page always has a size between 1 and MAX_PAGE_LENGTH
+		self.assertEqual(page(start=0, page_length=0), names[:1])
+
+		self.assertEqual(page(page_length=20, txt=names[1]), [names[1]])
+		self.assertEqual(page(page_length=20, txt=operation.operation), names)
+		# hidden fields such as the timer action are not searched
+		self.assertEqual(page(page_length=20, txt="start"), [])
+
+	def test_no_timer_action_for_read_only_user(self):
+		"A user who can read but not write the Job Card sees its time but no Start / Pause / Resume."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		# Stock User reads Work Orders but has no Job Card role
+		reader = self.make_job_card_test_user("job-card-reader@example.com", "Stock User")
+		frappe.share.add("Job Card", job_card.name, reader, read=1)
+
+		self.assertEqual(get_job_card_timer(job_card.name)["timer_action"], "start")
+		with self.set_user(reader):
+			row = next(
+				r for r in get_work_order_job_cards(self.work_order.name) if r["name"] == job_card.name
+			)
+			self.assertIsNone(row["timer_action"])
+			self.assertEqual(row["elapsed_seconds"], 0)
+
+	def test_writable_job_cards_match_document_permission(self):
+		"The batched write check agrees with the per-document check for every kind of user."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		names = [job_card.name]
+
+		def assert_matches_document_check():
+			expected = {name for name in names if frappe.has_permission("Job Card", "write", doc=name)}
+			self.assertEqual(get_writable_job_cards(names), expected)
+			return expected
+
+		reader = self.make_job_card_test_user("job-card-reader@example.com", "Stock User")
+		writer = self.make_job_card_test_user("job-card-writer@example.com", "Manufacturing User")
+		frappe.share.add("Job Card", job_card.name, reader, read=1)
+
+		with self.set_user(reader):
+			self.assertEqual(assert_matches_document_check(), set())
+		frappe.share.add("Job Card", job_card.name, reader, read=1, write=1)
+		with self.set_user(reader):
+			self.assertEqual(assert_matches_document_check(), set(names))
+
+		with self.set_user(writer):
+			self.assertEqual(assert_matches_document_check(), set(names))
+			# the doctype-level fast path, taken when no hook or User Permission could deny
+			with patch(
+				"erpnext.manufacturing.doctype.job_card.timer.has_document_specific_permission_rules",
+				return_value=False,
+			):
+				self.assertEqual(assert_matches_document_check(), set(names))
+
+	def make_job_card_test_user(self, email: str, role: str) -> str:
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": email.split("@")[0],
+					"send_welcome_email": 0,
+					"roles": [{"role": role}],
+				}
+			).insert()
+		return email
+
+	def test_timer_action_follows_last_time_log(self):
+		"Like the Job Card form, a closed last log allows a restart even if an earlier log is open."
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		employees = [row.name for row in frappe.get_all("Employee", limit=2)]
+		logs = [
+			{"employee": employees[0], "from_time": add_to_date(now(), hours=-2)},
+			{
+				"employee": employees[-1],
+				"from_time": add_to_date(now(), hours=-2),
+				"to_time": add_to_date(now(), hours=-1),
+				"time_in_mins": 60,
+			},
+		]
+		# inserted directly: the scenario, not the overlap validation, is under test
+		for log in logs:
+			job_card.append("time_logs", log).db_insert()
+		job_card.db_set("pending_qty", 1)
+
+		row = get_job_card_timer(job_card.name)
+		self.assertEqual((row["timer_action"], row["is_running"]), ("start", False))
+		# the open log still counts towards elapsed time, as in the form, so the display keeps ticking
+		self.assertAlmostEqual(row["elapsed_seconds"], 3 * 3600, delta=60)
+		self.assertEqual(row["open_log_count"], 1)
+
+	def test_repeated_start_is_refused(self):
+		"A second Start for an employee already on the Job Card opens no second time log."
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		operator = make_employee("job-card-operator@example.com", company=self.work_order.company)
+		helper = make_employee("job-card-helper@example.com", company=self.work_order.company)
+
+		job_card.start_timer(start_time=now(), employees=operator)
+		job_card.reload()
+		self.assertRaises(frappe.ValidationError, job_card.start_timer, start_time=now(), employees=operator)
+
+		# another employee can still join the running job
+		job_card.reload()
+		job_card.start_timer(start_time=now(), employees=helper)
+		job_card.reload()
+		open_logs = sorted(log.employee for log in job_card.time_logs if not log.to_time)
+		self.assertEqual(open_logs, sorted([operator, helper]))
+
+	def test_job_card_timer_action_edge_cases(self):
+		def timer(**overrides):
+			job_card = frappe._dict(
+				docstatus=0,
+				status="Open",
+				for_quantity=2,
+				total_completed_qty=0,
+				has_time_logs=False,
+				logged_minutes=0,
+				open_log_starts=[],
+				last_log_open=False,
+				employees=[],
+			)
+			job_card.update(overrides)
+			return JobCardTimer(job_card)
+
+		closed_cycle = {"has_time_logs": True, "logged_minutes": 60}
+
+		self.assertIsNone(timer(has_pending_transfer=True).get_action())
+		self.assertEqual(timer(has_pending_transfer=True, skip_material_transfer=1).get_action(), "start")
+		self.assertIsNone(timer(docstatus=1).get_action())
+		self.assertIsNone(timer().as_list_row(can_write=False)["timer_action"])
+		self.assertIsNone(timer(work_order_status="Closed").get_action())
+		self.assertIsNone(timer(work_order_status="Stopped").get_action())
+		self.assertIsNone(timer(total_completed_qty=2).get_action())
+		# a closed cycle with pending qty starts again; one without stays on pause
+		self.assertEqual(timer(**closed_cycle, pending_qty=1).get_action(), "start")
+		self.assertEqual(timer(**closed_cycle).get_action(), "pause")
+		self.assertEqual(timer(**closed_cycle).get_elapsed_seconds(), 3600)
+		# an earlier employee's log still open does not block a restart once the last log closed
+		earlier_log_open = {"has_time_logs": True, "open_log_starts": [now()], "last_log_open": False}
+		self.assertEqual(timer(**earlier_log_open, pending_qty=1).get_action(), "start")
+		self.assertFalse(timer(**earlier_log_open).is_running())
+		paused_with_open_log = timer(
+			has_time_logs=True, open_log_starts=[now()], last_log_open=True, is_paused=1
+		)
+		self.assertFalse(paused_with_open_log.is_running())
+		self.assertEqual(paused_with_open_log.get_action(), "resume")
 
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
