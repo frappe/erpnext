@@ -1270,27 +1270,24 @@ class StockEntry(StockController):
 		raw_materials = self.get_bom_raw_materials(self.fg_completed_qty, split_alternative_items=False)
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
-		for item_code, details in raw_materials.items():
-			if matched_items := self.get_matched_items(item_code):
-				if flt(details.get("qty"), precision) != flt(
-					sum(flt(d.qty) for d in matched_items), precision
-				):
-					frappe.throw(
-						_(
-							"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-						).format(
-							frappe.bold(item_code),
-							flt(details.get("qty")),
-							get_link_to_form("BOM", self.bom_no),
-						),
-						title=_("Incorrect Component Quantity"),
-					)
-			else:
+		for item_code, bom_qty in get_bom_stock_qty_by_item(raw_materials).items():
+			matched_items = self.get_matched_items(item_code)
+			if not matched_items:
 				frappe.throw(
 					_("According to the BOM {0}, the Item '{1}' is missing in the stock entry.").format(
 						get_link_to_form("BOM", self.bom_no), frappe.bold(item_code)
 					),
 					title=_("Missing Item"),
+				)
+
+			if flt(bom_qty, precision) != flt(sum(flt(d.transfer_qty) for d in matched_items), precision):
+				frappe.throw(
+					_(
+						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
+					).format(
+						frappe.bold(item_code), flt(bom_qty, precision), get_link_to_form("BOM", self.bom_no)
+					),
+					title=_("Incorrect Component Quantity"),
 				)
 
 	def _validate_no_excess_transfer(self):
@@ -1415,6 +1412,7 @@ class StockEntry(StockController):
 			.select(
 				child.item_code,
 				Sum(child.qty).as_("qty"),
+				Sum(child.transfer_qty).as_("transfer_qty"),
 				child.original_item,
 			)
 			.where(
@@ -4076,6 +4074,16 @@ def get_used_alternative_items(
 		used_alternative_items[d.original_item] = d
 
 	return used_alternative_items
+
+
+def get_bom_stock_qty_by_item(raw_materials):
+	stock_qty_by_item = {}
+	for key, details in raw_materials.items():
+		item_code = key[0] if isinstance(key, tuple) else key
+		stock_qty = flt(details.get("qty")) * (flt(details.get("conversion_factor")) or 1)
+		stock_qty_by_item[item_code] = stock_qty_by_item.get(item_code, 0.0) + stock_qty
+
+	return stock_qty_by_item
 
 
 def get_alternative_items_for_work_order(work_order, item_codes, exclude_stock_entry=None):

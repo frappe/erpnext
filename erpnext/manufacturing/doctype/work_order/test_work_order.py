@@ -4043,6 +4043,37 @@ class TestWorkOrder(FrappeTestCase):
 		manufacture.insert()
 		manufacture.submit()
 
+	@change_settings("Manufacturing Settings", {"validate_components_quantities_per_bom": 1})
+	def test_bom_quantity_check_compares_alternatives_in_stock_uom(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.update({"purpose": "Manufacture", "fg_completed_qty": 1, "bom_no": "_Test BOM"})
+		for item_code, qty, conversion_factor, original_item in (
+			("_Test RM A", 5, 10, None),
+			("_Test RM B", 50, 1, "_Test RM A"),
+		):
+			stock_entry.append(
+				"items",
+				{
+					"item_code": item_code,
+					"original_item": original_item,
+					"s_warehouse": "Stores - _TC",
+					"qty": qty,
+					"conversion_factor": conversion_factor,
+					"transfer_qty": qty * conversion_factor,
+				},
+			)
+
+		raw_materials = {"_Test RM A": frappe._dict(item_code="_Test RM A", qty=10, conversion_factor=10)}
+		with patch.object(StockEntry, "get_bom_raw_materials", return_value=raw_materials):
+			stock_entry.validate_component_and_quantities()
+
+			stock_entry.items[1].transfer_qty = 40
+			self.assertRaises(frappe.ValidationError, stock_entry.validate_component_and_quantities)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
