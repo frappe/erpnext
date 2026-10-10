@@ -154,6 +154,35 @@ class TestJournalEntry(ERPNextTestSuite):
 			jv.submit()
 			jv.cancel()
 
+	def test_party_of_another_company(self):
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		employee = make_employee("test_journal_entry_other_company@salary.com", company="_Test Company 1")
+
+		shareholder = frappe.new_doc("Shareholder")
+		shareholder.title = "_Test Shareholder Other Company"
+		shareholder.company = "_Test Company 1"
+		shareholder.insert()
+
+		def make_jv(party_type, party):
+			jv = make_journal_entry("Creditors - _TC", "_Test Bank - _TC", 100, save=False)
+			jv.get("accounts")[0].party_type = party_type
+			jv.get("accounts")[0].party = party
+			return jv
+
+		for party_type, party in (("Employee", employee), ("Shareholder", shareholder.name)):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"Row 1:.*does not belong to company",
+				make_jv(party_type, party).save,
+			)
+
+		frappe.flags.ignore_party_validation = True
+		try:
+			make_jv("Employee", employee).save()
+		finally:
+			frappe.flags.ignore_party_validation = False
+
 	def test_multi_currency(self):
 		jv = make_journal_entry("_Test Bank USD - _TC", "_Test Bank - _TC", 100, exchange_rate=50, save=False)
 

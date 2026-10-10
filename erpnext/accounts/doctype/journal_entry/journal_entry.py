@@ -27,7 +27,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_voucher_types,
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, validate_party_company
 from erpnext.accounts.services.gl_validator import validate_opening_entry_against_pcv
 from erpnext.accounts.services.taxes import validate_account_head
 from erpnext.accounts.utils import (
@@ -499,6 +499,9 @@ class JournalEntry(AccountsController):
 							d.idx, d.account, d.party_type
 						)
 					)
+
+			if d.party_type and d.party:
+				validate_party_company(d.party_type, d.party, self.company, row=d.idx)
 
 	def check_credit_limit(self):
 		customers = list(

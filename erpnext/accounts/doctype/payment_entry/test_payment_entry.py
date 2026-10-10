@@ -1464,6 +1464,17 @@ class TestPaymentEntry(ERPNextTestSuite):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
 		create_payment_entry(party_type="Employee", party=employee, save=True)
 
+	def test_payment_entry_for_employee_of_another_company(self):
+		employee = make_employee("test_payment_entry_other_company@salary.com", company="_Test Company 1")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"does not belong to company",
+			create_payment_entry,
+			party_type="Employee",
+			party=employee,
+			save=True,
+		)
+
 	def test_duplicate_payment_entry_allocate_amount(self):
 		si = create_sales_invoice()
 
