@@ -1008,7 +1008,8 @@ class JobCard(Document):
 				self.status = "Work In Progress"
 
 			completed_qty = flt(
-				self.total_completed_qty + self.process_loss_qty, self.precision("total_completed_qty")
+				flt(self.total_completed_qty) + flt(self.process_loss_qty),
+				self.precision("total_completed_qty"),
 			)
 			if self.docstatus == 1 and (self.for_quantity <= completed_qty or not self.items):
 				self.status = "Completed"
