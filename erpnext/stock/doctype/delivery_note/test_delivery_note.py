@@ -1647,6 +1647,29 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.items[0].rate, rate)
 		self.assertEqual(dn.items[0].net_rate, rate)
 
+	def test_ledger_balance_matches_the_qty_posted_in_a_fractional_uom(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Third"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "_Test Third", "conversion_factor": 0.3333333}]
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=10)
+
+		for _ in range(3):
+			dn = create_delivery_note(item_code=item, qty=1, rate=50, do_not_save=True)
+			dn.items[0].update({"uom": "_Test Third", "conversion_factor": 0.3333333})
+			dn.submit()
+
+		entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item, "is_cancelled": 0},
+			fields=["actual_qty", "qty_after_transaction"],
+			order_by="posting_datetime, creation",
+		)
+		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
+		self.assertEqual(
+			entries[-1].qty_after_transaction, flt(sum(row.actual_qty for row in entries), precision)
+		)
+
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
