@@ -523,8 +523,8 @@ class StockClosing:
 			filters={
 				"company": self.company,
 				"posting_date": [self.from_date, self.to_date],
+				# `is_cancelled` defines live stock (like get_stock_value_on); docstatus would drop legacy docstatus=0 SLEs.
 				"is_cancelled": 0,
-				"docstatus": 1,
 			},
 		)
 

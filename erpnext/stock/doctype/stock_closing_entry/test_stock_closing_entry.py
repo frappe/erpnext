@@ -65,6 +65,49 @@ class TestStockClosingEntry(ERPNextTestSuite):
 				self.assertEqual(balance.actual_qty, expected_qty)
 				self.assertEqual(balance.stock_value_difference, expected_qty * 10)
 
+	def test_closing_includes_non_submitted_ledger_entries(self):
+		"""A legacy docstatus=0 SLE is live stock (is_cancelled=0) and must be counted in the closing."""
+		from erpnext.stock.utils import get_combine_datetime
+
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		item = make_item("_Test Closing Draft SLE", {"is_stock_item": 1, "has_serial_no": 0}).name
+
+		sle = frappe.new_doc("Stock Ledger Entry")
+		sle.update(
+			{
+				"item_code": item,
+				"warehouse": WAREHOUSE,
+				"posting_date": "2026-01-01",
+				"posting_time": "10:00:00",
+				"actual_qty": 100,
+				"qty_after_transaction": 100,
+				"stock_value_difference": 1000,
+				"stock_value": 1000,
+				"valuation_rate": 10,
+				"company": COMPANY,
+				"voucher_type": "Stock Entry",
+				"voucher_no": "_T-DRAFT-SLE",
+				"is_cancelled": 0,
+				"has_batch_no": 0,
+				"stock_uom": "Nos",
+				"docstatus": 0,  # legacy, un-submitted but live ledger entry
+			}
+		)
+		sle.posting_datetime = get_combine_datetime(sle.posting_date, sle.posting_time)
+		sle.name = frappe.generate_hash(length=10)
+		sle.db_insert()
+
+		try:
+			with (
+				patch(f"{module}.get_inventory_dimensions", return_value=[]),
+				patch.object(StockClosing, "get_last_stock_closing_entry", return_value=None),
+			):
+				entries = StockClosing(COMPANY, "1900-01-01", "2026-01-02").get_stock_closing_entries()
+
+			self.assertEqual(entries[(item, WAREHOUSE)].actual_qty, 100)
+		finally:
+			frappe.db.delete("Stock Ledger Entry", {"name": sle.name})
+
 	def test_batch_zero_values_in_closing_balance(self):
 		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
 		item_details = frappe._dict(
