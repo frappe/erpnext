@@ -27,6 +27,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.get_item_details import (
 	get_barcode_data,
 	get_bin_details,
@@ -335,6 +336,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_item()
+		validate_item_uoms(self.get("items"))
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")

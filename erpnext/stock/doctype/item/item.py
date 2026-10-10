@@ -163,7 +163,9 @@ class Item(Document):
 	def onload(self):
 		self.set_onload("stock_exists", self.stock_ledger_created())
 		self.set_onload("asset_naming_series", get_asset_naming_series())
-		self.set_onload("current_valuation_method", get_valuation_method(self.name))
+		self.set_onload(
+			"current_valuation_method", get_valuation_method(self.name, erpnext.get_default_company())
+		)
 		self.set_onload("asset_exists", self.has_submitted_assets())
 
 	def autoname(self):

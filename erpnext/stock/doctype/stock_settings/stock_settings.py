@@ -88,7 +88,6 @@ class StockSettings(Document):
 		self.update_item_naming_settings()
 		self.update_barcode_field_visibility()
 
-		self.validate_over_delivery_receipt_allowance()
 		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
@@ -118,15 +117,16 @@ class StockSettings(Document):
 		if not self.has_value_changed("show_barcode_field"):
 			return
 
-		for name in ["barcode", "barcodes", "scan_barcode"]:
+		for doctype, fieldname in get_transaction_barcode_fields():
 			frappe.make_property_setter(
-				{"fieldname": name, "property": "hidden", "value": 0 if self.show_barcode_field else 1},
+				{
+					"doctype": doctype,
+					"fieldname": fieldname,
+					"property": "hidden",
+					"value": 0 if self.show_barcode_field else 1,
+				},
 				validate_fields_for_doctype=False,
 			)
-
-	def validate_over_delivery_receipt_allowance(self):
-		if not self.over_delivery_receipt_allowance:
-			self.role_allowed_to_over_deliver_receive = None
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
@@ -365,3 +365,14 @@ def get_enable_stock_uom_editing():
 		],
 		as_dict=1,
 	)
+
+
+def get_transaction_barcode_fields():
+	fields = []
+	for doctype in frappe.get_all("DocField", filters={"fieldname": "scan_barcode"}, pluck="parent"):
+		fields.append((doctype, "scan_barcode"))
+		for table_field in frappe.get_meta(doctype).get_table_fields():
+			if frappe.get_meta(table_field.options).has_field("barcode"):
+				fields.append((table_field.options, "barcode"))
+
+	return fields

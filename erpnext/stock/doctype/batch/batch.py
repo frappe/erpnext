@@ -12,6 +12,7 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import cint, cstr, flt, get_link_to_form, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
+import erpnext
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -186,11 +187,27 @@ class Batch(Document):
 
 		frappe.msgprint(_("Batch Qty updated to {0}").format(batch_qty), alert=True)
 
+	def get_company(self):
+		if self.flags.company:
+			return self.flags.company
+
+		if (
+			self.reference_doctype
+			and self.reference_name
+			and frappe.get_meta(self.reference_doctype).has_field("company")
+		):
+			if company := frappe.db.get_value(self.reference_doctype, self.reference_name, "company"):
+				return company
+
+		return erpnext.get_default_company()
+
 	def set_batchwise_valuation(self):
 		from erpnext.stock.utils import get_valuation_method
 
 		if self.is_new():
-			if get_valuation_method(self.item) == "Moving Average" and frappe.get_single_value(
+			if get_valuation_method(
+				self.item, self.get_company()
+			) == "Moving Average" and frappe.get_single_value(
 				"Stock Settings", "do_not_use_batchwise_valuation"
 			):
 				self.use_batchwise_valuation = 0
@@ -339,10 +356,9 @@ def get_batches_by_oldest(item_code: str, warehouse: str):
 @frappe.whitelist(methods=["POST"])
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
-	batch = make_split_batch(batch_no, item_code, new_batch_id)
-	qty = flt(qty)
-
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
+	batch = make_split_batch(batch_no, item_code, new_batch_id, company)
+	qty = flt(qty)
 
 	from_bundle_id = make_batch_bundle(
 		item_code=item_code,
@@ -383,7 +399,7 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 	return batch.name
 
 
-def make_split_batch(batch_no, item_code, new_batch_id=None):
+def make_split_batch(batch_no, item_code, new_batch_id=None, company=None):
 	source_batch = frappe.db.get_value(
 		"Batch",
 		batch_no,
@@ -391,9 +407,11 @@ def make_split_batch(batch_no, item_code, new_batch_id=None):
 		as_dict=True,
 	)
 
-	return frappe.get_doc(
+	batch = frappe.get_doc(
 		doctype="Batch", item=item_code, batch_id=new_batch_id, parent_batch=batch_no, **source_batch
-	).insert()
+	)
+	batch.flags.company = company
+	return batch.insert()
 
 
 def make_batch_bundle(

@@ -1231,6 +1231,30 @@ def get_price_list_rate(ctx: frappe._dict, item_doc, out: frappe._dict = None):
 	return out
 
 
+def get_item_prices_to_auto_update(ctx):
+	ip = frappe.qb.DocType("Item Price")
+	query = (
+		frappe.qb.from_(ip)
+		.select(ip.name, ip.price_list_rate, ip.valid_from, ip.valid_upto)
+		.where(
+			(ip.item_code == ctx.item_code)
+			& (ip.price_list == ctx.price_list)
+			& (ip.currency == ctx.currency)
+			& (ip.uom == ctx.stock_uom)
+		)
+	)
+
+	for fieldname in ("customer", "supplier", "batch_no"):
+		query = query.where(IfNull(ip[fieldname], "").isin(["", cstr(ctx.get(fieldname))]))
+		query = query.orderby(IfNull(ip[fieldname], ""), order=frappe.qb.desc)
+
+	return (
+		query.orderby(ip.valid_from.isnull(), order=frappe.qb.asc)
+		.orderby(ip.valid_from, order=frappe.qb.desc)
+		.orderby(ip.creation, order=frappe.qb.desc)
+	).run(as_dict=True)
+
+
 def insert_item_price(ctx: frappe._dict):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
 	if not ctx.price_list or not ctx.rate or ctx.is_internal_supplier or ctx.is_internal_customer:
@@ -1250,20 +1274,7 @@ def insert_item_price(ctx: frappe._dict):
 		or getdate()
 	)
 
-	ip = frappe.qb.DocType("Item Price")
-	item_prices = (
-		frappe.qb.from_(ip)
-		.select(ip.name, ip.price_list_rate, ip.valid_from, ip.valid_upto)
-		.where(
-			(ip.item_code == ctx.item_code)
-			& (ip.price_list == ctx.price_list)
-			& (ip.currency == ctx.currency)
-			& (ip.uom == ctx.stock_uom)
-		)
-		.orderby(ip.valid_from.isnull(), order=frappe.qb.asc)
-		.orderby(ip.valid_from, order=frappe.qb.desc)
-		.orderby(ip.creation, order=frappe.qb.desc)
-	).run(as_dict=True)
+	item_prices = get_item_prices_to_auto_update(ctx)
 	item_price = next(
 		(
 			row
