@@ -29,7 +29,8 @@ class ItemManufacturer(Document):
 		self.manage_default_item_manufacturer()
 
 	def on_trash(self):
-		self.manage_default_item_manufacturer(delete=True)
+		if self.is_default:
+			self.clear_item_default(self)
 
 	def validate_duplicate_entry(self):
 		filters = {
@@ -46,30 +47,33 @@ class ItemManufacturer(Document):
 				)
 			)
 
-	def manage_default_item_manufacturer(self, delete=False):
+	def manage_default_item_manufacturer(self):
 		from frappe.model.utils import set_default
 
-		if self.is_default and not delete:
+		previous = self.get_doc_before_save()
+		if previous and previous.is_default and self.has_default_changed(previous):
+			self.clear_item_default(previous)
+
+		if self.is_default:
 			set_default(self, "item_code")
-			self.set_item_default(self.manufacturer, self.manufacturer_part_no)
-		elif self.is_item_default():
-			self.set_item_default(None, None)
+			self.set_item_default(self.item_code, self.manufacturer, self.manufacturer_part_no)
 
-	def is_item_default(self):
-		previous = self.get_doc_before_save() or self
-		if not self.is_default and not previous.is_default:
-			return False
+	def has_default_changed(self, previous):
+		fieldnames = ("is_default", "item_code", "manufacturer", "manufacturer_part_no")
+		return any(previous.get(fieldname) != self.get(fieldname) for fieldname in fieldnames)
 
+	def clear_item_default(self, row):
 		item_default = frappe.db.get_value(
-			"Item", self.item_code, ["default_item_manufacturer", "default_manufacturer_part_no"]
+			"Item", row.item_code, ["default_item_manufacturer", "default_manufacturer_part_no"]
 		)
-		return tuple(item_default) == (previous.manufacturer, previous.manufacturer_part_no)
+		if tuple(item_default or ()) == (row.manufacturer, row.manufacturer_part_no):
+			self.set_item_default(row.item_code, None, None)
 
-	def set_item_default(self, manufacturer, manufacturer_part_no):
-		frappe.has_permission("Item", "write", doc=self.item_code, throw=True)
+	def set_item_default(self, item_code, manufacturer, manufacturer_part_no):
+		frappe.has_permission("Item", "write", doc=item_code, throw=True)
 		frappe.db.set_value(
 			"Item",
-			self.item_code,
+			item_code,
 			{"default_item_manufacturer": manufacturer, "default_manufacturer_part_no": manufacturer_part_no},
 		)
 
