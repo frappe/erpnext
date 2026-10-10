@@ -22,7 +22,7 @@ frappe.query_reports["BOM Operations Time"] = {
 			width: "100",
 			options: "BOM",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("BOM", txt);
+				return erpnext.utils.get_link_options("BOM", txt);
 			},
 			get_query: () => {
 				return {
