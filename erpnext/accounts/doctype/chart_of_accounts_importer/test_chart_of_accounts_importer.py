@@ -41,6 +41,18 @@ class TestChartofAccountsImporter(ERPNextTestSuite):
 		nameless = ["", "Assets", "", "", 0, "Cash", "Asset", "INR"]
 		self.assertRaises(frappe.ValidationError, build_forest, [ROOT, nameless])
 
+	def test_build_forest_rejects_duplicate_account_name(self):
+		# child named like its parent, no account numbers to tell them apart
+		parent = ["Cash", "Assets", "", "", 1, "Cash", "Asset", "INR"]
+		child = ["Cash", "Cash", "", "", 0, "Cash", "Asset", "INR"]
+		self.assertRaises(frappe.ValidationError, build_forest, [ROOT, parent, child])
+
+		# account numbers make the names unique -> child nests under parent
+		parent = ["Cash", "Assets", "100", "", 1, "Cash", "Asset", "INR"]
+		child = ["Cash", "Cash", "101", "100", 0, "Cash", "Asset", "INR"]
+		forest = build_forest([ROOT, parent, child])
+		self.assertIn("101 - Cash", forest["Assets"]["100 - Cash"])
+
 	def test_validate_missing_roots_requires_all_root_types(self):
 		present = ("Asset", "Liability", "Expense", "Income")  # Equity missing
 		self.assertRaises(
