@@ -7,12 +7,14 @@ import frappe
 
 # import erpnext
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import (
 	calculate_value_after_depreciation_on_disposal_date,
+	depreciate_asset,
+	get_last_depreciation_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
 )
@@ -76,7 +78,7 @@ class AssetCapitalization(StockController):
 		set_posting_time: DF.Check
 		stock_items: DF.Table[AssetCapitalizationStockItem]
 		stock_items_total: DF.Currency
-		target_asset: DF.Link | None
+		target_asset: DF.Link
 		target_asset_name: DF.Data | None
 		target_fixed_asset_account: DF.Link | None
 		target_incoming_rate: DF.Currency
@@ -92,6 +94,8 @@ class AssetCapitalization(StockController):
 		self.validate_target_asset()
 		self.validate_consumed_stock_item()
 		self.validate_consumed_asset_item()
+		self.validate_duplicate_consumed_assets()
+		self.validate_consumed_asset_disposal_date()
 		self.validate_service_item()
 		self.set_warehouse_details()
 		self.set_asset_values()
@@ -109,9 +113,18 @@ class AssetCapitalization(StockController):
 	def on_submit(self):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
+		self.dispose_consumed_assets()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_target_asset()
+
+	def before_cancel(self):
+		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel the submitted Target Asset {0} before cancelling this Asset Capitalization").format(
+					get_link_to_form("Asset", self.target_asset)
+				)
+			)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -208,35 +221,31 @@ class AssetCapitalization(StockController):
 		self.validate_item(target_item)
 
 	def validate_target_asset(self):
-		if self.target_asset:
-			target_asset = self.get_asset_for_validation(self.target_asset)
+		if not self.target_asset:
+			frappe.throw(_("Target Asset is mandatory"), frappe.MandatoryError)
 
-			if not target_asset.asset_type == "Composite Asset":
-				frappe.throw(_("Target Asset {0} needs to be a composite asset").format(target_asset.name))
+		target_asset = self.get_asset_for_validation(self.target_asset)
 
-			if target_asset.item_code != self.target_item_code:
-				frappe.throw(
-					_("Asset {0} does not belong to Item {1}").format(
-						self.target_asset, self.target_item_code
-					)
-				)
+		if not target_asset.asset_type == "Composite Asset":
+			frappe.throw(_("Target Asset {0} needs to be a composite asset").format(target_asset.name))
 
-			if target_asset.status in ("Scrapped", "Sold", "Capitalized"):
-				frappe.throw(
-					_("Target Asset {0} cannot be {1}").format(target_asset.name, target_asset.status)
-				)
+		if target_asset.item_code != self.target_item_code:
+			frappe.throw(
+				_("Asset {0} does not belong to Item {1}").format(self.target_asset, self.target_item_code)
+			)
 
-			if target_asset.docstatus == 1:
-				frappe.throw(_("Target Asset {0} cannot be submitted").format(target_asset.name))
-			elif target_asset.docstatus == 2:
-				frappe.throw(_("Target Asset {0} cannot be cancelled").format(target_asset.name))
+		if target_asset.status in ("Scrapped", "Sold", "Capitalized"):
+			frappe.throw(_("Target Asset {0} cannot be {1}").format(target_asset.name, target_asset.status))
 
-			if target_asset.company != self.company:
-				frappe.throw(
-					_("Target Asset {0} does not belong to company {1}").format(
-						target_asset.name, self.company
-					)
-				)
+		if target_asset.docstatus == 1:
+			frappe.throw(_("Target Asset {0} cannot be submitted").format(target_asset.name))
+		elif target_asset.docstatus == 2:
+			frappe.throw(_("Target Asset {0} cannot be cancelled").format(target_asset.name))
+
+		if target_asset.company != self.company:
+			frappe.throw(
+				_("Target Asset {0} does not belong to company {1}").format(target_asset.name, self.company)
+			)
 
 	def validate_consumed_stock_item(self):
 		for d in self.stock_items:
@@ -283,6 +292,23 @@ class AssetCapitalization(StockController):
 							d.idx, asset.name, self.company
 						)
 					)
+
+	def validate_duplicate_consumed_assets(self):
+		consumed_assets = set()
+		for d in self.asset_items:
+			if d.asset in consumed_assets:
+				frappe.throw(_("Row #{0}: Consumed Asset {1} is added more than once").format(d.idx, d.asset))
+			consumed_assets.add(d.asset)
+
+	def validate_consumed_asset_disposal_date(self):
+		for d in self.asset_items:
+			last_depreciation_date = get_last_depreciation_date(d.asset)
+			if last_depreciation_date and getdate(self.posting_date) < last_depreciation_date:
+				frappe.throw(
+					_(
+						"Row #{0}: Consumed Asset {1} cannot be capitalized before its last depreciation entry dated {2}"
+					).format(d.idx, d.asset, frappe.format(last_depreciation_date, "Date"))
+				)
 
 	def validate_service_item(self):
 		for d in self.service_items:
@@ -446,40 +472,72 @@ class AssetCapitalization(StockController):
 		else:
 			return self.target_fixed_asset_account
 
-	def get_composite_component_value(self):
-		composite_component_value = 0
-		for item in self.asset_items:
-			asset = frappe.db.get_value("Asset", item.asset, ["asset_type"], as_dict=True)
-			if asset and asset.asset_type == "Composite Component":
-				composite_component_value += flt(item.asset_value, item.precision("asset_value"))
-		return composite_component_value
-
 	def update_target_asset(self):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
-		asset_doc = frappe.get_doc("Asset", self.target_asset)
-
 		if self.docstatus == 2:
-			net_purchase_amount = asset_doc.net_purchase_amount - total_target_asset_value
-			purchase_amount = asset_doc.purchase_amount - total_target_asset_value
-			total_asset_cost = asset_doc.total_asset_cost - total_target_asset_value
-		else:
-			net_purchase_amount = asset_doc.net_purchase_amount + total_target_asset_value
-			purchase_amount = asset_doc.purchase_amount + total_target_asset_value
-			total_asset_cost = asset_doc.total_asset_cost + total_target_asset_value
+			total_target_asset_value *= -1
 
-		asset_doc.db_set(
-			{
-				"net_purchase_amount": net_purchase_amount,
-				"purchase_amount": purchase_amount,
-				"total_asset_cost": total_asset_cost,
-			}
-		)
+		self.add_to_target_asset_cost(total_target_asset_value)
 
 		frappe.msgprint(
 			_("Asset {0} has been updated. Please set the depreciation details if any and submit it.").format(
-				get_link_to_form("Asset", asset_doc.name)
+				get_link_to_form("Asset", self.target_asset)
 			)
 		)
+
+	def add_to_target_asset_cost(self, amount: float) -> None:
+		asset_doc = frappe.get_doc("Asset", self.target_asset)
+		asset_doc.db_set(
+			{
+				"net_purchase_amount": asset_doc.net_purchase_amount + amount,
+				"purchase_amount": asset_doc.purchase_amount + amount,
+				"total_asset_cost": asset_doc.total_asset_cost + amount,
+			}
+		)
+
+	def update_stock_item_rate(self, row_name: str, valuation_rate: float) -> None:
+		"""Called on repost when the stock ledger revalues a consumed stock row."""
+		row = self.get("stock_items", {"name": row_name})[0]
+		previous_total = self.total_value
+
+		row.valuation_rate = valuation_rate
+		self.calculate_totals()
+		difference = flt(self.total_value - previous_total, self.precision("total_value"))
+		if not difference:
+			return
+
+		target_asset_status = frappe.db.get_value("Asset", self.target_asset, "docstatus")
+		if target_asset_status == 1:
+			frappe.throw(
+				_(
+					"The cost of items consumed in Asset Capitalization {0} has changed, but its Target Asset {1} is already submitted. Cancel the Target Asset and this Asset Capitalization, then repost."
+				).format(
+					get_link_to_form(self.doctype, self.name), get_link_to_form("Asset", self.target_asset)
+				)
+			)
+
+		row.db_update()
+		self.db_update()
+		if target_asset_status == 0:
+			self.add_to_target_asset_cost(difference)
+
+	def dispose_consumed_assets(self):
+		"""Depreciate consumed assets up to the posting date and mark them capitalized.
+
+		Kept out of the GL composer, which also runs on every repost."""
+		for item in self.asset_items:
+			asset = frappe.get_doc("Asset", item.asset)
+			if asset.asset_type != "Composite Component":
+				notes = _(
+					"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
+				).format(
+					get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
+				)
+				depreciate_asset(asset, self.posting_date, notes)
+				asset.reload()
+
+			asset.db_set("disposal_date", self.posting_date)
+			self.set_consumed_asset_status(asset)
 
 	def restore_consumed_asset_items(self):
 		for item in self.asset_items:
