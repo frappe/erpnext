@@ -163,6 +163,7 @@ def get_pos_invoices(start, end, pos_profile, user):
 	frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
 	frappe.has_permission("POS Invoice", throw=True)
 
+<<<<<<< HEAD
 	data = frappe.db.sql(
 		"""
 	select
@@ -181,6 +182,105 @@ def get_pos_invoices(start, end, pos_profile, user):
 	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
 	# need to get taxes and payments so can't avoid get_doc
 	data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
+=======
+	frappe.has_permission("Sales Invoice", throw=True)
+	sales_inv_query = build_invoice_query("Sales Invoice", user, pos_profile, start, end)
+
+	query = sales_inv_query
+
+	if invoice_doctype == "POS Invoice":
+		frappe.has_permission("POS Invoice", throw=True)
+		pos_inv_query = build_invoice_query("POS Invoice", user, pos_profile, start, end)
+		query = query + pos_inv_query
+
+	query = query.orderby(query.timestamp)
+	invoices = query.run(as_dict=1)
+
+	data = {"invoices": invoices, "payments": get_payments(invoices), "taxes": get_taxes(invoices)}
+
+	return data
+
+
+def get_payments(invoices):
+	if not len(invoices):
+		return []
+
+	rows_by_invoice = get_payment_rows_by_invoice(invoices)
+	for invoice in invoices:
+		if not flt(invoice.change_amount):
+			continue
+
+		rows = rows_by_invoice.get((invoice.doctype, invoice.name), [])
+		if row := get_change_payment_row(rows, invoice.account_for_change_amount):
+			row.amount = flt(row.amount) - flt(invoice.change_amount)
+
+	amount_by_mode = {}
+	for rows in rows_by_invoice.values():
+		for row in rows:
+			amount_by_mode[row.mode_of_payment] = amount_by_mode.get(row.mode_of_payment, 0) + flt(row.amount)
+
+	return [frappe._dict(mode_of_payment=mode, amount=amount) for mode, amount in amount_by_mode.items()]
+
+
+def get_payment_rows_by_invoice(invoices):
+	SalesInvoicePayment = DocType("Sales Invoice Payment")
+	rows = (
+		frappe.qb.from_(SalesInvoicePayment)
+		.select(
+			SalesInvoicePayment.parenttype,
+			SalesInvoicePayment.parent,
+			SalesInvoicePayment.mode_of_payment,
+			SalesInvoicePayment.account,
+			SalesInvoicePayment.type,
+			SalesInvoicePayment.amount,
+		)
+		.where(
+			(SalesInvoicePayment.parenttype.isin(["Sales Invoice", "POS Invoice"]))
+			& (SalesInvoicePayment.parent.isin([d.name for d in invoices]))
+		)
+		.orderby(SalesInvoicePayment.idx)
+		.run(as_dict=True)
+	)
+
+	rows_by_invoice = {}
+	for row in rows:
+		rows_by_invoice.setdefault((row.parenttype, row.parent), []).append(row)
+
+	return rows_by_invoice
+
+
+def get_change_payment_row(rows, change_account):
+	"""The row the change was paid from: a Cash row on the change account, any row on the change
+	account, then any Cash row."""
+	change_account_rows = [row for row in rows if row.account == change_account]
+	return (
+		next((row for row in change_account_rows if row.type == "Cash"), None)
+		or next(iter(change_account_rows), None)
+		or next((row for row in rows if row.type == "Cash"), None)
+	)
+
+
+def get_taxes(invoices):
+	if not len(invoices):
+		return []
+
+	invoices_name = [d.name for d in invoices]
+
+	SalesInvoiceTaxesCharges = DocType("Sales Taxes and Charges")
+	query = (
+		frappe.qb.from_(SalesInvoiceTaxesCharges)
+		.where(
+			(SalesInvoiceTaxesCharges.parenttype.isin(["Sales Invoice", "POS Invoice"]))
+			& (SalesInvoiceTaxesCharges.parent.isin(invoices_name))
+		)
+		.groupby(SalesInvoiceTaxesCharges.account_head)
+		.select(
+			SalesInvoiceTaxesCharges.account_head,
+			fn.Sum(SalesInvoiceTaxesCharges.tax_amount_after_discount_amount).as_("tax_amount"),
+		)
+	)
+	data = query.run(as_dict=1)
+>>>>>>> 83904a6 (fix(accounts): take POS change off one payment row per invoice (#59514))
 
 	return data
 
