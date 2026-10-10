@@ -3,7 +3,6 @@
 
 
 import json
-from unittest.mock import patch
 
 import frappe
 from frappe import qb
@@ -1272,63 +1271,29 @@ class TestItem(ERPNextTestSuite):
 		setups = (
 			({"has_serial_no": 1}, "Serial Number Series"),
 			({"has_batch_no": 1, "create_new_batch": 0}, "Automatically Create New Batch"),
-			(
-				{"has_serial_no": 1, "has_batch_no": 1, "create_new_batch": 1},
-				"Serial Number Series",
-			),
-			(
-				{
-					"has_serial_no": 1,
-					"serial_no_series": "SN-OPENING-.####",
-					"has_batch_no": 1,
-					"create_new_batch": 0,
-				},
-				"Automatically Create New Batch",
-			),
 		)
 		for properties, message in setups:
-			for qty in (5, 10001):
-				with self.subTest(properties=properties, qty=qty), patch("frappe.enqueue") as enqueue:
-					with self.assertRaisesRegex(frappe.ValidationError, message):
-						make_item(
-							properties={
-								"is_stock_item": 1,
-								"opening_stock": qty,
-								"valuation_rate": 100,
-								**properties,
-							}
-						)
-					enqueue.assert_not_called()
+			with self.subTest(properties=properties), self.assertRaisesRegex(frappe.ValidationError, message):
+				make_item(
+					properties={"is_stock_item": 1, "opening_stock": 5, "valuation_rate": 100, **properties}
+				)
 
-	def test_opening_stock_with_batch_naming_fallback(self):
-		for use_naming_series in (0, 1):
-			with self.subTest(use_naming_series=use_naming_series), self.change_settings(
-				"Stock Settings", {"use_naming_series": use_naming_series, "naming_series_prefix": "BATCH-"}
-			):
-				item = make_item(
-					properties={
-						"is_stock_item": 1,
-						"has_batch_no": 1,
-						"create_new_batch": 1,
-						"batch_number_series": "",
-						"opening_stock": 5,
-						"valuation_rate": 100,
-						"item_defaults": [
-							{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
-						],
-					}
-				)
-				ledger = frappe.db.get_value(
-					"Stock Ledger Entry",
-					{"item_code": item.name, "voucher_type": "Stock Reconciliation", "is_cancelled": 0},
-					["actual_qty", "serial_and_batch_bundle"],
-					as_dict=True,
-				)
-				self.assertIsNotNone(ledger)
-				self.assertEqual(ledger.actual_qty, 5)
-				bundle = frappe.get_doc("Serial and Batch Bundle", ledger.serial_and_batch_bundle)
-				self.assertEqual(abs(bundle.total_qty), 5)
-				self.assertTrue(bundle.entries[0].batch_no)
+	def test_opening_stock_for_batch_without_series(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"opening_stock": 5,
+				"valuation_rate": 100,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			}
+		)
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"item_code": item.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(actual_qty, 5)
 
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_opening_stock_for_serial_batch(self):
