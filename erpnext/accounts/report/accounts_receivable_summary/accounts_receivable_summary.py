@@ -3,11 +3,12 @@
 
 
 import frappe
-from frappe import _, scrub
+from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
-from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import get_currency_precision, get_party_types_from_account_type
 
 
@@ -36,24 +37,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		self.get_party_total(args)
 
-		party = None
-		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
-				party = self.filters.get(scrub(party_type))
-
-		party_advance_amount = (
-			get_partywise_advanced_payment_amount(
-				self.party_type,
-				self.filters.report_date,
-				self.filters.show_future_payments,
-				self.filters.company,
-				party=party,
-			)
-			or {}
-		)
-
 		if self.filters.show_gl_balance:
-			gl_balance_map = get_gl_balance(self.filters.report_date, self.filters.company, self.account_type)
+			gl_balance_map = self.get_gl_balance()
 
 		for party, party_dict in self.party_total.items():
 			if flt(party_dict.outstanding, self.currency_precision) == 0:
@@ -74,7 +59,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			row.update(party_dict)
 
 			# Advance against party
-			row.advance = party_advance_amount.get(party, 0)
+			row.advance = self.party_advance.get(party, 0)
 
 			# In AR/AP, advance shown in paid columns,
 			# but in summary report advance shown in separate column
@@ -91,6 +76,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_party_total(self, args):
 		self.party_total = frappe._dict()
+		self.party_advance = frappe._dict()
+		invoice_doctypes = frappe.get_hooks("invoice_doctypes")
 
 		for d in self.receivables:
 			self.init_party_total(d)
@@ -99,6 +86,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			for k in list(self.party_total[d.party]):
 				if isinstance(self.party_total[d.party][k], float):
 					self.party_total[d.party][k] += d.get(k) or 0.0
+
+			# unallocated payments are the rows of non invoice vouchers
+			if d.voucher_type not in invoice_doctypes:
+				self.party_advance[d.party] = self.party_advance.get(d.party, 0.0) + flt(d.paid)
 
 			# set territory, customer_group, sales person etc
 			self.set_party_details(d)
@@ -114,7 +105,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"sales_person": [],
 			"party_type": row.party_type,
 		}
-		for i in self.range_numbers:
+		for i in [0, *self.range_numbers]:
 			range_key = f"range{i}"
 			default_dict[range_key] = 0.0
 
@@ -208,18 +199,34 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			label=_("Currency"), fieldname="currency", fieldtype="Link", options="Currency", width=80
 		)
 
-
-def get_gl_balance(report_date, company, account_type):
-	if account_type == "Payable":
-		balance_calc_fields = ["party", {"SUM": [{"SUB": ["credit", "debit"]}], "as": "balance"}]
-	else:
-		balance_calc_fields = ["party", {"SUM": [{"SUB": ["debit", "credit"]}], "as": "balance"}]
-	return frappe._dict(
-		frappe.db.get_all(
-			"GL Entry",
-			fields=balance_calc_fields,
-			filters={"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
-			group_by="party",
-			as_list=1,
+	def get_gl_balance(self) -> frappe._dict:
+		gle = frappe.qb.DocType("GL Entry")
+		balance = gle.credit - gle.debit if self.account_type == "Payable" else gle.debit - gle.credit
+		query = (
+			frappe.qb.from_(gle)
+			.select(gle.party, Sum(balance))
+			.where(
+				(gle.posting_date <= self.filters.report_date)
+				& (gle.is_cancelled == 0)
+				& (gle.company == self.filters.company)
+				& (gle.party_type.isin(self.party_type))
+				& (gle.account.isin(self.get_party_accounts()))
+			)
+			.groupby(gle.party)
 		)
-	)
+		if self.filters.cost_center:
+			query = query.where(
+				gle.cost_center.isin(get_cost_centers_with_children(self.filters.cost_center))
+			)
+
+		return frappe._dict(query.run())
+
+	def get_party_accounts(self) -> list[str]:
+		if self.filters.party_account:
+			return [self.filters.party_account]
+
+		return frappe.get_all(
+			"Account",
+			filters={"account_type": self.account_type, "company": self.filters.company},
+			pluck="name",
+		)
