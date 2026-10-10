@@ -1393,8 +1393,8 @@ class WorkOrder(Document):
 						AND entry.docstatus = 1
 						AND detail.parent = entry.name
 						AND detail.s_warehouse IS NOT null
-						AND (detail.item_code = %(item)s
-							OR detail.original_item = %(item)s)
+						AND (detail.original_item = %(item)s
+							OR (IFNULL(detail.original_item, '') = '' AND detail.item_code = %(item)s))
 				""",
 				{"name": self.name, "item": item.item_code},
 			)[0][0]
