@@ -7,7 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
-from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+from frappe.permissions import get_user_permissions, has_user_permission
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_link_to_form, now
 from frappe.utils.data import DateTimeLikeObject
@@ -1519,14 +1519,17 @@ def get_items(
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 	frappe.has_permission("Item", "read", throw=True)
 	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
-	_require_reconciliation_permission("Warehouse", warehouse)
+	if not _has_reconciliation_permission(
+		company, {"warehouse": warehouse, "item_code": item_code}, strict=False
+	):
+		_refuse()
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		for child_warehouse in frappe.db.get_descendants("Warehouse", warehouse):
 			frappe.has_permission("Warehouse", "read", doc=child_warehouse, throw=True)
-			_require_reconciliation_permission("Warehouse", child_warehouse)
+			if not _has_reconciliation_permission(company, {"warehouse": child_warehouse}, strict=False):
+				_refuse()
 	if item_code:
 		frappe.has_permission("Item", "read", doc=item_code, throw=True)
-		_require_reconciliation_permission("Item", item_code)
 
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
@@ -1578,10 +1581,9 @@ def get_items(
 	readable_items = set(
 		frappe.get_list("Item", filters={"name": ["in", list(item_codes)]}, pluck="name", limit_page_length=0)
 	)
-	allowed_items = set(_reconciliation_allowed_docs("Item"))
 	permitted = []
 	for row in res:
-		if row["item_code"] in readable_items and (not allowed_items or row["item_code"] in allowed_items):
+		if row["item_code"] in readable_items and _has_reconciliation_permission(company, row):
 			permitted.append(row)
 
 	return permitted
@@ -1774,9 +1776,19 @@ def get_stock_balance_for(
 ):
 	frappe.has_permission("Item", "read", doc=item_code, throw=True)
 	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
-	_require_reconciliation_permission("Item", item_code)
-	_require_reconciliation_permission("Warehouse", warehouse)
 	check_warehouse_company(warehouse)
+	row = frappe.parse_json(row)
+	lookup = {
+		**(row if isinstance(row, dict) else {}),
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"batch_no": batch_no,
+		**(inventory_dimensions_dict or {}),
+	}
+	if not _has_reconciliation_permission(company, lookup):
+		_refuse()
+	if isinstance(row, dict) and not _has_reconciliation_permission(company, row):
+		_refuse()
 
 	return _get_stock_balance_for(
 		item_code,
@@ -1941,16 +1953,26 @@ def _get_stock_balance_for(
 	}
 
 
-def _reconciliation_allowed_docs(doctype):
-	return get_allowed_docs_for_doctype(
-		get_user_permissions(frappe.session.user).get(doctype, []), "Stock Reconciliation"
-	)
+def _has_reconciliation_permission(company, row, strict=True):
+	if not get_user_permissions(frappe.session.user):
+		return True
 
+	row = frappe._dict(row)
+	item_code = cstr(row.item_code)
+	if item_code:
+		for df in frappe.get_meta("Stock Reconciliation Item").get_fields_to_fetch("item_code"):
+			if df.fieldtype == "Link":
+				row[df.fieldname] = frappe.get_cached_value("Item", item_code, df.fetch_from.split(".")[-1])
 
-def _require_reconciliation_permission(doctype, name):
-	allowed_docs = _reconciliation_allowed_docs(doctype)
-	if allowed_docs and name not in allowed_docs:
-		_refuse()
+	# the entry must be postable under the warehouse's own company as well as the requested one
+	warehouse_company = frappe.get_cached_value("Warehouse", cstr(row.warehouse), "company")
+	for entry_company in {company or warehouse_company, warehouse_company}:
+		doc = frappe.new_doc("Stock Reconciliation", company=entry_company, items=[row])
+		doc._set_defaults()
+		if not has_user_permission(doc, ptype="create", strict=strict):
+			return False
+
+	return True
 
 
 @frappe.whitelist()
