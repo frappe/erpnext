@@ -42,22 +42,54 @@ class AssetMaintenanceLog(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		if getdate(self.due_date) < getdate(nowdate()) and self.maintenance_status not in [
-			"Completed",
-			"Cancelled",
-		]:
-			self.maintenance_status = "Overdue"
+		self.validate_task()
+		if self.maintenance_status in ("Planned", "Overdue"):
+			self.maintenance_status = "Overdue" if getdate(self.due_date) < getdate(nowdate()) else "Planned"
 
 		if self.maintenance_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Asset Maintenance Log"))
 
+		if self.completion_date and getdate(self.completion_date) > getdate(nowdate()):
+			frappe.throw(_("Completion Date cannot be in the future"))
+
 		if self.maintenance_status != "Completed" and self.completion_date:
 			frappe.throw(_("Please select Maintenance Status as Completed or remove Completion Date"))
+
+	def validate_task(self):
+		if not self.task:
+			frappe.throw(_("Please select a Task"))
+		if frappe.db.get_value("Asset Maintenance Task", self.task, "parent") != self.asset_maintenance:
+			frappe.throw(
+				_("Task {0} does not belong to Asset Maintenance {1}").format(
+					self.task, self.asset_maintenance
+				)
+			)
 
 	def on_submit(self):
 		if self.maintenance_status not in ["Completed", "Cancelled"]:
 			frappe.throw(_("Maintenance Status has to be Cancelled or Completed to Submit"))
 		self.update_maintenance_task()
+
+	def on_cancel(self):
+		if self.maintenance_status == "Completed":
+			self.revert_maintenance_task()
+
+	def revert_maintenance_task(self):
+		task = frappe.get_doc("Asset Maintenance Task", self.task)
+		if not task.last_completion_date or getdate(task.last_completion_date) != getdate(
+			self.completion_date
+		):
+			return
+
+		task.last_completion_date = frappe.db.get_value(
+			"Asset Maintenance Log",
+			{"task": self.task, "docstatus": 1, "maintenance_status": "Completed", "name": ("!=", self.name)},
+			"completion_date",
+			order_by="completion_date desc",
+		)
+		task.next_due_date = self.due_date
+		task.save()
+		frappe.get_doc("Asset Maintenance", self.asset_maintenance).save()
 
 	def update_maintenance_task(self):
 		asset_maintenance_doc = frappe.get_doc("Asset Maintenance Task", self.task)
@@ -87,11 +119,26 @@ def update_asset_maintenance_log_status():
 		)
 	).run()
 
+	AssetMaintenanceTask = DocType("Asset Maintenance Task")
+	(
+		frappe.qb.update(AssetMaintenanceTask)
+		.set(AssetMaintenanceTask.maintenance_status, "Overdue")
+		.where(
+			(AssetMaintenanceTask.maintenance_status == "Planned")
+			& (AssetMaintenanceTask.next_due_date < today())
+		)
+	).run()
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_maintenance_tasks(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	asset_maintenance_tasks = frappe.db.get_values(
-		"Asset Maintenance Task", {"parent": filters.get("asset_maintenance")}, "maintenance_task"
+	asset_maintenance = filters.get("asset_maintenance")
+	frappe.has_permission("Asset Maintenance", "read", asset_maintenance, throw=True)
+	return frappe.get_all(
+		"Asset Maintenance Task",
+		filters={"parent": asset_maintenance, "parenttype": "Asset Maintenance"},
+		or_filters={"name": ("like", f"%{txt}%"), "maintenance_task": ("like", f"%{txt}%")},
+		fields=["name", "maintenance_task"],
+		as_list=True,
 	)
-	return asset_maintenance_tasks

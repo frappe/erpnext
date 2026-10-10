@@ -92,7 +92,7 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		asset_maintenance_log_doc = frappe.get_doc("Asset Maintenance Log", asset_maintenance_log)
 		asset_maintenance_log_doc.update(
 			{
-				"completion_date": add_days(nowdate(), 2),
+				"completion_date": nowdate(),
 				"maintenance_status": "Completed",
 			}
 		)
