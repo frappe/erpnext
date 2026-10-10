@@ -1082,6 +1082,62 @@ class TestPickList(ERPNextTestSuite):
 		pl1.cancel()
 		pl.cancel()
 
+	def test_picklist_deducts_quantities_from_multiple_bundle_batches(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
+		batches = [
+			frappe.get_doc(doctype="Batch", item=item.name, batch_id=f"{item.name}-{index}").insert().name
+			for index in (1, 2)
+		]
+		make_stock_entry(
+			item=item.name,
+			to_warehouse=warehouse,
+			qty=50,
+			basic_rate=100,
+			batches={batches[0]: 30, batches[1]: 20},
+		)
+		pick_list = frappe.get_doc(
+			doctype="Pick List",
+			company="_Test Company",
+			purpose="Delivery",
+			pick_manually=1,
+			locations=[
+				{
+					"item_code": item.name,
+					"warehouse": warehouse,
+					"qty": 15,
+					"stock_qty": 15,
+					"picked_qty": 15,
+					"uom": item.stock_uom,
+					"stock_uom": item.stock_uom,
+					"conversion_factor": 1,
+				}
+			],
+		).insert()
+		bundle = make_serial_batch_bundle(
+			{
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"voucher_type": "Pick List",
+				"voucher_no": pick_list.name,
+				"qty": -15,
+				"batches": {batches[0]: 10, batches[1]: 5},
+				"do_not_submit": True,
+			}
+		)
+		pick_list.locations[0].serial_and_batch_bundle = bundle.name
+		pick_list.save()
+		self.assertFalse(pick_list.locations[0].batch_no)
+		self.assertEqual(len(bundle.entries), 2)
+
+		sales_order = make_sales_order(item_code=item.name, warehouse=warehouse, qty=50, rate=100)
+		next_pick_list = create_pick_list(sales_order.name)
+
+		self.assertEqual(
+			{row.batch_no: row.stock_qty for row in next_pick_list.locations},
+			{batches[0]: 20, batches[1]: 15},
+		)
+
 	def test_picklist_for_serial_item(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
