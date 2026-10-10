@@ -4,105 +4,190 @@
 
 import frappe
 from frappe import _
+from frappe.permissions import get_user_permissions
 from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Count, Max, Sum
 from frappe.utils import cint
+from pypika.analytics import RowNumber
 
 
 def execute(filters=None):
-	if not filters:
-		filters = {}
+	filters = filters or {}
 
-	days_since_last_order = filters.get("days_since_last_order")
 	doctype = filters.get("doctype")
-
 	if doctype not in ("Sales Order", "Sales Invoice"):
 		frappe.throw(_("Invalid value {0} for 'Doctype'").format(doctype))
 
-	if cint(days_since_last_order) <= 0:
-		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
+	days_since_last_order = cint(filters.get("days_since_last_order"))
+	if days_since_last_order <= 0:
+		frappe.throw(_("'Days Since Last Order' must be greater than zero"))
 
-	columns = get_columns()
-	customers = get_sales_details(doctype)
+	return get_columns(doctype), get_data(doctype, days_since_last_order)
 
-	data = []
-	for row in customers:
-		if cint(row[8]) >= cint(days_since_last_order):
-			row.insert(7, get_last_sales_amt(row[0], doctype))
-			data.append(row)
-	return columns, data
+
+def get_data(doctype, days_since_last_order):
+	rows = [
+		row for row in get_sales_details(doctype) if cint(row.days_since_last_order) >= days_since_last_order
+	]
+
+	last_amounts = get_last_order_amounts(doctype, [row.customer for row in rows]) if rows else {}
+	for row in rows:
+		row.last_order_amount = last_amounts.get(row.customer, 0)
+
+	return rows
 
 
 def get_sales_details(doctype):
 	customer = frappe.qb.DocType("Customer")
-	sales_doctype = frappe.qb.DocType(doctype)
+	sales = frappe.qb.DocType(doctype)
 
 	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
 	current_date = CustomFunction("CURRENT_DATE", [])
 
 	if doctype == "Sales Order":
-		total_considered = Sum(
+		date_col = sales.transaction_date
+		# a Closed order is only partially fulfilled, so count it pro rata by delivery
+		considered = Sum(
 			Case()
-			.when(
-				sales_doctype.status == "Stopped",
-				sales_doctype.base_net_total * sales_doctype.per_delivered / 100,
-			)
-			.else_(sales_doctype.base_net_total)
+			.when(sales.status == "Closed", sales.base_net_total * sales.per_delivered / 100)
+			.else_(sales.base_net_total)
 		)
-		date_col = sales_doctype.transaction_date
+		num_of_order = Count(sales.name).distinct()
+		last_order_date = Max(date_col)
 	else:
-		total_considered = Sum(sales_doctype.base_net_total)
-		date_col = sales_doctype.posting_date
+		date_col = sales.posting_date
+		considered = Sum(sales.base_net_total)
+		# a credit note is not an order: keep it out of the count and the recency
+		not_return = sales.is_return == 0
+		num_of_order = Count(Case().when(not_return, sales.name)).distinct()
+		last_order_date = Max(Case().when(not_return, date_col))
 
-	last_order_date = Max(date_col)
 	days_since_last_order = date_diff(current_date(), last_order_date)
 
-	return (
+	query = (
 		frappe.qb.from_(customer)
-		.inner_join(sales_doctype)
-		.on(customer.name == sales_doctype.customer)
+		.inner_join(sales)
+		.on(customer.name == sales.customer)
 		.select(
-			customer.name,
+			customer.name.as_("customer"),
 			customer.customer_name,
 			customer.territory,
 			customer.customer_group,
-			Count(sales_doctype.name).distinct().as_("num_of_order"),
-			Sum(sales_doctype.base_net_total).as_("total_order_value"),
-			total_considered.as_("total_order_considered"),
+			num_of_order.as_("num_of_order"),
+			Sum(sales.base_net_total).as_("total_order_value"),
+			considered.as_("total_order_considered"),
 			last_order_date.as_("last_order_date"),
 			days_since_last_order.as_("days_since_last_order"),
 		)
-		.where(sales_doctype.docstatus == 1)
+		.where(sales.docstatus == 1)
 		.groupby(customer.name)
 		.orderby(days_since_last_order, order=frappe.qb.desc)
-	).run(as_list=True)
+	)
+
+	permitted = get_permitted_customers()
+	if permitted is not None:
+		query = query.where(customer.name.isin(permitted))
+
+	return query.run(as_dict=True)
 
 
-def get_last_sales_amt(customer, doctype):
-	sales_doctype = frappe.qb.DocType(doctype)
-	date_col = sales_doctype.transaction_date if doctype == "Sales Order" else sales_doctype.posting_date
+def get_last_order_amounts(doctype, customers):
+	sales = frappe.qb.DocType(doctype)
+	date_col = sales.transaction_date if doctype == "Sales Order" else sales.posting_date
 
-	res = (
-		frappe.qb.from_(sales_doctype)
-		.select(sales_doctype.base_net_total)
-		.where((sales_doctype.customer == customer) & (sales_doctype.docstatus == 1))
-		.orderby(date_col, order=frappe.qb.desc)
-		.limit(1)
-	).run()
+	ranked = (
+		frappe.qb.from_(sales)
+		.select(
+			sales.customer,
+			sales.base_net_total,
+			RowNumber().over(sales.customer).orderby(date_col, sales.name, order=frappe.qb.desc).as_("rn"),
+		)
+		.where((sales.docstatus == 1) & sales.customer.isin(customers))
+	)
+	if doctype == "Sales Invoice":
+		ranked = ranked.where(sales.is_return == 0)
 
-	return res and res[0][0] or 0
+	ranked = ranked.as_("ranked")
+	result = (
+		frappe.qb.from_(ranked).select(ranked.customer, ranked.base_net_total).where(ranked.rn == 1).run()
+	)
+
+	return {customer: amount for customer, amount in result}
 
 
-def get_columns():
+def get_permitted_customers():
+	# None when unrestricted; get_list applies User Permissions on linked fields (Territory, Customer Group)
+	user_permissions = get_user_permissions(frappe.session.user)
+	if not user_permissions:
+		return None
+
+	gating = {df.options for df in frappe.get_meta("Customer").get_link_fields()}
+	gating.add("Customer")
+	if not gating.intersection(user_permissions):
+		return None
+
+	return frappe.get_list("Customer", pluck="name", limit_page_length=0)
+
+
+def get_columns(doctype):
+	noun = "Order" if doctype == "Sales Order" else "Invoice"
 	return [
-		_("Customer") + ":Link/Customer:120",
-		_("Customer Name") + ":Data:120",
-		_("Territory") + "::120",
-		_("Customer Group") + "::120",
-		_("Number of Order") + "::120",
-		_("Total Order Value") + ":Currency:120",
-		_("Total Order Considered") + ":Currency:160",
-		_("Last Order Amount") + ":Currency:160",
-		_("Last Order Date") + ":Date:160",
-		_("Days Since Last Order") + "::160",
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 120,
+		},
+		{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
+		{
+			"label": _("Territory"),
+			"fieldname": "territory",
+			"fieldtype": "Link",
+			"options": "Territory",
+			"width": 120,
+		},
+		{
+			"label": _("Customer Group"),
+			"fieldname": "customer_group",
+			"fieldtype": "Link",
+			"options": "Customer Group",
+			"width": 120,
+		},
+		{
+			"label": _("Number of {0}s").format(_(noun)),
+			"fieldname": "num_of_order",
+			"fieldtype": "Int",
+			"width": 120,
+		},
+		{
+			"label": _("Total {0} Value").format(_(noun)),
+			"fieldname": "total_order_value",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
+			"label": _("Total {0} Considered").format(_(noun)),
+			"fieldname": "total_order_considered",
+			"fieldtype": "Currency",
+			"width": 160,
+		},
+		{
+			"label": _("Last {0} Amount").format(_(noun)),
+			"fieldname": "last_order_amount",
+			"fieldtype": "Currency",
+			"width": 160,
+		},
+		{
+			"label": _("Last {0} Date").format(_(noun)),
+			"fieldname": "last_order_date",
+			"fieldtype": "Date",
+			"width": 140,
+		},
+		{
+			"label": _("Days Since Last {0}").format(_(noun)),
+			"fieldname": "days_since_last_order",
+			"fieldtype": "Int",
+			"width": 160,
+		},
 	]
