@@ -194,6 +194,8 @@ class Item(Document):
 		self.validate_conversion_factor()
 		self.validate_item_type()
 		self.validate_naming_series()
+		if self.is_new():
+			self.validate_opening_stock()
 		self.validate_shelf_life()
 		self.check_for_active_boms()
 		self.fill_customer_code()
@@ -278,9 +280,27 @@ class Item(Document):
 			)
 			item_price.insert()
 
+	def validate_opening_stock(self):
+		if not self.is_stock_item or not self.opening_stock:
+			return
+
+		if self.has_serial_no and not self.serial_no_series:
+			frappe.throw(
+				_("Serial Number Series is mandatory when entering Opening Stock for a serialized item.")
+			)
+
+		if self.has_batch_no and not self.create_new_batch:
+			frappe.throw(
+				_("Enable Automatically Create New Batch when entering Opening Stock for a batched item.")
+			)
+
 	def set_opening_stock(self):
 		"""set opening stock"""
+<<<<<<< HEAD
 		if not self.is_stock_item or self.has_serial_no or self.has_batch_no:
+=======
+		if not self.is_stock_item:
+>>>>>>> 19c81ce (fix(stock): validate opening stock serial and batch settings (#60319))
 			return
 
 		if not self.valuation_rate and not self.standard_rate and not self.is_customer_provided_item:
