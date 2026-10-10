@@ -1007,9 +1007,10 @@ class JobCard(Document):
 			if self.time_logs:
 				self.status = "Work In Progress"
 
-			if self.docstatus == 1 and (
-				self.for_quantity <= (self.total_completed_qty + self.process_loss_qty) or not self.items
-			):
+			completed_qty = flt(
+				self.total_completed_qty + self.process_loss_qty, self.precision("total_completed_qty")
+			)
+			if self.docstatus == 1 and (self.for_quantity <= completed_qty or not self.items):
 				self.status = "Completed"
 
 		if update_status:
@@ -1056,7 +1057,9 @@ class JobCard(Document):
 		if data and len(data) > 0:
 			current_operation_qty = flt(data[0].completed_qty)
 
-		current_operation_qty += flt(self.total_completed_qty)
+		current_operation_qty = flt(
+			current_operation_qty + flt(self.total_completed_qty), self.precision("total_completed_qty")
+		)
 
 		data = frappe.get_all(
 			"Work Order Operation",
