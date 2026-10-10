@@ -1062,15 +1062,16 @@ class Item(Document):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
+		allow_different_uom = frappe.get_cached_value(
+			"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
+		)
+
 		if not self.is_new():
 			check_stock_uom_with_bin(self.name, self.stock_uom)
-		if self.has_variants:
+		if self.has_variants and not allow_different_uom:
 			for d in frappe.db.get_all("Item", filters={"variant_of": self.name}):
 				check_stock_uom_with_bin(d.name, self.stock_uom)
 		if self.variant_of:
-			allow_different_uom = frappe.get_cached_value(
-				"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
-			)
 			if not allow_different_uom:
 				template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 				if template_uom != self.stock_uom:
