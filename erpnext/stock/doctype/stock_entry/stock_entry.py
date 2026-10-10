@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
@@ -3810,7 +3811,7 @@ def _qty_tolerance(precision: int) -> float:
 
 
 @frappe.whitelist()
-def make_stock_in_entry(source_name, target_doc=None):
+def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	qty_precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 
 	def get_remaining_transfer_qty(source_doc):
