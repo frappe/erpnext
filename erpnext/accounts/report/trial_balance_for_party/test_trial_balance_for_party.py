@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -115,3 +116,39 @@ class TestTrialBalanceForParty(ERPNextTestSuite):
 			"closing_credit",
 		):
 			self.assertEqual(totals[column], sum(row[column] for row in party_rows))
+
+	def test_totals_cover_only_permitted_parties(self):
+		create_sales_invoice(customer="_Test Customer 1", qty=1, rate=10000, posting_date="2026-06-01")
+		create_sales_invoice(customer="_Test Customer 2", qty=1, rate=6000, posting_date="2026-06-01")
+
+		user = "test_tbp_party_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual({row["party"] for row in data[:-1]}, {"_Test Customer 1"})
+		self.assertEqual(data[-1]["debit"], 10000)
+
+	def test_alternative_finance_book_entries_excluded(self):
+		customer = "_Test Customer"
+		create_sales_invoice(customer=customer, qty=1, rate=10000, posting_date="2026-06-01")
+		journal = make_journal_entry(
+			"Sales - _TC", "Debtors - _TC", 4000, posting_date="2026-06-10", save=False
+		)
+		journal.accounts[1].update({"party_type": "Customer", "party": customer})
+		journal.finance_book = "Test Finance Book 1"
+		journal.submit()
+
+		row = self.party_row(customer, include_default_book_entries=1)
+		self.assertEqual((row["credit"], row["closing_debit"]), (0, 10000))
+
+		row = self.party_row(customer, finance_book="Test Finance Book 1")
+		self.assertEqual((row["credit"], row["closing_debit"]), (4000, 6000))
