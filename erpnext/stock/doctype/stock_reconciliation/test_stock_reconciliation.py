@@ -2482,6 +2482,51 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(args.actual_qty), 0.0)
 		self.assertEqual(flt(get_stock_reco_qty_shift(args)), 0.0)
 
+	def test_backdated_batch_transfer_into_a_reconciled_warehouse_is_blocked(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			SerialNoExistsInFutureTransactionError,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"valuation_method": "Moving Average", "has_batch_no": 1}).name
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": item}
+		).insert()
+		source, target = "_Test Warehouse 1 - _TC", "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=item,
+			target=source,
+			qty=10,
+			rate=100,
+			batch_no=batch.name,
+			use_serial_batch_fields=1,
+			posting_date=add_days(nowdate(), -5),
+		)
+		create_stock_reconciliation(
+			item_code=item,
+			warehouse=target,
+			qty=3,
+			rate=207,
+			batch_no=batch.name,
+			use_serial_batch_fields=1,
+			reconcile_all_serial_batch=0,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		transfer = make_stock_entry(
+			item_code=item,
+			source=source,
+			target=target,
+			qty=10,
+			batch_no=batch.name,
+			use_serial_batch_fields=1,
+			posting_date=add_days(nowdate(), -3),
+			do_not_submit=True,
+		)
+		self.assertRaises(SerialNoExistsInFutureTransactionError, transfer.submit)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
