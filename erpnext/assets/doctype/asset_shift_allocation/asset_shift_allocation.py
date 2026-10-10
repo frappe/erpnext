@@ -7,8 +7,10 @@ from frappe.model.document import Document
 from frappe.utils import (
 	add_months,
 	cint,
+	flt,
 	get_last_day,
 	get_link_to_form,
+	getdate,
 	is_last_day_of_the_month,
 )
 
@@ -40,7 +42,8 @@ class AssetShiftAllocation(Document):
 
 	def validate(self):
 		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
-		if self.get("depreciation_schedule") and self.docstatus == 0:
+		if self.get("depreciation_schedule"):
+			self.set_booked_journal_entries()
 			self.validate_invalid_shift_change()
 			self.update_depr_schedule()
 
@@ -49,6 +52,18 @@ class AssetShiftAllocation(Document):
 
 	def on_submit(self):
 		self.create_new_asset_depr_schedule()
+
+	def on_cancel(self):
+		self.restore_previous_depr_schedule()
+
+	def set_booked_journal_entries(self):
+		"""Take booked entries from the active schedule, as depreciation may be posted after the allocation was saved."""
+		journal_entries = {
+			getdate(row.schedule_date): row.journal_entry
+			for row in self.asset_depr_schedule_doc.depreciation_schedule
+		}
+		for row in self.depreciation_schedule:
+			row.journal_entry = journal_entries.get(getdate(row.schedule_date))
 
 	def validate_invalid_shift_change(self):
 		for i, sch in enumerate(self.depreciation_schedule):
@@ -100,18 +115,36 @@ class AssetShiftAllocation(Document):
 		return new_shift_sum - original_shift_sum
 
 	def reduce_depr_shifts(self, factor_diff, shift_factors_map, reverse_shift_factors_map):
+		last_changed_index = self.get_last_changed_row_index()
 		for i, schedule in reversed(list(enumerate(self.depreciation_schedule))):
-			if factor_diff <= 0:
+			if factor_diff <= 0 or i <= last_changed_index:
 				break
 
 			current_factor = shift_factors_map.get(schedule.shift, 0)
 			if current_factor <= factor_diff:
 				self.depreciation_schedule.pop(i)
 				factor_diff -= current_factor
-			else:
-				new_factor = current_factor - factor_diff
-				self.depreciation_schedule[i].shift = reverse_shift_factors_map.get(new_factor)
+			elif new_shift := reverse_shift_factors_map.get(current_factor - factor_diff):
+				self.depreciation_schedule[i].shift = new_shift
 				factor_diff = 0
+			else:
+				break
+
+		if factor_diff > 0:
+			frappe.throw(
+				_(
+					"The increase in shifts cannot be balanced by reducing the shifts of the rows after the changed rows"
+				)
+			)
+
+	def get_last_changed_row_index(self) -> int:
+		original_schedule = self.asset_depr_schedule_doc.depreciation_schedule
+		changed_indexes = [
+			i
+			for i, schedule in enumerate(self.depreciation_schedule)
+			if i >= len(original_schedule) or schedule.shift != original_schedule[i].shift
+		]
+		return max(changed_indexes, default=-1)
 
 	def add_depr_shifts(self, factor_diff, shift_factors_map, reverse_shift_factors_map):
 		factor_diff = abs(factor_diff)
@@ -211,11 +244,7 @@ class AssetShiftAllocation(Document):
 		)
 
 		new_asset_depr_schedule_doc.notes = notes
-
-		self.asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
-		self.asset_depr_schedule_doc.cancel()
-
-		new_asset_depr_schedule_doc.submit()
+		replace_active_depr_schedule(self.asset_depr_schedule_doc, new_asset_depr_schedule_doc)
 
 		add_asset_activity(
 			self.asset,
@@ -223,3 +252,49 @@ class AssetShiftAllocation(Document):
 				get_link_to_form(self.doctype, self.name)
 			),
 		)
+
+	def restore_previous_depr_schedule(self):
+		active_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
+		if get_schedule_rows(active_schedule_doc.depreciation_schedule) != get_schedule_rows(
+			self.depreciation_schedule
+		):
+			frappe.throw(
+				_(
+					"Cannot cancel since the asset's depreciation schedule has changed or depreciation has been posted after this allocation was submitted"
+				)
+			)
+
+		previous_schedule = frappe.db.get_value(
+			"Asset Depreciation Schedule",
+			{
+				"asset": self.asset,
+				"finance_book": self.finance_book or ["is", "not set"],
+				"docstatus": 2,
+			},
+			order_by="modified desc",
+		)
+		restored_schedule_doc = frappe.copy_doc(
+			frappe.get_doc("Asset Depreciation Schedule", previous_schedule)
+		)
+		restored_schedule_doc.notes = _(
+			"This schedule was restored when Asset Shift Allocation {0} was cancelled."
+		).format(get_link_to_form(self.doctype, self.name))
+		replace_active_depr_schedule(active_schedule_doc, restored_schedule_doc)
+
+
+def replace_active_depr_schedule(active_schedule_doc: Document, new_schedule_doc: Document) -> None:
+	active_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+	active_schedule_doc.cancel()
+	new_schedule_doc.submit()
+
+
+def get_schedule_rows(schedule: list) -> list[tuple]:
+	return [
+		(
+			getdate(row.schedule_date),
+			flt(row.depreciation_amount, 2),
+			row.shift,
+			row.journal_entry or None,
+		)
+		for row in schedule
+	]
