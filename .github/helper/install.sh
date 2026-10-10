@@ -299,6 +299,8 @@ fi
 
 if [ -n "$wkpid" ]; then wait $wkpid; fi
 
+(cd ~/frappe-bench && bench setup-chrome)
+
 mkdir -p ~/frappe-bench/sites/test_site
 
 if [ "$DB" == "mariadb" ];then
