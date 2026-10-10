@@ -2149,6 +2149,15 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.use_serial_no_wise_valuation, 1)
 
+	def test_get_picked_batches_runs(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_picked_batches
+
+		# Sum(qty) is selected with bare batch_no/warehouse; without a GROUP BY this
+		# raises a GroupingError on Postgres (and collapses to one arbitrary row on
+		# MariaDB). It must run and return a per-(batch, warehouse) mapping on both.
+		result = get_picked_batches(frappe._dict())
+		self.assertIsInstance(result, dict)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
