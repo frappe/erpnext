@@ -137,6 +137,139 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertTrue(any(r[0] == pi.name for r in rows))
 
+	def make_claiming_voucher(self, receipt, vendor_invoice, amount):
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=amount,
+			do_not_save=True,
+		)
+		lcv.append("vendor_invoices", {"vendor_invoice": vendor_invoice, "amount": amount})
+		return lcv
+
+	def test_vendor_invoice_claims_add_up_and_are_capped(self):
+		receipt = make_purchase_receipt(qty=10, rate=100)
+		vendor_invoice = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=1000).name
+
+		first = self.make_claiming_voucher(receipt, vendor_invoice, 400)
+		first.insert()
+		first.submit()
+		second = self.make_claiming_voucher(receipt, vendor_invoice, 600)
+		second.insert()
+		second.submit()
+		self.assertEqual(
+			frappe.db.get_value("Purchase Invoice", vendor_invoice, "claimed_landed_cost_amount"), 1000
+		)
+
+		first.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Purchase Invoice", vendor_invoice, "claimed_landed_cost_amount"), 600
+		)
+
+		self.assertRaises(
+			frappe.ValidationError, self.make_claiming_voucher(receipt, vendor_invoice, 5000).insert
+		)
+
+	def test_stock_account_cannot_be_charge_account(self):
+		receipt = make_purchase_receipt(qty=10, rate=100)
+		stock_account = frappe.db.get_value(
+			"Account", {"company": receipt.company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			expense_account=stock_account,
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, lcv.insert)
+
+	def test_manual_distribution_refuses_negative_charges(self):
+		receipt = make_purchase_receipt(qty=10, rate=100, do_not_save=True)
+		receipt.append(
+			"items",
+			receipt.items[0]
+			.as_dict()
+			.copy()
+			.update({"name": None, "qty": 1, "received_qty": 1, "stock_qty": 1}),
+		)
+		receipt.insert()
+		receipt.submit()
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 300
+		lcv.items[1].applicable_charges = -200
+		lcv.insert()
+		self.assertRaises(frappe.ValidationError, lcv.submit)
+
+	def make_receipt_with_rows(self, row_count):
+		receipt = make_purchase_receipt(qty=1, rate=100, do_not_save=True)
+		for _i in range(row_count - 1):
+			receipt.append("items", receipt.items[0].as_dict().copy().update({"name": None}))
+		receipt.insert()
+		receipt.submit()
+		return receipt
+
+	def test_small_charge_distribution_has_no_negative_share(self):
+		receipt = self.make_receipt_with_rows(7)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=0.04,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.insert()
+		lcv.submit()
+
+		shares = [flt(row.applicable_charges) for row in lcv.items]
+		self.assertTrue(all(share >= 0 for share in shares))
+		self.assertEqual(flt(sum(shares), 2), 0.04)
+
+	def test_manual_rounding_difference_keeps_shares_non_negative(self):
+		receipt = self.make_receipt_with_rows(2)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 100.01
+		lcv.items[1].applicable_charges = 0
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual([flt(row.applicable_charges) for row in lcv.items], [100.0, 0.0])
+
+	def test_receipt_reads_need_document_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		vendor_invoice = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=1000).name
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+
+		self.assertRaises(frappe.ValidationError, lcv.get_receipt_document_details, "Sales Invoice", "X")
+
+		user = create_user("test_lcv_reader@example.com", "Stock Manager")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError, lcv.get_receipt_document_details, "Purchase Invoice", vendor_invoice
+			)
+			self.assertRaises(frappe.PermissionError, lcv.get_vendor_invoice_amount, vendor_invoice)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
