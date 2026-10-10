@@ -14,7 +14,7 @@ ITEM = "_Test Item"
 POSTING_DATE = "2026-06-01"
 
 
-def make_dated_purchase_invoice(qty, rate):
+def make_dated_purchase_invoice(qty, rate, bill_date=None):
 	# make_purchase_invoice ignores posting_date unless posting time is explicitly set, so build the
 	# invoice unsubmitted, pin the posting date, then submit to land it in the intended period bucket.
 	pi = make_purchase_invoice(
@@ -22,6 +22,7 @@ def make_dated_purchase_invoice(qty, rate):
 	)
 	pi.set_posting_time = 1
 	pi.posting_date = POSTING_DATE
+	pi.bill_date = bill_date
 	pi.submit()
 	return pi
 
@@ -169,3 +170,18 @@ class TestPurchaseInvoiceTrends(ERPNextTestSuite):
 
 		self.assertEqual(self._cell(labels, row, "Total(Qty)") - before_tqty, qty)
 		self.assertEqual(self._cell(labels, row, "Total(Amt)") - before_tamt, qty * rate)
+
+	def test_billing_date_falls_back_to_posting_date(self):
+		filters = {"period": "Monthly", "period_based_on": "bill_date"}
+		labels, data = self.run_report(**filters)
+		before = self._find_row(data, ITEM)
+		before_june = self._cell(labels, before, "Jun (Qty)") if before else 0
+		before_july = self._cell(labels, before, "Jul (Qty)") if before else 0
+
+		make_dated_purchase_invoice(7, 100, bill_date="2026-07-10")
+		make_dated_purchase_invoice(5, 100)
+
+		labels, data = self.run_report(**filters)
+		row = self._find_row(data, ITEM)
+		self.assertEqual(self._cell(labels, row, "Jul (Qty)") - before_july, 7)
+		self.assertEqual(self._cell(labels, row, "Jun (Qty)") - before_june, 5)
