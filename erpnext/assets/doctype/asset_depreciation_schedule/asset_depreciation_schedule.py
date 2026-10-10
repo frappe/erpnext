@@ -9,6 +9,7 @@ from frappe.utils import (
 	add_months,
 	add_years,
 	cint,
+	cstr,
 	date_diff,
 	flt,
 	get_first_day,
@@ -276,10 +277,7 @@ class AssetDepreciationSchedule(Document):
 		value_after_depreciation,
 	):
 		asset_doc.validate_asset_finance_books(row)
-		if (
-			not value_after_depreciation
-			and not asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment
-		):
+		if value_after_depreciation is None:
 			value_after_depreciation = _get_value_after_depreciation_for_making_schedule(asset_doc, row)
 		row.value_after_depreciation = value_after_depreciation
 
@@ -540,7 +538,10 @@ class AssetDepreciationSchedule(Document):
 
 			if not accumulated_depreciation:
 				if i > 0 and (
-					asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment
+					(
+						asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment
+						and cstr(row.finance_book) == cstr(asset_doc.flags.value_adjustment_finance_book)
+					)
 					or asset_doc.flags.increase_in_asset_value_due_to_repair
 				):
 					accumulated_depreciation = self.get("depreciation_schedule")[
@@ -716,7 +717,9 @@ def get_straight_line_or_manual_depr_amount(
 			number_of_pending_depreciations
 		)
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
-	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
+	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment and cstr(row.finance_book) == cstr(
+		asset.flags.value_adjustment_finance_book
+	):
 		if row.daily_prorata_based:
 			amount = flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
 
@@ -1082,6 +1085,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 	value_after_depreciation=None,
 	ignore_booked_entry=False,
 	difference_amount=None,
+	target_finance_book=None,
 ):
 	for row in asset_doc.get("finance_books"):
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
@@ -1107,8 +1111,17 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 			row.rate_of_depreciation = new_rate_of_depreciation
 			new_asset_depr_schedule_doc.rate_of_depreciation = new_rate_of_depreciation
 
+		# value_after_depreciation is an override meant for a single finance book (eg. the book
+		# targeted by an Asset Value Adjustment). Only apply it to that book's row so other
+		# finance books on the same asset keep rebuilding from their own current value.
+		row_value_after_depreciation = (
+			value_after_depreciation
+			if target_finance_book is None or cstr(row.finance_book) == cstr(target_finance_book)
+			else None
+		)
+
 		new_asset_depr_schedule_doc.make_depr_schedule(
-			asset_doc, row, date_of_disposal, value_after_depreciation=value_after_depreciation
+			asset_doc, row, date_of_disposal, value_after_depreciation=row_value_after_depreciation
 		)
 		new_asset_depr_schedule_doc.set_accumulated_depreciation(
 			asset_doc, row, date_of_disposal, date_of_return, ignore_booked_entry
