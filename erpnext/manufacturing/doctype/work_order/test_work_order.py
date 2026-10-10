@@ -19,7 +19,7 @@ from frappe.utils import (
 	today,
 )
 
-from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError, OperationSequenceError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.mapper import (
@@ -57,6 +57,143 @@ class TestWorkOrder(ERPNextTestSuite):
 	def setUp(self):
 		self.warehouse = "_Test Warehouse 2 - _TC"
 		self.item = "_Test Item"
+
+	def test_job_card_uses_semi_finished_operation_output_qty(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.work_order.mapper import make_work_order
+
+		wheel = create_item("_Test WO Wheel Output").name
+		car = create_item("_Test WO Car Output").name
+		for name in ("_Test WO Make Wheels", "_Test WO Assemble Car"):
+			make_operation(operation=name, workstation="_Test Workstation 1")
+
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=car,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		bom.append("items", {"item_code": "_Test Item", "qty": 4, "operation_row_id": 1})
+		bom.append("items", {"item_code": wheel, "qty": 4, "operation_row_id": 2})
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test WO Make Wheels",
+				"workstation": "_Test Workstation 1",
+				"finished_good": wheel,
+				"finished_good_qty": 4,
+				"time_in_mins": 60,
+				"skip_material_transfer": 1,
+			},
+		)
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test WO Assemble Car",
+				"workstation": "_Test Workstation 1",
+				"finished_good": car,
+				"finished_good_qty": 1,
+				"is_final_finished_good": 1,
+				"time_in_mins": 60,
+				"skip_material_transfer": 1,
+			},
+		)
+		bom.insert()
+		bom.submit()
+
+		for car_qty in (1, 2):
+			wo = make_work_order(
+				bom_no=bom.name,
+				item=car,
+				qty=car_qty,
+				company="_Test Company",
+			)
+			wo.source_warehouse = "Stores - _TC"
+			wo.wip_warehouse = "_Test Warehouse - _TC"
+			wo.fg_warehouse = "Stores - _TC"
+			wo.skip_transfer = 1
+			wo.save()
+			wo.submit()
+
+			self.assertEqual([row.qty_to_produce for row in wo.operations], [4 * car_qty, car_qty])
+			job_cards = frappe.get_all(
+				"Job Card",
+				filters={"work_order": wo.name},
+				fields=["for_quantity", "operation_row_id", "name"],
+				order_by="operation_row_id",
+			)
+			self.assertEqual([row.for_quantity for row in job_cards], [4 * car_qty, car_qty])
+			wheel_job_card = frappe.get_doc("Job Card", job_cards[0].name)
+			self.assertEqual(wheel_job_card.get_allowed_wo_qty(), 4 * car_qty)
+			self.assertEqual(wheel_job_card.items[0].required_qty, 4 * car_qty)
+			self.assertEqual(wheel_job_card.time_required, 60 * car_qty)
+			final_job_card = frappe.get_doc("Job Card", job_cards[1].name)
+			previous_operation = frappe._dict(
+				operation="_Test WO Make Wheels",
+				finished_good=wheel,
+				qty_to_produce=4 * car_qty,
+				manufactured_qty=4 * car_qty,
+				process_loss_qty=0,
+			)
+			final_job_card.validate_previous_operation_manufactured_qty(previous_operation, car_qty)
+			previous_operation.manufactured_qty -= 1
+			self.assertRaises(
+				OperationSequenceError,
+				final_job_card.validate_previous_operation_manufactured_qty,
+				previous_operation,
+				car_qty,
+			)
+
+			wo.operations[0].completed_qty = 4 * car_qty
+			wo.update_operation_status(wo.operations[0].name)
+			self.assertEqual(wo.operations[0].status, "Completed")
+
+			if car_qty == 1:
+				test_stock_entry.make_stock_entry(
+					item_code="_Test Item", target="Stores - _TC", qty=4, basic_rate=100
+				)
+				wheel_job_card.append(
+					"time_logs",
+					{
+						"from_time": "2024-01-01 08:00:00",
+						"to_time": "2024-01-01 09:00:00",
+						"completed_qty": 4,
+					},
+				)
+				wheel_job_card.submit()
+				frappe.get_doc(wheel_job_card.make_stock_entry_for_semi_fg_item()).submit()
+				final_job_card.append(
+					"time_logs",
+					{
+						"from_time": "2024-01-01 10:00:00",
+						"to_time": "2024-01-01 11:00:00",
+						"completed_qty": 1,
+					},
+				)
+				final_job_card.submit()
+				frappe.get_doc(final_job_card.make_stock_entry_for_semi_fg_item()).submit()
+
+		bom_for_two_cars = frappe.copy_doc(bom)
+		bom_for_two_cars.quantity = 2
+		bom_for_two_cars.is_default = 0
+		bom_for_two_cars.insert()
+		bom_for_two_cars.submit()
+		wo = make_work_order(bom_no=bom_for_two_cars.name, item=car, qty=2, company="_Test Company")
+		self.assertEqual([row.qty_to_produce for row in wo.operations], [4, 2])
+
+		batch_bom = frappe.copy_doc(bom)
+		batch_bom.is_default = 0
+		batch_bom.operations[0].batch_size = 4
+		batch_bom.insert()
+		batch_bom.submit()
+		wheel_operation = frappe.get_doc("Operation", "_Test WO Make Wheels")
+		wheel_operation.create_job_card_based_on_batch_size = 1
+		wheel_operation.save()
+		wo = make_work_order(bom_no=batch_bom.name, item=car, qty=2, company="_Test Company")
+		self.assertEqual(wo.operations[0].qty_to_produce, 8)
+		self.assertEqual(wo.operations[0].time_in_mins, 120)
 
 	def check_planned_qty(self):
 		planned0 = (

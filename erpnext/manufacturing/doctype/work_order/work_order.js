@@ -211,7 +211,9 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
-		let pending_ops = frm.doc?.operations?.filter((op) => op.completed_qty < frm.doc.qty);
+		let pending_ops = frm.doc?.operations?.filter(
+			(op) => op.completed_qty < (flt(op.qty_to_produce) || frm.doc.qty)
+		);
 		// Jump to the operator Shop Floor view, pre-filtered to this work order.
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && pending_ops && pending_ops.length > 0) {
 			frm.add_custom_button(__("Operator Dashboard"), () => {
@@ -532,8 +534,9 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
-			if (data.completed_qty + data.process_loss_qty != frm.doc.qty) {
-				pending_qty = frm.doc.qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+			const operation_qty = flt(data.qty_to_produce) || frm.doc.qty;
+			if (data.completed_qty + data.process_loss_qty != operation_qty) {
+				pending_qty = operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty);
 
 				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({
@@ -676,7 +679,10 @@ frappe.ui.form.on("Work Order", {
 			let message = "";
 			let title = "";
 			let status_wise_oprtation_data = {};
-			let total_completed_qty = frm.doc.qty * frm.doc.operations.length;
+			let total_completed_qty = frm.doc.operations.reduce(
+				(total, operation) => total + (flt(operation.qty_to_produce) || frm.doc.qty),
+				0
+			);
 
 			frm.doc.operations.forEach((d) => {
 				if (!status_wise_oprtation_data[d.status]) {
