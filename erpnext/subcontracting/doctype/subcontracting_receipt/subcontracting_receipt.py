@@ -688,8 +688,8 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 					service_cost = flt(
-						item.service_cost_per_qty, item.precision("service_cost_per_qty")
-					) * flt(item.qty, item.precision("qty"))
+						flt(item.service_cost_per_qty) * flt(item.qty), item.precision("amount")
+					)
 					# Expense Account (Credit)
 					self.add_gl_entry(
 						gl_entries=gl_entries,
