@@ -302,9 +302,11 @@ class RepostItemValuation(Document):
 		msg += "<br>" + _("Please try again in an hour.")
 		frappe.throw(msg, title=_("Pending processing"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def restart_reposting(self):
 		self.check_permission("write")
+		if self.docstatus != 1 or self.status != "Failed":
+			frappe.throw(_("Only a submitted Repost Item Valuation with status Failed can be restarted"))
 
 		self.set_status("Queued", write=False)
 		self.current_index = 0
