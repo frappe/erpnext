@@ -4037,6 +4037,44 @@ class TestStockEntry(FrappeTestCase):
 		overdraw = stock_entry(100, add_days(today(), -1), from_warehouse=warehouse, do_not_submit=True)
 		self.assertRaises(NegativeStockError, overdraw.submit)
 
+	def test_repack_output_takes_the_consumed_value(self):
+		raw_material = make_item(properties={"valuation_method": "Moving Average"}).name
+		output = make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=8, rate=209.416)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=2, rate=19.14)
+
+		repack = self.make_repack(raw_material, 5, warehouse, [(output, 11)])
+
+		self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
+		self.assertEqual(self.get_value_change(repack, output), 856.81)
+
+	def make_repack(self, raw_material, qty, warehouse, outputs):
+		repack = make_stock_entry(
+			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
+		)
+		for item_code, output_qty in outputs:
+			repack.append(
+				"items",
+				{
+					"item_code": item_code,
+					"t_warehouse": warehouse,
+					"qty": output_qty,
+					"transfer_qty": output_qty,
+					"is_finished_item": 1,
+				},
+			)
+		repack.save()
+		repack.submit()
+		return repack
+
+	def get_value_change(self, stock_entry, item_code):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": stock_entry.name, "item_code": item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
