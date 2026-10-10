@@ -32,7 +32,7 @@ class QualityReview(Document):
 	def validate(self):
 		if not self.reviews:
 			self.set_objectives()
-		elif self.has_value_changed("goal"):
+		else:
 			self.validate_objectives()
 
 		self.set_status()
@@ -47,13 +47,20 @@ class QualityReview(Document):
 			filters={"parent": self.goal, "parenttype": "Quality Goal"},
 			pluck="objective",
 		)
-		for d in self.reviews:
+		for d in self.get_reviews_to_validate():
 			if d.objective not in objectives:
 				frappe.throw(
 					_("Row #{0}: Objective {1} is not part of Quality Goal {2}").format(
 						d.idx, frappe.bold(d.objective), frappe.bold(self.goal)
 					)
 				)
+
+	def get_reviews_to_validate(self):
+		if self.has_value_changed("goal"):
+			return self.reviews
+
+		previous = {d.name: d.objective for d in self.get_doc_before_save().reviews}
+		return [d for d in self.reviews if d.name not in previous or previous[d.name] != d.objective]
 
 	def set_status(self):
 		# if any child item is failed, fail the parent

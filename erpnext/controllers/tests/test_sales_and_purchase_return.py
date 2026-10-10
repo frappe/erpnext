@@ -94,6 +94,47 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.3334, delivery_rows=3)
 		return_dn.insert()
 
+	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		component, bundle = make_bundle_with_component(component_qty=10)
+		dn = create_delivery_note(item_code=component, qty=1, do_not_submit=True)
+		dn.append("items", dict(dn.items[0].as_dict(), name=None, item_code=bundle))
+		dn.submit()
+
+		create_delivery_note(is_return=1, return_against=dn.name, item_code=component, qty=-5)
+
+		component_return = create_delivery_note(
+			is_return=1, return_against=dn.name, item_code=component, qty=-7, do_not_save=True
+		)
+		self.assertRaises(frappe.ValidationError, component_return.insert)
+
+	def test_delivery_note_return_of_component_delivered_only_in_bundle_is_capped(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		component, bundle = make_bundle_with_component(component_qty=10)
+		dn = create_delivery_note(item_code=bundle, qty=1)
+
+		component_return = create_delivery_note(
+			is_return=1, return_against=dn.name, item_code=component, qty=-50, do_not_save=True
+		)
+		self.assertRaises(frappe.ValidationError, component_return.insert)
+
+		make_sales_return(dn.name).submit()
+		component_return.items[0].qty = -1
+		self.assertRaises(frappe.ValidationError, component_return.insert)
+
+	def test_delivery_note_bundle_return_counts_earlier_component_returns(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		component, bundle = make_bundle_with_component(component_qty=10)
+		dn = create_delivery_note(item_code=bundle, qty=1)
+		create_delivery_note(is_return=1, return_against=dn.name, item_code=component, qty=-5)
+
+		self.assertRaises(frappe.ValidationError, make_sales_return(dn.name).insert)
+
 	def test_purchase_invoice_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
@@ -222,3 +263,15 @@ def make_split_return_of_box_item(conversion_factor, delivery_rows):
 		for _ in range(2):
 			return_dn.append("items", dict(return_dn.items[0].as_dict(), name=None, dn_detail=None))
 	return return_dn
+
+
+def make_bundle_with_component(component_qty):
+	from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+	component = make_item(properties={"is_stock_item": 1}).name
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component], qty=component_qty)
+	make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+	return component, bundle

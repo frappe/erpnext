@@ -203,7 +203,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						if (r.exc) return;
 						const received_items = r.message || {};
 						const has_pending_qty = me.frm.doc.items.some(
-							(item) => flt(item.qty) - flt(received_items[item.name] || 0) > 0
+							(item) => flt(item.stock_qty) - flt(received_items[item.name] || 0) > 0
 						);
 						if (!has_pending_qty) {
 							me.frm.remove_custom_button(__(button_label), __("Create"));

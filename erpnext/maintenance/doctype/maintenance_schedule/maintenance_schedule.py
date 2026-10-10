@@ -201,25 +201,6 @@ class MaintenanceSchedule(TransactionBase):
 
 		return working_date
 
-	def validate_dates_with_periodicity(self):
-		for d in self.get("items"):
-			if d.start_date and d.end_date and d.periodicity and d.periodicity != "Random":
-				date_diff = (getdate(d.end_date) - getdate(d.start_date)).days + 1
-				days_in_period = {
-					"Weekly": 7,
-					"Monthly": 30,
-					"Quarterly": 90,
-					"Half Yearly": 180,
-					"Yearly": 365,
-				}
-
-				if date_diff < days_in_period[d.periodicity]:
-					throw(
-						_(
-							"Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
-						).format(d.idx, d.periodicity, days_in_period[d.periodicity])
-					)
-
 	def validate_maintenance_detail(self):
 		if not self.get("items"):
 			throw(_("Please enter Maintenance Details first"))
@@ -287,7 +268,6 @@ class MaintenanceSchedule(TransactionBase):
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
-		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
 		self.validate_serial_no_bundle()
 		if not self.schedules or self.validate_items_table_change() or self.validate_no_of_visits():

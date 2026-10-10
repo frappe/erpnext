@@ -503,6 +503,22 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Pending")
 
+	def test_removing_only_rfq_row_resets_rfq_quote_status(self):
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": 100})
+		sq.submit()
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Received")
+
+		row = sq.items[1]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "rate": row.rate, "qty": row.qty, "docname": row.name}]
+		)
+		update_child_qty_rate("Supplier Quotation", trans_items, sq.name)
+
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Pending")
+
 
 def rfq_quote_status(rfq, supplier):
 	return frappe.db.get_value(

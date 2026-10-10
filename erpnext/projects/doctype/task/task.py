@@ -83,6 +83,7 @@ class Task(NestedSet):
 
 	def validate(self):
 		self.validate_parent_project()
+		self.validate_children_project()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -258,6 +259,21 @@ class Task(NestedSet):
 				title=_("Invalid Parent Task"),
 			)
 
+	def validate_children_project(self):
+		if self.is_new() or not self.has_value_changed("project"):
+			return
+
+		child_projects = frappe.get_all(
+			"Task", filters={"parent_task": self.name}, pluck="project", distinct=True
+		)
+		if any((project or None) != (self.project or None) for project in child_projects):
+			frappe.throw(
+				_("Task {0} has child tasks in another project. Move them out of this group first.").format(
+					get_link_to_form("Task", self.name)
+				),
+				title=_("Invalid Project"),
+			)
+
 	def validate_parent_not_completed(self):
 		if not self.parent_task or self.status in ("Completed", "Cancelled"):
 			return
@@ -285,11 +301,11 @@ class Task(NestedSet):
 	def on_update(self):
 		self.update_nsm_model()
 		self.check_recursion()
+		self.remove_from_previous_parent_depends_on()
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.update_previous_project()
 		self.unassign_todo()
-		self.remove_from_previous_parent_depends_on()
 		self.populate_depends_on()
 
 	def unassign_todo(self):
@@ -388,7 +404,7 @@ class Task(NestedSet):
 				task.exp_end_date = add_days(task.exp_start_date, task_duration)
 				task.flags.ignore_recursion_check = True
 				task.flags.rescheduled = True
-				task.save()
+				task.save(ignore_permissions=self.flags.ignore_permissions)
 
 	def has_webform_permission(self):
 		project_user = frappe.db.get_value(
@@ -460,7 +476,7 @@ class Task(NestedSet):
 
 @frappe.whitelist()
 def check_if_child_exists(name: str):
-	frappe.has_permission("Task", "read", doc=name, throw=True)
+	frappe.get_doc("Task", name).check_permission("read")
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks

@@ -74,6 +74,14 @@ class TestProjectUpdate(ERPNextTestSuite):
 		collect_project_status()
 		self.assertEqual(len(frappe.get_doc("Project Update", project_update).users), 1)
 
+	def test_reply_with_a_link_is_collected_once(self):
+		project_update = make_project_update()
+		receive_reply(project_update, "admin@example.com", "See [the design](https://example.com/design)")
+
+		collect_project_status()
+		collect_project_status()
+		self.assertEqual(len(frappe.get_doc("Project Update", project_update).users), 1)
+
 	def test_identical_reply_in_a_later_run_is_collected(self):
 		project_update = make_project_update()
 		receive_reply(project_update, "admin@example.com", "Done with design")

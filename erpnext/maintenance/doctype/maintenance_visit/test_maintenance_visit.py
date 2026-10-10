@@ -206,6 +206,26 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		schedule.cancel()
 		self.assertRaises(frappe.ValidationError, visit.submit)
 
+	def test_purpose_item_must_match_header_schedule_row(self):
+		schedule = make_maintenance_schedule()
+		schedule.submit()
+		row = schedule.schedules[0].name
+
+		visit = make_visit_from_schedule(schedule.name, s_id=row)
+		visit.maintenance_schedule_detail = row
+		visit.mntc_date = today()
+		visit.completion_status = "Fully Completed"
+		visit.purposes[0].update(
+			{
+				"item_code": "_Test Item 2",
+				"maintenance_schedule_detail": None,
+				"service_person": self.sales_person.name,
+				"work_done": "Serviced",
+			}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not match the item", visit.insert)
+
 	def test_schedule_row_keeps_status_of_its_completing_visit(self):
 		schedule = make_maintenance_schedule()
 		schedule.submit()
