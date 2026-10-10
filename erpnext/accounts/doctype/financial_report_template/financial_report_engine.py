@@ -14,7 +14,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.model import numeric_fieldtypes
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Cast_, Sum
-from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils import cstr, date_diff, escape_html, flt, getdate
 from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
 
@@ -821,29 +821,27 @@ class FilterExpressionParser:
 
 	def build_condition(self, report_row, table, raise_on_invalid=False):
 		"""
-		Build SQL condition directly from filter formula.
+		Build an SQL condition from a filter formula.
 
-		Supports:
-		1. Simple condition: ["field", "operator", "value"]
-		   Example: ["account_type", "=", "Income"]
+		- A single condition is `["field", "operator", "value"]`:
 
-		2. Complex logical conditions:
-		   {"and": [condition1, condition2, ...]}  # All conditions must be true
-		   {"or": [condition1, condition2, ...]}   # Any condition can be true
+		```
+		["account_type", "=", "Income"]
+		```
 
-		   Example:
-		   {
-		         "and": [
-		           ["account_type", "=", "Income"],
-		           {"or": [
-		                 ["category", "=", "Direct Income"],
-		                 ["category", "=", "Indirect Income"]
-		           ]}
-		         ]
-		   }
+		- `and` and `or` nest them. `and` needs every condition to hold, `or` needs one:
 
-		Returns:
-		        SQL condition object or None if invalid
+		```
+		{
+		    "and": [
+		        ["account_type", "=", "Income"],
+		        {"or": [["category", "=", "Direct Income"], ["category", "=", "Indirect Income"]]},
+		    ]
+		}
+		```
+
+		---
+		Returns the condition, or None when the row has no filter or the filter is invalid.
 		"""
 		filter_formula = report_row.calculation_formula
 		if not filter_formula:
@@ -1334,31 +1332,56 @@ class FormulaCalculator:
 		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
-			# TODO: Throw?
-			messages = "<br><br>".join(str(issue) for issue in validation_result.issues)
-			frappe.log_error(f"Formula validation errors found:\n{messages}")
-			return [0.0] * len(self.period_list)
+			frappe.throw(
+				"<br><br>".join(str(issue) for issue in validation_result.issues),
+				title=_("Formula Error in Template"),
+			)
+
+		where = _("template row {0} ({1})").format(
+			report_row.idx, report_row.display_name or report_row.reference_code
+		)
 
 		results = []
 		for i in range(len(self.period_list)):
-			result = self._evaluate_for_period(formula, i, negation_factor)
+			result = self._evaluate_for_period(where, formula, i, negation_factor)
 			results.append(result)
 
 		return results
 
-	def _evaluate_for_period(self, formula: str, period_index: int, negation_factor: int) -> float:
-		# TODO: consistent error handling
+	def _evaluate_for_period(
+		self, where: str, formula: str, period_index: int, negation_factor: int
+	) -> float:
+		# the formula is user input, and the message is rendered as HTML
+		shown_formula = frappe.bold(escape_html(formula))
+
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
-			return flt(result * negation_factor, self.precision)
 
 		except ZeroDivisionError:
-			frappe.log_error(f"Division by zero in formula: {formula}")
-			return 0.0
+			frappe.throw(
+				_("Formula {0} in {1} divides by zero.").format(shown_formula, where)
+				+ "<br><br>"
+				+ _("Check the divisor first, for example {0}.").format(frappe.bold("A / B if B else 0")),
+				title=_("Formula Error in Template"),
+			)
 		except Exception as e:
-			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
-			return 0.0
+			frappe.throw(
+				_("Formula {0} in {1} could not be calculated.").format(shown_formula, where)
+				+ "<br><br>"
+				+ escape_html(str(e)),
+				title=_("Formula Error in Template"),
+			)
+
+		if type(result) not in (int, float):
+			frappe.throw(
+				_("Formula {0} in {1} must give a number, but it gave {2}.").format(
+					shown_formula, where, frappe.bold(type(result).__name__)
+				),
+				title=_("Formula Error in Template"),
+			)
+
+		return flt(result * negation_factor, self.precision)
 
 	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}
