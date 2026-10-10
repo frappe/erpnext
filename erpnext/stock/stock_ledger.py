@@ -169,6 +169,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			validate_standard_cost_posting_date(sl_entries)
 
 		args = get_args_for_future_sle(sl_entries[0])
+		invalidate_future_sle_cache(args.voucher_type, args.voucher_no)
 		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
