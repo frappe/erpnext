@@ -1075,6 +1075,35 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# same exact queue should be transferred
 		self.assertSLEs(repack, [{"incoming_rate": sum(rates) * 10}], sle_filters={"item_code": packed.name})
 
+	def test_repost_values_dependant_item_with_its_own_valuation_method(self):
+		rm = make_item(properties={"valuation_method": "FIFO"}).name
+		fg = make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=fg, target=warehouse, qty=10, rate=10, posting_date=add_days(today(), -3))
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, rate=100, posting_date=add_days(today(), -3))
+		repack = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=1,
+			purpose="Repack",
+			posting_date=add_days(today(), -2),
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{"item_code": fg, "t_warehouse": warehouse, "qty": 1, "transfer_qty": 1, "is_finished_item": 1},
+		)
+		repack.save()
+		repack.submit()
+
+		issue = make_stock_entry(item_code=fg, source=warehouse, qty=10, posting_date=add_days(today(), -1))
+		self.assertSLEs(issue, [{"stock_value_difference": -181.82}])
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, rate=50, posting_date=add_days(today(), -4))
+
+		self.assertSLEs(issue, [{"stock_value_difference": -136.36}])
+
 	def test_negative_fifo_valuation(self):
 		"""
 		When stock goes negative discard FIFO queue.
