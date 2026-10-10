@@ -127,3 +127,16 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 
 		data = execute(frappe._dict({"company": "_Test Company"}))[1]
 		self.assertIn(so.name, {row["sales_order"] for row in data})
+
+	def test_customer_group_taken_from_the_order(self):
+		so = make_sales_order(transaction_date="2026-06-01")
+		order_group = frappe.db.get_value("Sales Order", so.name, "customer_group")
+
+		new_group = next(
+			g
+			for g in frappe.get_all("Customer Group", filters={"is_group": 0}, pluck="name")
+			if g != order_group
+		)
+		frappe.db.set_value("Customer", so.customer, "customer_group", new_group)
+
+		self.assertEqual(self.so_row(so.name)["customer_group"], order_group)

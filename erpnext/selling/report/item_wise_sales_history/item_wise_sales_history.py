@@ -154,7 +154,7 @@ def get_data(filters):
 			"transaction_date": record.get("transaction_date"),
 			"customer": record.get("customer"),
 			"customer_name": customer_record.get("customer_name"),
-			"customer_group": customer_record.get("customer_group"),
+			"customer_group": record.get("customer_group"),
 			"territory": record.get("territory"),
 			"project": record.get("project"),
 			"delivered_quantity": flt(record.get("delivered_qty")),
@@ -196,6 +196,7 @@ def get_sales_order_details(company_list, filters):
 		.select(
 			db_so.name,
 			db_so.customer,
+			db_so.customer_group,
 			db_so.transaction_date,
 			db_so.territory,
 			db_so.project,
