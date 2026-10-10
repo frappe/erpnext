@@ -9,6 +9,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import (
 	make_sales_order,
 )
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import execute
+from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -66,12 +67,11 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 			],
 		)
 
-		item_codes = {row["item_code"] for row in self.run_report(item_code="_Test Item 2")[1]}
-		self.assertEqual(item_codes, {"_Test Item 2"})
+		rows = self.run_report(item_code="_Test Item 2")[1]
+		self.assertEqual({row["item_code"] for row in rows}, {"_Test Item 2"})
 		# the filtered-out line of the same order must not leak in
-		self.assertTrue(
-			all(row["sales_order"] == so.name for row in self.run_report(item_code="_Test Item 2")[1])
-		)
+		own_rows = [row for row in rows if row["sales_order"] == so.name]
+		self.assertEqual({row["item_code"] for row in own_rows}, {"_Test Item 2"})
 
 	def test_customer_filter(self):
 		make_sales_order(customer="_Test Customer 1", transaction_date="2026-06-01")
@@ -112,15 +112,17 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 		self.assertEqual(row["amount"], 80000)  # 10 * 100 USD * 80
 
 	def test_chart_aggregates_amount_per_item(self):
-		make_sales_order(item_code="_Test Item", qty=2, rate=100, transaction_date="2026-06-01")
-		make_sales_order(item_code="_Test Item", qty=3, rate=100, transaction_date="2026-06-01")
+		# a fresh item keeps the chart total free of other orders in the test database
+		item = create_item("_Test Item Wise Sales History", is_stock_item=0).name
+		make_sales_order(item_code=item, qty=2, rate=100, transaction_date="2026-06-01")
+		make_sales_order(item_code=item, qty=3, rate=100, transaction_date="2026-06-01")
 
-		chart = self.run_report(item_code="_Test Item")[3]
+		chart = self.run_report(item_code=item)[3]
 		labels = chart["data"]["labels"]
 		values = chart["data"]["datasets"][0]["values"]
-		self.assertIn("_Test Item", labels)
+		self.assertIn(item, labels)
 		# 2*100 + 3*100 aggregated for the item
-		self.assertEqual(values[labels.index("_Test Item")], 500)
+		self.assertEqual(values[labels.index(item)], 500)
 
 	def test_report_runs_without_dates(self):
 		so = make_sales_order(transaction_date="2026-06-01")
@@ -148,3 +150,38 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 
 		names = {row["sales_order"] for row in self.run_report(item_group=parent_group)[1]}
 		self.assertIn(so.name, names)
+
+	def test_user_permission_restricts_rows_and_chart(self):
+		# a user permission scoped to one customer must hide the other customer's order from
+		# both the rows and the chart totals
+		item = create_item("_Test IWSH Perm Item", is_stock_item=0).name
+		visible = make_sales_order(
+			customer="_Test Customer 1", item_code=item, qty=2, rate=100, transaction_date="2026-06-01"
+		)
+		hidden = make_sales_order(
+			customer="_Test Customer 2", item_code=item, qty=3, rate=100, transaction_date="2026-06-01"
+		)
+
+		user = "_test_iwsh_perm@example.com"
+		if not frappe.db.exists("User", user):
+			u = frappe.new_doc("User")
+			u.email = user
+			u.first_name = "IWSH Perm"
+			u.append("roles", {"role": "Sales User"})
+			u.insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			_columns, data, _msg, chart, *_ = self.run_report(item_code=item)
+		finally:
+			frappe.set_user("Administrator")
+
+		orders = {row["sales_order"] for row in data}
+		self.assertIn(visible.name, orders)
+		self.assertNotIn(hidden.name, orders)
+
+		labels = chart["data"]["labels"]
+		values = chart["data"]["datasets"][0]["values"]
+		# only the visible order's amount (2*100) reaches the chart total for the item
+		self.assertEqual(values[labels.index(item)], 200)
