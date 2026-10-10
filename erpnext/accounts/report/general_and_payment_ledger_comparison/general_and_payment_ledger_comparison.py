@@ -4,7 +4,7 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, NullIf, Sum
 
 
 class General_Payment_Ledger_Comparison:
@@ -79,6 +79,10 @@ class General_Payment_Ledger_Comparison:
 				else:
 					outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
 
+				# unallocated amounts have no against voucher in GL but point to themselves in Payment Ledger
+				against_voucher_type = IfNull(NullIf(gle.against_voucher_type, ""), gle.voucher_type)
+				against_voucher = IfNull(NullIf(gle.against_voucher, ""), gle.voucher_no)
+
 				self.account_types[acc_type].gle = (
 					qb.from_(gle)
 					.select(
@@ -88,6 +92,8 @@ class General_Payment_Ledger_Comparison:
 						gle.voucher_no,
 						gle.party_type,
 						gle.party,
+						against_voucher_type,
+						against_voucher,
 						outstanding,
 					)
 					.where(
@@ -97,7 +103,14 @@ class General_Payment_Ledger_Comparison:
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(
-						gle.company, gle.account, gle.voucher_type, gle.voucher_no, gle.party_type, gle.party
+						gle.company,
+						gle.account,
+						gle.voucher_type,
+						gle.voucher_no,
+						gle.party_type,
+						gle.party,
+						against_voucher_type,
+						against_voucher,
 					)
 					.run()
 				)
@@ -132,6 +145,8 @@ class General_Payment_Ledger_Comparison:
 						ple.voucher_no,
 						ple.party_type,
 						ple.party,
+						ple.against_voucher_type,
+						ple.against_voucher_no,
 						Sum(ple.amount).as_("outstanding"),
 					)
 					.where(
@@ -141,7 +156,14 @@ class General_Payment_Ledger_Comparison:
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(
-						ple.company, ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party
+						ple.company,
+						ple.account,
+						ple.voucher_type,
+						ple.voucher_no,
+						ple.party_type,
+						ple.party,
+						ple.against_voucher_type,
+						ple.against_voucher_no,
 					)
 					.run()
 				)
@@ -160,12 +182,31 @@ class General_Payment_Ledger_Comparison:
 		self.diff = frappe._dict({})
 
 		for x in self.variation_in_payment_ledger:
-			self.diff[(x[0], x[1], x[2], x[3], x[4], x[5])] = frappe._dict({"gl_balance": x[6]})
+			self.diff[x[:-1]] = frappe._dict({"gl_balance": x[-1]})
 
 		for x in self.variation_in_general_ledger:
-			self.diff.setdefault(
-				(x[0], x[1], x[2], x[3], x[4], x[5]), frappe._dict({"gl_balance": 0.0})
-			).update(frappe._dict({"pl_balance": x[6]}))
+			self.diff.setdefault(x[:-1], frappe._dict({"gl_balance": 0.0})).update(
+				frappe._dict({"pl_balance": x[-1]})
+			)
+
+	def remove_restricted_parties(self):
+		permitted = self.get_permitted_parties()
+		self.diff = frappe._dict(
+			{key: val for key, val in self.diff.items() if (key[4], key[5]) in permitted}
+		)
+
+	def get_permitted_parties(self) -> set[tuple[str, str]]:
+		parties_by_type = {}
+		for key in self.diff:
+			parties_by_type.setdefault(key[4], set()).add(key[5])
+
+		permitted = set()
+		for party_type, parties in parties_by_type.items():
+			if not party_type or not frappe.has_permission(party_type, "read"):
+				continue
+			names = frappe.get_list(party_type, filters={"name": ["in", list(parties)]}, pluck="name")
+			permitted.update((party_type, name) for name in names)
+		return permitted
 
 	def generate_data(self):
 		self.data = []
@@ -179,6 +220,8 @@ class General_Payment_Ledger_Comparison:
 						"voucher_no": key[3],
 						"party_type": key[4],
 						"party": key[5],
+						"against_voucher_type": key[6],
+						"against_voucher_no": key[7],
 						"gl_balance": val.gl_balance,
 						"pl_balance": val.pl_balance,
 					}
@@ -249,6 +292,26 @@ class General_Payment_Ledger_Comparison:
 
 		self.columns.append(
 			dict(
+				label=_("Against Voucher Type"),
+				fieldname="against_voucher_type",
+				fieldtype="Link",
+				options="DocType",
+				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Against Voucher"),
+				fieldname="against_voucher_no",
+				fieldtype="Dynamic Link",
+				options="against_voucher_type",
+				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
 				label=_("GL Balance"),
 				fieldname="gl_balance",
 				fieldtype="Currency",
@@ -273,6 +336,7 @@ class General_Payment_Ledger_Comparison:
 		self.get_gle()
 		self.get_ple()
 		self.compare()
+		self.remove_restricted_parties()
 		self.generate_data()
 		self.get_columns()
 
