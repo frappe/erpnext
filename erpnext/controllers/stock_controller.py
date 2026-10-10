@@ -2685,6 +2685,8 @@ def make_bundle_for_material_transfer(**kwargs):
 		bundle_doc.save(ignore_permissions=True)
 	else:
 		bundle_doc.submit()
+		if kwargs.docstatus != 2:
+			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
 
