@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe.desk.query_report import run
 from frappe.utils.formatters import format_value
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -69,8 +70,48 @@ class TestCalculatedDiscountMismatch(ERPNextTestSuite):
 		self.assertIsNotNone(row)
 		self.assertEqual(row["doctype"], "Sales Invoice")
 		self.assertEqual(row["actual_discount_percentage"], 10.0)
-		self.assertEqual(row["actual_discount_amount"], actual)
-		self.assertEqual(row["suspected_discount_amount"], suspected)
+		self.assertEqual(row["actual_discount_amount"], tampered_amount)
+		self.assertEqual(row["suspected_discount_amount"], consistent_amount)
+
+	def test_accounts_user_can_run_report(self):
+		frappe.reload_doc("accounts", "report", "calculated_discount_mismatch", force=True)
+		user = self.make_user("test_discount_mismatch_accounts@example.com", ["Accounts User"])
+
+		frappe.set_user(user)
+		try:
+			result = run("Calculated Discount Mismatch", frappe._dict())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIsInstance(result["result"], list)
+
+	def test_unreadable_transactions_are_hidden(self):
+		invoice = self.create_discounted_invoice()
+		frappe.db.set_value("Sales Invoice", invoice.name, "discount_amount", 250.0)
+		self.record_discount_change(
+			invoice.name, self.format_discount(invoice, 100.0), self.format_discount(invoice, 250.0)
+		)
+		user = self.make_user("test_discount_mismatch_restricted@example.com", ["Accounts User"])
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			row = self.run_report(invoice.name)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIsNone(row)
+
+	def format_discount(self, invoice: "frappe.Document", amount: float) -> str:
+		discount_field = frappe.get_meta("Sales Invoice").get_field("discount_amount")
+		return format_value(amount, df=discount_field, currency=invoice.currency)
+
+	def make_user(self, email: str, roles: list[str]) -> str:
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				doctype="User", email=email, first_name="Discount", roles=[{"role": role} for role in roles]
+			).insert()
+		return email
 
 	def record_discount_change(self, docname: str, old: str, new: str) -> None:
 		"""Insert the Version audit row a direct discount_amount edit would have produced."""

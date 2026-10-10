@@ -5,7 +5,9 @@ import json
 
 import frappe
 from frappe import _
+from frappe.locale import get_number_format
 from frappe.query_builder import Order, Tuple
+from frappe.utils import flt
 from frappe.utils.formatters import format_value
 
 AFFECTED_DOCTYPES = frozenset(
@@ -57,12 +59,14 @@ def get_columns():
 			"fieldname": "actual_discount_amount",
 			"label": _("Discount Amount in Transaction"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 180,
 		},
 		{
 			"fieldname": "suspected_discount_amount",
 			"label": _("Suspected Discount Amount"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 180,
 		},
 	]
@@ -144,8 +148,9 @@ def get_data():
 					"doctype": doctype,
 					"docname": doc_values.name,
 					"actual_discount_percentage": doc_values.additional_discount_percentage,
-					"actual_discount_amount": new,
-					"suspected_discount_amount": old,
+					"actual_discount_amount": doc_values.discount_amount,
+					"suspected_discount_amount": parse_formatted_amount(old, doc_values.currency),
+					"currency": doc_values.currency,
 				}
 			)
 			break
@@ -154,7 +159,10 @@ def get_data():
 
 
 def get_transactions_with_discount_percentage(doctype):
-	transactions = frappe.get_all(
+	if not frappe.has_permission(doctype):
+		return []
+
+	transactions = frappe.get_list(
 		doctype,
 		fields=[
 			"name",
@@ -171,3 +179,14 @@ def get_transactions_with_discount_percentage(doctype):
 	)
 
 	return transactions
+
+
+def parse_formatted_amount(value: str | float, currency: str) -> float:
+	"""Version data stores amounts formatted with the currency symbol and number format."""
+	if not isinstance(value, str):
+		return flt(value)
+
+	number_format = get_number_format()
+	symbol = frappe.db.get_value("Currency", currency, "symbol", cache=True) or currency
+	amount = value.replace(_(symbol), "").strip().replace(number_format.thousands_separator, "")
+	return flt(amount.replace(number_format.decimal_separator, "."))
