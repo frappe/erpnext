@@ -63,6 +63,10 @@ def capture_user_persona(args):  # nosemgrep
 	if not args:
 		return
 
+	if frappe.conf.sk_hrms:
+		# HR-only site, the HRMS app captures its own persona
+		return
+
 	capture(
 		"user_persona_submitted",
 		"erpnext",
