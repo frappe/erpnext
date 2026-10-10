@@ -5,7 +5,7 @@ from itertools import groupby
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Count, Date
+from frappe.query_builder.functions import Count
 from frappe.utils import flt
 
 from erpnext.accounts.report.utils import convert
@@ -25,48 +25,69 @@ def get_funnel_data(from_date: str, to_date: str, company: str):
 
 	validate_filters(from_date, to_date, company)
 
-	lead = frappe.qb.DocType("Lead")
-	active_leads = (
-		frappe.qb.from_(lead)
-		.select(Count("*"))
-		.where(Date(lead.creation).between(from_date, to_date) & (lead.company == company))
-		.run()
-	)[0][0]
+	date_range = ("between", [from_date, to_date])
 
-	opportunity = frappe.qb.DocType("Opportunity")
-	opportunities = (
-		frappe.qb.from_(opportunity)
-		.select(Count("*"))
-		.where(
-			Date(opportunity.creation).between(from_date, to_date)
-			& (opportunity.opportunity_from == "Lead")
-			& (opportunity.company == company)
-		)
-		.run()
-	)[0][0]
+	active_leads = len(
+		frappe.qb.get_query(
+			"Lead",
+			fields=["name"],
+			filters={"creation": date_range, "company": company},
+			ignore_permissions=False,
+		).run(pluck="name")
+	)
 
-	quotation = frappe.qb.DocType("Quotation")
-	quotations = (
-		frappe.qb.from_(quotation)
-		.select(Count("*"))
-		.where(
-			(quotation.docstatus == 1)
-			& Date(quotation.creation).between(from_date, to_date)
-			& ((quotation.opportunity != "") | (quotation.quotation_to == "Lead"))
-			& (quotation.company == company)
-		)
-		.run()
-	)[0][0]
+	opportunities = len(
+		frappe.qb.get_query(
+			"Opportunity",
+			fields=["name"],
+			filters={"creation": date_range, "opportunity_from": "Lead", "company": company},
+			ignore_permissions=False,
+		).run(pluck="name")
+	)
 
-	customer = frappe.qb.DocType("Customer")
-	converted = (
-		frappe.qb.from_(customer)
-		.inner_join(lead)
-		.on(lead.name == customer.lead_name)
-		.select(Count("*"))
-		.where(Date(customer.creation).between(from_date, to_date) & (lead.company == company))
-		.run()
-	)[0][0]
+	quotations = 0
+	quotation_names = frappe.qb.get_query(
+		"Quotation",
+		fields=["name"],
+		filters={"docstatus": 1, "creation": date_range, "company": company},
+		ignore_permissions=False,
+	).run(pluck="name")
+	if quotation_names:
+		lead_opportunities = frappe.qb.get_query(
+			"Opportunity",
+			fields=["name"],
+			filters={"opportunity_from": "Lead"},
+			ignore_permissions=False,
+		).run(pluck="name")
+		quotation = frappe.qb.DocType("Quotation")
+		condition = quotation.quotation_to == "Lead"
+		if lead_opportunities:
+			condition = condition | quotation.opportunity.isin(lead_opportunities)
+		quotations = (
+			frappe.qb.from_(quotation)
+			.select(Count("*"))
+			.where(quotation.name.isin(quotation_names) & condition)
+			.run()
+		)[0][0]
+
+	converted = 0
+	customer_names = frappe.qb.get_query(
+		"Customer",
+		fields=["name"],
+		filters={"creation": date_range},
+		ignore_permissions=False,
+	).run(pluck="name")
+	if customer_names:
+		customer = frappe.qb.DocType("Customer")
+		lead = frappe.qb.DocType("Lead")
+		converted = (
+			frappe.qb.from_(customer)
+			.inner_join(lead)
+			.on(lead.name == customer.lead_name)
+			.select(Count("*"))
+			.where(customer.name.isin(customer_names) & (lead.company == company))
+			.run()
+		)[0][0]
 
 	return [
 		{"title": _("Active Leads"), "value": active_leads, "color": "#B03B46"},

@@ -82,23 +82,24 @@ class TestSalesFunnel(ERPNextTestSuite):
 		self.assertEqual(after_leads, baseline_leads)
 
 	def test_funnel_quotations_count(self):
-		# A submitted Quotation linked to an Opportunity (the `opportunity != ""`
-		# branch of the funnel filter) must be reflected in the Quotations stage.
 		company = "_Test Company"
 		from_date, to_date = today(), add_days(today(), 1)
 
 		baseline_quotations = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Quotations")
 
-		opportunity = make_opportunity(company=company, opportunity_from="Customer")
+		lead = self.make_lead(company)
+		lead_opportunity = make_opportunity(company=company, opportunity_from="Lead", lead=lead.name)
+		lead_quotation = make_quotation(party_name="_Test Customer", company=company, do_not_submit=True)
+		lead_quotation.opportunity = lead_opportunity.name
+		lead_quotation.submit()
 
-		quotation = make_quotation(party_name="_Test Customer", company=company, do_not_submit=True)
-		quotation.opportunity = opportunity.name
-		quotation.submit()
-		self.assertEqual(quotation.docstatus, 1)
+		customer_opportunity = make_opportunity(company=company, opportunity_from="Customer")
+		customer_quotation = make_quotation(party_name="_Test Customer", company=company, do_not_submit=True)
+		customer_quotation.opportunity = customer_opportunity.name
+		customer_quotation.submit()
 
 		after_quotations = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Quotations")
 		self.assertEqual(after_quotations - baseline_quotations, 1)
-		self.assertGreaterEqual(after_quotations, 1)
 
 	def test_funnel_converted_count(self):
 		# A Customer joined to a Lead of this company (Customer INNER JOIN Lead on
@@ -123,3 +124,55 @@ class TestSalesFunnel(ERPNextTestSuite):
 		after_converted = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Converted")
 		self.assertEqual(after_converted - baseline_converted, 1)
 		self.assertGreaterEqual(after_converted, 1)
+
+	def roles_that_read(self, *doctypes):
+		roles = set()
+		for doctype in doctypes:
+			perms = frappe.get_all(
+				"Custom DocPerm", filters={"parent": doctype, "read": 1, "permlevel": 0}, pluck="role"
+			) or frappe.get_all(
+				"DocPerm", filters={"parent": doctype, "read": 1, "permlevel": 0}, pluck="role"
+			)
+			roles.update(perms)
+		return roles
+
+	def test_funnel_counts_respect_user_permissions(self):
+		company = "_Test Company"
+		from_date, to_date = today(), add_days(today(), 1)
+		territories = frappe.get_all("Territory", filters={"is_group": 0}, pluck="name", limit=2)
+
+		lead = self.make_lead(company)
+		lead.db_set("territory", territories[1])
+
+		roles = self.roles_that_read("Lead", "Opportunity", "Quotation", "Customer", "Company")
+		email = f"funnel-perm-{random_string(6)}@example.com"
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": "Funnel Perm",
+				"send_welcome_email": 0,
+				"roles": [{"role": role} for role in roles],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": email,
+				"allow": "Territory",
+				"for_value": territories[0],
+				"apply_to_all_doctypes": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		admin_leads = self.get_stage_value(get_funnel_data(from_date, to_date, company), "Active Leads")
+		frappe.set_user(email)
+		try:
+			self.assertEqual(frappe.get_list("Lead", filters={"name": lead.name}, pluck="name"), [])
+			restricted_leads = self.get_stage_value(
+				get_funnel_data(from_date, to_date, company), "Active Leads"
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertGreater(admin_leads, restricted_leads)
