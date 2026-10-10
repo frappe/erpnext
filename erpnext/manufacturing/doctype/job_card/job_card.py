@@ -1361,9 +1361,9 @@ class JobCard(Document):
 		qty_to_produce = self.get_qty_to_produce()
 		precision = self.precision("total_completed_qty")
 
-		if flt(self.manufactured_qty + self.process_loss_qty, precision) >= qty_to_produce:
+		if flt(flt(self.manufactured_qty) + flt(self.process_loss_qty), precision) >= qty_to_produce:
 			self.status = "Completed"
-		elif flt(self.total_completed_qty + self.process_loss_qty, precision) >= qty_to_produce:
+		elif flt(flt(self.total_completed_qty) + flt(self.process_loss_qty), precision) >= qty_to_produce:
 			# Production is done and the card is submitted, but the finished goods have not been
 			# booked into stock yet (Manufacture Stock Entry pending) — distinct from active WIP.
 			self.status = "To Manufacture"
@@ -1393,7 +1393,7 @@ class JobCard(Document):
 			self.status = "Work In Progress"
 
 		completed_qty = flt(
-			self.total_completed_qty + self.process_loss_qty, self.precision("total_completed_qty")
+			flt(self.total_completed_qty) + flt(self.process_loss_qty), self.precision("total_completed_qty")
 		)
 		if self.docstatus == 1 and (self.get_qty_to_produce() <= completed_qty or not self.items):
 			self.status = "Completed"
