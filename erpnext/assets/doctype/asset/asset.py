@@ -808,8 +808,18 @@ class Asset(AccountsController):
 	def set_status(self, status=None):
 		"""Get and update status"""
 		if not status:
-			status = self.get_status()
+			status = "Out of Order" if self.has_pending_repair() else self.get_status()
 		self.db_set("status", status)
+
+	def has_pending_repair(self) -> bool:
+		if self.docstatus != 1 or self.disposal_date:
+			return False
+
+		return bool(
+			frappe.db.exists(
+				"Asset Repair", {"asset": self.name, "repair_status": "Pending", "docstatus": ("<", 2)}
+			)
+		)
 
 	def get_status(self):
 		"""Returns status based on whether it is draft, submitted, scrapped or depreciated"""
@@ -1132,7 +1142,7 @@ def update_maintenance_status():
 
 	for asset in assets:
 		asset = frappe.get_doc("Asset", asset.name)
-		if frappe.db.exists("Asset Repair", {"asset_name": asset.name, "repair_status": "Pending"}):
+		if asset.has_pending_repair():
 			asset.set_status("Out of Order")
 		elif frappe.db.exists("Asset Maintenance Task", {"parent": asset.name, "next_due_date": today()}):
 			asset.set_status("In Maintenance")
