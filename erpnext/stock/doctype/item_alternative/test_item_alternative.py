@@ -146,6 +146,44 @@ class TestItemAlternative(ERPNextTestSuite):
 		substitute_item(ste, "Test FG A RW 1", unrelated_item)
 		self.assertRaises(frappe.ValidationError, ste.insert)
 
+	def test_transferred_alternative_can_be_consumed_and_returned_after_approval_removed(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_return_entry
+
+		create_stock_reconciliation(
+			item_code="Alternate Item For A RW 1", warehouse="_Test Warehouse - _TC", qty=5, rate=2000
+		)
+		create_stock_reconciliation(
+			item_code="Test FG A RW 2", warehouse="_Test Warehouse - _TC", qty=5, rate=2000
+		)
+		work_order = make_wo_order_test_record(
+			production_item="Test Finished Goods - A",
+			qty=5,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Test Supplier Warehouse - _TC",
+		)
+		allow_alternative_item(work_order, "Test FG A RW 1", "Alternate Item For A RW 1")
+
+		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 5))
+		substitute_item(transfer, "Test FG A RW 1", "Alternate Item For A RW 1")
+		transfer.submit()
+
+		frappe.db.delete(
+			"Item Alternative",
+			{"item_code": "Test FG A RW 1", "alternative_item_code": "Alternate Item For A RW 1"},
+		)
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 3))
+		manufacture.submit()
+
+		work_order.reload()
+		work_order.db_set("status", "Closed")
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.company = work_order.company
+		return_entry.submit()
+
+		returned_items = {row.item_code: row.qty for row in return_entry.items}
+		self.assertEqual(returned_items.get("Alternate Item For A RW 1"), 2)
+
 	def test_item_and_alternative_item_are_mandatory(self):
 		for fieldname in ("item_code", "alternative_item_code"):
 			doc = frappe.get_doc(
