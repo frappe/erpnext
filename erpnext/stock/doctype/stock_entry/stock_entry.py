@@ -58,6 +58,12 @@ from .services.material_transfer import (
 from .services.serial_batch import StockEntrySABB, set_fg_mapping_on_submit
 from .services.subcontracting import SendToSubcontractorStockEntry
 
+WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES = (
+	"Material Transfer for Manufacture",
+	"Manufacture",
+	"Material Consumption for Manufacture",
+)
+
 
 class FinishedGoodError(frappe.ValidationError):
 	pass
@@ -272,6 +278,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.purpose_cls(self).before_validate()
 
 		self.set_default_cost_center()
+		self.set_allow_alternative_item()
 
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
@@ -296,6 +303,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 					get_brand_defaults(row.item_code, self.company),
 					self.company,
 				)
+
+	def set_allow_alternative_item(self):
+		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""
+		if not self.work_order or self.purpose not in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES:
+			return
+
+		wo_allows_alternative_item = frappe.db.get_value(
+			"Work Order", self.work_order, "allow_alternative_item"
+		)
+		for row in self.items:
+			if not row.s_warehouse or row.is_finished_item:
+				continue
+
+			row.allow_alternative_item = cint(
+				wo_allows_alternative_item
+				and frappe.get_cached_value(
+					"Item", row.original_item or row.item_code, "allow_alternative_item"
+				)
+			)
 
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
@@ -1519,6 +1545,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose == "Send to Subcontractor":
 			ret["allow_alternative_item"] = item.allow_alternative_item
+		elif self.work_order and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES:
+			ret["allow_alternative_item"] = cint(
+				item.allow_alternative_item
+				and frappe.db.get_value("Work Order", self.work_order, "allow_alternative_item")
+			)
 
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get("item_code"), args.get("uom"), args.get("qty")))
