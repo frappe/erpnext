@@ -18,6 +18,7 @@ frappe.ui.form.on("Rename Tool", {
 				method: "erpnext.utilities.doctype.rename_tool.rename_tool.upload",
 				args: {
 					select_doctype: frm.doc.select_doctype,
+					file_to_rename: frm.doc.file_to_rename,
 				},
 				freeze: true,
 				freeze_message: __("Scheduling..."),
@@ -60,7 +61,7 @@ frappe.ui.form.on("Rename Tool", {
 				};
 
 				for (const job of jobs) {
-					if (job.job_name !== "frappe.model.rename_doc.bulk_rename") {
+					if (job.job_name !== "erpnext.utilities.doctype.rename_tool.rename_tool.rename_rows") {
 						continue;
 					}
 
