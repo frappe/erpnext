@@ -359,6 +359,7 @@ def repost_future_sle(
 	allow_negative_stock=None,
 	via_landed_cost_voucher=False,
 	doc=None,
+	allow_zero_rate=False,
 ):
 	reposting_data = {}
 	if not items_to_be_repost:
@@ -398,6 +399,7 @@ def repost_future_sle(
 					"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
 					"item_wh_first_reposted": item_wh_first_reposted,
 				},
+				allow_zero_rate=allow_zero_rate,
 				allow_negative_stock=allow_negative_stock,
 				via_landed_cost_voucher=via_landed_cost_voucher,
 			)

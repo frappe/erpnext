@@ -21,6 +21,7 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	execute_reposting_entry,
 	in_configured_timeslot,
 	mark_covered_transaction_reposts,
+	repost,
 	run_parallel_reposting,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -128,6 +129,27 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		repost.db_set("status", "Failed")
 		repost.restart_reposting()
 		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost.name, "status"), "Queued")
+
+	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_repost_uses_allow_zero_rate(self):
+		item_code = make_item(properties={"is_stock_item": 1, "allow_negative_stock": 1}).name
+		warehouse = "Stores - TCP1"
+		receipt = make_stock_entry(
+			item_code=item_code, to_warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -20)
+		)
+		make_stock_entry(
+			item_code=item_code, from_warehouse=warehouse, qty=5, posting_date=add_days(today(), -10)
+		)
+		receipt.cancel()
+
+		repost_doc = frappe.get_last_doc(
+			"Repost Item Valuation", filters={"voucher_no": receipt.name, "status": "Queued"}
+		)
+		repost_doc.db_set("allow_zero_rate", 1)
+		repost(repost_doc)
+
+		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost_doc.name, "status"), "Completed")
 
 	def test_clear_old_logs(self):
 		# create 10 logs
