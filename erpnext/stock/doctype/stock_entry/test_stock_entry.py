@@ -5662,6 +5662,50 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		self.assertEqual(se.process_loss_percentage, 5)
 		self.assertEqual(self.get_finished_good_row(se).qty, 190)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_fifo_rate_for_serial_item_without_serial_wise_valuation(self):
+		item = make_item(
+			properties={
+				"valuation_method": "FIFO",
+				"has_serial_no": 1,
+				"use_serial_no_wise_valuation": 0,
+				"serial_no_series": "SNWV-.#####",
+			}
+		).name
+		finished_good = make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item, target=warehouse, qty=2, rate=100)
+		receipt = make_stock_entry(item_code=item, target=warehouse, qty=2, rate=200)
+		serial_no = frappe.db.get_value(
+			"Serial No", get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0], "serial_no"
+		)
+
+		repack = make_stock_entry(
+			item_code=item,
+			source=warehouse,
+			qty=1,
+			purpose="Repack",
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{
+				"item_code": finished_good,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"is_finished_item": 1,
+			},
+		)
+		repack.save()
+		repack.submit()
+
+		self.assertEqual(repack.items[0].basic_rate, 100)
+		self.assertEqual(repack.items[1].amount, 100)
+
 
 def make_serialized_item(self, **args):
 	args = frappe._dict(args)
