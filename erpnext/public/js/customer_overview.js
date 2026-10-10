@@ -137,6 +137,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	build_sections() {
 		this.$body = $('<div class="co-body">').appendTo(this.$root);
+		this.$loyalty = $('<div class="co-loyalty">').hide().appendTo(this.$body);
 		this.$position = $('<div class="co-section co-kpis">').appendTo(this.$body);
 		this.$trend = $('<div class="co-section">').appendTo(this.$body);
 		this.$charts = $('<div class="co-section co-two-col">').appendTo(this.$body);
@@ -224,6 +225,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.render_position();
 		if (key === "sales") {
 			this.$period.text(this.period_text());
+			this.render_loyalty();
 			this.render_trend();
 			this.render_pipeline();
 		} else {
@@ -286,6 +288,23 @@ erpnext.CustomerOverview = class CustomerOverview {
 		}
 		const items = [this.net_sales_card(), ...this.receivable_cards()].filter(Boolean);
 		this.$position.empty().append(frappe.ui.stat_cards({ items }));
+	}
+
+	render_loyalty() {
+		const l = this.sales && this.sales.data && this.sales.data.loyalty;
+		if (!l) {
+			this.$loyalty.hide().empty();
+			return;
+		}
+		this.$loyalty
+			.empty()
+			.show()
+			.attr("title", l.program)
+			.append(
+				$('<span class="indicator blue">').text(
+					__("Loyalty Points: {0}", [format_number(l.points, null, 0)])
+				)
+			);
 	}
 
 	net_sales_card() {

@@ -37,6 +37,7 @@ def get_customer_overview(customer: str, company: str, period: str = "Current Fi
 		("position", position, (customer, company, from_date, to_date, accounts)),
 		("trend", trend, (customer, company, from_date, to_date, as_of, accounts)),
 		("pipeline", pipeline, (customer, company, as_of, accounts)),
+		("loyalty", loyalty, (customer, company)),
 	):
 		try:
 			payload[key] = fn(*args)
@@ -165,6 +166,20 @@ def sales_totals(customer, company, from_date, to_date):
 
 def net_sales(customer, company, from_date, to_date):
 	return sales_totals(customer, company, from_date, to_date)[0]
+
+
+def loyalty(customer, company):
+	program = frappe.db.get_value("Customer", customer, "loyalty_program")
+	if not program:
+		return None
+
+	lpe = frappe.qb.DocType("Loyalty Point Entry")
+	points = (
+		frappe.qb.from_(lpe)
+		.select(Sum(lpe.loyalty_points))
+		.where((lpe.customer == customer) & (lpe.company == company) & (lpe.expiry_date >= getdate(today())))
+	).run()[0][0]
+	return {"program": program, "points": cint(points)}
 
 
 def position(customer, company, from_date, to_date, accounts):
