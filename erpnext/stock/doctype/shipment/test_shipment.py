@@ -4,6 +4,7 @@
 from datetime import date, timedelta
 
 import frappe
+from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.delivery_note.mapper import make_shipment
 from erpnext.tests.utils import ERPNextTestSuite
@@ -20,6 +21,103 @@ class TestShipment(ERPNextTestSuite):
 		self.assertEqual(len(second_shipment.shipment_delivery_note), 1)
 		self.assertEqual(second_shipment.shipment_delivery_note[0].delivery_note, delivery_note.name)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_shipment_from_multi_item_delivery_note(self):
+		delivery_note = create_test_delivery_note(do_not_insert=True)
+		company = get_shipment_company()
+		create_material_receipt(get_shipment_item(company.name), company.name)
+		item = delivery_note.items[0].as_dict().copy()
+		item.update({"name": None, "qty": 3})
+		delivery_note.append("items", item)
+		delivery_note.insert()
+		delivery_note.submit()
+
+		shipment = make_shipment(delivery_note.name)
+
+		self.assertEqual(len(shipment.shipment_delivery_note), 1)
+		self.assertEqual(shipment.shipment_delivery_note[0].grand_total, delivery_note.base_grand_total)
+
+	def test_delivery_note_rows_are_validated(self):
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+
+		shipment = create_test_shipment([delivery_note], do_not_insert=True)
+		shipment.shipment_delivery_note[0].grand_total = 250000
+		shipment.insert()
+		self.assertEqual(shipment.value_of_goods, delivery_note.base_grand_total)
+		shipment.submit()
+
+		duplicate_row = create_test_shipment([delivery_note, delivery_note], do_not_insert=True)
+		self.assertRaises(frappe.ValidationError, duplicate_row.insert)
+
+		second_shipment = create_test_shipment([delivery_note], do_not_insert=True)
+		self.assertRaises(frappe.ValidationError, second_shipment.insert)
+
+		draft_note = create_test_delivery_note()
+		self.assertRaises(frappe.ValidationError, create_test_shipment, [draft_note])
+
+	def test_company_contact_needs_shipment_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.shipment.shipment import get_company_contact
+
+		user = create_user("test_shipment_contact@example.com", "Website Manager")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, get_company_contact, "Administrator")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertNotIn("gender", get_company_contact("Administrator"))
+
+	def test_return_delivery_note_cannot_be_shipped(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+		return_note = make_sales_return(delivery_note.name)
+		return_note.submit()
+
+		self.assertRaises(frappe.ValidationError, make_shipment, return_note.name)
+
+	def test_parcel_count_and_dimensions_are_validated(self):
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+
+		for parcel in ({"count": 0}, {"count": -3}, {"length": -10}):
+			shipment = create_test_shipment([delivery_note], do_not_insert=True)
+			shipment.shipment_parcel[0].update(parcel)
+			self.assertRaises(frappe.ValidationError, shipment.insert)
+
+	def test_delivery_contact_optional_for_company_destination(self):
+		field = frappe.get_meta("Shipment").get_field("delivery_contact_name")
+		self.assertEqual(field.mandatory_depends_on, "eval: doc.delivery_to_type !== 'Company'")
+
+	def test_parties_addresses_and_contacts_are_validated(self):
+		delivery_note = create_test_delivery_note()
+		delivery_note.submit()
+
+		missing_party = create_test_shipment([delivery_note], do_not_insert=True)
+		missing_party.delivery_customer = None
+		self.assertRaises(frappe.ValidationError, missing_party.insert)
+
+		other_address = create_test_shipment([delivery_note], do_not_insert=True)
+		other_address.delivery_address_name = get_shipment_company_address("_Test Company").name
+		self.assertRaises(frappe.ValidationError, other_address.insert)
+
+		past_pickup = create_test_shipment([delivery_note], do_not_insert=True)
+		past_pickup.pickup_date = add_days(today(), -30)
+		self.assertRaises(frappe.ValidationError, past_pickup.insert)
+
+		shipment = create_test_shipment([delivery_note])
+		self.assertEqual(
+			(shipment.pickup, shipment.delivery_to), ("_Test Company", get_shipment_customer().name)
+		)
+
+		shipment.submit()
+		shipment.pickup_date = add_days(today(), -30)
+		self.assertRaises(frappe.ValidationError, shipment.save)
+
 	def test_get_total_weight(self):
 		shipment = frappe.new_doc("Shipment")
 		shipment.extend(
@@ -32,7 +130,7 @@ class TestShipment(ERPNextTestSuite):
 		self.assertEqual(shipment.get_total_weight(), 35)
 
 
-def create_test_delivery_note():
+def create_test_delivery_note(do_not_insert=False):
 	company = get_shipment_company()
 	customer = get_shipment_customer()
 	item = get_shipment_item(company.name)
@@ -57,11 +155,12 @@ def create_test_delivery_note():
 			"cost_center": "Main - _TC",
 		},
 	)
-	delivery_note.insert()
+	if not do_not_insert:
+		delivery_note.insert()
 	return delivery_note
 
 
-def create_test_shipment(delivery_notes=None):
+def create_test_shipment(delivery_notes=None, do_not_insert=False):
 	company = get_shipment_company()
 	company_address = get_shipment_company_address(company.name)
 	customer = get_shipment_customer()
@@ -88,7 +187,8 @@ def create_test_shipment(delivery_notes=None):
 	for delivery_note in delivery_notes:
 		shipment.append("shipment_delivery_note", {"delivery_note": delivery_note.name})
 	shipment.append("shipment_parcel", {"length": 5, "width": 5, "height": 5, "weight": 5, "count": 5})
-	shipment.insert()
+	if not do_not_insert:
+		shipment.insert()
 	return shipment
 
 
@@ -109,7 +209,7 @@ def get_shipment_customer_address(customer_name):
 	if len(customer_address):
 		return customer_address[0]
 	else:
-		return create_shipment_address(address_title, customer_name, 81929)
+		return create_shipment_address(address_title, customer_name, 81929, "Customer", customer_name)
 
 
 def get_shipment_customer():
@@ -127,7 +227,7 @@ def get_shipment_company_address(company_name):
 	if len(addresses):
 		return addresses[0]
 	else:
-		return create_shipment_address(address_title, company_name, 80331)
+		return create_shipment_address(address_title, company_name, 80331, "Company", company_name)
 
 
 def get_shipment_company():
@@ -147,7 +247,7 @@ def get_shipment_item(company_name):
 		return create_shipment_item(item_name, company_name)
 
 
-def create_shipment_address(address_title, company_name, postal_code):
+def create_shipment_address(address_title, company_name, postal_code, link_doctype=None, link_name=None):
 	address = frappe.new_doc("Address")
 	address.address_title = address_title
 	address.address_type = "Shipping"
@@ -155,6 +255,8 @@ def create_shipment_address(address_title, company_name, postal_code):
 	address.city = "Random City"
 	address.postal_code = postal_code
 	address.country = "Germany"
+	if link_doctype:
+		address.append("links", {"link_doctype": link_doctype, "link_name": link_name})
 	address.insert()
 	return address
 
@@ -169,6 +271,7 @@ def create_customer_contact(fname, lname):
 	customer.append("email_ids", {"email_id": "randomme@email.com", "is_primary": 1})
 	customer.append("phone_nos", {"phone": "123123123", "is_primary_phone": 1, "is_primary_mobile_no": 1})
 	customer.status = "Passive"
+	customer.append("links", {"link_doctype": "Customer", "link_name": get_shipment_customer().name})
 	customer.insert()
 	return customer
 

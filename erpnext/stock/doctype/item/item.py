@@ -163,7 +163,9 @@ class Item(Document):
 	def onload(self):
 		self.set_onload("stock_exists", self.stock_ledger_created())
 		self.set_onload("asset_naming_series", get_asset_naming_series())
-		self.set_onload("current_valuation_method", get_valuation_method(self.name))
+		self.set_onload(
+			"current_valuation_method", get_valuation_method(self.name, erpnext.get_default_company())
+		)
 		self.set_onload("asset_exists", self.has_submitted_assets())
 
 	def autoname(self):
@@ -683,6 +685,7 @@ class Item(Document):
 			self.validate_properties_before_merge(new_name)
 			self.validate_shared_serial_batch_numbers_before_merge(old_name, new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
+			self.validate_duplicate_lead_times_before_merge(old_name, new_name)
 			self.delete_old_bins(old_name)
 
 	def after_rename(self, old_name, new_name, merge):
@@ -773,6 +776,21 @@ class Item(Document):
 				bundle_link, old_name, new_name
 			)
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_duplicate_lead_times_before_merge(self, old_name, new_name):
+		old_lead_time = frappe.db.get_value("Item Lead Time", {"item_code": old_name})
+		if not (old_lead_time and frappe.db.exists("Item Lead Time", {"item_code": new_name})):
+			return
+
+		frappe.throw(
+			_("Please delete Item Lead Time {0}, before merging {1} into {2}").format(
+				get_link_to_form("Item Lead Time", old_lead_time),
+				frappe.bold(old_name),
+				frappe.bold(new_name),
+			),
+			title=_("Cannot Merge"),
+			exc=DataValidationError,
+		)
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
@@ -1062,15 +1080,16 @@ class Item(Document):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
+		allow_different_uom = frappe.get_cached_value(
+			"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
+		)
+
 		if not self.is_new():
 			check_stock_uom_with_bin(self.name, self.stock_uom)
-		if self.has_variants:
+		if self.has_variants and not allow_different_uom:
 			for d in frappe.db.get_all("Item", filters={"variant_of": self.name}):
 				check_stock_uom_with_bin(d.name, self.stock_uom)
 		if self.variant_of:
-			allow_different_uom = frappe.get_cached_value(
-				"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
-			)
 			if not allow_different_uom:
 				template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 				if template_uom != self.stock_uom:

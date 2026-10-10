@@ -233,7 +233,9 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	if not exists:
 		pi_row = doc.append("packed_items", {})
 	elif reset:  # add row if row exists but table is reset
-		pi_row.idx, pi_row.name = None, None
+		pi_row.idx = None
+		if doc.is_new():
+			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
 
 	if doc.is_new() and doc.get("reserve_stock"):

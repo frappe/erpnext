@@ -164,8 +164,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		for item in (self.item, self.other_item):
 			batch = self.make_number("Batch", "Scan-Batch", item.name)
 			serial = self.make_number("Serial No", "Scan-Serial", item.name)
-			serial.batch_no = batch.name
-			serial.save()
+			serial.db_set("batch_no", batch.name)
 			self.assertEqual(
 				get_serial_batch_scan(item.name, " scan-serial ", "Serial No"),
 				{"name": serial.name, "serial_no": "Scan-Serial", "batch_no": batch.name},

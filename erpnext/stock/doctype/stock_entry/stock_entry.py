@@ -27,6 +27,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.get_item_details import (
 	get_barcode_data,
 	get_bin_details,
@@ -57,6 +58,12 @@ from .services.material_transfer import (
 )
 from .services.serial_batch import StockEntrySABB, set_fg_mapping_on_submit
 from .services.subcontracting import SendToSubcontractorStockEntry
+
+WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES = (
+	"Material Transfer for Manufacture",
+	"Manufacture",
+	"Material Consumption for Manufacture",
+)
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -272,6 +279,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.purpose_cls(self).before_validate()
 
 		self.set_default_cost_center()
+		self.set_allow_alternative_item()
 
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
@@ -297,6 +305,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 					self.company,
 				)
 
+	def set_allow_alternative_item(self):
+		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""
+		if not self.work_order or self.purpose not in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES:
+			return
+
+		wo_allows_alternative_item = frappe.db.get_value(
+			"Work Order", self.work_order, "allow_alternative_item"
+		)
+		for row in self.items:
+			if not row.s_warehouse or row.is_finished_item:
+				continue
+
+			row.allow_alternative_item = cint(
+				wo_allows_alternative_item
+				and frappe.get_cached_value(
+					"Item", row.original_item or row.item_code, "allow_alternative_item"
+				)
+			)
+
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
@@ -309,6 +336,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_item()
+		validate_item_uoms(self.get("items"))
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -412,6 +440,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 
 		self.make_gl_entries_on_cancel()
@@ -1518,6 +1547,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose == "Send to Subcontractor":
 			ret["allow_alternative_item"] = item.allow_alternative_item
+		elif self.work_order and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES:
+			ret["allow_alternative_item"] = cint(
+				item.allow_alternative_item
+				and frappe.db.get_value("Work Order", self.work_order, "allow_alternative_item")
+			)
 
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get("item_code"), args.get("uom"), args.get("qty")))
@@ -1905,6 +1939,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
+		target.add_to_transit = 0
 		target.set_missing_values()
 
 		if not frappe.get_single_value("Stock Settings", "use_serial_batch_fields"):

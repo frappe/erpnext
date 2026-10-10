@@ -1,10 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.utils import _create_bin
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.stock_balance import update_bin_qty
+from erpnext.stock.utils import _create_bin, get_bin
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -27,6 +31,62 @@ class TestBin(ERPNextTestSuite):
 		bin = _create_bin(item_code, warehouse)
 		self.assertEqual(bin.item_code, item_code)
 
+	def test_update_bin_qty_keeps_stock_movement_after_read(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		def get_bin_then_issue(item, wh):
+			bin = get_bin(item, wh)
+			make_stock_entry(item_code=item, source=wh, qty=4)
+			return bin
+
+		with patch("erpnext.stock.utils.get_bin", side_effect=get_bin_then_issue):
+			update_bin_qty(item_code, warehouse, {"ordered_qty": 5})
+
+		bin = frappe.db.get_value(
+			"Bin",
+			{"item_code": item_code, "warehouse": warehouse},
+			["actual_qty", "projected_qty"],
+			as_dict=1,
+		)
+		self.assertEqual((bin.actual_qty, bin.projected_qty), (6, 11))
+
+	def test_repost_recomputes_projected_qty(self):
+		from erpnext.stock.stock_balance import repost_stock
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		frappe.db.set_value("Bin", bin_name, {"actual_qty": 7, "projected_qty": 7})
+
+		repost_stock(item_code, warehouse)
+
+		bin = frappe.db.get_value("Bin", bin_name, ["actual_qty", "projected_qty"], as_dict=1)
+		self.assertEqual((bin.actual_qty, bin.projected_qty), (10, 10))
+
+	def test_stock_manager_can_recalculate_values(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin.db_set("actual_qty", 0)
+
+		user = create_user("test_bin_recalculate@example.com", "Stock Manager")
+		frappe.set_user(user.name)
+		try:
+			bin.reload()
+			bin.recalculate_values()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Bin", bin.name, "actual_qty"), 10)
+
 	def test_recalculate_values(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -42,6 +102,33 @@ class TestBin(ERPNextTestSuite):
 		self.assertEqual(bin.actual_qty, 10)
 		self.assertEqual(bin.valuation_rate, 100)
 		self.assertEqual(bin.stock_value, 1000)
+
+	def test_recalculate_values_ignores_client_supplied_fields(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		reserved_stock = bin.reserved_stock
+		bin.reserved_stock = 999
+		bin.actual_qty = 999
+		bin.recalculate_values()
+
+		values = frappe.db.get_value("Bin", bin.name, ["reserved_stock", "actual_qty"], as_dict=1)
+		self.assertEqual(values.reserved_stock, reserved_stock)
+		self.assertEqual(values.actual_qty, 10)
+
+	def test_bin_column_update_clears_cached_bin(self):
+		from erpnext.stock.doctype.bin.bin import update_bin_columns
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		bin = _create_bin(item_code, "_Test Warehouse - _TC")
+		frappe.get_cached_doc("Bin", bin.name)
+
+		update_bin_columns(bin.name, {"ordered_qty": 5})
+
+		cached_bin = frappe.get_cached_doc("Bin", bin.name)
+		self.assertEqual((cached_bin.ordered_qty, cached_bin.projected_qty), (5, 5))
 
 	def test_recalculate_values_without_sle(self):
 		item_code = make_item().name

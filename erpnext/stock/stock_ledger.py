@@ -28,7 +28,7 @@ from frappe.utils import (
 )
 
 import erpnext
-from erpnext.stock.doctype.bin.bin import update_qty_from_sle
+from erpnext.stock.doctype.bin.bin import update_bin_columns, update_qty_from_sle
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.utils import (
 	_get_stock_balance,
@@ -77,45 +77,84 @@ def validate_standard_cost_posting_date(sl_entries):
 	Standard Cost effective date. A backdated entry would slip in behind the standard-rate
 	revaluation, making its on-hand snapshot stale and forcing a repost — which Standard Cost
 	deliberately avoids. Enforced here so every stock voucher is covered uniformly."""
-	from erpnext.stock.utils import get_valuation_method
-
 	checked = {}
 	for sle in sl_entries:
-		item_code = sle.get("item_code")
-		company = sle.get("company")
-		posting_date = sle.get("posting_date")
-		if not item_code or not company or not posting_date:
+		item_code, company = sle.get("item_code"), sle.get("company")
+		if not item_code or not company or not sle.get("posting_date"):
 			continue
 
-		key = (item_code, company)
-		if key not in checked:
-			latest_isc = None
-			if get_valuation_method(item_code, company) == "Standard Cost":
-				latest_isc = frappe.db.get_value(
-					"Item Standard Cost",
-					{"item_code": item_code, "company": company, "docstatus": 1},
-					["name", "effective_date"],
-					order_by="effective_date desc",
-					as_dict=True,
-				)
-			checked[key] = latest_isc
+		if (item_code, company) not in checked:
+			checked[(item_code, company)] = get_standard_cost_boundary(item_code, company)
 
-		latest_isc = checked[key]
-		if latest_isc and getdate(posting_date) < getdate(latest_isc.effective_date):
-			effective_date = frappe.bold(frappe.format(latest_isc.effective_date, "Date"))
-			frappe.throw(
-				_(
-					"Cannot post Standard Cost item {0} on {1}: it is before {2}, the effective date of its latest Standard Valuation Rate {3}."
-				).format(
-					get_link_to_form("Item", item_code),
-					frappe.bold(frappe.format(posting_date, "Date")),
-					effective_date,
-					get_link_to_form("Item Standard Cost", latest_isc.name),
-				)
-				+ "<br><br>"
-				+ _("Post this entry on or after {0}.").format(effective_date),
-				title=_("Backdated Entry Not Allowed"),
-			)
+		boundary = checked[(item_code, company)]
+		if not boundary or sle.get("voucher_no") == boundary.revaluation_entry:
+			continue
+
+		if is_before_standard_cost_boundary(sle, boundary):
+			throw_standard_cost_backdated_error(item_code, sle.get("posting_date"), boundary)
+
+
+def is_before_standard_cost_boundary(sle, boundary):
+	posting_datetime = get_combine_datetime(sle.get("posting_date"), sle.get("posting_time"))
+	if posting_datetime != boundary.posting_datetime:
+		return posting_datetime < boundary.posting_datetime
+
+	if not sle.get("is_cancelled") or not boundary.get("creation"):
+		return False
+
+	original_creation = frappe.db.get_value(
+		"Stock Ledger Entry",
+		{
+			"voucher_type": sle.get("voucher_type"),
+			"voucher_no": sle.get("voucher_no"),
+			"voucher_detail_no": sle.get("voucher_detail_no"),
+			"is_cancelled": 0,
+		},
+		"creation",
+	)
+	return bool(original_creation) and get_datetime(original_creation) < get_datetime(boundary.creation)
+
+
+def get_standard_cost_boundary(item_code, company):
+	if get_valuation_method(item_code, company) != "Standard Cost":
+		return None
+
+	latest_isc = frappe.db.get_value(
+		"Item Standard Cost",
+		{"item_code": item_code, "company": company, "docstatus": 1},
+		["name", "effective_date", "revaluation_entry"],
+		order_by="effective_date desc",
+		as_dict=True,
+	)
+	if not latest_isc:
+		return None
+
+	latest_isc.posting_datetime = get_datetime(latest_isc.effective_date)
+	if latest_isc.revaluation_entry:
+		posting_date, posting_time, creation = frappe.db.get_value(
+			"Stock Reconciliation", latest_isc.revaluation_entry, ["posting_date", "posting_time", "creation"]
+		)
+		latest_isc.posting_datetime = get_combine_datetime(posting_date, posting_time)
+		latest_isc.creation = creation
+
+	return latest_isc
+
+
+def throw_standard_cost_backdated_error(item_code, posting_date, latest_isc):
+	effective_date = frappe.bold(frappe.format(latest_isc.effective_date, "Date"))
+	frappe.throw(
+		_(
+			"Cannot post Standard Cost item {0} on {1}: it is before {2}, the effective date of its latest Standard Valuation Rate {3}."
+		).format(
+			get_link_to_form("Item", item_code),
+			frappe.bold(frappe.format(posting_date, "Date")),
+			effective_date,
+			get_link_to_form("Item Standard Cost", latest_isc.name),
+		)
+		+ "<br><br>"
+		+ _("Post this entry after the revaluation on {0}.").format(effective_date),
+		title=_("Backdated Entry Not Allowed"),
+	)
 
 
 def validate_stock_frozen_by_closing_entry(sl_entries):
@@ -162,11 +201,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		validate_stock_frozen_by_closing_entry(sl_entries)
 
 		cancelled = sl_entries[0].get("is_cancelled")
+		validate_standard_cost_posting_date(sl_entries)
 		if cancelled:
 			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
-		else:
-			validate_standard_cost_posting_date(sl_entries)
 
 		args = get_args_for_future_sle(sl_entries[0])
 		future_sle_exists(args, sl_entries)
@@ -2170,7 +2208,7 @@ class update_entries_after:
 			if data.valuation_rate is not None:
 				updated_values["valuation_rate"] = flt(data.valuation_rate)
 
-			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
+			update_bin_columns(bin_name, updated_values)
 
 		self.reset_bin_without_stock_ledger_entries()
 
@@ -2189,12 +2227,7 @@ class update_entries_after:
 		if not bin_name:
 			return
 
-		frappe.db.set_value(
-			"Bin",
-			bin_name,
-			{"actual_qty": 0.0, "stock_value": 0.0, "valuation_rate": 0.0},
-			update_modified=True,
-		)
+		update_bin_columns(bin_name, {"actual_qty": 0.0, "stock_value": 0.0, "valuation_rate": 0.0})
 
 
 def get_sle_against_current_voucher(kwargs):

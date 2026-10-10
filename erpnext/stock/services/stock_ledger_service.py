@@ -218,6 +218,7 @@ class StockLedgerService:
 
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		from erpnext.controllers.stock_controller import (
+			create_accounting_repost_entry,
 			create_item_wise_repost_entries,
 			create_repost_item_valuation_entry,
 			future_sle_exists,
@@ -241,10 +242,12 @@ class StockLedgerService:
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self.doc):
 			item_based_reposting = frappe.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			if item_based_reposting:
-				create_item_wise_repost_entries(
+				repost_entries = create_item_wise_repost_entries(
 					voucher_type=self.doc.doctype,
 					voucher_no=self.doc.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
 				)
+				if force and not repost_entries and self.doc.docstatus == 1:
+					create_accounting_repost_entry(self.doc.doctype, self.doc.name)
 			else:
 				create_repost_item_valuation_entry(args)

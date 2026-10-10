@@ -936,6 +936,7 @@ def create_item_wise_repost_entries(
 	from erpnext.stock.utils import get_valuation_method
 
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
+	company = frappe.db.get_value(voucher_type, voucher_no, "company")
 
 	distinct_item_warehouses = set()
 	repost_entries = []
@@ -948,7 +949,7 @@ def create_item_wise_repost_entries(
 
 		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
 		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
-		if get_valuation_method(sle.item_code) == "Standard Cost":
+		if get_valuation_method(sle.item_code, company) == "Standard Cost":
 			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
@@ -966,6 +967,23 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+def create_accounting_repost_entry(voucher_type, voucher_no):
+	repost_entry = frappe.new_doc("Repost Item Valuation")
+	repost_entry.based_on = "Transaction"
+	repost_entry.voucher_type = voucher_type
+	repost_entry.voucher_no = voucher_no
+	repost_entry.update(
+		frappe.db.get_value(
+			voucher_type, voucher_no, ["company", "posting_date", "posting_time"], as_dict=True
+		)
+	)
+	repost_entry.repost_only_accounting_ledgers = 1
+	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
+	repost_entry.submit()
+	return repost_entry
 
 
 def make_bundle_for_material_transfer(**kwargs):
