@@ -4,6 +4,7 @@
 
 import re
 from datetime import datetime
+from urllib.parse import parse_qs, urlparse
 
 import frappe
 from frappe import _
@@ -11,6 +12,9 @@ from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 from pyyoutube import Api
+
+YOUTUBE_DOMAINS = ("youtube.com", "youtu.be", "youtube-nocookie.com")
+YOUTUBE_VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}")
 
 
 class Video(Document):
@@ -42,7 +46,7 @@ class Video(Document):
 			self.set_youtube_statistics()
 
 	def set_video_id(self):
-		if self.url and not self.get("youtube_video_id"):
+		if self.url and (not self.get("youtube_video_id") or self.has_value_changed("url")):
 			self.youtube_video_id = get_id_from_url(self.url)
 
 	def set_youtube_statistics(self):
@@ -113,13 +117,34 @@ def get_id_from_url(url: str):
 	if not isinstance(url, str):
 		frappe.throw(_("URL can only be a string"), title=_("Invalid URL"))
 
-	pattern = re.compile(r'[a-z\:\//\.]+(youtube|youtu)\.(com|be)/(watch\?v=|embed/|.+\?v=)?([^"&?\s]{11})?')
-	id = pattern.match(url)
-	return id.groups()[-1]
+	video_id = parse_youtube_video_id(url)
+	if not video_id:
+		frappe.throw(_("Could not find a YouTube video ID in the URL"), title=_("Invalid URL"))
+
+	return video_id
+
+
+def parse_youtube_video_id(url: str) -> str | None:
+	parsed = urlparse(url.strip() if "://" in url else f"https://{url.strip()}")
+	host = parsed.hostname or ""
+	if not any(host == domain or host.endswith(f".{domain}") for domain in YOUTUBE_DOMAINS):
+		return None
+
+	segments = [segment for segment in parsed.path.split("/") if segment]
+	if host.endswith("youtu.be"):
+		video_id = segments[0] if segments else None
+	elif len(segments) > 1 and segments[0] in ("embed", "shorts", "live", "v"):
+		video_id = segments[1]
+	else:
+		video_id = parse_qs(parsed.query).get("v", [None])[0]
+
+	return video_id if video_id and YOUTUBE_VIDEO_ID.fullmatch(video_id) else None
 
 
 @frappe.whitelist()
 def batch_update_youtube_data():
+	frappe.has_permission("Video Settings", "write", throw=True)
+
 	def get_youtube_statistics(video_ids):
 		api_key = frappe.db.get_single_value("Video Settings", "api_key")
 		api = Api(api_key=api_key)
@@ -133,7 +158,8 @@ def batch_update_youtube_data():
 	def prepare_and_set_data(video_list):
 		video_ids = get_formatted_ids(video_list)
 		stats = get_youtube_statistics(video_ids)
-		set_youtube_data(stats)
+		if stats:
+			set_youtube_data(stats)
 
 	def set_youtube_data(entries):
 		for entry in entries:
@@ -145,9 +171,13 @@ def batch_update_youtube_data():
 				"dislike_count": cint(video_stats.get("dislikeCount")),
 				"comment_count": cint(video_stats.get("commentCount")),
 			}
-			frappe.db.set_value("Video", video_id, stats)
+			frappe.db.set_value("Video", {"youtube_video_id": video_id}, stats)
 
-	video_list = frappe.get_all("Video", fields=["youtube_video_id"])
+	video_list = frappe.get_all(
+		"Video",
+		filters={"provider": "YouTube", "youtube_video_id": ["is", "set"]},
+		fields=["youtube_video_id"],
+	)
 	if len(video_list) > 50:
 		# Update in batches of 50
 		start, end = 0, 50

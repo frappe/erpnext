@@ -132,7 +132,7 @@
  "icon": "video",
  "image_field": "image",
  "links": [],
- "modified": "2024-03-27 13:10:58.743905",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video",
@@ -147,7 +147,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Desk User",
    "share": 1,
    "write": 1
   },
