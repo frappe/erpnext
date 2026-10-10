@@ -93,7 +93,7 @@ class SubcontractingService:
 
 		doc = self.doc
 		if doc.is_subcontracted:
-			sco = frappe.db.get_value("Subcontracting Order", {"purchase_order": doc.name, "docstatus": 1})
-
-			if sco:
+			for sco in frappe.get_all(
+				"Subcontracting Order", {"purchase_order": doc.name, "docstatus": 1}, pluck="name"
+			):
 				update_sco_status(sco, "Closed" if doc.status == "Closed" else None)

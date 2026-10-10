@@ -491,7 +491,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 			{
 				"main_item_code": "Subcontracted Item SA4",
 				"item_code": "Subcontracted SRM Item 3",
-				"qty": 3.0,
+				"qty": 1.0,
 				"rate": 100.0,
 				"stock_uom": "Nos",
 				"warehouse": "_Test Warehouse - _TC",
@@ -1181,6 +1181,36 @@ class TestSubcontractingController(ERPNextTestSuite):
 		sco.reload()
 
 		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
+
+	def test_phantom_item_materials_scale_with_phantom_qty(self):
+		phantom_item = make_item(properties={"is_stock_item": 1}).name
+		phantom_bom = make_bom(
+			item=phantom_item, raw_materials=["Subcontracted SRM Item 8"], rm_qty=2, do_not_save=True
+		)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		fg_bom = make_bom(item=fg_item, raw_materials=[phantom_item], rm_qty=3, do_not_save=True)
+		fg_bom.items[0].bom_no = phantom_bom.name
+		fg_bom.save()
+		fg_bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0, do_not_submit=1)
+
+		self.assertEqual(sco.supplied_items[0].rm_item_code, "Subcontracted SRM Item 8")
+		self.assertEqual(sco.supplied_items[0].required_qty, 30)
 
 	def test_co_by_product(self):
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)

@@ -203,11 +203,13 @@ class SubcontractingController(StockController):
 					item.amount = item.qty * item.rate
 
 				if item.bom:
-					is_active, bom_item = frappe.get_value("BOM", item.bom, ["is_active", "item"])
+					is_active, bom_item, docstatus = frappe.get_value(
+						"BOM", item.bom, ["is_active", "item", "docstatus"]
+					)
 
-					if not is_active:
+					if not is_active or docstatus != 1:
 						frappe.throw(
-							_("Row {0}: Please select an active BOM for Item {1}.").format(
+							_("Row {0}: Please select an active and submitted BOM for Item {1}.").format(
 								item.idx, item.item_name
 							)
 						)
@@ -607,9 +609,13 @@ class SubcontractingController(StockController):
 		to_remove = []
 		for item in data:
 			if item.is_phantom_item:
-				data += self._get_materials_from_bom(
+				phantom_materials = self._get_materials_from_bom(
 					item.rm_item_code, item.bom_no, exploded_item=exploded_item
 				)
+				for material in phantom_materials:
+					material.qty_consumed_per_unit *= item.qty_consumed_per_unit
+
+				data += phantom_materials
 				to_remove.append(item)
 
 		for item in to_remove:
@@ -1319,7 +1325,7 @@ class SubcontractingController(StockController):
 			if mr and mr_item_rows:
 				mr_obj = frappe.get_doc("Material Request", mr)
 
-				if mr_obj.status in ["Stopped", "Cancelled"]:
+				if mr_obj.status in ["Stopped", "Cancelled"] and self.get("_action") == "submit":
 					frappe.throw(
 						_("Material Request {0} is cancelled or stopped").format(mr),
 						frappe.InvalidStatusError,
