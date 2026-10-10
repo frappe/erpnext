@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-09-17 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "title",
+  "naming_series",
+  "bank_account",
+  "current_account",
+  "company",
+  "column_break_bank",
+  "cheque_book_no",
+  "status",
+  "cheque_range_section",
+  "cheque_start_no",
+  "column_break_range",
+  "cheque_end_no",
+  "no_of_cheques",
+  "next_cheque_no",
+  "amended_from",
+  "issued_cheques_tab",
+  "issued_cheques_html",
+  "cancelled_cheques_tab",
+  "cancelled_cheques_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "options": "{bank_account}-{cheque_book_no}",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CHQ-BK-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company Bank Account",
+   "options": "Bank Account",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The current ledger linked to the Company Bank Account",
+   "fieldname": "current_account",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_account.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bank",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cheque_book_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cheque Book No",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "description": "A cheque book is Finished when its bookmark passes the end and no cheque is free. Disable one you do not want to use.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nFinished\nDisabled\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cheque_range_section",
+   "fieldtype": "Section Break",
+   "label": "Cheque Range"
+  },
+  {
+   "fieldname": "cheque_start_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cheque Start No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_range",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cheque_end_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cheque End No",
+   "reqd": 1
+  },
+  {
+   "description": "Enter any two of Cheque Start No, Cheque End No and Number of Cheques",
+   "fieldname": "no_of_cheques",
+   "fieldtype": "Int",
+   "label": "Number of Cheques",
+   "non_negative": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.docstatus==1",
+   "description": "The cheque number suggested on the next Payment Entry",
+   "fieldname": "next_cheque_no",
+   "fieldtype": "Data",
+   "label": "Next Cheque No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cheque Book",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "issued_cheques_tab",
+   "fieldtype": "Tab Break",
+   "label": "Issued Cheques"
+  },
+  {
+   "fieldname": "issued_cheques_html",
+   "fieldtype": "HTML",
+   "label": "Issued Cheques"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "cancelled_cheques_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cancelled Cheques"
+  },
+  {
+   "fieldname": "cancelled_cheques_html",
+   "fieldtype": "HTML",
+   "label": "Cancelled Cheques"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-08 20:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cheque Book",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Submitted"
+  },
+  {
+   "color": "Green",
+   "title": "Finished"
+  },
+  {
+   "color": "Gray",
+   "title": "Disabled"
+  }
+ ],
+ "title_field": "title"
+}

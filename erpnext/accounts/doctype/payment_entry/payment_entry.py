@@ -22,6 +22,8 @@ from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_default_company_bank_account,
 	get_party_bank_account,
 )
+from erpnext.accounts.doctype.cheque_book.cheque_book import update_cheque_book, validate_cheque
+from erpnext.accounts.doctype.cheque_usage.cheque_usage import release_cheque
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -94,6 +96,7 @@ class PaymentEntry(AccountsController):
 		base_total_allocated_amount: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		book_advance_payments_in_separate_party_account: DF.Check
+		cheque_book: DF.Link | None
 		clearance_date: DF.Date | None
 		company: DF.Link
 		contact_email: DF.Data | None
@@ -185,6 +188,7 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
+		validate_cheque(self)
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -211,6 +215,7 @@ class PaymentEntry(AccountsController):
 		self.update_linked_dunnings()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+		update_cheque_book(self)
 
 	def update_linked_dunnings(self):
 		from erpnext.accounts.doctype.dunning.dunning import update_dunnings_linked_to_payment
@@ -301,6 +306,11 @@ class PaymentEntry(AccountsController):
 			alert=True,
 		)
 
+	def before_cancel(self):
+		super().before_cancel()
+		if self.cheque_book:
+			frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
@@ -325,6 +335,10 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+		if self.cheque_book:
+			book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
+			release_cheque(book, self.reference_no, self.doctype, self.name)
+			book.advance_next_cheque_no(self.reference_no, freed=True)
 
 	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (

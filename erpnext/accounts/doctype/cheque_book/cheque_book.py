@@ -1,0 +1,445 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cint, get_link_to_form
+
+from erpnext.accounts.doctype.cheque_usage.cheque_usage import claim_cheque, get_cheque_usage
+
+CHEQUE_NO_WIDTH = 6
+
+
+class ChequeBook(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		bank_account: DF.Link
+		cheque_book_no: DF.Data
+		cheque_end_no: DF.Data
+		cheque_start_no: DF.Data
+		company: DF.Link | None
+		naming_series: DF.Literal["CHQ-BK-.YYYY.-"]
+		next_cheque_no: DF.Data | None
+		no_of_cheques: DF.Int
+		status: DF.Literal["Draft", "Submitted", "Finished", "Disabled", "Cancelled"]
+		title: DF.Data | None
+	# end: auto-generated types
+
+	@property
+	def current_account(self):
+		if self.bank_account:
+			return frappe.db.get_value("Bank Account", self.bank_account, "account")
+
+	def check_if_latest(self):
+		# Frappe locks this book in the parent method, before validate/before_validate.
+		# Lock accounts first, including both sides of a draft's account change.
+		bank_accounts = {self.bank_account}
+		if not self.is_new():
+			bank_accounts.add(frappe.db.get_value("Cheque Book", self.name, "bank_account"))
+		for bank_account in sorted(name for name in bank_accounts if name):
+			frappe.db.get_value("Bank Account", bank_account, "name", for_update=True)
+		super().check_if_latest()
+
+	def validate(self):
+		self.validate_bank_account()
+		if not self.amended_from and frappe.db.get_value(
+			"Cheque Book",
+			{
+				"bank_account": self.bank_account,
+				"cheque_book_no": self.cheque_book_no,
+				"name": ("!=", self.name or ""),
+			},
+			"name",
+			for_update=True,
+		):
+			frappe.throw(
+				_("Cheque Book No {0} already exists for Bank Account {1}").format(
+					frappe.bold(self.cheque_book_no), frappe.bold(self.bank_account)
+				)
+			)
+		self.validate_cheque_range()
+		self.validate_overlapping_range()
+
+	def before_submit(self):
+		self.status = "Submitted"
+		# an amended book keeps its place, unless the new range no longer covers it
+		if not self.is_in_range(self.next_cheque_no or ""):
+			self.next_cheque_no = self.cheque_start_no
+
+	def before_update_after_submit(self):
+		if self.has_value_changed("next_cheque_no"):
+			frappe.throw(_("Next Cheque No is managed automatically"))
+
+	def validate_bank_account(self):
+		bank_account = frappe.db.get_value(
+			"Bank Account",
+			self.bank_account,
+			["is_company_account", "disabled"],
+			as_dict=True,
+			for_update=True,
+		)
+		if not bank_account or not bank_account.is_company_account:
+			frappe.throw(
+				_("Bank Account {0} is not a Company Account").format(frappe.bold(self.bank_account))
+			)
+		if bank_account.disabled and self.has_value_changed("bank_account"):
+			frappe.throw(_("Bank Account {0} is disabled").format(frappe.bold(self.bank_account)))
+
+	def validate_cheque_range(self):
+		self.cheque_start_no = (self.cheque_start_no or "").strip()
+		self.cheque_end_no = (self.cheque_end_no or "").strip()
+
+		for fieldname in ("cheque_start_no", "cheque_end_no"):
+			value = self.get(fieldname)
+			if value and not (value.isascii() and value.isdigit()):
+				frappe.throw(_("{0} must contain digits only").format(_(self.meta.get_label(fieldname))))
+
+		self.no_of_cheques = cint(self.no_of_cheques)
+		if self.cheque_start_no and self.cheque_end_no:
+			self.no_of_cheques = int(self.cheque_end_no) - int(self.cheque_start_no) + 1
+		elif self.cheque_start_no and self.no_of_cheques > 0:
+			self.cheque_end_no = str(int(self.cheque_start_no) + self.no_of_cheques - 1)
+		elif self.cheque_end_no and self.no_of_cheques > 0:
+			start_no = int(self.cheque_end_no) - self.no_of_cheques + 1
+			if start_no < 0:
+				frappe.throw(_("Number of Cheques cannot be more than Cheque End No"))
+			self.cheque_start_no = str(start_no)
+		else:
+			frappe.throw(
+				_("Enter any two of Cheque Start No, Cheque End No and Number of Cheques"),
+				frappe.MandatoryError,
+			)
+
+		if int(self.cheque_end_no) < int(self.cheque_start_no):
+			frappe.throw(_("Cheque End No cannot be less than Cheque Start No"))
+		if self.no_of_cheques > 2147483647:
+			frappe.throw(_("Number of Cheques cannot exceed {0}").format(2147483647))
+		self.cheque_start_no = self.format_cheque_no(self.cheque_start_no)
+		self.cheque_end_no = self.format_cheque_no(self.cheque_end_no)
+
+	def validate_overlapping_range(self):
+		# The account lock serializes creation; this locking read sees newly committed ranges.
+		other_books = frappe.db.get_values(
+			"Cheque Book",
+			filters={
+				"bank_account": self.bank_account,
+				"docstatus": ("<", 2),
+				"name": ("!=", self.name or ""),
+			},
+			fieldname=["name", "cheque_start_no", "cheque_end_no"],
+			as_dict=True,
+			for_update=True,
+		)
+		for book in other_books:
+			if int(self.cheque_start_no) <= int(book.cheque_end_no) and int(book.cheque_start_no) <= int(
+				self.cheque_end_no
+			):
+				frappe.throw(
+					_("Cheque range overlaps with Cheque Book {0} ({1} - {2})").format(
+						get_link_to_form("Cheque Book", book.name), book.cheque_start_no, book.cheque_end_no
+					)
+				)
+
+	def on_cancel(self):
+		# Submitted Payment Entries using this book already block the cancellation
+		if cheque_no := frappe.db.get_value(
+			"Cheque Usage",
+			{"cheque_book": self.name, "source_type": "Cancelled Cheque"},
+			"cheque_no",
+			for_update=True,
+		):
+			frappe.throw(
+				_("Cannot cancel {0} because cheque {1} is marked as cancelled").format(
+					frappe.bold(self.name), frappe.bold(cheque_no)
+				)
+			)
+
+		self.db_set("status", "Cancelled")
+
+	@staticmethod
+	def format_cheque_no(cheque_no):
+		"""Normalize a typed number, padding shorter numbers to six digits."""
+		cheque_no = (cheque_no or "").strip()
+		return (
+			str(int(cheque_no)).zfill(CHEQUE_NO_WIDTH)
+			if cheque_no.isascii() and cheque_no.isdigit()
+			else cheque_no
+		)
+
+	def is_in_range(self, cheque_no):
+		return (
+			cheque_no.isascii()
+			and cheque_no.isdigit()
+			and int(self.cheque_start_no) <= int(cheque_no) <= int(self.cheque_end_no)
+		)
+
+	def next_no_after(self, cheque_no):
+		return str(int(cheque_no) + 1).zfill(CHEQUE_NO_WIDTH)
+
+	def is_used(self, cheque_no):
+		return bool(get_cheque_usage(self.name, cheque_no, for_update=True))
+
+	def advance_next_cheque_no(self, cheque_no, *, freed=False):
+		"""Advance after use, or reopen a Finished book when a cheque is freed."""
+		if freed:
+			cheque_no = self.format_cheque_no(cheque_no)
+			if self.status == "Finished" and not self.is_used(cheque_no):
+				self.db_set({"next_cheque_no": cheque_no, "status": "Submitted"})
+			return
+
+		if cheque_no != self.next_cheque_no and self.is_in_range(self.next_cheque_no):
+			return
+
+		next_no = self.next_cheque_no
+		if cheque_no == next_no:
+			next_no = self.next_no_after(cheque_no)
+			if self.is_in_range(next_no):
+				occupied = get_occupied_cheque_nos(self, from_no=next_no, for_update=True)
+				while self.is_in_range(next_no) and int(next_no) in occupied:
+					next_no = self.next_no_after(next_no)
+
+		values = {}
+		if next_no != self.next_cheque_no:
+			values["next_cheque_no"] = next_no
+		if not self.is_in_range(next_no) and self.status == "Submitted":
+			if count_free_cheques(self, for_update=True) == 0:
+				values["status"] = "Finished"
+
+		if values:
+			self.db_set(values)
+
+
+def get_occupied_cheque_nos(book, from_no=None, for_update=False):
+	filters = {"cheque_book": book.name}
+
+	numbers = frappe.db.get_values(
+		"Cheque Usage",
+		filters,
+		"cheque_no",
+		pluck=True,
+		for_update=for_update,
+	)
+	start, end = int(book.cheque_start_no), int(book.cheque_end_no)
+	if from_no:
+		# Cheque numbers can have different widths, so compare numerically.
+		start = max(start, int(from_no))
+	return {int(no) for no in numbers if no and no.isdigit() and start <= int(no) <= end}
+
+
+def count_free_cheques(book, for_update=False):
+	return book.no_of_cheques - len(get_occupied_cheque_nos(book, for_update=for_update))
+
+
+@frappe.whitelist()
+def get_next_cheque_book_no(bank_account: str) -> str:
+	"""Suggest the number after the highest numbered cheque book of the bank account, else 01.
+
+	Cancelled books count too, so their book numbers are not reused.
+	"""
+	frappe.has_permission("Cheque Book", throw=True)
+	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)
+	numbers = [
+		no
+		for no in frappe.get_list(
+			"Cheque Book", filters={"bank_account": bank_account}, pluck="cheque_book_no"
+		)
+		if no.isdigit()
+	]
+	if not numbers:
+		return "01"
+
+	last_no = max(numbers, key=int)
+	return str(int(last_no) + 1).zfill(len(last_no))
+
+
+@frappe.whitelist()
+def get_next_cheque(account: str, cheque_book: str | None = None, include_free: bool = False) -> dict:
+	"""Return the cheque book (the given one, else the oldest active one) and its next cheque no."""
+	enabled_bank_accounts = frappe.get_all(
+		"Bank Account",
+		filters={"account": account, "is_company_account": 1, "disabled": 0},
+		pluck="name",
+	)
+	if not enabled_bank_accounts:
+		return {}
+
+	filters = {"name": cheque_book} if cheque_book else {}
+	books = frappe.get_list(
+		"Cheque Book",
+		filters={
+			**filters,
+			"bank_account": ("in", enabled_bank_accounts),
+			"docstatus": 1,
+			"status": "Submitted",
+		},
+		fields=["name", "next_cheque_no", "cheque_start_no", "cheque_end_no", "no_of_cheques"],
+		order_by="creation",
+	)
+
+	if not books:
+		return {}
+	book = next((book for book in books if int(book.next_cheque_no) <= int(book.cheque_end_no)), books[0])
+	result = {"cheque_book": book.name}
+	if int(book.next_cheque_no) <= int(book.cheque_end_no):
+		result["cheque_no"] = book.next_cheque_no
+	if include_free:
+		result["free"] = count_free_cheques(book)
+	return result
+
+
+def is_cheque_payment(payment_entry) -> bool:
+	return payment_entry.payment_type in ("Pay", "Internal Transfer") and payment_entry.mode_of_payment in (
+		"Cheque",
+		"Check",
+	)
+
+
+def validate_cheque(payment_entry):
+	doc = payment_entry
+	if not is_cheque_payment(doc):
+		doc.cheque_book = None
+		return
+
+	if doc.docstatus == 0 and not doc.reference_no:
+		cheque = get_next_cheque(doc.paid_from, doc.cheque_book)
+		doc.cheque_book = cheque.get("cheque_book", doc.cheque_book)
+		doc.reference_no = cheque.get("cheque_no")
+		doc.reference_date = doc.reference_date or doc.posting_date
+
+	if not doc.cheque_book:
+		bank_accounts = frappe.get_all("Bank Account", filters={"account": doc.paid_from}, pluck="name")
+		if bank_accounts and frappe.db.exists(
+			"Cheque Book", {"bank_account": ("in", bank_accounts), "docstatus": 1}
+		):
+			frappe.throw(_("Please select a Cheque Book"))
+		return
+
+	# Match Cheque Book saves: account first, then book, then usage. Reading the
+	# link without locking avoids acquiring the book before its account.
+	bank_account_name = frappe.db.get_value("Cheque Book", doc.cheque_book, "bank_account")
+	bank_account = frappe.db.get_value(
+		"Bank Account",
+		{"name": bank_account_name},
+		["account", "company", "is_company_account", "disabled"],
+		as_dict=True,
+		for_update=doc.docstatus == 1,
+	)
+	book = frappe.get_doc("Cheque Book", doc.cheque_book, for_update=doc.docstatus == 1)
+	if book.bank_account != bank_account_name:
+		frappe.throw(
+			_("Cheque Book has changed. Please reload and try again."), frappe.TimestampMismatchError
+		)
+
+	if not bank_account or not bank_account.is_company_account:
+		frappe.throw(_("Bank Account {0} is not a Company Account").format(frappe.bold(book.bank_account)))
+	if bank_account.disabled:
+		frappe.throw(_("Bank Account {0} is disabled").format(frappe.bold(book.bank_account)))
+	if bank_account.company != doc.company or book.company != doc.company:
+		frappe.throw(_("Cheque Book and Bank Account must belong to the Payment Entry company"))
+
+	# A finished book still accepts a number, so a payment on its last cheque can be amended
+	if book.docstatus != 1 or book.status == "Disabled":
+		frappe.throw(_("Cheque Book {0} must be submitted and enabled").format(frappe.bold(book.name)))
+
+	if bank_account.account != doc.paid_from:
+		frappe.throw(
+			_("Cheque Book {0} belongs to account {1}, but Account Paid From is {2}").format(
+				frappe.bold(book.name), frappe.bold(bank_account.account), frappe.bold(doc.paid_from)
+			)
+		)
+
+	if not doc.reference_no:
+		frappe.throw(_("Please enter a Cheque No for Cheque Book {0}").format(frappe.bold(book.name)))
+
+	doc.reference_no = book.format_cheque_no(doc.reference_no)
+	if not book.is_in_range(doc.reference_no):
+		frappe.throw(
+			_("Cheque No {0} is not in the range {1} - {2} of Cheque Book {3}").format(
+				frappe.bold(doc.reference_no),
+				book.cheque_start_no,
+				book.cheque_end_no,
+				frappe.bold(book.name),
+			)
+		)
+
+	usage = get_cheque_usage(book.name, doc.reference_no, for_update=doc.docstatus == 1)
+	if usage:
+		if usage.source_type == "Cancelled Cheque":
+			frappe.throw(
+				_("Cheque No {0} is cancelled ({1})").format(frappe.bold(doc.reference_no), usage.reason)
+			)
+		if usage.source_name != doc.name:
+			frappe.throw(
+				_("Cheque No {0} is already used in {1}").format(
+					frappe.bold(doc.reference_no), get_link_to_form("Payment Entry", usage.source_name)
+				)
+			)
+
+	filters = {"cheque_book": book.name, "reference_no": doc.reference_no, "name": ("!=", doc.name)}
+	if doc.docstatus == 0 and (draft := frappe.db.get_value("Payment Entry", {**filters, "docstatus": 0})):
+		frappe.msgprint(
+			_("Cheque No {0} is also used in draft {1}").format(
+				frappe.bold(doc.reference_no), get_link_to_form("Payment Entry", draft)
+			),
+			alert=True,
+			indicator="orange",
+		)
+
+
+def update_cheque_book(payment_entry):
+	if is_cheque_payment(payment_entry) and payment_entry.cheque_book:
+		book = frappe.get_doc("Cheque Book", payment_entry.cheque_book, for_update=True)
+		claim_cheque(book, payment_entry.reference_no, "Payment Entry", payment_entry.name)
+		book.advance_next_cheque_no(payment_entry.reference_no)
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_cheque_payment(
+	name: str,
+	reason: str,
+	remarks: str | None = None,
+	ignore_doctypes_on_cancel_all: str | list[str] | None = None,
+):
+	"""Cancel the payment and record its voided cheque in the same transaction."""
+	from frappe.desk.form.linked_with import (
+		MAX_SYNCHRONOUS_LINKED_DOCS,
+		cancel_all_linked_docs,
+		collect_cancellation_blockers,
+	)
+
+	payment = frappe.get_doc("Payment Entry", name)
+	payment.check_permission("cancel")
+	if payment.docstatus != 1 or not payment.cheque_book or not is_cheque_payment(payment) or not reason:
+		frappe.throw(_("Select a cancellation reason for a submitted cheque Payment Entry"))
+
+	ignored = frappe.parse_json(ignore_doctypes_on_cancel_all) or []
+	linked, truncated = collect_cancellation_blockers(
+		"Payment Entry", name, ignored, limit=MAX_SYNCHRONOUS_LINKED_DOCS
+	)
+	if truncated:
+		frappe.throw(_("Cancel linked documents separately before cancelling this cheque Payment Entry"))
+	if linked:
+		cancel_all_linked_docs(linked, ignored, "Payment Entry", name)
+	else:
+		payment.cancel()
+
+	if frappe.db.get_value("Payment Entry", name, "docstatus") != 2:
+		frappe.throw(_("Payment Entry cancellation must finish before marking its cheque cancelled"))
+	frappe.get_doc(
+		{
+			"doctype": "Cancelled Cheque",
+			"cheque_book": payment.cheque_book,
+			"cheque_no": payment.reference_no,
+			"payment_entry": name,
+			"reason": reason,
+			"remarks": remarks,
+		}
+	).insert().submit()
