@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 import frappe
 from frappe import _
-from frappe.utils import get_link_to_form, today
+from frappe.utils import escape_html, get_link_to_form, today
 
 
 @frappe.whitelist(methods=["POST"])
@@ -17,9 +17,10 @@ def transaction_processing(
 
 	args = frappe._dict(frappe.parse_json(args) or {})
 
-	skipped_records = [d for d in deserialized_data if d.get("status") in ("On Hold", "Closed")]
+	statuses = get_statuses(from_doctype, deserialized_data)
+	skipped_records = [d for d in deserialized_data if statuses.get(d.get("name")) in ("On Hold", "Closed")]
 
-	deserialized_data = [d for d in deserialized_data if d.get("status") not in ("On Hold", "Closed")]
+	deserialized_data = [d for d in deserialized_data if d not in skipped_records]
 
 	# The checks above are doctype level and never consult User Permissions, so on their own they
 	# let a caller convert documents they cannot read — a company-restricted user could turn another
@@ -60,6 +61,16 @@ def transaction_processing(
 	)
 
 
+def get_statuses(doctype: str, rows: list) -> dict:
+	if not frappe.get_meta(doctype).has_field("status"):
+		return {}
+
+	names = [row.get("name") for row in rows if isinstance(row.get("name"), str)]
+	return dict(
+		frappe.get_all(doctype, filters={"name": ["in", names]}, fields=["name", "status"], as_list=True)
+	)
+
+
 @frappe.whitelist(methods=["POST"])
 def retry(date: str | None = None):
 	frappe.only_for("System Manager")
@@ -70,7 +81,7 @@ def retry(date: str | None = None):
 		failed_docs = frappe.db.get_all(
 			"Bulk Transaction Log Detail",
 			filters={"date": date, "transaction_status": "Failed", "retried": 0},
-			fields=["name", "transaction_name", "from_doctype", "to_doctype"],
+			fields=["name", "transaction_name", "from_doctype", "to_doctype", "creation"],
 		)
 		if not failed_docs:
 			frappe.msgprint(_("There are no Failed transactions"))
@@ -89,6 +100,10 @@ def retry(date: str | None = None):
 def retry_failed_transactions(failed_docs: list | None):
 	if failed_docs:
 		for log in failed_docs:
+			if succeeded_since(log):
+				update_log(log.name, "Failed", 1)
+				continue
+
 			try:
 				frappe.db.savepoint("before_creation_state")
 				task(log.transaction_name, log.from_doctype, log.to_doctype)
@@ -99,6 +114,22 @@ def retry_failed_transactions(failed_docs: list | None):
 				update_log(log.name, "Success", 1)
 
 
+def succeeded_since(log: dict) -> bool:
+	"""Whether a later run already created the target for this failed log's source document."""
+	return bool(
+		frappe.db.exists(
+			"Bulk Transaction Log Detail",
+			{
+				"transaction_name": log.transaction_name,
+				"from_doctype": log.from_doctype,
+				"to_doctype": log.to_doctype,
+				"transaction_status": "Success",
+				"modified": [">", log.creation],
+			},
+		)
+	)
+
+
 def update_log(log_name, status, retried, err=None):
 	frappe.db.set_value("Bulk Transaction Log Detail", log_name, "transaction_status", status)
 	frappe.db.set_value("Bulk Transaction Log Detail", log_name, "retried", retried)
@@ -107,7 +138,7 @@ def update_log(log_name, status, retried, err=None):
 
 
 def job(deserialized_data, from_doctype, to_doctype, args):
-	fail_count = 0
+	failed = []
 
 	if args:
 		# currently: flag-based transport to `task`
@@ -120,7 +151,7 @@ def job(deserialized_data, from_doctype, to_doctype, args):
 			task(doc_name, from_doctype, to_doctype)
 		except Exception:
 			frappe.db.rollback(save_point="before_creation_state")
-			fail_count += 1
+			failed.append(doc_name)
 			create_log(
 				doc_name,
 				str(frappe.get_traceback(with_context=True)),
@@ -132,7 +163,7 @@ def job(deserialized_data, from_doctype, to_doctype, args):
 		else:
 			create_log(doc_name, None, from_doctype, to_doctype, status="Success", log_date=str(date.today()))
 
-	show_job_status(fail_count, len(deserialized_data), to_doctype)
+	show_job_status(failed, len(deserialized_data), to_doctype)
 
 
 def task(doc_name, from_doctype, to_doctype):
@@ -212,30 +243,40 @@ def create_log(doc_name, e, from_doctype, to_doctype, status, log_date=None, res
 	transaction_log.save(ignore_permissions=True)
 
 
-def show_job_status(fail_count, deserialized_data_count, to_doctype):
-	if not fail_count:
+def show_job_status(failed: list[str], deserialized_data_count: int, to_doctype: str) -> None:
+	if not failed:
 		frappe.msgprint(
 			_("Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful").format(
 				to_doctype.lower().replace(" ", "-"), to_doctype
 			),
 			title="Successful",
 			indicator="green",
+			realtime=True,
 		)
-	elif fail_count != 0 and fail_count < deserialized_data_count:
+	elif len(failed) < deserialized_data_count:
 		frappe.msgprint(
 			_(
 				"""Creation of {0} partially successful.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
-			).format(to_doctype),
+			).format(to_doctype)
+			+ get_failed_list(failed),
 			title="Partially successful",
 			indicator="orange",
+			realtime=True,
 		)
 	else:
 		frappe.msgprint(
 			_(
 				"""Creation of {0} failed.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
-			).format(to_doctype),
+			).format(to_doctype)
+			+ get_failed_list(failed),
 			title="Failed",
 			indicator="red",
+			realtime=True,
 		)
+
+
+def get_failed_list(failed: list[str]) -> str:
+	items = "".join(f"<li>{frappe.bold(escape_html(name))}</li>" for name in failed)
+	return "<br><br>" + _("Could not be created from:") + f"<ul>{items}</ul>"
