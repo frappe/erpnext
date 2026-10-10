@@ -88,20 +88,31 @@ def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Compe
 	total_quotations = len(lost_quotations)
 	total_value = frappe.qb.from_(q).where(q.name.isin(lost_quotations)).select(Sum(q.base_net_total))
 
-	query = (
+	# distinct (quotation, reason) pairs so the same reason entered twice is counted once
+	pairs = (
 		frappe.qb.from_(q)
-		.select(
-			Coalesce(dimension[fieldname], _("Not Specified")),
-			Count(q.name).distinct(),
-			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
-			Round((Count(q.name).distinct() * 100.0 / total_quotations), 2),
-			Sum(q.base_net_total),
-			Round((Sum(q.base_net_total) / NullIf(total_value, 0) * 100), 2),
-		)
 		.left_join(dimension)
 		.on(dimension.parent == q.name)
 		.where(q.name.isin(lost_quotations))
-		.groupby(dimension[fieldname])
+		.select(
+			q.name.as_("quotation"),
+			q.base_net_total.as_("value"),
+			Coalesce(dimension[fieldname], _("Not Specified")).as_("reason"),
+		)
+		.distinct()
+	).as_("pairs")
+
+	query = (
+		frappe.qb.from_(pairs)
+		.select(
+			pairs.reason,
+			Count(pairs.quotation).distinct(),
+			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
+			Round((Count(pairs.quotation).distinct() * 100.0 / total_quotations), 2),
+			Sum(pairs.value),
+			Round((Sum(pairs.value) / NullIf(total_value, 0) * 100), 2),
+		)
+		.groupby(pairs.reason)
 	)
 
 	return query.run()
