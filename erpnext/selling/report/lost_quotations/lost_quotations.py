@@ -6,14 +6,15 @@ from typing import Literal
 import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
-from frappe.query_builder.functions import Coalesce, Count, Round, Sum
+from frappe.query_builder.functions import Coalesce, Count, NullIf, Round, Sum
 from frappe.utils.data import get_timespan_date_range
 
 
 def execute(filters=None):
 	columns = get_columns(filters.get("group_by"))
 	from_date, to_date = get_timespan_date_range(filters.get("timespan").lower())
-	data = get_data(filters.get("company"), from_date, to_date, filters.get("group_by"))
+	lost_quotations = get_lost_quotations(filters.get("company"), from_date, to_date)
+	data = get_data(lost_quotations, filters.get("group_by"))
 	return columns, data
 
 
@@ -53,7 +54,22 @@ def get_columns(group_by: Literal["Lost Reason", "Competitor"]):
 	]
 
 
-def get_data(company: str, from_date: str, to_date: str, group_by: Literal["Lost Reason", "Competitor"]):
+def get_lost_quotations(company: str, from_date: str, to_date: str) -> list[str]:
+	# get_list applies the user's permissions, so the figures only cover quotations they may see
+	return frappe.get_list(
+		"Quotation",
+		filters={
+			"status": "Lost",
+			"docstatus": DocStatus.submitted(),
+			"company": company,
+			"transaction_date": ["between", [from_date, to_date]],
+		},
+		pluck="name",
+		limit_page_length=0,
+	)
+
+
+def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Competitor"]):
 	"""Return quotation value grouped by lost reason or competitor"""
 	if group_by == "Lost Reason":
 		fieldname = "lost_reason"
@@ -64,32 +80,26 @@ def get_data(company: str, from_date: str, to_date: str, group_by: Literal["Lost
 	else:
 		frappe.throw(_("Invalid Group By"))
 
+	if not lost_quotations:
+		return []
+
 	q = frappe.qb.DocType("Quotation")
-
-	lost_quotation_condition = (
-		(q.status == "Lost")
-		& (q.docstatus == DocStatus.submitted())
-		& (q.transaction_date >= from_date)
-		& (q.transaction_date <= to_date)
-		& (q.company == company)
-	)
-
-	from_lost_quotations = frappe.qb.from_(q).where(lost_quotation_condition)
-	total_quotations = from_lost_quotations.select(Count(q.name))
-	total_value = from_lost_quotations.select(Sum(q.base_net_total))
+	total_quotations = len(lost_quotations)
+	total_value = frappe.qb.from_(q).where(q.name.isin(lost_quotations)).select(Sum(q.base_net_total))
 
 	query = (
 		frappe.qb.from_(q)
 		.select(
 			Coalesce(dimension[fieldname], _("Not Specified")),
 			Count(q.name).distinct(),
-			Round((Count(q.name).distinct() / total_quotations * 100), 2),
+			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
+			Round((Count(q.name).distinct() * 100.0 / total_quotations), 2),
 			Sum(q.base_net_total),
-			Round((Sum(q.base_net_total) / total_value * 100), 2),
+			Round((Sum(q.base_net_total) / NullIf(total_value, 0) * 100), 2),
 		)
 		.left_join(dimension)
 		.on(dimension.parent == q.name)
-		.where(lost_quotation_condition)
+		.where(q.name.isin(lost_quotations))
 		.groupby(dimension[fieldname])
 	)
 
