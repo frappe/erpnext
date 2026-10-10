@@ -1099,6 +1099,126 @@ class TestItem(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, item_doc.save)
 
+<<<<<<< HEAD
+=======
+	def test_variant_uom_mismatch_throws_error(self):
+		frappe.db.set_single_value("Item Variant Settings", "allow_different_uom", 0)
+
+		template_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "_Test Template UOM",
+				"item_name": "_Test Template UOM",
+				"item_group": "_Test Item Group",
+				"stock_uom": "Kg",
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [
+					{"attribute": "Test Size"},
+				],
+			}
+		).insert()
+
+		with self.assertRaises(frappe.ValidationError) as ve:
+			frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": "_Test Variant UOM",
+					"item_name": "_Test Variant UOM",
+					"item_group": "_Test Item Group",
+					"stock_uom": "Litre",
+					"is_stock_item": 1,
+					"variant_of": template_item.name,
+					"attributes": [
+						{"attribute": "Test Size", "attribute_value": "Small"},
+					],
+				}
+			).insert()
+
+		self.assertIn(
+			"must be same as in Template",
+			str(ve.exception),
+			msg="Different Variant UOM should not be allowed when `allow_different_uom` is disabled.",
+		)
+
+	def test_opening_stock_requires_serial_and_batch_settings(self):
+		setups = (
+			({"has_serial_no": 1}, "Serial Number Series"),
+			({"has_batch_no": 1, "create_new_batch": 0}, "Automatically Create New Batch"),
+		)
+		for properties, message in setups:
+			with self.subTest(properties=properties), self.assertRaisesRegex(frappe.ValidationError, message):
+				make_item(
+					properties={"is_stock_item": 1, "opening_stock": 5, "valuation_rate": 100, **properties}
+				)
+
+	def test_opening_stock_for_batch_without_series(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"opening_stock": 5,
+				"valuation_rate": 100,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			}
+		)
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"item_code": item.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(actual_qty, 5)
+
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_opening_stock_for_serial_batch(self):
+		items = {
+			"Test Opening Stock for Serial No": {
+				"has_serial_no": 1,
+				"opening_stock": 5,
+				"serial_no_series": "SN-TOPN-.####",
+				"valuation_rate": 100,
+			},
+			"Test Opening Stock for Batch No": {
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "BCH-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+			"Test Opening Stock for Serial and Batch No": {
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"opening_stock": 5,
+				"batch_number_series": "SN-BCH-TOPN-.####",
+				"serial_no_series": "BCH-SN-TOPN-.####",
+				"valuation_rate": 100,
+				"create_new_batch": 1,
+			},
+		}
+
+		for item_code, properties in items.items():
+			make_item(item_code, properties)
+
+			stock_entry_bundle = frappe.db.get_value(
+				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
+			)
+			self.assertFalse(stock_entry_bundle)
+
+			serial_and_batch_bundle = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{
+					"voucher_type": "Stock Reconciliation",
+					"is_cancelled": 0,
+					"item_code": item_code,
+				},
+				"serial_and_batch_bundle",
+			)
+			self.assertTrue(serial_and_batch_bundle)
+
+			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
+			self.assertEqual(abs(sabb_qty), properties["opening_stock"])
+
+>>>>>>> 19c81ce (fix(stock): validate opening stock serial and batch settings (#60319))
 	def test_cannot_unset_serialized_while_bundle_exists(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 			make_serial_batch_bundle,
