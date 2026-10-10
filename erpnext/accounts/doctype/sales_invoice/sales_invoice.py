@@ -520,6 +520,8 @@ class SalesInvoice(SellingController):
 		self.update_billed_qty_in_scio()
 
 		if self.is_return:
+			if self.return_against:
+				frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 			self.refresh_subscription_status()
 
 	def before_cancel(self):
@@ -609,6 +611,9 @@ class SalesInvoice(SellingController):
 			POSService(self).cancel_pos_invoice_credit_note_generated_during_sales_invoice_mode()
 
 		self.update_billed_qty_in_scio()
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
+
 		self.refresh_subscription_status()
 
 	def update_status_updater_args(self):
