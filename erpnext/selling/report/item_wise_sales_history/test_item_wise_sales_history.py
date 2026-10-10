@@ -9,6 +9,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import (
 	make_sales_order,
 )
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import execute
+from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -66,12 +67,11 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 			],
 		)
 
-		item_codes = {row["item_code"] for row in self.run_report(item_code="_Test Item 2")[1]}
-		self.assertEqual(item_codes, {"_Test Item 2"})
+		rows = self.run_report(item_code="_Test Item 2")[1]
+		self.assertEqual({row["item_code"] for row in rows}, {"_Test Item 2"})
 		# the filtered-out line of the same order must not leak in
-		self.assertTrue(
-			all(row["sales_order"] == so.name for row in self.run_report(item_code="_Test Item 2")[1])
-		)
+		own_rows = [row for row in rows if row["sales_order"] == so.name]
+		self.assertEqual({row["item_code"] for row in own_rows}, {"_Test Item 2"})
 
 	def test_customer_filter(self):
 		make_sales_order(customer="_Test Customer 1", transaction_date="2026-06-01")
@@ -112,12 +112,41 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 		self.assertEqual(row["amount"], 80000)  # 10 * 100 USD * 80
 
 	def test_chart_aggregates_amount_per_item(self):
-		make_sales_order(item_code="_Test Item", qty=2, rate=100, transaction_date="2026-06-01")
-		make_sales_order(item_code="_Test Item", qty=3, rate=100, transaction_date="2026-06-01")
+		# a fresh item keeps the chart total free of other orders in the test database
+		item = create_item("_Test Item Wise Sales History", is_stock_item=0).name
+		make_sales_order(item_code=item, qty=2, rate=100, transaction_date="2026-06-01")
+		make_sales_order(item_code=item, qty=3, rate=100, transaction_date="2026-06-01")
 
-		chart = self.run_report(item_code="_Test Item")[3]
+		chart = self.run_report(item_code=item)[3]
 		labels = chart["data"]["labels"]
 		values = chart["data"]["datasets"][0]["values"]
-		self.assertIn("_Test Item", labels)
+		self.assertIn(item, labels)
 		# 2*100 + 3*100 aggregated for the item
-		self.assertEqual(values[labels.index("_Test Item")], 500)
+		self.assertEqual(values[labels.index(item)], 500)
+
+	def test_report_runs_without_dates(self):
+		so = make_sales_order(transaction_date="2026-06-01")
+
+		data = execute(frappe._dict({"company": "_Test Company"}))[1]
+		self.assertIn(so.name, {row["sales_order"] for row in data})
+
+	def test_customer_group_taken_from_the_order(self):
+		so = make_sales_order(transaction_date="2026-06-01")
+		order_group = frappe.db.get_value("Sales Order", so.name, "customer_group")
+
+		new_group = next(
+			g
+			for g in frappe.get_all("Customer Group", filters={"is_group": 0}, pluck="name")
+			if g != order_group
+		)
+		frappe.db.set_value("Customer", so.customer, "customer_group", new_group)
+
+		self.assertEqual(self.so_row(so.name)["customer_group"], order_group)
+
+	def test_item_group_filter_includes_child_groups(self):
+		item_group = frappe.db.get_value("Item", "_Test Item", "item_group")
+		parent_group = frappe.db.get_value("Item Group", item_group, "parent_item_group")
+		so = make_sales_order(item_code="_Test Item", transaction_date="2026-06-01")
+
+		names = {row["sales_order"] for row in self.run_report(item_group=parent_group)[1]}
+		self.assertIn(so.name, names)
