@@ -2426,12 +2426,14 @@ class StockController(AccountsController):
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self):
 			item_based_reposting = frappe.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			if item_based_reposting:
-				create_item_wise_repost_entries(
+				repost_entries = create_item_wise_repost_entries(
 					voucher_type=self.doctype,
 					voucher_no=self.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
 					skip_unchanged_entries=True,
 				)
+				if force and not repost_entries and self.docstatus == 1:
+					create_accounting_repost_entry(self.doctype, self.name)
 			else:
 				create_repost_item_valuation_entry(args)
 
@@ -3351,6 +3353,23 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+def create_accounting_repost_entry(voucher_type, voucher_no):
+	repost_entry = frappe.new_doc("Repost Item Valuation")
+	repost_entry.based_on = "Transaction"
+	repost_entry.voucher_type = voucher_type
+	repost_entry.voucher_no = voucher_no
+	repost_entry.update(
+		frappe.db.get_value(
+			voucher_type, voucher_no, ["company", "posting_date", "posting_time"], as_dict=True
+		)
+	)
+	repost_entry.repost_only_accounting_ledgers = 1
+	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
+	repost_entry.submit()
+	return repost_entry
 
 
 def make_bundle_for_material_transfer(**kwargs):
