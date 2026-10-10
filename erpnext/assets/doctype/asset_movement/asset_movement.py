@@ -5,9 +5,13 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cstr, get_datetime, get_link_to_form
 
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+
+LOCATION_PURPOSES = ("Receipt", "Transfer", "Transfer and Issue")
+CUSTODIAN_PURPOSES = ("Issue", "Receipt", "Transfer and Issue")
 
 
 class AssetMovement(Document):
@@ -31,15 +35,23 @@ class AssetMovement(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_duplicate_assets()
 		for d in self.assets:
 			self.validate_asset(d)
 			self.validate_movement(d)
 			self.validate_transaction_date(d)
 
+	def validate_duplicate_assets(self):
+		seen_assets = set()
+		for d in self.assets:
+			if d.asset in seen_assets:
+				frappe.throw(_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset))
+			seen_assets.add(d.asset)
+
 	def validate_asset(self, d):
-		status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])
-		if self.purpose == "Transfer" and status in ("Draft", "Scrapped", "Sold"):
-			frappe.throw(_("{0} asset cannot be transferred").format(status))
+		status, company, docstatus = frappe.db.get_value("Asset", d.asset, ["status", "company", "docstatus"])
+		if docstatus != 1 or status in ("Scrapped", "Sold", "Capitalized"):
+			frappe.throw(_("Asset {0} is {1} and cannot be moved").format(d.asset, _(status)))
 
 		if company != self.company:
 			frappe.throw(_("Asset {0} does not belong to company {1}").format(d.asset, self.company))
@@ -122,41 +134,54 @@ class AssetMovement(Document):
 	def set_latest_location_and_custodian_in_asset(self):
 		for d in self.assets:
 			current_location, current_employee = self.get_latest_location_and_custodian(d.asset)
-			self.update_asset_location_and_custodian(d.asset, current_location, current_employee)
-			self.log_asset_activity(d.asset, current_location, current_employee)
+			changed_location, changed_employee = self.update_asset_location_and_custodian(
+				d.asset, current_location, current_employee
+			)
+			self.log_asset_activity(d.asset, changed_location, changed_employee)
 
 	def get_latest_location_and_custodian(self, asset):
-		current_location, current_employee = "", ""
+		"""Location and custodian each come from the latest submitted movement that sets them."""
+		asm = frappe.qb.DocType("Asset Movement")
+		asm_item = frappe.qb.DocType("Asset Movement Item")
+		location = self.get_latest_movement_value(
+			asset, asm_item.target_location, asm.purpose.isin(LOCATION_PURPOSES)
+		)
+		employee = self.get_latest_movement_value(
+			asset,
+			asm_item.to_employee,
+			asm.purpose.isin(CUSTODIAN_PURPOSES) | (IfNull(asm_item.to_employee, "") != ""),
+		)
+		return location, employee
 
-		# latest entry corresponds to current document's location, employee when transaction date > previous dates
-		# In case of cancellation it corresponds to previous latest document's location, employee
+	def get_latest_movement_value(self, asset: str, field, condition) -> str:
 		asm = frappe.qb.DocType("Asset Movement")
 		asm_item = frappe.qb.DocType("Asset Movement Item")
 		latest_movement_entry = (
 			frappe.qb.from_(asm_item)
 			.inner_join(asm)
 			.on(asm_item.parent == asm.name)
-			.select(asm_item.target_location, asm_item.to_employee)
+			.select(field)
 			.where((asm_item.asset == asset) & (asm.company == self.company) & (asm.docstatus == 1))
+			.where(condition)
 			.orderby(asm.transaction_date, order=frappe.qb.desc)
 			.orderby(asm.name, order=frappe.qb.desc)
 			.limit(1)
 			.run()
 		)
-
-		if latest_movement_entry:
-			current_location = latest_movement_entry[0][0]
-			current_employee = latest_movement_entry[0][1]
-
-		return current_location, current_employee
+		return latest_movement_entry[0][0] if latest_movement_entry else ""
 
 	def update_asset_location_and_custodian(self, asset_id, location, employee):
 		asset = frappe.get_doc("Asset", asset_id)
+		changed_location, changed_employee = "", ""
 
-		if cstr(employee) != asset.custodian:
+		if cstr(employee) != cstr(asset.custodian):
 			frappe.db.set_value("Asset", asset_id, "custodian", cstr(employee))
+			changed_employee = employee
 		if location and location != asset.location:
 			frappe.db.set_value("Asset", asset_id, "location", location)
+			changed_location = location
+
+		return changed_location, changed_employee
 
 	def log_asset_activity(self, asset_id, location, employee):
 		if location and employee:
