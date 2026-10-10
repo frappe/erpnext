@@ -514,7 +514,10 @@ class AccountsController(TransactionBase):
 			).run()
 
 	def on_trash(self):
-		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+		from erpnext.accounts.utils import (
+			CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
+			get_linked_system_journals,
+		)
 
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
@@ -522,8 +525,13 @@ class AccountsController(TransactionBase):
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
-			# delete linked exchange gain/loss journal
-			delete_exchange_gain_loss_journal(self)
+			for name in get_linked_system_journals(
+				self.doctype,
+				self.name,
+				["Exchange Gain Or Loss", CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE],
+				docstatus=2,
+			):
+				frappe.delete_doc("Journal Entry", name, force=1, ignore_permissions=True)
 
 			ple = frappe.qb.DocType("Payment Ledger Entry")
 			frappe.qb.from_(ple).delete().where(
@@ -1204,11 +1212,11 @@ class AccountsController(TransactionBase):
 				)
 				args = frappe._dict(
 					{
-						"voucher_type": d.reference_type,
-						"voucher_no": d.reference_name,
-						"voucher_detail_no": d.reference_row,
-						"against_voucher_type": self.doctype,
-						"against_voucher": self.name,
+						"writable_voucher_type": d.reference_type,
+						"writable_voucher_no": d.reference_name,
+						"writable_voucher_detail_no": d.reference_row,
+						"non_writable_voucher_type": self.doctype,
+						"non_writable_voucher_no": self.name,
 						"account": party_account,
 						"party_type": party_type,
 						"party": party,
@@ -1246,49 +1254,26 @@ class AccountsController(TransactionBase):
 						x.update({dim.fieldname: self.get(dim.fieldname)})
 			reconcile_against_document(lst, active_dimensions=active_dimensions)
 
-	def cancel_system_generated_credit_debit_notes(self):
-		# Cancel 'Credit/Debit' Note Journal Entries, if found.
-		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			voucher_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
-			journals = frappe.db.get_all(
-				"Journal Entry",
-				filters={
-					"is_system_generated": 1,
-					"reference_type": self.doctype,
-					"reference_name": self.name,
-					"voucher_type": voucher_type,
-					"docstatus": 1,
-				},
-				pluck="name",
-			)
-			for x in journals:
-				frappe.get_doc("Journal Entry", x).cancel()
-
 	def on_cancel(self):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
 			remove_from_bank_transaction,
 		)
-		from erpnext.accounts.utils import (
-			cancel_common_party_journal,
-			cancel_exchange_gain_loss_journal,
-			unlink_ref_doc_from_payment_entries,
-		)
+		from erpnext.accounts.utils import unwind_reconciliation
 
 		remove_from_bank_transaction(self.doctype, self.name)
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
-			self.cancel_system_generated_credit_debit_notes()
-
-			# Cancel Exchange Gain/Loss Journal before unlinking
-			cancel_exchange_gain_loss_journal(self)
-			cancel_common_party_journal(self)
-
-			if frappe.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
-				unlink_ref_doc_from_payment_entries(self)
+			unwind_reconciliation(
+				self,
+				cancel_common_party=True,
+				unlink=frappe.get_single_value(
+					"Accounts Settings", "unlink_payment_on_cancellation_of_invoice"
+				),
+			)
 
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.get_single_value("Accounts Settings", "unlink_advance_payment_on_cancelation_of_order"):
-				unlink_ref_doc_from_payment_entries(self)
+				unwind_reconciliation(self)
 
 			if self.doctype == "Sales Order":
 				self.unlink_ref_doc_from_po()

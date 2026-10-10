@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+from erpnext.accounts.utils import CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE
 
 TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
@@ -280,6 +281,10 @@ class PartyLedgerSummaryReport:
 				# Cache the party data reference to avoid repeated dictionary lookups
 				party_data = self.party_data[gle.party]
 
+				# bridges move balance between the party's own entries; closing already has them
+				if gle.voucher_no in self.bridge_journals:
+					continue
+
 				# Check if this is a direct return invoice (most specific condition first)
 				if gle.voucher_no in self.return_invoices:
 					party_data.return_amount -= amount
@@ -356,7 +361,7 @@ class PartyLedgerSummaryReport:
 				filters={
 					"company": self.filters.get("company"),
 					"docstatus": 1,
-					"voucher_type": ("in", ["Credit Note", "Debit Note"]),
+					"voucher_type": ("in", ["Credit Note", "Debit Note", "Reconciliation Journal"]),
 					"is_system_generated": 1,
 					"posting_date": ["between", [self.filters.get("from_date"), self.filters.get("to_date")]],
 				},
@@ -375,6 +380,24 @@ class PartyLedgerSummaryReport:
 		query = self.prepare_conditions(query)
 
 		self.gl_entries = query.run(as_dict=True)
+		self.bridge_journals = self.get_bridge_journals()
+
+	def get_bridge_journals(self):
+		"""Reconciliation bridges in the period: transfers inside the party's own balance,
+		not invoicing or payment."""
+		return set(
+			frappe.get_all(
+				"Journal Entry",
+				filters={
+					"company": self.filters.get("company"),
+					"docstatus": 1,
+					"voucher_type": CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
+					"is_system_generated": 1,
+					"posting_date": ["between", [self.filters.get("from_date"), self.filters.get("to_date")]],
+				},
+				pluck="name",
+			)
+		)
 
 	def prepare_conditions(self, query):
 		gle = qb.DocType("GL Entry")

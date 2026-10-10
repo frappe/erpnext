@@ -94,7 +94,7 @@ def make_exchange_gain_loss_journal(
 						arg.get("referenced_row"),
 					):
 						posting_date = arg.get("difference_posting_date") or frappe.db.get_value(
-							arg.voucher_type, arg.voucher_no, "posting_date"
+							arg.writable_voucher_type, arg.writable_voucher_no, "posting_date"
 						)
 						je = create_gain_loss_journal(
 							doc.company,
@@ -106,8 +106,8 @@ def make_exchange_gain_loss_journal(
 							difference_amount,
 							dr_or_cr,
 							reverse_dr_or_cr,
-							arg.get("against_voucher_type"),
-							arg.get("against_voucher"),
+							arg.get("non_writable_voucher_type"),
+							arg.get("non_writable_voucher_no"),
 							arg.get("idx"),
 							doc.doctype,
 							doc.name,
@@ -153,8 +153,15 @@ def make_exchange_gain_loss_journal(
 					.run()
 				)
 
+		# journals key on the reference row's `name`; ones booked before upgrading used its idx
+		booked_rows = set(booked)
+
 		for d in gain_loss_to_book:
-			if d.exchange_gain_loss and ((d.reference_doctype, d.reference_name, str(d.idx)) not in booked):
+			keys = {
+				(d.reference_doctype, d.reference_name, d.name),
+				(d.reference_doctype, d.reference_name, str(d.idx)),
+			}
+			if d.exchange_gain_loss and not keys & booked_rows:
 				if doc.book_advance_payments_in_separate_party_account:
 					party_account = d.account
 				else:
@@ -183,10 +190,10 @@ def make_exchange_gain_loss_journal(
 					reverse_dr_or_cr,
 					d.reference_doctype,
 					d.reference_name,
-					d.idx,
+					d.name,
 					doc.doctype,
 					doc.name,
-					d.idx,
+					d.name,
 					doc.cost_center,
 					dimensions_dict,
 					doc.project,

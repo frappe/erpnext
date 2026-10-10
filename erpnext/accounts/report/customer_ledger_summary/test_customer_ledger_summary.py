@@ -164,23 +164,27 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 
 		pr.get_unreconciled_entries()
 
-		invoices = [invoice.as_dict() for invoice in pr.invoices if invoice.invoice_number == si.name]
-		payments = [payment.as_dict() for payment in pr.payments if payment.reference_name == cr_note.name]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		# Customer: SI in to_receive, CN in to_pay.
+		to_receive_subset = [r.as_dict() for r in pr.to_receive if r.voucher_no == si.name]
+		to_pay_subset = [r.as_dict() for r in pr.to_pay if r.voucher_no == cr_note.name]
+		pr.allocate_entries(to_receive=to_receive_subset, to_pay=to_pay_subset)
 		pr.reconcile()
 
+		# Post-refactor, reconciling an invoice against a note mints a system-generated
+		# "Reconciliation Journal" bridge (the old "Credit Note"/"Debit Note" JE is gone).
 		system_generated_journal = frappe.db.get_all(
 			"Journal Entry",
 			filters={
 				"docstatus": 1,
-				"reference_type": si.doctype,
-				"reference_name": si.name,
-				"voucher_type": "Credit Note",
+				"company": si.company,
+				"voucher_type": "Reconciliation Journal",
 				"is_system_generated": True,
 			},
 			fields=["name"],
 		)
 		self.assertEqual(len(system_generated_journal), 1)
+		# the bridge moves balance between the party's own entries, so it is neither
+		# invoiced nor paid
 		expected = {
 			"party": "_Test Customer",
 			"customer_name": "_Test Customer",

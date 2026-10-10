@@ -1,12 +1,10 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form
+from frappe.utils import get_link_to_form, getdate
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -25,18 +23,20 @@ class ProcessPaymentReconciliation(Document):
 		cost_center: DF.Link | None
 		default_advance_account: DF.Link | None
 		error_log: DF.LongText | None
+		from_date: DF.Date | None
 		from_invoice_date: DF.Date | None
 		from_payment_date: DF.Date | None
 		party: DF.DynamicLink
 		party_type: DF.Link
-		receivable_payable_account: DF.Link
+		receivable_payable_account: DF.Link | None
 		status: DF.Literal[
 			"", "Queued", "Running", "Paused", "Completed", "Partially Reconciled", "Failed", "Cancelled"
 		]
+		to_date: DF.Date | None
 		to_invoice_date: DF.Date | None
 		to_payment_date: DF.Date | None
-
 	# end: auto-generated types
+
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
@@ -96,6 +96,59 @@ def get_reconciled_count(docname: str | None = None) -> float:
 	return current_status
 
 
+class AllocationLog:
+	"""Moves Payment Reconciliation allocation rows in and out of the Process PR log.
+
+	The log keeps upstream's fields: `reference_*` is the party's payment, `invoice_*`
+	the other side. Accounts, parties and rates are not stored;
+	`validate_allocation` rebuilds them from the ledger before each batch is reconciled.
+	"""
+
+	CARRIED = (
+		"allocated_amount",
+		"unreconciled_amount",
+		"amount",
+		"is_advance",
+		"difference_amount",
+		"difference_account",
+		"gain_loss_posting_date",
+		"exchange_rate",
+		"currency",
+	)
+
+	def __init__(self, pr):
+		from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import payment_side
+
+		self.paid = payment_side(pr.party_type)
+		self.other = "to_receive" if self.paid == "to_pay" else "to_pay"
+
+	def to_log(self, allocation, log_name):
+		return {
+			"parenttype": "Process Payment Reconciliation Log",
+			"parent": log_name,
+			"name": None,
+			"reconciled": False,
+			"reference_type": allocation.get(f"{self.paid}_voucher_type"),
+			"reference_name": allocation.get(f"{self.paid}_voucher_no"),
+			"reference_row": allocation.get(f"{self.paid}_voucher_row"),
+			"invoice_type": allocation.get(f"{self.other}_voucher_type"),
+			"invoice_number": allocation.get(f"{self.other}_voucher_no"),
+			"invoice_row": allocation.get(f"{self.other}_voucher_row"),
+			**{field: allocation.get(field) for field in self.CARRIED},
+		}
+
+	def to_allocation(self, log_row):
+		return {
+			f"{self.paid}_voucher_type": log_row.reference_type,
+			f"{self.paid}_voucher_no": log_row.reference_name,
+			f"{self.paid}_voucher_row": log_row.reference_row,
+			f"{self.other}_voucher_type": log_row.invoice_type,
+			f"{self.other}_voucher_no": log_row.invoice_number,
+			f"{self.other}_voucher_row": log_row.get("invoice_row"),
+			**{field: log_row.get(field) for field in self.CARRIED},
+		}
+
+
 def get_pr_instance(doc: str):
 	process_payment_reconciliation = frappe.get_doc("Process Payment Reconciliation", doc)
 
@@ -106,19 +159,27 @@ def get_pr_instance(doc: str):
 		"party",
 		"receivable_payable_account",
 		"default_advance_account",
-		"bank_cash_account",
+		"from_date",
+		"to_date",
 		"cost_center",
-		"from_invoice_date",
-		"to_invoice_date",
-		"from_payment_date",
-		"to_payment_date",
 	]
 	d = {}
 	for field in fields:
 		d[field] = process_payment_reconciliation.get(field)
+
+	# records saved before the refactor kept separate invoice and payment dates: take
+	# the range covering the ones that were set
+	def covering(fields, pick):
+		values = [getdate(v) for v in (process_payment_reconciliation.get(field) for field in fields) if v]
+		return pick(values) if values else None
+
+	if not d["from_date"]:
+		d["from_date"] = covering(("from_invoice_date", "from_payment_date"), min)
+	if not d["to_date"]:
+		d["to_date"] = covering(("to_invoice_date", "to_payment_date"), max)
+
 	pr.update(d)
-	pr.invoice_limit = 1000
-	pr.payment_limit = 1000
+	pr.fetch_limit = 1000
 	return pr
 
 
@@ -220,7 +281,8 @@ def trigger_reconciliation_for_queued_docs():
 		unique_filters = set()
 		queue_size = frappe.get_single_value("Accounts Settings", "reconciliation_queue_size") or 5
 
-		fields = ["company", "party_type", "party", "receivable_payable_account", "default_advance_account"]
+		# one job per party: a run can fetch across all the party's accounts
+		fields = ["company", "party_type", "party"]
 
 		def get_filters_as_tuple(fields, doc):
 			return tuple(doc.get(x) or "" for x in fields)
@@ -228,7 +290,9 @@ def trigger_reconciliation_for_queued_docs():
 		for x in all_queued:
 			doc = frappe.get_doc("Process Payment Reconciliation", x)
 			filters = get_filters_as_tuple(fields, doc)
-			if filters not in unique_filters:
+			if filters not in unique_filters and not is_any_doc_running(
+				{field: doc.get(field) for field in [*fields, "receivable_payable_account"]}
+			):
 				unique_filters.add(filters)
 				docs_to_trigger.append(doc.name)
 			if len(docs_to_trigger) == queue_size:
@@ -350,23 +414,14 @@ def fetch_and_allocate(doc: str) -> None:
 				pr = get_pr_instance(doc)
 				pr.get_unreconciled_entries()
 
-				if len(pr.invoices) > 0 and len(pr.payments) > 0:
-					invoices = [x.as_dict() for x in pr.invoices]
-					payments = [x.as_dict() for x in pr.payments]
-					pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+				if len(pr.to_receive) > 0 and len(pr.to_pay) > 0:
+					to_receive = [x.as_dict() for x in pr.to_receive]
+					to_pay = [x.as_dict() for x in pr.to_pay]
+					pr.allocate_entries(frappe._dict({"to_receive": to_receive, "to_pay": to_pay}))
 
+					allocation_log = AllocationLog(pr)
 					for x in pr.get("allocation"):
-						reconcile_log.append(
-							"allocations",
-							x.as_dict().update(
-								{
-									"parenttype": "Process Payment Reconciliation Log",
-									"parent": reconcile_log.name,
-									"name": None,
-									"reconciled": False,
-								}
-							),
-						)
+						reconcile_log.append("allocations", allocation_log.to_log(x, reconcile_log.name))
 				reconcile_log.allocated = True
 				reconcile_log.total_allocations = len(reconcile_log.get("allocations"))
 				reconcile_log.reconciled_entries = 0
@@ -413,13 +468,19 @@ def reconcile(doc: None | str = None) -> None:
 
 					pr = get_pr_instance(doc)
 
-					# pass allocation to PR instance
+					allocation_log = AllocationLog(pr)
 					for x in allocations:
-						pr.append("allocation", x)
+						pr.append("allocation", allocation_log.to_allocation(x))
 
 					skip_ref_details_update_for_pe = check_multi_currency(pr)
 					# reconcile
-					pr.reconcile_allocations(skip_ref_details_update_for_pe=skip_ref_details_update_for_pe)
+					from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
+						ReconcileRouter,
+					)
+
+					# allocations were made earlier; refuse ones the ledger no longer backs
+					pr.validate_allocation()
+					ReconcileRouter(pr).execute(skip_ref_details_update_for_pe=skip_ref_details_update_for_pe)
 
 					# If Payment Entry, update details only for newly linked references
 					# This is for performance
@@ -530,11 +591,12 @@ def check_multi_currency(pr_doc):
 		return currency[0].account_currency if currency else None
 
 	for allocation in pr_doc.allocation:
-		reference_currency = get_account_currency(allocation.reference_type, allocation.reference_name)
+		pay_currency = get_account_currency(allocation.to_pay_voucher_type, allocation.to_pay_voucher_no)
+		recv_currency = get_account_currency(
+			allocation.to_receive_voucher_type, allocation.to_receive_voucher_no
+		)
 
-		invoice_currency = get_account_currency(allocation.invoice_type, allocation.invoice_number)
-
-		if reference_currency != invoice_currency:
+		if pay_currency != recv_currency:
 			return True
 
 	return False
@@ -542,24 +604,34 @@ def check_multi_currency(pr_doc):
 
 @frappe.whitelist()
 def is_any_doc_running(for_filter: str | dict | None = None) -> str | None:
-	running_doc = None
-	if for_filter:
-		for_filter = frappe.parse_json(for_filter)
+	"""Find a running/paused Process PR for the same party.
 
-		running_doc = frappe.db.get_value(
-			"Process Payment Reconciliation",
-			filters={
-				"docstatus": 1,
-				"status": ["in", ["Running", "Paused"]],
-				"company": for_filter.get("company"),
-				"party_type": for_filter.get("party_type"),
-				"party": for_filter.get("party"),
-				"receivable_payable_account": for_filter.get("receivable_payable_account"),
-			},
-			fieldname="name",
-		)
-	else:
-		running_doc = frappe.db.get_value(
+	Cross-account semantics: if `for_filter.receivable_payable_account` is None or empty
+	("*" wildcard intent), match ANY running job for the party — that catches both
+	per-account jobs (legacy) and cross-account jobs (new). If a specific account is
+	supplied, match that exact account OR any cross-account job (which would conflict).
+	This prevents two jobs from operating on overlapping vouchers.
+	"""
+	if not for_filter:
+		return frappe.db.get_value(
 			"Process Payment Reconciliation", filters={"docstatus": 1, "status": "Running"}
 		)
-	return running_doc
+
+	for_filter = frappe.parse_json(for_filter)
+
+	filters = {
+		"docstatus": 1,
+		"status": ["in", ["Running", "Paused"]],
+		"company": for_filter.get("company"),
+		"party_type": for_filter.get("party_type"),
+		"party": for_filter.get("party"),
+	}
+
+	requested_account = for_filter.get("receivable_payable_account")
+	if requested_account:
+		# Match either same account OR cross-account (blank) job — both would conflict.
+		filters["receivable_payable_account"] = ["in", [requested_account, "", None]]
+	# else: requested job is cross-account → matches any running job for the party
+	# (no `receivable_payable_account` filter added).
+
+	return frappe.db.get_value("Process Payment Reconciliation", filters=filters, fieldname="name")

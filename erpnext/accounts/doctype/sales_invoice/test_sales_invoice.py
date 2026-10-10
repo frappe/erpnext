@@ -4675,12 +4675,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		pr.default_advance_account = advance_account
 		pr.get_unreconciled_entries()
 
-		# allocate some more of the same advance
-		# self.assertEqual(len(pr.invoices), 1)
-		# self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices if x.get("invoice_number") == si.name]
-		payments = [x.as_dict() for x in pr.payments if x.get("reference_name") == pe.name]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		# allocate some more of the same advance — Customer: SI in to_receive, PE in to_pay.
+		to_receive_subset = [r.as_dict() for r in pr.to_receive if r.voucher_no == si.name]
+		to_pay_subset = [r.as_dict() for r in pr.to_pay if r.voucher_no == pe.name]
+		pr.allocate_entries(to_receive=to_receive_subset, to_pay=to_pay_subset)
 		pr.allocation[0].allocated_amount = 300
 		pr.reconcile()
 
