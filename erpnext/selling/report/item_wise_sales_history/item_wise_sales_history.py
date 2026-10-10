@@ -154,7 +154,7 @@ def get_data(filters):
 			"transaction_date": record.get("transaction_date"),
 			"customer": record.get("customer"),
 			"customer_name": customer_record.get("customer_name"),
-			"customer_group": customer_record.get("customer_group"),
+			"customer_group": record.get("customer_group"),
 			"territory": record.get("territory"),
 			"project": record.get("project"),
 			"delivered_quantity": flt(record.get("delivered_qty")),
@@ -168,12 +168,10 @@ def get_data(filters):
 
 
 def get_customer_details():
-	details = frappe.get_all("Customer", fields=["name", "customer_name", "customer_group"])
+	details = frappe.get_all("Customer", fields=["name", "customer_name"])
 	customer_details = {}
 	for d in details:
-		customer_details.setdefault(
-			d.name, frappe._dict({"customer_name": d.customer_name, "customer_group": d.customer_group})
-		)
+		customer_details.setdefault(d.name, frappe._dict({"customer_name": d.customer_name}))
 	return customer_details
 
 
@@ -196,6 +194,7 @@ def get_sales_order_details(company_list, filters):
 		.select(
 			db_so.name,
 			db_so.customer,
+			db_so.customer_group,
 			db_so.transaction_date,
 			db_so.territory,
 			db_so.project,
