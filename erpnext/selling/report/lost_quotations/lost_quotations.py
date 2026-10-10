@@ -102,17 +102,35 @@ def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Compe
 		.distinct()
 	).as_("pairs")
 
-	query = (
+	reasons_per_quotation = (
 		frappe.qb.from_(pairs)
+		.select(pairs.quotation, Count(pairs.reason).as_("reasons"))
+		.groupby(pairs.quotation)
+	).as_("reasons_per_quotation")
+
+	# split each quotation's value evenly across its distinct reasons so shares sum to the lost total
+	split = (
+		frappe.qb.from_(pairs)
+		.join(reasons_per_quotation)
+		.on(pairs.quotation == reasons_per_quotation.quotation)
 		.select(
 			pairs.reason,
-			Count(pairs.quotation).distinct(),
-			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
-			Round((Count(pairs.quotation).distinct() * 100.0 / total_quotations), 2),
-			Sum(pairs.value),
-			Round((Sum(pairs.value) / NullIf(total_value, 0) * 100), 2),
+			pairs.quotation,
+			(pairs.value / reasons_per_quotation.reasons).as_("value"),
 		)
-		.groupby(pairs.reason)
+	).as_("split")
+
+	query = (
+		frappe.qb.from_(split)
+		.select(
+			split.reason,
+			Count(split.quotation).distinct(),
+			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
+			Round((Count(split.quotation).distinct() * 100.0 / total_quotations), 2),
+			Sum(split.value),
+			Round((Sum(split.value) / NullIf(total_value, 0) * 100), 2),
+		)
+		.groupby(split.reason)
 	)
 
 	return query.run()
