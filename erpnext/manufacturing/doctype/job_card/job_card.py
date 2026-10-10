@@ -1258,7 +1258,10 @@ class JobCard(Document):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 		precision = self.precision("total_completed_qty")
 		if self.finished_good and self.docstatus == 1:
-			if flt(self.manufactured_qty + self.process_loss_qty, precision) >= self.get_qty_to_produce():
+			if (
+				flt(flt(self.manufactured_qty) + flt(self.process_loss_qty), precision)
+				>= self.get_qty_to_produce()
+			):
 				self.status = "Completed"
 			elif self.transferred_qty > 0 or self.skip_material_transfer:
 				self.status = "Work In Progress"
@@ -1288,7 +1291,7 @@ class JobCard(Document):
 			if self.time_logs:
 				self.status = "Work In Progress"
 
-			completed_qty = flt(self.total_completed_qty + self.process_loss_qty, precision)
+			completed_qty = flt(flt(self.total_completed_qty) + flt(self.process_loss_qty), precision)
 			if self.docstatus == 1 and (self.get_qty_to_produce() <= completed_qty or not self.items):
 				self.status = "Completed"
 
