@@ -313,9 +313,8 @@ class LandedCostVoucher(Document):
 				)
 				total_charges += item.applicable_charges
 
-			if diff := flt(self.total_taxes_and_charges - total_charges, precision):
-				largest_item = max(reversed(items), key=lambda item: flt(item.get(based_on_field)))
-				largest_item.applicable_charges = flt(largest_item.applicable_charges + diff, precision)
+			diff = flt(self.total_taxes_and_charges - total_charges, precision)
+			absorb_rounding_difference(items, diff, precision, self.total_taxes_and_charges)
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
@@ -629,3 +628,15 @@ def get_custom_dimension_overrides(entry):
 		for dimension, value in (entry.dimensions or {}).items()
 		if value and dimension not in ("cost_center", "project")
 	}
+
+
+def absorb_rounding_difference(items, diff, precision, total):
+	sign = -1 if flt(total) < 0 else 1
+	for item in reversed(items):
+		if not diff:
+			break
+
+		share = flt(item.applicable_charges) * sign
+		adjustment = diff if diff * sign > 0 else sign * max(diff * sign, -share)
+		item.applicable_charges = flt(flt(item.applicable_charges) + adjustment, precision)
+		diff = flt(diff - adjustment, precision)
