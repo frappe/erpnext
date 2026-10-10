@@ -752,6 +752,33 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		self.assertEqual(flt(lcv.items[0].applicable_charges, 2), 41.07)
 		self.assertEqual(flt(lcv.items[2].applicable_charges, 2), 41.08)
 
+	def test_landed_cost_remainder_never_turns_an_item_negative(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=1,
+			rate=100,
+			do_not_save=True,
+		)
+		pr.items[0].cost_center = "Main - TCP1"
+		for rate in (100, 100, 1):
+			pr.append(
+				"items",
+				{
+					"item_code": "_Test Item",
+					"warehouse": "Stores - TCP1",
+					"cost_center": "Main - TCP1",
+					"qty": 1,
+					"rate": rate,
+				},
+			)
+		pr.submit()
+
+		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, 0.2)
+
+		self.assertEqual([flt(item.applicable_charges, 2) for item in lcv.items], [0.07, 0.07, 0.06, 0.0])
+
 	def test_multiple_landed_cost_voucher_against_pr(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
