@@ -38,6 +38,7 @@
   "serial_and_batch_reservation_section",
   "reservation_based_on",
   "sb_entries",
+  "source_batches",
   "section_break_3vb3",
   "company",
   "column_break_jbyr",
@@ -261,6 +262,16 @@
    "read_only_depends_on": "eval: (doc.delivered_qty > 0)"
   },
   {
+   "depends_on": "eval: doc.source_batches && doc.source_batches.length",
+   "fieldname": "source_batches",
+   "fieldtype": "Table",
+   "label": "Source Batches",
+   "no_copy": 1,
+   "options": "Stock Reservation Source",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "serial_and_batch_reservation_section",
    "fieldtype": "Tab Break",
    "label": "Serial and Batch Reservation"
@@ -344,7 +355,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-05 11:46:28.992976",
+ "modified": "2026-10-07 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

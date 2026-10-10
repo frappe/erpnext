@@ -25,6 +25,9 @@ class StockReservationEntry(Document):
 		from frappe.types import DF
 
 		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import SerialandBatchEntry
+		from erpnext.stock.doctype.stock_reservation_source.stock_reservation_source import (
+			StockReservationSource,
+		)
 
 		amended_from: DF.Link | None
 		available_qty: DF.Float
@@ -49,6 +52,7 @@ class StockReservationEntry(Document):
 		reservation_based_on: DF.Literal["Qty", "Serial and Batch"]
 		reserved_qty: DF.Float
 		sb_entries: DF.Table[SerialandBatchEntry]
+		source_batches: DF.Table[StockReservationSource]
 		status: DF.Literal[
 			"Draft",
 			"Partially Reserved",
@@ -165,6 +169,8 @@ class StockReservationEntry(Document):
 				)
 			).run(as_list=True)[0][0] or 0
 
+			serial_batch_data = self.get_serial_batch_entries()
+			source_batch_qty = self.get_source_batch_qty()
 			sres = self.get_from_voucher_reservation_entries()
 			for row in sres:
 				if delivered_qty < 0.0:
@@ -173,8 +179,11 @@ class StockReservationEntry(Document):
 				status = "Reserved"
 
 				if self.has_batch_no or self.has_serial_no:
-					serial_batch_data = self.get_serial_batch_entries()
-					update_serial_batch_delivered_qty(serial_batch_data, row.name, is_cancelled=True)
+					update_serial_batch_delivered_qty(
+						get_serial_batch_to_reverse(serial_batch_data, source_batch_qty, row.name),
+						row.name,
+						is_cancelled=True,
+					)
 
 				if row.reserved_qty > delivered_qty:
 					frappe.db.set_value(
@@ -192,6 +201,14 @@ class StockReservationEntry(Document):
 					)
 
 					delivered_qty -= row.reserved_qty
+
+	def get_source_batch_qty(self) -> dict:
+		"""Batch qty taken from each source reservation when this entry was transferred."""
+		source_batch_qty = defaultdict(lambda: defaultdict(float))
+		for row in self.source_batches:
+			source_batch_qty[row.source_reservation_entry][row.batch_no] += row.qty
+
+		return source_batch_qty
 
 	def get_serial_batch_entries(self):
 		serial_nos = []
@@ -1439,6 +1456,7 @@ class StockReservation:
 								"serial_nos": [],
 								"sre_names": defaultdict(float),
 								"batches": defaultdict(float),
+								"sre_batches": {},
 								"against_row": row,
 								"company": self.doc.company,
 							}
@@ -1457,6 +1475,9 @@ class StockReservation:
 				entries_to_reserve[key]["qty_to_reserve"] += qty_to_reserve
 				if row.has_batch_no:
 					entries_to_reserve[key]["batches"][row.batch_no] += qty_to_reserve
+					entries_to_reserve[key]["sre_batches"].setdefault(row.name, defaultdict(float))[
+						row.batch_no
+					] += qty_to_reserve
 
 				if row.has_serial_no:
 					entries_to_reserve[key]["serial_nos"].append(row.serial_no)
@@ -1516,7 +1537,9 @@ class StockReservation:
 			query.run()
 
 			if data.serial_nos or data.batches:
-				update_serial_batch_delivered_qty(data, name)
+				update_serial_batch_delivered_qty(
+					frappe._dict(serial_nos=data.serial_nos, batches=data.sre_batches.get(name)), name
+				)
 
 	def make_stock_reservation_entry(self, row):
 		fields = [
@@ -1544,6 +1567,12 @@ class StockReservation:
 		sre.reservation_based_on = against_row.reservation_based_on
 		sre.has_serial_no = against_row.has_serial_no
 		sre.has_batch_no = against_row.has_batch_no
+		for source_reservation_entry, batches in (row.get("sre_batches") or {}).items():
+			for batch_no, qty in batches.items():
+				sre.append(
+					"source_batches",
+					{"source_reservation_entry": source_reservation_entry, "batch_no": batch_no, "qty": qty},
+				)
 
 		if row.serial_nos:
 			for serial_no in row.serial_nos:
@@ -2031,6 +2060,49 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 			)
 
 			query.run()
+
+
+def get_serial_batch_to_reverse(
+	serial_batch_data: frappe._dict, source_batch_qty: dict, sre_name: str
+) -> frappe._dict:
+	"""Batch qty this transfer took from the source SRE, limited to what the target has not used.
+
+	Targets created before the source split was stored are capped at the source's delivered batch qty
+	that no other active transfer has recorded as its own.
+	"""
+	batch_qty_taken = (
+		source_batch_qty.get(sre_name, {})
+		if source_batch_qty
+		else get_untracked_delivered_batch_qty(sre_name)
+	)
+
+	batches = {}
+	for batch_no, qty in batch_qty_taken.items():
+		qty_to_reverse = min(qty, serial_batch_data.batches.get(batch_no, 0))
+		if qty_to_reverse > 0:
+			batches[batch_no] = qty_to_reverse
+			serial_batch_data.batches[batch_no] -= qty_to_reverse
+
+	return frappe._dict(serial_nos=serial_batch_data.serial_nos, batches=batches)
+
+
+def get_untracked_delivered_batch_qty(sre_name: str) -> dict:
+	delivered_qty_by_batch = defaultdict(float)
+	for entry in frappe.get_all(
+		"Serial and Batch Entry",
+		filters={"parent": sre_name, "parenttype": "Stock Reservation Entry", "batch_no": ("is", "set")},
+		fields=["batch_no", "delivered_qty"],
+	):
+		delivered_qty_by_batch[entry.batch_no] += flt(entry.delivered_qty)
+
+	for entry in frappe.get_all(
+		"Stock Reservation Source",
+		filters={"source_reservation_entry": sre_name, "docstatus": 1},
+		fields=["batch_no", "qty"],
+	):
+		delivered_qty_by_batch[entry.batch_no] -= flt(entry.qty)
+
+	return delivered_qty_by_batch
 
 
 def get_reserved_materials(voucher_no):
