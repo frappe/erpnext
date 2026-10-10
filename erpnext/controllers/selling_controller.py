@@ -355,7 +355,7 @@ class SellingController(StockController):
 								{
 									"warehouse": p.warehouse or d.warehouse,
 									"item_code": p.item_code,
-									"qty": flt(p.qty),
+									"qty": flt(p.qty, p.precision("qty")),
 									"serial_no": p.serial_no if self.docstatus == 2 else None,
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
@@ -379,7 +379,7 @@ class SellingController(StockController):
 						{
 							"warehouse": d.warehouse,
 							"item_code": d.item_code,
-							"qty": d.stock_qty,
+							"qty": flt(d.stock_qty, d.precision("stock_qty")),
 							"serial_no": d.serial_no if self.docstatus == 2 else None,
 							"batch_no": d.batch_no if self.docstatus == 2 else None,
 							"uom": d.uom,
