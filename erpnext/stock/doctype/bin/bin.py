@@ -16,6 +16,7 @@ PROJECTED_QTY_DEDUCTIONS = (
 	"reserved_qty_for_sub_contract",
 	"reserved_qty_for_production_plan",
 )
+RECALCULATED_FIELDS = ("valuation_rate", "stock_value", *PROJECTED_QTY_ADDITIONS, *PROJECTED_QTY_DEDUCTIONS)
 
 
 class Bin(Document):
@@ -49,6 +50,30 @@ class Bin(Document):
 	def recalculate_values(self):
 		frappe.has_permission("Repost Item Valuation", "write", throw=True)
 
+		self.reload()
+		self.set_stock_values_from_ledger()
+		self.set_pending_and_reserved_qty()
+		self.set_projected_qty()
+		update_bin_columns(
+			self.name, {fieldname: flt(self.get(fieldname)) for fieldname in RECALCULATED_FIELDS}
+		)
+
+	def set_stock_values_from_ledger(self):
+		from erpnext.stock.utils import get_valuation_method
+
+		last_sle = get_last_sle_values(self.item_code, self.warehouse)
+		self.actual_qty = last_sle.qty_after_transaction
+		self.valuation_rate = last_sle.valuation_rate
+		self.stock_value = last_sle.stock_value
+
+		if get_valuation_method(self.item_code) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+			self.stock_value = flt(self.actual_qty) * flt(
+				get_item_standard_rate(self.item_code, self.company)
+			)
+
+	def set_pending_and_reserved_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 		from erpnext.stock.stock_balance import (
 			get_indented_qty,
@@ -57,29 +82,13 @@ class Bin(Document):
 			get_reserved_qty,
 		)
 
-		last_sle = get_last_sle_values(self.item_code, self.warehouse)
-		self.actual_qty = last_sle.qty_after_transaction
-		self.valuation_rate = last_sle.valuation_rate
-		self.stock_value = last_sle.stock_value
-
-		from erpnext.stock.utils import get_valuation_method
-
-		if get_valuation_method(self.item_code) == "Standard Cost":
-			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
-
-			self.stock_value = flt(self.actual_qty) * flt(
-				get_item_standard_rate(self.item_code, self.company)
-			)
 		self.planned_qty = get_planned_qty(self.item_code, self.warehouse)
 		self.indented_qty = get_indented_qty(self.item_code, self.warehouse)
 		self.ordered_qty = get_ordered_qty(self.item_code, self.warehouse)
 		self.reserved_qty = get_reserved_qty(self.item_code, self.warehouse)
 		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
-
 		self.update_reserved_qty_for_sub_contracting(update_qty=False)
 		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True, update_qty=False)
-		self.set_projected_qty()
-		self.save(ignore_permissions=True)
 
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
@@ -277,6 +286,7 @@ def update_bin_columns(bin_name, values):
 		query = query.set(table[fieldname], value)
 
 	query.set(table.projected_qty, get_projected_qty_term(table, values)).run()
+	frappe.clear_document_cache("Bin", bin_name)
 
 
 def get_projected_qty_term(table, values):

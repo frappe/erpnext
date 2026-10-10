@@ -274,7 +274,6 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 
 	if changed_values:
 		update_bin_columns(bin.name, changed_values)
-		bin.clear_cache()
 
 
 def set_stock_balance_as_per_serial_no(
