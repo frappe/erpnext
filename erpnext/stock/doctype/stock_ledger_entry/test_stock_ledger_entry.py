@@ -1922,6 +1922,49 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		if frappe.db.db_type == "mariadb":
 			self.assertIn("for update", frappe.db.last_query.lower())
 
+	def test_rate_with_no_earlier_stock_ignores_later_entries(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = make_item(properties={"valuation_method": "Moving Average", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=5,
+			rate=300,
+			company=company,
+			posting_date=add_days(today(), -1),
+		)
+
+		dn_return = create_delivery_note(
+			item_code=item,
+			qty=-3,
+			rate=500,
+			company=company,
+			warehouse=warehouse,
+			is_return=1,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			posting_date=add_days(today(), -3),
+		)
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+		make_stock_entry(item_code=item, target=warehouse, qty=5, rate=1000, company=company)
+		frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item,
+				"warehouse": warehouse,
+				"company": company,
+				"posting_date": add_days(today(), -7),
+				"posting_time": "00:00:00",
+			}
+		).submit()
+
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
