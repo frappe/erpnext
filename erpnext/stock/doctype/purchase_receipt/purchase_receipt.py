@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, getdate, now, nowdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
@@ -211,42 +211,46 @@ class PurchaseReceipt(BuyingController):
 			},
 		]
 
+	def update_prevdoc_status(self):
 		if cint(self.is_return):
-			self.status_updater.extend(
-				[
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Order Item",
-						"join_field": "purchase_order_item",
-						"target_field": "returned_qty",
-						"source_field": "-1 * qty",
-						"second_source_dt": "Purchase Invoice Item",
-						"second_source_field": "-1 * qty",
-						"second_join_field": "po_detail",
-						"extra_cond": """ and exists (select name from `tabPurchase Receipt`
-						where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
-						"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
-						where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
-					},
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Receipt Item",
-						"join_field": "purchase_receipt_item",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Purchase Receipt",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "received_stock_qty",
-						"source_field": "-1 * received_stock_qty",
-						"percent_join_field_parent": "return_against",
-					},
-				]
-			)
+			self.status_updater.extend(self.get_return_status_updaters())
+
+		super().update_prevdoc_status()
+
+	def get_return_status_updaters(self):
+		return [
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Purchase Order Item",
+				"join_field": "purchase_order_item",
+				"target_field": "returned_qty",
+				"source_field": "-1 * qty",
+				"second_source_dt": "Purchase Invoice Item",
+				"second_source_field": "-1 * qty",
+				"second_join_field": "po_detail",
+				"extra_cond": """ and exists (select name from `tabPurchase Receipt`
+				where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
+				"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
+			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Purchase Receipt Item",
+				"join_field": "purchase_receipt_item",
+				"target_field": "returned_qty",
+				"target_parent_dt": "Purchase Receipt",
+				"target_parent_field": "per_returned",
+				"target_ref_field": "received_stock_qty",
+				"source_field": "-1 * received_stock_qty",
+				"percent_join_field_parent": "return_against",
+			},
+		]
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
-			if items := apply_putaway_rule(self.doctype, self.get("items"), self.company):
+			if items := _apply_putaway_rule(self.doctype, self.get("items"), self.company):
 				self.items = items
 
 	def validate(self):
@@ -412,6 +416,13 @@ class PurchaseReceipt(BuyingController):
 			result = subquery.run(as_dict=True)
 			if result:
 				result = [item.production_plan_sub_assembly_item for item in result]
+				production_plan_names = set(
+					frappe.db.get_all(
+						"Production Plan Sub Assembly Item",
+						filters={"name": ("in", result)},
+						pluck="parent",
+					)
+				)
 				query = (
 					frappe.qb.from_(table)
 					.select(
@@ -424,11 +435,19 @@ class PurchaseReceipt(BuyingController):
 					.groupby(table.production_plan_sub_assembly_item)
 				)
 				for row in query.run(as_dict=True):
-					frappe.set_value(
+					frappe.db.set_value(
 						"Production Plan Sub Assembly Item",
 						row.production_plan_sub_assembly_item,
 						"received_qty",
 						row.received_qty,
+					)
+
+				for production_plan_name in production_plan_names:
+					frappe.db.set_value(
+						"Production Plan",
+						production_plan_name,
+						{"modified": now(), "modified_by": frappe.session.user},
+						update_modified=False,
 					)
 
 	def on_cancel(self):

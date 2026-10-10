@@ -7,11 +7,13 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_link_to_form, now
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
+from erpnext import _refuse
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
@@ -26,8 +28,8 @@ from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item i
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
+	_get_stock_balance,
 	check_warehouse_company,
-	get_stock_balance,
 	get_valuation_method,
 )
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
@@ -702,7 +704,7 @@ class StockReconciliation(StockController):
 							dimension.get("fieldname")
 						)
 
-			item_dict = get_stock_balance_for(
+			item_dict = _get_stock_balance_for(
 				item.item_code,
 				item.warehouse,
 				self.posting_date,
@@ -834,7 +836,7 @@ class StockReconciliation(StockController):
 				)
 
 			if row.qty and row.valuation_rate in ["", None]:
-				row.valuation_rate = get_stock_balance(
+				row.valuation_rate = _get_stock_balance(
 					row.item_code,
 					row.warehouse,
 					self.posting_date,
@@ -1474,6 +1476,18 @@ def get_items(
 	item_code: str | None = None,
 	ignore_empty_stock: bool | str | int = False,
 ):
+	frappe.has_permission("Stock Reconciliation", "write", throw=True)
+	frappe.has_permission("Item", "read", throw=True)
+	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
+	_require_reconciliation_permission("Warehouse", warehouse)
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		for child_warehouse in frappe.db.get_descendants("Warehouse", warehouse):
+			frappe.has_permission("Warehouse", "read", doc=child_warehouse, throw=True)
+			_require_reconciliation_permission("Warehouse", child_warehouse)
+	if item_code:
+		frappe.has_permission("Item", "read", doc=item_code, throw=True)
+		_require_reconciliation_permission("Item", item_code)
+
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = []
 	if item_code and warehouse:
@@ -1494,7 +1508,7 @@ def get_items(
 				args = get_item_data(row, row.qty, row.valuation_rate)
 				res.append(args)
 		else:
-			stock_bal = get_stock_balance(
+			stock_bal = _get_stock_balance(
 				d.item_code,
 				d.warehouse,
 				posting_date,
@@ -1515,7 +1529,22 @@ def get_items(
 
 			res.append(args)
 
-	return res
+	item_codes = set()
+	for row in res:
+		item_codes.add(row["item_code"])
+	if not item_codes:
+		return res
+
+	readable_items = set(
+		frappe.get_list("Item", filters={"name": ["in", list(item_codes)]}, pluck="name", limit_page_length=0)
+	)
+	allowed_items = set(_reconciliation_allowed_docs("Item"))
+	permitted = []
+	for row in res:
+		if row["item_code"] in readable_items and (not allowed_items or row["item_code"] in allowed_items):
+			permitted.append(row)
+
+	return permitted
 
 
 def get_item_and_warehouses(item_code, warehouse):
@@ -1703,6 +1732,36 @@ def get_stock_balance_for(
 	row: StockReconciliationItem | str | dict | None = None,
 	company: str | None = None,
 ):
+	frappe.has_permission("Item", "read", doc=item_code, throw=True)
+	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
+	_require_reconciliation_permission("Item", item_code)
+	_require_reconciliation_permission("Warehouse", warehouse)
+	check_warehouse_company(warehouse)
+
+	return _get_stock_balance_for(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		batch_no,
+		with_valuation_rate,
+		inventory_dimensions_dict,
+		row,
+		company,
+	)
+
+
+def _get_stock_balance_for(
+	item_code: str,
+	warehouse: str,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject | timedelta,
+	batch_no: str | None = None,
+	with_valuation_rate: bool = True,
+	inventory_dimensions_dict: dict | None = None,
+	row: StockReconciliationItem | str | dict | None = None,
+	company: str | None = None,
+):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
 	item_dict = frappe.get_cached_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
@@ -1732,7 +1791,7 @@ def get_stock_balance_for(
 			"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 		}
 
-	data = get_stock_balance(
+	data = _get_stock_balance(
 		item_code,
 		warehouse,
 		posting_date,
@@ -1816,6 +1875,18 @@ def get_stock_balance_for(
 		"serial_nos": serial_nos,
 		"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 	}
+
+
+def _reconciliation_allowed_docs(doctype):
+	return get_allowed_docs_for_doctype(
+		get_user_permissions(frappe.session.user).get(doctype, []), "Stock Reconciliation"
+	)
+
+
+def _require_reconciliation_permission(doctype, name):
+	allowed_docs = _reconciliation_allowed_docs(doctype)
+	if allowed_docs and name not in allowed_docs:
+		_refuse()
 
 
 @frappe.whitelist()

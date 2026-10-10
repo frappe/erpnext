@@ -1345,13 +1345,14 @@ def get_item_details(items):
 
 
 def get_pending_subcontracted_quantity(doctype, name):
+	qty_field = "qty" if doctype == "Purchase Order Item" else "stock_qty"
 	table = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(table)
-		.select(table.name, table.stock_qty, table.subcontracted_qty)
+		.select(table.name, table[qty_field], table.subcontracted_qty)
 		.where(table.parent == name)
 	)
-	return {item.name: item.stock_qty - item.subcontracted_qty for item in query.run(as_dict=True)}
+	return {item.name: item[qty_field] - item.subcontracted_qty for item in query.run(as_dict=True)}
 
 
 @frappe.whitelist()

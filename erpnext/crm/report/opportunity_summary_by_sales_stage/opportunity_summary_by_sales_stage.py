@@ -7,7 +7,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+import erpnext
 from erpnext.setup.utils import get_exchange_rate
+
+# internal key for opportunities without a sales stage, distinct from any real stage name
+NO_SALES_STAGE = "__no_sales_stage"
 
 
 def execute(filters=None):
@@ -19,10 +23,15 @@ class OpportunitySummaryBySalesStage:
 		self.filters = frappe._dict(filters or {})
 
 	def run(self):
-		self.get_columns()
+		self.validate_filters()
 		self.get_data()
+		self.get_columns()
 		self.get_chart_data()
 		return self.columns, self.data, None, self.chart
+
+	def validate_filters(self):
+		if self.filters.get("data_based_on") == "Amount" and not self.filters.get("company"):
+			frappe.throw(_("Company is mandatory when Data Based On is Amount"))
 
 	def get_columns(self):
 		self.columns = []
@@ -52,17 +61,32 @@ class OpportunitySummaryBySalesStage:
 
 	def set_sales_stage_columns(self):
 		self.sales_stage_list = frappe.db.get_list("Sales Stage", pluck="name")
+		if any(row["sales_stage"] == NO_SALES_STAGE for row in self.query_result):
+			self.sales_stage_list.append(NO_SALES_STAGE)
 
 		for sales_stage in self.sales_stage_list:
 			if self.filters.get("data_based_on") == "Number":
 				self.columns.append(
-					{"label": _(sales_stage), "fieldname": sales_stage, "fieldtype": "Int", "width": 150}
+					{
+						"label": self.get_sales_stage_label(sales_stage),
+						"fieldname": sales_stage,
+						"fieldtype": "Int",
+						"width": 150,
+					}
 				)
 
 			elif self.filters.get("data_based_on") == "Amount":
 				self.columns.append(
-					{"label": _(sales_stage), "fieldname": sales_stage, "fieldtype": "Currency", "width": 150}
+					{
+						"label": self.get_sales_stage_label(sales_stage),
+						"fieldname": sales_stage,
+						"fieldtype": "Currency",
+						"width": 150,
+					}
 				)
+
+	def get_sales_stage_label(self, sales_stage: str) -> str:
+		return _("Not Set") if sales_stage == NO_SALES_STAGE else _(sales_stage)
 
 	def get_data(self):
 		self.data = []
@@ -91,14 +115,23 @@ class OpportunitySummaryBySalesStage:
 				fields=["sales_stage", data_based_on, based_on],
 				group_by=group_by,
 			)
+			self.set_missing_sales_stage()
 
 		elif self.filters.get("data_based_on") == "Amount":
 			self.query_result = frappe.db.get_list(
 				"Opportunity",
 				filters=self.get_conditions(),
-				fields=["sales_stage", based_on, data_based_on, "currency"],
+				fields=[
+					"sales_stage",
+					based_on,
+					data_based_on,
+					"conversion_rate",
+					"currency",
+					"transaction_date",
+				],
 			)
 
+			self.set_missing_sales_stage()
 			self.convert_to_base_currency()
 
 			for row in self.query_result:
@@ -120,6 +153,10 @@ class OpportunitySummaryBySalesStage:
 				)
 
 			self.query_result = self.grouped_data
+
+	def set_missing_sales_stage(self):
+		for row in self.query_result:
+			row["sales_stage"] = row["sales_stage"] or NO_SALES_STAGE
 
 	def get_rows(self):
 		self.data = []
@@ -216,26 +253,18 @@ class OpportunitySummaryBySalesStage:
 					values[count] = values[count] + data[options]
 
 		datasets.append({"name": options, "values": values})
-		self.chart = {"data": {"labels": self.sales_stage_list, "datasets": datasets}, "type": "line"}
-
-	def get_exchange_rate(self, from_currency, to_currency):
-		cacheobj = frappe.cache()
-		if cacheobj and cacheobj.get(from_currency):
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-		else:
-			value = get_exchange_rate(from_currency, to_currency)
-			cacheobj.set(from_currency, value)
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-	def get_default_currency(self):
-		company = self.filters.get("company")
-		return frappe.db.get_value("Company", company, "default_currency")
+		labels = [_("Not Set") if stage == NO_SALES_STAGE else stage for stage in self.sales_stage_list]
+		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
 	def convert_to_base_currency(self):
-		default_currency = self.get_default_currency()
-		for data in self.query_result:
-			if data.get("currency") and data.get("currency") != default_currency:
-				opportunity_currency = data.get("currency")
-				exchange_rate = self.get_exchange_rate(opportunity_currency, default_currency)
-				data["amount"] = data["amount"] * exchange_rate
+		company_currency = erpnext.get_company_currency(self.filters.company)
+		for row in self.query_result:
+			row["amount"] = flt(row["amount"]) * self.get_conversion_rate(row, company_currency)
+
+	def get_conversion_rate(self, row: dict, company_currency: str) -> float:
+		if flt(row.conversion_rate):
+			return flt(row.conversion_rate)
+		if not row.currency or row.currency == company_currency:
+			return 1.0
+		# opportunities saved while no exchange rate was available
+		return flt(get_exchange_rate(row.currency, company_currency, row.transaction_date))

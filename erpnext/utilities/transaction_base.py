@@ -589,7 +589,7 @@ class TransactionBase(StatusUpdater):
 			"plc_conversion_rate": self.plc_conversion_rate,
 			"company": self.company,
 			"transaction_date": self.transaction_date or self.posting_date,
-			"campaign": self.campaign,
+			"campaign": self.get("utm_campaign"),
 			"sales_partner": self.sales_partner,
 			"ignore_pricing_rule": self.ignore_pricing_rule,
 			"doctype": self.doctype,

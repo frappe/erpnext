@@ -468,9 +468,14 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		FixedAssetService(self).split_asset_based_on_sale_qty()
-		FixedAssetService(self).process_asset_depreciation()
+		if not self.is_return:
+			FixedAssetService(self).process_asset_depreciation()
 
 		self.make_gl_entries()
+
+		if self.is_return:
+			# the regain entries need the asset value before the disposal depreciation is reversed
+			FixedAssetService(self).process_asset_depreciation()
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
@@ -1142,7 +1147,11 @@ class SalesInvoice(SellingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
+		self.po_no = reference_doc.po_no
+		# The payment schedule is rebuilt from the template, relative to the new posting date.
+		self.payment_terms_template = reference_doc.payment_terms_template
 		self.due_date = None
+		self.shift_service_dates(reference_doc, auto_repeat_doc)
 
 	def update_project(self):
 		unique_projects = list(set([d.project for d in self.get("items") if d.project]))

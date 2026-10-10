@@ -534,6 +534,7 @@ erpnext.patches.v16_0.disable_add_total_row_in_trends_reports
 erpnext.patches.v16_0.set_gle_processing_status_to_completed
 erpnext.patches.v16_0.mirror_select_perms_to_custom_docperm
 erpnext.patches.v16_0.mirror_release_perms_to_custom_docperm #2026-10-05
+erpnext.patches.v16_0.mirror_warehouse_stock_manager_perms
 erpnext.patches.v16_0.remove_all_role_from_payment_terms_template
 execute:from erpnext.setup.install import grant_address_read_to_accounts_manager; grant_address_read_to_accounts_manager()
 erpnext.patches.v16_0.remove_invalid_fetch_from_italy_payment_schedule_swift_number
@@ -542,3 +543,4 @@ erpnext.patches.v16_0.replace_legacy_print_formats_with_classic
 erpnext.patches.v16_0.set_stock_value_in_stock_closing_balance
 erpnext.patches.v16_0.reset_fifo_queue_in_stock_closing_balance
 erpnext.patches.v16_0.remove_invalid_fields_from_copy_fields_to_variants
+erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas

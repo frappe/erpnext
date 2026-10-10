@@ -118,6 +118,7 @@ def create_asset_value_adjustment(
 
 @frappe.whitelist()
 def make_journal_entry(asset_name: str):
+	frappe.has_permission("Asset", "read", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 	(
 		fixed_asset_account,
@@ -196,7 +197,7 @@ def split_asset(asset_name: str, split_qty: int):
 	existing_asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
 
-	validate_split_quantity(existing_asset, split_qty)
+	validate_asset_split(existing_asset, split_qty)
 	remaining_qty = existing_asset.asset_quantity - split_qty
 
 	splitted_asset = create_new_asset_from_split(existing_asset, split_qty)
@@ -205,7 +206,14 @@ def split_asset(asset_name: str, split_qty: int):
 	return splitted_asset
 
 
-def validate_split_quantity(existing_asset, split_qty):
+def validate_asset_split(existing_asset, split_qty):
+	if existing_asset.docstatus != 1 or existing_asset.status in ("Sold", "Scrapped", "Capitalized"):
+		frappe.throw(
+			_("Asset {0} cannot be split, as it is {1}").format(existing_asset.name, existing_asset.status)
+		)
+
+	if split_qty <= 0:
+		frappe.throw(_("Split Quantity must be greater than zero"))
 	if split_qty >= existing_asset.asset_quantity:
 		frappe.throw(_("Split Quantity must be less than Asset Quantity"))
 
@@ -307,6 +315,7 @@ def reschedule_depr_for_updated_asset(existing_asset, new_asset, fb_row, scaling
 
 	update_depreciation_terms(new_depr_schedule_doc, scaling_factor)
 	add_depr_schedule_notes(new_depr_schedule_doc, existing_asset, new_asset, is_new_asset)
+	new_depr_schedule_doc.flags.is_rescheduled = True
 
 	if not is_new_asset:
 		current_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
@@ -326,7 +335,7 @@ def create_new_depr_schedule(current_depr_schedule_doc, existing_asset, new_asse
 
 def update_depreciation_terms(new_depr_schedule_doc, scaling_factor):
 	"""Update depreciation terms with scaled amounts."""
-	accumulated_depreciation = 0
+	accumulated_depreciation = flt(new_depr_schedule_doc.opening_accumulated_depreciation)
 	for term in new_depr_schedule_doc.get("depreciation_schedule"):
 		depreciation_amount = flt(
 			term.depreciation_amount * scaling_factor, term.precision("depreciation_amount")
