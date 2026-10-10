@@ -77,17 +77,38 @@ def get_columns(customer_naming_type):
 
 
 def get_details(filters):
-	sql_query = """SELECT
-						c.name, c.customer_name,
-						ccl.bypass_credit_limit_check,
-						c.is_frozen, c.disabled
-					FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
-					WHERE
-						c.name = ccl.parent
-						AND ccl.company = %(company)s"""
+	company = filters.get("company")
+
+	c = frappe.qb.DocType("Customer")
+	ccl = frappe.qb.DocType("Customer Credit Limit")
+
+	# bypass flag follows the customer's own limit row, same as credit-limit enforcement
+	query = (
+		frappe.qb.from_(c)
+		.left_join(ccl)
+		.on((ccl.parent == c.name) & (ccl.parenttype == "Customer") & (ccl.company == company))
+		.select(
+			c.name, c.customer_name, c.customer_group, ccl.bypass_credit_limit_check, c.is_frozen, c.disabled
+		)
+	)
 
 	# customer filter is optional.
 	if filters.get("customer"):
-		sql_query += " AND c.name = %(customer)s"
+		query = query.where(c.name == filters.get("customer"))
 
-	return frappe.db.sql(sql_query, filters, as_dict=1)
+	# without a company-wide limit, keep only customers with an own-row or group limit
+	if not flt(frappe.get_cached_value("Company", company, "credit_limit")):
+		gccl = frappe.qb.DocType("Customer Credit Limit").as_("gccl")
+		groups_with_limit = (
+			frappe.qb.from_(gccl)
+			.select(gccl.parent)
+			.where(
+				(gccl.parenttype == "Customer Group")
+				& (gccl.company == company)
+				& (gccl.credit_limit > 0)
+				& (gccl.bypass_credit_limit_check == 0)
+			)
+		)
+		query = query.where(ccl.name.isnotnull() | c.customer_group.isin(groups_with_limit))
+
+	return query.run(as_dict=1)
