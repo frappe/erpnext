@@ -6298,6 +6298,15 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_fg_conversion_entry, wo_order.name, alt_item, 0)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
+	def test_last_fraction_of_produced_qty_can_be_converted(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry
+
+		wo_order, alt_item, _ = prepare_data_for_fg_conversion_test(qty=0.3, stock_uom="Kg")
+
+		frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 0.1)).submit()
+		frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 0.2)).submit()
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 0})
 	def test_fg_conversion_not_allowed_when_setting_is_disabled(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry
@@ -6308,11 +6317,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, conversion_entry.insert)
 
 
-def prepare_data_for_fg_conversion_test():
-	fg_item = make_item("_Test FG Conversion Item", {"is_stock_item": 1, "allow_alternative_item": 1}).name
-	alt_item = make_item("_Test FG Conversion Alt Item", {"is_stock_item": 1}).name
-	other_item = make_item("_Test FG Conversion Other Item", {"is_stock_item": 1}).name
-	rm_item = make_item("_Test FG Conversion RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
+	suffix = f" {stock_uom}" if stock_uom else ""
+	properties = {"is_stock_item": 1, "stock_uom": stock_uom or "Nos"}
+	fg_item = make_item(f"_Test FG Conversion Item{suffix}", {**properties, "allow_alternative_item": 1}).name
+	alt_item = make_item(f"_Test FG Conversion Alt Item{suffix}", properties).name
+	other_item = make_item(f"_Test FG Conversion Other Item{suffix}", properties).name
+	rm_item = make_item(f"_Test FG Conversion RM{suffix}", {**properties, "valuation_rate": 100}).name
 
 	frappe.db.set_value("Item", fg_item, "allow_alternative_item", 1)
 	if not frappe.db.exists("Item Alternative", {"item_code": fg_item, "alternative_item_code": alt_item}):
@@ -6336,16 +6347,17 @@ def prepare_data_for_fg_conversion_test():
 	wo_order = make_wo_order_test_record(
 		production_item=fg_item,
 		bom_no=bom.name,
-		qty=10,
+		qty=qty,
+		stock_uom=stock_uom,
 		skip_transfer=1,
 		source_warehouse="_Test Warehouse - _TC",
 	)
 
 	test_stock_entry.make_stock_entry(
-		item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		item_code=rm_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
 	)
 
-	manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+	manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", qty))
 	manufacture_entry.insert()
 	manufacture_entry.submit()
 
