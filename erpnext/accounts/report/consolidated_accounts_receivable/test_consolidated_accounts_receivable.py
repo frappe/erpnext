@@ -122,7 +122,7 @@ class TestConsolidatedAccountsReceivable(ERPNextTestSuite, ConsolidatedReportMix
 		self.assertTrue(any(row.get("bold") for row in result[1]))
 		self.assertEqual(result[5], 1)
 
-	def test_no_total_when_companies_use_different_currencies(self):
+	def test_no_total_or_chart_when_companies_use_different_currencies(self):
 		usd = self.create_test_company("_Test Unrelated USD", "_TUNU", currency="USD")
 		self.create_invoice(self.company_a, "_TUNA", 200)
 		self.create_invoice(usd, "_TUNU", 300, currency="USD")
@@ -131,6 +131,8 @@ class TestConsolidatedAccountsReceivable(ERPNextTestSuite, ConsolidatedReportMix
 
 		self.assertEqual([r.company for r in result[1]], [self.company_a, usd])
 		self.assertEqual(result[5], 1)  # skip_total_row, the rows span currencies
+		self.assertIsNone(result[3])  # the ageing chart would add them too
+		self.assertTrue(execute(self.filters(companies=[self.company_a]))[3])
 
 	def test_group_company_expands_to_its_subsidiaries(self):
 		group = self.create_test_company("_Test Consolidation Group", "_TCGRP", is_group=1)
