@@ -315,16 +315,20 @@ class StatusUpdater(Document):
 
 		sl = status_map[self.doctype][:]
 		sl.reverse()
+		doc_dict = None
 
 		for s in sl:
 			if not s[1]:
 				return {"status": s[0]}
 			elif s[1].startswith("eval:"):
+				if doc_dict is None:
+					doc_dict = self.as_dict()
+
 				if frappe.safe_eval(
 					s[1][5:],
 					None,
 					{
-						"self": self.as_dict(),
+						"self": doc_dict,
 						"getdate": getdate,
 						"nowdate": nowdate,
 						"get_value": frappe.db.get_value,
