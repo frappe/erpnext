@@ -1835,6 +1835,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		prepare_data_for_internal_transfer()
 
+		frappe.db.set_value("Account", "_Test Account Stock In Hand - TCP1", "account_type", "Stock")
 		create_warehouse(
 			"_Test Warehouse for Valuation",
 			company="_Test Company with perpetual inventory",
