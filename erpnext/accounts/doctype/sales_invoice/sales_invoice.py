@@ -330,7 +330,7 @@ class SalesInvoice(SellingController):
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			validate_coupon_code(self.coupon_code)
 
 		if cint(self.is_pos):
@@ -499,7 +499,7 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "used")
 
 		if (
@@ -565,7 +565,7 @@ class SalesInvoice(SellingController):
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
@@ -1203,6 +1203,35 @@ class SalesInvoice(SellingController):
 		if self.needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
+
+	def counts_coupon_use(self):
+		# Returns and POS consolidation do not redeem the coupon again.
+		if self.is_return or self.get("is_consolidated"):
+			return False
+
+		if not self.items or any(
+			not item.get("sales_order") or not item.get("so_detail") for item in self.items
+		):
+			return True
+
+		# Match each detail to the order that already consumed this coupon.
+		order = frappe.qb.DocType("Sales Order")
+		order_item = frappe.qb.DocType("Sales Order Item")
+		coupon_order_items = dict(
+			frappe.qb.from_(order_item)
+			.join(order)
+			.on(order.name == order_item.parent)
+			.select(order_item.name, order_item.parent)
+			.where(
+				(order_item.name.isin([item.so_detail for item in self.items]))
+				& (order.coupon_code == self.coupon_code)
+				& (order.customer == self.customer)
+				& (order.company == self.company)
+				& (order.docstatus == 1)
+			)
+			.run()
+		)
+		return any(coupon_order_items.get(item.so_detail) != item.sales_order for item in self.items)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		StatusService(self).set_status(update, status, update_modified)
