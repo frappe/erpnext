@@ -66,6 +66,7 @@ def validate_companies(filters):
 	)
 
 	for company in filters.company:
+		frappe.has_permission("Company", "read", company, throw=True)
 		if company not in company_subtree:
 			frappe.throw(
 				_("Consolidated Trial Balance can be generated for Companies having same root Company.")
@@ -148,11 +149,6 @@ def get_company_wise_tb_data(filters, reporting_currency, ignore_reporting_curre
 
 	default_currency = erpnext.get_company_currency(filters.company)
 
-	opening_exchange_rate = get_exchange_rate(
-		default_currency,
-		reporting_currency,
-		filters.get("from_date"),
-	)
 	current_date = (
 		filters.get("to_date") if getdate(filters.get("to_date")) <= now_datetime().date() else nowdate()
 	)
@@ -162,7 +158,7 @@ def get_company_wise_tb_data(filters, reporting_currency, ignore_reporting_curre
 		current_date,
 	)
 
-	if not (opening_exchange_rate and closing_exchange_rate):
+	if not closing_exchange_rate:
 		frappe.throw(
 			_(
 				"Consolidated Trial balance could not be generated as Exchange Rate from {0} to {1} is not available for {2}.",
@@ -176,10 +172,11 @@ def get_company_wise_tb_data(filters, reporting_currency, ignore_reporting_curre
 
 	gl_entries_by_account = {}
 
+	# balance sheet openings are restated at the closing rate, the difference goes to the FCTR
 	opening_balances = get_opening_balances(
 		filters,
 		ignore_is_opening,
-		exchange_rate=opening_exchange_rate,
+		exchange_rate=closing_exchange_rate,
 		ignore_reporting_currency=ignore_reporting_currency,
 	)
 
