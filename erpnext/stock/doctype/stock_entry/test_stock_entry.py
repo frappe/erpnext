@@ -4798,6 +4798,103 @@ class TestStockEntry(ERPNextTestSuite):
 		frappe.db.set_value("Work Order", wo.name, "produced_qty", wo.qty)
 		self.assertNotIn(wo.name, pending_work_orders())
 
+	def test_repack_output_takes_the_consumed_value(self):
+		raw_material = make_item(properties={"valuation_method": "Moving Average"}).name
+		output = make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=8, rate=209.416)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=2, rate=19.14)
+
+		repack = self.make_repack(raw_material, 5, warehouse, [(output, 11)])
+
+		self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
+		self.assertEqual(self.get_value_change(repack, output), 856.81)
+
+	def test_manufacture_outputs_split_the_consumed_value_without_a_remainder(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_manufacture_entry,
+		)
+
+		finished_good, raw_material, by_product, co_product = (
+			make_item(properties={"valuation_method": "FIFO"}).name for _ in range(4)
+		)
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=6, rate=34.417)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": finished_good, "quantity": 2, "company": "_Test Company", "currency": "INR"})
+		bom.append(
+			"items", {"item_code": raw_material, "qty": 6, "rate": 34.417, "source_warehouse": warehouse}
+		)
+		for item_code, secondary_item_type, qty, share in (
+			(by_product, "By-Product", 3, 12.5),
+			(co_product, "Co-Product", 2, 5),
+		):
+			bom.append(
+				"secondary_items",
+				{
+					"item_code": item_code,
+					"secondary_item_type": secondary_item_type,
+					"qty": qty,
+					"cost_allocation_per": share,
+					"valuation_type": "% of Component Cost",
+				},
+			)
+		bom.save()
+		bom.submit()
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{
+				"company": "_Test Company",
+				"fg_warehouse": "_Test Warehouse 1 - _TC",
+				"production_item": finished_good,
+				"bom_no": bom.name,
+				"qty": 2,
+				"stock_uom": "_Test UOM",
+				"skip_transfer": 1,
+			}
+		)
+		work_order.get_items_and_operations_from_bom()
+		work_order.submit()
+
+		entry = frappe.get_doc(make_manufacture_entry(work_order.name, "Manufacture", 2))
+		entry.insert()
+		entry.submit()
+
+		value_changes = frappe.get_all(
+			"Stock Ledger Entry",
+			{"voucher_no": entry.name, "is_cancelled": 0},
+			pluck="stock_value_difference",
+		)
+		self.assertEqual(flt(sum(value_changes), 2), 0)
+
+	def make_repack(self, raw_material, qty, warehouse, outputs):
+		repack = make_stock_entry(
+			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
+		)
+		for item_code, output_qty in outputs:
+			repack.append(
+				"items",
+				{
+					"item_code": item_code,
+					"t_warehouse": warehouse,
+					"qty": output_qty,
+					"transfer_qty": output_qty,
+					"is_finished_item": 1,
+				},
+			)
+		repack.save()
+		repack.submit()
+		return repack
+
+	def get_value_change(self, stock_entry, item_code):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": stock_entry.name, "item_code": item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+
 
 def make_serialized_item(self, **args):
 	args = frappe._dict(args)
