@@ -3,6 +3,8 @@ import json
 import frappe
 import requests
 
+FORUM_REQUEST_TIMEOUT = 10
+
 
 def get_context(context):
 	context.no_cache = 1
@@ -10,11 +12,13 @@ def get_context(context):
 	s = settings
 
 	# Get Started sections
-	sections = json.loads(s.get_started_sections)
+	sections = json.loads(s.get_started_sections or "[]")
 	context.get_started_sections = sections
 
 	# Forum posts
-	topics_data, post_params = get_forum_posts(s)
+	topics_data, post_params = [], {}
+	if s.show_latest_forum_posts and s.forum_url:
+		topics_data, post_params = get_forum_posts(s)
 	context.post_params = post_params
 	context.forum_url = s.forum_url
 	context.topics = topics_data[:3]
@@ -27,7 +31,7 @@ def get_context(context):
 
 
 def get_forum_posts(s):
-	response = requests.get(s.forum_url + "/" + s.get_latest_query)
+	response = requests.get(s.forum_url + "/" + s.get_latest_query, timeout=FORUM_REQUEST_TIMEOUT)
 	response.raise_for_status()
 	response_json = response.json()
 
