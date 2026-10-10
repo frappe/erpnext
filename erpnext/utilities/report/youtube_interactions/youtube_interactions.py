@@ -31,7 +31,7 @@ def get_columns():
 
 def get_data(filters):
 	video = frappe.qb.DocType("Video")
-	return (
+	query = (
 		frappe.qb.from_(video)
 		.select(
 			video.publish_date,
@@ -44,9 +44,14 @@ def get_data(filters):
 			video.comment_count,
 		)
 		.where(video.view_count.isnotnull())
-		.where(video.publish_date[filters.get("from_date") : filters.get("to_date")])
 		.orderby(video.view_count, order=frappe.qb.desc)
-	).run(as_dict=True)
+	)
+	if filters.get("from_date"):
+		query = query.where(video.publish_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		query = query.where(video.publish_date <= filters.get("to_date"))
+
+	return query.run(as_dict=True)
 
 
 def get_chart_summary_data(data):
