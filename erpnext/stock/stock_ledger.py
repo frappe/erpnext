@@ -1053,6 +1053,9 @@ class update_entries_after:
 		elif self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
+		if self.is_produced_row(sle) and not self.has_bundle_valuation(sle):
+			sle.incoming_rate = self.get_produced_row_rate(sle)
+
 		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
@@ -1447,6 +1450,57 @@ class update_entries_after:
 			return sle.incoming_rate
 
 		return outward_value / flt(sle.actual_qty)
+
+	def is_produced_row(self, sle):
+		return bool(
+			sle.voucher_type == "Stock Entry"
+			and flt(sle.actual_qty) > 0
+			and is_manufacture_or_repack_entry(sle.voucher_no)
+		)
+
+	def get_produced_row_rate(self, sle):
+		"""Outputs carry exactly the consumed value plus additional costs. Each output row is rounded
+		on its own, so the largest finished good takes what the rounding left over."""
+		rows = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": sle.voucher_no},
+			fields=[
+				"name",
+				"s_warehouse",
+				"t_warehouse",
+				"amount",
+				"is_finished_item",
+				"set_basic_rate_manually",
+				"allow_zero_valuation_rate",
+			],
+			order_by="amount desc, idx asc",
+		)
+		outputs = [row for row in rows if row.t_warehouse and not row.s_warehouse]
+		row = next((row for row in outputs if row.name == sle.voucher_detail_no), None)
+		absorbers = [
+			output for output in outputs if output.is_finished_item and not output.allow_zero_valuation_rate
+		]
+		if not row or not absorbers or any(output.set_basic_rate_manually for output in outputs):
+			return sle.incoming_rate
+
+		value = flt(row.amount)
+		if row.name == absorbers[0].name:
+			consumed = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_type": "Stock Entry",
+					"voucher_no": sle.voucher_no,
+					"actual_qty": ("<", 0),
+					"is_cancelled": 0,
+				},
+				pluck="stock_value_difference",
+			)
+			additional_cost = frappe.db.get_value("Stock Entry", sle.voucher_no, "total_additional_costs")
+			value += (
+				-sum(flt(v) for v in consumed) + flt(additional_cost) - sum(flt(r.amount) for r in outputs)
+			)
+
+		return value / flt(sle.actual_qty)
 
 	def get_outward_leg_value(self, sle):
 		"""Value that left the source warehouse for this transfer row, plus the row's additional cost."""
