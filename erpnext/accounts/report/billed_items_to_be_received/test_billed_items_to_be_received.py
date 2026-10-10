@@ -2,8 +2,9 @@
 # See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.billed_items_to_be_received.billed_items_to_be_received import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -58,7 +59,6 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 		self.assertEqual(len(rows), 0)
 
 	def test_fully_received_invoice_drops_off(self):
-		"""When per_received reaches 100 the invoice is fully received and drops off."""
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier",
 			item_code="_Test Item",
@@ -70,10 +70,60 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 		# Present while nothing has been received.
 		self.assertEqual(len(self.get_rows_for(self.run_report(), pi.name)), 1)
 
-		frappe.db.set_value("Purchase Invoice", pi.name, "per_received", 100)
+		self.receive(pi.name, today())
 
 		# Absent once fully received.
 		self.assertEqual(len(self.get_rows_for(self.run_report(), pi.name)), 0)
+
+	def test_receipt_after_as_on_date_is_pending(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier",
+			item_code="_Test Item",
+			qty=5,
+			rate=200,
+			update_stock=0,
+			posting_date=add_days(today(), -30),
+			do_not_save=True,
+		)
+		pi.set_posting_time = 1
+		pi.insert()
+		pi.submit()
+		self.receive(pi.name, today())
+
+		rows = self.get_rows_for(self.run_report(posting_date=add_days(today(), -10)), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty) for row in rows], [(5, 0)])
+
+	def test_debit_note_settles_pending_qty(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
+		)
+		self.receive(pi.name, today(), qty=4)
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -6
+		debit_note.insert()
+		debit_note.submit()
+
+		names = {row.name for row in self.run_report()}
+
+		self.assertNotIn(pi.name, names)
+		self.assertNotIn(debit_note.name, names)
+
+	def test_service_rows_are_not_listed(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Non Stock Item", qty=1, rate=300, update_stock=0
+		)
+
+		self.assertEqual(self.get_rows_for(self.run_report(), pi.name), [])
+
+	def receive(self, invoice: str, posting_date: str, qty: float | None = None) -> None:
+		receipt = make_purchase_receipt(invoice)
+		if qty:
+			receipt.items[0].qty = receipt.items[0].received_qty = qty
+		receipt.set_posting_time = 1
+		receipt.posting_date = posting_date
+		receipt.insert()
+		receipt.submit()
 
 	def test_posting_date_upper_bound_filter(self):
 		"""A PI posted after the filter's posting_date must be excluded."""
