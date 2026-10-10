@@ -1428,6 +1428,17 @@ class SerialandBatchBundle(Document):
 		if serial_batches:
 			self.validate_serial_batch_no(serial_batches)
 
+		if self.docstatus < 2:
+			batches = [row.batch_no for row in self.entries if row.batch_no]
+			if batches:
+				disabled_batches = frappe.get_all(
+					"Batch", filters={"name": ("in", batches), "disabled": 1}, pluck="batch_id"
+				)
+				if disabled_batches:
+					frappe.throw(
+						_("Batches {0} are disabled.").format(escape_html(", ".join(disabled_batches)))
+					)
+
 	def validate_serial_batch_no(self, serial_batches):
 		correct_batches = frappe._dict(
 			frappe.get_all(

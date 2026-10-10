@@ -83,6 +83,25 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 		self.assertEqual(serial.batch_no, batch.name)
 		self.assertEqual(bundle.total_qty, 1)
 
+	def test_serialized_bundle_rejects_disabled_batch(self):
+		bundle = self.make_bundle(has_batch_no=1)
+		batch = frappe.get_doc(
+			doctype="Batch", item=bundle.item_code, batch_id="Disabled Serial Batch", disabled=1
+		).insert()
+		serial = frappe.get_doc(
+			doctype="Serial No",
+			item_code=bundle.item_code,
+			serial_no="Disabled Batch Serial",
+			batch_no=batch.name,
+			company=bundle.company,
+		).insert()
+		bundle.append("entries", {"serial_no": serial.name, "batch_no": batch.name, "qty": 1})
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled"):
+			bundle.insert()
+		batch.disabled = 0
+		batch.save()
+		bundle.insert()
+
 	def test_outward_bundle_cannot_create_serials(self):
 		bundle = self.make_bundle()
 		bundle.type_of_transaction = "Outward"
@@ -118,6 +137,51 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 
 
 class TestSerialandBatchBundle(ERPNextTestSuite):
+	def test_transaction_rejects_disabled_batch(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
+		batch = frappe.get_doc(
+			doctype="Batch", item=item.name, batch_id=frappe.generate_hash(length=10)
+		).insert()
+		receipt = make_stock_entry(
+			item_code=item.name, qty=10, target="_Test Warehouse - _TC", rate=100, batch_no=batch.name
+		)
+		for use_serial_batch_fields in (0, 1):
+			with self.subTest(use_serial_batch_fields=use_serial_batch_fields):
+				delivery = create_delivery_note(
+					item_code=item.name,
+					qty=1,
+					warehouse="_Test Warehouse - _TC",
+					batch_no=batch.name,
+					use_serial_batch_fields=use_serial_batch_fields,
+					do_not_submit=True,
+				)
+				batch.reload()
+				batch.disabled = 1
+				batch.save()
+				frappe.db.savepoint("disabled_batch_submission")
+				with self.assertRaisesRegex(frappe.ValidationError, "disabled"):
+					delivery.submit()
+				frappe.db.rollback(save_point="disabled_batch_submission")
+				batch.reload()
+				batch.disabled = 0
+				batch.save()
+				delivery.reload()
+				delivery.submit()
+				batch.reload()
+				batch.disabled = 1
+				batch.save()
+				delivery.cancel()
+				batch.reload()
+				batch.disabled = 0
+				batch.save()
+
+		batch.reload()
+		batch.disabled = 1
+		batch.save()
+		receipt.cancel()
+
 	def test_naming_for_sabb(self):
 		frappe.db.set_single_value(
 			"Stock Settings", "set_serial_and_batch_bundle_naming_based_on_naming_series", 1

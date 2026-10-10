@@ -119,6 +119,17 @@ class SerialBatchBundleService:
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+		if self.doc.docstatus < 2:
+			batch_nos = [row.batch_no for row in self.doc.get("items") if row.get("batch_no")]
+			if batch_nos:
+				disabled_batches = frappe.get_all(
+					"Batch", filters={"name": ("in", batch_nos), "disabled": 1}, pluck="batch_id"
+				)
+				if disabled_batches:
+					frappe.throw(
+						_("Batches {0} are disabled.").format(escape_html(", ".join(disabled_batches)))
+					)
+
 		is_material_issue = False
 		if self.doc.doctype == "Stock Entry" and self.doc.purpose in ["Material Issue", "Material Transfer"]:
 			is_material_issue = True
