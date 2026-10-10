@@ -1906,6 +1906,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
+		target.add_to_transit = 0
 		target.set_missing_values()
 
 		if not frappe.get_single_value("Stock Settings", "use_serial_batch_fields"):
