@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+import calendar
+
 import frappe
 from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
@@ -210,6 +212,183 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 07:00"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
+
+	def test_portal_user_cannot_set_customer_or_status(self):
+		user = "test_issue_portal_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Portal",
+					"user_type": "Website User",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		contact = frappe.get_doc("Contact", {"email_id": user})
+		contact.links = []
+		contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		contact.save(ignore_permissions=True)
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+
+		frappe.set_user(user)
+		try:
+			issue = frappe.get_doc(
+				{
+					"doctype": "Issue",
+					"subject": "Portal issue",
+					"customer": "__Test Customer",
+					"status": "Closed",
+					"via_customer_portal": 1,
+				}
+			).insert(ignore_permissions=True)
+			self.assertEqual((issue.customer, issue.status), ("_Test Customer", "Open"))
+
+			issue = frappe.get_doc("Issue", issue.name)
+			issue.customer = "__Test Customer"
+			issue.status = "Closed"
+			issue.save(ignore_permissions=True)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			frappe.db.get_value("Issue", issue.name, ["customer", "status"]), ("_Test Customer", "Open")
+		)
+
+	def test_split_of_closed_issue_keeps_parent_metrics(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 16:00")
+		issue.status = "Closed"
+		issue.save()
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"sent_or_received": "Sent",
+				"subject": "Split",
+				"sender": "test@example.com",
+				"reference_doctype": "Issue",
+				"reference_name": issue.name,
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", issue.name)
+		split = frappe.get_doc("Issue", issue.split_issue("Split issue", communication.name))
+
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, "resolution_time"), 14400)
+		self.assertEqual(split.status, "Open")
+		self.assertEqual(split.opening_date, frappe.utils.getdate())
+		self.assertFalse(split.sla_resolution_date)
+		self.assertFalse(split.resolution_time)
+
+	def test_split_of_issue_on_hold_starts_without_hold_time(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		for current_time, status in (("13:00", "Replied"), ("14:00", "Open"), ("15:00", "Replied")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {current_time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+		self.assertEqual(issue.total_hold_time, 3600)
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"sent_or_received": "Sent",
+				"subject": "Split",
+				"sender": "test@example.com",
+				"reference_doctype": "Issue",
+				"reference_name": issue.name,
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", issue.name)
+		split = frappe.get_doc("Issue", issue.split_issue("Split issue", communication.name))
+
+		self.assertFalse(split.on_hold_since)
+		self.assertFalse(split.total_hold_time)
+		self.assertTrue(split.sla_resolution_by)
+
+	def test_issue_from_secondary_email_of_contact_gets_customer(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Secondary Email"})
+		contact.append("email_ids", {"email_id": "primary@secondary-email.example", "is_primary": 1})
+		contact.append("email_ids", {"email_id": "second@secondary-email.example"})
+		contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		contact.insert(ignore_permissions=True)
+
+		issue = frappe.get_doc(
+			{"doctype": "Issue", "subject": "From secondary", "raised_by": "second@secondary-email.example"}
+		).insert(ignore_permissions=True)
+
+		self.assertEqual((issue.contact, issue.customer), (contact.name, "_Test Customer"))
+
+	def test_set_status_validates_the_status(self):
+		from erpnext.support.doctype.issue.issue import set_status
+
+		issue = make_issue(index=1)
+		self.assertRaises(frappe.ValidationError, set_status, issue.name, "Banana")
+
+	def test_issue_from_sent_mail_is_raised_by_the_recipient(self):
+		from erpnext.support.doctype.issue.issue import make_issue_from_communication
+
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"communication_medium": "Email",
+				"sent_or_received": "Sent",
+				"subject": "Follow up",
+				"sender": "agent@example.com",
+				"recipients": '"Doe, Jane" <customer@example.com>, other@example.com',
+				"content": "Your order is delayed",
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", make_issue_from_communication(communication.name))
+		self.assertEqual(issue.raised_by, "customer@example.com")
+		self.assertIn("Your order is delayed", issue.description)
+
+	def test_closing_issue_closes_its_assignments(self):
+		from frappe.desk.form.assign_to import add as add_assignment
+
+		create_user("test@admin.com")
+		issue = make_issue(index=1)
+		add_assignment({"doctype": "Issue", "name": issue.name, "assign_to": ["test@admin.com"]})
+
+		issue.reload()
+		issue.status = "Closed"
+		issue.save()
+
+		self.assertEqual(
+			frappe.db.get_value("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, "status"),
+			"Closed",
+		)
+
+	def test_closed_assignments_stay_closed_with_assignment_rule(self):
+		from frappe.cache_manager import clear_doctype_map
+
+		create_user("test@admin.com")
+		frappe.get_doc(
+			{
+				"doctype": "Assignment Rule",
+				"name": "_Test Issue Assignment Rule",
+				"document_type": "Issue",
+				"assign_condition": "status == 'Open'",
+				"rule": "Round Robin",
+				"users": [{"user": "test@admin.com"}],
+				"assignment_days": [{"day": day} for day in calendar.day_name],
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(clear_doctype_map, "Assignment Rule", "Issue")
+
+		issue = make_issue(index=1)
+		issue.reload()
+		issue.status = "Closed"
+		issue.save()
+
+		self.assertEqual(
+			frappe.get_all("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, pluck="status"),
+			["Closed"],
+		)
 
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment

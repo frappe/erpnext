@@ -8,12 +8,21 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.core.utils import get_parent_doc
+from frappe.desk.form.assign_to import close_all_assignments
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils import (
+	date_diff,
+	get_datetime,
+	getdate,
+	now_datetime,
+	parse_addr,
+	split_emails,
+	time_diff_in_seconds,
+)
 from frappe.utils.user import is_website_user
 
 
@@ -66,6 +75,9 @@ class Issue(Document):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
 
+		if is_website_user():
+			self.restore_staff_only_fields()
+
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
 
@@ -77,6 +89,17 @@ class Issue(Document):
 			self.create_communication()
 			self.flags.communication_created = None
 
+	def on_change(self):
+		# after the on_update hooks, so an Assignment Rule without a close condition can't reopen them
+		if self.status in ("Resolved", "Closed") and self.has_value_changed("status"):
+			close_all_assignments(self.doctype, self.name, ignore_permissions=True)
+
+	def restore_staff_only_fields(self):
+		"""Customer and status are set by the support team, not by portal users."""
+		doc_before_save = self.get_doc_before_save()
+		self.customer = doc_before_save.customer if doc_before_save else None
+		self.status = doc_before_save.status if doc_before_save else "Open"
+
 	def set_lead_contact(self, email_id):
 		import email.utils
 
@@ -86,7 +109,9 @@ class Issue(Document):
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
 
 			if not self.contact and not self.customer:
-				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
+				self.contact = frappe.db.get_value(
+					"Contact Email", {"email_id": email_id, "parenttype": "Contact"}, "parent"
+				)
 
 				if self.contact:
 					contact = frappe.get_doc("Contact", self.contact)
@@ -172,6 +197,13 @@ class Issue(Document):
 		replicated_issue.first_response_time = 0
 		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
+		replicated_issue.status = "Open"
+		replicated_issue.opening_date = getdate()
+		replicated_issue.resolution_time = None
+		replicated_issue.user_resolution_time = None
+		replicated_issue.sla_resolution_date = None
+		replicated_issue.on_hold_since = None
+		replicated_issue.total_hold_time = None
 
 		# Reset SLA
 		if replicated_issue.service_level_agreement:
@@ -180,7 +212,6 @@ class Issue(Document):
 			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
 			replicated_issue.resolution_by = None
-			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -215,10 +246,6 @@ class Issue(Document):
 		).insert(ignore_permissions=True)
 
 		return replicated_issue.name
-
-	def reset_issue_metrics(self):
-		self.db_set("resolution_time", None)
-		self.db_set("user_resolution_time", None)
 
 
 def get_list_context(context=None):
@@ -272,7 +299,9 @@ def set_multiple_status(names: str | list, status: str):
 @frappe.whitelist(methods=["POST"])
 def set_status(name: str, status: str):
 	frappe.has_permission("Issue", "write", name, throw=True)
-	frappe.db.set_value("Issue", name, "status", status)
+	issue = frappe.get_doc("Issue", name)
+	issue.status = status
+	issue.save()
 
 
 def auto_close_tickets():
@@ -334,8 +363,9 @@ def make_issue_from_communication(communication: str, ignore_communication_links
 		{
 			"doctype": "Issue",
 			"subject": doc.subject,
+			"description": doc.content,
 			"communication_medium": doc.communication_medium,
-			"raised_by": doc.sender or "",
+			"raised_by": get_customer_email(doc),
 			"raised_by_phone": doc.phone_no or "",
 		}
 	).insert()
@@ -343,6 +373,14 @@ def make_issue_from_communication(communication: str, ignore_communication_links
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 
 	return issue.name
+
+
+def get_customer_email(communication) -> str:
+	"""The sender of a received mail, or the first recipient of a sent one."""
+	if communication.sent_or_received == "Sent":
+		recipients = split_emails(communication.recipients)
+		return parse_addr(recipients[0])[1] if recipients else ""
+	return communication.sender or ""
 
 
 def get_time_in_timedelta(time):
