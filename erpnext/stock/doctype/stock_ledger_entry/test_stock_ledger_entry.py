@@ -1785,6 +1785,60 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			flt(frappe.db.get_value("Bin", {"item_code": fg, "warehouse": warehouse}, "actual_qty")), 615.0
 		)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_bin_after_a_failed_submit_reuses_its_name(self):
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		item_a = make_item(properties={"valuation_method": "FIFO"}).name
+		item_b = make_item(properties={"valuation_method": "FIFO"}).name
+
+		make_stock_entry(
+			item_code=item_a,
+			target=warehouse,
+			qty=5,
+			rate=10,
+			company=company,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(
+			item_code=item_a, source=warehouse, qty=5, company=company, posting_date=add_days(today(), -1)
+		)
+		make_stock_entry(
+			item_code=item_b,
+			target=warehouse,
+			qty=2,
+			rate=10,
+			company=company,
+			posting_date=add_days(today(), -1),
+		)
+
+		frappe.db.savepoint("failed_submit")
+		failed = make_stock_entry(
+			item_code=item_a,
+			source=warehouse,
+			qty=2,
+			company=company,
+			posting_date=add_days(today(), -3),
+			do_not_submit=True,
+		)
+		self.assertRaises(frappe.ValidationError, failed.submit)
+		frappe.db.rollback(save_point="failed_submit")
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			receipt = make_stock_entry(
+				item_code=item_b,
+				target=warehouse,
+				qty=3,
+				rate=20,
+				company=company,
+				posting_date=add_days(today(), -2),
+			)
+
+		self.assertEqual(receipt.name, failed.name)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": item_b, "warehouse": warehouse}, "actual_qty"), 5
+		)
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
