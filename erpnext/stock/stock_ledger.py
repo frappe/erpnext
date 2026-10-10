@@ -1674,7 +1674,12 @@ class update_entries_after:
 
 				if self.valuation_method == "Moving Average" and (
 					self.skip_serial_batch_valuation
-					or not (sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle"))
+					or (
+						sle.voucher_type in ("Delivery Note", "Sales Invoice")
+						and not (
+							sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle")
+						)
+					)
 				):
 					rate = self.get_moving_average_rate_for_return(sle)
 
