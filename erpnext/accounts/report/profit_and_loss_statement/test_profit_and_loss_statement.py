@@ -242,3 +242,21 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		for key in expected.keys():
 			with self.subTest(key=key):
 				self.assertEqual(expected.get(key), actual.get(key))
+
+	def test_margin_view_with_numbered_income_account(self):
+		self.create_sales_invoice(qty=1, rate=150)
+		income_root = frappe.db.get_value(
+			"Account", {"company": self.company, "root_type": "Income", "parent_account": ("is", "not set")}
+		)
+		frappe.db.set_value("Account", income_root, "account_number", "4000")
+
+		filters = self.get_report_filters()
+		filters.selected_view = "Margin"
+		period_key = next(p.key for p in build_period_list(filters) if p.from_date <= getdate() <= p.to_date)
+		data = execute(filters)[1]
+
+		root_row = next(row for row in data if row.get("account") == income_root)
+		self.assertEqual(root_row["account_name"], f"4000 - {root_row['acc_name']}")
+		self.assertEqual(root_row[period_key], 100)
+		total_income = next(row for row in data if row.get("account", "").startswith("'Total Income"))
+		self.assertEqual(total_income[period_key], 100)
