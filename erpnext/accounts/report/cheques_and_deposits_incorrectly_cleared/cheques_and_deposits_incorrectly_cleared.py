@@ -5,6 +5,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -13,57 +14,22 @@ def execute(filters=None):
 	return columns, data
 
 
-def build_payment_entry_dict(row: dict) -> dict:
-	row_dict = frappe._dict()
-	row_dict.update(
-		{
-			"payment_document": row.get("doctype"),
-			"payment_entry": row.get("name"),
-			"posting_date": row.get("posting_date"),
-			"clearance_date": row.get("clearance_date"),
-		}
-	)
-	if row.get("payment_type") == "Receive" and row.get("party_type") in ["Customer", "Supplier"]:
-		row_dict.update(
-			{
-				"debit": row.get("amount"),
-				"credit": 0,
-			}
-		)
-	else:
-		row_dict.update(
-			{
-				"debit": 0,
-				"credit": row.get("amount"),
-			}
-		)
-	return row_dict
-
-
-def build_journal_entry_dict(row: dict) -> dict:
-	row_dict = frappe._dict()
-	row_dict.update(
-		{
-			"payment_document": row.get("doctype"),
-			"payment_entry": row.get("name"),
-			"posting_date": row.get("posting_date"),
-			"clearance_date": row.get("clearance_date"),
-			"debit": row.get("debit_in_account_currency"),
-			"credit": row.get("credit_in_account_currency"),
-		}
-	)
-	return row_dict
-
-
 def build_data(filters):
 	vouchers = get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filters)
-	data = []
-	for x in vouchers:
-		if x.doctype == "Payment Entry":
-			data.append(build_payment_entry_dict(x))
-		elif x.doctype == "Journal Entry":
-			data.append(build_journal_entry_dict(x))
-	return data
+	return [build_voucher_dict(voucher) for voucher in vouchers]
+
+
+def build_voucher_dict(row: dict) -> dict:
+	return frappe._dict(
+		{
+			"payment_document": row.get("doctype"),
+			"payment_entry": row.get("name"),
+			"posting_date": row.get("posting_date"),
+			"clearance_date": row.get("clearance_date"),
+			"debit": flt(row.get("debit")),
+			"credit": flt(row.get("credit")),
+		}
+	)
 
 
 def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filters):
@@ -78,8 +44,8 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		.select(
 			doctype_name.as_("doctype"),
 			je.name,
-			jea.debit_in_account_currency,
-			jea.credit_in_account_currency,
+			jea.debit_in_account_currency.as_("debit"),
+			jea.credit_in_account_currency.as_("credit"),
 			je.posting_date,
 			je.clearance_date,
 		)
@@ -100,12 +66,8 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		.select(
 			doctype_name.as_("doctype"),
 			pe.name,
-			Case()
-			.when(pe.paid_from.eq(filters.account), pe.paid_amount)
-			.else_(pe.received_amount)
-			.as_("amount"),
-			pe.payment_type,
-			pe.party_type,
+			Case().when(pe.paid_to.eq(filters.account), pe.received_amount_after_tax).else_(0).as_("debit"),
+			Case().when(pe.paid_from.eq(filters.account), pe.paid_amount_after_tax).else_(0).as_("credit"),
 			pe.posting_date,
 			pe.clearance_date,
 		)
@@ -118,7 +80,30 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		.run(as_dict=1)
 	)
 
-	return journals + payments
+	return journals + payments + get_paid_purchase_invoices(filters)
+
+
+def get_paid_purchase_invoices(filters) -> list[dict]:
+	pi = qb.DocType("Purchase Invoice")
+	return (
+		qb.from_(pi)
+		.select(
+			ConstantColumn("Purchase Invoice").as_("doctype"),
+			pi.name,
+			ConstantColumn(0).as_("debit"),
+			pi.paid_amount.as_("credit"),
+			pi.posting_date,
+			pi.clearance_date,
+		)
+		.where(
+			pi.docstatus.eq(1)
+			& pi.is_paid.eq(1)
+			& pi.cash_bank_account.eq(filters.account)
+			& pi.posting_date.gt(filters.report_date)
+			& pi.clearance_date.lte(filters.report_date)
+		)
+		.run(as_dict=1)
+	)
 
 
 def get_columns():
