@@ -2,16 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import (
+	execute,
 	get_mode_of_payment_details,
 	get_mode_of_payments,
 	get_pos_invoice_data,
 	get_pos_row_key,
 	get_pos_row_labels,
 )
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -210,6 +212,151 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		filters["customer"] = si.customer
 		self.assertTrue(any(flt(row.get("paid_amount")) >= 10000 for row in get_pos_invoice_data(filters)))
 
+	def test_equal_payments_from_different_sources_are_all_summed(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		make_pos_invoice(customer, paid=10000)
+		make_paid_invoice(customer)
+
+		row = run_report(customer)[0]
+		self.assertEqual((row[3], row[5]), (20000, 20000))
+
+	def test_sales_and_taxes_are_in_company_currency(self):
+		si = create_sales_invoice_record(customer="_Test Customer USD")
+		si.update({"currency": "USD", "conversion_rate": 50, "debit_to": "_Test Receivable USD - _TC"})
+		si.items[0].rate = 100
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": "Service Tax",
+				"rate": 10,
+			},
+		)
+		si.insert()
+		si.submit()
+
+		row = run_report(si.customer)[0]
+		self.assertEqual((row[3], row[4]), (5000, 500))
+
+	def test_journal_entry_payment_on_a_later_day_is_reported_against_the_invoice(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		si = create_sales_invoice_record(customer=customer)
+		si.insert()
+		si.submit()
+		make_journal_entry_receipt(si, posting_date=add_days(today(), 1))
+
+		to_date = add_days(today(), 1)
+		self.assertEqual(run_report(customer, to_date=to_date)[0][5], 10000)
+		detail = run_report(customer, to_date=to_date, payment_detail=1)
+		self.assertEqual([row[5] for row in detail], [0, 10000])
+
+	def test_pos_view_deducts_change_from_payments(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		make_pos_invoice(customer, paid=12000)
+
+		self.assertEqual(run_report(customer, is_pos=1)[0][5], 10000)
+
+	def test_pos_view_includes_foreign_currency_invoices(self):
+		si = make_pos_invoice(
+			"_Test Customer USD",
+			paid=10000,
+			currency="USD",
+			conversion_rate=50,
+			debit_to="_Test Receivable USD - _TC",
+		)
+
+		row = run_report(si.customer, is_pos=1)[0]
+		self.assertEqual((row[3], row[5]), (500000, 500000))
+
+	def test_rows_are_limited_to_permitted_invoices(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		other_customer = make_customer("_Test Sales Payment Summary Other Customer")
+		make_pos_invoice(customer, paid=10000)
+		make_pos_invoice(other_customer, paid=10000)
+		user = make_restricted_user(customer)
+
+		for is_pos in (0, 1):
+			frappe.set_user(user)
+			try:
+				row = run_report(None, is_pos=is_pos)[0]
+			finally:
+				frappe.set_user("Administrator")
+			self.assertEqual((row[3], row[5]), (10000, 10000))
+
+
+def run_report(customer, **filters):
+	filters = frappe._dict(
+		{
+			"company": "_Test Company",
+			"from_date": today(),
+			"to_date": today(),
+			"customer": customer,
+			**filters,
+		}
+	)
+	return execute(filters)[1]
+
+
+def make_pos_invoice(customer, paid, **fields):
+	si = create_sales_invoice_record(customer=customer)
+	si.update({"is_pos": 1, **fields})
+	si.append("payments", {"mode_of_payment": "Cash", "account": "_Test Cash - _TC", "amount": paid})
+	si.insert()
+	si.submit()
+	return si
+
+
+def make_paid_invoice(customer, **fields):
+	si = create_sales_invoice_record(customer=customer)
+	si.update(fields)
+	si.insert()
+	si.submit()
+	pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+	pe.update({"mode_of_payment": "Cash", "reference_no": "_Test", "reference_date": today()})
+	pe.insert()
+	pe.submit()
+	return si
+
+
+def make_journal_entry_receipt(si, posting_date):
+	je = frappe.get_doc(
+		{
+			"doctype": "Journal Entry",
+			"voucher_type": "Cash Entry",
+			"company": si.company,
+			"posting_date": posting_date,
+			"accounts": [
+				{"account": "_Test Cash - _TC", "debit_in_account_currency": si.grand_total},
+				{
+					"account": si.debit_to,
+					"credit_in_account_currency": si.grand_total,
+					"party_type": "Customer",
+					"party": si.customer,
+					"reference_type": "Sales Invoice",
+					"reference_name": si.name,
+				},
+			],
+		}
+	)
+	je.insert()
+	je.submit()
+
+
+def make_restricted_user(customer):
+	user = "test_sales_payment_summary@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Sales Payment Summary",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Customer", customer, user)
+	return user
+
 
 def get_filters():
 	return {"from_date": "1900-01-01", "to_date": today(), "company": "_Test Company"}
@@ -230,12 +377,12 @@ def create_mode_of_payment(name, account, company="_Test Company"):
 	return name
 
 
-def create_sales_invoice_record(qty=1):
+def create_sales_invoice_record(qty=1, customer=None):
 	# return sales invoice doc object
 	return frappe.get_doc(
 		{
 			"doctype": "Sales Invoice",
-			"customer": frappe.get_doc("Customer", {"customer_name": "Prestiga-Biz"}).name,
+			"customer": customer or frappe.get_doc("Customer", {"customer_name": "Prestiga-Biz"}).name,
 			"company": "_Test Company",
 			"due_date": today(),
 			"posting_date": today(),
