@@ -1451,6 +1451,7 @@ class update_entries_after:
 
 				if (
 					self.valuation_method == "Moving Average"
+					and sle.voucher_type in ("Delivery Note", "Sales Invoice")
 					and not sle.get("serial_no")
 					and not sle.get("batch_no")
 					and not sle.get("serial_and_batch_bundle")
