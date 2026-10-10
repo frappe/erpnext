@@ -18,24 +18,21 @@ CONTACT_FIELDS = ("mobile_no", "email_id", "first_name", "last_name")
 
 class PartyImportProvider(ImportProvider):
 	def get_import_fields(self) -> dict:
-		"""The party's fields and child tables, plus Contact and Address as extra child tables."""
+		"""The party's fields and child tables, plus Contact and Address as extra child tables
+		when the user may read them."""
+		linked_tables = [
+			{"fieldname": fieldname, "label": label, "fields": get_fields()}
+			for fieldname, doctype, label, get_fields in (
+				("contacts", "Contact", _("Contact"), _contact_docfields),
+				("addresses", "Address", _("Address"), lambda: _doctype_docfields("Address")),
+			)
+			if frappe.has_permission(doctype, "read")
+		]
 		schema = {
 			"fields": [
 				df for df in _doctype_docfields(self.doctype) if df["fieldname"] not in CONTACT_FIELDS
 			],
-			"child_tables": [
-				*_doctype_child_tables(self.doctype),
-				{
-					"fieldname": "contacts",
-					"label": _("Contact"),
-					"fields": _contact_docfields(),
-				},
-				{
-					"fieldname": "addresses",
-					"label": _("Address"),
-					"fields": _doctype_docfields("Address"),
-				},
-			],
+			"child_tables": [*_doctype_child_tables(self.doctype), *linked_tables],
 		}
 		_add_plain_headers(schema, ("contacts", "addresses"))
 		return schema
@@ -52,6 +49,37 @@ class PartyImportProvider(ImportProvider):
 		self._create_contacts(party, contact_rows, find_existing)
 		self._create_addresses(party, address_rows, find_existing)
 		return party, import_action
+
+	def get_export_rows(self, names, tables):
+		"""Each party's linked Contacts and Addresses as rows of those tables, the party's primary
+		first, so importing the file back keeps the same primaries."""
+		linked_tables = [
+			(table, doctype, flag)
+			for table, doctype, flag in (
+				("contacts", "Contact", "is_primary_contact"),
+				("addresses", "Address", "is_primary_address"),
+			)
+			if tables.get(table)
+		]
+		if not linked_tables:
+			return {}
+
+		# A Contact's flag is shared by every party it links to; the party's own field is per party.
+		parties = frappe.get_all(
+			self.doctype,
+			filters={"name": ["in", names]},
+			fields=["name", self._field("primary_contact"), self._field("primary_address")],
+		)
+		rows = {}
+		for table, doctype, flag in linked_tables:
+			primary_field = self._field(f"primary_{doctype.lower()}")
+			primaries = {(party.name, party.get(primary_field)) for party in parties}
+			linked = _linked_records(doctype, self.doctype, names, tables[table])
+			for party, record_name, record in sorted(linked, key=lambda r: r[:2] not in primaries):
+				if flag in record:
+					record[flag] = int((party, record_name) in primaries)
+				rows.setdefault(party, {}).setdefault(table, []).append(record)
+		return rows
 
 	def _field(self, name):
 		"""The party's own fieldname, e.g. ``customer_name`` or ``supplier_name``."""
@@ -173,6 +201,34 @@ def _find_linked(doctype: str, link_doctype: str, link_name: str, filters: dict)
 			*[[field, "=", value] for field, value in filters.items()],
 		],
 	)
+
+
+def _linked_records(doctype, link_doctype, link_names, fields):
+	"""``(link_name, record_name, {field: value})`` for each ``doctype`` record linked to
+	``link_names`` that the user may read, oldest first."""
+	links = frappe.get_all(
+		"Dynamic Link",
+		filters={"link_doctype": link_doctype, "link_name": ["in", link_names], "parenttype": doctype},
+		fields=["parent", "link_name"],
+	)
+	if not links:
+		return []
+
+	records = frappe.get_list(
+		doctype,
+		filters={"name": ["in", list({link.parent for link in links})]},
+		fields=["name", *fields],
+		order_by="creation asc",
+	)
+	parties_by_record = {}
+	for link in links:
+		# dict keys: a record linked to the same party twice is still one row
+		parties_by_record.setdefault(link.parent, {})[link.link_name] = None
+	return [
+		(party, record.name, {field: record.get(field) for field in fields})
+		for record in records
+		for party in parties_by_record[record.name]
+	]
 
 
 def _demote_other_primary_contacts(link_doctype: str, link_name: str, keep: str) -> None:
