@@ -213,7 +213,8 @@ def get_sales_order_details(company_list, filters):
 	)
 
 	if filters.get("item_group"):
-		query = query.where(db_so_item.item_group == filters.item_group)
+		item_groups = [*get_descendants_of("Item Group", filters.item_group), filters.item_group]
+		query = query.where(db_so_item.item_group.isin(item_groups))
 
 	if filters.get("from_date"):
 		query = query.where(db_so.transaction_date >= filters.from_date)

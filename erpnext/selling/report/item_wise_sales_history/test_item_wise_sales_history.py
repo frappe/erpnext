@@ -140,3 +140,11 @@ class TestItemWiseSalesHistory(ERPNextTestSuite):
 		frappe.db.set_value("Customer", so.customer, "customer_group", new_group)
 
 		self.assertEqual(self.so_row(so.name)["customer_group"], order_group)
+
+	def test_item_group_filter_includes_child_groups(self):
+		item_group = frappe.db.get_value("Item", "_Test Item", "item_group")
+		parent_group = frappe.db.get_value("Item Group", item_group, "parent_item_group")
+		so = make_sales_order(item_code="_Test Item", transaction_date="2026-06-01")
+
+		names = {row["sales_order"] for row in self.run_report(item_group=parent_group)[1]}
+		self.assertIn(so.name, names)
