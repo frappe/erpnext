@@ -19,6 +19,7 @@ from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting impo
 from erpnext.stock.doctype.purchase_receipt.services.reservation import (
 	PurchaseReceiptStockReservation,
 )
+from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -269,6 +270,9 @@ class PurchaseReceipt(BuyingController):
 		ProvisionalAccountingService(self).validate_provisional_expense_account()
 
 		self.check_purchase_order_on_hold_or_close("purchase_order")
+
+		if self.subcontracting_receipt and not self.is_return:
+			validate_single_purchase_receipt(self.subcontracting_receipt, self.name)
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be a future date"))

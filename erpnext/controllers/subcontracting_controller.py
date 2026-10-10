@@ -22,7 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import _get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate, get_valuation_method
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
 
 
@@ -72,6 +72,7 @@ class SubcontractingController(StockController):
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
+			rejected_return_rows = self.get_rejected_return_rows()
 			for row in self.supplied_items:
 				kwargs = frappe._dict(
 					{
@@ -91,7 +92,12 @@ class SubcontractingController(StockController):
 					}
 				)
 
-				rate = _get_incoming_rate(kwargs)
+				rate = (
+					0.0
+					if row.reference_name in rejected_return_rows
+					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
+					else _get_incoming_rate(kwargs)
+				)
 				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
@@ -100,6 +106,25 @@ class SubcontractingController(StockController):
 
 		if rate_changed:
 			self.calculate_items_qty_and_amount()
+
+	def get_rejected_return_rows(self):
+		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
+		if not self.is_return:
+			return set()
+
+		rejected_warehouses = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against},
+				fields=["name", "rejected_warehouse"],
+				as_list=True,
+			)
+		)
+		return {
+			row.name
+			for row in self.items
+			if row.warehouse and row.warehouse == rejected_warehouses.get(row.subcontracting_receipt_item)
+		}
 
 	def validate_rejected_warehouse(self):
 		for item in self.get("items"):
@@ -930,7 +955,9 @@ class SubcontractingController(StockController):
 			return transfer_item.qty
 
 		if self.qty_to_be_received.get(key):
-			qty = (flt(item_row.qty) * flt(transfer_item.qty)) / flt(self.qty_to_be_received.get(key))
+			qty = (self.get_qty_for_costing(item_row) * flt(transfer_item.qty)) / flt(
+				self.qty_to_be_received.get(key)
+			)
 			transfer_item.item_details.required_qty = transfer_item.qty
 
 			if transfer_item.serial_no or frappe.get_cached_value(
@@ -984,7 +1011,7 @@ class SubcontractingController(StockController):
 							row.get(self.subcontract_data.order_field),
 							row.get("bom"),
 						)
-					] -= row.qty
+					] -= self.get_qty_for_costing(row)
 
 	def __set_rate_for_serial_and_batch_bundle(self):
 		if self.doctype != "Subcontracting Receipt":
@@ -1268,10 +1295,10 @@ class SubcontractingController(StockController):
 					if not item.get("secondary_item_type") and not item.get("valuation_type"):
 						item.additional_cost_per_qty = (
 							(item.amount * self.total_additional_costs) / total_amt
-						) / item.qty
+						) / self.get_qty_for_costing(item)
 			else:
 				total_qty = sum(
-					flt(item.qty)
+					self.get_qty_for_costing(item)
 					for item in self.get("items")
 					if not item.get("secondary_item_type") and not item.get("valuation_type")
 				)
@@ -1283,6 +1310,10 @@ class SubcontractingController(StockController):
 			for item in self.items:
 				if not item.get("secondary_item_type") and not item.get("valuation_type"):
 					item.additional_cost_per_qty = 0
+
+	def get_qty_for_costing(self, item):
+		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
+		return flt(item.qty) + flt(item.get("rejected_qty")) + flt(item.get("process_loss_qty"))
 
 	@frappe.whitelist()
 	def get_current_stock(self):
