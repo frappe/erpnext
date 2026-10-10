@@ -346,32 +346,7 @@ class StockLedgerEntry(Document):
 		frappe.throw(_(message), exception)
 
 	def check_stock_frozen_date(self):
-		stock_settings = frappe.get_cached_doc("Stock Settings")
-
-		if stock_settings.stock_frozen_upto:
-			if (
-				getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)
-				and stock_settings.stock_auth_role not in frappe.get_roles()
-			):
-				frappe.throw(
-					_("Stock transactions before {0} are frozen").format(
-						formatdate(stock_settings.stock_frozen_upto)
-					),
-					StockFreezeError,
-				)
-
-		stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
-		if stock_frozen_upto_days:
-			older_than_x_days_ago = (
-				add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today()
-			)
-			if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
-				frappe.throw(
-					_("Not allowed to update stock transactions older than {0}").format(
-						stock_frozen_upto_days
-					),
-					StockFreezeError,
-				)
+		check_stock_frozen_date(self.posting_date)
 
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == "00:0":
@@ -471,3 +446,28 @@ def on_doctype_update():
 			index_name="sle_active_posting",
 			where="is_cancelled = 0",
 		)
+
+
+def check_stock_frozen_date(posting_date):
+	stock_settings = frappe.get_cached_doc("Stock Settings")
+
+	if stock_settings.stock_frozen_upto:
+		if (
+			getdate(posting_date) <= getdate(stock_settings.stock_frozen_upto)
+			and stock_settings.stock_auth_role not in frappe.get_roles()
+		):
+			frappe.throw(
+				_("Stock transactions before {0} are frozen").format(
+					formatdate(stock_settings.stock_frozen_upto)
+				),
+				StockFreezeError,
+			)
+
+	stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
+	if stock_frozen_upto_days:
+		older_than_x_days_ago = add_days(getdate(posting_date), stock_frozen_upto_days) <= date.today()
+		if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
+			frappe.throw(
+				_("Not allowed to update stock transactions older than {0}").format(stock_frozen_upto_days),
+				StockFreezeError,
+			)
