@@ -160,6 +160,7 @@ class SubcontractingInwardController:
 					)
 				)
 
+			precision = item.precision("transfer_qty")
 			if self.purpose == "Return Raw Material to Customer":
 				data = frappe.get_value(
 					"Subcontracting Inward Order Received Item",
@@ -167,7 +168,9 @@ class SubcontractingInwardController:
 					["received_qty", "returned_qty", "work_order_qty"],
 					as_dict=True,
 				)
-				if data.returned_qty + item.transfer_qty > data.received_qty - data.work_order_qty:
+				if flt(data.returned_qty + item.transfer_qty, precision) > flt(
+					data.received_qty - data.work_order_qty, precision
+				):
 					frappe.throw(
 						_(
 							"Row #{0}: Returned quantity cannot be greater than available quantity for Item {1}"
@@ -180,7 +183,7 @@ class SubcontractingInwardController:
 					["returned_qty", "delivered_qty"],
 					as_dict=True,
 				)
-				if item.transfer_qty > data.delivered_qty - data.returned_qty:
+				if flt(item.transfer_qty, precision) > flt(data.delivered_qty - data.returned_qty, precision):
 					frappe.throw(
 						_(
 							"Row #{0}: Returned quantity cannot be greater than available quantity to return for Item {1}"
