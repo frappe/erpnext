@@ -20,7 +20,6 @@ from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_li
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
-	get_dashboard_info,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
@@ -115,11 +114,6 @@ class Customer(TransactionBase):
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
-		self.load_dashboard_info()
-
-	def load_dashboard_info(self):
-		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
-		self.set_onload("dashboard_info", info)
 
 	def before_save(self):
 		if not self.on_hold:
