@@ -16,6 +16,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_qty_based_available_batches,
 	get_type_of_transaction,
 	parse_serial_nos,
+	update_available_batches,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -2608,6 +2609,20 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		# 8 is satisfied by B1 alone; B2 is not touched
 		result = get_qty_based_available_batches(batches, 8)
 		self.assertEqual([(b.batch_no, b.qty) for b in result], [("B1", 8)])
+
+	def test_get_qty_based_available_batches_leaves_no_float_remainder(self):
+		batches = [
+			frappe._dict(batch_no="B1", qty=0.7, warehouse="W"),
+			frappe._dict(batch_no="B2", qty=0.3, warehouse="W"),
+			frappe._dict(batch_no="B3", qty=0.5, warehouse="W"),
+		]
+		result = get_qty_based_available_batches(batches, 1.0)
+		self.assertEqual([(b.batch_no, b.qty) for b in result], [("B1", 0.7), ("B2", 0.3)])
+
+	def test_update_available_batches_nets_reservations_without_float_noise(self):
+		batches = [frappe._dict(batch_no="B1", qty=1.0, warehouse="W")]
+		update_available_batches(batches, {("B1", "W"): frappe._dict(qty=-0.8, warehouse="W")})
+		self.assertEqual(batches[0].qty, 0.2)
 
 	def test_get_available_batches_qty_aggregates_by_batch(self):
 		batches = [
