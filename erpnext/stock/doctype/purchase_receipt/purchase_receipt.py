@@ -454,13 +454,12 @@ class PurchaseReceipt(BuyingController):
 					)
 
 				for production_plan_name in production_plan_names:
-					if production_plan_name:
-						frappe.db.set_value(
-							"Production Plan",
-							production_plan_name,
-							{"modified": now(), "modified_by": frappe.session.user},
-							update_modified=False,
-						)
+					frappe.db.set_value(
+						"Production Plan",
+						production_plan_name,
+						{"modified": now(), "modified_by": frappe.session.user},
+						update_modified=False,
+					)
 
 	def on_cancel(self):
 		super().on_cancel()
