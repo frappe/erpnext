@@ -1677,6 +1677,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	def _make_shared_alternative_transfer(self):
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		allow_alternative_item(work_order, "_Test Item Home Desktop 100", "_Test Item")
 		test_stock_entry.make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
 		)
@@ -4076,6 +4077,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			item=fg_item,
 			qty=10,
 			source_warehouse=source_warehouse,
+			allow_alternative_item=1,
 		)
 
 		transfer_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
@@ -6214,7 +6216,9 @@ class TestWorkOrder(ERPNextTestSuite):
 			)
 
 		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[item_a, item_b])
-		wo = make_wo_order_test_record(item=fg_item, qty=10, source_warehouse=source_warehouse)
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=10, source_warehouse=source_warehouse, allow_alternative_item=1
+		)
 
 		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
 		transfer.save()
@@ -6755,6 +6759,21 @@ def allow_overproduction(fieldname, percentage):
 	doc.save()
 
 
+def allow_alternative_item(work_order, item_code, alternative_item_code):
+	work_order.db_set("allow_alternative_item", 1)
+	frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+	if not frappe.db.exists(
+		"Item Alternative", {"item_code": item_code, "alternative_item_code": alternative_item_code}
+	):
+		frappe.get_doc(
+			{
+				"doctype": "Item Alternative",
+				"item_code": item_code,
+				"alternative_item_code": alternative_item_code,
+			}
+		).insert()
+
+
 def make_wo_order_test_record(**args):
 	args = frappe._dict(args)
 	if args.company and args.company != "_Test Company":
@@ -6778,6 +6797,7 @@ def make_wo_order_test_record(**args):
 	wo_order.stock_uom = args.stock_uom or "_Test UOM"
 	wo_order.use_multi_level_bom = args.use_multi_level_bom or 0
 	wo_order.skip_transfer = args.skip_transfer or 0
+	wo_order.allow_alternative_item = args.allow_alternative_item or 0
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
 	wo_order.planned_start_date = args.planned_start_date or now()

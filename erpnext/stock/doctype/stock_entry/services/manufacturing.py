@@ -281,6 +281,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.check_duplicate_entry_for_work_order()
 		self.validate_component_and_quantities()
 		self.validate_finished_good_serial_batch_for_work_order()
+		self.validate_alternative_items()
 
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
@@ -1196,6 +1197,7 @@ class MaterialConsumptionForManufactureStockEntry(ManufactureStockEntry):
 		self.validate_work_order()
 		self.validate_manufactured_qty()
 		self.check_if_operations_completed()
+		self.validate_alternative_items()
 
 	def add_items(self):
 		if self.backflush_based_on == "BOM" or self.wo_doc.skip_transfer:

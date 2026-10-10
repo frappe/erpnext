@@ -221,6 +221,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_work_order_status_for_return()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
+		self.validate_alternative_items()
 
 	def validate_work_order_status_for_return(self):
 		if not (self.doc.is_return and self.wo_doc) or self.wo_doc.status in ("Completed", "Closed"):
