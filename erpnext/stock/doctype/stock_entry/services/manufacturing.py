@@ -1113,10 +1113,14 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 	def validate_conversion_qty(self):
 		production_item = self.wo_doc.production_item
-		consumed_qty = sum(
-			flt(row.transfer_qty)
-			for row in self.doc.items
-			if row.s_warehouse and row.item_code == production_item
+		precision = self.wo_doc.precision("produced_qty")
+		consumed_qty = flt(
+			sum(
+				flt(row.transfer_qty)
+				for row in self.doc.items
+				if row.s_warehouse and row.item_code == production_item
+			),
+			precision,
 		)
 
 		if not consumed_qty:
@@ -1132,8 +1136,10 @@ class RepackStockEntry(BaseManufactureStockEntry):
 		produced_qty = flt(
 			frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty", for_update=is_submitting)
 		)
-		available_qty = produced_qty - get_converted_fg_qty(
-			self.doc.work_order, exclude=self.doc.name, for_update=is_submitting
+		available_qty = flt(
+			produced_qty
+			- get_converted_fg_qty(self.doc.work_order, exclude=self.doc.name, for_update=is_submitting),
+			precision,
 		)
 		if consumed_qty > available_qty:
 			frappe.throw(

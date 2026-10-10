@@ -3411,6 +3411,7 @@ def filter_zero_near_batches(available_batches, kwargs):
 
 
 def get_qty_based_available_batches(available_batches, qty):
+	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
 	batches = []
 	for batch in available_batches:
 		if qty <= 0:
@@ -3427,7 +3428,7 @@ def get_qty_based_available_batches(available_batches, qty):
 					}
 				)
 			)
-			qty -= batch_qty
+			qty = flt(qty - batch_qty, precision)
 		else:
 			batches.append(
 				frappe._dict(
@@ -3444,6 +3445,7 @@ def get_qty_based_available_batches(available_batches, qty):
 
 
 def update_available_batches(available_batches, *reserved_batches) -> None:
+	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
 	for batches in reserved_batches:
 		if batches:
 			for key, data in batches.items():
@@ -3451,7 +3453,7 @@ def update_available_batches(available_batches, *reserved_batches) -> None:
 				batch_not_exists = True
 				for batch in available_batches:
 					if batch.batch_no == batch_no and batch.warehouse == warehouse:
-						batch.qty += data.qty
+						batch.qty = flt(batch.qty + data.qty, precision)
 						batch_not_exists = False
 
 				if batch_not_exists:

@@ -268,11 +268,12 @@ class StatusService:
 			update_produced_qty_in_so_item(self.doc.sales_order, self.doc.sales_order_item)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		precision = self.doc.precision("disassembled_qty")
 		if is_cancel:
-			self.doc.disassembled_qty = max(0, self.doc.disassembled_qty - qty)
+			self.doc.disassembled_qty = max(0, flt(self.doc.disassembled_qty - qty, precision))
 		else:
 			if self.doc.docstatus == 1:
-				self.doc.disassembled_qty += qty
+				self.doc.disassembled_qty = flt(self.doc.disassembled_qty + qty, precision)
 
 		if not is_cancel and self.doc.disassembled_qty > self.doc.produced_qty:
 			frappe.throw(_("Cannot disassemble more than produced quantity."))
