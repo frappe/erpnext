@@ -9,6 +9,8 @@ import frappe
 from frappe.utils import add_days, add_to_date, flt, get_datetime, now, nowdate, today
 
 from erpnext.accounts import utils as accounts_utils
+from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
+from erpnext.accounts.doctype.accounting_period.test_accounting_period import create_accounting_period
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
@@ -162,6 +164,36 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(
 			StockFreezeError, self.make_queued_item_repost, "_Test Item", add_days(today(), -20)
+		)
+
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_backdated_entry_refused_when_later_voucher_in_closed_period(self):
+		warehouse = "Stores - TCP1"
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item_code, to_warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -20)
+		)
+		make_stock_entry(
+			item_code=item_code, from_warehouse=warehouse, qty=4, posting_date=add_days(today(), -5)
+		)
+		period = create_accounting_period(
+			company="_Test Company with perpetual inventory",
+			start_date=add_days(today(), -8),
+			end_date=add_days(today(), -2),
+			period_name=frappe.generate_hash(length=10),
+		)
+		period.closed_documents = []
+		period.append("closed_documents", {"document_type": "Stock Entry", "closed": 1})
+		period.insert()
+
+		self.assertRaises(
+			ClosedAccountingPeriod,
+			make_stock_entry,
+			item_code=item_code,
+			to_warehouse=warehouse,
+			qty=10,
+			rate=50,
+			posting_date=add_days(today(), -15),
 		)
 
 	def test_clear_old_logs(self):
