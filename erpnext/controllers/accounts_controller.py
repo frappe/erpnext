@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, _dict, bold, qb, throw
+from frappe.automation.doctype.auto_repeat.auto_repeat import month_map
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
 from frappe.model.workflow import get_workflow_name
@@ -19,6 +20,7 @@ from frappe.utils import (
 	cint,
 	comma_and,
 	cstr,
+	date_diff,
 	flt,
 	fmt_money,
 	formatdate,
@@ -73,11 +75,11 @@ from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	ItemDetailsCtx,
+	_get_item_details,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_bin_details,
 	get_conversion_factor,
-	get_item_details,
 	get_item_tax_map,
 	get_item_warehouse_,
 )
@@ -791,6 +793,52 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
 			self.validate_non_invoice_documents_schedule()
 
+	def shift_service_dates(self, reference_doc, auto_repeat_doc):
+		"""Move item service dates into the new invoice period (used by Auto Repeat)."""
+		if not (self.from_date and self.to_date and reference_doc.from_date and reference_doc.to_date):
+			return
+
+		from_date = getdate(self.from_date)
+		reference_from_date = getdate(reference_doc.from_date)
+		months = (
+			(from_date.year - reference_from_date.year) * 12 + from_date.month - reference_from_date.month
+		)
+		days = date_diff(from_date, reference_from_date)
+		shift_by_months = auto_repeat_doc.frequency in month_map
+
+		reference_to_date = getdate(reference_doc.to_date)
+		to_date = getdate(self.to_date)
+
+		def shift(date):
+			# Keep the period end aligned, e.g. 1-28 Feb becomes 1-31 Mar.
+			if getdate(date) == reference_to_date:
+				return to_date
+			if not shift_by_months:
+				return add_days(date, days)
+			# Whole months never reverse a period, e.g. 29-31 Jan becomes 28-28 Feb.
+			shifted_date = getdate(add_months(date, months))
+			# Month ends stay month ends, e.g. 1-28 Feb becomes 1-31 Mar.
+			if getdate(date) == get_last_day(date):
+				shifted_date = get_last_day(shifted_date)
+			# Dates inside the reference period stay inside the new period, which can end earlier in the month.
+			if getdate(date) < reference_to_date:
+				return min(shifted_date, to_date)
+			return shifted_date
+
+		for item, reference_item in zip(self.items, reference_doc.items, strict=True):
+			if reference_item.service_start_date:
+				item.service_start_date = shift(reference_item.service_start_date)
+			if reference_item.service_end_date:
+				item.service_end_date = shift(reference_item.service_end_date)
+			# The new period can end later in the month, e.g. 30 Jan-26 Feb becomes 27 Feb-29 Mar.
+			# A start date moved to the period end can then pass the end date, so move the end date after it.
+			if (
+				item.service_start_date
+				and item.service_end_date
+				and getdate(item.service_end_date) < getdate(item.service_start_date)
+			):
+				item.service_end_date = add_days(to_date, 1)
+
 	def before_print(self, settings=None):
 		self.set_missing_terms()
 
@@ -1120,17 +1168,6 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
-			if (
-				self.currency
-				and buying_or_selling == "Buying"
-				and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
-				and self.doctype == "Purchase Invoice"
-			):
-				self.use_transaction_date_exchange_rate = True
-				self.conversion_rate = get_exchange_rate(
-					self.currency, self.company_currency, transaction_date, args
-				)
-
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1177,7 +1214,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						ctx.is_subcontracted = self.is_subcontracted
 
-					ret = get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
+					ret = _get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -4030,7 +4067,7 @@ def get_new_child_item_warehouse(p_doc, item, trans_item: dict, child_doctype: s
 		if is_warehouse_required_for_new_child_item(child_doctype, item, trans_item):
 			frappe.throw(
 				_(
-					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in Stock Settings."
+					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in the Company."
 				).format(frappe.bold(item.item_code))
 			)
 		return None
@@ -4626,14 +4663,12 @@ def update_gl_dict_with_app_based_fields(doc, gl_dict):
 
 
 @frappe.whitelist()
-def get_missing_company_details(doctype, docname):
+def get_missing_company_details(doctype: str, docname: str):
 	from frappe.contacts.doctype.address.address import get_address_display_list
 
 	company = frappe.db.get_value(doctype, docname, "company")
-	if doctype in ["Purchase Order", "Purchase Invoice"]:
+	if doctype in ["Purchase Order", "Purchase Invoice", "Request for Quotation"]:
 		company_address = frappe.db.get_value(doctype, docname, "billing_address")
-	elif doctype in ["Request for Quotation"]:
-		company_address = frappe.db.get_value(doctype, docname, "shipping_address")
 	else:
 		company_address = frappe.db.get_value(doctype, docname, "company_address")
 
@@ -4762,7 +4797,7 @@ def update_doc_company_address(current_doctype, docname, company_address, detail
 		"Delivery Note": ("company_address", "company_address_display"),
 		"POS Invoice": ("company_address", "company_address_display"),
 		"Quotation": ("company_address", "company_address_display"),
-		"Request for Quotation": ("shipping_address", "shipping_address_display"),
+		"Request for Quotation": ("billing_address", "billing_address_display"),
 	}
 
 	address_field, display_field = address_field_map.get(

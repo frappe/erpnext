@@ -22,6 +22,7 @@ from erpnext.stock.report.stock_ageing.stock_ageing import (
 	normalize_fifo_queue,
 )
 from erpnext.stock.utils import add_additional_uom_columns
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 
 class StockBalanceFilter(TypedDict):
@@ -105,7 +106,9 @@ class StockBalanceReport:
 					"out_val": 0.0,
 					"bal_qty": entry.actual_qty,
 					"bal_val": entry.stock_value_difference,
-					"val_rate": 0.0,
+					"val_rate": flt(entry.stock_value_difference / entry.actual_qty)
+					if entry.actual_qty
+					else 0.0,
 				}
 			)
 
@@ -209,11 +212,12 @@ class StockBalanceReport:
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
+		adjustment_netting = AdjustmentNetting()
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
 
-			for entry in self.sle_entries:
+			for entry in adjustment_netting.net(self.sle_entries):
 				group_by_key = self.get_group_by_key(entry)
 				if group_by_key not in self.item_warehouse_map:
 					self.initialize_data(group_by_key, entry)

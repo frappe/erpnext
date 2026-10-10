@@ -161,7 +161,6 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	erpnext.buying.BuyingController
 ) {
 	setup(doc) {
-		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -368,13 +367,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		const field_copy = ["expense_account", "cost_center"];
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			field_copy.push("project");
-		}
-		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
+		this.frm.script_manager.copy_from_first_row("items", row, ["expense_account"]);
 	}
 };
 
@@ -471,6 +464,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 				item_code: d.item_code,
 				sample_quantity: d.sample_quantity,
 				qty: d.qty,
+				company: frm.doc.company,
 			},
 			callback: (r) => {
 				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);

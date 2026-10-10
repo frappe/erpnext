@@ -778,7 +778,13 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
 					"source_field": "stock_qty",
+					"second_source_dt": "Purchase Receipt Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "material_request_item",
+					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 					"percent_join_field": "material_request",
+					"validate_qty": False,
 				}
 			)
 			if cint(self.is_return):
@@ -1962,6 +1968,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
+		self.shift_service_dates(reference_doc, auto_repeat_doc)
 
 	@frappe.whitelist(methods=["POST"])
 	def block_invoice(self, hold_comment: str | None = None, release_date: DateTimeLikeObject | None = None):

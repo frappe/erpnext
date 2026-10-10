@@ -275,7 +275,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	erpnext.buying.BuyingController
 ) {
 	setup() {
-		this.setup_accounting_dimension_triggers();
 		this.frm.custom_make_buttons = {
 			"Purchase Receipt": "Purchase Receipt",
 			"Purchase Invoice": "Purchase Invoice",
@@ -669,20 +668,10 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	}
 
 	items_add(doc, cdt, cdn) {
-		const row = frappe.get_doc(cdt, cdn);
-		const field_copy = [];
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			field_copy.push("project");
-		}
 		if (doc.schedule_date) {
 			frappe.model.set_value(cdt, cdn, "schedule_date", doc.schedule_date);
 		} else {
-			field_copy.push("schedule_date");
-		}
-		if (field_copy.length) {
-			this.frm.script_manager.copy_from_first_row("items", row, field_copy);
+			this.frm.script_manager.copy_from_first_row("items", frappe.get_doc(cdt, cdn), ["schedule_date"]);
 		}
 	}
 

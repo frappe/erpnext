@@ -12,7 +12,6 @@ erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
-		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -462,13 +461,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		const field_copy = ["expense_account", "discount_account", "cost_center"];
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			field_copy.push("project");
-		}
-		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
+		this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "discount_account"]);
 	}
 
 	on_submit() {

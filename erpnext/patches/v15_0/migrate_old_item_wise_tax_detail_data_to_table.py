@@ -3,6 +3,7 @@ import frappe
 from frappe import parse_json
 from frappe.model.document import bulk_insert
 from frappe.utils import flt
+from pypika.terms import ValueWrapper
 
 DOCTYPES_TO_PATCH = {
 	"Sales Taxes and Charges": [
@@ -92,8 +93,13 @@ def get_items_for_docs(parents, doctype):
 	item = frappe.qb.DocType(f"{doctype} Item")
 	additional_fields = []
 
+	# the tax withholding refactor removed these columns, so older databases may not have them;
+	# such documents withheld tax on every item
 	if doctype in TAX_WITHHOLDING_DOCS:
-		additional_fields.append(item.apply_tds)
+		if frappe.db.has_column(f"{doctype} Item", "apply_tds"):
+			additional_fields.append(item.apply_tds)
+		else:
+			additional_fields.append(ValueWrapper(1).as_("apply_tds"))
 
 	return (
 		frappe.qb.from_(item)
@@ -116,7 +122,8 @@ def get_items_for_docs(parents, doctype):
 def get_doc_details(parents, doctype):
 	inv = frappe.qb.DocType(doctype)
 	additional_fields = []
-	if doctype in TAX_WITHHOLDING_DOCS:
+	# without the column, compile_docs derives the withholding base from the items
+	if doctype in TAX_WITHHOLDING_DOCS and frappe.db.has_column(doctype, "base_tax_withholding_net_total"):
 		additional_fields.append(inv.base_tax_withholding_net_total)
 
 	return (
@@ -145,6 +152,13 @@ def compile_docs(doc_info, taxes, items, doctype, tax_doctype):
 
 	for item in items:
 		response[item.parent]["items"].append(item)
+
+	if doctype in TAX_WITHHOLDING_DOCS:
+		for doc in response.values():
+			if "base_tax_withholding_net_total" not in doc:
+				doc.base_tax_withholding_net_total = sum(
+					flt(item.base_net_amount) for item in doc["items"] if item.get("apply_tds")
+				)
 
 	return response.values()
 
@@ -205,13 +219,14 @@ class ItemTax:
 						tax_amount = item_tax_detail.get("tax_amount", 0) * item_proportion
 				# Actual rows where no item_wise_tax_detail
 				elif charge_type == "Actual":
+					row_proportion = item_proportion
 					if tax_row.get("is_tax_withholding_account"):
 						if not item.get("apply_tds") or not doc.get("base_tax_withholding_net_total"):
-							item_proportion = 0
+							row_proportion = 0
 						else:
-							item_proportion = item.base_net_amount / doc.base_tax_withholding_net_total
+							row_proportion = item.base_net_amount / doc.base_tax_withholding_net_total
 
-					tax_amount = tax_row.base_tax_amount_after_discount_amount * item_proportion
+					tax_amount = tax_row.base_tax_amount_after_discount_amount * row_proportion
 
 				if tax_row.get("add_deduct_tax") == "Deduct":
 					tax_amount *= -1

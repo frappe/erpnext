@@ -795,6 +795,7 @@ def close_or_unclose_purchase_orders(names, status):
 
 
 def set_missing_values(source, target):
+	target.set_transaction_date_exchange_rate()
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 	target.run_method("set_use_serial_batch_fields")

@@ -6,7 +6,18 @@ from collections import defaultdict
 
 import frappe
 from frappe.tests import timeout
-from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, nowdate, nowtime, today
+from frappe.utils import (
+	add_days,
+	add_months,
+	add_to_date,
+	cint,
+	flt,
+	get_datetime,
+	now,
+	nowdate,
+	nowtime,
+	today,
+)
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry as make_stock_entry_from_jc
@@ -89,6 +100,62 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(planned2, planned0 + 6)
 
 		return wo_order
+
+	def test_actual_dates_ignore_unsubmitted_stock_entries(self):
+		work_order = self.make_work_order_for_actual_dates()
+		for posting_time in ("02:00:00", "22:00:00"):
+			entry = self.make_manufacture_for_actual_dates(work_order, posting_time)
+			entry.submit()
+			entry.cancel()
+		for posting_time in ("01:30:00", "23:00:00"):
+			draft = self.make_manufacture_for_actual_dates(work_order, posting_time, qty=1)
+			entry = self.make_manufacture_for_actual_dates(work_order, "05:00:00")
+			entry.submit()
+			work_order.reload()
+			self.assertEqual(work_order.status, "Completed")
+			self.assertEqual(work_order.actual_start_date, get_datetime(f"{today()} 05:00:00"))
+			self.assertEqual(work_order.actual_end_date, work_order.actual_start_date)
+			entry.cancel()
+			draft.delete()
+
+	def test_actual_dates_recompute_on_cancellation(self):
+		work_order = self.make_work_order_for_actual_dates()
+		first = self.make_manufacture_for_actual_dates(work_order, "03:00:00", qty=1)
+		first.submit()
+		last = self.make_manufacture_for_actual_dates(work_order, "05:00:00", qty=1)
+		last.submit()
+		work_order.reload()
+		self.assertEqual(work_order.actual_start_date, get_datetime(f"{today()} 03:00:00"))
+		self.assertEqual(work_order.actual_end_date, get_datetime(f"{today()} 05:00:00"))
+
+		first.cancel()
+		work_order.reload()
+		self.assertNotEqual(work_order.status, "Completed")
+		self.assertEqual(work_order.actual_start_date, get_datetime(f"{today()} 05:00:00"))
+		self.assertIsNone(work_order.actual_end_date)
+		last.cancel()
+		work_order.reload()
+		self.assertIsNone(work_order.actual_start_date)
+		self.assertIsNone(work_order.actual_end_date)
+
+	def make_work_order_for_actual_dates(self):
+		for item in ("_Test Item", "_Test Item Home Desktop 100"):
+			test_stock_entry.make_stock_entry(
+				item_code=item,
+				target="Stores - _TC",
+				qty=100,
+				basic_rate=100,
+				posting_date=today(),
+				posting_time="01:00:00",
+			)
+		work_order = make_wo_order_test_record(qty=2, source_warehouse="Stores - _TC", skip_transfer=1)
+		self.assertFalse(work_order.operations)
+		return work_order
+
+	def make_manufacture_for_actual_dates(self, work_order, posting_time, qty=2):
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", qty))
+		entry.update({"set_posting_time": 1, "posting_date": today(), "posting_time": posting_time})
+		return entry.insert()
 
 	def test_over_production(self):
 		wo_doc = self.check_planned_qty()
@@ -507,6 +574,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entries.reverse()
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
+
+	def test_skip_transfer_work_order_completed_with_fractional_process_loss(self):
+		# 11.2 + 0.2 == 11.399999999999999 in float, which must still complete 11.4
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{"docstatus": 1, "skip_transfer": 1, "qty": 11.4, "produced_qty": 11.2, "process_loss_qty": 0.2}
+		)
+
+		self.assertEqual(work_order.get_status(), "Completed")
 
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
@@ -2057,8 +2133,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
 
 		return_entry = make_stock_return_entry(wo.name)
-		return_entry.company = wo.company
 		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_entry.save)
+
+	def test_return_entry_uses_work_order_company(self):
+		"""Return Components must take the company from the Work Order, not the user default."""
+		wo = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		for item_code in ("_Test Item", "_Test Item Home Desktop 100"):
+			test_stock_entry.make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+			)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
+
+		previous_default = frappe.defaults.get_user_default("company")
+		self.addCleanup(self._set_default_company, previous_default)
+		self._set_default_company("_Test Company 1")
+
+		return_entry = make_stock_return_entry(wo.name)
+		self.assertEqual(return_entry.company, wo.company)
+
+	@staticmethod
+	def _set_default_company(company):
+		frappe.defaults.set_user_default("company", company)
+		# new_doc caches a per doctype template, drop it so the changed default applies
+		frappe.local.new_doc_templates.clear()
 
 	###
 	def test_non_consumed_material_return_against_work_order(self):
@@ -2122,7 +2219,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(wo_doc.status, "Completed")
 		return_ste_doc = make_stock_return_entry(wo_doc.name)
-		return_ste_doc.company = wo_doc.company
 		return_ste_doc.save()
 
 		self.assertTrue(return_ste_doc.is_return)
@@ -2157,7 +2253,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		close_work_order(wo.name, "Closed")
 
 		first_return = make_stock_return_entry(wo.name)
-		first_return.company = wo.company
 		first_return.items[0].qty = 1
 		first_return.submit()
 
@@ -4128,6 +4223,41 @@ class TestWorkOrder(ERPNextTestSuite):
 		_, sl_data = get_stock_ledger_preview(transfer, frappe._dict(company=transfer.company))
 
 		self.assertEqual(len(sl_data), 2)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_unreserved_component_keeps_partially_reserved_status(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		production_item = "Test Unreserved Component FG"
+		reserved_rm, unreserved_rm = "Test Reserved Component RM", "Test Unreserved Component RM"
+		source_warehouse = "Stores - _TC"
+
+		for item in (production_item, reserved_rm, unreserved_rm):
+			make_item(item, {"is_stock_item": 1})
+
+		make_bom(
+			item=production_item,
+			source_warehouse=source_warehouse,
+			raw_materials=[reserved_rm, unreserved_rm],
+		)
+		make_stock_entry_test_record(item_code=reserved_rm, target=source_warehouse, qty=10, basic_rate=100)
+
+		wo = make_wo_order_test_record(
+			item=production_item, qty=10, reserve_stock=1, source_warehouse=source_warehouse
+		)
+		wo.reload()
+		self.assertEqual(wo.status, "Stock Partially Reserved")
+
+		make_stock_entry_test_record(item_code=unreserved_rm, target=source_warehouse, qty=10, basic_rate=100)
+		make_stock_reservation_entries(wo, items=get_unreserved_items(wo), is_transfer=0)
+
+		wo.reload()
+		self.assertEqual(wo.status, "Stock Reserved")
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",

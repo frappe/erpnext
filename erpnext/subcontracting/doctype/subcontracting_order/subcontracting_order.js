@@ -137,6 +137,7 @@ frappe.ui.form.on("Subcontracting Order", {
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
 		}
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	purchase_order: (frm) => {

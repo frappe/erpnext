@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, IfNull, Sum
+from frappe.query_builder.functions import Coalesce, CombineDatetime, IfNull, Max, Min, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -739,27 +739,22 @@ class WorkOrder(Document):
 		else:
 			status = "Cancelled"
 
-		if (
-			self.skip_transfer
-			and self.produced_qty
-			and self.qty > (flt(self.produced_qty) + flt(self.process_loss_qty))
-		):
-			status = "In Process"
+		if self.skip_transfer and self.produced_qty:
+			precision = frappe.get_precision("Work Order", "produced_qty")
+			total_qty = flt(self.produced_qty, precision) + flt(self.process_loss_qty, precision)
+			if flt(self.qty, precision) > flt(total_qty, precision):
+				status = "In Process"
 
 		if status != "Completed":
 			if not all(d.status == "Pending" for d in self.operations):
 				status = "In Process"
 
 		if status == "Not Started" and self.reserve_stock:
-			for row in self.required_items:
-				if not row.stock_reserved_qty:
-					continue
-
-				if row.stock_reserved_qty >= row.required_qty:
-					status = "Stock Reserved"
-				else:
+			if any(row.stock_reserved_qty for row in self.required_items):
+				if any(row.stock_reserved_qty < row.required_qty for row in self.required_items):
 					status = "Stock Partially Reserved"
-					break
+				else:
+					status = "Stock Reserved"
 
 		return status
 
@@ -1327,21 +1322,10 @@ class WorkOrder(Document):
 		if self.track_semi_finished_goods:
 			return
 
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_reserved_qty_for_sub_assembly,
-		)
-
-		qty_dict = {"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)}
-
-		if self.production_plan_sub_assembly_item and self.production_plan:
-			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
-				self.production_item, self.fg_warehouse
-			)
-
 		update_bin_qty(
 			self.production_item,
 			self.fg_warehouse,
-			qty_dict,
+			{"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)},
 		)
 
 		if self.material_request:
@@ -1403,7 +1387,7 @@ class WorkOrder(Document):
 			doc = frappe.get_doc("Production Plan", self.production_plan)
 			doc.flags.ignore_permissions = True
 			doc.update_status_and_bin_qty()
-			doc.update_raw_material_bin_qty({d.item_code for d in self.required_items})
+			doc.update_bin_qty({d.item_code for d in self.required_items})
 
 	def update_work_order_qty_in_so(self):
 		if (not self.sales_order and not self.sales_order_item) or self.production_plan_sub_assembly_item:
@@ -1593,7 +1577,7 @@ class WorkOrder(Document):
 
 		return holidays[holiday_list]
 
-	def update_operation_status(self):
+	def update_operation_status(self, operation_id=None):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -1608,7 +1592,7 @@ class WorkOrder(Document):
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif qty <= flt(max_allowed_qty_for_wo, precision):
+			elif qty <= flt(max_allowed_qty_for_wo, precision) or d.name != operation_id:
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
@@ -1623,21 +1607,24 @@ class WorkOrder(Document):
 			if actual_end_dates:
 				self.actual_end_date = max(actual_end_dates)
 		else:
-			data = frappe.get_all(
-				"Stock Entry",
-				fields=[{"TIMESTAMP": ["posting_date", "posting_time"], "as": "posting_datetime"}],
-				filters={
-					"work_order": self.name,
-					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
-				},
+			stock_entry = frappe.qb.DocType("Stock Entry")
+			posting_datetime = CombineDatetime(stock_entry.posting_date, stock_entry.posting_time)
+			data = (
+				frappe.qb.from_(stock_entry)
+				.select(Min(posting_datetime).as_("start_date"), Max(posting_datetime).as_("end_date"))
+				.where(
+					(stock_entry.work_order == self.name)
+					& (stock_entry.docstatus == 1)
+					& (stock_entry.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
+				)
+				.run(as_dict=True)
 			)
-
-			if data and len(data):
-				dates = [d.posting_datetime for d in data]
-				self.db_set("actual_start_date", min(dates))
-
-				if self.status == "Completed":
-					self.db_set("actual_end_date", max(dates))
+			self.db_set(
+				{
+					"actual_start_date": data[0].start_date,
+					"actual_end_date": data[0].end_date if self.status == "Completed" else None,
+				}
+			)
 
 		self.set_lead_time()
 
@@ -3215,7 +3202,7 @@ def _set_material_request_item(source, target, source_parent):
 
 
 @frappe.whitelist()
-def make_stock_return_entry(work_order):
+def make_stock_return_entry(work_order: str):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
 
 	non_consumed_items = get_available_materials(work_order)
@@ -3228,6 +3215,7 @@ def make_stock_return_entry(work_order):
 	stock_entry.from_bom = 1
 	stock_entry.is_return = 1
 	stock_entry.work_order = work_order
+	stock_entry.company = wo_doc.company
 	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.bom_no = wo_doc.bom_no
 	stock_entry.add_transfered_raw_materials_in_items()

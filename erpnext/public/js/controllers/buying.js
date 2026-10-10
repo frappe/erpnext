@@ -180,7 +180,11 @@ erpnext.buying = {
 
 						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+						const is_drop_ship = this.frm.doc.items.some((item) => item.delivered_by_supplier);
+						if (
+							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+							!is_drop_ship
+						) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
@@ -286,18 +290,6 @@ erpnext.buying = {
 							company: doc.company,
 							include_child_warehouses: true,
 						},
-					});
-				}
-			}
-
-			project(doc, cdt, cdn) {
-				var item = frappe.get_doc(cdt, cdn);
-				if (item.project) {
-					$.each(this.frm.doc["items"] || [], function (i, other_item) {
-						if (!other_item.project) {
-							other_item.project = item.project;
-							refresh_field("project", other_item.name, other_item.parentfield);
-						}
 					});
 				}
 			}

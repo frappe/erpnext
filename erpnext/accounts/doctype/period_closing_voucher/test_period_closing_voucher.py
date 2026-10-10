@@ -392,6 +392,58 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		pcv.submit()
 		self.assertEqual(pcv.docstatus, 1)
 
+	def test_stock_value_difference_within_tolerance_needs_confirmation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("Test PCV Tolerance Item", {"is_stock_item": 1})
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-03-15",
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": se.name}, ["name", "stock_value_difference"], as_dict=1
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 5
+		)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		result = pcv.get_stock_value_difference()
+		self.assertEqual(result["difference"], -5)
+		self.assertTrue(result["within_tolerance"])
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 100
+		)
+
+		pcv.reload()
+		result = pcv.get_stock_value_difference()
+		self.assertFalse(result["within_tolerance"])
+
+		pcv.stock_value_difference = result["difference"]
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 5
+		)
+		self.make_completed_stock_closing_entry(pcv.period_start_date, pcv.period_end_date)
+
+		pcv.reload()
+		pcv.stock_value_difference = -5
+		pcv.submit()
+
+		pcv.reload()
+		self.assertEqual(pcv.docstatus, 1)
+		self.assertEqual(pcv.stock_value_difference, -5)
+
 	def test_batch_valuation_seeded_from_stock_closing_after_period_closing(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -518,6 +570,77 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		sce.remove_stock_closing()
 		sce.create_stock_closing_balance_entries()
 		sce.db_set("status", "Completed")
+
+	def test_dimension_grouped_opening_balance_matches_gl_scan(self):
+		"""
+		A dimension-grouped Balance Sheet must produce identical per-dimension
+		figures whether opening balances come from
+
+		- Account Closing Balance (the fast path) or
+		- from a full GL scan (the fallback).
+		"""
+		from frappe.utils import add_days, getdate
+
+		from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+		from erpnext.accounts.report.financial_statements import build_period_list
+
+		company = "Test PCV Company"
+		cc1 = create_cost_center("Test Cost Center 1")
+		cc2 = create_cost_center("Test Cost Center 2")
+
+		# Post to two cost centers, then close the year so balances land in Account Closing Balance.
+		for amount, cost_center in ((400, cc1), (200, cc2)):
+			jv = make_journal_entry(
+				posting_date="2021-03-15",
+				amount=amount,
+				account1="Cash - TPC",
+				account2="Sales - TPC",
+				cost_center=cost_center,
+				company=company,
+				save=False,
+			)
+			jv.company = company
+			jv.save()
+			jv.submit()
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31")
+		report_date = add_days(getdate(pcv.period_end_date), 1)
+
+		report_filters = frappe._dict(
+			company=company,
+			period_start_date=report_date,
+			period_end_date=report_date,
+			periodicity="Yearly",
+			filter_based_on="Date Range",
+			accumulated_values=True,
+			group_by_dimension="Cost Center",
+		)
+
+		period_list = build_period_list(report_filters)
+		period_keys = [p.key for p in period_list]
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		def figures(data):
+			return {
+				row["account_name"]: {k: row.get(k) for k in period_keys}
+				for row in data
+				if row.get("account_name")
+			}
+
+		# Fast path: opening balance sourced from Account Closing Balance.
+		acb_figures = figures(execute(report_filters)[1])
+
+		# Fallback: force a full GL scan and expect the same numbers.
+		with self.change_settings("Accounts Settings", {"ignore_account_closing_balance": 1}):
+			gl_figures = figures(execute(report_filters)[1])
+
+		self.assertEqual(acb_figures, gl_figures)
+
+		# the fast path must carry per-dimension opening balances, not aggregates or zeros
+		self.assertEqual(acb_figures["Cash"][key_for(cc1)], 400)
+		self.assertEqual(acb_figures["Cash"][key_for(cc2)], 200)
 
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()
