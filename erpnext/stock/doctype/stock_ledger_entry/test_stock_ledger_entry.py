@@ -1899,6 +1899,77 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		if frappe.db.db_type == "mariadb":
 			self.assertIn("for update", frappe.db.last_query.lower())
 
+	def test_repost_keeps_the_fifo_lot_of_a_serial_finished_good(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		company = "_Test Company with perpetual inventory"
+		source, warehouse = "Finished Goods - TCP1", "Stores - TCP1"
+		rm = make_item(properties={"valuation_method": "FIFO"}).name
+		fg = make_item(
+			properties={
+				"valuation_method": "FIFO",
+				"has_serial_no": 1,
+				"use_serial_no_wise_valuation": 0,
+				"serial_no_series": "RFL-.#####",
+			}
+		).name
+		make_stock_entry(
+			item_code=rm, target=source, qty=19, rate=121, company=company, posting_date=add_days(today(), -6)
+		)
+		repack = make_stock_entry(
+			item_code=rm,
+			source=source,
+			qty=2,
+			purpose="Repack",
+			company=company,
+			posting_date=add_days(today(), -2),
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{"item_code": fg, "t_warehouse": warehouse, "qty": 5, "transfer_qty": 5, "is_finished_item": 1},
+		)
+		repack.save()
+		repack.submit()
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			receipt = make_stock_entry(
+				item_code=fg,
+				target=warehouse,
+				qty=2,
+				rate=113,
+				company=company,
+				posting_date=add_days(today(), -3),
+				do_not_save=True,
+			)
+			receipt.append(
+				"items",
+				{
+					"item_code": rm,
+					"t_warehouse": source,
+					"qty": 14,
+					"transfer_qty": 14,
+					"basic_rate": 19,
+					"set_basic_rate_manually": 1,
+				},
+			)
+			receipt.save()
+			receipt.submit()
+			make_stock_entry(
+				item_code=fg,
+				target=warehouse,
+				qty=4,
+				rate=108,
+				company=company,
+				posting_date=add_days(today(), -4),
+			)
+		repost_entries()
+
+		issue = make_stock_entry(
+			item_code=fg, source=warehouse, qty=8, company=company, posting_date=add_days(today(), -1)
+		)
+		self.assertSLEs(issue, [{"stock_value_difference": -(4 * 108 + 2 * 113 + 2 * 48.4)}])
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
