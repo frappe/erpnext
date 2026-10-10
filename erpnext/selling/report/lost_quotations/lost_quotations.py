@@ -14,7 +14,8 @@ def execute(filters=None):
 	columns = get_columns(filters.get("group_by"))
 	from_date, to_date = get_timespan_date_range(filters.get("timespan").lower())
 	lost_quotations = get_lost_quotations(filters.get("company"), from_date, to_date)
-	data = get_data(lost_quotations, filters.get("group_by"))
+	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+	data = get_data(lost_quotations, filters.get("group_by"), currency)
 	return columns, data
 
 
@@ -28,13 +29,13 @@ def get_columns(group_by: Literal["Lost Reason", "Competitor"]):
 			"width": 200,
 		},
 		{
-			"filedname": "lost_quotations",
+			"fieldname": "lost_quotations",
 			"label": _("Lost Quotations"),
 			"fieldtype": "Int",
 			"width": 150,
 		},
 		{
-			"filedname": "lost_quotations_pct",
+			"fieldname": "lost_quotations_pct",
 			"label": _("Lost Quotations %"),
 			"fieldtype": "Percent",
 			"width": 200,
@@ -43,13 +44,21 @@ def get_columns(group_by: Literal["Lost Reason", "Competitor"]):
 			"fieldname": "lost_value",
 			"label": _("Lost Value"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{
-			"filedname": "lost_value_pct",
+			"fieldname": "lost_value_pct",
 			"label": _("Lost Value %"),
 			"fieldtype": "Percent",
 			"width": 200,
+		},
+		{
+			"fieldname": "currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1,
+			"width": 0,
 		},
 	]
 
@@ -70,7 +79,7 @@ def get_lost_quotations(company: str, from_date: str, to_date: str) -> list[str]
 	)
 
 
-def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Competitor"]):
+def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Competitor"], currency: str):
 	"""Return quotation value grouped by lost reason or competitor"""
 	if group_by == "Lost Reason":
 		fieldname = "lost_reason"
@@ -133,4 +142,4 @@ def get_data(lost_quotations: list[str], group_by: Literal["Lost Reason", "Compe
 		.groupby(split.reason)
 	)
 
-	return query.run()
+	return [(*row, currency) for row in query.run()]
