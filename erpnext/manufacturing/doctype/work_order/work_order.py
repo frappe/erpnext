@@ -2390,7 +2390,9 @@ class WorkOrder(Document):
 	def remove_additional_items(self, stock_entry):
 		for row in stock_entry.items:
 			for item in self.required_items:
-				if row.item_code == item.item_code and row.name == item.voucher_detail_reference:
+				if (row.original_item or row.item_code) == item.item_code and (
+					row.name == item.voucher_detail_reference
+				):
 					item.delete()
 
 	def add_additional_items(self, stock_entry):
@@ -2404,8 +2406,9 @@ class WorkOrder(Document):
 
 		additional_items = frappe._dict()
 		for row in stock_entry.items:
-			if row.item_code not in required_items:
-				additional_items.setdefault(row.item_code, []).append(row)
+			item_code = row.original_item or row.item_code
+			if item_code not in required_items:
+				additional_items.setdefault(item_code, []).append(row)
 
 		for item_code, rows in additional_items.items():
 			for row in rows:
