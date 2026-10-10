@@ -599,7 +599,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		self.assertEqual(flt(lcv.items[0].applicable_charges, 2), 41.07)
 		self.assertEqual(flt(lcv.items[2].applicable_charges, 2), 41.08)
 
-	def test_landed_cost_remainder_goes_to_the_largest_item(self):
+	def test_landed_cost_remainder_never_turns_an_item_negative(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",

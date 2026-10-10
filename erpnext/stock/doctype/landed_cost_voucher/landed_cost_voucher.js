@@ -140,18 +140,19 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 					total_charges += item.applicable_charges;
 				});
 
-				var diff = flt(
-					this.frm.doc.total_taxes_and_charges - total_charges,
-					precision("applicable_charges", items[0])
-				);
-				if (diff) {
-					var largest_item = items.reduce((largest, item) =>
-						flt(item[based_on]) >= flt(largest[based_on]) ? item : largest
+				var charge_precision = precision("applicable_charges", items[0]);
+				var total = flt(this.frm.doc.total_taxes_and_charges);
+				var sign = total < 0 ? -1 : 1;
+				var diff = flt(total - total_charges, charge_precision);
+				for (const item of items.slice().reverse()) {
+					if (!diff) break;
+					var share = flt(item.applicable_charges) * sign;
+					var adjustment = diff * sign > 0 ? diff : sign * Math.max(diff * sign, -share);
+					item.applicable_charges = flt(
+						flt(item.applicable_charges) + adjustment,
+						charge_precision
 					);
-					largest_item.applicable_charges = flt(
-						largest_item.applicable_charges + diff,
-						precision("applicable_charges", largest_item)
-					);
+					diff = flt(diff - adjustment, charge_precision);
 				}
 				refresh_field("items");
 			}
