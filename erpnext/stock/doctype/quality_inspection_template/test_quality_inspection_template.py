@@ -20,8 +20,16 @@ class TestQualityInspectionTemplate(ERPNextTestSuite):
 		return template
 
 	def test_formula_based_row_requires_formula(self):
-		template = self.make_template({"specification": "_Test QIT Moisture", "formula_based_criteria": 1})
-		self.assertRaises(frappe.ValidationError, template.insert)
+		for formula in (None, "   ", "\n\t"):
+			with self.subTest(formula=formula):
+				template = self.make_template(
+					{
+						"specification": "_Test QIT Moisture",
+						"formula_based_criteria": 1,
+						"acceptance_formula": formula,
+					}
+				)
+				self.assertRaises(frappe.ValidationError, template.insert)
 
 	def test_rows_that_can_never_pass_are_rejected(self):
 		invalid_rows = (

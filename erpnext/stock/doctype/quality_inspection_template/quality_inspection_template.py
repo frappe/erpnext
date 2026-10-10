@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 class QualityInspectionTemplate(Document):
@@ -62,7 +62,7 @@ class QualityInspectionTemplate(Document):
 			)
 
 	def validate_acceptance_formula(self, row):
-		if row.formula_based_criteria and not row.acceptance_formula:
+		if row.formula_based_criteria and not cstr(row.acceptance_formula).strip():
 			frappe.throw(
 				_("Row #{0}: Acceptance Criteria Formula is required for parameter {1}").format(
 					row.idx, frappe.bold(row.specification)
