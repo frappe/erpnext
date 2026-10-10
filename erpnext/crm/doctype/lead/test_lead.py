@@ -42,6 +42,60 @@ class TestLead(unittest.TestCase):
 			contact_doc = frappe.get_doc("Contact", contact)
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
+	def test_customer_from_lead_keeps_records_the_user_cannot_write(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		user = "_test_lead_master_manager@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sales Master Manager",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Sales Master Manager"}],
+				}
+			).insert(ignore_permissions=True)
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+
+		frappe.set_user(user)
+		try:
+			customer.insert()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "opportunity_from"), "Lead")
+
+	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		quotation = make_quotation(do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.insert()
+		quotation.submit()
+
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.insert()
+
+		self.assertEqual(
+			frappe.db.get_value("Quotation", quotation.name, ["quotation_to", "party_name"]),
+			("Customer", customer.name),
+		)
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", opportunity.name, ["opportunity_from", "party_name"]),
+			("Customer", customer.name),
+		)
+
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 

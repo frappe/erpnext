@@ -11,7 +11,7 @@
 
 <div style = "max-height: 400px; overflow-y: auto;">
 {% $.each(data, (idx, d) => { %}
-	<div class="row form-dashboard-section job-card-link form-links border-gray-200" data-name="{{d.name}}">
+	<div class="row form-dashboard-section job-card-link form-links border-gray-200" data-name="{{ frappe.utils.escape_html(d.name) }}">
 		<div class="section-head section-head-job-card">
 			{{ d.operation }} - {{ d.production_item }}
 			<span class="ml-2 collapse-indicator-job mb-1" style="">
@@ -64,8 +64,8 @@
 				</div>
 			</div>
 			<div class="form-column col-sm-2 text-center">
-				<button style="width: 85px;" class="btn btn-default btn-start {% if(d.status !== "Open") { %} hide {% } %}" job-card="{{d.name}}"> {{__("Start")}} </button>
-				<button style="width: 85px;" class="btn btn-default btn-complete {% if(d.status === "Open") { %} hide {% } %}" job-card="{{d.name}}" pending-qty="{{d.for_quantity - d.transferred_qty}}"> {{__("Complete")}} </button>
+				<button style="width: 85px;" class="btn btn-default btn-start {% if(d.status !== "Open") { %} hide {% } %}" job-card="{{ frappe.utils.escape_html(d.name) }}"> {{__("Start")}} </button>
+				<button style="width: 85px;" class="btn btn-default btn-complete {% if(d.status === "Open") { %} hide {% } %}" job-card="{{ frappe.utils.escape_html(d.name) }}" pending-qty="{{d.for_quantity - d.transferred_qty}}"> {{__("Complete")}} </button>
 			</div>
 		</div>
 
@@ -77,7 +77,7 @@
 				</div>
 				{% if(d.make_material_request) { %}
 					<div class="form-column col-sm-10 text-right">
-						<button class="btn btn-default btn-xs make-material-request" job-card="{{d.name}}">{{ __("Material Request") }}</button>
+						<button class="btn btn-default btn-xs make-material-request" job-card="{{ frappe.utils.escape_html(d.name) }}">{{ __("Material Request") }}</button>
 					</div>
 				{% } %}
 			</div>

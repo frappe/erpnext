@@ -2,7 +2,7 @@ import frappe
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import escape_html, flt, nowdate
 
-from erpnext.stock.utils import get_stock_balance
+from erpnext.stock.utils import _get_stock_balance
 
 
 @frappe.whitelist()
@@ -16,6 +16,8 @@ def get_data(
 	sort_order="desc",
 ):
 	"""Return data to render the warehouse capacity dashboard."""
+	frappe.has_permission("Item", "read", throw=True)
+
 	filters = get_filters(item_code, warehouse, parent_warehouse, company)
 
 	no_permission, filters = get_warehouse_filter_based_on_permissions(filters)
@@ -72,7 +74,7 @@ def get_warehouse_capacity_data(filters, start):
 	)
 
 	for entry in capacity_data:
-		balance_qty = get_stock_balance(entry.item_code, entry.warehouse, nowdate()) or 0
+		balance_qty = _get_stock_balance(entry.item_code, entry.warehouse, nowdate()) or 0
 		entry.update(
 			{
 				"warehouse": escape_html(entry.warehouse),

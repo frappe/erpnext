@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, nowdate, nowtime
 
-from erpnext.stock.utils import get_or_make_bin, get_stock_balance
+from erpnext.stock.utils import _get_stock_balance, get_or_make_bin
 
 
 class StockReservationEntry(Document):
@@ -460,7 +460,7 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 		if qty_to_be_reserved > allowed_qty:
-			actual_qty = get_stock_balance(self.item_code, self.warehouse)
+			actual_qty = _get_stock_balance(self.item_code, self.warehouse)
 			msg = """
 				Cannot reserve more than Allowed Qty {} {} for Item {} against {} {}.<br /><br />
 				The <b>Allowed Qty</b> is calculated as follows:<br />
@@ -524,7 +524,7 @@ def get_available_qty_to_reserve(
 			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=[ignore_sre]
 		)
 
-	available_qty = get_stock_balance(item_code, warehouse)
+	available_qty = _get_stock_balance(item_code, warehouse)
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -770,6 +770,33 @@ def get_sre_reserved_serial_nos_details(
 	return frappe._dict(query.run())
 
 
+def get_sre_reserved_serial_nos_for_voucher_detail_nos(voucher_type: str, voucher_detail_nos: list) -> dict:
+	"""Returns {voucher_detail_no: set of reserved Serial Nos}, including the delivered ones."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sre.voucher_detail_no, sb_entry.serial_no)
+		.distinct()
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_detail_no.isin(voucher_detail_nos))
+			& (sre.reservation_based_on == "Serial and Batch")
+			& (sb_entry.serial_no.isnotnull())
+		)
+	)
+
+	reserved_serial_nos = {}
+	for voucher_detail_no, serial_no in query.run():
+		reserved_serial_nos.setdefault(voucher_detail_no, set()).add(serial_no)
+
+	return reserved_serial_nos
+
+
 def get_sre_reserved_batch_nos_details(
 	item_code: str, warehouse: str, batch_nos: list | None = None, ignore_voucher_nos: list | None = None
 ) -> dict:
@@ -814,6 +841,7 @@ def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict
 		frappe.qb.from_(sre)
 		.select(
 			sre.name,
+			sre.company,
 			sre.item_code,
 			sre.warehouse,
 			sre.voucher_type,
@@ -868,7 +896,7 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		bundle.posting_date = nowdate()
 		bundle.posting_time = nowtime()
 
-		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
+		for field in ("company", "item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])
 
 		for sb_entry in sb_entries:
@@ -882,7 +910,7 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
 	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
 
-	if get_stock_reservation_entries_for_voucher(
+	if _get_stock_reservation_entries_for_voucher(
 		voucher_type, voucher_no, voucher_detail_no, fields=["name"], ignore_status=True
 	):
 		return True
@@ -919,6 +947,11 @@ def create_stock_reservation_entries_for_so_items(
 	if items_details:
 		for item in items_details:
 			so_item = frappe.get_doc("Sales Order Item", item.get("sales_order_item"))
+			if so_item.parent != sales_order.name:
+				frappe.throw(
+					_("Sales Order Item {0} does not belong to {1}").format(so_item.name, sales_order.name)
+				)
+
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
 				flt(item.get("qty_to_reserve"))
@@ -940,6 +973,17 @@ def create_stock_reservation_entries_for_so_items(
 	for item in items if items_details else sales_order.get("items"):
 		# Skip if `Reserved Stock` is not checked for the item.
 		if not item.get("reserve_stock"):
+			continue
+
+		# Skip on submit, the produced Serial Nos are reserved from the Sales Order after manufacture.
+		if not items_details and item.get("ensure_delivery_based_on_produced_serial_no"):
+			frappe.msgprint(
+				_(
+					"Row #{0}: Stock is not reserved for the Item {1} as its delivery is ensured based on the produced Serial Nos. Reserve the produced Serial Nos against the Sales Order after manufacture."
+				).format(item.idx, frappe.bold(item.item_code)),
+				title=_("Stock Reservation"),
+				indicator="yellow",
+			)
 			continue
 
 		# Stock should be reserved from the Pick List if has Picked Qty.
@@ -1113,7 +1157,7 @@ def cancel_stock_reservation_entries(
 		sre_list = {}
 
 		if voucher_type and voucher_no:
-			sre_list = get_stock_reservation_entries_for_voucher(
+			sre_list = _get_stock_reservation_entries_for_voucher(
 				voucher_type, voucher_no, voucher_detail_no, fields=["name"]
 			)
 		elif from_voucher_type and from_voucher_no:
@@ -1156,6 +1200,24 @@ def get_stock_reservation_entries_for_voucher(
 ) -> list[dict]:
 	"""Returns list of Stock Reservation Entries against a Voucher."""
 
+	return _get_stock_reservation_entries_for_voucher(
+		voucher_type, voucher_no, voucher_detail_no, fields, ignore_status, ignore_permissions=False
+	)
+
+
+def _get_stock_reservation_entries_for_voucher(
+	voucher_type: str,
+	voucher_no: str,
+	voucher_detail_no: str | None = None,
+	fields: list[str] | None = None,
+	ignore_status: bool = False,
+	ignore_permissions: bool = True,
+) -> list[dict]:
+	"""Returns list of Stock Reservation Entries against a Voucher."""
+
+	if not ignore_permissions:
+		frappe.has_permission(voucher_type, doc=voucher_no, throw=True)
+
 	if not fields or not isinstance(fields, list):
 		fields = [
 			"name",
@@ -1169,13 +1231,10 @@ def get_stock_reservation_entries_for_voucher(
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
-		frappe.qb.from_(sre)
+		frappe.get_query(sre, fields=fields)
 		.where((sre.docstatus == 1) & (sre.voucher_type == voucher_type) & (sre.voucher_no == voucher_no))
 		.orderby(sre.creation)
 	)
-
-	for field in fields:
-		query = query.select(sre[field])
 
 	if voucher_detail_no:
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)

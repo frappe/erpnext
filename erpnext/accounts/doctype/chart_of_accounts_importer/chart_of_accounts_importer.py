@@ -8,6 +8,7 @@ from functools import reduce
 
 import frappe
 from frappe import _
+from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.desk.form.linked_with import get_linked_fields
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
@@ -58,6 +59,8 @@ def validate_columns(data):
 
 @frappe.whitelist()
 def validate_company(company):
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	parent_company, allow_account_creation_against_child_company = frappe.get_cached_value(
 		"Company", company, ["parent_company", "allow_account_creation_against_child_company"]
 	)
@@ -70,21 +73,36 @@ def validate_company(company):
 		frappe.throw(msg, title=_("Wrong Company"))
 
 	if frappe.db.get_all("GL Entry", {"company": company}, "name", limit=1):
-		return False
+		frappe.throw(
+			_(
+				"Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
+			)
+		)
+
+	validate_user_perms(company)
 
 
 @frappe.whitelist()
 def import_coa(file_name, company):
+	frappe.only_for("Accounts Manager")
+
 	# delete existing data for accounts
-	unset_existing_data(company)
+	frappe.has_permission("Company", "write", company, throw=True)
 
 	# create accounts
 	file_doc, extension = get_file(file_name)
+	validate_accounts(file_doc, extension)
 
 	if extension == "csv":
 		data = generate_data_from_csv(file_doc)
 	else:
 		data = generate_data_from_excel(file_doc, extension)
+
+	validate_columns(data)
+
+	validate_company(company)
+
+	unset_existing_data(company)
 
 	frappe.local.flags.ignore_root_company_validation = True
 	forest = build_forest(data)
@@ -95,7 +113,11 @@ def import_coa(file_name, company):
 
 
 def get_file(file_name):
-	file_doc = frappe.get_doc("File", {"file_url": file_name})
+	# look the file up through find_file_by_url, which returns it only when the caller may download it
+	file_doc = find_file_by_url(file_name)
+	if not file_doc:
+		raise frappe.PermissionError
+
 	parts = file_doc.get_extension()
 	extension = parts[1]
 	extension = extension.lstrip(".")
@@ -161,6 +183,7 @@ def generate_data_from_excel(file_doc, extension, as_dict=False):
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root=False, file_name=None, for_validate=0):
 	"""called by tree view (to fetch node's children)"""
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
 
 	file_doc, extension = get_file(file_name)
 	parent = None if parent == _("All Accounts") else parent
@@ -309,6 +332,8 @@ def build_response_as_excel(writer):
 
 @frappe.whitelist()
 def download_template(file_type, template_type, company):
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	writer = get_template(template_type, company)
 
 	if file_type == "CSV":
@@ -452,6 +477,7 @@ def unset_existing_data(company):
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
 	linked = [{"fieldname": name} for name in fieldnames]
 	update_values = {d.get("fieldname"): "" for d in linked}
+
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
@@ -465,6 +491,19 @@ def unset_existing_data(company):
 	]:
 		dt = frappe.qb.DocType(doctype)
 		frappe.qb.from_(dt).where(dt.company == company).delete().run()
+
+
+def validate_user_perms(company):
+	# User Permission Check for Account Deletion
+	company_accounts = frappe.get_query("Account", filters={"company": company}).run(as_dict=1)
+
+	for d in company_accounts:
+		if not frappe.get_cached_doc("Account", d.name).has_permission():
+			frappe.throw(
+				_(
+					"Accounts cannot be removed, as user doesn't have access to all the accounts of {0}."
+				).format(frappe.bold(company))
+			)
 
 
 def set_default_accounts(company):

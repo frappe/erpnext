@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, parse_json
 
+from erpnext.stock.utils import get_valuation_method
+
 SLE_FIELDS = (
 	"name",
 	"posting_date",
@@ -53,6 +55,8 @@ def add_invariant_check_fields(sles, filters):
 	balance_qty = 0.0
 	balance_stock_value = 0.0
 
+	valuation_method = get_valuation_method(filters.item_code)
+
 	incorrect_idx = None
 	float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
 	currency_precision = (
@@ -90,7 +94,7 @@ def add_invariant_check_fields(sles, filters):
 		)
 		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
-		if maintains_fifo_queue(sle):
+		if maintains_fifo_queue(sle, valuation_method):
 			add_fifo_fields(sle, sles[idx - 1] if idx else None)
 
 		if incorrect_idx is None and not is_sle_has_correct_data(sle, float_precision, currency_precision):
@@ -104,8 +108,10 @@ def add_invariant_check_fields(sles, filters):
 	return sles
 
 
-def maintains_fifo_queue(sle):
-	# no queue is maintained for serialized/batchwise-valued stock
+def maintains_fifo_queue(sle, valuation_method):
+	if valuation_method == "Moving Average":
+		return False
+
 	return not (
 		sle.serial_and_batch_bundle or sle.serial_no or (sle.batch_no and sle.use_batchwise_valuation)
 	)
@@ -138,6 +144,8 @@ def is_sle_has_correct_data(sle, float_precision, currency_precision):
 	return (
 		flt(sle.difference_in_qty, float_precision) == 0.0
 		and flt(sle.diff_value_diff, currency_precision) == 0.0
+		and flt(sle.fifo_qty_diff, float_precision) == 0.0
+		and flt(sle.fifo_value_diff, currency_precision) == 0.0
 	)
 
 

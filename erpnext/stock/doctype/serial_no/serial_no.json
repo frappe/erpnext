@@ -282,7 +282,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2025-12-24 20:14:52.942251",
+ "modified": "2026-09-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -318,6 +318,22 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

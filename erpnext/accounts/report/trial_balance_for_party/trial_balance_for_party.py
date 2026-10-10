@@ -9,6 +9,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.utils import get_currency_precision
 
 
 def execute(filters=None):
@@ -43,6 +44,7 @@ def get_data(filters, show_party_name):
 		account_filter = get_accounts_with_children(filters.get("account"))
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	precision = get_currency_precision()
 	opening_balances = get_opening_balances(filters, account_filter)
 	balances_within_period = get_balances_within_period(filters, account_filter)
 
@@ -65,14 +67,17 @@ def get_data(filters, show_party_name):
 
 		# opening
 		opening_debit, opening_credit = opening_balances.get(party.name, [0, 0])
+		opening_debit, opening_credit = flt(opening_debit, precision), flt(opening_credit, precision)
 		row.update({"opening_debit": opening_debit, "opening_credit": opening_credit})
 
 		# within period
 		debit, credit = balances_within_period.get(party.name, [0, 0])
+		debit, credit = flt(debit, precision), flt(credit, precision)
 		row.update({"debit": debit, "credit": credit})
 
 		# closing
 		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
+		closing_debit, closing_credit = flt(closing_debit, precision), flt(closing_credit, precision)
 		row.update({"closing_debit": closing_debit, "closing_credit": closing_credit})
 
 		row.update({"currency": company_currency})

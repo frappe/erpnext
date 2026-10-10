@@ -11,6 +11,9 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_receipt as create_purchase_receipt_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -65,6 +68,37 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.save()
 		self.assertEqual(pi.items[0].qty, 1)
 
+	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_duplicate_items_without_update_stock(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		self.assertRaisesRegex(frappe.ValidationError, "Same item cannot be entered", pi.save)
+
+	def test_same_item_from_different_receipts(self):
+		first_receipt = make_purchase_receipt()
+		second_receipt = make_purchase_receipt()
+		pi = create_purchase_invoice_from_receipt(first_receipt.name)
+		pi = create_purchase_invoice_from_receipt(second_receipt.name, target_doc=pi)
+
+		with change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			pi.save()
+
+		self.assertEqual(
+			[row.purchase_receipt for row in pi.items], [first_receipt.name, second_receipt.name]
+		)
+
+	def test_same_item_from_different_orders_in_one_receipt(self):
+		orders = [create_purchase_order(), create_purchase_order()]
+		receipt = create_purchase_receipt_from_order(orders[0].name)
+		receipt = create_purchase_receipt_from_order(orders[1].name, target_doc=receipt)
+
+		with change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			receipt.submit()
+			pi = create_purchase_invoice_from_receipt(receipt.name)
+			pi.save()
+
+		self.assertEqual([row.purchase_order for row in pi.items], [order.name for order in orders])
+
 	def test_purchase_invoice_received_qty(self):
 		"""
 		1. Test if received qty is validated against accepted + rejected
@@ -112,6 +146,51 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		# Check if the received quantity is updated in Material Request
 		mr.reload()
 		self.assertEqual(mr.items[0].received_qty, 10)
+
+	@change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_material_request_received_qty_with_mixed_receipts(self):
+		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
+		for invoice_first, order_qty in ((False, 10), (True, 10), (False, 12), (True, 12)):
+			with self.subTest(invoice_first=invoice_first, order_qty=order_qty):
+				mr = make_material_request(item_code="_Test Item", qty=10)
+				po = make_purchase_order(mr.name)
+				po.supplier = "_Test Supplier"
+				po.items[0].qty = order_qty
+				with change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20}):
+					po.insert()
+					po.submit()
+
+				billing_invoice = make_pi_from_po(po.name)
+				billing_invoice.update_stock = 0
+				billing_invoice.items[0].qty = 1
+				billing_invoice.insert()
+				billing_invoice.submit()
+
+				receipt = create_purchase_receipt_from_order(po.name)
+				receipt.items[0].qty = order_qty - 6
+				receipt.insert()
+				invoice = make_pi_from_po(po.name)
+				invoice.update_stock = 1
+				invoice.items[0].qty = 6
+				invoice.insert()
+				documents = [invoice, receipt] if invoice_first else [receipt, invoice]
+
+				received_qty = 0
+				for document in documents:
+					document.submit()
+					received_qty += document.items[0].stock_qty
+					mr.reload()
+					self.assertEqual(mr.items[0].received_qty, received_qty)
+					self.assertEqual(mr.per_received, min(received_qty * 10, 100))
+				self.assertEqual(mr.status, "Received")
+
+				for document in documents:
+					document.cancel()
+					received_qty -= document.items[0].stock_qty
+					mr.reload()
+					self.assertEqual(mr.items[0].received_qty, received_qty)
+					self.assertEqual(mr.per_received, min(received_qty * 10, 100))
+					self.assertNotEqual(mr.status, "Received")
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -287,13 +366,165 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_purchase_invoice_explicit_block(self):
 		pi = make_purchase_invoice()
-		pi.block_invoice()
+		release_date = add_days(nowdate(), 10)
+
+		pi.block_invoice(hold_comment="Waiting for the goods", release_date=release_date)
 
 		self.assertEqual(pi.on_hold, 1)
+
+		on_hold, hold_comment, saved_release_date = frappe.db.get_value(
+			"Purchase Invoice", pi.name, ["on_hold", "hold_comment", "release_date"]
+		)
+		self.assertEqual(on_hold, 1)
+		self.assertEqual(hold_comment, "Waiting for the goods")
+		self.assertEqual(getdate(saved_release_date), getdate(release_date))
 
 		pi.unblock_invoice()
 
 		self.assertEqual(pi.on_hold, 0)
+
+		on_hold, saved_release_date = frappe.db.get_value(
+			"Purchase Invoice", pi.name, ["on_hold", "release_date"]
+		)
+		self.assertEqual(on_hold, 0)
+		self.assertIsNone(saved_release_date)
+
+	def test_purchase_invoice_cannot_be_held_before_submission(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.on_hold = 1
+
+		self.assertRaises(frappe.ValidationError, pi.save)
+
+		pi.on_hold = 0
+		pi.save()
+		pi.submit()
+
+		pi.block_invoice()
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "on_hold"), 1)
+
+	def test_return_purchase_invoice_cannot_be_held(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pi = make_purchase_invoice()
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.on_hold = 1
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be held", return_pi.save)
+
+		return_pi.on_hold = 0
+		return_pi.save()
+		return_pi.submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be held", return_pi.block_invoice)
+
+	def test_return_purchase_invoice_is_not_affected_by_hold_validations(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pi = make_purchase_invoice()
+
+		# a return has a negative outstanding amount, which must not be mistaken
+		# for an invalid hold on a document that was never held
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.save()
+		return_pi.submit()
+
+		self.assertEqual(return_pi.docstatus, 1)
+		self.assertEqual(return_pi.on_hold, 0)
+		self.assertLess(return_pi.outstanding_amount, 0)
+
+	def test_settled_purchase_invoice_cannot_be_held(self):
+		pi = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.save()
+		pe.submit()
+
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 0)
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice)
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "on_hold"), 0)
+
+	def test_release_date_of_held_invoice_must_be_in_future(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", nowdate())
+
+	def test_rejected_hold_does_not_partially_update_invoice(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
+
+		pi.reload()
+		self.assertEqual(pi.on_hold, 0)
+		self.assertIsNone(pi.release_date)
+
+	def test_change_release_date_of_held_invoice(self):
+		pi = make_purchase_invoice()
+		pi.block_invoice(hold_comment="Hold", release_date=add_days(nowdate(), 10))
+
+		new_release_date = add_days(nowdate(), 20)
+		pi.change_release_date(new_release_date)
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Purchase Invoice", pi.name, "release_date")),
+			getdate(new_release_date),
+		)
+
+		self.assertRaises(frappe.ValidationError, pi.change_release_date, add_days(nowdate(), -1))
+
+	def test_release_date_cannot_be_changed_on_an_invoice_that_is_not_held(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Invoice is not blocked",
+			pi.change_release_date,
+			add_days(nowdate(), 10),
+		)
+
+		self.assertIsNone(frappe.db.get_value("Purchase Invoice", pi.name, "release_date"))
+
+	def test_hold_methods_are_whitelisted_document_methods(self):
+		import erpnext.accounts.doctype.purchase_invoice.purchase_invoice as purchase_invoice_module
+
+		pi = frappe.new_doc("Purchase Invoice")
+
+		for method in ("block_invoice", "unblock_invoice", "change_release_date"):
+			# raises if the method is not whitelisted for client side calls
+			pi.is_whitelisted(method)
+
+			self.assertFalse(
+				hasattr(purchase_invoice_module, method),
+				f"{method} should only be exposed as a document method",
+			)
+
+	def test_hold_methods_require_write_permission(self):
+		pi = make_purchase_invoice()
+		user = "test_pi_hold_permission@example.com"
+
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Test PI Hold",
+					"roles": [{"role": "Employee"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(frappe.PermissionError, pi.block_invoice)
+			self.assertRaises(frappe.PermissionError, pi.unblock_invoice)
+			self.assertRaises(frappe.PermissionError, pi.change_release_date, add_days(nowdate(), 10))
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "on_hold"), 0)
 
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = make_purchase_receipt(
@@ -361,6 +592,12 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Buying Settings",
+			"set_landed_cost_based_on_purchase_invoice_rate",
+			original_value,
+		)
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -372,25 +609,15 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi = create_purchase_invoice(pr.name)
 		pi.conversion_rate = 80
 
+		self.assertRaises(frappe.ValidationError, pi.insert)
+
+		pi.conversion_rate = 70
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
-		)
-
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[0].base_net_amount - pr.items[0].base_net_amount
-		)
-
-		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
-
-		frappe.db.set_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", original_value
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
@@ -398,11 +625,21 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		# Creating Purchase Invoice with USD currency
+		original_value = frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		)
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Buying Settings",
+			"set_landed_cost_based_on_purchase_invoice_rate",
+			original_value,
+		)
+
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
 		pr.company = "_Test Company with perpetual inventory"
-		pr.conversion_rate = (70,)
+		pr.conversion_rate = 80
 		pr.supplier = "_Test Supplier USD"
 		pr.append(
 			"items",
@@ -412,33 +649,47 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 				"rate": 100,
 			},
 		)
-		pr.append(
-			"items",
-			{"item_code": "_Test Item", "qty": 1, "rate": 5, "warehouse": "Stores - TCP1"},
-		)
 		pr.insert()
 		pr.submit()
 
-		# Createing purchase invoice against Purchase Receipt
 		pi = create_purchase_invoice(pr.name)
-		pi.conversion_rate = 80
+		pi.conversion_rate = 70
 		pi.credit_to = "_Test Payable USD - TCP1"
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[1].base_net_amount - pr.items[1].base_net_amount
+	@change_settings(
+		"Buying Settings",
+		{"use_transaction_date_exchange_rate": 1, "set_landed_cost_based_on_purchase_invoice_rate": 0},
+	)
+	def test_transaction_date_exchange_rate_applies_only_when_mapping_from_purchase_order(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			currency="USD",
+			conversion_rate=70,
+		)
+		pi = create_purchase_invoice(pr.name)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 70)
+
+		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD")
+		pi = make_pi_from_po(po.name)
+		self.assertTrue(pi.use_transaction_date_exchange_rate)
+		pi.conversion_rate = 75
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 75)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
@@ -1510,6 +1761,96 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
+	def test_stock_adjustment_account_fallbacks_when_default_expense_account_unset(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
+
+		class StockAdjustmentInvoice:
+			company = "_Test Company"
+			conversion_rate = 1
+			update_stock = 1
+			is_internal_supplier = 0
+			return_against = None
+			project = None
+
+			def __init__(self, is_return, defaults):
+				self.is_return = is_return
+				self.defaults = defaults
+
+			def get(self, fieldname):
+				return None
+
+			def get_company_default(self, fieldname, ignore_validation=False):
+				return self.defaults.get(fieldname)
+
+			def get_gl_dict(self, args, *unused_args, **unused_kwargs):
+				return frappe._dict(args)
+
+		def make_invoice(is_return, defaults):
+			return StockAdjustmentInvoice(is_return, defaults)
+
+		def make_item(is_fixed_asset=0, expense_account="Item Expense - _TC"):
+			return frappe._dict(
+				{
+					"name": "row-1",
+					"warehouse": "Stores - _TC",
+					"valuation_rate": 10,
+					"qty": 10,
+					"conversion_factor": 1,
+					"base_net_amount": 100,
+					"item_tax_amount": 0,
+					"landed_cost_voucher_amount": 0,
+					"sales_incoming_rate": 0,
+					"is_fixed_asset": is_fixed_asset,
+					"expense_account": expense_account,
+					"cost_center": "Main - _TC",
+					"project": None,
+					"precision": lambda fieldname: 2,
+				}
+			)
+
+		defaults = {
+			"default_expense_account": None,
+			"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+			"asset_received_but_not_billed": "Asset Received But Not Billed - _TC",
+		}
+		test_cases = (
+			(
+				"company default expense",
+				0,
+				make_item(),
+				{**defaults, "default_expense_account": "Default Expense - _TC"},
+				"Default Expense - _TC",
+			),
+			("stock rbnb", 0, make_item(), defaults, "Stock Received But Not Billed - _TC"),
+			(
+				"asset rbnb",
+				0,
+				make_item(is_fixed_asset=1),
+				defaults,
+				"Asset Received But Not Billed - _TC",
+			),
+			("return item expense", 1, make_item(), defaults, "Item Expense - _TC"),
+			(
+				"return without item expense",
+				1,
+				make_item(expense_account=None),
+				defaults,
+				"Stock Received But Not Billed - _TC",
+			),
+		)
+
+		for label, is_return, item, company_defaults, expected_account in test_cases:
+			with self.subTest(label=label):
+				invoice = make_invoice(is_return, company_defaults)
+				gl_entries = []
+				PurchaseInvoice.make_stock_adjustment_entry(
+					invoice, gl_entries, item, {(item.name, item.warehouse): 90}, "INR"
+				)
+
+				self.assertEqual(gl_entries[0].account, expected_account)
+				self.assertEqual(gl_entries[0].debit, 10)
+				self.assertEqual(gl_entries[0].debit_in_transaction_currency, 10)
+
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -2457,6 +2798,39 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
 
+	def test_purchase_invoice_return_against_closed_purchase_order(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(qty=2, rate=100)
+
+		invoices = []
+		for _ in range(2):
+			pi = make_pi_from_po(po.name)
+			pi.items[0].qty = 1
+			pi.submit()
+			invoices.append(pi)
+
+		make_return_doc("Purchase Invoice", invoices[0].name).submit()
+
+		po.reload()
+		po.update_status("Closed")
+
+		# a debit note against a closed Purchase Order should still go through,
+		# the same way a Sales Invoice return does against a closed Sales Order
+		debit_note = make_return_doc("Purchase Invoice", invoices[1].name)
+		debit_note.submit()
+
+		self.assertEqual(debit_note.docstatus, 1)
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
+
+		# cancelling the debit note runs the same check on the closed order
+		debit_note.reload()
+		debit_note.cancel()
+
+		# a regular invoice against the closed order must still be blocked
+		blocked_pi = make_pi_from_po(po.name)
+		self.assertRaisesRegex(frappe.InvalidStatusError, "Closed", blocked_pi.save)
+
 	def test_make_pr_and_pi_from_po(self):
 		from erpnext.assets.doctype.asset.test_asset import create_asset_category
 
@@ -2813,6 +3187,23 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		return_doc.items[0].qty = 0
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
+
+	def test_partial_returns_ignore_received_qty_without_update_stock(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		invoice = make_purchase_invoice(qty=10, received_qty=10)
+
+		first_return = make_return_doc(invoice.doctype, invoice.name)
+		first_return.items[0].qty = -4
+		first_return.save().submit()
+
+		self.assertEqual(first_return.items[0].received_qty, -10)
+
+		second_return = make_return_doc(invoice.doctype, invoice.name)
+		second_return.items[0].qty = -6
+		second_return.save().submit()
+
+		self.assertEqual(second_return.docstatus, 1)
 
 	def test_apply_discount_on_grand_total(self):
 		"""

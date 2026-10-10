@@ -17,6 +17,8 @@ def validate_filters(from_date, to_date, company):
 	if not company:
 		frappe.throw(_("Please Select a Company"))
 
+	frappe.has_permission("Company", doc=company, throw=True)
+
 
 @frappe.whitelist()
 def get_funnel_data(from_date, to_date, company):
@@ -63,7 +65,7 @@ def get_funnel_data(from_date, to_date, company):
 def get_opp_by_lead_source(from_date, to_date, company):
 	validate_filters(from_date, to_date, company)
 
-	opportunities = frappe.get_all(
+	opportunities = frappe.get_list(
 		"Opportunity",
 		filters=[
 			["status", "in", ["Open", "Quotation", "Replied"]],
@@ -115,7 +117,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 def get_pipeline_data(from_date, to_date, company):
 	validate_filters(from_date, to_date, company)
 
-	opportunities = frappe.get_all(
+	opportunities = frappe.get_list(
 		"Opportunity",
 		filters=[
 			["status", "in", ["Open", "Quotation", "Replied"]],

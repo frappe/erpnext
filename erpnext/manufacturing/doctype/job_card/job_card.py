@@ -513,6 +513,8 @@ class JobCard(Document):
 			)
 
 	def add_time_log(self, args):
+		self.validate_transfer_qty()
+
 		last_row = []
 		employees = args.employees
 		if isinstance(employees, str):
@@ -753,9 +755,10 @@ class JobCard(Document):
 
 	def set_process_loss(self):
 		precision = self.precision("total_completed_qty")
+		should_set_process_loss = self.total_completed_qty or self.process_loss_qty
 
 		self.process_loss_qty = 0.0
-		if self.total_completed_qty and self.for_quantity > self.total_completed_qty:
+		if should_set_process_loss and self.for_quantity > self.total_completed_qty:
 			self.process_loss_qty = flt(self.for_quantity, precision) - flt(
 				self.total_completed_qty, precision
 			)
@@ -850,7 +853,7 @@ class JobCard(Document):
 					data.hour_rate = flt(workstation_hour_rate)
 
 		wo.flags.ignore_validate_update_after_submit = True
-		wo.update_operation_status()
+		wo.update_operation_status(self.operation_id)
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
 		wo.save()
@@ -1180,7 +1183,7 @@ def make_material_request(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: Document | str | None = None):
 	def update_item(source, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
 
@@ -1192,6 +1195,9 @@ def make_stock_entry(source_name, target_doc=None):
 			target.qty = pending_rm_qty
 
 	def set_missing_values(source, target):
+		if not source.items:
+			frappe.throw(_("This Job Card has no raw materials to transfer."))
+
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
 

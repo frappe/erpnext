@@ -100,8 +100,11 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		{
 			fieldname: "supplier_group",
 			label: __("Supplier Group"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Supplier Group",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Supplier Group", txt);
+			},
 		},
 		{
 			fieldname: "based_on_payment_terms",
@@ -110,7 +113,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		},
 		{
 			fieldname: "for_revaluation_journals",
-			label: __("Revaluation Journals"),
+			label: __("Include Revaluation Journals"),
 			fieldtype: "Check",
 		},
 		{

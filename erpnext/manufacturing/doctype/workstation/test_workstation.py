@@ -4,20 +4,99 @@ import frappe
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	NotInWorkingHoursError,
+	OverlapError,
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
+	get_raw_materials,
 )
 
-test_dependencies = ["Warehouse"]
+test_dependencies = ["Warehouse", "Item"]
 test_records = frappe.get_test_records("Workstation")
 make_test_records("Workstation")
 
 
 class TestWorkstation(FrappeTestCase):
+	def make_workstation(self, name, *timings):
+		doc = frappe.new_doc("Workstation", workstation_name=name)
+		for start_time, end_time in timings:
+			doc.append("working_hours", {"start_time": start_time, "end_time": end_time})
+		return doc
+
+	def test_back_to_back_working_hours_do_not_overlap(self):
+		doc = self.make_workstation(
+			"_Test Back To Back Shifts", ("08:00:00", "16:00:00"), ("16:00:00", "23:59:59")
+		)
+		doc.insert()
+
+		# also holds when the touching row is added to an already saved workstation
+		doc.append("working_hours", {"start_time": "05:00:00", "end_time": "08:00:00"})
+		doc.save()
+		self.assertEqual(len(doc.working_hours), 3)
+
+	def test_overlapping_working_hours_raise_error(self):
+		for timing in (
+			("15:00:00", "20:00:00"),  # partial overlap at the end
+			("06:00:00", "09:00:00"),  # partial overlap at the start
+			("10:00:00", "12:00:00"),  # enclosed
+			("07:00:00", "17:00:00"),  # enclosing
+			("08:00:00", "16:00:00"),  # identical
+		):
+			with self.subTest(timing=timing):
+				doc = self.make_workstation("_Test Overlapping Shifts", ("08:00:00", "16:00:00"))
+				doc.insert()
+				doc.append("working_hours", {"start_time": timing[0], "end_time": timing[1]})
+				self.assertRaises(OverlapError, doc.save)
+				doc.delete()
+
+	def test_get_raw_materials_without_items(self):
+		job_card = frappe.get_doc(
+			{
+				"doctype": "Job Card",
+				"company": "_Test Company",
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		).insert(ignore_mandatory=True)
+
+		self.assertEqual(get_raw_materials([job_card.name]), {})
+		with self.assertRaisesRegex(frappe.ValidationError, "This Job Card has no raw materials to transfer"):
+			make_stock_entry(job_card.name)
+
+		job_card.reload()
+		self.assertFalse(job_card.items)
+		self.assertFalse(frappe.db.exists("Stock Entry", {"job_card": job_card.name}))
+
+	def test_get_raw_materials_with_items(self):
+		job_card = frappe.get_doc(
+			{
+				"doctype": "Job Card",
+				"company": "_Test Company",
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"source_warehouse": "_Test Warehouse - _TC",
+						"required_qty": 5,
+						"transferred_qty": 2,
+					}
+				],
+			}
+		).insert(ignore_mandatory=True)
+
+		materials = get_raw_materials([job_card.name])
+
+		self.assertEqual(list(materials), [job_card.name])
+		self.assertEqual(len(materials[job_card.name]), 1)
+		material = materials[job_card.name][0]
+		self.assertEqual(material.item_code, "_Test Item")
+		self.assertEqual(material.required_qty, 5)
+		self.assertEqual(material.transferred_qty, 2)
+		self.assertEqual(material.source_warehouse, "_Test Warehouse - _TC")
+
 	def test_validate_timings(self):
 		check_if_within_operating_hours(
 			"_Test Workstation 1", "Operation 1", "2013-02-02 11:00:00", "2013-02-02 19:00:00"

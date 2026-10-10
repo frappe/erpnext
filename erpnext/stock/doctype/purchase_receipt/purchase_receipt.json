@@ -33,6 +33,7 @@
   "currency_and_price_list",
   "currency",
   "conversion_rate",
+  "use_transaction_date_exchange_rate",
   "column_break2",
   "buying_price_list",
   "price_list_currency",
@@ -365,6 +366,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -390,6 +392,14 @@
    "precision": "9",
    "print_hide": 1,
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break2",
@@ -1301,7 +1311,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-27 16:46:30.210628",
+ "modified": "2026-10-07 20:56:49.769456",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1360,6 +1370,18 @@
    "read": 1,
    "role": "Stock Manager",
    "write": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

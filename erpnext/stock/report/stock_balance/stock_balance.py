@@ -259,8 +259,14 @@ class StockBalanceReport:
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
-		if entry.voucher_type == "Stock Reconciliation" and (
-			not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle
+		# An adjustment entry only writes off stock value that is stranded on an item with no
+		# quantity left; it moves nothing. Its qty_after_transaction and stock_value are therefore
+		# not a statement of the balance the way a real reconciliation's are, and the write-off it
+		# carries lives solely in stock_value_difference. Treat it as the plain delta it is.
+		if (
+			entry.voucher_type == "Stock Reconciliation"
+			and not entry.is_adjustment_entry
+			and (not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle)
 		):
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
@@ -385,6 +391,7 @@ class StockBalanceReport:
 				sle.serial_no,
 				sle.serial_and_batch_bundle,
 				sle.voucher_detail_no,
+				sle.is_adjustment_entry,
 				item_table.has_serial_no,
 				item_table.has_batch_no,
 				item_table.item_group,

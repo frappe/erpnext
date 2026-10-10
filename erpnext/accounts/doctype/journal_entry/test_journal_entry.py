@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe.tests.utils import change_settings
-from frappe.utils import flt, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
@@ -249,6 +249,27 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.check_gl_entries()
 
+	def test_disallow_reversal_of_a_reversal_journal_entry(self):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		jv = make_journal_entry("_Test Bank - _TC", "Sales - _TC", 100, submit=True)
+
+		rjv = make_reverse_journal_entry(jv.name)
+		rjv.posting_date = nowdate()
+		rjv.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is already a Reverse Journal Entry",
+			make_reverse_journal_entry,
+			rjv.name,
+		)
+
+		# the guard must not disclose the reversal to a user who cannot read the entry
+		frappe.set_user("Guest")
+		self.addCleanup(frappe.set_user, "Administrator")
+		self.assertRaises(frappe.PermissionError, make_reverse_journal_entry, rjv.name)
+
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD
 		jv = make_journal_entry("_Test Bank USD - _TC", "_Test Receivable USD - _TC", 100, save=False)
@@ -311,6 +332,21 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.assertEqual(jv.inter_company_journal_entry_reference, "")
 		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
+
+	def test_validate_account_company_mismatch_on_save(self):
+		jv = make_journal_entry(
+			"Sales Expenses - _TC",
+			"Buildings - _TC",
+			100,
+			posting_date=nowdate(),
+			cost_center="Main - _TC",
+			save=True,
+		)
+
+		jv.company = "_Test Company 1"
+		for row in jv.accounts:
+			row.cost_center = "Main - _TC1"
+		self.assertRaises(frappe.ValidationError, jv.save)
 
 	def test_jv_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -388,6 +424,59 @@ class TestJournalEntry(unittest.TestCase):
 		]
 
 		self.check_gl_entries()
+
+	def make_jv_with_fractional_totals(self):
+		"""0.10 + 0.20 sums to 0.30000000000000004, the residue this guards against."""
+		jv = frappe.new_doc("Journal Entry")
+		jv.posting_date = nowdate()
+		jv.company = "_Test Company"
+		jv.voucher_type = "Journal Entry"
+		jv.remark = "test"
+		for amount in (0.10, 0.20):
+			jv.append(
+				"accounts",
+				{
+					"account": "_Test Cash - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"debit_in_account_currency": amount,
+				},
+			)
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Bank - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": 0.30,
+			},
+		)
+		jv.insert()
+		return jv
+
+	def test_totals_are_rounded_to_precision(self):
+		jv = self.make_jv_with_fractional_totals()
+		jv.submit()
+
+		stored = frappe.db.get_value(
+			"Journal Entry", jv.name, ["total_debit", "total_credit", "difference"], as_dict=True
+		)
+		self.assertEqual(jv.total_debit, flt(jv.total_debit, jv.precision("total_debit")))
+		self.assertEqual(jv.total_credit, flt(jv.total_credit, jv.precision("total_credit")))
+		self.assertEqual(jv.total_debit, stored.total_debit)
+		self.assertEqual(jv.total_credit, stored.total_credit)
+		self.assertEqual(jv.difference, stored.difference)
+
+	def test_update_after_submit_with_fractional_totals(self):
+		"""An unrounded total is stored rounded, so updating a submitted entry used to throw."""
+		jv = self.make_jv_with_fractional_totals()
+		jv.submit()
+
+		jv.pay_to_recd_from = "_Test Supplier"
+		jv.save()
+
+		self.assertEqual(jv.docstatus, 1)
+		self.assertEqual(
+			jv.pay_to_recd_from, frappe.db.get_value("Journal Entry", jv.name, "pay_to_recd_from")
+		)
 
 	def test_jv_account_and_party_balance_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -601,6 +690,69 @@ class TestJournalEntry(unittest.TestCase):
 		jv.accounts[0].party = customer
 		jv.save()
 		self.assertRaises(frappe.ValidationError, jv.submit)
+
+	def make_jv_against_purchase_invoice(self, invoice, amount=100):
+		jv = make_journal_entry("Creditors - _TC", "_Test Cash - _TC", amount, save=False)
+		jv.accounts[0].party_type = "Supplier"
+		jv.accounts[0].party = invoice.supplier
+		jv.accounts[0].reference_type = "Purchase Invoice"
+		jv.accounts[0].reference_name = invoice.name
+		return jv
+
+	def test_jv_against_purchase_invoice_respects_hold_state(self):
+		"""Payment can be booked against a Purchase Invoice only while it is not on hold."""
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		release_date = add_days(nowdate(), 10)
+
+		def never_held():
+			return make_purchase_invoice()
+
+		def held_until_a_future_date():
+			invoice = make_purchase_invoice()
+			invoice.block_invoice(hold_comment="Waiting for the goods", release_date=release_date)
+			return invoice
+
+		def held_without_a_release_date():
+			invoice = make_purchase_invoice()
+			invoice.block_invoice(hold_comment="Under dispute")
+			return invoice
+
+		def held_until_a_date_that_has_passed():
+			invoice = held_until_a_future_date()
+			frappe.db.set_value("Purchase Invoice", invoice.name, "release_date", add_days(nowdate(), -1))
+			return invoice
+
+		def unblocked_again():
+			invoice = held_until_a_future_date()
+			invoice.unblock_invoice()
+			return invoice
+
+		for build_invoice in (held_until_a_future_date, held_without_a_release_date):
+			with self.subTest(build_invoice.__name__):
+				jv = self.make_jv_against_purchase_invoice(build_invoice())
+				self.assertRaisesRegex(frappe.ValidationError, "is blocked", jv.insert)
+
+		for build_invoice in (never_held, held_until_a_date_that_has_passed, unblocked_again):
+			with self.subTest(build_invoice.__name__):
+				invoice = build_invoice()
+				jv = self.make_jv_against_purchase_invoice(invoice)
+				jv.insert()
+				self.assertEqual(jv.reference_types[invoice.name], "Purchase Invoice")
+
+	def test_jv_against_blocked_sales_invoice_reference_is_not_checked(self):
+		"""A Sales Invoice has no hold state, so the check must skip it rather than fail."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=500)
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = "_Test Customer"
+		jv.accounts[1].reference_type = "Sales Invoice"
+		jv.accounts[1].reference_name = invoice.name
+		jv.insert()
+
+		self.assertEqual(jv.reference_types[invoice.name], "Sales Invoice")
 
 
 def make_journal_entry(

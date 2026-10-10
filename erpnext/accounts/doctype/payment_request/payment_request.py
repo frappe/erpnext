@@ -4,10 +4,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, nowdate
+from frappe.utils import cstr, flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
-from erpnext import get_company_currency
+from erpnext import _refuse, get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
@@ -461,7 +461,7 @@ class PaymentRequest(Document):
 		}
 
 		if self.message:
-			return frappe.render_template(self.message, context)
+			return frappe.render_template(self.message, context, restrict_globals=True)
 
 	def set_failed(self):
 		pass
@@ -942,6 +942,10 @@ def get_dummy_message(doc):
 
 @frappe.whitelist()
 def get_subscription_details(reference_doctype, reference_name):
+	reference_name = cstr(reference_name)
+	if not reference_name or not frappe.has_permission(reference_doctype, "read", doc=reference_name):
+		_refuse()
+
 	if reference_doctype == "Sales Invoice":
 		subscriptions = frappe.db.sql(
 			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",

@@ -110,19 +110,19 @@ def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	searchfield = searchfield.split(",")
 	searchfield.append("name")
 
-	item = frappe.qb.DocType("Item")
-	query = (
-		frappe.qb.from_(item)
-		.select(item.name, item.item_name)
-		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0))
-		.limit(page_len)
-		.offset(start)
-	)
-
-	if searchfield:
-		query = query.where(Criterion.any([item[fieldname].like(f"%{txt}%") for fieldname in searchfield]))
+	item_filters = [["is_stock_item", "=", 0], ["is_fixed_asset", "=", 0]]
 
 	if product_bundles:
-		query = query.where(item.name.notin(product_bundles))
+		item_filters.append(["name", "not in", product_bundles])
 
-	return query.run()
+	# get_list applies Item's permission conditions and User Permissions, as item_query() does
+	return frappe.get_list(
+		"Item",
+		filters=item_filters,
+		or_filters=[[fieldname, "like", f"%{txt}%"] for fieldname in searchfield] if searchfield else None,
+		fields=["name", "item_name"],
+		order_by="",  # the query this replaced had no ORDER BY; suppress the injected default
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+	)

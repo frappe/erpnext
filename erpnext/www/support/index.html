@@ -49,11 +49,11 @@
 				<div class="card card-md h-100 kb-card">
 					<div class="card-body">
 						<h6 class="card-subtitle mb-2 text-uppercase small text-muted">
-							{{ favorite_article['category'] }}</h6>
-						<h3 class="card-title">{{ favorite_article['title'] }}</h3>
-						<p class="card-text">{{ favorite_article['description'] }}</p>
+							{{ favorite_article['category'] | e }}</h6>
+						<h3 class="card-title">{{ favorite_article['title'] | e }}</h3>
+						<p class="card-text">{{ favorite_article['description'] | e }}</p>
 					</div>
-					<a href="{{ favorite_article['route'] }}" class="stretched-link"></a>
+					<a href="{{ favorite_article['route'] | e }}" class="stretched-link"></a>
 				</div>
 			</div>
 			{% endfor %}
@@ -72,7 +72,7 @@
 				<h5>{{ item['category'].name }}</h5>
 				<div>
 					{% for article in item['articles'] %}
-					<a href="{{ article.route }}" class="mt-2 d-block">{{ article.title }}</a>
+					<a href="{{ article.route | e }}" class="mt-2 d-block">{{ article.title | e }}</a>
 					{% endfor %}
 				</div>
 			</div>

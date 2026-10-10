@@ -462,6 +462,29 @@ class TestBOM(FrappeTestCase):
 		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
 
 	@timeout
+	def test_bom_item_query_matches_item_code_colliding_with_another_barcode(self):
+		item = make_item(
+			"_Test BOM Query 2.5MM",
+			{"is_stock_item": 1, "item_name": "_Test BOM Query Sheet", "description": "sheet"},
+		)
+		make_item(
+			"_Test BOM Query Barcode Holder",
+			{"is_stock_item": 1},
+			barcode=f"90{item.name}90",
+		)
+
+		results = item_query(
+			doctype="Item",
+			txt=item.name,
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"is_stock_item": 1},
+		)
+
+		self.assertIn(item.name, [d[0] for d in results])
+
+	@timeout
 	def test_exclude_exploded_items_from_bom(self):
 		bom_no = get_default_bom()
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", bom_no))

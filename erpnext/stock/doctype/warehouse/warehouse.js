@@ -33,6 +33,12 @@ frappe.ui.form.on("Warehouse", {
 		});
 	},
 
+	company: function (frm) {
+		if (frm.doc.account) {
+			frm.set_value("account", "");
+		}
+	},
+
 	refresh: function (frm) {
 		frm.toggle_display("warehouse_name", frm.doc.__islocal);
 		frm.toggle_display(["address_html", "contact_html"], !frm.doc.__islocal);

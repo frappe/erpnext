@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
@@ -57,6 +59,27 @@ class TestQualityInspection(FrappeTestCase):
 
 		qa.delete()
 		dn.delete()
+
+	def test_doc_update_published_for_reference_on_submit(self):
+		"""Submitting a QI publishes doc_update so open reference forms resync their timestamp."""
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True
+		)
+
+		with patch.object(frappe, "publish_realtime") as publish_realtime:
+			qa.submit()
+
+		reference_updates = [
+			call
+			for call in publish_realtime.call_args_list
+			if call.args and call.args[0] == "doc_update" and call.kwargs.get("docname") == dn.name
+		]
+		self.assertEqual(len(reference_updates), 1)
+
+		message = reference_updates[0].args[1]
+		self.assertEqual(message["doctype"], "Delivery Note")
+		self.assertEqual(message["modified"], frappe.db.get_value("Delivery Note", dn.name, "modified"))
 
 	def test_value_based_qi_readings(self):
 		# Test QI based on acceptance values (Non formula)
@@ -275,6 +298,48 @@ class TestQualityInspection(FrappeTestCase):
 		self.assertFalse(qc)
 
 		se.delete()
+
+	def test_job_card_qi_keeps_manually_rejected_reading(self):
+		create_quality_inspection_parameter("Finish")
+		parameter = {"specification": "Finish", "numeric": 0, "value": "OK"}
+		if not frappe.db.exists("Quality Inspection Template", "_Test QI Template Finish"):
+			frappe.get_doc(
+				{
+					"doctype": "Quality Inspection Template",
+					"quality_inspection_template_name": "_Test QI Template Finish",
+					"item_quality_inspection_parameter": [parameter],
+				}
+			).insert()
+		item = create_item("_Test Item QI Finish")
+		item.db_set("quality_inspection_template", "_Test QI Template Finish")
+
+		qa = create_quality_inspection(
+			item_code=item.name,
+			inspection_type="In Process",
+			reference_type="Job Card",
+			reference_name=make_minimal_job_card(production_item=item.name),
+			readings=[
+				dict(parameter, reading_value="Scratched", manual_inspection=1, status="Rejected"),
+			],
+			do_not_submit=True,
+		)
+
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
+
+def make_minimal_job_card(production_item):
+	"""db_insert a minimal submitted Job Card row carrying only the columns the
+	converted UPDATE reads (name, production_item, quality_inspection, modified)."""
+	jc = frappe.new_doc("Job Card")
+	jc.name = "_T-Job Card-" + frappe.utils.random_string(10)
+	jc.flags.name_set = True
+	jc.production_item = production_item
+	jc.company = "_Test Company"
+	jc.for_quantity = 1
+	jc.docstatus = 1
+	jc.db_insert()
+	return jc.name
 
 
 def create_quality_inspection(**args):

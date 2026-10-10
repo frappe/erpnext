@@ -10,12 +10,14 @@ from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
+	create_fixed_asset_item,
 	set_depreciation_settings_in_company,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
 )
@@ -339,6 +341,33 @@ class TestAssetCapitalization(unittest.TestCase):
 		asset_capitalization.cancel()
 		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
 		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
+
+	def test_grouped_stock_item_rows_split_fifo_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company"
+		warehouse = create_warehouse("_Test Warehouse for Grouped FIFO Rows", company=company)
+		item = create_item(
+			"_Test Grouped FIFO Rows Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=1
+		)
+		target_item = create_fixed_asset_item("_Test Grouped FIFO Rows Target Item")
+
+		make_purchase_receipt(item_code=item.item_code, qty=1, rate=100, company=company, warehouse=warehouse)
+		make_purchase_receipt(item_code=item.item_code, qty=1, rate=200, company=company, warehouse=warehouse)
+
+		asset_capitalization = frappe.new_doc("Asset Capitalization")
+		asset_capitalization.company = company
+		asset_capitalization.target_item_code = target_item.name
+		asset_capitalization.append(
+			"stock_items", {"item_code": item.item_code, "warehouse": warehouse, "stock_qty": 1}
+		)
+		asset_capitalization.append(
+			"stock_items", {"item_code": item.item_code, "warehouse": warehouse, "stock_qty": 1}
+		)
+		asset_capitalization.insert()
+
+		rates = [d.valuation_rate for d in asset_capitalization.stock_items]
+		self.assertEqual(rates, [100, 200])
 
 
 def create_asset_capitalization_data():

@@ -47,7 +47,7 @@ def copy_comments(doctype, docname, doc):
 		comment.name = None
 		comment.reference_doctype = doc.doctype
 		comment.reference_name = doc.name
-		comment.insert()
+		comment.insert(ignore_permissions=True)
 
 
 def link_communications(doctype, docname, doc):
@@ -150,6 +150,10 @@ def link_open_events(ref_doctype, ref_docname, doc):
 
 @frappe.whitelist()
 def get_open_activities(ref_doctype, ref_docname):
+	# both arguments are caller-supplied and the ToDo/Event rows are read with get_all, so the
+	# referenced document decides who may see its activities. doc= applies User Permissions.
+	frappe.has_permission(ref_doctype, doc=ref_docname, throw=True)
+
 	tasks = get_open_todos(ref_doctype, ref_docname)
 	events = get_open_events(ref_doctype, ref_docname)
 
@@ -227,7 +231,10 @@ class CRMNote(Document):
 		notify_mentions(self.doctype, self.name, note)
 
 	@frappe.whitelist()
-	def edit_note(self, note, row_id):
+	def edit_note(self, note: str, row_id: str):
+		# db_update() skips the write check that save() does in add_note/delete_note
+		self.check_permission("write")
+
 		for d in self.notes:
 			if cstr(d.name) == row_id:
 				d.note = note

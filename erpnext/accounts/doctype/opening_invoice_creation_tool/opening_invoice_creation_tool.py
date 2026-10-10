@@ -282,6 +282,9 @@ def start_import(invoices):
 				invoice_number = d.invoice_number
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
+			# the outstanding amount is entered inclusive of tax, so taxes must not
+			# be added on top of it
+			doc.flags.dont_auto_add_taxes = True
 			doc.insert(set_name=invoice_number)
 			doc.submit()
 			frappe.db.commit()

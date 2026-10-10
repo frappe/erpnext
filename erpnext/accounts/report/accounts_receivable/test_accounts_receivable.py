@@ -771,6 +771,38 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			# Assert that the customer group of each row is in the list of customer groups
 			self.assertIn(row.customer_group, cus_groups_list)
 
+	def test_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"territory": territory,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		self.assertEqual(
+			[100.0, 100.0, territory], [report[0].invoiced, report[0].outstanding, report[0].territory]
+		)
+
+		filters.update({"territory": ["_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 0)
+
+		filters.update({"territory": [territory, "_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		frappe.db.set_value("Customer", self.customer, "territory", "_Test Territory Maharashtra")
+		filters.update({"territory": ["_Test Territory India"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		filters.update({"territory": ["_Test Territory Mars"]})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
+		filters.update({"territory": "  "})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
 		self.customer2 = (
@@ -1142,6 +1174,28 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
+
+	def test_cost_center_on_payment_before_invoice(self):
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": [self.customer],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.posting_date = add_days(today(), 1)
+		si.due_date = si.posting_date
+		si.payment_schedule[0].due_date = si.posting_date
+		si.save().submit()
+
+		pe = self.create_payment_entry(si.name, do_not_submit=True)
+		pe.cost_center = self.cost_center
+		pe.save().submit()
+
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pe.name)
+		self.assertEqual(row.cost_center, pe.cost_center)
 
 	def test_payment_terms_template_filters(self):
 		from erpnext.controllers.accounts_controller import get_payment_terms

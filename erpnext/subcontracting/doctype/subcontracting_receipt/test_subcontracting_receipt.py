@@ -25,6 +25,7 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -38,6 +39,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_purchase_order,
+)
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	BOMQuantityError,
 )
@@ -49,6 +53,26 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		make_raw_materials()
 		make_service_items()
 		make_bom_for_subcontracted_items()
+
+	def test_project_is_carried_over_from_subcontracting_order(self):
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		po = make_subcontracted_purchase_order(project)
+		sco = get_subcontracting_order(po_name=po.name)
+
+		scr = make_subcontracting_receipt(sco.name)
+
+		self.assertEqual(scr.project, project)
+		self.assertEqual(scr.items[0].project, project)
+
+	def test_project_cannot_differ_from_subcontracting_order(self):
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		other_project = make_project({"project_name": "_Test SCR Project 2"}).name
+		po = make_subcontracted_purchase_order(project)
+		sco = get_subcontracting_order(po_name=po.name)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].project = other_project
+		self.assertRaises(frappe.ValidationError, scr.save)
 
 	def test_subcontracting(self):
 		set_backflush_based_on("BOM")
@@ -266,6 +290,59 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertIsNotNone(scr2_return.items[0].bom)
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_batch_return_uses_accepted_receipt_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
+		).name
+		make_bom(item=fg_item, raw_materials=[make_item(properties={"is_stock_item": 1}).name])
+		batch_no = (
+			frappe.get_doc({"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": fg_item})
+			.insert()
+			.name
+		)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 0)
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].batch_no = batch_no
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = create_warehouse("_Test SCR Batch Return Rejected Warehouse")
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-4)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			["stock_value_difference", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		bundle_value = frappe.db.get_value(
+			"Serial and Batch Bundle", sle.serial_and_batch_bundle, "total_amount"
+		)
+		self.assertEqual(sle.stock_value_difference, -4 * scr.items[0].rate)
+		self.assertEqual(bundle_value, sle.stock_value_difference)
 
 	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()

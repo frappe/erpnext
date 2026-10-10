@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "tax_type",
-  "tax_rate"
+  "tax_rate",
+  "not_applicable"
  ],
  "fields": [
   {
@@ -21,12 +22,21 @@
    "fieldname": "tax_rate",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Tax Rate"
+   "label": "Tax Rate",
+   "read_only_depends_on": "eval:doc.not_applicable"
+  },
+  {
+   "default": "0",
+   "description": "Check if this tax is not applicable to items (distinct from 0% rate)",
+   "fieldname": "not_applicable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Not Applicable"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-04-30 23:49:27.020639",
+ "modified": "2026-04-30 23:59:22.020639",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Item Tax Template Detail",

@@ -1,7 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_months, today
 
 from erpnext import get_company_currency
@@ -90,6 +90,32 @@ class TestBlanketOrder(FrappeTestCase):
 
 		frappe.db.set_single_value("Buying Settings", "blanket_order_allowance", 10)
 		po.submit()
+
+	@change_settings("Selling Settings", {"blanket_order_allowance": 0})
+	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	@change_settings(
+		"Stock Settings",
+		{"over_delivery_receipt_allowance": 10, "role_allowed_to_over_deliver_receive": "Stock Manager"},
+	)
+	def test_stock_over_delivery_role_does_not_bypass_blanket_order_allowance(self):
+		test_user = frappe.get_doc("User", "test@example.com")
+		test_user.add_roles("Accounts User", "Stock Manager")
+
+		frappe.clear_cache()
+		for blanket_order_type, doctype, date_field in (
+			("Selling", "Sales Order", "delivery_date"),
+			("Purchasing", "Purchase Order", "schedule_date"),
+		):
+			bo = make_blanket_order(blanket_order_type=blanket_order_type, quantity=100)
+			frappe.flags.args.doctype = doctype
+			order = make_order(bo.name)
+			order.currency = get_company_currency(order.company)
+			setattr(order, date_field, today())
+			order.items[0].qty = 110
+
+			with self.set_user("test@example.com"):
+				order.flags.ignore_permissions = True
+				self.assertRaises(frappe.ValidationError, order.submit)
 
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")

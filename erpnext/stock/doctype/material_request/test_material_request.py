@@ -15,6 +15,7 @@ from erpnext.stock.doctype.material_request.material_request import (
 	create_pick_list,
 	make_in_transit_stock_entry,
 	make_purchase_order,
+	make_request_for_quotation,
 	make_stock_entry,
 	make_supplier_quotation,
 	raise_work_orders,
@@ -46,6 +47,26 @@ class TestMaterialRequest(FrappeTestCase):
 
 		self.assertEqual(po.doctype, "Purchase Order")
 		self.assertEqual(len(po.get("items")), len(mr.get("items")))
+
+	def test_make_request_for_quotation_skips_ordered_items(self):
+		mr = frappe.copy_doc(test_records[0]).insert()
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.submit()
+
+		# fully order the first item, leave the second pending
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.schedule_date = today()
+		po.items = [po.items[0]]
+		po.items[0].schedule_date = today()
+		po.insert()
+		po.submit()
+
+		rfq = make_request_for_quotation(mr.name)
+
+		self.assertEqual(len(rfq.get("items")), 1)
+		self.assertEqual(rfq.items[0].material_request_item, mr.items[1].name)
+		self.assertEqual(rfq.items[0].qty, mr.items[1].qty)
 
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
@@ -918,6 +939,18 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.save()
 
 		self.assertRaises(OverAllowanceError, mr.submit)
+
+	def test_item_change_on_sales_order_row_is_blocked(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		other_item = create_item("_Test MR Item Swap").name
+		so = make_sales_order()
+		mr = make_material_request(so.name)
+		mr.material_request_type = "Purchase"
+		# swapping the fetched item would leave a stale link to the SO row
+		mr.items[0].item_code = other_item
+		self.assertRaises(frappe.ValidationError, mr.insert)
 
 	def test_pending_qty_in_pick_list(self):
 		"""Test for pick list mapped doc qty from partially received Material Request Transfer"""

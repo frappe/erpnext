@@ -49,6 +49,10 @@ class ERPNextAddress(Address):
 
 @frappe.whitelist()
 def get_shipping_address(company, address=None):
+	# `select`, not `read`: the roles that fill in these transactions hold no Company `read` row.
+	# doc= so the named company is evaluated and User Permissions apply.
+	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
+
 	filters = [
 		["Dynamic Link", "link_doctype", "=", "Company"],
 		["Dynamic Link", "link_name", "=", company],
@@ -65,4 +69,6 @@ def get_shipping_address(company, address=None):
 	if address:
 		address_as_dict = address[0]
 		name, address_template = get_address_templates(address_as_dict)
-		return address_as_dict.get("name"), frappe.render_template(address_template, address_as_dict)
+		return address_as_dict.get("name"), frappe.render_template(
+			address_template, address_as_dict, restrict_globals=True
+		)

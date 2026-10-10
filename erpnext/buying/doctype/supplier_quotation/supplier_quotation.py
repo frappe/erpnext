@@ -11,6 +11,7 @@ from frappe.utils import flt, getdate, nowdate
 
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.mapper import get_qty_already_mapped
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -243,6 +244,8 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
+
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
@@ -277,7 +280,8 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
-				"condition": select_item,
+				# no qty tracking between the two, so dedupe on the row reference alone
+				"condition": lambda d: d.name not in mapped_items and select_item(d),
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",

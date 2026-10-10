@@ -8,6 +8,7 @@ from frappe.utils.file_manager import remove_file
 
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from erpnext.regional.italy import state_codes
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX
 
 
 def update_itemised_tax_data(doc):
@@ -33,7 +34,8 @@ def update_itemised_tax_data(doc):
 def export_invoices(filters=None):
 	frappe.has_permission("Sales Invoice", throw=True)
 
-	invoices = frappe.get_all(
+	# get_list, not get_all: what leaves here is a zip of e-invoice attachments, so the rows must be scoped too
+	invoices = frappe.get_list(
 		"Sales Invoice", filters=get_conditions(filters), fields=["name", "company_tax_id"]
 	)
 
@@ -171,13 +173,20 @@ def get_invoice_summary(items, taxes):
 
 		# Check item tax rates if tax rate is zero.
 		if tax.rate == 0:
+			key = None
 			for item in items:
 				item_tax_rate = item.item_tax_rate
 				if isinstance(item.item_tax_rate, str):
 					item_tax_rate = json.loads(item.item_tax_rate)
 
 				if item_tax_rate and tax.account_head in item_tax_rate:
-					key = cstr(item_tax_rate[tax.account_head])
+					rate = item_tax_rate[tax.account_head]
+					if rate == NOT_APPLICABLE_TAX:
+						# the tax does not apply to this item, so the item belongs
+						# to another summary block and must not be counted here
+						continue
+
+					key = cstr(rate)
 					if key not in summary_data:
 						summary_data.setdefault(
 							key,
@@ -195,10 +204,15 @@ def get_invoice_summary(items, taxes):
 						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
 						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
 
-			if summary_data.get("0.0") and tax.charge_type in [
-				"On Previous Row Total",
-				"On Previous Row Amount",
-			]:
+			if (
+				key
+				and summary_data.get("0.0")
+				and tax.charge_type
+				in [
+					"On Previous Row Total",
+					"On Previous Row Amount",
+				]
+			):
 				summary_data[key]["taxable_amount"] = tax.total
 
 			if summary_data == {}:  # Implies that Zero VAT has not been set on any item.
@@ -237,6 +251,8 @@ def get_invoice_summary(items, taxes):
 
 # Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
+	set_payment_schedule_swift_number(doc)
+
 	# Validate company
 	if doc.doctype != "Sales Invoice" or doc.is_opening == "Yes":
 		return
@@ -317,6 +333,20 @@ def sales_invoice_validate(doc):
 			schedule.mode_of_payment_code = frappe.get_cached_value(
 				"Mode of Payment", schedule.mode_of_payment, "mode_of_payment_code"
 			)
+
+
+def set_payment_schedule_swift_number(doc):
+	"""Set the SWIFT/BIC of each Payment Schedule bank account (used in <DatiPagamento><BIC>).
+
+	The SWIFT code is stored on Bank, not on Bank Account, so it cannot be fetched through
+	the `bank_account` link with `fetch_from`."""
+	for row in doc.get("payment_schedule") or []:
+		swift_number = None
+		if row.get("bank_account"):
+			bank = frappe.get_cached_value("Bank Account", row.bank_account, "bank")
+			swift_number = bank and frappe.get_cached_value("Bank", bank, "swift_number")
+
+		row.bank_account_swift_number = swift_number or None
 
 
 # Ensure payment details are valid for e-invoice.

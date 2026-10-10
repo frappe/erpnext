@@ -30,6 +30,7 @@ class AdvanceTaxesandCharges(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		project: DF.Link | None
 		rate: DF.Float
 		row_id: DF.Data | None
 		tax_amount: DF.Currency

@@ -42,14 +42,12 @@ def get_context(context):
 		customer_loyalty_program = frappe.db.get_value("Customer", context.doc.customer, "loyalty_program")
 
 		if customer_loyalty_program:
-			from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
-				get_loyalty_program_details_with_points,
-			)
+			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 
-			loyalty_program_details = get_loyalty_program_details_with_points(
-				context.doc.customer, customer_loyalty_program
-			)
-			context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
+			# website permission on the order is already checked above; this page only needs
+			# the customer's own point balance, so skip the desk-permission wrapper
+			loyalty_details = get_loyalty_details(context.doc.customer, customer_loyalty_program)
+			context.available_loyalty_points = int(loyalty_details.get("loyalty_points"))
 
 	context.show_pay_button, context.pay_amount = get_payment_details(context.doc)
 	context.show_make_pi_button = False

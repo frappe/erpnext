@@ -55,14 +55,45 @@ class Warehouse(NestedSet):
 	def onload(self):
 		"""load account name for General Ledger Report"""
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
-			account = self.account or get_warehouse_account(self)
+			account = self.account or get_warehouse_account(self, raise_error=False)
 
 			if account:
 				self.set_onload("account", account)
 		load_address_and_contact(self)
 
 	def validate(self):
+		self.validate_warehouse_account()
+		self.validate_inventory_account()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_warehouse_account(self):
+		if self.account and self.company:
+			account_company = frappe.get_cached_value("Account", self.account, "company")
+			if account_company and account_company != self.company:
+				frappe.throw(
+					_("Account {0} does not belong to Company {1}").format(
+						frappe.bold(self.account), frappe.bold(self.company)
+					)
+				)
+
+	def validate_inventory_account(self):
+		if (
+			not self.is_new()
+			or not self.company
+			or self.flags.ignore_inventory_account_validation
+			or not frappe.get_cached_value("Company", self.company, "enable_perpetual_inventory")
+		):
+			return
+
+		warehouse = frappe._dict(self.as_dict())
+		if not self.account and self.parent_warehouse:
+			parent_bounds = frappe.db.get_value(
+				"Warehouse", self.parent_warehouse, ["lft", "rgt"], as_dict=True
+			)
+			if parent_bounds:
+				warehouse.update(parent_bounds)
+
+		get_warehouse_account(warehouse)
 
 	def on_update(self):
 		self.update_nsm_model()
@@ -183,7 +214,13 @@ def add_node():
 def convert_to_group_or_ledger(docname=None):
 	if not docname:
 		docname = frappe.form_dict.docname
-	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
+
+	# converting a warehouse between group and ledger restructures the tree, so it needs write on
+	# the warehouse being converted
+	warehouse = frappe.get_doc("Warehouse", docname)
+	warehouse.check_permission("write")
+
+	return warehouse.convert_to_group_or_ledger()
 
 
 def get_child_warehouses(warehouse):

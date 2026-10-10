@@ -71,7 +71,6 @@ class QualityInspection(Document):
 				for d in parameters:
 					if reading.specification == d.specification:
 						reading.update(d)
-						reading.status = "Accepted"
 
 		if self.readings:
 			self.inspect_and_set_status()
@@ -253,6 +252,9 @@ class QualityInspection(Document):
 					self.modified,
 				)
 
+		if self.reference_type and self.reference_name:
+			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
+
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual
@@ -419,7 +421,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Quality Inspection",
 		limit_start=start,
 		limit_page_length=page_len,

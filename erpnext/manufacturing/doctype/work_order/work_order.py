@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import CombineDatetime, Max, Min, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -31,6 +31,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
@@ -254,7 +255,7 @@ class WorkOrder(Document):
 			PackedItem = frappe.qb.DocType("Packed Item")
 			ProductBundleItem = frappe.qb.DocType("Product Bundle Item")
 
-			so = (
+			so_query = (
 				frappe.qb.from_(SalesOrder)
 				.inner_join(SalesOrderItem)
 				.on(SalesOrderItem.parent == SalesOrder.name)
@@ -270,16 +271,23 @@ class WorkOrder(Document):
 						| (ProductBundleItem.item_code == production_item)
 					)
 				)
-				.run(as_dict=1)
 			)
 
+			if self.sales_order_item:
+				so_query = so_query.where(SalesOrderItem.name == self.sales_order_item)
+
+			so = so_query.run(as_dict=1)
+
 			if not so:
-				so = (
+				packed_so_query = (
 					frappe.qb.from_(SalesOrder)
 					.inner_join(SalesOrderItem)
 					.on(SalesOrderItem.parent == SalesOrder.name)
 					.inner_join(PackedItem)
-					.on(PackedItem.parent == SalesOrder.name)
+					.on(
+						(PackedItem.parent == SalesOrder.name)
+						& (PackedItem.parent_detail_docname == SalesOrderItem.name)
+					)
 					.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 					.where(
 						(SalesOrder.name == self.sales_order)
@@ -288,8 +296,15 @@ class WorkOrder(Document):
 						& (SalesOrder.docstatus == 1)
 						& (PackedItem.item_code == production_item)
 					)
-					.run(as_dict=1)
 				)
+
+				if self.sales_order_item:
+					packed_so_query = packed_so_query.where(
+						(PackedItem.name == self.sales_order_item)
+						| (SalesOrderItem.name == self.sales_order_item)
+					)
+
+				so = packed_so_query.run(as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:
@@ -312,7 +327,18 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+			self.fg_warehouse = (
+				frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+				or self.get_production_item_warehouse()
+			)
+
+	def get_production_item_warehouse(self):
+		if not self.production_item:
+			return None
+
+		return get_item_defaults(self.production_item, self.company).get(
+			"default_warehouse"
+		) or get_item_group_defaults(self.production_item, self.company).get("default_warehouse")
 
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
@@ -412,11 +438,7 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if (
-					flt(self.material_transferred_for_manufacturing) > 0
-					or self.skip_transfer
-					or self.has_transferred_material()
-				):
+				if flt(self.material_transferred_for_manufacturing) > 0 or self.has_transferred_material():
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -426,12 +448,11 @@ class WorkOrder(Document):
 		else:
 			status = "Cancelled"
 
-		if (
-			self.skip_transfer
-			and self.produced_qty
-			and self.qty > (flt(self.produced_qty) + flt(self.process_loss_qty))
-		):
-			status = "In Process"
+		if self.skip_transfer and self.produced_qty:
+			precision = frappe.get_precision("Work Order", "produced_qty")
+			total_qty = flt(self.produced_qty, precision) + flt(self.process_loss_qty, precision)
+			if flt(self.qty, precision) > flt(total_qty, precision):
+				status = "In Process"
 
 		return status
 
@@ -536,6 +557,7 @@ class WorkOrder(Document):
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)
+		production_plan.flags.ignore_permissions = True
 		produced_qty = 0
 		if self.production_plan_item:
 			total_qty = frappe.get_all(
@@ -867,6 +889,9 @@ class WorkOrder(Document):
 			query = query.run()
 			qty = flt(query[0][0]) if query else 0
 
+			doc = frappe.get_doc("Production Plan", self.production_plan)
+			had_unordered_items = doc.has_unordered_items
+
 			if self.production_plan_item:
 				frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
 			elif self.production_plan_sub_assembly_item:
@@ -877,9 +902,13 @@ class WorkOrder(Document):
 					qty,
 				)
 
-			doc = frappe.get_doc("Production Plan", self.production_plan)
-			doc.set_status()
-			doc.db_set("status", doc.status)
+			doc.reload()
+			doc.flags.ignore_permissions = True
+			doc.update_status_and_bin_qty()
+			if had_unordered_items != doc.has_unordered_items:
+				doc.update_raw_material_bin_qty()
+			else:
+				doc.update_raw_material_bin_qty({d.item_code for d in self.required_items})
 
 	def update_work_order_qty_in_so(self):
 		if (not self.sales_order and not self.sales_order_item) or self.production_plan_sub_assembly_item:
@@ -1030,7 +1059,7 @@ class WorkOrder(Document):
 
 		return holidays[holiday_list]
 
-	def update_operation_status(self):
+	def update_operation_status(self, operation_id=None):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -1045,7 +1074,7 @@ class WorkOrder(Document):
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif qty <= flt(max_allowed_qty_for_wo, precision):
+			elif qty <= flt(max_allowed_qty_for_wo, precision) or d.name != operation_id:
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
@@ -1060,21 +1089,24 @@ class WorkOrder(Document):
 			if actual_end_dates:
 				self.actual_end_date = max(actual_end_dates)
 		else:
-			data = frappe.get_all(
-				"Stock Entry",
-				fields=["timestamp(posting_date, posting_time) as posting_datetime"],
-				filters={
-					"work_order": self.name,
-					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
-				},
+			stock_entry = frappe.qb.DocType("Stock Entry")
+			posting_datetime = CombineDatetime(stock_entry.posting_date, stock_entry.posting_time)
+			data = (
+				frappe.qb.from_(stock_entry)
+				.select(Min(posting_datetime).as_("start_date"), Max(posting_datetime).as_("end_date"))
+				.where(
+					(stock_entry.work_order == self.name)
+					& (stock_entry.docstatus == 1)
+					& (stock_entry.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
+				)
+				.run(as_dict=True)
 			)
-
-			if data and len(data):
-				dates = [d.posting_datetime for d in data]
-				self.db_set("actual_start_date", min(dates))
-
-				if self.status == "Completed":
-					self.db_set("actual_end_date", max(dates))
+			self.db_set(
+				{
+					"actual_start_date": data[0].start_date,
+					"actual_end_date": data[0].end_date if self.status == "Completed" else None,
+				}
+			)
 
 		self.set_lead_time()
 
@@ -1231,7 +1263,10 @@ class WorkOrder(Document):
 							"description": item.description,
 							"allow_alternative_item": item.allow_alternative_item,
 							"required_qty": item.qty,
-							"source_warehouse": item.source_warehouse or item.default_warehouse,
+							"source_warehouse": item.source_warehouse
+							or item.default_warehouse
+							or self.source_warehouse
+							or get_item_group_defaults(item.item_code, self.company).get("default_warehouse"),
 							"include_item_in_manufacturing": item.include_item_in_manufacturing,
 						},
 					)
@@ -1263,9 +1298,10 @@ class WorkOrder(Document):
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
-		# an alternative item transferred in place of a required item is credited to the required item
+		data = query.run(as_dict=1) or []
+		# An item's own transfer and its substitutes both key to the original item, so sum them.
 		transferred_items = frappe._dict()
-		for d in query.run(as_dict=1) or []:
+		for d in data:
 			key = d.original_item or d.item_code
 			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
 
@@ -1395,6 +1431,14 @@ class WorkOrder(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
+	parent = filters.get("parent")
+	parenttype = filters.get("parenttype") or "BOM"
+	if not parent or not frappe.db.exists(parenttype, parent):
+		return []
+
+	ptype = "select" if frappe.only_has_select_perm(parenttype) else "read"
+	frappe.has_permission(parenttype, ptype, doc=parent, throw=True)
+
 	if txt:
 		filters["operation"] = ("like", "%%%s%%" % txt)
 
@@ -1666,14 +1710,16 @@ def get_default_warehouse():
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def stop_unstop(work_order, status):
 	"""Called from client side on Stop/Unstop event"""
 
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
+	# the check above is doctype level and never consults User Permissions, so on its own it lets
+	# a caller restricted to one company stop another company's orders
 	pro_order = frappe.get_doc("Work Order", work_order)
+	pro_order.check_permission("write")
 
 	if pro_order.status == "Closed":
 		frappe.throw(_("Closed Work Order can not be stopped or Re-opened"))
@@ -1720,12 +1766,13 @@ def make_job_card(work_order, operations):
 				create_job_card(work_order, row, auto_create=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_work_order(work_order, status):
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
+	# doctype level above, record level here — see stop_unstop()
 	work_order = frappe.get_doc("Work Order", work_order)
+	work_order.check_permission("write")
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",

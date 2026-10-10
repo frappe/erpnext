@@ -352,6 +352,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.on_hold",
+   "depends_on": "eval:doc.on_hold",
    "fieldname": "sb_14",
    "fieldtype": "Section Break",
    "label": "Hold Invoice"
@@ -501,6 +502,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -1618,6 +1620,7 @@
    "fieldname": "use_transaction_date_exchange_rate",
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -1662,7 +1665,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-12 23:54:21.263951",
+ "modified": "2026-10-07 20:56:49.769456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1715,6 +1718,18 @@
    "read": 1,
    "role": "Accounts Manager",
    "write": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

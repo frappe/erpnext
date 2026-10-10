@@ -13,6 +13,7 @@ from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
 from frappe.utils import flt, get_fullname
 
+from erpnext.accounts.party import validate_party_frozen_disabled
 from erpnext.crm.utils import (
 	CRMNote,
 	copy_comments,
@@ -131,6 +132,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.validate_party()
 		self.map_fields()
 		self.validate_qty()
 		self.set_exchange_rate()
@@ -346,6 +348,10 @@ class Opportunity(TransactionBase, CRMNote):
 				return False
 			return True
 
+	def validate_party(self) -> None:
+		if self.opportunity_from == "Customer":
+			validate_party_frozen_disabled("Customer", self.party_name)
+
 	def validate_cust_name(self):
 		if self.party_name:
 			if self.opportunity_from == "Customer":
@@ -400,7 +406,7 @@ def get_item_details(item_code):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+		from erpnext.controllers.accounts_controller import _get_default_taxes_and_charges
 
 		quotation = frappe.get_doc(target)
 
@@ -416,7 +422,7 @@ def make_quotation(source_name, target_doc=None):
 		quotation.conversion_rate = exchange_rate
 
 		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
+		taxes = _get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
 		if taxes.get("taxes"):
 			quotation.update(taxes)
 
@@ -547,8 +553,14 @@ def make_opportunity_from_communication(
 ):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 
+	# `communication` is caller-supplied. Communication grants read to `All` only for the owner and
+	# carries a has_permission hook, so doc= is what decides access.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 
+	# make_lead_from_communication() carries its own check, but it is skipped entirely when the
+	# email already references a Lead, so this cannot rely on it.
 	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)

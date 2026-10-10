@@ -54,7 +54,7 @@ class PeriodClosingVoucher(AccountsController):
 		if for_cancellation and is_immutable_ledger_enabled():
 			posting_date = getdate()
 
-		check_freezing_date(posting_date, self.company)
+		check_freezing_date(posting_date)
 
 	def validate_start_and_end_date(self):
 		self.fy_start_date, self.fy_end_date = frappe.db.get_value(

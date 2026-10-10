@@ -22,6 +22,8 @@ from erpnext.selling.doctype.product_bundle.test_product_bundle import make_prod
 from erpnext.selling.doctype.sales_order.sales_order import (
 	WarehouseRequired,
 	create_pick_list,
+	get_potentially_billable_sales_orders,
+	has_potentially_billable_items,
 	make_delivery_note,
 	make_material_request,
 	make_purchase_order,
@@ -33,6 +35,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
+from erpnext.stock.utils import InvalidWarehouseCompany
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -224,6 +227,278 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
+
+	def test_make_sales_invoice_for_pending_qty_with_item_billing_allowance(self):
+		item = make_item(
+			"_Test Over Billed Pending Qty Item",
+			{"is_stock_item": 1, "over_billing_allowance": 0},
+		).name
+		so = make_sales_order(item_code=item, qty=390, rate=100)
+
+		for _ in range(2):
+			si = make_sales_invoice(so.name)
+			si.get("items")[0].qty = 120
+			si.get("items")[0].rate = 162.50
+			si.insert()
+			si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+		self.assertEqual(so.get("items")[0].billed_amt, so.get("items")[0].amount)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+
+		def is_offered(txt=""):
+			rows = get_potentially_billable_sales_orders("Sales Order", txt, "name", 0, 50, filters)
+			return so.name in [row.name for row in rows]
+
+		def forget_cached_allowances():
+			frappe.local.request_cache.clear()
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			forget_cached_allowances()
+			self.assertTrue(has_potentially_billable_items(so.name))
+			self.assertTrue(is_offered())
+			self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 150)
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 0}):
+			forget_cached_allowances()
+			self.assertFalse(has_potentially_billable_items(so.name))
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+			frappe.db.set_value("Item", item, "over_billing_allowance", 100)
+			forget_cached_allowances()
+
+			so.run_method("onload")
+			self.assertTrue(so.get_onload("has_potentially_billable_items"))
+			self.assertTrue(is_offered(so.customer))
+
+			si = make_sales_invoice(so.name)
+			self.assertEqual(len(si.get("items")), 1)
+			self.assertEqual(si.get("items")[0].qty, 150)
+
+	def test_make_sales_invoice_skips_fully_invoiced_free_item(self):
+		free_item = make_item("_Test Free Item", {"is_stock_item": 1}).name
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.append("items", {"item_code": free_item, "qty": 5, "rate": 0, "warehouse": so.items[0].warehouse})
+		so.submit()
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual([row.qty for row in si.items], [10, 5])
+		si.insert()
+		si.submit()
+
+		self.assertEqual(len(make_sales_invoice(so.name).items), 0)
+
+	def test_fully_billed_order_is_not_offered_within_billing_allowance(self):
+		item = make_item(
+			"_Test Fully Billed Allowance Item",
+			{"is_stock_item": 1, "over_billing_allowance": 0},
+		).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+
+			rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+			self.assertNotIn(so.name, [row.name for row in rows])
+
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_full_qty_billed_below_amount_is_offered_with_zero_qty(self):
+		so = make_sales_order(qty=1, rate=1000)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].rate = 400
+		si.insert()
+		si.submit()
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+		rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+		self.assertIn(so.name, [row.name for row in rows])
+		self.assertTrue(has_potentially_billable_items(so.name))
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual([row.qty for row in si.get("items")], [0])
+		self.assertEqual(len(make_sales_invoice(so.name, target_doc=si).get("items")), 1)
+
+		si.get("items")[0].qty = 1
+		si.get("items")[0].rate = 600
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+		self.assertFalse(has_potentially_billable_items(so.name))
+
+	def test_order_with_sub_precision_pending_qty_is_not_offered(self):
+		item = make_item("_Test Sub Precision Qty Item", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		qty_precision = frappe.get_precision("Sales Order Item", "qty")
+		billed_qty = 10 - 10 ** -(qty_precision + 1)
+		frappe.db.set_value(
+			"Sales Invoice Item", si.get("items")[0].name, "qty", billed_qty, update_modified=False
+		)
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_make_sales_invoice_after_return_and_redelivery(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		so = make_sales_order(qty=10, rate=100)
+		dn = create_dn_against_so(so.name, 10)
+
+		dn_return = frappe.get_doc(make_sales_return(dn.name).as_dict())
+		dn_return.insert()
+		dn_return.submit()
+
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+		create_dn_against_so(so.name, 10)
+
+		so.load_from_db()
+		item = so.get("items")[0]
+		self.assertEqual(item.delivered_qty, 10)
+		self.assertEqual(item.returned_qty, 10)
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.get("items")[0].qty, 10)
+
+	def test_make_sales_invoice_bills_ordered_qty_for_partial_delivery(self):
+		so = make_sales_order(qty=10, rate=100)
+		create_dn_against_so(so.name, 4)
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.get("items")[0].qty, 10)
+
+	def test_make_sales_invoice_after_partial_billing_return_and_redelivery(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		so = make_sales_order(qty=10, rate=100)
+		dn = create_dn_against_so(so.name, 10)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].qty = 4
+		si.insert()
+		si.submit()
+
+		dn_return = frappe.get_doc(make_sales_return(dn.name).as_dict())
+		dn_return.insert()
+		dn_return.submit()
+		create_dn_against_so(so.name, 5)
+
+		so.load_from_db()
+		item = so.get("items")[0]
+		self.assertEqual(item.delivered_qty, 5)
+		self.assertEqual(item.returned_qty, 10)
+		self.assertEqual(item.billed_amt, 400)
+
+		pending_invoice = make_sales_invoice(so.name)
+		self.assertEqual(pending_invoice.get("items")[0].qty, 1)
+		pending_invoice.insert()
+		pending_invoice.submit()
+
+		so.load_from_db()
+		self.assertEqual(so.get("items")[0].billed_amt, 500)
+
+	def test_make_sales_invoice_after_update_stock_credit_note(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		so = make_sales_order(qty=5, rate=100)
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.insert()
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.update_billed_amount_in_sales_order = 1
+		credit_note.get("items")[0].qty = -2
+		credit_note.insert()
+		credit_note.submit()
+
+		self.assertTrue(has_potentially_billable_items(so.name))
+		pending_invoice = make_sales_invoice(so.name)
+		self.assertEqual(pending_invoice.get("items")[0].qty, 2)
+
+		pending_invoice.update_stock = 1
+		pending_invoice.insert()
+		pending_invoice.submit()
+
+		self.assertFalse(has_potentially_billable_items(so.name))
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_returned_qty_after_return_delivery_note_and_update_stock_credit_note(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return as make_credit_note
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		for credit_note_first in (False, True):
+			with self.subTest(credit_note_first=credit_note_first):
+				so = make_sales_order(qty=5, rate=100)
+				dn = create_dn_against_so(so.name, 2)
+				si = make_sales_invoice(so.name)
+				si.update_stock = 1
+				si.get("items")[0].qty = 3
+				si.insert()
+				si.submit()
+
+				dn_return = frappe.get_doc(make_sales_return(dn.name).as_dict())
+				credit_note = make_credit_note(si.name)
+				credit_note.update_billed_amount_in_sales_order = 1
+				credit_note.get("items")[0].qty = -1
+
+				for return_doc in [credit_note, dn_return] if credit_note_first else [dn_return, credit_note]:
+					return_doc.insert()
+					return_doc.submit()
+
+				so.load_from_db()
+				self.assertEqual(so.get("items")[0].returned_qty, 3)
+				self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 1)
+
+	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": "_Test Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 10,
+					"rate": 100,
+				},
+				{
+					"item_code": "_Test FG Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 10,
+					"rate": 100,
+				},
+			]
+		)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].qty = 4
+		si.get("items")[1].qty = 6
+		si.insert()
+		si.submit()
+
+		pending_invoice = make_sales_invoice(so.name)
+		self.assertEqual(
+			{item.so_detail: item.qty for item in pending_invoice.get("items")},
+			{so.get("items")[0].name: 6, so.get("items")[1].name: 4},
+		)
 
 	def test_so_billed_amount_against_return_entry(self):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
@@ -557,6 +832,117 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		self.assertEqual(updated_total, prev_total + 1400)
 		self.assertNotEqual(updated_total_in_words, prev_total_in_words)
+
+	def test_update_child_adding_new_item_with_warehouse(self):
+		so = make_sales_order(item_code="_Test Item", qty=4)
+
+		first_item_of_so = so.get("items")[0]
+		self.assertNotEqual(first_item_of_so.warehouse, "_Test Warehouse 2 - _TC")
+
+		def get_trans_item(warehouse):
+			return json.dumps(
+				[
+					{
+						"item_code": first_item_of_so.item_code,
+						"rate": first_item_of_so.rate,
+						"qty": first_item_of_so.qty,
+						"docname": first_item_of_so.name,
+						"warehouse": warehouse,
+					},
+					{"item_code": "_Test Item 2", "rate": 200, "qty": 7, "warehouse": warehouse},
+				]
+			)
+
+		self.assertRaises(
+			InvalidWarehouseCompany,
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_item("_Test Warehouse 2 - _TC1"),
+			so.name,
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Group node warehouse",
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_item("_Test Warehouse Group - _TC"),
+			so.name,
+		)
+
+		if not frappe.db.exists("Warehouse", "_Test Disabled Warehouse - _TC"):
+			frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "_Test Disabled Warehouse",
+					"company": "_Test Company",
+					"disabled": 1,
+				}
+			).insert()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Disabled Warehouse",
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_item("_Test Disabled Warehouse - _TC"),
+			so.name,
+		)
+
+		update_child_qty_rate("Sales Order", get_trans_item("_Test Warehouse 2 - _TC"), so.name)
+
+		so.reload()
+		# the new row picks up the warehouse selected in the dialog
+		self.assertEqual(so.get("items")[-1].item_code, "_Test Item 2")
+		self.assertEqual(so.get("items")[-1].warehouse, "_Test Warehouse 2 - _TC")
+		# existing rows keep theirs, so their reserved qty stays in the same bin
+		self.assertEqual(so.get("items")[0].warehouse, first_item_of_so.warehouse)
+
+	def test_update_child_adding_new_item_without_any_default_warehouse(self):
+		item_code = make_item("_Test Item Without Default Warehouse", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code="_Test Item", qty=4)
+		existing_item = so.get("items")[0]
+
+		stock_settings_default = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		frappe.db.set_single_value("Stock Settings", "default_warehouse", None)
+		self.addCleanup(
+			frappe.db.set_single_value, "Stock Settings", "default_warehouse", stock_settings_default
+		)
+
+		def get_trans_items(warehouse=None):
+			new_row = {"item_code": item_code, "rate": 200, "qty": 7}
+			if warehouse:
+				new_row["warehouse"] = warehouse
+
+			return json.dumps(
+				[
+					{
+						"item_code": existing_item.item_code,
+						"rate": existing_item.rate,
+						"qty": existing_item.qty,
+						"docname": existing_item.name,
+					},
+					new_row,
+				]
+			)
+
+		# no default in the Item Master, Item Group, Brand or Stock Settings
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot find a default warehouse",
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_items(),
+			so.name,
+		)
+
+		update_child_qty_rate("Sales Order", get_trans_items("_Test Warehouse - _TC"), so.name)
+
+		so.reload()
+		self.assertEqual(len(so.get("items")), 2)
+		self.assertEqual(so.get("items")[0].warehouse, existing_item.warehouse)
+		self.assertEqual(so.get("items")[-1].item_code, item_code)
+		self.assertEqual(so.get("items")[-1].warehouse, "_Test Warehouse - _TC")
 
 	def test_update_child_removing_item(self):
 		so = make_sales_order(**{"item_list": [{"item_code": "_Test Item", "qty": 5, "rate": 1000}]})
@@ -1528,6 +1914,61 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				(so.name, item),
 			)
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_make_work_order_for_duplicate_product_bundle_rows(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		bundle_item = make_item("_Test Work Order Product Bundle", {"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, ["_Test FG Item"])
+
+		first_delivery_date = add_days(today(), 5)
+		second_delivery_date = add_days(today(), 10)
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": bundle_item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"delivery_date": first_delivery_date,
+				},
+				{
+					"item_code": bundle_item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"delivery_date": second_delivery_date,
+				},
+			]
+		)
+
+		items = [
+			{
+				"warehouse": item.get("warehouse"),
+				"item_code": item.get("item_code"),
+				"pending_qty": item.get("pending_qty"),
+				"sales_order_item": item.get("sales_order_item"),
+				"bom": item.get("bom"),
+				"description": item.get("description"),
+			}
+			for item in get_work_order_items(so.name)
+		]
+		work_orders = make_work_orders(json.dumps({"items": items}), so.name, so.company)
+
+		expected_delivery_dates = {
+			packed_item.name: next(
+				item.delivery_date for item in so.items if item.name == packed_item.parent_detail_docname
+			)
+			for packed_item in so.packed_items
+		}
+		self.assertEqual(len(work_orders), 2)
+		for work_order_name in work_orders:
+			work_order = frappe.get_doc("Work Order", work_order_name)
+			self.assertEqual(
+				getdate(work_order.expected_delivery_date),
+				getdate(expected_delivery_dates[work_order.sales_order_item]),
+			)
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -2645,6 +3086,17 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		# create a SO for FG Item with selling rate than valuation rate.
 		so = make_sales_order(item_code=fg_item, qty=10, rate=50, warehouse=fg_warehouse, do_not_save=1)
 		self.assertRaises(frappe.ValidationError, so.save)
+
+	def test_sales_team_allocated_percentage_tolerates_floating_point_drift(self):
+		# 10.0 + 58.02 + 31.98 accumulates to 100.00000000000001 in binary floating point
+		so = make_sales_order(do_not_save=True)
+		for sales_person, percentage in (
+			("_Test Sales Person", 10.0),
+			("_Test Sales Person 1", 58.02),
+			("_Test Sales Person 2", 31.98),
+		):
+			so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": percentage})
+		so.save()
 
 
 def compare_payment_schedules(doc, doc1, doc2):

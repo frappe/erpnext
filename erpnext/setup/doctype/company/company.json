@@ -908,7 +908,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-07-02 07:21:21.794533",
+ "modified": "2026-09-22 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -936,6 +936,10 @@
   {
    "read": 1,
    "role": "Employee"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
   },
   {
    "read": 1,
@@ -967,6 +971,10 @@
   },
   {
    "role": "Auditor",
+   "select": 1
+  },
+  {
+   "role": "Desk User",
    "select": 1
   }
  ],

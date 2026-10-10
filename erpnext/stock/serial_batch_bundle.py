@@ -492,6 +492,35 @@ class SerialBatchBundle:
 
 		query.run()
 
+		if warehouse:
+			self.update_item_in_serial_nos(sle, serial_nos)
+
+	def update_item_in_serial_nos(self, sle, serial_nos):
+		"""Move serial nos to the item of the inward entry.
+
+		A Repack or Manufacture entry can produce a finished good with the serial no of a
+		consumed raw material. Cancelling the entry moves the serial no back.
+		"""
+		item = frappe.get_cached_value(
+			"Item",
+			sle.item_code,
+			["item_name", "description", "item_group", "brand"],
+			as_dict=1,
+		)
+
+		sn_table = frappe.qb.DocType("Serial No")
+		query = (
+			frappe.qb.update(sn_table)
+			.set(sn_table.item_code, sle.item_code)
+			.set(sn_table.item_name, item.item_name)
+			.set(sn_table.description, item.description)
+			.set(sn_table.item_group, item.item_group)
+			.set(sn_table.brand, item.brand)
+			.where(sn_table.name.isin(serial_nos) & (sn_table.item_code != sle.item_code))
+		)
+
+		query.run()
+
 	def update_serial_no_status_for_stock_reco(self, serial_nos):
 		for serial_no in serial_nos:
 			sle_doctype = frappe.qb.DocType("Stock Ledger Entry")
@@ -774,6 +803,9 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		return is_rejected(self.sle.voucher_type, self.sle.voucher_detail_no, self.sle.warehouse)
 
 	def get_incoming_rate(self):
+		if not self.sle.actual_qty and self.sle.voucher_type == "Stock Reconciliation":
+			return 0.0
+
 		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))
 
 	def get_incoming_rate_of_serial_no(self, serial_no):
@@ -909,6 +941,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		self.batchwise_valuation_batches = []
 		self.non_batchwise_valuation_batches = []
+
+		if batchwise_batches := self.sle.get("batchwise_valuation_batches"):
+			self.batchwise_valuation_batches = list(batchwise_batches)
+			self.non_batchwise_valuation_batches = list(set(self.batches) - set(batchwise_batches))
+			return
 
 		if get_valuation_method(self.sle.item_code) == "Moving Average" and frappe.db.get_single_value(
 			"Stock Settings", "do_not_use_batchwise_valuation"
@@ -1234,6 +1271,7 @@ class SerialBatchCreation:
 			{
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
+				"company": self.get("company"),
 				"qty": abs(self.actual_qty) if self.actual_qty else 0,
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
@@ -1241,6 +1279,9 @@ class SerialBatchCreation:
 
 		if self.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = self.ignore_serial_nos
+
+		if self.get("already_picked_batches"):
+			kwargs["already_picked_batches"] = self.already_picked_batches
 
 		if (
 			self.has_serial_no

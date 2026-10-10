@@ -502,12 +502,19 @@ class Account(NestedSet):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		"""select name from tabAccount
-		where is_group = 1 and docstatus != 2 and company = {}
-		and {} like {} order by name limit {} offset {}""".format("%s", searchfield, "%s", "%s", "%s"),
-		(filters["company"], "%%%s%%" % txt, page_len, start),
-		as_list=1,
+	return frappe.get_list(
+		"Account",
+		filters=[
+			["is_group", "=", 1],
+			["docstatus", "!=", 2],
+			["company", "=", filters["company"]],
+			[searchfield, "like", f"%{txt}%"],
+		],
+		fields=["name"],
+		order_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
 
 

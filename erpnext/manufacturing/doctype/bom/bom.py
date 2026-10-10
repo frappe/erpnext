@@ -10,12 +10,12 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, today
+from frappe.utils import cint, cstr, flt, get_link_to_form, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.doctype.item.item import _get_item_details
 from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -337,7 +337,7 @@ class BOM(WebsiteGenerator):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = get_item_details(item_code)
+		item = _get_item_details(item_code)
 
 		if not item:
 			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
@@ -652,6 +652,19 @@ class BOM(WebsiteGenerator):
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
+
+		bom_items = {self.item}
+		bom_items.update(d.item_code for d in self.get("items"))
+		bom_items.update(d.item_code for d in self.get("scrap_items"))
+
+		if disabled_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", list(bom_items)), "disabled": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Disabled Item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in disabled_items)
+				)
+			)
 
 	def check_recursion(self, bom_list=None):
 		"""Check whether recursion occurs in any bom"""
@@ -1151,7 +1164,11 @@ def get_bom_items_as_dict(
 	fetch_scrap_items=0,
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
+	ignore_permissions=True,
 ):
+	if not ignore_permissions:
+		frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
 	item_dict = {}
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
@@ -1243,7 +1260,11 @@ def get_bom_items_as_dict(
 
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
-	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
+	frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
+	items = get_bom_items_as_dict(
+		bom, company, qty, fetch_exploded, include_non_stock_items=True, ignore_permissions=False
+	).values()
 	items = list(items)
 	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
@@ -1507,7 +1528,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 
 
 @frappe.whitelist()
-def get_bom_diff(bom1, bom2):
+def get_bom_diff(bom1: str, bom2: str):
 	from frappe.model import table_fields
 
 	if bom1 == bom2:
@@ -1517,6 +1538,8 @@ def get_bom_diff(bom1, bom2):
 
 	doc1 = frappe.get_doc("BOM", bom1)
 	doc2 = frappe.get_doc("BOM", bom2)
+	doc1.check_permission()
+	doc2.check_permission()
 
 	out = get_diff(doc1, doc2)
 	out.row_changed = []
@@ -1536,7 +1559,10 @@ def get_bom_diff(bom1, bom2):
 		old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
 
 		if df.fieldtype in table_fields:
-			identifier = identifiers[df.fieldname]
+			identifier = identifiers.get(df.fieldname)
+			if not identifier:
+				continue
+
 			# make maps
 			old_row_by_identifier, new_row_by_identifier = {}, {}
 			for d in old_value:
@@ -1577,10 +1603,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
 
-	or_cond_filters = {}
+	or_cond_filters = []
 	if txt:
 		for s_field in searchfields:
-			or_cond_filters[s_field] = ("like", f"%{txt}%")
+			or_cond_filters.append([s_field, "like", f"%{txt}%"])
 
 		barcodes = frappe.get_all(
 			"Item Barcode",
@@ -1590,7 +1616,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 		barcodes = [d.item_code for d in barcodes]
 		if barcodes:
-			or_cond_filters["name"] = ("in", barcodes)
+			or_cond_filters.append(["name", "in", barcodes])
 
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
@@ -1621,7 +1647,7 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 		doc.item = item
 		doc.quantity = 1
 
-		item_data = get_item_details(item)
+		item_data = _get_item_details(item)
 		doc.update(
 			{
 				"item_name": item_data.item_name,

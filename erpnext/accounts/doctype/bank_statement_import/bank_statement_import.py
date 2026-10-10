@@ -105,25 +105,30 @@ class BankStatementImport(DataImport):
 
 @frappe.whitelist()
 def get_preview_from_template(data_import, import_file=None, google_sheets_url=None):
-	return frappe.get_doc("Bank Statement Import", data_import).get_preview_from_template(
-		import_file, google_sheets_url
-	)
+	bsi = frappe.get_doc("Bank Statement Import", data_import)
+	bsi.check_permission()
+	return bsi.get_preview_from_template(import_file, google_sheets_url)
 
 
 @frappe.whitelist()
 def form_start_import(data_import):
-	return frappe.get_doc("Bank Statement Import", data_import).start_import()
+	bsi = frappe.get_doc("Bank Statement Import", data_import)
+	bsi.check_permission("write")
+	return bsi.start_import()
 
 
 @frappe.whitelist()
 def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
+	data_import.check_permission()
 	data_import.export_errored_rows()
 
 
 @frappe.whitelist()
 def download_import_log(data_import_name):
-	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
+	bsi = frappe.get_doc("Bank Statement Import", data_import_name)
+	bsi.check_permission()
+	return bsi.download_import_log()
 
 
 def parse_data_from_template(raw_data):
@@ -252,6 +257,7 @@ def get_import_status(docname):
 	import_status = {}
 
 	data_import = frappe.get_doc("Bank Statement Import", docname)
+	data_import.check_permission()
 	import_status["status"] = data_import.status
 
 	logs = frappe.get_all(
@@ -290,6 +296,10 @@ def get_import_logs(docname: str):
 
 @frappe.whitelist()
 def upload_bank_statement(**args):
+	# `create`: the sole caller is the Bank Reconciliation Tool's upload button, which routes
+	# straight into a new Bank Statement Import form.
+	frappe.has_permission("Bank Statement Import", "create", throw=True)
+
 	args = frappe._dict(args)
 	bsi = frappe.new_doc("Bank Statement Import")
 

@@ -168,7 +168,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-30 19:08:21.199759",
+ "modified": "2026-09-09 17:04:59.512294",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Invoice Discounting",
@@ -185,7 +185,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Accounts Manager",
    "share": 1,
    "submit": 1,
    "write": 1

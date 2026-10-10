@@ -12,20 +12,22 @@
   {
    "fieldname": "fieldname",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Fieldname"
+   "in_list_view": 1,
+   "label": "Fieldname",
+   "read_only": 1
   },
   {
    "fieldname": "field",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Field"
+   "label": "Field",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-21 11:12:54.632093",
+ "modified": "2026-08-31 20:41:12.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Search Fields",

@@ -47,7 +47,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.get_item_details import get_item_tax_map
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+from erpnext.stock.utils import _get_incoming_rate, get_stock_balance
 
 
 class TestSalesInvoice(FrappeTestCase):
@@ -1232,6 +1232,33 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(pos.change_amount, 10)
 
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
+
+		frappe.db.set_single_value("Accounts Settings", "post_change_gl_entries", 1)
+
+	def test_pos_change_amount_multi_currency_gl_entry(self):
+		frappe.db.set_single_value("Accounts Settings", "post_change_gl_entries", 0)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.currency = "USD"
+		si.conversion_rate = 50
+		si.party_account_currency = "USD"
+		si.account_for_change_amount = "Cash - _TC"
+		si.change_amount = 50
+		si.base_change_amount = 2500
+		si.append(
+			"payments",
+			{"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 150, "base_amount": 7500},
+		)
+
+		gl_entries = []
+		si.make_pos_gl_entries(gl_entries)
+
+		debtors_entry = next(entry for entry in gl_entries if entry["account"] == si.debit_to)
+		cash_entry = next(entry for entry in gl_entries if entry["account"] == "Cash - _TC")
+
+		self.assertEqual(flt(debtors_entry["credit"]), 5000.0)
+		self.assertEqual(flt(cash_entry["debit"]), 5000.0)
 
 		frappe.db.set_single_value("Accounts Settings", "post_change_gl_entries", 1)
 
@@ -2512,6 +2539,105 @@ class TestSalesInvoice(FrappeTestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
+	@change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_on_recurring_keeps_terms_and_shifts_service_dates(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		reference = make_recurring_reference_invoice(
+			"2025-01-01",
+			"2025-01-31",
+			[("2025-01-01", "2025-01-31"), ("2025-01-29", "2025-01-31"), ("2025-01-10", "2025-01-20")],
+		)
+		reference.payment_terms_template = "Test Receivable Template"
+		reference.po_no = "PO-0001"
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(new_invoice.po_no, "PO-0001")
+		self.assertEqual(new_invoice.payment_terms_template, "Test Receivable Template")
+		self.assertEqual(
+			[getdate(row.due_date) for row in new_invoice.payment_schedule],
+			[getdate("2025-02-02"), getdate("2025-02-03")],
+		)
+		self.assertEqual(
+			[(getdate(row.service_start_date), getdate(row.service_end_date)) for row in new_invoice.items],
+			[
+				(getdate("2025-02-01"), getdate("2025-02-28")),
+				(getdate("2025-02-28"), getdate("2025-02-28")),
+				(getdate("2025-02-10"), getdate("2025-02-20")),
+			],
+		)
+
+	def test_on_recurring_keeps_service_dates_in_shorter_period(self):
+		# Auto Repeat without frappe/frappe#44189 moves 30-31 Jan to 28-28 Feb, then to 28-28 Mar
+		reference = make_recurring_reference_invoice(
+			"2025-01-30", "2025-01-31", [("2025-01-30", "2025-01-31")]
+		)
+		reference.insert()
+
+		for from_date, to_date in [("2025-02-28", "2025-02-28"), ("2025-03-28", "2025-03-28")]:
+			new_invoice = make_recurring_invoice(reference, from_date, to_date)
+			self.assertEqual(
+				(
+					getdate(new_invoice.items[0].service_start_date),
+					getdate(new_invoice.items[0].service_end_date),
+				),
+				(getdate(from_date), getdate(to_date)),
+			)
+
+	def test_on_recurring_keeps_service_dates_after_period_end_ordered(self):
+		# Auto Repeat moves the period 30 Jan-26 Feb to 27 Feb-29 Mar
+		reference = make_recurring_reference_invoice(
+			"2025-01-30", "2025-02-26", [("2025-02-26", "2025-02-27")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-27", "2025-03-29")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-03-29"), getdate("2025-03-30")),
+		)
+
+	def test_on_recurring_keeps_short_service_range_after_period_end(self):
+		# Auto Repeat builds the full next month after a half-month period
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-15", [("2025-01-20", "2025-01-25")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-02-20"), getdate("2025-02-25")),
+		)
+
+	def test_on_recurring_keeps_service_end_at_month_end(self):
+		# Billing in advance: the January invoice covers the service in February
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-31", [("2025-02-01", "2025-02-28")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-03-01"), getdate("2025-03-31")),
+		)
+
 	@change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
@@ -2916,7 +3042,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 		rate = 0.0
 		for d in si.get("items"):
-			rate = get_incoming_rate(
+			rate = _get_incoming_rate(
 				{
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,
@@ -5015,6 +5141,34 @@ class TestSalesInvoice(FrappeTestCase):
 
 		frappe.db.set_value("Company", "_Test Company 1", "cost_center", cost_center)
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_update_stock_restricted_to_reserved_produced_serial_nos(self):
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_sales_invoice as make_si_from_so,
+		)
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
+			make_so_with_reserved_produced_serial_no,
+		)
+
+		so, reserved, unreserved = make_so_with_reserved_produced_serial_no()
+
+		def make_si(serial_no):
+			si = make_si_from_so(so.name)
+			si.update_stock = 1
+			si.items[0].warehouse = so.items[0].warehouse
+			si.items[0].use_serial_batch_fields = 1
+			si.items[0].serial_no = serial_no
+			return si.save()
+
+		frappe.db.savepoint("unreserved_serial_no")
+		si = make_si(unreserved[0])
+		self.assertRaises(frappe.ValidationError, si.submit)
+		frappe.db.rollback(save_point="unreserved_serial_no")
+
+		si = make_si(reserved[0])
+		si.submit()
+		self.assertEqual(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle), reserved)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
@@ -5335,3 +5489,42 @@ def add_taxes(doc):
 			"rate": 12,
 		},
 	)
+
+
+def make_recurring_reference_invoice(from_date, to_date, service_dates):
+	"""Return an unsaved Sales Invoice for the period, with one deferred item row per service date range."""
+	deferred_account = create_account(
+		account_name="Deferred Revenue",
+		parent_account="Current Liabilities - _TC",
+		company="_Test Company",
+	)
+	item = create_item("_Test Item for Deferred Accounting")
+	item.enable_deferred_revenue = 1
+	item.item_defaults[0].deferred_revenue_account = deferred_account
+	item.save()
+
+	reference = create_sales_invoice(item=item.name, posting_date=from_date, do_not_save=True)
+	reference.set_posting_time = 1
+	reference.from_date = from_date
+	reference.to_date = to_date
+	reference.items[0].enable_deferred_revenue = 1
+	reference.items[0].deferred_revenue_account = deferred_account
+	first_row = reference.items[0].as_dict(no_default_fields=True)
+	reference.items = []
+	for service_start_date, service_end_date in service_dates:
+		row = reference.append("items", first_row)
+		row.service_start_date = service_start_date
+		row.service_end_date = service_end_date
+	return reference
+
+
+def make_recurring_invoice(reference, from_date, to_date):
+	"""Same steps as Auto Repeat: copy without no_copy fields, set dates and period, call on_recurring."""
+	new_invoice = frappe.copy_doc(reference, ignore_no_copy=False)
+	new_invoice.set_posting_time = 1
+	new_invoice.posting_date = from_date
+	new_invoice.from_date = from_date
+	new_invoice.to_date = to_date
+	auto_repeat = frappe._dict(frequency="Monthly")
+	new_invoice.run_method("on_recurring", reference_doc=reference, auto_repeat_doc=auto_repeat)
+	return new_invoice.insert()

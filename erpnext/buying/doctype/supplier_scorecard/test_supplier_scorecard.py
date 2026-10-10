@@ -2,8 +2,13 @@
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import getdate
+
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 
 class TestSupplierScorecard(FrappeTestCase):
@@ -17,6 +22,33 @@ class TestSupplierScorecard(FrappeTestCase):
 		for d in my_doc.criteria:
 			d.weight = 0
 		self.assertRaises(frappe.ValidationError, my_doc.insert)
+
+	@patch("erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.nowdate", lambda: "2026-09-15")
+	def test_no_recursion_for_supplier_created_on_month_end(self):
+		make_supplier_scorecard()  # ensures the "Delivery" criteria master exists
+
+		supplier = create_supplier(supplier_name="_Test Month End Scorecard Supplier")
+		month_end = getdate("2026-08-31")
+		frappe.db.set_value("Supplier", supplier.name, "creation", month_end, update_modified=False)
+
+		scorecard = frappe.get_doc(valid_scorecard[0])
+		scorecard.supplier = supplier.name
+		scorecard.name = supplier.name
+		scorecard.insert()
+
+		periods = frappe.get_all(
+			"Supplier Scorecard Period",
+			filters={"scorecard": scorecard.name},
+			fields=["start_date", "end_date"],
+		)
+		self.assertEqual(len(periods), 1)
+		self.assertEqual(periods[0].start_date, month_end)
+		self.assertEqual(periods[0].end_date, month_end)
+
+		# saving again must not re-create the single-day period or recurse
+		frappe.get_doc("Supplier Scorecard", scorecard.name).save()
+		periods = frappe.get_all("Supplier Scorecard Period", filters={"scorecard": scorecard.name})
+		self.assertEqual(len(periods), 1)
 
 
 def make_supplier_scorecard():
