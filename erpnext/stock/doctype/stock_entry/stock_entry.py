@@ -2880,7 +2880,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return reserved_work_orders
 
 	@frappe.whitelist()
-	def get_item_details(self, args: ItemDetailsCtx = None, for_update=False):
+	def get_item_details(self, args: ItemDetailsCtx = None, for_update: bool = False):
 		item = frappe.qb.DocType("Item")
 		item_default = frappe.qb.DocType("Item Default")
 
