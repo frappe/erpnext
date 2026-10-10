@@ -399,6 +399,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 			company=args.get("company"),
 			fallbacks=fallbacks,
 			raise_error_if_no_rate=raise_error_if_no_rate,
+			posting_datetime=args.get("posting_datetime"),
+			creation=args.get("creation"),
 		)
 
 	return flt(in_rate)
