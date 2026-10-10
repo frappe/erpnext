@@ -683,6 +683,7 @@ class Item(Document):
 			self.validate_properties_before_merge(new_name)
 			self.validate_shared_serial_batch_numbers_before_merge(old_name, new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
+			self.validate_duplicate_lead_times_before_merge(old_name, new_name)
 			self.delete_old_bins(old_name)
 
 	def after_rename(self, old_name, new_name, merge):
@@ -773,6 +774,21 @@ class Item(Document):
 				bundle_link, old_name, new_name
 			)
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_duplicate_lead_times_before_merge(self, old_name, new_name):
+		old_lead_time = frappe.db.get_value("Item Lead Time", {"item_code": old_name})
+		if not (old_lead_time and frappe.db.exists("Item Lead Time", {"item_code": new_name})):
+			return
+
+		frappe.throw(
+			_("Please delete Item Lead Time {0}, before merging {1} into {2}").format(
+				get_link_to_form("Item Lead Time", old_lead_time),
+				frappe.bold(old_name),
+				frappe.bold(new_name),
+			),
+			title=_("Cannot Merge"),
+			exc=DataValidationError,
+		)
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
