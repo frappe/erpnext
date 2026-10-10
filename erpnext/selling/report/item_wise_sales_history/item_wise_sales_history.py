@@ -10,7 +10,7 @@ from frappe.utils.nestedset import get_descendants_of
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	if filters.from_date > filters.to_date:
+	if filters.from_date and filters.to_date and filters.from_date > filters.to_date:
 		frappe.throw(_("From Date cannot be greater than To Date"))
 
 	columns = get_columns(filters)
@@ -153,7 +153,7 @@ def get_data(filters):
 			"transaction_date": record.get("transaction_date"),
 			"customer": record.get("customer"),
 			"customer_name": customer_record.get("customer_name"),
-			"customer_group": customer_record.get("customer_group"),
+			"customer_group": record.get("customer_group"),
 			"territory": record.get("territory"),
 			"project": record.get("project"),
 			"delivered_quantity": flt(record.get("delivered_qty")),
@@ -167,12 +167,10 @@ def get_data(filters):
 
 
 def get_customer_details():
-	details = frappe.get_all("Customer", fields=["name", "customer_name", "customer_group"])
+	details = frappe.get_all("Customer", fields=["name", "customer_name"])
 	customer_details = {}
 	for d in details:
-		customer_details.setdefault(
-			d.name, frappe._dict({"customer_name": d.customer_name, "customer_group": d.customer_group})
-		)
+		customer_details.setdefault(d.name, frappe._dict({"customer_name": d.customer_name}))
 	return customer_details
 
 
@@ -185,6 +183,11 @@ def get_item_details():
 
 
 def get_sales_order_details(company_list, filters):
+	# scope to orders the user is allowed to see; the raw query below bypasses permissions
+	permitted_orders = get_permitted_sales_orders(company_list, filters)
+	if not permitted_orders:
+		return []
+
 	db_so = frappe.qb.DocType("Sales Order")
 	db_so_item = frappe.qb.DocType("Sales Order Item")
 
@@ -195,6 +198,7 @@ def get_sales_order_details(company_list, filters):
 		.select(
 			db_so.name,
 			db_so.customer,
+			db_so.customer_group,
 			db_so.transaction_date,
 			db_so.territory,
 			db_so.project,
@@ -208,26 +212,33 @@ def get_sales_order_details(company_list, filters):
 			db_so_item.delivered_qty,
 			(db_so_item.billed_amt * db_so.conversion_rate).as_("billed_amt"),
 		)
-		.where(db_so.docstatus == 1)
-		.where(db_so.company.isin(tuple(company_list)))
+		.where(db_so.name.isin(permitted_orders))
 	)
 
 	if filters.get("item_group"):
-		query = query.where(db_so_item.item_group == filters.item_group)
-
-	if filters.get("from_date"):
-		query = query.where(db_so.transaction_date >= filters.from_date)
-
-	if filters.get("to_date"):
-		query = query.where(db_so.transaction_date <= filters.to_date)
+		item_groups = [*get_descendants_of("Item Group", filters.item_group), filters.item_group]
+		query = query.where(db_so_item.item_group.isin(item_groups))
 
 	if filters.get("item_code"):
 		query = query.where(db_so_item.item_code == filters.item_code)
 
-	if filters.get("customer"):
-		query = query.where(db_so.customer == filters.customer)
-
 	return query.run(as_dict=1)
+
+
+def get_permitted_sales_orders(company_list, filters):
+	so_filters = {"docstatus": 1, "company": ["in", company_list]}
+
+	if filters.get("from_date") and filters.get("to_date"):
+		so_filters["transaction_date"] = ["between", [filters.from_date, filters.to_date]]
+	elif filters.get("from_date"):
+		so_filters["transaction_date"] = [">=", filters.from_date]
+	elif filters.get("to_date"):
+		so_filters["transaction_date"] = ["<=", filters.to_date]
+
+	if filters.get("customer"):
+		so_filters["customer"] = filters.customer
+
+	return frappe.get_list("Sales Order", filters=so_filters, pluck="name", limit_page_length=0)
 
 
 def get_chart_data(data):
