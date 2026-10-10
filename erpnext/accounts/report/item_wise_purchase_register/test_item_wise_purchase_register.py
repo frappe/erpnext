@@ -58,3 +58,75 @@ class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		report_output = {k: v for k, v in report[1][0].items() if k in expected_result}
 		self.assertDictEqual(report_output, expected_result)
+
+	def test_total_includes_other_charges(self):
+		pi = make_purchase_invoice(
+			item=self.item, company=self.company, supplier=self.supplier, rate=100, qty=1, do_not_save=1
+		)
+		for account, charge_type, rate, tax_amount in (
+			("_Test Account VAT - _TC", "On Net Total", 18, 0),
+			("_Test Account Shipping Charges - _TC", "Actual", 0, 10),
+		):
+			pi.append(
+				"taxes",
+				{
+					"category": "Total",
+					"add_deduct_tax": "Add",
+					"charge_type": charge_type,
+					"account_head": account,
+					"cost_center": "_Test Cost Center - _TC",
+					"description": account,
+					"rate": rate,
+					"tax_amount": tax_amount,
+				},
+			)
+		pi.submit()
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		self.assertEqual(row["total_tax"], 18)
+		self.assertEqual(row["total_other_charges"], 10)
+		self.assertEqual(row["total"], pi.base_grand_total)
+
+	def test_item_group_filter_includes_child_groups(self):
+		pi = self.create_purchase_invoice()
+
+		for item_group in ("All Item Groups", pi.items[0].item_group):
+			filters = frappe._dict(
+				{"from_date": today(), "to_date": today(), "company": self.company, "item_group": item_group}
+			)
+			self.assertEqual([row["invoice"] for row in execute(filters)[1]], [pi.name])
+
+	def test_purchase_receipt_for_invoice_made_from_order(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice, make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(item_code=self.item, company=self.company, supplier=self.supplier, qty=1)
+		pr = make_purchase_receipt(po.name).submit()
+		pi = make_purchase_invoice(po.name)
+		pi.bill_no = "test-receipt-column"
+		pi.submit()
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = next(row for row in execute(filters)[1] if row["invoice"] == pi.name)
+
+		self.assertEqual(row["purchase_receipt"], pr.name)
+
+	def test_grouped_percent_of_grand_total_follows_filters(self):
+		self.create_purchase_invoice()
+		self.supplier = "_Test Supplier 1"
+		self.create_purchase_invoice()
+
+		filters = frappe._dict(
+			from_date=today(),
+			to_date=today(),
+			company=self.company,
+			group_by="Supplier",
+			supplier=self.supplier,
+		)
+		grand_total_row = next(
+			row for row in execute(filters)[1] if row.get("bold") and row.get("item_code") == "Total"
+		)
+
+		self.assertEqual(grand_total_row["percent_gt"], 100)
