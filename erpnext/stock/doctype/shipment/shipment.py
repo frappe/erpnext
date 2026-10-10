@@ -3,10 +3,10 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.document import Document
-from frappe.utils import flt, get_time
+from frappe.utils import cint, flt, get_link_to_form, get_time, getdate
 
 from erpnext.accounts.party import get_party_shipping_address
 
@@ -76,16 +76,21 @@ class Shipment(Document):
 	def validate(self):
 		self.validate_weight()
 		self.validate_pickup_time()
+		self.validate_parties()
+		self.validate_delivery_notes()
 		self.set_value_of_goods()
 		self.set_total_weight()
 		if self.docstatus == 0:
 			self.status = "Draft"
 
+	def before_update_after_submit(self):
+		self.validate_pickup_time()
+
 	def on_submit(self):
 		if not self.shipment_parcel:
 			frappe.throw(_("Please enter Shipment Parcel information"))
-		if self.value_of_goods == 0:
-			frappe.throw(_("Value of goods cannot be 0"))
+		if flt(self.value_of_goods) <= 0:
+			frappe.throw(_("Value of goods must be greater than 0"))
 		self.db_set("status", "Submitted")
 
 	def on_cancel(self):
@@ -96,6 +101,17 @@ class Shipment(Document):
 			if flt(parcel.weight) <= 0:
 				frappe.throw(_("Parcel weight cannot be 0"))
 
+			if cint(parcel.count) < 1:
+				frappe.throw(_("Row #{0}: Parcel count must be at least 1").format(parcel.idx))
+
+			for fieldname in ("length", "width", "height"):
+				if flt(parcel.get(fieldname)) < 0:
+					frappe.throw(
+						_("Row #{0}: Parcel {1} cannot be negative").format(
+							parcel.idx, _(parcel.meta.get_label(fieldname))
+						)
+					)
+
 	def set_total_weight(self):
 		self.total_weight = self.get_total_weight()
 
@@ -103,14 +119,121 @@ class Shipment(Document):
 		return sum(flt(parcel.weight) * parcel.count for parcel in self.shipment_parcel if parcel.count > 0)
 
 	def validate_pickup_time(self):
-		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) < get_time(self.pickup_from):
+		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) <= get_time(self.pickup_from):
 			frappe.throw(_("Pickup To time should be greater than Pickup From time"))
+
+		if (self.is_new() or self.has_value_changed("pickup_date")) and getdate(self.pickup_date) < getdate():
+			frappe.throw(_("Pickup Date cannot be before today"))
+
+	def validate_parties(self):
+		for side, party_type in (("pickup", self.pickup_from_type), ("delivery", self.delivery_to_type)):
+			party = self.get(f"{side}_{frappe.scrub(party_type)}")
+			if not party:
+				frappe.throw(_("{0} is required for the {1} party").format(_(party_type), _(side.title())))
+
+			for other_type in ("Company", "Customer", "Supplier"):
+				if other_type != party_type:
+					self.set(f"{side}_{frappe.scrub(other_type)}", None)
+
+			self.set("pickup" if side == "pickup" else "delivery_to", party)
+			if self.is_new() or self.has_party_details_changed(side):
+				self.validate_party_links(side, party_type, party)
+
+	def has_party_details_changed(self, side):
+		return any(
+			self.has_value_changed(f"{side}_{fieldname}")
+			for fieldname in ("company", "customer", "supplier", "address_name", "contact_name")
+		)
+
+	def validate_party_links(self, side, party_type, party):
+		for doctype, fieldname in (("Address", f"{side}_address_name"), ("Contact", f"{side}_contact_name")):
+			name = self.get(fieldname)
+			if name and not is_linked_to_party(doctype, name, party_type, party):
+				frappe.throw(
+					_("{0} {1} is not linked to {2} {3}").format(
+						_(doctype), bold(name), _(party_type), bold(party)
+					)
+				)
+
+	def validate_delivery_notes(self):
+		delivery_notes = set()
+		for row in self.get("shipment_delivery_note"):
+			if row.delivery_note in delivery_notes:
+				frappe.throw(
+					_("Row #{0}: Delivery Note {1} is added more than once").format(
+						row.idx, bold(row.delivery_note)
+					)
+				)
+
+			delivery_notes.add(row.delivery_note)
+			self.validate_delivery_note_row(row)
+
+	def validate_delivery_note_row(self, row):
+		lock = self.docstatus == 1
+		delivery_note = frappe.db.get_value(
+			"Delivery Note",
+			row.delivery_note,
+			["docstatus", "customer", "base_grand_total"],
+			as_dict=True,
+			for_update=lock,
+		)
+		if delivery_note.docstatus != 1:
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} must be submitted").format(row.idx, bold(row.delivery_note))
+			)
+
+		if self.delivery_to_type == "Customer" and delivery_note.customer != self.delivery_customer:
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} belongs to Customer {2}").format(
+					row.idx, bold(row.delivery_note), bold(delivery_note.customer)
+				)
+			)
+
+		if shipment := get_other_shipment(row.delivery_note, self.name, for_update=lock):
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} is already in Shipment {2}").format(
+					row.idx, bold(row.delivery_note), get_link_to_form("Shipment", shipment)
+				)
+			)
+
+		row.grand_total = delivery_note.base_grand_total
 
 	def set_value_of_goods(self):
 		value_of_goods = 0
 		for entry in self.get("shipment_delivery_note"):
 			value_of_goods += flt(entry.get("grand_total"))
 		self.value_of_goods = value_of_goods if value_of_goods else self.value_of_goods
+
+
+def is_linked_to_party(doctype, name, party_type, party):
+	return bool(
+		frappe.db.exists(
+			"Dynamic Link",
+			{"parenttype": doctype, "parent": name, "link_doctype": party_type, "link_name": party},
+		)
+	)
+
+
+def get_other_shipment(delivery_note, shipment_name, for_update=False):
+	shipment = frappe.qb.DocType("Shipment")
+	row = frappe.qb.DocType("Shipment Delivery Note")
+	query = (
+		frappe.qb.from_(row)
+		.join(shipment)
+		.on(shipment.name == row.parent)
+		.select(shipment.name)
+		.where(
+			(row.delivery_note == delivery_note)
+			& (shipment.docstatus == 1)
+			& (shipment.name != shipment_name)
+		)
+		.limit(1)
+	)
+	if for_update:
+		query = query.for_update()
+
+	result = query.run()
+	return result[0][0] if result else None
 
 
 @frappe.whitelist()
@@ -127,7 +250,7 @@ def get_contact_name(ref_doctype: str, docname: str):
 
 @frappe.whitelist()
 def get_company_contact(user: str):
-	frappe.has_permission("User", "read", throw=True)
+	frappe.has_permission("Shipment", "write", throw=True)
 
 	contact = frappe.db.get_value(
 		"User",
@@ -138,7 +261,6 @@ def get_company_contact(user: str):
 			"email",
 			"phone",
 			"mobile_no",
-			"gender",
 		],
 		as_dict=1,
 	)
