@@ -1450,6 +1450,9 @@ class update_entries_after:
 				},
 				pluck="stock_value_difference",
 			)
+			if not consumed:
+				return sle.incoming_rate
+
 			additional_cost = frappe.db.get_value("Stock Entry", sle.voucher_no, "total_additional_costs")
 			value += (
 				-sum(flt(v) for v in consumed) + flt(additional_cost) - sum(flt(r.amount) for r in outputs)
