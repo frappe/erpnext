@@ -553,6 +553,34 @@ class TestPutawayRule(ERPNextTestSuite):
 			sorted([(ruled_item, self.warehouse_1), (other_item, "_Test Warehouse - _TC")]),
 		)
 
+	def test_putaway_rule_capacity_is_set_before_it_is_checked(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		make_stock_entry(item_code=item, target=self.warehouse_1, qty=10, basic_rate=100)
+
+		rule = frappe.get_doc(
+			{
+				"doctype": "Putaway Rule",
+				"company": "_Test Company",
+				"item_code": item,
+				"warehouse": self.warehouse_1,
+				"capacity": 100,
+			}
+		).insert()
+
+		rule.capacity = 5
+		self.assertRaises(frappe.ValidationError, rule.save)
+
+		rule.reload()
+		rule.update({"uom": "Box", "capacity": 3, "conversion_factor": 1000})
+		rule.save()
+		self.assertEqual((rule.conversion_factor, rule.stock_capacity), (10, 30))
+
 
 def create_putaway_rule(**args):
 	args = frappe._dict(args)

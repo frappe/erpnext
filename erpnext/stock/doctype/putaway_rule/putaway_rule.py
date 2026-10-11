@@ -14,6 +14,7 @@ from frappe.utils import cint, cstr, floor, flt, nowdate
 
 from erpnext import _refuse
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import _get_stock_balance
 
 
@@ -42,9 +43,9 @@ class PutawayRule(Document):
 	def validate(self):
 		self.validate_duplicate_rule()
 		self.validate_warehouse_and_company()
+		self.set_stock_capacity()
 		self.validate_capacity()
 		self.validate_priority()
-		self.set_stock_capacity()
 
 	def validate_duplicate_rule(self):
 		existing_rule = frappe.db.exists(
@@ -88,7 +89,10 @@ class PutawayRule(Document):
 			frappe.throw(_("Capacity must be greater than 0"), title=_("Invalid"))
 
 	def set_stock_capacity(self):
-		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
+		self.stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")
+		self.uom = self.uom or self.stock_uom
+		self.conversion_factor = get_conversion_factor(self.item_code, self.uom).get("conversion_factor") or 1
+		self.stock_capacity = flt(self.conversion_factor) * flt(self.capacity)
 
 
 @frappe.whitelist()
