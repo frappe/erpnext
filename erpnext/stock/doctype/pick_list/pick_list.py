@@ -148,45 +148,64 @@ class PickList(TransactionBase):
 			self.validate_warehouses()
 
 	def validate_stock_qty(self):
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		picked_qty = self.get_picked_qty_by_location()
+		self.validate_batch_stock_qty({key: value for key, value in picked_qty.items() if key[2]})
+		self.validate_free_stock_qty({key: value for key, value in picked_qty.items() if not key[2]})
 
+	def get_picked_qty_by_location(self) -> dict:
+		picked_qty = {}
 		for row in self.get("locations"):
 			if not row.picked_qty:
 				continue
 
-			if row.batch_no and row.picked_qty:
-				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
+			key = (row.item_code, row.warehouse, row.batch_no or "")
+			qty, first_row = picked_qty.get(key, (0.0, row))
+			picked_qty[key] = (qty + flt(row.picked_qty), first_row)
 
-				if row.picked_qty > batch_qty:
-					frappe.throw(
-						_(
-							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
-						).format(
-							row.idx,
-							row.picked_qty,
-							row.item_code,
-							batch_qty,
-							escape_html(frappe.get_cached_value("Batch", row.batch_no, "batch_id")),
-							bold(row.warehouse),
-						),
-						title=_("Insufficient Stock"),
-					)
+		return picked_qty
 
-				continue
+	def validate_batch_stock_qty(self, picked_qty):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-			bin_qty = flt(
-				frappe.db.get_value(
-					"Bin",
-					{"item_code": row.item_code, "warehouse": row.warehouse},
-					"actual_qty",
+		for (item_code, warehouse, batch_no), (qty, row) in picked_qty.items():
+			batch_qty = get_batch_qty(batch_no, warehouse, item_code)
+			if qty > batch_qty:
+				frappe.throw(
+					_(
+						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
+					).format(
+						row.idx,
+						qty,
+						item_code,
+						batch_qty,
+						escape_html(frappe.get_cached_value("Batch", batch_no, "batch_id")),
+						bold(warehouse),
+					),
+					title=_("Insufficient Stock"),
 				)
-			)
 
-			if row.picked_qty > bin_qty:
+	def validate_free_stock_qty(self, picked_qty):
+		if not picked_qty:
+			return
+
+		item_codes = list({key[0] for key in picked_qty})
+		warehouses = list({key[1] for key in picked_qty})
+		holders = get_pick_list_holders(item_codes, warehouses=warehouses, exclude_pick_list=self.name)
+		own_vouchers = {row.sales_order for row in self.locations if row.sales_order}
+		reservations = [
+			d for d in get_reservation_holders(item_codes, warehouses) if d.voucher_no not in own_vouchers
+		]
+		bin_qty_map = get_bin_qty_map(item_codes, warehouses)
+
+		for (item_code, warehouse, _batch_no), (qty, row) in picked_qty.items():
+			free_qty = get_availability_row(
+				(item_code, warehouse), bin_qty_map, holders, reservations
+			).free_qty
+			if qty > free_qty:
 				frappe.throw(
 					_(
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
-					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
+					).format(row.idx, qty, bold(item_code), free_qty, bold(warehouse)),
 					title=_("Insufficient Stock"),
 				)
 

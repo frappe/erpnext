@@ -1193,6 +1193,33 @@ class TestPickList(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, pick_list.insert)
 
+	def test_manual_pick_checks_stock_across_rows_and_open_pick_lists(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		def make_manual_pick_list(*row_qtys):
+			return frappe.get_doc(
+				{
+					"doctype": "Pick List",
+					"company": "_Test Company",
+					"purpose": "Material Transfer",
+					"pick_manually": 1,
+					"locations": [
+						{
+							"item_code": item,
+							"warehouse": "_Test Warehouse - _TC",
+							"qty": qty,
+							"picked_qty": qty,
+						}
+						for qty in row_qtys
+					],
+				}
+			)
+
+		self.assertRaises(frappe.ValidationError, make_manual_pick_list(8, 8).insert)
+		make_manual_pick_list(8).insert().submit()
+		self.assertRaises(frappe.ValidationError, make_manual_pick_list(8).insert)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
