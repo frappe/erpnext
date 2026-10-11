@@ -391,7 +391,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		super().validate_subcontracting_inward()
 
 	def remove_fg_completed_qty(self):
-		if not self.from_bom and self.fg_completed_qty:
+		if not self.from_bom and not self.work_order and self.fg_completed_qty:
 			self.fg_completed_qty = 0.0
 
 	def before_submit(self):

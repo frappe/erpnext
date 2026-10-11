@@ -5060,6 +5060,28 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.get_doc(make_stock_entry(work_order.name, "Disassemble", 2)).submit()
 		self.assertRaises(frappe.ValidationError, manufacture_entries[0].cancel)
 
+	def test_manufacture_without_from_bom_keeps_the_work_order_qty(self):
+		rm_item = make_item("_Test Without From BOM RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Without From BOM FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=5,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
+		entry.from_bom = 0
+		entry.submit()
+
+		self.assertEqual(entry.fg_completed_qty, 5)
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "produced_qty"), 5)
+
 	def test_return_is_capped_at_the_work_order_unconsumed_qty(self):
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 		for item_code in ("_Test Item", "_Test Item Home Desktop 100"):
@@ -5080,7 +5102,11 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	def test_return_of_components_transferred_in_another_uom(self):
 		raw_material = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 50}]}
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 50}],
+			}
 		).name
 		finished_good = make_item(properties={"is_stock_item": 1}).name
 		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=50)
@@ -5116,6 +5142,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0))
 		transfer.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 50})
 		self.assertRaises(frappe.ValidationError, transfer.save)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
