@@ -251,6 +251,7 @@ class StockReservationEntry(Document):
 				"voucher_no": self.from_voucher_no,
 				"voucher_detail_no": self.from_voucher_detail_no,
 				"item_code": self.item_code,
+				"docstatus": 1,
 			},
 		)
 
@@ -582,10 +583,12 @@ class StockReservationEntry(Document):
 					if self.transferred_qty < self.reserved_qty:
 						status = "Partially Used"
 
-				elif self.reserved_qty == (self.delivered_qty or self.consumed_qty):
+				elif flt(self.delivered_qty) + flt(self.consumed_qty) >= flt(self.reserved_qty):
 					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+				elif self.delivered_qty:
 					status = "Partially Delivered"
+				elif self.consumed_qty:
+					status = "Partially Used"
 				elif self.reserved_qty >= self.voucher_qty:
 					status = "Reserved"
 				else:
