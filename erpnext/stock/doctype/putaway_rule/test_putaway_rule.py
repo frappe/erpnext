@@ -581,6 +581,20 @@ class TestPutawayRule(ERPNextTestSuite):
 		rule.save()
 		self.assertEqual((rule.conversion_factor, rule.stock_capacity), (10, 30))
 
+	def test_putaway_rule_needs_an_enabled_ledger_warehouse_and_a_stock_item(self):
+		stock_item = make_item(properties={"is_stock_item": 1}).name
+		non_stock_item = make_item(properties={"is_stock_item": 0}).name
+		disabled_warehouse = create_warehouse("_Test Putaway Disabled", {"disabled": 1})
+
+		for item, warehouse in (
+			(stock_item, "_Test Warehouse Group - _TC"),
+			(stock_item, disabled_warehouse),
+			(non_stock_item, self.warehouse_1),
+		):
+			self.assertRaises(
+				frappe.ValidationError, create_putaway_rule, item_code=item, warehouse=warehouse, capacity=10
+			)
+
 
 def create_putaway_rule(**args):
 	args = frappe._dict(args)

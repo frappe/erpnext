@@ -64,7 +64,20 @@ class PutawayRule(Document):
 			frappe.throw(_("Priority cannot be less than 1."), title=_("Invalid Priority"))
 
 	def validate_warehouse_and_company(self):
-		company = frappe.db.get_value("Warehouse", self.warehouse, "company")
+		company, is_group, disabled = frappe.db.get_value(
+			"Warehouse", self.warehouse, ["company", "is_group", "disabled"]
+		)
+		if (is_group or disabled) and not self.disable:
+			frappe.throw(
+				_("Warehouse {0} must be an enabled warehouse that is not a group.").format(
+					frappe.bold(self.warehouse)
+				),
+				title=_("Invalid Warehouse"),
+			)
+
+		if not self.disable and not frappe.get_cached_value("Item", self.item_code, "is_stock_item"):
+			frappe.throw(_("Item {0} is not a stock item.").format(frappe.bold(self.item_code)))
+
 		if company != self.company:
 			frappe.throw(
 				_("Warehouse {0} does not belong to Company {1}.").format(
