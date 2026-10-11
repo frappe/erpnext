@@ -1254,6 +1254,7 @@ class StockReservation:
 		is_sre_created = False
 		for item in items:
 			sre = frappe.new_doc("Stock Reservation Entry")
+			sre.flags.ignore_permissions = True
 			if isinstance(item, dict):
 				item = frappe._dict(item)
 
@@ -1489,6 +1490,7 @@ class StockReservation:
 				)
 				continue
 			sre = frappe.new_doc("Stock Reservation Entry")
+			sre.flags.ignore_permissions = True
 			sre.company = self.doc.company
 			sre.voucher_type = entry.voucher_type
 			sre.voucher_no = entry.voucher_no
@@ -1534,6 +1536,7 @@ class StockReservation:
 		]
 
 		sre = frappe.new_doc("Stock Reservation Entry")
+		sre.flags.ignore_permissions = True
 		for row_field in fields:
 			sre.set(row_field, row.get(row_field))
 
