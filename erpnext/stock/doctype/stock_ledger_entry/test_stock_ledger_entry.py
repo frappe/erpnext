@@ -1965,6 +1965,19 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
 
+	def test_undated_rate_lookup_reads_the_latest_entry(self):
+		from erpnext.stock.utils import _get_incoming_rate
+
+		item = make_item(properties={"valuation_method": "FIFO", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, rate=300, company=company)
+
+		rate = _get_incoming_rate(
+			{"item_code": item, "warehouse": "Stores - TCP1", "qty": 1, "company": company}
+		)
+
+		self.assertEqual(rate, 300)
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
