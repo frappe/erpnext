@@ -1269,6 +1269,29 @@ class TestPickList(ERPNextTestSuite):
 			[("Box", 1, 12), ("Nos", 8, 8)],
 		)
 
+	def test_stock_entry_cannot_transfer_more_than_picked_or_from_elsewhere(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse 1 - _TC", qty=10, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": 5, "picked_qty": 5}
+				],
+			}
+		).insert()
+		pick_list.submit()
+
+		for field, value in (("qty", 8), ("s_warehouse", "_Test Warehouse 1 - _TC")):
+			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+			stock_entry.items[0].t_warehouse = "_Test Warehouse 2 - _TC"
+			stock_entry.items[0].set(field, value)
+			self.assertRaises(frappe.ValidationError, stock_entry.insert)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
