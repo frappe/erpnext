@@ -274,6 +274,7 @@ class DeliveryNote(SellingController):
 
 	def validate(self):
 		self.validate_posting_time()
+		self.set_internal_return_target_warehouse()
 		super().validate()
 		self.validate_references()
 		self.validate_expense_account()
@@ -295,6 +296,34 @@ class DeliveryNote(SellingController):
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		pre_submit_validation(self, check_credit_limit=True, check_packed_qty=True)
+
+	def set_internal_return_target_warehouse(self):
+		"""An internal return brings material back from the warehouse the delivery put it in."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not (self.is_return and self.return_against and self.is_internal_customer and original_rows):
+			return
+
+		target_warehouses = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows)},
+				fields=["name", "target_warehouse"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			expected = target_warehouses.get(row.dn_detail)
+			if not expected:
+				continue
+
+			if not row.target_warehouse:
+				row.target_warehouse = expected
+			elif row.target_warehouse != expected:
+				frappe.throw(
+					_("Row #{0}: Target Warehouse must be {1}, as on Delivery Note {2}").format(
+						row.idx, frappe.bold(expected), frappe.bold(self.return_against)
+					)
+				)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(

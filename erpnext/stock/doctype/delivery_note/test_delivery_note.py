@@ -4223,6 +4223,28 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, make_inter_company_purchase_receipt, delivery_note.name)
 
+	def test_internal_return_keeps_target_warehouse(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100, item_code=item)
+		delivery_note = create_delivery_note(
+			item_code=item,
+			company="_Test Company",
+			customer=create_internal_customer(represents_company="_Test Company"),
+			qty=5,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+			target_warehouse="Stores - _TC",
+		)
+
+		sales_return = make_sales_return(delivery_note.name)
+		self.assertEqual(sales_return.items[0].target_warehouse, "Stores - _TC")
+
+		sales_return.items[0].target_warehouse = "_Test Warehouse 1 - _TC"
+		self.assertRaises(frappe.ValidationError, sales_return.insert)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
