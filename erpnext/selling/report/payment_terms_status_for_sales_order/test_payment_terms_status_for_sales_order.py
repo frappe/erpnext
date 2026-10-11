@@ -4,6 +4,7 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, add_months, flt, nowdate
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order import (
@@ -14,6 +15,14 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
+	def pay_in_full(self, dt, dn, bank_account="_Test Bank - _TC"):
+		pe = get_payment_entry(dt, dn, bank_account=bank_account)
+		pe.reference_no = dn
+		pe.reference_date = nowdate()
+		pe.save()
+		pe.submit()
+		return pe
+
 	def create_payment_terms_template(self):
 		# create template for 50-50 payments
 		template = None
@@ -72,6 +81,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		sinv.items[0].qty = 6
 		sinv.insert()
 		sinv.submit()
+		self.pay_in_full("Sales Invoice", sinv.name)
 		columns, data, message, chart = execute(
 			frappe._dict(
 				{
@@ -167,6 +177,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		sinv.items[0].qty = 6
 		sinv.insert()
 		sinv.submit()
+		self.pay_in_full("Sales Invoice", sinv.name, bank_account="_Test Bank USD - _TC")
 		columns, data, message, chart = execute(
 			frappe._dict(
 				{
@@ -368,6 +379,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		sinv.items[0].qty = 6
 		sinv.insert()
 		sinv.submit()
+		self.pay_in_full("Sales Invoice", sinv.name)
 
 		first_due_date = add_days(add_months(transaction_date, -1), 15)
 		columns, data, message, chart = execute(
@@ -401,10 +413,223 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data, expected_value)
 
+	def test_05_unpaid_invoice_is_not_paid(self):
+		"""An invoice raised but not paid leaves the terms unpaid — invoicing is not payment."""
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test Excavator 1", is_stock_item=0)
+		so = make_sales_order(
+			transaction_date="2021-06-15",
+			delivery_date=add_days("2021-06-15", -30),
+			item=item.item_code,
+			qty=10,
+			rate=100000,
+			do_not_save=True,
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
+		so.save()
+		so.submit()
+
+		sinv = make_sales_invoice(so.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 6
+		sinv.insert()
+		sinv.submit()
+
+		_, data, _, _ = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
+		)
+
+		self.assertEqual(
+			[(row.paid_amount, row.status, row.invoices) for row in data],
+			[(0.0, "Overdue", ""), (0.0, "Overdue", "")],
+		)
+
+	def test_06_advance_marks_term_paid(self):
+		"""An advance recorded on the term (schedule paid amount) is Completed even with no invoice; an un-advanced term stays Overdue."""
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test Excavator 1", is_stock_item=0)
+		so = make_sales_order(
+			transaction_date="2021-06-15",
+			delivery_date=add_days("2021-06-15", -30),
+			item=item.item_code,
+			qty=10,
+			rate=100000,
+			do_not_save=True,
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
+		so.save()
+		so.submit()
+
+		# advance received against the first term
+		term1 = so.payment_schedule[0]
+		frappe.db.set_value(
+			"Payment Schedule",
+			term1.name,
+			{
+				"paid_amount": term1.payment_amount,
+				"base_paid_amount": term1.base_payment_amount,
+				"outstanding": 0,
+				"base_outstanding": 0,
+			},
+		)
+
+		_, data, _, _ = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
+		)
+
+		self.assertEqual(
+			[(row.paid_amount, row.status, row.invoices) for row in data],
+			[(500000.0, "Completed", ""), (0.0, "Overdue", "")],
+		)
+
+	def test_07_advance_applied_to_invoice_not_double_counted(self):
+		"""An order advance later applied to an invoice is counted once, not again as invoice cash."""
+		for nm, days in (("_Test PT Adv 1", 0), ("_Test PT Adv 2", 30)):
+			if not frappe.db.exists("Payment Term", nm):
+				frappe.get_doc(
+					{
+						"doctype": "Payment Term",
+						"payment_term_name": nm,
+						"invoice_portion": 50,
+						"due_date_based_on": "Day(s) after invoice date",
+						"credit_days": days,
+					}
+				).insert()
+		tmpl = frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": "_Test Adv 50-50",
+				"allocate_payment_based_on_payment_terms": 1,
+				"terms": [
+					{
+						"payment_term": "_Test PT Adv 1",
+						"invoice_portion": 50,
+						"due_date_based_on": "Day(s) after invoice date",
+						"credit_days": 0,
+					},
+					{
+						"payment_term": "_Test PT Adv 2",
+						"invoice_portion": 50,
+						"due_date_based_on": "Day(s) after invoice date",
+						"credit_days": 30,
+					},
+				],
+			}
+		).insert()
+		item = create_item(item_code="_Test PT Adv Item", is_stock_item=0)
+		so = make_sales_order(
+			transaction_date="2021-06-15", item=item.item_code, qty=2, rate=50, do_not_save=True
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = tmpl.name
+		so.save()
+		so.submit()
+
+		# advance of 50 against the first term only
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		keep = [r for r in pe.references if r.payment_term == "_Test PT Adv 1"]
+		pe.references = []
+		for r in keep:
+			r.allocated_amount = 50
+			pe.append("references", r)
+		pe.paid_amount = 50
+		pe.reference_no = "adv"
+		pe.reference_date = nowdate()
+		pe.save()
+		pe.submit()
+
+		# invoice half the order, auto-applying the advance to it
+		sinv = make_sales_invoice(so.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 1
+		sinv.allocate_advances_automatically = 1
+		sinv.insert()
+		sinv.submit()
+
+		_, data, _, _ = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
+		)
+
+		self.assertEqual(
+			[(row.paid_amount, row.status) for row in data],
+			[(50.0, "Completed"), (0.0, "Overdue")],
+		)
+
+	def test_08_pos_invoice_cash_is_counted(self):
+		"""Cash received on a POS invoice counts toward the order's terms."""
+		self.create_payment_terms_template()
+		mop = frappe.get_doc("Mode of Payment", "Cash")
+		if not any(a.company == "_Test Company" for a in mop.accounts):
+			mop.append("accounts", {"company": "_Test Company", "default_account": "Cash - _TC"})
+			mop.save()
+		item = create_item(item_code="_Test PT POS Item", is_stock_item=0)
+		so = make_sales_order(
+			transaction_date="2021-06-15", item=item.item_code, qty=2, rate=50, do_not_save=True
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
+		so.save()
+		so.submit()
+
+		sinv = make_sales_invoice(so.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.is_pos = 1
+		sinv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sinv.insert()
+		sinv.submit()
+
+		_, data, _, _ = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
+		)
+
+		self.assertEqual(
+			[(row.paid_amount, row.status) for row in data],
+			[(50.0, "Completed"), (50.0, "Completed")],
+		)
+
 	def test_invoice_split_counts_orders_outside_filters(self):
-		"""An invoice billing a June order and a March order must be split over both, even when the report
-		covers only June. The June order should be credited 600 of the 1000 invoice, not all of it, leaving its
-		second term Partly Paid."""
+		"""A paid invoice billing a June and a March order credits June only its 600 share, so its second term stays Partly Paid."""
 		self.create_payment_terms_template()
 		item = create_item(item_code="_Test PT Split Item", is_stock_item=0)
 
@@ -442,6 +667,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		)
 		sinv.insert()
 		sinv.submit()
+		self.pay_in_full("Sales Invoice", sinv.name)
 
 		_, data, _, _ = execute(
 			frappe._dict(
@@ -460,11 +686,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		)
 
 	def test_invoice_billing_multiple_orders_splits_proportionally(self):
-		"""An invoice that bills several Sales Orders must contribute to each, in proportion to each
-		order's net line amount. Grouping by the invoice alone and taking Max(sales_order) credited the
-		whole invoice to one arbitrary order and starved the rest. get_so_with_invoices now returns one
-		row per (invoice, sales_order) with the grand total split proportionally; the split is identical
-		on MariaDB and Postgres."""
+		"""A paid invoice billing several orders is split across them by net amount, summing back to its total."""
 		from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order import (
 			get_so_with_invoices,
 		)
@@ -511,6 +733,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 			)
 		sinv.insert()
 		sinv.submit()
+		self.pay_in_full("Sales Invoice", sinv.name)
 
 		filters = frappe._dict(
 			{
@@ -523,8 +746,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		sorders, invoices = get_so_with_invoices(filters)
 		rows = {r.sales_order: r for r in invoices if r.invoice == sinv.name}
 
-		# each order gets its share (old Max(sales_order) collapsed the invoice onto one), and the shares
-		# always sum back to the grand total (the last order absorbs any rounding residual)
+		# each order gets its share and the shares sum back to the grand total
 		self.assertAlmostEqual(rows[so_a.name].invoice_amount, 600.0, places=2)
 		self.assertAlmostEqual(rows[so_b.name].invoice_amount, 400.0, places=2)
 		self.assertAlmostEqual(rows[so_c.name].invoice_amount, 500.0, places=2)
@@ -569,3 +791,51 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 
 		self.assertIn(orders["_Test Company"], [row.name for row in own])
 		self.assertNotIn(orders["_Test Company 1"], [row.name for row in other])
+
+	def test_credit_note_is_not_counted_as_payment(self):
+		"""A credit note reduces the invoice outstanding but is not cash received, so the terms stay unpaid."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test Excavator 1", is_stock_item=0)
+		so = make_sales_order(
+			transaction_date="2021-06-15",
+			delivery_date=add_days("2021-06-15", -30),
+			item=item.item_code,
+			qty=10,
+			rate=100000,
+			do_not_save=True,
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
+		so.save()
+		so.submit()
+
+		sinv = make_sales_invoice(so.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 6
+		sinv.insert()
+		sinv.submit()
+
+		cn = make_sales_return(sinv.name)
+		cn.insert()
+		cn.submit()
+
+		_, data, _, _ = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
+		)
+
+		self.assertEqual(
+			[(row.paid_amount, row.status) for row in data],
+			[(0.0, "Overdue"), (0.0, "Overdue")],
+		)
