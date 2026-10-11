@@ -1697,7 +1697,10 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 		frappe.db.get_value("Stock Entry", filters, "sum(fg_completed_qty)", order_by=None)
 	)
 
-	return flt(se.fg_completed_qty) - already_disassembled
+	return flt(
+		flt(se.fg_completed_qty) - already_disassembled,
+		frappe.get_precision("Stock Entry", "fg_completed_qty"),
+	)
 
 
 @frappe.whitelist()
