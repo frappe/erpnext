@@ -1363,3 +1363,18 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		sre.db_set({"transferred_qty": sre.reserved_qty, "status": "Closed"})
 
 		self.assertEqual(has_open_stock_reservation(), had_open_reservation)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_partially_consumed_reservation_is_partially_used(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=10)
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		sre = frappe.get_last_doc("Stock Reservation Entry", {"voucher_no": sales_order.name})
+		sre.db_set("consumed_qty", 4)
+		sre.update_status()
+
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "status"), "Partially Used")
