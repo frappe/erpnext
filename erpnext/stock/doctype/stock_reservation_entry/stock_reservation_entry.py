@@ -1254,6 +1254,7 @@ class StockReservation:
 			items = self.doc.get(self.table_name)
 
 		child_doctype = frappe.scrub(self.doc.doctype + " Item")
+		allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
 
 		is_sre_created = False
 		for item in items:
@@ -1294,6 +1295,14 @@ class StockReservation:
 			)
 
 			if not self.qty_to_be_reserved:
+				continue
+
+			if self.qty_to_be_reserved < qty and not allow_partial_reservation:
+				frappe.msgprint(
+					_("Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."),
+					title=_("Partial Stock Reservation"),
+					indicator="yellow",
+				)
 				continue
 
 			sre.item_code = item_code

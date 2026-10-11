@@ -4477,6 +4477,28 @@ class TestWorkOrder(ERPNextTestSuite):
 			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 0, "allow_negative_stock": 0},
+	)
+	def test_work_order_reservation_respects_allow_partial_reservation(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=6, basic_rate=100)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=10, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
 	def test_sales_order_linked_work_order_reserves_finished_good(self):
 		# Spec #8: when a Work Order is linked to a Sales Order, manufacturing the finished good must
 		# reserve it against that Sales Order; cancelling the manufacture must release the reservation.
