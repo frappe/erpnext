@@ -4499,6 +4499,83 @@ class TestWorkOrder(ERPNextTestSuite):
 			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"enable_serial_and_batch_no_for_item": 1,
+		},
+	)
+	def test_work_order_serial_reservation_cannot_take_serials_reserved_elsewhere(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(
+			item_code=rm,
+			target="Stores - _TC",
+			qty=4,
+			basic_rate=100,
+			serial_no="\n".join(f"{rm}-{i}" for i in range(4)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=rm, warehouse="Stores - _TC", qty=2)
+		sales_order.create_stock_reservation_entries(notify=False)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=2, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+
+		order_reservation = frappe.get_last_doc("Stock Reservation Entry", {"voucher_no": sales_order.name})
+		work_order_reservation = frappe.get_last_doc(
+			"Stock Reservation Entry", {"voucher_no": work_order.name}
+		)
+		work_order_reservation.set(
+			"sb_entries",
+			[
+				{"serial_no": entry.serial_no, "qty": 1, "warehouse": "Stores - _TC"}
+				for entry in order_reservation.sb_entries
+			],
+		)
+		self.assertRaises(frappe.ValidationError, work_order_reservation.save)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 0,
+			"enable_serial_and_batch_no_for_item": 1,
+		},
+	)
+	def test_work_order_reserves_serial_items_by_qty_without_auto_selection(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(
+			item_code=rm,
+			target="Stores - _TC",
+			qty=2,
+			basic_rate=100,
+			serial_no="\n".join(f"{rm}-{i}" for i in range(2)),
+			use_serial_batch_fields=1,
+		)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=2, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+
+		self.assertEqual(
+			frappe.db.get_value("Stock Reservation Entry", {"voucher_no": work_order.name}, "reserved_qty"), 2
+		)
+
 	def test_sales_order_linked_work_order_reserves_finished_good(self):
 		# Spec #8: when a Work Order is linked to a Sales Order, manufacturing the finished good must
 		# reserve it against that Sales Order; cancelling the manufacture must release the reservation.

@@ -381,10 +381,14 @@ class StockReservationEntry(Document):
 
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
-		if self.voucher_type in ["Work Order", "Subcontracting Order"]:
-			if not self.from_voucher_type:
-				self.validate_with_allowed_qty(self.reserved_qty)
-			return
+		is_production_voucher = self.voucher_type in ["Work Order", "Subcontracting Order"]
+		if is_production_voucher:
+			if self.from_voucher_type:
+				return
+
+			self.validate_with_allowed_qty(self.reserved_qty)
+			if not self.sb_entries:
+				return
 
 		if self.reservation_based_on == "Serial and Batch":
 			allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
@@ -494,6 +498,9 @@ class StockReservationEntry(Document):
 			if not qty_to_be_reserved:
 				msg = _("Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty.")
 				frappe.throw(msg)
+
+			if is_production_voucher:
+				return
 
 			# Should be called after validating Serial and Batch Nos.
 			if self.voucher_type != "Subcontracting Inward Order":
