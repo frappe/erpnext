@@ -355,6 +355,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				self.validate_job_card_fg_item()
 
+			if self.purpose == "Manufacture":
+				self.validate_outputs_of_manufacture()
+
 		# Must run after set_transfer_qty() and mark_finished_and_secondary_items() so the
 		# qty parity and conversion cap checks see recomputed transfer_qty on edited rows.
 		if self.is_fg_conversion:
@@ -1083,6 +1086,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				d.is_finished_item = 0
 				d.secondary_item_type = ""
+
+	def validate_outputs_of_manufacture(self):
+		for d in self.get("items"):
+			if d.t_warehouse and not d.s_warehouse and not d.is_finished_item and not d.secondary_item_type:
+				frappe.throw(
+					_(
+						"Row #{0}: {1} is received but is neither the finished good nor a secondary item. Set its Secondary Item Type or remove the row."
+					).format(d.idx, frappe.bold(d.item_code)),
+					title=_("Unvalued Output"),
+				)
 
 	def get_finished_item(self):
 		finished_item = None

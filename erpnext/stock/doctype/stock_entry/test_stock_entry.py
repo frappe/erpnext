@@ -5151,6 +5151,22 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual([d.basic_amount for d in entry.items if d.is_finished_item], [200])
 
+	def test_manufacture_refuses_an_output_that_is_neither_finished_good_nor_secondary(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 500}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_entry_with_rows,
+			"Manufacture",
+			stock_entry_row(rm_item, 2, s_warehouse="_Test Warehouse - _TC"),
+			stock_entry_row(fg_item, 1, t_warehouse="_Test Warehouse 1 - _TC", is_finished_item=1),
+			stock_entry_row(other_item, 1, t_warehouse="_Test Warehouse 1 - _TC"),
+			fg_completed_qty=1,
+		)
+
 	def test_bom_disassembly_values_components_per_stock_uom(self):
 		entry = self.make_bom_disassembly()
 		self.assertEqual([(d.transfer_qty, d.basic_rate) for d in entry.items if d.t_warehouse], [(1, 100)])
