@@ -29,7 +29,7 @@ class ProvisionalAccountingService:
 				item.provisional_expense_account = default_provisional_account
 
 	def add_provisional_gl_entry(
-		self, item, gl_entries, posting_date, provisional_account, reverse=0, item_amount=None
+		self, item, gl_entries, posting_date, provisional_account, reverse=0, item_amount=None, pr_detail=None
 	) -> None:
 		doc = self.doc
 		credit_currency = get_account_currency(provisional_account)
@@ -44,7 +44,7 @@ class ProvisionalAccountingService:
 			# Post reverse entry for previously posted amount
 			amount = item_amount
 			expense_account = frappe.db.get_value(
-				"Purchase Receipt Item", {"name": item.get("pr_detail")}, ["expense_account"]
+				"Purchase Receipt Item", {"name": pr_detail or item.get("pr_detail")}, ["expense_account"]
 			)
 
 		doc.add_gl_entry(

@@ -2084,6 +2084,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle = [
 			["Cost of Goods Sold - _TC", 250, 0, add_days(pr.posting_date, 1)],
 			["Creditors - _TC", 0, 250, add_days(pr.posting_date, 1)],
+			["_Test Account Cost for Goods Sold - _TC", 0, 250, pi.posting_date],
+			["Provision Account - _TC", 250, 0, pi.posting_date],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
@@ -2091,8 +2093,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle_for_purchase_receipt = [
 			["_Test Account Cost for Goods Sold - _TC", 250, 0, pr.posting_date],
 			["Provision Account - _TC", 0, 250, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 250, pi.posting_date],
-			["Provision Account - _TC", 250, 0, pi.posting_date],
 		]
 
 		check_gl_entries(
@@ -2144,6 +2144,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle = [
 			["Cost of Goods Sold - _TC", 20000, 0, add_days(pr.posting_date, 1)],
 			["Creditors - _TC", 0, 20000, add_days(pr.posting_date, 1)],
+			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pi.posting_date],
+			["Provision Account - _TC", 5000, 0, pi.posting_date],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
@@ -2151,8 +2153,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle_for_purchase_receipt = [
 			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pr.posting_date],
 			["Provision Account - _TC", 0, 5000, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pi.posting_date],
-			["Provision Account - _TC", 5000, 0, pi.posting_date],
 		]
 
 		check_gl_entries(
@@ -2201,6 +2201,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle = [
 			["Cost of Goods Sold - _TC", 1000, 0, add_days(pr.posting_date, -1)],
 			["Creditors - _TC", 0, 1000, add_days(pr.posting_date, -1)],
+			["_Test Account Cost for Goods Sold - _TC", 0, 2000, pi.posting_date],
+			["Provision Account - _TC", 2000, 0, pi.posting_date],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
@@ -2208,8 +2210,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle_for_purchase_receipt = [
 			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pr.posting_date],
 			["Provision Account - _TC", 0, 5000, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 1000, pi.posting_date],
-			["Provision Account - _TC", 1000, 0, pi.posting_date],
 		]
 
 		check_gl_entries(
@@ -2247,6 +2247,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle = [
 			["_Test Payable USD - _TC", 0, 1642.54, add_days(pr.posting_date, 1)],
 			["Cost of Goods Sold - _TC", 1642.54, 0, add_days(pr.posting_date, 1)],
+			["_Test Account Cost for Goods Sold - _TC", 0, 1642.54, pi.posting_date],
+			["Provision Account - _TC", 1642.54, 0, pi.posting_date],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
@@ -2254,8 +2256,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		expected_gle_for_purchase_receipt = [
 			["_Test Account Cost for Goods Sold - _TC", 1642.54, 0, pr.posting_date],
 			["Provision Account - _TC", 0, 1642.54, pr.posting_date],
-			["_Test Account Cost for Goods Sold - _TC", 0, 1642.54, pi.posting_date],
-			["Provision Account - _TC", 1642.54, 0, pi.posting_date],
 		]
 		check_gl_entries(
 			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"

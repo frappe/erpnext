@@ -505,19 +505,21 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		if item.purchase_receipt:
 			pr_item = self.provisional_accounts.get(item.pr_detail, {})
 			if pr_item.get("has_provisional_entry"):
-				purchase_receipt_doc = frappe.get_cached_doc("Purchase Receipt", item.purchase_receipt)
+				from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
+					ProvisionalAccountingService,
+				)
 
-				# Intentionally passing purchase invoice item to handle partial billing
-				purchase_receipt_doc.add_provisional_gl_entry(
+				conversion_rate = frappe.get_cached_value(
+					"Purchase Receipt", item.purchase_receipt, "conversion_rate"
+				)
+
+				ProvisionalAccountingService(self.doc).add_provisional_gl_entry(
 					item,
 					gl_entries,
 					self.doc.posting_date,
 					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(
-						(min(item.qty, pr_item.get("qty")) * pr_item.get("rate"))
-						* purchase_receipt_doc.get("conversion_rate")
-					),
+					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("rate")) * conversion_rate,
 				)
 
 	def update_net_purchase_amount_for_linked_assets(self, item):

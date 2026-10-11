@@ -8344,6 +8344,50 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			[100, 100],
 		)
 
+	def get_provisional_balance(self, *voucher_nos):
+		gle = frappe.qb.DocType("GL Entry")
+		balance = (
+			frappe.qb.from_(gle)
+			.select(fn.Sum(gle.debit - gle.credit))
+			.where(
+				(gle.account == "Provision Account - _TC")
+				& (gle.voucher_no.isin(voucher_nos))
+				& (gle.is_cancelled == 0)
+			)
+		).run()[0][0]
+		return flt(balance)
+
+	def test_receipt_repost_keeps_invoice_provisional_reversal(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			setup_provisional_accounting,
+			toggle_provisional_accounting_setting,
+		)
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		setup_provisional_accounting()
+		self.addCleanup(toggle_provisional_accounting_setting)
+
+		receipt = make_purchase_receipt(item_code="_Test Item", qty=10, rate=100, do_not_submit=1)
+		receipt.append(
+			"items",
+			{**receipt.items[0].as_dict(), "name": None, "item_code": "_Test Non Stock Item", "qty": 5},
+		)
+		receipt.items[1].update({"received_qty": 5, "stock_qty": 5, "rate": 200})
+		receipt.save()
+		receipt.submit()
+
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.submit()
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, receipt.company, charges=50)
+
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), 0)
+
+		invoice.reload()
+		invoice.cancel()
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), -1000)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
