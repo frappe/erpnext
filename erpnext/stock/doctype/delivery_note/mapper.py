@@ -424,6 +424,16 @@ def make_inter_company_purchase_receipt(source_name: str, target_doc: str | dict
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 
+def has_pending_inter_company_qty(item, doctype: str) -> bool:
+	if item.closed:
+		return False
+
+	if doctype == "Purchase Receipt":
+		return flt(item.qty) - flt(item.returned_qty) > 0
+
+	return get_pending_receipt_qty(item) > 0
+
+
 def make_inter_company_transaction(doctype: str, source_name: str, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import (
 		get_inter_company_details,
@@ -462,6 +472,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				target.append("taxes", tax)
 
 		if not target.get("items"):
+			if target.doctype == "Delivery Note":
+				frappe.throw(_("All items have already been delivered"))
+
 			frappe.throw(_("All items have already been received"))
 
 	def update_details(source_doc, target_doc, source_parent):
@@ -565,6 +578,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		if source_parent.doctype == "Delivery Note":
 			target.qty = get_pending_receipt_qty(source)
 
+		if source_parent.doctype == "Purchase Receipt":
+			target.qty = flt(source.qty) - flt(source.returned_qty)
+
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
 
@@ -576,6 +592,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	table_maps = {
 		doctype: {
 			"doctype": target_doctype,
+			"validation": {"docstatus": ["=", 1]},
 			"postprocess": update_details,
 			"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 		},
@@ -590,8 +607,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				"Material_request_item": "material_request_item",
 			},
 			"field_no_map": ["warehouse"],
-			"condition": lambda item: get_pending_receipt_qty(item) > 0
-			and not item.closed
+			"condition": lambda item: has_pending_inter_company_qty(item, doctype)
 			and item.name not in bundle_rows,
 			"postprocess": update_item,
 		},

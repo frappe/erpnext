@@ -8510,6 +8510,24 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			[40000],
 		)
 
+	def test_inter_company_delivery_note_maps_the_kept_qty_of_a_submitted_receipt(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_inter_company_delivery_note
+
+		receipt = make_purchase_receipt(qty=5, rate=100)
+		self.submit_receipt_return(receipt, 2)
+		draft_receipt = make_purchase_receipt(qty=3, rate=100, do_not_submit=1)
+
+		with (
+			patch("erpnext.accounts.doctype.sales_invoice.mapper.validate_inter_company_transaction"),
+			patch(
+				"erpnext.accounts.doctype.sales_invoice.mapper.get_inter_company_details",
+				return_value=frappe._dict(company="_Test Company", party="_Test Customer"),
+			),
+		):
+			delivery_note = make_inter_company_delivery_note(receipt.name)
+			self.assertEqual([row.qty for row in delivery_note.items], [3])
+			self.assertRaises(frappe.ValidationError, make_inter_company_delivery_note, draft_receipt.name)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
