@@ -8487,6 +8487,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(srbnb_debit, 400)
 
+	def test_assets_bought_in_a_purchase_uom_carry_the_full_value(self):
+		asset_item = make_item(
+			"Test Asset Item Bought In Packs",
+			{
+				"is_stock_item": 0,
+				"stock_uom": "Nos",
+				"is_fixed_asset": 1,
+				"auto_create_assets": 1,
+				"asset_category": frappe.db.get_value("Item", "Test Asset Item", "asset_category"),
+				"asset_naming_series": "ABC.###",
+				"uoms": [{"uom": "Box", "conversion_factor": 4}],
+			},
+		).name
+
+		receipt = make_purchase_receipt(
+			item_code=asset_item, qty=1, rate=40000, uom="Box", stock_uom="Nos", conversion_factor=4
+		)
+
+		self.assertEqual(
+			frappe.get_all("Asset", filters={"purchase_receipt": receipt.name}, pluck="net_purchase_amount"),
+			[40000],
+		)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"

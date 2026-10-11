@@ -1403,7 +1403,7 @@ class BuyingController(SubcontractingController):
 			"Item", row.item_code, ["asset_naming_series", "asset_category"], as_dict=1
 		)
 		asset_quantity = row.qty if is_grouped_asset else 1
-		purchase_amount = flt(row.valuation_rate) * asset_quantity
+		purchase_amount = flt(row.valuation_rate) * flt(row.conversion_factor or 1) * asset_quantity
 
 		asset = frappe.get_doc(
 			{
