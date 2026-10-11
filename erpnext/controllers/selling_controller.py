@@ -355,7 +355,7 @@ class SellingController(StockController):
 								{
 									"warehouse": p.warehouse or d.warehouse,
 									"item_code": p.item_code,
-									"qty": flt(p.qty, p.precision("qty")),
+									"qty": flt(p.qty),
 									"serial_no": p.serial_no if self.docstatus == 2 else None,
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
@@ -379,7 +379,7 @@ class SellingController(StockController):
 						{
 							"warehouse": d.warehouse,
 							"item_code": d.item_code,
-							"qty": flt(d.stock_qty, d.precision("stock_qty")),
+							"qty": d.stock_qty,
 							"serial_no": d.serial_no if self.docstatus == 2 else None,
 							"batch_no": d.batch_no if self.docstatus == 2 else None,
 							"uom": d.uom,
@@ -729,7 +729,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * flt(item_row.qty),
+				"actual_qty": -1 * get_ledger_qty(item_row.qty),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -742,7 +742,7 @@ class SellingController(StockController):
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(
-			item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
+			item_row, {"actual_qty": get_ledger_qty(item_row.qty), "warehouse": item_row.target_warehouse}
 		)
 
 		if self.docstatus == 1:
@@ -1227,3 +1227,8 @@ def get_delivered_serial_batch_for_reservation(item):
 			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
 
 	return serial_nos, batch_qty
+
+
+def get_ledger_qty(qty) -> float:
+	"""Stock qty as the stock ledger keeps balances, rounded to its precision."""
+	return flt(qty, frappe.get_precision("Stock Ledger Entry", "actual_qty"))
