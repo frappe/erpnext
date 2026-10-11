@@ -464,8 +464,13 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				self.update_net_purchase_amount_for_linked_assets(item)
 
 	def get_provisional_accounts(self):
+		from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
+			get_order_billing_provisional_reversals,
+		)
+
 		doc = self.doc
 		self.provisional_accounts = frappe._dict()
+		self.order_provisional_reversals = get_order_billing_provisional_reversals(doc)
 		linked_purchase_receipts = {d.purchase_receipt for d in doc.items if d.purchase_receipt}
 		if not linked_purchase_receipts:
 			return
@@ -502,18 +507,19 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			}
 
 	def make_provisional_gl_entry(self, gl_entries, item):
+		from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
+			ProvisionalAccountingService,
+		)
+
+		service = ProvisionalAccountingService(self.doc)
 		if item.purchase_receipt:
 			pr_item = self.provisional_accounts.get(item.pr_detail, {})
 			if pr_item.get("has_provisional_entry"):
-				from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
-					ProvisionalAccountingService,
-				)
-
 				conversion_rate = frappe.get_cached_value(
 					"Purchase Receipt", item.purchase_receipt, "conversion_rate"
 				)
 
-				ProvisionalAccountingService(self.doc).add_provisional_gl_entry(
+				service.add_provisional_gl_entry(
 					item,
 					gl_entries,
 					self.doc.posting_date,
@@ -521,6 +527,18 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					reverse=1,
 					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("rate")) * conversion_rate,
 				)
+			return
+
+		for row, qty in self.order_provisional_reversals.get(item.name, []):
+			service.add_provisional_gl_entry(
+				item,
+				gl_entries,
+				self.doc.posting_date,
+				row.provisional_expense_account,
+				reverse=1,
+				item_amount=qty * flt(row.rate) * flt(row.conversion_rate),
+				pr_detail=row.name,
+			)
 
 	def update_net_purchase_amount_for_linked_assets(self, item):
 		doc = self.doc

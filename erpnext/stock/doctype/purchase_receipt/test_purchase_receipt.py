@@ -8388,6 +8388,35 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		invoice.cancel()
 		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), -1000)
 
+	def make_provisional_purchase_order(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			setup_provisional_accounting,
+			toggle_provisional_accounting_setting,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		setup_provisional_accounting()
+		self.addCleanup(toggle_provisional_accounting_setting)
+		return create_purchase_order(item_code="_Test Non Stock Item", qty=10, rate=200)
+
+	def test_order_invoice_skips_receipt_qty_billed_directly(self):
+		purchase_order = self.make_provisional_purchase_order()
+		(receipt,) = make_receipts_against_order(purchase_order.name, ((6, "08:00"),))
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.submit()
+
+		order_invoice = make_invoice_against_order(purchase_order.name, qty=4, rate=200)
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name, order_invoice.name), 0)
+
+	def test_order_invoices_reverse_receipt_provisional_entries(self):
+		purchase_order = self.make_provisional_purchase_order()
+		receipts = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
+		vouchers = [pr.name for pr in receipts]
+
+		for qty, balance in ((7, -600), (3, 0)):
+			vouchers.append(make_invoice_against_order(purchase_order.name, qty=qty, rate=200).name)
+			self.assertEqual(self.get_provisional_balance(*vouchers), balance)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
@@ -8568,13 +8597,15 @@ def get_amount_differences(receipts: list) -> list:
 	]
 
 
-def make_invoice_against_order(purchase_order: str, qty: float, rate: float) -> None:
+def make_invoice_against_order(purchase_order: str, qty: float, rate: float):
 	from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_invoice_from_order
 
 	pi = make_invoice_from_order(purchase_order)
 	pi.items[0].qty = qty
 	pi.items[0].rate = rate
 	pi.submit()
+
+	return pi
 
 
 def make_purchase_receipt(**args):
