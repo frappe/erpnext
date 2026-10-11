@@ -5171,6 +5171,9 @@ class TestStockEntry(ERPNextTestSuite):
 		entry = self.make_bom_disassembly()
 		self.assertEqual([(d.transfer_qty, d.basic_rate) for d in entry.items if d.t_warehouse], [(1, 100)])
 
+	def test_bom_disassembly_refuses_component_qty_not_in_the_bom(self):
+		self.assertRaises(frappe.ValidationError, self.make_bom_disassembly, component_qty=10)
+
 	def make_bom_disassembly(self, component_qty=None):
 		rm_item = make_item(
 			properties={
