@@ -7,6 +7,17 @@ from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
 
 
+def get_outward_rows(ste_details):
+	return {
+		row.name: row
+		for row in frappe.get_all(
+			"Stock Entry Detail",
+			filters={"name": ("in", ste_details)},
+			fields=["name", "item_code", "t_warehouse", "transfer_qty"],
+		)
+	}
+
+
 class BaseMaterialTransferStockEntry(BaseStockEntry):
 	def set_default_warehouse(self):
 		for row in self.doc.items:
@@ -23,6 +34,7 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 				frappe.throw(_("Source Warehouse is required for item {0}").format(row.item_code))
 
 		self.validate_transit_warehouses()
+		self.validate_stock_in_rows()
 
 	def validate_transit_warehouses(self):
 		if not self.doc.add_to_transit:
@@ -116,25 +128,22 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 		self._bulk_update_transferred_qty(stock_entries, child_list)
 		self._update_per_transferred_field()
 
-	def _get_item_transferred_qty(self, item):
+	def _get_transferred_qty_map(self, ste_details):
 		sed = frappe.qb.DocType("Stock Entry Detail")
-		result = (
-			frappe.qb.from_(sed)
-			.select(Sum(sed.transfer_qty).as_("qty"))
-			.where(
-				(sed.against_stock_entry == item.against_stock_entry)
-				& (sed.ste_detail == item.ste_detail)
-				& (sed.docstatus == 1)
-			)
-		).run(as_dict=True)
-		return result[0].qty if result and result[0].qty else 0.0
+		return dict(
+			(
+				frappe.qb.from_(sed)
+				.select(sed.ste_detail, Sum(sed.transfer_qty))
+				.where((sed.ste_detail.isin(ste_details)) & (sed.docstatus == 1))
+				.groupby(sed.ste_detail)
+			).run()
+		)
 
-	def _validate_item_transferred_qty(self, item, transferred_qty):
+	def _validate_item_transferred_qty(self, item, transferred_qty, outward_row):
 		if item.docstatus != 1:
 			return
 
-		transfer_qty = frappe.get_value("Stock Entry Detail", item.ste_detail, "transfer_qty")
-		if transferred_qty > transfer_qty:
+		if transferred_qty > flt(outward_row.transfer_qty):
 			frappe.throw(
 				_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
 					item.idx
@@ -142,16 +151,54 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 			)
 
 	def _collect_transferred_qtys(self):
-		stock_entries, child_list = {}, []
-		for item in self.doc.items:
-			if not (item.against_stock_entry and item.ste_detail):
-				continue
+		rows = [item for item in self.doc.items if item.against_stock_entry and item.ste_detail]
+		if not rows:
+			return {}, []
 
-			transferred_qty = self._get_item_transferred_qty(item)
-			self._validate_item_transferred_qty(item, transferred_qty)
+		ste_details = [item.ste_detail for item in rows]
+		outward_rows = get_outward_rows(ste_details)
+		transferred_qty_map = self._get_transferred_qty_map(ste_details)
+
+		stock_entries, child_list = {}, []
+		for item in rows:
+			transferred_qty = flt(transferred_qty_map.get(item.ste_detail))
+			self._validate_item_transferred_qty(
+				item, transferred_qty, outward_rows.get(item.ste_detail, frappe._dict())
+			)
 			child_list.append(item.ste_detail)
 			stock_entries[(item.against_stock_entry, item.ste_detail)] = transferred_qty
 		return stock_entries, child_list
+
+	def validate_stock_in_rows(self):
+		rows = [item for item in self.doc.items if item.against_stock_entry and item.ste_detail]
+		if not rows:
+			return
+
+		outward_rows = get_outward_rows([item.ste_detail for item in rows])
+		for item in rows:
+			outward_row = outward_rows.get(item.ste_detail)
+			if not outward_row:
+				continue
+
+			if item.item_code != outward_row.item_code:
+				frappe.throw(
+					_("Row #{0}: Item {1} does not match item {2} sent by {3}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(outward_row.item_code),
+						item.against_stock_entry,
+					)
+				)
+
+			if item.s_warehouse != outward_row.t_warehouse:
+				frappe.throw(
+					_("Row #{0}: Item {1} must be taken from {2}, where {3} sent it.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(outward_row.t_warehouse),
+						item.against_stock_entry,
+					)
+				)
 
 	def _bulk_update_transferred_qty(self, stock_entries, child_list):
 		sed = frappe.qb.DocType("Stock Entry Detail")

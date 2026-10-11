@@ -5212,6 +5212,31 @@ class TestStockEntry(ERPNextTestSuite):
 		entry.insert()
 		return entry
 
+	def test_stock_in_from_transit_must_take_the_sent_item_from_transit(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (item_code, other_item):
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+
+		outward = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="Goods In Transit - _TC",
+			add_to_transit=1,
+			qty=10,
+		)
+
+		for field, value in (("s_warehouse", "_Test Warehouse - _TC"), ("item_code", other_item)):
+			stock_in = make_stock_in_entry(outward.name)
+			stock_in.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+			stock_in.items[0].set(field, value)
+			self.assertRaises(frappe.ValidationError, stock_in.insert)
+
+		plain_transfer = make_stock_entry(
+			item_code=item_code, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+		self.assertRaises(frappe.ValidationError, make_stock_in_entry, plain_transfer.name)
+
 	def make_entry_with_rows(self, purpose, *rows, **kwargs):
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = kwargs.pop("company", "_Test Company")
