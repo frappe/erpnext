@@ -1157,6 +1157,10 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre_list[0][field])
 
+		bundle.company = sre_list[0].get("company") or frappe.get_cached_value(
+			"Stock Reservation Entry", sre_list[0]["name"], "company"
+		)
+
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
