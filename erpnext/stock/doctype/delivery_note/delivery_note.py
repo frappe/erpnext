@@ -272,8 +272,13 @@ class DeliveryNote(SellingController):
 				if not d.against_sales_order:
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
+	def before_insert(self):
+		if self.amended_from:
+			self.delivery_trip = None
+
 	def validate(self):
 		self.validate_posting_time()
+		self.set_internal_return_target_warehouse()
 		super().validate()
 		self.validate_references()
 		self.validate_expense_account()
@@ -295,6 +300,48 @@ class DeliveryNote(SellingController):
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		pre_submit_validation(self, check_credit_limit=True, check_packed_qty=True)
+
+	def get_unbilled_original_rows(self) -> set:
+		"""Original rows the return comes from that were never billed: their cost still sits in SDBNB."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not original_rows:
+			return set()
+
+		return set(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows), "billed_amt": 0},
+				pluck="name",
+			)
+		)
+
+	def set_internal_return_target_warehouse(self):
+		"""An internal return brings material back from the warehouse the delivery put it in."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not (self.is_return and self.return_against and self.is_internal_customer and original_rows):
+			return
+
+		target_warehouses = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows)},
+				fields=["name", "target_warehouse"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			expected = target_warehouses.get(row.dn_detail)
+			if not expected:
+				continue
+
+			if not row.target_warehouse:
+				row.target_warehouse = expected
+			elif row.target_warehouse != expected:
+				frappe.throw(
+					_("Row #{0}: Target Warehouse must be {1}, as on Delivery Note {2}").format(
+						row.idx, frappe.bold(expected), frappe.bold(self.return_against)
+					)
+				)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -438,6 +485,11 @@ class DeliveryNote(SellingController):
 		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
 		default_expense_account = company_values.default_expense_account
 		is_enabled_sdbnb = company_values.enable_stock_delivered_but_not_billed
+		unbilled_rows = (
+			self.get_unbilled_original_rows()
+			if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb
+			else set()
+		)
 		for item in self.items:
 			if item.get("against_sales_invoice"):
 				if sdbnb_account and item.expense_account == sdbnb_account:
@@ -451,7 +503,13 @@ class DeliveryNote(SellingController):
 				# Only stock items
 				if is_stock_item and not item.get("is_fixed_asset") and not item.get("is_subcontracted"):
 					# Sales Return handling
-					if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb:
+					if (
+						self.is_return
+						and disable_sdbnb_in_sr
+						and sdbnb_account
+						and is_enabled_sdbnb
+						and item.dn_detail not in unbilled_rows
+					):
 						if default_expense_account and (
 							not item.expense_account or item.expense_account == sdbnb_account
 						):
@@ -659,4 +717,7 @@ def get_list_context(context=None):
 def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.check_permission("submit")
+	if dn.docstatus != 1:
+		frappe.throw(_("Only a submitted Delivery Note can be closed or reopened"))
+
 	dn.update_status(status)
