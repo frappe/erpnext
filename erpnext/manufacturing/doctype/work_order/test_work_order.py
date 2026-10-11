@@ -5075,6 +5075,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		return_entry = make_stock_return_entry(work_order.name)
 		return_entry.save()
 		self.assertEqual(sum(row.transfer_qty for row in return_entry.items), 50)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_excess_transfer_check_uses_the_stock_uom_qty(self):
+		rm_item = make_item(
+			"_Test Excess Transfer UOM RM",
+			{"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 50}]},
+		).name
+		fg_item = make_item("_Test Excess Transfer UOM FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=10)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=1, source_warehouse="_Test Warehouse - _TC"
+		)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=100)
+
+		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0))
+		transfer.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 50})
+		self.assertRaises(frappe.ValidationError, transfer.save)
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},

@@ -364,12 +364,14 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			if key not in pending_by_item:
 				continue
 
-			transfer_by_item[key] = transfer_by_item.get(key, 0.0) + flt(item.qty)
+			transfer_by_item[key] = transfer_by_item.get(key, 0.0) + flt(item.qty) * flt(
+				item.conversion_factor or 1
+			)
 			first_row_by_item.setdefault(key, item)
 
 		for key, transfer_qty in transfer_by_item.items():
 			item = first_row_by_item[key]
-			precision = item.precision("qty")
+			precision = item.precision("transfer_qty")
 			transfer_qty = flt(transfer_qty, precision)
 			pending_qty = flt(pending_by_item[key], precision)
 			if transfer_qty > pending_qty:
@@ -380,7 +382,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 					).format(
 						item.idx,
 						transfer_qty,
-						item.uom,
+						item.stock_uom,
 						frappe.bold(item.item_code),
 						pending_qty,
 					),
