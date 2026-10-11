@@ -4869,6 +4869,58 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(sum(value_changes), 2), 0)
 
+	def test_repack_output_keeps_its_landed_cost(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		raw_material, output = (make_item(properties={"valuation_method": "FIFO"}).name for _ in range(2))
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=1, rate=100)
+		repack = self.make_repack(raw_material, 1, warehouse, [(output, 1)])
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type="Stock Entry", receipt_document=repack.name, charges=20, do_not_save=True
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual(self.get_value_change(repack, output), 120)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_manufacture_keeps_the_cost_of_its_consumption_entry(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		raw_material, finished_good = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		warehouse = "_Test Warehouse - _TC"
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": finished_good, "quantity": 10, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": raw_material, "qty": 10})
+		bom.insert()
+		bom.submit()
+
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=10,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+		)
+		frappe.get_doc(
+			make_stock_entry_from_wo(work_order.name, "Material Consumption for Manufacture", 10)
+		).submit()
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(work_order.name, "Manufacture", 10))
+		manufacture.submit()
+
+		self.assertEqual(self.get_value_change(manufacture, finished_good), 1000)
+
 	def make_repack(self, raw_material, qty, warehouse, outputs):
 		repack = make_stock_entry(
 			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
