@@ -1466,3 +1466,33 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "stock_reserved_qty"), 0
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_second_delivery_from_reserved_serials_skips_delivered_ones(self):
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=4,
+			basic_rate=100,
+			serial_no="\n".join(f"{item_code}-{i}" for i in range(4)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=3)
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		first_delivery = make_delivery_note(sales_order.name, kwargs={"for_reserved_stock": 1})
+		first_delivery.items[0].qty = 1
+		first_delivery.items[0].serial_no = first_delivery.items[0].serial_no.split("\n")[0]
+		first_delivery.submit()
+
+		second_delivery = make_delivery_note(sales_order.name, kwargs={"for_reserved_stock": 1})
+		self.assertEqual(len(second_delivery.items[0].serial_no.split("\n")), 2)

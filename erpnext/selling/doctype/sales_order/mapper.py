@@ -27,6 +27,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, make_packing_list
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_serial_batch_entries_for_voucher,
 	get_sre_details_for_voucher,
 	get_sre_reserved_qty_details_for_voucher,
 	get_ssb_bundle_for_voucher,
@@ -415,11 +416,7 @@ def make_delivery_note(
 						# Carry the reserved serial/batch in the row fields. A single field can't hold
 						# multiple batches, so fall back to a bundle in that case.
 						dn_item.use_serial_batch_fields = 1
-						sb_entries = frappe.get_all(
-							"Serial and Batch Entry",
-							filters={"parent": sre.name},
-							fields=["serial_no", "batch_no"],
-						)
+						sb_entries = get_serial_batch_entries_for_voucher([sre.name])
 						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
 						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
 						if serial_nos:
