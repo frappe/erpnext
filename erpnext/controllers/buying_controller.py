@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import render_address
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, format_date, get_link_to_form, getdate
 from frappe.utils.data import nowtime
 
@@ -479,6 +480,72 @@ class BuyingController(SubcontractingController):
 				).format(self.return_against),
 				title=_("Not Allowed"),
 			)
+
+		self.validate_assets_left_after_return()
+
+	def validate_assets_left_after_return(self):
+		if self.doctype == "Purchase Invoice" and not self.get("update_stock"):
+			return
+
+		detail_field = (
+			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
+		)
+		returned_qty, rows = self.get_returned_asset_qty(detail_field)
+		if not returned_qty:
+			return
+
+		kept_qty = self.get_qty_kept_after_return(detail_field, returned_qty)
+		for detail, asset_qty in get_linked_asset_qty(detail_field, list(returned_qty)).items():
+			if flt(asset_qty) > kept_qty[detail]:
+				frappe.throw(
+					_(
+						"Row #{0}: {1} assets of {2} are linked to {3}, which keeps only {4} after this return. Delete the extra draft assets first."
+					).format(
+						rows[detail].idx,
+						flt(asset_qty),
+						frappe.bold(rows[detail].item_code),
+						get_link_to_form(self.doctype, self.return_against),
+						kept_qty[detail],
+					),
+					title=_("Not Allowed"),
+				)
+
+	def get_returned_asset_qty(self, detail_field):
+		returned_qty, rows = {}, {}
+		for d in self.items:
+			if d.is_fixed_asset and d.get(detail_field):
+				returned_qty[d.get(detail_field)] = returned_qty.get(d.get(detail_field), 0) + abs(flt(d.qty))
+				rows.setdefault(d.get(detail_field), d)
+
+		return returned_qty, rows
+
+	def get_qty_kept_after_return(self, detail_field, returned_qty):
+		item_doctype = f"{self.doctype} Item"
+		kept_qty = dict(
+			frappe.get_all(
+				item_doctype, filters={"name": ("in", list(returned_qty))}, fields=["name", "qty"], as_list=1
+			)
+		)
+
+		parent, child = frappe.qb.DocType(self.doctype), frappe.qb.DocType(item_doctype)
+		earlier_returns = (
+			frappe.qb.from_(child)
+			.join(parent)
+			.on(parent.name == child.parent)
+			.select(child[detail_field], Sum(Abs(child.qty)))
+			.where(
+				(child[detail_field].isin(list(returned_qty)))
+				& (parent.docstatus == 1)
+				& (parent.is_return == 1)
+				& (parent.name != self.name)
+			)
+			.groupby(child[detail_field])
+		).run()
+
+		for detail, qty in earlier_returns:
+			kept_qty[detail] = flt(kept_qty.get(detail)) - flt(qty)
+
+		return {detail: flt(kept_qty.get(detail)) - qty for detail, qty in returned_qty.items()}
 
 	def get_asset_items(self):
 		if self.doctype not in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]:
@@ -1584,6 +1651,18 @@ def update_regional_item_valuation_rate(doc):
 
 
 @frappe.request_cache
+def get_linked_asset_qty(detail_field, details):
+	asset = frappe.qb.DocType("Asset")
+	return dict(
+		(
+			frappe.qb.from_(asset)
+			.select(asset[detail_field], Sum(asset.asset_quantity))
+			.where((asset[detail_field].isin(details)) & (asset.docstatus < 2))
+			.groupby(asset[detail_field])
+		).run()
+	)
+
+
 def get_purchase_expense_account(item_code, company):
 	defaults = get_item_defaults(item_code, company)
 

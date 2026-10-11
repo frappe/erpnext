@@ -8543,6 +8543,19 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, receipt.name)
 		self.assertRaises(frappe.ValidationError, invoice.insert)
 
+	def test_partial_asset_return_needs_the_extra_draft_assets_removed(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		receipt = make_purchase_receipt(item_code="Test Asset Item", qty=2, rate=50000)
+		receipt_return = make_purchase_return(receipt.name)
+		receipt_return.items[0].update({"qty": -1, "received_qty": -1})
+		self.assertRaises(frappe.ValidationError, receipt_return.insert)
+
+		draft_asset = frappe.get_all("Asset", filters={"purchase_receipt": receipt.name}, pluck="name")[0]
+		frappe.delete_doc("Asset", draft_asset)
+		receipt_return.insert()
+		receipt_return.submit()
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
