@@ -169,6 +169,19 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(wo.disassembled_qty, 0.3)
 
+	def test_disassembly_available_qty_has_no_float_noise(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
+
+		real_get_value = frappe.db.get_value
+
+		def get_value(doctype, filters=None, *args, **kwargs):
+			if doctype != "Stock Entry":
+				return real_get_value(doctype, filters, *args, **kwargs)
+			return frappe._dict(fg_completed_qty=0.3) if isinstance(filters, str) else 0.1
+
+		with patch.object(frappe.db, "get_value", side_effect=get_value):
+			self.assertEqual(get_disassembly_available_qty("Manufacture Entry"), 0.2)
+
 	def test_over_production(self):
 		wo_doc = self.check_planned_qty()
 
