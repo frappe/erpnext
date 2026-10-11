@@ -357,10 +357,8 @@ class SerialandBatchBundle(Document):
 			}
 		)
 
-		if (self.returned_against or self.voucher_type == "Stock Reconciliation") and self.docstatus == 1:
-			kwargs["ignore_voucher_detail_no"] = self.voucher_detail_no
-
 		if self.docstatus == 1:
+			kwargs["ignore_voucher_detail_no"] = self.voucher_detail_no
 			kwargs["voucher_no"] = self.voucher_no
 
 		available_serial_nos = get_available_serial_nos(kwargs)

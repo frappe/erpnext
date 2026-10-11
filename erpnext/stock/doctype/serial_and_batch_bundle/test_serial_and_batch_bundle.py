@@ -10,6 +10,7 @@ from frappe.utils import add_days, add_to_date, flt, nowtime, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import resolve_csv_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	SerialNoDuplicateError,
 	add_serial_batch_ledgers,
 	combine_datetime,
 	get_available_batches_qty,
@@ -2518,6 +2519,30 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 				[serial_nos[1]],
 			)
 			self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle, "modified"), modified)
+
+	def test_same_new_serial_on_two_rows_of_one_receipt_is_refused(self):
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		serial_no = f"{item_code}-SN1"
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = "Material Receipt"
+		entry.company = "_Test Company"
+		entry.set_stock_entry_type()
+		for _row in range(2):
+			entry.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": 1,
+					"t_warehouse": "_Test Warehouse - _TC",
+					"basic_rate": 100,
+					"serial_no": serial_no,
+					"use_serial_batch_fields": 1,
+				},
+			)
+		entry.insert()
+
+		self.assertRaises(SerialNoDuplicateError, entry.submit)
 
 
 def get_batch_from_bundle(bundle):
