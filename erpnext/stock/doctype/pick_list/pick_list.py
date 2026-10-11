@@ -632,9 +632,12 @@ class PickList(TransactionBase):
 				so_items_details_map.setdefault(location.sales_order, []).append(item_details)
 
 		if so_items_details_map:
+			from erpnext.selling.doctype.sales_order.services.reservation import SalesOrderStockReservation
+
 			for so, items_details in so_items_details_map.items():
-				so_doc = frappe.get_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(
+				SalesOrderStockReservation(
+					frappe.get_doc("Sales Order", so)
+				).create_stock_reservation_entries(
 					items_details=items_details,
 					from_voucher_type="Pick List",
 					notify=notify,

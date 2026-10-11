@@ -1392,7 +1392,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						}
 					)
 
-			frappe.get_doc("Subcontracting Order", self.subcontracting_order).reserve_raw_materials(
+			frappe.get_doc("Subcontracting Order", self.subcontracting_order).make_raw_material_reservations(
 				items=items.values(), stock_entry=self.name
 			)
 

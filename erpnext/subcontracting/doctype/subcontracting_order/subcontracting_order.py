@@ -136,7 +136,7 @@ class SubcontractingOrder(SubcontractingController):
 	def on_submit(self):
 		self.update_status()
 		self.update_subcontracted_quantity_in_po()
-		self.reserve_raw_materials()
+		self.make_raw_material_reservations()
 
 	def on_cancel(self):
 		self.update_status()
@@ -473,6 +473,10 @@ class SubcontractingOrder(SubcontractingController):
 
 	@frappe.whitelist()
 	def reserve_raw_materials(self, items: list | None = None, stock_entry: str | None = None):
+		self.check_permission("write")
+		self.make_raw_material_reservations(items, stock_entry)
+
+	def make_raw_material_reservations(self, items: list | None = None, stock_entry: str | None = None):
 		if self.reserve_stock:
 			item_dict = {}
 

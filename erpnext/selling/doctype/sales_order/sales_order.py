@@ -548,7 +548,7 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "used")
 
 		if self.get("reserve_stock") and not self.get("is_subcontracted"):
-			self.create_stock_reservation_entries()
+			SalesOrderStockReservation(self).create_stock_reservation_entries()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -723,6 +723,7 @@ class SalesOrder(SellingController):
 		notify: bool = True,
 	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
+		self.check_permission("write")
 		SalesOrderStockReservation(self).create_stock_reservation_entries(
 			items_details, from_voucher_type, notify
 		)
