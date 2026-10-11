@@ -357,7 +357,7 @@ class PickList(TransactionBase):
 	def validate_expired_batches(self):
 		batches = []
 		for row in self.get("locations"):
-			if row.get("batch_no") and row.get("picked_qty"):
+			if row.get("batch_no") and (row.get("picked_qty") or self.pick_manually):
 				batches.append(row.batch_no)
 
 		if batches:
@@ -367,7 +367,7 @@ class PickList(TransactionBase):
 				.select(batch.batch_id)
 				.where(
 					(batch.name.isin(batches))
-					& (batch.expiry_date <= frappe.utils.nowdate())
+					& (batch.expiry_date < frappe.utils.nowdate())
 					& (batch.expiry_date.isnotnull())
 				)
 			)
