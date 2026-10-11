@@ -634,9 +634,11 @@ class BuyingController(SubcontractingController):
 				):
 					net_rate = item.rejected_qty * item.net_rate
 
-				qty_in_stock_uom = self.get_valued_stock_qty(item)
-				if not qty_in_stock_uom and item.get("rejected_qty"):
-					qty_in_stock_uom = get_stock_qty(item, item.rejected_qty)
+				qty_in_stock_uom = (
+					self.get_valued_stock_qty(item)
+					or get_stock_qty(item, item.rejected_qty)
+					or flt(item.qty) * flt(item.conversion_factor)
+				)
 
 				item.valuation_rate = (
 					net_rate
