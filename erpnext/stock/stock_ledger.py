@@ -2845,6 +2845,8 @@ def get_datetime_limit_condition(sle, detail):
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
+		if not allow_negative_stock and is_reserved_stock_drawn(args):
+			validate_reserved_stock(args)
 		return
 
 	if (
@@ -2889,6 +2891,15 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 
 	if args.reserved_stock:
 		validate_reserved_stock(args)
+
+
+def is_reserved_stock_drawn(sle):
+	return bool(
+		flt(sle.reserved_stock)
+		and flt(sle.actual_qty) < 0
+		and not sle.get("is_cancelled")
+		and not frappe.get_cached_doc("Stock Settings").allow_negative_stock
+	)
 
 
 def is_negative_with_precision(neg_sle, is_batch=False):
