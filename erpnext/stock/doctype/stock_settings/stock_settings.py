@@ -253,9 +253,7 @@ class StockSettings(Document):
 			# Enable -> Disable
 			else:
 				# Don't allow if there are open Stock Reservation Entries
-				has_reserved_stock = frappe.db.exists(
-					"Stock Reservation Entry", {"docstatus": 1, "status": ["!=", "Delivered"]}
-				)
+				has_reserved_stock = has_open_stock_reservation()
 
 				if has_reserved_stock:
 					frappe.throw(
@@ -376,3 +374,17 @@ def get_transaction_barcode_fields():
 				fields.append((table_field.options, "barcode"))
 
 	return fields
+
+
+def has_open_stock_reservation() -> bool:
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	return bool(
+		frappe.qb.from_(sre)
+		.select(sre.name)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty > 0)
+		)
+		.limit(1)
+		.run()
+	)
