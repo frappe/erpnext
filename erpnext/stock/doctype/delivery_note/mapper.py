@@ -74,6 +74,8 @@ def make_sales_invoice(
 	args = frappe.parse_json(args)
 
 	doc = frappe.get_doc("Delivery Note", source_name)
+	if doc.status == "Closed":
+		frappe.throw(_("Delivery Note {0} is closed and cannot be invoiced").format(frappe.bold(doc.name)))
 
 	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)

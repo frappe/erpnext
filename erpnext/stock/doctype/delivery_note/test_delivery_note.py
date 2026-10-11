@@ -4282,6 +4282,20 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(expense_accounts[0], self.perpetual_account)
 		self.assertNotEqual(expense_accounts[1], self.perpetual_account)
 
+	def test_closed_delivery_note_cannot_be_invoiced(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		draft = create_delivery_note(qty=1, do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, update_delivery_note_status, draft.name, "Closed")
+
+		delivery_note = create_delivery_note(qty=4, rate=500)
+		invoice = make_sales_invoice(delivery_note.name)
+		update_delivery_note_status(delivery_note.name, "Closed")
+
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, delivery_note.name)
+		self.assertRaises(frappe.ValidationError, invoice.insert)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

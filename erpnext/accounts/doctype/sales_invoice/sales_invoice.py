@@ -365,6 +365,7 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
 		self.validate_delivery_note_rows_billed_by_invoice()
+		self.validate_closed_delivery_notes()
 		BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 
 		if self.is_return and self.return_against:
@@ -848,6 +849,20 @@ class SalesInvoice(SellingController):
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
+			)
+
+	def validate_closed_delivery_notes(self):
+		delivery_notes = {d.delivery_note for d in self.items if d.delivery_note}
+		if self.is_return or not delivery_notes:
+			return
+
+		if closed := frappe.get_all(
+			"Delivery Note", filters={"name": ("in", list(delivery_notes)), "status": "Closed"}, pluck="name"
+		):
+			frappe.throw(
+				_("Delivery Note {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
 			)
 
 	def validate_delivery_note_rows_billed_by_invoice(self):

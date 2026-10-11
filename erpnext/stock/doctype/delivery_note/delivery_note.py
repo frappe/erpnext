@@ -713,4 +713,7 @@ def get_list_context(context=None):
 def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.check_permission("submit")
+	if dn.docstatus != 1:
+		frappe.throw(_("Only a submitted Delivery Note can be closed or reopened"))
+
 	dn.update_status(status)
