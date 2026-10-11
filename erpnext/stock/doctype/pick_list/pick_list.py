@@ -878,26 +878,19 @@ class PickList(TransactionBase):
 			self.group_similar_items()
 
 	def group_similar_items(self):
-		group_item_qty = defaultdict(float)
-		group_picked_qty = defaultdict(float)
-
+		grouped_rows = {}
 		for item in self.locations:
-			group_item_qty[(item.item_code, item.warehouse)] += item.qty
-			group_picked_qty[(item.item_code, item.warehouse)] += item.picked_qty
+			key = (item.item_code, item.warehouse, item.uom, item.batch_no or "")
+			if key not in grouped_rows:
+				grouped_rows[key] = item
+				continue
 
-		duplicate_list = []
-		for item in self.locations:
-			if (item.item_code, item.warehouse) in group_item_qty:
-				item.qty = group_item_qty[(item.item_code, item.warehouse)]
-				item.picked_qty = group_picked_qty[(item.item_code, item.warehouse)]
-				item.stock_qty = group_item_qty[(item.item_code, item.warehouse)]
-				del group_item_qty[(item.item_code, item.warehouse)]
-			else:
-				duplicate_list.append(item)
+			grouped_row = grouped_rows[key]
+			grouped_row.qty = flt(grouped_row.qty) + flt(item.qty)
+			grouped_row.stock_qty = flt(grouped_row.stock_qty) + flt(item.stock_qty)
+			grouped_row.picked_qty = flt(grouped_row.picked_qty) + flt(item.picked_qty)
 
-		for item in duplicate_list:
-			self.remove(item)
-
+		self.set("locations", list(grouped_rows.values()))
 		for idx, item in enumerate(self.locations, start=1):
 			item.idx = idx
 

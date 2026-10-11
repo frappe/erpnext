@@ -1220,6 +1220,55 @@ class TestPickList(ERPNextTestSuite):
 		make_manual_pick_list(8).insert().submit()
 		self.assertRaises(frappe.ValidationError, make_manual_pick_list(8).insert)
 
+	def test_grouped_print_keeps_different_uoms_apart(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"group_same_items": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 1,
+						"uom": "Box",
+						"stock_qty": 12,
+						"picked_qty": 12,
+					},
+					{
+						"item_code": item,
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 5,
+						"uom": "Nos",
+						"stock_qty": 5,
+						"picked_qty": 5,
+					},
+					{
+						"item_code": item,
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 3,
+						"uom": "Nos",
+						"stock_qty": 3,
+						"picked_qty": 3,
+					},
+				],
+			}
+		)
+		pick_list.group_similar_items()
+
+		self.assertEqual(
+			[(row.uom, row.qty, row.stock_qty) for row in pick_list.locations],
+			[("Box", 1, 12), ("Nos", 8, 8)],
+		)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
