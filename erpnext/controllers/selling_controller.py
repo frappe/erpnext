@@ -1076,6 +1076,7 @@ class SellingController(StockController):
 
 					# Update Reserved Stock in Bin.
 					sre_doc.update_reserved_stock_in_bin()
+					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
 
 					qty_to_deliver -= qty_can_be_deliver
 
@@ -1143,6 +1144,7 @@ class SellingController(StockController):
 
 					# Update Reserved Stock in Bin.
 					sre_doc.update_reserved_stock_in_bin()
+					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
