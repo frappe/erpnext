@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, flt, today
+from frappe.utils import add_days, flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -693,6 +693,41 @@ class TestItemStandardCost(ERPNextTestSuite):
 				"Bin", {"item_code": item.name, "warehouse": warehouse}, "stock_value"
 			)
 			self.assertEqual(flt(stock_value), qty * 150)
+
+	def test_batch_outgoing_rate_follows_the_revalued_standard_rate(self):
+		from erpnext.stock.utils import _get_incoming_rate
+
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		item = create_standard_cost_item(
+			has_batch_no=1, create_new_batch=1, batch_number_series="SC-BATCH-.####"
+		)
+		create_item_standard_cost(
+			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -5)
+		)
+		receipt = make_stock_entry(
+			item_code=item.name,
+			to_warehouse=PI_STORES,
+			company=PI_COMPANY,
+			qty=3,
+			basic_rate=100,
+			use_serial_batch_fields=1,
+			posting_date=add_days(today(), -3),
+		)
+		create_item_standard_cost(item.name, rate=150, company=PI_COMPANY, effective_date=today())
+
+		rate = _get_incoming_rate(
+			{
+				"item_code": item.name,
+				"warehouse": PI_STORES,
+				"company": PI_COMPANY,
+				"qty": 3,
+				"serial_and_batch_bundle": receipt.items[0].serial_and_batch_bundle,
+				"posting_date": today(),
+				"posting_time": nowtime(),
+			}
+		)
+
+		self.assertEqual(rate, 150)
 
 	def test_serialized_item_revalued_across_warehouses(self):
 		item = create_standard_cost_item(has_serial_no=1, serial_no_series="SC-SER-.####")
