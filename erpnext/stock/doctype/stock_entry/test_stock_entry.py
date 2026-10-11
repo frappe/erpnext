@@ -351,6 +351,40 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(make_stock_in_entry(transit_entry.name).items[0].qty, 75)
 
+	def test_end_transit_after_a_partial_receipt_in_an_inexact_uom(self):
+		company = "_Test Company"
+		transit_warehouse = get_in_transit_warehouse(company)
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Pack"}).insert(ignore_if_duplicate=True)
+		item_code = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Pack", "conversion_factor": 2.5004}],
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=1,
+			basic_rate=100,
+			do_not_save=True,
+		)
+		transit_entry.items[0].update({"uom": "_Test Pack", "conversion_factor": 2.5004})
+		transit_entry.save().submit()
+
+		for qty in (0.333, None):
+			receipt = make_stock_in_entry(transit_entry.name)
+			receipt.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+			if qty:
+				receipt.items[0].qty = qty
+			receipt.save().submit()
+
+		from erpnext.stock.utils import get_stock_balance
+
+		self.assertEqual(get_stock_balance(item_code, transit_warehouse), 0)
+
 	def test_end_transit_qty_with_uom_conversion(self):
 		"""transferred_qty is tracked in the stock UOM, so the end transit qty must be converted back."""
 		company = "_Test Company"
