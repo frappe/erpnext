@@ -566,6 +566,7 @@ def get_item_wise_returned_qty(items: list) -> dict:
 				["Purchase Receipt", "docstatus", "=", 1],
 				["Purchase Receipt", "is_return", "=", 1],
 				["Purchase Receipt Item", "purchase_receipt_item", "in", items],
+				["Purchase Receipt Item", "return_qty_from_rejected_warehouse", "=", 0],
 			],
 			group_by="`tabPurchase Receipt Item`.purchase_receipt_item",
 			as_list=1,

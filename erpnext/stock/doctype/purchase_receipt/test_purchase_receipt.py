@@ -8282,6 +8282,52 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			0,
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0}
+	)
+	def test_rejected_returns_do_not_lower_billed_percentage(self):
+		receipt = self.make_receipt_with_rejected_qty()
+		self.submit_receipt_return(receipt, 2, from_rejected_warehouse=True)
+
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.items[0].qty = 6
+		invoice.submit()
+		self.assertEqual(frappe.db.get_value("Purchase Receipt", receipt.name, "per_billed"), 75)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0}
+	)
+	def test_invoice_after_return_subtracts_only_accepted_returns(self):
+		receipt = self.make_receipt_with_rejected_qty()
+		self.submit_receipt_return(receipt, 3)
+		invoice = make_purchase_invoice(receipt.name)
+		self.assertEqual((invoice.items[0].qty, invoice.items[0].rejected_qty), (5, 0))
+
+		receipt_with_rejected_return = self.make_receipt_with_rejected_qty()
+		self.submit_receipt_return(receipt_with_rejected_return, 1, from_rejected_warehouse=True)
+		self.assertEqual(make_purchase_invoice(receipt_with_rejected_return.name).items[0].qty, 8)
+
+	def submit_receipt_return(self, receipt, qty, from_rejected_warehouse=False):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		make_return = (
+			make_purchase_return_against_rejected_warehouse
+			if from_rejected_warehouse
+			else make_purchase_return
+		)
+		receipt_return = make_return(receipt.name)
+		receipt_return.items[0].update({"qty": -qty, "received_qty": -qty, "rejected_qty": 0})
+		receipt_return.insert()
+		frappe.get_doc("Purchase Receipt", receipt_return.name).submit()
+
+	def make_receipt_with_rejected_qty(self):
+		return make_purchase_receipt(
+			qty=8, rejected_qty=2, rejected_warehouse="_Test Rejected Warehouse - _TC", rate=100
+		)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
