@@ -39,7 +39,7 @@ from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
@@ -1412,7 +1412,7 @@ class PurchaseInvoice(BuyingController):
 		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
 		warehouse_debit_amount = flt(
-			flt(item.valuation_rate, val_rate_db_precision) * flt(item.qty) * flt(item.conversion_factor),
+			flt(item.valuation_rate, val_rate_db_precision) * get_stock_qty(item, item.qty),
 			net_amt_precision,
 		)
 
