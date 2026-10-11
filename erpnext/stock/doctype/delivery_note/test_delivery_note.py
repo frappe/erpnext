@@ -4245,6 +4245,43 @@ class TestDeliveryNote(ERPNextTestSuite):
 		sales_return.items[0].target_warehouse = "_Test Warehouse 1 - _TC"
 		self.assertRaises(frappe.ValidationError, sales_return.insert)
 
+	def test_unbilled_return_stays_on_sdbnb_when_disabled_for_returns(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		self.get_perpetual_defaults()
+		frappe.db.set_value("Company", self.perpetual_company, "disable_sdbnb_in_sr", 1)
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=20,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+		kwargs = {
+			"item_code": item_code,
+			"qty": 10,
+			"rate": 150,
+			"company": self.perpetual_company,
+			"warehouse": self.perpetual_warehouse,
+			"cost_center": self.perpetual_cost_center,
+			"expense_account": self.perpetual_expense_account,
+		}
+
+		expense_accounts = []
+		for billed in (False, True):
+			delivery_note = create_delivery_note(**kwargs)
+			if billed:
+				make_sales_invoice(delivery_note.name).submit()
+
+			sales_return = make_sales_return(delivery_note.name)
+			sales_return.items[0].qty = -4
+			sales_return.insert()
+			expense_accounts.append(sales_return.items[0].expense_account)
+
+		self.assertEqual(expense_accounts[0], self.perpetual_account)
+		self.assertNotEqual(expense_accounts[1], self.perpetual_account)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

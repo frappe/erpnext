@@ -297,6 +297,20 @@ class DeliveryNote(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		pre_submit_validation(self, check_credit_limit=True, check_packed_qty=True)
 
+	def get_unbilled_original_rows(self) -> set:
+		"""Original rows the return comes from that were never billed: their cost still sits in SDBNB."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not original_rows:
+			return set()
+
+		return set(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows), "billed_amt": 0},
+				pluck="name",
+			)
+		)
+
 	def set_internal_return_target_warehouse(self):
 		"""An internal return brings material back from the warehouse the delivery put it in."""
 		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
@@ -467,6 +481,11 @@ class DeliveryNote(SellingController):
 		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
 		default_expense_account = company_values.default_expense_account
 		is_enabled_sdbnb = company_values.enable_stock_delivered_but_not_billed
+		unbilled_rows = (
+			self.get_unbilled_original_rows()
+			if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb
+			else set()
+		)
 		for item in self.items:
 			if item.get("against_sales_invoice"):
 				if sdbnb_account and item.expense_account == sdbnb_account:
@@ -480,7 +499,13 @@ class DeliveryNote(SellingController):
 				# Only stock items
 				if is_stock_item and not item.get("is_fixed_asset") and not item.get("is_subcontracted"):
 					# Sales Return handling
-					if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb:
+					if (
+						self.is_return
+						and disable_sdbnb_in_sr
+						and sdbnb_account
+						and is_enabled_sdbnb
+						and item.dn_detail not in unbilled_rows
+					):
 						if default_expense_account and (
 							not item.expense_account or item.expense_account == sdbnb_account
 						):
