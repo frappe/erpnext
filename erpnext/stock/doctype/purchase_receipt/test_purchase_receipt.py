@@ -8328,6 +8328,22 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			qty=8, rejected_qty=2, rejected_warehouse="_Test Rejected Warehouse - _TC", rate=100
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0}
+	)
+	def test_po_invoice_split_over_receipts_nets_their_returns(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		purchase_order = create_purchase_order(qty=10, rate=100)
+		first, second = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
+		self.submit_receipt_return(first, 2)
+		make_invoice_against_order(purchase_order.name, qty=8, rate=100)
+
+		self.assertEqual(
+			[frappe.db.get_value("Purchase Receipt", pr.name, "per_billed") for pr in (first, second)],
+			[100, 100],
+		)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
