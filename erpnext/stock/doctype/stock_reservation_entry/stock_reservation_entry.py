@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import cint, flt, now_datetime, nowdate, nowtime, parse_json
+from frappe.utils import ceil, cint, floor, flt, now_datetime, nowdate, nowtime, parse_json
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_stock_balance, get_or_make_bin
@@ -1179,6 +1179,17 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		return bundle
 
 
+def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = None) -> float:
+	conversion_factor = flt(item.get("conversion_factor")) or 1
+	if conversion_factor == 1 or not frappe.get_cached_value("UOM", item.get("uom"), "must_be_whole_number"):
+		return stock_qty
+
+	if max_qty is not None:
+		stock_qty = min(ceil(flt(flt(stock_qty) / conversion_factor, 6)) * conversion_factor, max_qty)
+
+	return floor(flt(flt(stock_qty) / conversion_factor, 6)) * conversion_factor
+
+
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
 	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
 
@@ -1857,6 +1868,14 @@ def create_stock_reservation_entries_for_so_items(
 				continue
 			else:
 				qty_to_be_reserved = min(qty_to_be_reserved, item.qty_to_reserve)
+
+		qty_to_be_reserved = get_whole_sales_unit_qty(
+			item,
+			qty_to_be_reserved,
+			min(unreserved_qty, available_qty_to_reserve) if from_voucher_type else None,
+		)
+		if not qty_to_be_reserved:
+			continue
 
 		# Partial Reservation
 		if qty_to_be_reserved < unreserved_qty:
