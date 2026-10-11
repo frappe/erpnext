@@ -2610,6 +2610,36 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			{frappe.db.get_value("Batch", row.batch_no, "batch_id") for row in picked}, {f"{item_code}-SOON"}
 		)
 
+	def test_bundle_cannot_be_submitted_apart_from_its_voucher(self):
+		item_code = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "item": item_code, "batch_id": f"{item_code}-B1"}
+		).insert()
+		receipt = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			batch_no=batch.name,
+			use_serial_batch_fields=1,
+		)
+
+		bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"company": "_Test Company",
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"type_of_transaction": "Inward",
+				"voucher_type": "Stock Entry",
+				"voucher_no": receipt.name,
+				"voucher_detail_no": receipt.items[0].name,
+				"entries": [{"batch_no": batch.name, "qty": 10}],
+			}
+		).insert()
+
+		self.assertRaises(frappe.ValidationError, bundle.submit)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos

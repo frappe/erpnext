@@ -1734,11 +1734,38 @@ class SerialandBatchBundle(Document):
 			frappe.throw(_("Voucher No is mandatory"))
 
 	def before_submit(self):
+		self.validate_submitted_with_its_voucher()
 		self.validate_serial_and_batch_data()
 		self.validate_serial_and_batch_no_for_returned()
 		self.validate_returned_batch_qty()
 		self.set_child_details()
 		self.set_source_document_no()
+
+	def validate_submitted_with_its_voucher(self):
+		if self.flags.ignore_voucher_validation or self.type_of_transaction not in ("Inward", "Outward"):
+			return
+
+		if not self.voucher_no or self.voucher_type in (
+			"Installation Note",
+			"Job Card",
+			"Maintenance Schedule",
+			"Pick List",
+			"POS Invoice",
+		):
+			return
+
+		if frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") != 1:
+			return
+
+		if not frappe.db.exists(
+			"Stock Ledger Entry",
+			{"serial_and_batch_bundle": self.name, "voucher_no": self.voucher_no, "is_cancelled": 0},
+		):
+			frappe.throw(
+				_(
+					"Serial and Batch Bundle {0} is not posted by {1} {2}. A bundle is submitted with the transaction it belongs to."
+				).format(bold(self.name), self.voucher_type, bold(self.voucher_no))
+			)
 
 	def on_submit(self):
 		self.validate_docstatus()
