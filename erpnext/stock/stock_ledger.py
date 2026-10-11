@@ -1402,12 +1402,13 @@ class update_entries_after:
 		if sle.voucher_type == "Stock Entry":
 			return True
 
-		return sle.voucher_type in (
-			"Delivery Note",
-			"Sales Invoice",
-		) and sle.warehouse == frappe.db.get_value(
-			f"{sle.voucher_type} Item", sle.voucher_detail_no, "target_warehouse"
+		if sle.voucher_type not in ("Delivery Note", "Sales Invoice"):
+			return False
+
+		row = frappe.db.get_value(
+			f"{sle.voucher_type} Item", sle.voucher_detail_no, ["item_code", "target_warehouse"], as_dict=True
 		)
+		return bool(row and row.item_code == sle.item_code and row.target_warehouse == sle.warehouse)
 
 	def is_outward_internal_transfer_leg(self, sle):
 		return bool(
