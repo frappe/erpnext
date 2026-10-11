@@ -80,10 +80,42 @@ class StockReservationEntry(Document):
 
 		self.validate_amended_doc()
 		self.validate_mandatory()
+		self.validate_voucher()
 		self.validate_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 		self.validate_uom_is_integer()
+
+	def before_insert(self) -> None:
+		self.delivered_qty = self.consumed_qty = self.transferred_qty = 0
+
+	def validate_voucher(self) -> None:
+		if self.voucher_type == "Sales Order" and not frappe.get_single_value(
+			"Stock Settings", "enable_stock_reservation"
+		):
+			frappe.throw(
+				_("Please enable {0} in the {1}.").format(
+					frappe.bold(_("Stock Reservation")), frappe.bold(_("Stock Settings"))
+				)
+			)
+
+		if frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") != 1:
+			frappe.throw(
+				_("{0} {1} must be submitted to reserve stock against it.").format(
+					_(self.voucher_type), frappe.bold(self.voucher_no)
+				)
+			)
+
+		if self.voucher_type == "Sales Order" and not self.is_row_of_voucher():
+			frappe.throw(
+				_("Item {0} is not a row of {1} {2}.").format(
+					frappe.bold(self.item_code), _(self.voucher_type), frappe.bold(self.voucher_no)
+				)
+			)
+
+	def is_row_of_voucher(self) -> bool:
+		filters = {"name": self.voucher_detail_no, "parent": self.voucher_no, "item_code": self.item_code}
+		return bool(frappe.db.exists("Sales Order Item", filters) or frappe.db.exists("Packed Item", filters))
 
 	def before_submit(self) -> None:
 		self.set_reservation_based_on()

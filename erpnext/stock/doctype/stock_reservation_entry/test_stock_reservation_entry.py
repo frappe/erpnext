@@ -1312,3 +1312,37 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		sales_invoice.update_stock = 1
 		sales_invoice.items[0].warehouse = "_Test Warehouse 1 - _TC"
 		self.assertRaises(frappe.ValidationError, sales_invoice.insert)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_direct_entry_is_checked_against_its_voucher(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (item_code, other_item):
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		draft_order = make_sales_order(item_code=item_code, qty=10, do_not_submit=1)
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_sre(
+				item_code=item_code, voucher_no=draft_order.name, voucher_detail_no=draft_order.items[0].name
+			).insert,
+		)
+
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=10)
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_sre(
+				item_code=other_item, voucher_no=sales_order.name, voucher_detail_no=sales_order.items[0].name
+			).insert,
+		)
+
+		entry = self.make_sre(
+			item_code=item_code,
+			voucher_no=sales_order.name,
+			voucher_detail_no=sales_order.items[0].name,
+			reserved_qty=1,
+			consumed_qty=-9,
+		).insert()
+		self.assertEqual(entry.consumed_qty, 0)
