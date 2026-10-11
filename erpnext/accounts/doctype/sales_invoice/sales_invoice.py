@@ -652,6 +652,11 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "against_pick_list",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "pick_list_item",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 				},
 			]
 		)

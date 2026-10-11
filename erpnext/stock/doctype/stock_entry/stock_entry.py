@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -368,6 +369,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.purpose_cls(self).validate_disassembly_quantities()
 
 		self.validate_batch()
+		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.set_process_loss_qty()
 		self.validate_job_card_pending_production()
@@ -1861,6 +1863,43 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item.description = alternative_item_data.description
 
 		return item_dict
+
+	def validate_against_pick_list(self):
+		pick_list_items = {d.pick_list_item for d in self.items if d.pick_list_item}
+		if not pick_list_items or self.is_return:
+			return
+
+		picked_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Pick List Item",
+				filters={"name": ("in", list(pick_list_items))},
+				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
+			)
+		}
+		transfer_qty = defaultdict(float)
+		for d in self.items:
+			picked_row = picked_rows.get(d.pick_list_item)
+			if not picked_row:
+				continue
+
+			if d.s_warehouse and d.s_warehouse != picked_row.warehouse:
+				frappe.throw(
+					_("Row #{0}: Item {1} was picked from {2}, not {3}.").format(
+						d.idx,
+						frappe.bold(d.item_code),
+						frappe.bold(picked_row.warehouse),
+						frappe.bold(d.s_warehouse),
+					)
+				)
+
+			transfer_qty[d.pick_list_item] += flt(d.qty) * flt(d.conversion_factor or 1)
+			if flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item] > flt(picked_row.picked_qty):
+				frappe.throw(
+					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+					)
+				)
 
 	def validate_batch(self):
 		if self.purpose in [

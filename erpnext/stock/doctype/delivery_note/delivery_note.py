@@ -205,6 +205,11 @@ class DeliveryNote(SellingController):
 				"percent_join_field": "against_pick_list",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
+				"second_source_dt": "Sales Invoice Item",
+				"second_source_field": "stock_qty",
+				"second_join_field": "pick_list_item",
+				"second_source_extra_cond": """ and exists(select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 			},
 		]
 		if cint(self.is_return):
