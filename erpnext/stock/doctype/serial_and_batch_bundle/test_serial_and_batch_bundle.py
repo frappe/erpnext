@@ -2571,6 +2571,45 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, entry.submit)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"pick_serial_and_batch_based_on": "Expiry"})
+	def test_expiry_picks_serials_of_the_batch_that_expires_first(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_available_serial_nos,
+		)
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
+		for suffix, days in (("LATE", 60), ("SOON", 5)):
+			batch = frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"item": item_code,
+					"batch_id": f"{item_code}-{suffix}",
+					"expiry_date": add_days(today(), days),
+				}
+			).insert()
+			make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=2,
+				basic_rate=100,
+				serial_no="\n".join(f"{item_code}-{suffix}{i}" for i in range(2)),
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+
+		picked = get_available_serial_nos(
+			frappe._dict(
+				item_code=item_code,
+				warehouse="_Test Warehouse - _TC",
+				qty=2,
+				based_on="Expiry",
+				has_batch_no=1,
+			)
+		)
+		self.assertEqual(
+			{frappe.db.get_value("Batch", row.batch_no, "batch_id") for row in picked}, {f"{item_code}-SOON"}
+		)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos

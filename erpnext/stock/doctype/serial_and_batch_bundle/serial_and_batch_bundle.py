@@ -12,7 +12,7 @@ from frappe import _, _dict, bold
 from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Abs, Concat_ws, Max, Sum
+from frappe.query_builder.functions import Abs, Coalesce, Concat_ws, Max, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -2730,6 +2730,11 @@ def get_available_serial_nos(kwargs):
 	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
 
 
+def get_batch_expiry_date_column(serial_no):
+	batch = frappe.qb.DocType("Batch")
+	return frappe.qb.from_(batch).select(batch.expiry_date).where(batch.name == serial_no.batch_no)
+
+
 def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
 	doctype = frappe.qb.DocType("Serial No")
 
@@ -2738,9 +2743,10 @@ def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
 
 	if kwargs.based_on == "LIFO":
 		query = query.orderby(order_by_column, order=frappe.query_builder.Order.desc)
+	elif kwargs.based_on == "Expiry":
+		expiry_date = Coalesce(get_batch_expiry_date_column(doctype), doctype.amc_expiry_date, "9999-12-31")
+		query = query.orderby(expiry_date).orderby(doctype.creation)
 	else:
-		if order_by == "amc_expiry_date":
-			query = query.orderby(order_by_column.isnull(), order=frappe.query_builder.Order.desc)
 		query = query.orderby(order_by_column)
 
 	for key, value in filters.items():
