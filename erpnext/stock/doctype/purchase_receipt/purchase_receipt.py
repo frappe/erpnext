@@ -209,6 +209,16 @@ class PurchaseReceipt(BuyingController):
 				"target_ref_field": "qty",
 				"overflow_type": "receipt",
 			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Packed Item",
+				"join_field": "delivery_note_packed_item",
+				"source_field": "received_qty",
+				"target_field": "received_qty",
+				"target_parent_dt": "Delivery Note",
+				"target_ref_field": "qty",
+				"overflow_type": "receipt",
+			},
 		]
 
 	def update_prevdoc_status(self):
