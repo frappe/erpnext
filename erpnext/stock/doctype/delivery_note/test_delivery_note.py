@@ -4141,6 +4141,43 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -2)
 
+	def test_inter_company_receipt_excludes_returned_qty(self):
+		from erpnext.stock.doctype.delivery_note.mapper import (
+			make_inter_company_purchase_receipt,
+			make_sales_return,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		receipt = make_purchase_receipt(warehouse="Stores - TCP1", company=company, qty=10)
+		kwargs = {
+			"item_code": receipt.items[0].item_code,
+			"company": company,
+			"customer": "_Test Internal Customer 2",
+			"cost_center": "Main - TCP1",
+			"expense_account": "Cost of Goods Sold - TCP1",
+			"rate": 500,
+			"warehouse": "Stores - TCP1",
+			"target_warehouse": "Work In Progress - TCP1",
+		}
+		delivery_note = create_delivery_note(qty=10, **kwargs)
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"qty": -4, "target_warehouse": "Work In Progress - TCP1"})
+		sales_return.insert()
+		frappe.get_doc("Delivery Note", sales_return.name).submit()
+
+		inter_company_receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		self.assertEqual(inter_company_receipt.items[0].qty, 6)
+
+		inter_company_receipt.items[0].update(
+			{"qty": 10, "from_warehouse": "Work In Progress - TCP1", "warehouse": "Stores - TCP1"}
+		)
+		self.assertRaises(frappe.ValidationError, inter_company_receipt.submit)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

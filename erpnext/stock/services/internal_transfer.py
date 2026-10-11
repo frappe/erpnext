@@ -73,9 +73,9 @@ class StockInternalTransferService:
 			return
 
 		inter_company_reference = (
-			self.doc.get("inter_company_reference")
+			self.doc.get("inter_company_invoice_reference")
 			if self.doc.doctype == "Purchase Invoice"
-			else self.doc.get("inter_company_invoice_reference")
+			else self.doc.get("inter_company_reference")
 		)
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty(inter_company_reference)
@@ -100,13 +100,16 @@ class StockInternalTransferService:
 				)
 
 			if recevied_qty > flt(transferred_qty, precision):
+				from erpnext.controllers.status_updater import OverAllowanceError
+
 				frappe.throw(
 					_("Item {0} cannot be received in more than {1} qty against the {2} {3}").format(
 						bold(key[1]),
 						bold(flt(transferred_qty, precision)),
 						bold(parent_doctype),
 						get_link_to_form(parent_doctype, inter_company_reference),
-					)
+					),
+					OverAllowanceError,
 				)
 
 	def get_item_wise_inter_transfer_qty(self, inter_company_reference):
@@ -131,11 +134,13 @@ class StockInternalTransferService:
 			)
 			.where((parent_tab.name == inter_company_reference) & (parent_tab.docstatus == 1))
 		)
+		if parent_doctype == "Delivery Note":
+			query = query.select(child_tab.returned_qty)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - flt(row.get("returned_qty"))
 
 		return item_wise_transfer_qty
 
@@ -171,9 +176,15 @@ class StockInternalTransferService:
 
 			query = query.where(parent_tab.inter_company_reference == self.doc.inter_company_reference)
 
-		data = query.run(as_dict=True)
-		item_wise_transfer_qty = defaultdict(float)
-		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+		query = query.where(parent_tab.name != self.doc.name)
+		item_wise_received_qty = defaultdict(float)
+		for row in query.run(as_dict=True):
+			item_wise_received_qty[(row.name, row.item_code)] += flt(row.qty)
 
-		return item_wise_transfer_qty
+		reference_field = (
+			"sales_invoice_item" if self.doc.doctype == "Purchase Invoice" else "delivery_note_item"
+		)
+		for row in self.doc.items:
+			item_wise_received_qty[(row.get(reference_field), row.item_code)] += flt(row.qty)
+
+		return item_wise_received_qty

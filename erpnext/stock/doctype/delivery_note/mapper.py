@@ -556,8 +556,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 			)
 
 	def update_item(source, target, source_parent):
-		if source_parent.doctype == "Delivery Note" and source.received_qty:
-			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
+		if source_parent.doctype == "Delivery Note":
+			target.qty = get_pending_receipt_qty(source)
 
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
@@ -585,8 +585,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 					"Material_request_item": "material_request_item",
 				},
 				"field_no_map": ["warehouse"],
-				"condition": lambda item: item.received_qty < item.qty + item.returned_qty
-				and not item.closed,
+				"condition": lambda item: get_pending_receipt_qty(item) > 0 and not item.closed,
 				"postprocess": update_item,
 			},
 		},
@@ -595,3 +594,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	)
 
 	return doclist
+
+
+def get_pending_receipt_qty(item) -> float:
+	return flt(item.qty) - flt(item.get("returned_qty")) - flt(item.get("received_qty"))
