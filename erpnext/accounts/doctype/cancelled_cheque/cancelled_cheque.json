@@ -7,6 +7,7 @@
  "field_order": [
   "naming_series",
   "cheque_book",
+  "company",
   "cheque_no",
   "column_break_reason",
   "reason",
@@ -19,6 +20,7 @@
    "default": "CHQ-CAN-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "CHQ-CAN-.YYYY.-",
    "print_hide": 1,
@@ -32,6 +34,16 @@
    "in_standard_filter": 1,
    "label": "Cheque Book",
    "options": "Cheque Book",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "cheque_book.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
    "reqd": 1
   },
   {

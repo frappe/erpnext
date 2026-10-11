@@ -857,6 +857,34 @@ class TestChequeBook(ERPNextTestSuite):
 		cancelled = cancel_cheque(self.book.name, "101", payment_entry=pe.name)
 		self.assertEqual((cancelled.cheque_no, cancelled.payment_entry), ("000101", pe.name))
 
+	def test_cancelled_cheque_company_is_taken_from_book(self):
+		cancelled = cancel_cheque(self.book.name, "101", submit=False)
+		self.assertEqual(cancelled.company, self.book.company)
+		self.assertEqual(
+			frappe.db.get_value("Cancelled Cheque", cancelled.name, "company"), self.book.company
+		)
+
+	def test_cheque_usage_company_is_stored_for_both_sources(self):
+		pe = self.make_cheque_payment("101")
+		cancelled = cancel_cheque(self.book.name, "102")
+		for cheque_no, source in (("000101", pe), ("000102", cancelled)):
+			with self.subTest(source=source.doctype):
+				self.assertEqual(
+					frappe.db.get_value("Cheque Usage", f"{self.book.name}-{cheque_no}", "company"),
+					self.book.company,
+				)
+
+	def test_company_deletion_list_includes_cheque_records(self):
+		cancelled = cancel_cheque(self.book.name, "101")
+		deletion = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": self.book.company})
+		deletion.insert()
+		deletion.generate_to_delete_list()
+		for doctype in ("Cancelled Cheque", "Cheque Usage"):
+			with self.subTest(doctype=doctype):
+				row = next(row for row in deletion.doctypes_to_delete if row.doctype_name == doctype)
+				self.assertEqual(row.company_field, "company")
+				self.assertEqual(row.document_count, frappe.db.count(doctype, {"company": cancelled.company}))
+
 	def test_cancelled_cheque_link_ignores_leading_zero_differences(self):
 		pe = self.make_cheque_payment("000101")
 		pe.cancel()

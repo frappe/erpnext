@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "cheque_book",
+  "company",
   "cheque_no",
   "source_type",
   "source_name",
@@ -17,6 +18,15 @@
    "fieldtype": "Link",
    "label": "Cheque Book",
    "options": "Cheque Book",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "cheque_book.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
    "read_only": 1,
    "reqd": 1
   },

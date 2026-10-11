@@ -26,6 +26,7 @@ class CancelledCheque(Document):
 		amended_from: DF.Link | None
 		cheque_book: DF.Link
 		cheque_no: DF.Data
+		company: DF.Link
 		naming_series: DF.Literal["CHQ-CAN-.YYYY.-"]
 		payment_entry: DF.Link | None
 		reason: DF.Autocomplete
@@ -43,6 +44,7 @@ class CancelledCheque(Document):
 	def validate(self):
 		# Share the book lock with Payment Entry submission before checking whether the cheque is used.
 		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
+		self.company = book.company
 		if book.docstatus != 1:
 			frappe.throw(_("Cheque Book {0} is not submitted").format(frappe.bold(book.name)))
 

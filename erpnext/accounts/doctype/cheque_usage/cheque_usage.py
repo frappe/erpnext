@@ -42,6 +42,7 @@ def claim_cheque(book, cheque_no, source_type, source_name, reason=None):
 			{
 				"doctype": "Cheque Usage",
 				"cheque_book": book.name,
+				"company": book.company,
 				"cheque_no": cheque_no,
 				"source_type": source_type,
 				"source_name": source_name,
