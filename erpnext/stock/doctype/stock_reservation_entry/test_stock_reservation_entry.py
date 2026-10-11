@@ -1496,3 +1496,79 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 
 		second_delivery = make_delivery_note(sales_order.name, kwargs={"for_reserved_stock": 1})
 		self.assertEqual(len(second_delivery.items[0].serial_no.split("\n")), 2)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
+	)
+	def test_partial_reservation_reserves_whole_sales_units(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=25, basic_rate=100)
+		sales_order = make_sales_order(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=3, uom="Box", do_not_submit=1
+		)
+		sales_order.items[0].conversion_factor = 12
+		sales_order.submit()
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		self.assertEqual(
+			frappe.db.get_value("Stock Reservation Entry", {"voucher_no": sales_order.name}, "reserved_qty"),
+			24,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_stock_for_sales_order_on_purchase": 1,
+		},
+	)
+	def test_split_receipts_reserve_the_completed_sales_unit(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		sales_order = make_sales_order(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, uom="Box", do_not_submit=1
+		)
+		sales_order.items[0].conversion_factor = 12
+		sales_order.submit()
+
+		for _receipt in range(2):
+			frappe.get_doc(
+				{
+					"doctype": "Purchase Receipt",
+					"company": "_Test Company",
+					"supplier": "_Test Supplier",
+					"items": [
+						{
+							"item_code": item_code,
+							"qty": 6,
+							"rate": 100,
+							"warehouse": "_Test Warehouse - _TC",
+							"sales_order": sales_order.name,
+							"sales_order_item": sales_order.items[0].name,
+						}
+					],
+				}
+			).insert().submit()
+
+		reserved = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": sales_order.name, "docstatus": 1},
+			pluck="reserved_qty",
+		)
+		self.assertEqual(sum(reserved), 12)
