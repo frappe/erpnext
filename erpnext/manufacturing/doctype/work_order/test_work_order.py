@@ -5036,6 +5036,30 @@ class TestWorkOrder(ERPNextTestSuite):
 			[(wo.wip_warehouse, "Stores - _TC", batches[0], 3)],
 		)
 
+	def test_manufacture_cannot_be_cancelled_below_the_disassembled_qty(self):
+		rm_item = make_item("_Test Disassembled Cancel RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Disassembled Cancel FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=2,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+
+		manufacture_entries = []
+		for _qty in range(2):
+			entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+			entry.submit()
+			manufacture_entries.append(entry)
+
+		frappe.get_doc(make_stock_entry(work_order.name, "Disassemble", 2)).submit()
+		self.assertRaises(frappe.ValidationError, manufacture_entries[0].cancel)
+
 	def test_return_is_capped_at_the_work_order_unconsumed_qty(self):
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 		for item_code in ("_Test Item", "_Test Item Home Desktop 100"):
