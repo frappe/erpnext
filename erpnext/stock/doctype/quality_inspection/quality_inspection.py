@@ -78,12 +78,7 @@ class QualityInspection(Document):
 			self.get_item_specification_details()
 
 		if self.inspection_type == "In Process" and self.reference_type == "Job Card":
-			item_qi_template = frappe.db.get_value("Item", self.item_code, "quality_inspection_template")
-			parameters = get_template_details(item_qi_template)
-			for reading in self.readings:
-				for d in parameters:
-					if reading.specification == d.specification:
-						reading.update(d)
+			self.set_acceptance_criteria_from_template()
 
 		if self.readings:
 			self.validate_reading_number_format()
@@ -93,6 +88,15 @@ class QualityInspection(Document):
 		self.validate_status()
 		self.set_child_row_reference()
 		self.set_company()
+
+	def set_acceptance_criteria_from_template(self):
+		template = self.quality_inspection_template or frappe.db.get_value(
+			"Item", self.item_code, "quality_inspection_template"
+		)
+		parameters = {d.specification: d for d in get_template_details(template)}
+		for reading in self.readings:
+			if criteria := parameters.get(reading.specification):
+				reading.update(criteria)
 
 	def validate_status(self):
 		if self.status == "Cancelled" and self.docstatus < 2:
