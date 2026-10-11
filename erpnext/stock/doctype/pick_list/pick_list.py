@@ -111,11 +111,32 @@ class PickList(TransactionBase):
 				item.update(get_item_details(item.item_code, item.uom, item.warehouse, company))
 
 	def validate(self):
+		self.set_stock_qty()
 		self.validate_expired_batches()
 		self.validate_for_qty()
 		self.validate_stock_qty()
 		self.check_serial_no_status()
 		self.validate_with_previous_doc()
+
+	def set_stock_qty(self):
+		if self.docstatus != 0:
+			return
+
+		conversion_factors = get_uom_conversion_factors(
+			{row.item_code for row in self.locations if row.item_code}
+		)
+		for row in self.locations:
+			if not row.item_code:
+				continue
+
+			stock_uom = frappe.get_cached_value("Item", row.item_code, "stock_uom")
+			row.uom = row.uom or stock_uom
+			if row.uom == stock_uom:
+				row.conversion_factor = 1
+			elif (row.item_code, row.uom) in conversion_factors:
+				row.conversion_factor = conversion_factors[(row.item_code, row.uom)]
+
+			row.stock_qty = flt(flt(row.qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 	def before_save(self):
 		self.update_status()
@@ -319,7 +340,7 @@ class PickList(TransactionBase):
 					title=_("Pick List Incomplete"),
 				)
 
-			if not self.scan_mode and item.picked_qty == 0:
+			if not self.scan_mode and not item.picked_qty:
 				# if the user has not entered any picked qty, set it to stock_qty, before submit
 				item.picked_qty = item.stock_qty
 
@@ -1189,6 +1210,20 @@ def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 		query = query.for_update()
 
 	return query.run(as_dict=True)
+
+
+def get_uom_conversion_factors(item_codes) -> dict:
+	if not item_codes:
+		return {}
+
+	return {
+		(row.parent, row.uom): flt(row.conversion_factor)
+		for row in frappe.get_all(
+			"UOM Conversion Detail",
+			filters={"parent": ("in", list(item_codes)), "parenttype": "Item"},
+			fields=["parent", "uom", "conversion_factor"],
+		)
+	}
 
 
 def get_open_pick_list_items_query(item_codes, exclude_pick_list=None):
