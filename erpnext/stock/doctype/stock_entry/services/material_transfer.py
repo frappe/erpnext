@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
@@ -266,6 +268,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 	def validate(self):
 		self.validate_warehouse()
 		self.validate_work_order_status_for_return()
+		self.validate_returned_qty_within_work_order()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
@@ -280,6 +283,47 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			),
 			title=_("Work Order Not Finished"),
 		)
+
+	def validate_returned_qty_within_work_order(self):
+		if not (self.doc.is_return and self.wo_doc):
+			return
+
+		returnable_qty = self.get_returnable_qty()
+		for item_code, returned_qty in self.get_returned_qty_by_item().items():
+			if flt(returned_qty, 6) > flt(returnable_qty[item_code], 6):
+				frappe.throw(
+					_(
+						"Item {0}: cannot return {1} to the store, Work Order {2} has only {3} of it left unconsumed."
+					).format(
+						frappe.bold(item_code),
+						flt(returned_qty),
+						get_link_to_form("Work Order", self.wo_doc.name),
+						flt(returnable_qty[item_code]),
+					),
+					title=_("Excess Return"),
+				)
+
+	def get_returnable_qty(self) -> dict:
+		from .manufacturing import ManufactureStockEntry
+
+		available = ManufactureStockEntry(self.doc)
+		available.prepare_available_materials_based_on_transfer()
+		returnable_qty = defaultdict(float)
+		for row in available._transfer_entries or []:
+			returnable_qty[row.item_code] += flt(row.transfer_qty)
+
+		for row in getattr(available, "_consumption_entries", None) or []:
+			returnable_qty[row.item_code] -= flt(row.transfer_qty)
+
+		return returnable_qty
+
+	def get_returned_qty_by_item(self) -> dict:
+		qty_by_item = defaultdict(float)
+		for row in self.doc.items:
+			if row.s_warehouse:
+				qty_by_item[row.item_code] += flt(row.qty) * flt(row.conversion_factor or 1)
+
+		return qty_by_item
 
 	def validate_component_and_quantities(self):
 		if self.doc.fg_completed_qty:
