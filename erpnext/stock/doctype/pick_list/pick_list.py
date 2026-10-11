@@ -707,6 +707,9 @@ class PickList(TransactionBase):
 					consider_rejected_warehouses=self.consider_rejected_warehouses,
 					priority_warehouses=priority_warehouses,
 					pick_list=self.name,
+					keep_all_locations=bool(
+						frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
+					),
 				),
 			)
 
@@ -1321,7 +1324,7 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			qty = floor(qty)
 			stock_qty = qty * item_doc.conversion_factor
 			if not stock_qty:
-				break
+				continue
 
 		serial_nos = None
 		if item_location.serial_nos:
@@ -1370,6 +1373,7 @@ def get_available_item_locations(
 	consider_rejected_warehouses=False,
 	priority_warehouses=None,
 	pick_list=None,
+	keep_all_locations=False,
 ):
 	locations = []
 
@@ -1409,7 +1413,9 @@ def get_available_item_locations(
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
 
-	if locations:
+	if locations and keep_all_locations:
+		locations = prioritize_locations(locations, priority_warehouses)
+	elif locations:
 		locations = get_locations_based_on_required_qty(locations, required_qty, priority_warehouses)
 
 	if not ignore_validation:
@@ -1418,15 +1424,19 @@ def get_available_item_locations(
 	return locations
 
 
+def prioritize_locations(locations, priority_warehouses):
+	if not priority_warehouses:
+		return locations
+
+	priority_locations = [loc for loc in locations if loc.warehouse in priority_warehouses]
+	fallback_locations = [loc for loc in locations if loc.warehouse not in priority_warehouses]
+	return priority_locations + fallback_locations
+
+
 def get_locations_based_on_required_qty(locations, required_qty, priority_warehouses):
 	filtered_locations = []
 
-	if priority_warehouses:
-		priority_locations = [loc for loc in locations if loc.warehouse in priority_warehouses]
-		fallback_locations = [loc for loc in locations if loc.warehouse not in priority_warehouses]
-		locations = priority_locations + fallback_locations
-
-	for location in locations:
+	for location in prioritize_locations(locations, priority_warehouses):
 		if location.qty >= required_qty:
 			location.qty = required_qty
 			filtered_locations.append(location)

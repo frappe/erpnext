@@ -954,6 +954,34 @@ class TestPickList(ERPNextTestSuite):
 			frappe.db.get_value("Material Request Item", material_request.items[0].name, "picked_qty"), 6
 		)
 
+	def test_whole_number_uom_moves_past_a_location_too_small_for_one_unit(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse 1 - _TC", qty=36, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{"item_code": item, "qty": 2, "uom": "Box", "conversion_factor": 12, "stock_qty": 24}
+				],
+			}
+		)
+		pick_list.set_item_locations()
+
+		self.assertEqual(
+			[(row.warehouse, row.qty) for row in pick_list.locations], [("_Test Warehouse 1 - _TC", 2)]
+		)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
