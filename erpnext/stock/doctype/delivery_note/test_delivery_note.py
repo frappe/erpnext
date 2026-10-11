@@ -4115,6 +4115,32 @@ class TestDeliveryNote(ERPNextTestSuite):
 		second_invoice.items[0].dn_detail = delivery_note.items[0].name
 		self.assertRaises(frappe.ValidationError, second_invoice.insert)
 
+	def test_credit_note_from_return_covers_only_billed_qty(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+
+		unbilled_return = make_sales_return(delivery_note.name)
+		unbilled_return.items[0].qty = -2
+		unbilled_return.issue_credit_note = 1
+		unbilled_return.submit()
+		self.assertFalse(frappe.db.exists("Sales Invoice Item", {"dn_detail": unbilled_return.items[0].name}))
+
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.items[0].qty = 2
+		invoice.insert()
+		invoice.submit()
+
+		billed_return = make_sales_return(delivery_note.name)
+		billed_return.items[0].qty = -3
+		billed_return.issue_credit_note = 1
+		billed_return.submit()
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": billed_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -2)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
