@@ -1058,6 +1058,44 @@ class TestPickList(ERPNextTestSuite):
 			[("_Test Warehouse - _TC", 2), ("_Test Warehouse 1 - _TC", 3)],
 		)
 
+	def test_delivery_note_maps_only_the_selected_pick_list_rows(self):
+		items = [make_item(properties={"is_stock_item": 1}).name for _item in range(2)]
+		for item in items:
+			make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		sales_order = make_sales_order(
+			item_code=items[0], warehouse="_Test Warehouse - _TC", qty=5, do_not_submit=1
+		)
+		sales_order.append("items", {**sales_order.items[0].as_dict(), "name": None, "item_code": items[1]})
+		sales_order.submit()
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		selected_row = next(row.name for row in pick_list.locations if row.item_code == items[0])
+		delivery_note = frappe.new_doc("Delivery Note")
+		delivery_note.update({"company": "_Test Company", "customer": sales_order.customer})
+		delivery_note = create_dn_for_pick_lists(
+			pick_list.name,
+			delivery_note.as_dict(),
+			{"customer": sales_order.customer, "filtered_children": [selected_row]},
+		)
+
+		self.assertEqual([row.item_code for row in delivery_note.items], [items[0]])
+
+	def test_pick_list_stops_holding_rows_delivered_without_it(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=5, rate=100)
+		create_pick_list(sales_order.name).submit()
+		make_delivery_note(sales_order.name).submit()
+
+		next_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=20, rate=100)
+		pick_list = create_pick_list(next_order.name)
+
+		self.assertEqual(sum(row.stock_qty for row in pick_list.locations), 15)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)

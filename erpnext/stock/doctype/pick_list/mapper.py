@@ -186,11 +186,6 @@ def create_delivery_from_so(pick_list, sales_order_list, target, target_doc=None
 	if kwargs is None:
 		kwargs = {}
 
-	def select_item(d):
-		filtered_items = kwargs.get("filtered_children", [])
-		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
-
 	item_table_mapper = {
 		"doctype": f"{target} Item",
 		"field_map": {
@@ -198,37 +193,45 @@ def create_delivery_from_so(pick_list, sales_order_list, target, target_doc=None
 			"name": "so_detail",
 			"parent": "against_sales_order" if target == "Delivery Note" else "sales_order",
 		},
-		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-		and doc.delivered_by_supplier != 1
-		and select_item(doc),
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1,
 	}
+	selected_locations = set(kwargs.get("filtered_children") or [])
 
-	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
+	mapper_kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
 
 	target_doc = (
-		create_delivery_note_from_sales_order(next(iter(sales_order_list)), target_doc, kwargs=kwargs)
+		create_delivery_note_from_sales_order(next(iter(sales_order_list)), target_doc, kwargs=mapper_kwargs)
 		if target == "Delivery Note"
-		else create_sales_invoice_from_sales_order(next(iter(sales_order_list)), target_doc, args=kwargs)
+		else create_sales_invoice_from_sales_order(
+			next(iter(sales_order_list)), target_doc, args=mapper_kwargs
+		)
 	)
 
 	if not target_doc:
 		return
 
 	for so in sales_order_list:
-		map_pl_locations(pick_list, item_table_mapper, target_doc, so)
+		map_pl_locations(pick_list, item_table_mapper, target_doc, so, selected_locations)
 
 	return target_doc
 
 
-def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None):
+def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selected_locations=None):
+	sales_order_items = (
+		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
+	)
+	condition = item_mapper.get("condition")
+
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
 
-		if location.sales_order_item:
-			sales_order_item = frappe.get_doc("Sales Order Item", location.sales_order_item)
-		else:
-			sales_order_item = None
+		if selected_locations and location.name not in selected_locations:
+			continue
+
+		sales_order_item = sales_order_items.get(location.sales_order_item)
+		if sales_order_item and condition and not condition(sales_order_item):
+			continue
 
 		source_doc = sales_order_item or location
 

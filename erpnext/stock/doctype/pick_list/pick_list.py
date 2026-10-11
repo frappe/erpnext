@@ -12,6 +12,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, GroupConcat, Locate, Lower, Max, Replace, Sum
 from frappe.utils import cint, escape_html, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
+from pypika.terms import ExistsCriterion
 
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -1204,6 +1205,7 @@ def get_open_pick_list_items_query(item_codes, exclude_pick_list=None):
 			& (pi.status != "Completed")
 			& (pi.status != "Cancelled")
 			& (pi_item.docstatus != 2)
+			& ExistsCriterion(get_delivered_sales_order_item_query(pi_item)).negate()
 		)
 	)
 
@@ -1211,6 +1213,15 @@ def get_open_pick_list_items_query(item_codes, exclude_pick_list=None):
 		query = query.where(pi_item.parent != exclude_pick_list)
 
 	return query
+
+
+def get_delivered_sales_order_item_query(pi_item):
+	so_item = frappe.qb.DocType("Sales Order Item")
+	return (
+		frappe.qb.from_(so_item)
+		.select(so_item.name)
+		.where((so_item.name == pi_item.sales_order_item) & (so_item.delivered_qty >= so_item.qty))
+	)
 
 
 def get_holding_qty_case(pi_item):
