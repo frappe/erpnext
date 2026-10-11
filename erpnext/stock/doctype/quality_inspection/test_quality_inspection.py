@@ -783,6 +783,54 @@ class TestQualityInspection(ERPNextTestSuite):
 		self.assertEqual(qa.readings[0].status, "Rejected")
 		self.assertEqual(qa.status, "Rejected")
 
+	def test_job_card_qi_uses_criteria_of_its_own_template(self):
+		create_quality_inspection_parameter("Length")
+		item_template = make_qi_template("_Test QI Template Item Length", min_value=0, max_value=100)
+		operation_template = make_qi_template("_Test QI Template Operation Length", min_value=5, max_value=10)
+		item = create_item("_Test Item QI Template Length")
+		item.db_set("quality_inspection_template", item_template)
+
+		qa = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "In Process",
+				"reference_type": "Job Card",
+				"reference_name": make_minimal_job_card(production_item=item.name),
+				"item_code": item.name,
+				"quality_inspection_template": operation_template,
+				"sample_size": 1,
+				"inspected_by": "Administrator",
+				"readings": [
+					{
+						"specification": "Length",
+						"numeric": 1,
+						"min_value": 5,
+						"max_value": 10,
+						"reading_1": "50",
+					}
+				],
+			}
+		).insert()
+
+		self.assertEqual((qa.readings[0].min_value, qa.readings[0].max_value), (5, 10))
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
+
+def make_qi_template(name, min_value, max_value):
+	if not frappe.db.exists("Quality Inspection Template", name):
+		frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": name,
+				"item_quality_inspection_parameter": [
+					{"specification": "Length", "numeric": 1, "min_value": min_value, "max_value": max_value}
+				],
+			}
+		).insert()
+
+	return name
+
 
 def make_minimal_job_card(production_item):
 	"""db_insert a minimal submitted Job Card row carrying only the columns the
