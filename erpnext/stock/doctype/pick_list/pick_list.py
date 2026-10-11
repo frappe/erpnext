@@ -407,6 +407,7 @@ class PickList(TransactionBase):
 			"Delivery Note",
 		]
 
+		self.cancel_open_stock_reservation_entries()
 		self.update_status()
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
@@ -414,6 +415,15 @@ class PickList(TransactionBase):
 		self.update_picked_qty_in_work_order()
 		self.delink_serial_and_batch_bundle()
 		self.update_prevdoc_status()
+
+	def cancel_open_stock_reservation_entries(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			from_voucher_type="Pick List", from_voucher_no=self.name, notify=False
+		)
 
 	def delink_serial_and_batch_bundle(self):
 		for row in self.locations:

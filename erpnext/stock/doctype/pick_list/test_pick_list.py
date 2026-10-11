@@ -982,6 +982,25 @@ class TestPickList(ERPNextTestSuite):
 			[(row.warehouse, row.qty) for row in pick_list.locations], [("_Test Warehouse 1 - _TC", 2)]
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_cancelling_a_pick_list_cancels_its_open_reservations(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=10, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		pick_list.create_stock_reservation_entries(notify=False)
+
+		pick_list.reload()
+		pick_list.cancel()
+
+		self.assertFalse(
+			frappe.db.exists(
+				"Stock Reservation Entry",
+				{"from_voucher_type": "Pick List", "from_voucher_no": pick_list.name, "docstatus": 1},
+			)
+		)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
