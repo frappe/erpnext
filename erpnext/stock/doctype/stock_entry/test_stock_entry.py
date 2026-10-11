@@ -5237,6 +5237,23 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, make_stock_in_entry, plain_transfer.name)
 
+	def test_expired_batch_items_need_batch_read_and_leave_out_batches_expiring_today(self):
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+		from erpnext.stock.doctype.stock_entry.services.serial_batch import (
+			get_expired_batch_items,
+			get_expired_batches,
+		)
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		expiring_today = make_new_batch(
+			batch_id=frappe.generate_hash("", 8), item_code=item, expiry_date=today()
+		).name
+		self.assertNotIn(expiring_today, get_expired_batches())
+
+		frappe.set_user("Guest")
+		self.addCleanup(frappe.set_user, "Administrator")
+		self.assertRaises(frappe.PermissionError, get_expired_batch_items)
+
 	def make_entry_with_rows(self, purpose, *rows, **kwargs):
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = kwargs.pop("company", "_Test Company")
