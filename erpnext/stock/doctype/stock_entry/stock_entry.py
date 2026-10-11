@@ -1156,7 +1156,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
-		stock_ledger.make_sl_entries(source_entries, allow_negative_stock, via_landed_cost_voucher)
+		stock_ledger.make_sl_entries(
+			source_entries, allow_negative_stock, via_landed_cost_voucher, defer_dimension_checks=True
+		)
 		if self.recalculate_for_bundles_picked_while_posting():
 			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
 			for sle in target_entries:
@@ -1167,6 +1169,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
+		stock_ledger.run_pending_dimension_checks(self.doctype, self.name)
 
 	def recalculate_for_bundles_picked_while_posting(self) -> bool:
 		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""

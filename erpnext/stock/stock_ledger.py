@@ -183,7 +183,9 @@ def validate_stock_frozen_by_closing_entry(sl_entries):
 			)
 
 
-def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
+def make_sl_entries(
+	sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False, defer_dimension_checks=False
+):
 	"""Create SL entries from SL entry dicts
 
 	args:
@@ -209,6 +211,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		args = get_args_for_future_sle(sl_entries[0])
 		future_sle_exists(args, sl_entries)
 
+		sle_docs = []
 		for sle in sl_entries:
 			if cancelled:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
@@ -228,7 +231,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			if not (sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation"):
 				continue
 
-			sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+			sle_doc = make_entry(
+				sle, allow_negative_stock, via_landed_cost_voucher, defer_future_dimension_check=True
+			)
+			sle_docs.append(sle_doc)
 			args = sle_doc.as_dict()
 			args["posting_datetime"] = get_combine_datetime(args.posting_date, args.posting_time)
 
@@ -249,7 +255,31 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 					_("Item {0} ignored since it is not a stock item").format(args.get("item_code"))
 				)
 
+		validate_future_dimension_balances(sle_docs, defer=defer_dimension_checks)
+
 		invalidate_future_sle_cache(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
+
+
+def validate_future_dimension_balances(sle_docs, defer=False):
+	if not sle_docs:
+		return
+
+	voucher_type, voucher_no = sle_docs[0].voucher_type, sle_docs[0].voucher_no
+	get_pending_dimension_checks().setdefault((voucher_type, voucher_no), []).extend(sle_docs)
+	if not defer:
+		run_pending_dimension_checks(voucher_type, voucher_no)
+
+
+def run_pending_dimension_checks(voucher_type, voucher_no):
+	for sle_doc in get_pending_dimension_checks().pop((voucher_type, voucher_no), []):
+		sle_doc.validate_future_dimension_balance_after_voucher()
+
+
+def get_pending_dimension_checks():
+	if not getattr(frappe.local, "pending_dimension_checks", None):
+		frappe.local.pending_dimension_checks = {}
+
+	return frappe.local.pending_dimension_checks
 
 
 def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False, cancelled=False):
@@ -332,10 +362,13 @@ def set_as_cancel(voucher_type, voucher_no):
 	).run()
 
 
-def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+def make_entry(
+	args, allow_negative_stock=False, via_landed_cost_voucher=False, defer_future_dimension_check=False
+):
 	args["doctype"] = "Stock Ledger Entry"
 	sle = frappe.get_doc(args)
 	sle.flags.ignore_permissions = 1
+	sle.flags.defer_future_dimension_check = defer_future_dimension_check
 	sle.allow_negative_stock = allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
 	if args.get("is_cancelled"):
