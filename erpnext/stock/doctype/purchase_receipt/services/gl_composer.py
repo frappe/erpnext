@@ -410,7 +410,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		loss_account = (
 			doc.get_company_default("default_expense_account", ignore_validation=True) or stock_asset_rbnb
 		)
-		if doc.is_return and item.expense_account:
+		if doc.is_return and item.expense_account and item.expense_account != stock_asset_rbnb:
 			loss_account = item.expense_account
 
 		return loss_account
