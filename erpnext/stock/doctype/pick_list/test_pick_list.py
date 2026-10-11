@@ -919,6 +919,41 @@ class TestPickList(ERPNextTestSuite):
 		pick_lists[0].submit()
 		self.assertRaises(frappe.ValidationError, pick_lists[1].submit)
 
+	def test_material_request_picked_qty_follows_the_picked_qty(self):
+		from erpnext.stock.doctype.material_request.mapper import (
+			create_pick_list as create_pick_list_from_request,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		material_request = frappe.get_doc(
+			{
+				"doctype": "Material Request",
+				"material_request_type": "Material Transfer",
+				"company": "_Test Company",
+				"schedule_date": frappe.utils.nowdate(),
+				"items": [
+					{
+						"item_code": item,
+						"qty": 10,
+						"schedule_date": frappe.utils.nowdate(),
+						"from_warehouse": "_Test Warehouse - _TC",
+						"warehouse": "_Test Warehouse 1 - _TC",
+					}
+				],
+			}
+		).insert()
+		material_request.submit()
+
+		pick_list = create_pick_list_from_request(material_request.name)
+		pick_list.insert()
+		pick_list.locations[0].picked_qty = 6
+		pick_list.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Item", material_request.items[0].name, "picked_qty"), 6
+		)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)

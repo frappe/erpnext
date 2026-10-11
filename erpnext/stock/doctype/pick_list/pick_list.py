@@ -90,7 +90,7 @@ class PickList(TransactionBase):
 				"target_parent_field": "",
 				"join_field": "material_request_item",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				"source_field": "picked_qty",
 				"validate_qty": False,
 			}
 		]
