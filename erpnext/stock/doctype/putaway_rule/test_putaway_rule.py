@@ -49,6 +49,26 @@ class TestPutawayRule(ERPNextTestSuite):
 		new_items = {d.name for d in doc.items}
 		self.assertSetEqual(old_items, new_items)
 
+	def test_putaway_rule_resolves_a_missing_conversion_factor(self):
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		create_putaway_rule(item_code=item_code, warehouse=self.warehouse_1, capacity=100)
+
+		rows = apply_putaway_rule(
+			"Purchase Receipt",
+			[{"item_code": item_code, "qty": 2, "uom": "Box", "warehouse": "_Test Warehouse - _TC"}],
+			"_Test Company",
+		)
+
+		self.assertEqual([(row.qty, row.stock_qty) for row in rows], [(2, 20)])
+
 	def test_putaway_rules_priority(self):
 		"""Test if rule is applied by priority, irrespective of free space."""
 		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg")
@@ -508,6 +528,29 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(
 			[(row.warehouse, row.qty, row.rejected_qty, row.received_qty) for row in pr.items],
 			[(self.warehouse_1, 8, 2, 10)],
+		)
+
+	def test_putaway_rule_keeps_rows_sent_without_stock_qty(self):
+		ruled_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		create_putaway_rule(item_code=ruled_item, warehouse=self.warehouse_1, capacity=100)
+
+		pr = frappe.get_doc(
+			{
+				"doctype": "Purchase Receipt",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier",
+				"apply_putaway_rule": 1,
+				"items": [
+					{"item_code": item, "qty": 5, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+					for item in (ruled_item, other_item)
+				],
+			}
+		).insert()
+
+		self.assertEqual(
+			sorted((row.item_code, row.warehouse) for row in pr.items),
+			sorted([(ruled_item, self.warehouse_1), (other_item, "_Test Warehouse - _TC")]),
 		)
 
 
