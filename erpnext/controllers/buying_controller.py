@@ -394,9 +394,11 @@ class BuyingController(SubcontractingController):
 				):
 					net_rate = item.rejected_qty * item.net_rate
 
-				qty_in_stock_uom = get_stock_qty(item, item.qty)
-				if not qty_in_stock_uom and item.get("rejected_qty"):
-					qty_in_stock_uom = get_stock_qty(item, item.rejected_qty)
+				qty_in_stock_uom = (
+					get_stock_qty(item, item.qty)
+					or get_stock_qty(item, item.rejected_qty)
+					or flt(item.qty) * flt(item.conversion_factor)
+				)
 
 				if self.get("is_old_subcontracting_flow"):
 					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
