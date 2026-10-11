@@ -4416,6 +4416,43 @@ class TestWorkOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
+	)
+	def test_staged_transfers_do_not_bring_back_the_store_reservation(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		store, wip = "Stores - _TC", "Work In Progress - _TC"
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse=store)
+		make_stock_entry_test_record(item_code=rm, target=store, qty=6, basic_rate=100)
+		wo = make_wo_order_test_record(
+			production_item=fg,
+			qty=10,
+			bom_no=bom.name,
+			reserve_stock=1,
+			source_warehouse=store,
+			wip_warehouse=wip,
+			fg_warehouse=wip,
+		)
+		make_stock_entry_test_record(item_code=rm, target=store, qty=14, basic_rate=100)
+
+		for qty in (4, 6):
+			frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)).submit()
+
+		self.assertEqual(
+			frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": wo.name, "warehouse": store, "docstatus": 1},
+				pluck="transferred_qty",
+			),
+			[6],
+		)
+
 	def test_sales_order_linked_work_order_reserves_finished_good(self):
 		# Spec #8: when a Work Order is linked to a Sales Order, manufacturing the finished good must
 		# reserve it against that Sales Order; cancelling the manufacture must release the reservation.
