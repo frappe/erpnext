@@ -1294,3 +1294,21 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 			source="_Test Warehouse - _TC",
 			qty=6,
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_stock_updating_invoice_must_deliver_from_the_reserved_warehouse(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=10)
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		sales_invoice = make_sales_invoice(sales_order.name)
+		sales_invoice.update_stock = 1
+		sales_invoice.items[0].warehouse = "_Test Warehouse 1 - _TC"
+		self.assertRaises(frappe.ValidationError, sales_invoice.insert)
