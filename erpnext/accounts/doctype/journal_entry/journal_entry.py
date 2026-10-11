@@ -35,7 +35,7 @@ from erpnext.accounts.utils import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 )
-from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.accounts_controller import AccountsController, validate_account_head
 from erpnext.setup.utils import get_exchange_rate as _get_exchange_rate
 
 
@@ -130,6 +130,7 @@ class JournalEntry(AccountsController):
 
 		self.clearance_date = None
 
+		self.validate_account_company()
 		self.validate_party()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
@@ -158,6 +159,14 @@ class JournalEntry(AccountsController):
 
 		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
+
+	def validate_account_company(self):
+		"""Catch an account/Company mismatch on save, before GL Entry has to reject it on submit."""
+		if not self.company:
+			return
+		for d in self.get("accounts"):
+			if d.account:
+				validate_account_head(d.idx, d.account, self.company, _("Journal Entry"))
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
@@ -1479,6 +1488,10 @@ class JournalEntryTaxWithholding:
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
+	# `select`, not `read`: also runs server-side from get_payment_entry, and Auditor/HR User/
+	# Desk User hold only the select row on Company. doc= for User Permissions.
+	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
+
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
@@ -1507,6 +1520,10 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 					account = account_list[0].name
 
 	if account:
+		# `account` is caller-supplied; get_balance_on() checks it only on the branch that reads a
+		# balance, and `fetch_balance` is caller-supplied too.
+		frappe.has_permission("Account", doc=account, throw=True)
+
 		account_details = frappe.get_cached_value(
 			"Account", account, ["account_currency", "account_type"], as_dict=1
 		)
@@ -1692,29 +1709,39 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if not frappe.db.has_column("Journal Entry", searchfield):
 		return []
 
-	return frappe.db.sql(
-		f"""
-		SELECT jv.name, jv.posting_date, jv.user_remark
-		FROM `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
-		WHERE jv_detail.parent = jv.name
-			AND jv_detail.account = %(account)s
-			AND IFNULL(jv_detail.party, '') = %(party)s
-			AND (
-				jv_detail.reference_type IS NULL
-				OR jv_detail.reference_type = ''
-			)
-			AND jv.docstatus = 1
-			AND jv.`{searchfield}` LIKE %(txt)s
-		ORDER BY jv.name DESC
-		LIMIT %(limit)s offset %(offset)s
-		""",
-		dict(
-			account=filters.get("account"),
-			party=cstr(filters.get("party")),
-			txt=f"%{txt}%",
-			offset=start,
-			limit=page_len,
-		),
+	account = filters.get("account")
+	party = filters.get("party")
+
+	# each names one value. A list would be read as a filter operator below and widen the search
+	# past what the caller named.
+	for value in (account, party):
+		if value and not isinstance(value, str):
+			frappe.throw(_("Invalid filter"), frappe.PermissionError)
+
+	# get_list applies the permission query conditions; the child-table filter resolves the check to `read`
+	je_filters = [
+		["docstatus", "=", 1],
+		[searchfield, "like", f"%{txt}%"],
+		["Journal Entry Account", "account", "=", account],
+		["Journal Entry Account", "reference_type", "is", "not set"],
+	]
+	je_filters.append(
+		["Journal Entry Account", "party", "=", party]
+		if party
+		else ["Journal Entry Account", "party", "is", "not set"]
+	)
+
+	return frappe.get_list(
+		"Journal Entry",
+		filters=je_filters,
+		fields=["name", "posting_date", "user_remark"],
+		order_by="name desc",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+		# one row per entry, not per matching account row. group_by rather than distinct: frappe
+		# drops ORDER BY from a distinct query on postgres, which would lose the ordering above.
+		group_by="name",
 	)
 
 
@@ -1919,6 +1946,10 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 
 	def post_process(source, target):
 		target.reversal_of = source.name
+		target.naming_series = source.naming_series
+		if source.voucher_type == "Bank Entry":
+			target.cheque_no = source.cheque_no
+			target.cheque_date = source.cheque_date
 
 	doclist = get_mapped_doc(
 		"Journal Entry",

@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.utils import (
 	cint,
+	cstr,
 	flt,
 	get_datetime,
 	get_last_day,
@@ -159,8 +160,16 @@ class Asset(AccountsController):
 		self.status = self.get_status()
 
 	def before_submit(self):
-		if self.is_composite_asset and not has_active_capitalization(self.name):
+		if self.is_composite_asset and not has_active_capitalization(self.get_original_asset()):
 			frappe.throw(_("Please capitalize this asset before submitting."))
+
+	def get_original_asset(self):
+		"""Return the asset this one was (transitively) split from, or itself."""
+		asset, parent = self.name, self.split_from
+		while parent:
+			asset = parent
+			parent = frappe.db.get_value("Asset", asset, "split_from")
+		return asset
 
 	def on_submit(self):
 		self.validate_in_use_date()
@@ -1190,6 +1199,14 @@ def make_asset_movement(assets, purpose=None):
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
 	for asset in assets:
+		name = cstr(asset.get("name"))
+		asset["name"] = name
+		if not name:
+			erpnext._refuse()
+		if not frappe.has_permission("Asset", "select", doc=name) and not frappe.has_permission(
+			"Asset", "read", doc=name
+		):
+			erpnext._refuse()
 		asset = frappe.get_doc("Asset", asset.get("name"))
 		asset_movement.company = asset.get("company")
 		asset_movement.append(
@@ -1211,6 +1228,22 @@ def is_cwip_accounting_enabled(asset_category):
 
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
+	# one of the three calling forms is the boundary; Asset itself excludes the roles holding Asset Value Adjustment write
+	if not any(
+		frappe.has_permission(dt, "write")
+		for dt in ("Asset Value Adjustment", "Asset Capitalization", "Asset Repair")
+	):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	# select-or-read: these roles hold `select` on Asset, which does not satisfy a `read` check.
+	# Guard only here -- the in-process callers use _get_asset_value_after_depreciation() below.
+	ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
+	frappe.has_permission("Asset", ptype, doc=asset_name, throw=True)
+
+	return _get_asset_value_after_depreciation(asset_name, finance_book)
+
+
+def _get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
 	if not asset.calculate_depreciation:
 		return flt(asset.value_after_depreciation)
@@ -1220,6 +1253,8 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 
 @frappe.whitelist()
 def has_active_capitalization(asset):
+	frappe.has_permission("Asset", doc=asset, throw=True)
+
 	active_capitalizations = frappe.db.count(
 		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
 	)
@@ -1228,7 +1263,16 @@ def has_active_capitalization(asset):
 
 @frappe.whitelist()
 def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
+	# `doctype` is caller-supplied and reaches frappe.get_doc(), so without this list any document
+	# with an `items` table could be read for its valuation rates
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# filling an Asset needs Asset write and read on the purchase document it is filled from
+	frappe.has_permission("Asset", "write", throw=True)
+
 	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+	purchase_doc.check_permission("read")
 	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
 
 	if not matching_items:
@@ -1249,7 +1293,7 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 
 
 @frappe.whitelist()
-def split_asset(asset_name, split_qty):
+def split_asset(asset_name: str, split_qty: int):
 	asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
 
@@ -1259,14 +1303,15 @@ def split_asset(asset_name, split_qty):
 	remaining_qty = asset.asset_quantity - split_qty
 
 	new_asset = create_new_asset_after_split(asset, split_qty)
-	update_existing_asset(asset, remaining_qty, new_asset.name)
+	update_existing_asset(asset, remaining_qty, new_asset)
 
 	return new_asset
 
 
-def update_existing_asset(asset, remaining_qty, new_asset_name):
+def update_existing_asset(asset, remaining_qty, new_asset):
 	remaining_gross_purchase_amount = flt(
-		(asset.gross_purchase_amount * remaining_qty) / asset.asset_quantity
+		asset.gross_purchase_amount - new_asset.gross_purchase_amount,
+		asset.precision("gross_purchase_amount"),
 	)
 	opening_accumulated_depreciation = flt(
 		(asset.opening_accumulated_depreciation * remaining_qty) / asset.asset_quantity
@@ -1276,20 +1321,20 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 		asset.precision("gross_purchase_amount"),
 	)
 
-	frappe.db.set_value(
-		"Asset",
-		asset.name,
-		{
-			"opening_accumulated_depreciation": opening_accumulated_depreciation,
-			"gross_purchase_amount": remaining_gross_purchase_amount,
-			"value_after_depreciation": value_after_depreciation,
-			"asset_quantity": remaining_qty,
-		},
-	)
+	remaining_asset_values = {
+		"opening_accumulated_depreciation": opening_accumulated_depreciation,
+		"gross_purchase_amount": remaining_gross_purchase_amount,
+		"value_after_depreciation": value_after_depreciation,
+		"asset_quantity": remaining_qty,
+	}
+	if asset.purchase_amount:
+		remaining_asset_values["purchase_amount"] = remaining_gross_purchase_amount
+
+	frappe.db.set_value("Asset", asset.name, remaining_asset_values)
 
 	add_asset_activity(
 		asset.name,
-		_("Asset updated after being split into Asset {0}").format(get_link_to_form("Asset", new_asset_name)),
+		_("Asset updated after being split into Asset {0}").format(get_link_to_form("Asset", new_asset.name)),
 	)
 
 	for row in asset.get("finance_books"):
@@ -1322,7 +1367,7 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 
 		notes = _(
 			"This schedule was created when Asset {0} was updated after being split into new Asset {1}."
-		).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset_name))
+		).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset.name))
 		new_asset_depr_schedule_doc.notes = notes
 
 		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
@@ -1333,7 +1378,10 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 
 def create_new_asset_after_split(asset, split_qty):
 	new_asset = frappe.copy_doc(asset)
-	new_gross_purchase_amount = flt((asset.gross_purchase_amount * split_qty) / asset.asset_quantity)
+	new_gross_purchase_amount = flt(
+		(asset.gross_purchase_amount * split_qty) / asset.asset_quantity,
+		asset.precision("gross_purchase_amount"),
+	)
 	opening_accumulated_depreciation = flt(
 		(asset.opening_accumulated_depreciation * split_qty) / asset.asset_quantity
 	)

@@ -60,6 +60,9 @@ def get_voucher_details(bank_guarantee_type: str, reference_name: str):
 	if not isinstance(reference_name, str):
 		raise TypeError("reference_name must be a string")
 
+	# the form is the boundary, not the referenced order: an order guard would break one of the two roles
+	frappe.has_permission("Bank Guarantee", throw=True)
+
 	fields_to_fetch = ["grand_total"]
 
 	if bank_guarantee_type == "Receiving":

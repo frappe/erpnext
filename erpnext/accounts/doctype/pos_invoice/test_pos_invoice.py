@@ -6,11 +6,17 @@ import unittest
 
 import frappe
 from frappe import _
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import PartialPaymentValidationError, make_sales_return
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import (
+	PartialPaymentValidationError,
+	make_merge_log,
+	make_sales_return,
+)
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
@@ -21,6 +27,16 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	insert_test_record,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 
 class TestPOSInvoice(unittest.TestCase):
@@ -388,6 +404,61 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 		pos_inv.insert()
 		self.assertRaises(PartialPaymentValidationError, pos_inv.submit)
+
+	def test_discounted_invoice_status(self):
+		allow_partial_payment = self.pos_profile.allow_partial_payment
+		self.pos_profile.db_set("allow_partial_payment", 1)
+		self.addCleanup(self.pos_profile.db_set, "allow_partial_payment", allow_partial_payment)
+		# v15 does not calculate outstanding_amount for POS Invoice.
+		pos_inv = create_pos_invoice(
+			pos_profile=self.pos_profile.name,
+			rate=100,
+			is_discounted=1,
+			outstanding_amount=10,
+			do_not_save=1,
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 90})
+		pos_inv.insert()
+
+		# Seed the lookup records because Invoice Discounting only accepts Sales Invoice links.
+		discounting = frappe.get_doc(
+			doctype="Invoice Discounting",
+			name=frappe.generate_hash(length=10),
+			company=pos_inv.company,
+			docstatus=1,
+			status="Disbursed",
+		)
+		discounting.db_insert()
+		frappe.get_doc(
+			doctype="Discounted Invoice",
+			parent=discounting.name,
+			parenttype=discounting.doctype,
+			parentfield="invoices",
+			sales_invoice=pos_inv.name,
+			docstatus=1,
+		).db_insert()
+
+		pos_inv.submit()
+		pos_inv.reload()
+		self.assertEqual(pos_inv.docstatus, 1)
+		self.assertEqual(pos_inv.outstanding_amount, 10)
+		self.assertEqual(pos_inv.status, "Unpaid and Discounted")
+
+		for outstanding_amount, due_date, expected_status in (
+			(10, add_days(nowdate(), -1), "Overdue"),
+			(10, nowdate(), "Unpaid"),
+			(100, nowdate(), "Unpaid"),
+		):
+			with self.subTest(status=expected_status):
+				pos_inv.outstanding_amount = outstanding_amount
+				pos_inv.due_date = due_date
+				discounting.db_set("status", "Disbursed")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, f"{expected_status} and Discounted")
+
+				discounting.db_set("status", "Settled")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, expected_status)
 
 	def test_serialized_item_transaction(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -1198,3 +1269,54 @@ def create_pos_invoice(**args):
 		pos_inv.payment_schedule = []
 
 	return pos_inv
+
+
+class TestPOSInvoiceMergeLogPermissions(FrappeTestCase):
+	def setUp(self):
+		self.invoice_a = self.insert_invoice("_Test Customer")
+		self.invoice_b = self.insert_invoice("_Test Customer 1")
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def insert_invoice(self, customer):
+		return insert_test_record(
+			"POS Invoice",
+			{
+				"company": "_Test Company",
+				"customer": customer,
+				"posting_date": frappe.utils.nowdate(),
+				"grand_total": 100,
+				"docstatus": 1,
+			},
+		)
+
+	def merge_log_kwargs(self, name):
+		return {"invoices": frappe.as_json([{"name": name}])}
+
+	def test_make_merge_log_refuses_an_invoice_outside_the_customer_fence(self):
+		fenced = make_fenced_user(
+			"pos-merge-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer")]
+		)
+		with as_user(fenced):
+			assert_refused_for_names(
+				self, make_merge_log, self.merge_log_kwargs, [self.invoice_b], caller_supplied=True
+			)
+			merge_log = make_merge_log(**self.merge_log_kwargs(self.invoice_a))
+		self.assertEqual(merge_log["pos_invoices"][0]["customer"], "_Test Customer")
+
+	def test_make_merge_log_refuses_an_invoice_outside_the_company_fence(self):
+		fenced = make_company_fenced_user("pos-merge-company@example.com", ["Sales User"], OTHER_COMPANY)
+		with as_user(fenced):
+			assert_refused_without(
+				self,
+				["linked to", "'_Test Company'"],
+				make_merge_log,
+				**self.merge_log_kwargs(self.invoice_a),
+			)
+
+	def test_make_merge_log_allows_an_unfenced_sales_user(self):
+		user = make_fenced_user("pos-merge-open@example.com", ["Sales User"])
+		with as_user(user):
+			merge_log = make_merge_log(**self.merge_log_kwargs(self.invoice_b))
+		self.assertEqual(merge_log["pos_invoices"][0]["grand_total"], 100)

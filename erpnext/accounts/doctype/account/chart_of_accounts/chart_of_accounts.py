@@ -120,6 +120,8 @@ def identify_is_group(child):
 def get_chart(chart_template, existing_company=None):
 	chart = {}
 	if existing_company:
+		frappe.has_permission("Company", doc=existing_company, throw=True)
+
 		return get_account_tree_from_existing_company(existing_company)
 
 	elif chart_template == "Standard":

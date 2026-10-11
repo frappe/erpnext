@@ -29,6 +29,10 @@ class RenameTool(Document):
 @frappe.whitelist()
 @deprecated
 def get_doctypes():
+	# The Rename Tool page is System-Manager-only, and its sibling upload() below already checks
+	# before doing anything; this listed every renameable doctype on the site to any caller.
+	frappe.has_permission("Rename Tool", throw=True)
+
 	return frappe.db.sql_list(
 		"""select name from tabDocType
 		where allow_rename=1 and module!='Core' order by name"""

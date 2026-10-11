@@ -699,14 +699,19 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 			return item_last_purchase_rate
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_purchase_orders(names, status):
-	if not frappe.has_permission("Purchase Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Purchase Order", "write", throw=True)
 
 	names = json.loads(names)
 	for name in names:
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level and never consults User Permissions, so on its own it lets
+		# a caller restricted to one company close another company's orders
 		po = frappe.get_doc("Purchase Order", name)
+		po.check_permission("submit")
 		if po.docstatus == 1:
 			if status == "Closed":
 				if po.status not in ("Cancelled", "Closed") and (
@@ -722,6 +727,7 @@ def close_or_unclose_purchase_orders(names, status):
 
 
 def set_missing_values(source, target):
+	target.set_transaction_date_exchange_rate()
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 	target.run_method("set_use_serial_batch_fields")
@@ -804,7 +810,9 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 @frappe.whitelist()
 def make_purchase_invoice_from_portal(purchase_order_name):
 	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
-	if frappe.session.user not in frappe.get_all("Portal User", {"parent": doc.supplier}, pluck="user"):
+	if frappe.session.user not in frappe.get_all(
+		"Portal User", {"parenttype": "Supplier", "parent": doc.supplier}, pluck="user"
+	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 	doc.save()
 	frappe.db.commit()

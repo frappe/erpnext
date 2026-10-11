@@ -314,7 +314,6 @@ def make_custom_fields(update=True):
 				fieldtype="Data",
 				insert_after="bank_account_iban",
 				print_hide=1,
-				fetch_from="bank_account.swift_number",
 				read_only=1,
 			),
 		],

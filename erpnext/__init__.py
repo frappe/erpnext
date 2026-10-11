@@ -2,6 +2,7 @@ import functools
 import inspect
 
 import frappe
+from frappe.utils import cstr
 from frappe.utils.user import is_website_user
 
 __version__ = "15.112.0"
@@ -160,3 +161,67 @@ def check_app_permission():
 		return False
 
 	return True
+
+
+def require_user_permission(doctype: str, name) -> None:
+	if not _is_within_user_permissions(doctype, name):
+		_refuse()
+
+
+def _is_within_user_permissions(doctype: str, name) -> bool:
+	from frappe.permissions import has_user_permission
+
+	name = cstr(name)
+	if not name:
+		return False
+	saved_messages = frappe.get_message_log()
+	frappe.clear_messages()
+	try:
+		return has_user_permission(frappe.get_doc(doctype, name), frappe.session.user)
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = saved_messages
+
+
+def require_permission(doctype: str, name, ptype: str = "read") -> None:
+	if not _is_permitted(doctype, name, ptype):
+		_refuse()
+
+
+def require_party_permission(party_type: str | None, party) -> None:
+	party = cstr(party)
+	if not party:
+		return
+	party_type = cstr(party_type)
+	if not frappe.db.exists("Party Type", party_type):
+		_refuse()
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	if frappe.has_permission(party_type, ptype, doc=party):
+		return
+	if ptype != "select" or not frappe.has_permission(party_type, "read", doc=party):
+		_refuse()
+
+
+def _is_permitted(doctype: str, name, ptype: str) -> bool:
+	name = cstr(name)
+	if not name:
+		return False
+	saved_messages = frappe.get_message_log()
+	frappe.clear_messages()
+	try:
+		if frappe.has_permission(doctype, ptype, doc=name):
+			return True
+		# v15 frappe has no select-implies-read fallback, so read must satisfy select here
+		if ptype != "select":
+			return False
+		return frappe.has_permission(doctype, "read", doc=name)
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = saved_messages
+
+
+def _refuse() -> None:
+	frappe.flags.disable_traceback = True
+	frappe.throw(frappe._("Not permitted"), frappe.PermissionError)

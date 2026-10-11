@@ -5,13 +5,15 @@
 import frappe
 from frappe import _, bold
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import _refuse
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	SalesInvoice,
+	get_discounting_status,
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
@@ -573,7 +575,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) < getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
@@ -582,7 +584,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
@@ -801,6 +803,21 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
+	# POS Profile is the only boundary that fits: Item/Bin `read` exclude Accounts Manager, Item
+	# `select` is granted to every desk user, and POS Invoice `read` is granted to `All`.
+	# select-or-read: the shipped rows give Sales Manager only `select`.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
+
+	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
+	# Warehouse User Permission
+	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
+		if allowed_warehouses and warehouse not in allowed_warehouses:
+			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
+
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
@@ -938,6 +955,12 @@ def make_merge_log(invoices):
 
 	if len(invoices) == 0:
 		frappe.throw(_("Atleast one invoice has to be selected."))
+
+	for inv in invoices:
+		name = cstr(inv.get("name"))
+		inv["name"] = name
+		if not name or not frappe.has_permission("POS Invoice", "read", doc=name):
+			_refuse()
 
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())

@@ -24,15 +24,15 @@ frappe.ui.form.on("Invoice Discounting", {
 	},
 
 	filter_accounts: (fieldname, frm, addl_filters) => {
-		let filters = [
-			["company", "=", frm.doc.company],
-			["is_group", "=", 0],
-		];
-		if (addl_filters) {
-			filters = $.merge(filters, addl_filters);
-		}
-
 		frm.set_query(fieldname, () => {
+			let filters = [
+				["company", "=", frm.doc.company],
+				["is_group", "=", 0],
+			];
+			if (addl_filters) {
+				filters = $.merge(filters, addl_filters);
+			}
+
 			return { filters: filters };
 		});
 	},

@@ -203,7 +203,7 @@ function refresh_payments(d, frm, is_new) {
 				mode_of_payment: p.mode_of_payment,
 				opening_amount: 0,
 				expected_amount: p.amount,
-				closing_amount: 0,
+				closing_amount: p.amount,
 			});
 		}
 	});

@@ -12,6 +12,29 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
+# the transactions the pricing engine is called for, from transaction.js and the POS
+PRICING_TRANSACTION_DOCTYPES = frozenset(
+	{
+		"Quotation",
+		"Sales Order",
+		"Delivery Note",
+		"Sales Invoice",
+		"POS Invoice",
+		"Supplier Quotation",
+		"Purchase Order",
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Material Request",
+		# these three also extend a controller that calls the pricing engine: BOM and BOM Creator
+		# through TransactionController, Request for Quotation through BuyingController
+		"BOM",
+		"BOM Creator",
+		"Request for Quotation",
+		# no client sends this one, but set_transaction_type below still branches on it
+		"Opportunity",
+	}
+)
+
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
 
 other_fields = ["other_item_code", "other_item_group", "other_brand"]
@@ -363,6 +386,7 @@ def apply_pricing_rule(args, doc=None):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
+	validate_pricing_context(args)
 
 	set_transaction_type(args)
 
@@ -389,6 +413,7 @@ def apply_pricing_rule(args, doc=None):
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
+		set_transaction_type(args_copy)
 		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
@@ -700,6 +725,91 @@ def remove_pricing_rules(item_list):
 	return out
 
 
+def validate_pricing_context(ctx: frappe._dict) -> None:
+	"""Authorise the transaction, parties and price lists that a client-supplied pricing context names."""
+	# an allow-list, not a type check: `doctype` is caller-chosen, and any doctype the caller can
+	# read would otherwise satisfy the has_permission below while the pricing engine still ran
+	transaction_doctype = ctx.get("doctype")
+	if transaction_doctype not in PRICING_TRANSACTION_DOCTYPES:
+		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
+
+	transaction_name = ctx.get("name")
+	if not isinstance(transaction_name, str) or not frappe.db.exists(transaction_doctype, transaction_name):
+		transaction_name = None
+
+	frappe.has_permission(transaction_doctype, doc=transaction_name, throw=True)
+
+	ctx.transaction_type = None
+	validate_pricing_parties(ctx)
+	validate_pricing_price_lists(ctx, transaction_doctype)
+
+
+def validate_pricing_parties(ctx: frappe._dict) -> None:
+	for party_type in ("Customer", "Supplier"):
+		party = ctx.get(frappe.scrub(party_type))
+		if party and frappe.db.exists(party_type, party):
+			frappe.has_permission(party_type, "select", doc=party, throw=True)
+
+
+def validate_pricing_price_lists(ctx: frappe._dict, doctype: str) -> None:
+	if doctype in ("BOM", "BOM Creator"):
+		return
+
+	meta = frappe.get_meta(doctype)
+	side = None
+	if meta.has_field("selling_price_list"):
+		side = "selling"
+	elif meta.has_field("buying_price_list"):
+		side = "buying"
+
+	for price_list in {ctx.get("price_list"), ctx.get("selling_price_list"), ctx.get("buying_price_list")}:
+		if price_list and not (side and fits_price_list_side(ctx, price_list, side)):
+			frappe.throw(
+				_("Price List {0} cannot be used in {1}").format(price_list, _(doctype)),
+				frappe.PermissionError,
+			)
+
+
+def fits_price_list_side(ctx: frappe._dict, price_list: str, side: str) -> bool:
+	if frappe.get_cached_value("Price List", price_list, side):
+		return True
+
+	if is_return_against_price_list(ctx, price_list, side):
+		return True
+
+	if side == "selling":
+		return bool(
+			ctx.get("customer") and frappe.get_cached_value("Customer", ctx.customer, "is_internal_customer")
+		)
+	return bool(
+		ctx.get("supplier") and frappe.get_cached_value("Supplier", ctx.supplier, "is_internal_supplier")
+	)
+
+
+def is_return_against_price_list(ctx: frappe._dict, price_list: str, side: str) -> bool:
+	return_against = ctx.get("return_against")
+	if not (
+		ctx.get("is_return")
+		and isinstance(return_against, str)
+		and frappe.get_meta(ctx.doctype).has_field("return_against")
+	):
+		return False
+
+	party_field = "customer" if side == "selling" else "supplier"
+	voucher = frappe.db.get_value(
+		ctx.doctype,
+		{"name": return_against, "docstatus": 1},
+		[f"{side}_price_list", party_field],
+		as_dict=True,
+	)
+	return bool(
+		voucher
+		and voucher[f"{side}_price_list"] == price_list
+		and voucher[party_field] == ctx.get(party_field)
+		and frappe.has_permission(ctx.doctype, doc=return_against)
+	)
+
+
 def set_transaction_type(pricing_ctx: frappe._dict) -> None:
 	if pricing_ctx.transaction_type in ["buying", "selling"]:
 		return
@@ -733,14 +843,18 @@ def make_pricing_rule(doctype, docname):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
-	items = [filters.get("value")]
-	if filters.get("apply_on") != "Item Code":
-		field = frappe.scrub(filters.get("apply_on"))
-		items = [d.name for d in frappe.db.get_all("Item", filters={field: filters.get("value")})]
+	if filters.get("apply_on") == "Item Code":
+		item_filters = [["name", "=", filters.get("value")]]
+	else:
+		item_filters = [[frappe.scrub(filters.get("apply_on")), "=", filters.get("value")]]
+
+	items = frappe.get_list("Item", filters=item_filters, pluck="name")
+	if not items:
+		return []
 
 	return frappe.get_all(
 		"UOM Conversion Detail",
-		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
+		filters={"parent": ("in", items), "parenttype": "Item", "uom": ("like", f"{txt}%")},
 		fields=["distinct uom"],
 		as_list=1,
 	)

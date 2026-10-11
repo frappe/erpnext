@@ -296,6 +296,10 @@ def get_import_logs(docname: str):
 
 @frappe.whitelist()
 def upload_bank_statement(**args):
+	# `create`: the sole caller is the Bank Reconciliation Tool's upload button, which routes
+	# straight into a new Bank Statement Import form.
+	frappe.has_permission("Bank Statement Import", "create", throw=True)
+
 	args = frappe._dict(args)
 	bsi = frappe.new_doc("Bank Statement Import")
 

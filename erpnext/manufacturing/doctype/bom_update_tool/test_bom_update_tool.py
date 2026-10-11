@@ -10,6 +10,15 @@ from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 test_records = frappe.get_test_records("BOM")
 
@@ -64,3 +73,58 @@ class TestBOMUpdateTool(FrappeTestCase):
 
 		doc.load_from_db()
 		self.assertEqual(doc.total_cost, 200)
+
+
+class TestBOMUpdateToolPermissions(FrappeTestCase):
+	def setUp(self):
+		self.current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
+		new_bom = frappe.copy_doc(test_records[0])
+		new_bom.items[1].item_code = "_Test Item"
+		new_bom.insert()
+		self.new_bom = new_bom.name
+		self.parents = frappe.get_all(
+			"BOM Item",
+			filters={"bom_no": self.current_bom, "docstatus": 1, "parenttype": "BOM"},
+			pluck="parent",
+			distinct=True,
+		)
+		self.assertTrue(self.parents)
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def replace_kwargs(self, current_bom=None):
+		return {"boms": {"current_bom": current_bom or self.current_bom, "new_bom": self.new_bom}}
+
+	def parents_still_on_current_bom(self):
+		return frappe.db.exists("BOM Item", {"bom_no": self.current_bom, "docstatus": 1, "parenttype": "BOM"})
+
+	def test_enqueue_replace_bom_refuses_a_parent_outside_the_company_fence(self):
+		frappe.db.set_value("BOM", self.parents[0], "company", OTHER_COMPANY)
+		fenced = make_company_fenced_user(
+			"bom-replace-company@example.com", ["Manufacturing Manager"], "_Test Company"
+		)
+		with as_user(fenced):
+			assert_refused(self, enqueue_replace_bom, **self.replace_kwargs())
+		self.assertTrue(self.parents_still_on_current_bom())
+
+	def test_enqueue_replace_bom_refuses_ancestors_outside_a_bom_fence(self):
+		fenced = make_fenced_user(
+			"bom-replace-bom@example.com",
+			["Manufacturing Manager"],
+			[("BOM", self.current_bom), ("BOM", self.new_bom)],
+		)
+		with as_user(fenced):
+			assert_refused_without(self, self.parents, enqueue_replace_bom, **self.replace_kwargs())
+		self.assertTrue(self.parents_still_on_current_bom())
+
+	def test_enqueue_replace_bom_refuses_malformed_boms(self):
+		user = make_fenced_user("bom-replace-malformed@example.com", ["Manufacturing Manager"])
+		with as_user(user):
+			assert_refused_for_names(self, enqueue_replace_bom, self.replace_kwargs, [], caller_supplied=True)
+
+	def test_enqueue_replace_bom_allows_an_unfenced_manufacturing_manager(self):
+		user = make_fenced_user("bom-replace-open@example.com", ["Manufacturing Manager"])
+		with as_user(user):
+			enqueue_replace_bom(**self.replace_kwargs())
+		self.assertFalse(self.parents_still_on_current_bom())

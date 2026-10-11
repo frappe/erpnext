@@ -17,7 +17,7 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
-from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.controllers.accounts_controller import _get_taxes_and_charges, merge_taxes
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.stock_ledger import validate_reserved_stock
@@ -507,6 +507,7 @@ class DeliveryNote(SellingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
+		self.validate_produced_serial_nos_against_reservation()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 
@@ -1317,7 +1318,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			master_doctype = "Sales Taxes and Charges Template"
 
 		if not target.get("taxes") and target.get("taxes_and_charges"):
-			for tax in get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
+			for tax in _get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
 				target.append("taxes", tax)
 
 		if not target.get("items"):

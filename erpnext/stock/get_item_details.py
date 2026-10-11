@@ -18,6 +18,7 @@ from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
 	set_transaction_type,
+	validate_pricing_context,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -60,7 +61,18 @@ NOT_APPLICABLE_TAX = "N/A"
 def get_item_details(
 	args: dict | str,
 	doc: Document | dict | str | None = None,
-	for_validate: bool | str = False,
+	for_validate: bool | str | None = False,
+	overwrite_warehouse: bool | str = True,
+):
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
+	return _get_item_details(args, doc, for_validate, overwrite_warehouse)
+
+
+def _get_item_details(
+	args: dict | str,
+	doc: Document | dict | str | None = None,
+	for_validate: bool | str | None = False,
 	overwrite_warehouse: bool | str = True,
 ):
 	"""
@@ -183,6 +195,11 @@ def remove_standard_fields(details):
 	return details
 
 
+@frappe.request_cache
+def has_source_doc_permission(doctype: str, docname: str, user: str) -> bool:
+	return frappe.has_permission(doctype, doc=docname, user=user)
+
+
 def get_rate_locked_source_row(args, doc):
 	"""Reads the source row from the DB, not the mutable target row, so an unsaved edit can't override the locked rate."""
 	if isinstance(doc, str):
@@ -206,7 +223,7 @@ def get_rate_locked_source_row(args, doc):
 			source = frappe.db.get_value(
 				source_doctype, source_name, [*LOCKED_RATE_FIELDS, "parent", "parenttype"], as_dict=True
 			)
-			if source and frappe.has_permission(source.parenttype, doc=source.parent):
+			if source and has_source_doc_permission(source.parenttype, source.parent, frappe.session.user):
 				return source
 			return None
 	return None
@@ -240,7 +257,7 @@ def set_valuation_rate(out, args):
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += flt(
-				get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get(
+				_get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
 				* bundle_item.qty
@@ -249,7 +266,7 @@ def set_valuation_rate(out, args):
 		out.update({"valuation_rate": valuation_rate})
 
 	else:
-		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
+		out.update(_get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
 
 
 def update_bin_details(args, out, doc):
@@ -299,7 +316,7 @@ def update_stock(ctx, out, doc=None):
 				filter_batches(batches, doc)
 
 			for batch_no, batch_qty in batches.items():
-				rate = get_batch_based_item_price(
+				rate = _get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
@@ -1236,6 +1253,12 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 
 @frappe.whitelist()
 def get_batch_based_item_price(params, item_code) -> float:
+	params = frappe._dict(frappe.parse_json(params))
+	validate_pricing_context(params)
+	return _get_batch_based_item_price(params, item_code)
+
+
+def _get_batch_based_item_price(params, item_code) -> float:
 	if isinstance(params, str):
 		params = parse_json(params)
 
@@ -1490,6 +1513,10 @@ def get_conversion_factor(item_code, uom):
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):
+	# record-level read on the item, matching what get_item_details() in this file already does.
+	# Nothing in the tree calls this, so there is no caller whose roles constrain the choice.
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
 	return {
 		"projected_qty": frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
@@ -1499,6 +1526,9 @@ def get_projected_qty(item_code, warehouse):
 
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
+	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1548,6 +1578,12 @@ def get_batch_qty(batch_no, warehouse, item_code):
 
 @frappe.whitelist()
 def apply_price_list(args, as_doc=False, doc=None):
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
+	return _apply_price_list(args, as_doc, doc)
+
+
+def _apply_price_list(args, as_doc=False, doc=None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1682,6 +1718,16 @@ def get_default_bom(item_code=None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code, company, warehouse=None):
+	"""Whitelisted entry point: authorise the item, then return its cost price."""
+	frappe.has_permission("Item", doc=item_code, throw=True)
+	frappe.has_permission("Company", doc=company, ptype="select", throw=True)
+
+	return _get_valuation_rate(item_code, company, warehouse)
+
+
+def _get_valuation_rate(item_code, company, warehouse=None):
+	# no guard here: set_valuation_rate calls this for the item AND for every Product Bundle
+	# component, and a caller entitled to the bundle is not necessarily entitled to each component
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 
@@ -1730,13 +1776,19 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 
 def update_party_blanket_order(args, out):
 	if out["against_blanket_order"]:
-		blanket_order_details = get_blanket_order_details(args)
+		blanket_order_details = _get_blanket_order_details(args)
 		if blanket_order_details:
 			out.update(blanket_order_details)
 
 
 @frappe.whitelist()
 def get_blanket_order_details(args):
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
+	return _get_blanket_order_details(args)
+
+
+def _get_blanket_order_details(args):
 	if isinstance(args, str):
 		args = frappe._dict(json.loads(args))
 

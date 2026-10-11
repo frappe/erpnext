@@ -849,17 +849,14 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	if parent is None or parent == "All Companies":
 		parent = ""
 
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabCompany` comp
-		where
-			ifnull(parent_company, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
+	filters = {"parent_company": parent} if parent else {"parent_company": ["is", "not set"]}
+
+	# get_list, not db.sql: it applies the caller's Company permission and their Company User
+	# Permissions, so a restricted user sees only their own companies.
+	return frappe.get_list(
+		"Company",
+		filters=filters,
+		fields=["name as value", "is_group as expandable"],
 	)
 
 
@@ -869,6 +866,10 @@ def add_node():
 
 	args = frappe.form_dict
 	args = make_tree_args(**args)
+
+	# `args` comes straight from form_dict, so without this the caller chooses the doctype that
+	# gets created; nothing here is meant to build anything but a Company.
+	args.doctype = "Company"
 
 	if args.parent_company == "All Companies":
 		args.parent_company = None
@@ -955,6 +956,10 @@ def get_timeline_data(doctype, name):
 def get_default_company_address(name, sort_key="is_primary_address", existing_address=None):
 	if sort_key not in ["is_shipping_address", "is_primary_address"]:
 		return None
+
+	# `select`, not `read`: denies the portal identities and costs none of the transaction-writing
+	# roles. doc= so the named company is evaluated and User Permissions apply.
+	frappe.has_permission("Company", ptype="select", doc=name, throw=True)
 
 	out = frappe.db.sql(
 		""" SELECT

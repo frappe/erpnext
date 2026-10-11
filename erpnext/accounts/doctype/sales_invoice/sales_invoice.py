@@ -494,6 +494,7 @@ class SalesInvoice(SellingController):
 			self.validate_standalone_serial_nos_customer()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
+			self.validate_produced_serial_nos_against_reservation()
 
 		self.process_asset_depreciation()
 
@@ -668,6 +669,7 @@ class SalesInvoice(SellingController):
 						"second_source_field": "-1 * qty",
 						"second_join_field": "so_detail",
 						"extra_cond": """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)""",
+						"second_source_extra_cond": """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)""",
 					}
 				)
 
@@ -1864,7 +1866,11 @@ class SalesInvoice(SellingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
+		self.po_no = reference_doc.po_no
+		# The payment schedule is rebuilt from the template, relative to the new posting date.
+		self.payment_terms_template = reference_doc.payment_terms_template
 		self.due_date = None
+		self.shift_service_dates(reference_doc, auto_repeat_doc)
 
 	def update_project(self):
 		unique_projects = list(set([d.project for d in self.get("items") if d.project]))
@@ -2590,9 +2596,28 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 @frappe.whitelist()
 def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
-	reference_field = "inter_company_invoice_reference"
-	if doctype == "Purchase Order":
-		reference_field = "inter_company_order_reference"
+	# The only two targets this resolves a reference field for. Stating them rejects a caller
+	# supplied doctype that would otherwise be filtered on a column it does not have.
+	reference_fields = {
+		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice", "sales_invoice_item"),
+		"Purchase Order": ("inter_company_order_reference", "Sales Order", "sales_order_item"),
+	}
+	if doctype not in reference_fields:
+		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
+
+	reference_field, source_doctype, expected_fieldname = reference_fields[doctype]
+
+	# the source document decides access, not the targets: those belong to the counterpart company
+	# and the caller legitimately may not read them. doc= for User Permissions.
+	frappe.has_permission(source_doctype, doc=reference_name, throw=True)
+
+	# `reference_fieldname` becomes a selected column and the result key, so it has to be this
+	# target's own reference field: any other item-table column would be returned from unauthorised rows.
+	if reference_fieldname != expected_fieldname:
+		frappe.throw(
+			_("{0} is not a valid reference field for {1}").format(reference_fieldname, doctype),
+			frappe.ValidationError,
+		)
 
 	filters = {
 		reference_field: reference_name,

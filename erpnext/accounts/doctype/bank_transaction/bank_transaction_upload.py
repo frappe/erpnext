@@ -11,6 +11,9 @@ from frappe.utils.dateutils import parse_date
 
 @frappe.whitelist()
 def upload_bank_statement():
+	# parsing a statement is the first step of creating Bank Transactions from it
+	frappe.has_permission("Bank Transaction", "create", throw=True)
+
 	if getattr(frappe, "uploaded_file", None):
 		with open(frappe.uploaded_file, "rb") as upfile:
 			fcontent = upfile.read()
@@ -36,6 +39,11 @@ def upload_bank_statement():
 
 @frappe.whitelist()
 def create_bank_entries(columns, data, bank_account):
+	# insert()/submit() enforce this per document, but only after the row loop has written an
+	# Error Log for every rejected row -- so check once up front.
+	frappe.has_permission("Bank Transaction", "create", throw=True)
+	frappe.has_permission("Bank Account", doc=bank_account, throw=True)
+
 	header_map = get_header_mapping(columns, bank_account)
 
 	success = 0

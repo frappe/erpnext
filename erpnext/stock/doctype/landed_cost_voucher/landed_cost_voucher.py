@@ -186,22 +186,24 @@ class LandedCostVoucher(Document):
 
 	def set_applicable_charges_on_item(self):
 		if self.get("taxes") and self.distribute_charges_based_on != "Distribute Manually":
-			total_item_cost = 0.0
+			items = self.get("items")
 			total_charges = 0.0
 			item_count = 0
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
-			for item in self.get("items"):
-				total_item_cost += item.get(based_on_field)
+			total_item_cost = sum(flt(item.get(based_on_field)) for item in items)
+			if items:
+				total_item_cost = flt(total_item_cost, items[0].precision(based_on_field))
 
-			for item in self.get("items"):
-				if not total_item_cost and not item.get(based_on_field):
-					frappe.throw(
-						_(
-							"It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
-						)
+			if not total_item_cost:
+				frappe.throw(
+					_("Total {0} of all items is zero. Set 'Distribute Charges Based On' to {1}.").format(
+						self.distribute_charges_based_on,
+						_("Qty") if based_on_field == "amount" else _("Amount"),
 					)
+				)
 
+			for item in self.get("items"):
 				item.applicable_charges = flt(
 					flt(item.get(based_on_field))
 					* (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
@@ -364,8 +366,8 @@ def get_pr_items(purchase_receipt):
 			pr_item.item_code,
 			pr_item.description,
 			pr_item.qty,
-			pr_item.base_rate,
-			pr_item.base_amount,
+			pr_item.base_net_rate.as_("base_rate"),
+			pr_item.base_net_amount.as_("base_amount"),
 			pr_item.name,
 			pr_item.cost_center,
 			pr_item.is_fixed_asset,

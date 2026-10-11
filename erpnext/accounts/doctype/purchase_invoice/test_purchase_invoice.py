@@ -11,6 +11,9 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_receipt as create_purchase_receipt_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -65,6 +68,37 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.save()
 		self.assertEqual(pi.items[0].qty, 1)
 
+	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_duplicate_items_without_update_stock(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		self.assertRaisesRegex(frappe.ValidationError, "Same item cannot be entered", pi.save)
+
+	def test_same_item_from_different_receipts(self):
+		first_receipt = make_purchase_receipt()
+		second_receipt = make_purchase_receipt()
+		pi = create_purchase_invoice_from_receipt(first_receipt.name)
+		pi = create_purchase_invoice_from_receipt(second_receipt.name, target_doc=pi)
+
+		with change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			pi.save()
+
+		self.assertEqual(
+			[row.purchase_receipt for row in pi.items], [first_receipt.name, second_receipt.name]
+		)
+
+	def test_same_item_from_different_orders_in_one_receipt(self):
+		orders = [create_purchase_order(), create_purchase_order()]
+		receipt = create_purchase_receipt_from_order(orders[0].name)
+		receipt = create_purchase_receipt_from_order(orders[1].name, target_doc=receipt)
+
+		with change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			receipt.submit()
+			pi = create_purchase_invoice_from_receipt(receipt.name)
+			pi.save()
+
+		self.assertEqual([row.purchase_order for row in pi.items], [order.name for order in orders])
+
 	def test_purchase_invoice_received_qty(self):
 		"""
 		1. Test if received qty is validated against accepted + rejected
@@ -112,6 +146,51 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		# Check if the received quantity is updated in Material Request
 		mr.reload()
 		self.assertEqual(mr.items[0].received_qty, 10)
+
+	@change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_material_request_received_qty_with_mixed_receipts(self):
+		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
+		for invoice_first, order_qty in ((False, 10), (True, 10), (False, 12), (True, 12)):
+			with self.subTest(invoice_first=invoice_first, order_qty=order_qty):
+				mr = make_material_request(item_code="_Test Item", qty=10)
+				po = make_purchase_order(mr.name)
+				po.supplier = "_Test Supplier"
+				po.items[0].qty = order_qty
+				with change_settings("Stock Settings", {"over_delivery_receipt_allowance": 20}):
+					po.insert()
+					po.submit()
+
+				billing_invoice = make_pi_from_po(po.name)
+				billing_invoice.update_stock = 0
+				billing_invoice.items[0].qty = 1
+				billing_invoice.insert()
+				billing_invoice.submit()
+
+				receipt = create_purchase_receipt_from_order(po.name)
+				receipt.items[0].qty = order_qty - 6
+				receipt.insert()
+				invoice = make_pi_from_po(po.name)
+				invoice.update_stock = 1
+				invoice.items[0].qty = 6
+				invoice.insert()
+				documents = [invoice, receipt] if invoice_first else [receipt, invoice]
+
+				received_qty = 0
+				for document in documents:
+					document.submit()
+					received_qty += document.items[0].stock_qty
+					mr.reload()
+					self.assertEqual(mr.items[0].received_qty, received_qty)
+					self.assertEqual(mr.per_received, min(received_qty * 10, 100))
+				self.assertEqual(mr.status, "Received")
+
+				for document in documents:
+					document.cancel()
+					received_qty -= document.items[0].stock_qty
+					mr.reload()
+					self.assertEqual(mr.items[0].received_qty, received_qty)
+					self.assertEqual(mr.per_received, min(received_qty * 10, 100))
+					self.assertNotEqual(mr.status, "Received")
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -583,6 +662,34 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertFalse(
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
+
+	@change_settings(
+		"Buying Settings",
+		{"use_transaction_date_exchange_rate": 1, "set_landed_cost_based_on_purchase_invoice_rate": 0},
+	)
+	def test_transaction_date_exchange_rate_applies_only_when_mapping_from_purchase_order(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as create_purchase_invoice,
+		)
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			currency="USD",
+			conversion_rate=70,
+		)
+		pi = create_purchase_invoice(pr.name)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 70)
+
+		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD")
+		pi = make_pi_from_po(po.name)
+		self.assertTrue(pi.use_transaction_date_exchange_rate)
+		pi.conversion_rate = 75
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.insert()
+		self.assertEqual(pi.conversion_rate, 75)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
