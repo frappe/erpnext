@@ -1014,6 +1014,34 @@ class TestPickList(ERPNextTestSuite):
 			[("_Test Warehouse - _TC", 10), ("_Test Warehouse 1 - _TC", 5)],
 		)
 
+	def test_work_order_pick_leaves_out_the_wip_warehouse(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			create_pick_list as create_pick_list_from_wo,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		root_warehouse = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company", "parent_warehouse": ["IS", "NOT SET"], "is_group": 1}
+		)
+		wip_warehouse = create_warehouse("_Test Pick List WIP", {"parent_warehouse": root_warehouse})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=2)
+		make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=6, basic_rate=100)
+		make_stock_entry(item=raw_material, to_warehouse=wip_warehouse, qty=50, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=5,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse=wip_warehouse,
+		)
+
+		pick_list = create_pick_list_from_wo(work_order.name, None, 5)
+		self.assertNotIn(wip_warehouse, [row.warehouse for row in pick_list.locations])
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)

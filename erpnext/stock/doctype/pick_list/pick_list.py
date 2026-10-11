@@ -779,11 +779,17 @@ class PickList(TransactionBase):
 			self.save()
 
 	def get_excluded_warehouses(self) -> set:
-		return set(
+		excluded = set(
 			frappe.get_all(
 				"Warehouse", filters={"company": self.company, "warehouse_type": "Transit"}, pluck="name"
 			)
 		)
+		if self.work_order and (
+			wip_warehouse := frappe.db.get_value("Work Order", self.work_order, "wip_warehouse")
+		):
+			excluded.add(wip_warehouse)
+
+		return excluded
 
 	def aggregate_item_qty(self):
 		locations = self.get("locations")
