@@ -287,6 +287,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
 		self.check_purchase_order_on_hold_or_close("purchase_order", exclude_if_field="purchase_receipt")
+		self.validate_closed_purchase_receipts()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -391,6 +392,22 @@ class PurchaseInvoice(BuyingController):
 
 		if self.docstatus < 1:
 			frappe.throw(_("Purchase Invoice can be held after submitting."))
+
+	def validate_closed_purchase_receipts(self):
+		purchase_receipts = {d.purchase_receipt for d in self.items if d.purchase_receipt}
+		if self.is_return or not purchase_receipts:
+			return
+
+		if closed := frappe.get_all(
+			"Purchase Receipt",
+			filters={"name": ("in", list(purchase_receipts)), "status": "Closed"},
+			pluck="name",
+		):
+			frappe.throw(
+				_("Purchase Receipt {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
+			)
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):

@@ -567,6 +567,9 @@ def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 @frappe.whitelist()
 def update_purchase_receipt_status(docname: str, status: str):
 	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="submit")
+	if pr.docstatus != 1:
+		frappe.throw(_("Only a submitted Purchase Receipt can be closed or reopened"))
+
 	pr.update_status(status)
 
 
