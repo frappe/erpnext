@@ -356,7 +356,9 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 		new_updated_table_row.putaway_rule = rule
 
 	if serial_nos:
-		new_updated_table_row.serial_no = get_serial_nos_to_allocate(serial_nos, to_allocate)
+		new_updated_table_row.serial_no = get_serial_nos_to_allocate(
+			serial_nos, flt(to_allocate) * flt(new_updated_table_row.conversion_factor or 1)
+		)
 
 	new_updated_table_row.serial_and_batch_bundle = ""
 
