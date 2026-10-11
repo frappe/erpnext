@@ -897,6 +897,21 @@ class TestPickList(ERPNextTestSuite):
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
 
+	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=10, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.items[0].qty = 4
+		delivery_note.submit()
+		create_delivery(pick_list.name, target="Sales Invoice").submit()
+
+		pick_list.reload()
+		self.assertEqual((pick_list.locations[0].delivered_qty, pick_list.status), (10, "Completed"))
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_sales_invoice_from_pick_list_copies_old_batch_serial_fields(self):
 		warehouse = "_Test Warehouse - _TC"
