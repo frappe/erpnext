@@ -5151,6 +5151,48 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual([d.basic_amount for d in entry.items if d.is_finished_item], [200])
 
+	def test_bom_disassembly_values_components_per_stock_uom(self):
+		entry = self.make_bom_disassembly()
+		self.assertEqual([(d.transfer_qty, d.basic_rate) for d in entry.items if d.t_warehouse], [(1, 100)])
+
+	def make_bom_disassembly(self, component_qty=None):
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Gram", "conversion_factor": 0.001}],
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse - _TC", qty=2, basic_rate=50)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 500, "uom": "Gram", "conversion_factor": 0.001})
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = "Disassemble"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"bom_no": bom.name,
+				"use_multi_level_bom": 0,
+				"fg_completed_qty": 2,
+				"from_warehouse": "_Test Warehouse - _TC",
+				"to_warehouse": "_Test Warehouse - _TC",
+			}
+		)
+		entry.set_stock_entry_type()
+		entry.get_items()
+		for row in entry.items:
+			if component_qty and row.item_code == rm_item:
+				row.qty = component_qty
+
+		entry.insert()
+		return entry
+
 	def make_entry_with_rows(self, purpose, *rows, **kwargs):
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = kwargs.pop("company", "_Test Company")

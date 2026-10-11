@@ -1411,10 +1411,13 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.valuation_type,
 			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
-	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
-		return query.select(doctype.allow_alternative_item, doctype.bom_no)
-	return query
+		return query.select(
+			(doctype.base_rate / NullIf(doctype.conversion_factor, 0)).as_("basic_rate"),
+			doctype.allow_alternative_item,
+			doctype.bom_no,
+		)
+	return query.select(doctype.rate.as_("basic_rate"))
 
 
 def _deduplicate_bom_items(items, by_type=False):
