@@ -45,6 +45,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "CHQ-BK-.YYYY.-",
    "print_hide": 1,
@@ -176,7 +177,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-08 20:30:00.000000",
+ "modified": "2026-10-12 01:07:21.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Book",
@@ -214,6 +215,7 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [
