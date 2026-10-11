@@ -4296,6 +4296,29 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, delivery_note.name)
 		self.assertRaises(frappe.ValidationError, invoice.insert)
 
+	def test_trip_and_transport_details_are_not_copied(self):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		delivery_note = create_delivery_note(qty=1, do_not_save=True)
+		delivery_note.update({"lr_no": "LR-001", "lr_date": nowdate(), "vehicle_no": "MH-01-1234"})
+
+		duplicate = frappe.copy_doc(delivery_note, ignore_no_copy=False)
+		self.assertEqual((duplicate.lr_no, duplicate.lr_date, duplicate.vehicle_no), (None, None, None))
+
+		delivery_note.insert()
+		delivery_note.submit()
+		delivery_trip = make_delivery_trip(delivery_note.name)
+		delivery_trip.delivery_stops[0].customer_address = "fake string"
+		delivery_trip.flags.ignore_mandatory = True
+		delivery_trip.save()
+		delivery_note.reload()
+		self.assertEqual(delivery_note.delivery_trip, delivery_trip.name)
+
+		delivery_note.cancel()
+		amended = frappe.copy_doc(delivery_note)
+		amended.update({"docstatus": 0, "amended_from": delivery_note.name})
+		amended.insert()
+		self.assertIsNone(amended.delivery_trip)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

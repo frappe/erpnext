@@ -272,6 +272,10 @@ class DeliveryNote(SellingController):
 				if not d.against_sales_order:
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
+	def before_insert(self):
+		if self.amended_from:
+			self.delivery_trip = None
+
 	def validate(self):
 		self.validate_posting_time()
 		self.set_internal_return_target_warehouse()
