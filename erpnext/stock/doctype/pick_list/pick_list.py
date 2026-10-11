@@ -684,6 +684,7 @@ class PickList(TransactionBase):
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
+		own_vouchers = {row.sales_order for row in self.get("locations") if row.sales_order}
 
 		# reset
 		reset_rows = []
@@ -722,6 +723,7 @@ class PickList(TransactionBase):
 						frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
 					),
 					exclude_warehouses=excluded_warehouses,
+					own_vouchers=own_vouchers,
 				),
 			)
 
@@ -1400,6 +1402,7 @@ def get_available_item_locations(
 	pick_list=None,
 	keep_all_locations=False,
 	exclude_warehouses=None,
+	own_vouchers=None,
 ):
 	locations = []
 
@@ -1435,6 +1438,7 @@ def get_available_item_locations(
 			company,
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
+		locations = remove_stock_reserved_for_others(item_code, locations, own_vouchers)
 
 	if exclude_warehouses:
 		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
@@ -1714,6 +1718,21 @@ def get_available_item_locations_for_other_item(
 	item_locations = query.run(as_dict=True)
 
 	return item_locations
+
+
+def remove_stock_reserved_for_others(item_code, locations, own_vouchers=None):
+	if not locations or not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+		return locations
+
+	reserved_qty = defaultdict(float)
+	for row in get_reservation_holders([item_code], [location.warehouse for location in locations]):
+		if row.voucher_no not in (own_vouchers or ()):
+			reserved_qty[row.warehouse] += flt(row.reserved_qty)
+
+	for location in locations:
+		location.qty = flt(location.qty) - reserved_qty[location.warehouse]
+
+	return [location for location in locations if location.qty > 0]
 
 
 def check_pick_list_company(company: str | None) -> None:
