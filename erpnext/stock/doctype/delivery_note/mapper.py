@@ -131,7 +131,7 @@ def make_sales_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter and not d.closed
+		return child_filter and not d.closed and not d.si_detail
 
 	doc = get_mapped_doc(
 		"Delivery Note",
