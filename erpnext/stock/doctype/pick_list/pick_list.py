@@ -519,7 +519,7 @@ class PickList(TransactionBase):
 
 	def update_packed_items_qty(self, packed_items):
 		picked_items = get_picked_items_qty(packed_items, contains_packed_items=True)
-		self.validate_picked_qty(picked_items)
+		self.validate_picked_qty(picked_items, "Packed Item")
 
 		doc_updates = {item: {"picked_qty": 0} for item in set(packed_items)}
 		for d in picked_items:
@@ -602,13 +602,22 @@ class PickList(TransactionBase):
 			from_voucher_type="Pick List", from_voucher_no=self.name, notify=notify
 		)
 
-	def validate_picked_qty(self, data):
-		over_delivery_receipt_allowance = 100 + flt(
-			frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
+	def validate_picked_qty(self, data, ordered_doctype="Sales Order Item"):
+		allowance = 1 + flt(frappe.get_single_value("Stock Settings", "over_picking_allowance")) / 100
+		qty_field = "qty" if ordered_doctype == "Packed Item" else "stock_qty"
+		reference_field = "product_bundle_item" if ordered_doctype == "Packed Item" else "sales_order_item"
+		ordered_qty = dict(
+			frappe.get_all(
+				ordered_doctype,
+				filters={"name": ("in", [row.get(reference_field) for row in data])},
+				fields=["name", qty_field],
+				as_list=True,
+			)
 		)
 
 		for row in data:
-			if (row.picked_qty / row.stock_qty) * 100 > over_delivery_receipt_allowance:
+			ordered = flt(ordered_qty.get(row.get(reference_field)))
+			if ordered and flt(row.picked_qty, 6) > flt(ordered * allowance, 6):
 				frappe.throw(
 					_(
 						"You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}."
