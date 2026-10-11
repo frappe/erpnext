@@ -1378,7 +1378,7 @@ class SerialandBatchBundle(Document):
 			frappe.throw(_("The Item {0} does not have Serial No or Batch No").format(self.item_code))
 
 		serial_nos = []
-		batch_nos = []
+		batch_nos = set()
 
 		serial_batches = {}
 		for row in self.entries:
@@ -1411,8 +1411,8 @@ class SerialandBatchBundle(Document):
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
 
-			if row.batch_no and not row.serial_no:
-				batch_nos.append(row.batch_no)
+			if row.batch_no:
+				batch_nos.add(row.batch_no)
 
 			if row.serial_no and row.batch_no and self.type_of_transaction == "Outward":
 				serial_batches.setdefault(row.serial_no, row.batch_no)
@@ -1420,8 +1420,8 @@ class SerialandBatchBundle(Document):
 		if serial_nos:
 			self.validate_incorrect_serial_nos(serial_nos)
 
-		elif batch_nos:
-			self.validate_incorrect_batch_nos(batch_nos)
+		if batch_nos:
+			self.validate_incorrect_batch_nos(list(batch_nos))
 
 		if serial_batches:
 			self.validate_serial_batch_no(serial_batches)

@@ -2544,6 +2544,33 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertRaises(SerialNoDuplicateError, entry.submit)
 
+	def test_serial_and_batch_item_refuses_a_batch_of_another_item(self):
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		foreign_batch = frappe.get_doc(
+			{"doctype": "Batch", "item": other_item, "batch_id": f"{other_item}-LOT"}
+		).insert()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = "Material Receipt"
+		entry.company = "_Test Company"
+		entry.set_stock_entry_type()
+		entry.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": 2,
+				"t_warehouse": "_Test Warehouse - _TC",
+				"basic_rate": 100,
+				"serial_no": f"{item_code}-1\n{item_code}-2",
+				"batch_no": foreign_batch.name,
+				"use_serial_batch_fields": 1,
+			},
+		)
+		entry.insert()
+
+		self.assertRaises(frappe.ValidationError, entry.submit)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
