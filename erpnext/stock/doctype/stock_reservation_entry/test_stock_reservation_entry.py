@@ -1411,3 +1411,43 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		frappe.set_user(user)
 		self.assertRaises(frappe.PermissionError, sales_order.create_stock_reservation_entries)
 		self.assertRaises(frappe.PermissionError, subcontracting_order.reserve_raw_materials)
+
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_stock_for_sales_order_on_purchase": 1,
+		},
+	)
+	def test_receipt_that_reserved_stock_can_be_cancelled(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=5)
+		receipt = frappe.get_doc(
+			{
+				"doctype": "Purchase Receipt",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier",
+				"items": [
+					{
+						"item_code": item_code,
+						"qty": 5,
+						"rate": 100,
+						"warehouse": "_Test Warehouse - _TC",
+						"sales_order": sales_order.name,
+						"sales_order_item": sales_order.items[0].name,
+					}
+				],
+			}
+		).insert()
+		receipt.submit()
+		self.assertTrue(
+			frappe.db.exists("Stock Reservation Entry", {"from_voucher_no": receipt.name, "docstatus": 1})
+		)
+
+		receipt.cancel()
+
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"from_voucher_no": receipt.name, "docstatus": 1})
+		)
