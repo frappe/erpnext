@@ -1001,6 +1001,19 @@ class TestPickList(ERPNextTestSuite):
 			)
 		)
 
+	def test_delivery_pick_prefers_the_order_warehouse_and_skips_transit(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		for warehouse in ("Goods In Transit - _TC", "_Test Warehouse 1 - _TC", "_Test Warehouse - _TC"):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=15, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+
+		self.assertEqual(
+			[(row.warehouse, row.qty) for row in pick_list.locations],
+			[("_Test Warehouse - _TC", 10), ("_Test Warehouse 1 - _TC", 5)],
+		)
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)

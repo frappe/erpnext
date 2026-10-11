@@ -696,9 +696,10 @@ class PickList(TransactionBase):
 
 		updated_locations = frappe._dict()
 		len_idx = len(self.get("locations")) or 0
+		excluded_warehouses = self.get_excluded_warehouses()
 		for item_doc in items:
 			item_code = item_doc.item_code
-			priority_warehouses = []
+			priority_warehouses = [item_doc.warehouse] if item_doc.warehouse and not self.work_order else []
 
 			if self.work_order and item_warehouse_dict.get(item_code):
 				source_warehouse = item_warehouse_dict.get(item_code)
@@ -720,6 +721,7 @@ class PickList(TransactionBase):
 					keep_all_locations=bool(
 						frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
 					),
+					exclude_warehouses=excluded_warehouses,
 				),
 			)
 
@@ -775,6 +777,13 @@ class PickList(TransactionBase):
 
 		if save:
 			self.save()
+
+	def get_excluded_warehouses(self) -> set:
+		return set(
+			frappe.get_all(
+				"Warehouse", filters={"company": self.company, "warehouse_type": "Transit"}, pluck="name"
+			)
+		)
 
 	def aggregate_item_qty(self):
 		locations = self.get("locations")
@@ -1384,6 +1393,7 @@ def get_available_item_locations(
 	priority_warehouses=None,
 	pick_list=None,
 	keep_all_locations=False,
+	exclude_warehouses=None,
 ):
 	locations = []
 
@@ -1419,6 +1429,9 @@ def get_available_item_locations(
 			company,
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
+
+	if exclude_warehouses:
+		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
 
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
