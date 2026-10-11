@@ -1459,8 +1459,8 @@ class update_entries_after:
 		)
 
 	def get_produced_row_rate(self, sle):
-		"""Outputs carry exactly the consumed value plus additional costs. Each output row is rounded
-		on its own, so the largest finished good takes what the rounding left over."""
+		"""Outputs carry exactly the consumed value plus additional and landed costs. Each output row is
+		rounded on its own, so the largest finished good takes what the rounding left over."""
 		rows = frappe.get_all(
 			"Stock Entry Detail",
 			filters={"parent": sle.voucher_no},
@@ -1472,6 +1472,7 @@ class update_entries_after:
 				"is_finished_item",
 				"set_basic_rate_manually",
 				"allow_zero_valuation_rate",
+				"landed_cost_voucher_amount",
 			],
 			order_by="amount desc, idx asc",
 		)
@@ -1495,9 +1496,16 @@ class update_entries_after:
 				},
 				pluck="stock_value_difference",
 			)
+			if not consumed:
+				return sle.incoming_rate
+
 			additional_cost = frappe.db.get_value("Stock Entry", sle.voucher_no, "total_additional_costs")
+			landed_cost = sum(flt(r.landed_cost_voucher_amount) for r in outputs)
 			value += (
-				-sum(flt(v) for v in consumed) + flt(additional_cost) - sum(flt(r.amount) for r in outputs)
+				-sum(flt(v) for v in consumed)
+				+ flt(additional_cost)
+				+ landed_cost
+				- sum(flt(r.amount) for r in outputs)
 			)
 
 		return value / flt(sle.actual_qty)
