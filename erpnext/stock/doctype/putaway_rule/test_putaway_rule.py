@@ -627,6 +627,30 @@ class TestPutawayRule(ERPNextTestSuite):
 
 		self.assertEqual([len(row.serial_no.split("\n")) for row in rows], [4, 2])
 
+	def test_putaway_rule_free_space_is_shared_across_source_warehouses(self):
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=10)
+
+		rows = _apply_putaway_rule(
+			"Stock Entry",
+			[
+				{
+					"doctype": "Stock Entry Detail",
+					"item_code": item,
+					"qty": 10,
+					"conversion_factor": 1,
+					"s_warehouse": source_warehouse,
+				}
+				for source_warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+			],
+			"_Test Company",
+			purpose="Material Transfer",
+		)
+
+		self.assertEqual(sum(row.qty for row in rows if row.t_warehouse == self.warehouse_1), 10)
+
 
 def create_putaway_rule(**args):
 	args = frappe._dict(args)
