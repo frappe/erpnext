@@ -5111,6 +5111,46 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual([d.basic_amount for d in entry.items if d.is_finished_item], [500, 500])
 
+	def test_finished_good_takes_the_share_of_a_co_product_not_made(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		co_product = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 2, "rate": 100})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 1,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = "Manufacture"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": 1,
+				"from_warehouse": "_Test Warehouse - _TC",
+				"to_warehouse": "_Test Warehouse - _TC",
+			}
+		)
+		entry.set_stock_entry_type()
+		entry.get_items()
+		entry.items = [d for d in entry.items if d.item_code != co_product]
+		entry.insert()
+
+		self.assertEqual([d.basic_amount for d in entry.items if d.is_finished_item], [200])
+
 	def make_entry_with_rows(self, purpose, *rows, **kwargs):
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = kwargs.pop("company", "_Test Company")

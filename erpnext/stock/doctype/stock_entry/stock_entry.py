@@ -605,9 +605,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		raise_error_if_no_rate = raise_error_if_no_rate and not self.is_new()
 		has_consumption_basis = self.has_consumption_basis()
 
-		bom_cost_allocation_per = (
-			frappe.get_cached_value("BOM", self.bom_no, "cost_allocation_per") if self.bom_no else None
-		)
+		bom_cost_allocation_per = self.get_finished_good_cost_allocation_per() if self.bom_no else None
 
 		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
 
@@ -642,6 +640,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if zero_valuation_items:
 			self._notify_zero_valuation_rate(zero_valuation_items)
+
+	def get_finished_good_cost_allocation_per(self) -> float:
+		secondary_rows = {
+			d.bom_secondary_item for d in self.get("items") if d.bom_secondary_item and flt(d.transfer_qty)
+		}
+		if not secondary_rows:
+			return 100.0
+
+		allocated_per = frappe.get_all(
+			"BOM Secondary Item",
+			filters={"name": ("in", list(secondary_rows)), "parent": self.bom_no},
+			pluck="cost_allocation_per",
+		)
+		return flt(100 - sum(flt(per) for per in allocated_per))
 
 	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
 		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""
