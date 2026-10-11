@@ -690,6 +690,15 @@ class BuyingController(SubcontractingController):
 
 		update_regional_item_valuation_rate(self)
 
+	def get_rejected_valuation_rate(self, row) -> float:
+		if not is_rejected_material_valued(self.doctype, row.name):
+			return 0.0
+
+		if self.is_internal_transfer() or bills_rejected_quantity(self) or not flt(row.qty):
+			return flt(row.valuation_rate)
+
+		return flt(row.base_net_rate) / (flt(row.conversion_factor) or 1.0)
+
 	def get_valued_stock_qty(self, row):
 		"""Stock qty the net amount of the row was billed for, which is what its valuation spreads
 		over. Each part is rounded as the stock ledger posts it."""
@@ -1179,9 +1188,7 @@ class BuyingController(SubcontractingController):
 					source_reversal_sle = from_warehouse_sle
 
 			if flt(d.rejected_qty) != 0:
-				valuation_rate_for_rejected_item = 0.0
-				if is_rejected_material_valued(self.doctype, d.name):
-					valuation_rate_for_rejected_item = d.valuation_rate
+				valuation_rate_for_rejected_item = self.get_rejected_valuation_rate(d)
 
 				sl_entries.append(
 					self.get_sl_entries(

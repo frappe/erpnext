@@ -8417,6 +8417,48 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			vouchers.append(make_invoice_against_order(purchase_order.name, qty=qty, rate=200).name)
 			self.assertEqual(self.get_provisional_balance(*vouchers), balance)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	def test_rejected_material_is_valued_without_the_valuation_charges(self):
+		company = "_Test Company with perpetual inventory"
+		receipt = make_purchase_receipt(
+			company=company,
+			warehouse=create_warehouse("_Test In-ward Warehouse", company=company),
+			rejected_warehouse=create_warehouse("_Test Warehouse - Rejected Material", company=company),
+			qty=8,
+			rejected_qty=2,
+			rate=100,
+			do_not_save=1,
+		)
+		receipt.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Customs Duty - TCP1",
+				"add_deduct_tax": "Add",
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 100,
+			},
+		)
+		receipt.insert()
+		receipt.submit()
+
+		stock_value = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": receipt.name, "is_cancelled": 0},
+			pluck="stock_value_difference",
+		)
+		srbnb_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
+		srbnb_credit = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": receipt.name, "account": srbnb_account, "is_cancelled": 0},
+			[{"SUM": "credit"}],
+		)
+
+		self.assertEqual(sorted(stock_value), [200, 900])
+		self.assertEqual(srbnb_credit, 1000)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
