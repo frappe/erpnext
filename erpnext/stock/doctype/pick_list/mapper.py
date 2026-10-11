@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import cstr, flt, get_link_to_form
 
 from erpnext.selling.doctype.sales_order.mapper import (
 	make_delivery_note as create_delivery_note_from_sales_order,
@@ -36,34 +36,10 @@ def create_delivery(
 	target = target or (frappe.flags.args or {}).get("target") or "Delivery Note"
 	validate_item_locations(pick_list)
 	sales_dict = dict()
-	sales_orders = []
 	documents = []
-	for location in pick_list.locations:
-		if location.sales_order:
-			sales_orders.append(
-				frappe.db.get_value(
-					"Sales Order",
-					location.sales_order,
-					[
-						"customer",
-						"name as sales_order",
-						"company_address",
-						"dispatch_address_name",
-						"shipping_address_name",
-						"customer_address",
-					],
-					as_dict=True,
-				)
-			)
+	sales_orders = get_sales_order_headers({location.sales_order for location in pick_list.locations})
 
-	group_key = lambda so: (  # noqa
-		so["customer"],
-		so["company_address"] or "",
-		so["dispatch_address_name"] or "",
-		so["shipping_address_name"] or "",
-		so["customer_address"] or "",
-	)
-	for key, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
+	for key, rows in groupby(sorted(sales_orders, key=get_header_key), key=get_header_key):
 		sales_dict[key] = {row.sales_order for row in rows}
 
 	if sales_dict:
@@ -79,6 +55,43 @@ def create_delivery(
 
 		doc_list = [get_link_to_form(target, p.name) for p in documents]
 		frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
+
+
+SALES_ORDER_HEADER_FIELDS = (
+	"customer",
+	"company_address",
+	"dispatch_address_name",
+	"shipping_address_name",
+	"customer_address",
+	"currency",
+	"selling_price_list",
+	"taxes_and_charges",
+	"apply_discount_on",
+	"additional_discount_percentage",
+	"discount_amount",
+	"tc_name",
+	"payment_terms_template",
+)
+
+
+def get_header_key(sales_order):
+	key = tuple(cstr(sales_order.get(field)) for field in SALES_ORDER_HEADER_FIELDS)
+	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+		key += (sales_order.sales_order,)
+
+	return key
+
+
+def get_sales_order_headers(sales_orders):
+	sales_orders = [so for so in sales_orders if so]
+	if not sales_orders:
+		return []
+
+	return frappe.get_all(
+		"Sales Order",
+		filters={"name": ("in", sales_orders)},
+		fields=["name as sales_order", *SALES_ORDER_HEADER_FIELDS],
+	)
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
