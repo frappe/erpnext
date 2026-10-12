@@ -3270,7 +3270,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.selling_price_list = "_Test Price List Rest of the World"
 		si.submit()
 
-		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		draft_pi = frappe.new_doc(
+			"Purchase Invoice", company="_Test Company", conversion_rate=1, plc_conversion_rate=1
+		)
+		pi = make_inter_company_transaction("Sales Invoice", si.name, draft_pi)
 		pi.credit_to = "_Test Payable USD - _TC"
 		pi.items[0].update(
 			{
