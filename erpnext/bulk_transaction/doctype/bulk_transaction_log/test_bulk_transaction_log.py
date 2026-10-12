@@ -119,6 +119,33 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 
 		self.assertTrue(BulkTransactionLog.get_list(frappe._dict()))
 
+	def test_list_and_count_keep_the_filter_operator(self):
+		self._insert_detail("2099-03-01")
+		self._insert_detail("2099-03-02")
+		self._insert_detail("2099-03-03")
+
+		for filters in (
+			{"date": ["!=", "2099-03-01"]},
+			[["date", "!=", "2099-03-01"]],
+		):
+			args = frappe._dict(filters=filters)
+			dates = [str(log.date) for log in BulkTransactionLog.get_list(args)]
+			self.assertNotIn("2099-03-01", dates)
+			self.assertIn("2099-03-02", dates)
+			self.assertEqual(BulkTransactionLog.get_count(args), count_dates(["!=", "2099-03-01"]))
+
+		args = frappe._dict(filters={"date": ["between", ["2099-03-02", "2099-03-03"]]})
+		self.assertEqual(
+			[str(log.date) for log in BulkTransactionLog.get_list(args)], ["2099-03-03", "2099-03-02"]
+		)
+		self.assertEqual(BulkTransactionLog.get_count(args), 2)
+
 
 def get_list(**args) -> list:
 	return BulkTransactionLog.get_list(frappe._dict(args))
+
+
+def count_dates(date_filter: list) -> int:
+	return len(
+		frappe.get_all("Bulk Transaction Log Detail", {"date": date_filter}, pluck="date", distinct=True)
+	)

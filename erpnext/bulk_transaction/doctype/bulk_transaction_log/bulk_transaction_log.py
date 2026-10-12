@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import qb
+from frappe import _, qb
+from frappe.database.operator_map import OPERATOR_MAP
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, Sum
@@ -59,6 +60,7 @@ class BulkTransactionLog(Document):
 		)
 		super(Document, self).__init__(serialize_transaction_log(transaction_log))
 
+	# nosemgrep: frappe-semgrep-rules.rules.overusing-args -- reviewed: frappe calls virtual doctype get_list with `args=`
 	@staticmethod
 	def get_list(args):
 		frappe.has_permission("Bulk Transaction Log", "read", throw=True)
@@ -76,15 +78,16 @@ class BulkTransactionLog(Document):
 			.offset(cint(args.get("start")))
 			.limit(cint(args.get("page_length")) or 20)
 		)
-		query = filter_by_date(query, log_detail, parse_list_filters(args))
+		query = filter_by_date(query, log_detail, parse_list_filters(args.get("filters")))
 		return [serialize_transaction_log(x) for x in query.run(as_dict=True)]
 
+	# nosemgrep: frappe-semgrep-rules.rules.overusing-args -- reviewed: frappe calls virtual doctype get_count with `args=`
 	@staticmethod
 	def get_count(args):
 		frappe.has_permission("Bulk Transaction Log", "read", throw=True)
 		log_detail = qb.DocType("Bulk Transaction Log Detail")
 		query = qb.from_(log_detail).select(Count(log_detail.date).distinct())
-		return filter_by_date(query, log_detail, parse_list_filters(args)).run()[0][0]
+		return filter_by_date(query, log_detail, parse_list_filters(args.get("filters"))).run()[0][0]
 
 	@staticmethod
 	def get_stats(args):
@@ -111,17 +114,28 @@ def count_with_status(log_detail: Table, status: str) -> Sum:
 	return Sum(Case().when(log_detail.transaction_status == status, 1).else_(0))
 
 
-def filter_by_date(query: QueryBuilder, log_detail: Table, filter_date: str | None) -> QueryBuilder:
-	return query.where(log_detail.date == filter_date) if filter_date else query
+def filter_by_date(query: QueryBuilder, log_detail: Table, conditions: list[tuple]) -> QueryBuilder:
+	for operator, value in conditions:
+		if operator not in OPERATOR_MAP:
+			frappe.throw(_("Unsupported filter operator {0}").format(operator))
+		query = query.where(OPERATOR_MAP[operator](log_detail.date, value))
+	return query
 
 
-def parse_list_filters(args) -> str | None:
-	"""Return the date filter value from dict filters or 3- and 4-item list filters."""
-	filters = args.get("filters") or []
+def parse_list_filters(filters: dict | list | None) -> list[tuple]:
+	"""Return (operator, value) pairs for the date filters in dict or 3- and 4-item list filters."""
+	filters = filters or []
 	if isinstance(filters, dict):
-		filters = [[field, value] for field, value in filters.items()]
+		filters = [
+			[field, *value] if is_list(value) else [field, "=", value] for field, value in filters.items()
+		]
 
-	for condition in filters:
-		if isinstance(condition, list | tuple) and "date" in condition[:-1]:
-			value = condition[-1]
-			return value[-1] if isinstance(value, list | tuple) else value
+	return [
+		(str(condition[-2]).lower(), condition[-1])
+		for condition in filters
+		if is_list(condition) and len(condition) >= 3 and condition[-3] == "date"
+	]
+
+
+def is_list(value) -> bool:
+	return isinstance(value, list | tuple)
