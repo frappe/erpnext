@@ -3246,7 +3246,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-	def test_inter_company_purchase_invoice_uses_buying_company_exchange_rate(self):
+	def make_cross_currency_inter_company_purchase_invoice(self):
 		for doctype, party, company in (
 			("Customer", "_Test Internal Customer 3", "Wind Power LLC"),
 			("Supplier", "_Test Internal Supplier", "_Test Company"),
@@ -3282,12 +3282,24 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"warehouse": "Stores - _TC",
 			}
 		)
+		return pi
+
+	def test_inter_company_purchase_invoice_uses_buying_company_exchange_rate(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
 		pi.save()
 
 		self.assertEqual(pi.company, "_Test Company")
 		self.assertEqual(pi.currency, "USD")
 		self.assertEqual(pi.conversion_rate, 62.9)
 		self.assertEqual(pi.base_net_total, 6290)
+
+	def test_inter_company_purchase_invoice_keeps_sales_invoice_currency(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
+		pi.currency = "INR"
+		pi.credit_to = "Creditors - _TC"
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Currency must be"):
+			pi.save()
 
 	def test_repeat_inter_company_pi_converts_invoiced_qty_to_sales_invoice_uom(self):
 		si = create_sales_invoice(
