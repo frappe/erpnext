@@ -8488,6 +8488,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(srbnb_debit, 400)
 
 	def test_assets_bought_in_a_purchase_uom_carry_the_full_value(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
 		asset_item = make_item(
 			"Test Asset Item Bought In Packs",
 			{
@@ -8508,6 +8512,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.get_all("Asset", filters={"purchase_receipt": receipt.name}, pluck="net_purchase_amount"),
 			[40000],
+		)
+
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, receipt.company, charges=400)
+		self.assertEqual(
+			frappe.get_all("Asset", filters={"purchase_receipt": receipt.name}, pluck="net_purchase_amount"),
+			[40400],
 		)
 
 	def test_inter_company_delivery_note_maps_the_kept_qty_of_a_submitted_receipt(self):
