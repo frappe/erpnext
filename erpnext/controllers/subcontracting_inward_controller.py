@@ -1153,43 +1153,39 @@ class SubcontractingInwardController:
 						consumed_qty[row.batch_no] += qty
 
 				for sre_name, qty in qty_to_deliver.items():
-					sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
-					sre_doc.db_set(
-						"delivered_qty",
-						sre_doc.delivered_qty + (qty if release else -qty),
-					)
-					sre_doc.update_status()
-					sre_doc.update_reserved_stock_in_bin()
+					self.update_inward_reserved_qty(sre_name, -qty if release else qty)
 			else:
 				table = frappe.qb.DocType("Stock Reservation Entry")
-				query = (
+				open_qty = (
+					table.reserved_qty - table.delivered_qty
+					if release
+					else table.voucher_qty - table.reserved_qty
+				)
+				sre_list = (
 					frappe.qb.from_(table)
-					.select(
-						table.name,
-						(table.reserved_qty - table.delivered_qty).as_("qty"),
-					)
+					.select(table.name, open_qty.as_("qty"))
 					.where(
 						(table.docstatus == 1)
 						& (table.voucher_detail_no == item.scio_detail)
-						& (table.delivered_qty < table.reserved_qty)
+						& (open_qty > 0)
 					)
 					.orderby(table.creation)
-				)
-				sre_list = query.run(as_dict=True)
+				).run(as_dict=True)
 
 				voucher_qty = item.transfer_qty
 				for sre in sre_list:
 					qty = min(sre.qty, voucher_qty)
-					sre_doc = frappe.get_doc("Stock Reservation Entry", sre.name)
-					sre_doc.db_set(
-						"delivered_qty",
-						sre_doc.delivered_qty + (qty if release else -qty),
-					)
-					sre_doc.update_status()
-					sre_doc.update_reserved_stock_in_bin()
+					self.update_inward_reserved_qty(sre.name, -qty if release else qty)
 					voucher_qty -= qty
 					if voucher_qty <= 0:
 						break
+
+	def update_inward_reserved_qty(self, sre_name, qty_change):
+		"""Change reserved qty, not delivered qty, which Work Order reservations own."""
+		sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+		sre_doc.db_set("reserved_qty", sre_doc.reserved_qty + qty_change)
+		sre_doc.update_status()
+		sre_doc.update_reserved_stock_in_bin()
 
 	def update_inward_order_status(self):
 		if self.subcontracting_inward_order:
