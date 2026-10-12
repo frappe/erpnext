@@ -118,12 +118,6 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 		self.assertEqual(self._cell(after, "Item", "_Test Item", "Total(Amt)", labels) - before_amt, 600)
 
 	def test_restricted_user_sees_only_permitted_sales(self):
-		create_sales_invoice(
-			customer="_Test Customer", item="_Test Item", qty=2, rate=100, posting_date=POSTING_DATE
-		)
-		create_sales_invoice(
-			customer="_Test Customer 1", item="_Test Item", qty=5, rate=900, posting_date=POSTING_DATE
-		)
 		user = "test_sales_trends_user@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
@@ -136,6 +130,19 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 			).insert()
 		frappe.permissions.add_user_permission("Customer", "_Test Customer", user)
 
+		before = self.get_customer_and_totals_as(user)
+		create_sales_invoice(
+			customer="_Test Customer", item="_Test Item", qty=2, rate=100, posting_date=POSTING_DATE
+		)
+		create_sales_invoice(
+			customer="_Test Customer 1", item="_Test Item", qty=5, rate=900, posting_date=POSTING_DATE
+		)
+		after = self.get_customer_and_totals_as(user)
+
+		self.assertEqual([a - b for a, b in zip(after, before)], [200, 200, 200])
+
+	def get_customer_and_totals_as(self, user: str) -> tuple:
+		"""Permitted customer's amount, customer-view total and item-view total, seen by `user`."""
 		frappe.set_user(user)
 		try:
 			labels, by_customer = self.run_report(based_on="Customer")
@@ -143,10 +150,10 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		permitted_amount = self._cell(by_customer, "Customer", "_Test Customer", "Total(Amt)", labels)
-		total_index = labels.index("Total(Amt)")
-		self.assertEqual(by_customer[-1][total_index], permitted_amount)
-		self.assertEqual(by_item[-1][labels_by_item.index("Total(Amt)")], permitted_amount)
+		customer_amount = self._cell(by_customer, "Customer", "_Test Customer", "Total(Amt)", labels)
+		customer_total = by_customer[-1][labels.index("Total(Amt)")] if by_customer else 0
+		item_total = by_item[-1][labels_by_item.index("Total(Amt)")] if by_item else 0
+		return customer_amount, customer_total, item_total
 
 	def test_based_on_project_excludes_invoices_without_project(self):
 		project = frappe.db.get_value("Project", {"project_name": "_Test Project"})
