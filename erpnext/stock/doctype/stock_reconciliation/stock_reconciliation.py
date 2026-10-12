@@ -639,6 +639,34 @@ class StockReconciliation(StockController):
 
 		return False
 
+	def set_new_bundle_from_current(self, item):
+		current_doc = frappe.get_doc("Serial and Batch Bundle", item.current_serial_and_batch_bundle)
+		if item.qty in ("", None):
+			item.qty = abs(current_doc.total_qty)
+		elif flt(item.qty) != abs(current_doc.total_qty):
+			frappe.throw(
+				_("Row #{0}: select the serial and batch numbers for the new quantity of Item {1}").format(
+					item.idx, frappe.bold(item.item_code)
+				)
+			)
+
+		rate_entered = item.valuation_rate not in ("", None)
+		if not rate_entered:
+			item.valuation_rate = abs(current_doc.avg_rate)
+
+		bundle_doc = frappe.copy_doc(current_doc)
+		bundle_doc.warehouse = item.warehouse
+		bundle_doc.type_of_transaction = "Inward"
+		for row in bundle_doc.entries:
+			row.qty = abs(row.qty)
+			row.incoming_rate = flt(item.valuation_rate) if rate_entered else abs(flt(row.incoming_rate))
+			row.is_outward = 0
+
+		bundle_doc.calculate_qty_and_amount()
+		bundle_doc.flags.ignore_permissions = True
+		bundle_doc.save()
+		item.serial_and_batch_bundle = bundle_doc.name
+
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
 			if not item.item_code:
@@ -651,33 +679,14 @@ class StockReconciliation(StockController):
 			if item.use_serial_batch_fields:
 				continue
 
+			if item.current_serial_and_batch_bundle and not item.serial_and_batch_bundle and item.qty != 0:
+				self.set_new_bundle_from_current(item)
+				continue
+
 			if not item.qty:
 				continue
 
-			if item.current_serial_and_batch_bundle and not item.serial_and_batch_bundle:
-				current_doc = frappe.get_doc("Serial and Batch Bundle", item.current_serial_and_batch_bundle)
-
-				item.qty = abs(current_doc.total_qty)
-				item.valuation_rate = abs(current_doc.avg_rate)
-
-				bundle_doc = frappe.copy_doc(current_doc)
-				bundle_doc.warehouse = item.warehouse
-				bundle_doc.type_of_transaction = "Inward"
-
-				for row in bundle_doc.entries:
-					if row.qty < 0:
-						row.qty = abs(row.qty)
-
-					if row.stock_value_difference < 0:
-						row.stock_value_difference = abs(row.stock_value_difference)
-
-					row.is_outward = 0
-
-				bundle_doc.calculate_qty_and_amount()
-				bundle_doc.flags.ignore_permissions = True
-				bundle_doc.save()
-				item.serial_and_batch_bundle = bundle_doc.name
-			elif item.serial_and_batch_bundle and not item.qty and not item.valuation_rate:
+			if item.serial_and_batch_bundle and not item.qty and not item.valuation_rate:
 				bundle_doc = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 
 				item.qty = bundle_doc.total_qty
