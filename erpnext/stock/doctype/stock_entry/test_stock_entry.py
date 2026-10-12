@@ -4134,6 +4134,9 @@ class TestStockEntry(FrappeTestCase):
 			self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
 			self.assertEqual(self.get_value_change(repack, output), 856.81)
 
+			issue = make_stock_entry(item_code=output, source=warehouse, qty=5)
+			self.assertEqual(self.get_value_change(issue, output), -389.46)
+
 	def make_repack(self, raw_material, qty, warehouse, outputs):
 		repack = make_stock_entry(
 			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
