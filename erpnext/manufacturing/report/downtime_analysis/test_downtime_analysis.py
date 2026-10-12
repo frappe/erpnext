@@ -94,3 +94,11 @@ class TestDowntimeAnalysis(ERPNextTestSuite):
 		index = chart["data"]["labels"].index(self.workstation)
 		# Two entries of 2 hours each for this workstation -> 4 hours aggregated.
 		self.assertEqual(chart["data"]["datasets"][0]["values"][index], 4.0)
+
+	def test_entry_crossing_the_range_is_clipped(self):
+		rows = self.run_report(
+			from_date=get_datetime(f"{today()} 10:00:00"), to_date=get_datetime(f"{today()} 10:30:00")
+		)
+		row = self.row_for_entry(rows, self.entry.name)
+		self.assertIsNotNone(row)
+		self.assertEqual(row.get("downtime"), 0.5)
