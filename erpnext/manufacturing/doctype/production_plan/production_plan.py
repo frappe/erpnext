@@ -371,6 +371,9 @@ class ProductionPlan(Document):
 		self.update_stock_reservation()
 		self.delete_sub_assembly_and_material_rows()
 
+	def on_trash(self):
+		self.delete_production_plan_schedule()
+
 	def delete_production_plan_schedule(self):
 		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
 

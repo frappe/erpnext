@@ -602,6 +602,14 @@ class TestPlanAdapter(ERPNextTestSuite):
 		plan.set_status(close=False)
 		self.assertFalse(self.has_schedule(plan))
 
+	def test_scheduled_draft_plan_can_be_deleted(self):
+		plan = self.make_draft_plan()
+		apply_schedule(plan.name, "2026-12-21 09:00:00")
+
+		frappe.delete_doc("Production Plan", plan.name)
+		self.assertFalse(frappe.db.exists("Production Plan", plan.name))
+		self.assertFalse(self.has_schedule(plan))
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 
