@@ -27,7 +27,8 @@
    "fieldtype": "Link",
    "label": "Workstation / Machine",
    "options": "Workstation",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "from_time",
@@ -93,7 +94,7 @@
  ],
  "icon": "clock-alert",
  "links": [],
- "modified": "2024-03-27 13:08:18.393488",
+ "modified": "2026-10-12 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Downtime Entry",

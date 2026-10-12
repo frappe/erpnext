@@ -74,7 +74,11 @@ class TestDowntimeAnalysis(ERPNextTestSuite):
 		self.assertIsNone(self.row_for_entry(rows, self.entry.name))
 
 	def test_chart_aggregates_downtime_per_workstation(self):
-		self.make_downtime_entry(self.workstation)
+		self.make_downtime_entry(
+			self.workstation,
+			from_time=get_datetime(f"{today()} 11:00:00"),
+			to_time=get_datetime(f"{today()} 13:00:00"),
+		)
 
 		chart = execute(
 			frappe._dict(
