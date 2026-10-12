@@ -102,6 +102,7 @@ class StockReconciliation(StockController):
 		self.validate_data()
 		self.change_row_indexes()
 		self.validate_expense_account()
+		self.validate_opening_stock()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
 		sbb.clean_serial_nos()
@@ -1286,6 +1287,46 @@ class StockReconciliation(StockController):
 					),
 					OpeningEntryAccountError,
 				)
+
+	def validate_opening_stock(self):
+		if self.purpose != "Opening Stock" or not self.items:
+			return
+
+		dimensions = [dimension.get("fieldname") for dimension in get_inventory_dimensions()]
+		entries = {}
+		for entry in self.get_existing_ledger_entries(dimensions):
+			entries.setdefault((entry.item_code, entry.warehouse), []).append(entry)
+
+		rows = [
+			str(row.idx)
+			for row in self.items
+			if any(
+				all(entry.get(field) == row.get(field) for field in dimensions if row.get(field))
+				for entry in entries.get((row.item_code, row.warehouse), [])
+			)
+		]
+		if rows:
+			frappe.throw(
+				_(
+					"Rows {0}: the items already have stock transactions in these warehouses, use the purpose Stock Reconciliation instead of Opening Stock"
+				).format(", ".join(rows))
+			)
+
+	def get_existing_ledger_entries(self, dimensions):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return (
+			frappe.qb.from_(sle)
+			.select(sle.item_code, sle.warehouse, *[sle[field] for field in dimensions])
+			.distinct()
+			.where(
+				sle.item_code.isin({d.item_code for d in self.items})
+				& sle.warehouse.isin({d.warehouse for d in self.items})
+				& (sle.is_cancelled == 0)
+				& (sle.voucher_no != self.name)
+				& (sle.posting_datetime <= combine_datetime(self.posting_date, self.posting_time))
+			)
+			.run(as_dict=True)
+		)
 
 	def set_zero_value_for_customer_provided_items(self):
 		changed_any_values = False

@@ -2665,6 +2665,58 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			rate=100,
 		)
 
+	def test_opening_stock_is_refused_after_existing_transactions(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = create_item("_Test Reco Opening After Ledger").name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -3),
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_stock_reconciliation,
+			item_code=item_code,
+			purpose="Opening Stock",
+			expense_account="Temporary Opening - _TC",
+			qty=2,
+			rate=100,
+		)
+		create_stock_reconciliation(
+			item_code=item_code,
+			purpose="Opening Stock",
+			expense_account="Temporary Opening - _TC",
+			posting_date=add_days(nowdate(), -5),
+			qty=2,
+			rate=100,
+		)
+
+	def test_opening_stock_is_checked_per_inventory_dimension(self):
+		plant_a, plant_b = make_plant_dimension()
+		item_code = create_item("_Test Reco Opening Per Plant").name
+
+		def make_opening(plant, days, qty):
+			sr = create_stock_reconciliation(
+				item_code=item_code,
+				purpose="Opening Stock",
+				expense_account="Temporary Opening - _TC",
+				posting_date=add_days(nowdate(), days),
+				qty=qty,
+				rate=100,
+				do_not_save=True,
+			)
+			sr.items[0].id_plant = plant
+			sr.submit()
+			return sr
+
+		make_opening(plant_a, -3, 5)
+		self.assertEqual(make_opening(plant_b, -2, 3).docstatus, 1)
+		self.assertRaises(frappe.ValidationError, make_opening, plant_a, -1, 7)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
