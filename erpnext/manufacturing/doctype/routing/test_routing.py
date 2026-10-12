@@ -147,6 +147,18 @@ class TestRouting(ERPNextTestSuite):
 		routing.save()
 		self.assertEqual(routing.operations[0].hour_rate, 900)
 
+	def test_disabled_routing_refused_on_bom(self):
+		operations = [
+			{"operation": "Test Operation A", "workstation": "Test Workstation A", "time_in_mins": 30}
+		]
+		setup_operations(operations)
+		routing = create_routing(routing_name="Disabled Route", operations=operations)
+		routing.db_set("disabled", 1)
+
+		self.assertRaises(
+			frappe.ValidationError, setup_bom, item_code="_Test Disabled Routing Item", routing=routing.name
+		)
+
 
 def setup_operations(rows):
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
