@@ -2418,7 +2418,10 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 	if inter_company_reference:
 		doc = frappe.get_doc(ref_doc, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
-		if frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") != party:
+		if (
+			frappe.db.get_value(partytype, {"represents_company": doc.company, "disabled": 0}, "name")
+			!= party
+		):
 			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(partytype)))
 		if frappe.get_cached_value(ref_partytype, ref_party, "represents_company") != company:
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
