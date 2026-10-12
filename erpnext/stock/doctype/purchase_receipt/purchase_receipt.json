@@ -381,6 +381,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_reference",
    "reqd": 1
   },
   {
@@ -1306,7 +1307,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 20:56:49.769456",
+ "modified": "2026-10-12 18:16:58.531757",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
