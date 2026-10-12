@@ -10,6 +10,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "project_name",
   "status",
@@ -77,6 +80,22 @@
   "connections_tab"
  ],
  "fields": [
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
@@ -525,7 +544,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-10-05 12:07:33.920918",
+ "modified": "2026-10-07 21:45:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

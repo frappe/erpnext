@@ -1,0 +1,158 @@
+.project-overview {
+	// keeps the last section clear of the comment area that follows the form
+	padding-bottom: var(--padding-xl);
+
+	.po-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 6px 12px;
+		margin-bottom: var(--margin-lg);
+		font-size: var(--text-sm);
+		color: var(--ink-gray-5);
+	}
+
+	.po-header-divider {
+		width: 1px;
+		height: 14px;
+		background: var(--outline-gray-2);
+	}
+
+	.po-milestone {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.po-milestone-link {
+		font-weight: var(--weight-medium);
+		color: var(--ink-gray-8);
+	}
+
+	.po-milestone-due {
+		color: var(--ink-gray-7);
+	}
+
+	.po-section {
+		margin-top: var(--margin-lg);
+	}
+
+	.po-head {
+		margin-bottom: var(--margin-md);
+	}
+
+	// inside a panel the panel's own gap spaces the heading
+	.po-panel > .po-head {
+		margin-bottom: 0;
+	}
+
+	.po-head-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--margin-sm);
+	}
+
+	.po-section > .po-head .po-title {
+		font-weight: var(--weight-semibold);
+	}
+
+	.po-subtitle {
+		margin-top: 2px;
+		font-size: var(--text-sm);
+		color: var(--ink-gray-5);
+	}
+
+	.po-note {
+		font-size: var(--text-sm);
+		color: var(--ink-gray-5);
+	}
+
+	.po-attention-more {
+		margin-top: var(--margin-sm);
+	}
+
+	.po-title-info {
+		display: inline-flex;
+		margin-inline-start: 4px;
+		vertical-align: middle;
+		color: var(--ink-gray-4);
+		cursor: help;
+	}
+
+	.po-chart-gap {
+		font-weight: var(--weight-medium);
+	}
+
+	.po-assignees {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.po-assignee-more {
+		font-size: var(--text-xs);
+		color: var(--ink-gray-6);
+	}
+
+	.po-assignee {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		max-width: 100%;
+		white-space: nowrap;
+	}
+
+	.po-assignee-name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	// a list inside a panel uses the panel's border instead of drawing its own
+	.po-panel .embedded-list-table-wrap {
+		margin-bottom: 0;
+		border: none;
+	}
+
+	.po-two-col {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+		gap: 16px;
+		align-items: stretch;
+	}
+
+	.po-panel {
+		display: flex;
+		flex-direction: column;
+		gap: var(--margin-md);
+		padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+		border: 1px solid var(--outline-gray-1);
+		border-radius: var(--radius-lg);
+	}
+
+	.po-title {
+		font-size: var(--text-base);
+		color: var(--ink-gray-8);
+	}
+
+	.po-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 150px;
+		font-size: var(--text-sm);
+	}
+
+	.po-error {
+		color: var(--ink-red-7);
+	}
+
+	.po-retry {
+		display: flex;
+		align-items: center;
+		gap: var(--margin-md);
+		font-size: var(--text-sm);
+		color: var(--ink-gray-6);
+	}
+}

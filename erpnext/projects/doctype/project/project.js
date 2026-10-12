@@ -162,14 +162,7 @@ frappe.ui.form.on("Project", {
 				empty_message: __("No Tasks in this Project yet."),
 				add_button: frappe.model.can_create("Task") && {
 					label: __("Add Task"),
-					action: () => {
-						frappe.model.with_doctype("Task", () => {
-							const task = frappe.model.get_new_doc("Task");
-							task.project = frm.doc.name;
-							// % Complete and status are recomputed on the server when a task changes
-							frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
-						});
-					},
+					action: () => frm.events.create_task(frm),
 				},
 				on_row_click: (row) => frappe.set_route("Form", "Task", row.name),
 				columns: [
@@ -227,6 +220,15 @@ frappe.ui.form.on("Project", {
 			return list;
 		});
 		return pending;
+	},
+
+	create_task: function (frm) {
+		frappe.model.with_doctype("Task", () => {
+			const task = frappe.model.get_new_doc("Task");
+			task.project = frm.doc.name;
+			// % Complete and status are recomputed on the server when a task changes
+			frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
+		});
 	},
 
 	set_custom_buttons: function (frm) {
