@@ -2644,6 +2644,15 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			nowtime(),
 		)
 
+	def test_stock_balance_lookup_without_valuation_rate(self):
+		item_code = create_item("_Test Reco Balance Without Rate").name
+		create_stock_reconciliation(item_code=item_code, qty=7, rate=100)
+
+		balance = get_stock_balance_for(
+			item_code, "_Test Warehouse - _TC", nowdate(), nowtime(), with_valuation_rate=0
+		)
+		self.assertEqual((balance["qty"], balance["rate"]), (7, 0))
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

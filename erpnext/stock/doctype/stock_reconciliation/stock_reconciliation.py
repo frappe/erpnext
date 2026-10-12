@@ -1835,7 +1835,7 @@ def _get_stock_balance_for(
 		warehouse,
 		posting_date,
 		posting_time,
-		with_valuation_rate=with_valuation_rate,
+		with_valuation_rate=True,
 		with_serial_no=has_serial_no and not has_batch_no,
 		inventory_dimensions_dict=inventory_dimensions_dict,
 	)
@@ -1910,7 +1910,7 @@ def _get_stock_balance_for(
 
 	return {
 		"qty": qty,
-		"rate": rate,
+		"rate": rate if cint(with_valuation_rate) else 0,
 		"serial_nos": serial_nos,
 		"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 	}
