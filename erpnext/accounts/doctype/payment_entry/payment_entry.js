@@ -1807,6 +1807,7 @@ frappe.ui.form.on("Payment Entry Reference", {
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
 					party_account: frm.doc.payment_type == "Receive" ? frm.doc.paid_from : frm.doc.paid_to,
+					posting_date: frm.doc.posting_date,
 				},
 				callback: function (r, rt) {
 					if (r.message) {
