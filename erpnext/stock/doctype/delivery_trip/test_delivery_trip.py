@@ -201,6 +201,47 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 		self.assertRaises(frappe.MandatoryError, self.delivery_trip.save)
 
+	def make_delivery_note_with_address(self, **kwargs):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		delivery_note = create_delivery_note(do_not_submit=True)
+		delivery_note.shipping_address_name = get_contact_and_address(
+			"_Test Customer"
+		).shipping_address.parent
+		delivery_note.update(kwargs)
+		return delivery_note.submit()
+
+	def make_trip_for(self, *delivery_notes, submit=False):
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.delivery_stops = []
+		for name in delivery_notes:
+			trip = make_delivery_trip(name, trip)
+		trip.insert()
+		if submit:
+			trip.submit()
+		return trip
+
+	def test_delivery_note_stays_on_one_trip(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = self.make_trip_for(delivery_note.name, submit=True)
+
+		self.assertRaises(frappe.ValidationError, self.make_trip_for, delivery_note.name)
+
+		frappe.db.set_value("Delivery Note", delivery_note.name, "delivery_trip", self.delivery_trip.name)
+		trip.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), self.delivery_trip.name
+		)
+
+	def test_delivery_note_of_another_company_is_refused(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.company = "_Test Company 1"
+		trip.delivery_stops = []
+		trip = make_delivery_trip(delivery_note.name, trip)
+
+		self.assertRaises(frappe.ValidationError, trip.insert)
+		self.assertIsNone(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"))
 
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):

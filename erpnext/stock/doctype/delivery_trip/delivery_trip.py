@@ -65,6 +65,7 @@ class DeliveryTrip(Document):
 
 		if self._action == "submit":
 			self.validate_delivery_note_not_draft()
+		self.validate_delivery_notes_not_on_other_trips()
 		self.validate_stop_addresses()
 
 	def on_update(self):
@@ -100,6 +101,41 @@ class DeliveryTrip(Document):
 				_(
 					"Delivery Notes should not be in draft state when submitting a Delivery Trip. The following Delivery Notes are still in draft state: {0}. Please submit them first."
 				).format(", ".join(draft_delivery_notes))
+			)
+
+	def validate_delivery_notes_not_on_other_trips(self):
+		delivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}
+		if not delivery_notes:
+			return
+
+		delivery_note = frappe.qb.DocType("Delivery Note")
+		notes = (
+			frappe.qb.from_(delivery_note)
+			.select(delivery_note.name, delivery_note.delivery_trip, delivery_note.company)
+			.where(delivery_note.name.isin(delivery_notes))
+			.for_update()
+			.run(as_dict=True)
+		)
+		if other_company := [d.name for d in notes if self.company and d.company != self.company]:
+			frappe.throw(
+				_("Delivery Notes {0} do not belong to Company {1}").format(
+					", ".join(other_company), frappe.bold(self.company)
+				)
+			)
+
+		other_trips = {d.delivery_trip for d in notes if d.delivery_trip and d.delivery_trip != self.name}
+		open_trips = other_trips and set(
+			frappe.get_all(
+				"Delivery Trip",
+				filters={"name": ("in", list(other_trips)), "docstatus": ("<", 2)},
+				pluck="name",
+			)
+		)
+		if linked := [d for d in notes if open_trips and d.delivery_trip in open_trips]:
+			frappe.throw(
+				_("Delivery Notes are already on another Delivery Trip: {0}").format(
+					", ".join(f"{d.name} ({d.delivery_trip})" for d in linked)
+				)
 			)
 
 	def update_status(self):
@@ -139,6 +175,8 @@ class DeliveryTrip(Document):
 
 		for delivery_note in delivery_notes:
 			note_doc = frappe.get_doc("Delivery Note", delivery_note)
+			if delete and note_doc.delivery_trip != self.name:
+				continue
 
 			for field, value in update_fields.items():
 				prev_value = getattr(note_doc, field)
