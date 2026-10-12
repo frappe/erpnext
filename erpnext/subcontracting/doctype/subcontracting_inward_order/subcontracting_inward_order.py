@@ -10,6 +10,9 @@ from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	cancel_stock_reservation_entries,
+)
 
 
 class SubcontractingInwardOrder(SubcontractingController):
@@ -78,6 +81,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def on_cancel(self):
 		self.update_status()
 		self.update_subcontracted_quantity_in_so()
+		cancel_stock_reservation_entries(voucher_type=self.doctype, voucher_no=self.name, notify=False)
 
 	def update_status(self, status=None, update_modified=True):
 		if self.status == "Closed" and self.status != status:

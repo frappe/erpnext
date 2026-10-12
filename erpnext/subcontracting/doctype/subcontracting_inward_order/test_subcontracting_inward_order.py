@@ -574,6 +574,20 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
 		self.assertEqual(reserved_qty[first_receipt.items[0].scio_detail], 3)
 
+	def test_cancel_inward_order_after_its_receipts_are_cancelled(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.submit()
+		rm_in.cancel()
+
+		scio.reload()
+		scio.cancel()
+
+		self.assertEqual(scio.docstatus, 2)
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": scio.name, "docstatus": 1})
+		)
+
 	def test_self_rm_billed_qty_across_rows(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
