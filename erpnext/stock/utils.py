@@ -317,6 +317,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
+	posting_datetime = args.get("posting_datetime")
+
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
@@ -421,6 +423,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 			company=args.get("company"),
 			fallbacks=fallbacks,
 			raise_error_if_no_rate=raise_error_if_no_rate,
+			posting_datetime=posting_datetime,
+			creation=args.get("creation"),
 		)
 
 	return flt(in_rate)

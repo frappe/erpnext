@@ -1989,6 +1989,62 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertSLEs(issue, [{"stock_value_difference": -(4 * 108 + 2 * 113 + 2 * 48.4)}])
 
+	def test_rate_with_no_earlier_stock_ignores_later_entries(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = make_item(properties={"valuation_method": "Moving Average", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=5,
+			rate=300,
+			company=company,
+			posting_date=add_days(today(), -1),
+		)
+
+		dn_return = create_delivery_note(
+			item_code=item,
+			qty=-3,
+			rate=500,
+			company=company,
+			warehouse=warehouse,
+			is_return=1,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			posting_date=add_days(today(), -3),
+		)
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+		make_stock_entry(item_code=item, target=warehouse, qty=5, rate=1000, company=company)
+		frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item,
+				"warehouse": warehouse,
+				"company": company,
+				"posting_date": add_days(today(), -7),
+				"posting_time": "00:00:00",
+			}
+		).submit()
+
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+	def test_undated_rate_lookup_reads_the_latest_entry(self):
+		from erpnext.stock.utils import _get_incoming_rate
+
+		item = make_item(properties={"valuation_method": "FIFO", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, rate=300, company=company)
+
+		rate = _get_incoming_rate(
+			{"item_code": item, "warehouse": "Stores - TCP1", "qty": 1, "company": company}
+		)
+
+		self.assertEqual(rate, 300)
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
