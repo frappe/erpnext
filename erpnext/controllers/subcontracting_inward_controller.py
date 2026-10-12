@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Order
 from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
@@ -1042,8 +1042,69 @@ class SubcontractingInwardController:
 				sre.submit()
 			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
+	def validate_no_later_work_order_reservation(self):
+		"""Cancel gives batch qty back newest reservation first, which is wrong once a later Work Order took from them."""
+		rows = defaultdict(list)
+		for item in self.items:
+			if not item.scio_detail or frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
+				continue
+			if batches := get_serial_batch_list_from_item(item)[1]:
+				rows[item.scio_detail].append((item, batches))
+		if not rows:
+			return
+
+		for reservation in self.get_later_work_order_reservations(list(rows)):
+			for item, batches in rows[reservation.from_voucher_detail_no]:
+				if reservation.batch_no and reservation.batch_no not in batches:
+					continue
+
+				frappe.throw(
+					_(
+						"Row #{0}: Work Order {1} reserved Item {2} after this return. Cancel the Work Order first."
+					).format(
+						item.idx,
+						get_link_to_form("Work Order", reservation.voucher_no),
+						bold(item.item_code),
+					)
+				)
+
+	def get_later_work_order_reservations(self, scio_details: list[str]) -> list:
+		"""Work Order reservations taken from these inward order rows after this entry was submitted, including closed ones that used stock."""
+		submitted_on = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": self.doctype, "voucher_no": self.name},
+			pluck="creation",
+			order_by="creation asc",
+			limit=1,
+		)
+		reservation = frappe.qb.DocType("Stock Reservation Entry")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		return (
+			frappe.qb.from_(reservation)
+			.left_join(entry)
+			.on((entry.parent == reservation.name) & (entry.parenttype == "Stock Reservation Entry"))
+			.select(reservation.voucher_no, reservation.from_voucher_detail_no, entry.batch_no)
+			.where(
+				(
+					(reservation.docstatus == 1)
+					| (
+						(reservation.docstatus == 2)
+						& (
+							reservation.delivered_qty + reservation.transferred_qty + reservation.consumed_qty
+							> 0
+						)
+					)
+				)
+				& (reservation.voucher_type == "Work Order")
+				& reservation.from_voucher_detail_no.isin(scio_details)
+				& (reservation.creation > submitted_on[0])
+			)
+		).run(as_dict=True)
+
 	def adjust_stock_reservation_entries_for_return(self):
 		if self.purpose == "Return Raw Material to Customer":
+			if self._action == "cancel":
+				self.validate_no_later_work_order_reservation()
 			for item in self.items:
 				serial_list, batch_list = get_serial_batch_list_from_item(item)
 
@@ -1062,6 +1123,7 @@ class SubcontractingInwardController:
 							child_table.delivered_qty,
 						)
 						.where((table.docstatus == 1) & (table.voucher_detail_no == item.scio_detail))
+						.orderby(table.creation, order=Order.asc if self._action == "submit" else Order.desc)
 					)
 					if serial_list:
 						query = query.where(child_table.serial_no.isin(serial_list))
