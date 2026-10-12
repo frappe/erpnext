@@ -34,6 +34,7 @@ class ChildItemUpdater:
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
 		self._transacted_stock_qty: dict | None = None
+		self._rfqs_before_update: set[str] = set()
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
@@ -57,6 +58,7 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		elif self.parent_doctype == "Supplier Quotation":
+			self._rfqs_before_update = self.parent.get_request_for_quotations()
 			self._transacted_stock_qty = get_ordered_supplier_quotation_items(self.parent.name)
 			items_added_or_removed |= validate_and_delete_children(
 				self.parent, data, self._transacted_stock_qty
@@ -206,7 +208,7 @@ class ChildItemUpdater:
 			parent.update_delivery_status()
 
 		elif self.parent_doctype == "Supplier Quotation":
-			parent.update_rfq_supplier_status(parent.docstatus.is_submitted())
+			parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), self._rfqs_before_update)
 			parent.set_status(update=True)
 
 		parent.reload()

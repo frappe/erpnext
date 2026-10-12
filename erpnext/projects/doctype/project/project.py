@@ -11,6 +11,7 @@ from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Locate, Lower, Sum, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.user import is_website_user
 from pypika import Order
 
@@ -829,8 +830,9 @@ def get_project_update_replies(project_update):
 				"user": user_data.name,
 				"full_name": user_data.full_name,
 				"image": user_data.user_image,
-				"project_status": frappe.utils.md_to_html(
-					EmailReplyParser.parse_reply(d.text_content) or d.content
+				"project_status": sanitize_html(
+					frappe.utils.md_to_html(EmailReplyParser.parse_reply(d.text_content) or d.content),
+					linkify=True,
 				),
 			}
 		)
