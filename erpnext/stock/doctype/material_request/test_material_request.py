@@ -45,11 +45,10 @@ class TestMaterialRequest(ERPNextTestSuite):
 	def test_production_plan_qty_with_repeated_references(self):
 		from unittest.mock import patch
 
-		plan_items = [
-			frappe._dict(name="plan-item-1", available_qty=10),
-			frappe._dict(name="plan-item-2", available_qty=10),
-			frappe._dict(name="plan-item-3", available_qty=0.3),
-		]
+		plan_items = {
+			name: frappe._dict(name=name, quantity=quantity, requested_qty=0, conversion_factor=2)
+			for name, quantity in (("plan-item-1", 10), ("plan-item-2", 10), ("plan-item-3", 0.3))
+		}
 		cases = [
 			("above availability", [("plan-item-1", 6), ("plan-item-1", 6)], True),
 			("equal to availability", [("plan-item-1", 6), ("plan-item-1", 4)], False),
@@ -76,8 +75,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 						},
 					)
 
-				with patch("frappe.qb.from_") as query:
-					query.return_value.select.return_value.where.return_value.run.return_value = plan_items
+				with patch.object(type(mr), "get_plan_items", return_value=plan_items):
 					if should_raise:
 						with self.assertRaises(frappe.ValidationError):
 							mr.validate_pp_qty()
@@ -1830,6 +1828,57 @@ class TestMaterialRequest(ERPNextTestSuite):
 			make_material_request,
 			item_code="_Test Item",
 			material_request_type="Customer Provided",
+		)
+
+
+
+	def test_production_plan_requested_qty_follows_the_stock_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		raw_material = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		)
+		bom = make_bom(item=fg_item, raw_materials=[raw_material.name], rm_qty=24)
+		plan = frappe.get_doc(
+			{
+				"doctype": "Production Plan",
+				"company": "_Test Company",
+				"posting_date": today(),
+				"po_items": [
+					{
+						"item_code": fg_item,
+						"bom_no": bom.name,
+						"planned_qty": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+				"mr_items": [
+					{
+						"item_code": raw_material.name,
+						"quantity": 24,
+						"uom": raw_material.stock_uom,
+						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).submit()
+		plan.make_material_request()
+
+		mr = frappe.get_doc(
+			"Material Request",
+			frappe.db.get_value(
+				"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
+			),
+		)
+		mr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2})
+		mr.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "requested_qty"), 24
 		)
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)

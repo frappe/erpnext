@@ -260,30 +260,33 @@ class MaterialRequest(BuyingController):
 
 	def validate_pp_qty(self):
 		items_from_pp = [item for item in self.items if item.material_request_plan_item]
-		if items_from_pp:
-			items_mr_plan_items = [item.material_request_plan_item for item in items_from_pp]
-			table = frappe.qb.DocType("Material Request Plan Item")
-			query = (
-				frappe.qb.from_(table)
-				.select(table.name, (table.quantity - table.requested_qty).as_("available_qty"))
-				.where(table.name.isin(items_mr_plan_items))
-			)
-			result = query.run(as_dict=True)
+		if not items_from_pp:
+			return
 
-			requested_qty = {}
-			for item in items_from_pp:
-				plan_item = item.material_request_plan_item
-				requested_qty[plan_item] = requested_qty.get(plan_item, 0) + item.qty
-				row = next(r for r in result if r.name == item.material_request_plan_item)
-				if (
-					item.qty > row.available_qty
-					or flt(requested_qty[plan_item], item.precision("qty")) > row.available_qty
-				):
-					frappe.throw(
-						_("Quantity cannot be greater than {0} for Item {1}").format(
-							row.available_qty, item.item_code
-						)
+		plan_items = self.get_plan_items(items_from_pp)
+		requested_qty = {}
+		for item in items_from_pp:
+			row = plan_items[item.material_request_plan_item]
+			precision = item.precision("qty")
+			available_qty = flt(flt(row.quantity) - flt(row.requested_qty), precision)
+			qty = get_qty_in_plan_uom(item, row)
+			requested_qty[row.name] = requested_qty.get(row.name, 0) + qty
+			if max(flt(qty, precision), flt(requested_qty[row.name], precision)) > available_qty:
+				frappe.throw(
+					_("Quantity cannot be greater than {0} for Item {1}").format(
+						available_qty, item.item_code
 					)
+				)
+
+	def get_plan_items(self, items):
+		return {
+			row.name: row
+			for row in frappe.get_all(
+				"Material Request Plan Item",
+				filters={"name": ("in", {item.material_request_plan_item for item in items})},
+				fields=["name", "quantity", "requested_qty", "conversion_factor"],
+			)
+		}
 
 	def before_update_after_submit(self):
 		self.validate_schedule_date()
@@ -567,25 +570,26 @@ class MaterialRequest(BuyingController):
 			)
 
 	def update_requested_qty_in_production_plan(self, cancel=False):
-		production_plans = []
-		for d in self.get("items"):
-			if d.production_plan and d.material_request_plan_item:
-				requested_qty = frappe.get_value(
-					"Material Request Plan Item", d.material_request_plan_item, "requested_qty"
-				)
-				qty = (requested_qty + d.qty) if not cancel else (requested_qty - d.qty)
-				frappe.db.set_value(
-					"Material Request Plan Item", d.material_request_plan_item, "requested_qty", qty
-				)
+		items_from_pp = [d for d in self.items if d.production_plan and d.material_request_plan_item]
+		if not items_from_pp:
+			return
 
-				if d.production_plan not in production_plans:
-					production_plans.append(d.production_plan)
+		plan_items = self.get_plan_items(items_from_pp)
+		for d in items_from_pp:
+			row = plan_items[d.material_request_plan_item]
+			qty = get_qty_in_plan_uom(d, row)
+			row.requested_qty = flt(row.requested_qty) + (-qty if cancel else qty)
+			frappe.db.set_value("Material Request Plan Item", row.name, "requested_qty", row.requested_qty)
 
-		for production_plan in production_plans:
+		for production_plan in {d.production_plan for d in items_from_pp}:
 			doc = frappe.get_doc("Production Plan", production_plan)
 			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
+
+
+def get_qty_in_plan_uom(item, plan_item):
+	return flt(item.stock_qty) / (flt(plan_item.conversion_factor) or 1)
 
 
 def is_valid_buying_price_list(price_list: str | None) -> bool:
