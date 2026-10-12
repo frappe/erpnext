@@ -241,6 +241,18 @@ class StockClosingEntry(Document):
 				)
 			)
 
+	def validate_no_pending_reposts(self):
+		from erpnext.stock.utils import PendingRepostingError, check_pending_reposting
+
+		if check_pending_reposting(self.to_date, self.company, throw_error=False):
+			frappe.throw(
+				_(
+					"Cannot generate the closing balance of Stock Closing Entry {0} while Repost Item Valuation entries dated on or before {1} are pending. Try again once they are completed."
+				).format(self.name, frappe.bold(frappe.format(self.to_date, "Date"))),
+				PendingRepostingError,
+				title=_("Stock Reposting Ongoing"),
+			)
+
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
@@ -249,6 +261,7 @@ class StockClosingEntry(Document):
 	def enqueue_job(self):
 		self.check_permission("write")
 		self.validate_submitted()
+		self.validate_no_pending_reposts()
 
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
