@@ -1294,6 +1294,70 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.cancel()
 
+	def test_internal_transfer_on_half_cent_moves_no_value(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		prepare_data_for_internal_transfer()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=2, basic_rate=10.005)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].from_warehouse = "Work In Progress - TCP1"
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		ledger = {
+			(row.voucher_type, row.warehouse): row.stock_value_difference
+			for row in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"item_code": item, "voucher_no": ("in", [dn.name, pr.name]), "is_cancelled": 0},
+				fields=["voucher_type", "warehouse", "stock_value_difference"],
+			)
+		}
+		self.assertEqual(
+			ledger,
+			{
+				("Delivery Note", "Stores - TCP1"): -10.01,
+				("Delivery Note", "Work In Progress - TCP1"): 10.01,
+				("Purchase Receipt", "Work In Progress - TCP1"): -10.01,
+				("Purchase Receipt", "Finished Goods - TCP1"): 10.01,
+			},
+		)
+
+	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4536}],
+		).name
+		pr = make_purchase_receipt(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			qty=7,
+			rate=12.34,
+			do_not_save=True,
+		)
+		pr.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4536, "cost_center": "Main - TCP1"})
+		pr.submit()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pr.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(stock_value, pr.items[0].base_net_amount)
+
 	def test_inter_company_purchase_receipt_does_not_inherit_party_fields(self):
 		"""
 		Party-derived fields on DN (from Customer) must not leak into the mapped PR.
@@ -6690,6 +6754,138 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.status, status_before)
 		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
+
+	def test_purchase_return_rate_on_repost_ignores_the_rejected_warehouse(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = make_item(properties={"valuation_method": "FIFO"}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		rejected_warehouse = create_warehouse("_Test Rejected Return Warehouse", company=company)
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=6,
+			rejected_qty=1,
+			rate=394,
+			company=company,
+			warehouse=warehouse,
+			rejected_warehouse=rejected_warehouse,
+			posting_date=add_days(today(), -3),
+		)
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].qty = pr_return.items[0].received_qty = -5
+		pr_return.items[0].rejected_qty = 0
+		pr_return.set_posting_time = 1
+		pr_return.posting_date = add_days(today(), -1)
+		pr_return.submit()
+
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=3,
+			rate=100,
+			company=company,
+			posting_date=add_days(today(), -4),
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr_return.name, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			-1970,
+		)
+
+	def test_moving_average_purchase_return_keeps_its_rate_on_repost(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"valuation_method": "Moving Average"}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=10,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -3),
+		)
+		pr_return = make_purchase_receipt(
+			item_code=item,
+			qty=-5,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			is_return=1,
+			return_against=pr.name,
+			posting_date=add_days(today(), -1),
+		)
+
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=10,
+			rate=300,
+			company=company,
+			posting_date=add_days(today(), -5),
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr_return.name, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			-500,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"set_valuation_rate_for_rejected_materials": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+		},
+	)
+	def test_unvalued_rejected_material_stays_unvalued_on_repost(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = make_item(properties={"valuation_method": "FIFO"}).name
+		company = "_Test Company with perpetual inventory"
+		rejected_warehouse = create_warehouse("_Test Unvalued Rejected Warehouse", company=company)
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=8,
+			rejected_qty=2,
+			rate=41,
+			company=company,
+			warehouse="Stores - TCP1",
+			rejected_warehouse=rejected_warehouse,
+			posting_date=add_days(today(), -2),
+		)
+
+		make_stock_entry(
+			item_code=item,
+			target=rejected_warehouse,
+			qty=5,
+			rate=100,
+			company=company,
+			posting_date=add_days(today(), -3),
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			0,
+		)
 
 
 def create_asset_category_for_pr_test():
