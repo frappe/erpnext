@@ -154,7 +154,7 @@ class AccountsController(TransactionBase):
 			self.remove_serial_and_batch_bundle()
 
 	def ensure_supplier_is_not_blocked(self):
-		if self.get("is_return"):
+		if self.meta.has_field("is_return") and self.is_return:
 			return
 
 		hold_type, suppliers = self.get_supplier_hold_scope()
@@ -176,11 +176,16 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Payment Entry" and self.party_type == "Supplier":
 			return "Payments", [self.party]
 		if self.doctype == "Journal Entry" and any(
-			flt(row.credit_in_account_currency) > 0
+			flt(row.credit_in_account_currency) - flt(row.debit_in_account_currency) > 0
 			and frappe.get_cached_value("Account", row.account, "account_type") in ("Bank", "Cash")
 			for row in self.accounts
 		):
-			return "Payments", [row.party for row in self.accounts if row.party_type == "Supplier"]
+			return "Payments", [
+				row.party
+				for row in self.accounts
+				if row.party_type == "Supplier"
+				and flt(row.debit_in_account_currency) - flt(row.credit_in_account_currency) > 0
+			]
 		return None, []
 
 	def validate_against_voucher_outstanding(self):

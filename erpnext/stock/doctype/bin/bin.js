@@ -7,6 +7,10 @@ frappe.ui.form.on("Bin", {
 	},
 
 	recalculate_values(frm) {
+		if (!frappe.model.can_write("Repost Item Valuation")) {
+			return;
+		}
+
 		frm.add_custom_button(__("Recalculate Values"), () => {
 			frappe.call({
 				method: "recalculate_values",

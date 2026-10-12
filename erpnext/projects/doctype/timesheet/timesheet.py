@@ -367,15 +367,15 @@ def get_projectwise_timesheet_data(
 			(tsd.parenttype == "Timesheet")
 			& (tsd.docstatus == 1)
 			& (tsd.is_billable == 1)
-			& tsd.sales_invoice.isnull()
+			& (Coalesce(tsd.sales_invoice, "") == "")
 			& (tsd.parent.isin(allowed_timesheets))
 		)
 	)
 
 	if allowed_projects:
-		query = query.where((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
+		query = query.where((tsd.project.isin(allowed_projects)) | (Coalesce(tsd.project, "") == ""))
 	else:
-		query = query.where(tsd.project.isnull())
+		query = query.where(Coalesce(tsd.project, "") == "")
 
 	if project:
 		query = query.where(tsd.project == project)

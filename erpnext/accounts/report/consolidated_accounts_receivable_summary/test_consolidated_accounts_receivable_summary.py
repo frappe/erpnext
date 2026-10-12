@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import frappe
+from frappe.desk.query_report import run
 from frappe.utils import today
 
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
@@ -90,6 +92,32 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 
 		self.assertEqual([r.company for r in rows], [self.company_a, usd])
 		self.assertFalse(any(row.get("bold") for row in rows))
+
+	def test_user_restricted_to_a_subsidiary_sees_its_rows(self):
+		group = self.create_test_company("_Test Consolidation Group", "_TCGRP", is_group=1)
+		child = self.create_test_company("_Test Consolidation Child", "_TCCLD", parent=group)
+		self.create_invoice(child, "_TCCLD", 400)
+		user = self.restricted_user(child)
+
+		frappe.set_user(user)
+		try:
+			rows = run("Consolidated Accounts Receivable Summary", self.filters(companies=[child]))["result"]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([r.get("company") for r in rows], [child, ""])
+		self.assertEqual([r.get("outstanding") for r in rows], [400.0, 400.0])
+
+	def restricted_user(self, company):
+		user = "test_consolidated_ar_summary@example.com"
+		if not frappe.db.exists("User", user):
+			doc = frappe.new_doc("User")
+			doc.email = user
+			doc.first_name = "Consolidated AR"
+			doc.append("roles", {"role": "Accounts User"})
+			doc.insert()
+		frappe.permissions.add_user_permission("Company", company, user)
+		return user
 
 	def company_outstanding(self, company):
 		filters = {"company": company, "report_date": today(), "range": "30, 60, 90, 120"}
