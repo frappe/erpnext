@@ -1862,6 +1862,16 @@ frappe.ui.form.on("Advance Taxes and Charges", {
 	},
 });
 
+frappe.ui.form.on("Tax Withholding Entry", {
+	taxable_amount: function (frm, cdt, cdn) {
+		erpnext.utils.set_withholding_amount(cdt, cdn);
+	},
+
+	tax_rate: function (frm, cdt, cdn) {
+		erpnext.utils.set_withholding_amount(cdt, cdn);
+	},
+});
+
 frappe.ui.form.on("Payment Entry Deduction", {
 	before_deductions_remove: function (doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);

@@ -755,15 +755,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	calculate_withholding_amount(frm, cdt, cdn) {
-		// Calculate withholding amount: taxable_amount * tax_rate / 100
-		let row = frappe.get_doc(cdt, cdn);
-		let withholding_amount = flt(
-			(row.taxable_amount * row.tax_rate) / 100,
-			precision("withholding_amount", row)
-		);
-
-		// Set the calculated withholding amount
-		frappe.model.set_value(cdt, cdn, "withholding_amount", withholding_amount);
+		erpnext.utils.set_withholding_amount(cdt, cdn);
 	}
 
 	send_sms() {

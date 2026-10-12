@@ -621,6 +621,25 @@ $.extend(erpnext.utils, {
 			});
 		}
 	},
+
+	set_withholding_amount: async function (cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		let digits = precision("withholding_amount", row);
+
+		if (row.tax_withholding_category) {
+			const res = await frappe.db.get_value(
+				"Tax Withholding Category",
+				row.tax_withholding_category,
+				"round_off_tax_amount"
+			);
+			if (res.message?.round_off_tax_amount) {
+				digits = 0;
+			}
+		}
+
+		const withholding_amount = flt((row.taxable_amount * row.tax_rate) / 100, digits);
+		frappe.model.set_value(cdt, cdn, "withholding_amount", withholding_amount);
+	},
 });
 
 erpnext.utils.confirm_negative_stock = function (frm) {
