@@ -511,6 +511,35 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
 		self.assertEqual(basic_rm.work_order_qty, 0)
 
+	def test_cancel_closed_work_order_after_its_manufacture_is_cancelled(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Manufacture", 2)
+		)
+		manufacture.submit()
+		close_work_order(wo.name, "Closed")
+
+		for sre in frappe.get_all(
+			"Stock Reservation Entry", {"from_voucher_no": manufacture.name, "docstatus": 1}, pluck="name"
+		):
+			frappe.get_doc("Stock Reservation Entry", sre).cancel()
+		manufacture.reload()
+		manufacture.cancel()
+		wo.reload()
+		wo.cancel()
+
+		scio.reload()
+		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
+		self.assertEqual(basic_rm.work_order_qty, 0)
+
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
