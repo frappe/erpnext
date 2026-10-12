@@ -294,11 +294,13 @@ def get_conditions(filters):
 		else:
 			conditions.append("posting_date >=%(from_date)s")
 
-	# opening balance calculation is done only if filtered on account/party
+	# opening balance calculation is done only if filtered on account/party/cost center/project
 	# so from_date filter is not applied
 	elif not (
 		filters.get("account")
 		or filters.get("party")
+		or filters.get("cost_center")
+		or filters.get("project")
 		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
 	):
 		if not ignore_is_opening:
@@ -1052,7 +1054,7 @@ def _build_gl_conditions_duckdb(filters):
 		conditions.append(f"party IN ({', '.join(['?'] * len(filters.party))})")
 		params.extend(filters.party)
 
-	# from_date: skip when filtering by account/party to allow opening balance calc in Python
+	# from_date: skip when filtering by account/party/cost center/project to allow opening balance calc in Python
 	if filters.get("disable_opening_balance_calculation"):
 		if not ignore_is_opening:
 			conditions.append("(posting_date >= ? OR is_opening = 'Yes')")
@@ -1062,6 +1064,8 @@ def _build_gl_conditions_duckdb(filters):
 	elif not (
 		filters.get("account")
 		or filters.get("party")
+		or filters.get("cost_center")
+		or filters.get("project")
 		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
 	):
 		if not ignore_is_opening:
