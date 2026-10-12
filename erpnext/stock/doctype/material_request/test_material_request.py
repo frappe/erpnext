@@ -1941,6 +1941,53 @@ class TestMaterialRequest(ERPNextTestSuite):
 		update_po_status("Closed", po.name)
 
 		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
+
+
+
+	def test_subcontracting_request_is_counted_in_indented_qty(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		existing_qty = self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC")
+
+		mr = make_material_request(
+			item_code="Subcontracted Item SA1", qty=10, material_request_type="Subcontracting"
+		)
+		self.assertEqual(
+			self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC"), existing_qty + 10
+		)
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 10,
+				}
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_save=True,
+		)
+		po.items[0].material_request = mr.name
+		po.items[0].material_request_item = mr.items[0].name
+		po.submit()
+
+		self.assertEqual(
+			self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC"), existing_qty
+		)
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
 	item.set("item_defaults", [])
