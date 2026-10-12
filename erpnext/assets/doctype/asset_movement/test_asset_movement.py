@@ -172,6 +172,27 @@ class TestAssetMovement(unittest.TestCase):
 
 		self.assertEqual(get_location_and_custodian(asset.name), ("Test Location", employee))
 
+	def test_return_to_current_location_logs_custodian_removal(self):
+		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
+		asset = create_asset(location="Test Location", submit=1)
+		for purpose, row in (
+			("Issue", {"to_employee": employee}),
+			("Receipt", {"target_location": "Test Location"}),
+		):
+			create_asset_movement(
+				purpose=purpose, company=asset.company, assets=[{"asset": asset.name, **row}]
+			)
+
+		self.assertFalse(frappe.db.get_value("Asset", asset.name, "custodian"))
+		latest_activity = frappe.get_all(
+			"Asset Activity",
+			filters={"asset": asset.name},
+			pluck="subject",
+			order_by="creation desc",
+			limit=1,
+		)
+		self.assertIn("returned by Employee", latest_activity[0])
+
 	def test_movement_transaction_date(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.save().submit()
