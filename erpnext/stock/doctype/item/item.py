@@ -32,6 +32,7 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item_search import queue_item
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -185,17 +186,19 @@ class Item(Document):
 
 	def after_insert(self):
 		"""set opening stock and item price"""
-		if self.standard_rate:
-			for default in self.item_defaults or [frappe._dict()]:
-				self.add_price(default.default_price_list)
-
-			frappe.msgprint(
-				_("Item Price created at rate {0}").format(
-					frappe.format(self.standard_rate, {"fieldtype": "Currency"})
-				),
-				indicator="green",
-				alert=True,
-			)
+		if self.standard_rate and not self.has_variants:
+			price_lists = {
+				self.get_selling_price_list(default.default_price_list)
+				for default in self.item_defaults or [frappe._dict()]
+			}
+			if [price_list for price_list in price_lists if self.add_price(price_list)]:
+				frappe.msgprint(
+					_("Item Price created at rate {0}").format(
+						frappe.format(self.standard_rate, {"fieldtype": "Currency"})
+					),
+					indicator="green",
+					alert=True,
+				)
 
 		if self.opening_stock:
 			if self.opening_stock > 10000 and self.has_serial_no:
@@ -304,25 +307,42 @@ class Item(Document):
 				frappe.throw(_('"Customer Provided Item" cannot have Valuation Rate'))
 			self.default_material_request_type = "Customer Provided"
 
+	def get_selling_price_list(self, price_list=None):
+		if price_list and frappe.get_cached_value("Price List", price_list, "selling"):
+			return price_list
+
+		return frappe.get_single_value("Selling Settings", "selling_price_list") or frappe.db.get_value(
+			"Price List", "Standard Selling"
+		)
+
 	def add_price(self, price_list=None):
 		"""Add a new price"""
+		price_list = self.get_selling_price_list(price_list)
 		if not price_list:
-			price_list = frappe.get_single_value(
-				"Selling Settings", "selling_price_list"
-			) or frappe.db.get_value("Price List", "Standard Selling")
-		if price_list:
-			item_price = frappe.get_doc(
-				{
-					"doctype": "Item Price",
-					"price_list": price_list,
-					"item_code": self.name,
-					"uom": self.stock_uom,
-					"brand": self.brand,
-					"currency": erpnext.get_default_currency(),
-					"price_list_rate": self.standard_rate,
-				}
-			)
-			item_price.insert()
+			return False
+
+		default_currency = erpnext.get_default_currency()
+		currency = frappe.get_cached_value("Price List", price_list, "currency") or default_currency
+		price_list_rate = flt(self.standard_rate)
+		if default_currency and currency != default_currency:
+			exchange_rate = flt(get_exchange_rate(currency, default_currency))
+			if not exchange_rate:
+				return False
+
+			price_list_rate = price_list_rate / exchange_rate
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": price_list,
+				"item_code": self.name,
+				"uom": self.stock_uom,
+				"brand": self.brand,
+				"currency": currency,
+				"price_list_rate": price_list_rate,
+			}
+		).insert()
+		return True
 
 	def validate_opening_stock(self):
 		if not self.is_stock_item or not self.opening_stock:
