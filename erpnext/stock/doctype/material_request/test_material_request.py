@@ -1735,6 +1735,67 @@ class TestMaterialRequest(ERPNextTestSuite):
 		update_status(stopped_mr.name, "Stopped")
 		self.assertRaises(frappe.InvalidStatusError, draft.submit)
 
+	def test_closed_work_order_keeps_its_produced_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		fg_item = make_item(properties={"is_stock_item": 1})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		make_se(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_bom(item=fg_item.name, raw_materials=[raw_material], rm_qty=1)
+		mr = make_material_request(
+			item_code=fg_item.name, material_request_type="Manufacture", qty=10, uom=fg_item.stock_uom
+		)
+
+		work_order = frappe.get_doc("Work Order", raise_work_orders(mr.name, mr.company)[0])
+		work_order.update(
+			{
+				"skip_transfer": 1,
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"source_warehouse": "_Test Warehouse - _TC",
+			}
+		)
+		for row in work_order.required_items:
+			row.source_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+		frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 4)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"), 4)
+		self.assertEqual(
+			frappe.db.get_value("Work Order", raise_work_orders(mr.name, mr.company)[0], "qty"), 6
+		)
+
+	@change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 10})
+	def test_closing_an_overproduced_work_order_is_allowed(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		fg_item = make_item(properties={"is_stock_item": 1})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		make_se(item_code=raw_material, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		make_bom(item=fg_item.name, raw_materials=[raw_material], rm_qty=1)
+		mr = make_material_request(
+			item_code=fg_item.name, material_request_type="Manufacture", qty=10, uom=fg_item.stock_uom
+		)
+
+		work_order = frappe.get_doc("Work Order", raise_work_orders(mr.name, mr.company)[0])
+		work_order.update(
+			{"skip_transfer": 1, "wip_warehouse": "_Test Warehouse 1 - _TC", "source_warehouse": "_Test Warehouse - _TC"}
+		)
+		for row in work_order.required_items:
+			row.source_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+		frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 11)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"), 10)
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
