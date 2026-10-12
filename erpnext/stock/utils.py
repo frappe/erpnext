@@ -326,13 +326,16 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		as_dict=1,
 	)
 
-	use_moving_avg_for_batch = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
 	skip_serial_batch_valuation = bool(
 		item_details and item_details.has_serial_no and not item_details.use_serial_no_wise_valuation
 	)
 
 	if isinstance(args, dict):
 		args = frappe._dict(args)
+
+	use_moving_avg_for_batch = frappe.get_single_value(
+		"Stock Settings", "do_not_use_batchwise_valuation"
+	) and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
 
 	if (
 		item_details
@@ -421,6 +424,20 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		)
 
 	return flt(in_rate)
+
+
+def has_batchwise_valued_batch(batch_no: str | None, serial_and_batch_bundle: str | None) -> bool:
+	"""Pooling applies to Moving Average batches only; FIFO batches keep batch-wise valuation."""
+	batches = [batch_no] if batch_no else []
+	if serial_and_batch_bundle:
+		batches = frappe.get_all(
+			"Serial and Batch Entry", {"parent": serial_and_batch_bundle}, pluck="batch_no"
+		)
+
+	return (
+		bool(batches)
+		and frappe.db.exists("Batch", {"name": ("in", batches), "use_batchwise_valuation": 1}) is not None
+	)
 
 
 def get_avg_purchase_rate(serial_nos):
