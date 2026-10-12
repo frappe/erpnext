@@ -490,6 +490,33 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.total_billable_amount, 200)
 		self.assertEqual(timesheet.total_costing_amount, 20)
 
+	def test_activity_cost_refuses_a_missing_exchange_rate(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0):
+			self.assertRaises(frappe.ValidationError, get_activity_cost, None, "_Test Activity Type", "EUR")
+
+			timesheet = frappe.get_doc(
+				{
+					"doctype": "Timesheet",
+					"company": "_Test Company",
+					"currency": "EUR",
+					"exchange_rate": 80,
+					"time_logs": [
+						{
+							"activity_type": "_Test Activity Type",
+							"is_billable": 1,
+							"from_time": now_datetime(),
+							"hours": 2,
+							"billing_rate": 50,
+							"costing_rate": 20,
+						}
+					],
+				}
+			).insert()
+
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 50)
+
 	def test_default_activity_cost_applies_to_employees_without_their_own(self):
 		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 
