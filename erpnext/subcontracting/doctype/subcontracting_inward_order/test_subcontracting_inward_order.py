@@ -745,6 +745,82 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			rows = frappe.get_all("Serial and Batch Entry", {"parent": sre.name}, pluck="delivered_qty")
 			self.assertEqual(sum(rows), sre.delivered_qty)
 
+	def test_work_order_takes_a_batch_received_twice_once(self):
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		batch_row = next(item for item in rm_in.items if item.item_code == "RM with Batch")
+		batch_row.qty = 3
+		rm_in.submit()
+		batch_no = next(iter(get_batch_nos(batch_row.serial_and_batch_bundle)))
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.items[0].update({"use_serial_batch_fields": 1, "batch_no": batch_no})
+		rm_in.submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		batch_rm = next(row for row in scio.received_items if row.rm_item_code == "RM with Batch")
+		delivered = [
+			frappe.get_all("Serial and Batch Entry", {"parent": name}, pluck="delivered_qty")
+			for name in frappe.get_all(
+				"Stock Reservation Entry",
+				{"voucher_detail_no": batch_rm.name, "docstatus": 1},
+				pluck="name",
+				order_by="creation",
+			)
+		]
+		self.assertEqual(delivered, [[3], [2]])
+
+	def test_closing_work_order_gives_back_a_returned_batch_to_the_reservation_it_used(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		batch_row = next(item for item in rm_in.items if item.item_code == "RM with Batch")
+		batch_row.qty = 3
+		rm_in.submit()
+		batch_no = next(iter(get_batch_nos(batch_row.serial_and_batch_bundle)))
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.items[0].update({"use_serial_batch_fields": 1, "batch_no": batch_no})
+		rm_in.submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 1
+		wo.submit()
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].update(
+			{"qty": 4, "use_serial_batch_fields": 1, "batch_no": batch_no, "serial_and_batch_bundle": None}
+		)
+		rm_return.submit()
+		close_work_order(wo.name, "Closed")
+
+		batch_rm = next(row for row in scio.received_items if row.rm_item_code == "RM with Batch")
+		for sre in frappe.get_all(
+			"Stock Reservation Entry",
+			{"voucher_detail_no": batch_rm.name, "docstatus": 1},
+			["name", "reserved_qty", "delivered_qty"],
+		):
+			rows = frappe.get_all("Serial and Batch Entry", {"parent": sre.name}, ["qty", "delivered_qty"])
+			self.assertEqual(
+				sum(row.qty - row.delivered_qty for row in rows), sre.reserved_qty - sre.delivered_qty
+			)
+			self.assertEqual(sre.delivered_qty, 0)
+
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
