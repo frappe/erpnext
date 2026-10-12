@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cint, get_datetime, get_link_to_form
+from frappe.utils import cint, cstr, get_datetime, get_link_to_form, getdate
 
 
 class DeliveryTrip(Document):
@@ -162,47 +162,37 @@ class DeliveryTrip(Document):
 			self.update_delivery_notes(delete=True, delivery_notes=removed - current)
 
 	def update_delivery_notes(self, delete=False, delivery_notes=None):
-		"""
-		Update all connected Delivery Notes with Delivery Trip details
-		(Driver, Vehicle, etc.). If `delete` is `True`, then details
-		are removed.
-
-		Args:
-		        delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
-		"""
-
 		if delivery_notes is None:
 			delivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}
+		if not delivery_notes:
+			return
 
-		update_fields = {
+		trip_values = [self.get_delivery_note_values()]
+		if doc_before_save := self.get_doc_before_save():
+			trip_values.append(doc_before_save.get_delivery_note_values())
+
+		updated = []
+		for note in frappe.get_all(
+			"Delivery Note",
+			filters={"name": ("in", list(delivery_notes))},
+			fields=["name", "delivery_trip", *trip_values[0]],
+		):
+			update = release_delivery_note if delete else link_delivery_note
+			if values := update(note, self.name, trip_values):
+				frappe.db.set_value("Delivery Note", note.name, values)
+				updated.append(get_link_to_form("Delivery Note", note.name))
+
+		if updated:
+			frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(updated)))
+
+	def get_delivery_note_values(self):
+		return {
 			"driver": self.driver,
 			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
-			"delivery_trip": self.name,
 			"lr_no": self.name,
-			"lr_date": self.departure_time,
+			"lr_date": getdate(self.departure_time) if self.departure_time else None,
 		}
-
-		delivery_notes_updated = set()
-
-		for delivery_note in delivery_notes:
-			note_doc = frappe.get_doc("Delivery Note", delivery_note)
-			if delete and note_doc.delivery_trip != self.name:
-				continue
-
-			for field, value in update_fields.items():
-				prev_value = getattr(note_doc, field)
-				value = None if delete else value
-				if prev_value != value:
-					delivery_notes_updated.add(delivery_note)
-				setattr(note_doc, field, value)
-
-			if delivery_note in delivery_notes_updated:
-				note_doc.flags.ignore_validate_update_after_submit = True
-				note_doc.save()
-
-		delivery_notes_updated = [get_link_to_form("Delivery Note", note) for note in delivery_notes_updated]
-		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes_updated)))
 
 	@frappe.whitelist()
 	def process_route(self, optimize: bool):
@@ -357,6 +347,31 @@ class DeliveryTrip(Document):
 			frappe.throw(_(str(e)))
 
 		return directions[0] if directions else False
+
+
+def is_trip_value(note, field, trip_values):
+	return any(cstr(note.get(field)) == cstr(values[field]) for values in trip_values)
+
+
+def link_delivery_note(note, trip_name, trip_values):
+	values = {} if note.delivery_trip == trip_name else {"delivery_trip": trip_name}
+	for field, value in trip_values[0].items():
+		if note.get(field) != value and (not note.get(field) or is_trip_value(note, field, trip_values)):
+			values[field] = value
+
+	return values
+
+
+def release_delivery_note(note, trip_name, trip_values):
+	if note.delivery_trip != trip_name:
+		return {}
+
+	values = {"delivery_trip": None}
+	for field in trip_values[0]:
+		if note.get(field) and is_trip_value(note, field, trip_values):
+			values[field] = None
+
+	return values
 
 
 @frappe.whitelist()

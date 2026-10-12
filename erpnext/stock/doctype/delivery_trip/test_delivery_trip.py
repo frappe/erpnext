@@ -255,6 +255,30 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		trip.cancel()
 		self.assertEqual(trip.docstatus, 2)
 
+
+
+	def test_trip_keeps_the_delivery_note_transport_details(self):
+		delivery_note = self.make_delivery_note_with_address(lr_no="LR-777", vehicle_no="MH12AB1234")
+		trip = self.make_trip_for(delivery_note.name)
+
+		values = frappe.db.get_value(
+			"Delivery Note", delivery_note.name, ["lr_no", "vehicle_no", "driver"], as_dict=True
+		)
+		self.assertEqual(
+			(values.lr_no, values.vehicle_no, values.driver), ("LR-777", "MH12AB1234", trip.driver)
+		)
+
+		trip.delete()
+		values = frappe.db.get_value(
+			"Delivery Note",
+			delivery_note.name,
+			["lr_no", "vehicle_no", "driver", "delivery_trip"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			(values.lr_no, values.vehicle_no, values.driver, values.delivery_trip),
+			("LR-777", "MH12AB1234", None, None),
+		)
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc(
