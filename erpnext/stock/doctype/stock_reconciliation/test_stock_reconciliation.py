@@ -2717,6 +2717,27 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(make_opening(plant_b, -2, 3).docstatus, 1)
 		self.assertRaises(frappe.ValidationError, make_opening, plant_a, -1, 7)
 
+	def test_new_item_without_rate_takes_the_item_valuation_rate(self):
+		item_code = create_item("_Test Reco Item Valuation Fallback", valuation_rate=50).name
+
+		sr = create_stock_reconciliation(item_code=item_code, qty=10, do_not_submit=True)
+		self.assertEqual(sr.difference_amount, 500)
+
+		sr.submit()
+		self.assertEqual(sr.items[0].valuation_rate, 50)
+
+	def test_blank_rate_on_a_bundle_row_keeps_the_draft_difference(self):
+		item = create_item("_Test Reco Bundle Blank Rate")
+		item.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRBBR-.###"})
+		item.save()
+		first = create_stock_reconciliation(
+			item_code=item.name, qty=10, rate=100, posting_date=add_days(nowdate(), -2)
+		)
+		batch_no = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+
+		sr = create_stock_reconciliation(item_code=item.name, batch_no=batch_no, qty=5, do_not_submit=True)
+
+		self.assertEqual(sr.difference_amount, -500)
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

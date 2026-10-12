@@ -762,7 +762,7 @@ class StockReconciliation(StockController):
 				if item.qty is None:
 					item.qty = item_dict.get("qty")
 
-				if item.valuation_rate is None:
+				if item.valuation_rate is None and (item_dict.get("rate") or item_dict.get("qty")):
 					item.valuation_rate = item_dict.get("rate")
 
 				# Standard Cost items are valued at the standard rate; don't pull serial nos onto the row,
@@ -806,6 +806,7 @@ class StockReconciliation(StockController):
 		new_amount = flt(new_qty * new_valuation_rate, amount_precision)
 		current_amount = flt(current_qty * current_valuation_rate, amount_precision)
 
+		item.flags.difference_valuation_rate = new_valuation_rate
 		self.difference_amount += new_amount - current_amount
 
 	def validate_data(self):
@@ -882,6 +883,11 @@ class StockReconciliation(StockController):
 					else:
 						# get valuation rate from Item
 						row.valuation_rate = frappe.get_value("Item", row.item_code, "valuation_rate")
+
+				self.difference_amount += flt(
+					flt(row.qty) * (flt(row.valuation_rate) - flt(row.flags.difference_valuation_rate)),
+					row.precision("amount"),
+				)
 
 		# throw all validation messages
 		if self.validation_messages:
