@@ -2653,6 +2653,18 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual((balance["qty"], balance["rate"]), (7, 0))
 
+	def test_stock_account_is_refused_as_difference_account(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			create_stock_reconciliation,
+			item_code="_Test Item",
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			expense_account="Stock In Hand - TCP1",
+			qty=20,
+			rate=100,
+		)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
