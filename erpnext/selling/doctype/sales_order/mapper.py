@@ -11,7 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, cint, flt, nowdate, strip_html
+from frappe.utils import add_days, cint, cstr, flt, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
@@ -239,6 +239,55 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name
 
 
+def has_items_from_other_sales_order(target_doc, sales_order: str) -> bool:
+	if not target_doc:
+		return False
+
+	if isinstance(target_doc, str):
+		target_doc = json.loads(target_doc)
+
+	return any(
+		d.get("against_sales_order") and d.get("against_sales_order") != sales_order
+		for d in target_doc.get("items") or []
+	)
+
+
+def merge_sales_order_taxes(source, target) -> None:
+	"""Merge the tax rows of `source` into `target`, which already holds the taxes of other Sales Orders.
+
+	Identical rows are kept once (Actual charges are added up) and the rest are appended, so that
+	taxes get recalculated on all the items instead of being replaced by the last Sales Order's.
+	"""
+	target_idx_by_source_idx = {}
+
+	for tax in source.get("taxes"):
+		row_id = target_idx_by_source_idx.get(cint(tax.row_id)) if tax.row_id else None
+
+		target_tax = next(
+			(
+				d
+				for d in target.get("taxes")
+				if d.charge_type == tax.charge_type
+				and d.account_head == tax.account_head
+				and d.cost_center == tax.cost_center
+				and flt(d.rate) == flt(tax.rate)
+				and cint(d.included_in_print_rate) == cint(tax.included_in_print_rate)
+				and cint(d.row_id) == cint(row_id)
+			),
+			None,
+		)
+
+		if target_tax:
+			if tax.charge_type == "Actual":
+				target_tax.tax_amount = flt(target_tax.tax_amount) + flt(tax.tax_amount)
+		else:
+			row = tax.as_dict(no_default_fields=True, no_child_table_fields=True)
+			row.row_id = cstr(row_id) if row_id else None
+			target_tax = target.append("taxes", row)
+
+		target_idx_by_source_idx[tax.idx] = target_tax.idx
+
+
 @frappe.whitelist()
 def make_delivery_note(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
@@ -256,6 +305,8 @@ def make_delivery_note(
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
+	# items of other Sales Orders are already on the target, keep their taxes and merge this order's into them
+	merge_taxes = has_items_from_other_sales_order(target_doc, source_name)
 
 	mapper = {
 		"Sales Order": {
@@ -264,7 +315,11 @@ def make_delivery_note(
 			# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
 			"field_map": {"commission_rate": "commission_rate"},
 		},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges",
+			"reset_value": not merge_taxes,
+			"ignore": merge_taxes,
+		},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
@@ -288,6 +343,9 @@ def make_delivery_note(
 		if kwargs.get("ignore_pricing_rule"):
 			# Skip pricing rule when the dn is creating from the pick list
 			target.ignore_pricing_rule = 1
+
+		if merge_taxes:
+			merge_sales_order_taxes(source, target)
 
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
