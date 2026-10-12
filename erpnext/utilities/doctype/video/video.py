@@ -47,9 +47,9 @@ class Video(Document):
 
 	def set_youtube_statistics(self):
 		api_key = frappe.db.get_single_value("Video Settings", "api_key")
-		api = Api(api_key=api_key)
 
 		try:
+			api = Api(api_key=api_key)
 			video = api.get_video_by_id(video_id=self.youtube_video_id)
 			video_stats = video.items[0].to_dict().get("statistics")
 
