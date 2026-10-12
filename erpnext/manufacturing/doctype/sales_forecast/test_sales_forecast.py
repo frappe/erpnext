@@ -73,6 +73,13 @@ class TestSalesForecastIntegration(ERPNextTestSuite):
 		forecast.cancel()
 		self.assertEqual(frappe.db.get_value("Sales Forecast", forecast.name, "status"), "Cancelled")
 
+	def test_selected_items_need_no_demand_qty(self):
+		forecast = make_sales_forecast(selected_items=[{"item_code": "_Test Item"}], do_not_submit=True)
+		self.assertTrue(forecast.items)
+
+		forecast.items[0].demand_qty = None
+		self.assertRaises(frappe.MandatoryError, forecast.save)
+
 
 def make_sales_forecast(**args):
 	args = frappe._dict(args)
@@ -84,7 +91,8 @@ def make_sales_forecast(**args):
 			"from_date": args.from_date or frappe.utils.today(),
 			"frequency": args.frequency or "Monthly",
 			"demand_number": args.demand_number or 2,
-			"selected_items": [{"item_code": args.item_code or "_Test Item", "demand_qty": 1}],
+			"selected_items": args.selected_items
+			or [{"item_code": args.item_code or "_Test Item", "demand_qty": 1}],
 		}
 	)
 	forecast.generate_demand()

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_to_date
@@ -30,6 +31,14 @@ class SalesForecast(Document):
 		selected_items: DF.TableMultiSelect[SalesForecastItem]
 		status: DF.Literal["Planned", "MPS Generated", "Cancelled"]
 	# end: auto-generated types
+
+	def validate(self):
+		self.validate_demand_qty()
+
+	def validate_demand_qty(self):
+		for row in self.items:
+			if row.get("demand_qty") in (None, ""):
+				frappe.throw(_("Row #{0}: Demand Qty is mandatory").format(row.idx), frappe.MandatoryError)
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
