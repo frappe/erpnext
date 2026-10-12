@@ -1545,6 +1545,7 @@ class update_entries_after:
 				+ landed_cost
 				- sum(flt(r.amount) for r in outputs)
 			)
+			value = max(value, 0)
 
 		return value / flt(sle.actual_qty)
 
