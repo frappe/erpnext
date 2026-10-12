@@ -68,9 +68,9 @@ class SalesForecast(Document):
 
 			for index in range(self.demand_number):
 				if self.frequency == "Monthly":
-					delivery_date = add_to_date(self.from_date, months=index + 1)
+					delivery_date = add_to_date(self.from_date, months=index)
 				else:
-					delivery_date = add_to_date(self.from_date, weeks=index + 1)
+					delivery_date = add_to_date(self.from_date, weeks=index)
 
 				forecast_demand.append(
 					{
