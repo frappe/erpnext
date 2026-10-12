@@ -1074,7 +1074,7 @@ def get_requested_item_qty(sales_order):
 
 
 @frappe.whitelist()
-def make_material_request(source_name, target_doc=None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -1085,7 +1085,7 @@ def make_material_request(source_name, target_doc=None):
 	def get_remaining_qty(so_item):
 		return flt(
 			flt(so_item.qty)
-			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+			- flt(requested_item_qty.get(so_item.name, {}).get("qty")) / (flt(so_item.conversion_factor) or 1)
 			- max(
 				flt(so_item.get("delivered_qty")),
 				0,
