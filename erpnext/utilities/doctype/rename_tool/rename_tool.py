@@ -41,7 +41,7 @@ def get_doctypes():
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def upload(select_doctype: str | None = None, file_to_rename: str | None = None):
 	if not select_doctype:
 		select_doctype = frappe.form_dict.select_doctype
@@ -59,7 +59,16 @@ def upload(select_doctype: str | None = None, file_to_rename: str | None = None)
 			queue="long",
 			doctype=select_doctype,
 			rows=rows[i : i + 500],
+			enqueue_after_commit=True,
 		)
+
+	delete_file_to_rename(file)
+
+
+def delete_file_to_rename(file: Document) -> None:
+	# the Attach control saves the field, and File refuses to delete a URL still referenced there
+	if frappe.db.get_single_value("Rename Tool", "file_to_rename") == file.file_url:
+		frappe.db.set_single_value("Rename Tool", "file_to_rename", None)
 
 	file.delete()
 
