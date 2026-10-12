@@ -332,6 +332,37 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		)
 		trip.insert()
 		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), trip.name)
+
+
+
+	def process_route_with_locks(self, locks):
+		from unittest.mock import patch
+
+		def get_directions(route, optimize):
+			legs = [
+				{
+					"end_location": {"lat": 1.0, "lng": 2.0},
+					"distance": {"value": 1000},
+					"duration": {"value": 600},
+				}
+				for _ in route[1:]
+			]
+			return {"legs": legs, "waypoint_order": list(range(len(route) - 2))}
+
+		for stop, locked in zip(self.delivery_trip.delivery_stops, locks, strict=True):
+			stop.locked = locked
+		self.delivery_trip.uom_conversion_factor = 1
+		with patch.object(type(self.delivery_trip), "get_directions", side_effect=get_directions):
+			self.delivery_trip.process_route(optimize=True)
+		return self.delivery_trip
+
+	def test_route_with_locks_estimates_every_stop(self):
+		trip = self.process_route_with_locks([0, 1])
+		self.assertTrue(trip.delivery_stops[1].estimated_arrival)
+		self.assertEqual(trip.delivery_stops[1].distance, 1000)
+
+	def test_route_with_locks_adds_up_the_total_distance(self):
+		self.assertEqual(self.process_route_with_locks([1, 0]).total_distance, 3000)
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc(

@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, get_datetime, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate
 
 
 class DeliveryTrip(Document):
@@ -207,10 +207,12 @@ class DeliveryTrip(Document):
 
 		departure_datetime = get_datetime(self.departure_time)
 		route_list = self.form_route_list(optimize)
+		ends_at_home = not (optimize and self.delivery_stops and self.delivery_stops[-1].locked)
+		total_distance = None
 
 		# For locks, maintain idx count while looping through route list
 		idx = 0
-		for route in route_list:
+		for route_idx, route in enumerate(route_list):
 			directions = self.get_directions(route, optimize)
 
 			if directions:
@@ -218,7 +220,9 @@ class DeliveryTrip(Document):
 					self.rearrange_stops(directions.get("waypoint_order"), start=idx)
 
 				# Avoid estimating last leg back to the home address
-				legs = directions.get("legs")[:-1] if route == route_list[-1] else directions.get("legs")
+				legs = directions.get("legs")
+				if ends_at_home and route_idx == len(route_list) - 1:
+					legs = legs[:-1]
 
 				# Google Maps returns the legs in the optimized order
 				for leg in legs:
@@ -238,13 +242,15 @@ class DeliveryTrip(Document):
 					idx += 1
 
 				# Include last leg in the final distance calculation
-				self.uom = self.default_distance_uom
-				total_distance = sum(
+				total_distance = flt(total_distance) + sum(
 					leg.get("distance", {}).get("value", 0.0) for leg in directions.get("legs")
 				)  # in meters
-				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1
+
+		if total_distance is not None:
+			self.uom = self.default_distance_uom
+			self.total_distance = total_distance * self.uom_conversion_factor
 
 		self.save()
 
