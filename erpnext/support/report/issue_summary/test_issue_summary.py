@@ -112,6 +112,20 @@ class TestIssueSummary(ERPNextTestSuite):
 		self.assertEqual(row["total_issues"], 1)
 		self.assertIsNone(get_report_row("Assigned To", "user", f"x-{user}", assigned_to=user))
 
+	def test_assigned_to_filter_matches_wildcard_characters_literally(self):
+		make_issue("__Test Issue Summary Underscore", _assign=json.dumps(["issue_summary@example.com"]))
+		make_issue("__Test Issue Summary Lookalike X", _assign=json.dumps(["issuexsummary@example.com"]))
+
+		row = get_report_row(
+			"Assigned To", "user", "issue_summary@example.com", assigned_to="issue_summary@example.com"
+		)
+		self.assertEqual(row["total_issues"], 1)
+		self.assertIsNone(
+			get_report_row(
+				"Assigned To", "user", "issuexsummary@example.com", assigned_to="issue_summary@example.com"
+			)
+		)
+
 
 def make_issue(subject: str, **values) -> str:
 	"""Insert an open Issue opened today and set `values` on it directly."""
