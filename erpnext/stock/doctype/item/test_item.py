@@ -825,6 +825,19 @@ class TestItem(ERPNextTestSuite):
 			item.append("item_defaults", {"company": "_Test Company", field: account})
 			self.assertRaises(frappe.ValidationError, item.save)
 
+	def test_edited_variant_is_checked_for_duplicates_and_range(self):
+		template = self.make_numeric_template()
+		variants = []
+		for size in ("Small", "Large"):
+			variant = create_variant(template, {"Test Size": size, "Test Item Depth": 20})
+			variant.save()
+			variants.append(variant)
+
+		for attribute, value in (("Test Size", "Small"), ("Test Item Depth", 999)):
+			variant = frappe.get_doc("Item", variants[1].name)
+			next(row for row in variant.attributes if row.attribute == attribute).attribute_value = value
+			self.assertRaises(frappe.ValidationError, variant.save)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):

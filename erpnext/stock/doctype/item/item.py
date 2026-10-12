@@ -1176,7 +1176,11 @@ class Item(Document):
 					attributes.append(d.attribute)
 
 	def validate_variant_attributes(self):
-		if self.is_new() and self.variant_of and self.variant_based_on == "Item Attribute":
+		if (
+			self.variant_of
+			and self.variant_based_on == "Item Attribute"
+			and (self.is_new() or self.has_attribute_changes())
+		):
 			# remove attributes with no attribute_value set
 			self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
 
@@ -1196,6 +1200,16 @@ class Item(Document):
 			# copy variant_of value for each attribute row
 			for d in self.attributes:
 				d.variant_of = self.variant_of
+
+	def has_attribute_changes(self) -> bool:
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return True
+
+		def get_values(doc):
+			return [(d.attribute, cstr(d.attribute_value)) for d in doc.get("attributes")]
+
+		return get_values(self) != get_values(doc_before_save)
 
 	def validate_standard_cost_change(self):
 		"""Once stock exists, an item's valuation method cannot be switched to or from Standard
