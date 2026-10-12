@@ -1590,7 +1590,7 @@ def get_items(
 		items = get_items_for_stock_reco(warehouse, company)
 
 	res = []
-	itemwise_batch_data = get_itemwise_batch(warehouse, posting_date, company, item_code)
+	itemwise_batch_data = get_itemwise_batch(warehouse, posting_date, company, item_code, posting_time)
 
 	for d in items:
 		if (d.item_code, d.warehouse) in itemwise_batch_data:
@@ -1764,7 +1764,7 @@ def get_item_data(row, qty, valuation_rate, serial_no=None):
 	}
 
 
-def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
+def get_itemwise_batch(warehouse, posting_date, company, item_code=None, posting_time=None):
 	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import get_data
 
 	itemwise_batch_data = {}
@@ -1772,6 +1772,8 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 	filters = frappe._dict(
 		{"warehouse": warehouse, "from_date": posting_date, "to_date": posting_date, "company": company}
 	)
+	if posting_time:
+		filters.to_datetime = combine_datetime(posting_date, posting_time)
 
 	if item_code:
 		filters.item_code = item_code

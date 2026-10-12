@@ -2739,6 +2739,36 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(sr.difference_amount, -500)
 
+	def test_get_items_reads_batch_balance_at_the_posting_time(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = create_item("_Test Reco Batch At Posting Time")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.batch_number_series = "TRBPT-.###"
+		item.save()
+		posting_date = add_days(nowdate(), -1)
+
+		receipt = make_stock_entry(
+			item_code=item.name,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=posting_date,
+			posting_time="09:00:00",
+		)
+		make_stock_entry(
+			item_code=item.name,
+			source="_Test Warehouse - _TC",
+			qty=4,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			posting_date=posting_date,
+			posting_time="17:00:00",
+		)
+
+		rows = get_items("_Test Warehouse - _TC", posting_date, "12:00:00", "_Test Company", item.name)
+		self.assertEqual([row["qty"] for row in rows], [10])
+
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
 	if not batch_item_doc.has_batch_no:
