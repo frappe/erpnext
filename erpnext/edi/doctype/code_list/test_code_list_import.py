@@ -200,6 +200,39 @@ class TestCodeListImport(ERPNextTestSuite):
 				title_column="name",
 			)
 
+	def test_process_genericode_import_reports_the_source_row_when_filtered(self):
+		content = SAMPLE_GENERICODE.replace(
+			b'<Value ColumnRef="code"><SimpleValue>C</SimpleValue></Value>', b""
+		)
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Row 3"):
+			code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+				filters={"category": "Group 1"},
+			)
+
+	def test_process_genericode_import_keeps_codes_that_differ_in_case(self):
+		content = SAMPLE_GENERICODE.replace(b"<SimpleValue>B</SimpleValue>", b"<SimpleValue>a</SimpleValue>")
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		code_list_import.process_genericode_import(
+			code_list_name=import_result["code_list"],
+			file_name=import_result["file"],
+			code_column="code",
+			title_column="name",
+		)
+
+		codes = frappe.get_all(
+			"Common Code", {"code_list": import_result["code_list"]}, ["common_code", "title"], as_list=True
+		)
+		self.assertCountEqual(codes, [("A", "Alpha"), ("a", "Beta"), ("C", "Gamma")])
+
 	@staticmethod
 	@contextmanager
 	def upload_context(

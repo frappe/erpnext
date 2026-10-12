@@ -95,7 +95,7 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	elements = get_filtered_rows(root, filters or {})
 	total_elements = len(elements)
 	for i, xml_element in enumerate(elements, start=1):
-		code = get_row_code(xml_element, column_map["code"], i)
+		code = get_row_code(xml_element, column_map["code"])
 		common_code = get_common_code(code_list, code)
 		common_code.from_genericode(column_map, xml_element)
 		common_code.save()
@@ -104,9 +104,10 @@ def import_genericode(code_list: str, file_name: str, column_map: dict, filters:
 	return total_elements
 
 
-def get_row_code(xml_element: "etree.Element", code_column: str, row_number: int) -> str:
+def get_row_code(xml_element: "etree.Element", code_column: str) -> str:
 	code = getattr(get_simple_value(xml_element, code_column), "text", None)
 	if not code:
+		row_number = int(xml_element.xpath("count(preceding-sibling::Row)")) + 1
 		frappe.throw(
 			_("Row {0} has no value in the code column {1}").format(row_number, frappe.bold(code_column))
 		)
@@ -116,7 +117,11 @@ def get_row_code(xml_element: "etree.Element", code_column: str, row_number: int
 
 def get_common_code(code_list: str, code: str) -> CommonCode:
 	"""Return the list's existing Common Code for the code, so a re-import updates it."""
-	if name := frappe.db.get_value("Common Code", {"code_list": code_list, "common_code": code}):
+	# the column's collation is case-insensitive, so compare the codes exactly here
+	existing = frappe.get_all(
+		"Common Code", {"code_list": code_list, "common_code": code}, ["name", "common_code"]
+	)
+	if name := next((row.name for row in existing if row.common_code == code), None):
 		return frappe.get_doc("Common Code", name)
 
 	common_code = frappe.new_doc("Common Code")
