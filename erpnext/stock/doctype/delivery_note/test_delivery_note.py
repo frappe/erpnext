@@ -4099,6 +4099,226 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Packing Slip", ps.name, "docstatus"), 2)
 
+	def test_delivery_note_made_from_invoice_is_not_billed_again(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note as make_dn_from_invoice
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		invoice = create_sales_invoice(qty=5, rate=500)
+		delivery_note = make_dn_from_invoice(invoice.name)
+		delivery_note.insert()
+		delivery_note.submit()
+
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, delivery_note.name)
+
+		second_invoice = create_sales_invoice(qty=5, rate=500, do_not_save=True)
+		second_invoice.items[0].delivery_note = delivery_note.name
+		second_invoice.items[0].dn_detail = delivery_note.items[0].name
+		self.assertRaises(frappe.ValidationError, second_invoice.insert)
+
+	def test_credit_note_from_return_covers_only_billed_qty(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+
+		unbilled_return = make_sales_return(delivery_note.name)
+		unbilled_return.items[0].qty = -2
+		unbilled_return.issue_credit_note = 1
+		unbilled_return.submit()
+		self.assertFalse(frappe.db.exists("Sales Invoice Item", {"dn_detail": unbilled_return.items[0].name}))
+
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.items[0].qty = 2
+		invoice.insert()
+		invoice.submit()
+
+		billed_return = make_sales_return(delivery_note.name)
+		billed_return.items[0].qty = -3
+		billed_return.issue_credit_note = 1
+		billed_return.submit()
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": billed_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -2)
+
+	def test_inter_company_receipt_excludes_returned_qty(self):
+		from erpnext.stock.doctype.delivery_note.mapper import (
+			make_inter_company_purchase_receipt,
+			make_sales_return,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		receipt = make_purchase_receipt(warehouse="Stores - TCP1", company=company, qty=10)
+		kwargs = {
+			"item_code": receipt.items[0].item_code,
+			"company": company,
+			"customer": "_Test Internal Customer 2",
+			"cost_center": "Main - TCP1",
+			"expense_account": "Cost of Goods Sold - TCP1",
+			"rate": 500,
+			"warehouse": "Stores - TCP1",
+			"target_warehouse": "Work In Progress - TCP1",
+		}
+		delivery_note = create_delivery_note(qty=10, **kwargs)
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"qty": -4, "target_warehouse": "Work In Progress - TCP1"})
+		sales_return.insert()
+		frappe.get_doc("Delivery Note", sales_return.name).submit()
+
+		inter_company_receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		self.assertEqual(inter_company_receipt.items[0].qty, 6)
+
+		inter_company_receipt.items[0].update(
+			{"qty": 10, "from_warehouse": "Work In Progress - TCP1", "warehouse": "Stores - TCP1"}
+		)
+		self.assertRaises(frappe.ValidationError, inter_company_receipt.submit)
+
+	def test_inter_company_receipt_receives_bundle_components(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		transit_warehouse = "Work In Progress - TCP1"
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component], qty=2)
+		make_purchase_receipt(item_code=component, warehouse="Stores - TCP1", company=company, qty=10)
+
+		delivery_note = create_delivery_note(
+			item_code=bundle_item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=3,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse=transit_warehouse,
+		)
+
+		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		self.assertEqual([(row.item_code, row.qty) for row in receipt.items], [(component, 6)])
+		receipt.items[0].warehouse = "Stores - TCP1"
+		receipt.submit()
+
+		self.assertEqual(
+			flt(
+				frappe.db.get_value(
+					"Bin", {"item_code": component, "warehouse": transit_warehouse}, "actual_qty"
+				)
+			),
+			0,
+		)
+		self.assertEqual(
+			frappe.db.get_value("Packed Item", delivery_note.packed_items[0].name, "received_qty"), 6
+		)
+		self.assertRaises(frappe.ValidationError, make_inter_company_purchase_receipt, delivery_note.name)
+
+	def test_internal_return_keeps_target_warehouse(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100, item_code=item)
+		delivery_note = create_delivery_note(
+			item_code=item,
+			company="_Test Company",
+			customer=create_internal_customer(represents_company="_Test Company"),
+			qty=5,
+			rate=100,
+			warehouse="_Test Warehouse - _TC",
+			target_warehouse="Stores - _TC",
+		)
+
+		sales_return = make_sales_return(delivery_note.name)
+		self.assertEqual(sales_return.items[0].target_warehouse, "Stores - _TC")
+
+		sales_return.items[0].target_warehouse = "_Test Warehouse 1 - _TC"
+		self.assertRaises(frappe.ValidationError, sales_return.insert)
+
+	def test_unbilled_return_stays_on_sdbnb_when_disabled_for_returns(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		self.get_perpetual_defaults()
+		frappe.db.set_value("Company", self.perpetual_company, "disable_sdbnb_in_sr", 1)
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=20,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+		kwargs = {
+			"item_code": item_code,
+			"qty": 10,
+			"rate": 150,
+			"company": self.perpetual_company,
+			"warehouse": self.perpetual_warehouse,
+			"cost_center": self.perpetual_cost_center,
+			"expense_account": self.perpetual_expense_account,
+		}
+
+		expense_accounts = []
+		for billed in (False, True):
+			delivery_note = create_delivery_note(**kwargs)
+			if billed:
+				make_sales_invoice(delivery_note.name).submit()
+
+			sales_return = make_sales_return(delivery_note.name)
+			sales_return.items[0].qty = -4
+			sales_return.insert()
+			expense_accounts.append(sales_return.items[0].expense_account)
+
+		self.assertEqual(expense_accounts[0], self.perpetual_account)
+		self.assertNotEqual(expense_accounts[1], self.perpetual_account)
+
+	def test_closed_delivery_note_cannot_be_invoiced(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		draft = create_delivery_note(qty=1, do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, update_delivery_note_status, draft.name, "Closed")
+
+		delivery_note = create_delivery_note(qty=4, rate=500)
+		invoice = make_sales_invoice(delivery_note.name)
+		update_delivery_note_status(delivery_note.name, "Closed")
+
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, delivery_note.name)
+		self.assertRaises(frappe.ValidationError, invoice.insert)
+
+	def test_trip_and_transport_details_are_not_copied(self):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		delivery_note = create_delivery_note(qty=1, do_not_save=True)
+		delivery_note.update({"lr_no": "LR-001", "lr_date": nowdate(), "vehicle_no": "MH-01-1234"})
+
+		duplicate = frappe.copy_doc(delivery_note, ignore_no_copy=False)
+		self.assertEqual((duplicate.lr_no, duplicate.lr_date, duplicate.vehicle_no), (None, None, None))
+
+		delivery_note.insert()
+		delivery_note.submit()
+		delivery_trip = make_delivery_trip(delivery_note.name)
+		delivery_trip.delivery_stops[0].customer_address = "fake string"
+		delivery_trip.flags.ignore_mandatory = True
+		delivery_trip.save()
+		delivery_note.reload()
+		self.assertEqual(delivery_note.delivery_trip, delivery_trip.name)
+
+		delivery_note.cancel()
+		amended = frappe.copy_doc(delivery_note)
+		amended.update({"docstatus": 0, "amended_from": delivery_note.name})
+		amended.insert()
+		self.assertIsNone(amended.delivery_trip)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

@@ -47,7 +47,9 @@ class ItemPrice(Document):
 		self.validate_item()
 		self.validate_from_to_dates("valid_from", "valid_upto")
 		self.update_price_list_details()
+		self.clear_party_not_applicable()
 		self.update_item_details()
+		self.validate_batch()
 		self.check_duplicates()
 		self.validate_item_template()
 
@@ -85,8 +87,16 @@ class ItemPrice(Document):
 			frappe.throw(_(msg))
 
 	def check_duplicates(self):
-		item_price = frappe.qb.DocType("Item Price")
+		if self.get_duplicate_price_query().run():
+			frappe.throw(
+				_(
+					"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
+				),
+				ItemPriceDuplicateItem,
+			)
 
+	def get_duplicate_price_query(self):
+		item_price = frappe.qb.DocType("Item Price")
 		query = (
 			frappe.qb.from_(item_price)
 			.select(item_price.price_list_rate)
@@ -96,51 +106,30 @@ class ItemPrice(Document):
 				& (item_price.name != self.name)
 			)
 		)
-		data_fields = (
-			"uom",
-			"valid_from",
-			"valid_upto",
-			"customer",
-			"supplier",
-			"batch_no",
-		)
 
-		number_fields = ["packing_unit"]
+		for field in ("uom", "valid_from", "customer", "supplier", "batch_no"):
+			query = query.where(
+				self.get_match_condition(item_price[field], Cast_(item_price[field], "varchar") == "")
+			)
 
-		for field in data_fields:
-			if self.get(field):
-				query = query.where(item_price[field] == self.get(field))
-			else:
-				query = query.where(
-					Criterion.any(
-						[
-							item_price[field].isnull(),
-							Cast_(item_price[field], "varchar") == "",
-						]
-					)
-				)
+		return query.where(self.get_match_condition(item_price.packing_unit, item_price.packing_unit == 0))
 
-		for field in number_fields:
-			if self.get(field):
-				query = query.where(item_price[field] == self.get(field))
-			else:
-				query = query.where(
-					Criterion.any(
-						[
-							item_price[field].isnull(),
-							item_price[field] == 0,
-						]
-					)
-				)
+	def get_match_condition(self, column, empty_condition):
+		if value := self.get(column.name):
+			return column == value
 
-		price_list_rate = query.run(as_dict=True)
+		return Criterion.any([column.isnull(), empty_condition])
 
-		if price_list_rate:
+	def clear_party_not_applicable(self):
+		if self.selling and not self.buying:
+			self.supplier = None
+		if self.buying and not self.selling:
+			self.customer = None
+
+	def validate_batch(self):
+		if self.batch_no and frappe.db.get_value("Batch", self.batch_no, "item") != self.item_code:
 			frappe.throw(
-				_(
-					"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
-				),
-				ItemPriceDuplicateItem,
+				_("Batch {0} does not belong to Item {1}").format(bold(self.batch_no), bold(self.item_code))
 			)
 
 	def before_save(self):
@@ -148,10 +137,3 @@ class ItemPrice(Document):
 			self.reference = self.customer
 		if self.buying:
 			self.reference = self.supplier
-
-		if self.selling and not self.buying:
-			# if only selling then remove supplier
-			self.supplier = None
-		if self.buying and not self.selling:
-			# if only buying then remove customer
-			self.customer = None
