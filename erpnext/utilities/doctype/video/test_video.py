@@ -82,6 +82,18 @@ class TestVideo(ERPNextTestSuite):
 		self.assertEqual(video.youtube_video_id, "9bZkp7q1z0E")
 		self.assertEqual(video.view_count, 7)
 
+	def test_video_id_is_saved_with_tracking_off(self):
+		frappe.db.set_single_value("Video Settings", "enable_youtube_tracking", 0)
+		for title, url in (
+			("Test Nocookie Embed", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"),
+			("Test Shorts", "https://www.youtube.com/shorts/9bZkp7q1z0E"),
+		):
+			video = make_video(title, url)
+			self.assertEqual(video.youtube_video_id, url[-11:], url)
+			self.assertFalse(video.view_count)
+
+		self.assertRaises(frappe.ValidationError, make_video, "Test Bad URL", "https://www.youtube.com/")
+
 	def test_batch_update_needs_video_settings_permission(self):
 		user = frappe.get_doc(
 			{

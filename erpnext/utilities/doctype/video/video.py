@@ -41,8 +41,11 @@ class Video(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		if self.provider == "YouTube" and is_tracking_enabled():
-			self.set_video_id()
+		if self.provider != "YouTube":
+			return
+
+		self.set_video_id()
+		if is_tracking_enabled():
 			self.set_youtube_statistics()
 
 	def set_video_id(self):
