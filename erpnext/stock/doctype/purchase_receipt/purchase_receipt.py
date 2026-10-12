@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, getdate, now, nowdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
@@ -19,6 +19,7 @@ from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting impo
 from erpnext.stock.doctype.purchase_receipt.services.reservation import (
 	PurchaseReceiptStockReservation,
 )
+from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -209,6 +210,16 @@ class PurchaseReceipt(BuyingController):
 				"target_ref_field": "qty",
 				"overflow_type": "receipt",
 			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Packed Item",
+				"join_field": "delivery_note_packed_item",
+				"source_field": "received_qty",
+				"target_field": "received_qty",
+				"target_parent_dt": "Delivery Note",
+				"target_ref_field": "qty",
+				"overflow_type": "receipt",
+			},
 		]
 
 	def update_prevdoc_status(self):
@@ -269,6 +280,9 @@ class PurchaseReceipt(BuyingController):
 		ProvisionalAccountingService(self).validate_provisional_expense_account()
 
 		self.check_purchase_order_on_hold_or_close("purchase_order")
+
+		if self.subcontracting_receipt and not self.is_return:
+			validate_single_purchase_receipt(self.subcontracting_receipt, self.name)
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be a future date"))
@@ -331,28 +345,10 @@ class PurchaseReceipt(BuyingController):
 					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def validate_items_quality_inspection(self):
+		from erpnext.stock.services.quality_inspection_service import validate_qi_reference
+
 		for item in self.get("items"):
-			if item.quality_inspection:
-				qi = frappe.db.get_value(
-					"Quality Inspection",
-					item.quality_inspection,
-					["reference_type", "reference_name", "item_code"],
-					as_dict=True,
-				)
-
-				if qi.reference_type != self.doctype or qi.reference_name != self.name:
-					frappe.throw(
-						_(
-							"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
-						).format(item.idx, frappe.bold(self.doctype), frappe.bold(self.name))
-					)
-
-				if qi.item_code != item.item_code:
-					frappe.throw(
-						_("Row #{0}: Please select a valid Quality Inspection with Item Code {1}.").format(
-							item.idx, frappe.bold(item.item_code)
-						)
-					)
+			validate_qi_reference(self, item)
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.get_all(
@@ -416,6 +412,13 @@ class PurchaseReceipt(BuyingController):
 			result = subquery.run(as_dict=True)
 			if result:
 				result = [item.production_plan_sub_assembly_item for item in result]
+				production_plan_names = set(
+					frappe.db.get_all(
+						"Production Plan Sub Assembly Item",
+						filters={"name": ("in", result)},
+						pluck="parent",
+					)
+				)
 				query = (
 					frappe.qb.from_(table)
 					.select(
@@ -428,11 +431,19 @@ class PurchaseReceipt(BuyingController):
 					.groupby(table.production_plan_sub_assembly_item)
 				)
 				for row in query.run(as_dict=True):
-					frappe.set_value(
+					frappe.db.set_value(
 						"Production Plan Sub Assembly Item",
 						row.production_plan_sub_assembly_item,
 						"received_qty",
 						row.received_qty,
+					)
+
+				for production_plan_name in production_plan_names:
+					frappe.db.set_value(
+						"Production Plan",
+						production_plan_name,
+						{"modified": now(), "modified_by": frappe.session.user},
+						update_modified=False,
 					)
 
 	def on_cancel(self):
@@ -453,6 +464,7 @@ class PurchaseReceipt(BuyingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()

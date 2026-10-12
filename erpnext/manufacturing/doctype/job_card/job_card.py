@@ -854,6 +854,7 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ("Quality Inspection",)
 		self.update_work_order()
 		self.set_transferred_qty()
 
@@ -871,6 +872,10 @@ class JobCard(Document):
 					"Quality Inspection is required for the item {0} before completing the job card {1}"
 				).format(get_link_to_form("Item", self.finished_good), bold(self.name))
 			)
+
+		from erpnext.stock.services.quality_inspection_service import validate_qi_reference
+
+		validate_qi_reference(self, self, item_code=self.production_item)
 
 		action_submit, action_reject = frappe.get_single_value(
 			"Stock Settings",
@@ -1346,7 +1351,7 @@ class JobCard(Document):
 
 	def get_qty_to_produce(self):
 		"""Qty this job card is expected to produce, the pending qty is left to another job card."""
-		return flt(self.for_quantity) - flt(self.pending_qty)
+		return flt(flt(self.for_quantity) - flt(self.pending_qty), self.precision("total_completed_qty"))
 
 	def get_qty_with_uom(self, qty, item_code=None):
 		"""A quantity in a message reads as a count of nothing without the unit it is measured in."""
@@ -1359,10 +1364,11 @@ class JobCard(Document):
 	def set_finished_good_status(self):
 		# Only reached for a submitted job card (docstatus == 1) with a finished good, see set_status().
 		qty_to_produce = self.get_qty_to_produce()
+		precision = self.precision("total_completed_qty")
 
-		if (self.manufactured_qty + self.process_loss_qty) >= qty_to_produce:
+		if flt(flt(self.manufactured_qty) + flt(self.process_loss_qty), precision) >= qty_to_produce:
 			self.status = "Completed"
-		elif (self.total_completed_qty + self.process_loss_qty) >= qty_to_produce:
+		elif flt(flt(self.total_completed_qty) + flt(self.process_loss_qty), precision) >= qty_to_produce:
 			# Production is done and the card is submitted, but the finished goods have not been
 			# booked into stock yet (Manufacture Stock Entry pending) — distinct from active WIP.
 			self.status = "To Manufacture"
@@ -1391,9 +1397,10 @@ class JobCard(Document):
 		if self.time_logs:
 			self.status = "Work In Progress"
 
-		if self.docstatus == 1 and (
-			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty) or not self.items
-		):
+		completed_qty = flt(
+			flt(self.total_completed_qty) + flt(self.process_loss_qty), self.precision("total_completed_qty")
+		)
+		if self.docstatus == 1 and (self.get_qty_to_produce() <= completed_qty or not self.items):
 			self.status = "Completed"
 
 	def set_wip_warehouse(self):
@@ -1522,7 +1529,9 @@ class JobCard(Document):
 		if data and len(data) > 0:
 			current_operation_qty = flt(data[0].completed_qty)
 
-		return current_operation_qty + flt(self.total_completed_qty)
+		return flt(
+			current_operation_qty + flt(self.total_completed_qty), self.precision("total_completed_qty")
+		)
 
 	def get_max_completable_qty(self):
 		if self.is_corrective_job_card or not (self.work_order and self.sequence_id):

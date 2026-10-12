@@ -7,6 +7,12 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, flt, formatdate
 
+DISPOSAL_VALUE_FIELDS = {
+	"Sold": "value_of_sold_asset",
+	"Scrapped": "value_of_scrapped_asset",
+	"Capitalized": "value_of_capitalized_asset",
+}
+
 
 def execute(filters=None):
 	filters.day_before_from_date = add_days(filters.from_date, -1)
@@ -32,12 +38,7 @@ def get_group_by_asset_category_data(filters):
 		row = frappe._dict()
 		row.update(asset_category)
 
-		adjustments = asset_value_adjustment_map.get(asset_category.get("asset_category"), {})
-		row.adjustment_before_from_date = flt(adjustments.get("adjustment_before_from_date", 0))
-		row.adjustment_till_to_date = flt(adjustments.get("adjustment_till_to_date", 0))
-		row.adjustment_during_period = row.adjustment_till_to_date - row.adjustment_before_from_date
-
-		row.value_as_on_from_date += row.adjustment_before_from_date
+		apply_value_adjustments(row, asset_value_adjustment_map.get(asset_category.get("asset_category"), {}))
 		row.value_as_on_to_date = (
 			flt(row.value_as_on_from_date)
 			+ flt(row.value_of_new_purchase)
@@ -210,7 +211,7 @@ def get_assets_for_grouped_by_category(filters):
 					.when(
 						(gl_entry.posting_date < filters.from_date)
 						& ((asset.disposal_date.isnull()) | (asset.disposal_date >= filters.from_date)),
-						gl_entry.debit,
+						gl_entry.debit - gl_entry.credit,
 					)
 					.else_(0)
 				),
@@ -220,7 +221,9 @@ def get_assets_for_grouped_by_category(filters):
 				Sum(
 					frappe.qb.terms.Case()
 					.when(
-						(gl_entry.posting_date <= filters.to_date) & (asset.disposal_date.isnull()),
+						(gl_entry.posting_date >= filters.from_date)
+						& (gl_entry.posting_date <= filters.to_date)
+						& ((asset.disposal_date.isnull()) | (gl_entry.posting_date <= asset.disposal_date)),
 						gl_entry.credit,
 					)
 					.else_(0)
@@ -235,7 +238,7 @@ def get_assets_for_grouped_by_category(filters):
 						& (asset.disposal_date >= filters.from_date)
 						& (asset.disposal_date <= filters.to_date)
 						& (gl_entry.posting_date <= asset.disposal_date),
-						gl_entry.debit,
+						gl_entry.debit - gl_entry.credit,
 					)
 					.else_(0)
 				),
@@ -310,10 +313,9 @@ def get_assets_for_grouped_by_category(filters):
 			asset.asset_category == filters.get("asset_category")
 		)
 
+	from_gl_entries_query = from_gl_entries_query.where(get_finance_book_condition(gl_entry, filters))
 	if assets_with_finance_book is not None:
-		from_gl_entries_query = from_gl_entries_query.where(
-			IfNull(gl_entry.finance_book, "") == filters.get("finance_book")
-		).where(asset.name.isin(assets_with_finance_book))
+		from_gl_entries_query = from_gl_entries_query.where(asset.name.isin(assets_with_finance_book))
 		from_opening_depreciation_query = from_opening_depreciation_query.where(
 			asset.name.isin(assets_with_finance_book)
 		)
@@ -349,6 +351,14 @@ def get_assets_for_grouped_by_category(filters):
 	return list(combined.values())
 
 
+def get_finance_book_condition(gl_entry, filters):
+	"""GL rows with no finance book, plus the selected book or else the company's default book."""
+	finance_book = filters.get("finance_book") or frappe.get_cached_value(
+		"Company", filters.company, "default_finance_book"
+	)
+	return IfNull(gl_entry.finance_book, "").isin(["", finance_book or ""])
+
+
 def get_asset_value_adjustment_map_by_category(filters):
 	asset = frappe.qb.DocType("Asset")
 	gl_entry = frappe.qb.DocType("GL Entry")
@@ -365,30 +375,7 @@ def get_asset_value_adjustment_map_by_category(filters):
 		)
 		.select(
 			asset.asset_category.as_("asset_category"),
-			IfNull(
-				Sum(
-					frappe.qb.terms.Case()
-					.when(
-						(gl_entry.posting_date < filters.from_date)
-						& (asset.disposal_date.isnull() | (asset.disposal_date >= filters.from_date)),
-						gl_entry.debit - gl_entry.credit,
-					)
-					.else_(0)
-				),
-				0,
-			).as_("value_adjustment_before_from_date"),
-			IfNull(
-				Sum(
-					frappe.qb.terms.Case()
-					.when(
-						(gl_entry.posting_date <= filters.to_date)
-						& (asset.disposal_date.isnull() | (asset.disposal_date >= filters.to_date)),
-						gl_entry.debit - gl_entry.credit,
-					)
-					.else_(0)
-				),
-				0,
-			).as_("value_adjustment_till_to_date"),
+			*get_value_adjustment_columns(asset, gl_entry, filters),
 		)
 		.where(gl_entry.is_cancelled == 0)
 		.where(asset.docstatus == 1)
@@ -396,18 +383,11 @@ def get_asset_value_adjustment_map_by_category(filters):
 		.where(asset.purchase_date <= filters.to_date)
 		.where(gl_entry.account == asset_category_account.fixed_asset_account)
 		.where(gl_entry.is_opening == "No")
+		.where(get_finance_book_condition(gl_entry, filters))
 		.groupby(asset.asset_category)
 	).run(as_dict=True)
 
-	category_value_adjustment_map = {}
-
-	for r in asset_value_adjustments:
-		category_value_adjustment_map[r["asset_category"]] = {
-			"adjustment_before_from_date": flt(r.get("value_adjustment_before_from_date", 0)),
-			"adjustment_till_to_date": flt(r.get("value_adjustment_till_to_date", 0)),
-		}
-
-	return category_value_adjustment_map
+	return {row.pop("asset_category"): row for row in asset_value_adjustments}
 
 
 def get_group_by_asset_data(filters):
@@ -422,19 +402,7 @@ def get_group_by_asset_data(filters):
 		row.update(asset_detail)
 
 		row.update(next(asset for asset in assets if asset["asset"] == asset_detail.get("name", "")))
-		adjustments = asset_value_adjustment_map.get(
-			asset_detail.get("name", ""),
-			{
-				"adjustment_before_from_date": 0.0,
-				"adjustment_till_to_date": 0.0,
-			},
-		)
-		row.adjustment_before_from_date = adjustments["adjustment_before_from_date"]
-		row.adjustment_till_to_date = adjustments["adjustment_till_to_date"]
-		row.adjustment_during_period = flt(row.adjustment_till_to_date) - flt(row.adjustment_before_from_date)
-
-		row.value_as_on_from_date += row.adjustment_before_from_date
-
+		apply_value_adjustments(row, asset_value_adjustment_map.get(asset_detail.get("name", ""), {}))
 		row.value_as_on_to_date = (
 			flt(row.value_as_on_from_date)
 			+ flt(row.value_of_new_purchase)
@@ -542,6 +510,7 @@ def get_asset_details_for_grouped_by_category(filters):
 		.where(asset.company == filters.company)
 		.where(asset.purchase_date <= filters.to_date)
 		.where(asset.name.notin(capitalized_before_from_date))
+		.where(asset.name.isin(frappe.qb.get_query("Asset", fields=["name"], ignore_permissions=False)))
 		.groupby(asset.name)
 	)
 
@@ -593,7 +562,7 @@ def get_assets_for_grouped_by_asset(filters):
 					.when(
 						(gl_entry.posting_date < filters.from_date)
 						& ((asset.disposal_date.isnull()) | (asset.disposal_date >= filters.from_date)),
-						gl_entry.debit,
+						gl_entry.debit - gl_entry.credit,
 					)
 					.else_(0)
 				),
@@ -603,7 +572,9 @@ def get_assets_for_grouped_by_asset(filters):
 				Sum(
 					frappe.qb.terms.Case()
 					.when(
-						(gl_entry.posting_date <= filters.to_date) & (asset.disposal_date.isnull()),
+						(gl_entry.posting_date >= filters.from_date)
+						& (gl_entry.posting_date <= filters.to_date)
+						& ((asset.disposal_date.isnull()) | (gl_entry.posting_date <= asset.disposal_date)),
 						gl_entry.credit,
 					)
 					.else_(0)
@@ -618,7 +589,7 @@ def get_assets_for_grouped_by_asset(filters):
 						& (asset.disposal_date >= filters.from_date)
 						& (asset.disposal_date <= filters.to_date)
 						& (gl_entry.posting_date <= asset.disposal_date),
-						gl_entry.debit,
+						gl_entry.debit - gl_entry.credit,
 					)
 					.else_(0)
 				),
@@ -691,10 +662,9 @@ def get_assets_for_grouped_by_asset(filters):
 			asset.name == filters.get("asset")
 		)
 
+	from_gl_entries_query = from_gl_entries_query.where(get_finance_book_condition(gl_entry, filters))
 	if assets_with_finance_book is not None:
-		from_gl_entries_query = from_gl_entries_query.where(
-			IfNull(gl_entry.finance_book, "") == filters.get("finance_book")
-		).where(asset.name.isin(assets_with_finance_book))
+		from_gl_entries_query = from_gl_entries_query.where(asset.name.isin(assets_with_finance_book))
 		from_opening_depreciation_query = from_opening_depreciation_query.where(
 			asset.name.isin(assets_with_finance_book)
 		)
@@ -746,30 +716,7 @@ def get_asset_value_adjustment_map(filters):
 		)
 		.select(
 			asset.name.as_("asset"),
-			IfNull(
-				Sum(
-					frappe.qb.terms.Case()
-					.when(
-						(gl_entry.posting_date < filters.from_date)
-						& (asset.disposal_date.isnull() | (asset.disposal_date >= filters.from_date)),
-						gl_entry.debit - gl_entry.credit,
-					)
-					.else_(0)
-				),
-				0,
-			).as_("value_adjustment_before_from_date"),
-			IfNull(
-				Sum(
-					frappe.qb.terms.Case()
-					.when(
-						(gl_entry.posting_date <= filters.to_date)
-						& (asset.disposal_date.isnull() | (asset.disposal_date >= filters.to_date)),
-						gl_entry.debit - gl_entry.credit,
-					)
-					.else_(0)
-				),
-				0,
-			).as_("value_adjustment_till_to_date"),
+			*get_value_adjustment_columns(asset, gl_entry, filters),
 		)
 		.where(gl_entry.is_cancelled == 0)
 		.where(asset.docstatus == 1)
@@ -777,18 +724,54 @@ def get_asset_value_adjustment_map(filters):
 		.where(asset.purchase_date <= filters.to_date)
 		.where(gl_entry.account == asset_category_account.fixed_asset_account)
 		.where(gl_entry.is_opening == "No")
+		.where(get_finance_book_condition(gl_entry, filters))
 		.groupby(asset.name)
 	).run(as_dict=True)
 
-	asset_value_adjustment_map = {}
+	return {row.pop("asset"): row for row in asset_with_value_adjustments}
 
-	for r in asset_with_value_adjustments:
-		asset_value_adjustment_map[r["asset"]] = {
-			"adjustment_before_from_date": flt(r.get("value_adjustment_before_from_date", 0)),
-			"adjustment_till_to_date": flt(r.get("value_adjustment_till_to_date", 0)),
-		}
 
-	return asset_value_adjustment_map
+def get_value_adjustment_columns(asset, gl_entry, filters) -> list:
+	"""Fixed asset GL rows other than the disposal entry, summed before the period, till its end and,
+	for assets disposed in the period, till its end by how they were disposed."""
+	is_adjustment = gl_entry.voucher_type.notin(["Sales Invoice", "Asset Capitalization"]) & (
+		gl_entry.voucher_no != IfNull(asset.journal_entry_for_scrap, "")
+	)
+	held_in_period = asset.disposal_date.isnull() | (asset.disposal_date >= filters.from_date)
+	till_to_date = is_adjustment & held_in_period & (gl_entry.posting_date <= filters.to_date)
+	disposed_in_period = asset.disposal_date.isnotnull() & (asset.disposal_date <= filters.to_date)
+
+	return [
+		get_adjustment_sum(
+			gl_entry,
+			held_in_period & (gl_entry.posting_date < filters.from_date),
+			"adjustment_before_from_date",
+		),
+		get_adjustment_sum(gl_entry, till_to_date, "adjustment_till_to_date"),
+		*(
+			get_adjustment_sum(
+				gl_entry,
+				till_to_date & disposed_in_period & (asset.status == status),
+				f"adjustment_of_{fieldname}",
+			)
+			for status, fieldname in DISPOSAL_VALUE_FIELDS.items()
+		),
+	]
+
+
+def get_adjustment_sum(gl_entry, condition, alias: str):
+	amount = frappe.qb.terms.Case().when(condition, gl_entry.debit - gl_entry.credit).else_(0)
+	return IfNull(Sum(amount), 0).as_(alias)
+
+
+def apply_value_adjustments(row, adjustments: dict) -> None:
+	"""Add value adjustments to the opening value, to the period, and to the value of assets disposed in it."""
+	row.adjustment_during_period = flt(adjustments.get("adjustment_till_to_date")) - flt(
+		adjustments.get("adjustment_before_from_date")
+	)
+	row.value_as_on_from_date += flt(adjustments.get("adjustment_before_from_date"))
+	for fieldname in DISPOSAL_VALUE_FIELDS.values():
+		row[fieldname] = flt(row[fieldname]) + flt(adjustments.get(f"adjustment_of_{fieldname}"))
 
 
 def get_columns(filters):
@@ -849,8 +832,14 @@ def get_columns(filters):
 			"width": 140,
 		},
 		{
-			"label": _("Value of New Capitalized Asset"),
+			"label": _("Value of Assets Consumed in Capitalization"),
 			"fieldname": "value_of_capitalized_asset",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
+			"label": _("Adjustment during the period"),
+			"fieldname": "adjustment_during_period",
 			"fieldtype": "Currency",
 			"width": 140,
 		},

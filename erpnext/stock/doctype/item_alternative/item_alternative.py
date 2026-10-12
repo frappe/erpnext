@@ -19,14 +19,17 @@ class ItemAlternative(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		alternative_item_code: DF.Link | None
+		alternative_item_code: DF.Link
 		alternative_item_name: DF.ReadOnly | None
-		item_code: DF.Link | None
+		item_code: DF.Link
 		item_name: DF.ReadOnly | None
 		two_way: DF.Check
 	# end: auto-generated types
 
 	def validate(self):
+		if not (self.item_code and self.alternative_item_code):
+			return
+
 		self.has_alternative_item()
 		self.validate_alternative_item()
 		self.validate_duplicate()
@@ -82,6 +85,18 @@ class ItemAlternative(Document):
 			},
 		):
 			frappe.throw(_("Record already exists for the item {0}").format(self.item_code))
+
+
+def is_alternative_item(item_code, alternative_item_code):
+	return bool(
+		frappe.db.exists(
+			"Item Alternative", {"item_code": item_code, "alternative_item_code": alternative_item_code}
+		)
+		or frappe.db.exists(
+			"Item Alternative",
+			{"item_code": alternative_item_code, "alternative_item_code": item_code, "two_way": 1},
+		)
+	)
 
 
 @frappe.whitelist()

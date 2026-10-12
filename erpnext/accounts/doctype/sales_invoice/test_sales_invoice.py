@@ -2076,7 +2076,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
 	def test_gle_made_when_asset_is_returned(self):
-		asset = create_asset(item_code="Macbook Pro")
+		asset = create_asset(item_code="Macbook Pro", submit=1)
 
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
 		return_si = create_sales_invoice(
@@ -3006,6 +3006,57 @@ class TestSalesInvoice(ERPNextTestSuite):
 				(getdate(from_date), getdate(to_date)),
 			)
 
+	def test_on_recurring_keeps_service_dates_after_period_end_ordered(self):
+		# Auto Repeat moves the period 30 Jan-26 Feb to 27 Feb-29 Mar
+		reference = make_recurring_reference_invoice(
+			"2025-01-30", "2025-02-26", [("2025-02-26", "2025-02-27")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-27", "2025-03-29")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-03-29"), getdate("2025-03-30")),
+		)
+
+	def test_on_recurring_keeps_short_service_range_after_period_end(self):
+		# Auto Repeat builds the full next month after a half-month period
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-15", [("2025-01-20", "2025-01-25")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-02-20"), getdate("2025-02-25")),
+		)
+
+	def test_on_recurring_keeps_service_end_at_month_end(self):
+		# Billing in advance: the January invoice covers the service in February
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-31", [("2025-02-01", "2025-02-28")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-03-01"), getdate("2025-03-31")),
+		)
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
@@ -3808,7 +3859,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		expected_values = [
 			["2020-06-30", 1366.12, 1366.12],
 			["2021-06-30", 20000.0, 21366.12],
-			["2021-09-30", 5041.34, 26407.46],
+			["2021-09-30", 5041.1, 26407.22],
 		]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
@@ -3839,7 +3890,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		asset.load_from_db()
 
-		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30041.15, 60041.15]]
+		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)

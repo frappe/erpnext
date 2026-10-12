@@ -463,7 +463,7 @@ frappe.ui.form.on("Asset", {
 
 			let asset_depr_schedule_doc = (
 				await frappe.call(
-					"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_asset_depr_schedule_doc",
+					"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_asset_depreciation_schedule",
 					{
 						asset_name: frm.doc.name,
 						status: "Active",

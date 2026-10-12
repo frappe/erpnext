@@ -93,7 +93,7 @@ class InternalTransferService:
 		field = frappe.scrub(label)
 
 		for row in self.doc.get("items"):
-			if not row.get(field):
+			if not row.get(field) and not row.get("delivery_note_packed_item"):
 				frappe.throw(
 					_("At Row {0}: The field {1} is mandatory for internal transfer").format(
 						row.idx, bold(label)

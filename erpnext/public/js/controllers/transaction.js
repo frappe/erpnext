@@ -2296,7 +2296,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 			company: me.frm.doc.company,
 			transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
-			campaign: me.frm.doc.campaign,
+			campaign: me.frm.doc.utm_campaign,
 			sales_partner: me.frm.doc.sales_partner,
 			ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 			doctype: me.frm.doc.doctype,
