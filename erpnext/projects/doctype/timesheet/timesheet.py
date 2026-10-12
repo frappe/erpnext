@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Concat, Date, Round
-from frappe.utils import cstr, flt, get_datetime, getdate
+from frappe.utils import cstr, flt, get_datetime, getdate, nowdate
 from frappe.utils.deprecations import deprecated
 
 from erpnext import _refuse
@@ -583,6 +583,13 @@ def _get_activity_cost(
 		)
 	if rate and currency and currency != base_currency:
 		exchange_rate = get_exchange_rate(base_currency, currency)
+		if not exchange_rate:
+			frappe.throw(
+				_(
+					"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+				).format(base_currency, currency, nowdate())
+			)
+
 		rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
 		rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
