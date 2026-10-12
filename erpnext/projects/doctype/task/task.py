@@ -110,7 +110,9 @@ class Task(NestedSet):
 			self.report_date_conflict(
 				_(
 					"Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-				).format(format_date(parent_exp_end_date))
+				).format(format_date(parent_exp_end_date)),
+				"exp_end_date",
+				"parent_task",
 			)
 
 	def validate_parent_project_dates(self):
@@ -133,7 +135,9 @@ class Task(NestedSet):
 						get_link_to_form("Task", self.name),
 						_(self.meta.get_label(fieldname)),
 						get_link_to_form("Project", self.project),
-					)
+					),
+					fieldname,
+					"project",
 				)
 
 			if project_start_date and date_diff(task_date, getdate(project_start_date)) < 0:
@@ -142,12 +146,17 @@ class Task(NestedSet):
 						get_link_to_form("Task", self.name),
 						_(self.meta.get_label(fieldname)),
 						get_link_to_form("Project", self.project),
-					)
+					),
+					fieldname,
+					"project",
 				)
 
-	def report_date_conflict(self, message: str):
+	def report_date_conflict(self, message: str, *fieldnames: str):
+		"""Refuse a date conflict this save causes; warn when a reschedule causes it."""
 		if not self.flags.rescheduled:
-			frappe.throw(message, frappe.exceptions.InvalidDates)
+			if self.is_new() or any(self.has_value_changed(fieldname) for fieldname in fieldnames):
+				frappe.throw(message, frappe.exceptions.InvalidDates)
+			return
 
 		frappe.msgprint(
 			_("{0} was moved after the task it depends on. {1}").format(
