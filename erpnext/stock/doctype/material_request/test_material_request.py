@@ -1904,6 +1904,27 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		update_status(mr.name, "Stopped")
 		self.assertRaises(frappe.InvalidStatusError, create_pick_list, mr.name)
+
+
+
+	def test_mappers_skip_ordered_rows_and_stopped_requests(self):
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		self.assertFalse(make_supplier_quotation(mr.name).items)
+		self.assertRaises(frappe.ValidationError, create_pick_list, mr.name)
+
+		stopped_mr = make_material_request(item_code="_Test Item", qty=10)
+		update_status(stopped_mr.name, "Stopped")
+		for mapper in (
+			make_supplier_quotation,
+			make_request_for_quotation,
+			make_purchase_order,
+			make_stock_entry,
+		):
+			self.assertRaises(frappe.InvalidStatusError, mapper, stopped_mr.name)
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
 	item.set("item_defaults", [])
