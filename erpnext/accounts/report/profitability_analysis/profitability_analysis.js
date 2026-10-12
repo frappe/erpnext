@@ -116,6 +116,10 @@ frappe.query_reports["Profitability Analysis"] = {
 			company: frappe.query_report.get_filter_value("company"),
 			from_fiscal_year: data.fiscal_year,
 			to_fiscal_year: data.fiscal_year,
+			finance_book: frappe.query_report.get_filter_value("finance_book"),
+			include_default_book_entries: frappe.query_report.get_filter_value(
+				"include_default_book_entries"
+			),
 		};
 
 		if (data.based_on == "Cost Center") {
