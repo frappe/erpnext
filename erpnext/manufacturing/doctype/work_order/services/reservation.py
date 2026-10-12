@@ -100,20 +100,31 @@ class WorkOrderStockReservation:
 		# A fully-transferred entry is "Closed"; it must stay eligible here, otherwise cancelling the
 		# transfer can never reset its transferred_qty and the Store reservation is lost. Only truly
 		# cancelled entries (docstatus 2) are excluded.
-		names = frappe.get_all(
+		filters = {
+			"voucher_no": self.doc.name,
+			"item_code": row.item_code,
+			"voucher_detail_no": row.name,
+			"warehouse": row.source_warehouse,
+		}
+		for name in self.get_reservations_to_update(filters, "transferred_qty"):
+			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
+
+	def get_reservations_to_update(self, filters: dict, field: str) -> list[str]:
+		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
+		or_filters = None
+		if self.doc.status == "Closed":
+			filters = {**filters, "docstatus": ("in", [1, 2])}
+			or_filters = {"docstatus": 1, field: (">", 0)}
+		else:
+			filters = {**filters, "docstatus": 1}
+
+		return frappe.get_all(
 			"Stock Reservation Entry",
-			filters={
-				"voucher_no": self.doc.name,
-				"item_code": row.item_code,
-				"voucher_detail_no": row.name,
-				"warehouse": row.source_warehouse,
-				"docstatus": 1,
-			},
+			filters=filters,
+			or_filters=or_filters,
 			pluck="name",
 			order_by="creation",
 		)
-		for name in names:
-			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
 
 	def _apply_transferred_qty(self, name, transferred_qty, row_wise_serial_batch):
 		if transferred_qty < 0:
@@ -122,6 +133,11 @@ class WorkOrderStockReservation:
 		doc = frappe.get_doc("Stock Reservation Entry", name)
 		qty_to_update, transferred_qty = self._split_transferred_qty(doc, transferred_qty)
 		if qty_to_update < 0:
+			return transferred_qty
+
+		if doc.docstatus == 2:
+			doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
+			doc.release_reversed_usage("transferred_qty", row_wise_serial_batch)
 			return transferred_qty
 
 		self._apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch)
@@ -154,14 +170,12 @@ class WorkOrderStockReservation:
 			"item_code": item.item_code,
 			"voucher_detail_no": item.name,
 			"warehouse": wip_warehouse,
-			"docstatus": 1,
 		}
 		if not self.doc.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
 
 		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES)
-		names = frappe.get_all("Stock Reservation Entry", filters=filters, pluck="name", order_by="creation")
-		for name in names:
+		for name in self.get_reservations_to_update(filters, "consumed_qty"):
 			consumed_qty = self._apply_consumed_qty(name, consumed_qty, row_wise_serial_batch)
 
 	@staticmethod
@@ -172,6 +186,10 @@ class WorkOrderStockReservation:
 		if qty_to_update >= 0:
 			doc.db_set("consumed_qty", flt(qty_to_update), update_modified=False)
 			consumed_qty -= qty_to_update
+
+		if doc.docstatus == 2:
+			doc.release_reversed_usage("consumed_qty", row_wise_serial_batch)
+			return consumed_qty
 
 		if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 			doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
