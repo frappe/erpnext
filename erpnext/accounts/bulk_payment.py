@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+import erpnext
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
 	get_payment_entry,
@@ -78,6 +79,8 @@ def _partition_payable_invoices(names):
 			"credit_to",
 			"outstanding_amount",
 			"conversion_rate",
+			"company",
+			"party_account_currency",
 			"is_return",
 			"is_internal_supplier",
 		],
@@ -98,7 +101,7 @@ def _partition_payable_invoices(names):
 					"voucher_no": r.name,
 					"supplier": r.supplier,
 					"party_account": r.credit_to,
-					"outstanding": flt(r.outstanding_amount) * flt(r.conversion_rate or 1),
+					"outstanding": _get_outstanding_in_company_currency(r),
 				}
 			)
 
@@ -109,6 +112,14 @@ def _partition_payable_invoices(names):
 			excluded.append({"voucher_no": name, "reason": _("Not available")})
 
 	return payable, excluded
+
+
+def _get_outstanding_in_company_currency(invoice):
+	"""Outstanding is in the party account currency; convert it only when that is foreign."""
+	outstanding = flt(invoice.outstanding_amount)
+	if invoice.party_account_currency == erpnext.get_company_currency(invoice.company):
+		return outstanding
+	return outstanding * flt(invoice.conversion_rate or 1)
 
 
 def _create_payment_entry(group):

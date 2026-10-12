@@ -8,7 +8,6 @@ from frappe.utils import (
 	add_to_date,
 	get_datetime,
 	get_link_to_form,
-	get_time_str,
 	getdate,
 	time_diff_in_hours,
 	today,
@@ -67,7 +66,7 @@ class StockRepostingSettings(Document):
 		diff = time_diff_in_hours(end_time, start_time)
 
 		if diff < 10:
-			self.end_time = get_time_str(add_to_date(self.start_time, hours=10, as_datetime=True))
+			self.end_time = add_to_date(start_time, hours=10).strftime("%H:%M:%S")
 
 	@frappe.whitelist(methods=["POST"])
 	def convert_to_item_wh_reposting(self):

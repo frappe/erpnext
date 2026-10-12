@@ -2,9 +2,14 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
-from erpnext.accounts.report.financial_ratios.financial_ratios import execute
+from erpnext.accounts.report.financial_ratios.financial_ratios import (
+	avg_ratio_balance,
+	execute,
+	get_gl_data,
+)
+from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -36,6 +41,87 @@ class TestFinancialRatios(ERPNextTestSuite):
 		# (the old behaviour divided by total assets, giving 20,000 / 30,000 = 0.667)
 		self.assertEqual(ratio_row[year_key], 2.0)
 
+	def test_creditor_turnover_is_positive(self):
+		self.set_account_type("Direct Expenses", "Direct Expense")
+		self.make_journal_entry("Cost of Goods Sold", "Creditors", 200, supplier="_Test Supplier")
+
+		columns, data = execute(self.get_report_filters())
+		ratio_row = next(row for row in data if row.get("ratio") == "Creditor Turnover Ratio")
+
+		self.assertGreater(ratio_row[columns[1]["fieldname"]], 0)
+
+	def test_income_is_for_the_selected_year_only(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+		self.make_journal_entry("Cash", "Sales", 1000, posting_date=add_days(filters.period_start_date, -10))
+
+		self.assertEqual(self.get_total_income(filters), before)
+
+	def test_income_survives_closing_the_selected_year(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+
+		period_closing_voucher = frappe.new_doc("Period Closing Voucher")
+		period_closing_voucher.update(
+			{
+				"transaction_date": today(),
+				"company": self.company,
+				"fiscal_year": filters.from_fiscal_year,
+				"period_start_date": filters.period_start_date,
+				"period_end_date": filters.period_end_date,
+				"cost_center": f"Main - {self.abbr}",
+				"closing_account_head": f"Capital Stock - {self.abbr}",
+				"remarks": "test",
+			}
+		)
+		period_closing_voucher.submit()
+
+		self.assertEqual(self.get_total_income(filters), before)
+
+	def test_average_debtors_in_company_currency(self):
+		filters = self.get_report_filters()
+		period_key = self.get_period_list(filters)[0].key
+
+		def average_debtors():
+			return avg_ratio_balance("Receivable", self.get_period_list(filters), 2, filters)[period_key]
+
+		before = average_debtors()
+		journal_entry = frappe.new_doc("Journal Entry")
+		journal_entry.update({"posting_date": today(), "company": self.company, "multi_currency": 1})
+		journal_entry.append(
+			"accounts",
+			{
+				"account": "_Test Receivable USD - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer USD",
+				"exchange_rate": 80,
+				"debit_in_account_currency": 100,
+			},
+		)
+		journal_entry.append("accounts", {"account": "Sales - _TC", "credit_in_account_currency": 8000})
+		journal_entry.submit()
+
+		self.assertEqual(average_debtors() - before, 4000)
+
+	def get_period_list(self, filters):
+		return get_period_list(
+			filters.from_fiscal_year,
+			filters.to_fiscal_year,
+			filters.period_start_date,
+			filters.period_end_date,
+			filters.filter_based_on,
+			filters.periodicity,
+			company=filters.company,
+		)
+
+	def get_total_income(self, filters):
+		period_list = self.get_period_list(filters)
+		income = get_gl_data(filters, period_list, [])[2]
+		root = next((row for row in income if row.get("account") and not row.get("parent_account")), {})
+		return root.get(period_list[0].key, 0)
+
 	def get_report_filters(self):
 		active_fy = frappe.db.get_value(
 			"Fiscal Year",
@@ -53,13 +139,13 @@ class TestFinancialRatios(ERPNextTestSuite):
 			periodicity="Yearly",
 		)
 
-	def make_journal_entry(self, debit_account, credit_account, amount):
+	def make_journal_entry(self, debit_account, credit_account, amount, posting_date=None, supplier=None):
 		journal_entry = frappe.new_doc("Journal Entry")
-		journal_entry.posting_date = today()
+		journal_entry.posting_date = posting_date or today()
 		journal_entry.company = self.company
-		for account, debit, credit in (
-			(debit_account, amount, 0),
-			(credit_account, 0, amount),
+		for account, debit, credit, party in (
+			(debit_account, amount, 0, None),
+			(credit_account, 0, amount, supplier),
 		):
 			journal_entry.append(
 				"accounts",
@@ -67,6 +153,8 @@ class TestFinancialRatios(ERPNextTestSuite):
 					"account": f"{account} - {self.abbr}",
 					"debit_in_account_currency": debit,
 					"credit_in_account_currency": credit,
+					"party_type": "Supplier" if party else None,
+					"party": party,
 				},
 			)
 		journal_entry.insert()

@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 
-from erpnext.accounts.utils import get_balance_on
+from erpnext.accounts.utils import get_balance_on, get_fiscal_year
 
 
 def execute(filters=None):
@@ -62,14 +62,30 @@ def get_conditions(filters):
 def get_data(filters):
 	data = []
 	conditions = get_conditions(filters)
-	accounts = frappe.db.get_all(
-		"Account", fields=["name", "account_currency"], filters=conditions, order_by="name"
+	accounts = frappe.get_list(
+		"Account",
+		fields=["name", "account_currency", "report_type", "company"],
+		filters=conditions,
+		order_by="name",
 	)
 
 	for d in accounts:
-		balance = get_balance_on(d.name, date=filters.report_date)
+		# income and expense balances run from the start of the fiscal year
+		start_date = (
+			get_year_start_date(filters.report_date, d.company)
+			if d.report_type == "Profit and Loss"
+			else None
+		)
+		balance = get_balance_on(
+			d.name, date=filters.report_date, start_date=start_date, apply_gl_entry_permissions=True
+		)
 		row = {"account": d.name, "balance": balance, "currency": d.account_currency}
 
 		data.append(row)
 
 	return data
+
+
+def get_year_start_date(report_date: str, company: str):
+	fiscal_year = get_fiscal_year(report_date, company=company, verbose=0, raise_on_missing=False)
+	return fiscal_year[1] if fiscal_year else None

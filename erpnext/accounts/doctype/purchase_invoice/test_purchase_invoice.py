@@ -50,6 +50,52 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.load_test_records("Purchase Invoice")
 		self.load_test_records("Journal Entry")
 
+	def test_invoice_qty_below_stock_qty_precision_is_valued(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4}],
+		).name
+		pi = make_purchase_invoice(item_code=item, qty=1, rate=10, uom="Kg", do_not_save=True)
+		qty = 1 / 10 ** pi.items[0].precision("qty")
+		pi.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4, "qty": qty})
+		pi.save()
+
+		self.assertEqual(flt(pi.items[0].valuation_rate * qty * 0.4, 2), flt(pi.items[0].base_net_amount, 2))
+
+	def test_stock_updating_invoice_values_the_stock_qty_the_ledger_posts(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4536}],
+		).name
+		pi = make_purchase_invoice(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="_Test Account Cost for Goods Sold - TCP1",
+			update_stock=1,
+			qty=7,
+			rate=1234,
+			uom="Kg",
+			do_not_save=True,
+		)
+		pi.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4536})
+		pi.submit()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pi.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		gl_debits = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pi.name, "is_cancelled": 0, "debit": (">", 0)}, pluck="debit"
+		)
+		self.assertEqual((stock_value, gl_debits), (pi.items[0].base_net_amount, [stock_value]))
+
 	def test_purchase_invoice_qty(self):
 		pi = make_purchase_invoice(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
@@ -138,6 +184,51 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		# Check if the received quantity is updated in Material Request
 		mr.reload()
 		self.assertEqual(mr.items[0].received_qty, 10)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 20})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_material_request_received_qty_with_mixed_receipts(self):
+		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
+		for invoice_first, order_qty in ((False, 10), (True, 10), (False, 12), (True, 12)):
+			with self.subTest(invoice_first=invoice_first, order_qty=order_qty):
+				mr = make_material_request(item_code="_Test Item", qty=10)
+				po = make_purchase_order(mr.name)
+				po.supplier = "_Test Supplier"
+				po.items[0].qty = order_qty
+				po.insert()
+				po.submit()
+
+				billing_invoice = make_pi_from_po(po.name)
+				billing_invoice.update_stock = 0
+				billing_invoice.items[0].qty = 1
+				billing_invoice.insert()
+				billing_invoice.submit()
+
+				receipt = create_purchase_receipt_from_order(po.name)
+				receipt.items[0].qty = order_qty - 6
+				receipt.insert()
+				invoice = make_pi_from_po(po.name)
+				invoice.update_stock = 1
+				invoice.items[0].qty = 6
+				invoice.insert()
+				documents = [invoice, receipt] if invoice_first else [receipt, invoice]
+
+				received_qty = 0
+				for document in documents:
+					document.submit()
+					received_qty += document.items[0].stock_qty
+					mr.reload()
+					self.assertEqual(mr.items[0].received_qty, received_qty)
+					self.assertEqual(mr.per_received, min(received_qty * 10, 100))
+				self.assertEqual(mr.status, "Received")
+
+				for document in documents:
+					document.cancel()
+					received_qty -= document.items[0].stock_qty
+					mr.reload()
+					self.assertEqual(mr.items[0].received_qty, received_qty)
+					self.assertEqual(mr.per_received, min(received_qty * 10, 100))
+					self.assertNotEqual(mr.status, "Received")
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")

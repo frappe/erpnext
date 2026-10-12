@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.utils.user import is_website_user
 
 
@@ -99,7 +100,12 @@ def get_timesheets(project, start=0, search=None):
 
 @frappe.whitelist()
 def get_timesheet_html(project: str, start: int = 0):
-	validate_and_get_project_user(project=project)
+	project_user = validate_and_get_project_user(project=project)
+	if not project_user or project_user.hide_timesheets:
+		frappe.throw(
+			_("You are not permitted to view the timesheets of this project."), frappe.PermissionError
+		)
+
 	return frappe.render_template(
 		"erpnext/templates/includes/projects/project_timesheets.html",
 		{"doc": {"timesheets": get_timesheets(project, start)}},

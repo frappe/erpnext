@@ -233,9 +233,18 @@ class SalesOrder(SellingController):
 				"has_potentially_billable_items",
 				has_potentially_billable_items(self.name),
 			)
+			self.set_onload("has_over_deliverable_rows", self.has_over_deliverable_rows())
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
+
+	def has_over_deliverable_rows(self) -> bool:
+		"""Return True if a fully delivered row can take more qty within its over delivery allowance."""
+		return any(
+			flt(item.qty) <= flt(item.delivered_qty) < flt(item.max_deliverable_qty, item.precision("qty"))
+			for item in self.items
+			if not (item.delivered_by_supplier or cint(item.skip_delivery) or item.closed)
+		)
 
 	def before_validate(self):
 		self.set_has_unit_price_items()
