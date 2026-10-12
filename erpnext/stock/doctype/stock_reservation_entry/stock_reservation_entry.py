@@ -208,41 +208,11 @@ class StockReservationEntry(Document):
 		self.update_delivered_qty_in_from_voucher_reservations()
 
 	def give_back_serial_batch(self, released: frappe._dict) -> None:
-		"""Lower the delivered serial and batch qty of the source reservations by `released` once, newest first."""
-		sources = [row.name for row in self.get_from_voucher_reservation_entries()]
-		if not sources:
-			return
-
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
-		entries = (
-			frappe.qb.from_(sb_entry)
-			.inner_join(sre)
-			.on(sre.name == sb_entry.parent)
-			.select(sb_entry.name, sb_entry.serial_no, sb_entry.batch_no, sb_entry.delivered_qty)
-			.where(
-				(sb_entry.parenttype == "Stock Reservation Entry")
-				& sb_entry.parent.isin(sources)
-				& (sb_entry.delivered_qty > 0)
-			)
-			.orderby(sre.creation, order=Order.desc)
-		).run(as_dict=True)
-
-		serial_nos = set(released.serial_nos)
-		batches = defaultdict(float, released.batches)
-		for entry in entries:
-			qty = 0
-			if entry.serial_no and entry.serial_no in serial_nos:
-				qty = entry.delivered_qty
-				serial_nos.remove(entry.serial_no)
-			elif not entry.serial_no and entry.batch_no:
-				qty = min(entry.delivered_qty, batches[entry.batch_no])
-				batches[entry.batch_no] -= qty
-
-			if qty > 0:
-				frappe.db.set_value(
-					"Serial and Batch Entry", entry.name, "delivered_qty", entry.delivered_qty - qty
-				)
+		"""Lower the delivered serial and batch qty of the source reservations by `released` once."""
+		sources = self.get_from_voucher_reservation_entries()
+		move_serial_batch_delivered_qty(
+			{row.name: row.delivered_qty for row in sources}, released, release=True
+		)
 
 	def get_delivered_serial_batch_entries(self) -> frappe._dict:
 		serial_nos = []
@@ -1578,8 +1548,8 @@ class StockReservation:
 
 			query.run()
 
-			if data.serial_nos or data.batches:
-				update_serial_batch_delivered_qty(data, name)
+		if data.serial_nos or data.batches:
+			move_serial_batch_delivered_qty(data.get("sre_names"), data)
 
 	def make_stock_reservation_entry(self, row):
 		fields = [
@@ -2093,6 +2063,63 @@ def set_delivered_qty(sre_name: str, reserved_qty: float, delivered_qty: float) 
 	frappe.db.set_value(
 		"Stock Reservation Entry", sre_name, {"delivered_qty": delivered_qty, "status": status}
 	)
+
+
+def move_serial_batch_delivered_qty(
+	limits: dict[str, float], serial_batch: frappe._dict, release: bool = False
+) -> None:
+	"""Mark serial and batch qty delivered on these reservations once, oldest first, or give it back newest first.
+
+	`limits` holds the most each reservation may take or give back.
+	"""
+	if not limits:
+		return
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	open_qty = sb_entry.delivered_qty if release else sb_entry.qty - sb_entry.delivered_qty
+	entries = (
+		frappe.qb.from_(sb_entry)
+		.inner_join(sre)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.name,
+			sb_entry.parent,
+			sb_entry.serial_no,
+			sb_entry.batch_no,
+			sb_entry.delivered_qty,
+			open_qty.as_("open_qty"),
+		)
+		.where(
+			(sb_entry.parenttype == "Stock Reservation Entry")
+			& sb_entry.parent.isin(list(limits))
+			& (open_qty > 0)
+		)
+		.orderby(sre.creation, order=Order.desc if release else Order.asc)
+		.orderby(sb_entry.idx)
+	).run(as_dict=True)
+
+	limits = defaultdict(float, limits)
+	serial_nos = set(serial_batch.get("serial_nos") or [])
+	batches = defaultdict(float, serial_batch.get("batches") or {})
+	for entry in entries:
+		qty = 0
+		if entry.serial_no and entry.serial_no in serial_nos and limits[entry.parent] >= entry.open_qty:
+			qty = entry.open_qty
+			serial_nos.remove(entry.serial_no)
+		elif not entry.serial_no and entry.batch_no:
+			qty = min(entry.open_qty, batches[entry.batch_no], limits[entry.parent])
+			batches[entry.batch_no] -= qty
+
+		limits[entry.parent] -= qty
+
+		if qty > 0:
+			frappe.db.set_value(
+				"Serial and Batch Entry",
+				entry.name,
+				"delivered_qty",
+				entry.delivered_qty + (-qty if release else qty),
+			)
 
 
 def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
