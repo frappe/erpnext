@@ -445,6 +445,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 
@@ -573,12 +574,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
-			"field_no_map": [
-				*CROSS_PARTY_FIELD_NO_MAP,
-				"conversion_rate",
-				"plc_conversion_rate",
-				"set_warehouse",
-			],
+			"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 		},
 		doctype + " Item": {
 			"doctype": target_doctype + " Item",
