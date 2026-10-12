@@ -484,7 +484,9 @@ class SerialandBatchBundle(Document):
 					elif flt(row.qty) < 0:
 						queue_class = LIFOValuation if valuation_method == "LIFO" else FIFOValuation
 						stock_queue = queue_class(stock_queue)
-						stock_queue.remove_stock(qty=abs(row.qty))
+						stock_queue.remove_stock(
+							qty=abs(row.qty), outgoing_rate=row.incoming_rate, is_return_purchase_entry=True
+						)
 						stock_queue = stock_queue.state
 					row.stock_queue = json.dumps(stock_queue)
 
