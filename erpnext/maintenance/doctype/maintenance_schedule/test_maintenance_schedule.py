@@ -172,6 +172,18 @@ class TestMaintenanceSchedulePermissions(FrappeTestCase):
 
 			self.assertEqual(visit.docstatus, 1)
 
+	def test_serial_nos_from_schedule_need_schedule_read(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		sales_user = make_fenced_user("schedule-serial-sales@example.com", ["Sales User"])
+		maintenance_user = make_fenced_user("schedule-serial-maintenance@example.com", ["Maintenance User"])
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, get_serial_nos_from_schedule, item_code, ms.name)
+		with as_user(maintenance_user):
+			self.assertEqual(get_serial_nos_from_schedule(item_code, ms.name), ["TEST001"])
+
 
 def make_serial_item_with_serial(item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
