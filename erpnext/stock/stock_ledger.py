@@ -1262,6 +1262,10 @@ class update_entries_after:
 			if outward_value is not None:
 				amount = outward_value
 
+		if self.is_produced_row(sle):
+			sle.incoming_rate = self.get_produced_row_rate(sle)
+			amount = sle.incoming_rate * flt(sle.actual_qty)
+
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
 		# total_qty. A valuation repost must never rewrite physical quantities; if the bundle's child
