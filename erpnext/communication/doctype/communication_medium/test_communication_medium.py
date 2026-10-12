@@ -13,7 +13,9 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestCommunicationMedium(ERPNextTestSuite):
 	def setUp(self):
 		self.day_group = make_employee_group("_Test Medium Day Group", "medium-day@example.com")
-		self.fallback_group = make_employee_group("_Test Medium Fallback Group", "medium-fallback@example.com")
+		self.fallback_group = make_employee_group(
+			"_Test Medium Fallback Group", "medium-fallback@example.com"
+		)
 
 	def test_disabled_medium_shows_no_popup(self):
 		medium = make_medium([make_slot("09:00:00", "18:00:00", self.day_group)], self.fallback_group)
