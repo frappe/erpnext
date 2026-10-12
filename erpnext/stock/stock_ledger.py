@@ -3081,9 +3081,14 @@ def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
 		val_method = get_valuation_method(item_code, company)
 
 		actual_qty = row.qty
-		if stock_queue and val_method == "FIFO" and row.batch_no in sn_obj.non_batchwise_valuation_batches:
+		if (
+			stock_queue
+			and val_method in ("FIFO", "LIFO")
+			and row.batch_no in sn_obj.non_batchwise_valuation_batches
+		):
 			if actual_qty < 0:
-				stock_queue = FIFOValuation(stock_queue)
+				queue_class = LIFOValuation if val_method == "LIFO" else FIFOValuation
+				stock_queue = queue_class(stock_queue)
 				_prev_qty, prev_stock_value = stock_queue.get_total_stock_and_value()
 
 				stock_queue.remove_stock(qty=abs(actual_qty))
