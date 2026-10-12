@@ -35,6 +35,25 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		create_items()
 		reset("Stock Entry")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_fifo_rate_survives_a_balance_below_qty_precision(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Third"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"stock_uom": "Kg", "valuation_method": "FIFO"},
+			uoms=[{"uom": "_Test Third", "conversion_factor": 0.3333333}],
+		).name
+		for _ in range(4):
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=0.5, basic_rate=10.01)
+
+		dn = create_delivery_note(item_code=item, qty=6, rate=50, do_not_save=True)
+		dn.items[0].update({"uom": "_Test Third", "conversion_factor": 0.3333333})
+		dn.submit()
+
+		rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": dn.name, "is_cancelled": 0}, "valuation_rate"
+		)
+		self.assertAlmostEqual(rate, 10.01, delta=0.01)
+
 	def test_stock_write_takes_sle_advisory_gate(self):
 		if frappe.db.db_type != "postgres":
 			self.skipTest("advisory locks are a PostgreSQL feature")
@@ -49,6 +68,22 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		before = held_advisory_locks()
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
 		self.assertGreater(held_advisory_locks(), before)
+
+	def test_negative_stock_fallback_rate_ignores_later_entries(self):
+		item = make_item(properties={"allow_negative_stock": 1, "valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=300, posting_date=add_days(today(), -5)
+		)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5, posting_date=add_days(today(), -10))
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -400)
 
 	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
 		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
@@ -1059,6 +1094,35 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# same exact queue should be transferred
 		self.assertSLEs(repack, [{"incoming_rate": sum(rates) * 10}], sle_filters={"item_code": packed.name})
 
+	def test_repost_values_dependant_item_with_its_own_valuation_method(self):
+		rm = make_item(properties={"valuation_method": "FIFO"}).name
+		fg = make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=fg, target=warehouse, qty=10, rate=10, posting_date=add_days(today(), -3))
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, rate=100, posting_date=add_days(today(), -3))
+		repack = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=1,
+			purpose="Repack",
+			posting_date=add_days(today(), -2),
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{"item_code": fg, "t_warehouse": warehouse, "qty": 1, "transfer_qty": 1, "is_finished_item": 1},
+		)
+		repack.save()
+		repack.submit()
+
+		issue = make_stock_entry(item_code=fg, source=warehouse, qty=10, posting_date=add_days(today(), -1))
+		self.assertSLEs(issue, [{"stock_value_difference": -181.82}])
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, rate=50, posting_date=add_days(today(), -4))
+
+		self.assertSLEs(issue, [{"stock_value_difference": -136.36}])
+
 	def test_negative_fifo_valuation(self):
 		"""
 		When stock goes negative discard FIFO queue.
@@ -1905,6 +1969,133 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		self.assertTrue(future_sle_exists(args, for_update=True))
 		if frappe.db.db_type == "mariadb":
 			self.assertIn("for update", frappe.db.last_query.lower())
+
+	def test_repost_keeps_the_fifo_lot_of_a_serial_finished_good(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		company = "_Test Company with perpetual inventory"
+		source, warehouse = "Finished Goods - TCP1", "Stores - TCP1"
+		rm = make_item(properties={"valuation_method": "FIFO"}).name
+		fg = make_item(
+			properties={
+				"valuation_method": "FIFO",
+				"has_serial_no": 1,
+				"use_serial_no_wise_valuation": 0,
+				"serial_no_series": "RFL-.#####",
+			}
+		).name
+		make_stock_entry(
+			item_code=rm, target=source, qty=19, rate=121, company=company, posting_date=add_days(today(), -6)
+		)
+		repack = make_stock_entry(
+			item_code=rm,
+			source=source,
+			qty=2,
+			purpose="Repack",
+			company=company,
+			posting_date=add_days(today(), -2),
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{"item_code": fg, "t_warehouse": warehouse, "qty": 5, "transfer_qty": 5, "is_finished_item": 1},
+		)
+		repack.save()
+		repack.submit()
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			receipt = make_stock_entry(
+				item_code=fg,
+				target=warehouse,
+				qty=2,
+				rate=113,
+				company=company,
+				posting_date=add_days(today(), -3),
+				do_not_save=True,
+			)
+			receipt.append(
+				"items",
+				{
+					"item_code": rm,
+					"t_warehouse": source,
+					"qty": 14,
+					"transfer_qty": 14,
+					"basic_rate": 19,
+					"set_basic_rate_manually": 1,
+				},
+			)
+			receipt.save()
+			receipt.submit()
+			make_stock_entry(
+				item_code=fg,
+				target=warehouse,
+				qty=4,
+				rate=108,
+				company=company,
+				posting_date=add_days(today(), -4),
+			)
+		repost_entries()
+
+		issue = make_stock_entry(
+			item_code=fg, source=warehouse, qty=8, company=company, posting_date=add_days(today(), -1)
+		)
+		self.assertSLEs(issue, [{"stock_value_difference": -(4 * 108 + 2 * 113 + 2 * 48.4)}])
+
+	def test_rate_with_no_earlier_stock_ignores_later_entries(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = make_item(properties={"valuation_method": "Moving Average", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=5,
+			rate=300,
+			company=company,
+			posting_date=add_days(today(), -1),
+		)
+
+		dn_return = create_delivery_note(
+			item_code=item,
+			qty=-3,
+			rate=500,
+			company=company,
+			warehouse=warehouse,
+			is_return=1,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			posting_date=add_days(today(), -3),
+		)
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+		make_stock_entry(item_code=item, target=warehouse, qty=5, rate=1000, company=company)
+		frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item,
+				"warehouse": warehouse,
+				"company": company,
+				"posting_date": add_days(today(), -7),
+				"posting_time": "00:00:00",
+			}
+		).submit()
+
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+	def test_undated_rate_lookup_reads_the_latest_entry(self):
+		from erpnext.stock.utils import _get_incoming_rate
+
+		item = make_item(properties={"valuation_method": "FIFO", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, rate=300, company=company)
+
+		rate = _get_incoming_rate(
+			{"item_code": item, "warehouse": "Stores - TCP1", "qty": 1, "company": company}
+		)
+
+		self.assertEqual(rate, 300)
 
 
 def create_repack_entry(**args):

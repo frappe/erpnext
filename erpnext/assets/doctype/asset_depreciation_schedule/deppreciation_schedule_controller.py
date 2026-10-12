@@ -36,20 +36,15 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		self.set_accumulated_depreciation()
 
 	def clear(self):
-		self.first_non_depreciated_row_idx = 0
-		num_of_depreciations_completed = 0
-		depr_schedule = []
+		rows = self.get("depreciation_schedule")
+		self.schedules_before_clearing = rows
+		gap_idx = next((idx for idx, row in enumerate(rows) if not row.journal_entry), None)
 
-		self.schedules_before_clearing = self.get("depreciation_schedule")
-		for schedule in self.get("depreciation_schedule"):
-			if schedule.journal_entry:
-				num_of_depreciations_completed += 1
-				depr_schedule.append(schedule)
-			else:
-				self.first_non_depreciated_row_idx = num_of_depreciations_completed
-				break
-
-		self.depreciation_schedule = depr_schedule
+		self.first_non_depreciated_row_idx = gap_idx or 0
+		self.depreciation_schedule = list(rows) if gap_idx is None else rows[:gap_idx]
+		self.booked_rows_after_gap = (
+			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
+		)
 
 	def create(self):
 		self.initialize_variables()
@@ -65,6 +60,8 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			self.get_prev_depreciation_amount(row_idx)
 
 			self.schedule_date = self.get_next_schedule_date(row_idx)
+			if self.add_booked_row(self.schedule_date):
+				continue
 
 			self.depreciation_amount = self.get_depreciation_amount(row_idx)
 
@@ -95,6 +92,35 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 
 			if flt(self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")) > 0:
 				self.add_depr_schedule_row(row_idx)
+
+		self.add_remaining_booked_rows()
+
+	def add_booked_row(self, schedule_date) -> bool:
+		"""Keep a row booked after an unbooked one in place of regenerating it."""
+		booked_row = next(
+			(
+				row
+				for row in self.booked_rows_after_gap
+				if getdate(row.schedule_date) == getdate(schedule_date)
+			),
+			None,
+		)
+		if not booked_row:
+			return False
+
+		self.booked_rows_after_gap.remove(booked_row)
+		self.append("depreciation_schedule", booked_row)
+		return True
+
+	def add_remaining_booked_rows(self):
+		if not self.booked_rows_after_gap:
+			return
+
+		rows = self.depreciation_schedule + self.booked_rows_after_gap
+		self.booked_rows_after_gap = []
+		self.depreciation_schedule = []
+		for row in sorted(rows, key=lambda row: getdate(row.schedule_date)):
+			self.append("depreciation_schedule", row)
 
 	def initialize_variables(self):
 		self.pending_depreciation_amount = self.fb_row.value_after_depreciation
@@ -219,9 +245,43 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			self.fb_row.frequency_of_depreciation
 		) + cint(self.fb_row.increase_in_asset_life)
 		last_depr_date = self.get_last_booked_depreciation_date()
-		depr_booked_for_months = self.get_booked_depr_for_months_count(last_depr_date)
+		depr_booked_for_months = (
+			self.get_booked_depr_for_months_count(last_depr_date) + self.get_months_booked_after_gap()
+		)
 
 		self.pending_months = total_months - depr_booked_for_months
+
+	def get_months_booked_after_gap(self) -> float:
+		"""Months covered by rows booked after an unbooked one, partial rows by the days they cover."""
+		if not self.booked_rows_after_gap:
+			return 0
+
+		rows = self.schedules_before_clearing
+		return sum(
+			self.get_months_covered(rows[idx - 1].schedule_date, rows[idx].schedule_date)
+			for idx in range(self.first_non_depreciated_row_idx + 1, len(rows))
+			if rows[idx].journal_entry
+		)
+
+	def get_months_covered(self, previous_date, schedule_date) -> float:
+		frequency = cint(self.fb_row.frequency_of_depreciation)
+		if self.is_full_period(previous_date, schedule_date):
+			return frequency
+
+		return get_elapsed_months(add_days(previous_date, 1), schedule_date, frequency)
+
+	def is_full_period(self, previous_date, schedule_date) -> bool:
+		"""Whether both dates are consecutive dates of the regular schedule."""
+		start_date, schedule_date = getdate(self.fb_row.depreciation_start_date), getdate(schedule_date)
+		frequency = cint(self.fb_row.frequency_of_depreciation)
+		months = (schedule_date.year - start_date.year) * 12 + schedule_date.month - start_date.month
+		if months % frequency:
+			return False
+
+		row_idx = months // frequency
+		return getdate(self.get_next_schedule_date(row_idx)) == schedule_date and getdate(
+			self.get_next_schedule_date(row_idx - 1)
+		) == getdate(previous_date)
 
 	def get_last_booked_depreciation_date(self):
 		last_depr_date = None
@@ -252,8 +312,8 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			)
 			if getdate(computed_available_for_use_date) < getdate(self.asset_doc.available_for_use_date):
 				computed_available_for_use_date = self.asset_doc.available_for_use_date
-			depr_booked_for_months = (date_diff(last_depr_date, computed_available_for_use_date) + 1) / (
-				365 / 12
+			depr_booked_for_months = get_elapsed_months(
+				computed_available_for_use_date, last_depr_date, cint(self.fb_row.frequency_of_depreciation)
 			)
 		return depr_booked_for_months
 
@@ -433,10 +493,6 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 		for d in self.get("depreciation_schedule"):
-			if d.journal_entry:
-				accumulated_depreciation = d.accumulated_depreciation_amount
-				continue
-
 			accumulated_depreciation += d.depreciation_amount
 			d.accumulated_depreciation_amount = flt(
 				accumulated_depreciation, d.precision("accumulated_depreciation_amount")
@@ -478,3 +534,16 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			fy_end_date = add_days(add_years(fy_start_date, 1), -1)
 
 		return fy_start_date, fy_end_date
+
+
+def get_elapsed_months(from_date, to_date, frequency: int) -> float:
+	"""Months from from_date to to_date: whole periods counted back from to_date, plus the first
+	partial period as a fraction of its days, as the pro-rata first row is computed."""
+	from_date, period_end = getdate(from_date), getdate(add_days(to_date, 1))
+	periods = 0
+	while getdate(add_months(period_end, -frequency * (periods + 1))) >= from_date:
+		periods += 1
+
+	partial_period_end = add_months(period_end, -frequency * periods)
+	partial_period_days = date_diff(partial_period_end, add_months(partial_period_end, -frequency))
+	return (periods + date_diff(partial_period_end, from_date) / partial_period_days) * frequency

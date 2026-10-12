@@ -231,40 +231,38 @@ frappe.ui.form.on("Company", {
 			freeze: true,
 			callback: function (r) {
 				if (!r.exc) {
-					frappe.verify_password(function () {
-						var d = frappe.prompt(
-							{
-								fieldtype: "Data",
-								fieldname: "company_name",
-								label: __("Please enter the company name to confirm"),
-								reqd: 1,
-								description: __(
-									"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone.",
-									[frappe.utils.bold(frm.doc.name)]
-								),
-							},
-							function (data) {
-								if (data.company_name !== frm.doc.name) {
-									frappe.msgprint(__("Company name does not match"));
-									return;
-								}
-								frappe.call({
-									method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
-									args: {
-										company: data.company_name,
-									},
-									freeze: true,
-									callback: function (r, rt) {},
-									onerror: function () {
-										frappe.msgprint(__("Wrong Password"));
-									},
-								});
-							},
-							__("Delete all the Transactions for {0}", [frappe.utils.bold(frm.doc.name)]),
-							__("Delete")
-						);
-						d.get_primary_btn().addClass("btn-danger");
-					});
+					var d = frappe.prompt(
+						{
+							fieldtype: "Data",
+							fieldname: "company_name",
+							label: __("Please enter the company name to confirm"),
+							reqd: 1,
+							description: __(
+								"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone.",
+								[frappe.utils.bold(frm.doc.name)]
+							),
+						},
+						function (data) {
+							if (data.company_name !== frm.doc.name) {
+								frappe.msgprint(__("Company name does not match"));
+								return;
+							}
+							frappe.call({
+								method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
+								args: {
+									company: data.company_name,
+								},
+								freeze: true,
+								callback: function (r, rt) {},
+								onerror: function () {
+									frappe.msgprint(__("Wrong Password"));
+								},
+							});
+						},
+						__("Delete all the Transactions for {0}", [frappe.utils.bold(frm.doc.name)]),
+						__("Delete")
+					);
+					d.get_primary_btn().addClass("btn-danger");
 				}
 			},
 		});

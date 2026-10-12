@@ -166,7 +166,6 @@ def task(doc_name, from_doctype, to_doctype):
 		},
 		"Supplier Quotation": {
 			"Purchase Order": supplier_quotation.make_purchase_order,
-			"Purchase Invoice": supplier_quotation.make_purchase_invoice,
 		},
 		"Purchase Order": {
 			"Purchase Invoice": purchase_order.make_purchase_invoice,

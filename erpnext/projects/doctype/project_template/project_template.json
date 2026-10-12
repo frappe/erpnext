@@ -37,7 +37,7 @@
  ],
  "icon": "folder",
  "links": [],
- "modified": "2026-08-21 23:11:46.618525",
+ "modified": "2026-10-05 17:03:50.245948",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
@@ -57,10 +57,14 @@
    "write": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Projects Manager",
-   "select": 1
+   "select": 1,
+   "write": 1
   },
   {
+   "read": 1,
    "role": "Projects User",
    "select": 1
   }

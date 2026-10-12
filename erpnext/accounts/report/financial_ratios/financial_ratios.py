@@ -106,7 +106,7 @@ def get_ratios_data(filters, period_list, years):
 				0,
 			],
 			[cogs, total_expense, "Cost of Goods Sold", year, expense, "Expense", {}, total_cogs],
-			[direct_expense, direct_expense, "Direct Expense", year, expense, "Expense", {}, 0],
+			[direct_expense, {}, "Direct Expense", year, expense, "Expense", {}, 0],
 			[net_sales, total_income, "Direct Income", year, income, "Income", {}, total_net_sales],
 		]:
 			update_balances(d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7])
@@ -122,19 +122,26 @@ def get_ratios_data(filters, period_list, years):
 def get_gl_data(filters, period_list, years):
 	data = {}
 
-	for d in [
-		["Asset", "Debit"],
-		["Liability", "Credit"],
-		["Income", "Credit"],
-		["Expense", "Debit"],
-	]:
-		data[frappe.scrub(d[0])] = get_data(
+	for root_type, balance_must_be in [["Asset", "Debit"], ["Liability", "Credit"]]:
+		data[frappe.scrub(root_type)] = get_data(
 			filters.company,
-			d[0],
-			d[1],
+			root_type,
+			balance_must_be,
 			period_list,
 			only_current_fiscal_year=False,
 			filters=filters,
+		)
+
+	# income and expense of each period only, as in the Profit and Loss Statement
+	for root_type, balance_must_be in [["Income", "Credit"], ["Expense", "Debit"]]:
+		data[frappe.scrub(root_type)] = get_data(
+			filters.company,
+			root_type,
+			balance_must_be,
+			period_list,
+			filters=filters,
+			accumulated_values=0,
+			ignore_closing_entries=True,
 		)
 
 	assets, liabilities, income, expense = (
@@ -203,11 +210,9 @@ def add_turnover_ratios(data, years, period_list, filters, fixed_asset, net_sale
 	for d in ["Receivable", "Payable", "Stock"]:
 		avg_data[frappe.scrub(d)] = avg_ratio_balance(d, period_list, precision, filters)
 
-	avg_debtors, avg_creditors, avg_stock = (
-		avg_data.get("receivable"),
-		avg_data.get("payable"),
-		avg_data.get("stock"),
-	)
+	avg_debtors, avg_stock = avg_data.get("receivable"), avg_data.get("stock")
+	# payables are credit balances
+	avg_creditors = {key: -flt(balance) for key, balance in avg_data.get("payable").items()}
 
 	ratio_data = [
 		[_("Fixed Asset Turnover Ratio"), net_sales, fixed_asset],
@@ -238,8 +243,6 @@ def update_balances(
 	for entry in root_type_data:
 		if not entry.get("parent_account") and entry.get("is_group"):
 			total_dict[year] = entry[year]
-			if account_type == "Direct Expense":
-				total_dict[year] = entry[year] * -1
 
 		if root_type in ("Asset", "Liability"):
 			if entry.get("account_type") == account_type and entry.get("is_group"):
@@ -271,11 +274,13 @@ def avg_ratio_balance(account_type, period_list, precision, filters):
 			date=closing_date,
 			company=filters.company,
 			account_type=account_type,
+			in_account_currency=False,
 		)
 		opening_balance = get_balance_on(
 			date=opening_date,
 			company=filters.company,
 			account_type=account_type,
+			in_account_currency=False,
 		)
 		avg_ratio[period["key"]] = flt((flt(closing_balance) + flt(opening_balance)) / 2, precision=precision)
 
