@@ -1365,9 +1365,13 @@ class Item(Document):
 				if linked_doc := frappe.db.get_value(doctype, filters, fieldname, as_dict=True):
 					return linked_doc.update({"doctype": doctype})
 
-			elif doctype in (
-				"Purchase Invoice Item",
-				"Sales Invoice Item",
+			elif (
+				doctype
+				in (
+					"Purchase Invoice Item",
+					"Sales Invoice Item",
+				)
+				and "is_stock_item" not in changed_fields
 			):
 				# If Invoice has Stock impact, only then consider it.
 				if linked_doc := frappe.db.get_value(

@@ -791,6 +791,16 @@ class TestItem(ERPNextTestSuite):
 		)
 		self.assertFalse(frappe.db.exists("Item Price", {"item_code": template.name}))
 
+	def test_maintain_stock_cannot_be_turned_on_after_an_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = make_item(properties={"is_stock_item": 0})
+		make_purchase_invoice(item_code=item.name, qty=4, rate=250)
+
+		item.reload()
+		item.is_stock_item = 1
+		self.assertRaises(frappe.ValidationError, item.save)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
