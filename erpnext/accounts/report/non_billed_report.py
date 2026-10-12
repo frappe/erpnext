@@ -10,11 +10,16 @@ from erpnext import get_default_currency
 
 BILLING_LINKS = {
 	"Delivery Note": frappe._dict(
-		invoice="Sales Invoice", invoice_link="dn_detail", return_link="dn_detail", returned_qty="stock_qty"
+		invoice="Sales Invoice",
+		invoice_link="dn_detail",
+		billing_flag="update_billed_amount_in_delivery_note",
+		return_link="dn_detail",
+		returned_qty="stock_qty",
 	),
 	"Purchase Receipt": frappe._dict(
 		invoice="Purchase Invoice",
 		invoice_link="pr_detail",
+		billing_flag="update_billed_amount_in_purchase_receipt",
 		return_link="purchase_receipt_item",
 		returned_qty="stock_qty",
 		rejected_return_flag="return_qty_from_rejected_warehouse",
@@ -103,6 +108,7 @@ def get_billed_after(links, as_on_date):
 		.on(invoice.name == invoice_item.parent)
 		.select(invoice_item[links.invoice_link].as_("detail"), Sum(invoice_item.amount).as_("amount"))
 		.where((invoice.docstatus == 1) & (invoice.posting_date > as_on_date))
+		.where((invoice.is_return == 0) | (invoice[links.billing_flag] == 1))
 		.where(invoice_item[links.invoice_link].isnotnull())
 		.groupby(invoice_item[links.invoice_link])
 	).as_("later_billed")

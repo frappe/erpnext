@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 from erpnext.accounts.report.received_items_to_be_billed.received_items_to_be_billed import execute
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_pi_from_pr
 from erpnext.stock.doctype.purchase_receipt.mapper import (
@@ -149,6 +150,24 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 		)
 
 		self.assertEqual(self.get_row(self.run_report(), pr.name).pending_amount, 50000)
+
+	def test_later_debit_note_not_updating_billing_is_ignored(self):
+		pr = make_purchase_receipt(qty=10, rate=100, posting_date="2026-06-01")
+		pi = make_pi_from_pr(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = "2026-06-05"
+		pi.items[0].qty = 4
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.set_posting_time = 1
+		debit_note.posting_date = "2026-06-20"
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.items[0].qty = -1
+		debit_note.submit()
+
+		row = self.get_row(self.run_report(posting_date="2026-06-10"), pr.name)
+		self.assertEqual((row.billed_amount, row.pending_amount), (400, 600))
 
 
 def make_receipt_return(purchase_receipt, qty, posting_date):
