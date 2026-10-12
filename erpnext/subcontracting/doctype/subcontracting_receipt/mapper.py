@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, get_link_to_form
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+
 
 @frappe.whitelist()
 def make_subcontract_return_against_rejected_warehouse(source_name: str):
@@ -87,7 +89,10 @@ def make_purchase_receipt(
 		)
 
 	target_doc = None
+	first_order_charges = 0
 	for po_name in purchase_orders:
+		is_first_order = target_doc is None
+		charges_before = len(target_doc.taxes) if target_doc else 0
 		target_doc = get_mapped_doc(
 			"Purchase Order",
 			po_name,
@@ -111,14 +116,22 @@ def make_purchase_receipt(
 				},
 				"Purchase Taxes and Charges": {
 					"doctype": "Purchase Taxes and Charges",
-					"reset_value": True,
+					"reset_value": is_first_order,
 					# for POs created in earlier version with tax_withholding_row
-					"condition": lambda doc: not doc.is_tax_withholding_account,
+					"condition": lambda doc: (
+						not doc.is_tax_withholding_account and (is_first_order or doc.charge_type == "Actual")
+					),
 				},
 			},
 			target_doc,
 			postprocess=post_process,
 		)
+		if is_first_order:
+			first_order_charges = len(target_doc.taxes)
+		else:
+			merge_order_charges(target_doc, first_order_charges, charges_before)
+
+	target_doc.calculate_taxes_and_totals()
 
 	if not target_doc.get("items"):
 		add_po_items_to_pr(source_doc, target_doc)
@@ -144,6 +157,29 @@ def make_purchase_receipt(
 			)
 
 	return target_doc
+
+
+def merge_order_charges(target_doc, first_order_charges: int, order_charges_start: int):
+	"""Fold an order's Actual charges into the first order's rows, matching repeated charges by position."""
+	key_fields = ["account_head", "category", "add_deduct_tax", "cost_center", "project"]
+	key_fields += get_accounting_dimensions()
+
+	def get_charge_key(row) -> tuple:
+		return tuple(row.get(field) for field in key_fields)
+
+	first_order_rows = defaultdict(list)
+	for row in target_doc.taxes[:first_order_charges]:
+		if row.charge_type == "Actual":
+			first_order_rows[get_charge_key(row)].append(row)
+
+	for row in target_doc.taxes[order_charges_start:]:
+		if matching_rows := first_order_rows.get(get_charge_key(row)):
+			first_row = matching_rows.pop(0)
+			first_row.tax_amount = flt(first_row.tax_amount) + flt(row.tax_amount)
+			target_doc.remove(row)
+
+	for idx, row in enumerate(target_doc.taxes, 1):
+		row.idx = idx
 
 
 def validate_no_purchase_receipt_made(scr_doc):

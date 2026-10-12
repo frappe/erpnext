@@ -799,6 +799,59 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.db.exists("Stock Ledger Entry", {"voucher_type": scr.doctype, "voucher_no": scr.name})
 		)
 
+	def test_purchase_receipt_keeps_charges_of_every_order(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		set_backflush_based_on("BOM")
+		orders = [get_subcontracting_order(), get_subcontracting_order()]
+		for idx, sco in enumerate(orders):
+			for charge in (
+				{
+					"idx": 1,
+					"charge_type": "Actual",
+					"account_head": "_Test Account Shipping Charges - _TC",
+					"description": f"Freight {idx}",
+					"tax_amount": 10 * (idx + 1),
+				},
+				{
+					"idx": 2,
+					"charge_type": "On Previous Row Amount",
+					"row_id": "1",
+					"rate": 10,
+					"account_head": "_Test Account Excise Duty - _TC",
+					"description": f"Freight Tax {idx}",
+				},
+			):
+				frappe.get_doc(
+					{
+						"doctype": "Purchase Taxes and Charges",
+						"parent": sco.purchase_order,
+						"parenttype": "Purchase Order",
+						"parentfield": "taxes",
+						"category": "Total",
+						"add_deduct_tax": "Add",
+						"cost_center": "Main - _TC",
+						**charge,
+					}
+				).db_insert()
+			rm_items = get_rm_items(sco.supplied_items)
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name,
+				rm_items=rm_items,
+				itemwise_details=copy.deepcopy(itemwise_details),
+			)
+
+		scr = make_subcontracting_receipt(orders[0].name)
+		scr = make_subcontracting_receipt(orders[1].name, scr)
+		scr.save()
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(
+			[(t.description, t.tax_amount) for t in pr.taxes], [("Freight 0", 30), ("Freight Tax 0", 3)]
+		)
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
