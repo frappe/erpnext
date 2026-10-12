@@ -462,10 +462,21 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 	return doclist
 
 
+def validate_request_not_stopped(source_name):
+	if frappe.db.get_value("Material Request", source_name, "status") == "Stopped":
+		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
+
+
+def get_pending_pick_qty(row):
+	return flt(row.stock_qty) - max(flt(row.ordered_qty), flt(row.picked_qty))
+
+
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
-		qty = flt((obj.stock_qty - obj.picked_qty) / target.conversion_factor, obj.precision("qty"))
+		qty = flt(get_pending_pick_qty(obj) / target.conversion_factor, obj.precision("qty"))
 		target.qty = qty
 		target.stock_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
@@ -487,10 +498,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 					"from_warehouse": "warehouse",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: (
-					flt(doc.picked_qty, doc.precision("picked_qty"))
-					< flt(doc.stock_qty, doc.precision("stock_qty"))
-				),
+				"condition": lambda doc: flt(get_pending_pick_qty(doc), doc.precision("stock_qty")) > 0,
 			},
 		},
 		target_doc,
