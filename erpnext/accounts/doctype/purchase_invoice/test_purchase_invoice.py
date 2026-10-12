@@ -58,6 +58,52 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	def tearDown(self):
 		frappe.db.rollback()
 
+	def test_invoice_qty_below_stock_qty_precision_is_valued(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4}],
+		).name
+		pi = make_purchase_invoice(item_code=item, qty=1, rate=10, uom="Kg", do_not_save=True)
+		qty = 1 / 10 ** pi.items[0].precision("qty")
+		pi.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4, "qty": qty})
+		pi.save()
+
+		self.assertEqual(flt(pi.items[0].valuation_rate * qty * 0.4, 2), flt(pi.items[0].base_net_amount, 2))
+
+	def test_stock_updating_invoice_values_the_stock_qty_the_ledger_posts(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4536}],
+		).name
+		pi = make_purchase_invoice(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="_Test Account Cost for Goods Sold - TCP1",
+			update_stock=1,
+			qty=7,
+			rate=1234,
+			uom="Kg",
+			do_not_save=True,
+		)
+		pi.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4536})
+		pi.submit()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pi.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		gl_debits = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pi.name, "is_cancelled": 0, "debit": (">", 0)}, pluck="debit"
+		)
+		self.assertEqual((stock_value, gl_debits), (pi.items[0].base_net_amount, [stock_value]))
+
 	def test_purchase_invoice_qty(self):
 		pi = make_purchase_invoice(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):

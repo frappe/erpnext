@@ -519,11 +519,12 @@ class WorkOrder(Document):
 			self.update_production_plan_status()
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		precision = self.precision("disassembled_qty")
 		if is_cancel:
-			self.disassembled_qty = max(0, self.disassembled_qty - qty)
+			self.disassembled_qty = max(0, flt(self.disassembled_qty - qty, precision))
 		else:
 			if self.docstatus == 1:
-				self.disassembled_qty += qty
+				self.disassembled_qty = flt(self.disassembled_qty + qty, precision)
 
 		if not is_cancel and self.disassembled_qty > self.produced_qty:
 			frappe.throw(_("Cannot disassemble more than produced quantity."))
@@ -1393,8 +1394,8 @@ class WorkOrder(Document):
 						AND entry.docstatus = 1
 						AND detail.parent = entry.name
 						AND detail.s_warehouse IS NOT null
-						AND (detail.item_code = %(item)s
-							OR detail.original_item = %(item)s)
+						AND (detail.original_item = %(item)s
+							OR (IFNULL(detail.original_item, '') = '' AND detail.item_code = %(item)s))
 				""",
 				{"name": self.name, "item": item.item_code},
 			)[0][0]
@@ -1696,7 +1697,10 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 		frappe.db.get_value("Stock Entry", filters, "sum(fg_completed_qty)", order_by=None)
 	)
 
-	return flt(se.fg_completed_qty) - already_disassembled
+	return flt(
+		flt(se.fg_completed_qty) - already_disassembled,
+		frappe.get_precision("Stock Entry", "fg_completed_qty"),
+	)
 
 
 @frappe.whitelist()
