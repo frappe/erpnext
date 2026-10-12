@@ -878,6 +878,28 @@ class TestItem(ERPNextTestSuite):
 		item.append("barcodes", {"barcode": "036000291453", "barcode_type": "UPC-A"})
 		self.assertRaises(InvalidBarcode, item.save)
 
+	def test_reorder_group_change_is_checked(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		other_group = create_warehouse("_Test Reorder Other Group", {"is_group": 1})
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"reorder_levels": [
+					{
+						"warehouse_group": "_Test Warehouse Group - _TC",
+						"warehouse": "_Test Warehouse Group-C1 - _TC",
+						"warehouse_reorder_level": 10,
+						"warehouse_reorder_qty": 5,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		)
+
+		item.reorder_levels[0].warehouse_group = other_group
+		self.assertRaises(frappe.ValidationError, item.save)
+
 	def test_add_item_barcode(self):
 		# Clean up
 		item_code = "Test Item Barcode"

@@ -616,7 +616,8 @@ class Item(Document):
 		_warehouse_before_save = frappe._dict()
 		if not self.is_new() and self._doc_before_save:
 			_warehouse_before_save = {
-				d.name: d.warehouse for d in self._doc_before_save.get("reorder_levels") or []
+				d.name: (d.warehouse, d.warehouse_group)
+				for d in self._doc_before_save.get("reorder_levels") or []
 			}
 
 		for d in self.get("reorder_levels"):
@@ -636,7 +637,7 @@ class Item(Document):
 				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
 
 			if d.warehouse_group and d.warehouse:
-				if _warehouse_before_save.get(d.name) == d.warehouse:
+				if _warehouse_before_save.get(d.name) == (d.warehouse, d.warehouse_group):
 					continue
 
 				child_warehouses = get_child_warehouses(d.warehouse_group)
