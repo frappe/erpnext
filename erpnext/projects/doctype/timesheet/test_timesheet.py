@@ -164,6 +164,34 @@ class TestTimesheet(FrappeTestCase):
 		sales_invoice.append("timesheets", sales_invoice.timesheets[0].as_dict(no_default_fields=True))
 		self.assertRaises(frappe.ValidationError, sales_invoice.save)
 
+	def test_invoice_row_without_time_log_keeps_its_amount(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		sales_invoice.append("timesheets", {"time_sheet": timesheet.name, "billing_amount": 70})
+		sales_invoice.save()
+		self.assertEqual(len(sales_invoice.timesheets), 1)
+		self.assertEqual(sales_invoice.timesheets[0].timesheet_detail, timesheet.time_logs[0].name)
+		self.assertEqual(sales_invoice.timesheets[0].billing_amount, 70)
+
+		two_logs = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+		log = two_logs.time_logs[0]
+		two_logs.append(
+			"time_logs",
+			{
+				"activity_type": log.activity_type,
+				"is_billable": 1,
+				"from_time": log.to_time,
+				"to_time": add_to_date(log.to_time, hours=1),
+				"hours": 1,
+			},
+		)
+		two_logs.submit()
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		sales_invoice.append("timesheets", {"time_sheet": two_logs.name, "billing_amount": 70})
+		self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
 	def _invoice_with_timesheet_row(self, time_sheet, timesheet_detail, with_amounts=True):
 		sales_invoice = create_sales_invoice(do_not_save=True)
 		row = {"time_sheet": time_sheet, "timesheet_detail": timesheet_detail}
