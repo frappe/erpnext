@@ -2105,44 +2105,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(docstatus, 2)
 
 	def test_stock_reco_with_opening_stock_with_diff_inventory(self):
-		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
-			create_inventory_dimension,
-		)
-
-		if not frappe.db.exists("DocType", "Plant"):
-			frappe.get_doc(
-				{
-					"doctype": "DocType",
-					"name": "Plant",
-					"module": "Stock",
-					"custom": 1,
-					"fields": [
-						{
-							"fieldname": "plant_name",
-							"fieldtype": "Data",
-							"label": "Plant Name",
-							"reqd": 1,
-						}
-					],
-					"autoname": "field:plant_name",
-				}
-			).insert(ignore_permissions=True)
-		create_inventory_dimension(dimension_name="ID-Plant", reference_document="Plant")
-
-		plant_a = frappe.get_doc(
-			{
-				"doctype": "Plant",
-				"plant_name": "Plant A",
-			}
-		).insert(ignore_permissions=True)
-
-		plant_b = frappe.get_doc(
-			{
-				"doctype": "Plant",
-				"plant_name": "Plant B",
-			}
-		).insert(ignore_permissions=True)
-
+		plant_a, plant_b = make_plant_dimension()
 		warehouse = "_Test Warehouse - _TC"
 
 		item_code = "Item-Test"
@@ -2161,7 +2124,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"warehouse": warehouse,
 				"qty": 5,
 				"valuation_rate": 100,
-				"id_plant": plant_a.name,
+				"id_plant": plant_a,
 			},
 		)
 
@@ -2172,7 +2135,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"warehouse": warehouse,
 				"qty": 3,
 				"valuation_rate": 110,
-				"id_plant": plant_b.name,
+				"id_plant": plant_b,
 			},
 		)
 
@@ -2192,7 +2155,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(
 			{row.id_plant: row.actual_qty for row in sle},
-			{plant_a.name: 5, plant_b.name: 3},
+			{plant_a: 5, plant_b: 3},
 		)
 
 	def test_serial_no_status_with_backdated_stock_reco(self):
@@ -2751,3 +2714,29 @@ def set_valuation_method(item_code, valuation_method):
 			update_entries_after(
 				{"item_code": item_code, "warehouse": warehouse.name}, allow_negative_stock=1
 			)
+
+
+def make_plant_dimension():
+	from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
+		create_inventory_dimension,
+	)
+
+	if not frappe.db.exists("DocType", "Plant"):
+		frappe.get_doc(
+			{
+				"doctype": "DocType",
+				"name": "Plant",
+				"module": "Stock",
+				"custom": 1,
+				"fields": [
+					{"fieldname": "plant_name", "fieldtype": "Data", "label": "Plant Name", "reqd": 1}
+				],
+				"autoname": "field:plant_name",
+			}
+		).insert(ignore_permissions=True)
+	create_inventory_dimension(dimension_name="ID-Plant", reference_document="Plant")
+
+	return [
+		frappe.get_doc({"doctype": "Plant", "plant_name": name}).insert(ignore_if_duplicate=True).name
+		for name in ("Plant A", "Plant B")
+	]
