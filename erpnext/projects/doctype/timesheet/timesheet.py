@@ -14,6 +14,7 @@ from frappe.utils import (
 	flt,
 	get_datetime,
 	getdate,
+	nowdate,
 	time_diff_in_hours,
 	time_diff_in_seconds,
 )
@@ -304,9 +305,10 @@ class Timesheet(Document):
 	def update_cost(self):
 		for data in self.time_logs:
 			self.update_billing_hours(data)
+			needs_rate = not flt(data.costing_rate) or (data.is_billable and not flt(data.billing_rate))
 			rate = (
 				_get_activity_cost(self.employee, data.activity_type, self.currency)
-				if data.activity_type
+				if data.activity_type and needs_rate
 				else {}
 			)
 			data.billing_rate = flt(data.billing_rate) or flt(rate.get("billing_rate"))
@@ -577,6 +579,13 @@ def _get_activity_cost(employee=None, activity_type=None, currency=None):
 		)
 	if rate and currency and currency != base_currency:
 		exchange_rate = get_exchange_rate(base_currency, currency)
+		if not exchange_rate:
+			frappe.throw(
+				_(
+					"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+				).format(base_currency, currency, nowdate())
+			)
+
 		rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
 		rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
