@@ -216,6 +216,7 @@ class SubcontractingReceipt(SubcontractingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 		self.validate_closed_subcontracting_order()
 		self.update_status_updater_args()

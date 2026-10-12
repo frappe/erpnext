@@ -364,6 +364,8 @@ class SalesInvoice(SellingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
+		self.validate_delivery_note_rows_billed_by_invoice()
+		self.validate_closed_delivery_notes()
 		BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 
 		if self.is_return and self.return_against:
@@ -594,6 +596,7 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
 
@@ -649,6 +652,11 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "against_pick_list",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "pick_list_item",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 				},
 			]
 		)
@@ -847,6 +855,42 @@ class SalesInvoice(SellingController):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
 			)
+
+	def validate_closed_delivery_notes(self):
+		delivery_notes = {d.delivery_note for d in self.items if d.delivery_note}
+		if self.is_return or not delivery_notes:
+			return
+
+		if closed := frappe.get_all(
+			"Delivery Note", filters={"name": ("in", list(delivery_notes)), "status": "Closed"}, pluck="name"
+		):
+			frappe.throw(
+				_("Delivery Note {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
+			)
+
+	def validate_delivery_note_rows_billed_by_invoice(self):
+		dn_details = [d.dn_detail for d in self.items if d.dn_detail]
+		if self.is_return or not dn_details:
+			return
+
+		billing_invoices = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", dn_details), "against_sales_invoice": ("is", "set")},
+				fields=["name", "against_sales_invoice"],
+				as_list=True,
+			)
+		)
+		for d in self.items:
+			invoice = billing_invoices.get(d.dn_detail)
+			if invoice and invoice != self.name:
+				frappe.throw(
+					_(
+						"Row #{0}: Delivery Note {1} was created from Sales Invoice {2}, which already bills it"
+					).format(d.idx, frappe.bold(d.delivery_note), get_link_to_form("Sales Invoice", invoice))
+				)
 
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""

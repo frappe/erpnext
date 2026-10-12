@@ -153,14 +153,15 @@ class BuyingController(SubcontractingController):
 				):
 					bundle_ids[bundle.name] = bundle.serial_and_batch_bundle
 
+			bundle_ids.update(self.get_component_packages())
+
 			if not bundle_ids:
 				return
 
 			for item in self.get("items"):
-				if item.get(field) and not item.serial_and_batch_bundle and bundle_ids.get(item.get(field)):
-					item.serial_and_batch_bundle = self.make_accepted_package(
-						item, bundle_ids.get(item.get(field))
-					)
+				reference = item.get(field) or item.get("delivery_note_packed_item")
+				if reference and not item.serial_and_batch_bundle and bundle_ids.get(reference):
+					item.serial_and_batch_bundle = self.make_accepted_package(item, bundle_ids.get(reference))
 
 				elif (
 					not self.is_new()
@@ -220,10 +221,48 @@ class BuyingController(SubcontractingController):
 		"""Package of the material the delivery note put in the in-transit warehouse."""
 		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 		doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+		if row.get("delivery_note_packed_item"):
+			return frappe.db.get_value(
+				"Packed Item", row.delivery_note_packed_item, "serial_and_batch_bundle"
+			)
+
 		if not row.get(field):
 			return None
 
 		return frappe.db.get_value(doctype, row.get(field), "serial_and_batch_bundle")
+
+	def get_component_incoming_rates(self) -> dict:
+		packed_items = [
+			d.delivery_note_packed_item for d in self.get("items") if d.get("delivery_note_packed_item")
+		]
+		if not packed_items:
+			return {}
+
+		return frappe._dict(
+			frappe.get_all(
+				"Packed Item",
+				filters={"name": ("in", packed_items)},
+				fields=["name", "incoming_rate"],
+				as_list=True,
+			)
+		)
+
+	def get_component_packages(self) -> dict:
+		"""Packages of the bundle components the delivery note put in the in-transit warehouse."""
+		packed_items = [
+			d.delivery_note_packed_item for d in self.get("items") if d.get("delivery_note_packed_item")
+		]
+		if not packed_items:
+			return {}
+
+		return frappe._dict(
+			frappe.get_all(
+				"Packed Item",
+				filters={"name": ("in", packed_items)},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
 
 	def set_rejected_package(self, row, package) -> None:
 		"""Package of the material the row rejects.
@@ -828,10 +867,15 @@ class BuyingController(SubcontractingController):
 
 		ref_doctype = ref_doctype_map.get(self.doctype)
 		returned_field = frappe.scrub(self.doctype) + "_item"
+		component_rates = self.get_component_incoming_rates()
 		for d in self.get("items"):
 			if self.get("is_return") and d.get(returned_field):
 				d.sales_incoming_rate = flt(
 					frappe.db.get_value(self.doctype + " Item", d.get(returned_field), "sales_incoming_rate")
+				)
+			elif d.get("delivery_note_packed_item") in component_rates:
+				d.sales_incoming_rate = flt(
+					component_rates[d.delivery_note_packed_item] * (d.conversion_factor or 1)
 				)
 			elif not d.get(frappe.scrub(ref_doctype)):
 				posting_time = self.get("posting_time")
