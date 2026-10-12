@@ -81,7 +81,7 @@ class ProvisionalAccountingService:
 
 def get_order_billing_provisional_reversals(invoice) -> dict:
 	items = [d for d in invoice.items if d.po_detail and not d.pr_detail]
-	if not items or invoice.is_return:
+	if not items:
 		return {}
 
 	receipt_rows = get_provisional_receipt_rows(invoice.company, {d.po_detail for d in items})
@@ -91,9 +91,11 @@ def get_order_billing_provisional_reversals(invoice) -> dict:
 	unreversed_qty = get_unreversed_receipt_qty(receipt_rows, invoice)
 	reversals = {}
 	for item in items:
-		reversals[item.name] = allocate_receipt_rows(
-			receipt_rows.get(item.po_detail, []), unreversed_qty, flt(item.qty)
-		)
+		rows = receipt_rows.get(item.po_detail, [])
+		if flt(item.qty) < 0:
+			reversals[item.name] = release_receipt_rows(rows, unreversed_qty, -flt(item.qty))
+		else:
+			reversals[item.name] = allocate_receipt_rows(rows, unreversed_qty, flt(item.qty))
 
 	return reversals
 
@@ -155,14 +157,32 @@ def group_rows_with_provisional_entries(rows) -> dict:
 
 def get_unreversed_receipt_qty(receipt_rows, invoice) -> dict:
 	rows = [row for po_rows in receipt_rows.values() for row in po_rows]
-	billed_qty = get_invoiced_qty("pr_detail", [d.name for d in rows])
-	unreversed_qty = {d.name: flt(d.qty) - flt(billed_qty.get(d.name)) for d in rows}
+	names = [d.name for d in rows]
+	billed_qty = get_invoiced_qty("pr_detail", names)
+	returned_qty = get_returned_receipt_qty(names)
+	for d in rows:
+		d.kept_qty = flt(d.qty) + flt(returned_qty.get(d.name)) - flt(billed_qty.get(d.name))
 
+	unreversed_qty = {d.name: d.kept_qty for d in rows}
 	order_billed_qty = get_invoiced_qty("po_detail", list(receipt_rows), invoice)
 	for po_detail, po_rows in receipt_rows.items():
 		allocate_receipt_rows(po_rows, unreversed_qty, flt(order_billed_qty.get(po_detail)))
 
 	return unreversed_qty
+
+
+def get_returned_receipt_qty(names) -> dict:
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+	return frappe._dict(
+		frappe.qb.from_(pr_item)
+		.join(pr)
+		.on(pr.name == pr_item.parent)
+		.select(pr_item.purchase_receipt_item, Sum(pr_item.qty))
+		.where((pr_item.purchase_receipt_item.isin(names)) & (pr.docstatus == 1) & (pr.is_return == 1))
+		.groupby(pr_item.purchase_receipt_item)
+		.run()
+	)
 
 
 def get_invoiced_qty(fieldname, names, invoice=None) -> dict:
@@ -173,16 +193,12 @@ def get_invoiced_qty(fieldname, names, invoice=None) -> dict:
 		.join(pi)
 		.on(pi.name == pi_item.parent)
 		.select(pi_item[fieldname], Sum(pi_item.qty))
-		.where((pi_item[fieldname].isin(names)) & (pi.docstatus == 1) & (pi.is_return == 0))
+		.where((pi_item[fieldname].isin(names)) & (pi.docstatus == 1))
 		.groupby(pi_item[fieldname])
 	)
 
 	if invoice:
-		query = query.where(
-			(IfNull(pi_item.pr_detail, "") == "")
-			& (pi.name != invoice.name)
-			& (pi.creation < invoice.creation)
-		)
+		query = query.where((IfNull(pi_item.pr_detail, "") == "") & (pi.name != invoice.name))
 
 	return frappe._dict(query.run())
 
@@ -198,5 +214,20 @@ def allocate_receipt_rows(rows, unreversed_qty, qty) -> list:
 			allocations.append((row, allocated_qty))
 			unreversed_qty[row.name] -= allocated_qty
 			qty -= allocated_qty
+
+	return allocations
+
+
+def release_receipt_rows(rows, unreversed_qty, qty) -> list:
+	allocations = []
+	for row in reversed(rows):
+		if qty <= 0:
+			break
+
+		released_qty = min(qty, flt(row.kept_qty) - unreversed_qty[row.name])
+		if released_qty > 0:
+			allocations.append((row, -released_qty))
+			unreversed_qty[row.name] += released_qty
+			qty -= released_qty
 
 	return allocations
