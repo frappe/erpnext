@@ -151,9 +151,7 @@ class Timesheet(Document):
 			self.status = "Completed"
 
 	def set_user(self):
-		self.user = (
-			self.employee and frappe.db.get_value("Employee", self.employee, "user_id")
-		) or self.owner
+		self.user = frappe.db.get_value("Employee", self.employee, "user_id") if self.employee else self.owner
 
 	def set_dates(self):
 		if self.docstatus < 2 and self.time_logs:
