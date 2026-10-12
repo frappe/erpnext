@@ -568,6 +568,27 @@ class TestPlanAdapter(ERPNextTestSuite):
 		plan.save()
 		self.assertFalse(self.has_schedule(plan))
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"mins_between_operations": 10, "allow_overtime": 0, "disable_capacity_planning": 0},
+	)
+	def test_partial_work_order_not_seeded_from_full_row_block(self):
+		plan = self.make_draft_plan()
+		plan.submit()
+		apply_schedule(plan.name, "2026-12-07 09:00:00")
+
+		plan.reload()
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.qty = 1
+		work_order.set_work_order_operations()
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = work_order.fg_warehouse or "Finished Goods - _TC"
+		work_order.submit()
+
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		self.assertEqual(sum(flt(log.time_in_mins) for log in job_card.scheduled_time_logs), 30)
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 
