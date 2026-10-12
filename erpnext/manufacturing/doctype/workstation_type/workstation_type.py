@@ -49,6 +49,52 @@ class WorkstationType(Document):
 			if row.operating_cost:
 				self.hour_rate += flt(row.operating_cost)
 
+	def on_update(self):
+		self.update_workstation_costs()
+
+	def update_workstation_costs(self):
+		previous = self.get_doc_before_save()
+		if not previous:
+			return
+
+		old_costs = get_cost_map(previous.workstation_costs)
+		if old_costs == get_cost_map(self.workstation_costs):
+			return
+
+		for name in self.get_workstations_with_costs(old_costs):
+			workstation = frappe.get_doc("Workstation", name)
+			workstation.workstation_costs = []
+			for row in self.workstation_costs:
+				workstation.append(
+					"workstation_costs",
+					{"operating_component": row.operating_component, "operating_cost": row.operating_cost},
+				)
+			workstation.save()
+
+	def get_workstations_with_costs(self, costs):
+		workstation = frappe.qb.DocType("Workstation")
+		cost = frappe.qb.DocType("Workstation Cost")
+		rows = (
+			frappe.qb.from_(workstation)
+			.left_join(cost)
+			.on((cost.parent == workstation.name) & (cost.parenttype == "Workstation"))
+			.select(workstation.name, cost.operating_component, cost.operating_cost)
+			.where(workstation.workstation_type == self.name)
+			.run(as_dict=True)
+		)
+
+		workstation_costs = {}
+		for row in rows:
+			workstation_costs.setdefault(row.name, [])
+			if row.operating_component:
+				workstation_costs[row.name].append(row)
+
+		return [name for name, rows in workstation_costs.items() if get_cost_map(rows) == costs]
+
+
+def get_cost_map(rows):
+	return {row.operating_component: flt(row.operating_cost) for row in rows}
+
 
 def get_workstations(workstation_type):
 	workstations = frappe.get_all(
