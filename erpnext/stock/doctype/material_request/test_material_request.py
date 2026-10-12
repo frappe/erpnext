@@ -1693,6 +1693,22 @@ class TestMaterialRequest(ERPNextTestSuite):
 			[row, row | {"supplier": "_Test Supplier 1"}],
 		)
 
+	def test_manufacture_request_from_sales_order_updates_requested_qty(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request as make_request_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=5)
+		mr = make_request_from_so(so.name)
+		mr.material_request_type = "Manufacture"
+		mr.items[0].schedule_date = today()
+		mr.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 5)
+		self.assertRaises(frappe.ValidationError, make_request_from_so, so.name)
+
+		mr.cancel()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 0)
+
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
