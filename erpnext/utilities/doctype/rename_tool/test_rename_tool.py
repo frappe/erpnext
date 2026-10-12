@@ -30,6 +30,16 @@ class TestRenameTool(ERPNextTestSuite):
 		upload("Customer", attach_csv(f"{second},{second} Renamed\n"))
 		self.assertTrue(frappe.db.exists("Customer", f"{second} Renamed"))
 
+	def test_file_saved_in_the_attach_field_is_removed(self):
+		customer = make_customer("_Test Rename Tool F")
+		file_url = attach_csv(f"{customer},{customer} Renamed\n")
+		frappe.db.set_single_value("Rename Tool", "file_to_rename", file_url)
+
+		upload("Customer", file_url)
+		self.assertTrue(frappe.db.exists("Customer", f"{customer} Renamed"))
+		self.assertFalse(frappe.db.exists("File", {"file_url": file_url}))
+		self.assertFalse(frappe.db.get_single_value("Rename Tool", "file_to_rename"))
+
 	def test_upload_requires_rename_tool_access_and_a_renameable_doctype(self):
 		customer = make_customer("_Test Rename Tool C")
 		file_url = attach_csv(f"{customer},{customer} Renamed\n")
@@ -62,4 +72,5 @@ def attach_csv(content: str) -> str:
 def run_job_inline(method, **kwargs):
 	if callable(method):
 		kwargs.pop("queue", None)
+		kwargs.pop("enqueue_after_commit", None)
 		return method(**kwargs)
