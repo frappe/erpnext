@@ -20,6 +20,7 @@ from erpnext.stock.doctype.material_request.mapper import (
 )
 from erpnext.stock.doctype.material_request.material_request import (
 	raise_work_orders,
+	update_status,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -1708,6 +1709,31 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		mr.cancel()
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 0)
+
+	def test_work_orders_are_raised_once_per_requested_qty(self):
+		mr = make_material_request(item_code="_Test FG Item", material_request_type="Manufacture", qty=10)
+
+		first = raise_work_orders(mr.name, mr.company)
+		self.assertEqual(raise_work_orders(mr.name, mr.company), [])
+
+		extra = frappe.copy_doc(frappe.get_doc("Work Order", first[0]))
+		extra.insert()
+		for name in (first[0], extra.name):
+			work_order = frappe.get_doc("Work Order", name)
+			work_order.wip_warehouse = "_Test Warehouse 1 - _TC"
+			work_order.save()
+
+		frappe.get_doc("Work Order", first[0]).submit()
+		self.assertRaises(frappe.ValidationError, frappe.get_doc("Work Order", extra.name).submit)
+
+		stopped_mr = make_material_request(
+			item_code="_Test FG Item", material_request_type="Manufacture", qty=3
+		)
+		draft = frappe.get_doc("Work Order", raise_work_orders(stopped_mr.name, stopped_mr.company)[0])
+		draft.wip_warehouse = "_Test Warehouse 1 - _TC"
+		draft.save()
+		update_status(stopped_mr.name, "Stopped")
+		self.assertRaises(frappe.InvalidStatusError, draft.submit)
 
 
 def create_item_with_default_supplier(item_code, supplier):
