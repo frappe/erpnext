@@ -1572,6 +1572,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_gross_profit(item);
 	}
 
+	disable_rounded_total() {
+		this.calculate_taxes_and_totals();
+	}
+
 	shipping_rule() {
 		var me = this;
 		if (this.frm.doc.shipping_rule) {
