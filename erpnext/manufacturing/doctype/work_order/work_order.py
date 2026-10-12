@@ -1022,11 +1022,12 @@ class WorkOrder(Document):
 
 	def on_cancel(self):
 		self.validate_cancel()
+		was_closed = self.status == "Closed"
 		self.db_set("status", "Cancelled")
 
-		self.on_close_or_cancel()
+		self.on_close_or_cancel(release_inward_order=not was_closed)
 
-	def on_close_or_cancel(self):
+	def on_close_or_cancel(self, release_inward_order=True):
 		if self.production_plan and frappe.db.exists(
 			"Production Plan Item Reference", {"parent": self.production_plan}
 		):
@@ -1042,7 +1043,8 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			self.update_stock_reservation()
 
-		self.update_subcontracting_inward_order_received_items(release=True)
+		if release_inward_order:
+			self.update_subcontracting_inward_order_received_items(release=True)
 
 	def update_stock_reservation(self):
 		self.set_qty_change()
