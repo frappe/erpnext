@@ -112,6 +112,41 @@ class TestRouting(ERPNextTestSuite):
 		self.assertEqual(first.operations[0].time_in_mins, 10)
 		self.assertEqual(second.operations[0].time_in_mins, 20)
 
+	def test_workstation_change_refreshes_hour_rate(self):
+		operations = [
+			{
+				"operation": "_Test Op Routing Rate",
+				"workstation": "_Test WS Routing 600",
+				"hour_rate_rent": 600,
+			},
+			{
+				"operation": "_Test Op Routing Rate",
+				"workstation": "_Test WS Routing 1200",
+				"hour_rate_rent": 1200,
+			},
+		]
+		setup_operations(operations)
+		routing = create_routing(
+			routing_name="Routing Rate Change",
+			operations=[
+				{
+					"operation": "_Test Op Routing Rate",
+					"workstation": "_Test WS Routing 600",
+					"time_in_mins": 60,
+				}
+			],
+		)
+		self.assertEqual(routing.operations[0].hour_rate, 600)
+
+		routing.operations[0].workstation = "_Test WS Routing 1200"
+		routing.save()
+		self.assertEqual(routing.operations[0].hour_rate, 1200)
+		self.assertEqual(routing.operations[0].operating_cost, 1200)
+
+		routing.operations[0].hour_rate = 900
+		routing.save()
+		self.assertEqual(routing.operations[0].hour_rate, 900)
+
 
 def setup_operations(rows):
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
