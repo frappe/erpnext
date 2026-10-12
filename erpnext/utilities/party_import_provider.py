@@ -101,7 +101,8 @@ class PartyImportProvider(ImportProvider):
 			row = dict(row)
 			email = row.pop("email_id", None)
 			mobile = row.pop("mobile_no", None)
-			flagged = frappe.utils.cint(row.pop("is_primary_contact", 0))
+			flag = row.pop("is_primary_contact", None)
+			flagged = frappe.utils.cint(flag)
 
 			# Reuse a contact already linked to this party so re-imports don't duplicate it.
 			match = {"email_id": email} if email else {"mobile_no": mobile} if mobile else None
@@ -123,8 +124,9 @@ class PartyImportProvider(ImportProvider):
 				if mobile:
 					contact.add_phone(mobile, is_primary_mobile_no=True)
 				contact.insert()
-			# First created contact is the default primary; an explicit flag overrides.
-			if flagged or (primary is None and not existing):
+			# The first row is the default primary and a flag overrides it; on an update an explicit 0,
+			# as in an exported file, keeps the row out of that default.
+			if flagged or (primary is None and not (find_existing and flag is not None)):
 				primary = contact
 		if primary:
 			# Unlike addresses, saving a contact doesn't clear the party's other primary contact.
@@ -160,7 +162,8 @@ class PartyImportProvider(ImportProvider):
 		primary = None
 		for row in rows:
 			row = dict(row)
-			flagged = frappe.utils.cint(row.pop("is_primary_address", 0))
+			flag = row.pop("is_primary_address", None)
+			flagged = frappe.utils.cint(flag)
 			existing = find_existing and _find_linked(
 				"Address",
 				party.doctype,
@@ -180,8 +183,8 @@ class PartyImportProvider(ImportProvider):
 					}
 				)
 				address.insert()
-			# First created address is the default primary; an explicit flag overrides.
-			if flagged or (primary is None and not existing):
+			# Same default and override as contacts.
+			if flagged or (primary is None and not (find_existing and flag is not None)):
 				primary = address
 		if primary:
 			# save() clears the party's other primary address; set_value would leave two.

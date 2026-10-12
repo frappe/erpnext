@@ -377,6 +377,56 @@ class TestPartyImportProvider(ERPNextTestSuite):
 			(None, None),
 		)
 
+	def test_rows_added_to_an_export_keep_the_primaries(self):
+		columns = [
+			"customer_name",
+			"customer_type",
+			"customer_group",
+			"territory",
+			"contacts.email_id",
+			"addresses.address_line1",
+			"addresses.city",
+			"addresses.country",
+		]
+		values = [
+			f"{PREFIX} Added Rows",
+			"Company",
+			self.customer_group,
+			self.territory,
+			"kept@example.com",
+			"1 Main St",
+			"Berlin",
+			"Germany",
+		]
+		self.run_import("Customer", INSERT, [columns, values])
+		name = self.get_party("Customer", values[0])
+		primaries = frappe.db.get_value(
+			"Customer", name, ["customer_primary_contact", "customer_primary_address"]
+		)
+
+		# exported without the primary flag columns
+		with self.set_user(USER):
+			export = Exporter(
+				"Customer",
+				export_fields={
+					"Customer": ["name"],
+					"contacts": ["email_id"],
+					"addresses": ["address_line1", "city", "country"],
+				},
+				export_data=True,
+				export_filters={"name": name},
+			).get_csv_array()
+		export.append(["", "added@example.com", "9 Dock Rd", "Hamburg", "Germany"])
+
+		self.run_import("Customer", UPDATE, export)
+
+		self.assertEqual(len(self.linked("Contact", "Customer", name)), 2)
+		self.assertEqual(len(self.linked("Address", "Customer", name)), 2)
+		self.assertEqual(
+			frappe.db.get_value("Customer", name, ["customer_primary_contact", "customer_primary_address"]),
+			primaries,
+		)
+
 	def test_tables_the_user_cannot_read_are_left_out(self):
 		has_permission = frappe.has_permission
 
