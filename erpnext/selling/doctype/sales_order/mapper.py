@@ -14,6 +14,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -65,7 +66,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 	def get_remaining_qty(so_item):
 		return flt(
 			flt(so_item.qty)
-			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+			- flt(requested_item_qty.get(so_item.name, {}).get("qty")) / (flt(so_item.conversion_factor) or 1)
 			- max(
 				flt(so_item.get("delivered_qty")),
 				0,
@@ -165,7 +166,8 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 @frappe.whitelist()
 def make_project(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
-		doc.project_type = "External"
+		if frappe.db.exists("Project Type", "External"):
+			doc.project_type = "External"
 		doc.project_name = source.name
 
 	doc = get_mapped_doc(
@@ -267,7 +269,11 @@ def make_delivery_note(
 	}
 
 	# 0 qty is accepted, as the qty is uncertain for some items
-	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+	has_unit_price_items, per_delivered = frappe.db.get_value(
+		"Sales Order", source_name, ["has_unit_price_items", "per_delivered"]
+	)
+	can_over_deliver_all_rows = flt(per_delivered) >= 100 and not frappe.flags.bulk_transaction
+	selected_rows = set(kwargs.get("filtered_children") or [])
 	use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 	def is_unit_price_row(source):
@@ -321,13 +327,19 @@ def make_delivery_note(
 			(
 				(abs(doc.delivered_qty) + abs(mapped_qty_by_item.get(doc.name, 0)) < abs(doc.qty))
 				or (is_unit_price_row(doc) and doc.name not in mapped_qty_by_item)
+				or remaining_qty(doc) > 0
 			)
 			and doc.delivered_by_supplier != 1
 			and not cint(doc.skip_delivery)
 		)
 
 	def remaining_qty(source):
-		return flt(source.qty) - flt(source.delivered_qty) - flt(mapped_qty_by_item.get(source.name, 0))
+		delivered_qty = flt(source.delivered_qty) + flt(mapped_qty_by_item.get(source.name, 0))
+		can_over_deliver = can_over_deliver_all_rows or source.name in selected_rows
+		if delivered_qty < flt(source.qty) or not can_over_deliver:
+			return flt(source.qty) - delivered_qty
+
+		return flt(source.max_deliverable_qty - delivered_qty, source.precision("qty"))
 
 	def update_item(source, target, source_parent):
 		target.base_amount = remaining_qty(source) * flt(source.base_rate)
@@ -518,6 +530,14 @@ def make_sales_invoice(
 
 		return pending_qty_by_item[source.name]
 
+	def is_qty_billed_below_amount(source):
+		invoiced = get_invoiced_qty_by_item().get(source.name, frappe._dict())
+		return (
+			source.name not in mapped_qty_by_item
+			and flt(flt(source.qty) - flt(invoiced.billed_qty), source.precision("qty")) <= 0
+			and abs(flt(source.billed_amt)) < abs(flt(source.amount))
+		)
+
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
@@ -650,8 +670,10 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or is_amount_billable(doc))
-						and get_pending_qty(doc) > 0
+						and (
+							((doc.base_amount == 0 or is_amount_billable(doc)) and get_pending_qty(doc) > 0)
+							or is_qty_billed_below_amount(doc)
+						)
 					)
 				),
 			},
@@ -1131,6 +1153,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 
 @frappe.whitelist()
 def make_subcontracting_inward_order(source_name: str, target_doc: str | dict | Document | None = None):
+	check_on_hold_or_closed_status("Sales Order", source_name)
 	if not is_so_fully_subcontracted(source_name):
 		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:
@@ -1142,7 +1165,7 @@ def is_so_fully_subcontracted(so_name: str) -> bool:
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name)
-		.where((table.parent == so_name) & (table.qty != table.subcontracted_qty))
+		.where((table.parent == so_name) & (table.stock_qty > table.subcontracted_qty))
 	)
 	return not query.run(as_dict=True)
 
@@ -1189,7 +1212,7 @@ def get_mapped_subcontracting_inward_order(
 					"name": "sales_order_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: item.qty != item.subcontracted_qty and not item.closed,
+				"condition": lambda item: item.stock_qty > item.subcontracted_qty and not item.closed,
 			},
 		},
 		target_doc,

@@ -114,8 +114,10 @@ frappe.ui.form.on("Repost Item Valuation", {
 		frm.add_custom_button(__("Start Reposting"), () => {
 			frappe.call({
 				method: "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_repost_item_valuation",
-				callback: function () {
-					frappe.msgprint(__("Reposting has been started in the background."));
+				callback: function (r) {
+					if (r.message) {
+						frappe.msgprint(__("Reposting has been started in the background."));
+					}
 				},
 			});
 		});

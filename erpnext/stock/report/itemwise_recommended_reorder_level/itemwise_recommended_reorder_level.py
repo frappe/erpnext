@@ -117,6 +117,8 @@ def get_consumed_items(filters):
 		.where(
 			(sle.actual_qty < 0)
 			& (sle.is_cancelled == 0)
+			# the stock an Adjustment Entry counts out comes back in, it is not consumed
+			& (sle.is_adjustment_entry == 0)
 			& (sle.voucher_type.notin(["Delivery Note", "Sales Invoice"]))
 			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))
 		)

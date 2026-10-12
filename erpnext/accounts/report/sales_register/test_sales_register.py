@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_register.sales_register import execute
@@ -57,6 +58,80 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 			si = si.submit()
 		return si
 
+	def make_party_journal(self, voucher_type, debit=0, credit=0):
+		return frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": voucher_type,
+				"company": self.company,
+				"posting_date": getdate(),
+				"cheque_no": "REF-1",
+				"cheque_date": getdate(),
+				"accounts": [
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"debit_in_account_currency": debit,
+						"credit_in_account_currency": credit,
+						"cost_center": self.cost_center,
+					},
+					{
+						"account": self.cash,
+						"debit_in_account_currency": credit,
+						"credit_in_account_currency": debit,
+						"cost_center": self.cost_center,
+					},
+				],
+			}
+		).submit()
+
+	def make_customer_payment(self, payment_type, amount):
+		paid_from, paid_to = (
+			(self.debit_to, self.cash) if payment_type == "Receive" else (self.cash, self.debit_to)
+		)
+		return create_payment_entry(
+			company=self.company,
+			payment_type=payment_type,
+			party_type="Customer",
+			party=self.customer,
+			paid_from=paid_from,
+			paid_to=paid_to,
+			paid_amount=amount,
+			save=1,
+			submit=1,
+		)
+
+	def get_ledger_view(self):
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"include_payments": True,
+				"customer": self.customer,
+			}
+		)
+		return execute(filters)[1]
+
+	def get_customer_gl_balance(self):
+		balance = frappe.get_all(
+			"GL Entry",
+			filters={
+				"party_type": "Customer",
+				"party": self.customer,
+				"account": self.debit_to,
+				"company": self.company,
+				"is_cancelled": 0,
+				"posting_date": ["<=", today()],
+			},
+			fields=[
+				{"SUM": "debit_in_account_currency", "as": "debit"},
+				{"SUM": "credit_in_account_currency", "as": "credit"},
+			],
+		)[0]
+		return flt(balance.debit) - flt(balance.credit)
+
 	def _ensure_income_account(self, account_name):
 		name = f"{account_name} - _TC"
 		if not frappe.db.exists("Account", name):
@@ -111,6 +186,41 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		report_output = {k: v for k, v in report[1][0].items() if k in expected_result}
 		self.assertDictEqual(report_output, expected_result)
+
+	def test_customer_group_filter_includes_child_groups(self):
+		si = self.create_sales_invoice()
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"customer_group": "All Customer Groups",
+			}
+		)
+		self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
+
+	def test_group_filters_need_no_access_to_the_tree(self):
+		si = self.create_sales_invoice()
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "_test_sr_accounts_manager@example.com",
+				"first_name": "Accounts Manager",
+			}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles("Accounts Manager")
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			customer_group="All Customer Groups",
+		)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertIn(si.name, [row.get("voucher_no") for row in execute(filters)[1]])
+		finally:
+			frappe.set_user("Administrator")
 
 	def test_sales_register_ignores_tax_rows_from_other_doctype(self):
 		si = self.create_sales_invoice(rate=98)
@@ -252,6 +362,37 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		result_output = {k: v for k, v in filtered_output[0].items() if k in expected_result}
 		self.assertDictEqual(result_output, expected_result)
 
+	def test_ledger_view_matches_party_gl(self):
+		invoice = self.create_sales_invoice(rate=99.6)
+		receipt = self.make_customer_payment("Receive", 60)
+		refund = self.make_customer_payment("Pay", 10)
+		bank_entry = self.make_party_journal("Bank Entry", credit=20)
+		debit_journal = self.make_party_journal("Journal Entry", debit=5)
+
+		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
+		expected = {
+			invoice.name: (invoice.base_rounded_total, 0),
+			receipt.name: (0, 60),
+			refund.name: (10, 0),
+			bank_entry.name: (0, 20),
+			debit_journal.name: (5, 0),
+		}
+		for voucher_no, (debit, credit) in expected.items():
+			self.assertEqual((rows[voucher_no]["debit"], rows[voucher_no]["credit"]), (debit, credit))
+		self.assertEqual(rows[bank_entry.name]["voucher_type"], "Journal Entry")
+
+		closing_balance = list(rows.values())[-1]["balance"]
+		self.assertEqual(flt(closing_balance), self.get_customer_gl_balance())
+
+	def test_ledger_view_debits_grand_total_without_rounding_adjustment(self):
+		# older invoices can carry a rounded total without having posted a rounding adjustment
+		invoice = self.create_sales_invoice(rate=99.6)
+		invoice.db_set("base_rounding_adjustment", 0)
+
+		rows = {row.get("voucher_no"): row for row in self.get_ledger_view()}
+
+		self.assertEqual(rows[invoice.name]["debit"], invoice.base_grand_total)
+
 	def test_ledger_view_nets_pos_paid_invoice(self):
 		# A POS payment settles the receivable inside the invoice, so the ledger view must credit it
 		# and net to zero instead of showing a phantom outstanding.
@@ -301,15 +442,22 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		)
 		foreign_invoice.db_set("currency", "USD")
 		foreign_invoice.db_set("conversion_rate", 80)
+		foreign_invoice.db_set("party_account_currency", "USD")
 		foreign_invoice.db_set("outstanding_amount", 100.236)
 		make_customer("_Test Customer2")
 		local_invoice = create_sales_invoice(
 			customer="_Test Customer2", currency="INR", conversion_rate=1, qty=1, rate=200
 		)
 		local_invoice.db_set("outstanding_amount", 200.456)
+		# foreign currency invoice on a company currency receivable: outstanding is already in INR
+		foreign_invoice_on_local_receivable = create_sales_invoice(customer="_Test Customer2", qty=1, rate=10)
+		foreign_invoice_on_local_receivable.db_set("currency", "USD")
+		foreign_invoice_on_local_receivable.db_set("conversion_rate", 80)
+		foreign_invoice_on_local_receivable.db_set("outstanding_amount", 800)
 		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
 		outstanding_precision = 2
 
 		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
 		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
 		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
+		self.assertEqual(data_by_name.get(foreign_invoice_on_local_receivable.name), 800)

@@ -177,12 +177,15 @@ frappe.ui.form.on("Project", {
 					{
 						label: __("Status"),
 						render: (row) => {
-							const [label, color] = frappe.get_indicator(row, "Task") || [
-								__(row.status),
-								"gray",
-							];
-							// badge knows "darkgrey" but not the list view's "dark grey"
-							return frappe.ui.badge.html({ label, theme: color.replace(" ", "") });
+							if (!row.status) return "";
+							// the Task list gives no colour for statuses missing from its map, e.g. ones
+							// added through Customize Form
+							const [label, color] = frappe.get_indicator(row, "Task") || [];
+							return frappe.ui.badge.html({
+								label: label || __(row.status),
+								// badge knows "darkgrey" but not the list view's "dark grey"
+								theme: (color || "gray").replace(" ", ""),
+							});
 						},
 					},
 					{ label: __("Priority"), render: (row) => __(row.priority || "") },

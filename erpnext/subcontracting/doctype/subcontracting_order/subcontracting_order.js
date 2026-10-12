@@ -133,6 +133,7 @@ frappe.ui.form.on("Subcontracting Order", {
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
 		}
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	purchase_order: (frm) => {
@@ -301,7 +302,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 		frm.doc.supplied_items.forEach((item) => {
 			let unreserved_qty =
-				flt(item.required_qty) - flt(item.supplied_qty) - flt(item.stock_reserved_qty);
+				flt(item.required_qty) - flt(item.total_supplied_qty) - flt(item.stock_reserved_qty);
 
 			if (unreserved_qty > 0) {
 				dialog.fields_dict.items.df.data.push({

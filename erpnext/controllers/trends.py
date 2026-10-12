@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.utils import DateTimeLikeObject, getdate, today
 
 import erpnext
@@ -91,8 +92,7 @@ def get_data(filters, conditions):
 			posting_date = "t1." + filters.period_based_on
 
 	if filters.get("based_on") == "Project":
-		project_field = conditions["group_by"].split(",")[0]
-		cond = f" and ifnull({project_field}, '') != ''"
+		cond = " and " + conditions["based_on_select"].split(",")[0] + " != ''"
 
 	if not filters.get("include_closed_orders"):
 		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
@@ -101,11 +101,10 @@ def get_data(filters, conditions):
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"
 
+	cond += get_permission_condition(conditions["trans"])
+
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
-	)
-	cond += get_permitted_transactions_condition(
-		filters, conditions["trans"], posting_date, year_start_date, year_end_date
 	)
 
 	if filters.get("group_by"):
@@ -253,21 +252,10 @@ def get_data(filters, conditions):
 	return data
 
 
-def get_permitted_transactions_condition(
-	filters: dict, trans: str, posting_date: str, year_start_date: str, year_end_date: str
-) -> str:
-	"""Limit rows to transactions the user may read, so totals and non-party rows respect permissions."""
-	permitted = frappe.qb.get_query(
-		trans,
-		fields=["name"],
-		filters={
-			"company": filters.get("company"),
-			"docstatus": 1,
-			posting_date.removeprefix("t1."): ["between", [year_start_date, year_end_date]],
-		},
-		ignore_permissions=False,
-	)
-	return " and t1.name in ({})".format(permitted.get_sql().replace("%", "%%"))
+def get_permission_condition(doctype):
+	if match_conditions := build_match_conditions(doctype):
+		return f" and t1.name in (select name from `tab{doctype}` where {match_conditions})"
+	return ""
 
 
 def calculate_total_row(data, columns, company_currency=None):

@@ -26,7 +26,7 @@ permissions:
 # Postgres CI stays on GitHub-hosted (free, full-speed VM per shard) but follows the same fan-out
 # we built for MariaDB: build the bench + reinstall ONCE in the setup job, bake the PostgreSQL
 # PGDATA into the artifact, and have 4 test shards start Postgres on that datadir — no per-shard
-# clone/build/reinstall/restore. Python is pinned so the venv transplants between VMs.
+# clone/build/reinstall/restore. Shards reuse the setup job's exact Python so the venv transplants.
 env:
   TZ: 'Asia/Kolkata'
   NODE_ENV: "production"
@@ -40,11 +40,14 @@ jobs:
     # the 'postgres' label — the test job needs setup, so it's skipped too when this is.
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'postgres')
     timeout-minutes: 40
+    outputs:
+      python-version: ${{ steps.setup-python.outputs.python-version }}
     steps:
       - name: Clone
         uses: actions/checkout@v6
 
       - name: Setup Python
+        id: setup-python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -156,7 +159,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ needs.setup.outputs.python-version }}
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts

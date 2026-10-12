@@ -48,6 +48,8 @@ class CallLog(Document):
 
 	def validate(self):
 		deduplicate_dynamic_links(self)
+		if not self.is_new() and self.is_incoming_call() and self.has_value_changed("to"):
+			self.update_received_by()
 
 	def before_insert(self):
 		"""Add lead(third party person) links to the document."""
@@ -56,6 +58,7 @@ class CallLog(Document):
 
 		if contact := get_contact_with_phone_number(strip_number(lead_number)):
 			self.add_link(link_type="Contact", link_name=contact)
+			self.link_customer_of_contact(contact)
 
 		if lead := get_lead_with_phone_number(lead_number):
 			self.add_link(link_type="Lead", link_name=lead)
@@ -79,9 +82,6 @@ class CallLog(Document):
 		if not doc_before_save:
 			return
 
-		if self.is_incoming_call() and self.has_value_changed("to"):
-			self.update_received_by()
-
 		if _is_call_missed(doc_before_save, self):
 			frappe.publish_realtime(f"call_{self.id}_missed", self)
 			self.trigger_call_popup()
@@ -94,6 +94,16 @@ class CallLog(Document):
 
 	def add_link(self, link_type, link_name):
 		self.append("links", {"link_doctype": link_type, "link_name": link_name})
+
+	def link_customer_of_contact(self, contact: str):
+		customer = frappe.db.get_value(
+			"Dynamic Link",
+			{"parenttype": "Contact", "parent": contact, "link_doctype": "Customer"},
+			"link_name",
+		)
+		if customer:
+			self.customer = customer
+			self.add_link(link_type="Customer", link_name=customer)
 
 	def trigger_call_popup(self):
 		if not self.is_incoming_call():
@@ -128,10 +138,17 @@ class CallLog(Document):
 
 
 @frappe.whitelist(methods=["POST"])
-def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
+def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str | None = None):
 	doc = frappe.get_doc("Call Log", call_log)
-	doc.type_of_call = call_type
-	doc.save()
+	doc.check_permission("read")
+	# the agent who took the call may record its summary without write access
+	if doc.employee_user_id != frappe.session.user:
+		doc.check_permission("write")
+
+	if call_type:
+		doc.type_of_call = call_type
+	doc.summary = summary
+	doc.save(ignore_permissions=True)
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
 
 
@@ -157,16 +174,15 @@ def get_employees_with_number(number):
 
 def link_existing_conversations(doc, state):
 	"""
-	Called from hooks on creation of Contact or Lead to link all the existing conversations.
+	Called from hooks on update of Contact or Lead to link the existing conversations of new numbers.
 	"""
 	if doc.flags.ignore_auto_link_call_log:
 		return
-	if doc.doctype != "Contact":
+	numbers = get_new_phone_numbers(doc)
+	if not numbers:
 		return
 	frappe.db.savepoint("link_call_logs")
 	try:
-		numbers = [d.phone for d in doc.phone_nos]
-
 		for number in numbers:
 			number = strip_number(number)
 			if not number:
@@ -188,21 +204,37 @@ def link_existing_conversations(doc, state):
 				)
 				.run(pluck=True)
 			)
-			if logs:
-				for log in logs:
-					call_log = frappe.get_doc("Call Log", log)
-					call_log.add_link(link_type=doc.doctype, link_name=doc.name)
-					call_log.save(ignore_permissions=True)
-
-				if not frappe.in_test:
-					frappe.db.commit()
+			for log in logs:
+				call_log = frappe.get_doc("Call Log", log)
+				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
+				if doc.doctype == "Contact" and not call_log.customer:
+					call_log.link_customer_of_contact(doc.name)
+				call_log.save(ignore_permissions=True)
 	except Exception:
 		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))
 
 
+def get_new_phone_numbers(doc) -> set[str]:
+	numbers = set(get_phone_numbers(doc))
+	if doc_before_save := doc.get_doc_before_save():
+		numbers -= set(get_phone_numbers(doc_before_save))
+	return numbers
+
+
+def get_phone_numbers(doc) -> list[str]:
+	if doc.doctype == "Contact":
+		numbers = [d.phone for d in doc.phone_nos]
+	else:
+		numbers = [doc.get("phone"), doc.get("mobile_no")]
+	return [number for number in numbers if number]
+
+
 def get_linked_call_logs(doctype, docname):
 	# content will be shown in timeline
+	if not frappe.has_permission("Call Log", "read"):
+		return []
+
 	logs = frappe.get_all(
 		"Dynamic Link",
 		fields=["parent"],
@@ -213,7 +245,11 @@ def get_linked_call_logs(doctype, docname):
 
 	logs = {log.parent for log in logs}
 
-	logs = frappe.get_all("Call Log", fields=["*"], filters={"name": ["in", logs]})
+	logs = frappe.get_list(
+		"Call Log",
+		fields=["name", "type", "from", "to", "duration", "summary", "recording_url", "creation"],
+		filters={"name": ["in", logs]},
+	)
 
 	timeline_contents = []
 	for log in logs:
