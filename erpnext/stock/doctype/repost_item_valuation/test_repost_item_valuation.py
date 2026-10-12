@@ -557,10 +557,10 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		return_pr.submit()
 
 		expected_sles = [
-			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 600.0},
-			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 500.0},
-			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 200.0},
-			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 100.0},
+			{"outgoing_rate": 200.0, "stock_value_difference": -80000.0, "qty_after_transaction": 600.0},
+			{"outgoing_rate": 200.0, "stock_value_difference": -20000.0, "qty_after_transaction": 500.0},
+			{"outgoing_rate": 200.0, "stock_value_difference": -60000.0, "qty_after_transaction": 200.0},
+			{"outgoing_rate": 200.0, "stock_value_difference": -20000.0, "qty_after_transaction": 100.0},
 		]
 
 		for _ in range(2):
