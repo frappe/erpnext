@@ -841,11 +841,19 @@ class Item(Document):
 			distinct=True,
 		)
 
+		bin_warehouses = set(frappe.get_all("Bin", filters={"item_code": new_name}, pluck="warehouse"))
+
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
 		frappe.db.delete("Bin", {"item_code": new_name})
 
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
+
+		for warehouse in bin_warehouses - set(repost_stock_for_warehouses):
+			repost_stock(new_name, warehouse, only_bin=True)
+
+		for warehouse in bin_warehouses | set(repost_stock_for_warehouses):
+			rebuild_bin_reservations(new_name, warehouse)
 
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", existing_allow_negative_stock)
 
@@ -1602,6 +1610,15 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 
 	# only the latest ([0]) row is ever used, so fetch just that instead of every purchase of the item
 	return query.limit(1).run(as_dict=1)
+
+
+def rebuild_bin_reservations(item_code, warehouse):
+	from erpnext.stock.utils import get_or_make_bin
+
+	bin_doc = frappe.get_doc("Bin", get_or_make_bin(item_code, warehouse))
+	bin_doc.update_reserved_qty_for_sub_contracting()
+	bin_doc.update_reserved_stock()
+	bin_doc.update_reserved_qty_for_production()
 
 
 def check_stock_uom_with_bin(item, stock_uom):

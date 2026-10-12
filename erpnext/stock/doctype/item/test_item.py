@@ -838,6 +838,25 @@ class TestItem(ERPNextTestSuite):
 			next(row for row in variant.attributes if row.attribute == attribute).attribute_value = value
 			self.assertRaises(frappe.ValidationError, variant.save)
 
+	def test_merge_keeps_the_target_bin_reservations(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.utils import get_bin
+
+		old_item = make_item(properties={"is_stock_item": 1}).name
+		target_item = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=old_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=target_item, target="_Test Warehouse - _TC", qty=5, basic_rate=300)
+		bom = make_bom(item=finished_good, raw_materials=[target_item], rm_qty=1)
+		make_wo_order_test_record(
+			production_item=finished_good, bom_no=bom.name, qty=6, source_warehouse="_Test Warehouse - _TC"
+		)
+
+		frappe.rename_doc("Item", old_item, target_item, merge=True)
+
+		self.assertEqual(get_bin(target_item, "_Test Warehouse - _TC").reserved_qty_for_production, 6)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
