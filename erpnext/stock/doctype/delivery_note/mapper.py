@@ -605,7 +605,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 
 
 def get_pending_receipt_qty(item) -> float:
-	return flt(item.qty) - flt(item.get("returned_qty")) - flt(item.get("received_qty"))
+	returned_qty = flt(item.get("returned_qty")) / (flt(item.get("conversion_factor")) or 1)
+	return flt(item.qty) - returned_qty - flt(item.get("received_qty"))
 
 
 def get_component_receipt_map(bundle_rows: dict) -> dict:
