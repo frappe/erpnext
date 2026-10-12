@@ -541,15 +541,33 @@ class SubcontractingOrder(SubcontractingController):
 		return False
 
 	def release_stock_reservations(self):
-		sre_list = [
-			sre.name
-			for sre in get_stock_reservation_entries_for_voucher(
-				self.doctype, self.name, fields=["name", "transferred_qty"], ignore_status=True
-			)
-			if not flt(sre.transferred_qty)
-		]
+		sre_list = []
+		for sre in get_stock_reservation_entries_for_voucher(
+			self.doctype, self.name, fields=["name", "transferred_qty"], ignore_status=True
+		):
+			if flt(sre.transferred_qty):
+				self.release_unused_reserved_qty(sre.name)
+			else:
+				sre_list.append(sre.name)
+
 		if sre_list:
 			self.cancel_stock_reservation_entries(sre_list, notify=False)
+
+	def release_unused_reserved_qty(self, sre_name: str) -> None:
+		"""Keep only the used qty reserved."""
+		sre = frappe.get_doc("Stock Reservation Entry", sre_name)
+		sre.db_set("reserved_qty", flt(sre.delivered_qty) + flt(sre.transferred_qty) + flt(sre.consumed_qty))
+
+		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		frappe.qb.update(sb_entry).set(sb_entry.qty, sb_entry.delivered_qty).where(
+			(sb_entry.parenttype == "Stock Reservation Entry")
+			& (sb_entry.parent == sre_name)
+			& (sb_entry.qty > sb_entry.delivered_qty)
+		).run()
+
+		sre.update_status()
+		sre.update_reserved_qty_in_voucher()
+		sre.update_reserved_stock_in_bin()
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
