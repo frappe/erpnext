@@ -124,6 +124,23 @@ class TestPlaidSettings(ERPNextTestSuite):
 		transactions = connector.get_transactions("2026-01-01", "2026-06-30", account_id="acc-1")
 		self.assertEqual(transactions, rows["acc-1"])
 
+	def test_get_transactions_stops_when_transactions_are_removed_between_pages(self):
+		rows = [{"account_id": "acc-1", "transaction_id": f"acc-1-{n}"} for n in range(150)]
+
+		def get_page(access_token, start_date, end_date, offset=0):
+			if connector.client.Transactions.get.call_count > 5:
+				raise RuntimeError("Transactions.get called repeatedly")
+			total = 150 if offset == 0 else 149
+			return {"transactions": rows[:total][offset : offset + 100], "total_transactions": total}
+
+		connector = PlaidConnector.__new__(PlaidConnector)
+		connector.access_token = "access-test"
+		connector.client = MagicMock()
+		connector.client.Transactions.get.side_effect = get_page
+
+		transactions = connector.get_transactions("2026-01-01", "2026-06-30")
+		self.assertEqual(transactions, rows[:149])
+
 	def test_sync_skips_a_failing_transaction(self):
 		bank_account = link_test_bank_account("plaid-sync-test")
 		rows = [
