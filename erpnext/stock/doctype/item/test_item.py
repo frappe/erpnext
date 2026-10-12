@@ -723,33 +723,43 @@ class TestItem(ERPNextTestSuite):
 		validate_item_variant_attributes(create_variant("_Test Variant Item", {"Test Size": "Small"}))
 		frappe.delete_doc_if_exists("Item", f"{template}-L-20", force=1)
 
-		variant = create_variant(template, {"Test Size": "Large", "Test Item Width": 20})
+		variant = create_variant(template, {"Test Size": "Large", "Test Item Depth": 20})
 		variant.save()
+
+	def test_numeric_attribute_refuses_text(self):
+		template = self.make_numeric_template()
+		variant = create_variant(template, {"Test Size": "Large", "Test Item Depth": "abc"})
+		self.assertRaises(InvalidItemAttributeValueError, variant.save)
+
+		from erpnext.controllers.item_variant import validate_is_incremental
+
+		depth = frappe._dict(from_range=0, to_range=2000, increment=10)
+		validate_is_incremental(depth, "Test Item Depth", "1,000", template)
 
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
-		if not frappe.db.exists("Item Attribute", "Test Item Width"):
+		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
 			frappe.get_doc(
 				{
 					"doctype": "Item Attribute",
-					"attribute_name": "Test Item Width",
+					"attribute_name": "Test Item Depth",
 					"numeric_values": 1,
-					"from_range": 10,
+					"from_range": 0,
 					"to_range": 50,
 					"increment": 10,
 				}
 			).insert()
 
 		return make_item(
-			"_Test Width Template Item",
+			"_Test Depth Template Item",
 			{
 				"has_variants": 1,
 				"attributes": [
 					{"attribute": "Test Size"},
 					{
-						"attribute": "Test Item Width",
+						"attribute": "Test Item Depth",
 						"numeric_values": 1,
-						"from_range": 10,
+						"from_range": 0,
 						"to_range": 50,
 						"increment": 10,
 					},

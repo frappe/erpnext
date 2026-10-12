@@ -119,6 +119,17 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 	to_range = numeric_attribute.to_range
 	increment = numeric_attribute.increment
 
+	try:
+		float(cstr(value).replace(",", ""))
+	except (TypeError, ValueError):
+		frappe.throw(
+			_("Value {0} for Attribute {1} must be a number for Item {2}").format(
+				frappe.bold(value), attribute, item
+			),
+			InvalidItemAttributeValueError,
+			title=_("Invalid Attribute"),
+		)
+
 	if increment == 0:
 		# defensive validation to prevent ZeroDivisionError
 		frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
