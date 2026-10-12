@@ -102,7 +102,8 @@ class TestTimesheet(FrappeTestCase):
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 
 		sales_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
-		sales_invoice.submit()
+		with patch("erpnext.accounts.doctype.sales_invoice.sales_invoice.get_exchange_rate", return_value=1):
+			sales_invoice.submit()
 		timesheet.reload()
 		self.assertEqual(sales_invoice.timesheets[0].timesheet_detail, timesheet.time_logs[0].name)
 		self.assertEqual(sales_invoice.total_billing_amount, 100)
@@ -191,6 +192,39 @@ class TestTimesheet(FrappeTestCase):
 		sales_invoice = create_sales_invoice(do_not_save=True)
 		sales_invoice.append("timesheets", {"time_sheet": two_logs.name, "billing_amount": 70})
 		self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
+	def test_invoice_converts_time_log_amount_to_invoice_currency(self):
+		from_time = add_to_date(now_datetime(), days=400)
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"currency": "USD",
+				"exchange_rate": 80,
+				"time_logs": [
+					{
+						"is_billable": 1,
+						"from_time": from_time,
+						"to_time": add_to_date(from_time, hours=2),
+						"hours": 2,
+						"billing_hours": 2,
+						"billing_rate": 50,
+					}
+				],
+			}
+		).submit()
+
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		sales_invoice.append(
+			"timesheets", {"time_sheet": timesheet.name, "timesheet_detail": timesheet.time_logs[0].name}
+		)
+		with patch("erpnext.accounts.doctype.sales_invoice.sales_invoice.get_exchange_rate", return_value=0):
+			self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
+		with patch("erpnext.accounts.doctype.sales_invoice.sales_invoice.get_exchange_rate", return_value=80):
+			sales_invoice.save()
+
+		self.assertEqual(sales_invoice.timesheets[0].billing_amount, 8000)
 
 	def _invoice_with_timesheet_row(self, time_sheet, timesheet_detail, with_amounts=True):
 		sales_invoice = create_sales_invoice(do_not_save=True)
