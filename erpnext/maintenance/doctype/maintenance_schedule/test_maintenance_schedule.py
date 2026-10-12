@@ -272,12 +272,50 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		)
 		self.assertEqual(getdate(ms.items[0].end_date), getdate("2027-03-31"))
 
+	def test_amc_start_checked_against_serial_delivery_date(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"})
+		deliver_serial_nos(item_code, [serial_no])
+
+		early = make_maintenance_schedule(
+			item_code=item_code,
+			start_date=add_days(today(), -3),
+			serial_and_batch_bundle=make_maintenance_bundle(item_code, [serial_no]),
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "can not be before delivery date", early.submit)
+
+		later = make_maintenance_schedule(
+			item_code=item_code,
+			start_date=add_days(today(), 1),
+			serial_and_batch_bundle=make_maintenance_bundle(item_code, [serial_no]),
+		)
+		later.submit()
+		self.assertEqual(later.docstatus, 1)
+
 
 def deliver_serial_nos(item_code, serial_nos, customer="_Test Customer"):
 	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 	return create_delivery_note(
 		item_code=item_code, serial_no=serial_nos, qty=len(serial_nos), customer=customer
+	)
+
+
+def make_maintenance_bundle(item_code, serial_nos):
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"item_code": item_code,
+				"company": "_Test Company",
+				"voucher_type": "Maintenance Schedule",
+				"type_of_transaction": "Maintenance",
+				"entries": [{"serial_no": serial_no, "qty": 1} for serial_no in serial_nos],
+			}
+		)
+		.insert()
+		.name
 	)
 
 
@@ -314,6 +352,7 @@ def make_maintenance_schedule(**args):
 			"periodicity": args.get("periodicity") or "Weekly",
 			"no_of_visits": args.get("no_of_visits") or 4,
 			"serial_no": args.get("serial_no"),
+			"serial_and_batch_bundle": args.get("serial_and_batch_bundle"),
 			"sales_person": "Sales Team",
 		},
 	)
