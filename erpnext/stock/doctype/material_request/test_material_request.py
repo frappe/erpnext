@@ -1785,7 +1785,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		work_order = frappe.get_doc("Work Order", raise_work_orders(mr.name, mr.company)[0])
 		work_order.update(
-			{"skip_transfer": 1, "wip_warehouse": "_Test Warehouse 1 - _TC", "source_warehouse": "_Test Warehouse - _TC"}
+			{
+				"skip_transfer": 1,
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"source_warehouse": "_Test Warehouse - _TC",
+			}
 		)
 		for row in work_order.required_items:
 			row.source_warehouse = "_Test Warehouse - _TC"
@@ -1820,8 +1824,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(get_requested_qty(reorder_item()), [15])
 		self.assertEqual(get_requested_qty(reorder_item() or []), [])
 
-
-
 	def test_customer_provided_request_refuses_other_items(self):
 		self.assertRaises(
 			frappe.ValidationError,
@@ -1829,8 +1831,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 			item_code="_Test Item",
 			material_request_type="Customer Provided",
 		)
-
-
 
 	def test_production_plan_requested_qty_follows_the_stock_qty(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -1881,8 +1881,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "requested_qty"), 24
 		)
 
-
-
 	def test_pick_list_maps_only_the_qty_left_to_transfer(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
 
@@ -1905,8 +1903,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 		update_status(mr.name, "Stopped")
 		self.assertRaises(frappe.InvalidStatusError, create_pick_list, mr.name)
 
-
-
 	def test_mappers_skip_ordered_rows_and_stopped_requests(self):
 		mr = make_material_request(item_code="_Test Item", qty=10)
 		po = make_purchase_order(mr.name)
@@ -1926,8 +1922,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 		):
 			self.assertRaises(frappe.InvalidStatusError, mapper, stopped_mr.name)
 
-
-
 	def test_purchase_order_of_a_stopped_request_can_be_closed(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status as update_po_status
 
@@ -1941,8 +1935,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 		update_po_status("Closed", po.name)
 
 		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
-
-
 
 	def test_subcontracting_request_is_counted_in_indented_qty(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -1988,6 +1980,68 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(
 			self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC"), existing_qty
 		)
+
+	def test_reorder_mail_goes_to_the_company_and_shows_stock_qty(self):
+		from erpnext.stock.reorder_item import get_email_list
+
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-other-company@example.com",
+				"first_name": "Reorder",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertNotIn(user.email, get_email_list("_Test Company 1"))
+
+		scoped_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-request-scoped@example.com",
+				"first_name": "Reorder Scoped",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": scoped_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Material Request",
+			}
+		).insert(ignore_permissions=True)
+		self.assertNotIn(scoped_user.email, get_email_list("_Test Company 1"))
+
+		message = frappe.render_template(
+			"templates/emails/reorder_item.html",
+			{
+				"mr_list": [
+					frappe._dict(
+						name="MR-1",
+						items=[
+							frappe._dict(item_code="X", qty=2, uom="Box", stock_qty=24, projected_on_hand=6)
+						],
+					)
+				]
+			},
+		)
+		self.assertIn(">30.0<", message)
+
+
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
 	item.set("item_defaults", [])
