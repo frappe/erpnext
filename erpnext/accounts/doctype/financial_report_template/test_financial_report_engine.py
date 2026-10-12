@@ -1769,6 +1769,75 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 			jv_nov.cancel()
 			jv_oct.cancel()
 
+	def test_fetch_balances_grouped_by_dimension(self):
+		company = "_Test Company"
+		cash_account = "_Test Cash - _TC"
+		bank_account = "_Test Bank - _TC"
+		cc1, cc2 = "_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"
+
+		# columns: cc1-Oct, cc1-Nov, cc2-Oct, cc2-Nov
+		periods = [
+			{
+				"key": f"{cost_center}_{month}",
+				"from_date": from_date,
+				"to_date": to_date,
+				"dimension_field": "cost_center",
+				"dimension_value": cost_center,
+			}
+			for cost_center in (cc1, cc2)
+			for month, from_date, to_date in (
+				("oct", "2024-10-01", "2024-10-31"),
+				("nov", "2024-11-01", "2024-11-30"),
+			)
+		]
+		filters = {"company": company, "include_default_book_entries": 1}
+		accounts = [frappe._dict({"name": cash_account, "account_name": "Cash", "account_number": "1001"})]
+
+		def cash_balances():
+			"""{column key: (opening, movement, closing)} of the cash account"""
+			cash = FinancialQueryBuilder(filters, periods).fetch_account_balances(accounts)[cash_account]
+			self.assertEqual(list(cash.period_values), [p["key"] for p in periods])
+			return {key: (pv.opening, pv.movement, pv.closing) for key, pv in cash.period_values.items()}
+
+		before = cash_balances()
+
+		def transfer(amount, cost_center, posting_date):
+			return make_journal_entry(
+				account1=cash_account,
+				account2=bank_account,
+				amount=amount,
+				cost_center=cost_center,
+				posting_date=posting_date,
+				company=company,
+				submit=True,
+			)
+
+		entries = [
+			# before the report: opening cash 300 in cc1, 500 in cc2
+			transfer(300, cc1, "2024-09-15"),
+			transfer(500, cc2, "2024-09-15"),
+			# in the report: 100 in cc1 (Oct), 50 in cc2 (Nov)
+			transfer(100, cc1, "2024-10-15"),
+			transfer(50, cc2, "2024-11-20"),
+		]
+
+		try:
+			after = cash_balances()
+			change = {
+				key: tuple(flt(a - b) for a, b in zip(after[key], before[key], strict=True)) for key in after
+			}
+
+			# (opening, movement, closing)
+			self.assertEqual(change[f"{cc1}_oct"], (300, 100, 400))
+			self.assertEqual(change[f"{cc1}_nov"], (400, 0, 400))
+			# cc2 starts from its own opening, not from cc1's closing
+			self.assertEqual(change[f"{cc2}_oct"], (500, 0, 500))
+			self.assertEqual(change[f"{cc2}_nov"], (500, 50, 550))
+
+		finally:
+			for entry in reversed(entries):
+				entry.cancel()
+
 	def test_opening_balance_from_previous_period_closing(self):
 		company = "_Test Company"
 		cash_account = "_Test Cash - _TC"

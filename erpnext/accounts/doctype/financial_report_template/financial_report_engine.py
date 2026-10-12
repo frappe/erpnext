@@ -510,6 +510,13 @@ class FinancialQueryBuilder:
 		self.account_meta = {}  # {name: {account_name, account_number}}
 		self.ignore_opening_entries = False
 
+		# grouped by dimension: each dimension's columns start with its own opening balance
+		# not grouped: dimension_field is None, so everything falls under the `None` key
+		self.dimension_field = periods[0].get("dimension_field") if periods else None
+		self.first_period_keys = {}  # {dimension_value: key of its first period}
+		for period in periods:
+			self.first_period_keys.setdefault(period.get("dimension_value"), period["key"])
+
 	def fetch_account_balances(self, accounts: list[dict]) -> dict[str, AccountData]:
 		"""
 		Fetch account balances for all periods with optimization.
@@ -573,8 +580,8 @@ class FinancialQueryBuilder:
 
 		return self._get_opening_balances_from_gl(accounts)
 
-	def _get_closing_balances(self, account_names: list[str], closing_voucher: str) -> dict[str, float]:
-		closing_balances = {account: 0.0 for account in account_names}
+	def _get_closing_balances(self, account_names: list[str], closing_voucher: str) -> dict[tuple, float]:
+		closing_balances = self._get_zero_balances(account_names)
 		acb_table = frappe.qb.DocType("Account Closing Balance")
 
 		query = (
@@ -589,20 +596,35 @@ class FinancialQueryBuilder:
 			.groupby(acb_table.account)
 		)
 
+		query = self._group_by_dimension(query, acb_table)
 		query = self._apply_standard_filters(query, acb_table, "Account Closing Balance")
 		results = self._execute_with_permissions(query, "Account Closing Balance")
 
 		for row in results:
-			closing_balances[row["account"]] = row["balance"] or 0.0
+			closing_balances[self._balance_key(row)] = row["balance"] or 0.0
 
 		return closing_balances
 
+	def _get_zero_balances(self, account_names: list[str]) -> dict[tuple, float]:
+		return {
+			(account, dimension): 0.0 for account in account_names for dimension in self.first_period_keys
+		}
+
+	def _group_by_dimension(self, query, table):
+		if not self.dimension_field:
+			return query
+
+		return query.select(table[self.dimension_field]).groupby(table[self.dimension_field])
+
+	def _balance_key(self, row: dict) -> tuple:
+		# row.get(None) is None when not grouped
+		return (row["account"], row.get(self.dimension_field))
+
 	def _rebase_closing_balances(
-		self, closing_data: dict[str, float], closing_date: str
+		self, closing_data: dict[tuple, float], closing_date: str
 	) -> dict[str, dict[str, dict[str, float]]]:
 		balances_data = {}
 
-		first_period_key = self.periods[0]["key"]
 		report_start = getdate(self.periods[0]["from_date"])
 		closing_end = getdate(closing_date)
 
@@ -610,29 +632,37 @@ class FinancialQueryBuilder:
 
 		gap_movements = {}
 		if has_gap:
-			gap_movements = self._get_gap_movements(list(closing_data.keys()), closing_date, report_start)
+			account_names = list({account for account, _dimension in closing_data})
+			gap_movements = self._get_gap_movements(account_names, closing_date, report_start)
 
-		for account, closing_balance in closing_data.items():
-			gap_movement = gap_movements.get(account, 0.0)
+		for (account, dimension), closing_balance in closing_data.items():
+			# balances of dimension values that have no column (e.g. blank cost center) are left out
+			if dimension not in self.first_period_keys:
+				continue
+
+			gap_movement = gap_movements.get((account, dimension), 0.0)
 			opening_balance = closing_balance + gap_movement
 
-			account_data = AccountData(account=account, **self._get_account_meta(account))
+			if account not in balances_data:
+				balances_data[account] = AccountData(account=account, **self._get_account_meta(account))
 
-			account_data.add_period(PeriodValue(first_period_key, opening_balance, 0, 0))
-			balances_data[account] = account_data
+			first_period_key = self.first_period_keys[dimension]
+			balances_data[account].add_period(PeriodValue(first_period_key, opening_balance, 0, 0))
 
 		return balances_data
 
 	def _get_opening_balances_from_gl(self, accounts: list[str]) -> dict:
 		# Simulate zero closing balances
-		zero_closing_balances = {account: 0.0 for account in accounts}
+		zero_closing_balances = self._get_zero_balances(accounts)
 
 		# Use a very early date
 		earliest_date = "1900-01-01"
 
 		return self._rebase_closing_balances(zero_closing_balances, earliest_date)
 
-	def _get_gap_movements(self, account_names: list[str], from_date: str, to_date: str) -> dict[str, float]:
+	def _get_gap_movements(
+		self, account_names: list[str], from_date: str, to_date: str
+	) -> dict[tuple, float]:
 		gl_table = frappe.qb.DocType("GL Entry")
 
 		query = (
@@ -646,10 +676,11 @@ class FinancialQueryBuilder:
 			.groupby(gl_table.account)
 		)
 
+		query = self._group_by_dimension(query, gl_table)
 		query = self._apply_standard_filters(query, gl_table)
 		results = self._execute_with_permissions(query, "GL Entry")
 
-		return {row["account"]: row["movement"] or 0.0 for row in results}
+		return {self._balance_key(row): row["movement"] or 0.0 for row in results}
 
 	def _get_gl_movements(self, account_names: list[str]) -> list[dict]:
 		gl_table = frappe.qb.DocType("GL Entry")
@@ -674,15 +705,13 @@ class FinancialQueryBuilder:
 
 		# Add period-specific columns
 		for period in self.periods:
-			period_condition = (
-				Case()
-				.when(
-					(gl_table.posting_date >= period["from_date"])
-					& (gl_table.posting_date <= period["to_date"]),
-					gl_table.debit - gl_table.credit,
-				)
-				.else_(0)
+			in_period = (gl_table.posting_date >= period["from_date"]) & (
+				gl_table.posting_date <= period["to_date"]
 			)
+			if self.dimension_field:
+				in_period &= gl_table[self.dimension_field] == period["dimension_value"]
+
+			period_condition = Case().when(in_period, gl_table.debit - gl_table.credit).else_(0)
 			query = query.select(Sum(period_condition).as_(period["key"]))
 
 		query = self._apply_standard_filters(query, gl_table)
@@ -691,6 +720,7 @@ class FinancialQueryBuilder:
 	def _calculate_running_balances(self, balances_data: dict, gl_data: list[dict]) -> dict:
 		gl_dict = {row["account"]: row for row in gl_data}
 		accounts = set(balances_data.keys()) | set(gl_dict.keys())
+		first_period_keys = set(self.first_period_keys.values())
 
 		for account in accounts:
 			if account not in balances_data:
@@ -698,21 +728,27 @@ class FinancialQueryBuilder:
 
 			account_data: AccountData = balances_data[account]
 			gl_movement = gl_dict.get(account, {})
-
-			if account_data.has_periods():
-				first_period = account_data.get_period(self.periods[0]["key"])
-				current_balance = first_period.get_value("Opening Balance") if first_period else 0.0
-			else:
-				current_balance = 0.0
+			current_balance = 0.0
 
 			for period in self.periods:
 				period_key = period["key"]
+
+				# each dimension starts from its own opening balance
+				if period_key in first_period_keys:
+					first_period = account_data.get_period(period_key)
+					current_balance = first_period.get_value("Opening Balance") if first_period else 0.0
+
 				movement = gl_movement.get(period_key, 0.0)
 				closing_balance = current_balance + movement
 
 				account_data.add_period(PeriodValue(period_key, current_balance, closing_balance, movement))
 
 				current_balance = closing_balance
+
+			# openings were added first, so put the periods back in column order
+			account_data.period_values = {
+				p["key"]: account_data.period_values[p["key"]] for p in self.periods
+			}
 
 	def _handle_balance_accumulation(self, balances_data):
 		for account_data in balances_data.values():
