@@ -899,6 +899,7 @@ def set_project_status(project: str, status: str):
 	for task_name in get_tasks_in_dependency_order(project.name, status):
 		task = frappe.get_doc("Task", task_name)
 		task.status = status
+		task.flags.ignore_reschedule = True
 		task.save(ignore_permissions=True)
 
 	project.status = status
