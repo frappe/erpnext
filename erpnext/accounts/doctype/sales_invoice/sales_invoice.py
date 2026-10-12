@@ -1377,7 +1377,7 @@ class SalesInvoice(SellingController):
 			self.set("packed_items", [])
 
 	def set_billing_hours_and_amount(self):
-		"""Fill rows from their time logs; a row without one is replaced by its timesheet's unbilled logs."""
+		"""Fill rows from their time logs; a row without one gets its timesheet's unbilled logs."""
 		if self.is_return:
 			return
 
@@ -1411,9 +1411,25 @@ class SalesInvoice(SellingController):
 				)
 			)
 
+		if row.billing_amount:
+			self.link_time_log(row, time_logs)
+			return
+
 		self.remove(row)
 		for log in time_logs:
 			self.append("timesheets", self.get_timesheet_row(log))
+
+	def link_time_log(self, row, time_logs: list):
+		"""Bill a row's own amount against the only unbilled log of its timesheet."""
+		if len(time_logs) > 1:
+			frappe.throw(
+				_("Row {0}: Select the time log of Timesheet {1} that this amount bills").format(
+					row.idx, frappe.bold(row.time_sheet)
+				)
+			)
+
+		row.timesheet_detail = time_logs[0].name
+		row.billing_hours = row.billing_hours or time_logs[0].billing_hours
 
 	def update_timesheet_billing_for_project(self):
 		if (
