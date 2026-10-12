@@ -66,7 +66,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 	def get_remaining_qty(so_item):
 		return flt(
 			flt(so_item.qty)
-			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+			- flt(requested_item_qty.get(so_item.name, {}).get("qty")) / (flt(so_item.conversion_factor) or 1)
 			- max(
 				flt(so_item.get("delivered_qty")),
 				0,
