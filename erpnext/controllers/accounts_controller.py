@@ -514,7 +514,13 @@ class AccountsController(TransactionBase):
 			).run()
 
 	def on_trash(self):
-		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+		from erpnext.accounts.utils import delete_exchange_gain_loss_journal, is_immutable_ledger_enabled
+
+		if self.docstatus == 2 and is_immutable_ledger_enabled():
+			frappe.throw(
+				_("Cancelled transactions cannot be deleted when Immutable Ledger is enabled."),
+				title=_("Immutable Ledger Enabled"),
+			)
 
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
