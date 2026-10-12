@@ -127,6 +127,14 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	return flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 
 
+@frappe.whitelist()
+def get_account_opening_balance(bank_account: str, till_date: str | date):
+	# returns the GL balance of the bank account till the specified date, cleared or not
+	frappe.has_permission("Bank Account", "read", bank_account, throw=True)
+	account = frappe.db.get_value("Bank Account", bank_account, "account")
+	return get_balance_on(account, till_date)
+
+
 @frappe.whitelist(methods=["POST"])
 def update_bank_transaction(
 	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
