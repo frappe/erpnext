@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.cheques_and_deposits_incorrectly_cleared.cheques_and_deposits_incorrectly_cleared import (
 	execute,
@@ -43,6 +44,32 @@ class TestChequesAndDepositsIncorrectlyCleared(ERPNextTestSuite):
 
 		self.assertIsNotNone(row)
 		self.assertEqual((row.payment_document, row.debit, row.credit), ("Purchase Invoice", 0, 400))
+
+	def test_paid_purchase_invoice_amount_in_bank_currency(self):
+		invoice = make_purchase_invoice(
+			is_paid=1,
+			cash_bank_account="_Test Bank - _TC",
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=100,
+		)
+		invoice.db_set("clearance_date", add_days(nowdate(), -5))
+
+		row = self.get_rows(add_days(nowdate(), -2)).get(invoice.name)
+
+		self.assertEqual((row.debit, row.credit), (0, 8000))
+
+	def test_paid_purchase_return_is_listed_as_debit(self):
+		invoice = make_purchase_invoice(is_paid=1, cash_bank_account="_Test Bank - _TC", qty=1, rate=400)
+		purchase_return = make_debit_note(invoice.name).submit()
+		purchase_return.db_set("clearance_date", add_days(nowdate(), -5))
+
+		row = self.get_rows(add_days(nowdate(), -2)).get(purchase_return.name)
+
+		self.assertEqual((row.debit, row.credit), (400, 0))
 
 	def make_cleared_payment(self, payment_type: str, paid_from: str, paid_to: str, amount: float) -> str:
 		if payment_type == "Internal Transfer":

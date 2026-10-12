@@ -7,6 +7,10 @@ from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
 
+from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
+	get_amount_in_bank_currency,
+)
+
 
 def execute(filters=None):
 	columns = get_columns()
@@ -85,13 +89,14 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 
 def get_paid_purchase_invoices(filters) -> list[dict]:
 	pi = qb.DocType("Purchase Invoice")
+	paid_amount = get_amount_in_bank_currency(filters, pi.paid_amount, pi.base_paid_amount)
 	return (
 		qb.from_(pi)
 		.select(
 			ConstantColumn("Purchase Invoice").as_("doctype"),
 			pi.name,
-			ConstantColumn(0).as_("debit"),
-			pi.paid_amount.as_("credit"),
+			Case().when(paid_amount < 0, paid_amount * -1).else_(0).as_("debit"),
+			Case().when(paid_amount > 0, paid_amount).else_(0).as_("credit"),
 			pi.posting_date,
 			pi.clearance_date,
 		)
