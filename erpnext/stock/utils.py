@@ -448,7 +448,7 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		return batch_obj.get_incoming_rate()
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
-		previous_sle = get_previous_sle(args)
+		previous_sle = get_previous_sle({**args, "serial_no": None})
 		if valuation_method in ("FIFO", "LIFO"):
 			if previous_sle:
 				previous_stock_queue = json.loads(previous_sle.get("stock_queue", "[]") or "[]")
