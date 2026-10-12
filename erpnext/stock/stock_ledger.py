@@ -1157,8 +1157,10 @@ class update_entries_after:
 
 		self.prev_sle_dict[key] = sle
 
-		if not self.args.get("sle_id") or (
-			sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle
+		if (
+			not self.args.get("sle_id")
+			or (sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle)
+			or self.is_outward_internal_transfer_leg(sle)
 		):
 			self.update_outgoing_rate_on_transaction(sle)
 
@@ -1410,7 +1412,26 @@ class update_entries_after:
 				sle.outgoing_rate = rate
 
 	def is_inward_transfer_leg(self, sle):
-		return bool(sle.voucher_type == "Stock Entry" and sle.recalculate_rate and flt(sle.actual_qty) > 0)
+		if not (sle.recalculate_rate and flt(sle.actual_qty) > 0):
+			return False
+
+		if sle.voucher_type == "Stock Entry":
+			return True
+
+		if sle.voucher_type not in ("Delivery Note", "Sales Invoice"):
+			return False
+
+		row = frappe.db.get_value(
+			f"{sle.voucher_type} Item", sle.voucher_detail_no, ["item_code", "target_warehouse"], as_dict=True
+		)
+		return bool(row and row.item_code == sle.item_code and row.target_warehouse == sle.warehouse)
+
+	def is_outward_internal_transfer_leg(self, sle):
+		return bool(
+			sle.voucher_type in ("Delivery Note", "Sales Invoice")
+			and sle.dependant_sle_voucher_detail_no
+			and flt(sle.actual_qty) < 0
+		)
 
 	def get_incoming_rate_from_outward_leg(self, sle):
 		outward_value = self.get_outward_leg_value(sle)
@@ -1427,6 +1448,7 @@ class update_entries_after:
 				"voucher_type": sle.voucher_type,
 				"voucher_no": sle.voucher_no,
 				"voucher_detail_no": sle.voucher_detail_no,
+				"item_code": sle.item_code,
 				"actual_qty": ("<", 0),
 				"is_cancelled": 0,
 			},
@@ -1434,6 +1456,9 @@ class update_entries_after:
 		)
 		if outward_value is None:
 			return None
+
+		if sle.voucher_type != "Stock Entry":
+			return abs(flt(outward_value))
 
 		additional_cost = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "additional_cost")
 		return abs(flt(outward_value)) + flt(additional_cost)
