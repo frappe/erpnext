@@ -1925,6 +1925,22 @@ class TestMaterialRequest(ERPNextTestSuite):
 			make_stock_entry,
 		):
 			self.assertRaises(frappe.InvalidStatusError, mapper, stopped_mr.name)
+
+
+
+	def test_purchase_order_of_a_stopped_request_can_be_closed(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import update_status as update_po_status
+
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 4
+		po.submit()
+		update_status(mr.name, "Stopped")
+
+		update_po_status("Closed", po.name)
+
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
 	item.set("item_defaults", [])
