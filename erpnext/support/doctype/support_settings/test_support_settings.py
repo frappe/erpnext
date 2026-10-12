@@ -4,6 +4,7 @@
 from unittest.mock import MagicMock, patch
 
 import frappe
+import requests
 
 from erpnext.templates.pages import help as help_page
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
@@ -36,3 +37,13 @@ class TestSupportSettings(ERPNextTestSuite):
 				help_page.get_context(context)
 				self.assertEqual(context.topics, [{"id": 1, "link": "https://forum.example.com/t/1"}])
 				self.assertIn("timeout", get.call_args.kwargs)
+
+	def test_help_page_loads_when_the_forum_times_out(self):
+		with patch.object(help_page.requests, "get", side_effect=requests.Timeout):
+			with change_settings("Support Settings", show_latest_forum_posts=1, **FORUM_SETTINGS):
+				context = frappe._dict()
+				help_page.get_context(context)
+
+		self.assertEqual(context.topics, [])
+		self.assertEqual(context.forum_url, FORUM_SETTINGS["forum_url"])
+		self.assertIsInstance(context.issues, list)

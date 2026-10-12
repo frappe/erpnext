@@ -31,8 +31,12 @@ def get_context(context):
 
 
 def get_forum_posts(s):
-	response = requests.get(s.forum_url + "/" + s.get_latest_query, timeout=FORUM_REQUEST_TIMEOUT)
-	response.raise_for_status()
+	try:
+		response = requests.get(s.forum_url + "/" + s.get_latest_query, timeout=FORUM_REQUEST_TIMEOUT)
+		response.raise_for_status()
+	except requests.RequestException:
+		return [], {}
+
 	response_json = response.json()
 
 	topics_data = {}  # it will actually be an array
