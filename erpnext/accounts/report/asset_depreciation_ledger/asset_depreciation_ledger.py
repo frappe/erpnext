@@ -132,33 +132,63 @@ def get_depreciation_before_from_date(filters_data, or_filters_data, from_date) 
 
 
 def get_cost_adjustments(filters, or_filters_data, assets_details) -> dict:
-	"""Revaluations and capitalised repairs posted to the fixed asset account of each asset before its disposal."""
+	"""Revaluations and capitalised repairs posted to the fixed asset account of each asset, excluding its scrap entry."""
 	fixed_asset_accounts = frappe.get_all("Account", filters={"account_type": "Fixed Asset"}, pluck="name")
-	gl_entries = frappe.get_all(
+	common_filters = [
+		["company", "=", filters.get("company")],
+		["posting_date", "<=", filters.get("to_date")],
+		["account", "in", fixed_asset_accounts],
+		["is_cancelled", "=", 0],
+	]
+	asset_filters = [["against_voucher_type", "=", "Asset"], ["against_voucher", "in", list(assets_details)]]
+	gl_entries = get_fixed_asset_entries(common_filters + asset_filters, or_filters_data)
+	gl_entries += get_repair_stock_entries(common_filters, or_filters_data, list(assets_details))
+
+	cost_adjustments = {}
+	for d in gl_entries:
+		if d.voucher_no != assets_details[d.against_voucher].journal_entry_for_scrap:
+			cost_adjustments.setdefault(d.against_voucher, []).append(d)
+
+	return cost_adjustments
+
+
+def get_repair_stock_entries(common_filters: list, or_filters_data: list, assets: list) -> list:
+	"""Stock consumed in asset repairs, which is posted against the Stock Entry instead of the asset."""
+	repair_assets = dict(
+		frappe.get_all(
+			"Asset Repair",
+			filters={"asset": ["in", assets], "docstatus": 1},
+			fields=["name", "asset"],
+			as_list=1,
+		)
+	)
+	if not repair_assets:
+		return []
+
+	repair_filters = [
+		["voucher_type", "=", "Asset Repair"],
+		["voucher_no", "in", list(repair_assets)],
+		["against_voucher_type", "=", "Stock Entry"],
+	]
+	gl_entries = get_fixed_asset_entries(common_filters + repair_filters, or_filters_data)
+	for d in gl_entries:
+		d.against_voucher = repair_assets[d.voucher_no]
+
+	return gl_entries
+
+
+def get_fixed_asset_entries(filters_data: list, or_filters_data: list) -> list:
+	return frappe.get_all(
 		"GL Entry",
-		filters=[
-			["company", "=", filters.get("company")],
-			["posting_date", "<=", filters.get("to_date")],
-			["against_voucher_type", "=", "Asset"],
-			["against_voucher", "in", list(assets_details)],
-			["account", "in", fixed_asset_accounts],
-			["is_cancelled", "=", 0],
-		],
+		filters=filters_data,
 		or_filters=or_filters_data,
 		fields=[
 			"against_voucher",
+			"voucher_no",
 			"posting_date",
 			{"SUB": ["debit_in_account_currency", "credit_in_account_currency"], "as": "amount"},
 		],
 	)
-
-	cost_adjustments = {}
-	for d in gl_entries:
-		disposal_date = assets_details[d.against_voucher].disposal_date
-		if not disposal_date or d.posting_date < disposal_date:
-			cost_adjustments.setdefault(d.against_voucher, []).append(d)
-
-	return cost_adjustments
 
 
 def get_cost_adjustment_till(cost_adjustments: list, date) -> float:
@@ -178,7 +208,7 @@ def get_assets_details(assets):
 		"depreciation_method",
 		"purchase_date",
 		"cost_center",
-		"disposal_date",
+		"journal_entry_for_scrap",
 	]
 
 	for d in frappe.get_all("Asset", fields=fields, filters={"name": ("in", assets)}):

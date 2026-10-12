@@ -11,6 +11,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	scrap_asset,
 )
 from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
+from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_asset_value_adjustment,
 )
@@ -81,6 +82,41 @@ class TestAssetDepreciationLedger(ERPNextTestSuite):
 		rows = get_asset_rows(asset.name, "2020-01-01", "2021-12-31")
 
 		self.assertEqual(rows[0].value_after_depreciation, 90000)
+		self.assertAlmostEqual(
+			rows[-1].value_after_depreciation, 110000 - rows[-1].accumulated_depreciation_amount, places=2
+		)
+
+	def test_value_after_depreciation_includes_repair_stock(self):
+		asset = create_depreciating_asset()
+		post_depreciation_entries(date="2021-01-01")
+		create_asset_repair(
+			asset=asset,
+			stock_consumption=1,
+			capitalize_repair_cost=1,
+			item="_Test Non Stock Item",
+			failure_date="2021-01-10",
+			submit=1,
+		)
+		post_depreciation_entries(date="2022-01-01")
+
+		rows = get_asset_rows(asset.name, "2020-01-01", "2021-12-31")
+
+		# 550 of invoiced repair cost and 100 of consumed stock
+		self.assertAlmostEqual(
+			rows[-1].value_after_depreciation, 100650 - rows[-1].accumulated_depreciation_amount, places=2
+		)
+
+	def test_revaluation_on_scrap_date_is_included(self):
+		asset = create_depreciating_asset()
+		post_depreciation_entries(date="2021-01-01")
+		make_asset_value_adjustment(
+			asset=asset.name, date="2021-06-30", current_asset_value=90000, new_asset_value=100000
+		).submit()
+		scrap_asset(asset.name, "2021-06-30")
+
+		rows = get_asset_rows(asset.name, "2020-01-01", "2021-12-31")
+
+		self.assertEqual(rows[-1].depreciation_date, frappe.utils.getdate("2021-06-30"))
 		self.assertAlmostEqual(
 			rows[-1].value_after_depreciation, 110000 - rows[-1].accumulated_depreciation_amount, places=2
 		)
