@@ -22,6 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	get_items,
+	get_stock_balance_for,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -2618,6 +2619,30 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			do_not_submit=True,
 		)
 		self.assertRaises(SerialNoExistsInFutureTransactionError, transfer.submit)
+
+	def test_stock_balance_lookup_needs_reconciliation_write(self):
+		user = "reco-accounts-user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Reco Accounts",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Accounts User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+		self.assertRaises(
+			frappe.PermissionError,
+			get_stock_balance_for,
+			"_Test Item",
+			"_Test Warehouse - _TC",
+			nowdate(),
+			nowtime(),
+		)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

@@ -1772,6 +1772,7 @@ def get_stock_balance_for(
 	row: StockReconciliationItem | str | dict | None = None,
 	company: str | None = None,
 ):
+	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 	frappe.has_permission("Item", "read", doc=item_code, throw=True)
 	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
 	_require_reconciliation_permission("Item", item_code)
@@ -1788,32 +1789,6 @@ def get_stock_balance_for(
 		inventory_dimensions_dict,
 		row,
 		company,
-	)
-
-
-def _get_stock_balance_for(
-	item_code: str,
-	warehouse: str,
-	posting_date: DateTimeLikeObject,
-	posting_time: DateTimeLikeObject | timedelta,
-	batch_no: str | None = None,
-	with_valuation_rate: bool = True,
-	inventory_dimensions_dict: dict | None = None,
-	row: StockReconciliationItem | str | dict | None = None,
-	company: str | None = None,
-):
-	frappe.has_permission("Stock Reconciliation", "write", throw=True)
-
-	return _get_stock_balance_for(
-		item_code,
-		warehouse,
-		posting_date,
-		posting_time,
-		batch_no=batch_no,
-		with_valuation_rate=with_valuation_rate,
-		inventory_dimensions_dict=inventory_dimensions_dict,
-		row=row,
-		company=company,
 	)
 
 
