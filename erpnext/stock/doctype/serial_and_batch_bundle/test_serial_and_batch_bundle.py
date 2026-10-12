@@ -2087,7 +2087,6 @@ class TestSerialandBatchBundleLogic(FrappeTestCase):
 		self.assertNotIn(bundles[1], bundle_wise_serial_nos)
 		self.assertEqual(bundle_wise_serial_nos[bundles[0]], [serial_no])
 
-	@change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1})
 	def test_lifo_issue_from_non_batchwise_batch(self):
 		item_code = make_item(
 			"LIFO Non Batchwise Valuation Item",
@@ -2130,6 +2129,7 @@ class TestSerialandBatchBundleLogic(FrappeTestCase):
 		self.assertEqual(sle.stock_value_difference, -1000)
 		self.assertEqual(json.loads(sle.stock_queue), [[10, 100], [5, 200]])
 
+	@change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1})
 	def test_batchwise_valuation_for_same_posting_datetime_entries(self):
 		# an inward at a different rate and multiple outward rows with the same
 		# item and warehouse share the same posting datetime, the tie-breaking
