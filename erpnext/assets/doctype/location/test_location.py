@@ -4,7 +4,7 @@ import json
 
 import frappe
 
-from erpnext.assets.doctype.location.location import get_children
+from erpnext.assets.doctype.location.location import compute_area, get_children
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -17,11 +17,15 @@ class TestLocation(ERPNextTestSuite):
 		for location in locations:
 			doc = frappe.get_doc("Location", location)
 			doc.save()
-			area += doc.area
-			temp = json.loads(doc.location)
-			temp["features"][0]["properties"]["child_feature"] = True
-			temp["features"][0]["properties"]["feature_of"] = location
-			formatted_locations.extend(temp["features"])
+			own_features = [
+				feature
+				for feature in json.loads(doc.location)["features"]
+				if not feature["properties"].get("child_feature")
+			]
+			for feature in own_features:
+				feature["properties"].update({"child_feature": True, "feature_of": location})
+			area += compute_area(own_features)
+			formatted_locations.extend(own_features)
 
 		test_location = frappe.get_doc("Location", "Test Location Area")
 		test_location.save()
@@ -33,7 +37,7 @@ class TestLocation(ERPNextTestSuite):
 		ordered_formatted_locations = sorted(formatted_locations, key=lambda x: x["properties"]["feature_of"])
 
 		self.assertEqual(ordered_formatted_locations, ordered_test_location_features)
-		self.assertEqual(area, test_location.get("area"))
+		self.assertAlmostEqual(area, test_location.get("area"))
 
 	def test_area_rolls_up_on_insert_delete_and_move(self):
 		parent, other_parent = (make_location(name, is_group=1) for name in ("Area Parent", "Area Other"))
@@ -48,6 +52,20 @@ class TestLocation(ERPNextTestSuite):
 
 		self.assertEqual(get_area_and_feature_count(parent.name), (0, 0))
 		self.assertEqual(get_area_and_feature_count(other_parent.name), (child.area, 1))
+
+	def test_moving_a_group_moves_its_descendants_features(self):
+		old_parent, new_parent = (make_location(name, is_group=1) for name in ("Move From", "Move To"))
+		group = make_location("Move Group", parent_location=old_parent.name, is_group=1)
+		child = make_location("Move Child", parent_location=group.name, location=square(79.0))
+
+		group.reload()
+		group.parent_location = new_parent.name
+		group.save()
+
+		self.assertEqual(get_area_and_feature_count(old_parent.name), (0, 0))
+		self.assertEqual(get_area_and_feature_count(new_parent.name), (child.area, 1))
+		feature = json.loads(new_parent.reload().location)["features"][0]
+		self.assertEqual(feature["properties"]["feature_of"], child.location_name)
 
 	def test_coordinates_out_of_range_are_refused(self):
 		for coordinates in (

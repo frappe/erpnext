@@ -51,7 +51,7 @@ class Location(NestedSet):
 		ancestors = self.get_ancestors()
 		update_nsm(self)
 		for ancestor in ancestors:
-			self.set_features_in_ancestor(ancestor, [])
+			set_features_in_ancestor(ancestor, {self.location_name}, [])
 
 	def validate_coordinates(self):
 		if abs(flt(self.latitude)) > 90:
@@ -84,45 +84,37 @@ class Location(NestedSet):
 
 	def update_ancestor_location_features(self):
 		ancestors = self.get_ancestors()
+		features = self.get_subtree_features()
+		subtree = {feature["properties"].get("feature_of") for feature in features} - {None}
+		subtree.add(self.location_name)
+
 		for ancestor in set(self.get("previous_ancestors") or []) - set(ancestors):
-			self.set_features_in_ancestor(ancestor, [])
-
-		features = self.add_child_property()
+			set_features_in_ancestor(ancestor, subtree, [])
 		for ancestor in ancestors:
-			self.set_features_in_ancestor(ancestor, features)
+			set_features_in_ancestor(ancestor, subtree, features)
 
-	def set_features_in_ancestor(self, ancestor: str, features: list[str]):
-		"""Replace this location's features in the ancestor and recompute the ancestor's area."""
-		ancestor_doc = frappe.get_doc("Location", ancestor)
-		_child_features, other_features = ancestor_doc.feature_seperator(child_feature=self.location_name)
-		ancestor_features = [json.loads(feature) for feature in other_features + features]
-
-		ancestor_doc.set_location_features(features=ancestor_features)
-		ancestor_doc.db_set("area", compute_area(ancestor_features))
-
-	def add_child_property(self):
+	def get_subtree_features(self) -> list[dict]:
+		"""Return this location's own features tagged with its name, along with its descendants' features."""
 		features = self.get_location_features()
-		filter_features = [
-			feature for feature in features if not feature.get("properties").get("child_feature")
-		]
-
-		for index, feature in enumerate(filter_features):
-			feature["properties"].update({"child_feature": True, "feature_of": self.location_name})
-			filter_features[index] = json.dumps(filter_features[index])
-
-		return filter_features
-
-	def feature_seperator(self, child_feature=None):
-		child_features, non_child_features = [], []
-		features = self.get_location_features()
-
 		for feature in features:
-			if feature.get("properties").get("feature_of") == child_feature:
-				child_features.extend([json.dumps(feature)])
-			else:
-				non_child_features.extend([json.dumps(feature)])
+			if not feature.get("properties").get("child_feature"):
+				feature["properties"].update({"child_feature": True, "feature_of": self.location_name})
 
-		return child_features, non_child_features
+		return features
+
+
+def set_features_in_ancestor(ancestor: str, subtree: set[str], features: list[dict]):
+	"""Replace the features of the `subtree` locations in the ancestor and recompute the ancestor's area."""
+	ancestor_doc = frappe.get_doc("Location", ancestor)
+	ancestor_features = [
+		feature
+		for feature in ancestor_doc.get_location_features()
+		if feature.get("properties").get("feature_of") not in subtree
+	]
+	ancestor_features.extend(features)
+
+	ancestor_doc.set_location_features(features=ancestor_features)
+	ancestor_doc.db_set("area", compute_area(ancestor_features))
 
 
 def compute_area(features):
