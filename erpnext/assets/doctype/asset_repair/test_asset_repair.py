@@ -103,6 +103,14 @@ class TestAssetRepair(ERPNextTestSuite):
 		self.assertIn("submission", subjects[-2])
 		self.assertIn("cancellation", subjects[-1])
 
+	def test_resaving_pending_repair_does_not_log_back_in_service(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(asset=asset)
+		asset_repair.save()
+
+		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
+		self.assertFalse([subject for subject in subjects if "back in service" in subject])
+
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 

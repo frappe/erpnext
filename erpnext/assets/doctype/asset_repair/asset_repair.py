@@ -200,7 +200,11 @@ class AssetRepair(AccountsController):
 		else:
 			previous_status = self.asset_doc.status
 			self.asset_doc.set_status()
-			if previous_status == "Out of Order" and self.asset_doc.status != "Out of Order":
+			if (
+				self.repair_status != "Pending"
+				and previous_status == "Out of Order"
+				and self.asset_doc.status != "Out of Order"
+			):
 				self.add_asset_activity(
 					_("Asset back in service after Asset Repair {0}").format(
 						get_link_to_form("Asset Repair", self.name)
