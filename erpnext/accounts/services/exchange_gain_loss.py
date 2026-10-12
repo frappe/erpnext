@@ -216,7 +216,7 @@ def set_transaction_currency_and_rate_in_gl_map(doc, gl_entries: list) -> None:
 
 def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date) -> float | None:
 	"""Rate of the latest Exchange Rate Revaluation of the invoice's party account, posted between
-	the invoice date and `on_date`, still matching the ledger and not reversed by `on_date`.
+	the invoice date and `on_date`, covering the invoice and not reversed by `on_date`.
 	None if there is no such revaluation."""
 	if invoice_doctype not in ("Sales Invoice", "Purchase Invoice") or not invoice_name or not on_date:
 		return None
@@ -238,6 +238,7 @@ def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date)
 		return None
 	account = inv.debit_to if is_sales else inv.credit_to
 	party_type, party = ("Customer", inv.customer) if is_sales else ("Supplier", inv.supplier)
+	invoice_booked_at = _booked_at(invoice_doctype, invoice_name)
 
 	je = qb.DocType("Journal Entry")
 	jea = qb.DocType("Journal Entry Account")
@@ -280,11 +281,17 @@ def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date)
 	)
 
 	for row in revaluations:
-		# a back-dated entry made after the revaluation (e.g. a late invoice) changes the balance it
-		# revalued, so the revaluation no longer covers this invoice
-		if _balance_in_account_currency(inv.company, account, party_type, party, row.posting_date) != flt(
-			row.balance_in_account_currency, get_currency_precision()
-		):
+		# The revaluation covers the invoice if it hit the ledger after the invoice, or, when reposting
+		# has renewed the invoice's ledger entries, if the balance it revalued is still unchanged.
+		# Limitation: misses an invoice that was reposted and has a back-dated entry on the same party;
+		# it then falls back to the invoice rate.
+		revaluation_booked_at = _booked_at("Journal Entry", row.name)
+		booked_after_invoice = (
+			invoice_booked_at and revaluation_booked_at and revaluation_booked_at > invoice_booked_at
+		)
+		if not booked_after_invoice and _balance_in_account_currency(
+			inv.company, account, party_type, party, row.posting_date
+		) != flt(row.balance_in_account_currency, get_currency_precision()):
 			continue
 		reversed_by_date = frappe.db.exists(
 			"Journal Entry",
@@ -311,3 +318,13 @@ def _balance_in_account_currency(company, account, party_type, party, posting_da
 		.run()
 	)
 	return flt(balance[0][0] if balance else 0, get_currency_precision())
+
+
+def _booked_at(voucher_type: str, voucher_no: str):
+	"""When the voucher's live ledger entries were written."""
+	return frappe.db.get_value(
+		"GL Entry",
+		{"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+		"creation",
+		order_by="creation asc",
+	)

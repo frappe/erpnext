@@ -557,6 +557,19 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 		debit, credit = self._party_balance()
 		self.assertEqual(flt(debit - credit, 2), 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_12_unrelated_late_invoice_keeps_revaluation_of_others(self):
+		si, _ = self._invoice_revalued_at_84()
+		# back-dated invoice entered after the revaluation; must not undo the revaluation of `si`
+		self._usd_invoice_at_80(add_days(today(), -8), rate=20)
+
+		pe = self._pay_at_85(si)
+		self.assertEqual(pe.references[0].exchange_rate, 84)
+		self.assertEqual(pe.references[0].exchange_gain_loss, 100)
+
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
 	"""Validation and gain/loss calculation paths, exercised on the document directly
