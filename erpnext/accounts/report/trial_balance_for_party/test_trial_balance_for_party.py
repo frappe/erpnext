@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -111,17 +111,26 @@ class TestTrialBalanceForParty(FrappeTestCase):
 	def test_alternative_finance_book_entries_excluded(self):
 		customer = make_customer("_Test TBP Finance Book Customer")
 		finance_book = create_finance_book().name
+		year_start_date = get_fiscal_year(today(), company="_Test Company")[1]
 		create_sales_invoice(customer=customer, qty=1, rate=10000)
-		journal = make_journal_entry("Sales - _TC", "Debtors - _TC", 4000, save=False)
+		self.make_finance_book_credit(customer, 1500, add_days(year_start_date, -17), finance_book)
+		self.make_finance_book_credit(customer, 4000, today(), finance_book)
+
+		row = self.party_row(customer, include_default_book_entries=1)
+		self.assertEqual((row["opening_credit"], row["credit"], row["closing_debit"]), (0, 0, 10000))
+
+		row = self.party_row(customer, finance_book=finance_book)
+		self.assertEqual((row["opening_credit"], row["credit"], row["closing_debit"]), (1500, 4000, 4500))
+
+	def make_finance_book_credit(
+		self, customer: str, amount: float, posting_date: str, finance_book: str
+	) -> None:
+		journal = make_journal_entry(
+			"Sales - _TC", "Debtors - _TC", amount, posting_date=posting_date, save=False
+		)
 		journal.accounts[1].update({"party_type": "Customer", "party": customer})
 		journal.finance_book = finance_book
 		journal.submit()
-
-		row = self.party_row(customer, include_default_book_entries=1)
-		self.assertEqual((row["credit"], row["closing_debit"]), (0, 10000))
-
-		row = self.party_row(customer, finance_book=finance_book)
-		self.assertEqual((row["credit"], row["closing_debit"]), (4000, 6000))
 
 
 def make_customer(customer_name: str) -> str:
