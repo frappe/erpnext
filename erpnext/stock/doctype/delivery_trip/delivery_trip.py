@@ -70,6 +70,7 @@ class DeliveryTrip(Document):
 
 	def on_update(self):
 		self.update_delivery_notes()
+		self.release_removed_delivery_notes()
 
 	def on_trash(self):
 		self.update_delivery_notes(delete=True)
@@ -150,7 +151,17 @@ class DeliveryTrip(Document):
 
 		self.db_set("status", status)
 
-	def update_delivery_notes(self, delete=False):
+	def release_removed_delivery_notes(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		current = {stop.delivery_note for stop in self.delivery_stops}
+		removed = {stop.delivery_note for stop in doc_before_save.delivery_stops if stop.delivery_note}
+		if removed - current:
+			self.update_delivery_notes(delete=True, delivery_notes=removed - current)
+
+	def update_delivery_notes(self, delete=False, delivery_notes=None):
 		"""
 		Update all connected Delivery Notes with Delivery Trip details
 		(Driver, Vehicle, etc.). If `delete` is `True`, then details
@@ -160,7 +171,8 @@ class DeliveryTrip(Document):
 		        delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
 		"""
 
-		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
+		if delivery_notes is None:
+			delivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}
 
 		update_fields = {
 			"driver": self.driver,

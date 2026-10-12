@@ -243,6 +243,18 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, trip.insert)
 		self.assertIsNone(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"))
 
+	def test_removed_stop_releases_its_delivery_note(self):
+		first, second = self.make_delivery_note_with_address(), self.make_delivery_note_with_address()
+		trip = self.make_trip_for(first.name, second.name)
+
+		trip.delivery_stops = [stop for stop in trip.delivery_stops if stop.delivery_note == first.name]
+		trip.save()
+		self.assertIsNone(frappe.db.get_value("Delivery Note", second.name, "delivery_trip"))
+
+		trip.submit()
+		trip.cancel()
+		self.assertEqual(trip.docstatus, 2)
+
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc(
