@@ -197,6 +197,8 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 	)
 
 	if not asset_maintenance_log:
+		if not task.next_due_date:
+			return
 		asset_maintenance_log = frappe.get_doc(
 			{
 				"doctype": "Asset Maintenance Log",

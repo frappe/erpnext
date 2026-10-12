@@ -250,9 +250,30 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		asset_maintenance = self.make_asset_maintenance(tasks)
 		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].maintenance_status, "Overdue")
 
-		asset_maintenance.asset_maintenance_tasks[0].next_due_date = add_days(nowdate(), 20)
+		task = asset_maintenance.asset_maintenance_tasks[0]
+		log_filters = {"task": task.name, "docstatus": 0}
+		self.assertEqual(
+			frappe.db.get_value("Asset Maintenance Log", log_filters, "maintenance_status"), "Overdue"
+		)
+
+		task.next_due_date = add_days(nowdate(), 20)
 		asset_maintenance.save()
-		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].maintenance_status, "Planned")
+		self.assertEqual(task.maintenance_status, "Planned")
+		self.assertEqual(
+			frappe.db.get_value("Asset Maintenance Log", log_filters, "maintenance_status"), "Planned"
+		)
+
+	def test_completing_the_last_occurrence_schedules_no_more_maintenance(self):
+		tasks = get_maintenance_tasks()[:1]
+		tasks[0].update({"start_date": add_days(nowdate(), -40), "end_date": add_days(nowdate(), 10)})
+		task = self.make_asset_maintenance(tasks).asset_maintenance_tasks[0]
+
+		log = frappe.get_last_doc("Asset Maintenance Log", {"task": task.name})
+		log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		log.submit()
+
+		self.assertFalse(frappe.db.get_value("Asset Maintenance Task", task.name, "next_due_date"))
+		self.assertFalse(frappe.db.exists("Asset Maintenance Log", {"task": task.name, "docstatus": 0}))
 
 	def test_asset_must_be_submitted(self):
 		maintenance = frappe.get_doc(

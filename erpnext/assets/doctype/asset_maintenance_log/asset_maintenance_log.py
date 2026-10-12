@@ -48,6 +48,8 @@ class AssetMaintenanceLog(Document):
 			"Cancelled",
 		]:
 			self.maintenance_status = "Overdue"
+		elif self.maintenance_status == "Overdue":
+			self.maintenance_status = "Planned"
 
 		if self.maintenance_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Asset Maintenance Log"))
@@ -66,7 +68,9 @@ class AssetMaintenanceLog(Document):
 		if self.maintenance_status == "Completed":
 			if asset_maintenance_doc.last_completion_date != self.completion_date:
 				next_due_date = calculate_next_due_date(
-					periodicity=self.periodicity, last_completion_date=self.completion_date
+					periodicity=self.periodicity,
+					end_date=asset_maintenance_doc.end_date,
+					last_completion_date=self.completion_date,
 				)
 				asset_maintenance_doc.last_completion_date = self.completion_date
 				asset_maintenance_doc.next_due_date = next_due_date
