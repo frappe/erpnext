@@ -808,6 +808,7 @@ def get_rate_for_return(
 		item_code,
 		return_against_item_field,
 		item_row,
+		warehouse=sle.get("warehouse") if sle else None,
 	)
 
 	if voucher_type in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
@@ -890,6 +891,7 @@ def get_filters(
 	item_code,
 	return_against_item_field,
 	item_row,
+	warehouse=None,
 ):
 	filters = {"voucher_type": voucher_type, "voucher_no": return_against, "item_code": item_code}
 
@@ -904,12 +906,15 @@ def get_filters(
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
 	warehouses = []
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row:
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and (item_row or warehouse):
 		if reference_voucher_detail_no:
 			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
 
-		if item_row.get("warehouse") and item_row.get("warehouse") in warehouses:
-			filters["warehouse"] = item_row.get("warehouse")
+		if item_row:
+			warehouse = item_row.get("warehouse")
+
+		if warehouse and warehouse in warehouses:
+			filters["warehouse"] = warehouse
 
 	return filters
 

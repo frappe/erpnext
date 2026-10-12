@@ -6691,6 +6691,51 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
+	def test_purchase_return_rate_on_repost_ignores_the_rejected_warehouse(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = make_item(properties={"valuation_method": "FIFO"}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		rejected_warehouse = create_warehouse("_Test Rejected Return Warehouse", company=company)
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=6,
+			rejected_qty=1,
+			rate=394,
+			company=company,
+			warehouse=warehouse,
+			rejected_warehouse=rejected_warehouse,
+			posting_date=add_days(today(), -3),
+		)
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].qty = pr_return.items[0].received_qty = -5
+		pr_return.items[0].rejected_qty = 0
+		pr_return.set_posting_time = 1
+		pr_return.posting_date = add_days(today(), -1)
+		pr_return.submit()
+
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=3,
+			rate=100,
+			company=company,
+			posting_date=add_days(today(), -4),
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr_return.name, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			-1970,
+		)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
