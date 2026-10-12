@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _, qb
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Field
 
 
 def execute(filters: dict | None = None):
@@ -78,7 +78,7 @@ def validate_filters(filters: dict | None = None):
 		frappe.throw(_("Start Date should be lower than End Date"))
 
 
-def build_query_filters(filters: dict | None = None) -> list:
+def build_query_filters(filters: dict, voucher_no: Field) -> list:
 	qb_filters = []
 	if filters:
 		if filters.account:
@@ -86,7 +86,7 @@ def build_query_filters(filters: dict | None = None) -> list:
 			qb_filters.append(qb.Field("account").isin(accounts))
 
 		if filters.voucher_no:
-			qb_filters.append(qb.Field("voucher_no").eq(filters.voucher_no))
+			qb_filters.append(voucher_no.eq(filters.voucher_no))
 
 	return qb_filters
 
@@ -123,6 +123,6 @@ def get_ledger_vouchers(ledger, is_active, voucher_type, voucher_no, filters: di
 			& voucher_no.notnull()
 			& voucher_no.ne("")
 		)
-		.where(Criterion.all(build_query_filters(filters)))
+		.where(Criterion.all(build_query_filters(filters, voucher_no)))
 		.run(as_dict=True)
 	)

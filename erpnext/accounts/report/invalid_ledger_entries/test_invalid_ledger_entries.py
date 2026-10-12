@@ -101,6 +101,9 @@ class TestInvalidLedgerEntries(ERPNextTestSuite):
 		self.assertIn(invoice.name, flagged)
 		self.assertNotIn(payment.name, flagged)
 
+		flagged = {row.get("voucher_no") for row in self.run_report(voucher_no=invoice.name)}
+		self.assertEqual(flagged, {invoice.name})
+
 	def test_gl_entries_of_deleted_voucher_flagged(self):
 		"""Active GL rows whose voucher no longer exists are flagged."""
 		jv = self.make_submitted_jv()
