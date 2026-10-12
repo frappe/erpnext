@@ -349,6 +349,27 @@ class TestTask(FrappeTestCase):
 			getdate(add_days(nowdate(), 20)),
 		)
 
+	def test_timesheet_by_user_without_task_access_reschedules_dependent(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		prerequisite = create_task("_Test Task Logged By HR User", nowdate(), add_days(nowdate(), 5))
+		dependent = create_task(
+			"_Test Task After HR User Log", nowdate(), add_days(nowdate(), 1), prerequisite.name
+		)
+		employee = make_employee("test_employee_6@salary.com", company="_Test Company")
+		user = create_user("test_task_hr_logger@example.com", "HR User")
+
+		with self.set_user(user.name):
+			make_timesheet(employee, simulate=True, task=prerequisite.name)
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 6)),
+		)
+
 
 def create_task(
 	subject,
