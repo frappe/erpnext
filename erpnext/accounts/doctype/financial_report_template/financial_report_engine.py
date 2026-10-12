@@ -1991,7 +1991,8 @@ class GrowthViewTransformer:
 			if current_value in (None, ""):
 				continue
 
-			if i == 0:
+			# first period, or first of a new dimension: nothing to compare with
+			if i == 0 or period.get("dimension_value") != self.period_list[i - 1].get("dimension_value"):
 				transformed[current_period] = current_value
 			else:
 				previous_period = self.period_list[i - 1]["key"]
