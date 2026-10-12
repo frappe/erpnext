@@ -29,6 +29,24 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPickList(ERPNextTestSuite):
+	def test_delivery_mapping_requires_pick_list_read_permission(self):
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Delivery",
+				"pick_manually": 1,
+			}
+		).insert()
+		user = frappe.session.user
+		try:
+			frappe.set_user("Guest")
+			for mapper in (create_delivery_note, create_dn_for_pick_lists):
+				with self.subTest(mapper=mapper.__name__), self.assertRaises(frappe.PermissionError):
+					mapper(pick_list.name)
+		finally:
+			frappe.set_user(user)
+
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:
