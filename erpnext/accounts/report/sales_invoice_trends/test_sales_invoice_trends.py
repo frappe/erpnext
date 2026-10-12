@@ -139,7 +139,7 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 		)
 		after = self.get_customer_and_totals_as(user)
 
-		self.assertEqual([a - b for a, b in zip(after, before)], [200, 200, 200])
+		self.assertEqual([a - b for a, b in zip(after, before, strict=True)], [200, 200, 200])
 
 	def get_customer_and_totals_as(self, user: str) -> tuple:
 		"""Permitted customer's amount, customer-view total and item-view total, seen by `user`."""
