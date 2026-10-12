@@ -1457,6 +1457,7 @@ class update_entries_after:
 			value += (
 				-sum(flt(v) for v in consumed) + flt(additional_cost) - sum(flt(r.amount) for r in outputs)
 			)
+			value = max(value, 0)
 
 		return value / flt(sle.actual_qty)
 
