@@ -12,6 +12,7 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule_margin
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 from erpnext.controllers.accounts_controller import (
@@ -177,18 +178,7 @@ class calculate_taxes_and_totals:
 
 			for d in get_applied_pricing_rules(item.pricing_rules):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
-
-				if not (
-					pricing_rule.margin_type
-					and pricing_rule.margin_rate_or_amount
-					and (
-						pricing_rule.margin_type == "Percentage" or pricing_rule.currency == self.doc.currency
-					)
-				):
-					continue
-
-				item.margin_type = pricing_rule.margin_type
-				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+				apply_pricing_rule_margin(pricing_rule, item, self.doc)
 
 		item.rate_with_margin = get_rate_with_margin(item)
 		if item.discount_percentage > 0:
