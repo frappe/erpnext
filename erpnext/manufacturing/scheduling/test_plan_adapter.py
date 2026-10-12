@@ -545,6 +545,29 @@ class TestPlanAdapter(ERPNextTestSuite):
 		plan.cancel()
 		self.assertFalse(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
 
+	def make_draft_plan(self, planned_qty=2):
+		return create_production_plan(
+			item_code="Test PPS FG 2",
+			planned_qty=planned_qty,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+
+	def has_schedule(self, plan):
+		return bool(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
+
+	def test_editing_draft_plan_items_clears_schedule(self):
+		plan = self.make_draft_plan()
+		apply_schedule(plan.name, "2026-12-01 09:00:00")
+
+		plan.reload()
+		plan.save()
+		self.assertTrue(self.has_schedule(plan))
+
+		plan.po_items[0].planned_qty = 1
+		plan.save()
+		self.assertFalse(self.has_schedule(plan))
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 
