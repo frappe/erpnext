@@ -1612,6 +1612,10 @@ def check_stock_uom_with_bin(item, stock_uom):
 			["ordered_qty", ">", 0],
 			["indented_qty", ">", 0],
 			["planned_qty", ">", 0],
+			["reserved_qty_for_production", ">", 0],
+			["reserved_qty_for_sub_contract", ">", 0],
+			["reserved_qty_for_production_plan", ">", 0],
+			["reserved_stock", ">", 0],
 		],
 		pluck="name",  # only used as an existence check below
 		limit=1,

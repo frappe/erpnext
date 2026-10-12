@@ -801,6 +801,21 @@ class TestItem(ERPNextTestSuite):
 		item.is_stock_item = 1
 		self.assertRaises(frappe.ValidationError, item.save)
 
+	def test_stock_uom_cannot_change_while_a_work_order_reserves_it(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"})
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material.name], rm_qty=1)
+		make_wo_order_test_record(
+			production_item=finished_good, bom_no=bom.name, qty=10, source_warehouse="_Test Warehouse - _TC"
+		)
+
+		raw_material.reload()
+		raw_material.stock_uom = "Kg"
+		self.assertRaises(frappe.ValidationError, raw_material.save)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
