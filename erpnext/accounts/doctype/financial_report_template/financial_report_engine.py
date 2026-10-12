@@ -37,7 +37,9 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
 	get_cost_centers_with_children,
+	get_period_keys_for_total,
 	get_period_list,
+	is_dimension_grouped,
 )
 from erpnext.accounts.utils import get_children, get_currency_precision
 
@@ -135,6 +137,7 @@ class RowData:
 	account_details: dict[str, AccountData] | None = None
 	is_detail_row: bool = False
 	parent_reference: str | None = None
+	total: float | None = None  # set when grouped by dimension
 
 
 @dataclass
@@ -1175,6 +1178,29 @@ def get_children_accounts(
 # ============================================================================
 
 
+def get_total_keys(period_list: list[dict], balance_type: str | None, accumulated_values) -> list[str]:
+	"""Period keys that add up to a row's Total column (empty when there is no Total)."""
+	all_keys = [period["key"] for period in period_list]
+
+	if not is_dimension_grouped(period_list):
+		return all_keys if accumulated_values == 0 else []
+
+	# grouped: a balance is counted once per dimension, a movement in every period
+	if balance_type == "Opening Balance":
+		first_keys = {}
+		for period in period_list:
+			first_keys.setdefault(period["dimension_value"], period["key"])
+		return list(first_keys.values())
+
+	# see `_handle_balance_accumulation`: 0 turns closing into a movement, 1 turns movement into a closing
+	if balance_type == "Closing Balance":
+		is_balance = accumulated_values != 0
+	else:
+		is_balance = accumulated_values == 1
+
+	return get_period_keys_for_total(period_list, True) if is_balance else all_keys
+
+
 class RowProcessor:
 	"""
 	Processes individual rows of the financial report template.
@@ -1185,6 +1211,8 @@ class RowProcessor:
 		self.context = context
 		self.period_list = context.period_list
 		self.row_values = {}  # For formula calculations
+		self.row_totals = {}  # grouped only: Total column by reference code, for formula rows
+		self.is_grouped = is_dimension_grouped(self.period_list)
 		self.dependency_resolver = DependencyResolver(context.template)
 
 	def process_all_rows(self) -> list[RowData]:
@@ -1198,6 +1226,9 @@ class RowProcessor:
 		for row in processing_order:
 			row_data = self._process_single_row(row, account_summary, account_details)
 			processed_rows.append(row_data)
+
+			if self.is_grouped and row.data_source in ("Account Data", "Calculated Amount", "Custom API"):
+				self._set_total(row_data)
 
 		processed_rows.sort(key=lambda x: getattr(x.row, "idx", 0) or 0)
 
@@ -1260,6 +1291,26 @@ class RowProcessor:
 			self.row_values[row.reference_code] = values
 
 		return RowData(row=row, values=values)
+
+	def _set_total(self, row_data: RowData) -> None:
+		row = row_data.row
+
+		# formula rows: run the formula on the totals, so ratios stay ratios
+		if row.data_source == "Calculated Amount":
+			calculator = FormulaCalculator({code: [total] for code, total in self.row_totals.items()}, [{}])
+			row_data.total = calculator.evaluate_formula(row)[0]
+		else:
+			keys = get_total_keys(
+				self.period_list, row.balance_type, self.context.filters.get("accumulated_values")
+			)
+			row_data.total = sum(
+				flt(value)
+				for period, value in zip(self.period_list, row_data.values, strict=False)
+				if period["key"] in keys
+			)
+
+		if row.reference_code:
+			self.row_totals[row.reference_code] = row_data.total
 
 	def _process_blank_row(self, row) -> RowData:
 		return RowData(row=row, values=[""] * len(self.period_list))
@@ -1697,16 +1748,25 @@ class RowFormatterBase(ABC):
 			"total": 0,
 		}
 
+		total_keys = get_total_keys(
+			self.period_list,
+			getattr(row_data.row, "balance_type", None),
+			self.context.filters.get("accumulated_values"),
+		)
+
 		for i, period in enumerate(self.period_list):
 			period_value = self._get_period_value(row_data, i)
 			values[period["key"]] = period_value
 
-			if self.context.filters.get("accumulated_values") == 0:
+			if period["key"] in total_keys:
 				values["total"] += flt(period_value)
 
+		if row_data.total is not None:
+			values["total"] = row_data.total
+
 		# avg for percent
-		if self.context.filters.get("accumulated_values") == 0 and row_data.row.fieldtype == "Percent":
-			values["total"] = values["total"] / len(self.period_list)
+		elif total_keys and row_data.row.fieldtype == "Percent":
+			values["total"] = values["total"] / len(total_keys)
 
 		return values
 
@@ -1840,6 +1900,7 @@ class DetailRowBuilder:
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
 				"fieldtype": getattr(parent_row, "fieldtype", None),
+				"balance_type": getattr(parent_row, "balance_type", None),
 				"bold_text": False,
 				"italic_text": True,
 				"reverse_sign": getattr(parent_row, "reverse_sign", False),
