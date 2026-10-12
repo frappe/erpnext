@@ -8528,6 +8528,16 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			self.assertEqual([row.qty for row in delivery_note.items], [3])
 			self.assertRaises(frappe.ValidationError, make_inter_company_delivery_note, draft_receipt.name)
 
+			boxed_receipt = make_purchase_receipt(qty=5, rate=100, uom="_Test UOM 1", conversion_factor=4)
+			self.submit_receipt_return(boxed_receipt, 1)
+			delivery_note = make_inter_company_delivery_note(boxed_receipt.name)
+			self.assertEqual([row.qty for row in delivery_note.items], [4])
+
+			rejected_receipt = self.make_receipt_with_rejected_qty()
+			self.submit_receipt_return(rejected_receipt, 2, from_rejected_warehouse=True)
+			delivery_note = make_inter_company_delivery_note(rejected_receipt.name)
+			self.assertEqual([row.qty for row in delivery_note.items], [8])
+
 	def test_closed_receipt_cannot_be_invoiced(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status
 
