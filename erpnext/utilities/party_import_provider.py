@@ -124,7 +124,7 @@ class PartyImportProvider(ImportProvider):
 					contact.add_phone(mobile, is_primary_mobile_no=True)
 				contact.insert()
 			# First created contact is the default primary; an explicit flag overrides.
-			if flagged or primary is None:
+			if flagged or (primary is None and not existing):
 				primary = contact
 		if primary:
 			# Unlike addresses, saving a contact doesn't clear the party's other primary contact.
@@ -181,7 +181,7 @@ class PartyImportProvider(ImportProvider):
 				)
 				address.insert()
 			# First created address is the default primary; an explicit flag overrides.
-			if flagged or primary is None:
+			if flagged or (primary is None and not existing):
 				primary = address
 		if primary:
 			# save() clears the party's other primary address; set_value would leave two.

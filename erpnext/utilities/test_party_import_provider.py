@@ -318,6 +318,65 @@ class TestPartyImportProvider(ERPNextTestSuite):
 			[[party_b, "own-b@example.com", 1], ["", "shared@example.com", 0]],
 		)
 
+	def test_reimporting_an_export_keeps_unset_primaries_unset(self):
+		columns = [
+			"customer_name",
+			"customer_type",
+			"customer_group",
+			"territory",
+			"contacts.email_id",
+			"addresses.address_line1",
+			"addresses.city",
+			"addresses.country",
+		]
+		values = [
+			f"{PREFIX} No Primary",
+			"Company",
+			self.customer_group,
+			self.territory,
+			"no-primary@example.com",
+			"1 Main St",
+			"Berlin",
+			"Germany",
+		]
+		self.run_import("Customer", INSERT, [columns, values])
+		name = self.get_party("Customer", values[0])
+
+		# what "Unset as Primary" on the Customer form does, including the fields fetched from the primary
+		frappe.db.set_value(
+			"Customer",
+			name,
+			{
+				"customer_primary_contact": None,
+				"mobile_no": None,
+				"email_id": None,
+				"first_name": None,
+				"last_name": None,
+				"customer_primary_address": None,
+			},
+		)
+		frappe.db.commit()  # nosemgrep
+
+		with self.set_user(USER):
+			export = Exporter(
+				"Customer",
+				export_fields={
+					"Customer": ["name"],
+					"contacts": ["email_id", "is_primary_contact"],
+					"addresses": ["address_line1", "city", "is_primary_address"],
+				},
+				export_data=True,
+				export_filters={"name": name},
+			).get_csv_array()
+		self.assertEqual(export[1:], [[name, "no-primary@example.com", 0, "1 Main St", "Berlin", 0]])
+
+		self.run_import("Customer", UPDATE, export)
+
+		self.assertEqual(
+			frappe.db.get_value("Customer", name, ["customer_primary_contact", "customer_primary_address"]),
+			(None, None),
+		)
+
 	def test_tables_the_user_cannot_read_are_left_out(self):
 		has_permission = frappe.has_permission
 
