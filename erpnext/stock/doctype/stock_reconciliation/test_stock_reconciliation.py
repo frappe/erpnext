@@ -2769,6 +2769,39 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		rows = get_items("_Test Warehouse - _TC", posting_date, "12:00:00", "_Test Company", item.name)
 		self.assertEqual([row["qty"] for row in rows], [10])
 
+
+
+	def test_fifo_batch_keeps_its_own_rate_without_batchwise_setting(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		setting = "do_not_use_batchwise_valuation"
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Stock Settings",
+			setting,
+			frappe.db.get_single_value("Stock Settings", setting),
+		)
+		frappe.db.set_single_value("Stock Settings", setting, 1)
+		item = create_item("_Test Reco FIFO Batch Own Rate")
+		item.update({"has_batch_no": 1, "valuation_method": "FIFO"})
+		item.save()
+		first, second = (create_batch_item_with_batch(item.name, f"TRFBOR-{i}") for i in (1, 2))
+		posting_date = add_days(nowdate(), -5)
+		for batch_no, rate in ((first, 100), (second, 200)):
+			make_stock_entry(
+				item_code=item.name,
+				target="_Test Warehouse - _TC",
+				qty=10,
+				basic_rate=rate,
+				batch_no=batch_no,
+				posting_date=add_days(posting_date, -1),
+			)
+
+		sr = create_stock_reconciliation(
+			item_code=item.name, batch_no=first, qty=4, use_serial_batch_fields=1, posting_date=posting_date
+		)
+
+		self.assertEqual((sr.items[0].current_valuation_rate, sr.items[0].valuation_rate), (100, 100))
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
 	if not batch_item_doc.has_batch_no:
