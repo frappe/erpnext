@@ -12,6 +12,7 @@ from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule 
 	make_maintenance_schedule,
 	make_serial_item_with_serial,
 )
+from erpnext.maintenance.doctype.maintenance_visit.maintenance_visit import get_user_of_sales_person
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -131,7 +132,7 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		claim.reload()
 		self.assertEqual(claim.status, "Work In Progress")
 		# Resolution data is back-filled from the prior partial visit found by query (A).
-		self.assertEqual(claim.resolved_by, self.sales_person.name)
+		self.assertEqual(claim.resolved_by, get_user_of_sales_person(self.sales_person.name))
 		self.assertEqual(claim.resolution_details, prior.purposes[0].work_done)
 		self.assertEqual(getdate(claim.resolution_date), getdate(prior.mntc_date))
 

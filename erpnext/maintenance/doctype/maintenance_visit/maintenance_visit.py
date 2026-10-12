@@ -201,6 +201,8 @@ class MaintenanceVisit(TransactionBase):
 		if not self.maintenance_schedule:
 			for d in self.get("purposes"):
 				if d.prevdoc_docname and d.prevdoc_doctype == "Warranty Claim":
+					if self.is_superseded_by_completed_visit(d.prevdoc_docname):
+						continue
 					if flag == 1:
 						mntc_date = self.mntc_date
 						service_person = d.service_person
@@ -241,13 +243,36 @@ class MaintenanceVisit(TransactionBase):
 					wc_doc.update(
 						{
 							"resolution_date": mntc_date,
-							"resolved_by": service_person,
+							"resolved_by": get_user_of_sales_person(service_person),
 							"resolution_details": work_done,
 							"status": status,
 						}
 					)
 
 					wc_doc.db_update()
+
+	def is_superseded_by_completed_visit(self, warranty_claim: str) -> bool:
+		"""Submitting or cancelling a non-final visit must not reopen a claim closed by a completed visit."""
+		if self.completion_status == "Fully Completed":
+			return False
+
+		mv = frappe.qb.DocType("Maintenance Visit")
+		mvp = frappe.qb.DocType("Maintenance Visit Purpose")
+		completed_visit = (
+			frappe.qb.from_(mv)
+			.inner_join(mvp)
+			.on(mvp.parent == mv.name)
+			.select(mv.name)
+			.where(
+				(mvp.prevdoc_docname == warranty_claim)
+				& (mv.name != self.name)
+				& (mv.docstatus == 1)
+				& (mv.completion_status == "Fully Completed")
+			)
+			.limit(1)
+			.run()
+		)
+		return bool(completed_visit)
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same Warranty Claim"""
@@ -299,6 +324,12 @@ class MaintenanceVisit(TransactionBase):
 
 	def on_update(self):
 		pass
+
+
+def get_user_of_sales_person(sales_person: str | None) -> str | None:
+	"""Resolved By on a Warranty Claim is a User; a Sales Person maps to one through its Employee."""
+	employee = sales_person and frappe.db.get_value("Sales Person", sales_person, "employee")
+	return frappe.db.get_value("Employee", employee, "user_id") if employee else None
 
 
 def was_delivered_to(serial_no, customer):
