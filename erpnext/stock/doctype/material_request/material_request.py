@@ -303,8 +303,9 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
 		self.update_requested_qty_in_work_order()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
+		if self.material_request_type == "Purchase":
 			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
 				self.validate_budget()
 
@@ -376,7 +377,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
 		self.update_requested_qty_in_work_order()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
