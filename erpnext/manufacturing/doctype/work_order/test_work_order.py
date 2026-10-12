@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings, timeout
@@ -159,6 +160,27 @@ class TestWorkOrder(FrappeTestCase):
 		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", qty))
 		entry.update({"set_posting_time": 1, "posting_date": today(), "posting_time": posting_time})
 		return entry.insert()
+
+	def test_disassembled_qty_sums_without_float_noise(self):
+		wo = frappe.new_doc("Work Order")
+		wo.update({"docstatus": 1, "produced_qty": 0.3, "disassembled_qty": 0.1})
+		with patch.object(wo, "db_set"):
+			wo.update_disassembled_qty(0.2)
+
+		self.assertEqual(wo.disassembled_qty, 0.3)
+
+	def test_disassembly_available_qty_has_no_float_noise(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
+
+		real_get_value = frappe.db.get_value
+
+		def get_value(doctype, filters=None, *args, **kwargs):
+			if doctype != "Stock Entry":
+				return real_get_value(doctype, filters, *args, **kwargs)
+			return frappe._dict(fg_completed_qty=0.3) if isinstance(filters, str) else 0.1
+
+		with patch.object(frappe.db, "get_value", side_effect=get_value):
+			self.assertEqual(get_disassembly_available_qty("Manufacture Entry"), 0.2)
 
 	def test_over_production(self):
 		wo_doc = self.check_planned_qty()
