@@ -4314,6 +4314,17 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, make_inter_company_purchase_receipt, delivery_note.name)
 
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		receipt_return = make_return_doc("Purchase Receipt", receipt.name)
+		receipt_return.submit()
+		self.assertEqual(
+			frappe.db.get_value("Packed Item", delivery_note.packed_items[0].name, "received_qty"), 0
+		)
+		self.assertEqual(
+			[row.qty for row in make_inter_company_purchase_receipt(delivery_note.name).items], [6]
+		)
+
 	def test_internal_return_keeps_target_warehouse(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
