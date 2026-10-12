@@ -4903,6 +4903,9 @@ class TestStockEntry(ERPNextTestSuite):
 			self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
 			self.assertEqual(self.get_value_change(repack, output), 856.81)
 
+			issue = make_stock_entry(item_code=output, source=warehouse, qty=5)
+			self.assertEqual(self.get_value_change(issue, output), -389.46)
+
 	def test_manufacture_outputs_split_the_consumed_value_without_a_remainder(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_manufacture_entry,
