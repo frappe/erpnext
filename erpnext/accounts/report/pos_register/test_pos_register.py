@@ -4,10 +4,13 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.pos_register.pos_register import execute
 from erpnext.selling.doctype.customer.test_customer import make_customer
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_ACCOUNTS = {"Cash": "Cash - _TC", "_Test POS Register Card": "_Test Bank - _TC"}
@@ -76,6 +79,41 @@ class TestPOSRegister(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 		self.assertEqual([row.get("grand_total") for row in rows if row], [1000, 1000])
+
+	def test_pos_invoices_are_listed_with_sales_invoices(self):
+		pos_invoice = self.make_pos_invoice({"Cash": 300, "_Test POS Register Card": 200}, rate=500)
+		sales_invoice = self.make_pos_sales_invoice({"Cash": 1000})
+
+		rows = self.run_report(group_by="")
+		self.assertEqual(
+			sorted((row.invoice_type, row.pos_invoice, row.grand_total, row.paid_amount) for row in rows),
+			[("POS Invoice", pos_invoice.name, 500, 500), ("Sales Invoice", sales_invoice.name, 1000, 1000)],
+		)
+
+		subtotals = [row for row in self.run_report(group_by="Payment Method") if row.get("bold")]
+		self.assertEqual(
+			[(row["mode_of_payment"], row["grand_total"], row["paid_amount"]) for row in subtotals],
+			[("Cash", 1500, 1300), ("_Test POS Register Card", 0, 200)],
+		)
+
+	def make_pos_invoice(self, payments, rate):
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=1, basic_rate=100)
+		create_opening_entry(frappe.get_doc("POS Profile", self.pos_profile), frappe.session.user)
+
+		pos_invoice = create_pos_invoice(pos_profile=self.pos_profile, rate=rate, do_not_save=True)
+		for mode_of_payment, amount in payments.items():
+			pos_invoice.append(
+				"payments",
+				{
+					"mode_of_payment": mode_of_payment,
+					"account": PAYMENT_ACCOUNTS[mode_of_payment],
+					"amount": amount,
+				},
+			)
+		pos_invoice.insert()
+		pos_invoice.submit()
+		return pos_invoice
 
 	def make_pos_sales_invoice(self, payments, rate=1000, **args):
 		si = create_sales_invoice(rate=rate, do_not_save=True, **args)
