@@ -209,6 +209,7 @@ def make_sl_entries(
 			set_as_cancel(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
 
 		args = get_args_for_future_sle(sl_entries[0])
+		invalidate_future_sle_cache(args.voucher_type, args.voucher_no)
 		future_sle_exists(args, sl_entries)
 
 		sle_docs = []
