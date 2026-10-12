@@ -2,14 +2,16 @@
 # For license information, please see license.txt
 
 import json
+from datetime import date
 from itertools import groupby
 
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.query_builder.custom import Month, MonthName, Quarter
+from frappe.query_builder.custom import Month, Quarter, Year
 from frappe.utils import cint, flt, getdate
 
+import erpnext
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -28,6 +30,9 @@ class SalesPipelineAnalytics:
 		if not self.filters.to_date:
 			frappe.throw(_("To Date is mandatory"))
 
+		if self.filters.based_on == "Amount" and not self.filters.company:
+			frappe.throw(_("Company is mandatory when Based On is Amount"))
+
 	def run(self):
 		self.validate_filters()
 		self.get_columns()
@@ -45,19 +50,8 @@ class SalesPipelineAnalytics:
 	def set_range_columns(self):
 		based_on = {"Number": "Int", "Amount": "Currency"}[self.filters.get("based_on")]
 
-		if self.filters.get("range") == "Monthly":
-			month_list = self.get_month_list()
-
-			for month in month_list:
-				self.columns.append(
-					{"fieldname": month, "fieldtype": based_on, "label": _(month), "width": 200}
-				)
-
-		elif self.filters.get("range") == "Quarterly":
-			for quarter in range(1, 5):
-				self.columns.append(
-					{"fieldname": f"Q{quarter}", "fieldtype": based_on, "label": f"Q{quarter}", "width": 200}
-				)
+		for period in self.get_periods():
+			self.columns.append({**period, "fieldtype": based_on, "width": 200})
 
 	def set_pipeline_based_on_column(self):
 		if self.filters.get("pipeline_by") == "Owner":
@@ -84,20 +78,18 @@ class SalesPipelineAnalytics:
 
 		opp = frappe.qb.DocType("Opportunity")
 
-		if self.filters.get("range") == "Monthly":
-			self.group_by_period = Month(opp.expected_closing)
-			self.duration_expr = MonthName(opp.expected_closing)
-			self.duration = self.duration_expr.as_("month")
-		else:
-			self.group_by_period = Quarter(opp.expected_closing)
-			self.duration_expr = Quarter(opp.expected_closing)
-			self.duration = self.duration_expr.as_("quarter")
+		period_function = Month if self.filters.get("range") == "Monthly" else Quarter
+		self.period_expressions = [Year(opp.expected_closing), period_function(opp.expected_closing)]
+		self.period_fields = [
+			self.period_expressions[0].as_("year"),
+			self.period_expressions[1].as_("period"),
+		]
 
 		self.pipeline_by = {"Owner": "opportunity_owner", "Sales Stage": "sales_stage"}[
 			self.filters.get("pipeline_by")
 		]
 
-		self.period_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
+		self.period_by = "period"
 
 	def get_data(self):
 		self.get_fields()
@@ -107,9 +99,7 @@ class SalesPipelineAnalytics:
 
 		if self.filters.get("based_on") == "Number":
 			# Ask get_query for exactly the grouped columns via `fields`, instead of taking its
-			# default un-grouped "name" select and stripping it. Group by the displayed period
-			# expression too, so postgres accepts MonthName alongside the numeric Month used for
-			# chronological ordering (for Quarterly they're the same expression).
+			# default un-grouped "name" select and stripping it.
 			self.query_result = (
 				frappe.qb.get_query(
 					"Opportunity",
@@ -117,28 +107,32 @@ class SalesPipelineAnalytics:
 					fields=[
 						pipeline_field.as_(self.pipeline_by),
 						frappe.query_builder.functions.Count("*").as_("count"),
-						self.duration,
+						*self.period_fields,
 					],
-					ignore_permissions=True,
+					ignore_permissions=False,
 				)
-				.groupby(pipeline_field, self.group_by_period, self.duration_expr)
-				.orderby(self.group_by_period)
+				.groupby(pipeline_field, *self.period_expressions)
+				.orderby(*self.period_expressions)
 				.run(as_dict=True)
 			)
+			self.set_row_periods()
 
 		if self.filters.get("based_on") == "Amount":
 			query = frappe.qb.get_query(
 				"Opportunity",
 				filters=self.get_conditions(),
-				ignore_permissions=True,
+				ignore_permissions=False,
 			)
 			self.query_result = query.select(
 				pipeline_field.as_(self.pipeline_by),
 				opp.opportunity_amount.as_("amount"),
-				self.duration,
+				*self.period_fields,
+				opp.conversion_rate,
 				opp.currency,
+				opp.transaction_date,
 			).run(as_dict=True)
 
+			self.set_row_periods()
 			self.convert_to_base_currency()
 
 			self.grouped_data = []
@@ -171,9 +165,15 @@ class SalesPipelineAnalytics:
 
 		if self.filters.get("status"):
 			conditions.append({"status": self.filters.get("status")})
+		else:
+			conditions.append(["status", "not in", ["Lost", "Closed"]])
 
 		if self.filters.get("company"):
 			conditions.append({"company": self.filters.get("company")})
+
+		if self.filters.get("assigned_to"):
+			assigned_to = self.filters.get("assigned_to").replace("%", "\\%").replace("_", "\\_")
+			conditions.append(["_assign", "like", f'%"{assigned_to}"%'])
 
 		if self.filters.get("from_date") and self.filters.get("to_date"):
 			conditions.append(
@@ -190,7 +190,7 @@ class SalesPipelineAnalytics:
 
 		for column in self.columns:
 			if column["fieldname"] != "opportunity_owner" and column["fieldname"] != "sales_stage":
-				labels.append(_(column["fieldname"]))
+				labels.append(column["label"])
 
 		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
@@ -205,13 +205,8 @@ class SalesPipelineAnalytics:
 			self.filters.get("pipeline_by")
 		]
 
-		frequency = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
-
 		for info in self.query_result:
-			if self.filters.get("range") == "Monthly":
-				period = info.get(frequency)
-			if self.filters.get("range") == "Quarterly":
-				period = f'Q{cint(info.get("quarter"))}'
+			period = info.get(self.period_by)
 
 			value = info.get(pipeline_by)
 			count_or_amount = info.get(based_on)
@@ -257,32 +252,41 @@ class SalesPipelineAnalytics:
 		else:
 			self.set_formatted_data(period, value, count_or_amount, assigned_to)
 
-	def get_month_list(self):
-		month_list = []
-		current_date = getdate(self.filters.get("from_date"))
+	def get_periods(self) -> list[dict]:
+		periods = []
+		months_per_period = 1 if self.filters.get("range") == "Monthly" else 3
+		current_date = self.get_period_start(getdate(self.filters.get("from_date")), months_per_period)
 
-		while current_date < getdate(self.filters.get("to_date")):
-			month_list.append(current_date.strftime("%B"))
-			current_date = current_date + relativedelta(months=1)
+		while current_date <= getdate(self.filters.get("to_date")):
+			periods.append(self.get_period(current_date))
+			current_date = current_date + relativedelta(months=months_per_period)
 
-		return month_list
+		return periods
+
+	def get_period_start(self, day: date, months_per_period: int) -> date:
+		return date(day.year, (day.month - 1) // months_per_period * months_per_period + 1, 1)
+
+	def get_period(self, period_start: date) -> dict:
+		if self.filters.get("range") == "Monthly":
+			label = f"{_(period_start.strftime('%B'))} {period_start.year}"
+			return {"fieldname": period_start.strftime("%B_%Y").lower(), "label": label}
+
+		quarter = (period_start.month - 1) // 3 + 1
+		return {"fieldname": f"q{quarter}_{period_start.year}", "label": f"Q{quarter} {period_start.year}"}
+
+	def set_row_periods(self):
+		for row in self.query_result:
+			month = cint(row.period) if self.filters.get("range") == "Monthly" else cint(row.period) * 3 - 2
+			row.period = self.get_period(date(cint(row.year), month, 1))["fieldname"]
 
 	def append_to_dataset(self, datasets):
-		range_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
-
 		based_on = {"Amount": "amount", "Number": "count"}[self.filters.get("based_on")]
-
-		if self.filters.get("range") == "Quarterly":
-			frequency_list = [1, 2, 3, 4]
-			count = [0] * 4
-
-		if self.filters.get("range") == "Monthly":
-			frequency_list = self.get_month_list()
-			count = [0] * 12
+		frequency_list = [period["fieldname"] for period in self.get_periods()]
+		count = [0] * len(frequency_list)
 
 		for info in self.query_result:
 			for i in range(len(frequency_list)):
-				if info[range_by] == frequency_list[i]:
+				if info[self.period_by] == frequency_list[i]:
 					count[i] = count[i] + info[based_on]
 		datasets.append({"name": based_on, "values": count})
 
@@ -291,36 +295,21 @@ class SalesPipelineAnalytics:
 		for pipeline, period_data in self.periodic_data.items():
 			row = {pipeline_by: pipeline}
 			for info in self.query_result:
-				if self.filters.get("range") == "Monthly":
-					period = info.get(period_by)
-
-				if self.filters.get("range") == "Quarterly":
-					period = f"Q{cint(info.get(period_by))}"
-
+				period = info.get(period_by)
 				count = period_data.get(period, 0.0)
 				row[period] = count
 
 			self.data.append(row)
 
-	def get_default_currency(self):
-		company = self.filters.get("company")
-		return frappe.db.get_value("Company", company, ["default_currency"])
-
-	def get_currency_rate(self, from_currency, to_currency):
-		cacheobj = frappe.cache()
-
-		if cacheobj.get(from_currency):
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-		else:
-			value = get_exchange_rate(from_currency, to_currency)
-			cacheobj.set(from_currency, value)
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
 	def convert_to_base_currency(self):
-		default_currency = self.get_default_currency()
-		for data in self.query_result:
-			if data.get("currency") != default_currency:
-				opportunity_currency = data.get("currency")
-				value = self.get_currency_rate(opportunity_currency, default_currency)
-				data["amount"] = data["amount"] * value
+		company_currency = erpnext.get_company_currency(self.filters.company)
+		for row in self.query_result:
+			row["amount"] = flt(row["amount"]) * self.get_conversion_rate(row, company_currency)
+
+	def get_conversion_rate(self, row: dict, company_currency: str) -> float:
+		if flt(row.conversion_rate):
+			return flt(row.conversion_rate)
+		if not row.currency or row.currency == company_currency:
+			return 1.0
+		# opportunities saved while no exchange rate was available
+		return flt(get_exchange_rate(row.currency, company_currency, row.transaction_date))

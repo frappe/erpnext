@@ -28,6 +28,7 @@ from erpnext.controllers.website_list_for_contact import (
 	add_role_for_portal_user,
 	link_portal_users_to_contacts,
 )
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 from erpnext.utilities.transaction_base import TransactionBase
 
 from .mapper import (
@@ -197,8 +198,10 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.validate_prospect_not_converted()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+		validate_default_price_list_side(self.default_price_list, "selling")
 
 		# set loyalty program tier
 		if not self.is_new() and (customer := self.get_doc_before_save()):
@@ -357,8 +360,29 @@ class Customer(TransactionBase):
 	def update_lead_status(self):
 		"""If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity"""
-		if self.lead_name:
-			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
+		if not self.lead_name:
+			return
+
+		lead = frappe.get_doc("Lead", self.lead_name)
+		lead.db_set("status", "Converted")
+		lead.update_prospect()
+		for doctype, party_type_field in (("Quotation", "quotation_to"), ("Opportunity", "opportunity_from")):
+			self.link_lead_records(doctype, party_type_field)
+
+	def link_lead_records(self, doctype: str, party_type_field: str):
+		names = [
+			name
+			for name in frappe.get_all(
+				doctype, {party_type_field: "Lead", "party_name": self.lead_name}, pluck="name"
+			)
+			if frappe.has_permission(doctype, "write", name)
+		]
+		if names:
+			frappe.db.set_value(
+				doctype,
+				{"name": ("in", names), party_type_field: "Lead", "party_name": self.lead_name},
+				{party_type_field: "Customer", "party_name": self.name},
+			)
 
 	def link_address_and_contact(self):
 		linked_documents = {
@@ -406,6 +430,21 @@ class Customer(TransactionBase):
 				),
 				frappe.NameError,
 			)
+
+	def validate_prospect_not_converted(self):
+		if not (self.is_new() and self.prospect_name):
+			return
+
+		customer = frappe.db.exists("Customer", {"prospect_name": self.prospect_name})
+		if not customer:
+			return
+
+		message = _("Prospect {0} is already converted to a Customer").format(frappe.bold(self.prospect_name))
+		if frappe.has_permission("Customer", "read", customer):
+			message = _("Prospect {0} is already converted to Customer {1}").format(
+				frappe.bold(self.prospect_name), get_link_to_form("Customer", customer)
+			)
+		frappe.throw(message, frappe.DuplicateEntryError)
 
 	def validate_customer_group(self):
 		if not self.customer_group:

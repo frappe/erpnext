@@ -12,7 +12,7 @@ from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import cint, flt, get_datetime, now_datetime, nowdate, nowtime, parse_json
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import get_combine_datetime, get_or_make_bin, get_stock_balance
+from erpnext.stock.utils import _get_stock_balance, get_combine_datetime, get_or_make_bin
 
 
 class StockReservationEntry(Document):
@@ -652,7 +652,7 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 		if qty_to_be_reserved > allowed_qty:
-			actual_qty = get_stock_balance(self.item_code, self.warehouse)
+			actual_qty = _get_stock_balance(self.item_code, self.warehouse)
 			msg = _(
 				"Cannot reserve more than Allowed Qty {0} {1} for Item {2} against {3} {4}.<br /><br />"
 				"The <b>Allowed Qty</b> is calculated as follows:<br />"
@@ -776,7 +776,7 @@ def get_available_qty_to_reserve(
 			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=[ignore_sre]
 		)
 
-	available_qty = get_stock_balance(item_code, warehouse)
+	available_qty = _get_stock_balance(item_code, warehouse)
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -1358,7 +1358,7 @@ class StockReservation:
 		frappe.msgprint(msg, title=_("Stock Reservation"), indicator="orange")
 
 	def get_available_qty_to_reserve(self, item_code, warehouse, ignore_sre=None):
-		available_qty = get_stock_balance(item_code, warehouse)
+		available_qty = _get_stock_balance(item_code, warehouse)
 
 		if available_qty:
 			sre = frappe.qb.DocType("Stock Reservation Entry")
