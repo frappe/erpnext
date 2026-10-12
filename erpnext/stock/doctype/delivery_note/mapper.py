@@ -215,6 +215,9 @@ def make_sales_invoice(
 def make_delivery_trip(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
+	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
+
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 
