@@ -164,11 +164,51 @@ class TestGeneralAndPaymentLedger(ERPNextTestSuite, AccountsTestMixin):
 
 		data = execute(filters=frappe._dict({"company": self.company}))[1]
 
+		# the row re-pointed to another invoice is counted under the unallocated amount
 		against = {(row.voucher_no, row.against_voucher_no): (row.gl_balance, row.pl_balance) for row in data}
 		self.assertEqual(
 			against,
 			{
 				(payment.name, invoices[0].name): (-40, None),
-				(payment.name, invoices[1].name): (0, -40),
+				(payment.name, payment.name): (-20, -60),
 			},
 		)
+
+	def test_payment_reconciled_to_invoice_is_not_reported(self):
+		invoice = create_sales_invoice(
+			company=self.company,
+			debit_to=self.debit_to,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			income_account=self.income_account,
+			warehouse=self.warehouse,
+		)
+		payment = get_payment_entry("Sales Invoice", invoice.name)
+		payment.paid_amount = payment.received_amount = 60
+		payment.references = []
+		payment.submit()
+
+		reconciliation = frappe.new_doc("Payment Reconciliation")
+		reconciliation.update(
+			{
+				"company": self.company,
+				"party_type": "Customer",
+				"party": invoice.customer,
+				"receivable_payable_account": self.debit_to,
+			}
+		)
+		reconciliation.get_unreconciled_entries()
+		reconciliation.allocate_entries(
+			frappe._dict(
+				invoices=[
+					row.as_dict() for row in reconciliation.invoices if row.invoice_number == invoice.name
+				],
+				payments=[
+					row.as_dict() for row in reconciliation.payments if row.reference_name == payment.name
+				],
+			)
+		)
+		reconciliation.reconcile()
+
+		self.assertEqual(frappe.db.get_value("Sales Invoice", invoice.name, "outstanding_amount"), 40)
+		self.assertEqual(execute(filters=frappe._dict({"company": self.company}))[1], [])

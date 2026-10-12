@@ -5,6 +5,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, NullIf, Sum
+from frappe.utils import flt
 
 
 class General_Payment_Ledger_Comparison:
@@ -177,6 +178,7 @@ class General_Payment_Ledger_Comparison:
 			self.gle_balances = set(val.gle) | self.gle_balances
 			self.ple_balances = set(val.ple) | self.ple_balances
 
+		self.ple_balances = self.fold_reconciled_allocations()
 		self.variation_in_payment_ledger = self.gle_balances.difference(self.ple_balances)
 		self.variation_in_general_ledger = self.ple_balances.difference(self.gle_balances)
 		self.diff = frappe._dict({})
@@ -188,6 +190,18 @@ class General_Payment_Ledger_Comparison:
 			self.diff.setdefault(x[:-1], frappe._dict({"gl_balance": 0.0})).update(
 				frappe._dict({"pl_balance": x[-1]})
 			)
+
+	def fold_reconciled_allocations(self) -> set[tuple]:
+		"""Reconciliation re-points Payment Ledger rows to invoices but leaves the GL entry unallocated,
+		so count such rows under the voucher's unallocated GL row."""
+		gl_keys = {row[:-1] for row in self.gle_balances}
+		balances = {}
+		for row in self.ple_balances:
+			key, unallocated = row[:-1], (*row[:6], row[2], row[3])
+			if key not in gl_keys and unallocated in gl_keys:
+				key = unallocated
+			balances[key] = flt(balances[key] + row[-1], 9) if key in balances else row[-1]
+		return {(*key, amount) for key, amount in balances.items()}
 
 	def remove_restricted_parties(self):
 		permitted = self.get_permitted_parties()
