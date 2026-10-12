@@ -4082,6 +4082,42 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertEqual(self.get_value_change(manufacture, finished_good), 1000)
 
+	def test_manufacture_output_stays_non_negative_after_repost(self):
+		raw_material, output = (
+			make_item(properties={"valuation_method": "Moving Average"}).name for _ in range(2)
+		)
+		scrap = make_item(properties={"valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=raw_material, target=warehouse, qty=1, rate=100, posting_date=add_days(today(), -3)
+		)
+		manufacture = make_stock_entry(
+			item_code=raw_material,
+			source=warehouse,
+			qty=1,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -1),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items", {"item_code": output, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1}
+		)
+		manufacture.append(
+			"items", {"item_code": scrap, "t_warehouse": warehouse, "qty": 1, "is_scrap_item": 1}
+		)
+		manufacture.submit()
+		self.assertEqual(self.get_value_change(manufacture, output), 20)
+
+		make_stock_entry(
+			item_code=raw_material,
+			target=warehouse,
+			qty=1,
+			rate=10,
+			posting_date=add_days(today(), -5),
+		)
+
+		self.assertEqual(self.get_value_change(manufacture, output), 0)
+
 	def make_repack(self, raw_material, qty, warehouse, outputs):
 		repack = make_stock_entry(
 			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
