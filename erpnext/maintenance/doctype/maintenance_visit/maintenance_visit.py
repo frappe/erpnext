@@ -10,6 +10,7 @@ from frappe.utils import escape_html, format_date, get_datetime
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	validate_serial_no_for_customer,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
 
 CLAIM_STATUS = {"Fully Completed": "Closed", "Partially Completed": "Work In Progress"}
@@ -61,7 +62,7 @@ class MaintenanceVisit(TransactionBase):
 			)
 			if not serial:
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
-			if serial.warehouse and was_delivered_to(d.serial_no, self.customer):
+			if serial.warehouse and was_delivered_to(d.serial_no, d.item_code, self.customer):
 				continue
 			validate_serial_no_for_customer(serial, self.customer)
 
@@ -282,10 +283,24 @@ class MaintenanceVisit(TransactionBase):
 		pass
 
 
-def was_delivered_to(serial_no, customer):
+def was_delivered_to(serial_no: str, item_code: str, customer: str) -> bool:
 	"""Whether the serial was ever delivered to the customer, e.g. before coming back for repair."""
+	return has_delivery_to(get_bundle_deliveries(serial_no), customer) or has_delivery_to(
+		get_legacy_deliveries(serial_no, item_code), customer
+	)
+
+
+def has_delivery_to(deliveries: list, customer: str) -> bool:
+	for doctype in ("Delivery Note", "Sales Invoice"):
+		names = [row.voucher_no for row in deliveries if row.voucher_type == doctype]
+		if names and frappe.db.exists(doctype, {"name": ("in", names), "customer": customer}):
+			return True
+	return False
+
+
+def get_bundle_deliveries(serial_no: str) -> list:
 	entry = frappe.qb.DocType("Serial and Batch Entry")
-	deliveries = (
+	return (
 		frappe.qb.from_(entry)
 		.select(entry.voucher_type, entry.voucher_no)
 		.where(
@@ -297,8 +312,18 @@ def was_delivered_to(serial_no, customer):
 		)
 	).run(as_dict=True)
 
-	for doctype in ("Delivery Note", "Sales Invoice"):
-		names = [row.voucher_no for row in deliveries if row.voucher_type == doctype]
-		if names and frappe.db.exists(doctype, {"name": ("in", names), "customer": customer}):
-			return True
-	return False
+
+def get_legacy_deliveries(serial_no: str, item_code: str) -> list:
+	"""Deliveries kept on the Stock Ledger Entry itself, from before Serial and Batch Bundles."""
+	entries = frappe.get_all(
+		"Stock Ledger Entry",
+		filters={
+			"item_code": item_code,
+			"serial_no": ["like", f"%{serial_no}%"],
+			"actual_qty": ["<", 0],
+			"is_cancelled": 0,
+			"voucher_type": ["in", ["Delivery Note", "Sales Invoice"]],
+		},
+		fields=["voucher_type", "voucher_no", "serial_no"],
+	)
+	return [entry for entry in entries if serial_no in get_serial_nos(entry.serial_no)]
