@@ -138,7 +138,8 @@ class AssetShiftAllocation(Document):
 			)
 
 	def get_last_changed_row_index(self) -> int:
-		original_schedule = self.asset_depr_schedule_doc.depreciation_schedule
+		"""Return the last row changed in this save, so earlier automatic reductions are not treated as edits."""
+		original_schedule = (self.get_doc_before_save() or self.asset_depr_schedule_doc).depreciation_schedule
 		changed_indexes = [
 			i
 			for i, schedule in enumerate(self.depreciation_schedule)
