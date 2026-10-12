@@ -177,3 +177,10 @@ class TestAssetCategory(ERPNextTestSuite):
 		asset_category.reload()
 		asset_category.non_depreciable_category = 1
 		self.assertRaisesRegex(frappe.ValidationError, "Non Depreciable", asset_category.save)
+
+	def test_non_depreciable_check_includes_assets_under_repair(self):
+		asset = create_asset(asset_category="Computers", calculate_depreciation=1, submit=1)
+		asset.db_set("status", "Out of Order")
+		asset_category = frappe.get_doc("Asset Category", "Computers")
+		asset_category.non_depreciable_category = 1
+		self.assertRaisesRegex(frappe.ValidationError, "Non Depreciable", asset_category.save)

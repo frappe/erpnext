@@ -14,6 +14,7 @@ ACCOUNT_FIELDS = (
 	"capital_work_in_progress_account",
 )
 DISPOSED_ASSET_STATUSES = ("Sold", "Scrapped", "Capitalized")
+DEPRECIATING_ASSET_STATUSES = ("Submitted", "Partially Depreciated", "In Maintenance", "Out of Order")
 
 
 class AssetCategory(Document):
@@ -50,7 +51,7 @@ class AssetCategory(Document):
 				"asset_category": self.name,
 				"calculate_depreciation": 1,
 				"docstatus": 1,
-				"status": ["in", ("Submitted", "Partially Depreciated")],
+				"status": ["in", DEPRECIATING_ASSET_STATUSES],
 			},
 		):
 			frappe.throw(
@@ -207,7 +208,7 @@ class AssetCategory(Document):
 			{
 				"calculate_depreciation": 1,
 				"asset_category": self.name,
-				"status": ["in", ("Submitted", "Partially Depreciated")],
+				"status": ["in", DEPRECIATING_ASSET_STATUSES],
 			},
 			pluck="company",
 			distinct=True,
