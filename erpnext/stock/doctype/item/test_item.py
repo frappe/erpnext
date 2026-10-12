@@ -871,6 +871,13 @@ class TestItem(ERPNextTestSuite):
 			item_doc.has_variants = 1
 			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
+	def test_invalid_upc_a_barcode_is_refused(self):
+		from erpnext.stock.doctype.item.item import InvalidBarcode
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("barcodes", {"barcode": "036000291453", "barcode_type": "UPC-A"})
+		self.assertRaises(InvalidBarcode, item.save)
+
 	def test_add_item_barcode(self):
 		# Clean up
 		item_code = "Test Item Barcode"
@@ -884,7 +891,7 @@ class TestItem(ERPNextTestSuite):
 			{
 				"barcode": "ARBITRARY_TEXT",
 			},
-			{"barcode": "72527273070", "barcode_type": "UPC-A"},
+			{"barcode": "036000291452", "barcode_type": "UPC-A"},
 			{"barcode": "123456", "barcode_type": "CODE-39"},
 			{"barcode": "401268452363", "barcode_type": "EAN"},
 			{"barcode": "90311017", "barcode_type": "EAN"},
