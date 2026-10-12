@@ -9,6 +9,7 @@ from functools import cached_property
 
 import frappe
 from frappe import _, bold
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce, Max, Sum
@@ -4729,7 +4730,7 @@ def move_sample_to_retention_warehouse(company, items):
 
 
 @frappe.whitelist()
-def make_stock_in_entry(source_name, target_doc=None):
+def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	qty_precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 
 	def get_remaining_transfer_qty(source_doc):
@@ -4755,7 +4756,19 @@ def make_stock_in_entry(source_name, target_doc=None):
 				target_doc.t_warehouse = warehouse
 
 		target_doc.s_warehouse = source_doc.t_warehouse
-		target_doc.qty = get_remaining_transfer_qty(source_doc) / flt(source_doc.conversion_factor)
+		target_doc.qty = get_remaining_qty_in_row_uom(source_doc)
+
+	def get_remaining_qty_in_row_uom(source_doc):
+		remaining_qty = get_remaining_transfer_qty(source_doc)
+		conversion_factor = flt(source_doc.conversion_factor)
+		qty = flt(
+			flt(source_doc.qty) - flt(source_doc.transferred_qty) / conversion_factor,
+			source_doc.precision("qty"),
+		)
+		if flt(qty * conversion_factor, qty_precision) == remaining_qty:
+			return qty
+
+		return remaining_qty / conversion_factor
 
 	doclist = get_mapped_doc(
 		"Stock Entry",
