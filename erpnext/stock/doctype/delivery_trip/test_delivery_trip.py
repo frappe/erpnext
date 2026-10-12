@@ -363,6 +363,30 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 	def test_route_with_locks_adds_up_the_total_distance(self):
 		self.assertEqual(self.process_route_with_locks([1, 0]).total_distance, 3000)
+
+
+
+	def test_dispatch_mail_renders_the_html_template(self):
+		from unittest.mock import patch
+
+		if not frappe.db.exists("Email Template", "_Test Dispatch HTML"):
+			frappe.get_doc(
+				{
+					"doctype": "Email Template",
+					"name": "_Test Dispatch HTML",
+					"subject": "Trip {{ parent }}",
+					"use_html": 1,
+					"response_html": "<p>Stop for {{ customer }}</p>",
+				}
+			).insert()
+		frappe.db.set_single_value("Delivery Settings", "dispatch_template", "_Test Dispatch HTML")
+		self.delivery_trip.submit()
+
+		with patch("frappe.sendmail") as sendmail:
+			notify_customers(self.delivery_trip.name)
+
+		self.assertEqual(sendmail.call_args.kwargs["subject"], f"Trip {self.delivery_trip.name}")
+		self.assertIn("Stop for _Test Customer", sendmail.call_args.kwargs["message"])
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc(

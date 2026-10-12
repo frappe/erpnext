@@ -527,8 +527,8 @@ def notify_customers(delivery_trip: str):
 
 			frappe.sendmail(
 				recipients=contact_info.email_id,
-				subject=dispatch_template.subject,
-				message=frappe.render_template(dispatch_template.response, context, restrict_globals=True),
+				subject=dispatch_template.get_formatted_subject(context),
+				message=dispatch_template.get_formatted_response(context),
 				attachments=get_attachments(stop),
 			)
 
