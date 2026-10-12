@@ -35,10 +35,10 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 	get_valid_api_method,
 )
 from erpnext.accounts.report.financial_statements import (
+	build_period_list,
 	get_columns,
 	get_cost_centers_with_children,
 	get_period_keys_for_total,
-	get_period_list,
 	is_dimension_grouped,
 )
 from erpnext.accounts.utils import get_children, get_currency_precision
@@ -220,6 +220,10 @@ class FinancialReportEngine:
 		# Initialize context
 		context = self._initialize_context(filters)
 
+		# e.g. grouped by a dimension that has no values
+		if not context.period_list:
+			return context.get_result()
+
 		# Execute
 		self.collect_financial_data(context)
 		self.process_calculations(context)
@@ -274,13 +278,6 @@ class FinancialReportEngine:
 				msg=_("{0} view is currently unsupported in Custom Financial Report").format(view),
 			)
 
-		if filters.get("group_by_dimension"):
-			frappe.msgprint(
-				indicator="orange",
-				title=_("Not Supported"),
-				msg=_("Dimension-based grouping is currently unsupported in Custom Financial Report"),
-			)
-
 	def _initialize_context(self, filters: dict[str, Any]) -> ReportContext:
 		template_name = filters.get("report_template")
 		template = frappe.get_doc("Financial Report Template", template_name)
@@ -291,16 +288,8 @@ class FinancialReportEngine:
 		if template.disabled:
 			frappe.throw(_("Financial Report Template {0} is disabled").format(template_name))
 
-		# Generate periods
-		period_list = get_period_list(
-			filters.from_fiscal_year,
-			filters.to_fiscal_year,
-			filters.period_start_date,
-			filters.period_end_date,
-			filters.filter_based_on,
-			filters.periodicity,
-			company=filters.company,
-		)
+		# Generate periods (dimension * period when grouped by dimension)
+		period_list = build_period_list(filters)
 
 		# Support both old and new field names for backward compatibility
 		show_detailed = filters.get("show_account_details") == "Account Breakdown"
