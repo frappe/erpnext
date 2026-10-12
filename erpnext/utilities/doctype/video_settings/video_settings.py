@@ -23,7 +23,18 @@ class VideoSettings(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_tracking_settings()
 		self.validate_youtube_api_key()
+
+	def validate_tracking_settings(self):
+		if not self.enable_youtube_tracking:
+			return
+
+		for fieldname in ("api_key", "frequency"):
+			if not self.get(fieldname):
+				frappe.throw(
+					_("{0} is required to enable YouTube tracking").format(_(self.meta.get_label(fieldname)))
+				)
 
 	def validate_youtube_api_key(self):
 		if self.enable_youtube_tracking and self.api_key:
