@@ -279,6 +279,18 @@ class TestDeliveryTrip(ERPNextTestSuite):
 			(values.lr_no, values.vehicle_no, values.driver, values.delivery_trip),
 			("LR-777", "MH12AB1234", None, None),
 		)
+
+
+
+	def test_cancelled_delivery_note_does_not_block_its_draft_trip(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = self.make_trip_for(delivery_note.name)
+		delivery_note.reload()
+		delivery_note.cancel()
+
+		trip.delete()
+		self.assertIsNone(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"))
+		self.assertRaises(frappe.ValidationError, make_delivery_trip, delivery_note.name)
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc(
