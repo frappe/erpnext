@@ -8,6 +8,7 @@ import json
 import frappe
 from frappe import _
 from frappe.query_builder import Case
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import cstr, flt
 
 from erpnext.utilities.product import get_item_codes_by_attributes
@@ -25,7 +26,7 @@ class ItemTemplateCannotHaveStock(frappe.ValidationError):
 	pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_variant(
 	template: str,
 	args: dict | str | None = None,
@@ -64,6 +65,9 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	manufacturer part no"""
 	from frappe.model.naming import append_number_if_name_exists
 
+	if existing_variant := get_manufacturer_variant(template.name, manufacturer, manufacturer_part_no):
+		return frappe.get_doc("Item", existing_variant)
+
 	variant = frappe.new_doc("Item")
 
 	copy_attributes_to_variant(template, variant)
@@ -90,6 +94,25 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 		manufacturer_doc.save(ignore_permissions=True)
 
 	return variant
+
+
+def get_manufacturer_variant(template, manufacturer, manufacturer_part_no):
+	item = frappe.qb.DocType("Item")
+	item_manufacturer = frappe.qb.DocType("Item Manufacturer")
+	variant = (
+		frappe.qb.from_(item_manufacturer)
+		.join(item)
+		.on(item.name == item_manufacturer.item_code)
+		.select(item.name)
+		.where(
+			(item.variant_of == template)
+			& (item_manufacturer.manufacturer == manufacturer)
+			& (Coalesce(item_manufacturer.manufacturer_part_no, "") == (manufacturer_part_no or ""))
+		)
+		.limit(1)
+	).run(pluck=True)
+
+	return variant[0] if variant else None
 
 
 def validate_item_variant_attributes(item, args=None):

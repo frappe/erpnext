@@ -736,6 +736,24 @@ class TestItem(ERPNextTestSuite):
 		depth = frappe._dict(from_range=0, to_range=2000, increment=10)
 		validate_is_incremental(depth, "Test Item Depth", "1,000", template)
 
+	def test_manufacturer_variant_is_reused(self):
+		from erpnext.controllers.item_variant import get_variant
+
+		if not frappe.db.exists("Manufacturer", "_Test Variant Manufacturer"):
+			frappe.get_doc({"doctype": "Manufacturer", "short_name": "_Test Variant Manufacturer"}).insert()
+
+		template = make_item(
+			"_Test Manufacturer Template Item", {"has_variants": 1, "variant_based_on": "Manufacturer"}
+		).name
+		variants = [
+			get_variant(
+				template, manufacturer="_Test Variant Manufacturer", manufacturer_part_no="P-100"
+			).name
+			for _call in range(2)
+		]
+
+		self.assertEqual(variants[0], variants[1])
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
