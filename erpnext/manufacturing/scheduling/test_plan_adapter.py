@@ -589,6 +589,19 @@ class TestPlanAdapter(ERPNextTestSuite):
 		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
 		self.assertEqual(sum(flt(log.time_in_mins) for log in job_card.scheduled_time_logs), 30)
 
+	def test_closing_plan_releases_its_schedule(self):
+		plan = self.make_draft_plan()
+		plan.submit()
+		apply_schedule(plan.name, "2026-12-14 09:00:00")
+
+		plan.reload()
+		plan.set_status(close=True)
+		self.assertFalse(self.has_schedule(plan))
+
+		plan.reload()
+		plan.set_status(close=False)
+		self.assertFalse(self.has_schedule(plan))
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 

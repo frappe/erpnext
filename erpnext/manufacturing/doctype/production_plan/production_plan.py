@@ -478,6 +478,7 @@ class ProductionPlan(Document):
 		if close:
 			self.db_set("status", "Closed")
 			self.update_bin_qty()
+			self.delete_production_plan_schedule()
 			return
 
 		if self.total_produced_qty > 0:
