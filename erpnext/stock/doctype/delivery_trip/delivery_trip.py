@@ -67,6 +67,7 @@ class DeliveryTrip(Document):
 			self.validate_delivery_note_not_draft()
 		self.validate_delivery_notes_not_on_other_trips()
 		self.validate_stop_addresses()
+		self.validate_stop_contacts()
 
 	def on_update(self):
 		self.update_delivery_notes()
@@ -89,6 +90,30 @@ class DeliveryTrip(Document):
 		for stop in self.delivery_stops:
 			if stop.address and not stop.customer_address:
 				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
+
+	def validate_stop_contacts(self):
+		stops = [stop for stop in self.delivery_stops if stop.contact and stop.customer]
+		if not stops:
+			return
+
+		dynamic_link = frappe.qb.DocType("Dynamic Link")
+		contact_customers = set(
+			frappe.qb.from_(dynamic_link)
+			.select(dynamic_link.parent, dynamic_link.link_name)
+			.where(
+				(dynamic_link.parenttype == "Contact")
+				& (dynamic_link.link_doctype == "Customer")
+				& dynamic_link.parent.isin({stop.contact for stop in stops})
+			)
+			.run()
+		)
+		for stop in stops:
+			if (stop.contact, stop.customer) not in contact_customers:
+				frappe.throw(
+					_("Row #{0}: Contact {1} does not belong to Customer {2}").format(
+						stop.idx, frappe.bold(stop.contact), frappe.bold(stop.customer)
+					)
+				)
 
 	def validate_delivery_note_not_draft(self):
 		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
@@ -492,10 +517,12 @@ def sanitize_address(address):
 	return ", ".join(address[:3])
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def notify_customers(delivery_trip: str):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 	delivery_trip.check_permission()
+	if delivery_trip.docstatus != 1:
+		frappe.throw(_("Customers can be notified only for a submitted Delivery Trip"))
 
 	dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
 	if not dispatch_template_name:
