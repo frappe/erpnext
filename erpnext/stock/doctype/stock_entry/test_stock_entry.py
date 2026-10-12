@@ -4887,6 +4887,22 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
 		self.assertEqual(self.get_value_change(repack, output), 856.81)
 
+	def test_batched_and_serialized_repack_outputs_take_the_consumed_value(self):
+		warehouse = "_Test Warehouse - _TC"
+		for properties in (
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "RPB-.#####"},
+			{"has_serial_no": 1, "serial_no_series": "RPS-.#####"},
+		):
+			raw_material = make_item(properties={"valuation_method": "Moving Average"}).name
+			output = make_item(properties={"valuation_method": "Moving Average", **properties}).name
+			make_stock_entry(item_code=raw_material, target=warehouse, qty=8, rate=209.416)
+			make_stock_entry(item_code=raw_material, target=warehouse, qty=2, rate=19.14)
+
+			repack = self.make_repack(raw_material, 5, warehouse, [(output, 11)])
+
+			self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
+			self.assertEqual(self.get_value_change(repack, output), 856.81)
+
 	def test_manufacture_outputs_split_the_consumed_value_without_a_remainder(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_manufacture_entry,
