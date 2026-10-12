@@ -17,11 +17,6 @@ def transaction_processing(
 
 	args = frappe._dict(frappe.parse_json(args) or {})
 
-	statuses = get_statuses(from_doctype, deserialized_data)
-	skipped_records = [d for d in deserialized_data if statuses.get(d.get("name")) in ("On Hold", "Closed")]
-
-	deserialized_data = [d for d in deserialized_data if d not in skipped_records]
-
 	# The checks above are doctype level and never consult User Permissions, so on their own they
 	# let a caller convert documents they cannot read — a company-restricted user could turn another
 	# company's orders into invoices. Each source document is checked before anything is enqueued.
@@ -31,6 +26,11 @@ def transaction_processing(
 			frappe.throw(_("Invalid name"), frappe.PermissionError)
 
 		frappe.has_permission(from_doctype, "read", source_name, throw=True)
+
+	statuses = get_statuses(from_doctype, deserialized_data)
+	skipped_records = [d for d in deserialized_data if statuses.get(d.get("name")) in ("On Hold", "Closed")]
+
+	deserialized_data = [d for d in deserialized_data if d not in skipped_records]
 
 	length_of_data = len(deserialized_data)
 

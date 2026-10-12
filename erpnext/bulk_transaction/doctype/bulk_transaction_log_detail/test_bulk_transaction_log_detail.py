@@ -4,6 +4,7 @@
 from unittest.mock import MagicMock, patch
 
 import frappe
+from frappe.permissions import add_user_permission
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
@@ -39,6 +40,17 @@ class TestBulkTransactionLogDetail(ERPNextTestSuite):
 		make_invoices([held, closed], status="To Deliver and Bill")
 
 		self.assertFalse(get_invoices(held.name) + get_invoices(closed.name))
+
+	def test_unreadable_held_order_is_rejected_not_skipped(self):
+		held = make_sales_order()
+		held.update_status("On Hold")
+		user = "test1@example.com"
+		frappe.get_doc("User", user).add_roles("Sales User", "Accounts User")
+		add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		self.addCleanup(frappe.set_user, "Administrator")
+		self.assertRaises(frappe.PermissionError, make_invoices, [held])
 
 	def test_job_result_is_sent_to_the_user_with_the_failed_sources(self):
 		submitted, draft = make_sales_order(), make_sales_order(do_not_submit=True)
