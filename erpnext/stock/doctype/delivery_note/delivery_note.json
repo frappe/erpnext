@@ -934,6 +934,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
+   "no_copy": 1,
    "options": "Driver",
    "print_hide": 1
   },
@@ -942,6 +943,7 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Transport Receipt No",
+   "no_copy": 1,
    "oldfieldname": "lr_no",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -952,6 +954,7 @@
    "fieldname": "vehicle_no",
    "fieldtype": "Data",
    "label": "Vehicle No",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -973,6 +976,7 @@
    "fieldname": "driver_name",
    "fieldtype": "Data",
    "label": "Driver Name",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -980,6 +984,7 @@
    "fieldname": "lr_date",
    "fieldtype": "Date",
    "label": "Transport Receipt Date",
+   "no_copy": 1,
    "oldfieldname": "lr_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -1411,6 +1416,7 @@
    "fieldname": "delivery_trip",
    "fieldtype": "Link",
    "label": "Delivery Trip",
+   "no_copy": 1,
    "options": "Delivery Trip",
    "print_hide": 1
   },
@@ -1513,7 +1519,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

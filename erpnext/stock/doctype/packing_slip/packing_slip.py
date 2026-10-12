@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 from erpnext.controllers.status_updater import StatusUpdater
@@ -73,6 +72,17 @@ class PackingSlip(StatusUpdater):
 	def on_submit(self):
 		self.update_prevdoc_status()
 
+	def before_cancel(self):
+		if self.flags.cancelled_by_delivery_note:
+			return
+
+		if cint(frappe.db.get_value("Delivery Note", self.delivery_note, "docstatus")) == 1:
+			frappe.throw(
+				_("Packing Slip cannot be cancelled as Delivery Note {0} is already submitted.").format(
+					frappe.bold(self.delivery_note)
+				)
+			)
+
 	def on_cancel(self):
 		self.update_prevdoc_status()
 
@@ -117,6 +127,7 @@ class PackingSlip(StatusUpdater):
 				)
 
 	def validate_items(self):
+		references = {}
 		for item in self.items:
 			if item.qty <= 0:
 				frappe.throw(_("Row {0}: Qty must be greater than 0.").format(item.idx))
@@ -127,31 +138,58 @@ class PackingSlip(StatusUpdater):
 						item.idx
 					)
 				)
-			DocType = frappe.qb.DocType("Delivery Note Item" if item.dn_detail else "Packed Item")
-			remaining_qty = frappe.db.get_value(
-				"Delivery Note Item" if item.dn_detail else "Packed Item",
-				{"name": item.dn_detail or item.pi_detail, "docstatus": 0},
-				Sum(DocType.qty - DocType.packed_qty),
-			)
 
-			if remaining_qty is None:
+			reference = self.get_reference_row(item)
+			self.validate_reference_row(item, reference)
+			self.validate_remaining_qty(item, flt(reference.qty) - flt(reference.packed_qty))
+			references[item.dn_detail or item.pi_detail] = reference
+
+		self.validate_total_qty_per_reference(references)
+
+	def validate_total_qty_per_reference(self, references):
+		qty_by_reference = {}
+		for item in self.items:
+			key = item.dn_detail or item.pi_detail
+			qty_by_reference[key] = qty_by_reference.get(key, 0) + flt(item.qty)
+
+			reference = references[key]
+			remaining_qty = flt(reference.qty) - flt(reference.packed_qty)
+			if qty_by_reference[key] > remaining_qty:
 				frappe.throw(
-					_("Row {0}: Please provide a valid Delivery Note Item or Packed Item reference.").format(
-						item.idx
-					)
-				)
-			elif remaining_qty <= 0:
-				frappe.throw(
-					_("Row {0}: Packing Slip is already created for Item {1}.").format(
-						item.idx, frappe.bold(item.item_code)
-					)
-				)
-			elif item.qty > remaining_qty:
-				frappe.throw(
-					_("Row {0}: Qty cannot be greater than {1} for the Item {2}.").format(
+					_("Row {0}: Total packed qty cannot be greater than {1} for the Item {2}.").format(
 						item.idx, frappe.bold(remaining_qty), frappe.bold(item.item_code)
 					)
 				)
+
+	def get_reference_row(self, item):
+		return frappe.db.get_value(
+			"Delivery Note Item" if item.dn_detail else "Packed Item",
+			{"name": item.dn_detail or item.pi_detail, "docstatus": 0},
+			["parent", "item_code", "qty", "packed_qty"],
+			as_dict=True,
+		)
+
+	def validate_reference_row(self, item, reference):
+		if not reference or reference.parent != self.delivery_note or reference.item_code != item.item_code:
+			frappe.throw(
+				_("Row {0}: Please provide a valid Delivery Note Item or Packed Item reference.").format(
+					item.idx
+				)
+			)
+
+	def validate_remaining_qty(self, item, remaining_qty):
+		if remaining_qty <= 0:
+			frappe.throw(
+				_("Row {0}: Packing Slip is already created for Item {1}.").format(
+					item.idx, frappe.bold(item.item_code)
+				)
+			)
+		elif item.qty > remaining_qty:
+			frappe.throw(
+				_("Row {0}: Qty cannot be greater than {1} for the Item {2}.").format(
+					item.idx, frappe.bold(remaining_qty), frappe.bold(item.item_code)
+				)
+			)
 
 	def set_missing_values(self):
 		if not self.from_case_no:
@@ -163,9 +201,15 @@ class PackingSlip(StatusUpdater):
 			)
 
 			if weight_per_unit and not item.net_weight:
-				item.net_weight = weight_per_unit
+				item.net_weight = flt(weight_per_unit) * self.get_conversion_factor(item)
 			if weight_uom and not item.weight_uom:
 				item.weight_uom = weight_uom
+
+	def get_conversion_factor(self, item):
+		if not item.dn_detail:
+			return 1.0
+
+		return flt(frappe.db.get_value("Delivery Note Item", item.dn_detail, "conversion_factor")) or 1.0
 
 	def get_recommended_case_no(self):
 		"""Returns the next case no. for a new packing slip for a delivery note"""
