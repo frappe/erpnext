@@ -34,6 +34,9 @@ class SalesForecast(Document):
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
+	def on_cancel(self):
+		self.db_set("status", "Cancelled")
+
 	def generate_manual_demand(self):
 		if not self.selected_items:
 			return
@@ -102,7 +105,7 @@ def create_mps(source_name: str, target_doc: str | dict | Document | None = None
 		{
 			"Sales Forecast": {
 				"doctype": "Master Production Schedule",
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "status": ["=", "Planned"]},
 				"field_map": {
 					"name": "sales_forecast",
 					"from_date": "from_date",
@@ -114,3 +117,15 @@ def create_mps(source_name: str, target_doc: str | dict | Document | None = None
 	)
 
 	return doc
+
+
+def update_sales_forecast_status(sales_forecast):
+	if not sales_forecast or frappe.db.get_value("Sales Forecast", sales_forecast, "docstatus") != 1:
+		return
+
+	status = (
+		"MPS Generated"
+		if frappe.db.exists("Master Production Schedule", {"sales_forecast": sales_forecast})
+		else "Planned"
+	)
+	frappe.db.set_value("Sales Forecast", sales_forecast, "status", status)

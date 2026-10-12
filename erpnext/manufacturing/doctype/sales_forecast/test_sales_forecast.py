@@ -7,7 +7,8 @@ from unittest.mock import Mock, patch
 import frappe
 from frappe.tests import UnitTestCase
 
-from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import SalesForecast
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import SalesForecast, create_mps
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSalesForecast(UnitTestCase):
@@ -54,3 +55,41 @@ class TestSalesForecast(UnitTestCase):
 				SalesForecast.generate_manual_demand(forecast)
 
 			self.assertEqual([str(row["delivery_date"]) for row in forecast.items], expected)
+
+
+class TestSalesForecastIntegration(ERPNextTestSuite):
+	def test_status_follows_mps_and_cancel(self):
+		forecast = make_sales_forecast()
+
+		mps = create_mps(forecast.name)
+		mps.insert()
+		self.assertEqual(frappe.db.get_value("Sales Forecast", forecast.name, "status"), "MPS Generated")
+		self.assertRaises(frappe.ValidationError, create_mps, forecast.name)
+
+		mps.delete()
+		self.assertEqual(frappe.db.get_value("Sales Forecast", forecast.name, "status"), "Planned")
+
+		forecast.reload()
+		forecast.cancel()
+		self.assertEqual(frappe.db.get_value("Sales Forecast", forecast.name, "status"), "Cancelled")
+
+
+def make_sales_forecast(**args):
+	args = frappe._dict(args)
+	forecast = frappe.get_doc(
+		{
+			"doctype": "Sales Forecast",
+			"company": args.company or "_Test Company",
+			"parent_warehouse": args.parent_warehouse or "All Warehouses - _TC",
+			"from_date": args.from_date or frappe.utils.today(),
+			"frequency": args.frequency or "Monthly",
+			"demand_number": args.demand_number or 2,
+			"selected_items": [{"item_code": args.item_code or "_Test Item", "demand_qty": 1}],
+		}
+	)
+	forecast.generate_demand()
+	forecast.insert()
+	if not args.do_not_submit:
+		forecast.submit()
+
+	return forecast

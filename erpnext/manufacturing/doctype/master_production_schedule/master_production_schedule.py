@@ -8,6 +8,8 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, parse_json
 
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
+
 
 class MasterProductionSchedule(Document):
 	# begin: auto-generated types
@@ -434,6 +436,16 @@ class MasterProductionSchedule(Document):
 			return
 
 		return [d.item_code for d in self.select_items if d.item_code]
+
+	def on_update(self):
+		previous = self.get_doc_before_save()
+		if previous and previous.sales_forecast != self.sales_forecast:
+			update_sales_forecast_status(previous.sales_forecast)
+
+		update_sales_forecast_status(self.sales_forecast)
+
+	def after_delete(self):
+		update_sales_forecast_status(self.sales_forecast)
 
 	def on_submit(self):
 		self.enqueue_mrp_creation()
