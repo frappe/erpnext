@@ -655,6 +655,46 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			100,
 		)
 
+	def test_purchase_receipt_keeps_charges_of_every_order(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		set_backflush_based_on("BOM")
+		orders = [get_subcontracting_order(), get_subcontracting_order()]
+		for idx, sco in enumerate(orders):
+			frappe.get_doc(
+				{
+					"doctype": "Purchase Taxes and Charges",
+					"parent": sco.purchase_order,
+					"parenttype": "Purchase Order",
+					"parentfield": "taxes",
+					"idx": 1,
+					"category": "Total",
+					"add_deduct_tax": "Add",
+					"charge_type": "Actual",
+					"account_head": "_Test Account Shipping Charges - _TC",
+					"cost_center": "Main - _TC",
+					"description": f"Freight {idx}",
+					"tax_amount": 10 * (idx + 1),
+				}
+			).db_insert()
+			rm_items = get_rm_items(sco.supplied_items)
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name,
+				rm_items=rm_items,
+				itemwise_details=copy.deepcopy(itemwise_details),
+			)
+
+		scr = make_subcontracting_receipt(orders[0].name)
+		scr = make_subcontracting_receipt(orders[1].name, scr)
+		scr.save()
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(sorted(t.description for t in pr.taxes), ["Freight 0", "Freight 1"])
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{

@@ -1186,6 +1186,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 
 	target_doc = None
 	for po_name in purchase_orders:
+		is_first_order = target_doc is None
 		target_doc = get_mapped_doc(
 			"Purchase Order",
 			po_name,
@@ -1209,9 +1210,11 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 				},
 				"Purchase Taxes and Charges": {
 					"doctype": "Purchase Taxes and Charges",
-					"reset_value": True,
+					"reset_value": is_first_order,
 					# for POs created in earlier version with tax_withholding_row
-					"condition": lambda doc: not doc.is_tax_withholding_account,
+					"condition": lambda doc: (
+						not doc.is_tax_withholding_account and (is_first_order or doc.charge_type == "Actual")
+					),
 				},
 			},
 			target_doc,
