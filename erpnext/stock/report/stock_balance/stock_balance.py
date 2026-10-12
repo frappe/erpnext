@@ -363,6 +363,7 @@ class StockBalanceReport:
 			entry.voucher_type == "Stock Reconciliation"
 			and not entry.is_adjustment_entry
 			and (not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle)
+			and len(group_by_key) == 2
 		):
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)

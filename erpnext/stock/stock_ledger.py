@@ -1823,7 +1823,7 @@ class update_entries_after:
 				)
 
 				if item_code == sle.item_code:
-					rate = incoming_rate
+					rate = 0.0 if self.is_unvalued_rejected_material(sle) else incoming_rate
 				else:
 					if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 						ref_doctype = "Packed Item"
@@ -1839,6 +1839,20 @@ class update_entries_after:
 					)
 
 		return rate
+
+	def is_unvalued_rejected_material(self, sle):
+		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""
+		from erpnext.buying.doctype.buying_settings.buying_settings import is_rejected_material_valued
+
+		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice"):
+			return False
+
+		rejected_warehouse = frappe.db.get_value(
+			f"{sle.voucher_type} Item", sle.voucher_detail_no, "rejected_warehouse"
+		)
+		return sle.warehouse == rejected_warehouse and not is_rejected_material_valued(
+			sle.voucher_type, sle.voucher_detail_no
+		)
 
 	def get_moving_average_rate_for_return(self, sle):
 		"""Rate just before this entry, taken from the in-memory running state so a
@@ -1860,15 +1874,7 @@ class update_entries_after:
 
 		rate = previous_sle.get("valuation_rate")
 		if rate is None:
-			rate = get_valuation_rate(
-				sle.item_code,
-				sle.warehouse,
-				sle.voucher_type,
-				sle.voucher_no,
-				self.allow_zero_rate,
-				currency=erpnext.get_company_currency(sle.company),
-				company=sle.company,
-			)
+			rate = self.get_fallback_rate(sle)
 
 		return flt(rate)
 
@@ -2117,7 +2123,7 @@ class update_entries_after:
 				[0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate]
 			)
 
-		if self.wh_data.qty_after_transaction:
+		if flt(self.wh_data.qty_after_transaction, self.flt_precision):
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def is_return_purchase_entry(self, sle):
