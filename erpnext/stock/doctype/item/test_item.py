@@ -816,6 +816,15 @@ class TestItem(ERPNextTestSuite):
 		raw_material.stock_uom = "Kg"
 		self.assertRaises(frappe.ValidationError, raw_material.save)
 
+	def test_item_default_accounts_follow_the_company_and_type(self):
+		for field, account in (
+			("default_cogs_account", "Cost of Goods Sold - _TC1"),
+			("default_inventory_account", "Sales - _TC"),
+		):
+			item = make_item(properties={"is_stock_item": 1})
+			item.append("item_defaults", {"company": "_Test Company", field: account})
+			self.assertRaises(frappe.ValidationError, item.save)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):

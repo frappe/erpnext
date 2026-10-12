@@ -1843,14 +1843,13 @@ def update_variants(variants, template, publish_progress=True):
 
 
 def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> None:
+	company_links = [
+		(df.options, df.fieldname)
+		for df in frappe.get_meta("Item Default").get_link_fields()
+		if df.options in ("Warehouse", "Cost Center", "Account")
+	]
 	for item_default in item_defaults:
-		for doctype, field in [
-			["Warehouse", "default_warehouse"],
-			["Cost Center", "buying_cost_center"],
-			["Cost Center", "selling_cost_center"],
-			["Account", "expense_account"],
-			["Account", "income_account"],
-		]:
+		for doctype, field in company_links:
 			if item_default.get(field):
 				company = frappe.db.get_value(doctype, item_default.get(field), "company", cache=True)
 				if company and company != item_default.company:
@@ -1866,6 +1865,24 @@ def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> Non
 						),
 						title=_("Invalid Item Defaults"),
 					)
+
+		validate_default_inventory_account(item_default)
+
+
+def validate_default_inventory_account(item_default) -> None:
+	if not item_default.default_inventory_account:
+		return
+
+	account_type, is_group = frappe.db.get_value(
+		"Account", item_default.default_inventory_account, ["account_type", "is_group"], cache=True
+	)
+	if account_type != "Stock" or is_group:
+		frappe.throw(
+			_("Row #{0}: Default Inventory Account {1} must be a Stock account that is not a group.").format(
+				item_default.idx, frappe.bold(item_default.default_inventory_account)
+			),
+			title=_("Invalid Item Defaults"),
+		)
 
 
 @frappe.whitelist()
