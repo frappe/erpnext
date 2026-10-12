@@ -290,21 +290,23 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 def get_attribute_values(item):
 	if not frappe.flags.attribute_values:
 		attribute_values = {}
-		numeric_values = {}
 		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
 			attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
 
-		for t in frappe.get_all(
-			"Item Variant Attribute",
-			fields=["attribute", "from_range", "to_range", "increment"],
-			filters={"numeric_values": 1, "parent": item.variant_of},
-		):
-			numeric_values[t.attribute.lower()] = t
-
 		frappe.flags.attribute_values = attribute_values
-		frappe.flags.numeric_values = numeric_values
+		frappe.flags.numeric_values = {}
 
-	return frappe.flags.attribute_values, frappe.flags.numeric_values
+	if item.variant_of not in frappe.flags.numeric_values:
+		frappe.flags.numeric_values[item.variant_of] = {
+			t.attribute.lower(): t
+			for t in frappe.get_all(
+				"Item Variant Attribute",
+				fields=["attribute", "from_range", "to_range", "increment"],
+				filters={"numeric_values": 1, "parent": item.variant_of},
+			)
+		}
+
+	return frappe.flags.attribute_values, frappe.flags.numeric_values[item.variant_of]
 
 
 def find_variant(template, args, variant_item_code=None):

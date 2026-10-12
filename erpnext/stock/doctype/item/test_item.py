@@ -716,6 +716,47 @@ class TestItem(ERPNextTestSuite):
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
 
+	def test_numeric_range_is_read_per_template(self):
+		from erpnext.controllers.item_variant import validate_item_variant_attributes
+
+		template = self.make_numeric_template()
+		validate_item_variant_attributes(create_variant("_Test Variant Item", {"Test Size": "Small"}))
+		frappe.delete_doc_if_exists("Item", f"{template}-L-20", force=1)
+
+		variant = create_variant(template, {"Test Size": "Large", "Test Item Width": 20})
+		variant.save()
+
+	def make_numeric_template(self):
+		frappe.flags.attribute_values = None
+		if not frappe.db.exists("Item Attribute", "Test Item Width"):
+			frappe.get_doc(
+				{
+					"doctype": "Item Attribute",
+					"attribute_name": "Test Item Width",
+					"numeric_values": 1,
+					"from_range": 10,
+					"to_range": 50,
+					"increment": 10,
+				}
+			).insert()
+
+		return make_item(
+			"_Test Width Template Item",
+			{
+				"has_variants": 1,
+				"attributes": [
+					{"attribute": "Test Size"},
+					{
+						"attribute": "Test Item Width",
+						"numeric_values": 1,
+						"from_range": 10,
+						"to_range": 50,
+						"increment": 10,
+					},
+				],
+			},
+		).name
+
 	def test_item_merging(self):
 		old = create_item(frappe.generate_hash(length=20)).name
 		new = create_item(frappe.generate_hash(length=20)).name
