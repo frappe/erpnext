@@ -64,7 +64,8 @@ frappe.ui.form.on("Delivery Trip", {
 						},
 						get_query_filters: {
 							company: frm.doc.company,
-							status: ["Not In", ["Completed", "Cancelled"]],
+							docstatus: 1,
+							status: ["!=", "Closed"],
 						},
 					});
 				},
