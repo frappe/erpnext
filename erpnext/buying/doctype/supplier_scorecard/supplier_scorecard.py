@@ -164,12 +164,9 @@ class SupplierScorecard(Document):
 			self.supplier_score = 100
 
 	def update_standing(self):
-		# Get the setup document
-
+		highest_grade = max((s.max_grade for s in self.standings if s.max_grade), default=0)
 		for standing in self.standings:
-			if (not standing.min_grade or (standing.min_grade <= self.supplier_score)) and (
-				not standing.max_grade or (standing.max_grade > self.supplier_score)
-			):
+			if self.score_within_standing(standing, highest_grade):
 				self.status = standing.standing_name
 				self.indicator_color = standing.standing_color
 				self.notify_supplier = standing.notify_supplier
@@ -180,6 +177,13 @@ class SupplierScorecard(Document):
 				for fieldname in STANDING_FLAGS:
 					self.set(fieldname, standing.get(fieldname))
 					frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
+
+	def score_within_standing(self, standing, highest_grade):
+		score = self.supplier_score
+		above_min = not standing.min_grade or standing.min_grade <= score
+		if standing.max_grade and standing.max_grade == highest_grade:
+			return above_min and score <= standing.max_grade
+		return above_min and (not standing.max_grade or standing.max_grade > score)
 
 
 @frappe.whitelist()
