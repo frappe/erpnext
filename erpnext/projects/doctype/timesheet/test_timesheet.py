@@ -508,6 +508,30 @@ class TestTimesheet(FrappeTestCase):
 		)
 		self.assertEqual(frappe.db.get_value("Timesheet", without_employee.name, "user"), "Administrator")
 
+	@change_settings("Projects Settings", {"ignore_user_time_overlap": 0})
+	def test_employees_without_a_user_do_not_overlap_each_other(self):
+		from erpnext.patches.v16_0.set_user_on_timesheets import execute
+
+		from_time = now_datetime()
+		for first_name in ("_Test Userless One", "_Test Userless Two"):
+			employee = frappe.get_doc(
+				{
+					"doctype": "Employee",
+					"first_name": first_name,
+					"company": "_Test Company",
+					"gender": "Male",
+					"date_of_birth": "1990-01-01",
+					"date_of_joining": "2020-01-01",
+				}
+			).insert()
+			timesheet = make_timesheet_without_employee(from_time, 1)
+			timesheet.employee = employee.name
+			timesheet.insert()
+			self.assertFalse(timesheet.user)
+
+		execute()
+		self.assertFalse(frappe.db.get_value("Timesheet", timesheet.name, "user"))
+
 
 def make_timesheet_without_employee(start, hours):
 	return frappe.get_doc(
