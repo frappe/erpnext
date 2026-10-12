@@ -173,6 +173,26 @@ class TestTask(ERPNextTestSuite):
 		)
 		self.assertIn(dependent.name, frappe.get_message_log()[-1]["message"])
 
+	def test_rescheduled_task_saves_after_reload(self):
+		parent = create_task("_Test Group Of Rescheduled", nowdate(), add_days(nowdate(), 10), is_group=1)
+		prerequisite = create_task("_Test Task Before Rescheduled", nowdate(), add_days(nowdate(), 2))
+		dependent = create_task(
+			"_Test Rescheduled Past Group",
+			add_days(nowdate(), 3),
+			add_days(nowdate(), 5),
+			prerequisite.name,
+			parent_task=parent.name,
+		)
+		prerequisite.exp_end_date = add_days(nowdate(), 8)
+		prerequisite.save()
+
+		dependent.reload()
+		dependent.status = "Working"
+		dependent.save()
+
+		dependent.exp_end_date = add_days(nowdate(), 12)
+		self.assertRaises(frappe.exceptions.InvalidDates, dependent.save)
+
 	def test_reschedule_dependent_task_from_actual_end_date(self):
 		prerequisite = create_task("_Test Task Actual End", save=False)
 		prerequisite.exp_start_date = prerequisite.exp_end_date = None
