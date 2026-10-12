@@ -134,10 +134,11 @@ class AssetMovement(Document):
 	def set_latest_location_and_custodian_in_asset(self):
 		for d in self.assets:
 			current_location, current_employee = self.get_latest_location_and_custodian(d.asset)
-			changed_location, changed_employee = self.update_asset_location_and_custodian(
+			changed_location, previous_custodian = self.update_asset_location_and_custodian(
 				d.asset, current_location, current_employee
 			)
-			self.log_asset_activity(d.asset, changed_location, changed_employee)
+			changed_employee = current_employee if previous_custodian is not None else ""
+			self.log_asset_activity(d.asset, changed_location, changed_employee, previous_custodian)
 
 	def get_latest_location_and_custodian(self, asset):
 		"""Location and custodian each come from the latest submitted movement that sets them."""
@@ -171,19 +172,20 @@ class AssetMovement(Document):
 		return latest_movement_entry[0][0] if latest_movement_entry else ""
 
 	def update_asset_location_and_custodian(self, asset_id, location, employee):
+		"""Return the changed location and the previous custodian (None if the custodian is unchanged)."""
 		asset = frappe.get_doc("Asset", asset_id)
-		changed_location, changed_employee = "", ""
+		changed_location, previous_custodian = "", None
 
 		if cstr(employee) != cstr(asset.custodian):
 			frappe.db.set_value("Asset", asset_id, "custodian", cstr(employee))
-			changed_employee = employee
+			previous_custodian = cstr(asset.custodian)
 		if location and location != asset.location:
 			frappe.db.set_value("Asset", asset_id, "location", location)
 			changed_location = location
 
-		return changed_location, changed_employee
+		return changed_location, previous_custodian
 
-	def log_asset_activity(self, asset_id, location, employee):
+	def log_asset_activity(self, asset_id, location, employee, previous_custodian=None):
 		if location and employee:
 			add_asset_activity(
 				asset_id,
@@ -201,4 +203,9 @@ class AssetMovement(Document):
 			add_asset_activity(
 				asset_id,
 				_("Asset issued to Employee {0}").format(get_link_to_form("Employee", employee)),
+			)
+		elif previous_custodian:
+			add_asset_activity(
+				asset_id,
+				_("Asset returned by Employee {0}").format(get_link_to_form("Employee", previous_custodian)),
 			)
