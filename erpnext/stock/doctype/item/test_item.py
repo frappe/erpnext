@@ -900,6 +900,18 @@ class TestItem(ERPNextTestSuite):
 		item.reorder_levels[0].warehouse_group = other_group
 		self.assertRaises(frappe.ValidationError, item.save)
 
+	def test_item_cannot_be_merged_into_a_template(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+			}
+		).name
+
+		self.assertRaises(frappe.ValidationError, frappe.rename_doc, "Item", item, template, merge=True)
+
 	def test_add_item_barcode(self):
 		# Clean up
 		item_code = "Test Item Barcode"

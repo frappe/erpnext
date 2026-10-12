@@ -743,8 +743,18 @@ class Item(Document):
 		if not frappe.db.exists("Item", new_name):
 			frappe.throw(_("Item {0} does not exist").format(new_name))
 
-		field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
+		field_list = [
+			"stock_uom",
+			"is_stock_item",
+			"has_serial_no",
+			"has_batch_no",
+			"has_variants",
+			"variant_of",
+		]
 		new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
+
+		if self.has_variants or cint(frappe.db.get_value("Item", new_name, "has_variants")):
+			frappe.throw(_("Templates cannot be merged"), title=_("Cannot Merge"), exc=DataValidationError)
 
 		if new_properties != [cstr(self.get(field)) for field in field_list]:
 			msg = _("To merge, following properties must be same for both items")
