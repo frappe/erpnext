@@ -18,6 +18,16 @@ class TestWorkstationOperatingComponent(ERPNextTestSuite):
 		component.insert()
 		self.assertEqual(component.accounts[0].expense_account, "Cost of Goods Sold - _TC")
 
+	def test_one_account_per_company(self):
+		component = make_component(
+			"_Test Component Two Accounts",
+			[
+				("_Test Company", "Cost of Goods Sold - _TC"),
+				("_Test Company", "Administrative Expenses - _TC"),
+			],
+		)
+		self.assertRaises(frappe.ValidationError, component.insert)
+
 
 def make_component(name, accounts):
 	return frappe.get_doc(

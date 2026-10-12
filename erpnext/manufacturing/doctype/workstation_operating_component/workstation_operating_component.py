@@ -24,7 +24,19 @@ class WorkstationOperatingComponent(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_duplicate_company()
 		self.validate_accounts()
+
+	def validate_duplicate_company(self):
+		companies = set()
+		for row in self.accounts:
+			if row.company in companies:
+				frappe.throw(
+					_("Row #{0}: Company {1} already has an expense account").format(
+						row.idx, bold(row.company)
+					)
+				)
+			companies.add(row.company)
 
 	def validate_accounts(self):
 		names = [row.expense_account for row in self.accounts if row.expense_account]
