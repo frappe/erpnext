@@ -298,13 +298,9 @@ def get_conditions(filters):
 		else:
 			conditions.append("posting_date >=%(from_date)s")
 
-	# opening balance calculation is done only if filtered on account/party
+	# opening balance calculation is done only if filtered on account/party/cost center/project/dimension
 	# so from_date filter is not applied
-	elif not (
-		filters.get("account")
-		or filters.get("party")
-		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
-	):
+	elif not is_opening_balance_calculated(filters):
 		if not ignore_is_opening:
 			conditions.append("(posting_date >=%(from_date)s or is_opening = 'Yes')")
 		else:
@@ -360,6 +356,26 @@ def get_conditions(filters):
 						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def is_opening_balance_calculated(filters):
+	"""Entries before from_date are fetched for the opening balance only when the report is narrowed
+	down, so an unfiltered run doesn't load the company's whole history."""
+	if (
+		filters.get("account")
+		or filters.get("party")
+		or filters.get("cost_center")
+		or filters.get("project")
+		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
+	):
+		return True
+
+	# Finance Book set up as a dimension is handled by the finance book filters
+	return any(
+		filters.get(dimension.fieldname)
+		for dimension in get_accounting_dimensions(as_list=False)
+		if dimension.document_type != "Finance Book"
+	)
 
 
 def get_party_name_map():
@@ -1072,18 +1088,14 @@ def _build_gl_conditions_duckdb(filters):
 		conditions.append(f"party IN ({', '.join(['?'] * len(filters.party))})")
 		params.extend(filters.party)
 
-	# from_date: skip when filtering by account/party to allow opening balance calc in Python
+	# from_date: skip when filtering by account/party/cost center/project/dimension to allow opening balance calc in Python
 	if filters.get("disable_opening_balance_calculation"):
 		if not ignore_is_opening:
 			conditions.append("(posting_date >= ? OR is_opening = 'Yes')")
 		else:
 			conditions.append("posting_date >= ?")
 		params.append(filters.from_date)
-	elif not (
-		filters.get("account")
-		or filters.get("party")
-		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
-	):
+	elif not is_opening_balance_calculated(filters):
 		if not ignore_is_opening:
 			conditions.append("(posting_date >= ? OR is_opening = 'Yes')")
 		else:
