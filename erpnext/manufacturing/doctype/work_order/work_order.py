@@ -1913,17 +1913,26 @@ class WorkOrder(Document):
 		self.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
-		if names := frappe.get_all(
+		filters = {
+			"voucher_no": self.name,
+			"item_code": row.item_code,
+			"voucher_detail_no": row.name,
+			"warehouse": row.source_warehouse,
+		}
+		names = frappe.get_all(
 			"Stock Reservation Entry",
-			filters={
-				"voucher_no": self.name,
-				"item_code": row.item_code,
-				"voucher_detail_no": row.name,
-				"warehouse": row.source_warehouse,
-				"status": ("not in", ["Closed", "Cancelled", "Completed"]),
-			},
+			filters={**filters, "status": ("not in", ["Closed", "Cancelled", "Completed"])},
 			pluck="name",
-		):
+		)
+		if self.status == "Closed":
+			names += frappe.get_all(
+				"Stock Reservation Entry",
+				filters={**filters, "docstatus": 2, "transferred_qty": (">", 0)},
+				pluck="name",
+				order_by="creation",
+			)
+
+		if names:
 			for name in names:
 				doc = frappe.get_doc("Stock Reservation Entry", name)
 				qty_to_update = 0.0
@@ -1938,6 +1947,11 @@ class WorkOrder(Document):
 					transferred_qty = 0.0
 
 				if qty_to_update < 0:
+					continue
+
+				if doc.docstatus == 2:
+					doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
+					doc.release_reversed_usage("transferred_qty", row_wise_serial_batch)
 					continue
 
 				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
@@ -1985,6 +1999,10 @@ class WorkOrder(Document):
 			"warehouse": wip_warehouse,
 			"docstatus": 1,
 		}
+		or_filters = None
+		if self.status == "Closed":
+			filters["docstatus"] = ("in", [1, 2])
+			or_filters = {"docstatus": 1, "consumed_qty": (">", 0)}
 
 		if not self.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
@@ -1992,7 +2010,11 @@ class WorkOrder(Document):
 		row_wise_serial_batch = get_row_wise_serial_batch(self.name, CONSUMPTION_PURPOSES)
 
 		if names := frappe.get_all(
-			"Stock Reservation Entry", filters=filters, pluck="name", order_by="creation"
+			"Stock Reservation Entry",
+			filters=filters,
+			or_filters=or_filters,
+			pluck="name",
+			order_by="creation",
 		):
 			for name in names:
 				if consumed_qty < 0:
@@ -2004,6 +2026,10 @@ class WorkOrder(Document):
 				if qty_to_update >= 0:
 					doc.db_set("consumed_qty", flt(qty_to_update), update_modified=False)
 					consumed_qty -= qty_to_update
+
+				if doc.docstatus == 2:
+					doc.release_reversed_usage("consumed_qty", row_wise_serial_batch)
+					continue
 
 				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
