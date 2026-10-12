@@ -28,6 +28,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.services.exchange_gain_loss import get_revalued_exchange_rate
 from erpnext.accounts.services.gl_validator import validate_opening_entry_against_pcv
 from erpnext.accounts.services.taxes import validate_account_head
 from erpnext.accounts.utils import (
@@ -1329,7 +1330,9 @@ def get_exchange_rate(
 
 	if account_currency != company_currency:
 		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
-			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
+			exchange_rate = get_revalued_exchange_rate(
+				reference_type, reference_name, posting_date
+			) or frappe.db.get_value(reference_type, reference_name, "conversion_rate")
 
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.

@@ -42,6 +42,7 @@ from erpnext.accounts.party import (
 	get_party_account,
 	validate_party_company,
 )
+from erpnext.accounts.services.exchange_gain_loss import get_revalued_exchange_rate
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -614,6 +615,7 @@ class PaymentEntry(AccountsController):
 				self.party_account_currency,
 				self.party_type,
 				self.party,
+				self.posting_date,
 			)
 
 			# Only update exchange rate when the reference is Journal Entry
@@ -2539,6 +2541,7 @@ def get_reference_details(
 	party_account_currency: str,
 	party_type: str | None = None,
 	party: str | None = None,
+	posting_date: str | date | None = None,
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
@@ -2587,10 +2590,12 @@ def get_reference_details(
 			else:
 				total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 		if not exchange_rate:
-			# Get the exchange rate from the original ref doc
+			# Get the exchange rate from the latest revaluation, the original ref doc
 			# or get it based on the posting date of the ref doc.
-			exchange_rate = ref_doc.get("conversion_rate") or get_exchange_rate(
-				party_account_currency, company_currency, ref_doc.posting_date
+			exchange_rate = (
+				get_revalued_exchange_rate(reference_doctype, reference_name, posting_date)
+				or ref_doc.get("conversion_rate")
+				or get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 			)
 
 		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):

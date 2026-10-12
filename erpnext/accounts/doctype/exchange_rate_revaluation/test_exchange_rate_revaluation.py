@@ -386,6 +386,114 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 		)
 		self.assertIsNotNone(reverse_jv)
 
+	def _invoice_revalued_at_84(self):
+		"""$100 invoice at 80 ten days ago, revalued to 84 five days ago. Returns (invoice, revaluation journal)."""
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debtors_usd,
+			posting_date=add_days(today(), -10),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			price_list_rate=100,
+			do_not_submit=1,
+		)
+		si.currency = "USD"
+		si.conversion_rate = 80
+		si.save().submit()
+
+		err = frappe.new_doc("Exchange Rate Revaluation")
+		err.company = self.company
+		err.posting_date = add_days(today(), -5)
+		err.extend("accounts", err.get_accounts_data())
+		for row in err.accounts:
+			row.new_exchange_rate = 84
+			row.new_balance_in_base_currency = flt(84 * flt(row.balance_in_account_currency))
+			row.gain_loss = row.new_balance_in_base_currency - flt(row.balance_in_base_currency)
+		err.set_total_gain_loss()
+		err = err.save().submit()
+		je = frappe.get_doc("Journal Entry", err.make_jv_entries().get("revaluation_jv")).submit()
+		return si, je
+
+	def _party_balance(self):
+		return frappe.db.get_all(
+			"GL Entry",
+			filters={"account": self.debtors_usd, "party": self.customer, "is_cancelled": 0},
+			fields=[{"SUM": "debit"}, {"SUM": "credit"}],
+			as_list=1,
+		)[0]
+
+	def _pay_at_85(self, si, allocate=True):
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = today()
+		pe.source_exchange_rate = 85
+		pe.received_amount = 8500
+		if not allocate:
+			pe.references = []
+		return pe.save().submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_06_payment_after_revaluation_uses_revalued_rate(self):
+		si, _ = self._invoice_revalued_at_84()
+		pe = self._pay_at_85(si)
+
+		# gain at payment is 85 - 84, not 85 - 80
+		self.assertEqual(pe.references[0].exchange_rate, 84)
+		self.assertEqual(pe.references[0].exchange_gain_loss, 100)
+		debit, credit = self._party_balance()
+		self.assertEqual(flt(debit - credit, 2), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_07_payment_after_reversed_revaluation_uses_invoice_rate(self):
+		from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+
+		si, je = self._invoice_revalued_at_84()
+		reversal = make_reverse_journal_entry(je.name)
+		reversal.posting_date = add_days(today(), -4)
+		reversal.save().submit()
+
+		pe = self._pay_at_85(si)
+		self.assertEqual(pe.references[0].exchange_rate, 80)
+		self.assertEqual(pe.references[0].exchange_gain_loss, 500)
+		debit, credit = self._party_balance()
+		self.assertEqual(flt(debit - credit, 2), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_08_reconciliation_and_journal_use_revalued_rate(self):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+
+		si, _ = self._invoice_revalued_at_84()
+		self.assertEqual(
+			get_exchange_rate(today(), self.debtors_usd, "USD", self.company, si.doctype, si.name), 84
+		)
+
+		self._pay_at_85(si, allocate=False)
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.invoices if x.invoice_number == si.name]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(pr.allocation[0].difference_amount, 100)
+		pr.reconcile()
+
+		debit, credit = self._party_balance()
+		self.assertEqual(flt(debit - credit, 2), 0)
+
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
 	"""Validation and gain/loss calculation paths, exercised on the document directly

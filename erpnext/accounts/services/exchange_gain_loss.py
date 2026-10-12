@@ -211,3 +211,70 @@ def set_transaction_currency_and_rate_in_gl_map(doc, gl_entries: list) -> None:
 	for entry in gl_entries:
 		entry["transaction_currency"] = doc.currency
 		entry["transaction_exchange_rate"] = doc.get("conversion_rate") or 1
+
+
+def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date) -> float | None:
+	"""Rate of the latest Exchange Rate Revaluation of the invoice's party account, posted between
+	the invoice date and `on_date` and not reversed by `on_date`. None if there is no such revaluation."""
+	if invoice_doctype not in ("Sales Invoice", "Purchase Invoice") or not invoice_name or not on_date:
+		return None
+
+	is_sales = invoice_doctype == "Sales Invoice"
+	inv = frappe.db.get_value(
+		invoice_doctype,
+		invoice_name,
+		[
+			"company",
+			"posting_date",
+			"debit_to" if is_sales else "credit_to",
+			"customer" if is_sales else "supplier",
+		],
+		as_dict=True,
+	)
+	if not inv:
+		return None
+	account = inv.debit_to if is_sales else inv.credit_to
+	party_type, party = ("Customer", inv.customer) if is_sales else ("Supplier", inv.supplier)
+
+	je = qb.DocType("Journal Entry")
+	jea = qb.DocType("Journal Entry Account")
+	err_acc = qb.DocType("Exchange Rate Revaluation Account")
+	revaluations = (
+		qb.from_(je)
+		.join(jea)
+		.on(jea.parent == je.name)
+		.join(err_acc)
+		.on(
+			(err_acc.parent == jea.reference_name)
+			& (err_acc.account == jea.account)
+			& (err_acc.party_type == jea.party_type)
+			& (err_acc.party == jea.party)
+		)
+		.select(je.name, err_acc.new_exchange_rate)
+		.distinct()
+		.where(
+			(je.voucher_type == "Exchange Rate Revaluation")
+			& (je.docstatus == 1)
+			& (je.company == inv.company)
+			& (je.reversal_of.isnull())
+			& (je.posting_date >= inv.posting_date)
+			& (je.posting_date <= on_date)
+			& (jea.reference_type == "Exchange Rate Revaluation")
+			& (jea.account == account)
+			& (jea.party_type == party_type)
+			& (jea.party == party)
+			& (err_acc.new_exchange_rate > 0)
+		)
+		.orderby(je.posting_date, order=frappe.qb.desc)
+		.orderby(je.creation, order=frappe.qb.desc)
+		.run(as_dict=True)
+	)
+
+	for row in revaluations:
+		reversed_by_date = frappe.db.exists(
+			"Journal Entry",
+			{"reversal_of": row.name, "docstatus": 1, "posting_date": ("<=", on_date)},
+		)
+		if not reversed_by_date:
+			return flt(row.new_exchange_rate)
+	return None
