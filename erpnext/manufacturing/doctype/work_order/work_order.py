@@ -899,11 +899,12 @@ class WorkOrder(Document):
 			)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		precision = self.precision("disassembled_qty")
 		if is_cancel:
-			self.disassembled_qty = max(0, self.disassembled_qty - qty)
+			self.disassembled_qty = max(0, flt(self.disassembled_qty - qty, precision))
 		else:
 			if self.docstatus == 1:
-				self.disassembled_qty += qty
+				self.disassembled_qty = flt(self.disassembled_qty + qty, precision)
 
 		if not is_cancel and self.disassembled_qty > self.produced_qty:
 			frappe.throw(_("Cannot disassemble more than produced quantity."))
@@ -2390,7 +2391,9 @@ class WorkOrder(Document):
 	def remove_additional_items(self, stock_entry):
 		for row in stock_entry.items:
 			for item in self.required_items:
-				if row.item_code == item.item_code and row.name == item.voucher_detail_reference:
+				if (row.original_item or row.item_code) == item.item_code and (
+					row.name == item.voucher_detail_reference
+				):
 					item.delete()
 
 	def add_additional_items(self, stock_entry):
@@ -2404,8 +2407,9 @@ class WorkOrder(Document):
 
 		additional_items = frappe._dict()
 		for row in stock_entry.items:
-			if row.item_code not in required_items:
-				additional_items.setdefault(row.item_code, []).append(row)
+			item_code = row.original_item or row.item_code
+			if item_code not in required_items:
+				additional_items.setdefault(item_code, []).append(row)
 
 		for item_code, rows in additional_items.items():
 			for row in rows:
@@ -2540,7 +2544,11 @@ def get_consumed_qty(work_order, item_code):
 			& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 			& (stock_entry.docstatus == 1)
 			& (stock_entry_detail.s_warehouse.isnotnull())
-			& ((stock_entry_detail.item_code == item_code) | (stock_entry_detail.original_item == item_code))
+			# an alternative item row belongs to the item it replaced, not to both item codes
+			& (
+				fn.Coalesce(fn.NullIf(stock_entry_detail.original_item, ""), stock_entry_detail.item_code)
+				== item_code
+			)
 		)
 	)
 
@@ -2822,7 +2830,10 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 
 	already_disassembled = flt(frappe.db.get_value("Stock Entry", filters, [{"SUM": "fg_completed_qty"}]))
 
-	return flt(se.fg_completed_qty) - already_disassembled
+	return flt(
+		flt(se.fg_completed_qty) - already_disassembled,
+		frappe.get_precision("Stock Entry", "fg_completed_qty"),
+	)
 
 
 @frappe.whitelist()

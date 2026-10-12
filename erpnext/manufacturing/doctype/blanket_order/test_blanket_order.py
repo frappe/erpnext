@@ -124,6 +124,22 @@ class TestBlanketOrder(ERPNextTestSuite):
 				order.flags.ignore_permissions = True
 				self.assertRaises(frappe.ValidationError, order.submit)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_last_fraction_of_blanket_order_can_be_ordered(self):
+		item = make_item(properties={"stock_uom": "Kg", "is_stock_item": 0}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=1, item_code=item)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		for qty in (0.9, 0.1):
+			po = make_order(bo.name)
+			po.currency = get_company_currency(po.company)
+			po.schedule_date = today()
+			po.items[0].qty = qty
+			po.submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 1)
+
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
 		item_code = item_doc.name
