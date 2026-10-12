@@ -53,3 +53,6 @@ class TestInvalidLedgerEntries(FrappeTestCase):
 		flagged = {row.get("voucher_no") for row in self.run_report()}
 		self.assertIn(invoice.name, flagged)
 		self.assertNotIn(payment.name, flagged)
+
+		flagged = {row.get("voucher_no") for row in self.run_report(voucher_no=invoice.name)}
+		self.assertEqual(flagged, {invoice.name})
