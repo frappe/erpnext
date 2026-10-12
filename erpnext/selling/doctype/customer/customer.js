@@ -216,6 +216,12 @@ frappe.ui.form.on("Customer", {
 					__("Actions")
 				);
 			}
+
+			(frm.doc.__onload?.dashboard_info || []).forEach((info) => {
+				if (info.loyalty_points) {
+					frm.dashboard.add_indicator(__("Loyalty Points: {0}", [info.loyalty_points]), "blue");
+				}
+			});
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
