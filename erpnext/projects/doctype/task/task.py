@@ -342,7 +342,7 @@ class Task(NestedSet):
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
-		if not end_date:
+		if not end_date or self.flags.ignore_reschedule:
 			return
 
 		dependent_parents = frappe.get_all(
