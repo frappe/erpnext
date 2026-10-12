@@ -4177,6 +4177,26 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -2)
 
+	def test_credit_note_after_a_reduced_rate_invoice(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.items[0].update({"qty": 2, "rate": 400})
+		invoice.insert()
+		invoice.submit()
+
+		billed_return = make_sales_return(delivery_note.name)
+		billed_return.items[0].qty = -2
+		billed_return.issue_credit_note = 1
+		billed_return.submit()
+
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": billed_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -2)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,

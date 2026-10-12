@@ -90,13 +90,25 @@ def get_creditable_qty(return_doc) -> dict:
 
 
 def get_billed_qty(original_rows: set) -> dict:
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	invoiced_qty = frappe._dict(
+		frappe.qb.from_(sii)
+		.select(sii.dn_detail, Sum(sii.qty))
+		.where(sii.dn_detail.isin(list(original_rows)) & (sii.docstatus == 1) & (sii.qty > 0))
+		.groupby(sii.dn_detail)
+		.run()
+	)
+
 	billed_qty = {}
 	for row in frappe.get_all(
 		"Delivery Note Item",
 		filters={"name": ("in", list(original_rows))},
 		fields=["name", "billed_amt", "rate", "qty"],
 	):
-		billed_qty[row.name] = flt(row.billed_amt) / flt(row.rate) if flt(row.rate) else flt(row.qty)
+		if row.name in invoiced_qty:
+			billed_qty[row.name] = flt(invoiced_qty[row.name])
+		else:
+			billed_qty[row.name] = flt(row.billed_amt) / flt(row.rate) if flt(row.rate) else flt(row.qty)
 
 	return billed_qty
 
