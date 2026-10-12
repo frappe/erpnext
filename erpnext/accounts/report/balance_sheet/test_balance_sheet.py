@@ -74,6 +74,16 @@ class TestBalanceSheet(FrappeTestCase):
 
 		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional + 300))
 
+		# a current loss that exactly offsets all earlier profit must still be shown
+		make_journal_entry(
+			[
+				dict(account_name="Capital Stock", credit_in_account_currency=1300),
+				dict(account_name="Sales", debit_in_account_currency=1300),
+			],
+			posting_date="2026-07-01",
+		)
+		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional - 1000))
+
 
 def get_profit_loss_rows(filters):
 	rows = {row.get("account"): flt(row.get("total")) for row in execute(frappe._dict(filters))[1]}

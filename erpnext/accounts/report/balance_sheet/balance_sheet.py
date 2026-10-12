@@ -145,16 +145,20 @@ def get_provisional_profit_loss(
 			total_row["total"] = total_row_total
 
 		if has_value:
-			provisional_profit_loss.update(
-				{
-					"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
-					"account": "'" + _("Provisional Profit / Loss (Credit)") + "'",
-					"warn_if_negative": True,
-					"currency": currency,
-				}
-			)
+			set_provisional_profit_loss_labels(provisional_profit_loss, currency)
 
 	return provisional_profit_loss, total_row
+
+
+def set_provisional_profit_loss_labels(provisional_profit_loss: dict, currency: str) -> None:
+	provisional_profit_loss.update(
+		{
+			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
+			"account": "'" + _("Provisional Profit / Loss (Credit)") + "'",
+			"warn_if_negative": True,
+			"currency": currency,
+		}
+	)
 
 
 def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency):
@@ -173,6 +177,7 @@ def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_li
 
 	if provisional_profit_loss:
 		provisional_profit_loss["total"] -= opening_balance
+		set_provisional_profit_loss_labels(provisional_profit_loss, currency)
 	return unclosed
 
 
