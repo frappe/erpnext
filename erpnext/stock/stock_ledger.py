@@ -1312,7 +1312,8 @@ class update_entries_after:
 
 		if self.is_produced_row(sle):
 			sle.incoming_rate = self.get_produced_row_rate(sle)
-			amount = self.update_bundle_rate(doc, sle.incoming_rate)
+			self.update_bundle_rate(doc, sle.incoming_rate)
+			amount = sle.incoming_rate * flt(sle.actual_qty)
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
@@ -1484,7 +1485,6 @@ class update_entries_after:
 				entry.db_set({"incoming_rate": rate, "stock_value_difference": flt(entry.qty) * rate})
 
 		bundle.calculate_qty_and_amount(save=True)
-		return bundle.total_amount
 
 	def get_produced_row_rate(self, sle):
 		"""Outputs carry exactly the consumed value plus additional and landed costs. Each output row is
