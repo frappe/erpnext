@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Min, Sum
 from frappe.utils import cstr
 
@@ -325,6 +326,7 @@ def get_mode_of_payments(filters):
 			.on(si3.name == jea.reference_name)
 			.select(si3.owner, si3.posting_date, Coalesce(je.voucher_type, "").as_("mode_of_payment"))
 			.where(je.docstatus == 1)
+			.where(je.voucher_type != "Exchange Gain Or Loss")
 			.where(jea.reference_type == "Sales Invoice")
 			.where(jea.reference_name.isin(invoice_names))
 		)
@@ -374,6 +376,9 @@ def get_mode_of_payment_details(filters):
 		pe = frappe.qb.DocType("Payment Entry")
 		per = frappe.qb.DocType("Payment Entry Reference")
 		mop2 = Coalesce(pe.mode_of_payment, "")
+		party_account_rate = (
+			Case().when(pe.payment_type == "Receive", pe.source_exchange_rate).else_(pe.target_exchange_rate)
+		)
 		branch2 = (
 			frappe.qb.from_(si2)
 			.join(per)
@@ -384,7 +389,7 @@ def get_mode_of_payment_details(filters):
 				si2.owner,
 				si2.posting_date,
 				mop2.as_("mode_of_payment"),
-				Sum(per.allocated_amount).as_("paid_amount"),
+				Sum(per.allocated_amount * party_account_rate).as_("paid_amount"),
 			)
 			.where(pe.docstatus == 1)
 			.where(si2.name.isin(invoice_names))
@@ -406,6 +411,7 @@ def get_mode_of_payment_details(filters):
 				si3.owner, si3.posting_date, mop3.as_("mode_of_payment"), Sum(jea.credit).as_("paid_amount")
 			)
 			.where(je.docstatus == 1)
+			.where(je.voucher_type != "Exchange Gain Or Loss")
 			.where(jea.reference_type == "Sales Invoice")
 			.where(jea.reference_name.isin(invoice_names))
 			.groupby(si3.owner, si3.posting_date, mop3)

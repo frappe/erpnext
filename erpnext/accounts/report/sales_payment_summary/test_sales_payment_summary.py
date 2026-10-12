@@ -251,6 +251,33 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		detail = run_report(customer, to_date=to_date, payment_detail=1)
 		self.assertEqual([row[5] for row in detail], [0, 10000])
 
+	def test_foreign_currency_receipt_is_reported_at_the_amount_received(self):
+		si = create_sales_invoice_record(customer="_Test Customer USD")
+		si.update({"currency": "USD", "conversion_rate": 50, "debit_to": "_Test Receivable USD - _TC"})
+		si.items[0].rate = 100
+		si.insert()
+		si.submit()
+
+		# received later at a lower rate, which books an exchange loss against the invoice
+		tomorrow = add_days(today(), 1)
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		pe.update(
+			{
+				"posting_date": tomorrow,
+				"source_exchange_rate": 45,
+				"received_amount": 4500,
+				"mode_of_payment": "Cash",
+				"reference_no": "_Test",
+				"reference_date": tomorrow,
+			}
+		)
+		pe.insert()
+		pe.submit()
+
+		self.assertEqual(run_report(si.customer, to_date=tomorrow)[0][5], 4500)
+		detail = run_report(si.customer, to_date=tomorrow, payment_detail=1)
+		self.assertEqual([row[5] for row in detail], [0, 4500])
+
 	def test_pos_view_deducts_change_from_payments(self):
 		customer = make_customer("_Test Sales Payment Summary Customer")
 		make_pos_invoice(customer, paid=12000)
