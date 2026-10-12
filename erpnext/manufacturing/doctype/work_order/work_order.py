@@ -677,12 +677,11 @@ class WorkOrder(Document):
 
 	def on_cancel(self):
 		self.validate_cancel()
-		was_closed = self.status == "Closed"
 		self.db_set("status", "Cancelled")
 
-		self.on_close_or_cancel(release_inward_order=not was_closed)
+		self.on_close_or_cancel()
 
-	def on_close_or_cancel(self, release_inward_order=True):
+	def on_close_or_cancel(self):
 		if self.production_plan and frappe.db.exists(
 			"Production Plan Item Reference", {"parent": self.production_plan}
 		):
@@ -698,8 +697,7 @@ class WorkOrder(Document):
 		if self.reserve_stock:
 			WorkOrderStockReservation(self).update_stock_reservation()
 
-		if release_inward_order:
-			self.update_subcontracting_inward_order_received_items(release=True)
+		self.update_subcontracting_inward_order_received_items()
 
 	def set_qty_change(self):
 		"""Excess received qty to move into this Work Order's reservation on submit."""
@@ -728,37 +726,64 @@ class WorkOrder(Document):
 				):
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
-	def update_subcontracting_inward_order_received_items(self, release=False):
-		if scio_item_name := self.get("subcontracting_inward_order_item"):
-			scio_rm_data = frappe.get_all(
-				"Subcontracting Inward Order Received Item",
-				filters={
-					"reference_name": scio_item_name,
-					"docstatus": 1,
-					"rm_item_code": ["in", [d.item_code for d in self.get("required_items")]],
-				},
-				fields=["name", "rm_item_code"],
+	def update_subcontracting_inward_order_received_items(self):
+		"""Recompute the qty allocated to Work Orders: a closed order keeps the qty it used or still holds, others their required qty."""
+		if not (scio_item_name := self.get("subcontracting_inward_order_item")):
+			return
+
+		scio_rm_data = frappe.get_all(
+			"Subcontracting Inward Order Received Item",
+			filters={
+				"reference_name": scio_item_name,
+				"docstatus": 1,
+				"rm_item_code": ["in", [d.item_code for d in self.get("required_items")]],
+			},
+			fields=["name", "rm_item_code"],
+		)
+		if not scio_rm_data:
+			return
+
+		work_order = frappe.qb.DocType("Work Order")
+		work_order_item = frappe.qb.DocType("Work Order Item")
+		allocated_qty = dict(
+			frappe.qb.from_(work_order_item)
+			.join(work_order)
+			.on(work_order.name == work_order_item.parent)
+			.select(
+				work_order_item.item_code,
+				Sum(
+					Case()
+					.when(
+						(work_order.status == "Closed")
+						& (work_order_item.transferred_qty > work_order_item.consumed_qty),
+						work_order_item.transferred_qty - work_order_item.returned_qty,
+					)
+					.when(
+						work_order.status == "Closed",
+						work_order_item.consumed_qty - work_order_item.returned_qty,
+					)
+					.else_(work_order_item.required_qty)
+				),
+			)
+			.where(
+				(work_order.docstatus == 1)
+				& (work_order.subcontracting_inward_order_item == scio_item_name)
+				& (work_order_item.item_code.isin([d.rm_item_code for d in scio_rm_data]))
+			)
+			.groupby(work_order_item.item_code)
+			.run()
+		)
+
+		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+		case_expr = Case()
+		for item in scio_rm_data:
+			case_expr = case_expr.when(
+				table.rm_item_code == item.rm_item_code, flt(allocated_qty.get(item.rm_item_code))
 			)
 
-			qty_change = {
-				wo_item.item_code: wo_item.consumed_qty - wo_item.required_qty
-				if release
-				else wo_item.required_qty
-				for wo_item in self.get("required_items")
-				if wo_item.item_code in [d.rm_item_code for d in scio_rm_data]
-			}
-
-			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-			case_expr = Case()
-			for item in scio_rm_data:
-				case_expr = case_expr.when(
-					table.rm_item_code == item.rm_item_code,
-					table.work_order_qty + qty_change[item.rm_item_code],
-				)
-
-			frappe.qb.update(table).set(table.work_order_qty, case_expr).where(
-				(table.name.isin([d.name for d in scio_rm_data])) & (table.docstatus == 1)
-			).run()
+		frappe.qb.update(table).set(table.work_order_qty, case_expr).where(
+			(table.name.isin([d.name for d in scio_rm_data])) & (table.docstatus == 1)
+		).run()
 
 	def create_serial_no_batch_no(self):
 		if self.track_semi_finished_goods:
@@ -1022,7 +1047,9 @@ class WorkOrder(Document):
 		return OperationsService(self).create_job_card()
 
 	def update_required_items(self):
-		return RequiredItemsService(self).update_required_items()
+		RequiredItemsService(self).update_required_items()
+		if self.status == "Closed":
+			self.update_subcontracting_inward_order_received_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		return RequiredItemsService(self).update_reserved_qty_for_production(items)
