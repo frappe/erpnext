@@ -1294,6 +1294,28 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.cancel()
 
+	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4536}],
+		).name
+		pr = make_purchase_receipt(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			qty=7,
+			rate=12.34,
+			do_not_save=True,
+		)
+		pr.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4536, "cost_center": "Main - TCP1"})
+		pr.submit()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pr.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(stock_value, pr.items[0].base_net_amount)
+
 	def test_inter_company_purchase_receipt_does_not_inherit_party_fields(self):
 		"""
 		Party-derived fields on DN (from Customer) must not leak into the mapped PR.
