@@ -539,6 +539,24 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 		debit, credit = self._party_balance()
 		self.assertEqual(flt(debit - credit, 2), 6720)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_11_reposted_invoice_still_uses_revalued_rate(self):
+		from erpnext.accounts.utils import _delete_accounting_ledger_entries
+
+		si, _ = self._invoice_revalued_at_84()
+		# reposting deletes and recreates the invoice's ledger entries
+		_delete_accounting_ledger_entries(si.doctype, si.name)
+		si.make_gl_entries()
+
+		pe = self._pay_at_85(si)
+		self.assertEqual(pe.references[0].exchange_rate, 84)
+		self.assertEqual(pe.references[0].exchange_gain_loss, 100)
+		debit, credit = self._party_balance()
+		self.assertEqual(flt(debit - credit, 2), 0)
+
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
 	"""Validation and gain/loss calculation paths, exercised on the document directly
