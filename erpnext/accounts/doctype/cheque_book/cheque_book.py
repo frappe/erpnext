@@ -74,10 +74,6 @@ class ChequeBook(Document):
 		if not self.is_in_range(self.next_cheque_no or ""):
 			self.next_cheque_no = self.cheque_start_no
 
-	def before_update_after_submit(self):
-		if self.has_value_changed("next_cheque_no"):
-			frappe.throw(_("Next Cheque No is managed automatically"))
-
 	def validate_bank_account(self):
 		bank_account = frappe.db.get_value(
 			"Bank Account",

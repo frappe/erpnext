@@ -274,8 +274,10 @@ class TestChequeBook(ERPNextTestSuite):
 
 	def test_submitted_bookmark_cannot_be_changed_with_normal_save(self):
 		self.book.next_cheque_no = "000104"
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(frappe.UpdateAfterSubmitError):
 			self.book.save()
+		self.book.reload()
+		self.assertEqual(self.book.next_cheque_no, "000101")
 
 	def test_free_count_uses_all_numbers_not_just_bookmark(self):
 		self.make_cheque_payment("000104")
