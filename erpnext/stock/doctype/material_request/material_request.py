@@ -291,11 +291,25 @@ class MaterialRequest(BuyingController):
 	def validate_material_request_type(self):
 		"""Validate fields in accordance with selected type"""
 
-		if self.material_request_type != "Customer Provided":
+		if self.material_request_type == "Customer Provided":
+			self.validate_customer_provided_items()
+		else:
 			self.customer = None
 
 		if self.material_request_type == "Subcontracting":
 			self.validate_subcontracted_items()
+
+	def validate_customer_provided_items(self):
+		items = {d.item_code for d in self.items if d.item_code}
+		provided_items = frappe.get_all(
+			"Item", filters={"name": ("in", items), "is_customer_provided_item": 1}, pluck="name"
+		)
+		if other_items := items - set(provided_items):
+			frappe.throw(
+				_("Items {0} are not Customer Provided Items").format(
+					", ".join(frappe.bold(d) for d in sorted(other_items))
+				)
+			)
 
 	def validate_subcontracted_items(self):
 		items = frappe.get_all(
