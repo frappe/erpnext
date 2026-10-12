@@ -24,7 +24,7 @@ from erpnext.stock.doctype.material_request.material_request import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
 class TestMaterialRequest(ERPNextTestSuite):
@@ -1796,6 +1796,31 @@ class TestMaterialRequest(ERPNextTestSuite):
 		close_work_order(work_order.name, "Closed")
 
 		self.assertEqual(frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"), 10)
+
+	@change_settings("Stock Settings", {"auto_indent": 1, "reorder_email_notify": 0})
+	def test_reorder_raises_one_request_for_a_shortfall(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.reorder_item import reorder_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"reorder_levels": [
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"warehouse_reorder_level": 10,
+						"warehouse_reorder_qty": 5,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+
+		def get_requested_qty(requests):
+			return [d.stock_qty for mr in requests for d in mr.items if d.item_code == item_code]
+
+		self.assertEqual(get_requested_qty(reorder_item()), [15])
+		self.assertEqual(get_requested_qty(reorder_item() or []), [])
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
