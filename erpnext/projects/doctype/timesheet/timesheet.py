@@ -197,13 +197,20 @@ class Timesheet(Document):
 			time_log.validate_dates()
 
 	def validate_time_logs(self):
+		previous = self.get_doc_before_save()
+		saved_activity_types = (
+			{row.name: row.activity_type for row in previous.time_logs}
+			if previous and previous.docstatus == 1
+			else {}
+		)
 		for time_log in self.time_logs:
 			time_log.set_to_time()
 			self.validate_overlap(time_log)
 			time_log.set_project()
 			time_log.validate_parent_project(self.parent_project)
 			time_log.validate_task_project()
-			time_log.validate_activity_type()
+			if time_log.activity_type != saved_activity_types.get(time_log.name):
+				time_log.validate_activity_type()
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single("Projects Settings")
