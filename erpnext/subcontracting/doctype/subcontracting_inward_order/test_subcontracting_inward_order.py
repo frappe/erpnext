@@ -376,6 +376,122 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(rm_return.items[0].transfer_qty, 2)
 
+	def test_cancel_rm_return_restores_each_batch_reservation(self):
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		batch_row = next(item for item in rm_in.items if item.item_code == "RM with Batch")
+		batch_row.qty = 3
+		rm_in.submit()
+		batch_no = next(iter(get_batch_nos(batch_row.serial_and_batch_bundle)))
+
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.items[0].update({"use_serial_batch_fields": 1, "batch_no": batch_no})
+		rm_in.submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 1
+		wo.submit()
+
+		def get_delivered_qty_per_reservation():
+			return [
+				frappe.db.get_value(
+					"Serial and Batch Entry", {"parent": sre, "batch_no": batch_no}, "delivered_qty"
+				)
+				for sre in frappe.get_all(
+					"Stock Reservation Entry",
+					{
+						"voucher_type": "Subcontracting Inward Order",
+						"voucher_detail_no": batch_row.scio_detail,
+						"docstatus": 1,
+					},
+					pluck="name",
+					order_by="creation",
+				)
+			]
+
+		delivered_before_return = get_delivered_qty_per_reservation()
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.submit()
+		rm_return.cancel()
+
+		self.assertEqual(get_delivered_qty_per_reservation(), delivered_before_return)
+
+	def test_rm_return_cancel_allowed_when_later_work_order_takes_another_batch(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		next(item for item in rm_in.items if item.item_code == "RM with Batch").qty = 3
+		rm_in.submit()
+
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.submit()
+
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 1
+		wo.submit()
+
+		rm_return.cancel()
+		self.assertEqual(rm_return.docstatus, 2)
+
+	def test_rm_return_cancel_blocked_by_later_work_order(self):
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		batch_row = next(item for item in rm_in.items if item.item_code == "RM with Batch")
+		batch_row.qty = 3
+		rm_in.submit()
+		batch_no = next(iter(get_batch_nos(batch_row.serial_and_batch_bundle)))
+
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.items[0].update({"use_serial_batch_fields": 1, "batch_no": batch_no})
+		rm_in.submit()
+
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].update(
+			{"qty": 1, "use_serial_batch_fields": 1, "batch_no": batch_no, "serial_and_batch_bundle": None}
+		)
+		rm_return.submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 1
+		wo.submit()
+
+		rm_return.reload()
+		rm_return.select_print_heading = (
+			frappe.get_doc(doctype="Print Heading", print_heading="_Test Return Heading")
+			.insert(ignore_if_duplicate=True)
+			.name
+		)
+		rm_return.save()
+
+		self.assertRaisesRegex(frappe.ValidationError, "Cancel the Work Order first", rm_return.cancel)
+
 	def test_rm_return_of_batch_received_twice(self):
 		from erpnext.stock.serial_batch_bundle import get_batch_nos
 
