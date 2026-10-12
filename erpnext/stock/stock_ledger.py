@@ -593,9 +593,7 @@ class update_entries_after:
 		self.repost_doc = args.get("repost_doc") or None
 		self.items_to_be_repost = args.get("items_to_be_repost") or None
 
-		self.allow_negative_stock = allow_negative_stock or is_negative_stock_allowed(
-			item_code=self.item_code
-		)
+		self.force_negative_stock = allow_negative_stock
 
 		self.args = frappe._dict(args)
 		if self.args.sle_id:
@@ -604,13 +602,12 @@ class update_entries_after:
 		self.prev_sle_dict = frappe._dict({})
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
-		self.valuation_method = get_valuation_method(self.item_code, self.company)
-		self.skip_serial_batch_valuation = is_serial_no_wise_valuation_disabled(self.item_code)
+		self.set_item_settings(self.item_code)
 		self.repost_affected_transaction = args.get("repost_affected_transaction") or set()
 
 		self.new_items_found = False
 		self.reposted_dependant_item_wh = {}
-		self.reserved_stock = self.get_reserved_stock()
+		self.reserved_stock = {}
 
 		self.data = frappe._dict()
 
@@ -621,7 +618,18 @@ class update_entries_after:
 
 		self.build()
 
-	def get_reserved_stock(self):
+	def set_item_settings(self, item_code):
+		"""A repost also walks the items made from this one, so settings follow each entry's item."""
+		self.valuation_method = get_valuation_method(item_code, self.company)
+		self.skip_serial_batch_valuation = is_serial_no_wise_valuation_disabled(item_code)
+		self.allow_negative_stock = self.force_negative_stock or is_negative_stock_allowed(
+			item_code=item_code
+		)
+
+	def get_reserved_stock(self, item_code, warehouse):
+		if (item_code, warehouse) in self.reserved_stock:
+			return self.reserved_stock[(item_code, warehouse)]
+
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		posting_datetime = get_combine_datetime(self.args.posting_date, self.args.posting_time)
 		query = (
@@ -631,14 +639,15 @@ class update_entries_after:
 				- (Sum(sre.delivered_qty) + Sum(sre.transferred_qty) + Sum(sre.consumed_qty))
 			)
 			.where(
-				(sre.item_code == self.item_code)
-				& (sre.warehouse == self.args.warehouse)
+				(sre.item_code == item_code)
+				& (sre.warehouse == warehouse)
 				& (sre.docstatus == 1)
 				& (sre.creation <= posting_datetime)
 			)
 		).run()
 
-		return flt(query[0][0]) if query else 0.0
+		self.reserved_stock[(item_code, warehouse)] = flt(query[0][0]) if query else 0.0
+		return self.reserved_stock[(item_code, warehouse)]
 
 	def set_precision(self):
 		self.flt_precision = cint(frappe.db.get_default("float_precision")) or 2
@@ -1013,6 +1022,8 @@ class update_entries_after:
 			)
 
 	def process_sle(self, sle):
+		self.set_item_settings(sle.item_code)
+
 		# previous sle data for this warehouse
 		key = (sle.item_code, sle.warehouse)
 		if key not in self.prev_sle_dict:
@@ -1320,14 +1331,14 @@ class update_entries_after:
 			sle["serial_nos"] = get_serial_nos_data(",".join(serial_nos))
 			sn_obj = SerialNoValuation(
 				sle=sle,
-				item_code=self.item_code,
+				item_code=sle.item_code,
 				warehouse=sle.warehouse,
 			)
 		else:
 			sle["batch_nos"] = {row.batch_no: row for row in sabb_data if row.batch_no}
 			sn_obj = BatchNoValuation(
 				sle=sle,
-				item_code=self.item_code,
+				item_code=sle.item_code,
 				warehouse=sle.warehouse,
 				prev_sle=prev_sle,
 			)
@@ -1337,7 +1348,7 @@ class update_entries_after:
 		avg_rate = 0.0
 
 		for d in sabb_data:
-			incoming_rate = get_incoming_rate_for_serial_and_batch(self.item_code, d, sn_obj, self.company)
+			incoming_rate = get_incoming_rate_for_serial_and_batch(sle.item_code, d, sn_obj, self.company)
 			amount = incoming_rate * flt(d.qty)
 			tot_amt += flt(amount)
 			total_qty += flt(d.qty)
@@ -1399,7 +1410,11 @@ class update_entries_after:
 		validate negative stock for entries current datetime onwards
 		will not consider cancelled entries
 		"""
-		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty) - flt(self.reserved_stock)
+		diff = (
+			self.wh_data.qty_after_transaction
+			+ flt(sle.actual_qty)
+			- flt(self.get_reserved_stock(sle.item_code, sle.warehouse))
+		)
 		diff = flt(diff, self.flt_precision)  # respect system precision
 
 		diff_threshold = 0.0001
@@ -1956,12 +1971,13 @@ class update_entries_after:
 				)
 
 			if msg:
-				if self.reserved_stock:
+				reserved_stock = self.get_reserved_stock(exceptions[0]["item_code"], warehouse)
+				if reserved_stock:
 					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
 
 					if allowed_qty > 0:
 						msg = "{} As {} units are reserved for other sales orders, you are allowed to consume only {} units.".format(
-							msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
+							msg, frappe.bold(reserved_stock), frappe.bold(allowed_qty)
 						)
 					else:
 						msg = f"{msg} As the full stock is reserved for other transactions, you're not allowed to consume the stock."
