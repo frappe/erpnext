@@ -150,6 +150,12 @@ class TestSupplierScorecard(ERPNextTestSuite):
 			recipients, ["scorecard.employee@example.com", "scorecard.supplier@example.com"]
 		)
 
+	def test_perfect_score_maps_to_top_standing(self):
+		doc = make_scorecard_for("_Test Supplier SC Perfect")
+		doc.supplier_score = 100
+		doc.update_standing()
+		self.assertEqual(doc.status, "Excellent")
+
 
 def make_supplier_scorecard():
 	my_doc = frappe.get_doc(valid_scorecard[0])
