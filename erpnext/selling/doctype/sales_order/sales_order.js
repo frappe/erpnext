@@ -1010,7 +1010,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					if (doc.is_subcontracted) {
-						if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+						if (doc.items.some((item) => flt(item.subcontracted_qty) < flt(item.stock_qty))) {
 							this.frm.add_custom_button(
 								__("Subcontracting Inward Order"),
 								() => {
