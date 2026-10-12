@@ -210,6 +210,34 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 
 		self.assertEqual(visit.purposes[0].serial_no, serial_no)
 
+	def test_visit_allows_returned_serial_delivered_before_bundles(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		self.load_test_records("Stock Entry")
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"})
+		delivery = deliver_serial_nos(item_code, [serial_no])
+		make_sales_return(delivery.name).submit()
+
+		ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": delivery.name, "is_cancelled": 0},
+			["name", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		frappe.db.set_value("Stock Ledger Entry", ledger_entry.name, "serial_no", serial_no)
+		frappe.db.set_value(
+			"Serial and Batch Entry", {"parent": ledger_entry.serial_and_batch_bundle}, "is_cancelled", 1
+		)
+
+		visit = make_maintenance_visit()
+		visit.purposes[0].item_code = item_code
+		visit.purposes[0].serial_no = serial_no
+		visit.save()
+
+		self.assertEqual(visit.purposes[0].serial_no, serial_no)
+
 
 def make_maintenance_visit():
 	mv = frappe.new_doc("Maintenance Visit")
