@@ -146,9 +146,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 					)
 					sle["outgoing_rate"] = 0.0
 
-			if sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation":
-				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+			if not (sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation"):
+				continue
 
+			sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 			args = sle_doc.as_dict()
 			args["posting_datetime"] = get_combine_datetime(args.posting_date, args.posting_time)
 
@@ -1519,7 +1520,12 @@ class update_entries_after:
 
 				if self.valuation_method == "Moving Average" and (
 					self.skip_serial_batch_valuation
-					or not (sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle"))
+					or (
+						sle.voucher_type in ("Delivery Note", "Sales Invoice")
+						and not (
+							sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle")
+						)
+					)
 				):
 					rate = self.get_moving_average_rate_for_return(sle)
 
@@ -1870,7 +1876,7 @@ class update_entries_after:
 				[0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate]
 			)
 
-		if self.wh_data.qty_after_transaction:
+		if flt(self.wh_data.qty_after_transaction, self.flt_precision):
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def is_return_purchase_entry(self, sle):
