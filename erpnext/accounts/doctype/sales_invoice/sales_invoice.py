@@ -47,6 +47,7 @@ from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -1176,18 +1177,19 @@ class SalesInvoice(SellingController):
 			name: get_projectwise_timesheet_data(self.project, name)
 			for name in {row.time_sheet for row in pending}
 		}
+		exchange_rates = {}
 		for row in pending:
 			if row.timesheet_detail:
-				self.fill_from_time_log(row, unbilled_logs[row.time_sheet])
+				self.fill_from_time_log(row, unbilled_logs[row.time_sheet], exchange_rates)
 			else:
-				self.replace_with_time_logs(row, unbilled_logs[row.time_sheet])
+				self.replace_with_time_logs(row, unbilled_logs[row.time_sheet], exchange_rates)
 
-	def fill_from_time_log(self, row, time_logs: list):
+	def fill_from_time_log(self, row, time_logs: list, exchange_rates: dict):
 		if log := next((log for log in time_logs if log.name == row.timesheet_detail), None):
 			row.billing_hours = row.billing_hours or log.billing_hours
-			row.billing_amount = row.billing_amount or log.billing_amount
+			row.billing_amount = row.billing_amount or self.get_billing_amount(log, exchange_rates)
 
-	def replace_with_time_logs(self, row, time_logs: list):
+	def replace_with_time_logs(self, row, time_logs: list, exchange_rates: dict):
 		listed = {d.timesheet_detail for d in self.timesheets}
 		time_logs = [log for log in time_logs if log.name not in listed]
 		if not time_logs:
@@ -1203,7 +1205,7 @@ class SalesInvoice(SellingController):
 
 		self.remove(row)
 		for log in time_logs:
-			self.append("timesheets", self.get_timesheet_row(log))
+			self.append("timesheets", self.get_timesheet_row(log, exchange_rates))
 
 	def link_time_log(self, row, time_logs: list):
 		"""Bill a row's own amount against the only unbilled log of its timesheet."""
@@ -1236,21 +1238,38 @@ class SalesInvoice(SellingController):
 	def add_timesheet_data(self):
 		self.set("timesheets", [])
 		if self.project:
+			exchange_rates = {}
 			for data in get_projectwise_timesheet_data(self.project):
-				self.append("timesheets", self.get_timesheet_row(data))
+				self.append("timesheets", self.get_timesheet_row(data, exchange_rates))
 
 			self.calculate_billing_amount_for_timesheet()
 
-	@staticmethod
-	def get_timesheet_row(time_log) -> dict:
+	def get_timesheet_row(self, time_log, exchange_rates: dict) -> dict:
 		return {
 			"time_sheet": time_log.time_sheet,
 			"billing_hours": time_log.billing_hours,
-			"billing_amount": time_log.billing_amount,
+			"billing_amount": self.get_billing_amount(time_log, exchange_rates),
 			"timesheet_detail": time_log.name,
 			"activity_type": time_log.activity_type,
 			"description": time_log.description,
 		}
+
+	def get_billing_amount(self, time_log, exchange_rates: dict) -> float:
+		"""Time log billing amount in the invoice currency; `exchange_rates` keeps each rate for the pass."""
+		if not time_log.currency or time_log.currency == self.currency:
+			return time_log.billing_amount
+
+		if time_log.currency not in exchange_rates:
+			exchange_rate = get_exchange_rate(time_log.currency, self.currency, self.posting_date)
+			if not exchange_rate:
+				frappe.throw(
+					_(
+						"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+					).format(time_log.currency, self.currency, self.posting_date)
+				)
+			exchange_rates[time_log.currency] = exchange_rate
+
+		return flt(time_log.billing_amount) * exchange_rates[time_log.currency]
 
 	def calculate_billing_amount_for_timesheet(self):
 		def timesheet_sum(field):
