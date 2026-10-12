@@ -76,9 +76,7 @@ class AssetMaintenanceLog(Document):
 
 	def revert_maintenance_task(self):
 		task = frappe.get_doc("Asset Maintenance Task", self.task)
-		if not task.last_completion_date or getdate(task.last_completion_date) != getdate(
-			self.completion_date
-		):
+		if not self.drives_task_schedule(task):
 			return
 
 		task.last_completion_date = frappe.db.get_value(
@@ -90,6 +88,23 @@ class AssetMaintenanceLog(Document):
 		task.next_due_date = self.due_date
 		task.save()
 		frappe.get_doc("Asset Maintenance", self.asset_maintenance).save()
+
+	def drives_task_schedule(self, task) -> bool:
+		if not task.last_completion_date or getdate(task.last_completion_date) != getdate(
+			self.completion_date
+		):
+			return False
+
+		return not frappe.db.exists(
+			"Asset Maintenance Log",
+			{
+				"task": self.task,
+				"docstatus": 1,
+				"maintenance_status": "Completed",
+				"completion_date": self.completion_date,
+				"creation": (">", self.creation),
+			},
+		)
 
 	def update_maintenance_task(self):
 		asset_maintenance_doc = frappe.get_doc("Asset Maintenance Task", self.task)

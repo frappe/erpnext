@@ -67,6 +67,21 @@ class TestAssetMaintenanceLog(ERPNextTestSuite):
 		self.assertEqual(getdate(task.next_due_date), getdate())
 		self.assertEqual(getdate(get_open_log(task.name).due_date), getdate())
 
+	def test_cancelling_a_superseded_completed_log_keeps_the_schedule(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		first_log = get_open_log(task.name)
+		first_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		first_log.submit()
+		second_log = get_open_log(task.name)
+		second_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		second_log.submit()
+
+		first_log.cancel()
+
+		task.reload()
+		self.assertEqual(getdate(task.last_completion_date), getdate())
+		self.assertEqual(getdate(task.next_due_date), add_months(getdate(), 1))
+
 	def test_cancelled_log_does_not_reschedule_the_task(self):
 		task = self.asset_maintenance.asset_maintenance_tasks[0]
 		log = get_open_log(task.name)
