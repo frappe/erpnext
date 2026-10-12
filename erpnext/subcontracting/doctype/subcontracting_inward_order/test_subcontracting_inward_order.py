@@ -548,6 +548,32 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
 		self.assertEqual(reserved_qty.get(receipts[1].items[0].scio_detail), 3)
 
+	def test_receipt_cancel_release_survives_work_order_close(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher,
+		)
+
+		so, scio = create_so_scio()
+		first_receipt = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		first_receipt.items = [item for item in first_receipt.items if item.item_code == "Basic RM"]
+		first_receipt.items[0].qty = 2
+		first_receipt.submit()
+		scio.reload()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		first_receipt.cancel()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.qty = 3
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		close_work_order(wo.name, "Closed")
+
+		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
+		self.assertEqual(reserved_qty[first_receipt.items[0].scio_detail], 3)
+
 	def test_self_rm_billed_qty_across_rows(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
