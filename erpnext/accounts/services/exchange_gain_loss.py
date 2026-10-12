@@ -215,7 +215,8 @@ def set_transaction_currency_and_rate_in_gl_map(doc, gl_entries: list) -> None:
 
 def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date) -> float | None:
 	"""Rate of the latest Exchange Rate Revaluation of the invoice's party account, posted between
-	the invoice date and `on_date` and not reversed by `on_date`. None if there is no such revaluation."""
+	the invoice date and `on_date`, booked after the invoice and not reversed by `on_date`.
+	None if there is no such revaluation."""
 	if invoice_doctype not in ("Sales Invoice", "Purchase Invoice") or not invoice_name or not on_date:
 		return None
 
@@ -234,6 +235,9 @@ def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date)
 	if not inv:
 		return None
 	account = inv.debit_to if is_sales else inv.credit_to
+	invoice_booked_at = _booked_at(invoice_doctype, invoice_name)
+	if not invoice_booked_at:
+		return None
 	party_type, party = ("Customer", inv.customer) if is_sales else ("Supplier", inv.supplier)
 
 	je = qb.DocType("Journal Entry")
@@ -250,7 +254,7 @@ def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date)
 			& (err_acc.party_type == jea.party_type)
 			& (err_acc.party == jea.party)
 		)
-		.select(je.name, err_acc.new_exchange_rate)
+		.select(je.name, err_acc.new_exchange_rate, je.posting_date, je.creation)
 		.distinct()
 		.where(
 			(je.voucher_type == "Exchange Rate Revaluation")
@@ -271,6 +275,10 @@ def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date)
 	)
 
 	for row in revaluations:
+		# a revaluation booked before a back-dated invoice never covered that invoice's balance
+		revaluation_booked_at = _booked_at("Journal Entry", row.name)
+		if not revaluation_booked_at or revaluation_booked_at <= invoice_booked_at:
+			continue
 		reversed_by_date = frappe.db.exists(
 			"Journal Entry",
 			{"reversal_of": row.name, "docstatus": 1, "posting_date": ("<=", on_date)},
@@ -278,3 +286,13 @@ def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date)
 		if not reversed_by_date:
 			return flt(row.new_exchange_rate)
 	return None
+
+
+def _booked_at(voucher_type: str, voucher_no: str):
+	"""When the voucher hit the ledger (its first live GL Entry)."""
+	return frappe.db.get_value(
+		"GL Entry",
+		{"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+		"creation",
+		order_by="creation asc",
+	)

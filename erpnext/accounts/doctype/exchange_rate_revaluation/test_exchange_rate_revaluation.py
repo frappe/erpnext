@@ -388,22 +388,29 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 
 	def _invoice_revalued_at_84(self):
 		"""$100 invoice at 80 ten days ago, revalued to 84 five days ago. Returns (invoice, revaluation journal)."""
+		si = self._usd_invoice_at_80(add_days(today(), -10))
+		return si, self._revalue_at_84()
+
+	def _usd_invoice_at_80(self, posting_date, rate=100, qty=1):
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,
 			customer=self.customer,
 			debit_to=self.debtors_usd,
-			posting_date=add_days(today(), -10),
+			posting_date=posting_date,
 			parent_cost_center=self.cost_center,
 			cost_center=self.cost_center,
-			rate=100,
-			price_list_rate=100,
+			rate=rate,
+			price_list_rate=rate,
+			qty=qty,
+			is_return=qty < 0,
 			do_not_submit=1,
 		)
 		si.currency = "USD"
 		si.conversion_rate = 80
-		si.save().submit()
+		return si.save().submit()
 
+	def _revalue_at_84(self):
 		err = frappe.new_doc("Exchange Rate Revaluation")
 		err.company = self.company
 		err.posting_date = add_days(today(), -5)
@@ -414,8 +421,7 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 			row.gain_loss = row.new_balance_in_base_currency - flt(row.balance_in_base_currency)
 		err.set_total_gain_loss()
 		err = err.save().submit()
-		je = frappe.get_doc("Journal Entry", err.make_jv_entries().get("revaluation_jv")).submit()
-		return si, je
+		return frappe.get_doc("Journal Entry", err.make_jv_entries().get("revaluation_jv")).submit()
 
 	def _party_balance(self):
 		return frappe.db.get_all(
@@ -493,6 +499,45 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 
 		debit, credit = self._party_balance()
 		self.assertEqual(flt(debit - credit, 2), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_09_invoice_entered_after_revaluation_keeps_its_rate(self):
+		self._invoice_revalued_at_84()
+		# back-dated before the revaluation but entered after it, so the revaluation never covered it
+		late_si = self._usd_invoice_at_80(add_days(today(), -8))
+
+		pe = self._pay_at_85(late_si)
+		self.assertEqual(pe.references[0].exchange_rate, 80)
+		self.assertEqual(pe.references[0].exchange_gain_loss, 500)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_10_credit_note_reconciled_after_revaluation_has_no_gain_loss(self):
+		si = self._usd_invoice_at_80(add_days(today(), -10))
+		credit_note = self._usd_invoice_at_80(add_days(today(), -5), rate=20, qty=-1)
+		# revalues the net $80 balance, invoice and credit note alike
+		self._revalue_at_84()
+
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.invoices if x.invoice_number == si.name]
+		payments = [x.as_dict() for x in pr.payments if x.reference_name == credit_note.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(pr.allocation[0].difference_amount, 0)
+		pr.reconcile()
+
+		# the $80 left on the invoice is carried at 84
+		debit, credit = self._party_balance()
+		self.assertEqual(flt(debit - credit, 2), 6720)
 
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
