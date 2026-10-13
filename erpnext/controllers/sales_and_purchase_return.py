@@ -294,16 +294,9 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			current_stock_qty = args.get(column)
 			if column == "stock_qty":
 				current_stock_qty = flt(args.get("qty")) * flt(args.get("conversion_factor") or 1)
-		elif column == "rejected_qty" and args.get("return_qty_from_rejected_warehouse"):
-			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = flt(
-				args.get("stock_qty") or (flt(args.get("qty")) * flt(args.get("conversion_factor") or 1))
-			)
-		elif column == "received_qty" and args.get("return_qty_from_rejected_warehouse"):
-			reference_qty = ref.get("received_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = flt(
-				args.get("stock_qty") or (flt(args.get("qty")) * flt(args.get("conversion_factor") or 1))
-			)
+		elif column in ("rejected_qty", "received_qty") and args.get("return_qty_from_rejected_warehouse"):
+			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
+			current_stock_qty = flt(args.get("qty")) * flt(args.get("conversion_factor") or 1)
 		else:
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)

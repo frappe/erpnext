@@ -404,6 +404,40 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_pr4.items[0].received_qty = -1
 		self.assertRaises(frappe.ValidationError, return_pr4.insert)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_rejected_return_recalculates_checked_qty_from_qty_and_conversion_factor(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item().name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		rejected_warehouse = "Work In Progress - TCP1"
+
+		pr = make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=item_code,
+			qty=0,
+			received_qty=2,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name, return_against_rejected_qty=True)
+		return_pr.items[0].qty = -1
+		return_pr.items[0].stock_qty = -1
+		return_pr.items[0].received_qty = -1
+		return_pr.insert()
+
+		# Mutate draft qty to -3 while stock_qty remains -1
+		return_pr.items[0].qty = -3
+		return_pr.items[0].received_qty = -3
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError
+
+		self.assertRaises(StockOverReturnError, return_pr.submit)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
