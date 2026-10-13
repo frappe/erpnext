@@ -313,13 +313,9 @@ def validate_against_blanket_order(order_doc):
 
 		for item in order_doc.get("items"):
 			if item.blanket_order:
-				if item.blanket_order in order_data:
-					if item.item_code in order_data[item.blanket_order]:
-						order_data[item.blanket_order][item.item_code] += item.qty
-					else:
-						order_data[item.blanket_order][item.item_code] = item.qty
-				else:
-					order_data[item.blanket_order] = {item.item_code: item.qty}
+				stock_qty = flt(item.qty) * (flt(item.conversion_factor) or 1)
+				item_data = order_data.setdefault(item.blanket_order, {})
+				item_data[item.item_code] = item_data.get(item.item_code, 0) + stock_qty
 
 		for bo_name, item_data in sorted(order_data.items()):
 			bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)

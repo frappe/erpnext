@@ -160,6 +160,21 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, so.submit)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_over_order_check_uses_stock_qty(self):
+		item = make_box_item("_Test Blanket Order Box Item")
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, item_code=item)
+
+		po = make_purchase_order_against(bo, qty=9)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be ordered more than", po.submit)
+
+		po.items[0].qty = 8
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 96)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg"}).name
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=1, item_code=item)
@@ -572,6 +587,17 @@ def make_blanket_order(**args):
 	bo.insert()
 	bo.submit()
 	return bo
+
+
+def make_box_item(item_code):
+	return make_item(
+		item_code,
+		{
+			"is_stock_item": 1,
+			"stock_uom": "Nos",
+			"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+		},
+	).name
 
 
 def make_purchase_order_against(blanket_order, qty):
