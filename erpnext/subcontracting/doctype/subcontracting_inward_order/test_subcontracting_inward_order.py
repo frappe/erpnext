@@ -1305,6 +1305,27 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
 		self.assertEqual(reserved_qty[basic_rm.name], 3)
 
+	def test_used_work_order_reservation_cannot_be_unreserved(self):
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			unreserve_stock_for_work_order,
+		)
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 2)).submit()
+
+		reservations = frappe.get_all(
+			"Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}, pluck="name"
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Close the Work Order", unreserve_stock_for_work_order, wo, reservations
+		)
+
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
