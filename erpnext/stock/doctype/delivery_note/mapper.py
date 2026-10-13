@@ -448,6 +448,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 
