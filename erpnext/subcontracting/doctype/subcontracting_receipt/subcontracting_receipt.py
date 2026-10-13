@@ -813,12 +813,11 @@ class SubcontractingReceipt(SubcontractingController):
 		) and not (frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")):
 			return
 
-		rm_consumed_dict = self.get_rm_wise_consumed_qty()
 		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")
+		rm_consumed_dict = self.get_rm_wise_consumed_qty()
 
-		for rm_item_code, required in self.get_rm_wise_required_qty().items():
-			consumed_qty = rm_consumed_dict.get(rm_item_code, 0)
-			diff = flt(consumed_qty, precision) - flt(required.qty, precision)
+		for rm_item_code, required in self.get_rm_wise_required_qty(precision).items():
+			diff = flt(rm_consumed_dict.get(rm_item_code, 0), precision) - flt(required.qty, precision)
 
 			if diff < 0:
 				msg = _(
@@ -834,8 +833,7 @@ class SubcontractingReceipt(SubcontractingController):
 					exc=BOMQuantityError,
 				)
 
-	def get_rm_wise_required_qty(self):
-		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped."""
+	def get_rm_wise_required_qty(self, precision: int) -> dict:
 		rm_dict = {}
 
 		for row in self.items:
@@ -849,7 +847,7 @@ class SubcontractingReceipt(SubcontractingController):
 					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
 				)
 				required.qty += flt(
-					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, row.precision("qty")
+					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, precision
 				)
 
 		return rm_dict

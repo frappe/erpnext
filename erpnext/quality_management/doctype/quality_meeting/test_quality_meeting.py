@@ -2,9 +2,13 @@
 # See license.txt
 import unittest
 
+import frappe
+
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestQualityMeeting(ERPNextTestSuite):
-	# nothing to test
-	pass
+	def test_two_meetings_on_the_same_day(self):
+		first = frappe.get_doc(doctype="Quality Meeting").insert()
+		second = frappe.get_doc(doctype="Quality Meeting").insert()
+		self.assertNotEqual(first.name, second.name)
