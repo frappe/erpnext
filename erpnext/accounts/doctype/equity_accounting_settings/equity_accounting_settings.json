@@ -11,12 +11,7 @@
   "share_capital_account",
   "securities_premium_account",
   "treasury_shares_account",
-  "equity_adjustment_account",
-  "posting_policy",
-  "accounting_mode",
-  "auto_submit_journal",
-  "allow_treasury",
-  "frozen_through"
+  "equity_adjustment_account"
  ],
  "fields": [
   {
@@ -58,38 +53,6 @@
    "fieldtype": "Link",
    "label": "Equity Adjustment Account",
    "options": "Account"
-  },
-  {
-   "fieldname": "posting_policy",
-   "fieldtype": "Section Break",
-   "label": "Posting Policy"
-  },
-  {
-   "fieldname": "accounting_mode",
-   "fieldtype": "Select",
-   "label": "Accounting Mode",
-   "options": "Clearing\nDirect",
-   "default": "Direct",
-   "reqd": 1,
-   "description": "Direct prepares the company journal. Clearing uses an amount-due account; finance records payment with a separate Journal Entry."
-  },
-  {
-   "fieldname": "auto_submit_journal",
-   "fieldtype": "Check",
-   "label": "Automatically Submit Generated Journals",
-   "default": "0"
-  },
-  {
-   "fieldname": "allow_treasury",
-   "fieldtype": "Check",
-   "label": "Allow Treasury Shares",
-   "default": "0",
-   "description": "Confirm that holding and reissuing own shares is permitted for this company."
-  },
-  {
-   "fieldname": "frozen_through",
-   "fieldtype": "Date",
-   "label": "Ownership Frozen Through"
   }
  ],
  "permissions": [
@@ -117,5 +80,6 @@
  ],
  "track_changes": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "modified": "2026-10-13 00:00:00.000000"
 }

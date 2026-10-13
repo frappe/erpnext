@@ -60,6 +60,7 @@
   "reversal_of",
   "payment_order",
   "stock_entry",
+  "share_transaction",
   "printing_settings",
   "pay_to_recd_from",
   "letter_head",
@@ -660,6 +661,15 @@
    "fieldname": "custom_remark",
    "fieldtype": "Check",
    "label": "Custom Remark"
+  },
+  {
+   "fieldname": "share_transaction",
+   "fieldtype": "Link",
+   "label": "Share Transaction",
+   "options": "Share Transaction",
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1
   }
  ],
  "icon": "notebook-pen",
