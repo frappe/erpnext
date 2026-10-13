@@ -41,7 +41,7 @@ class TestCustomer(FrappeTestCase):
 		doc.credit_limits = []
 		test_account_details = {
 			"company": "_Test Company",
-			"account": "Creditors - _TC",
+			"account": "Debtors - _TC",
 		}
 		test_credit_limits = {"company": "_Test Company", "credit_limit": 350000}
 		doc.append("accounts", test_account_details)
@@ -59,7 +59,7 @@ class TestCustomer(FrappeTestCase):
 		self.assertEqual(c_doc.payment_terms, "_Test Payment Term Template 3")
 
 		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
-		self.assertEqual(c_doc.accounts[0].account, "Creditors - _TC")
+		self.assertEqual(c_doc.accounts[0].account, "Debtors - _TC")
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
