@@ -162,6 +162,10 @@ def process_boms_cost_level_wise(
 			# First level yet to process. On Submit.
 			current_level = 0
 			current_boms = get_leaf_boms()
+			if not current_boms:
+				set_values_in_log(update_doc.name, {"status": "Completed"}, commit=True)
+				return
+
 			values = {
 				"processed_boms": json.dumps({}),
 				"status": "In Progress",

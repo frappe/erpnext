@@ -1,8 +1,11 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
+from erpnext.manufacturing.doctype.bom_update_log import bom_update_log
 from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import (
 	BOMMissingError,
 	resume_bom_cost_update_jobs,
@@ -102,6 +105,15 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 		exploded_items = [item.item_code for item in exploded_items]
 		expected_exploded_items = ["B-Item C", "B-Item G"]
 		self.assertEqual(sorted(exploded_items), sorted(expected_exploded_items))
+
+	def test_update_cost_without_leaf_boms_completes(self):
+		with patch.object(bom_update_log, "get_leaf_boms", return_value=[]):
+			log = enqueue_update_cost()
+
+		log.reload()
+		self.assertEqual(log.status, "Completed")
+		self.assertFalse(log.bom_batches)
+		enqueue_update_cost()
 
 
 def remove_bom(item_code):
