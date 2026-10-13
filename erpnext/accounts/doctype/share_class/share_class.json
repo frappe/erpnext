@@ -1,0 +1,200 @@
+{
+ "actions": [],
+ "autoname": "format:SC-{#####}",
+ "creation": "2026-09-25 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "identity_section",
+  "class_name",
+  "class_code",
+  "column_break_identity",
+  "category",
+  "description",
+  "voting_rights_section",
+  "has_voting_rights",
+  "column_break_voting_rights",
+  "votes_per_share",
+  "dividend_rights_section",
+  "has_dividend_rights",
+  "dividend_type",
+  "column_break_dividend_rights",
+  "dividend_rate",
+  "is_cumulative",
+  "transfer_rules_section",
+  "transfer_requires_approval",
+  "legacy_share_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "identity_section",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "class_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Class Name",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "class_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Class Code",
+   "reqd": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_identity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Ordinary\nPreference",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "voting_rights_section",
+   "fieldtype": "Section Break",
+   "label": "Voting Rights"
+  },
+  {
+   "default": "1",
+   "fieldname": "has_voting_rights",
+   "fieldtype": "Check",
+   "label": "Has Voting Rights?"
+  },
+  {
+   "fieldname": "column_break_voting_rights",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "depends_on": "has_voting_rights",
+   "fieldname": "votes_per_share",
+   "fieldtype": "Float",
+   "label": "Votes Per Share",
+   "mandatory_depends_on": "has_voting_rights"
+  },
+  {
+   "fieldname": "dividend_rights_section",
+   "fieldtype": "Section Break",
+   "label": "Dividend Rights"
+  },
+  {
+   "default": "1",
+   "fieldname": "has_dividend_rights",
+   "fieldtype": "Check",
+   "label": "Has Dividend Rights?"
+  },
+  {
+   "depends_on": "has_dividend_rights",
+   "fieldname": "dividend_type",
+   "fieldtype": "Select",
+   "label": "Dividend Type",
+   "mandatory_depends_on": "has_dividend_rights",
+   "options": "Variable\nFixed Rate on Face Value"
+  },
+  {
+   "fieldname": "column_break_dividend_rights",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.has_dividend_rights && doc.dividend_type == 'Fixed Rate on Face Value'",
+   "fieldname": "dividend_rate",
+   "fieldtype": "Percent",
+   "label": "Dividend Rate (%)",
+   "mandatory_depends_on": "eval:doc.has_dividend_rights && doc.dividend_type == 'Fixed Rate on Face Value'"
+  },
+  {
+   "depends_on": "eval:doc.has_dividend_rights && doc.dividend_type == 'Fixed Rate on Face Value'",
+   "fieldname": "is_cumulative",
+   "fieldtype": "Check",
+   "label": "Is Cumulative?"
+  },
+  {
+   "fieldname": "transfer_rules_section",
+   "fieldtype": "Section Break",
+   "label": "Transfer Rules"
+  },
+  {
+   "fieldname": "transfer_requires_approval",
+   "fieldtype": "Check",
+   "label": "Transfer Requires Approval?"
+  },
+  {
+   "fieldname": "legacy_share_type",
+   "fieldtype": "Link",
+   "options": "Share Type",
+   "label": "Legacy Share Type",
+   "description": "Map an old Share Type before replaying its share history."
+  }
+ ],
+ "icon": "tag",
+ "links": [],
+ "modified": "2026-10-13 01:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Share Class",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "class_name, class_code",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "class_name",
+ "track_changes": 1
+}
