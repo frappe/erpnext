@@ -1014,11 +1014,10 @@ class WorkOrder(Document):
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
 		self.create_job_card()
+		self.update_subcontracting_inward_order_received_items()
 
 		if self.reserve_stock:
 			self.update_stock_reservation()
-
-		self.update_subcontracting_inward_order_received_items()
 
 	def on_cancel(self):
 		self.validate_cancel()
@@ -1045,7 +1044,6 @@ class WorkOrder(Document):
 		self.update_subcontracting_inward_order_received_items()
 
 	def update_stock_reservation(self):
-		self.set_qty_change()
 		reserve_stock_for_work_order(self)
 		self.db_set("status", self.get_status())
 
@@ -1069,11 +1067,7 @@ class WorkOrder(Document):
 					None,
 				)
 
-				if (
-					wo_item
-					and d.work_order_qty + wo_item.required_qty == d.bom_qty
-					and d.received_qty > d.bom_qty
-				):
+				if wo_item and d.work_order_qty == d.bom_qty and d.received_qty > d.bom_qty:
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
 	def update_subcontracting_inward_order_received_items(self):
@@ -2521,12 +2515,13 @@ def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False
 				doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
 			)
 		elif doc.subcontracting_inward_order and is_transfer:
+			doc.set_qty_change()
 			sre.transfer_reservation_entries_to(
 				doc.subcontracting_inward_order,
 				from_doctype="Subcontracting Inward Order",
 				to_doctype="Work Order",
 				against_fg_item=doc.subcontracting_inward_order_item,
-				qty_change=doc.qty_change,
+				qty_change=doc.get("qty_change"),
 			)
 		else:
 			sre_created = sre.make_stock_reservation_entries()
