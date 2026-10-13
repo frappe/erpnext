@@ -520,6 +520,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.per_billed, 0)
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_purchase_return_full(self):
@@ -552,6 +553,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.status, "Return Issued")
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_purchase_return_for_rejected_qty(self):
@@ -598,6 +600,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(actual_qty, -2)
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_per_billed_for_fully_rejected_receipt(self):
@@ -725,6 +728,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(abs(return_pr.items[0].stock_qty), 1.0)
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_closed_purchase_receipt(self):
@@ -1131,6 +1135,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr_return.submit()
 
 		pr_return.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_purchase_receipt_cost_center(self):
