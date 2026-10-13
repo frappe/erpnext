@@ -139,11 +139,11 @@ jobs:
           cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/frappe-bench/start-db.sh
           mkdir -p /opt/ci-bench-staging
           # self-clean: drop bench tars from runs older than 2h
-          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.gz' -mmin +120 -delete 2>/dev/null || true
+          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +120 -delete 2>/dev/null || true
           # Exclude .git/node_modules; the mariadb-data datadir IS included (the pre-loaded DB).
-          tar czpf "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.gz" -C /home/ci \
+          tar -I 'zstd -T0' -cpf "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" -C /home/ci \
             --exclude='.git' --exclude='node_modules' frappe-bench
-          ls -lh "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.gz"
+          ls -lh "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst"
 
   # Fan-out: each shard downloads the bench, untars it, starts MariaDB on the baked datadir, and
   # runs its slice of the suite. No clone, no build, no reinstall, no DB dump restore on the shards.
@@ -174,7 +174,7 @@ jobs:
       # GitHub download. -p preserves the ci (uid 1001) ownership so bench runs as ci cleanly.
       - name: Untar bench from node (hostPath)
         run: |
-          tar xzpf "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.gz" -C /home/ci
+          tar -I zstd -xpf "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" -C /home/ci
           ls -ld /home/ci/frappe-bench
 
       - name: Hydrate (start DB on baked datadir + bench start)
