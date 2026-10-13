@@ -331,6 +331,27 @@ class TestWorkstation(ERPNextTestSuite):
 			[("2031-03-04 08:00:00", "2031-03-04 09:00:00")],
 		)
 
+	def test_complete_job_books_the_qty_once_on_an_open_card(self):
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		job_card = make_scheduled_job_card("_Test WS Complete Job", [], 60, "2031-03-03 08:00:00", qty=10)
+		workstation = frappe.get_doc("Workstation", "_Test WS Complete Job")
+		other_workstation = make_workstation(workstation_name="_Test WS Complete Job Other")
+
+		first = make_employee("ws-operator-1@example.com", company="_Test Company")
+		second = make_employee("ws-operator-2@example.com", company="_Test Company")
+		self.assertRaises(
+			frappe.ValidationError, other_workstation.start_job, job_card.name, "2031-03-03 10:00:00", first
+		)
+		workstation.start_job(job_card.name, "2031-03-03 10:00:00", first)
+		workstation.start_job(job_card.name, "2031-03-03 10:00:00", second)
+		workstation.complete_job(job_card.name, 5, "2031-03-03 11:00:00")
+
+		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "total_completed_qty"), 5)
+		self.assertRaises(
+			frappe.ValidationError, workstation.start_job, job_card.name, "2031-03-03 13:00:00", first
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
@@ -369,6 +390,11 @@ def make_workstation(*args, **kwargs):
 
 
 def schedule_one_operation(workstation_name, shifts, minutes, planned_start, holiday_list=None):
+	job_card = make_scheduled_job_card(workstation_name, shifts, minutes, planned_start, holiday_list)
+	return [(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
+
+
+def make_scheduled_job_card(workstation_name, shifts, minutes, planned_start, holiday_list=None, qty=1):
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 	from erpnext.stock.doctype.item.test_item import make_item
@@ -394,10 +420,9 @@ def schedule_one_operation(workstation_name, shifts, minutes, planned_start, hol
 	bom.submit()
 
 	work_order = make_wo_order_test_record(
-		item=fg_item, bom_no=bom.name, qty=1, planned_start_date=planned_start
+		item=fg_item, bom_no=bom.name, qty=qty, planned_start_date=planned_start, skip_transfer=1
 	)
-	job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
-	return [(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
+	return frappe.get_doc("Job Card", {"work_order": work_order.name})
 
 
 def make_test_holiday_list(name, dates):

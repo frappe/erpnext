@@ -228,9 +228,7 @@ class Workstation(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
-		doc = frappe.get_doc("Job Card", job_card)
-		doc.check_permission("write")
-
+		doc = self.get_open_job_card(job_card, "write")
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
 		doc.save()
 
@@ -238,16 +236,32 @@ class Workstation(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
-		doc = frappe.get_doc("Job Card", job_card)
-		doc.check_permission("submit")
-
+		doc = self.get_open_job_card(job_card, "submit")
+		pending_qty = flt(qty)
 		for row in doc.time_logs:
 			if not row.to_time:
 				row.to_time = to_time
-				row.completed_qty = qty
+				row.completed_qty = pending_qty
+				pending_qty = 0
 
 		doc.save()
 		doc.submit()
+
+		return doc
+
+	def get_open_job_card(self, job_card, ptype):
+		doc = frappe.get_doc("Job Card", job_card)
+		doc.check_permission(ptype)
+
+		if doc.docstatus != 0:
+			frappe.throw(_("Job Card {0} is not open").format(get_link_to_form("Job Card", doc.name)))
+
+		if doc.workstation != self.name:
+			frappe.throw(
+				_("Job Card {0} is not for workstation {1}").format(
+					get_link_to_form("Job Card", doc.name), frappe.bold(self.name)
+				)
+			)
 
 		return doc
 
