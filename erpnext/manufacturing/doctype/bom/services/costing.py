@@ -33,7 +33,7 @@ class BOMCostingService:
 			self.doc.rm_cost_as_per = "Valuation Rate"
 
 		rate = self._raw_material_rate(arg, notify) if arg else 0
-		return flt(rate) * flt(self.doc.plc_conversion_rate or 1) / (self.doc.conversion_rate or 1)
+		return flt(rate) / (self.doc.conversion_rate or 1)
 
 	def _raw_material_rate(self, arg, notify):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
@@ -57,6 +57,10 @@ class BOMCostingService:
 		rate = get_bom_item_rate(arg, self.doc)
 		if not rate:
 			self._warn_rate_not_found(arg, notify)
+
+		if self.doc.rm_cost_as_per == "Price List":
+			rate = flt(rate) * flt(self.doc.plc_conversion_rate or 1)
+
 		return rate
 
 	def _warn_rate_not_found(self, arg, notify):

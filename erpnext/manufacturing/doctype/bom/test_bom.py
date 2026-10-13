@@ -1506,6 +1506,45 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("BOM", bom.name, "quantity"), 1)
 		self.assertEqual(frappe.db.get_value("BOM Item", {"parent": bom.name}, "qty"), 1)
 
+	def test_price_list_rate_conversion_applies_only_to_price_list_rates(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		price_list = make_usd_buying_price_list(80)
+		rm_item = make_item("_Test BOM USD RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		scrap_item = make_item("_Test BOM USD Scrap", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test BOM USD Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test BOM USD FG", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=800)
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse - _TC", qty=10, basic_rate=80)
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		sub_bom = make_usd_bom(sub_item, [{"item_code": rm_item, "qty": 1}])
+		self.assertEqual(sub_bom.total_cost, 10)
+
+		bom = make_usd_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}, {"item_code": sub_item, "qty": 1, "bom_no": sub_bom.name}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+			price_list_currency="USD",
+			plc_conversion_rate=80,
+			secondary_items=[
+				{
+					"item_code": scrap_item,
+					"qty": 1,
+					"uom": "Kg",
+					"secondary_item_type": "Scrap",
+					"valuation_type": "Valuation Rate",
+				}
+			],
+		)
+
+		self.assertEqual([row.rate for row in bom.items], [10, 10])
+		self.assertEqual(bom.secondary_items[0].cost, 1)
+		self.assertEqual(bom.total_cost, 19)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -1676,3 +1715,51 @@ def create_tree_for_phantom_bom_tests():  # returns expected explosion result
 	phantom_list = ["Phantom Item Level 1-2", "Phantom Item Level 2-1", "Phantom Item Level 2-2"]
 	create_nested_bom(bom_tree_1, prefix="", phantom_items=phantom_list)
 	return ["Sub Assembly Level 1-1", "Item Level 2-3"]
+
+
+def make_usd_buying_price_list(exchange_rate):
+	price_list = "_Test BOM USD Buying"
+	if not frappe.db.exists("Price List", price_list):
+		frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": price_list,
+				"currency": "USD",
+				"buying": 1,
+				"enabled": 1,
+			}
+		).insert()
+
+	today = frappe.utils.nowdate()
+	frappe.db.delete("Currency Exchange", {"date": today, "from_currency": "USD", "to_currency": "INR"})
+	frappe.get_doc(
+		{
+			"doctype": "Currency Exchange",
+			"date": today,
+			"from_currency": "USD",
+			"to_currency": "INR",
+			"exchange_rate": exchange_rate,
+			"for_buying": 1,
+			"for_selling": 1,
+		}
+	).insert()
+	return price_list
+
+
+def make_usd_bom(item, items, **values):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": item,
+			"company": "_Test Company",
+			"currency": "USD",
+			"conversion_rate": 80,
+			"quantity": 1,
+			"rm_cost_as_per": "Valuation Rate",
+			"items": [dict(row, source_warehouse="_Test Warehouse - _TC") for row in items],
+			**values,
+		}
+	)
+	bom.insert()
+	bom.submit()
+	return bom
