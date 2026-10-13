@@ -1573,6 +1573,21 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(switched.plc_conversion_rate, 80)
 		self.assertEqual(switched.items[0].rate, 10)
 
+	def test_exploded_items_use_the_current_stock_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_box_item("_Test BOM Box RM")
+		fg_item = make_item("_Test BOM Box FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+		bom.items[0].update({"qty": 2, "uom": "Box", "conversion_factor": 12, "stock_qty": None})
+		bom.insert()
+		self.assertEqual(bom.exploded_items[0].stock_qty, 24)
+
+		bom.items[0].qty = 3
+		bom.save()
+		self.assertEqual(bom.items[0].stock_qty, 36)
+		self.assertEqual(bom.exploded_items[0].stock_qty, 36)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -1791,3 +1806,15 @@ def make_usd_bom(item, items, **values):
 	bom.insert()
 	bom.submit()
 	return bom
+
+
+def make_box_item(item_code):
+	return make_item(
+		item_code,
+		{
+			"is_stock_item": 1,
+			"valuation_rate": 10,
+			"stock_uom": "Nos",
+			"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+		},
+	).name
