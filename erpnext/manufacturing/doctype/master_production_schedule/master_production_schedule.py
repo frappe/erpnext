@@ -346,13 +346,14 @@ class MasterProductionSchedule(Document):
 		item_wise_data = frappe._dict({})
 
 		for item in data:
-			key = (item.item_code, item.delivery_date)
+			key = (item.item_code, item.delivery_date, item.warehouse)
 
 			if key not in item_wise_data:
 				item_wise_data[key] = frappe._dict(
 					{
 						"item_code": item.item_code,
 						"delivery_date": item.delivery_date,
+						"warehouse": item.warehouse,
 						"stock_uom": item.stock_uom,
 						"qty": 0.0,
 						"cumulative_lead_time": 0.0,

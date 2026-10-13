@@ -56,6 +56,24 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 3)])
 
+	def test_demand_rows_keep_their_warehouse(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Warehouse Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=3, warehouse="Stores - _TC", do_not_submit=True)
+		order.append(
+			"items", {**order.items[0].as_dict(), "name": None, "qty": 4, "warehouse": "Finished Goods - _TC"}
+		)
+		order.submit()
+
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+
+		self.assertEqual(
+			sorted((row.warehouse, row.planned_qty) for row in mps.items),
+			[("Finished Goods - _TC", 4), ("Stores - _TC", 3)],
+		)
+
 	def test_lead_time_is_not_int_truncated(self):
 		lead_time = frappe._dict(manufacturing_time_in_mins=720, shift_time_in_hours=8, buffer_time=0)
 		self.assertAlmostEqual(get_own_lead_time(lead_time, 1, True), 1.5, places=2)
