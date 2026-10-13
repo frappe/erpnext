@@ -695,6 +695,33 @@ class TestSalesOrder(ERPNextTestSuite):
 				self.assertEqual(so.get("items")[0].returned_qty, 3)
 				self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 1)
 
+	def test_delivery_progress_after_returns_in_stock_uom(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return as make_credit_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, rate=10)
+		so = make_sales_order(item_code=item.name, qty=2, uom="Box", rate=120)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 1
+		dn.submit()
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -2})
+		dn_return.submit()
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.items[0].qty = 1
+		si.submit()
+		credit_note = make_credit_note(si.name)
+		credit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -4})
+		credit_note.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 1.5)
+		self.assertEqual(so.items[0].returned_qty, 0.5)
+
 	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
 		so = make_sales_order(
 			item_list=[
