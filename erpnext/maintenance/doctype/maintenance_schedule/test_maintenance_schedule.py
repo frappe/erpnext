@@ -416,6 +416,28 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 			)
 			self.assertEqual(len(ms.schedules), 1)
 
+	def test_start_date_checked_against_delivery_before_bundles(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial = frappe.db.get_value(
+			"Serial No", {"item_code": item_code, "status": "Active"}, ["name", "serial_no"], as_dict=True
+		)
+		delivery = deliver_serial_nos(item_code, [serial.serial_no])
+
+		ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": delivery.name, "is_cancelled": 0},
+			["name", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		frappe.db.set_value("Stock Ledger Entry", ledger_entry.name, "serial_no", serial.name)
+		frappe.db.set_value(
+			"Serial and Batch Entry", {"parent": ledger_entry.serial_and_batch_bundle}, "is_cancelled", 1
+		)
+
+		ms = make_maintenance_schedule(item_code=item_code, serial_no=serial.serial_no, start_date=today())
+		self.assertRaisesRegex(frappe.ValidationError, "before delivery date", ms.submit)
+
 	def test_serial_in_stock_is_refused(self):
 		item_code = "_Test Serial Item"
 		make_serial_item_with_serial(self, item_code)
