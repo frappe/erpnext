@@ -3114,6 +3114,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(pi.conversion_rate, 62.9)
 		self.assertEqual(pi.base_net_total, 6290)
 
+	def test_inter_company_purchase_invoice_keeps_sales_invoice_currency(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
+		pi.currency = "INR"
+		pi.credit_to = "Creditors - _TC"
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Currency must be"):
+			pi.save()
+
 	def test_inter_company_transaction_does_not_inherit_party_fields(self):
 		"""
 		Party-derived fields on SI (from Customer) must not leak into the mapped PI.
