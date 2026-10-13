@@ -11,7 +11,7 @@ from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_url
+from frappe.utils import flt, get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
@@ -81,6 +81,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_supplier_list()
 		super().validate_qty_is_not_zero()
 		validate_for_items(self)
+		self.set_missing_item_names()
 		super().set_qty_as_per_stock_uom()
 		self.update_email_id()
 
@@ -88,11 +89,17 @@ class RequestforQuotation(BuyingController):
 			# after amend and save, status still shows as cancelled, until submit
 			self.db_set("status", "Draft")
 
+	def set_missing_item_names(self):
+		for row in self.items:
+			if row.item_code and not row.item_name:
+				row.item_name = frappe.get_cached_value("Item", row.item_code, "item_name")
+
 	def set_has_unit_price_items(self):
 		"""
 		If permitted in settings and any item has 0 qty, the RFQ has unit price items.
 		"""
 		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_request_for_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -494,21 +501,21 @@ def create_supplier_quotation(doc: str | Document | dict):
 	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
-	validate_existing_supplier_quotation(supplier, doc.get("items"))
+	rfq = get_quotable_rfq(doc.get("name"), supplier)
+	validate_existing_supplier_quotation(supplier, rfq.name)
 
 	sq_doc = frappe.get_doc(
 		{
 			"doctype": "Supplier Quotation",
 			"supplier": supplier,
 			"terms": doc.get("terms"),
-			"company": doc.get("company"),
-			"currency": doc.get("currency")
-			or get_party_account_currency("Supplier", supplier, doc.get("company")),
+			"company": rfq.company,
+			"currency": doc.get("currency") or get_party_account_currency("Supplier", supplier, rfq.company),
 			"buying_price_list": doc.get("buying_price_list")
 			or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 		}
 	)
-	add_items(sq_doc, supplier, doc.get("items"))
+	add_items(sq_doc, supplier, rfq, doc.get("items"))
 	sq_doc.flags.ignore_permissions = True
 	sq_doc.run_method("set_missing_values")
 	sq_doc.save()
@@ -516,19 +523,18 @@ def create_supplier_quotation(doc: str | Document | dict):
 	return sq_doc.name
 
 
-def validate_existing_supplier_quotation(supplier, items):
-	request_for_quotations = {item.get("parent") for item in items if item.get("parent")}
-	if not request_for_quotations:
-		return
+def get_quotable_rfq(rfq_name, supplier):
+	"""Return the submitted Request for Quotation `supplier` was invited to quote on."""
+	rfq = frappe.get_doc("Request for Quotation", rfq_name)
+	if rfq.docstatus != 1 or supplier not in {row.supplier for row in rfq.suppliers}:
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
+	return rfq
+
+
+def validate_existing_supplier_quotation(supplier, request_for_quotation):
 	rfq = frappe.qb.DocType("Request for Quotation")
-	(
-		frappe.qb.from_(rfq)
-		.select(rfq.name)
-		.where(rfq.name.isin(request_for_quotations))
-		.orderby(rfq.name)
-		.for_update()
-	).run()
+	(frappe.qb.from_(rfq).select(rfq.name).where(rfq.name == request_for_quotation).for_update()).run()
 
 	sq = frappe.qb.DocType("Supplier Quotation")
 	sqi = frappe.qb.DocType("Supplier Quotation Item")
@@ -536,57 +542,59 @@ def validate_existing_supplier_quotation(supplier, items):
 		frappe.qb.from_(sq)
 		.inner_join(sqi)
 		.on(sq.name == sqi.parent)
-		.select(sq.name, sqi.request_for_quotation)
+		.select(sq.name)
 		.where(
 			(sq.docstatus < 2)
 			& (sq.supplier == supplier)
-			& (sqi.request_for_quotation.isin(request_for_quotations))
+			& (sqi.request_for_quotation == request_for_quotation)
 		)
 		.limit(1)
 	).run(as_dict=True)
 
 	if existing_quotation:
-		existing_quotation = existing_quotation[0]
 		frappe.throw(
 			_("Supplier Quotation {0} already exists against Request for Quotation {1}").format(
-				frappe.bold(existing_quotation.name),
-				frappe.bold(existing_quotation.request_for_quotation),
+				frappe.bold(existing_quotation[0].name),
+				frappe.bold(request_for_quotation),
 			)
 		)
 
 
-def add_items(sq_doc, supplier, items):
+def add_items(sq_doc, supplier, rfq, items):
+	rfq_rows = {row.name: row for row in rfq.items}
 	for data in items:
 		if isinstance(data, dict):
 			data = frappe._dict(data)
 
-		create_rfq_items(sq_doc, supplier, data)
+		if data.name not in rfq_rows:
+			frappe.throw(_("Row {0} is not part of Request for Quotation {1}.").format(data.idx, rfq.name))
+
+		create_rfq_items(sq_doc, supplier, rfq_rows[data.name], data)
 
 
-def create_rfq_items(sq_doc, supplier, data):
-	args = {}
-
-	for field in [
-		"item_code",
-		"item_name",
-		"description",
-		"qty",
-		"rate",
-		"conversion_factor",
-		"warehouse",
-		"material_request",
-		"material_request_item",
-		"stock_qty",
-		"uom",
-	]:
-		args[field] = data.get(field)
-
+def create_rfq_items(sq_doc, supplier, rfq_row, data):
+	"""Take the item and its UOM from the RFQ row; only the qty and rate come from the supplier."""
+	args = {
+		field: rfq_row.get(field)
+		for field in [
+			"item_code",
+			"item_name",
+			"description",
+			"conversion_factor",
+			"warehouse",
+			"material_request",
+			"material_request_item",
+			"uom",
+		]
+	}
 	args.update(
 		{
-			"request_for_quotation_item": data.name,
-			"request_for_quotation": data.parent,
+			"qty": flt(data.get("qty")),
+			"rate": flt(data.get("rate")),
+			"request_for_quotation_item": rfq_row.name,
+			"request_for_quotation": rfq_row.parent,
 			"supplier_part_no": frappe.db.get_value(
-				"Item Supplier", {"parent": data.item_code, "supplier": supplier}, "supplier_part_no"
+				"Item Supplier", {"parent": rfq_row.item_code, "supplier": supplier}, "supplier_part_no"
 			),
 		}
 	)
