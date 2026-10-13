@@ -16,13 +16,14 @@ WH = "Stores - _TC"
 
 
 class TestBatchWiseBalanceHistory(ERPNextTestSuite):
-	def make_batch_item(self):
+	def make_batch_item(self, **properties):
 		return make_item(
 			properties={
 				"is_stock_item": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
 				"batch_number_series": "BWB-.#####",
+				**properties,
 			}
 		).name
 
@@ -44,6 +45,105 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 		self.assertEqual(row.balance_qty, 6)
 		self.assertEqual(row.valuation_rate, 100)
 		self.assertEqual(row.balance_value, 600)
+
+	def test_non_batchwise_valuation_at_report_cutoff(self):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 0)
+		item = self.make_batch_item(valuation_method="Moving Average")
+		for date, rate in [("2026-06-01", 100), ("2026-06-02", 300)]:
+			make_stock_entry(
+				item_code=item,
+				to_warehouse=WH,
+				qty=10,
+				rate=rate,
+				posting_date=date,
+				posting_time="09:00:00",
+			)
+
+		# Enabling pooled valuation must also include batches created with batch-wise valuation.
+		self.assertEqual(
+			frappe.get_all("Batch", filters={"item": item}, pluck="use_batchwise_valuation"), [1, 1]
+		)
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		rows = self.run_report(item, to_date="2026-06-02")
+		self.assertEqual(len(rows), 2)
+		self.assertEqual([row.valuation_rate for row in rows], [200, 200])
+		self.assertEqual([row.balance_value for row in rows], [2000, 2000])
+		(first_row,) = self.run_report(item, to_date="2026-06-01")
+		first_batch = first_row.batch
+		make_stock_entry(
+			item_code=item,
+			from_warehouse=WH,
+			qty=5,
+			batch_no=first_batch,
+			posting_date="2026-06-03",
+			posting_time="09:00:00",
+		)
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WH,
+			qty=5,
+			rate=600,
+			posting_date="2026-06-03",
+			posting_time="12:00:00",
+		)
+
+		for to_date, cutoff, expected_rate, expected_qty in [
+			("2026-06-02", None, 200, 10),
+			("2026-06-03", "2026-06-03 10:00:00", 200, 5),
+			("2026-06-03", None, 300, 5),
+		]:
+			with self.subTest(to_date=to_date, cutoff=cutoff):
+				filters = frappe._dict(
+					company="_Test Company",
+					item_code=item,
+					warehouse=WH,
+					batch_no=first_batch,
+					from_date="2026-06-01",
+					to_date=to_date,
+					to_datetime=cutoff,
+				)
+				(row,) = execute(filters)[1]
+				self.assertEqual(row.balance_qty, expected_qty)
+				self.assertEqual(row.valuation_rate, expected_rate)
+				self.assertEqual(row.balance_value, expected_qty * expected_rate)
+
+		make_stock_entry(
+			item_code=item,
+			from_warehouse=WH,
+			qty=5,
+			batch_no=first_batch,
+			posting_date="2026-06-04",
+			posting_time="09:00:00",
+		)
+		filters.to_date = "2026-06-04"
+		(row,) = execute(filters)[1]
+		self.assertEqual(row.balance_qty, 0)
+		self.assertEqual(row.valuation_rate, 0)
+		self.assertEqual(row.balance_value, 0)
+
+	def test_batchwise_valuation_keeps_batch_cost(self):
+		for method in ("Moving Average", "FIFO"):
+			with self.subTest(valuation_method=method):
+				frappe.db.set_single_value(
+					"Stock Settings", "do_not_use_batchwise_valuation", method == "FIFO"
+				)
+				item = self.make_batch_item(valuation_method=method)
+				for date, rate in [("2026-06-01", 100), ("2026-06-02", 300)]:
+					make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=rate, posting_date=date)
+				(first_row,) = self.run_report(item, to_date="2026-06-01")
+				if method == "Moving Average":
+					# Represent a legacy batch alongside a newer batch valued batch-wise.
+					frappe.db.set_value("Batch", first_row.batch, "use_batchwise_valuation", 0)
+				make_stock_entry(
+					item_code=item,
+					from_warehouse=WH,
+					batch_no=first_row.batch,
+					qty=5,
+					posting_date="2026-06-03",
+				)
+				rows = self.run_report(item)
+				self.assertEqual(sorted(row.valuation_rate for row in rows), [100, 300])
+				self.assertEqual(sorted(row.balance_value for row in rows), [500, 3000])
 
 	def test_reconciliation_uses_batch_ids(self):
 		item = self.make_batch_item()
