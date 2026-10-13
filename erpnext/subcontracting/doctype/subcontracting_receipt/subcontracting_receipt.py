@@ -845,7 +845,8 @@ class SubcontractingReceipt(SubcontractingController):
 					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
 				)
 				required.qty += flt(
-					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, row.precision("qty")
+					bom_item.qty_consumed_per_unit * self.get_qty_for_costing(row) * row.conversion_factor,
+					row.precision("qty"),
 				)
 
 		return rm_dict
