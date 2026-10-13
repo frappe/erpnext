@@ -351,7 +351,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_purchase_invoice_for_blocked_supplier_payment_today_date(self):
+	def test_purchase_invoice_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.hold_type = "Payments"
@@ -360,13 +360,8 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		pi = make_purchase_invoice()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Invoice",
-			dn=pi.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()
@@ -736,6 +731,13 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.credit_to = "_Test Payable USD - _TC"
 		pi.insert()
 		self.assertEqual(pi.conversion_rate, 75)
+
+	@change_settings("Buying Settings", {"pr_required": "Yes"})
+	def test_purchase_receipt_not_required_when_invoice_updates_stock(self):
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		pi = make_purchase_invoice(update_stock=1)
+		self.assertEqual(pi.docstatus, 1)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])

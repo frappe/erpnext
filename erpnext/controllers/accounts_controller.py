@@ -25,7 +25,6 @@ from frappe.utils import (
 	get_last_day,
 	get_link_to_form,
 	getdate,
-	nowdate,
 	parse_json,
 	today,
 )
@@ -183,24 +182,39 @@ class AccountsController(TransactionBase):
 			self.remove_serial_and_batch_bundle()
 
 	def ensure_supplier_is_not_blocked(self):
-		is_supplier_payment = self.doctype == "Payment Entry" and self.party_type == "Supplier"
-		is_buying_invoice = self.doctype in ["Purchase Invoice", "Purchase Order"]
-		supplier = None
-		supplier_name = None
+		if self.meta.has_field("is_return") and self.is_return:
+			return
 
-		if is_buying_invoice or is_supplier_payment:
-			supplier_name = self.supplier if is_buying_invoice else self.party
-			supplier = frappe.get_doc("Supplier", supplier_name)
+		hold_type, suppliers = self.get_supplier_hold_scope()
+		for supplier in {supplier for supplier in suppliers if supplier}:
+			if frappe.get_lazy_doc("Supplier", supplier).is_blocked_for(hold_type):
+				frappe.msgprint(
+					_("{0} is blocked so this transaction cannot proceed").format(supplier),
+					raise_exception=1,
+				)
 
-		if supplier and supplier_name and supplier.on_hold:
-			if (is_buying_invoice and supplier.hold_type in ["All", "Invoices"]) or (
-				is_supplier_payment and supplier.hold_type in ["All", "Payments"]
-			):
-				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
-					frappe.msgprint(
-						_("{0} is blocked so this transaction cannot proceed").format(supplier_name),
-						raise_exception=1,
-					)
+	def get_supplier_hold_scope(self) -> tuple[str | None, list[str]]:
+		"""Return the Hold Type that blocks this document and the suppliers it applies to."""
+		if self.doctype in ("Purchase Order", "Purchase Invoice"):
+			return "Invoices", [self.supplier]
+		if self.doctype in ("Purchase Receipt", "Supplier Quotation"):
+			return "All", [self.supplier]
+		if self.doctype == "Request for Quotation":
+			return "All", [row.supplier for row in self.suppliers]
+		if self.doctype == "Payment Entry" and self.party_type == "Supplier":
+			return "Payments", [self.party]
+		if self.doctype == "Journal Entry" and any(
+			flt(row.credit_in_account_currency) - flt(row.debit_in_account_currency) > 0
+			and frappe.get_cached_value("Account", row.account, "account_type") in ("Bank", "Cash")
+			for row in self.accounts
+		):
+			return "Payments", [
+				row.party
+				for row in self.accounts
+				if row.party_type == "Supplier"
+				and flt(row.debit_in_account_currency) - flt(row.credit_in_account_currency) > 0
+			]
+		return None, []
 
 	def validate_against_voucher_outstanding(self):
 		from frappe.model.meta import get_meta
