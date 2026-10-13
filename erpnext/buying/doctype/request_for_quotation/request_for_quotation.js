@@ -495,11 +495,13 @@ frappe.ui.form.on("Request for Quotation", {
 
 		const offer_pending_tooltips = {};
 		offers.forEach((offer) => {
+			// a zero qty line with a rate is a unit price offer, so the item counts as quoted
 			const pending_items = all_items.filter((item) => {
 				const q = get_quote(item, offer);
-				return (
-					!q || q.converted_amount === undefined || q.converted_amount === null || flt(q.qty) <= 0
-				);
+				if (!q || q.converted_amount === undefined || q.converted_amount === null) {
+					return true;
+				}
+				return flt(q.qty) <= 0 && flt(q.converted_rate) <= 0;
 			});
 
 			if (pending_items.length > 0) {
