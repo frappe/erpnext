@@ -270,7 +270,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if not args.get("return_qty_from_rejected_warehouse"):
 			fields.extend(["received_qty", "rejected_qty"])
 		else:
-			fields.extend(["received_qty"])
+			fields = ["rejected_qty", "received_qty"]
 
 	already_returned_data = already_returned_items.get(key) or {}
 
@@ -289,17 +289,20 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			else 0
 		)
 
-		if column in ("stock_qty", "qty") and not args.get("return_qty_from_rejected_warehouse"):
+		if column in ("stock_qty", "qty"):
 			reference_qty = ref.get(column)
 			current_stock_qty = args.get(column)
 			if column == "stock_qty":
 				current_stock_qty = flt(args.get("qty")) * flt(args.get("conversion_factor") or 1)
-		elif args.get("return_qty_from_rejected_warehouse"):
+		elif column == "rejected_qty" and args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
-			current_stock_qty = (
-				args.get(column) * args.get("conversion_factor", 1.0)
-				if column != "stock_qty"
-				else args.get(column)
+			current_stock_qty = flt(
+				args.get("stock_qty") or (flt(args.get("qty")) * flt(args.get("conversion_factor") or 1))
+			)
+		elif column == "received_qty" and args.get("return_qty_from_rejected_warehouse"):
+			reference_qty = ref.get("received_qty") * ref.get("conversion_factor", 1.0)
+			current_stock_qty = flt(
+				args.get("stock_qty") or (flt(args.get("qty")) * flt(args.get("conversion_factor") or 1))
 			)
 		else:
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
@@ -340,16 +343,20 @@ def validate_return_item_qty(doc, key, row, valid_items, already_returned_items)
 	rejected_qty = abs(flt(row.get("rejected_qty") or 0)) * conversion_factor
 	received_qty = abs(flt(row.get("received_qty") or 0)) * conversion_factor
 
+	is_rejected_wh_return = bool(row.get("return_qty_from_rejected_warehouse"))
 	for returned_key in {key, row.item_code}:
 		returned = already_returned_items.setdefault(
 			returned_key, frappe._dict(qty=0, stock_qty=0, received_qty=0, rejected_qty=0)
 		)
-		returned.qty = flt(returned.qty) + abs(flt(row.qty))
-		returned.stock_qty = flt(returned.stock_qty) + stock_qty
-		if rejected_qty:
-			returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
-		if received_qty:
-			returned.received_qty = flt(returned.received_qty) + received_qty
+		if is_rejected_wh_return:
+			returned.rejected_qty = flt(returned.rejected_qty) + stock_qty
+			returned.received_qty = flt(returned.received_qty) + stock_qty
+		else:
+			returned.qty = flt(returned.qty) + abs(flt(row.qty))
+			returned.stock_qty = flt(returned.stock_qty) + stock_qty
+			if rejected_qty:
+				returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+			returned.received_qty = flt(returned.received_qty) + (received_qty or stock_qty)
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
@@ -423,7 +430,14 @@ def get_already_returned_items(doc):
 		.where((par.docstatus == 1) & (par.is_return == 1) & (par.return_against == doc.return_against))
 		.groupby(child.item_code, child[field])
 	)
-	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
+	tracks_rejected_wh = doc.doctype in ["Purchase Receipt", "Subcontracting Receipt"]
+	if tracks_rejected_wh:
+		query = query.select(
+			Sum(Abs(child.rejected_qty) * child.conversion_factor).as_("rejected_qty"),
+			Sum(Abs(child.received_qty) * child.conversion_factor).as_("received_qty"),
+			child.return_qty_from_rejected_warehouse,
+		).groupby(child.return_qty_from_rejected_warehouse)
+	elif doc.doctype == "Purchase Invoice":
 		query = query.select(
 			Sum(Abs(child.rejected_qty) * child.conversion_factor).as_("rejected_qty"),
 			Sum(Abs(child.received_qty) * child.conversion_factor).as_("received_qty"),
@@ -436,28 +450,37 @@ def get_already_returned_items(doc):
 		data + get_returned_packed_items(doc.return_against) if doc.doctype == "Delivery Note" else data
 	)
 	for d in returned_rows:
+		is_rejected_wh = bool(d.get("return_qty_from_rejected_warehouse"))
+		d_stock_qty = 0.0 if is_rejected_wh else flt(d.stock_qty)
+		d_qty = 0.0 if is_rejected_wh else flt(d.qty)
+		d_rejected_qty = flt(d.stock_qty) if is_rejected_wh else flt(d.get("rejected_qty"))
+		d_received_qty = flt(d.get("received_qty")) or (d_stock_qty + d_rejected_qty)
+
 		item_total = items.setdefault(
 			d.item_code,
 			frappe._dict(qty=0, stock_qty=0, received_qty=0, rejected_qty=0),
 		)
-		item_total.qty += flt(d.qty)
-		item_total.stock_qty += flt(d.stock_qty)
-		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-			item_total.received_qty += flt(d.get("received_qty"))
-			item_total.rejected_qty += flt(d.get("rejected_qty"))
+		item_total.qty += d_qty
+		item_total.stock_qty += d_stock_qty
+		item_total.rejected_qty += d_rejected_qty
+		item_total.received_qty += d_received_qty
 
 	for d in data:
-		items.setdefault(
-			(d.item_code, d.get(field)),
-			frappe._dict(
-				{
-					"qty": d.get("qty"),
-					"stock_qty": d.get("stock_qty"),
-					"received_qty": d.get("received_qty"),
-					"rejected_qty": d.get("rejected_qty"),
-				}
-			),
+		is_rejected_wh = bool(d.get("return_qty_from_rejected_warehouse"))
+		d_stock_qty = 0.0 if is_rejected_wh else flt(d.stock_qty)
+		d_qty = 0.0 if is_rejected_wh else flt(d.qty)
+		d_rejected_qty = flt(d.stock_qty) if is_rejected_wh else flt(d.get("rejected_qty"))
+		d_received_qty = flt(d.get("received_qty")) or (d_stock_qty + d_rejected_qty)
+
+		row_key = (d.item_code, d.get(field))
+		row_total = items.setdefault(
+			row_key,
+			frappe._dict(qty=0, stock_qty=0, received_qty=0, rejected_qty=0),
 		)
+		row_total.qty += d_qty
+		row_total.stock_qty += d_stock_qty
+		row_total.rejected_qty += d_rejected_qty
+		row_total.received_qty += d_received_qty
 
 	return items
 

@@ -339,6 +339,71 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_pr2.items[0].received_qty = -2
 		self.assertRaises(frappe.ValidationError, return_pr2.insert)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_purchase_receipt_return_accepted_then_rejected_from_separate_rows(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item().name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		rejected_warehouse = "Work In Progress - TCP1"
+
+		pr = make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=item_code,
+			qty=10,
+			rate=100,
+			do_not_submit=True,
+		)
+		pr.append(
+			"items",
+			dict(
+				pr.items[0].as_dict(no_default_fields=True),
+				qty=0,
+				received_qty=2,
+				rejected_qty=2,
+				rejected_warehouse=rejected_warehouse,
+			),
+		)
+		pr.submit()
+
+		# 1. Return 10 accepted units from Row 1
+		return_pr1 = make_return_doc("Purchase Receipt", pr.name)
+		return_pr1.items = [return_pr1.items[0]]
+		return_pr1.items[0].qty = -10
+		return_pr1.items[0].received_qty = -10
+		return_pr1.insert()
+		return_pr1.submit()
+		self.assertEqual(return_pr1.docstatus, 1)
+
+		# 2. Return 2 rejected units from Row 2
+		return_pr2 = make_return_doc("Purchase Receipt", pr.name, return_against_rejected_qty=True)
+		return_pr2.items = [
+			item for item in return_pr2.items if item.purchase_receipt_item == pr.items[1].name
+		]
+		return_pr2.insert()
+		return_pr2.submit()
+		self.assertEqual(return_pr2.docstatus, 1)
+
+		# 3. Attempting to return additional rejected units must fail
+		return_pr3 = make_return_doc("Purchase Receipt", pr.name, return_against_rejected_qty=True)
+		return_pr3.items = [
+			item for item in return_pr3.items if item.purchase_receipt_item == pr.items[1].name
+		]
+		return_pr3.items[0].qty = -1
+		return_pr3.items[0].received_qty = -1
+		self.assertRaises(frappe.ValidationError, return_pr3.insert)
+
+		# 4. Attempting to return additional accepted units must fail
+		return_pr4 = make_return_doc("Purchase Receipt", pr.name)
+		return_pr4.items = [return_pr4.items[0]]
+		return_pr4.items[0].qty = -1
+		return_pr4.items[0].received_qty = -1
+		self.assertRaises(frappe.ValidationError, return_pr4.insert)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
