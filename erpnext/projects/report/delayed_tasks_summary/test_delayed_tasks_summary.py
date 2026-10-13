@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
@@ -11,7 +9,7 @@ from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.report.delayed_tasks_summary.delayed_tasks_summary import execute
 
 
-class TestDelayedTasksSummary(unittest.TestCase):
+class TestDelayedTasksSummary(FrappeTestCase):
 	@classmethod
 	def setUp(self):
 		task1 = create_task("_Test Task 98", add_days(nowdate(), -10), nowdate())
@@ -46,6 +44,18 @@ class TestDelayedTasksSummary(unittest.TestCase):
 
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[1].get(key), data.get(key))
+
+	def test_cancelled_and_template_tasks_are_excluded(self):
+		cancelled = create_task("_Test Task Cancelled", add_days(nowdate(), -10), add_days(nowdate(), -5))
+		cancelled.status = "Cancelled"
+		cancelled.save()
+		template = create_task(
+			"_Test Task Template", add_days(nowdate(), -10), add_days(nowdate(), -5), is_template=1
+		)
+
+		tasks = {row.name for row in execute(frappe._dict())[1]}
+		self.assertNotIn(cancelled.name, tasks)
+		self.assertNotIn(template.name, tasks)
 
 	def tearDown(self):
 		for task in ["_Test Task 98", "_Test Task 99"]:
