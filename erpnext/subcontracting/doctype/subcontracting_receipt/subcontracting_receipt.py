@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -18,6 +18,8 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
+
+ROW_BASED_CHARGE_TYPES = ("On Previous Row Amount", "On Previous Row Total")
 
 
 class BOMQuantityError(frappe.ValidationError):
@@ -145,6 +147,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		if not self.get("is_return"):
 			self.validate_inspection()
+			self.validate_purchase_orders_share_terms()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
@@ -168,6 +171,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
+
+	def validate_purchase_orders_share_terms(self):
+		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
+			frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -882,15 +889,16 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 		if item.purchase_order:
 			po_sr_items[item.purchase_order_item].append(item)
 
-	purchase_orders = list(
-		dict.fromkeys(item.purchase_order for item in source_doc.items if item.purchase_order)
-	)
+	purchase_orders = get_purchase_orders(source_doc)
 	if not purchase_orders:
 		frappe.throw(
 			_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
 				source_doc.name
 			)
 		)
+
+	if not can_combine_purchase_orders(purchase_orders):
+		frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
 
 	def update_item(obj, target, source_parent):
 		sr_items = po_sr_items[obj.name]
@@ -988,10 +996,91 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 	return target_doc
 
 
+def get_purchase_orders(scr_doc) -> list[str]:
+	return list(dict.fromkeys(item.purchase_order for item in scr_doc.items if item.purchase_order))
+
+
+def can_combine_purchase_orders(purchase_orders: list[str]) -> bool:
+	"""One Purchase Receipt carries one set of rate-based taxes and one header discount."""
+	if len(purchase_orders) < 2:
+		return True
+
+	key_fields = get_charge_key_fields()
+	taxes = defaultdict(list)
+	for row in frappe.get_all(
+		"Purchase Taxes and Charges",
+		filters={
+			"parenttype": "Purchase Order",
+			"parent": ["in", purchase_orders],
+			"is_tax_withholding_account": 0,
+		},
+		fields=[
+			"parent",
+			"charge_type",
+			"row_id",
+			"rate",
+			"included_in_print_rate",
+			*key_fields,
+		],
+		order_by="idx",
+	):
+		taxes[row.parent].append(row)
+
+	def get_discount(order) -> tuple:
+		if flt(order.additional_discount_percentage):
+			return (order.apply_discount_on, flt(order.additional_discount_percentage))
+		if flt(order.discount_amount):
+			return (order.name,)
+		return ()
+
+	terms = {
+		(get_tax_terms(taxes[order.name], key_fields), get_discount(order))
+		for order in frappe.get_all(
+			"Purchase Order",
+			filters={"name": ["in", purchase_orders]},
+			fields=["name", "apply_discount_on", "additional_discount_percentage", "discount_amount"],
+		)
+	}
+	return len(terms) == 1
+
+
+def get_tax_terms(taxes: list, key_fields: list[str]) -> tuple:
+	"""Rate-based taxes, plus the Actual charges when a tax is calculated on a previous row."""
+	has_row_based_tax = any(row.charge_type in ROW_BASED_CHARGE_TYPES for row in taxes)
+
+	return tuple(
+		(
+			row.charge_type,
+			row.row_id,
+			flt(row.rate),
+			row.included_in_print_rate,
+			*(row.get(field) for field in key_fields),
+		)
+		for row in taxes
+		if has_row_based_tax or row.charge_type != "Actual"
+	)
+
+
+def get_charge_key_fields() -> list[str]:
+	return [
+		"account_head",
+		"category",
+		"add_deduct_tax",
+		"cost_center",
+		"project",
+		*get_accounting_dimensions(),
+	]
+
+
+def get_uncombinable_orders_message(purchase_orders: list[str]) -> str:
+	return _(
+		"Purchase Orders {0} have different taxes or discounts, so they cannot share one Purchase Receipt. Make one Subcontracting Receipt for each Purchase Order."
+	).format(comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders]))
+
+
 def merge_later_order_charges(target_doc, first_order_charges: int):
 	"""Fold later orders' Actual charges into the first order's row with the same account and dimensions."""
-	key_fields = ["account_head", "category", "add_deduct_tax", "cost_center", "project"]
-	key_fields += get_accounting_dimensions()
+	key_fields = get_charge_key_fields()
 
 	def get_charge_key(row) -> tuple:
 		return tuple(row.get(field) for field in key_fields)
