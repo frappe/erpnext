@@ -123,18 +123,22 @@ def filter_by_date(query: QueryBuilder, log_detail: Table, conditions: list[tupl
 
 
 def parse_list_filters(filters: dict | list | None) -> list[tuple]:
-	"""Return (operator, value) pairs for the date filters in dict or 3- and 4-item list filters."""
+	"""Return (operator, value) pairs for the date filters in dict or 2-, 3- and 4-item list filters."""
 	filters = filters or []
 	if isinstance(filters, dict):
-		filters = [
-			[field, *value] if is_list(value) else [field, "=", value] for field, value in filters.items()
-		]
+		filters = [[field, *value] if is_list(value) else [field, value] for field, value in filters.items()]
 
+	conditions = [with_operator(condition) for condition in filters if is_list(condition)]
 	return [
 		(str(condition[-2]).lower(), condition[-1])
-		for condition in filters
-		if is_list(condition) and len(condition) >= 3 and condition[-3] == "date"
+		for condition in conditions
+		if len(condition) >= 3 and condition[-3] == "date"
 	]
+
+
+def with_operator(condition: list | tuple) -> list:
+	"""Expand the [field, value] equality shorthand to [field, "=", value]."""
+	return [condition[0], "=", condition[1]] if len(condition) == 2 else list(condition)
 
 
 def is_list(value) -> bool:

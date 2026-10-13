@@ -111,11 +111,13 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 		for filters in (
 			{"date": date},
 			{"date": ["=", date]},
+			[["date", date]],
 			[["date", "=", date]],
 			[["Bulk Transaction Log", "date", "=", date]],
 		):
-			logs = BulkTransactionLog.get_list(frappe._dict(filters=filters))
-			self.assertEqual([str(log.date) for log in logs], [date], filters)
+			args = frappe._dict(filters=filters)
+			self.assertEqual([str(log.date) for log in BulkTransactionLog.get_list(args)], [date], filters)
+			self.assertEqual(BulkTransactionLog.get_count(args), 1, filters)
 
 		self.assertTrue(BulkTransactionLog.get_list(frappe._dict()))
 
