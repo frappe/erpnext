@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -1180,8 +1180,18 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 	def auto_create_purchase_receipt(self):
-		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
-			make_purchase_receipt(self, save=True, notify=True)
+		if not frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
+			return
+
+		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
+			frappe.msgprint(
+				get_uncombinable_orders_message(purchase_orders),
+				title=_("Purchase Receipt Not Created"),
+				indicator="orange",
+			)
+			return
+
+		make_purchase_receipt(self, save=True, notify=True)
 
 	def has_reserved_stock(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -1226,15 +1236,16 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 		if item.purchase_order:
 			po_sr_items[item.purchase_order_item].append(item)
 
-	purchase_orders = list(
-		dict.fromkeys(item.purchase_order for item in source_doc.items if item.purchase_order)
-	)
+	purchase_orders = get_purchase_orders(source_doc)
 	if not purchase_orders:
 		frappe.throw(
 			_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
 				source_doc.name
 			)
 		)
+
+	if not can_combine_purchase_orders(purchase_orders):
+		frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
 
 	def update_item(obj, target, source_parent):
 		sr_items = po_sr_items[obj.name]
@@ -1351,6 +1362,55 @@ def validate_single_purchase_receipt(subcontracting_receipt, purchase_receipt=No
 				get_link_to_form("Purchase Receipt", existing), subcontracting_receipt
 			)
 		)
+
+
+def get_purchase_orders(scr_doc) -> list[str]:
+	return list(dict.fromkeys(item.purchase_order for item in scr_doc.items if item.purchase_order))
+
+
+def can_combine_purchase_orders(purchase_orders: list[str]) -> bool:
+	"""One Purchase Receipt carries one set of rate-based taxes and one header discount."""
+	if len(purchase_orders) < 2:
+		return True
+
+	rate_based_taxes = defaultdict(list)
+	for row in frappe.get_all(
+		"Purchase Taxes and Charges",
+		filters={
+			"parenttype": "Purchase Order",
+			"parent": ["in", purchase_orders],
+			"charge_type": ["!=", "Actual"],
+			"is_tax_withholding_account": 0,
+		},
+		fields=["parent", "charge_type", "account_head", "rate", "add_deduct_tax"],
+		order_by="idx",
+	):
+		rate_based_taxes[row.parent].append(
+			(row.charge_type, row.account_head, flt(row.rate), row.add_deduct_tax)
+		)
+
+	def get_discount(order) -> tuple:
+		if flt(order.additional_discount_percentage):
+			return (order.apply_discount_on, flt(order.additional_discount_percentage))
+		if flt(order.discount_amount):
+			return (order.name,)
+		return ()
+
+	terms = {
+		(tuple(rate_based_taxes[order.name]), get_discount(order))
+		for order in frappe.get_all(
+			"Purchase Order",
+			filters={"name": ["in", purchase_orders]},
+			fields=["name", "apply_discount_on", "additional_discount_percentage", "discount_amount"],
+		)
+	}
+	return len(terms) == 1
+
+
+def get_uncombinable_orders_message(purchase_orders: list[str]) -> str:
+	return _(
+		"Purchase Orders {0} have different taxes or discounts, so they cannot share one Purchase Receipt. Make one Purchase Receipt for each Purchase Order."
+	).format(comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders]))
 
 
 def add_po_items_to_pr(scr_doc, target_doc):
