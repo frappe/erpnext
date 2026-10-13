@@ -6,6 +6,7 @@ import math
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, get_link_to_form, getdate, parse_json
 
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
@@ -189,27 +190,35 @@ class MasterProductionSchedule(Document):
 		return sales_order_data + material_request_data
 
 	def get_material_requests_data(self):
-		if not self.material_requests:
+		material_requests = [m.material_request for m in self.material_requests if m.material_request]
+		if not material_requests:
 			return []
 
 		doctype = frappe.qb.DocType("Material Request Item")
+		parent = frappe.qb.DocType("Material Request")
+		pending_qty = doctype.stock_qty - IfNull(doctype.ordered_qty, 0)
 
 		query = (
 			frappe.qb.from_(doctype)
+			.join(parent)
+			.on(parent.name == doctype.parent)
 			.select(
 				doctype.item_code,
 				doctype.warehouse,
 				doctype.stock_uom,
 				doctype.schedule_date.as_("delivery_date"),
 				doctype.parent.as_("material_request"),
-				doctype.stock_qty.as_("qty"),
+				pending_qty.as_("qty"),
+			)
+			.where(
+				doctype.parent.isin(material_requests)
+				& (parent.docstatus == 1)
+				& (parent.company == self.company)
+				& (parent.status != "Stopped")
+				& (pending_qty > 0)
 			)
 			.orderby(doctype.schedule_date)
 		)
-
-		if self.material_requests:
-			material_requests = [m.material_request for m in self.material_requests if m.material_request]
-			query = query.where(doctype.parent.isin(material_requests))
 
 		if self.from_date:
 			query = query.where(doctype.schedule_date >= self.from_date)
@@ -217,7 +226,13 @@ class MasterProductionSchedule(Document):
 		if self.to_date:
 			query = query.where(doctype.schedule_date <= self.to_date)
 
-		return query.run(as_dict=True)
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
+
+	def filter_selected_items(self, query, doctype):
+		if items := self.get_items_for_mps():
+			query = query.where(doctype.item_code.isin(items))
+
+		return query
 
 	def get_sales_orders_data(self):
 		sales_order_schedules = self.get_sales_order_schedules()
@@ -233,17 +248,27 @@ class MasterProductionSchedule(Document):
 
 	def get_items_from_sales_orders(self, ignore_orders=None):
 		doctype = frappe.qb.DocType("Sales Order Item")
+		parent = frappe.qb.DocType("Sales Order")
+		pending_qty = (doctype.qty - IfNull(doctype.delivered_qty, 0)) * doctype.conversion_factor
+
 		query = (
 			frappe.qb.from_(doctype)
+			.join(parent)
+			.on(parent.name == doctype.parent)
 			.select(
 				doctype.item_code,
 				doctype.warehouse,
 				doctype.stock_uom,
 				doctype.delivery_date,
 				doctype.name.as_("sales_order"),
-				doctype.stock_qty.as_("qty"),
+				pending_qty.as_("qty"),
 			)
-			.where(doctype.docstatus == 1)
+			.where(
+				(doctype.docstatus == 1)
+				& (parent.company == self.company)
+				& parent.status.notin(["Closed", "Completed"])
+				& (pending_qty > 0)
+			)
 			.orderby(doctype.delivery_date)
 		)
 
@@ -263,7 +288,7 @@ class MasterProductionSchedule(Document):
 		if ignore_orders:
 			query = query.where(doctype.name.notin(ignore_orders))
 
-		return query.run(as_dict=True)
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
 
 	def get_sales_order_schedules(self):
 		doctype = frappe.qb.DocType("Delivery Schedule Item")
@@ -284,7 +309,7 @@ class MasterProductionSchedule(Document):
 		if self.from_date:
 			query = query.where(doctype.delivery_date >= self.from_date)
 
-		return query.run(as_dict=True)
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
 
 	def get_item_wise_mps_data(self, data):
 		item_wise_data = frappe._dict({})
