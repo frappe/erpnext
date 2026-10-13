@@ -1,10 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import copy
-
 import frappe
 from frappe import _
+from frappe.utils import today
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
 from erpnext.stock.serial_batch_bundle import get_serial_no_status
@@ -97,6 +97,11 @@ def get_columns(filters):
 
 
 def get_data(filters):
+	filters = frappe._dict(filters)
+	filters.posting_date = filters.get("posting_date") or today()
+	if isinstance(filters.get("warehouse"), str) and filters.warehouse:
+		filters.warehouse = [filters.warehouse, *get_descendants_of("Warehouse", filters.warehouse)]
+
 	stock_ledgers = get_stock_ledger_entries(filters, "<=", order="asc", check_serial_no=False)
 
 	if not stock_ledgers:
@@ -120,6 +125,14 @@ def get_data(filters):
 				"qty": 1 if row.actual_qty > 0 else -1,
 			}
 		)
+
+		if (
+			row.voucher_type == "Stock Entry"
+			and row.actual_qty < 0
+			and frappe.get_cached_value("Stock Entry", row.voucher_no, "purpose")
+			in ("Material Transfer", "Material Transfer for Manufacture")
+		):
+			args.status = "Active"
 
 		# get party details depending on the voucher type
 		party_field = (
@@ -149,20 +162,11 @@ def get_data(filters):
 		if row.serial_and_batch_bundle:
 			serial_nos.extend(bundle_wise_serial_nos.get(row.serial_and_batch_bundle, []))
 
-		for index, bundle_data in enumerate(serial_nos):
-			if index == 0:
-				new_args = copy.deepcopy(args)
-				new_args.serial_no = bundle_data.get("serial_no")
-				new_args.valuation_rate = bundle_data.get("valuation_rate")
-				data.append(new_args)
-			else:
-				data.append(
-					{
-						"serial_no": bundle_data.get("serial_no"),
-						"valuation_rate": bundle_data.get("valuation_rate"),
-						"qty": args.qty,
-					}
-				)
+		for bundle_data in serial_nos:
+			new_args = args.copy()
+			new_args.serial_no = bundle_data.get("serial_no")
+			new_args.valuation_rate = bundle_data.get("valuation_rate")
+			data.append(new_args)
 
 	return data
 

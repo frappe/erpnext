@@ -92,6 +92,8 @@ class Task(NestedSet):
 			return ret
 
 	def validate(self):
+		self.validate_parent_project()
+		self.validate_children_project()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -257,6 +259,39 @@ class Task(NestedSet):
 					),
 					ParentIsGroupError,
 				)
+
+	def validate_parent_project(self):
+		"""Keep a task in its parent task's project."""
+		if not self.parent_task or not (
+			self.has_value_changed("parent_task") or self.has_value_changed("project")
+		):
+			return
+
+		parent_project = frappe.db.get_value("Task", self.parent_task, "project")
+		if not self.project:
+			self.project = parent_project
+		elif self.project != parent_project:
+			frappe.throw(
+				_("Parent Task {0} is not in Project {1}. Pick a group task of the same project.").format(
+					get_link_to_form("Task", self.parent_task), frappe.bold(self.project)
+				),
+				title=_("Invalid Parent Task"),
+			)
+
+	def validate_children_project(self):
+		if self.is_new() or not self.has_value_changed("project"):
+			return
+
+		child_projects = frappe.get_all(
+			"Task", filters={"parent_task": self.name}, pluck="project", distinct=True
+		)
+		if any((project or None) != (self.project or None) for project in child_projects):
+			frappe.throw(
+				_("Task {0} has child tasks in another project. Move them out of this group first.").format(
+					get_link_to_form("Task", self.name)
+				),
+				title=_("Invalid Project"),
+			)
 
 	def validate_parent_not_completed(self):
 		if not self.parent_task or self.status in ("Completed", "Cancelled"):

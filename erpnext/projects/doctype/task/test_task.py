@@ -474,6 +474,42 @@ class TestTask(ERPNextTestSuite):
 			getdate(add_days(nowdate(), 6)),
 		)
 
+	def test_parent_task_must_be_in_the_same_project(self):
+		other_project = frappe.get_doc(
+			doctype="Project", project_name="_Test Parent Task Project", company="_Test Company"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Other Project Group", project=other_project.name, is_group=1
+		).insert()
+
+		child_task = create_task("_Test Child In Another Project", parent_task=group.name, save=False)
+		self.assertRaises(frappe.ValidationError, child_task.save)
+
+		child_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group.name
+		).insert()
+		self.assertEqual(child_without_project.project, other_project.name)
+
+	def test_group_with_children_cannot_move_to_another_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		group = create_task("_Test Group Moving Project", is_group=1)
+		create_task("_Test Child Of Group Moving Project", parent_task=group.name)
+		group.reload()
+
+		group.project = make_project({"project_name": "_Test Project Group Target"}).name
+		self.assertRaises(frappe.ValidationError, group.save)
+
+		group_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Group Without Project", is_group=1
+		).insert()
+		frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group_without_project.name
+		).insert()
+		group_without_project.reload()
+		group_without_project.project = group.project
+		self.assertRaises(frappe.ValidationError, group_without_project.save)
+
 
 def create_task(
 	subject,
