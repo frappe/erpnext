@@ -729,9 +729,19 @@ class BOM(WebsiteGenerator):
 
 	def _unset_default_bom(self):
 		self.db_set("is_default", 0)
-		item = frappe.get_doc("Item", self.item)
-		if item.default_bom == self.name:
-			frappe.db.set_value("Item", self.item, "default_bom", None)
+		if frappe.db.get_value("Item", self.item, "default_bom") != self.name:
+			return
+
+		next_default = frappe.db.get_value(
+			"BOM",
+			{"item": self.item, "docstatus": 1, "is_active": 1, "name": ("!=", self.name)},
+			"name",
+			order_by="creation desc",
+		)
+		if next_default:
+			frappe.db.set_value("BOM", next_default, "is_default", 1)
+
+		frappe.db.set_value("Item", self.item, "default_bom", next_default)
 
 	def clear_operations(self):
 		if not self.with_operations:
