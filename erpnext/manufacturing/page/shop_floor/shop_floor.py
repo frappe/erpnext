@@ -765,6 +765,11 @@ def get_workstation_oee(workstation: str) -> dict | None:
 	scheduled_min = flt(frappe.db.get_value("Workstation", workstation, "total_working_hours")) * 60
 	actual_run_min, ideal_min = _get_run_and_ideal_minutes(workstation, today)
 	completed_jcs = _get_completed_jcs_today(workstation, today)
+	ideal_min += sum(
+		flt(j.time_required) / flt(j.for_quantity) * flt(j.process_loss_qty)
+		for j in completed_jcs
+		if flt(j.for_quantity)
+	)
 
 	# No activity at all today — nothing to display.
 	if actual_run_min == 0 and not completed_jcs:
@@ -811,7 +816,7 @@ def _get_completed_jcs_today(workstation, today) -> list[dict]:
 	jc = frappe.qb.DocType("Job Card")
 	return (
 		frappe.qb.from_(jc)
-		.select(jc.total_completed_qty, jc.process_loss_qty)
+		.select(jc.total_completed_qty, jc.process_loss_qty, jc.for_quantity, jc.time_required)
 		.where(jc.workstation == workstation)
 		.where(jc.status.isin(["Completed", "Submitted"]))
 		.where(Date(jc.modified) == today)
@@ -824,7 +829,8 @@ def _build_oee(scheduled_min, actual_run_min, ideal_min, completed_jcs) -> dict:
 	total_loss = sum(flt(j.process_loss_qty) for j in completed_jcs)
 	availability = min(actual_run_min / scheduled_min, 1.0) if scheduled_min > 0 else None
 	performance = min(ideal_min / actual_run_min, 1.0) if actual_run_min > 0 else 0.0
-	quality = max(total_completed - total_loss, 0.0) / total_completed if total_completed > 0 else 1.0
+	total_made = total_completed + total_loss
+	quality = total_completed / total_made if total_made > 0 else 1.0
 	# OEE requires all three factors; without a schedule, Availability is unknown.
 	oee_val = round(availability * performance * quality * 100, 1) if availability is not None else None
 	return {
