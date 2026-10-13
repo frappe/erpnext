@@ -277,10 +277,19 @@ class InvestmentTransaction(AccountsController):
 			if getdate(p.posting_date) <= getdate(self.posting_date)
 		)
 		exit_field = "units" if purchase_field == "units" else "gross_amount"
-		exited = get_submitted_sum(
-			self.doctype, exit_field, self.investment, None, self.name, EXIT_TYPES, for_update=True
+		# rows are locked and summed here, as PostgreSQL cannot lock rows inside SUM()
+		exits = frappe.db.get_values(
+			self.doctype,
+			{
+				"investment": self.investment,
+				"docstatus": 1,
+				"transaction_type": ("in", EXIT_TYPES),
+				"name": ("!=", self.name or ""),
+			},
+			exit_field,
+			for_update=True,
 		)
-		available = purchased - exited
+		available = purchased - sum(flt(value) for (value,) in exits)
 
 		if required > flt(available, self.precision(exit_field)):
 			frappe.throw(
@@ -654,14 +663,7 @@ def get_interest_received(investment, exclude=None):
 
 
 def get_submitted_sum(
-	doctype,
-	fieldname,
-	investment,
-	upto=None,
-	exclude=None,
-	transaction_types=None,
-	link_field="investment",
-	for_update=False,
+	doctype, fieldname, investment, upto=None, exclude=None, transaction_types=None, link_field="investment"
 ):
 	"""Sum of a field over the submitted documents of an investment, optionally up to a posting date."""
 	table = frappe.qb.DocType(doctype)
@@ -677,9 +679,6 @@ def get_submitted_sum(
 
 	if upto:
 		query = query.where(table.posting_date <= upto)
-
-	if for_update:
-		query = query.for_update()
 
 	return flt(query.run()[0][0])
 
