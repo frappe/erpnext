@@ -128,6 +128,7 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 
 	if parent:
 		parent_procedure = frappe.get_doc("Quality Procedure", parent)
+		parent_procedure.check_permission("read")
 		# return the list in order
 		return [
 			dict(
@@ -138,7 +139,7 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 			if d.procedure
 		]
 	else:
-		return frappe.get_all(
+		return frappe.get_list(
 			"Quality Procedure",
 			fields=["name as value", "is_group as expandable"],
 			filters=dict(parent_quality_procedure=parent),
