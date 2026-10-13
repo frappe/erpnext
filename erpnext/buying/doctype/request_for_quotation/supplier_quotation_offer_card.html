@@ -1,0 +1,34 @@
+{%
+	const is_lowest = min_rate !== undefined && Math.abs(q.converted_rate - min_rate) < 0.0001;
+	const qty_title = [q.is_partial_qty ? q.partial_qty_tooltip : "", q.quoted_as].filter(Boolean).join(" · ");
+%}
+<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
+	<div class="flex justify-between items-center mb-2" {% if (qty_title) { %}title="{{ frappe.utils.escape_html(qty_title) }}" style="cursor: help;"{% } %}>
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
+		<span class="{% if (q.is_partial_qty) { %}partial-qty-text{% } %}">{{ format_qty(q.converted_qty) }}</span>
+	</div>
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
+		<span>{{ frappe.utils.escape_html(q.display_uom || "") }}</span>
+	</div>
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+		{% if (q.is_combined && q.rate_display) { %}
+			<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %} truncate text-right" title="{{ frappe.utils.escape_html(q.rate_title || q.rate_display) }}" style="max-width: 140px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; cursor: pointer;">{{ frappe.utils.escape_html(q.rate_display) }}</span>
+		{% } else { %}
+			<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
+		{% } %}
+	</div>
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
+		<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
+	</div>
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
+		<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+	</div>
+	<div class="flex justify-between items-center">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
+		<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
+	</div>
+</div>

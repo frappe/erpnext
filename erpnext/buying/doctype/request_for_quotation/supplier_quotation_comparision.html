@@ -141,45 +141,35 @@
 						<tr>
 							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
 							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Item") }}</th>
-							{% if (suppliers && suppliers.length) { %}
-								{% for (let s = 0; s < suppliers.length; s++) {
-									const sup = suppliers[s];
-									const sup_sq_list = Array.from(new Set((quotes || []).filter(q => q.supplier === sup).map(q => q.supplier_quotation).filter(Boolean)));
-									const sup_pending_tip = supplier_pending_tooltips && supplier_pending_tooltips[sup];
-								%}
-									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
-										<div class="text-center" title="{{ frappe.utils.escape_html(sup) }}{% if (sup_sq_list.length) { %} : {{ frappe.utils.escape_html(sup_sq_list.join(', ')) }}{% } %}">
-											<span>{{ frappe.utils.escape_html(sup) }}</span>{% if (sup_sq_list.length) { %} :
-												{% for (let sq_idx = 0; sq_idx < sup_sq_list.length; sq_idx++) {
-													const sq_name = sup_sq_list[sq_idx];
-												%}
-													<a href="/app/supplier-quotation/{{ encodeURIComponent(sq_name) }}" class="quotation-link {% if (sup_pending_tip) { %}partial-quotation-link{% } %}" {% if (sup_pending_tip) { %}style="color: var(--red-500, #e02424) !important; font-weight: 600; cursor: help;" title="{{ frappe.utils.escape_html(sup_pending_tip) }}"{% } else { %}title="{{ frappe.utils.escape_html(sq_name) }}"{% } %}>{{ frappe.utils.escape_html(sq_name) }}</a>{% if (sq_idx < sup_sq_list.length - 1) { %}, {% } %}
-												{% } %}
-											{% } %}
-										</div>
-									</th>
-								{% } %}
+							{% for (let o = 0; o < offers.length; o++) {
+								const offer = offers[o];
+								const pending_tip = offer_pending_tooltips[offer.key];
+							%}
+								<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
+									<div class="text-center" title="{{ frappe.utils.escape_html(offer.supplier) }} : {{ frappe.utils.escape_html(offer.supplier_quotation) }}">
+										<span>{{ frappe.utils.escape_html(offer.supplier) }}</span> :
+										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link {% if (pending_tip) { %}partial-quotation-link{% } %}" title="{{ frappe.utils.escape_html(pending_tip || offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
+									</div>
+								</th>
 							{% } %}
 						</tr>
 					{% } else { %}
 						<tr>
 							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
 							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Supplier") }}</th>
-							{% if (items && items.length) { %}
-								{% for (let it = 0; it < items.length; it++) { const itm = items[it]; %}
-									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
-										<div class="truncate" title="{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}">{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}</div>
-										{%
-											const raw_desc = (itm.description ? (frappe.utils.strip_html ? frappe.utils.strip_html(itm.description) : itm.description.replace(/<[^>]*>/g, "")) : "").trim();
-											const clean_desc = raw_desc.length > 45 ? raw_desc.slice(0, 42) + "..." : raw_desc;
-										%}
-										{% if (raw_desc && raw_desc !== itm.item_name && raw_desc !== itm.item_code) { %}
-											<div class="text-muted small truncate font-normal mx-auto" title="{{ frappe.utils.escape_html(raw_desc) }}" style="max-width: 240px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-												{{ frappe.utils.escape_html(clean_desc) }}
-											</div>
-										{% } %}
-									</th>
-								{% } %}
+							{% for (let it = 0; it < items.length; it++) { const itm = items[it]; %}
+								<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
+									<div class="truncate" title="{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}">{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}</div>
+									{%
+										const raw_desc = (itm.description ? (frappe.utils.strip_html ? frappe.utils.strip_html(itm.description) : itm.description.replace(/<[^>]*>/g, "")) : "").trim();
+										const clean_desc = raw_desc.length > 45 ? raw_desc.slice(0, 42) + "..." : raw_desc;
+									%}
+									{% if (raw_desc && raw_desc !== itm.item_name && raw_desc !== itm.item_code) { %}
+										<div class="text-muted small truncate font-normal mx-auto" title="{{ frappe.utils.escape_html(raw_desc) }}" style="max-width: 240px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+											{{ frappe.utils.escape_html(clean_desc) }}
+										</div>
+									{% } %}
+								</th>
 							{% } %}
 						</tr>
 					{% } %}
@@ -203,55 +193,12 @@
 										</div>
 									{% } %}
 								</td>
-								{% for (let s = 0; s < suppliers.length; s++) { %}
-									{%
-										const sup = suppliers[s];
-										const q = item.name ? quote_map[item.name + ":::" + sup] : quote_map[item.item_code + ":::" + sup];
-										const min_rate = item.name ? min_rates[item.name] : min_rates[item.item_code];
-										const is_lowest = q && min_rate !== undefined && Math.abs(q.converted_rate - min_rate) < 0.0001;
-										const card_sqs = (q && (q.supplier_quotations || (q.supplier_quotation ? [q.supplier_quotation] : []))) || [];
-										const req_qty = flt(item.qty);
-										const quoted_qty = q ? (q.converted_qty !== undefined ? flt(q.converted_qty) : flt(q.qty)) : 0;
-										const is_partial_qty = q && (q.is_partial_qty !== undefined ? q.is_partial_qty : (req_qty > 0 && quoted_qty < req_qty));
-										const fmt_quoted = quoted_qty % 1 === 0 ? cint(quoted_qty) : flt(quoted_qty, 2);
-										const fmt_req = req_qty % 1 === 0 ? cint(req_qty) : flt(req_qty, 2);
-										const partial_qty_title = is_partial_qty ? (q.partial_qty_tooltip || __("partial offer: {0} out of {1} qty", [fmt_quoted, fmt_req])) : "";
-									%}
+								{% for (let o = 0; o < offers.length; o++) { const q = get_quote(item, offers[o]); %}
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
 									{% } else { %}
 										<td style="vertical-align: middle; padding: 6px;">
-											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
-
-												<div class="flex justify-between items-center mb-2" {% if (is_partial_qty) { %}title="{{ frappe.utils.escape_html(partial_qty_title) }}" style="cursor: help;"{% } %}>
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
-													<span class="{% if (is_partial_qty) { %}partial-qty-text{% } %}" {% if (is_partial_qty) { %}style="color: var(--red-500, #e02424) !important; font-weight: 600; cursor: help;" title="{{ frappe.utils.escape_html(partial_qty_title) }}"{% } %}>{{ q.qty !== undefined && q.qty !== null ? q.qty : (item.qty || "") }}</span>
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
-													<span>{{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-													{% if (q.is_combined && q.rate_display) { %}
-														<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %} truncate text-right" title="{{ frappe.utils.escape_html(q.rate_title || q.rate_display) }}" style="max-width: 140px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; cursor: pointer;">{{ frappe.utils.escape_html(q.rate_display) }}</span>
-													{% } else { %}
-														<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
-													{% } %}
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
-													<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
-													<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
-												</div>
-												<div class="flex justify-between items-center">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
-													<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
-												</div>
-											</div>
+											{{ frappe.render_template("supplier_quotation_offer_card", { q: q, item: item, min_rate: min_rates[item.name], company_currency: company_currency, format_qty: format_qty }) }}
 										</td>
 									{% } %}
 								{% } %}
@@ -262,13 +209,11 @@
 								<td colspan="2" class="text-center font-weight-bold" style="vertical-align: middle; padding: 12px 16px; font-weight: 600; font-size: 13px; color: #171717;">
 									{{ __("Total Price") }}
 								</td>
-								{% for (let s = 0; s < suppliers.length; s++) { %}
-									{%
-										const sup = suppliers[s];
-										const total = supplier_totals && supplier_totals[sup];
-										const is_sup_complete = complete_suppliers && (Array.isArray(complete_suppliers) ? complete_suppliers.includes(sup) : complete_suppliers[sup]);
-										const is_cheapest = is_sup_complete && total !== undefined && min_supplier_total !== null && Math.abs(total - min_supplier_total) < 0.0001;
-									%}
+								{% for (let o = 0; o < offers.length; o++) {
+									const offer = offers[o];
+									const total = offer_totals[offer.key];
+									const is_cheapest = complete_offers.includes(offer.key) && total !== undefined && min_offer_total !== null && Math.abs(total - min_offer_total) < 0.0001;
+								%}
 									{% if (total === undefined) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 12px 18px; font-size: 13px;">-</td>
 									{% } else { %}
@@ -282,82 +227,30 @@
 							</tr>
 						{% } %}
 					{% } else { %}
-						{% for (let idx = 0; idx < suppliers.length; idx++) {
-							const sup = suppliers[idx];
-							const sup_sq_list = Array.from(new Set((quotes || []).filter(q => q.supplier === sup).map(q => q.supplier_quotation).filter(Boolean)));
+						{% for (let idx = 0; idx < offers.length; idx++) {
+							const offer = offers[idx];
+							const pending_tip = offer_pending_tooltips[offer.key];
 						%}
 							<tr>
 								<td style="width: 50px; text-align: center; vertical-align: middle;">
 									{{ idx + 1 }}
 								</td>
 								<td style="width: 200px; min-width: 160px; vertical-align: middle; font-size: 14px;">
-									{% const sup_pending_tip = supplier_pending_tooltips && supplier_pending_tooltips[sup]; %}
-									<div class="flex flex-col gap-1 truncate" title="{{ frappe.utils.escape_html(sup) }}{% if (sup_sq_list.length) { %} : {{ frappe.utils.escape_html(sup_sq_list.join(', ')) }}{% } %}">
+									<div class="flex flex-col gap-1 truncate" title="{{ frappe.utils.escape_html(offer.supplier) }} : {{ frappe.utils.escape_html(offer.supplier_quotation) }}">
 										<div class="truncate">
-											<span>
-												{{ frappe.utils.escape_html(sup) }}
-											</span>
+											<span>{{ frappe.utils.escape_html(offer.supplier) }}</span>
 										</div>
-										{% if (sup_sq_list.length) { %}
-											<div class="flex flex-wrap gap-1">
-												{% for (let sq_idx = 0; sq_idx < sup_sq_list.length; sq_idx++) {
-													const sq_name = sup_sq_list[sq_idx];
-												%}
-													<a href="/app/supplier-quotation/{{ encodeURIComponent(sq_name) }}" class="quotation-link truncate {% if (sup_pending_tip) { %}partial-quotation-link{% } %}" {% if (sup_pending_tip) { %}style="color: var(--red-500, #e02424) !important; font-weight: 600; cursor: help;" title="{{ frappe.utils.escape_html(sup_pending_tip) }}"{% } else { %}title="{{ frappe.utils.escape_html(sq_name) }}"{% } %}>{{ frappe.utils.escape_html(sq_name) }}</a>{% if (sq_idx < sup_sq_list.length - 1) { %}, {% } %}
-												{% } %}
-											</div>
-										{% } %}
+										<div class="flex flex-wrap gap-1">
+											<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link truncate {% if (pending_tip) { %}partial-quotation-link{% } %}" title="{{ frappe.utils.escape_html(pending_tip || offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
+										</div>
 									</div>
 								</td>
-								{% for (let it = 0; it < items.length; it++) { %}
-									{%
-										const item = items[it];
-										const q = item.name ? quote_map[item.name + ":::" + sup] : quote_map[item.item_code + ":::" + sup];
-										const min_rate = item.name ? min_rates[item.name] : min_rates[item.item_code];
-										const is_lowest = q && min_rate !== undefined && Math.abs(q.converted_rate - min_rate) < 0.0001;
-										const card_sqs = (q && (q.supplier_quotations || (q.supplier_quotation ? [q.supplier_quotation] : []))) || [];
-										const req_qty = flt(item.qty);
-										const quoted_qty = q ? (q.converted_qty !== undefined ? flt(q.converted_qty) : flt(q.qty)) : 0;
-										const is_partial_qty = q && (q.is_partial_qty !== undefined ? q.is_partial_qty : (req_qty > 0 && quoted_qty < req_qty));
-										const fmt_quoted = quoted_qty % 1 === 0 ? cint(quoted_qty) : flt(quoted_qty, 2);
-										const fmt_req = req_qty % 1 === 0 ? cint(req_qty) : flt(req_qty, 2);
-										const partial_qty_title = is_partial_qty ? (q.partial_qty_tooltip || __("partial offer: {0} out of {1} qty", [fmt_quoted, fmt_req])) : "";
-									%}
+								{% for (let it = 0; it < items.length; it++) { const item = items[it]; const q = get_quote(item, offer); %}
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
 									{% } else { %}
 										<td style="vertical-align: middle; padding: 6px;">
-											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
-
-												<div class="flex justify-between items-center mb-2" {% if (is_partial_qty) { %}title="{{ frappe.utils.escape_html(partial_qty_title) }}" style="cursor: help;"{% } %}>
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
-													<span class="{% if (is_partial_qty) { %}partial-qty-text{% } %}" {% if (is_partial_qty) { %}style="color: var(--red-500, #e02424) !important; font-weight: 600; cursor: help;" title="{{ frappe.utils.escape_html(partial_qty_title) }}"{% } %}>{{ q.qty !== undefined && q.qty !== null ? q.qty : (item.qty || "") }}</span>
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
-													<span>{{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-													{% if (q.is_combined && q.rate_display) { %}
-														<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %} truncate text-right" title="{{ frappe.utils.escape_html(q.rate_title || q.rate_display) }}" style="max-width: 140px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; cursor: pointer;">{{ frappe.utils.escape_html(q.rate_display) }}</span>
-													{% } else { %}
-														<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
-													{% } %}
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
-													<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
-												</div>
-												<div class="flex justify-between items-center mb-2">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
-													<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
-												</div>
-												<div class="flex justify-between items-center">
-													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
-													<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
-												</div>
-											</div>
+											{{ frappe.render_template("supplier_quotation_offer_card", { q: q, item: item, min_rate: min_rates[item.name], company_currency: company_currency, format_qty: format_qty }) }}
 										</td>
 									{% } %}
 								{% } %}
@@ -370,4 +263,3 @@
 	</div>
 </div>
 </div>
-
