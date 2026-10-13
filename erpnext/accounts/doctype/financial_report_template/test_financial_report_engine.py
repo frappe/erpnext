@@ -1790,7 +1790,7 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 				("nov", "2024-11-01", "2024-11-30"),
 			)
 		]
-		filters = {"company": company, "include_default_book_entries": 1}
+		filters = frappe._dict(company=company, include_default_book_entries=1)
 		accounts = [frappe._dict({"name": cash_account, "account_name": "Cash", "account_number": "1001"})]
 
 		def cash_balances():
