@@ -74,6 +74,8 @@ frappe.treeview_settings["Task"] = {
 							args: {
 								data: dialog.get_values()["multiple_tasks"],
 								parent: node.data.value,
+								project:
+									frappe.treeview_settings["Task"].page.fields_dict.project.get_value(),
 							},
 							callback: function () {},
 						});

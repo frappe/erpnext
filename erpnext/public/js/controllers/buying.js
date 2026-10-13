@@ -196,6 +196,7 @@ erpnext.buying = {
 
 			transaction_date() {
 				super.transaction_date();
+				if (!this.frm.fields_dict.schedule_date) return;
 				this.frm.set_value("schedule_date", "");
 				this.prevent_past_schedule_dates(this.frm);
 			}
