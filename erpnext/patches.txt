@@ -262,6 +262,8 @@ erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.convert_commission_rate_to_percent
 erpnext.patches.v16_0.convert_hide_currency_symbol_to_check
+erpnext.patches.v17_0.stage_legacy_shareholders
+erpnext.patches.v17_0.stage_legacy_share_balances
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -527,3 +529,6 @@ erpnext.patches.v16_0.enable_serial_no_wise_valuation
 erpnext.patches.v16_0.add_voucher_index_to_repost_item_valuation
 erpnext.patches.v16_0.set_blanket_order_status
 erpnext.patches.v16_0.set_blanket_order_item_stock_uom
+erpnext.patches.v17_0.migrate_legacy_shareholders_to_folios
+erpnext.patches.v17_0.backfill_legacy_share_transfers
+erpnext.patches.v17_0.rebuild_shareholder_current_balances
