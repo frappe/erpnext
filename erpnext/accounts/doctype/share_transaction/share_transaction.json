@@ -1,0 +1,350 @@
+{
+ "actions": [],
+ "autoname": "format:ST-{#####}",
+ "creation": "2026-09-25 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transaction_details_section",
+  "transaction_type",
+  "company",
+  "share_class",
+  "column_break_transaction_details",
+  "posting_date",
+  "currency",
+  "from_section",
+  "from_shareholder",
+  "column_break_from",
+  "from_folio",
+  "to_section",
+  "to_shareholder",
+  "column_break_to",
+  "to_folio",
+  "shares_and_value_section",
+  "from_share_number",
+  "to_share_number",
+  "number_of_shares",
+  "face_value_per_share",
+  "column_break_shares_and_value",
+  "rate_per_share",
+  "total_amount",
+  "share_capital_amount",
+  "securities_premium_amount",
+  "treasury_cost_per_share",
+  "treasury_cost",
+  "equity_adjustment_amount",
+  "references_section",
+  "journal_entry",
+  "remarks",
+  "amended_from",
+  "settlement_account",
+  "accounting_snapshot"
+ ],
+ "fields": [
+  {
+   "fieldname": "transaction_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Details"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Transaction Type",
+   "options": "Issue\nTransfer\nBuyback\nRetirement\nReissue",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "share_class",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Share Class",
+   "options": "Share Class",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_transaction_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fetch_if_empty": 1,
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:['Transfer', 'Buyback', 'Retirement', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "from_section",
+   "fieldtype": "Section Break",
+   "label": "From"
+  },
+  {
+   "depends_on": "eval:['Transfer', 'Buyback'].includes(doc.transaction_type)",
+   "fieldname": "from_shareholder",
+   "fieldtype": "Link",
+   "label": "From Shareholder",
+   "mandatory_depends_on": "eval:['Transfer', 'Buyback'].includes(doc.transaction_type)",
+   "options": "Shareholder"
+  },
+  {
+   "fieldname": "column_break_from",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:['Transfer', 'Buyback', 'Retirement', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "from_folio",
+   "fieldtype": "Link",
+   "label": "From Folio",
+   "options": "Share Folio",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:['Issue', 'Transfer', 'Buyback', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "to_section",
+   "fieldtype": "Section Break",
+   "label": "To"
+  },
+  {
+   "depends_on": "eval:['Issue', 'Transfer', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "to_shareholder",
+   "fieldtype": "Link",
+   "label": "To Shareholder",
+   "mandatory_depends_on": "eval:['Issue', 'Transfer', 'Reissue'].includes(doc.transaction_type)",
+   "options": "Shareholder"
+  },
+  {
+   "fieldname": "column_break_to",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:['Issue', 'Transfer', 'Buyback', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "to_folio",
+   "fieldtype": "Link",
+   "label": "To Folio",
+   "options": "Share Folio",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shares_and_value_section",
+   "fieldtype": "Section Break",
+   "label": "Shares and Value"
+  },
+  {
+   "fieldname": "from_share_number",
+   "fieldtype": "Int",
+   "label": "From Share Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_share_number",
+   "fieldtype": "Int",
+   "label": "To Share Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "number_of_shares",
+   "fieldtype": "Int",
+   "label": "Number of Shares",
+   "read_only": 1
+  },
+  {
+   "fieldname": "face_value_per_share",
+   "fieldtype": "Currency",
+   "label": "Face Value Per Share",
+   "mandatory_depends_on": "eval:doc.transaction_type == 'Issue'",
+   "options": "currency",
+   "read_only_depends_on": "eval:doc.transaction_type != 'Issue'"
+  },
+  {
+   "fieldname": "column_break_shares_and_value",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type && doc.transaction_type != 'Retirement'",
+   "fieldname": "rate_per_share",
+   "fieldtype": "Currency",
+   "label": "Rate Per Share",
+   "options": "currency"
+  },
+  {
+   "depends_on": "eval:doc.transaction_type && doc.transaction_type != 'Retirement'",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "share_capital_amount",
+   "fieldtype": "Currency",
+   "label": "Share Capital Amount",
+   "options": "currency",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "securities_premium_amount",
+   "fieldtype": "Currency",
+   "label": "Securities Premium Amount",
+   "options": "currency",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "treasury_cost_per_share",
+   "fieldtype": "Currency",
+   "label": "Treasury Cost Per Share",
+   "options": "currency",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "treasury_cost",
+   "fieldtype": "Currency",
+   "label": "Treasury Cost",
+   "options": "currency",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "description": "Positive values credit the equity adjustment account; negative values debit it.",
+   "fieldname": "equity_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Equity Adjustment (+ Credit / - Debit)",
+   "options": "currency",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Share Transaction",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "settlement_account",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Prepared Settlement Account",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "accounting_snapshot",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "label": "Accounting Snapshot",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "icon": "exchange",
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Share Transaction",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "transaction_type, company, share_class, from_shareholder, to_shareholder",
+ "show_name_in_global_search": 1,
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
