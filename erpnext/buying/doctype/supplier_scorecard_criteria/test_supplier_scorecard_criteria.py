@@ -19,6 +19,15 @@ class TestSupplierScorecardCriteria(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(test_bad_criteria[1]).insert)
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(test_bad_criteria[2]).insert)
 
+	def test_formula_must_evaluate_with_real_variable_values(self):
+		for formula in (
+			"{cost_of_on_time_shipments} / {tot_cost_shipments} * 100",
+			"{total_working_days}{total_working_days}",
+		):
+			with self.subTest(formula=formula):
+				criteria = frappe.get_doc({"doctype": "Supplier Scorecard Criteria", "formula": formula})
+				self.assertRaises(frappe.ValidationError, criteria.validate_formula)
+
 
 def delete_test_scorecards():
 	# Delete all the periods so we can delete all the criteria
