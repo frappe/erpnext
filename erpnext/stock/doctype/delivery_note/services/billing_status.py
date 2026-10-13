@@ -43,6 +43,10 @@ class BillingStatusService:
 			update_dn_modified = update_modified and dn != doc.return_against
 			dn_doc.update_billing_percentage(update_modified=update_dn_modified)
 
+		if doc.is_return and doc.return_against:
+			# A submitted or cancelled return can shift which other returns are settled.
+			update_billing_percentage_of_returns(doc.return_against)
+
 		doc.load_from_db()
 
 	def make_return_invoice(self) -> None:
@@ -79,11 +83,13 @@ def get_creditable_qty(return_doc) -> dict:
 
 	billed_qty = get_billed_qty(set(original_rows.values()))
 	credited_qty = get_credited_qty(set(original_rows.values()), return_doc.name)
+	settled_qty = get_settled_return_qty(return_doc.return_against)
 	creditable_qty = {}
 	for row in return_doc.items:
 		original = original_rows.get(row.name)
 		available = flt(billed_qty.get(original)) - flt(credited_qty.get(original))
-		creditable_qty[row.name] = max(min(abs(flt(row.qty)), available), 0)
+		unsettled = abs(flt(row.qty)) - flt(settled_qty.get(row.name))
+		creditable_qty[row.name] = max(min(unsettled, available), 0)
 		credited_qty[original] = flt(credited_qty.get(original)) + creditable_qty[row.name]
 
 	return creditable_qty
@@ -131,6 +137,73 @@ def get_credited_qty(original_rows: set, current_return: str) -> dict:
 		credited_qty[original] = flt(credited_qty.get(original)) + abs(flt(qty))
 
 	return credited_qty
+
+
+def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
+	"""Qty of each return row against `delivery_note` that its invoices already deducted.
+
+	An invoice made from a Delivery Note leaves out the returned qty. Once the original row is
+	invoiced up to its net qty, these returns are settled and need no credit note. Earlier
+	returns are settled first.
+	"""
+	dn = frappe.qb.DocType("Delivery Note")
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	return_rows = (
+		frappe.qb.from_(dn_item)
+		.join(dn)
+		.on(dn.name == dn_item.parent)
+		.select(dn_item.name, dn_item.dn_detail, dn_item.qty)
+		.where(
+			(dn.return_against == delivery_note)
+			& (dn.is_return == 1)
+			& (dn.docstatus == 1)
+			& (dn_item.dn_detail.isnotnull())
+		)
+		.orderby(dn.posting_date, dn.posting_time, dn.name)
+		.run(as_dict=True)
+	)
+	if not return_rows:
+		return {}
+
+	delivered_qty = frappe._dict(
+		frappe.get_all(
+			"Delivery Note Item",
+			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
+			fields=["name", "qty"],
+			as_list=True,
+		)
+	)
+	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
+	returned_qty = {}
+	for row in return_rows:
+		returned_qty[row.dn_detail] = flt(returned_qty.get(row.dn_detail)) + abs(flt(row.qty))
+
+	settleable_qty = {}
+	for original, returned in returned_qty.items():
+		net_invoiced = flt(invoiced_qty.get(original))
+		uninvoiced = flt(delivered_qty.get(original)) - net_invoiced
+		# Until the net qty is fully invoiced, the next invoice still deducts the returns.
+		# Rows invoiced through the Sales Order have no invoiced qty here and stay unsettled.
+		fully_invoiced = net_invoiced > 0 and net_invoiced + returned >= flt(delivered_qty.get(original))
+		settleable_qty[original] = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
+
+	settled_qty = {}
+	for row in return_rows:
+		settled = min(abs(flt(row.qty)), settleable_qty[row.dn_detail])
+		settleable_qty[row.dn_detail] -= settled
+		settled_qty[row.name] = settled
+
+	return settled_qty
+
+
+def update_billing_percentage_of_returns(delivery_note: str) -> None:
+	# Side effect on other documents, like for `return_against`: keep their modified timestamp.
+	for name in frappe.get_all(
+		"Delivery Note",
+		filters={"return_against": delivery_note, "is_return": 1, "docstatus": 1},
+		pluck="name",
+	):
+		frappe.get_lazy_doc("Delivery Note", name).update_billing_percentage(update_modified=False)
 
 
 def limit_to_creditable_qty(return_invoice, creditable_qty: dict) -> None:

@@ -34,6 +34,7 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.delivery_note.services.billing_status import (
 	update_billed_amount_based_on_so,
+	update_billing_percentage_of_returns,
 )
 from erpnext.stock.utils import get_bin_qty_map
 
@@ -1190,6 +1191,7 @@ class SalesInvoice(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
+			update_billing_percentage_of_returns(dn)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))

@@ -4177,6 +4177,42 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -2)
 
+	def test_return_deducted_on_original_invoice_is_billed(self):
+		from erpnext.controllers.queries import get_delivery_notes_to_be_billed
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=10, rate=500)
+
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+
+		invoice = make_sales_invoice(delivery_note.name)
+		self.assertEqual(invoice.items[0].qty, 8)
+		invoice.submit()
+
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertEqual(deducted_return.status, "Completed")
+		to_bill = get_delivery_notes_to_be_billed(
+			"Delivery Note", deducted_return.name, "name", 0, 20, {"is_return": 1}
+		)
+		self.assertFalse(to_bill)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
+		# A return made after the full invoice still needs a credit note.
+		later_return = make_sales_return(delivery_note.name)
+		later_return.items[0].qty = -3
+		later_return.submit()
+		self.assertEqual(later_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(later_return.name).items[0].qty, -3)
+
+		invoice.reload()
+		invoice.cancel()
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 0)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,

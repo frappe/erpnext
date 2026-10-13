@@ -18,6 +18,7 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.stock.doctype.delivery_note.services.billing_status import get_settled_return_qty
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -82,6 +83,10 @@ def make_sales_invoice(
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	for ref, qty in get_qty_already_mapped(target_doc, "dn_detail").items():
 		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
+	if doc.is_return and doc.return_against:
+		# Returns deducted on the original's invoice need no credit note.
+		for ref, qty in get_settled_return_qty(doc.return_against).items():
+			invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) - qty
 
 	def set_missing_values(source, target):
 		target.update_stock = 0
