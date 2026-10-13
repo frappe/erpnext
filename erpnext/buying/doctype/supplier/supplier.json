@@ -11,6 +11,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "supplier_name",
   "alias",
@@ -88,6 +91,22 @@
   "dashboard_tab"
  ],
  "fields": [
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -606,7 +625,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-08 08:01:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
