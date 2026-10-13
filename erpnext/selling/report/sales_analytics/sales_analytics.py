@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, scrub
+from frappe import N_, _, scrub
 from frappe.query_builder import DocType
 from frappe.utils import add_days, add_to_date, flt, getdate
 
@@ -23,7 +23,7 @@ def execute(filters=None):
 			"Sales Order",
 			"Delivery Note",
 			"Sales Invoice",
-			"Sales Invoice (due)",
+			N_("Sales Invoice (due)"),
 			"Payment Entry",
 		]:
 			filters.doc_type = dt
