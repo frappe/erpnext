@@ -238,6 +238,8 @@ class PurchaseInvoice(BuyingController):
 				"source_field": "amount",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and (is_return=0 or update_billed_amount_in_purchase_order=1))""",
 			}
 		]
 
@@ -690,7 +692,7 @@ class PurchaseInvoice(BuyingController):
 					throw(msg, title=_("Mandatory Purchase Order"))
 
 	def pr_required(self):
-		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes" and not self.update_stock:
 			stock_and_asset_items = self.get_stock_items()
 			stock_and_asset_items.extend(self.get_asset_items())
 			if frappe.get_value(
