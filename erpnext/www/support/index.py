@@ -43,11 +43,10 @@ def get_favorite_articles_by_page_view():
 	if not published:
 		return []
 
-	# Lowercase keys: a case-insensitive backend may return a path in any spelling of the route
-	articles_by_route = {article.route.lower(): article.name for article in published}
+	articles_by_route = {article.route: article.name for article in published}
 
-	counts = {}
-	for row in frappe.get_all(
+	# The log database compares paths case-sensitively, so each row matches one route exactly
+	view_counts = frappe.get_all(
 		"Web Page View",
 		# Aliased, because the driver names an unaliased COUNT(*) differently per backend
 		fields=["path", {"COUNT": "*", "as": "count"}],
@@ -56,10 +55,8 @@ def get_favorite_articles_by_page_view():
 		# Postgres rejects the default `creation desc` on a grouped query
 		order_by="path",
 		limit=len(published),
-	):
-		name = articles_by_route.get(row["path"].lower())
-		if name:
-			counts[name] = counts.get(name, 0) + row["count"]
+	)
+	counts = {articles_by_route[row["path"]]: row["count"] for row in view_counts}
 
 	if not counts:
 		return []

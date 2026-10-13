@@ -107,22 +107,20 @@ class TestSupportIndex(ERPNextTestSuite):
 		self.assertEqual(by_name[name]["count"], 4)
 		self.assertEqual(by_name[name].route, route)
 
-	def test_case_variant_paths_do_not_break_the_page(self):
-		"""Views recorded at a differently-cased spelling of a route must not raise.
-
-		Whether they also count depends on the backend's collation, so only assert the lower bound.
-		"""
+	def test_routes_differing_only_in_case_are_separate_articles(self):
+		"""Each article keeps its own views when two routes differ only in case."""
 		category = self.make_help_category()
-		route = "support-variant-" + random_string(10)
-		name = self.make_help_article(category, route, "Variant Article", "<p>Variant</p>")
+		route = "support-case-" + random_string(10)
+		name_lower = self.make_help_article(category, route, "Lower Article", "<p>Lower</p>")
+		name_upper = self.make_help_article(category, route.upper(), "Upper Article", "<p>Upper</p>")
 
 		self.seed_page_views(route, 2)
 		self.seed_page_views(route.upper(), 5)
 
 		by_name = {row.name: row for row in get_favorite_articles_by_page_view()}
 
-		self.assertIn(name, by_name, "case variant dropped the article from the results")
-		self.assertGreaterEqual(by_name[name]["count"], 2)
+		self.assertEqual(by_name[name_lower]["count"], 2)
+		self.assertEqual(by_name[name_upper]["count"], 5)
 
 	def test_view_paths_without_an_article_are_ignored(self):
 		"""A page view whose path matches no published article contributes nothing."""
