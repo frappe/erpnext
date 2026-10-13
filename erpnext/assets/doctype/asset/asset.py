@@ -207,19 +207,11 @@ class Asset(AccountsController):
 					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 				).format(asset_depr_schedules_links)
 			)
-		if (
-			not frappe.db.exists(
-				{
-					"doctype": "Asset Activity",
-					"asset": self.name,
-				}
-			)
-			and not self.flags.asset_created_via_asset_capitalization
-		):
+		if not self.flags.asset_created_via_asset_capitalization:
 			add_asset_activity(self.name, _("Asset created"))
 
 	def after_delete(self):
-		add_asset_activity(self.name, _("Asset deleted"))
+		frappe.db.delete("Asset Activity", {"asset": self.name})
 
 	def set_purchase_doc_row_item(self):
 		if self.is_existing_asset or self.is_composite_asset:
