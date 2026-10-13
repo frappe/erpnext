@@ -622,13 +622,11 @@ class JobCard(Document):
 
 	def check_workstation_time(self, row):
 		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)
-		if not workstation_doc.working_hours or cint(
-			frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")
-		):
+		working_hours = get_sorted_working_hours(workstation_doc)
+		if not working_hours or cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")):
 			self.schedule_without_working_hours(row)
 			return
 
-		working_hours = get_sorted_working_hours(workstation_doc)
 		start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
 		start_date = self.fit_row_in_working_hours(working_hours, row, start_date)
 
@@ -1903,7 +1901,10 @@ class JobCard(Document):
 
 
 def get_sorted_working_hours(workstation_doc):
-	return sorted(workstation_doc.working_hours, key=lambda row: get_time(row.start_time))
+	return sorted(
+		(row for row in workstation_doc.working_hours if row.enabled),
+		key=lambda row: get_time(row.start_time),
+	)
 
 
 @frappe.whitelist()

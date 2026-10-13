@@ -101,7 +101,8 @@ class Workstation(Document):
 
 			if row.start_time and row.end_time:
 				row.hours = flt(time_diff_in_hours(row.end_time, row.start_time), row.precision("hours"))
-				self.total_working_hours += row.hours
+				if row.enabled:
+					self.total_working_hours += row.hours
 
 	def validate_working_hours(self, row):
 		if get_time(row.start_time) >= get_time(row.end_time):
@@ -169,6 +170,9 @@ class Workstation(Document):
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
 		for d in self.get("working_hours"):
+			if not d.enabled:
+				continue
+
 			wh = frappe.qb.DocType("Workstation Working Hour")
 			existing = (
 				frappe.qb.from_(wh)
@@ -176,6 +180,7 @@ class Workstation(Document):
 				.where(
 					(wh.parent == self.name)
 					& (wh.name != d.name)
+					& (wh.enabled == 1)
 					& (wh.start_time < d.end_time)
 					& (wh.end_time > d.start_time)
 				)

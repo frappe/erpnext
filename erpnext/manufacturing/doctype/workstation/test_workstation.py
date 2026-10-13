@@ -297,6 +297,17 @@ class TestWorkstation(ERPNextTestSuite):
 			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-03 13:00:00", "2031-03-03 15:00:00")],
 		)
 
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_disabled_working_hours_are_not_used(self):
+		shifts = [("08:00:00", "12:00:00"), ("13:00:00", "17:00:00", 0)]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Disabled Shift", shifts, 360, "2031-03-03 08:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-04 08:00:00", "2031-03-04 10:00:00")],
+		)
+		self.assertEqual(
+			frappe.db.get_value("Workstation", "_Test WS Disabled Shift", "total_working_hours"), 4
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
