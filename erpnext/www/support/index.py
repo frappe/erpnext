@@ -52,7 +52,7 @@ def get_favorite_articles_by_page_view():
 		fields=["path", {"COUNT": "*", "as": "count"}],
 		filters={"path": ("in", [article.route for article in published])},
 		group_by="path",
-		# Postgres rejects the default `creation desc` on a grouped query
+		# Gives ties a fixed order for the stable sort below
 		order_by="path",
 		limit=len(published),
 	)
