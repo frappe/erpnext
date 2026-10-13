@@ -252,6 +252,26 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].blanket_order_rate, 100)
 		self.assertIn("differs from the rate", str(frappe.message_log[-1]))
 
+	def test_party_and_order_type_are_enforced(self):
+		bo = new_blanket_order(blanket_order_type="Selling")
+		bo.customer = None
+		bo.supplier = "_Test Supplier"
+		bo.append("items", {"item_code": "_Test Item", "qty": 10, "rate": 100})
+		self.assertRaises(frappe.MandatoryError, bo.insert)
+
+		bo.customer = "_Test Customer"
+		bo.insert()
+		self.assertIsNone(bo.supplier)
+		bo.submit()
+
+		frappe.flags.args.doctype = "Purchase Order"
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be made from", make_order, bo.name)
+
+		untyped = new_blanket_order(blanket_order_type="Selling")
+		untyped.blanket_order_type = None
+		untyped.append("items", {"item_code": "_Test Item", "qty": 10, "rate": 100})
+		self.assertRaises(frappe.MandatoryError, untyped.insert)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg"}).name

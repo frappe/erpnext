@@ -18,6 +18,11 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 
 FULFILLED_QTY_FIELD = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}
 
+ORDER_DOCTYPES_BY_TYPE = {
+	"Selling": ("Sales Order", "Quotation"),
+	"Purchasing": ("Purchase Order",),
+}
+
 ORDER_TYPE_BY_DOCTYPE = {
 	"Sales Order": ("Selling", "customer"),
 	"Purchase Order": ("Purchasing", "supplier"),
@@ -60,11 +65,18 @@ class BlanketOrder(StatusUpdater):
 	# end: auto-generated types
 
 	def before_validate(self):
+		if not self.blanket_order_type:
+			return
+
 		self.set_currency()
 		self.set_conversion_rate()
 		blanket_order_pricing.set_price_list(self)
 
 	def validate(self):
+		if not self.blanket_order_type:
+			return
+
+		self.validate_party()
 		self.validate_dates()
 		self.validate_duplicate_items()
 		self.validate_item_qty()
@@ -114,6 +126,20 @@ class BlanketOrder(StatusUpdater):
 						item.item_code, allowed_qty, self.name
 					)
 				)
+
+	def validate_party(self):
+		party_field = blanket_order_pricing.get_order_type_config(self.blanket_order_type)["party_field"]
+		if not self.get(party_field):
+			frappe.throw(
+				_("{0} is mandatory for a {1} Blanket Order").format(
+					self.meta.get_label(party_field), _(self.blanket_order_type)
+				),
+				frappe.MandatoryError,
+			)
+
+		other_party_field = "supplier" if party_field == "customer" else "customer"
+		self.set(other_party_field, None)
+		self.set(f"{other_party_field}_name", None)
 
 	def validate_order_matches(self, order_doc) -> None:
 		order_type, party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
@@ -331,6 +357,12 @@ def make_order(source_name: str):
 	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
 	blanket_order.validate_can_be_ordered(today())
 	doctype = frappe.flags.args.doctype
+	if doctype not in ORDER_DOCTYPES_BY_TYPE[blanket_order.blanket_order_type]:
+		frappe.throw(
+			_("A {0} cannot be made from a {1} Blanket Order").format(
+				_(doctype), _(blanket_order.blanket_order_type)
+			)
+		)
 
 	def update_doc(source_doc, target_doc, source_parent):
 		if doctype == "Quotation":
