@@ -197,7 +197,7 @@ class AssetRepair(AccountsController):
 					get_link_to_form("Asset Repair", self.name)
 				),
 			)
-		else:
+		elif not self.has_other_pending_repairs():
 			previous_status = self.asset_doc.status
 			self.asset_doc.set_status()
 			if (
@@ -210,6 +210,19 @@ class AssetRepair(AccountsController):
 						get_link_to_form("Asset Repair", self.name)
 					),
 				)
+
+	def has_other_pending_repairs(self) -> bool:
+		return bool(
+			frappe.db.exists(
+				"Asset Repair",
+				{
+					"asset": self.asset,
+					"repair_status": "Pending",
+					"docstatus": ("<", 2),
+					"name": ("!=", self.name),
+				},
+			)
+		)
 
 	def calculate_consumed_items_cost(self):
 		consumed_items_cost = 0.0

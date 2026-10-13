@@ -111,6 +111,31 @@ class TestAssetRepair(ERPNextTestSuite):
 		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
 		self.assertFalse([subject for subject in subjects if "back in service" in subject])
 
+	def test_asset_stays_out_of_order_while_another_repair_is_pending(self):
+		asset = create_asset(submit=1)
+		first_repair = create_asset_repair(asset=asset)
+		second_repair = create_asset_repair(asset=asset)
+
+		first_repair.repair_status = "Completed"
+		first_repair.save()
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
+		self.assertFalse([subject for subject in subjects if "back in service" in subject])
+
+		second_repair.repair_status = "Completed"
+		second_repair.save()
+
+		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
+		self.assertTrue(
+			[
+				subject
+				for subject in subjects
+				if second_repair.name in subject and "back in service" in subject
+			]
+		)
+
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 
