@@ -530,15 +530,31 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 	sq = frappe.qb.DocType("Supplier Quotation")
 
-	rfq_item_names = frappe.get_all(
+	rfq_items = frappe.get_all(
 		"Request for Quotation Item",
 		filters={"parent": rfq_name},
-		pluck="name",
+		fields=["name", "item_code"],
+	)
+	rfq_item_names = [d.name for d in rfq_items]
+	rfq_item_codes = list({d.item_code for d in rfq_items if d.item_code})
+
+	linked_sq_conditions = sq_item.request_for_quotation == rfq_name
+	if rfq_item_names:
+		linked_sq_conditions = linked_sq_conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
+
+	linked_sq_names = (
+		frappe.qb.from_(sq_item)
+		.select(sq_item.parent)
+		.where(linked_sq_conditions)
+		.distinct()
+		.run(pluck=True)
 	)
 
-	conditions = sq_item.request_for_quotation == rfq_name
-	if rfq_item_names:
-		conditions = conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
+	conditions = linked_sq_conditions
+	if linked_sq_names and rfq_item_codes:
+		conditions = conditions | (
+			sq_item.parent.isin(linked_sq_names) & sq_item.item_code.isin(rfq_item_codes)
+		)
 
 	query = (
 		frappe.qb.from_(sq_item)
@@ -547,6 +563,7 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 		.select(
 			sq_item.parent.as_("supplier_quotation"),
 			sq.supplier,
+			sq_item.request_for_quotation_item,
 			sq_item.item_code,
 			sq_item.item_name,
 			sq_item.qty,
@@ -567,6 +584,7 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 		)
 		.where(conditions & (sq.docstatus < 2))
 		.orderby(sq.transaction_date)
+		.orderby(sq_item.idx)
 	)
 
 	return query.run(as_dict=True)
