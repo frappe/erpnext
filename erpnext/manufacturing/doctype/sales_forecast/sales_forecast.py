@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_to_date
+from frappe.utils import add_to_date, cint, formatdate, getdate
 
 
 class SalesForecast(Document):
@@ -34,6 +34,47 @@ class SalesForecast(Document):
 
 	def validate(self):
 		self.validate_demand_qty()
+		self.validate_parent_warehouse()
+		self.validate_periods_and_dates()
+		self.validate_stock_items()
+
+	def validate_parent_warehouse(self):
+		warehouse = frappe.get_cached_value(
+			"Warehouse", self.parent_warehouse, ["is_group", "company"], as_dict=True
+		)
+		if warehouse and (not warehouse.is_group or warehouse.company != self.company):
+			frappe.throw(
+				_("Parent Warehouse {0} must be a group warehouse of company {1}").format(
+					frappe.bold(self.parent_warehouse), frappe.bold(self.company)
+				)
+			)
+
+	def validate_periods_and_dates(self):
+		if cint(self.demand_number) <= 0:
+			frappe.throw(_("Number of periods must be greater than zero"))
+
+		for row in self.items:
+			if row.delivery_date and getdate(row.delivery_date) < getdate(self.from_date):
+				frappe.throw(
+					_("Row #{0}: Delivery Date {1} cannot be before From Date {2}").format(
+						row.idx, formatdate(row.delivery_date), formatdate(self.from_date)
+					)
+				)
+
+	def validate_stock_items(self):
+		item_codes = {row.item_code for row in self.items + self.selected_items if row.item_code}
+		if not item_codes:
+			return
+
+		non_stock_items = frappe.get_all(
+			"Item", filters={"name": ["in", list(item_codes)], "is_stock_item": 0}, pluck="name"
+		)
+		if non_stock_items:
+			frappe.throw(
+				_("Only stock items can be forecast: {0}").format(
+					", ".join(frappe.bold(item) for item in non_stock_items)
+				)
+			)
 
 	def validate_demand_qty(self):
 		for row in self.items:

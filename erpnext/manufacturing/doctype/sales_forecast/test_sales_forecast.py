@@ -80,6 +80,19 @@ class TestSalesForecastIntegration(ERPNextTestSuite):
 		forecast.items[0].demand_qty = None
 		self.assertRaises(frappe.MandatoryError, forecast.save)
 
+	def test_invalid_forecast_refused(self):
+		for args in (
+			{"parent_warehouse": "_Test Warehouse - _TC"},
+			{"parent_warehouse": "All Warehouses - TCP1"},
+			{"demand_number": -2},
+			{"item_code": "_Test Non Stock Item"},
+		):
+			self.assertRaises(frappe.ValidationError, make_sales_forecast, do_not_submit=True, **args)
+
+		forecast = make_sales_forecast(do_not_submit=True)
+		forecast.items[0].delivery_date = frappe.utils.add_days(forecast.from_date, -400)
+		self.assertRaises(frappe.ValidationError, forecast.save)
+
 
 def make_sales_forecast(**args):
 	args = frappe._dict(args)
