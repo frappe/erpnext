@@ -1640,6 +1640,24 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertEqual(get_op_cost_from_sub_assemblies(top_bom.name), 110)
 
+	def test_bom_cannot_be_reactivated_with_an_inactive_sub_assembly_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item("_Test Reactivate RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_item = make_item("_Test Reactivate Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Reactivate FG", {"is_stock_item": 1}).name
+		sub_bom = make_bom(item=sub_item, raw_materials=[rm_item])
+		parent = make_bom(item=fg_item, raw_materials=[sub_item])
+
+		for bom, active in ((parent, 0), (sub_bom, 0)):
+			bom.reload()
+			bom.is_active = active
+			bom.save()
+
+		parent.reload()
+		parent.is_active = 1
+		self.assertRaisesRegex(frappe.ValidationError, "are not active", parent.save)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
