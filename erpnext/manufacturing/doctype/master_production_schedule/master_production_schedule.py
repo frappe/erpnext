@@ -98,7 +98,9 @@ class MasterProductionSchedule(Document):
 				)
 
 	def set_to_date(self):
-		self.to_date = None
+		if self.to_date:
+			return
+
 		for row in self.items:
 			if not self.to_date or getdate(row.delivery_date) > getdate(self.to_date):
 				self.to_date = row.delivery_date
