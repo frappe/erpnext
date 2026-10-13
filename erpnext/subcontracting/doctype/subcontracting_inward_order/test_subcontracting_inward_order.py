@@ -1200,6 +1200,29 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
 		self.assertEqual(basic_rm.work_order_qty, 5)
 
+	def test_closed_work_order_frees_material_returned_from_wip(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_return_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.wip_warehouse = "Work In Progress - _TC"
+		next(
+			item for item in wo.required_items if item.item_code == "Self RM"
+		).source_warehouse = "Stores - _TC"
+		wo.submit()
+		frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture")
+		).submit()
+		close_work_order(wo.name, "Closed")
+		make_stock_return_entry(wo.name).submit()
+
+		scio.reload()
+		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
+		self.assertEqual(basic_rm.work_order_qty, 0)
+
 	def test_rm_return_cancel_blocked_by_later_closed_work_order(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
 		from erpnext.stock.serial_batch_bundle import get_batch_nos
