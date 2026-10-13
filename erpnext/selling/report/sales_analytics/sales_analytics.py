@@ -5,7 +5,6 @@
 import frappe
 from frappe import _, scrub
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, add_to_date, flt, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -140,50 +139,46 @@ class Analytics:
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
+	@property
+	def document_filters(self):
+		filters = {
+			"docstatus": 1,
+			"company": ["in", self.filters.company],
+			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		}
+
+		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+			filters["is_opening"] = "No"
+
+		return filters
+
+	@property
+	def value_field(self):
+		if self.filters["value_quantity"] == "Value":
+			return "base_net_total as value_field"
+
+		return "items.stock_qty as value_field"
+
 	def _get_permitted_parent_names(self):
 		return frappe.get_list(
 			self.filters.doc_type,
 			fields=["name"],
-			filters={
-				"docstatus": 1,
-				"company": ["in", self.filters.company],
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+			filters=self.document_filters,
 			pluck="name",
 		)
 
 	def get_sales_transactions_based_on_order_type(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total"
-		else:
-			value_field = "total_qty"
-
-		permitted_names = self._get_permitted_parent_names()
-		if not permitted_names:
-			self.entries = []
-			self.get_teams()
-			return
-
-		doctype = DocType(self.filters.doc_type)
-
-		self.entries = (
-			frappe.qb.from_(doctype)
-			.select(
-				doctype.order_type.as_("entity"),
-				doctype[self.date_field],
-				doctype[value_field].as_("value_field"),
-			)
-			.where((doctype.name.isin(permitted_names)) & (IfNull(doctype.order_type, "") != ""))
-			.orderby(doctype.order_type)
-		).run(as_dict=True)
+		self.entries = frappe.get_list(
+			self.filters.doc_type,
+			fields=["order_type as entity", self.value_field, self.date_field],
+			filters={**self.document_filters, "order_type": ["is", "set"]},
+			order_by="order_type asc",
+		)
 
 		self.get_teams()
 
 	def get_sales_transactions_based_on_customers_or_suppliers(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
+		value_field = self.value_field
 
 		if self.filters.tree_type == "Customer":
 			entity = "customer as entity"
@@ -192,19 +187,10 @@ class Analytics:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
-
-		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
-			filters.update({"is_opening": "No"})
-
 		self.entries = frappe.get_list(
 			self.filters.doc_type,
 			fields=[entity, entity_name, value_field, self.date_field],
-			filters=filters,
+			filters=self.document_filters,
 		)
 
 		self.entity_names = {}
@@ -245,11 +231,6 @@ class Analytics:
 			self.entity_names.setdefault(d.entity, d.entity_name)
 
 	def get_sales_transactions_based_on_customer_or_territory_group(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
-
 		if self.filters.tree_type == "Customer Group":
 			entity_field = "customer_group as entity"
 		elif self.filters.tree_type == "Supplier Group":
@@ -258,19 +239,10 @@ class Analytics:
 		else:
 			entity_field = "territory as entity"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
-
-		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
-			filters.update({"is_opening": "No"})
-
 		self.entries = frappe.get_list(
 			self.filters.doc_type,
-			fields=[entity_field, value_field, self.date_field],
-			filters=filters,
+			fields=[entity_field, self.value_field, self.date_field],
+			filters=self.document_filters,
 		)
 		self.get_groups()
 
@@ -278,7 +250,7 @@ class Analytics:
 		if self.filters["value_quantity"] == "Value":
 			value_field = "base_net_amount"
 		else:
-			value_field = "qty"
+			value_field = "stock_qty"
 
 		permitted_names = self._get_permitted_parent_names()
 		if not permitted_names:
@@ -304,22 +276,11 @@ class Analytics:
 		self.get_groups()
 
 	def get_sales_transactions_based_on_project(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
+		value_field = self.value_field
 
 		entity = "project as entity"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			"project": ["!=", ""],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
-
-		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
-			filters.update({"is_opening": "No"})
+		filters = {**self.document_filters, "project": ["!=", ""]}
 
 		self.entries = frappe.get_list(
 			self.filters.doc_type,
@@ -403,7 +364,8 @@ class Analytics:
 
 	def get_period(self, posting_date):
 		if self.filters.range == "Weekly":
-			period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
+			iso_date = posting_date.isocalendar()
+			period = _("Week {0} {1}").format(str(iso_date.week), str(iso_date.year))
 		elif self.filters.range == "Monthly":
 			period = _(str(self.months[posting_date.month - 1])) + " " + str(posting_date.year)
 		elif self.filters.range == "Quarterly":
