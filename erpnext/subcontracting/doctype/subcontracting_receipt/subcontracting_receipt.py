@@ -585,12 +585,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 			row.additional_cost_per_qty = 0.0
 			if flt(original_row.qty) and row.warehouse and row.warehouse != original_row.rejected_warehouse:
-				row.additional_cost_per_qty = (
-					flt(original_row.additional_cost_per_qty)
+				row_returned_cost = (
+					flt(row.qty)
+					* flt(original_row.additional_cost_per_qty)
 					* self.get_qty_for_costing(original_row)
 					/ flt(original_row.qty)
 				)
-				returned_cost += flt(row.qty) * row.additional_cost_per_qty
+				costing_qty = self.get_qty_for_costing(row)
+				row.additional_cost_per_qty = row_returned_cost / costing_qty if costing_qty else 0.0
+				returned_cost += row_returned_cost
 				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
 
 		if total_cost:
@@ -721,7 +724,7 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.bom:
 				item.received_qty = self.get_qty_for_costing(item)
 				if item.name in received_qty_ratios:
-					additional_cost = flt(item.qty) * flt(item.additional_cost_per_qty)
+					additional_cost = flt(item.received_qty) * flt(item.additional_cost_per_qty)
 					amount = (
 						flt(item.qty)
 						* received_qty_ratios[item.name]
