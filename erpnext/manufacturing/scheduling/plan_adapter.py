@@ -111,7 +111,7 @@ def run_engine(plan, start_date, use_item_dates=0, item_dates=None):
 	engine = SchedulingEngine(
 		resources,
 		existing_load=load,
-		gap_mins=cint(settings.mins_between_operations) or 10,
+		gap_mins=cint(settings.mins_between_operations),
 		horizon_days=get_capacity_planning_days(),
 	)
 
