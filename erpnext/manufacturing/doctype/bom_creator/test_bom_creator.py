@@ -334,6 +334,17 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.submit()
 		self.assertEqual(doc.docstatus, 1)
 
+	def test_repeated_sub_assembly_is_costed_with_its_own_raw_materials(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Repeated Costing")
+		rows = {row.name: row for row in doc.items}
+		rate = {row.item_code: row.rate for row in doc.items if not row.is_expandable}
+
+		self.assertEqual(rows[first_wheel].amount, rate["Rim"] + rate["Spokes"])
+		self.assertEqual(rows[second_wheel].amount, rate["Hub"])
+		self.assertEqual(
+			doc.raw_material_cost, rate["Frame"] + rate["Rim"] + rate["Spokes"] + rate["Seat"] + rate["Hub"]
+		)
+
 
 def create_items():
 	raw_materials = [
