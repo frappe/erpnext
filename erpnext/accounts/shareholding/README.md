@@ -10,11 +10,19 @@ using numbered share ranges. Submitting creates the company membership
 both sides of the ownership movement. Cancellation writes reversal entries
 and keeps the original history.
 
+Accounting transaction reversals follow ERPNext's immutable ledger setting.
+With immutable accounting enabled, cancellation takes effect on the cancellation
+date. Otherwise, ownership reversals use the original posting date to match
+the General Ledger. Ordinary Transfer reversals retain their cancellation date.
+
 Share Ledger and Equity Position show history and holdings for a selected
 date. The Shareholder form also shows a read-only Current Share Balance child
 table. Transactions rebuild this table from the ledger. Users cannot change
 its quantities by saving the Shareholder. A user must have access to every
 company linked to a Shareholder to read that global record.
+Document sharing is disabled for Shareholders because it bypasses company
+restrictions. A patch removes existing Shareholder document shares. Use roles
+and company permissions to grant access instead.
 
 Equity Accounting Settings stores the default accounts for each company.
 Issue, Buyback, Retirement, and Reissue prepare a draft Journal Entry.
@@ -38,7 +46,7 @@ The backfill validates complete share ranges and compares ending ownership
 against the saved balances. It never reposts historical accounting or guesses
 face values, tax IDs, or share rights.
 
-Incomplete mappings or mismatched balances block new transactions for affected
+Incomplete mappings or mismatched balances block reports and new transactions for affected
 companies. After correcting the data and mappings, run:
 
 ```sh
