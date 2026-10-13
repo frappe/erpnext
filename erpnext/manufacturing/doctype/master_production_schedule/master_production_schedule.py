@@ -7,9 +7,10 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull
-from frappe.utils import add_days, get_link_to_form, getdate, parse_json
+from frappe.utils import add_days, flt, get_link_to_form, getdate, parse_json
 
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
+from erpnext.manufacturing.scheduling.plan_adapter import get_days_needed
 
 
 class MasterProductionSchedule(Document):
@@ -130,12 +131,16 @@ class MasterProductionSchedule(Document):
 	def update_item_details(self, data):
 		items = [item[0] for item in data if item[0]]
 		item_details = self.get_item_details(items)
+		self.load_lead_times([(row.item_code, row.bom_no) for row in item_details.values()])
 
 		for key in data:
 			item_data = data[key]
 			item_code = key[0]
 			if item_code in item_details:
 				item_data.update(item_details[item_code])
+				item_data.cumulative_lead_time = self.get_cumulative_lead_time(
+					item_code, item_data.bom_no, flt(item_data.qty)
+				)
 
 	def get_item_details(self, items):
 		doctype = frappe.qb.DocType("Item")
@@ -150,38 +155,64 @@ class MasterProductionSchedule(Document):
 			.where(doctype.name.isin(items))
 		)
 
-		item_details = query.run(as_dict=True)
-		item_wise_details = frappe._dict({})
+		return frappe._dict({row.item_code: row for row in query.run(as_dict=True)})
 
-		if not item_details:
-			return item_wise_details
+	def load_lead_times(self, roots):
+		self._bom_materials = {}
+		items, visited, stack = set(), set(), list(roots)
+		while stack:
+			item_code, bom_no = stack.pop()
+			items.add(item_code)
+			if bom_no and bom_no not in visited:
+				visited.add(bom_no)
+				stack.extend((row.item_code, row.bom_no) for row in self.get_bom_materials(bom_no))
 
-		for row in item_details:
-			row.cumulative_lead_time = self.get_cumulative_lead_time(row.item_code, row.bom_no)
+		self._lead_times = {
+			row.item_code: row
+			for row in frappe.get_all(
+				"Item Lead Time",
+				filters={"item_code": ("in", list(items) or [""])},
+				fields=[
+					"item_code",
+					"capacity_per_day",
+					"manufacturing_time_in_mins",
+					"no_of_shift",
+					"shift_time_in_hours",
+					"no_of_workstations",
+					"purchase_time",
+					"buffer_time",
+				],
+			)
+		}
 
-		for row in item_details:
-			item_wise_details.setdefault(row.item_code, row)
+	def get_bom_materials(self, bom_no):
+		if bom_no not in self._bom_materials:
+			bom = frappe.qb.DocType("BOM")
+			bom_item = frappe.qb.DocType("BOM Item")
+			self._bom_materials[bom_no] = (
+				frappe.qb.from_(bom_item)
+				.join(bom)
+				.on(bom.name == bom_item.parent)
+				.select(
+					bom_item.item_code,
+					bom_item.bom_no,
+					(bom_item.stock_qty / bom.quantity).as_("qty_per_unit"),
+				)
+				.where((bom_item.parent == bom_no) & (bom_item.parenttype == "BOM") & (bom.docstatus == 1))
+			).run(as_dict=True)
 
-		return item_wise_details
+		return self._bom_materials[bom_no]
 
-	def get_cumulative_lead_time(self, item_code, bom_no, time_in_days=0):
-		if not time_in_days:
-			time_in_days = get_item_lead_time(item_code)
+	def get_cumulative_lead_time(self, item_code, bom_no, qty):
+		own_time = get_own_lead_time(self._lead_times.get(item_code), qty, bool(bom_no))
+		if not bom_no:
+			return own_time
 
-		bom_materials = frappe.get_all(
-			"BOM Item",
-			filters={"parent": bom_no, "docstatus": 1},
-			fields=["item_code", "bom_no"],
-		)
-
-		for row in bom_materials:
-			if row.bom_no:
-				time_in_days += self.get_cumulative_lead_time(row.item_code, row.bom_no)
-			else:
-				lead_time = get_item_lead_time(row.item_code)
-				time_in_days += lead_time
-
-		return time_in_days
+		component_times = [
+			self.get_cumulative_lead_time(row.item_code, row.bom_no, qty * flt(row.qty_per_unit))
+			for row in self.get_bom_materials(bom_no)
+		]
+		return own_time + max(component_times, default=0)
 
 	def get_demand_data(self):
 		sales_order_data = self.get_sales_orders_data()
@@ -503,24 +534,16 @@ class MasterProductionSchedule(Document):
 		)
 
 
-def get_item_lead_time(item_code):
-	doctype = frappe.qb.DocType("Item Lead Time")
+def get_own_lead_time(lead_time, qty, is_manufactured):
+	if not lead_time:
+		return 0
 
-	query = (
-		frappe.qb.from_(doctype)
-		.select(
-			((doctype.manufacturing_time_in_mins / 1440.0) + doctype.purchase_time + doctype.buffer_time).as_(
-				"cumulative_lead_time"
-			)
-		)
-		.where(doctype.item_code == item_code)
-	)
+	if is_manufactured:
+		days = get_days_needed(lead_time, qty, 0)
+	else:
+		days = flt(lead_time.purchase_time)
 
-	result = query.run(as_dict=True)
-	if result:
-		return result[0].cumulative_lead_time or 0
-
-	return 0
+	return days + flt(lead_time.buffer_time)
 
 
 @frappe.whitelist()

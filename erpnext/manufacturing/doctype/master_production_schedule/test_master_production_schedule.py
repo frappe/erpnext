@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import add_days, getdate, today
 
 from erpnext.manufacturing.doctype.master_production_schedule.master_production_schedule import (
-	get_item_lead_time,
+	get_own_lead_time,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
@@ -56,24 +56,40 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 3)])
 
-	def test_cumulative_lead_time_is_not_int_truncated(self):
-		"""cumulative_lead_time = manufacturing_time_in_mins / 1440 + purchase_time + buffer_time.
-		manufacturing_time_in_mins is an Int column; integer/integer division truncates on
-		PostgreSQL (720/1440 -> 0) while MariaDB yields 0.5, changing the planned release date."""
-		item = make_item("_Test MPS Lead Time Item", {"is_stock_item": 1}).name
-		# idempotent across re-runs / a shared CI database
-		frappe.db.delete("Item Lead Time", {"item_code": item})
-		frappe.get_doc(
-			{
-				"doctype": "Item Lead Time",
-				"item_code": item,
-				"manufacturing_time_in_mins": 720,
-				"purchase_time": 0,
-				"buffer_time": 0,
-			}
-		).insert()
-		# 720 / 1440 = 0.5; a truncating integer division on PostgreSQL would give 0.
-		self.assertAlmostEqual(float(get_item_lead_time(item)), 0.5, places=2)
+	def test_lead_time_is_not_int_truncated(self):
+		lead_time = frappe._dict(manufacturing_time_in_mins=720, shift_time_in_hours=8, buffer_time=0)
+		self.assertAlmostEqual(get_own_lead_time(lead_time, 1, True), 1.5, places=2)
+
+	def test_cumulative_lead_time_follows_the_longest_path(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		rm_1, rm_2, rm_3, sub_item, fg_item = (
+			make_item(f"_Test MPS Lead {name}", {"is_stock_item": 1}).name
+			for name in ("RM 1", "RM 2", "RM 3", "Sub", "FG")
+		)
+		sub_bom = make_bom(item=sub_item, raw_materials=[rm_3])
+		fg_bom = make_bom(item=fg_item, raw_materials=[rm_1, rm_2, sub_item])
+		self.assertEqual(
+			frappe.db.get_value("BOM Item", {"parent": fg_bom.name, "item_code": sub_item}, "bom_no"),
+			sub_bom.name,
+		)
+
+		make_lead_time(fg_item, buffer_time=1, manufacturing_time_in_mins=5, shift_time_in_hours=8)
+		for item in (rm_1, rm_2, rm_3):
+			make_lead_time(item, purchase_time=10)
+		make_lead_time(sub_item, buffer_time=2)
+
+		order = make_sales_order(item_code=fg_item, qty=1000)
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+
+		self.assertEqual(mps.items[0].cumulative_lead_time, 24)
+
+
+def make_lead_time(item_code, **values):
+	frappe.db.delete("Item Lead Time", {"item_code": item_code})
+	frappe.get_doc({"doctype": "Item Lead Time", "item_code": item_code, **values}).insert()
 
 
 def make_mps(**args):
