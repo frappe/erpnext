@@ -1,0 +1,289 @@
+{
+ "actions": [],
+ "autoname": "format:SHLE-{#####}",
+ "creation": "2026-09-25 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "source_section",
+  "share_transaction",
+  "column_break_source",
+  "transaction_type",
+  "posting_section",
+  "company",
+  "posting_date",
+  "column_break_posting",
+  "posting_sequence",
+  "ownership_account_section",
+  "share_class",
+  "column_break_ownership_account",
+  "share_folio",
+  "share_movement_section",
+  "from_share_number",
+  "to_share_number",
+  "column_break_share_movement",
+  "quantity_change",
+  "value_snapshot_section",
+  "currency",
+  "column_break_value_snapshot",
+  "face_value_per_share",
+  "treasury_cost_change",
+  "reversal_section",
+  "is_reversal",
+  "column_break_reversal",
+  "reversal_of",
+  "source_doctype",
+  "source_name",
+  "posting_key",
+  "capital_change",
+  "recorded_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "source_section",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "share_transaction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Share Transaction",
+   "options": "Share Transaction",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_source",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Data",
+   "label": "Transaction Type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_section",
+   "fieldtype": "Section Break",
+   "label": "Posting"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_posting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_sequence",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Posting Sequence",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "ownership_account_section",
+   "fieldtype": "Section Break",
+   "label": "Ownership Account"
+  },
+  {
+   "fieldname": "share_class",
+   "fieldtype": "Link",
+   "label": "Share Class",
+   "options": "Share Class",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_ownership_account",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "share_folio",
+   "fieldtype": "Link",
+   "label": "Share Folio",
+   "options": "Share Folio",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "share_movement_section",
+   "fieldtype": "Section Break",
+   "label": "Share Movement"
+  },
+  {
+   "fieldname": "from_share_number",
+   "fieldtype": "Int",
+   "label": "From Share Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_share_number",
+   "fieldtype": "Int",
+   "label": "To Share Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_share_movement",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Positive when shares enter the folio and negative when shares leave it.",
+   "fieldname": "quantity_change",
+   "fieldtype": "Int",
+   "label": "Quantity Change",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "value_snapshot_section",
+   "fieldtype": "Section Break",
+   "label": "Value Snapshot"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "face_value_per_share",
+   "fieldtype": "Currency",
+   "label": "Face Value Per Share",
+   "options": "currency",
+   "read_only": 1,
+   "precision": "6"
+  },
+  {
+   "fieldname": "column_break_value_snapshot",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Signed historical-cost movement for a treasury folio. Zero for normal shareholder folios.",
+   "fieldname": "treasury_cost_change",
+   "fieldtype": "Currency",
+   "label": "Treasury Cost Change",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reversal_section",
+   "fieldtype": "Section Break",
+   "label": "Reversal"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_reversal",
+   "fieldtype": "Check",
+   "label": "Is Reversal?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_reversal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_reversal",
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Share Ledger Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "label": "Source Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Dynamic Link",
+   "options": "source_doctype",
+   "label": "Source Document",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_key",
+   "fieldtype": "Data",
+   "label": "Posting Key",
+   "read_only": 1,
+   "hidden": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "capital_change",
+   "fieldtype": "Currency",
+   "options": "currency",
+   "label": "Nominal Capital Change",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recorded_at",
+   "fieldtype": "Datetime",
+   "label": "Recorded At",
+   "read_only": 1
+  }
+ ],
+ "icon": "list-alt",
+ "links": [],
+ "modified": "2026-09-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Share Ledger Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  }
+ ],
+ "search_fields": "share_transaction, company, share_class, share_folio",
+ "show_name_in_global_search": 1,
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "share_folio",
+ "track_changes": 1
+}
