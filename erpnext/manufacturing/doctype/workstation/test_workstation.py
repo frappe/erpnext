@@ -234,6 +234,53 @@ class TestWorkstation(ERPNextTestSuite):
 			self.assertEqual(hour_rate, 250)
 			self.assertEqual(operating_cost, expected_operating_cost)
 
+	def test_manufacture_uses_operating_cost_recorded_on_the_work_order(self):
+		from frappe.utils import add_to_date, now
+
+		from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry as make_test_entry
+
+		workstation = make_workstation(workstation_name="_Test WS Recorded Cost", hour_rate_rent=600)
+		operations = [
+			{"operation": "_Test Op Recorded Cost", "workstation": workstation.name, "time_in_mins": 6}
+		]
+		setup_operations(operations)
+		fg_item = make_item("_Test FG Recorded Cost", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test RM Recorded Cost", {"is_stock_item": 1}).name
+		routing = create_routing(routing_name="Recorded Cost Route", operations=operations)
+		bom = setup_bom(
+			item_code=fg_item, routing=routing.name, raw_materials=[rm_item], source_warehouse="Stores - _TC"
+		)
+		make_test_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=50)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, skip_transfer=1, source_warehouse="Stores - _TC"
+		)
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		from_time = add_to_date(now(), days=1)
+		job_card.append(
+			"time_logs",
+			{"from_time": from_time, "to_time": add_to_date(from_time, minutes=60), "completed_qty": 10},
+		)
+		job_card.submit()
+
+		workstation.reload()
+		workstation.workstation_costs[0].operating_cost = 1200
+		workstation.save()
+
+		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
+		entry.insert()
+		recorded_cost = frappe.db.get_value(
+			"Work Order Operation", {"parent": work_order.name}, "actual_operating_cost"
+		)
+		self.assertAlmostEqual(recorded_cost, 600, delta=1)
+		self.assertEqual(
+			sum(row.amount for row in entry.additional_costs if row.has_operating_cost), recorded_cost
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
