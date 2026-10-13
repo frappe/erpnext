@@ -392,6 +392,21 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_purchase_order_row_qty(po, row, 5)
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
+	def test_blanket_order_cannot_be_used_before_it_starts(self):
+		bo = new_blanket_order(blanket_order_type="Purchasing")
+		bo.from_date = add_days(today(), 30)
+		bo.to_date = add_days(today(), 60)
+		bo.append("items", {"item_code": "_Test Item", "qty": 100, "rate": 100})
+		bo.insert()
+		bo.submit()
+
+		frappe.flags.args.doctype = "Purchase Order"
+		self.assertRaisesRegex(frappe.ValidationError, "is valid from", make_order, bo.name)
+
+		bo.reload()
+		bo.to_date = add_days(today(), 1)
+		self.assertRaises(frappe.ValidationError, bo.save)
+
 	def test_expired_blanket_order_cannot_be_ordered_against(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
 		bo.db_set("to_date", today())

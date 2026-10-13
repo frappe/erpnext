@@ -72,6 +72,9 @@ class BlanketOrder(StatusUpdater):
 		self.set_base_rates()
 		clear_closed_rows_on_amend(self)
 
+	def before_update_after_submit(self):
+		self.validate_dates()
+
 	def on_submit(self):
 		self.set_status(update=True)
 
@@ -183,6 +186,14 @@ class BlanketOrder(StatusUpdater):
 			frappe.throw(_("From date cannot be greater than To date"))
 
 	def validate_not_expired(self, order_date) -> None:
+		if getdate(order_date) < getdate(self.from_date):
+			frappe.throw(
+				_("Blanket Order {0} is valid from {1}").format(
+					frappe.bold(self.name), formatdate(self.from_date)
+				),
+				title=_("Blanket Order Not Started"),
+			)
+
 		if getdate(order_date) > getdate(self.to_date):
 			frappe.throw(
 				_("Blanket Order {0} expired on {1}").format(
