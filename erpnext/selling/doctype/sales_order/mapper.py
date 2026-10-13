@@ -500,7 +500,7 @@ def make_sales_invoice(
 			invoice_item = frappe.qb.DocType("Sales Invoice Item")
 			sales_order_item = frappe.qb.DocType("Sales Order Item")
 			credit_note_qty = (
-				Case().when(get_credit_note_return_criterion(invoice), -invoice_item.qty).else_(0)
+				Case().when(get_credit_note_return_criterion(invoice), -invoice_item.stock_qty).else_(0)
 			)
 			rows = (
 				frappe.qb.from_(invoice_item)
@@ -510,8 +510,10 @@ def make_sales_invoice(
 				.on(invoice.name == invoice_item.parent)
 				.select(
 					invoice_item.so_detail,
-					Sum(invoice_item.qty).as_("billed_qty"),
-					Sum(credit_note_qty).as_("credit_note_returned_qty"),
+					(Sum(invoice_item.stock_qty) / sales_order_item.conversion_factor).as_("billed_qty"),
+					(Sum(credit_note_qty) / sales_order_item.conversion_factor).as_(
+						"credit_note_returned_qty"
+					),
 				)
 				.where((invoice_item.docstatus == 1) & (sales_order_item.parent == source_name))
 				.groupby(invoice_item.so_detail)

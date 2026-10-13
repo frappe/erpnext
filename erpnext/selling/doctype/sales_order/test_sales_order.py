@@ -672,6 +672,57 @@ class TestSalesOrder(ERPNextTestSuite):
 				self.assertEqual(so.get("items")[0].returned_qty, 3)
 				self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 1)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 0})
+	def test_stock_invoice_return_in_different_uom_updates_order_progress(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=12, rate=10)
+		so = make_sales_order(item_code=item.name, qty=1, uom="Box", rate=120)
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.insert()
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.items[0].uom = item.stock_uom
+		credit_note.items[0].conversion_factor = 1
+		credit_note.items[0].qty = -2
+		credit_note.items[0].rate = si.items[0].rate / 12
+		credit_note.insert()
+		credit_note.submit()
+
+		so.reload()
+		self.assertAlmostEqual(so.items[0].delivered_qty, 10 / 12)
+		self.assertAlmostEqual(so.items[0].returned_qty, 2 / 12)
+		self.assertAlmostEqual(get_reserved_qty(item.name), 2)
+		self.assertEqual(len(make_sales_invoice(so.name).items), 0)
+		self.assertFalse(has_potentially_billable_items(so.name))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 0})
+	def test_delivery_note_return_in_different_uom_updates_order_progress(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=12, rate=10)
+		so = make_sales_order(item_code=item.name, qty=1, uom="Box", rate=120)
+		dn = create_dn_against_so(so.name, 1)
+
+		returned_dn = frappe.get_doc(make_sales_return(dn.name).as_dict())
+		returned_dn.items[0].uom = item.stock_uom
+		returned_dn.items[0].conversion_factor = 1
+		returned_dn.items[0].qty = -2
+		returned_dn.insert()
+		returned_dn.submit()
+		self.assertEqual(returned_dn.items[0].stock_qty, -2)
+		self.assertEqual(returned_dn.items[0].so_detail, so.items[0].name)
+
+		so.reload()
+		self.assertAlmostEqual(so.items[0].delivered_qty, 10 / 12)
+		self.assertAlmostEqual(so.items[0].returned_qty, 2 / 12)
+		self.assertAlmostEqual(get_reserved_qty(item.name), 2)
+
 	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
 		so = make_sales_order(
 			item_list=[

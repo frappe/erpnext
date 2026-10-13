@@ -670,6 +670,16 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
+				if args.get("target_conversion_factor"):
+					conversion_factor = flt(
+						frappe.db.get_value(
+							args["target_dt"], args["detail_id"], args["target_conversion_factor"]
+						)
+					)
+					args["source_dt_value"] = (
+						args["source_dt_value"] / conversion_factor if conversion_factor else 0
+					)
+
 				frappe.db.sql(
 					"""update `tab{target_dt}`
 					set {target_field} = {source_dt_value} {update_modified}
