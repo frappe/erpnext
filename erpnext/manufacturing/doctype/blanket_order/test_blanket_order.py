@@ -191,6 +191,25 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].blanket_order_rate, 100)
 		self.assertEqual(so.items[0].rate, 1200)
 
+	def test_order_must_match_blanket_order_party_type_and_currency(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+
+		other_party = make_purchase_order_against(bo, qty=4)
+		other_party.supplier = "_Test Supplier 1"
+		self.assertRaisesRegex(frappe.ValidationError, "is for", other_party.insert)
+
+		other_currency = make_purchase_order_against(bo, qty=4)
+		other_currency.currency = "USD"
+		other_currency.conversion_rate = 50
+		self.assertRaisesRegex(frappe.ValidationError, "is in", other_currency.insert)
+
+		selling_bo = make_blanket_order(blanket_order_type="Selling", quantity=100)
+		wrong_type = make_purchase_order_against(bo, qty=4)
+		wrong_type.items[0].blanket_order = selling_bo.name
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be used on", wrong_type.insert)
+
+		make_purchase_order_against(bo, qty=4).insert()
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg"}).name
