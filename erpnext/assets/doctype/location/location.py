@@ -8,7 +8,7 @@ import math
 import frappe
 from frappe import _
 from frappe.utils import flt
-from frappe.utils.nestedset import NestedSet, update_nsm
+from frappe.utils.nestedset import NestedSet, get_descendants_of, update_nsm
 
 EARTH_RADIUS = 6378137
 
@@ -84,20 +84,19 @@ class Location(NestedSet):
 
 	def update_ancestor_location_features(self):
 		ancestors = self.get_ancestors()
-		features = self.get_subtree_features()
-		subtree = {feature["properties"].get("feature_of") for feature in features} - {None}
-		subtree.add(self.location_name)
+		subtree = {self.name, *get_descendants_of(self.doctype, self.name, ignore_permissions=True)}
+		features = self.get_subtree_features(subtree)
 
 		for ancestor in set(self.get("previous_ancestors") or []) - set(ancestors):
 			set_features_in_ancestor(ancestor, subtree, [])
 		for ancestor in ancestors:
 			set_features_in_ancestor(ancestor, subtree, features)
 
-	def get_subtree_features(self) -> list[dict]:
-		"""Return this location's own features tagged with its name, along with its descendants' features."""
+	def get_subtree_features(self, subtree: set[str]) -> list[dict]:
+		"""Return this location's features, tagging any not owned by a location in `subtree` as its own."""
 		features = self.get_location_features()
 		for feature in features:
-			if not feature.get("properties").get("child_feature"):
+			if feature.get("properties").get("feature_of") not in subtree:
 				feature["properties"].update({"child_feature": True, "feature_of": self.location_name})
 
 		return features

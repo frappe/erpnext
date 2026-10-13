@@ -67,6 +67,26 @@ class TestLocation(ERPNextTestSuite):
 		feature = json.loads(new_parent.reload().location)["features"][0]
 		self.assertEqual(feature["properties"]["feature_of"], child.location_name)
 
+	def test_child_cannot_replace_sibling_features_in_parent(self):
+		parent = make_location("Sibling Parent", is_group=1)
+		sibling = make_location("Sibling A", parent_location=parent.name, location=square(80.0))
+		child = make_location("Sibling B", parent_location=parent.name, location=square(81.0))
+
+		location = json.loads(child.location)
+		forged = json.loads(square(82.0))["features"][0]
+		forged["properties"] = {"child_feature": True, "feature_of": sibling.name}
+		location["features"].append(forged)
+		child.location = json.dumps(location)
+		child.save()
+
+		features = json.loads(parent.reload().location)["features"]
+		sibling_geometries = [
+			f["geometry"] for f in features if f["properties"]["feature_of"] == sibling.name
+		]
+		self.assertEqual(sibling_geometries, [json.loads(square(80.0))["features"][0]["geometry"]])
+		self.assertEqual(len(features), 3)
+		self.assertAlmostEqual(parent.area, sibling.area + child.reload().area)
+
 	def test_coordinates_out_of_range_are_refused(self):
 		for coordinates in (
 			{"latitude": 123.4},
