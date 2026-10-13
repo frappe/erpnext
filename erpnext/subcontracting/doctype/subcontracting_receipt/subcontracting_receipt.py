@@ -934,6 +934,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 	first_order_charges = 0
 	for po_name in purchase_orders:
 		is_first_order = target_doc is None
+		charges_before = len(target_doc.taxes) if target_doc else 0
 		target_doc = get_mapped_doc(
 			"Purchase Order",
 			po_name,
@@ -969,8 +970,10 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 		)
 		if is_first_order:
 			first_order_charges = len(target_doc.taxes)
+		else:
+			merge_order_charges(target_doc, first_order_charges, charges_before)
 
-	merge_later_order_charges(target_doc, first_order_charges)
+	target_doc.calculate_taxes_and_totals()
 
 	if not target_doc.get("items"):
 		add_po_items_to_pr(source_doc, target_doc)
@@ -1078,27 +1081,26 @@ def get_uncombinable_orders_message(purchase_orders: list[str]) -> str:
 	).format(comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders]))
 
 
-def merge_later_order_charges(target_doc, first_order_charges: int):
-	"""Fold later orders' Actual charges into the first order's row with the same account and dimensions."""
+def merge_order_charges(target_doc, first_order_charges: int, order_charges_start: int):
+	"""Fold an order's Actual charges into the first order's rows, matching repeated charges by position."""
 	key_fields = get_charge_key_fields()
 
 	def get_charge_key(row) -> tuple:
 		return tuple(row.get(field) for field in key_fields)
 
-	first_order_rows = {
-		get_charge_key(row): row
-		for row in target_doc.taxes[:first_order_charges]
-		if row.charge_type == "Actual"
-	}
-	for row in target_doc.taxes[first_order_charges:]:
-		if first_row := first_order_rows.get(get_charge_key(row)):
+	first_order_rows = defaultdict(list)
+	for row in target_doc.taxes[:first_order_charges]:
+		if row.charge_type == "Actual":
+			first_order_rows[get_charge_key(row)].append(row)
+
+	for row in target_doc.taxes[order_charges_start:]:
+		if matching_rows := first_order_rows.get(get_charge_key(row)):
+			first_row = matching_rows.pop(0)
 			first_row.tax_amount = flt(first_row.tax_amount) + flt(row.tax_amount)
 			target_doc.remove(row)
 
 	for idx, row in enumerate(target_doc.taxes, 1):
 		row.idx = idx
-
-	target_doc.calculate_taxes_and_totals()
 
 
 def validate_no_purchase_receipt_made(scr_doc):
