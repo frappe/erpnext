@@ -140,6 +140,25 @@ class BlanketOrder(StatusUpdater):
 				)
 			)
 
+	def set_order_rates(self, order_doc) -> None:
+		rates = {row.item_code: flt(row.rate) for row in self.items}
+		for row in order_doc.get("items"):
+			if row.blanket_order != self.name or row.item_code not in rates:
+				continue
+
+			row.blanket_order_rate = rates[row.item_code]
+			expected_rate = flt(
+				row.blanket_order_rate * (flt(row.conversion_factor) or 1), row.precision("rate")
+			)
+			if flt(row.rate, row.precision("rate")) != expected_rate:
+				frappe.msgprint(
+					_("Row #{0}: Rate {1} differs from the rate {2} agreed in Blanket Order {3}").format(
+						row.idx, row.rate, expected_rate, frappe.bold(self.name)
+					),
+					alert=True,
+					indicator="orange",
+				)
+
 	def validate_is_open(self) -> None:
 		if self.status == "Closed":
 			frappe.throw(
@@ -372,6 +391,7 @@ def validate_against_blanket_order(order_doc):
 			bo_doc.validate_order_matches(order_doc)
 			bo_doc.validate_items_are_open(list(item_data))
 			bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
+			bo_doc.set_order_rates(order_doc)
 
 
 def validate_reopen_against_blanket_order(order_doc):
