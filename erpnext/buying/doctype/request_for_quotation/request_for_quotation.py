@@ -8,6 +8,7 @@ from frappe.contacts.doctype.contact.contact import get_full_name
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -540,20 +541,22 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 
 	linked_sq_conditions = sq_item.request_for_quotation == rfq_name
 	if rfq_item_names:
-		linked_sq_conditions = linked_sq_conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))
+		linked_sq_conditions = linked_sq_conditions | (
+			sq_item.request_for_quotation_item.isin(rfq_item_names)
+		)
 
 	linked_sq_names = (
-		frappe.qb.from_(sq_item)
-		.select(sq_item.parent)
-		.where(linked_sq_conditions)
-		.distinct()
-		.run(pluck=True)
+		frappe.qb.from_(sq_item).select(sq_item.parent).where(linked_sq_conditions).distinct().run(pluck=True)
 	)
 
 	conditions = linked_sq_conditions
 	if linked_sq_names and rfq_item_codes:
+		# rows added manually to a linked quotation, but not rows that belong to another RFQ
 		conditions = conditions | (
-			sq_item.parent.isin(linked_sq_names) & sq_item.item_code.isin(rfq_item_codes)
+			sq_item.parent.isin(linked_sq_names)
+			& sq_item.item_code.isin(rfq_item_codes)
+			& (Coalesce(sq_item.request_for_quotation, "") == "")
+			& (Coalesce(sq_item.request_for_quotation_item, "") == "")
 		)
 
 	query = (
