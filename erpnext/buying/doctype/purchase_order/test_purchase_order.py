@@ -1534,6 +1534,27 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_billed_qty_after_debit_note_in_stock_uom(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+		from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+			get_invoiced_qty_against_po_items,
+		)
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 4}])
+		po = create_purchase_order(item_code=item.name, qty=2, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 4})
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.update_billed_amount_in_purchase_order = 1
+		debit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -2})
+		debit_note.submit()
+
+		self.assertEqual(make_pi_from_po(po.name).items[0].qty, 0.5)
+		self.assertEqual(get_invoiced_qty_against_po_items([po.items[0].name])[po.items[0].name], 1.5)
+
 	def test_order_neutral_debit_note_stays_out_of_later_billing(self):
 		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 
