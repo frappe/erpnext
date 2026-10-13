@@ -164,7 +164,7 @@ class MaintenanceVisit(TransactionBase):
 			)
 
 	def get_submitted_schedule_visits(self, details):
-		"""Submitted visits referencing the schedule rows, latest first."""
+		"""Submitted visits referencing the schedule rows, latest first, locked so concurrent cancels see each other."""
 		visit = frappe.qb.DocType("Maintenance Visit")
 		purpose = frappe.qb.DocType("Maintenance Visit Purpose")
 		visits = (
@@ -186,6 +186,7 @@ class MaintenanceVisit(TransactionBase):
 			)
 			.orderby(visit.mntc_date, order=Order.desc)
 			.orderby(visit.creation, order=Order.desc)
+			.for_update()
 		).run(as_dict=True)
 
 		for row in visits:
