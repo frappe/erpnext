@@ -6,6 +6,7 @@ from itertools import pairwise
 
 import frappe
 from frappe.utils import add_days, getdate, nowdate
+from frappe.utils.logging import get_log_db
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
@@ -173,7 +174,7 @@ class TestSupplierScorecard(ERPNextTestSuite):
 
 		self.assertTrue(frappe.db.exists("Supplier Scorecard Period", {"scorecard": healthy}))
 		self.assertTrue(
-			frappe.db.exists(
+			get_log_db().exists(
 				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}
 			)
 		)

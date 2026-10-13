@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import add_days, today
+from frappe.utils.logging import get_log_db
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
@@ -94,7 +95,7 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		)
 
 		# Check if missing debit account error raised
-		error_log = frappe.db.exists(
+		error_log = get_log_db().exists(
 			"Error Log",
 			{"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]},
 		)

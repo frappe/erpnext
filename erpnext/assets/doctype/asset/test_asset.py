@@ -14,6 +14,7 @@ from frappe.utils import (
 	nowdate,
 )
 from frappe.utils.data import add_to_date
+from frappe.utils.logging import get_log_db
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -1091,7 +1092,7 @@ class TestAsset(AssetSetup):
 
 		self.assertFalse(frappe.db.get_value("Asset", assets[0], "booked_fixed_asset"))
 		self.assertTrue(frappe.db.get_value("Asset", assets[1], "booked_fixed_asset"))
-		self.assertTrue(frappe.db.exists("Error Log", {"reference_name": assets[0]}))
+		self.assertTrue(get_log_db().exists("Error Log", {"reference_name": assets[0]}))
 
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
