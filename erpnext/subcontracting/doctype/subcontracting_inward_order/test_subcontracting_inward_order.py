@@ -1266,6 +1266,38 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			len(reservations),
 		)
 
+	def test_work_order_reserves_extra_received_material_again_after_unreserving(self):
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			make_stock_reservation_entries,
+			unreserve_stock_for_work_order,
+		)
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items[-2].qty = 7
+		rm_in.submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		reservations = frappe.get_all(
+			"Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}, pluck="name"
+		)
+		unreserve_stock_for_work_order(wo, reservations)
+
+		wo.reload()
+		make_stock_reservation_entries(wo.as_dict())
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Reservation Entry",
+				{"voucher_no": wo.name, "item_code": rm_in.items[-2].item_code, "docstatus": 1},
+				"reserved_qty",
+			),
+			7,
+		)
+
 	def test_cancelled_manufacture_of_closed_work_order_keeps_the_rest_consumed(self):
 		from erpnext.manufacturing.doctype.work_order.services.reservation import (
 			make_stock_reservation_entries,
