@@ -552,3 +552,4 @@ execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report"
 erpnext.patches.v17_0.migrate_legacy_shareholders_to_folios
 erpnext.patches.v17_0.backfill_legacy_share_transfers
 erpnext.patches.v17_0.rebuild_shareholder_current_balances
+erpnext.patches.v17_0.remove_shareholder_document_shares

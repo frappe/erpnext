@@ -9,6 +9,12 @@ from frappe.utils import flt, now_datetime, nowdate
 
 
 class Shareholder(Document):
+	def validate_share(self, share):
+		frappe.throw(
+			_("Shareholders cannot be shared. Grant access through roles and company permissions."),
+			frappe.PermissionError,
+		)
+
 	def validate(self):
 		if not self.is_new():
 			frappe.db.get_value("Shareholder", self.name, "name", for_update=True)

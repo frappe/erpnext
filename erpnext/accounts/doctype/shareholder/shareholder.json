@@ -132,7 +132,7 @@
  ],
  "icon": "user-star",
  "links": [],
- "modified": "2026-09-24 00:00:00.000000",
+ "modified": "2026-10-14 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shareholder",
@@ -148,7 +148,7 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
+   "share": 0,
    "write": 1
   },
   {
@@ -160,7 +160,7 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager",
-   "share": 1,
+   "share": 0,
    "write": 1
   },
   {
@@ -172,7 +172,7 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User",
-   "share": 1,
+   "share": 0,
    "write": 1
   }
  ],
