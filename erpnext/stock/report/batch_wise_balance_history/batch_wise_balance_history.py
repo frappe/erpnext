@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from datetime import timedelta
+
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
@@ -13,6 +15,8 @@ from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockC
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.utils import get_valuation_method
 
 SLE_COUNT_LIMIT = 100_000
 
@@ -314,7 +318,33 @@ def get_item_warehouse_batch_map(filters, float_precision):
 		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
 		qty_dict.bal_value += flt(d.stock_value_difference)
 
+	set_non_batchwise_valuation(filters, iwb_map)
 	return iwb_map
+
+
+def set_non_batchwise_valuation(filters, iwb_map):
+	if not frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
+		return
+
+	posting_datetime = get_datetime(add_to_date(filters.to_date, days=1)) - timedelta(microseconds=1)
+	if filters.get("to_datetime"):
+		posting_datetime = min(posting_datetime, get_datetime(filters.to_datetime))
+
+	for item, warehouses in iwb_map.items():
+		# Only this mode pools every batch; legacy batches otherwise retain their own values.
+		if get_valuation_method(item, filters.company) != "Moving Average":
+			continue
+
+		for warehouse, batches in warehouses.items():
+			last_sle = get_previous_sle(
+				{
+					"item_code": item,
+					"warehouse": warehouse,
+					"posting_datetime": posting_datetime,
+				}
+			)
+			for balance in batches.values():
+				balance.bal_value = balance.bal_qty * flt(last_sle.get("valuation_rate"))
 
 
 def get_item_details(filters):
