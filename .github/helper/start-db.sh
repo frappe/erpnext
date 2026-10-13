@@ -19,23 +19,7 @@ ci_user="${ERPNEXT_CI_USER:-frappe}"
 # refused anyway). Mirrors install.sh's user switch.
 if [ "$(id -u)" = "0" ] && [ "${SKIP_SYSTEM_SETUP:-0}" = "1" ] && [ "$ci_user" != "root" ]; then
     exec su -m "$ci_user" -s /bin/bash -c \
-        "ERPNEXT_CI_USER='$ci_user' CI_DB_DATADIR='${CI_DB_DATADIR:-}' DB='${DB:-}' bash '$0'"
-fi
-
-# --- PostgreSQL (GitHub-hosted CI): run in-runner on a PGDATA so it bakes into the artifact,
-# same idea as the mariadb datadir. Trust auth (throwaway CI) skips password setup; durability
-# off for speed. Postgres is preinstalled on ubuntu-latest under /usr/lib/postgresql/<ver>/bin.
-if [ "${DB:-mariadb}" = "postgres" ]; then
-    PG_BIN=$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -1)
-    [ -n "$PG_BIN" ] && export PATH="$PG_BIN:$PATH"
-    PGDATA="${CI_DB_DATADIR:-$HOME/frappe-bench/pgdata}"
-    if [ ! -d "$PGDATA/base" ]; then
-        initdb -D "$PGDATA" -U postgres --auth-local=trust --auth-host=trust >/dev/null
-        echo "host all all 127.0.0.1/32 trust" >> "$PGDATA/pg_hba.conf"
-    fi
-    pg_ctl -D "$PGDATA" -w -o "-p 5432 -c listen_addresses=127.0.0.1 -c unix_socket_directories=$PGDATA -c fsync=off -c synchronous_commit=off -c full_page_writes=off" start
-    echo "PostgreSQL up in-runner (pgdata=$PGDATA)"
-    exit 0
+        "ERPNEXT_CI_USER='$ci_user' CI_DB_DATADIR='${CI_DB_DATADIR:-}' bash '$0'"
 fi
 
 # --- MariaDB ---
