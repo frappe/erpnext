@@ -759,6 +759,9 @@ class PickList(TransactionBase):
 			key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
 			serial_no = [x for x in item_data.serial_no.split("\n") if x] if item_data.serial_no else None
 
+			if item_data.item_code not in picked_items:
+				picked_items[item_data.item_code] = {}
+
 			if item_data.serial_and_batch_bundle:
 				if not serial_no:
 					serial_no = get_serial_nos_from_bundle(item_data.serial_and_batch_bundle)
@@ -769,15 +772,11 @@ class PickList(TransactionBase):
 						batch_qty = abs(batch_qty)
 
 						key = (item_data.warehouse, batch_no)
-						if item_data.item_code not in picked_items:
-							picked_items[item_data.item_code] = {key: {"picked_qty": batch_qty}}
-						else:
-							picked_items[item_data.item_code][key]["picked_qty"] += batch_qty
+						if key not in picked_items[item_data.item_code]:
+							picked_items[item_data.item_code][key] = {"picked_qty": 0}
+						picked_items[item_data.item_code][key]["picked_qty"] += batch_qty
 
 					continue
-
-			if item_data.item_code not in picked_items:
-				picked_items[item_data.item_code] = {}
 
 			if key not in picked_items[item_data.item_code]:
 				picked_items[item_data.item_code][key] = frappe._dict(
