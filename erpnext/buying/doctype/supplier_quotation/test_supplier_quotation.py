@@ -8,6 +8,12 @@ import frappe
 from frappe.tests import change_settings
 from frappe.utils import add_days, today
 
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+	make_supplier_quotation_from_rfq,
+)
+from erpnext.buying.doctype.request_for_quotation.test_request_for_quotation import (
+	make_request_for_quotation,
+)
 from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.tests.utils import ERPNextTestSuite
@@ -139,6 +145,14 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		sq.save()
 		self.assertEqual(sq.items[0].qty, 1)
 
+	def test_supplier_quotation_zero_qty_cannot_be_forced_by_the_client(self):
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq.items[0].qty = 0
+		sq.has_unit_price_items = 1
+
+		with self.assertRaises(InvalidQtyError):
+			sq.save()
+
 	def test_supplier_quotation_zero_qty(self):
 		"""
 		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
@@ -180,3 +194,42 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(len(po.get("items")), 1)
 		self.assertEqual(po.get("items")[0].qty, 0)
 		self.assertEqual(po.get("items")[0].item_code, sq.get("items")[0].item_code)
+
+	def test_removing_quoted_rows_resets_rfq_quote_status(self):
+		rfq = make_request_for_quotation(do_not_submit=True)
+		rfq.append("items", dict(rfq.items[0].as_dict(), name=None, idx=None, item_code="_Test Item 2"))
+		rfq.submit()
+		supplier = rfq.suppliers[0].supplier
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.submit()
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Received")
+
+		row = sq.items[0]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "rate": row.rate, "qty": row.qty, "docname": row.name}]
+		)
+		update_child_qty_rate("Supplier Quotation", trans_items, sq.name)
+
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Pending")
+
+	def test_removing_only_rfq_row_resets_rfq_quote_status(self):
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": 100})
+		sq.submit()
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Received")
+
+		row = sq.items[1]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "rate": row.rate, "qty": row.qty, "docname": row.name}]
+		)
+		update_child_qty_rate("Supplier Quotation", trans_items, sq.name)
+
+		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Pending")
+
+
+def rfq_quote_status(rfq, supplier):
+	return frappe.db.get_value(
+		"Request for Quotation Supplier", {"parent": rfq, "supplier": supplier}, "quote_status"
+	)
