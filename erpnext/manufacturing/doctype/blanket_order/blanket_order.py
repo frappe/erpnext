@@ -84,6 +84,26 @@ class BlanketOrder(StatusUpdater):
 		self.validate_is_open()
 		self.validate_not_expired(order_date)
 
+	def validate_qty_can_be_ordered(self, item_data: dict, order_doctype: str) -> None:
+		allowance = flt(
+			frappe.db.get_single_value(
+				"Selling Settings" if order_doctype == "Sales Order" else "Buying Settings",
+				"blanket_order_allowance",
+			)
+		)
+		for item in self.get("items"):
+			if item.item_code not in item_data:
+				continue
+
+			precision = item.precision("qty")
+			allowed_qty = flt(item.qty + (item.qty * allowance / 100) - item.ordered_qty, precision)
+			if item.qty and allowed_qty < flt(item_data[item.item_code], precision):
+				frappe.throw(
+					_("Item {0} cannot be ordered more than {1} against Blanket Order {2}.").format(
+						item.item_code, allowed_qty, self.name
+					)
+				)
+
 	def validate_is_open(self) -> None:
 		if self.status == "Closed":
 			frappe.throw(
@@ -301,26 +321,8 @@ def validate_against_blanket_order(order_doc):
 				else:
 					order_data[item.blanket_order] = {item.item_code: item.qty}
 
-		if order_data:
-			allowance = flt(
-				frappe.db.get_single_value(
-					"Selling Settings" if order_doc.doctype == "Sales Order" else "Buying Settings",
-					"blanket_order_allowance",
-				)
-			)
-			for bo_name, item_data in sorted(order_data.items()):
-				bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
-				bo_doc.validate_can_be_ordered(order_doc.transaction_date)
-				bo_doc.validate_items_are_open(list(item_data))
-				for item in bo_doc.get("items"):
-					if item.item_code in item_data:
-						precision = item.precision("qty")
-						allowed_qty = flt(
-							item.qty + (item.qty * allowance / 100) - item.ordered_qty, precision
-						)
-						if item.qty and allowed_qty < flt(item_data[item.item_code], precision):
-							frappe.throw(
-								_(
-									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."
-								).format(item.item_code, allowed_qty, bo_name)
-							)
+		for bo_name, item_data in sorted(order_data.items()):
+			bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
+			bo_doc.validate_can_be_ordered(order_doc.transaction_date)
+			bo_doc.validate_items_are_open(list(item_data))
+			bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)

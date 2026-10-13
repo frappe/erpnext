@@ -3,6 +3,8 @@
 
 """Child item update service: ChildItemUpdater class and helpers for the update_child_qty_rate API."""
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.workflow import get_workflow_name
@@ -33,6 +35,7 @@ class ChildItemUpdater:
 		self.child_docname = child_docname
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
+		self._blanket_order_increase = defaultdict(float)
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
 
@@ -333,6 +336,12 @@ class ChildItemUpdater:
 			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
 			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
 			blanket_order.validate_items_are_open([child_item.item_code])
+
+			key = (child_item.blanket_order, child_item.item_code)
+			self._blanket_order_increase[key] += new_stock_qty - flt(child_item.stock_qty)
+			blanket_order.validate_qty_can_be_ordered(
+				{child_item.item_code: self._blanket_order_increase[key]}, self.parent_doctype
+			)
 
 	def _validate_uom_unchanged_after_fulfilment(self, child_item, new_data: dict, change_state) -> None:
 		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(

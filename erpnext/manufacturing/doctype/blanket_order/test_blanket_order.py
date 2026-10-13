@@ -231,6 +231,18 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_purchase_order_row_qty(po, row, 5)
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
+	def test_update_items_cannot_raise_qty_past_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=50)
+		po.submit()
+		row = po.items[0]
+
+		self.assertRaises(frappe.ValidationError, update_purchase_order_row_qty, po, row, 250)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 50)
+
+		update_purchase_order_row_qty(po, row, 100)
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 100)
+
 	def test_closing_every_row_closes_the_blanket_order(self):
 		bo = make_blanket_order(blanket_order_type="Selling")
 		row = bo.items[0].name
