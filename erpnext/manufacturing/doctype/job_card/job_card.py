@@ -628,13 +628,14 @@ class JobCard(Document):
 			self.schedule_without_working_hours(row)
 			return
 
+		working_hours = get_sorted_working_hours(workstation_doc)
 		start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
-		start_date = self.fit_row_in_working_hours(workstation_doc, row, start_date)
+		start_date = self.fit_row_in_working_hours(working_hours, row, start_date)
 
 		if row.remaining_time_in_mins > 0:
 			start_date = add_days(start_date, 1)
 			row.planned_start_time = datetime.datetime.combine(
-				start_date, get_time(workstation_doc.working_hours[0].start_time)
+				start_date, get_time(working_hours[0].start_time)
 			)
 
 	def schedule_without_working_hours(self, row):
@@ -658,25 +659,20 @@ class JobCard(Document):
 
 		return start_date
 
-	def fit_row_in_working_hours(self, workstation_doc, row, start_date):
-		total_idx = len(workstation_doc.working_hours)
-
-		for i, time_slot in enumerate(workstation_doc.working_hours):
+	def fit_row_in_working_hours(self, working_hours, row, start_date):
+		for time_slot in working_hours:
 			workstation_start_time = datetime.datetime.combine(start_date, get_time(time_slot.start_time))
 			workstation_end_time = datetime.datetime.combine(start_date, get_time(time_slot.end_time))
 
-			if not (
-				get_datetime(row.planned_start_time) >= workstation_start_time
-				and get_datetime(row.planned_start_time) <= workstation_end_time
-			):
+			if get_datetime(row.planned_start_time) >= workstation_end_time:
 				continue
 
-			self.consume_working_hour_slot(row, workstation_end_time)
+			if get_datetime(row.planned_start_time) < workstation_start_time:
+				row.planned_start_time = workstation_start_time
 
-			if total_idx != (i + 1) and row.remaining_time_in_mins > 0:
-				row.planned_start_time = datetime.datetime.combine(
-					start_date, get_time(workstation_doc.working_hours[i + 1].start_time)
-				)
+			self.consume_working_hour_slot(row, workstation_end_time)
+			if row.remaining_time_in_mins <= 0:
+				break
 
 		return start_date
 
@@ -1904,6 +1900,10 @@ class JobCard(Document):
 		for row in ste.stock_entry.items:
 			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
+
+
+def get_sorted_working_hours(workstation_doc):
+	return sorted(workstation_doc.working_hours, key=lambda row: get_time(row.start_time))
 
 
 @frappe.whitelist()

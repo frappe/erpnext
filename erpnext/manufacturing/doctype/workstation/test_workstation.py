@@ -14,7 +14,7 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 	get_raw_materials,
 	update_job_card,
 )
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
 class TestWorkstation(ERPNextTestSuite):
@@ -281,6 +281,22 @@ class TestWorkstation(ERPNextTestSuite):
 			sum(row.amount for row in entry.additional_costs if row.has_operating_cost), recorded_cost
 		)
 
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
+		shifts = [("13:00:00", "17:00:00"), ("08:00:00", "12:00:00")]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Early", shifts, 60, "2031-03-03 06:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 09:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Break", shifts, 60, "2031-03-03 12:30:00"),
+			[("2031-03-03 13:00:00", "2031-03-03 14:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Order", shifts, 360, "2031-03-03 08:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-03 13:00:00", "2031-03-03 15:00:00")],
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
@@ -316,3 +332,35 @@ def make_workstation(*args, **kwargs):
 		return doc
 
 	return frappe.get_doc("Workstation", workstation_name)
+
+
+def schedule_one_operation(workstation_name, shifts, minutes, planned_start, holiday_list=None):
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	workstation = frappe.get_doc("Workstation", make_workstation(workstation_name=workstation_name).name)
+	workstation.holiday_list = holiday_list
+	workstation.set("working_hours", [])
+	for shift in shifts:
+		workstation.append(
+			"working_hours",
+			{"start_time": shift[0], "end_time": shift[1], "enabled": shift[2] if len(shift) > 2 else 1},
+		)
+	workstation.save()
+
+	operation = make_operation(operation=f"{workstation_name} Op", workstation=workstation.name).name
+	fg_item = make_item(f"{workstation_name} FG", {"is_stock_item": 1}).name
+	rm_item = make_item(f"{workstation_name} RM", {"is_stock_item": 1}).name
+	bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_submit=True)
+	bom.append(
+		"operations",
+		{"operation": operation, "workstation": workstation.name, "time_in_mins": minutes, "hour_rate": 100},
+	)
+	bom.submit()
+
+	work_order = make_wo_order_test_record(
+		item=fg_item, bom_no=bom.name, qty=1, planned_start_date=planned_start
+	)
+	job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+	return [(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
