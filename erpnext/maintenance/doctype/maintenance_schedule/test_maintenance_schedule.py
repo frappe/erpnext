@@ -340,6 +340,30 @@ class TestMaintenanceSchedule(FrappeTestCase):
 			frappe.db.get_value("Serial No", serial_no, "amc_expiry_date"), getdate(first.items[0].end_date)
 		)
 
+	def test_start_date_checked_against_delivery_before_bundles(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(item_code)
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "status": "Active"})
+		delivery = deliver_serial_nos(item_code, [serial_no])
+
+		ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": delivery.name, "is_cancelled": 0},
+			["name", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		frappe.db.set_value("Stock Ledger Entry", ledger_entry.name, "serial_no", serial_no)
+		frappe.db.set_value(
+			"Serial and Batch Bundle", ledger_entry.serial_and_batch_bundle, "is_cancelled", 1
+		)
+
+		ms = make_maintenance_schedule(
+			item_code=item_code,
+			serial_and_batch_bundle=make_maintenance_bundle(item_code, [serial_no]),
+			start_date=today(),
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "before delivery date", ms.submit)
+
 	def test_serial_in_stock_is_refused(self):
 		item_code = "_Test Serial Item"
 		make_serial_item_with_serial(item_code)
