@@ -308,6 +308,29 @@ class TestWorkstation(ERPNextTestSuite):
 			frappe.db.get_value("Workstation", "_Test WS Disabled Shift", "total_working_hours"), 4
 		)
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "allow_overtime": 0, "allow_production_on_holidays": 0},
+	)
+	def test_holidays_are_skipped_without_working_hours_and_with_overtime(self):
+		holiday_list = make_test_holiday_list("_Test WS Holiday List", ["2031-03-03"])
+		self.assertEqual(
+			schedule_one_operation("_Test WS Holiday No Shift", [], 60, "2031-03-03 08:00:00", holiday_list),
+			[("2031-03-04 08:00:00", "2031-03-04 09:00:00")],
+		)
+
+		frappe.db.set_single_value("Manufacturing Settings", "allow_overtime", 1)
+		self.assertEqual(
+			schedule_one_operation(
+				"_Test WS Holiday Overtime",
+				[("08:00:00", "17:00:00")],
+				60,
+				"2031-03-03 08:00:00",
+				holiday_list,
+			),
+			[("2031-03-04 08:00:00", "2031-03-04 09:00:00")],
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
@@ -375,3 +398,17 @@ def schedule_one_operation(workstation_name, shifts, minutes, planned_start, hol
 	)
 	job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
 	return [(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
+
+
+def make_test_holiday_list(name, dates):
+	if not frappe.db.exists("Holiday List", name):
+		frappe.get_doc(
+			{
+				"doctype": "Holiday List",
+				"holiday_list_name": name,
+				"from_date": "2031-01-01",
+				"to_date": "2031-12-31",
+				"holidays": [{"holiday_date": date, "description": "Test holiday"} for date in dates],
+			}
+		).insert()
+	return name

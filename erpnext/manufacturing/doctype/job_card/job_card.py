@@ -623,11 +623,11 @@ class JobCard(Document):
 	def check_workstation_time(self, row):
 		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)
 		working_hours = get_sorted_working_hours(workstation_doc)
+		start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
 		if not working_hours or cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")):
 			self.schedule_without_working_hours(row)
 			return
 
-		start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
 		start_date = self.fit_row_in_working_hours(working_hours, row, start_date)
 
 		if row.remaining_time_in_mins > 0:
