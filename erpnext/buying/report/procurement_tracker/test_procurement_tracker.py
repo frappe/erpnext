@@ -216,3 +216,12 @@ class TestProcurementTracker(ERPNextTestSuite):
 		rows = {row.get("purchase_order"): row for row in self.run_report(show_completed_orders=1)}
 		self.assertEqual(rows[completed.name]["actual_cost"], 5000)
 		self.assertEqual(rows[closed.name]["actual_cost"], 0)
+
+	def test_uninvoiced_actual_cost_is_in_company_currency(self):
+		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD", rate=10, do_not_submit=1)
+		po.conversion_rate = 80
+		po.submit()
+
+		data = self.run_report()
+		row = next(row for row in data if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_cost"], 8000)
