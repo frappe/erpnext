@@ -4,6 +4,7 @@
 from unittest.mock import MagicMock, patch
 
 import frappe
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.permissions import add_user_permission
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -44,13 +45,21 @@ class TestBulkTransactionLogDetail(ERPNextTestSuite):
 	def test_unreadable_held_order_is_rejected_not_skipped(self):
 		held = make_sales_order()
 		held.update_status("On Hold")
-		user = "test1@example.com"
-		frappe.get_doc("User", user).add_roles("Sales User", "Accounts User")
-		add_user_permission("Customer", "_Test Customer 1", user)
+		user = self.give_sales_access("test1@example.com")
 
-		frappe.set_user(user)
-		self.addCleanup(frappe.set_user, "Administrator")
-		self.assertRaises(frappe.PermissionError, make_invoices, [held])
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, make_invoices, [held])
+
+	def test_sales_access_is_not_cached_after_rollback(self):
+		user = self.give_sales_access("test1@example.com")
+		self.assertIn("Sales User", frappe.get_roles(user))
+		self.assertIn("Customer", get_user_permissions(user))
+
+		frappe.db.rollback()
+		self.doCleanups()
+
+		self.assertNotIn("Sales User", frappe.get_roles(user))
+		self.assertNotIn("Customer", get_user_permissions(user))
 
 	def test_job_result_is_sent_to_the_user_with_the_failed_sources(self):
 		submitted, draft = make_sales_order(), make_sales_order(do_not_submit=True)
@@ -67,6 +76,12 @@ class TestBulkTransactionLogDetail(ERPNextTestSuite):
 		self.assertEqual(messages[0].indicator, "orange")
 		self.assertIn(draft.name, messages[0].message)
 		self.assertNotIn(submitted.name, messages[0].message)
+
+	def give_sales_access(self, user: str) -> str:
+		frappe.get_doc("User", user).add_roles("Sales User", "Accounts User")
+		add_user_permission("Customer", "_Test Customer 1", user)
+		self.addCleanup(frappe.clear_cache, user=user)
+		return user
 
 
 def make_invoices(orders: list, **kwargs) -> None:
