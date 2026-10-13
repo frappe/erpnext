@@ -112,7 +112,7 @@ class BOMCostingService:
 		).run(pluck=True)
 
 		for bom in parent_boms:
-			frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
+			BOMCostingService(frappe.get_doc("BOM", bom)).update_cost(from_child_bom=True)
 
 	def update_parent_cost(self):
 		if self.doc.total_cost:

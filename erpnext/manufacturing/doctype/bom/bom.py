@@ -1173,11 +1173,15 @@ class BOM(WebsiteGenerator):
 		update_hour_rate: bool = True,
 		save: bool = True,
 	):
+		if cint(save) and not self.is_new():
+			self.load_from_db()
+			self.check_permission("write")
+
 		return BOMCostingService(self).update_cost(
-			update_parent=update_parent,
+			update_parent=cint(update_parent) and cint(save),
 			from_child_bom=from_child_bom,
 			update_hour_rate=update_hour_rate,
-			save=save,
+			save=cint(save),
 		)
 
 	def update_parent_cost(self):
