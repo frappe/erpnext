@@ -1602,9 +1602,95 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			as_dict=True,
 		)
 
-		# Stock queue should have 5 removed via FIFO from [[10, 100], [20, 200], [5, 300]]
-		# FIFO removes from front: [10, 100] -> [5, 100], rest unchanged
-		self.assertEqual(json.loads(return_sle.stock_queue), [[5, 100], [20, 200], [5, 300]])
+		self.assertEqual(json.loads(return_sle.stock_queue), [[10, 100], [20, 200]])
+
+	def test_lifo_issue_from_non_batchwise_batch(self):
+		item_code = make_item(
+			"LIFO Non Batchwise Valuation Item",
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "LIFO-NBW-.#####",
+				"is_stock_item": 1,
+				"valuation_method": "LIFO",
+			},
+		).name
+
+		for batch_id, rate in (("LIFO-NBW-A", 100), ("LIFO-NBW-B", 200)):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item_code}).insert(
+				set_name=batch_id
+			)
+			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 0)
+			make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=10,
+				rate=rate,
+				batch_no=batch_id,
+				use_serial_batch_fields=True,
+			)
+
+		issue = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			qty=5,
+			batch_no="LIFO-NBW-A",
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			["stock_value_difference", "stock_queue"],
+			as_dict=True,
+		)
+		self.assertEqual(sle.stock_value_difference, -1000)
+		self.assertEqual(json.loads(sle.stock_queue), [[10, 100], [5, 200]])
+
+	def test_lifo_purchase_return_from_non_batchwise_batch(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			"LIFO Non Batchwise Return Item",
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "LIFO-NBR-.#####",
+				"is_stock_item": 1,
+				"valuation_method": "LIFO",
+			},
+		).name
+
+		batch_id = "LIFO-NBR-A"
+		frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item_code}).insert(
+			set_name=batch_id
+		)
+		frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 0)
+
+		receipts = [
+			make_purchase_receipt(
+				item_code=item_code,
+				warehouse="_Test Warehouse - _TC",
+				qty=10,
+				rate=rate,
+				batch_no=batch_id,
+				use_serial_batch_fields=True,
+			)
+			for rate in (100, 200)
+		]
+
+		purchase_return = make_return_doc("Purchase Receipt", receipts[0].name)
+		purchase_return.items[0].qty = -5
+		purchase_return.items[0].received_qty = -5
+		purchase_return.submit()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": purchase_return.name, "is_cancelled": 0},
+			["stock_value", "stock_queue"],
+			as_dict=True,
+		)
+		self.assertEqual(sle.stock_value, 2500)
+		self.assertEqual(json.loads(sle.stock_queue), [[5, 100], [10, 200]])
 
 	def test_stock_queue_for_return_entry_with_empty_fifo_queue(self):
 		"""Credit note (sales return) against empty FIFO queue should still rebuild stock_queue."""
