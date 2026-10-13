@@ -34,54 +34,61 @@ def get_context(context):
 def get_favorite_articles_by_page_view():
 	"""Return the most-viewed published Help Articles, most viewed first.
 
-	The two sides of this used to be one statement joining `tabHelp Article` to
-	`tabWeb Page View`. Web Page View is a virtual DocType whose rows live in the site's
-	separate log database, so no single query can reach both tables -- on a fresh site the
-	join raises "table doesn't exist", and on an upgraded one it silently matches nothing.
-
-	Matching by route here instead keeps working either way: `frappe.get_all` reads whichever
-	storage the DocType declares, so this is correct both on a Frappe that holds page views in
-	the site database and on one that holds them in the log database.
+	This used to be one statement joining `tabHelp Article` to `tabWeb Page View`. Web Page View
+	is a virtual DocType whose rows can live in a separate log database, so no single query can
+	reach both tables; the two sides are matched on route across separate reads instead.
 	"""
-	# route is the unique page URL, so there is one published article per route -- the same
-	# assumption the previous GROUP BY route relied on.
+	published = frappe.get_all(
+		"Help Article",
+		fields=["name", "route"],
+		filters={"published": 1, "route": ("is", "set")},
+		limit=0,
+	)
+	if not published:
+		return []
+
+	# Keyed on the folded route, while the filter below sends the routes as stored. Both halves
+	# matter: a case-sensitive backend only matches the route it was given, and MariaDB -- whose
+	# columns are `utf8mb4_unicode_ci` -- groups case-insensitively and answers under an
+	# arbitrary spelling from the group, which need not be the one the route was stored with.
+	articles_by_route = {article.route.lower(): article.name for article in published}
+
+	counts = {}
+	for row in frappe.get_all(
+		"Web Page View",
+		# COUNT(*) is aliased because an unaliased one is named by the driver: `COUNT(*)` on
+		# MariaDB and SQLite, `count` on postgres.
+		fields=["path", {"COUNT": "*", "as": "count"}],
+		filters={"path": ("in", [article.route for article in published])},
+		group_by="path",
+		# The grouped column, not the default `creation desc`: postgres rejects ordering a grouped
+		# query by an ungrouped one. Ranking happens below, on the totals.
+		order_by="path",
+		limit=len(published),
+	):
+		name = articles_by_route.get(row["path"].lower())
+		if name:
+			counts[name] = counts.get(name, 0) + row["count"]
+
+	if not counts:
+		return []
+
+	# `sorted` is stable and the rows arrived ordered by path, so equal counts keep a fixed order.
+	ranked = sorted(counts.items(), key=lambda item: -item[1])[:FAVORITE_ARTICLE_LIMIT]
+
+	# The only read of `content`, and only for the articles that survived the ranking: ranking in
+	# python previously meant reading every published article's body to then discard all but six.
 	articles = {
-		article.route: article
+		article.name: article
 		for article in frappe.get_all(
 			"Help Article",
 			fields=["name", "title", "content", "route", "category"],
-			filters={"published": 1, "route": ("is", "set")},
-			limit=0,
+			filters={"name": ("in", [name for name, _ in ranked])},
+			limit=len(ranked),
 		)
 	}
 
-	if not articles:
-		return []
-
-	routes = list(articles)
-	view_counts = frappe.get_all(
-		"Web Page View",
-		fields=["path", {"COUNT": "*"}],
-		filters={"path": ("in", routes)},
-		group_by="path",
-		# Ordered by the grouped column, not by the default `creation desc`: ordering a grouped
-		# query by an ungrouped column is rejected on postgres, which is where these rows still
-		# live on a Frappe that has not moved Web Page View to the log database.
-		order_by="path",
-		# An explicit limit rather than 0: older Frappe versions read 0 as the default page of
-		# 20 when a DocType is virtual. One row per matching route, so this is the true bound.
-		limit=len(routes),
-	)
-
-	# Ordered and trimmed here rather than in the query: a virtual DocType's controller is not
-	# obliged to support ordering by an aggregate, and the row count is already bounded by the
-	# number of published articles.
-	view_counts.sort(key=lambda row: row["COUNT(*)"], reverse=True)
-
-	return [
-		frappe._dict(articles[row["path"]], count=row["COUNT(*)"])
-		for row in view_counts[:FAVORITE_ARTICLE_LIMIT]
-	]
+	return [frappe._dict(articles[name], count=count) for name, count in ranked if name in articles]
 
 
 def get_favorite_articles(favorite_articles):
