@@ -82,6 +82,8 @@ class Task(NestedSet):
 			return ret
 
 	def validate(self):
+		self.validate_parent_project()
+		self.validate_children_project()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -217,6 +219,39 @@ class Task(NestedSet):
 					ParentIsGroupError,
 				)
 
+	def validate_parent_project(self):
+		"""Keep a task in its parent task's project."""
+		if not self.parent_task or not (
+			self.has_value_changed("parent_task") or self.has_value_changed("project")
+		):
+			return
+
+		parent_project = frappe.db.get_value("Task", self.parent_task, "project")
+		if not self.project:
+			self.project = parent_project
+		elif self.project != parent_project:
+			frappe.throw(
+				_("Parent Task {0} is not in Project {1}. Pick a group task of the same project.").format(
+					get_link_to_form("Task", self.parent_task), frappe.bold(self.project)
+				),
+				title=_("Invalid Parent Task"),
+			)
+
+	def validate_children_project(self):
+		if self.is_new() or not self.has_value_changed("project"):
+			return
+
+		child_projects = frappe.get_all(
+			"Task", filters={"parent_task": self.name}, pluck="project", distinct=True
+		)
+		if any((project or None) != (self.project or None) for project in child_projects):
+			frappe.throw(
+				_("Task {0} has child tasks in another project. Move them out of this group first.").format(
+					get_link_to_form("Task", self.name)
+				),
+				title=_("Invalid Project"),
+			)
+
 	def update_depends_on(self):
 		depends_on_tasks = ""
 		for d in self.depends_on:
@@ -348,7 +383,7 @@ class Task(NestedSet):
 				parent.save()
 
 	def on_trash(self):
-		if check_if_child_exists(self.name):
+		if frappe.db.exists("Task", {"parent_task": self.name}):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
 		self.update_nsm_model()
@@ -367,6 +402,7 @@ class Task(NestedSet):
 
 @frappe.whitelist()
 def check_if_child_exists(name):
+	frappe.get_doc("Task", name).check_permission("read")
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks

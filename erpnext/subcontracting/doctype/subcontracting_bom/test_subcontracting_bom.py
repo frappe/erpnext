@@ -5,6 +5,11 @@ import frappe
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+	get_subcontracting_boms_for_finished_goods,
+	get_subcontracting_boms_for_service_item,
+)
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -46,6 +51,34 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 			subcontracting_bom.reload()
 			subcontracting_bom.set(fieldname, 0)
 			self.assertRaises(frappe.ValidationError, subcontracting_bom.save)
+
+	def test_lookups_need_order_read_permission(self):
+		finished_good = make_item(
+			"Subcontracting BOM Lookup FG", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		)
+		raw_material = make_item("Subcontracting BOM Lookup RM", {"is_stock_item": 1})
+		finished_good_bom = make_bom(item=finished_good.name, raw_materials=[raw_material.name])
+		service_item = make_item("Subcontracting BOM Lookup Service Item", {"is_stock_item": 0})
+		create_subcontracting_bom(
+			finished_good=finished_good.name,
+			finished_good_bom=finished_good_bom.name,
+			service_item=service_item.name,
+		)
+		purchase_user = make_fenced_user("subcontracting-bom-purchase@example.com", ["Purchase User"])
+		website_user = make_fenced_user("subcontracting-bom-website@example.com", [])
+
+		with as_user(purchase_user):
+			subcontracting_bom = get_subcontracting_boms_for_finished_goods(finished_good.name)
+		self.assertEqual(subcontracting_bom.service_item, service_item.name)
+		self.assertNotIn("owner", subcontracting_bom)
+
+		with as_user(website_user):
+			self.assertRaises(
+				frappe.PermissionError, get_subcontracting_boms_for_finished_goods, finished_good.name
+			)
+			self.assertRaises(
+				frappe.PermissionError, get_subcontracting_boms_for_service_item, service_item.name
+			)
 
 
 def create_subcontracting_bom(**kwargs):
