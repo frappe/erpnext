@@ -19,6 +19,9 @@ from erpnext.stock.get_item_details import get_default_cost_center, get_default_
 from erpnext.stock.stock_ledger import get_valuation_rate
 
 from .mapper import (
+	can_combine_purchase_orders,
+	get_purchase_orders,
+	get_uncombinable_orders_message,
 	make_purchase_receipt,
 )
 
@@ -150,6 +153,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		if not self.get("is_return"):
 			self.validate_inspection()
+			self.validate_purchase_orders_share_terms()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be a future date"))
@@ -176,6 +180,10 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
+
+	def validate_purchase_orders_share_terms(self):
+		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
+			frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
