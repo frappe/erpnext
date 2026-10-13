@@ -812,6 +812,46 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+	def test_internal_transfer_sets_bank_accounts(self):
+		frappe.get_doc({"doctype": "Bank", "bank_name": "_Test IT Bank"}).insert(ignore_if_duplicate=True)
+		bank_accounts = {}
+		for gl_account in ("_Test Bank - _TC", "_Test Bank USD - _TC"):
+			bank_accounts[gl_account] = (
+				frappe.db.get_value("Bank Account", {"account": gl_account})
+				or frappe.get_doc(
+					{
+						"doctype": "Bank Account",
+						"account_name": gl_account,
+						"bank": "_Test IT Bank",
+						"account": gl_account,
+					}
+				)
+				.insert()
+				.name
+			)
+			frappe.db.set_value("Bank Account", bank_accounts[gl_account], "disabled", 0)
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Internal Transfer"
+		pe.company = "_Test Company"
+		pe.paid_from = "_Test Bank USD - _TC"
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = 100
+		pe.source_exchange_rate = 50
+		pe.received_amount = 5000
+		pe.reference_no = "3"
+		pe.reference_date = nowdate()
+		pe.insert()
+
+		self.assertEqual(pe.paid_from_bank_account, bank_accounts["_Test Bank USD - _TC"])
+		self.assertEqual(pe.paid_to_bank_account, bank_accounts["_Test Bank - _TC"])
+
+		# switching away from Internal Transfer clears them
+		pe.payment_type = "Pay"
+		pe.set_internal_transfer_bank_accounts()
+		self.assertIsNone(pe.paid_from_bank_account)
+		self.assertIsNone(pe.paid_to_bank_account)
+
 	def test_internal_transfer_rejects_same_account(self):
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"

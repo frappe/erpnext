@@ -114,9 +114,11 @@ class PaymentEntry(AccountsController):
 		paid_from: DF.Link
 		paid_from_account_currency: DF.Link
 		paid_from_account_type: DF.Data | None
+		paid_from_bank_account: DF.Link | None
 		paid_to: DF.Link
 		paid_to_account_currency: DF.Link
 		paid_to_account_type: DF.Data | None
+		paid_to_bank_account: DF.Link | None
 		party: DF.DynamicLink | None
 		party_bank_account: DF.Link | None
 		party_name: DF.Data | None
@@ -176,6 +178,7 @@ class PaymentEntry(AccountsController):
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_internal_transfer_accounts()
+		self.set_internal_transfer_bank_accounts()
 		self.validate_party_details()
 		self.set_exchange_rate()
 		self.validate_mandatory()
@@ -348,6 +351,13 @@ class PaymentEntry(AccountsController):
 				)
 
 			reference_names.add(key)
+
+	def set_internal_transfer_bank_accounts(self):
+		for side in ("paid_from", "paid_to"):
+			bank_account = None
+			if self.payment_type == "Internal Transfer" and self.get(side):
+				bank_account = frappe.db.get_value("Bank Account", {"account": self.get(side), "disabled": 0})
+			self.set(f"{side}_bank_account", bank_account)
 
 	def set_bank_account_data(self):
 		if not self.bank_account:
