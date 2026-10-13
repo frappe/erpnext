@@ -299,21 +299,26 @@ def _manufacture_stock_entries(work_order):
 
 
 def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
-	# Get operating cost from sub-assemblies
+	return flt(op_cost) + _get_unit_operating_cost(bom_no, {})
 
-	bom_items = frappe.get_all(
-		"BOM Item", filters={"parent": bom_no, "docstatus": 1}, fields=["bom_no"], order_by="idx asc"
-	)
 
-	for row in bom_items:
-		if not row.bom_no:
-			continue
+def _get_unit_operating_cost(bom_no, unit_costs):
+	if bom_no in unit_costs:
+		return unit_costs[bom_no]
 
-		if cost := frappe.get_cached_value("BOM", row.bom_no, "operating_cost_per_bom_quantity"):
-			op_cost += flt(cost)
-			get_op_cost_from_sub_assemblies(row.bom_no, op_cost)
+	bom = frappe.get_cached_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=True)
+	quantity = flt(bom.quantity) or 1
+	cost = flt(bom.operating_cost) / quantity
 
-	return op_cost
+	for row in frappe.get_all(
+		"BOM Item",
+		filters={"parent": bom_no, "parenttype": "BOM", "docstatus": 1, "bom_no": ("is", "set")},
+		fields=["bom_no", "stock_qty"],
+	):
+		cost += flt(row.stock_qty) / quantity * _get_unit_operating_cost(row.bom_no, unit_costs)
+
+	unit_costs[bom_no] = cost
+	return cost
 
 
 def get_secondary_items_from_sub_assemblies(bom_no, company, qty, secondary_items=None):

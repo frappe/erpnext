@@ -1624,6 +1624,22 @@ class TestBOM(ERPNextTestSuite):
 		per_unit = {row.item_code: row.qty / variant_bom.quantity for row in variant_bom.items}
 		self.assertEqual(per_unit, {rm_item: 2, rm_variant.item_code: 3})
 
+	def test_operating_cost_from_sub_assemblies_covers_the_whole_tree(self):
+		from erpnext.manufacturing.doctype.bom.services.operations_cost import (
+			get_op_cost_from_sub_assemblies,
+		)
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item("_Test Op Tree RM", {"is_stock_item": 1, "valuation_rate": 10}).name
+		leaf, mid, top = (
+			make_item(f"_Test Op Tree {name}", {"is_stock_item": 1}).name for name in ("Leaf", "Mid", "Top")
+		)
+		make_bom(item=leaf, raw_materials=[rm_item], operating_cost_per_bom_quantity=30)
+		make_bom(item=mid, raw_materials=[leaf], operating_cost_per_bom_quantity=20)
+		top_bom = make_bom(item=top, raw_materials=[mid], rm_qty=2, operating_cost_per_bom_quantity=10)
+
+		self.assertEqual(get_op_cost_from_sub_assemblies(top_bom.name), 110)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
