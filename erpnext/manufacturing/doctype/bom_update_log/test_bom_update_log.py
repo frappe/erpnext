@@ -115,6 +115,60 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 		self.assertFalse(log.bom_batches)
 		enqueue_update_cost()
 
+	def test_update_cost_reaches_parents_of_inactive_child(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		child_rm = make_item("_Test BUL Child RM", {"is_stock_item": 1}).name
+		parent_rm = make_item("_Test BUL Parent RM", {"is_stock_item": 1}).name
+		child_item = make_item("_Test BUL Child", {"is_stock_item": 1}).name
+		parent_item = make_item("_Test BUL Parent", {"is_stock_item": 1}).name
+		top_item = make_item("_Test BUL Top", {"is_stock_item": 1}).name
+		for item in (child_rm, parent_rm):
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		child = make_test_bom(child_item, [(child_rm, None)])
+		parent = make_test_bom(parent_item, [(child_item, child.name), (parent_rm, None)])
+		top = make_test_bom(top_item, [(parent_item, parent.name)])
+		child.db_set("is_active", 0)
+
+		make_stock_entry(item_code=parent_rm, target="_Test Warehouse - _TC", qty=10, basic_rate=500)
+		log = update_cost_in_all_boms_in_test()
+
+		self.assertEqual(log.status, "Completed")
+		self.assertEqual(
+			frappe.db.get_value("BOM Item", {"parent": parent.name, "item_code": parent_rm}, "rate"), 300
+		)
+		self.assertEqual(
+			frappe.db.get_value("BOM", top.name, "total_cost"),
+			frappe.db.get_value("BOM", parent.name, "total_cost"),
+		)
+
+
+def make_test_bom(item, rows):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": item,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": 1,
+			"rm_cost_as_per": "Valuation Rate",
+			"items": [
+				{
+					"item_code": item_code,
+					"qty": 1,
+					"bom_no": bom_no,
+					"source_warehouse": "_Test Warehouse - _TC",
+				}
+				for item_code, bom_no in rows
+			],
+		}
+	)
+	bom.insert()
+	bom.submit()
+	return bom
+
 
 def remove_bom(item_code):
 	boms = frappe.get_all("BOM", fields=["docstatus", "name"], filters={"item": item_code})

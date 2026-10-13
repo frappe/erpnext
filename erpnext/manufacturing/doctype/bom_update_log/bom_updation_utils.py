@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 import frappe
 from frappe import _
+from pypika.terms import ExistsCriterion
 
 
 def replace_bom(boms: dict, log_name: str) -> None:
@@ -159,17 +160,26 @@ def get_leaf_boms() -> list[str]:
 
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
+	child_bom = frappe.qb.DocType("BOM").as_("child_bom")
 
-	boms = (
+	active_children = (
+		frappe.qb.from_(bom_item)
+		.join(child_bom)
+		.on(child_bom.name == bom_item.bom_no)
+		.select(bom_item.name)
+		.where(
+			(bom_item.parent == bom.name)
+			& (bom_item.parenttype == "BOM")
+			& (child_bom.docstatus == 1)
+			& (child_bom.is_active == 1)
+		)
+	)
+
+	return (
 		frappe.qb.from_(bom)
-		.left_join(bom_item)
-		.on((bom.name == bom_item.parent) & (bom_item.bom_no != ""))
 		.select(bom.name)
-		.where((bom.docstatus == 1) & (bom.is_active == 1) & (bom_item.bom_no.isnull()))
-		.distinct()
+		.where((bom.docstatus == 1) & (bom.is_active == 1) & ExistsCriterion(active_children).negate())
 	).run(pluck=True)
-
-	return boms
 
 
 def _generate_dependence_map() -> defaultdict:
@@ -183,17 +193,20 @@ def _generate_dependence_map() -> defaultdict:
 
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
+	child_bom = frappe.qb.DocType("BOM").as_("child_bom")
 
 	bom_items = (
 		frappe.qb.from_(bom_item)
 		.join(bom)
 		.on(bom_item.parent == bom.name)
+		.join(child_bom)
+		.on(child_bom.name == bom_item.bom_no)
 		.select(bom_item.bom_no, bom_item.parent)
 		.where(
-			(bom_item.bom_no.isnotnull())
-			& (bom_item.bom_no != "")
-			& (bom.docstatus == 1)
+			(bom.docstatus == 1)
 			& (bom.is_active == 1)
+			& (child_bom.docstatus == 1)
+			& (child_bom.is_active == 1)
 			& (bom_item.parenttype == "BOM")
 		)
 	).run(as_dict=True)
