@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
+from erpnext.accounts.shareholding.legacy import assert_legacy_history_backfilled
 from erpnext.accounts.shareholding.permissions import get_allowed_companies
 
 
@@ -12,6 +13,17 @@ def apply_report_filters(query, entry, folio, filters, *, ignore_company_permiss
 	for field in ("company", "share_class", "share_folio", "shareholder"):
 		if filters.get(field) and not isinstance(filters[field], str):
 			frappe.throw(_("{0} must be a document name.").format(field))
+	companies = get_allowed_companies()
+	if filters.get("company"):
+		companies = (
+			[filters.company]
+			if ignore_company_permissions
+			or frappe.session.user == "Administrator"
+			or filters.company in companies
+			else []
+		)
+	for company in companies:
+		assert_legacy_history_backfilled(company)
 	if not ignore_company_permissions and frappe.session.user != "Administrator":
 		companies = get_allowed_companies()
 		if filters.get("company") and filters.company not in companies:
