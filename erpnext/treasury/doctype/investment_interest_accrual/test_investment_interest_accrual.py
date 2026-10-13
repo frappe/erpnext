@@ -191,6 +191,23 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		# January on 100000 (620) + 1 Feb to 31 Mar on the remaining 60000 (708)
 		self.assertEqual(first_quarter.estimated_interest, 1328)
 		self.assertEqual((first_quarter.actual_interest, first_quarter.status), (620, "Partially Accrued"))
+		# the next accrual's estimate is on the 60000 left, not a share of the quarter's 1328
+		self.assertEqual(get_accrual_defaults(investment.name).interest_amount, 708)
+
+	def test_accrual_used_by_an_exit_cannot_be_cancelled(self):
+		investment = make_fd(FD_TERMS)
+		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-01-31", 620).submit()
+		make_deposit(investment.name, "Withdrawal", "2026-02-01", 40000)
+
+		self.assertRaises(frappe.ValidationError, accrual.cancel)
+
+	def test_maturity_paid_late_needs_interest_only_up_to_maturity(self):
+		investment = make_fd(FD_TERMS)
+		accrue_all_interest(investment.name)
+
+		# matures on 1 Jan, paid on 5 Jan: interest stopped on 31 Dec
+		maturity = make_deposit(investment.name, "Maturity", "2027-01-05", 100000)
+		self.assertEqual(maturity.docstatus, 1)
 
 	def test_principal_cannot_change_inside_accrued_period(self):
 		investment = make_fd(FD_TERMS)
@@ -220,13 +237,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		investment = make_submitted_investment(**BOND_TERMS)
 		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=950).submit()
 
-		amortisation = 0
-		while defaults := get_accrual_defaults(investment.name):
-			accrual = make_interest_accrual(
-				investment.name, defaults.from_date, defaults.to_date, defaults.interest_amount
-			).submit()
-			amortisation += accrual.amortisation_amount
-
+		amortisation = sum(accrual.amortisation_amount for accrual in accrue_all_interest(investment.name))
 		self.assertEqual(flt(amortisation, 2), 500)
 
 		maturity = make_transaction(
@@ -248,6 +259,19 @@ def make_fd(terms, amount=100000):
 	make_deposit(investment.name, "Purchase", terms["purchase_date"], amount)
 
 	return get_investment(investment.name)
+
+
+def accrue_all_interest(investment):
+	"""Submit an accrual of the estimated interest for every period up to maturity."""
+	accruals = []
+	while defaults := get_accrual_defaults(investment):
+		accruals.append(
+			make_interest_accrual(
+				investment, defaults.from_date, defaults.to_date, defaults.interest_amount
+			).submit()
+		)
+
+	return accruals
 
 
 def make_deposit(investment, transaction_type, posting_date, gross_amount, submit=True):

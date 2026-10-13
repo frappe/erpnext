@@ -34,7 +34,14 @@ def get_fiscal_year_income(filters, account_field):
 
 def get_company(filters):
 	filters = frappe.parse_json(filters) or {}
-	return filters.get("company") or frappe.defaults.get_user_default("Company")
+	company = filters.get("company") or frappe.defaults.get_user_default("Company")
+	validate_company_permission(company)
+	return company
+
+
+def validate_company_permission(company):
+	"""The company comes from the caller, so a user restricted to one company cannot read another's figures."""
+	frappe.has_permission("Company", "read", company, throw=True)
 
 
 def get_income_query(company, account_field, from_date, to_date):

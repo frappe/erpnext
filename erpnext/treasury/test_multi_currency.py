@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests import freeze_time
-from frappe.utils import nowdate
+from frappe.utils import getdate, nowdate
 
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.treasury.doctype.investment.test_investment import (
@@ -32,6 +32,7 @@ from erpnext.treasury.doctype.investment_transaction.test_investment_transaction
 	make_submitted_investment,
 	make_transaction,
 )
+from erpnext.treasury.report.cash_flow_forecast.cash_flow_forecast import get_investment_flows
 
 USD_BANK_ACCOUNT = "_Test Bank USD - _TC"
 EUR_BANK_ACCOUNT = "_Test Bank EUR - _TC"
@@ -176,6 +177,21 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 			{FAIR_VALUE_ACCOUNT: (18400, 0), UNREALISED_ACCOUNT: (0, 18400)},
 		)
 
+	def test_market_revaluation_posts_to_foreign_currency_account(self):
+		investment = make_usd_investment(
+			investment_type="_Test Equity Fund",
+			measurement_category="FVTPL",
+			**{**REVALUATION_ACCOUNTS, "fair_value_adjustment_account": USD_INVESTMENT_ACCOUNT},
+		)
+		make_usd_transaction(investment.name, "Purchase", 80, units=100, rate=10).submit()
+
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, conversion_rate=82).submit()
+
+		# INR 18,400 at 82 is USD 224.39 in the USD account
+		self.assertEqual(
+			get_account_currency_entries(revaluation.name)[USD_INVESTMENT_ACCOUNT], ("USD", 224.39, 0)
+		)
+
 	def test_market_revaluation_needs_exchange_rate(self):
 		investment = make_usd_investment(
 			investment_type="_Test Equity Fund", measurement_category="FVTPL", **REVALUATION_ACCOUNTS
@@ -271,6 +287,18 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		).submit()
 
 		self.assertEqual(get_investment(investment.name).unamortised_premium_discount, 500)
+
+	def test_bond_maturity_forecast_converts_discount(self):
+		"""Book value INR 788,500 plus the USD 500 discount at 83 is the face value of INR 830,000."""
+		investment = make_usd_investment(**BOND_TERMS)
+		make_usd_transaction(
+			investment.name, "Purchase", 83, posting_date="2026-01-01", units=10, rate=950
+		).submit()
+		filters = frappe._dict(company=TEST_COMPANY, currency="INR", from_date=nowdate())
+		with patch(f"{get_investment_flows.__module__}.get_exchange_rate", return_value=83):
+			maturities = get_investment_flows(filters)["maturities"]
+
+		self.assertIn((getdate("2028-01-01"), 830000), maturities)
 
 	def test_maturity_at_new_rate_books_exchange_gain(self):
 		"""Cost leaves the investment account at the purchase rate; the rate change is an exchange gain."""

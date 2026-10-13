@@ -10,6 +10,7 @@ from erpnext.treasury.report.utils import (
 	get_currency_column,
 	get_investment_columns,
 	get_positions,
+	parse_filters,
 	set_share_of_total,
 )
 
@@ -17,7 +18,7 @@ AMOUNT_FIELDS = ("book_value", "accrued_interest", "unrealised_gain_loss", "mark
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	data = get_positions(filters, filters.as_on_date)
 	set_share_of_total(data, "market_value")
 	chart = get_chart(data)

@@ -7,13 +7,13 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 import erpnext
-from erpnext.treasury.report.utils import add_total_row, get_currency_column
+from erpnext.treasury.report.utils import add_total_row, get_currency_column, parse_filters
 
 CASH_ACCOUNT_TYPES = ("Bank", "Cash")
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	return get_columns(), get_data(filters)
 
 

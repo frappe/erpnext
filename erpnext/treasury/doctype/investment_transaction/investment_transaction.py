@@ -107,6 +107,7 @@ class InvestmentTransaction(AccountsController):
 		self.validate_interest_accrued()
 
 	def before_submit(self):
+		self.validate_no_later_exits()
 		self.validate_interest_accrued_before_exit()
 		self.set_cost_and_realised_gain_loss()
 
@@ -118,6 +119,7 @@ class InvestmentTransaction(AccountsController):
 	def before_cancel(self):
 		super().before_cancel()
 		self.validate_purchase_not_consumed()
+		self.validate_no_later_exits()
 		self.validate_after_accrued_interest()
 		self.validate_accrued_interest_not_received()
 
@@ -264,7 +266,15 @@ class InvestmentTransaction(AccountsController):
 			self.validate_balance("amount", _("Principal"), flt(self.gross_amount))
 
 	def validate_balance(self, purchase_field, label, required):
-		purchased = sum(flt(p.get(purchase_field)) for p in get_purchases(self.investment))
+		# lock the investment so two exits submitted together cannot both spend the same balance
+		frappe.db.get_value("Investment", self.investment, "name", for_update=True)
+
+		# only what was bought by the posting date can leave, so an exit never takes a later purchase's cost
+		purchased = sum(
+			flt(p.get(purchase_field))
+			for p in get_purchases(self.investment)
+			if getdate(p.posting_date) <= getdate(self.posting_date)
+		)
 		exit_field = "units" if purchase_field == "units" else "gross_amount"
 		available = purchased - self.get_submitted_total(exit_field, EXIT_TYPES)
 
@@ -332,8 +342,12 @@ class InvestmentTransaction(AccountsController):
 			return
 
 		schedule = get_schedule(self.investment)
-		accrue_upto = add_days(self.posting_date, -1)
-		if not schedule or getdate(accrue_upto) < getdate(schedule[0].period_from):
+		if not schedule:
+			return
+
+		# interest stops at maturity, so a late payment needs accruals only up to the schedule's last day
+		accrue_upto = min(getdate(add_days(self.posting_date, -1)), getdate(schedule[-1].period_to))
+		if accrue_upto < getdate(schedule[0].period_from):
 			return
 
 		accrued_upto = self.get_investment().accrued_upto
@@ -379,6 +393,28 @@ class InvestmentTransaction(AccountsController):
 
 		if flt(remaining - self.get_submitted_total(exit_field, EXIT_TYPES), self.precision(exit_field)) < 0:
 			frappe.throw(_("Cannot cancel this purchase because it has already been sold or withdrawn"))
+
+	def validate_no_later_exits(self):
+		"""Exits are costed from the oldest units, so a purchase cannot change once exits on or after it exist."""
+		if not (self.instrument_class in UNIT_CLASSES and self.transaction_type in PURCHASE_TYPES):
+			return
+
+		if frappe.db.exists(
+			"Investment Transaction",
+			{
+				"investment": self.investment,
+				"docstatus": 1,
+				"transaction_type": ("in", EXIT_TYPES),
+				"posting_date": (">=", self.posting_date),
+			},
+		):
+			frappe.throw(
+				_(
+					"Investment {0} has exits on or after {1} that were costed without this change. Please cancel them first."
+				).format(
+					frappe.bold(self.investment), frappe.bold(frappe.format_value(self.posting_date, "Date"))
+				)
+			)
 
 	def update_investment(self):
 		self.get_investment().update_position()

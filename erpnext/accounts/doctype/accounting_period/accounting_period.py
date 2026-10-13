@@ -114,6 +114,8 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 		date = doc.completion_date
 	elif doc.doctype == "Period Closing Voucher":
 		date = doc.period_end_date
+	elif doc.doctype == "Investment Revaluation":
+		date = doc.revaluation_date
 	else:
 		date = doc.posting_date
 

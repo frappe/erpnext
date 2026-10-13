@@ -28,6 +28,8 @@
   "accounts_tab",
   "accounting_section",
   "cost_center",
+  "accounting_dimensions_section",
+  "dimension_col_break",
   "more_info_tab",
   "reference_section",
   "remarks",
@@ -193,6 +195,16 @@
    "options": "Cost Center"
   },
   {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
    "label": "More Info"
@@ -220,7 +232,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 15:28:32.128616",
+ "modified": "2026-10-13 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Interest Accrual",

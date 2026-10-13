@@ -14,6 +14,8 @@
   "revaluation_date",
   "finance_book",
   "cost_center",
+  "accounting_dimensions_section",
+  "dimension_col_break",
   "investments_section",
   "investments",
   "totals_section",
@@ -88,6 +90,16 @@
    "options": "Cost Center"
   },
   {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "investments_section",
    "fieldtype": "Section Break",
    "label": "Investments"
@@ -141,7 +153,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 15:28:33.600971",
+ "modified": "2026-10-13 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Revaluation",

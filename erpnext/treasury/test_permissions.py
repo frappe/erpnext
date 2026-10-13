@@ -5,8 +5,11 @@
 
 import frappe
 from frappe.desk.search import search_link
+from frappe.permissions import add_user_permission
+from frappe.utils import nowdate
 
 from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.treasury.dashboard import get_interest_earned
 from erpnext.treasury.doctype.investment.test_investment import (
 	TEST_COMPANY,
 	create_financial_institution,
@@ -18,6 +21,7 @@ from erpnext.treasury.doctype.investment_transaction.test_investment_transaction
 	make_submitted_investment,
 	make_transaction,
 )
+from erpnext.treasury.report.cash_flow_forecast import cash_flow_forecast
 
 ACCOUNTS_USER = "treasury.accountant@example.com"
 ACCOUNTS_MANAGER = "treasury.manager@example.com"
@@ -101,6 +105,14 @@ class TestTreasuryPermissions(ERPNextTestSuite):
 
 		self.assertEqual(investment.status, "Active")
 		self.assertEqual(investment.approved_by, ACCOUNTS_MANAGER)
+
+	def test_user_restricted_to_a_company_cannot_read_another(self):
+		add_user_permission("Company", TEST_COMPANY, ACCOUNTS_USER)
+		filters = {"company": "_Test Company 1", "from_date": nowdate()}
+
+		with self.set_user(ACCOUNTS_USER):
+			self.assertRaises(frappe.PermissionError, get_interest_earned, filters)
+			self.assertRaises(frappe.PermissionError, cash_flow_forecast.execute, filters)
 
 	def test_accounts_manager_can_change_investment_settings(self):
 		with self.set_user(ACCOUNTS_MANAGER):

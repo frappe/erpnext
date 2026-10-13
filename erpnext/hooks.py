@@ -390,6 +390,9 @@ period_closing_doctypes = [
 	"Purchase Receipt",
 	"Stock Reconciliation",
 	"Subcontracting Receipt",
+	"Investment Transaction",
+	"Investment Interest Accrual",
+	"Investment Revaluation",
 ]
 
 sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
@@ -648,6 +651,9 @@ accounting_dimension_doctypes = [
 	"Asset Movement Item",
 	"Asset Depreciation Schedule",
 	"Advance Taxes and Charges",
+	"Investment Transaction",
+	"Investment Interest Accrual",
+	"Investment Revaluation",
 ]
 
 subscription_doctypes = ["Sales Invoice", "Purchase Invoice", "Payment Request", "POS Invoice"]

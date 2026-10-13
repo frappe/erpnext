@@ -5,6 +5,7 @@ from functools import partial
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, getdate
 
@@ -13,14 +14,14 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.treasury.dashboard import HELD_STATUSES, get_month_ends
 from erpnext.treasury.doctype.investment_transaction.investment_transaction import PURCHASE_TYPES
 from erpnext.treasury.report.bank_and_cash_balances.bank_and_cash_balances import get_cash_balances
-from erpnext.treasury.report.utils import get_currency_column
+from erpnext.treasury.report.utils import get_currency_column, parse_filters
 
 INFLOWS = ("receivables", "maturities", "interest")
 OUTFLOWS = ("payables", "commitments")
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	filters.currency = erpnext.get_company_currency(filters.company)
 	period_ends = get_period_ends(filters)
 
@@ -97,9 +98,10 @@ def get_party_flows(company):
 
 
 def get_investment_flows(filters):
+	# closed investments are kept, as they can still be owed interest
 	investments = frappe.get_all(
 		"Investment",
-		filters={"company": filters.company, "docstatus": 1, "status": ("in", HELD_STATUSES)},
+		filters={"company": filters.company, "docstatus": 1},
 		fields=[
 			"name",
 			"status",
@@ -113,57 +115,60 @@ def get_investment_flows(filters):
 			"currency",
 		],
 	)
+	held = [i for i in investments if i.status in HELD_STATUSES]
 
 	return {
-		# a bond is redeemed at face value: book value plus the discount not yet amortised
+		# a bond is redeemed at face value: book value plus the discount not yet amortised (in its own currency)
 		"maturities": [
-			(i.maturity_date, flt(i.total_cost) + flt(i.unamortised_premium_discount))
-			for i in investments
+			(
+				i.maturity_date,
+				flt(i.total_cost) + flt(i.unamortised_premium_discount) * get_rate(i.currency, filters),
+			)
+			for i in held
 			if i.maturity_date
 		],
 		"interest": get_interest_flows(investments, filters),
-		"commitments": get_commitment_flows(investments, filters),
+		"commitments": get_commitment_flows(held, filters),
 	}
 
 
 def get_interest_flows(investments, filters):
-	"""Interest due at maturity (cumulative) or each period end; unpaid past periods show as overdue."""
+	"""Interest still owed: each period's interest, oldest first, less what was already received."""
 	by_name = {investment.name: investment for investment in investments}
-	received = get_interest_received(list(by_name))
-	flows, overdue = [], {}
+	credits = get_interest_credits(list(by_name))
+	flows = []
 
 	for period in get_schedule_periods(list(by_name)):
 		investment = by_name[period.investment]
-		rate = get_rate(investment.currency, filters)
-		if is_paid_at_maturity(investment):
-			if investment.maturity_date:
-				flows.append((investment.maturity_date, flt(period.interest_amount) * rate))
-		elif getdate(period.period_to) >= getdate(filters.from_date):
-			flows.append((period.period_to, flt(period.interest_amount) * rate))
-		else:
-			due = overdue.setdefault(investment.name, frappe._dict(date=period.period_to, amount=0))
-			due.date = max(getdate(due.date), getdate(period.period_to))
-			due.amount += flt(period.interest_amount)
+		unpaid = flt(period.interest_amount) - credits.get(investment.name, 0)
+		credits[investment.name] = max(-unpaid, 0)
 
-	for name, due in overdue.items():
-		unpaid = due.amount - flt(received.get(name))
-		if unpaid > 0:
-			flows.append((due.date, unpaid * get_rate(by_name[name].currency, filters)))
+		date = investment.maturity_date if is_paid_at_maturity(investment) else period.period_to
+		if unpaid > 0 and date:
+			flows.append((date, unpaid * get_rate(investment.currency, filters)))
 
 	return flows
 
 
-def get_interest_received(investments):
+def get_interest_credits(investments):
+	"""Interest received less interest bought with purchases, which the first receipt pays back."""
 	if not investments:
 		return {}
 
-	receipts = frappe.get_all(
-		"Investment Transaction",
-		filters={"investment": ("in", investments), "docstatus": 1, "transaction_type": "Interest Receipt"},
-		fields=["investment", {"SUM": "interest_amount", "as": "received"}],
-		group_by="investment",
+	transaction = frappe.qb.DocType("Investment Transaction")
+	received = Case().when(transaction.transaction_type == "Interest Receipt", transaction.interest_amount)
+	bought = Case().when(
+		transaction.transaction_type.isin(PURCHASE_TYPES), transaction.accrued_interest_in_purchase
 	)
-	return {receipt.investment: receipt.received for receipt in receipts}
+	rows = (
+		frappe.qb.from_(transaction)
+		.select(transaction.investment, Sum(received.else_(0)) - Sum(bought.else_(0)))
+		.where(transaction.investment.isin(investments))
+		.where(transaction.docstatus == 1)
+		.groupby(transaction.investment)
+	).run()
+
+	return {investment: flt(credit) for investment, credit in rows}
 
 
 def get_schedule_periods(investments):
@@ -179,6 +184,7 @@ def get_schedule_periods(investments):
 			"parentfield": "interest_schedule",
 		},
 		fields=["parent as investment", "period_to", "estimated_interest", "actual_interest", "status"],
+		order_by="period_to asc",
 	)
 	for period in periods:
 		is_accrued = period.status == "Accrued"

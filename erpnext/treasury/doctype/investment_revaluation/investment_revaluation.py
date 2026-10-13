@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from copy import copy
+
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
@@ -234,7 +236,12 @@ class InvestmentRevaluation(AccountsController):
 
 	def get_gl_entry(self, row, account, debit, credit):
 		precision = self.precision("total_gain_loss")
-		return self.get_gl_dict(
+		# each row is in its investment's currency and rate, so its accounts may be in that currency too
+		row_doc = copy(self)
+		row_doc.currency = self.get_investment(row.investment).currency
+		row_doc.conversion_rate = row.conversion_rate
+
+		return row_doc.get_gl_dict(
 			{
 				"account": account,
 				"debit": flt(debit, precision),

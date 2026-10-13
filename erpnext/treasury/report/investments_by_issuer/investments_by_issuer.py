@@ -9,6 +9,7 @@ from erpnext.treasury.report.utils import (
 	add_total_row,
 	get_currency_column,
 	get_positions,
+	parse_filters,
 	set_share_of_total,
 )
 
@@ -16,7 +17,7 @@ AMOUNT_FIELDS = ("book_value", "accrued_interest", "exposure", "market_value")
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	data = get_exposures(get_positions(filters, filters.as_on_date))
 	set_share_of_total(data, "exposure")
 	chart = get_chart(data)

@@ -233,8 +233,10 @@ def make_new_investment(source_name: str) -> Document:
 	renewal = frappe.get_doc("Investment Renewal", source_name)
 	renewal.check_permission("read")
 	renewal.validate_can_create_new_investment()
+	original = renewal.get_original_investment()
+	original.check_permission("read")
 
-	new_investment = frappe.copy_doc(renewal.get_original_investment())
+	new_investment = frappe.copy_doc(original)
 	new_investment.update(renewal.get_new_investment_values())
 	new_investment.investment_renewal = renewal.name
 

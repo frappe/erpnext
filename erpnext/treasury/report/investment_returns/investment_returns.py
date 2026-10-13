@@ -18,6 +18,7 @@ from erpnext.treasury.report.utils import (
 	get_investments,
 	get_ledger_movements,
 	get_unrealised_gain_loss,
+	parse_filters,
 	sum_movements,
 )
 
@@ -38,7 +39,7 @@ AMOUNT_FIELDS = (
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	investments = get_investments(filters)
 	names = [investment.name for investment in investments]
 	movements = get_ledger_movements(filters.company, filters.to_date, names)

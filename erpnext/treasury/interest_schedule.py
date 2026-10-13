@@ -105,13 +105,18 @@ def get_rounded_amortisation(calculator, start, end):
 
 
 def get_estimated_interest(investment_name, from_date, to_date):
-	"""Estimated interest of a date range, taken from the schedule periods it overlaps by days."""
-	estimate = 0
+	"""Estimated interest of a date range, on the balance actually held each day of it."""
+	calculator = InterestCalculator(frappe.get_doc("Investment", investment_name))
+	estimate, compounded_interest = 0, 0
 	for row in get_schedule(investment_name):
-		days = get_overlap_days(row.period_from, row.period_to, from_date, to_date)
-		if days:
-			period_days = date_diff(row.period_to, row.period_from) + 1
-			estimate += flt(row.estimated_interest) * days / period_days
+		start = max(getdate(row.period_from), getdate(from_date))
+		end = min(getdate(row.period_to), getdate(to_date))
+		if start <= end:
+			estimate += calculator.get_interest(start, add_days(end, 1), compounded_interest)
+
+		# same compounding as set_estimated_interest, so the two estimates agree
+		if calculator.compounds:
+			compounded_interest += row.actual_interest if row.status == "Accrued" else row.estimated_interest
 
 	return flt(estimate, get_amount_precision())
 

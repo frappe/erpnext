@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import add_days, nowdate
 
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.treasury.doctype.investment.test_investment import (
@@ -106,6 +106,39 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		make_transaction(investment.name, "Sale", units=40, rate=10).submit()
 
 		self.assertRaises(frappe.ValidationError, purchase.cancel)
+
+	def test_cannot_cancel_purchase_whose_cost_a_sale_used(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		first = make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
+		make_transaction(investment.name, "Purchase", units=100, rate=12).submit()
+		make_transaction(investment.name, "Sale", units=100, rate=15).submit()
+
+		# the second purchase still covers the units, but the sale took the first one's cost
+		self.assertRaises(frappe.ValidationError, first.cancel)
+
+	def test_cannot_backdate_purchase_before_a_sale(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
+		make_transaction(
+			investment.name, "Sale", posting_date=add_days(nowdate(), 2), units=50, rate=15
+		).submit()
+
+		purchase = make_transaction(
+			investment.name, "Purchase", posting_date=add_days(nowdate(), 1), units=100, rate=8
+		)
+		self.assertRaises(frappe.ValidationError, purchase.submit)
+
+	def test_cannot_sell_units_bought_later(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
+		make_transaction(
+			investment.name, "Purchase", posting_date=add_days(nowdate(), 5), units=100, rate=12
+		).submit()
+
+		sale = make_transaction(
+			investment.name, "Sale", posting_date=add_days(nowdate(), 2), units=150, rate=15
+		)
+		self.assertRaises(frappe.ValidationError, sale.insert)
 
 	def test_interest_accrual_and_receipt(self):
 		investment = make_submitted_investment()

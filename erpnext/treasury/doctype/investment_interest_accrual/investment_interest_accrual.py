@@ -10,6 +10,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_ent
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.treasury.doctype.investment_transaction.investment_transaction import (
+	EXIT_TYPES,
 	get_gl_entry,
 	set_conversion_rate,
 	validate_interest_not_received,
@@ -69,6 +70,7 @@ class InvestmentInterestAccrual(AccountsController):
 	def before_cancel(self):
 		super().before_cancel()
 		self.validate_latest_accrual()
+		self.validate_no_later_exits()
 		validate_interest_not_received(
 			self,
 			_(
@@ -196,6 +198,23 @@ class InvestmentInterestAccrual(AccountsController):
 			frappe.throw(
 				_("Please cancel the later Interest Accruals of Investment {0} first").format(
 					frappe.bold(self.investment)
+				)
+			)
+
+	def validate_no_later_exits(self):
+		"""Exits after this period left at a book value that includes its interest and amortisation."""
+		if frappe.db.exists(
+			"Investment Transaction",
+			{
+				"investment": self.investment,
+				"docstatus": 1,
+				"transaction_type": ("in", EXIT_TYPES),
+				"posting_date": (">", self.from_date),
+			},
+		):
+			frappe.throw(
+				_("Please cancel the exits of Investment {0} after {1} first").format(
+					frappe.bold(self.investment), frappe.bold(frappe.format_value(self.from_date, "Date"))
 				)
 			)
 

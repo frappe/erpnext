@@ -15,6 +15,7 @@ from erpnext.treasury.report.utils import (
 	get_investment_columns,
 	get_investments,
 	get_ledger_movements,
+	parse_filters,
 	sum_movements,
 )
 
@@ -30,7 +31,7 @@ AMOUNT_FIELDS = (
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	investments = [i for i in get_investments(filters) if i.instrument_class in INTEREST_CLASSES]
 	movements = get_ledger_movements(filters.company, filters.to_date, [i.name for i in investments])
 	opening = get_balances(movements, "accrued_interest_account", add_days(filters.from_date, -1))

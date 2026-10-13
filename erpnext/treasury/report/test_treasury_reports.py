@@ -11,9 +11,17 @@ from erpnext.treasury.doctype.investment.test_investment import (
 	create_financial_institution,
 	create_investment_type,
 )
+from erpnext.treasury.doctype.investment_interest_accrual.test_investment_interest_accrual import (
+	FD_TERMS,
+	accrue_all_interest,
+	get_investment,
+	make_deposit,
+	make_fd,
+)
 from erpnext.treasury.doctype.investment_transaction.test_investment_transaction import (
 	BANK_ACCOUNT,
 	make_accrual_for_today,
+	make_interest_accrual,
 	make_submitted_investment,
 	make_transaction,
 )
@@ -120,6 +128,30 @@ class TestTreasuryReports(ERPNextTestSuite):
 			after["Customer Receivables"] - before["Customer Receivables"], invoice.base_grand_total
 		)
 		self.assertEqual(after["Committed Investments"] - before["Committed Investments"], 100000)
+
+	def test_cash_flow_forecast_leaves_out_received_interest(self):
+		investment = make_fd(FD_TERMS)
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).submit()
+		make_transaction(
+			investment.name, "Interest Receipt", posting_date="2026-03-31", interest_amount=1000
+		).submit()
+
+		filters = frappe._dict(company=TEST_COMPANY, currency="INR", from_date="2026-01-01")
+		flows = cash_flow_forecast.get_interest_flows([get_investment(investment.name)], filters)
+
+		# 800 of the first quarter is still owed, the next quarter in full
+		self.assertEqual(flows[:2], [(getdate("2026-03-31"), 800), (getdate("2026-06-30"), 1820)])
+
+	def test_cash_flow_forecast_keeps_unpaid_interest_of_matured_deposit(self):
+		investment = make_fd(FD_TERMS)
+		accrue_all_interest(investment.name)
+		filters = frappe._dict(company=TEST_COMPANY, currency="INR", from_date="2026-01-01")
+		before = sum(amount for _date, amount in cash_flow_forecast.get_investment_flows(filters)["interest"])
+
+		make_deposit(investment.name, "Maturity", "2027-01-01", 100000)
+		after = sum(amount for _date, amount in cash_flow_forecast.get_investment_flows(filters)["interest"])
+
+		self.assertEqual(before, after)
 
 	def test_cash_flow_forecast_includes_maturity_and_interest(self):
 		totals = get_forecast_totals(investment_maturity=self.investment.maturity_date)

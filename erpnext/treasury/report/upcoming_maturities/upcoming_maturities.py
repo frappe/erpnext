@@ -10,6 +10,7 @@ from erpnext.treasury.report.utils import (
 	get_currency_column,
 	get_investment_columns,
 	get_positions,
+	parse_filters,
 )
 
 # upper limit in days to maturity of each bucket; a negative count means the maturity date has passed
@@ -17,7 +18,7 @@ BUCKET_LIMITS = (-1, 30, 90, 180, 365)
 
 
 def execute(filters=None):
-	filters = frappe._dict(filters or {})
+	filters = parse_filters(filters)
 	data = [row for row in get_positions(filters, filters.as_on_date) if row.maturity_date]
 	labels = get_bucket_labels()
 	for row in data:

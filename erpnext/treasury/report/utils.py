@@ -11,6 +11,7 @@ from frappe.query_builder import Case, Criterion
 from frappe.utils import flt, getdate
 
 import erpnext
+from erpnext.treasury.dashboard import validate_company_permission
 from erpnext.treasury.doctype.investment_transaction.investment_transaction import (
 	EXIT_TYPES,
 	PURCHASE_TYPES,
@@ -29,6 +30,13 @@ ACCOUNT_ROLES = (
 )
 # company accounts investment vouchers also post to, so exchange gains count in returns
 COMPANY_ACCOUNT_ROLES = ("exchange_gain_loss_account",)
+
+
+def parse_filters(filters):
+	"""Report filters, once the user is known to have access to the company asked for."""
+	filters = frappe._dict(filters or {})
+	validate_company_permission(filters.company)
+	return filters
 
 
 def get_investments(filters):
