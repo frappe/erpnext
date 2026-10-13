@@ -6,8 +6,10 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
+from pypika.terms import Bracket, LiteralValue
 
 
 def execute(filters=None):
@@ -89,6 +91,9 @@ def get_data(filters):
 
 	if filters.get("project"):
 		query = query.where(po_item.project == filters.get("project"))
+
+	if match_conditions := build_match_conditions("Purchase Order"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
 
 	data = query.run(as_dict=True)
 
