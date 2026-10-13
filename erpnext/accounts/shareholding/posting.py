@@ -13,8 +13,22 @@ def money(value, currency):
 
 
 def assert_journal_unreconciled(transaction):
-	if transaction.journal_entry and frappe.db.exists(
-		"Bank Transaction Payments",
-		{"payment_document": "Journal Entry", "payment_entry": transaction.journal_entry},
-	):
+	if not transaction.journal_entry:
+		return
+	payment = frappe.qb.DocType("Bank Transaction Payments")
+	bank = frappe.qb.DocType("Bank Transaction")
+	allocated = (
+		frappe.qb.from_(payment)
+		.join(bank)
+		.on(bank.name == payment.parent)
+		.select(payment.name)
+		.where(
+			(payment.payment_document == "Journal Entry")
+			& (payment.payment_entry == transaction.journal_entry)
+			& (bank.docstatus == 1)
+			& (payment.allocated_amount > 0)
+		)
+		.limit(1)
+	).run()
+	if allocated:
 		frappe.throw(_("Unreconcile the linked journal before cancelling this Share Transaction."))
