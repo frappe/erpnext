@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -18,4 +20,14 @@ class ShareType(Document):
 		title: DF.Data
 	# end: auto-generated types
 
-	pass
+	def before_insert(self):
+		self.throw_legacy_read_only()
+
+	def validate(self):
+		self.throw_legacy_read_only()
+
+	def on_trash(self):
+		self.throw_legacy_read_only()
+
+	def throw_legacy_read_only(self):
+		frappe.throw(_("Share Type is read-only. Create a Share Class instead."))

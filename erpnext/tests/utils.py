@@ -116,7 +116,6 @@ class BootStrapTestData:
 			"Party Type": "party_type",
 			"Project Type": "project_type",
 			"Print Heading": "print_heading",
-			"Share Type": "title",
 			"Market Segment": "market_segment",
 			"Workstation Operating Component": "component_name",
 		}
@@ -2119,14 +2118,19 @@ class BootStrapTestData:
 		records = [
 			{
 				"doctype": "Shareholder",
-				"naming_series": "SH-",
-				"title": "Iron Man",
-				"company": "_Test Company",
-			},
-			{"doctype": "Shareholder", "naming_series": "SH-", "title": "Thor", "company": "_Test Company"},
-			{"doctype": "Shareholder", "naming_series": "SH-", "title": "Hulk", "company": "_Test Company"},
+				"legal_name": name,
+				"shareholder_type": "Individual",
+				"tax_id_type": "Test Tax ID",
+				"tax_id": tax_id,
+				"tax_id_country": "India",
+			}
+			for name, tax_id in (
+				("Iron Man", "IRONMAN01"),
+				("Thor", "THOR000001"),
+				("Hulk", "HULK000001"),
+			)
 		]
-		self.make_records(["title", "company"], records)
+		self.make_records(["legal_name"], records)
 
 	def make_sales_taxes_template(self):
 		records = [
