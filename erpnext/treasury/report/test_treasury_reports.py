@@ -11,7 +11,11 @@ from erpnext.treasury.doctype.investment.test_investment import (
 	create_financial_institution,
 	create_investment_type,
 )
+from erpnext.treasury.doctype.investment_interest_accrual.investment_interest_accrual import (
+	get_accrual_defaults,
+)
 from erpnext.treasury.doctype.investment_interest_accrual.test_investment_interest_accrual import (
+	BOND_TERMS,
 	FD_TERMS,
 	accrue_all_interest,
 	get_investment,
@@ -141,6 +145,36 @@ class TestTreasuryReports(ERPNextTestSuite):
 
 		# 800 of the first quarter is still owed, the next quarter in full
 		self.assertEqual(flows[:2], [(getdate("2026-03-31"), 800), (getdate("2026-06-30"), 1820)])
+
+	def test_cash_flow_forecast_pays_bought_interest_with_its_coupon(self):
+		create_investment_type("_Test Corporate Bond", "Bond")
+		investment = make_submitted_investment(**BOND_TERMS)
+		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
+		first_coupon = make_interest_accrual(
+			investment.name, **get_accrual_defaults(investment.name)
+		).submit()
+		make_transaction(
+			investment.name,
+			"Interest Receipt",
+			posting_date="2026-06-30",
+			interest_amount=first_coupon.interest_amount,
+		).submit()
+		make_transaction(
+			investment.name,
+			"Purchase",
+			posting_date="2026-08-01",
+			units=5,
+			rate=1000,
+			accrued_interest_in_purchase=30,
+		).submit()
+
+		filters = frappe._dict(company=TEST_COMPANY, currency="INR", from_date="2026-01-01")
+		flows = dict(cash_flow_forecast.get_interest_flows([get_investment(investment.name)], filters))
+		second_coupon = get_investment(investment.name).interest_schedule[1]
+
+		# the paid first coupon stays paid; the 30 bought comes back with the second coupon
+		self.assertNotIn(getdate("2026-06-30"), flows)
+		self.assertAlmostEqual(flows[getdate("2026-12-31")], second_coupon.estimated_interest + 30)
 
 	def test_cash_flow_forecast_keeps_unpaid_interest_of_matured_deposit(self):
 		investment = make_fd(FD_TERMS)

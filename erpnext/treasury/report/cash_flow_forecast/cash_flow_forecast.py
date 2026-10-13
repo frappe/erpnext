@@ -5,7 +5,6 @@ from functools import partial
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, getdate
 
@@ -135,13 +134,15 @@ def get_investment_flows(filters):
 def get_interest_flows(investments, filters):
 	"""Interest still owed: each period's interest, oldest first, less what was already received."""
 	by_name = {investment.name: investment for investment in investments}
-	credits = get_interest_credits(list(by_name))
+	received = get_interest_received(list(by_name))
+	periods = get_schedule_periods(list(by_name))
+	add_bought_interest(periods, list(by_name))
 	flows = []
 
-	for period in get_schedule_periods(list(by_name)):
+	for period in periods:
 		investment = by_name[period.investment]
-		unpaid = flt(period.interest_amount) - credits.get(investment.name, 0)
-		credits[investment.name] = max(-unpaid, 0)
+		unpaid = flt(period.interest_amount) - received.get(investment.name, 0)
+		received[investment.name] = max(-unpaid, 0)
 
 		date = investment.maturity_date if is_paid_at_maturity(investment) else period.period_to
 		if unpaid > 0 and date:
@@ -150,25 +151,46 @@ def get_interest_flows(investments, filters):
 	return flows
 
 
-def get_interest_credits(investments):
-	"""Interest received less interest bought with purchases, which the first receipt pays back."""
+def get_interest_received(investments):
 	if not investments:
 		return {}
 
-	transaction = frappe.qb.DocType("Investment Transaction")
-	received = Case().when(transaction.transaction_type == "Interest Receipt", transaction.interest_amount)
-	bought = Case().when(
-		transaction.transaction_type.isin(PURCHASE_TYPES), transaction.accrued_interest_in_purchase
+	receipts = frappe.get_all(
+		"Investment Transaction",
+		filters={"investment": ("in", investments), "docstatus": 1, "transaction_type": "Interest Receipt"},
+		fields=["investment", {"SUM": "interest_amount", "as": "received"}],
+		group_by="investment",
 	)
-	rows = (
-		frappe.qb.from_(transaction)
-		.select(transaction.investment, Sum(received.else_(0)) - Sum(bought.else_(0)))
-		.where(transaction.investment.isin(investments))
-		.where(transaction.docstatus == 1)
-		.groupby(transaction.investment)
-	).run()
+	return {receipt.investment: flt(receipt.received) for receipt in receipts}
 
-	return {investment: flt(credit) for investment, credit in rows}
+
+def add_bought_interest(periods, investments):
+	"""Interest bought with a bond is paid with the coupon of the period it was bought in."""
+	if not investments:
+		return
+
+	purchases = frappe.get_all(
+		"Investment Transaction",
+		filters={
+			"investment": ("in", investments),
+			"docstatus": 1,
+			"transaction_type": ("in", PURCHASE_TYPES),
+			"accrued_interest_in_purchase": (">", 0),
+		},
+		fields=["investment", "posting_date", "accrued_interest_in_purchase"],
+	)
+	for purchase in purchases:
+		period = next(
+			(
+				p
+				for p in periods
+				if p.investment == purchase.investment
+				and getdate(p.period_to) >= getdate(purchase.posting_date)
+			),
+			None,
+		)
+		if period:
+			period.interest_amount = flt(period.interest_amount) + flt(purchase.accrued_interest_in_purchase)
 
 
 def get_schedule_periods(investments):

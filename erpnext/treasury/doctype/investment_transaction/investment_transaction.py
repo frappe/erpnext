@@ -266,17 +266,21 @@ class InvestmentTransaction(AccountsController):
 			self.validate_balance("amount", _("Principal"), flt(self.gross_amount))
 
 	def validate_balance(self, purchase_field, label, required):
-		# lock the investment so two exits submitted together cannot both spend the same balance
+		# lock the investment so two exits submitted together cannot both spend the same balance,
+		# and read with locks too, so the second exit sees the first one once it commits
 		frappe.db.get_value("Investment", self.investment, "name", for_update=True)
 
 		# only what was bought by the posting date can leave, so an exit never takes a later purchase's cost
 		purchased = sum(
 			flt(p.get(purchase_field))
-			for p in get_purchases(self.investment)
+			for p in get_purchases(self.investment, for_update=True)
 			if getdate(p.posting_date) <= getdate(self.posting_date)
 		)
 		exit_field = "units" if purchase_field == "units" else "gross_amount"
-		available = purchased - self.get_submitted_total(exit_field, EXIT_TYPES)
+		exited = get_submitted_sum(
+			self.doctype, exit_field, self.investment, None, self.name, EXIT_TYPES, for_update=True
+		)
+		available = purchased - exited
 
 		if required > flt(available, self.precision(exit_field)):
 			frappe.throw(
@@ -650,7 +654,14 @@ def get_interest_received(investment, exclude=None):
 
 
 def get_submitted_sum(
-	doctype, fieldname, investment, upto=None, exclude=None, transaction_types=None, link_field="investment"
+	doctype,
+	fieldname,
+	investment,
+	upto=None,
+	exclude=None,
+	transaction_types=None,
+	link_field="investment",
+	for_update=False,
 ):
 	"""Sum of a field over the submitted documents of an investment, optionally up to a posting date."""
 	table = frappe.qb.DocType(doctype)
@@ -666,6 +677,9 @@ def get_submitted_sum(
 
 	if upto:
 		query = query.where(table.posting_date <= upto)
+
+	if for_update:
+		query = query.for_update()
 
 	return flt(query.run()[0][0])
 
@@ -692,16 +706,16 @@ def get_exit_transactions(investment):
 	)
 
 
-def get_purchases(investment):
+def get_purchases(investment, for_update=False):
 	"""Submitted purchases of an investment in FIFO order (oldest first), with units and investment cost."""
-	purchases = frappe.get_all(
+	purchases = frappe.db.get_values(
 		"Investment Transaction",
-		filters={
+		{
 			"investment": investment,
 			"transaction_type": ("in", PURCHASE_TYPES),
 			"docstatus": 1,
 		},
-		fields=[
+		[
 			"name",
 			"transaction_type",
 			"instrument_class",
@@ -710,7 +724,9 @@ def get_purchases(investment):
 			"gross_amount",
 			"accrued_interest_in_purchase",
 		],
+		as_dict=True,
 		order_by="posting_date asc, creation asc",
+		for_update=for_update,
 	)
 
 	for purchase in purchases:
