@@ -427,6 +427,33 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 			frappe.db.get_value("Serial No", serial_no, "amc_expiry_date"), getdate(ms.items[0].end_date)
 		)
 
+	def test_maintenance_roles_can_make_visits_from_schedule(self):
+		ms = make_maintenance_schedule()
+		ms.submit()
+
+		for index, role in enumerate(("Maintenance User", "Maintenance Manager")):
+			user = make_fenced_user(f"schedule-visit-{index}@example.com", [role])
+			with as_user(user):
+				visit = make_maintenance_visit(source_name=ms.name, s_id=ms.schedules[index].name)
+				visit.completion_status = "Partially Completed"
+				visit.purposes[0].work_done = "Serviced"
+				visit.insert()
+				visit.submit()
+
+			self.assertEqual(visit.docstatus, 1)
+
+	def test_serial_nos_from_schedule_need_schedule_read(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		sales_user = make_fenced_user("schedule-serial-sales@example.com", ["Sales User"])
+		maintenance_user = make_fenced_user("schedule-serial-maintenance@example.com", ["Maintenance User"])
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, get_serial_nos_from_schedule, item_code, ms.name)
+		with as_user(maintenance_user):
+			self.assertEqual(get_serial_nos_from_schedule(item_code, ms.name), ["TEST001"])
+
 
 def deliver_serial_nos(item_code, serial_nos, customer="_Test Customer"):
 	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

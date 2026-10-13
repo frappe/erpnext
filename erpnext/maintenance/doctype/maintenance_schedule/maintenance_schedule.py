@@ -527,6 +527,7 @@ def get_legacy_delivery_dates(item_code: str, serial_nos: list[str]) -> dict:
 def get_serial_nos_from_schedule(item_code, schedule=None):
 	serial_nos = []
 	if schedule:
+		frappe.has_permission("Maintenance Schedule", "read", doc=schedule, throw=True)
 		serial_nos = frappe.db.get_value(
 			"Maintenance Schedule Item", {"parent": schedule, "item_code": item_code}, "serial_no"
 		)
