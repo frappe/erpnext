@@ -1236,6 +1236,36 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return.reload()
 		self.assertRaisesRegex(frappe.ValidationError, "Cancel the Work Order first", rm_return.cancel)
 
+	def test_work_order_stock_can_be_reserved_again_after_unreserving(self):
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			make_stock_reservation_entries,
+			unreserve_stock_for_work_order,
+		)
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		reservations = frappe.get_all(
+			"Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}, pluck="name"
+		)
+		unreserve_stock_for_work_order(wo, reservations)
+		self.assertNotIn(
+			frappe.db.get_value("Work Order", wo.name, "status"),
+			("Stock Reserved", "Stock Partially Reserved"),
+		)
+
+		wo.reload()
+		make_stock_reservation_entries(wo.as_dict())
+
+		self.assertEqual(
+			len(frappe.get_all("Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1})),
+			len(reservations),
+		)
+
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
