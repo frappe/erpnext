@@ -1658,6 +1658,22 @@ class TestBOM(ERPNextTestSuite):
 		parent.is_active = 1
 		self.assertRaisesRegex(frappe.ValidationError, "are not active", parent.save)
 
+	def test_sub_assembly_cost_is_per_good_unit_after_process_loss(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(
+			"_Test Loss RM", {"is_stock_item": 1, "valuation_rate": 100, "stock_uom": "Kg"}
+		).name
+		sub_item = make_item("_Test Loss Sub", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("_Test Loss FG", {"is_stock_item": 1}).name
+		sub_bom = make_bom(
+			item=sub_item, raw_materials=[rm_item], quantity=10, rm_qty=10, process_loss_percentage=10
+		)
+		self.assertEqual(sub_bom.process_loss_qty, 1)
+
+		parent = make_bom(item=fg_item, raw_materials=[sub_item])
+		self.assertAlmostEqual(parent.items[0].rate, sub_bom.total_cost / 9, places=2)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

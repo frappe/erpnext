@@ -121,7 +121,7 @@ class BOMCostingService:
 
 	def update_parent_cost(self):
 		if self.doc.total_cost:
-			cost = self.doc.total_cost / self.doc.quantity
+			cost = self.doc.total_cost / get_good_qty(self.doc)
 
 			bom_item = frappe.qb.DocType("BOM Item")
 			(
@@ -139,13 +139,10 @@ class BOMCostingService:
 		bom_table = frappe.qb.DocType("BOM")
 		bom = (
 			frappe.qb.from_(bom_table)
-			.select(
-				bom_table.name,
-				(bom_table.base_total_cost / bom_table.quantity).as_("unit_cost"),
-			)
+			.select(bom_table.base_total_cost, bom_table.quantity, bom_table.process_loss_qty)
 			.where((bom_table.is_active == 1) & (bom_table.name == bom_no))
 		).run(as_dict=1)
-		return bom and bom[0]["unit_cost"] or 0
+		return flt(bom[0].base_total_cost) / get_good_qty(bom[0]) if bom else 0
 
 	def calculate_cost(self, save_updates=False, update_hour_rate=False):
 		"""Calculate bom totals"""
@@ -356,3 +353,8 @@ class BOMCostingService:
 				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
 
 		return rm_rate_map
+
+
+def get_good_qty(bom):
+	good_qty = flt(bom.quantity) - flt(bom.process_loss_qty)
+	return good_qty if good_qty > 0 else flt(bom.quantity) or 1
