@@ -174,6 +174,23 @@ class TestBlanketOrder(ERPNextTestSuite):
 		po.submit()
 		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 96)
 
+	def test_blanket_order_rate_applies_per_stock_uom(self):
+		item = make_box_item("_Test Blanket Order Box Item")
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=100, item_code=item, rate=100)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		so.items[0].update(
+			{"qty": 1, "uom": "Box", "conversion_factor": 12, "warehouse": "_Test Warehouse - _TC"}
+		)
+		so.insert()
+
+		so.process_item_selection(item_idx=1)
+		self.assertEqual(so.items[0].blanket_order_rate, 100)
+		self.assertEqual(so.items[0].rate, 1200)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg"}).name
