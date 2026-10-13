@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import random_string
+from frappe.utils.logging import get_log_db
 
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.www.support.index import (
@@ -39,6 +40,8 @@ class TestSupportIndex(ERPNextTestSuite):
 	def seed_page_views(self, path, count):
 		# Web Page View is in_create/read_only; insert the minimal row the
 		# lookup reads (path matched against Help Article.route) directly.
+		# The log database is not rolled back between tests, so delete the rows afterwards.
+		self.addCleanup(get_log_db().delete, "Web Page View", {"path": path})
 		for _ in range(count):
 			view = frappe.new_doc("Web Page View")
 			view.path = path
