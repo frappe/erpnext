@@ -663,22 +663,35 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		set_backflush_based_on("BOM")
 		orders = [get_subcontracting_order(), get_subcontracting_order()]
 		for idx, sco in enumerate(orders):
-			frappe.get_doc(
+			for charge in (
 				{
-					"doctype": "Purchase Taxes and Charges",
-					"parent": sco.purchase_order,
-					"parenttype": "Purchase Order",
-					"parentfield": "taxes",
 					"idx": 1,
-					"category": "Total",
-					"add_deduct_tax": "Add",
 					"charge_type": "Actual",
 					"account_head": "_Test Account Shipping Charges - _TC",
-					"cost_center": "Main - _TC",
 					"description": f"Freight {idx}",
 					"tax_amount": 10 * (idx + 1),
-				}
-			).db_insert()
+				},
+				{
+					"idx": 2,
+					"charge_type": "On Previous Row Amount",
+					"row_id": "1",
+					"rate": 10,
+					"account_head": "_Test Account Excise Duty - _TC",
+					"description": f"Freight Tax {idx}",
+				},
+			):
+				frappe.get_doc(
+					{
+						"doctype": "Purchase Taxes and Charges",
+						"parent": sco.purchase_order,
+						"parenttype": "Purchase Order",
+						"parentfield": "taxes",
+						"category": "Total",
+						"add_deduct_tax": "Add",
+						"cost_center": "Main - _TC",
+						**charge,
+					}
+				).db_insert()
 			rm_items = get_rm_items(sco.supplied_items)
 			itemwise_details = make_stock_in_entry(rm_items=rm_items)
 			make_stock_transfer_entry(
@@ -693,7 +706,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.submit()
 
 		pr = make_purchase_receipt(scr.name)
-		self.assertEqual(sorted(t.description for t in pr.taxes), ["Freight 0", "Freight 1"])
+		self.assertEqual(
+			[(t.description, t.tax_amount) for t in pr.taxes], [("Freight 0", 30), ("Freight Tax 0", 3)]
+		)
 
 	def test_return_of_accepted_qty_values_goods_at_receipt_rate(self):
 		service_items = [

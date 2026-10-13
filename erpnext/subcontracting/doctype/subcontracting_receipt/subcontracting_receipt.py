@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -1278,6 +1279,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 		)
 
 	target_doc = None
+	first_order_charges = 0
 	for po_name in purchase_orders:
 		is_first_order = target_doc is None
 		target_doc = get_mapped_doc(
@@ -1313,6 +1315,10 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 			target_doc,
 			postprocess=post_process,
 		)
+		if is_first_order:
+			first_order_charges = len(target_doc.taxes)
+
+	merge_later_order_charges(target_doc, first_order_charges)
 
 	if not target_doc.get("items"):
 		add_po_items_to_pr(source_doc, target_doc)
@@ -1336,6 +1342,30 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 			)
 
 	return target_doc
+
+
+def merge_later_order_charges(target_doc, first_order_charges: int):
+	"""Fold later orders' Actual charges into the first order's row with the same account and dimensions."""
+	key_fields = ["account_head", "category", "add_deduct_tax", "cost_center", "project"]
+	key_fields += get_accounting_dimensions()
+
+	def get_charge_key(row) -> tuple:
+		return tuple(row.get(field) for field in key_fields)
+
+	first_order_rows = {
+		get_charge_key(row): row
+		for row in target_doc.taxes[:first_order_charges]
+		if row.charge_type == "Actual"
+	}
+	for row in target_doc.taxes[first_order_charges:]:
+		if first_row := first_order_rows.get(get_charge_key(row)):
+			first_row.tax_amount = flt(first_row.tax_amount) + flt(row.tax_amount)
+			target_doc.remove(row)
+
+	for idx, row in enumerate(target_doc.taxes, 1):
+		row.idx = idx
+
+	target_doc.calculate_taxes_and_totals()
 
 
 def validate_no_purchase_receipt_made(scr_doc):
