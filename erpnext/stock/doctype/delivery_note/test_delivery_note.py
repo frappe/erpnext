@@ -4213,6 +4213,24 @@ class TestDeliveryNote(ERPNextTestSuite):
 		deducted_return.reload()
 		self.assertEqual(deducted_return.per_billed, 0)
 
+	def test_fractional_return_deducted_on_original_invoice_is_billed(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(properties={"stock_uom": "Kg"}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		delivery_note = create_delivery_note(item_code=item, qty=0.8, rate=500)
+
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].qty = -0.1
+		deducted_return.submit()
+
+		invoice = make_sales_invoice(delivery_note.name)
+		self.assertEqual(invoice.items[0].qty, 0.7)
+		invoice.submit()
+
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,
