@@ -175,7 +175,11 @@ erpnext.PointOfSale.ItemSelector = class {
 			price_list_rate,
 		} = sanitize_item;
 		const shown = me.convert_to_invoice_currency(price_list_rate, item.currency);
-		const precision = flt(shown.price, 2) % 1 != 0 ? 2 : 0;
+		const doc = me.events.get_frm().doc;
+		const rate_df = doc && frappe.meta.get_docfield(`${doc.doctype} Item`, "price_list_rate");
+		// whole prices without decimals, others with the invoice rate field's precision (e.g. 3 for KWD)
+		const precision =
+			flt(shown.price, 6) % 1 == 0 ? 0 : rate_df ? frappe.meta.get_field_precision(rate_df, doc) : 2;
 		let indicator_color;
 		let qty_to_display = actual_qty;
 
