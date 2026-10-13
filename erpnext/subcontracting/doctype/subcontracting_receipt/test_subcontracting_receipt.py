@@ -876,7 +876,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
 
-	def make_receipt_of_two_orders(self, taxes=None, discounts=None):
+	def make_receipt_of_two_orders(
+		self, taxes=None, discounts=None, cost_centers=("Main - _TC", "Main - _TC")
+	):
 		"""Subcontracting Receipt of two orders; taxes and discounts are keyed by the order's position."""
 		set_backflush_based_on("BOM")
 		orders = [get_subcontracting_order(), get_subcontracting_order()]
@@ -893,7 +895,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 						"add_deduct_tax": "Add",
 						"charge_type": "On Net Total",
 						"account_head": "_Test Account Excise Duty - _TC",
-						"cost_center": "Main - _TC",
+						"cost_center": cost_centers[idx],
 						"description": f"Excise {rate}",
 						"rate": rate,
 					}
@@ -922,6 +924,13 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 	def test_receipt_refuses_orders_with_different_discounts(self):
 		scr = self.make_receipt_of_two_orders(discounts={0: 10})
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def test_receipt_refuses_orders_with_taxes_in_different_cost_centers(self):
+		scr = self.make_receipt_of_two_orders(
+			taxes={0: [10], 1: [10]}, cost_centers=("Main - _TC", "_Test Cost Center - _TC")
+		)
 
 		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
 
