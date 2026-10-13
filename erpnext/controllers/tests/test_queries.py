@@ -81,6 +81,70 @@ class TestQueries(ERPNextTestSuite):
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
 
+<<<<<<< HEAD
+=======
+	def test_get_batch_numbers_query(self):
+		# converted from raw SQL to query builder; assert it executes on both engines
+		query = add_default_params(queries.get_batch_numbers, "Batch")
+		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_purchase_receipts_query(self):
+		query = add_default_params(queries.get_purchase_receipts, "Purchase Receipt")
+		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_purchase_invoices_query(self):
+		query = add_default_params(queries.get_purchase_invoices, "Purchase Invoice")
+		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_delivery_notes_to_be_billed_skips_fully_returned(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		returned_dn = create_delivery_note(qty=2)
+		dn_return = make_sales_return(returned_dn.name)
+		dn_return.submit()
+		# a new doc misses the is_return part of status_updater, so update the original DN explicitly
+		frappe.get_doc("Delivery Note", dn_return.name).update_prevdoc_status()
+		returned_dn.reload()
+		self.assertEqual(returned_dn.status, "Return Issued")
+
+		open_dn = create_delivery_note(qty=2)
+
+		query = add_default_params(queries.get_delivery_notes_to_be_billed, "Delivery Note")
+		result = query(filters={"customer": open_dn.customer})
+
+		self.assert_nested_in(open_dn.name, result)
+		self.assertNotIn(returned_dn.name, [row[0] for row in result])
+
+	def test_get_filtered_child_rows_query(self):
+		# idx is an integer column. Searching child rows by it must run on Postgres
+		# (a bare LIKE rejects "bigint ILIKE text") AND cast to a full-length string:
+		# CAST(idx AS CHAR) is character(1) on Postgres, so a two-digit idx like 11
+		# would render as "1" and be missed. Build a Sales Order with >10 rows and
+		# search for row 11 to lock both behaviours.
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		frappe.db.set_single_value("Selling Settings", "allow_multiple_items", 1)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+				for _ in range(11)
+			],
+			do_not_submit=True,
+		)
+
+		rows = queries.get_filtered_child_rows(
+			"Sales Order Item",
+			txt="#11",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"parent": so.name},
+		)
+		# row label is "#<idx>, <item_code>"; row 11 must be present
+		self.assertTrue(any(str(label).startswith("#11,") for _name, label in rows))
+
+>>>>>>> e15d5d3 (fix(selling): hide fully returned delivery notes in Get Items From (#60602))
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
 
