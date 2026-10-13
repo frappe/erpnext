@@ -35,12 +35,12 @@ def execute(filters=None):
 
 def append_report(dt, org, new):
 	# idx 1 is data, 3 is chart
-	new[1].insert(0, {"entity": dt})  # heading
+	new[1].insert(0, {"entity": _(dt)})  # heading
 	new[1].append({})  # empty row
 	# datasets can be an empty list if no dates are supplied by the Dashboard Chart
 	if not new[3]["data"]["datasets"]:
 		new[3]["data"]["datasets"].append({"name": None, "values": []})
-	new[3]["data"]["datasets"][0]["name"] = dt  # override curve name
+	new[3]["data"]["datasets"][0]["name"] = _(dt)  # override curve name
 	if org:
 		org[1].extend(new[1])
 		org[3]["data"]["datasets"].extend(new[3]["data"]["datasets"])
