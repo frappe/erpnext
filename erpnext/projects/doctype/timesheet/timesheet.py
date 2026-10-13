@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Date
+from frappe.query_builder.functions import Coalesce, Date
 from frappe.utils import (
 	add_to_date,
 	cstr,
@@ -368,15 +368,15 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 			(tsd.parenttype == "Timesheet")
 			& (tsd.docstatus == 1)
 			& (tsd.is_billable == 1)
-			& tsd.sales_invoice.isnull()
+			& (Coalesce(tsd.sales_invoice, "") == "")
 			& (tsd.parent.isin(allowed_timesheets))
 		)
 	)
 
 	if allowed_projects:
-		query = query.where((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
+		query = query.where((tsd.project.isin(allowed_projects)) | (Coalesce(tsd.project, "") == ""))
 	else:
-		query = query.where(tsd.project.isnull())
+		query = query.where(Coalesce(tsd.project, "") == "")
 
 	if project:
 		query = query.where(tsd.project == project)
@@ -486,6 +486,7 @@ def make_sales_invoice(
 ):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc("Timesheet", source_name)
+	timesheet.check_permission("read")
 
 	if not timesheet.total_billable_hours:
 		frappe.throw(_("Invoice can't be made for zero billing hour"))

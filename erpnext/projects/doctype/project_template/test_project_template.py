@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.projects.doctype.task.test_task import create_task
@@ -23,6 +24,15 @@ class TestProjectTemplate(FrappeTestCase):
 			template = frappe.get_doc(doctype="Project Template", name="_Test PT Long Child Template")
 			template.extend("tasks", [{"task": parent.name}, {"task": child.name}])
 			self.assertRaises(frappe.ValidationError, template.insert)
+
+	def test_projects_manager_maintains_and_projects_user_reads_templates(self):
+		manager = create_user("project_template_manager@example.com", "Projects Manager").name
+		user = create_user("project_template_user@example.com", "Projects User").name
+
+		for ptype in ("create", "read", "write"):
+			self.assertTrue(frappe.has_permission("Project Template", ptype, user=manager))
+		self.assertTrue(frappe.has_permission("Project Template", "read", user=user))
+		self.assertFalse(frappe.has_permission("Project Template", "write", user=user))
 
 
 def make_project_template(project_template_name, project_tasks=None):

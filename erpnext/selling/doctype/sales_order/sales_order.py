@@ -622,25 +622,33 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.db.sql(
-					"""select sum(qty)
-					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.sales_order_item = %s
-						and poi.item_code = %s
-						and poi.parent = po.name
-						and po.docstatus = 1
-						and po.status = 'Delivered'""",
-					(item.name, item.item_code),
-				)
-
-				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
-				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
+				item.db_set("delivered_qty", self.get_drop_ship_delivered_qty(item), update_modified=False)
 
 			delivered_qty += min(item.delivered_qty, item.qty)
 			tot_qty += item.qty
 
 		if tot_qty != 0:
 			self.db_set("per_delivered", flt(delivered_qty / tot_qty) * 100, update_modified=False)
+
+	def get_drop_ship_delivered_qty(self, item) -> float:
+		"""Qty of the delivered drop-ship Purchase Orders of `item`, in the Sales Order UOM."""
+		po = frappe.qb.DocType("Purchase Order")
+		po_item = frappe.qb.DocType("Purchase Order Item")
+		delivered_stock_qty = (
+			frappe.qb.from_(po_item)
+			.join(po)
+			.on(po_item.parent == po.name)
+			.select(Sum(po_item.qty * po_item.conversion_factor))
+			.where(
+				(po_item.sales_order_item == item.name)
+				& (po_item.item_code == item.item_code)
+				& (po.docstatus == 1)
+				& (po.status == "Delivered")
+			)
+		).run()[0][0]
+		return flt(
+			flt(delivered_stock_qty) / flt(item.conversion_factor or 1), item.precision("delivered_qty")
+		)
 
 	def update_picking_status(self):
 		total_picked_qty = 0.0

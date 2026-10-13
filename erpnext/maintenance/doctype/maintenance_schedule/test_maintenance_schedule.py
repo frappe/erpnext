@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
 
@@ -13,6 +14,7 @@ from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule impor
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 # test_records = frappe.get_test_records('Maintenance Schedule')
 
@@ -152,6 +154,35 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		self.assertEqual(len(ms.schedules), 2)
 
 		frappe.db.rollback()
+
+
+class TestMaintenanceSchedulePermissions(FrappeTestCase):
+	def test_maintenance_roles_can_make_visits_from_schedule(self):
+		ms = make_maintenance_schedule()
+		ms.submit()
+
+		for index, role in enumerate(("Maintenance User", "Maintenance Manager")):
+			user = make_fenced_user(f"schedule-visit-{index}@example.com", [role])
+			with as_user(user):
+				visit = make_maintenance_visit(source_name=ms.name, s_id=ms.schedules[index].name)
+				visit.completion_status = "Partially Completed"
+				visit.purposes[0].work_done = "Serviced"
+				visit.insert()
+				visit.submit()
+
+			self.assertEqual(visit.docstatus, 1)
+
+	def test_serial_nos_from_schedule_need_schedule_read(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001")
+		sales_user = make_fenced_user("schedule-serial-sales@example.com", ["Sales User"])
+		maintenance_user = make_fenced_user("schedule-serial-maintenance@example.com", ["Maintenance User"])
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, get_serial_nos_from_schedule, item_code, ms.name)
+		with as_user(maintenance_user):
+			self.assertEqual(get_serial_nos_from_schedule(item_code, ms.name), ["TEST001"])
 
 
 def make_serial_item_with_serial(item_code):
