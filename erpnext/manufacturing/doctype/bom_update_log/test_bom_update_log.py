@@ -209,6 +209,45 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("BOM", parent.name, "total_cost"), 600)
 		self.assertEqual(frappe.db.get_value("BOM", top.name, "total_cost"), 600)
 
+	def test_replace_updates_operation_boms(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		rm = make_item("_Test BUL Op RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_stock_entry(item_code=rm, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sub_item = make_item("_Test BUL Op Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test BUL Op FG", {"is_stock_item": 1}).name
+		make_workstation({"workstation": "_Test BUL Workstation"})
+		make_operation({"operation": "_Test BUL Operation", "workstation": "_Test BUL Workstation"})
+
+		sub_1 = make_test_bom(sub_item, [(rm, None, 1)])
+		sub_2 = make_test_bom(sub_item, [(rm, None, 2)])
+
+		parent = frappe.new_doc("BOM", company="_Test Company", item=fg_item, quantity=1, currency="INR")
+		parent.with_operations = 1
+		parent.track_semi_finished_goods = 1
+		operation = {
+			"operation": "_Test BUL Operation",
+			"workstation": "_Test BUL Workstation",
+			"time_in_mins": 10,
+		}
+		parent.append(
+			"operations", dict(operation, finished_good=sub_item, bom_no=sub_1.name, finished_good_qty=1)
+		)
+		parent.append("operations", dict(operation, finished_good=fg_item, is_final_finished_good=1))
+		parent.append("items", {"item_code": sub_item, "qty": 1, "operation_row_id": 2, "do_not_explode": 1})
+		parent.insert()
+		parent.submit()
+
+		enqueue_replace_bom(boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name))
+
+		operation_boms = frappe.get_all(
+			"BOM Operation", filters={"parent": parent.name}, pluck="bom_no", order_by="idx"
+		)
+		self.assertEqual(operation_boms[0], sub_2.name)
+
 
 def make_test_bom(item, rows):
 	bom = frappe.get_doc(

@@ -70,21 +70,11 @@ def get_ancestor_boms(new_bom: str) -> list:
 	"""Return every ancestor BOM of `new_bom` (BOMs that consume it, transitively) in one recursive
 	CTE built with frappe.qb -- portable across postgres and mariadb 10.2+. `UNION` makes it
 	cycle-safe (it stops once no new BOM is reached); a BOM that is its own ancestor is rejected."""
-	bom_item = frappe.qb.DocType("BOM Item")
+	links = get_bom_links_query().as_("bom_links")
 	tree = frappe.qb.Table("ancestor_boms")
 
-	seed = (
-		frappe.qb.from_(bom_item)
-		.select(bom_item.parent.as_("bom"))
-		.where((bom_item.bom_no == new_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
-	)
-	recursion = (
-		frappe.qb.from_(bom_item)
-		.join(tree)
-		.on(bom_item.bom_no == tree.bom)
-		.select(bom_item.parent)
-		.where((bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
-	)
+	seed = frappe.qb.from_(links).select(links.parent.as_("bom")).where(links.bom_no == new_bom)
+	recursion = frappe.qb.from_(links).join(tree).on(links.bom_no == tree.bom).select(links.parent)
 	ancestors = (
 		frappe.qb.with_(seed + recursion, "ancestor_boms", recursive=True).from_(tree).select(tree.bom)
 	).run(pluck=True)
@@ -95,30 +85,40 @@ def get_ancestor_boms(new_bom: str) -> list:
 	return ancestors
 
 
-def update_new_bom_in_bom_items(current_bom: str, new_bom: str) -> None:
+def get_bom_links_query():
 	bom_item = frappe.qb.DocType("BOM Item")
-	(
-		frappe.qb.update(bom_item)
-		.set(bom_item.bom_no, new_bom)
-		.where((bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
-	).run()
+	bom_operation = frappe.qb.DocType("BOM Operation")
+
+	return (
+		frappe.qb.from_(bom_item)
+		.select(bom_item.parent, bom_item.bom_no)
+		.where((bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
+	) + (
+		frappe.qb.from_(bom_operation)
+		.select(bom_operation.parent, bom_operation.bom_no)
+		.where((bom_operation.docstatus < 2) & (bom_operation.parenttype == "BOM"))
+	)
+
+
+def update_new_bom_in_bom_items(current_bom: str, new_bom: str) -> None:
+	for doctype in ("BOM Item", "BOM Operation"):
+		table = frappe.qb.DocType(doctype)
+		(
+			frappe.qb.update(table)
+			.set(table.bom_no, new_bom)
+			.where((table.bom_no == current_bom) & (table.docstatus < 2) & (table.parenttype == "BOM"))
+		).run()
 
 
 def sort_children_first(boms: list[str]) -> list[str]:
 	if len(boms) < 2:
 		return boms
 
-	bom_item = frappe.qb.DocType("BOM Item")
+	bom_links = get_bom_links_query().as_("bom_links")
 	links = (
-		frappe.qb.from_(bom_item)
-		.select(bom_item.parent, bom_item.bom_no)
-		.where(
-			bom_item.parent.isin(boms)
-			& bom_item.bom_no.isin(boms)
-			& (bom_item.parenttype == "BOM")
-			& (bom_item.docstatus < 2)
-		)
-		.distinct()
+		frappe.qb.from_(bom_links)
+		.select(bom_links.parent, bom_links.bom_no)
+		.where(bom_links.parent.isin(boms) & bom_links.bom_no.isin(boms))
 	).run(as_dict=True)
 
 	pending_children = defaultdict(set)
