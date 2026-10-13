@@ -2869,6 +2869,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
+	def test_bom_backflush_return_of_accepted_and_rejected_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "_Test Warehouse 2 - _TC"
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].rejected_qty = -2
+		scr_return.items[0].rejected_warehouse = "_Test Warehouse 2 - _TC"
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual(scr_return.docstatus, 1)
+		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -5)
+
 	def test_return_of_rows_sharing_a_raw_material(self):
 		set_backflush_based_on("BOM")
 		rm_item = make_item(properties={"is_stock_item": 1}).name
