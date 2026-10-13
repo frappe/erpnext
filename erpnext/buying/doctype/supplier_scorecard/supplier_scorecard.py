@@ -244,7 +244,6 @@ def refresh_scorecards():
 			)
 
 
-@frappe.whitelist()
 def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
 	scp_count = create_scorecard_periods(sc)
