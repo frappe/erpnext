@@ -411,6 +411,83 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(sq1_row.get("rate"), 150)
 		self.assertEqual(sq1_row.get("qty"), 5)
 		self.assertEqual(sq1_row.get("supplier_quotation"), sq1.name)
+		self.assertEqual(sq1_row.get("request_for_quotation_item"), rfq.items[0].name)
+
+	def test_get_supplier_quotations_data_duplicate_item_code_rows(self):
+		rfq = frappe.new_doc("Request for Quotation")
+		rfq.transaction_date = nowdate()
+		rfq.company = "_Test Company"
+		rfq.message_for_supplier = "Please quote"
+		rfq.append("suppliers", {"supplier": "_Test Supplier"})
+		rfq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"description": "Batch A",
+				"qty": 5,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": nowdate(),
+			},
+		)
+		rfq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"description": "Batch B",
+				"qty": 10,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": nowdate(),
+			},
+		)
+		rfq.insert()
+		rfq.submit()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+		sq.items[0].rate = 100
+		sq.items[1].rate = 90
+		sq.save()
+		sq.submit()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 2)
+		rfq_item_names = {item.name for item in rfq.items}
+		returned_rfq_item_names = {row.get("request_for_quotation_item") for row in data}
+		self.assertEqual(rfq_item_names, returned_rfq_item_names)
+
+	def test_get_supplier_quotations_data_segregated_in_sq_not_in_rfq(self):
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.items[0].rate = 300
+
+		# Manually add a second row for the same item code without request_for_quotation link
+		sq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 5,
+				"rate": 200,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+			},
+		)
+		sq.save()
+		sq.submit()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 2)
+		self.assertEqual(sum(row.get("qty") for row in data), 10)
+		rates = [row.get("rate") for row in data]
+		self.assertIn(300, rates)
+		self.assertIn(200, rates)
 
 	def test_get_supplier_quotations_data_excludes_cancelled(self):
 		rfq = make_request_for_quotation()
@@ -428,6 +505,21 @@ class TestRequestforQuotation(ERPNextTestSuite):
 	def test_get_supplier_quotations_data_non_existent_rfq(self):
 		data = get_supplier_quotations_data("NON-EXISTENT-RFQ-12345")
 		self.assertEqual(data, [])
+
+	def test_get_supplier_quotations_data_for_unlisted_supplier(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}]
+		)
+		self.assertEqual(len(rfq.suppliers), 1)
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier 1")
+		sq.items[0].rate = 180
+		sq.save()
+		sq.submit()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0].get("supplier"), "_Test Supplier 1")
 
 
 def make_request_for_quotation(**args):
