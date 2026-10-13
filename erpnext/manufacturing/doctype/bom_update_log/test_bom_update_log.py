@@ -144,6 +144,39 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 			frappe.db.get_value("BOM", parent.name, "total_cost"),
 		)
 
+	def test_replace_refuses_unusable_new_bom(self):
+		draft = frappe.copy_doc(self.new_bom_doc)
+		draft.docstatus = 0
+		draft.insert()
+		self.assertRaises(
+			frappe.ValidationError,
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=draft.name),
+		)
+
+		inactive = frappe.copy_doc(self.new_bom_doc)
+		inactive.docstatus = 0
+		inactive.insert()
+		inactive.submit()
+		inactive.db_set("is_active", 0)
+		self.assertRaises(
+			frappe.ValidationError,
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=inactive.name),
+		)
+
+		foreign = frappe.copy_doc(self.new_bom_doc)
+		foreign.docstatus = 0
+		foreign.currency = "INR"
+		foreign.conversion_rate = 1
+		foreign.insert()
+		foreign.submit()
+		self.assertRaises(
+			frappe.ValidationError,
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=foreign.name),
+		)
+
 
 def make_test_bom(item, rows):
 	bom = frappe.get_doc(
