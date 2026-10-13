@@ -132,6 +132,24 @@ erpnext.PointOfSale.ItemSelector = class {
 		</div>`;
 	}
 
+	// price list can be in another currency (e.g. USD list, INR invoice), so show/use the invoice price
+	convert_to_invoice_currency(price, currency) {
+		const doc = this.events.get_frm().doc || {};
+		if (
+			!price ||
+			!doc.currency ||
+			currency === doc.currency ||
+			!doc.plc_conversion_rate ||
+			!doc.conversion_rate
+		)
+			return { price, currency };
+
+		return {
+			price: (flt(price) * flt(doc.plc_conversion_rate)) / flt(doc.conversion_rate),
+			currency: doc.currency,
+		};
+	}
+
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
@@ -156,7 +174,8 @@ erpnext.PointOfSale.ItemSelector = class {
 			uom,
 			price_list_rate,
 		} = sanitize_item;
-		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
+		const shown = me.convert_to_invoice_currency(price_list_rate, item.currency);
+		const precision = flt(shown.price, 2) % 1 != 0 ? 2 : 0;
 		let indicator_color;
 		let qty_to_display = actual_qty;
 
@@ -197,6 +216,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				data-item-code="${item_code}" data-serial-no="${serial_no}"
 				data-batch-no="${batch_no}" data-uom="${uom}"
 				data-rate="${price_list_rate || 0}"
+				data-currency="${sanitize_item.currency}"
 				data-stock-uom="${stock_uom}"
 				title="${item_name}">
 
@@ -209,12 +229,12 @@ erpnext.PointOfSale.ItemSelector = class {
 					${
 						!me.hide_images
 							? `<div class="item-rate">
-								${frappe.utils.escape_html(format_currency(price_list_rate, item.currency, precision)) || 0} / ${uom}
+								${frappe.utils.escape_html(format_currency(shown.price, shown.currency, precision)) || 0} / ${uom}
 							</div>`
 							: `
 							<div class="item-price">${
 								frappe.utils.escape_html(
-									format_currency(price_list_rate, item.currency, precision)
+									format_currency(shown.price, shown.currency, precision)
 								) || 0
 							}</div>
 							<div class="item-uom">${uom}</div>
@@ -377,7 +397,10 @@ erpnext.PointOfSale.ItemSelector = class {
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
-			rate = rate === "undefined" ? undefined : rate;
+			rate =
+				rate === "undefined"
+					? undefined
+					: me.convert_to_invoice_currency(rate, $item.attr("data-currency")).price;
 			stock_uom = stock_uom === "undefined" ? undefined : stock_uom;
 
 			me.events.item_selected({
