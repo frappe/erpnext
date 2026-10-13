@@ -4,7 +4,6 @@
 import frappe
 from frappe import _
 
-from erpnext.accounts.shareholding.locking import lock_company
 from erpnext.accounts.shareholding.posting import money
 
 
@@ -18,11 +17,12 @@ def validate_equity_journal_entry(doc, method=None):
 		frappe.throw(_("The source Share Transaction cannot be changed."))
 	if not doc.get("share_transaction"):
 		return
-	lock_company(doc.company)
 	transaction = frappe.get_doc("Share Transaction", doc.share_transaction)
 	transaction.check_permission("read")
 	if transaction.docstatus != 1:
 		frappe.throw(_("The source Share Transaction must be submitted."))
+	if transaction.journal_entry != doc.name:
+		frappe.throw(_("An active Journal Entry already exists for this Share Transaction."))
 	if transaction.company != doc.company:
 		frappe.throw(_("Journal Entry and Share Transaction must belong to the same company."))
 	if transaction.transaction_type == "Transfer":

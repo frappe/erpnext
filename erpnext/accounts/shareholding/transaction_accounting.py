@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.accounts.shareholding.locking import lock_company
-from erpnext.accounts.shareholding.ranges import get_treasury_cost_per_share
+from erpnext.accounts.shareholding.ranges import get_treasury_cost
 
 ACCOUNTING_TRANSACTION_TYPES = {"Issue", "Buyback", "Retirement", "Reissue"}
 
@@ -53,15 +53,16 @@ class TransactionAccounting:
 			self.treasury_cost = flt(self.total_amount)
 
 		elif self.transaction_type in {"Retirement", "Reissue"}:
-			self.treasury_cost_per_share = get_treasury_cost_per_share(
+			self.treasury_cost = get_treasury_cost(
 				company=self.company,
 				share_class=self.share_class,
 				share_folio=self.from_folio,
-				from_share_number=self.from_share_number,
-				to_share_number=self.to_share_number,
-				exclude_share_transaction=self.name,
+				start=self.from_share_number,
+				end=self.to_share_number,
+				currency=self.currency,
+				exclude_transaction=self.name,
 			)
-			self.treasury_cost = self.money(self.treasury_cost_per_share * quantity)
+			self.treasury_cost_per_share = self.treasury_cost / quantity
 
 			if self.transaction_type == "Retirement":
 				self.share_capital_amount = face_amount
@@ -128,6 +129,9 @@ class TransactionAccounting:
 	def create_accounting_journal_entry(self):
 		self.reload()
 		self.check_permission("write")
+		# Document submission and cancellation lock the transaction before the company.
+		frappe.db.get_value("Share Transaction", self.name, "name", for_update=True)
+		self.reload()
 		lock_company(self.company)
 		if self.transaction_type == "Transfer":
 			frappe.throw(_("A shareholder-to-shareholder Transfer does not create a company Journal Entry."))
@@ -136,11 +140,6 @@ class TransactionAccounting:
 		if self.docstatus != 1:
 			frappe.throw(_("Submit the Share Transaction before creating its Journal Entry."))
 
-		# Serialize creation so repeated requests cannot create duplicate vouchers.
-		frappe.db.get_value("Share Transaction", self.name, "name", for_update=True)
-		self.reload()
-		if self.docstatus != 1:
-			frappe.throw(_("Only a submitted Share Transaction can create accounting."))
 		existing = frappe.db.get_value(
 			"Journal Entry", {"share_transaction": self.name, "docstatus": ["!=", 2]}, "name"
 		)
@@ -166,8 +165,10 @@ class TransactionAccounting:
 		).format(self.name)
 
 		accounting_rows = self.get_accounting_rows()
+		journal_entry.set_new_name()
 		self.db_set(
 			{
+				"journal_entry": journal_entry.name,
 				"accounting_snapshot": frappe.as_json(accounting_rows),
 				"settlement_account": self.settlement_account,
 			},

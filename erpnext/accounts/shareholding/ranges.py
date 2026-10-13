@@ -4,6 +4,7 @@
 """Validate ownership and recover historical values for numbered shares."""
 
 from collections import defaultdict
+from itertools import pairwise
 
 import frappe
 from frappe import _
@@ -17,9 +18,12 @@ def range_has_coverage(
 	to_share_number,
 	expected_coverage,
 	share_folio=None,
+	exclude_transaction=None,
 ):
 	"""Return whether every share number in a range has the expected ledger balance."""
-	entries = get_range_entries(company, share_class, from_share_number, to_share_number, share_folio)
+	entries = get_range_entries(
+		company, share_class, from_share_number, to_share_number, share_folio, exclude_transaction
+	)
 	if expected_coverage == 0:
 		reversed_entries = {entry.reversal_of for entry in entries if entry.is_reversal}
 		if any(
@@ -163,6 +167,56 @@ def get_treasury_cost_per_share(
 	return flt(selected_cost)
 
 
+def get_treasury_cost(company, share_class, share_folio, start, end, currency, exclude_transaction=None):
+	"""Allocate a lot's rounded cost by cumulative share-number boundaries."""
+	from erpnext.accounts.shareholding.posting import money
+
+	if not range_has_coverage(company, share_class, start, end, 1, share_folio, exclude_transaction):
+		frappe.throw(_("The treasury folio does not own the complete selected share range."))
+	entries = get_range_entries(company, share_class, start, end, share_folio, exclude_transaction)
+	points = sorted(
+		{cint(start), cint(end) + 1}
+		| {
+			point
+			for entry in entries
+			for point in (
+				max(cint(start), cint(entry.from_share_number)),
+				min(cint(end), cint(entry.to_share_number)) + 1,
+			)
+		}
+	)
+	cost = 0
+	for left, right in pairwise(points):
+		lot = get_active_treasury_lot(entries, left, right - 1)
+		quantity = abs(cint(lot.quantity_change))
+		cost += money(
+			flt(lot.treasury_cost_change) * (right - lot.from_share_number) / quantity, currency
+		) - money(flt(lot.treasury_cost_change) * (left - lot.from_share_number) / quantity, currency)
+	cost = money(cost, currency)
+	if cost < 0:
+		frappe.throw(_("Could not determine treasury cost for the complete selected share range."))
+	return cost
+
+
+def get_active_treasury_lot(entries, start, end):
+	"""Retain acquisition boundaries when a disposal is cancelled or numbers are reused."""
+	active = None
+	removed = {}
+	for entry in entries:
+		if entry.from_share_number > start or entry.to_share_number < end:
+			continue
+		if entry.quantity_change < 0:
+			removed[entry.name] = active
+			active = None
+		elif entry.is_reversal:
+			active = removed.get(entry.reversal_of)
+		else:
+			active = entry
+	if not active:
+		frappe.throw(_("Could not determine the original treasury acquisition for this range."))
+	return active
+
+
 def get_range_entries(company, share_class, start, end, folio=None, exclude_transaction=None):
 	"""Read all signed movements overlapping a numbered interval."""
 	entry = frappe.qb.DocType("Share Ledger Entry")
@@ -192,4 +246,4 @@ def get_range_entries(company, share_class, start, end, folio=None, exclude_tran
 		query = query.where(
 			entry.share_transaction.isnull() | (entry.share_transaction != exclude_transaction)
 		)
-	return query.for_update().run(as_dict=True)
+	return query.orderby(entry.creation).orderby(entry.posting_sequence).for_update().run(as_dict=True)

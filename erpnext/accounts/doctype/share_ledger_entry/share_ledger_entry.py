@@ -38,9 +38,9 @@ class ShareLedgerEntry(Document):
 		if not is_treasury and flt(self.treasury_cost_change):
 			frappe.throw(_("Treasury Cost Change can only be posted against a treasury folio."))
 		if is_treasury and self.transaction_type in {"Buyback", "Retirement", "Reissue"}:
-			if not flt(self.treasury_cost_change):
+			if self.transaction_type == "Buyback" and not flt(self.treasury_cost_change):
 				frappe.throw(_("Treasury Cost Change is required for a treasury movement."))
-			if cint(self.quantity_change) * flt(self.treasury_cost_change) <= 0:
+			if cint(self.quantity_change) * flt(self.treasury_cost_change) < 0:
 				frappe.throw(_("Treasury Cost Change and Quantity Change must have the same sign."))
 
 		if self.is_reversal and not self.reversal_of:
