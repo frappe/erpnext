@@ -155,6 +155,34 @@ class TestMaintenanceSchedule(FrappeTestCase):
 
 		frappe.db.rollback()
 
+	def test_schedule_refused_when_every_day_is_a_holiday(self):
+		from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
+
+		start_date, end_date = add_days(today(), 1), add_days(today(), 3)
+		holiday_list = make_holiday_list(
+			"_Test MS Holidays " + frappe.generate_hash("", 6),
+			from_date=today(),
+			to_date=add_days(today(), 10),
+			holiday_dates=[
+				{"holiday_date": add_days(today(), day), "description": "Test Holiday"} for day in range(1, 4)
+			],
+		)
+		ms = make_maintenance_schedule()
+		sales_person = frappe.get_doc(
+			{"doctype": "Sales Person", "sales_person_name": "_Test MS SP " + frappe.generate_hash("", 5)}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Company", ms.company, "default_holiday_list", holiday_list.name)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is a holiday",
+			ms.create_schedule_list,
+			start_date,
+			end_date,
+			1,
+			sales_person.name,
+		)
+
 	def test_visit_from_schedule_skips_completed_rows(self):
 		ms = make_maintenance_schedule()
 		ms.submit()
