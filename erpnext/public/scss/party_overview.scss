@@ -1,4 +1,4 @@
-.customer-overview {
+.party-overview {
 	.co-period,
 	.co-subtitle,
 	.co-note,
@@ -99,6 +99,11 @@
 
 	.co-chart {
 		margin: 0 calc(-1 * var(--padding-sm));
+		--charts-label-color: var(--ink-gray-5);
+		--charts-legend-label: var(--ink-gray-7);
+		--charts-tooltip-title: var(--ink-gray-5);
+		--charts-tooltip-label: var(--ink-gray-7);
+		--charts-tooltip-value: var(--ink-gray-9);
 	}
 
 	.co-panel .co-chart,
@@ -107,6 +112,9 @@
 	}
 
 	.co-age-chart {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
 		margin-top: var(--margin-sm);
 	}
 

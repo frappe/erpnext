@@ -300,7 +300,9 @@ def trend(customer, company, from_date, to_date, as_of, accounts):
 	while cursor <= last:
 		is_mtd = cursor == current_month
 		value = by_month.get(cursor, 0.0)
-		points.append({"label": cursor.strftime("%b"), "value": value, "mtd": is_mtd})
+		points.append(
+			{"label": cursor.strftime("%b"), "title": cursor.strftime("%b %Y"), "value": value, "mtd": is_mtd}
+		)
 		if not is_mtd:
 			closed.append(value)
 		cursor = add_months(cursor, 1)
