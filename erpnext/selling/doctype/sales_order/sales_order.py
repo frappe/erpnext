@@ -952,7 +952,10 @@ def get_billed_qty_query(sales_order_item):
 	invoice_item = qb.DocType("Sales Invoice Item")
 	return (
 		qb.from_(invoice_item)
-		.select(IfNull(Sum(invoice_item.qty), 0))
+		.select(
+			IfNull(Sum(invoice_item.qty * invoice_item.conversion_factor), 0)
+			/ sales_order_item.conversion_factor
+		)
 		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
 	)
 
@@ -965,7 +968,10 @@ def get_pending_qty_criterion(sales_order_item, billed_qty):
 		qb.from_(invoice_item)
 		.inner_join(invoice)
 		.on(invoice.name == invoice_item.parent)
-		.select(IfNull(Sum(-invoice_item.qty), 0))
+		.select(
+			IfNull(Sum(-invoice_item.qty * invoice_item.conversion_factor), 0)
+			/ sales_order_item.conversion_factor
+		)
 		.where(
 			(invoice_item.docstatus == 1)
 			& (invoice_item.so_detail == sales_order_item.name)
