@@ -654,7 +654,7 @@ def daily_reminder():
 	projects = get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.daily_time_to_send):
+		if get_due_project_updates(project.name, project.daily_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
@@ -662,7 +662,7 @@ def twice_daily_reminder():
 	projects = get_projects_for_collect_progress("Twice Daily", ["first_email", "second_email"])
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.first_email, project.second_email):
+		for _due in range(get_due_project_updates(project.name, project.first_email, project.second_email)):
 			send_project_update_email_to_users(project.name)
 
 
@@ -675,15 +675,15 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if allow_to_make_project_update(project.name, project.weekly_time_to_send):
+		if get_due_project_updates(project.name, project.weekly_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
-def allow_to_make_project_update(project, *times):
-	"""Whether fewer updates were made today than there are send times already passed."""
+def get_due_project_updates(project: str, *times) -> int:
+	"""Send times already passed today that have no Project Update yet."""
 	now = get_time(nowtime())
 	times_passed = sum(now >= get_time(time) for time in times)
-	return frappe.db.count("Project Update", {"project": project, "date": today()}) < times_passed
+	return max(times_passed - frappe.db.count("Project Update", {"project": project, "date": today()}), 0)
 
 
 @frappe.whitelist(methods=["POST"])
