@@ -10,16 +10,16 @@
  "idx": 6,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-07-17 23:16:19.892044",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Partners Commission",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "SELECT\n   sales_partner as \"Sales Partner:Link / Sales Partner:220\",\n   sum(base_net_total) as \"Invoiced Amount (Excl. Tax):Currency:220\",\n   sum(amount_eligible_for_commission) as \"Amount Eligible for Commission:Currency:220\",\n   sum(total_commission) as \"Total Commission:Currency:170\",\n   sum(total_commission)*100 / NULLIF(sum(amount_eligible_for_commission), 0) as \"Average Commission Rate:Percent:220\"\nFROM\n   (\n      SELECT\n         sales_partner,\n         base_net_total,\n         total_commission,\n         amount_eligible_for_commission\n      FROM\n         `tabSales Invoice` \n      WHERE\n         docstatus = 1\n         AND IFNULL(base_net_total, 0) > 0\n         AND IFNULL(total_commission, 0) > 0\n\n      UNION ALL\n\n      SELECT\n         sales_partner,\n         base_net_total,\n         total_commission,\n         amount_eligible_for_commission\n      FROM\n         `tabPOS Invoice`\n      WHERE\n         docstatus = 1\n         AND IFNULL(base_net_total, 0) > 0\n         AND IFNULL(total_commission, 0) > 0\n   ) AS sub\nGROUP BY\n   sales_partner",
+ "query": "",
  "ref_doctype": "Sales Invoice",
  "report_name": "Sales Partners Commission",
- "report_type": "Query Report",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "Accounts Manager"

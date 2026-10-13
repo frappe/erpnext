@@ -2,7 +2,9 @@
 # See license.txt
 
 import frappe
+from frappe.tests.classes.context_managers import freeze_time
 
+from erpnext.quality_management.doctype.quality_review.quality_review import review
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -12,6 +14,53 @@ class TestQualityGoal(ERPNextTestSuite):
 		goal = get_quality_goal()
 		self.assertTrue(goal)
 		goal.delete()
+
+	def test_quarterly_goal_reviewed_on_its_date(self):
+		goal = frappe.get_doc(
+			doctype="Quality Goal",
+			goal="Test Quarterly Goal",
+			frequency="Quarterly",
+			date="15",
+			objectives=[dict(objective="Check test cases")],
+		).insert()
+
+		for day in ("2027-04-01", "2027-04-15"):
+			with freeze_time(day):
+				review()
+
+		self.assertEqual(
+			frappe.get_all("Quality Review", {"goal": goal.name}, pluck="date"),
+			[frappe.utils.getdate("2027-04-15")],
+		)
+
+	def test_month_end_and_sunday_goals_reviewed(self):
+		month_end = frappe.get_doc(
+			doctype="Quality Goal",
+			goal="Test Month End Goal",
+			frequency="Monthly",
+			date="31",
+			objectives=[dict(objective="Check test cases")],
+		).insert()
+		sunday = frappe.get_doc(
+			doctype="Quality Goal",
+			goal="Test Sunday Goal",
+			frequency="Weekly",
+			weekday="Sunday",
+			objectives=[dict(objective="Check test cases")],
+		).insert()
+
+		for day in ("2027-02-28", "2027-03-30", "2027-03-31"):
+			with freeze_time(day):
+				review()
+
+		self.assertEqual(
+			frappe.get_all("Quality Review", {"goal": month_end.name}, pluck="date", order_by="date"),
+			[frappe.utils.getdate("2027-02-28"), frappe.utils.getdate("2027-03-31")],
+		)
+		self.assertEqual(
+			frappe.get_all("Quality Review", {"goal": sunday.name}, pluck="date"),
+			[frappe.utils.getdate("2027-02-28")],
+		)
 
 
 def get_quality_goal():

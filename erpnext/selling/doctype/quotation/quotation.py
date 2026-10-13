@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.desk.notifications import get_open_count as get_linked_document_counts
 from frappe.model.document import Document
-from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
+from frappe.utils import add_days, cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -169,6 +169,7 @@ class Quotation(SellingController):
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
+		self.set_default_valid_till()
 		self.validate_valid_till()
 		self.validate_revision()
 		self.set_customer_name()
@@ -184,6 +185,11 @@ class Quotation(SellingController):
 
 	def before_submit(self):
 		self.set_has_alternative_item()
+
+	def set_default_valid_till(self):
+		validity_days = cint(frappe.get_single_value("CRM Settings", "default_valid_till"))
+		if self.is_new() and not self.valid_till and validity_days > 0:
+			self.valid_till = add_days(self.transaction_date, validity_days)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
@@ -468,14 +474,16 @@ class Quotation(SellingController):
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications
 
-		if not (
-			self.opportunity
-			and frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments")
-		):
+		if self.opportunity:
+			source = ("Opportunity", self.opportunity)
+		elif self.quotation_to == "Lead" and self.party_name:
+			source = ("Lead", self.party_name)
+		else:
 			return
 
-		copy_comments("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
-		link_communications("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
+		if frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			copy_comments(*source, self, self.flags.ignore_permissions)
+			link_communications(*source, self, self.flags.ignore_permissions)
 
 	def print_other_charges(self, docname):
 		print_lst = []
@@ -566,13 +574,14 @@ def set_expired_status():
 	)
 
 	# expire submitted, non-expired/lost quotations whose validity has ended and that have no SO
-	(
-		frappe.qb.update(quotation)
-		.set(quotation.status, "Expired")
-		.where(
-			(quotation.docstatus == 1)
-			& (quotation.status.notin(["Expired", "Lost"]))
-			& (quotation.valid_till < nowdate())
-			& ExistsCriterion(so_against_quo).negate()
-		)
-	).run()
+	expiring = (
+		(quotation.docstatus == 1)
+		& (quotation.status.notin(["Expired", "Lost"]))
+		& (quotation.valid_till < nowdate())
+		& ExistsCriterion(so_against_quo).negate()
+	)
+	expired_quotations = frappe.qb.from_(quotation).select(quotation.name).where(expiring).run(pluck=True)
+	frappe.qb.update(quotation).set(quotation.status, "Expired").where(expiring).run()
+
+	for name in expired_quotations:
+		frappe.get_doc("Quotation", name).update_opportunity(None)

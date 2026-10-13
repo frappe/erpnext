@@ -2,14 +2,22 @@
 # See license.txt
 
 
+from itertools import pairwise
+
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 	get_scorecard_date,
 	make_all_scorecards,
+	refresh_scorecards,
+)
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
+	make_supplier_scorecard as make_scorecard_period,
 )
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard_dashboard import get_data
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -18,11 +26,21 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		doc = make_supplier_scorecard().insert()
 		self.assertEqual(doc.name, valid_scorecard[0].get("supplier"))
 
+	def test_make_all_scorecards_is_not_whitelisted(self):
+		self.assertRaises(frappe.PermissionError, frappe.is_whitelisted, make_all_scorecards)
+
 	def test_criteria_weight(self):
 		my_doc = make_supplier_scorecard()
 		for d in my_doc.criteria:
 			d.weight = 0
 		self.assertRaises(frappe.ValidationError, my_doc.insert)
+
+	def test_criteria_weights_allow_float_rounding(self):
+		doc = make_supplier_scorecard()
+		doc.criteria = []
+		for weight in (10.1, 66.6, 23.3):
+			doc.append("criteria", {"criteria_name": "Delivery", "weight": weight})
+		doc.validate_criteria_weights()
 
 	def test_overlapping_standings_are_rejected(self):
 		doc = make_supplier_scorecard()
@@ -72,9 +90,44 @@ class TestSupplierScorecard(ERPNextTestSuite):
 
 	def test_scorecard_period_end_dates(self):
 		start = getdate("2024-01-01")
-		self.assertEqual(get_scorecard_date("Per Week", start), getdate("2024-01-08"))
+		self.assertEqual(get_scorecard_date("Per Week", start), getdate("2024-01-07"))
 		self.assertEqual(get_scorecard_date("Per Month", start), getdate("2024-01-31"))
 		self.assertEqual(get_scorecard_date("Per Year", start), getdate("2024-12-31"))
+
+	def test_period_ending_today_is_not_created(self):
+		supplier = create_test_supplier("_Test Supplier SC Ends Today")
+		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -6))
+		doc = make_supplier_scorecard()
+		doc.supplier = supplier
+		doc.period = "Per Week"
+		doc.insert()
+
+		self.assertFalse(frappe.db.exists("Supplier Scorecard Period", {"scorecard": doc.name}))
+
+	def test_weekly_periods_continue_after_an_existing_period(self):
+		supplier = create_test_supplier("_Test Supplier SC Legacy Week")
+		doc = make_supplier_scorecard()
+		doc.supplier = supplier
+		doc.period = "Per Week"
+		doc.insert()
+		start = getdate(add_days(nowdate(), -30))
+		legacy_period = make_scorecard_period(doc.name, None)
+		legacy_period.start_date = start
+		legacy_period.end_date = add_days(start, 7)
+		legacy_period.insert()
+		legacy_period.submit()
+		frappe.db.set_value("Supplier", supplier, "creation", start)
+
+		make_all_scorecards(doc.name)
+
+		periods = frappe.get_all(
+			"Supplier Scorecard Period",
+			filters={"scorecard": doc.name, "docstatus": 1},
+			fields=["start_date", "end_date"],
+			order_by="start_date",
+		)
+		for previous, current in pairwise(periods):
+			self.assertEqual(current.start_date, add_days(previous.end_date, 1))
 
 	def test_make_all_scorecards_is_idempotent(self):
 		supplier = create_test_supplier("_Test Supplier SC Idempotent")
@@ -89,6 +142,94 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		created = frappe.db.count("Supplier Scorecard Period", {"scorecard": doc.name, "docstatus": 1})
 		self.assertGreater(created, 0)
 		self.assertEqual(make_all_scorecards(doc.name), 0)
+
+	def test_make_all_scorecards_refreshes_standing(self):
+		supplier = create_test_supplier("_Test Supplier SC Make All")
+		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+		doc = make_supplier_scorecard()
+		doc.supplier = supplier
+		doc.insert()
+		self.assertEqual(doc.status, "Excellent")
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		frappe.db.set_value("Supplier Scorecard Criteria", "Delivery", "formula", "10")
+		self.assertGreater(make_all_scorecards(doc.name), 0)
+		self.assertEqual(frappe.db.get_value("Supplier Scorecard", doc.name, "status"), "Very Poor")
+
+	def test_refresh_continues_after_a_failing_scorecard(self):
+		scorecards = []
+		for supplier_name in ("_Test Supplier SC Refresh Broken", "_Test Supplier SC Refresh Healthy"):
+			supplier = create_test_supplier(supplier_name)
+			frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+			doc = make_supplier_scorecard()
+			doc.supplier = supplier
+			doc.insert()
+			scorecards.append(doc.name)
+		broken, healthy = scorecards
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": ["in", scorecards]})
+		frappe.db.set_value("Supplier Scorecard", broken, "weighting_function", "{total_score} +")
+		refresh_scorecards()
+
+		self.assertTrue(frappe.db.exists("Supplier Scorecard Period", {"scorecard": healthy}))
+		self.assertTrue(
+			frappe.db.exists(
+				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}
+			)
+		)
+
+	def test_deleting_scorecard_clears_supplier_flags(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Delete")
+		self.assertEqual(frappe.db.get_value("Supplier", doc.supplier, "prevent_pos"), 1)
+
+		frappe.db.delete("Supplier Scorecard Period", {"scorecard": doc.name})
+		doc.delete()
+
+		flags = frappe.db.get_value(
+			"Supplier", doc.supplier, ["prevent_pos", "prevent_rfqs", "warn_pos", "warn_rfqs"]
+		)
+		self.assertFalse(any(flags))
+
+	def test_renamed_supplier_keeps_scorecard_block(self):
+		doc = make_very_poor_scorecard("_Test Supplier SC Rename")
+		renamed = frappe.rename_doc("Supplier", doc.supplier, "_Test Supplier SC Renamed")
+
+		po = create_purchase_order(supplier=renamed, do_not_save=True)
+		self.assertRaises(frappe.ValidationError, po.validate_supplier)
+
+	def test_standing_change_notifies_supplier_and_employee(self):
+		frappe.get_doc(
+			{
+				"doctype": "Email Account",
+				"enable_outgoing": 1,
+				"default_outgoing": 1,
+				"awaiting_password": 1,
+				"auth_method": "Basic",
+				"password": "test",
+				"smtp_server": "localhost",
+				"email_id": "scorecard.outgoing@example.com",
+			}
+		).insert()
+		employee = make_employee("scorecard.employee@example.com", company="_Test Company")
+		supplier = create_test_supplier("_Test Supplier SC Notify")
+		frappe.db.set_value(
+			"Supplier",
+			supplier,
+			{"creation": add_days(nowdate(), -75), "email_id": "scorecard.supplier@example.com"},
+		)
+		doc = make_supplier_scorecard()
+		frappe.db.set_value("Supplier Scorecard Criteria", "Delivery", "formula", "10")
+		doc.supplier = supplier
+		doc.standings[0].update({"notify_supplier": 1, "notify_employee": 1, "employee_link": employee})
+		doc.insert()
+		doc.save()
+
+		self.assertEqual(doc.employee, employee)
+		queues = frappe.get_all("Email Queue", {"reference_name": doc.name}, pluck="name")
+		recipients = frappe.get_all("Email Queue Recipient", {"parent": ["in", queues]}, pluck="recipient")
+		self.assertCountEqual(
+			recipients, ["scorecard.employee@example.com", "scorecard.supplier@example.com"]
+		)
 
 	def test_dashboard_endpoint_returns_connection_count_and_heatmap(self):
 		supplier = create_test_supplier("_Test Supplier SC Dashboard")
@@ -126,6 +267,16 @@ def make_supplier_scorecard():
 			my_criteria = frappe.get_doc(d)
 			my_criteria.insert()
 	return my_doc
+
+
+def make_very_poor_scorecard(supplier_name):
+	supplier = create_test_supplier(supplier_name)
+	frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+	doc = make_supplier_scorecard()
+	frappe.db.set_value("Supplier Scorecard Criteria", "Delivery", "formula", "10")
+	doc.supplier = supplier
+	doc.insert()
+	return doc
 
 
 def create_test_supplier(supplier_name):

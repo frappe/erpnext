@@ -176,11 +176,8 @@ class Workstation(Document):
 				.where(
 					(wh.parent == self.name)
 					& (wh.name != d.name)
-					& (
-						wh.start_time.between(d.start_time, d.end_time)
-						| wh.end_time.between(d.start_time, d.end_time)
-						| ((wh.start_time <= d.start_time) & (wh.end_time >= d.start_time))
-					)
+					& (wh.start_time < d.end_time)
+					& (wh.end_time > d.start_time)
 				)
 				.run(pluck=True)
 			)

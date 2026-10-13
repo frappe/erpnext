@@ -10,6 +10,10 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
 
 import erpnext
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	get_invoiced_qty_against_po_items,
+)
+from erpnext.utilities.query import get_match_conditions_qb
 
 
 def execute(filters=None):
@@ -28,6 +32,7 @@ def execute(filters=None):
 		return [], [], None, []
 
 	update_received_amount(data)
+	update_billed_qty(data)
 
 	data, chart_data = prepare_data(data, filters)
 
@@ -52,14 +57,11 @@ def validate_filters(filters):
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
-	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
 		frappe.qb.from_(po)
 		.inner_join(po_item)
 		.on(po_item.parent == po.name)
-		.left_join(pi_item)
-		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -72,7 +74,6 @@ def get_data(filters):
 			po_item.qty,
 			po_item.received_qty,
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
-			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
 			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
@@ -84,9 +85,6 @@ def get_data(filters):
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
 		.where(po.company == filters.get("company"))
-		# the selected po.* columns need the Purchase Order PK grouped on postgres; po.name is 1:1
-		# with the grouped po_item.name, so groups are unchanged.
-		.groupby(po_item.name, po.name)
 		.orderby(po.transaction_date)
 	)
 
@@ -102,6 +100,9 @@ def get_data(filters):
 	if filters.get("project"):
 		query = query.where(po_item.project == filters.get("project"))
 
+	for condition in get_match_conditions_qb("Purchase Order", table=po):
+		query = query.where(condition)
+
 	data = query.run(as_dict=True)
 
 	return data
@@ -112,6 +113,13 @@ def update_received_amount(data):
 
 	for row in data:
 		row.received_qty_amount = flt(pr_data.get(row.name))
+
+
+def update_billed_qty(data):
+	billed_qty = get_invoiced_qty_against_po_items([row.name for row in data])
+
+	for row in data:
+		row.billed_qty = flt(billed_qty.get(row.name))
 
 
 def get_received_amount_data(data):
@@ -160,10 +168,12 @@ def prepare_data(data, filters):
 	completed, pending = 0, 0
 
 	for row in data:
+		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		if row["status"] == "Closed":
+			row.update(pending_qty=0, qty_to_bill=0, pending_amount=0)
+
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
-
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
 
 	chart_data = prepare_chart_data(pending, completed)
 

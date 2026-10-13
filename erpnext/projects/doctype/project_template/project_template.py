@@ -27,7 +27,34 @@ class ProjectTemplate(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_template_tasks()
 		self.validate_dependencies()
+
+	def validate_template_tasks(self):
+		tasks = {
+			task.name: task
+			for task in frappe.get_all(
+				"Task",
+				filters={"name": ["in", [row.task for row in self.tasks]]},
+				fields=["name", "is_template", "parent_task", "start", "duration"],
+			)
+		}
+		for row in self.tasks:
+			task = tasks[row.task]
+			if not task.is_template:
+				frappe.throw(
+					_("Row {0}: Task {1} is not a Template Task").format(
+						row.idx, get_link_to_form("Task", task.name)
+					)
+				)
+
+			parent = tasks.get(task.parent_task)
+			if parent and task.start + task.duration > parent.start + parent.duration:
+				frappe.throw(
+					_("Row {0}: Task {1} ends after its parent task {2}").format(
+						row.idx, get_link_to_form("Task", task.name), get_link_to_form("Task", parent.name)
+					)
+				)
 
 	def validate_dependencies(self):
 		for task in self.tasks:

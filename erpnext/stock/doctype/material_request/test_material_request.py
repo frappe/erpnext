@@ -425,7 +425,8 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.update_status("Stopped")
 		self.assertRaises(frappe.InvalidStatusError, po.submit)
 		po.db_set("docstatus", 1)
-		self.assertRaises(frappe.InvalidStatusError, po.cancel)
+		po.cancel()
+		self.assertEqual(po.docstatus, 2)
 
 		# resubmit and check for per complete
 		mr.load_from_db()
@@ -1107,6 +1108,48 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 
 		self.assertRaises(OverAllowanceError, mr.submit)
+
+	def test_subcontracting_requested_qty_from_sales_order(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		for purpose in ("Purchase", "Subcontracting"):
+			for uom, conversion_factor in ((item.stock_uom, 1), ("Box", 12)):
+				with self.subTest(purpose=purpose, uom=uom):
+					so = make_sales_order(item_code=item.name, qty=10, uom=uom)
+					mr = make_material_request(so.name)
+					mr.material_request_type = purpose
+					mr.items[0].qty = 4
+					mr.insert()
+					mr.submit()
+
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 4 * conversion_factor)
+					remaining_mr = make_material_request(so.name)
+					self.assertEqual(remaining_mr.items[0].qty, 6)
+					self.assertEqual(remaining_mr.items[0].stock_qty, 6 * conversion_factor)
+					remaining_mr.material_request_type = purpose
+					remaining_mr.insert()
+					remaining_mr.submit()
+
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 10 * conversion_factor)
+					with self.assertRaisesRegex(
+						frappe.ValidationError, "Material Request already created for the ordered quantity"
+					):
+						make_material_request(so.name)
+
+					remaining_mr.cancel()
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 4 * conversion_factor)
+					self.assertEqual(make_material_request(so.name).items[0].qty, 6)
+
+					mr.cancel()
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 0)
+					self.assertEqual(make_material_request(so.name).items[0].qty, 10)
 
 	def test_get_remaining_qty_from_sales_order(self):
 		from frappe.utils import add_to_date, today

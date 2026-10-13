@@ -1,4 +1,7 @@
+import datetime
+
 import frappe
+from frappe.utils import getdate
 from pypika.terms import ValueWrapper
 
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
@@ -63,9 +66,7 @@ def execute():
 
 def get_accounts_closing_date():
 	"""Get the date when accounts were frozen/closed"""
-	accounts_frozen_till = frappe.db.get_single_value(
-		"Accounts Settings", "acc_frozen_upto"
-	)  # always returns datetime.date
+	accounts_frozen_till = get_accounts_frozen_till()
 
 	period_closing_date = frappe.db.get_value(
 		"Period Closing Voucher", {"docstatus": 1}, "period_end_date", order_by="period_end_date desc"
@@ -78,3 +79,9 @@ def get_accounts_closing_date():
 		can_edit_accounts_after = accounts_frozen_till or period_closing_date
 
 	return can_edit_accounts_after
+
+
+def get_accounts_frozen_till() -> datetime.date | None:
+	# read from tabSingles: the field is no longer in the Accounts Settings meta after schema sync (v16)
+	value = frappe.db.get_singles_dict("Accounts Settings").get("acc_frozen_upto")
+	return getdate(value) if value else None

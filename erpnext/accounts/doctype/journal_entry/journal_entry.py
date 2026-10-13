@@ -158,6 +158,7 @@ class JournalEntry(AccountsController):
 
 		self.validate_account_company()
 		self.validate_party()
+		self.ensure_supplier_is_not_blocked()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()

@@ -36,6 +36,13 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		rfq.save()
 		self.assertEqual(rfq.items[0].qty, 1)
 
+	def test_rfq_zero_qty_cannot_be_forced_by_the_client(self):
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+		rfq.has_unit_price_items = 1
+
+		with self.assertRaises(InvalidQtyError):
+			rfq.save()
+
 	def test_rfq_zero_qty(self):
 		"""
 		Test if RFQ with zero qty (Unit Price Item) is conditionally allowed.
@@ -200,6 +207,32 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_portal_supplier_quotation_is_built_from_the_rfq_rows(self):
+		make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier 2", "supplier_name": "_Test Supplier 2"}]
+		)
+		rfq = make_request_for_quotation()
+
+		rfq.supplier = "_Test Supplier 2"
+		self.assertRaises(frappe.PermissionError, create_supplier_quotation, rfq)
+
+		rfq.supplier = rfq.suppliers[0].supplier
+		rfq.items[0].item_code = "_Test Item 2"
+		rfq.items[0].conversion_factor = 7
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+
+		self.assertEqual(
+			(supplier_quotation.items[0].item_code, supplier_quotation.items[0].conversion_factor),
+			("_Test Item", 1),
+		)
+
+	def test_missing_item_name_is_filled_from_the_item(self):
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].item_name = None
+		rfq.insert()
+
+		self.assertEqual(rfq.items[0].item_name, frappe.db.get_value("Item", "_Test Item", "item_name"))
+
 	def test_make_duplicate_supplier_quotation_from_portal(self):
 		rfq = make_request_for_quotation()
 		rfq.supplier = rfq.suppliers[0].supplier
@@ -284,6 +317,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 
 		supplier_doc.reload()
 		self.assertTrue(supplier_doc.portal_users[0].user)
+		self.assertIn("Supplier", frappe.get_roles(supplier_doc.portal_users[0].user))
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1})
 	def test_supplier_quotation_from_zero_qty_rfq(self):
