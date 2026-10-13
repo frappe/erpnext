@@ -19,6 +19,43 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		mps.save()
 		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 30)))
 
+	def test_actual_demand_is_pending_qty_of_selected_items(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			create_dn_against_so,
+			make_sales_order,
+		)
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item("_Test MPS Demand Item", {"is_stock_item": 1}).name
+		other_item = make_item("_Test MPS Other Item", {"is_stock_item": 1}).name
+
+		delivered = make_sales_order(item_code=item, qty=10)
+		create_dn_against_so(delivered.name, delivered_qty=10)
+		closed = make_sales_order(item_code=item, qty=4)
+		closed.update_status("Closed")
+		partial = make_sales_order(item_code=item, qty=5)
+		create_dn_against_so(partial.name, delivered_qty=2)
+		unselected = make_sales_order(item_code=other_item, qty=7)
+
+		request = make_material_request(
+			item_code=item,
+			qty=6,
+			uom="Nos",
+			material_request_type="Manufacture",
+			schedule_date=add_days(today(), 5),
+		)
+		request.items[0].db_set("ordered_qty", 6)
+
+		mps = make_mps(
+			to_date=add_days(today(), 30),
+			select_items=[item],
+			sales_orders=[delivered.name, closed.name, partial.name, unselected.name],
+			material_requests=[request.name],
+		)
+		mps.get_actual_demand()
+
+		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 3)])
+
 	def test_cumulative_lead_time_is_not_int_truncated(self):
 		"""cumulative_lead_time = manufacturing_time_in_mins / 1440 + purchase_time + buffer_time.
 		manufacturing_time_in_mins is an Int column; integer/integer division truncates on
