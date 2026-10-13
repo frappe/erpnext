@@ -123,10 +123,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		)
 
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		for row in mr.items:
+			frappe.db.set_value("Item", row.item_code, "is_sub_contracted_item", 1)
+
 		mr.material_request_type = "Subcontracting"
 		mr.submit()
-
-		frappe.db.set_value("Item", mr.items[0].item_code, "is_sub_contracted_item", 1)
 
 		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
 		for item in raw_materials:
@@ -181,6 +182,23 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(remaining_po.items[0].stock_qty, 54)
 		self.assertEqual(remaining_po.items[0].uom, "Test UOM")
 		self.assertEqual(remaining_po.items[0].conversion_factor, 3)
+
+	def test_subcontracting_material_request_item_validation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		service_item = make_item(properties={"is_stock_item": 0, "is_sub_contracted_item": 1})
+		stock_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 0})
+
+		for item in (service_item, stock_item):
+			mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+			mr.material_request_type = "Subcontracting"
+			mr.items = mr.items[:1]
+			mr.items[0].item_code = item.name
+			self.assertRaises(frappe.ValidationError, mr.insert)
+
+		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
+		mr.insert()
+		self.assertEqual(mr.items[0].item_code, stock_item.name)
 
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
@@ -1114,7 +1132,9 @@ class TestMaterialRequest(ERPNextTestSuite):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		item = make_item(
+			properties={"is_sub_contracted_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		)
 		for purpose in ("Purchase", "Subcontracting"):
 			for uom, conversion_factor in ((item.stock_uom, 1), ("Box", 12)):
 				with self.subTest(purpose=purpose, uom=uom):
