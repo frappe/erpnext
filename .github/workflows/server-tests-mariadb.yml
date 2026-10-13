@@ -83,7 +83,7 @@ jobs:
           fi
 
       - name: Add to Hosts
-        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+        run: echo "127.0.0.1 test_site" | tee -a /etc/hosts
 
       # MariaDB runs in-container on a datadir OUTSIDE the bench, because install.sh's next step
       # does `rm -rf ~/frappe-bench`. After the reinstall, the datadir is moved into the bench so
@@ -160,7 +160,7 @@ jobs:
 
     steps:
       - name: Add to Hosts
-        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+        run: echo "127.0.0.1 test_site" | tee -a /etc/hosts
 
       # Read the bench straight from the node-local hostPath the setup job staged it on — no
       # GitHub download. -p preserves the ci (uid 1001) ownership so bench runs as ci cleanly.
