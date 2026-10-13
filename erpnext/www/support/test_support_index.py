@@ -73,13 +73,11 @@ class TestSupportIndex(ERPNextTestSuite):
 		self.assertIn(route_hi, by_route, "High-viewed route missing from results")
 		self.assertIn(route_lo, by_route, "Low-viewed route missing from results")
 
-		# The aliased count reflects the real number of seeded Web Page View rows. Reading it
-		# under a driver-specific key such as "COUNT(*)" would raise KeyError on postgres.
+		# The aliased count reflects the real number of seeded Web Page View rows.
 		self.assertEqual(by_route[route_hi]["count"], 3)
 		self.assertEqual(by_route[route_lo]["count"], 1)
 
-		# The display fields come from the article's own row, including the body, which is read
-		# only for the articles that survive the ranking.
+		# The display fields come from the article's own row.
 		self.assertEqual(by_route[route_hi].name, name_hi)
 		self.assertEqual(by_route[route_hi].title, "High Views Article")
 		self.assertEqual(by_route[route_hi].category, category)
@@ -95,13 +93,7 @@ class TestSupportIndex(ERPNextTestSuite):
 		)
 
 	def test_mixed_case_route_is_matched_and_counted(self):
-		"""A route stored with capitals must still find the views recorded against it.
-
-		The two halves of the lookup are case-sensitive in opposite directions, and this covers
-		both: the `in` filter is sent the route as stored, so a case-sensitive backend matches it
-		at all, and the returned path is folded before lookup, because MariaDB groups
-		case-insensitively and answers under an arbitrary spelling from the group.
-		"""
+		"""A route stored with capitals must still find the views recorded against it."""
 		category = self.make_help_category()
 		route = "Support-Mixed-" + random_string(10)
 		self.assertNotEqual(route, route.lower(), "route must contain capitals to be a regression")
@@ -118,10 +110,7 @@ class TestSupportIndex(ERPNextTestSuite):
 	def test_case_variant_paths_do_not_break_the_page(self):
 		"""Views recorded at a differently-cased spelling of a route must not raise.
 
-		Whether they also count towards the article is the backend collation's call -- MariaDB
-		folds them into the route's group, postgres and SQLite do not -- so this asserts the
-		invariant that holds on all three: the article is returned, and no spelling of its path
-		can cost it the views recorded at the route itself.
+		Whether they also count depends on the backend's collation, so only assert the lower bound.
 		"""
 		category = self.make_help_category()
 		route = "support-variant-" + random_string(10)
@@ -166,9 +155,7 @@ class TestSupportIndex(ERPNextTestSuite):
 		"""At most FAVORITE_ARTICLE_LIMIT articles come back, and they are the most viewed."""
 		category = self.make_help_category()
 
-		# Eight candidates with distinct, descending view counts, so the two that fall outside
-		# the limit are unambiguous. Articles with no views never appear, so nothing else in the
-		# site's data can compete for the six slots.
+		# Eight candidates with distinct, descending view counts
 		expected = []
 		for index in range(8):
 			route = f"support-limit-{index}-" + random_string(10)
