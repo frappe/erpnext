@@ -173,6 +173,12 @@ class MaintenanceSchedule(TransactionBase):
 						getdate(start_date_copy), sales_person, start_date
 					)
 					if schedule_date > getdate(end_date):
+						if schedule_date != getdate(start_date_copy):
+							throw(
+								_("Every day from {0} to {1} is a holiday for Sales Person {2}.").format(
+									formatdate(start_date), formatdate(end_date), sales_person
+								)
+							)
 						schedule_date = getdate(end_date)
 					schedule_list.append(schedule_date)
 
