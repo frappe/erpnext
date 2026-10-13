@@ -38,7 +38,7 @@
    "link_fieldname": "template"
   }
  ],
- "modified": "2020-10-27 16:18:53.579688",
+ "modified": "2026-10-05 17:08:31.742391",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Template",
@@ -55,6 +55,10 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Quality Manager"
   }
  ],
  "quick_entry": 1,
