@@ -23,6 +23,7 @@ def execute(filters=None):
 		return [], [], None, []
 
 	update_received_amount(data)
+	update_billed_qty(data)
 
 	data, chart_data = prepare_data(data, filters)
 
@@ -41,14 +42,11 @@ def validate_filters(filters):
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
-	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
 		frappe.qb.from_(po)
 		.inner_join(po_item)
 		.on(po_item.parent == po.name)
-		.left_join(pi_item)
-		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -60,7 +58,6 @@ def get_data(filters):
 			po_item.qty,
 			po_item.received_qty,
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
-			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
 			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
@@ -71,7 +68,6 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
-		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
 
@@ -100,6 +96,33 @@ def update_received_amount(data):
 
 	for row in data:
 		row.received_qty_amount = flt(pr_data.get(row.name))
+
+
+def update_billed_qty(data):
+	billed_qty = get_billed_qty_data(data)
+
+	for row in data:
+		row.billed_qty = flt(billed_qty.get(row.name))
+
+
+def get_billed_qty_data(data):
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(pi_item)
+		.inner_join(pi)
+		.on(pi_item.parent == pi.name)
+		.select(pi_item.po_detail, Sum(pi_item.qty))
+		.where(
+			(pi_item.po_detail.isin([row.name for row in data]))
+			& (pi.docstatus == 1)
+			& ((pi.is_return == 0) | (pi.update_billed_amount_in_purchase_order == 1))
+		)
+		.groupby(pi_item.po_detail)
+	)
+
+	return frappe._dict(query.run())
 
 
 def get_received_amount_data(data):
@@ -140,12 +163,13 @@ def prepare_data(data, filters):
 		purchase_order_map = {}
 
 	for row in data:
+		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		if row["status"] == "Closed":
+			row.update(pending_qty=0, qty_to_bill=0, pending_amount=0)
+
 		# sum data for chart
 		completed += row[completed_field]
 		pending += row[pending_field]
-
-		# prepare data for report view
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
 
 		if filters.get("group_by_po"):
 			po_name = row["purchase_order"]
