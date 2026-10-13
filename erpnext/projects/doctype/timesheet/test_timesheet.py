@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.projects.doctype.timesheet.timesheet import (
 	OverlapError,
 	get_activity_cost,
+	get_projectwise_timesheet_data,
 	make_sales_invoice,
 )
 from erpnext.setup.doctype.employee.test_employee import make_employee
@@ -33,6 +34,16 @@ from erpnext.tests.permission_test_utils import (
 class TestTimesheet(unittest.TestCase):
 	def setUp(self):
 		frappe.db.delete("Timesheet")
+
+	def test_time_log_with_empty_project_and_sales_invoice_is_unbilled(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+		time_log = timesheet.time_logs[0].name
+		frappe.db.set_value("Timesheet Detail", time_log, {"project": "", "sales_invoice": ""})
+
+		self.assertEqual(
+			[log.name for log in get_projectwise_timesheet_data(parent=timesheet.name)], [time_log]
+		)
 
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
@@ -79,6 +90,14 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(item.item_code, "_Test Item")
 		self.assertEqual(item.qty, 2.00)
 		self.assertEqual(item.rate, 50.00)
+
+	def test_sales_invoice_from_timesheet_needs_timesheet_read(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+		sales_user = make_fenced_user("timesheet-invoice-sales@example.com", ["Sales User"])
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, timesheet.name)
 
 	@change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
 	def test_timesheet_billing_based_on_project(self):

@@ -187,26 +187,34 @@ function add_to_pos_transaction(d, frm) {
 }
 
 function refresh_payments(d, frm, is_new) {
+	const change_payment = get_change_payment_row(d.payments, d.account_for_change_amount);
 	d.payments.forEach((p) => {
 		const payment = frm.doc.payment_reconciliation.find(
 			(pay) => pay.mode_of_payment === p.mode_of_payment
 		);
-		if (p.account == d.account_for_change_amount) {
-			p.amount -= flt(d.change_amount);
-		}
+		const amount = flt(p.amount) - (p === change_payment ? flt(d.change_amount) : 0);
 		if (payment) {
-			payment.expected_amount += flt(p.amount);
+			payment.expected_amount += amount;
 			if (is_new) payment.closing_amount = payment.expected_amount;
 			payment.difference = payment.closing_amount - payment.expected_amount;
 		} else {
 			frm.add_child("payment_reconciliation", {
 				mode_of_payment: p.mode_of_payment,
 				opening_amount: 0,
-				expected_amount: p.amount,
-				closing_amount: p.amount,
+				expected_amount: amount,
+				closing_amount: amount,
 			});
 		}
 	});
+}
+
+function get_change_payment_row(rows, change_account) {
+	const change_account_rows = rows.filter((row) => row.account === change_account);
+	return (
+		change_account_rows.find((row) => row.type === "Cash") ||
+		change_account_rows[0] ||
+		rows.find((row) => row.type === "Cash")
+	);
 }
 
 function refresh_taxes(d, frm) {
