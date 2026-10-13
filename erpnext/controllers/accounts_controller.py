@@ -113,6 +113,16 @@ force_item_fields = (
 )
 
 
+COUNTERPART_REFERENCE = {
+	"Sales Invoice": ("inter_company_invoice_reference", "Purchase Invoice"),
+	"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
+	"Sales Order": ("inter_company_order_reference", "Purchase Order"),
+	"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+	"Delivery Note": ("inter_company_reference", "Purchase Receipt"),
+	"Purchase Receipt": ("inter_company_reference", "Delivery Note"),
+}
+
+
 class AccountsController(TransactionBase):
 	def get_print_settings(self):
 		print_setting_fields = []
@@ -295,6 +305,7 @@ class AccountsController(TransactionBase):
 				self.validate_deferred_start_and_end_date()
 
 		self.validate_inter_company_reference()
+		self.validate_inter_company_currency()
 		# validate inter  company transaction rate
 		self.validate_internal_transaction()
 
@@ -995,6 +1006,23 @@ class AccountsController(TransactionBase):
 				if not row.get(field):
 					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
 					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
+
+	def validate_inter_company_currency(self):
+		if self.doctype not in COUNTERPART_REFERENCE:
+			return
+
+		reference_field, counterpart_doctype = COUNTERPART_REFERENCE[self.doctype]
+		counterpart = self.get(reference_field)
+		if not counterpart:
+			return
+
+		currency = frappe.db.get_value(counterpart_doctype, counterpart, "currency")
+		if currency and self.currency != currency:
+			frappe.throw(
+				_("Currency must be {0} to match {1} {2}").format(
+					bold(currency), counterpart_doctype, bold(counterpart)
+				)
+			)
 
 	def validate_internal_transaction(self):
 		if not cint(frappe.get_single_value("Accounts Settings", "maintain_same_internal_transaction_rate")):
