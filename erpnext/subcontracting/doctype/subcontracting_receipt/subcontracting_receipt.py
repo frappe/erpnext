@@ -574,7 +574,9 @@ class SubcontractingReceipt(SubcontractingController):
 		original_rows = {row.name: row for row in original.items if row.bom}
 		basis = "amount" if original.distribute_additional_costs_based_on == "Amount" else "qty"
 		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
-		total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in original_rows.values())
+		total_cost = sum(
+			self.get_qty_for_costing(row) * flt(row.additional_cost_per_qty) for row in original_rows.values()
+		)
 		returned_basis = returned_cost = 0.0
 		for row in self.items:
 			original_row = original_rows.get(row.subcontracting_receipt_item)
@@ -583,7 +585,11 @@ class SubcontractingReceipt(SubcontractingController):
 
 			row.additional_cost_per_qty = 0.0
 			if flt(original_row.qty) and row.warehouse and row.warehouse != original_row.rejected_warehouse:
-				row.additional_cost_per_qty = flt(original_row.additional_cost_per_qty)
+				row.additional_cost_per_qty = (
+					flt(original_row.additional_cost_per_qty)
+					* self.get_qty_for_costing(original_row)
+					/ flt(original_row.qty)
+				)
 				returned_cost += flt(row.qty) * row.additional_cost_per_qty
 				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
 
@@ -714,16 +720,17 @@ class SubcontractingReceipt(SubcontractingController):
 
 			if item.bom:
 				item.received_qty = self.get_qty_for_costing(item)
-				costed_qty = (
-					flt(item.qty) * received_qty_ratios[item.name]
-					if item.name in received_qty_ratios
-					else flt(item.received_qty)
-				)
-				item.amount = (
-					costed_qty
-					* flt(item.rate)
-					* (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
-				)
+				if item.name in received_qty_ratios:
+					additional_cost = flt(item.qty) * flt(item.additional_cost_per_qty)
+					amount = (
+						flt(item.qty)
+						* received_qty_ratios[item.name]
+						* (flt(item.rate) - flt(item.additional_cost_per_qty))
+						+ additional_cost
+					)
+				else:
+					amount = flt(item.received_qty) * flt(item.rate)
+				item.amount = amount * (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
 				item.rate = item.amount / (item.qty or item.rejected_qty)
 			else:
 				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
