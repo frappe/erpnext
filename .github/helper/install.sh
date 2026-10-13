@@ -286,6 +286,8 @@ if [ "$DB" == "mariadb" ];then
     if [ "$db_host" != "127.0.0.1" ]; then
         sed -i "s/\"db_host\": \"127.0.0.1\"/\"db_host\": \"${db_host}\"/" ~/frappe-bench/sites/test_site/site_config.json
     fi
+else
+    cp -r "${GITHUB_WORKSPACE}/.github/helper/site_config_postgres.json" ~/frappe-bench/sites/test_site/site_config.json
 fi
 
 
@@ -319,6 +321,20 @@ if [ "$DB" == "mariadb" ];then
     mariadb --host "$db_host" --port 3306 -u root -proot -e "GRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'${db_user_host}'"
 
     mariadb --host "$db_host" --port 3306 -u root -proot -e "FLUSH PRIVILEGES"
+fi
+
+if [ "$DB" == "postgres" ];then
+    echo "travis" | psql -h 127.0.0.1 -p 5432 -c "CREATE DATABASE test_frappe" -U postgres;
+    echo "travis" | psql -h 127.0.0.1 -p 5432 -c "CREATE USER test_frappe WITH PASSWORD 'test_frappe'" -U postgres;
+
+    # Disposable CI DB: durability off for speed (postgres fsyncs every commit by default, which
+    # dominates a commit-heavy suite). All reloadable, no restart. The postgres workflow runs a
+    # service-container DB and never calls start-db.sh, so the flags must be applied here.
+    echo "travis" | psql -h 127.0.0.1 -p 5432 -U postgres \
+        -c "ALTER SYSTEM SET synchronous_commit = 'off'" \
+        -c "ALTER SYSTEM SET fsync = 'off'" \
+        -c "ALTER SYSTEM SET full_page_writes = 'off'" \
+        -c "SELECT pg_reload_conf()";
 fi
 
 cd ~/frappe-bench || exit

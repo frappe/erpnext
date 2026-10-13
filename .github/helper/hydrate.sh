@@ -16,7 +16,7 @@ db_host="${DB_HOST:-127.0.0.1}"
 # install.sh. The workflow untar'd as root with -p, so the files are already owned by ci.
 if [ "$(id -u)" = "0" ] && [ "${SKIP_SYSTEM_SETUP:-0}" = "1" ] && [ "$ci_user" != "root" ]; then
     exec su -m "$ci_user" -s /bin/bash -c \
-        "ERPNEXT_CI_USER='$ci_user' DB_HOST='$db_host' bash '$0'"
+        "ERPNEXT_CI_USER='$ci_user' DB_HOST='$db_host' DB='${DB:-}' bash '$0'"
 fi
 
 cd ~/frappe-bench
@@ -26,7 +26,23 @@ cd ~/frappe-bench
 # existing files. This is what replaces the per-shard SQL replay.
 bash ~/frappe-bench/start-db.sh
 
-bench start >> ~/frappe-bench/bench_start.log 2>&1 &
+# Bring up redis (lightmode unit tests need cache + queue). In the self-hosted container we use the
+# full `bench start` (web/workers too, like install.sh). On the bare GitHub Postgres shard
+# `bench start` (honcho) lagged — it blocks the redis procs behind web/worker procs the lightmode
+# suite never uses, so the wait below burned its full timeout (~4m). There, start the two redis
+# instances directly: fast and deterministic.
+if [ "${DB:-mariadb}" = "postgres" ]; then
+    # Start redis directly as daemons — reliable and persists across steps. Do NOT route it through
+    # `bench start`: honcho tears the whole process group down if any one Procfile proc dies on the
+    # bare shard, which took redis with it (redis @ 13000 refused in Run Tests). Keeping redis
+    # independent is what makes it survive. The web server (for PDF tests) is NOT started here — a
+    # backgrounded server doesn't survive into the next step; it's started inside the Run Tests step.
+    for conf in redis_cache redis_queue; do
+        [ -f ~/frappe-bench/config/$conf.conf ] && redis-server ~/frappe-bench/config/$conf.conf --daemonize yes
+    done
+else
+    bench start >> ~/frappe-bench/bench_start.log 2>&1 &
+fi
 
 # Wait for redis, failing fast instead of silently burning minutes if it never comes up.
 cfg=~/frappe-bench/sites/common_site_config.json
