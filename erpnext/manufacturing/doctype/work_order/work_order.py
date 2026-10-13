@@ -669,11 +669,10 @@ class WorkOrder(Document):
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
 		self.create_job_card_from_wo()
+		self.update_subcontracting_inward_order_received_items()
 
 		if self.reserve_stock:
 			WorkOrderStockReservation(self).update_stock_reservation()
-
-		self.update_subcontracting_inward_order_received_items()
 
 	def on_cancel(self):
 		self.validate_cancel()
@@ -719,11 +718,7 @@ class WorkOrder(Document):
 					None,
 				)
 
-				if (
-					wo_item
-					and d.work_order_qty + wo_item.required_qty == d.bom_qty
-					and d.received_qty > d.bom_qty
-				):
+				if wo_item and d.work_order_qty == d.bom_qty and d.received_qty > d.bom_qty:
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
 
 	def update_subcontracting_inward_order_received_items(self):

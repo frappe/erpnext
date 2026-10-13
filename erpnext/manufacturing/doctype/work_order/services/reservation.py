@@ -90,7 +90,6 @@ class WorkOrderStockReservation:
 			self.doc.reserve_stock = 1
 
 	def update_stock_reservation(self):
-		self.doc.set_qty_change()
 		reserve_stock_for_work_order(self.doc)
 		self.doc.db_set("status", self.doc.get_status())
 
@@ -609,12 +608,13 @@ def _reserve_or_transfer(sre, doc, is_transfer):
 			doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
 		)
 	elif doc.subcontracting_inward_order and is_transfer:
+		doc.set_qty_change()
 		sre.transfer_reservation_entries_to(
 			doc.subcontracting_inward_order,
 			from_doctype="Subcontracting Inward Order",
 			to_doctype="Work Order",
 			against_fg_item=doc.subcontracting_inward_order_item,
-			qty_change=doc.qty_change,
+			qty_change=doc.get("qty_change"),
 		)
 	elif sre.make_stock_reservation_entries():
 		frappe.msgprint(_("Stock Reservation Entries Created"), alert=True)
