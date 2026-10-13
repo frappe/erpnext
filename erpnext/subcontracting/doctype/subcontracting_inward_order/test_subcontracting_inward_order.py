@@ -1266,6 +1266,45 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			len(reservations),
 		)
 
+	def test_cancelled_manufacture_of_closed_work_order_keeps_the_rest_consumed(self):
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			make_stock_reservation_entries,
+			unreserve_stock_for_work_order,
+		)
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher,
+		)
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		unreserve_stock_for_work_order(
+			wo,
+			frappe.get_all("Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}, pluck="name"),
+		)
+		wo.reload()
+		make_stock_reservation_entries(wo.as_dict())
+
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 2)).submit()
+		second = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 2))
+		second.submit()
+		close_work_order(wo.name, "Closed")
+		for sre in frappe.get_all(
+			"Stock Reservation Entry", {"from_voucher_no": second.name, "docstatus": 1}, pluck="name"
+		):
+			frappe.get_doc("Stock Reservation Entry", sre).cancel()
+		second.reload()
+		second.cancel()
+
+		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
+		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
+		self.assertEqual(reserved_qty[basic_rm.name], 3)
+
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
