@@ -203,6 +203,13 @@ class Timesheet(Document):
 			self.validate_overlap(data)
 			self.set_project(data)
 			self.validate_project(data)
+			self.validate_activity_type(data)
+
+	def validate_activity_type(self, data):
+		if data.activity_type and frappe.get_cached_value("Activity Type", data.activity_type, "disabled"):
+			frappe.throw(
+				_("Row {0}: Activity Type {1} is disabled").format(data.idx, frappe.bold(data.activity_type))
+			)
 
 	def set_to_time(self, data):
 		if not (data.from_time and data.hours):

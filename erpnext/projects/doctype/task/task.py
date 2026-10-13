@@ -88,6 +88,7 @@ class Task(NestedSet):
 		self.update_depends_on()
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
+		self.set_default_weight()
 		self.validate_parent_is_group()
 		self.validate_parent_not_completed()
 		self.validate_web_form_project_permission()
@@ -97,6 +98,10 @@ class Task(NestedSet):
 		self.validate_from_to_dates("act_start_date", "act_end_date")
 		self.validate_parent_expected_end_date()
 		self.validate_parent_project_dates()
+
+	def set_default_weight(self):
+		if self.type and self.task_weight is None:
+			self.task_weight = frappe.get_cached_value("Task Type", self.type, "weight")
 
 	def validate_parent_expected_end_date(self):
 		if not self.parent_task or not self.exp_end_date:

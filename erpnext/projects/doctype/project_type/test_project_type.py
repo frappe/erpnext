@@ -1,8 +1,16 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
+import frappe
+from frappe.tests.utils import FrappeTestCase
+
+from erpnext.selling.doctype.sales_order.sales_order import make_project
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-class TestProjectType(unittest.TestCase):
-	pass
+class TestProjectType(FrappeTestCase):
+	def test_project_from_sales_order_without_external_project_type(self):
+		frappe.db.delete("Project Type", "External")
+		project = make_project(make_sales_order().name)
+		project.insert()
+		self.assertFalse(project.project_type)

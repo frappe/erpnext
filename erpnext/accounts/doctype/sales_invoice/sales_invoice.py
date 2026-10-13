@@ -1170,6 +1170,7 @@ class SalesInvoice(SellingController):
 			not self.is_return
 			and not self.timesheets
 			and self.project
+			and self.has_value_changed("project")
 			and self.is_auto_fetch_timesheet_enabled()
 		):
 			self.add_timesheet_data()
