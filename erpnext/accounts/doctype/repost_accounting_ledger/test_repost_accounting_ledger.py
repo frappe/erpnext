@@ -8,7 +8,6 @@ import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, nowdate, today
-from frappe.utils.logging import get_log_db
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -420,7 +419,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.status, "Partially Reposted")
 		self.assertIn(SIMULATED_FAILURE, ral.error_log)
 		self.assertTrue(
-			get_log_db().exists("Error Log", {"reference_doctype": ral.doctype, "reference_name": ral.name})
+			frappe.db.exists("Error Log", {"reference_doctype": ral.doctype, "reference_name": ral.name})
 		)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
