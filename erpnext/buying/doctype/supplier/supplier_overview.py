@@ -1,12 +1,13 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Case, DocType
-from frappe.query_builder.functions import Coalesce, Count, Max, Min, Sum
+from frappe.query_builder.functions import Coalesce, Count, Max, Sum
 from frappe.utils import add_days, add_months, cint, date_diff, flt, getdate, today
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.selling.doctype.customer.customer_overview import (
 	PERIODS,
+	_unrestricted_read,
 	ageing,
 	pct_change,
 	permitted,
@@ -42,7 +43,7 @@ def get_supplier_overview(supplier: str, company: str, period: str = "Current Fi
 	for key, fn, args in (
 		("position", position, (supplier, company, from_date, to_date, accounts)),
 		("trend", trend, (supplier, company, from_date, to_date, accounts)),
-		("delivery", delivery, (supplier, company, from_date, as_of)),
+		("delivery", delivery, (supplier, company, from_date, min(to_date, as_of), as_of)),
 		("pipeline", pipeline, (supplier, company, as_of)),
 	):
 		try:
@@ -157,6 +158,12 @@ def trend(supplier, company, from_date, to_date, accounts):
 	signed = Case().when(pe.payment_type == "Pay", pe.base_paid_amount).else_(-pe.base_received_amount)
 	paid = monthly(
 		permitted(
+			"Purchase Invoice",
+			[*invoice_filters(supplier, company, from_date, to_date), ["is_paid", "=", 1]],
+			["posting_date as date", Sum(pi.base_paid_amount).as_("amount")],
+			group_by="posting_date",
+		)
+		+ permitted(
 			"Payment Entry",
 			{
 				"docstatus": 1,
@@ -199,7 +206,7 @@ def monthly(rows):
 	return totals
 
 
-def delivery(supplier, company, from_date, as_of):
+def delivery(supplier, company, from_date, to_date, as_of):
 	if not (
 		frappe.has_permission("Purchase Order", "read") and frappe.has_permission("Purchase Receipt", "read")
 	):
@@ -213,9 +220,16 @@ def delivery(supplier, company, from_date, as_of):
 			["company", "=", company],
 			["status", "!=", "Closed"],
 			["Purchase Order Item", "schedule_date", ">=", from_date],
-			["Purchase Order Item", "schedule_date", "<=", as_of],
+			["Purchase Order Item", "schedule_date", "<=", to_date],
 		],
-		["name", "items.name as line", "items.qty", "items.received_qty", "items.schedule_date"],
+		[
+			"name",
+			"items.name as line",
+			"items.qty",
+			"items.received_qty",
+			"items.schedule_date",
+			"items.closed",
+		],
 	)
 	received_on = receipt_dates(supplier, company, from_date)
 	counts = {"on_time": 0, "late": 0, "overdue": 0}
@@ -224,7 +238,7 @@ def delivery(supplier, company, from_date, as_of):
 		due = getdate(line.schedule_date)
 		if flt(line.received_qty) >= flt(line.qty):
 			outcome = "late" if received_on.get(line.line, due) > due else "on_time"
-		elif due < as_of:
+		elif due < as_of and not line.closed:
 			outcome = "overdue"
 		else:
 			continue
@@ -297,57 +311,61 @@ def open_quotations(supplier, company, as_of):
 
 def order_tiles(supplier, company, as_of):
 	po = DocType("Purchase Order")
-	unreceived = po.base_grand_total * (100 - po.per_received) / 100
+	open_orders = {
+		"docstatus": 1,
+		"supplier": supplier,
+		"company": company,
+		"status": ["not in", CLOSED_PO_STATUS],
+	}
 
-	def open_orders(condition, fields):
-		return permitted(
+	unreceived = {
+		row.name: flt(row.value)
+		for row in permitted(
 			"Purchase Order",
-			[
-				{
-					"docstatus": 1,
-					"supplier": supplier,
-					"company": company,
-					"status": ["not in", CLOSED_PO_STATUS],
-				},
-				condition,
-			],
-			fields,
-		)[0]
+			{**open_orders, "per_received": ["<", 100]},
+			["name", (po.base_grand_total * (100 - po.per_received) / 100).as_("value")],
+		)
+	}
+	late, upcoming = set(), []
+	oldest = None
+	for line in permitted(
+		"Purchase Order",
+		[
+			{**open_orders, "per_received": ["<", 100]},
+			["Purchase Order Item", "closed", "=", 0],
+		],
+		["name", "items.schedule_date as due", "items.qty", "items.received_qty"],
+	):
+		if flt(line.received_qty) >= flt(line.qty) or not line.due:
+			continue
+		due = getdate(line.due)
+		if due < as_of:
+			late.add(line.name)
+			oldest = min(oldest or due, due)
+		else:
+			upcoming.append(due)
 
-	receipt = open_orders(
-		{"per_received": ["<", 100]},
-		[
-			Coalesce(Sum(unreceived), 0).as_("value"),
-			Count(po.name).as_("count"),
-			Min(Case().when(po.schedule_date >= as_of, po.schedule_date)).as_("next_due"),
-		],
-	)
-	late = open_orders(
-		{"per_received": ["<", 100], "schedule_date": ["<", as_of]},
-		[
-			Coalesce(Sum(unreceived), 0).as_("value"),
-			Count(po.name).as_("count"),
-			Min(po.schedule_date).as_("oldest"),
-		],
-	)
-	billing = open_orders(
-		po.per_received > po.per_billed,
-		[
-			Coalesce(Sum(po.base_grand_total * (po.per_received - po.per_billed) / 100), 0).as_("value"),
-			Count(po.name).as_("count"),
-		],
+	billing = permitted(
+		"Purchase Order",
+		[open_orders, po.per_received > po.per_billed],
+		["name", (po.base_grand_total * (po.per_received - po.per_billed) / 100).as_("value")],
 	)
 	return {
 		"receipt": {
-			"value": flt(receipt.value),
-			"count": receipt.count,
-			"next_due": str(receipt.next_due) if receipt.next_due else None,
+			"value": sum(unreceived.values()),
+			"count": len(unreceived),
+			"next_due": str(min(upcoming)) if upcoming else None,
 		},
-		"billing": {"value": flt(billing.value), "count": billing.count},
+		"billing": {
+			"value": sum(flt(row.value) for row in billing),
+			"count": len(billing),
+			"orders": [row.name for row in billing],
+		},
 		"late": {
-			"value": flt(late.value),
-			"count": late.count,
-			"days_late": date_diff(as_of, late.oldest) if late.oldest else None,
+			"value": sum(unreceived.get(name, 0) for name in late),
+			"count": len(late),
+			"days_late": date_diff(as_of, oldest) if oldest else None,
+			"orders": sorted(late),
 		},
 	}
 
@@ -428,6 +446,8 @@ def payment_days(supplier, company, as_of, outstanding):
 
 
 def advances(supplier, company, as_of):
+	if not _unrestricted_read("Payment Ledger Entry"):
+		return None
 	return flt(
 		get_partywise_advanced_payment_amount(["Supplier"], as_of, company=company, party=supplier).get(
 			supplier
@@ -499,6 +519,7 @@ def get_supplier_companies(supplier: str):
 	for doctype, filters in (
 		("Purchase Invoice", {"supplier": supplier}),
 		("Purchase Order", {"supplier": supplier}),
+		("Purchase Receipt", {"supplier": supplier}),
 		("Supplier Quotation", {"supplier": supplier}),
 		("Payment Entry", {"party_type": "Supplier", "party": supplier}),
 		("GL Entry", {"party_type": "Supplier", "party": supplier, "is_cancelled": 0}),

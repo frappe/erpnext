@@ -96,6 +96,8 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 	}
 
 	advances_card(label, advances, unpaid_count) {
+		if (advances.value == null)
+			return { label, value: "—", caption: __("Not available with your permissions") };
 		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ledger() };
 		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
 		if (!unpaid_count) return { ...card, caption: __("Debit balance, no bills to apply it to") };
@@ -223,10 +225,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 					data: pl.billing,
 					caption: (d) => COUNT.orders(d.count) + " · " + __("received, not billed"),
 					empty: __("Nothing to bill"),
-					route: [
-						"Purchase Order",
-						{ ...open_orders, per_received: [">", 0], per_billed: ["<", 100] },
-					],
+					route: ["Purchase Order", { company, name: ["in", pl.billing?.orders || []] }],
 				},
 				{
 					label: __("Overdue Deliveries"),
@@ -236,14 +235,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 							.filter(Boolean)
 							.join(" · "),
 					empty: __("Nothing overdue"),
-					route: [
-						"Purchase Order",
-						{
-							...open_orders,
-							per_received: ["<", 100],
-							schedule_date: ["<", frappe.datetime.get_today()],
-						},
-					],
+					route: ["Purchase Order", { company, name: ["in", pl.late?.orders || []] }],
 				}
 			);
 		return specs;
