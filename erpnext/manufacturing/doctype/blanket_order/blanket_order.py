@@ -256,8 +256,9 @@ def validate_against_blanket_order(order_doc):
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						precision = item.precision("qty")
-						remaining_qty = item.qty - item.ordered_qty
-						allowed_qty = flt(remaining_qty + (remaining_qty * (allowance / 100)), precision)
+						allowed_qty = flt(
+							item.qty + (item.qty * allowance / 100) - item.ordered_qty, precision
+						)
 						if item.qty and allowed_qty < flt(item_data[item.item_code], precision):
 							frappe.throw(
 								_(
