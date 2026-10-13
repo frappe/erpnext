@@ -26,7 +26,7 @@
   }
  ],
  "links": [],
- "modified": "2026-09-16 12:00:00.000000",
+ "modified": "2026-10-05 17:03:50.245948",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
@@ -45,10 +45,14 @@
    "write": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Projects Manager",
-   "select": 1
+   "select": 1,
+   "write": 1
   },
   {
+   "read": 1,
    "role": "Projects User",
    "select": 1
   }
