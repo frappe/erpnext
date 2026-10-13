@@ -722,6 +722,24 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].delivered_qty, 1.5)
 		self.assertEqual(so.items[0].returned_qty, 0.5)
 
+	def test_make_sales_invoice_after_credit_note_in_stock_uom(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, rate=10)
+		so = make_sales_order(item_code=item.name, qty=2, uom="Box", rate=120)
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.submit()
+		credit_note = make_sales_return(si.name)
+		credit_note.update_billed_amount_in_sales_order = 1
+		credit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -12, "rate": 10})
+		credit_note.submit()
+
+		self.assertTrue(has_potentially_billable_items(so.name))
+		self.assertEqual(make_sales_invoice(so.name).items[0].qty, 1)
+
 	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
 		so = make_sales_order(
 			item_list=[
