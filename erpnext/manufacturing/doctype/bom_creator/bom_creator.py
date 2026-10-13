@@ -72,9 +72,10 @@ class BOMCreator(Document):
 
 	def before_save(self):
 		self.set_status()
-		self.set_is_expandable()
 		self.set_conversion_factor()
 		self.set_reference_id()
+		self.set_is_expandable()
+		self.validate_no_cycles()
 		self.set_rate_for_items()
 
 	def validate(self):
@@ -221,11 +222,25 @@ class BOMCreator(Document):
 		return amount
 
 	def set_is_expandable(self):
-		fg_items = [row.fg_item for row in self.items if row.fg_item != self.item_code]
+		parent_ids = {row.fg_reference_id for row in self.items}
 		for row in self.items:
-			row.is_expandable = 0
-			if row.item_code in fg_items:
-				row.is_expandable = 1
+			row.is_expandable = 1 if row.name in parent_ids else 0
+
+	def validate_no_cycles(self):
+		rows = {row.name: row for row in self.items}
+		for row in self.items:
+			ancestor_items = set()
+			parent = rows.get(row.fg_reference_id)
+			while parent and parent.item_code not in ancestor_items:
+				ancestor_items.add(parent.item_code)
+				parent = rows.get(parent.fg_reference_id)
+
+			if row.item_code == self.item_code or row.item_code in ancestor_items:
+				frappe.throw(
+					_("Row #{0}: Item {1} cannot be used inside its own sub-assembly").format(
+						row.idx, bold(row.item_code)
+					)
+				)
 
 	def set_conversion_factor(self):
 		for row in self.items:

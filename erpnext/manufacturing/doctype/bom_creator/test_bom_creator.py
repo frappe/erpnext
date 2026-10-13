@@ -345,6 +345,46 @@ class TestBOMCreator(ERPNextTestSuite):
 			doc.raw_material_cost, rate["Frame"] + rate["Rim"] + rate["Spokes"] + rate["Seat"] + rate["Hub"]
 		)
 
+	def test_sub_assembly_reused_as_raw_material_is_not_expandable(self):
+		make_item("Tricycle", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Tricycle BOM Reused Sub Assembly",
+			company="_Test Company",
+			item_code="Tricycle",
+			qty=1,
+			currency="INR",
+			conversion_rate=1,
+		)
+		frame = add_test_sub_assembly(doc, "Tricycle", doc.name, "Frame Assembly", ["Frame"])
+		seat = add_test_sub_assembly(doc, "Tricycle", doc.name, "Seat Assembly", ["Seat"])
+		doc.add_item(fg_item="Seat Assembly", fg_reference_id=seat, item_code="Frame Assembly", qty=1)
+		doc.reload()
+
+		reused = next(row for row in doc.items if row.item_code == "Frame Assembly" and row.name != frame)
+		self.assertEqual(reused.is_expandable, 0)
+
+		doc.submit()
+		doc.create_boms()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
+
+	def test_sub_assembly_cycle_is_refused(self):
+		make_item("Unicycle", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Unicycle BOM Cycle", company="_Test Company", item_code="Unicycle", qty=1, currency="INR"
+		)
+		frame = add_test_sub_assembly(doc, "Unicycle", doc.name, "Frame Assembly", ["Frame"])
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"inside its own sub-assembly",
+			add_test_sub_assembly,
+			doc,
+			"Frame Assembly",
+			frame,
+			"Wheel Assembly",
+			["Frame Assembly"],
+		)
+
 
 def create_items():
 	raw_materials = [
@@ -452,3 +492,20 @@ def make_bom_creator(**kwargs):
 	doc.save()
 
 	return doc
+
+
+def add_test_sub_assembly(doc, fg_item, fg_reference_id, item_code, raw_materials):
+	doc.add_sub_assembly(
+		fg_item=fg_item,
+		fg_reference_id=fg_reference_id,
+		bom_item={
+			"item_code": item_code,
+			"qty": 1,
+			"items": [{"item_code": item, "qty": 1} for item in raw_materials],
+		},
+	)
+	doc.reload()
+
+	return next(
+		row.name for row in doc.items if row.item_code == item_code and row.fg_reference_id == fg_reference_id
+	)
