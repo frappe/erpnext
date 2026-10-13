@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Max
 from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
@@ -411,7 +412,10 @@ class MaintenanceSchedule(TransactionBase):
 			.groupby(entry.serial_no)
 		).run(as_dict=True)
 
-		return {row.serial_no: row.posting_datetime for row in rows}
+		dates = {row.serial_no: row.posting_datetime for row in rows}
+		if missing := [serial_no for serial_no in serial_nos if serial_no not in dates]:
+			dates.update(get_legacy_delivery_dates(item_code, missing))
+		return dates
 
 	def validate_schedule(self):
 		item_lst1 = []
@@ -535,6 +539,28 @@ def validate_serial_no_for_customer(serial, customer):
 			title=_("Different Customer"),
 			indicator="orange",
 		)
+
+
+def get_legacy_delivery_dates(item_code: str, serial_nos: list[str]) -> dict:
+	"""Latest delivery per serial kept on the Stock Ledger Entry itself, from before Serial and Batch Bundles."""
+	ledger = frappe.qb.DocType("Stock Ledger Entry")
+	rows = (
+		frappe.qb.from_(ledger)
+		.select(ledger.serial_no, ledger.posting_datetime)
+		.where(
+			(ledger.item_code == item_code)
+			& (ledger.is_cancelled == 0)
+			& (ledger.actual_qty < 0)
+			& ledger.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			& Criterion.any([ledger.serial_no.like(f"%{serial_no}%") for serial_no in serial_nos])
+		)
+	).run(as_dict=True)
+
+	dates = {}
+	for row in rows:
+		for serial_no in set(get_serial_nos(row.serial_no)).intersection(serial_nos):
+			dates[serial_no] = max(dates.get(serial_no, row.posting_datetime), row.posting_datetime)
+	return dates
 
 
 @frappe.whitelist()
