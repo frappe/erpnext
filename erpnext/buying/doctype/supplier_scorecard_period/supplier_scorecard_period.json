@@ -21,11 +21,13 @@
  ],
  "fields": [
   {
+   "fetch_from": "scorecard.supplier",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Supplier",
    "options": "Supplier",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -105,7 +107,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:50.051033",
+ "modified": "2026-10-05 15:30:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Scorecard Period",

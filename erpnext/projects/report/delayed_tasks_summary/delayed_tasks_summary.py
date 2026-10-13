@@ -56,7 +56,7 @@ def get_data(filters):
 
 
 def get_conditions(filters):
-	conditions = frappe._dict()
+	conditions = frappe._dict(is_template=0, status=["!=", "Cancelled"])
 	keys = ["priority", "status", "project"]
 	for key in keys:
 		if filters.get(key):
