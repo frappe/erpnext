@@ -41,6 +41,7 @@ class BOMItem(Document):
 		qty: DF.Float
 		qty_consumed_per_unit: DF.Float
 		rate: DF.Currency
+		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		source_warehouse: DF.Link | None
 		sourced_by_supplier: DF.Check
 		stock_qty: DF.Float

@@ -5,7 +5,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 18:50:30",
- "description": "Potential Sales Deal",
+ "description": "A potential sale to a lead or customer.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/opportunity",
@@ -159,6 +159,7 @@
   {
    "fieldname": "opportunity_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Opportunity Type",
    "oldfieldname": "enquiry_type",
@@ -189,6 +190,7 @@
   {
    "fieldname": "expected_closing",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Expected Closing Date",
    "no_copy": 1
   },
@@ -206,6 +208,7 @@
   {
    "fieldname": "opportunity_amount",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Opportunity Amount",
    "options": "currency"
   },
@@ -217,6 +220,7 @@
    "default": "Prospecting",
    "fieldname": "sales_stage",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Sales Stage",
    "options": "Sales Stage"
   },
@@ -304,12 +308,14 @@
   {
    "fieldname": "contact_email",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Contact Email",
    "options": "Email"
   },
   {
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Contact Mobile",
    "options": "Phone"
   },
@@ -653,7 +659,7 @@
  "icon": "user-star",
  "idx": 195,
  "links": [],
- "modified": "2026-02-10 14:36:01.387984",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

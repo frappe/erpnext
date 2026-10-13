@@ -10,10 +10,20 @@ from erpnext import get_region
 
 
 def execute(filters=None):
+	validate_company(filters)
 	validate_company_region(filters)
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)
+	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+	for row in data:
+		row["currency"] = currency
 	return columns, data
+
+
+def validate_company(filters):
+	if not filters.get("company"):
+		frappe.throw(_("Company is required"), title=_("Missing Company"))
+	frappe.has_permission("Company", doc=filters.get("company"), throw=True)
 
 
 def validate_company_region(filters):
@@ -34,12 +44,14 @@ def get_columns():
 			"fieldname": "amount",
 			"label": _("Amount (AED)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 125,
 		},
 		{
 			"fieldname": "vat_amount",
 			"label": _("VAT Amount (AED)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 	]
@@ -55,7 +67,7 @@ def get_data(filters=None):
 
 def append_vat_on_sales(data, filters):
 	"""Appends Sales and All Other Outputs."""
-	append_data(data, "", _("VAT on Sales and All Other Outputs"), "", "")
+	append_data(data, "", _("VAT on Sales and All Other Outputs"), None, None)
 
 	emirates, amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
 
@@ -63,23 +75,23 @@ def append_vat_on_sales(data, filters):
 		data,
 		"2",
 		_("Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme"),
-		frappe.format((-1) * get_tourist_tax_return_total(filters), "Currency"),
-		frappe.format((-1) * get_tourist_tax_return_tax(filters), "Currency"),
+		(-1) * get_tourist_tax_return_total(filters),
+		(-1) * get_tourist_tax_return_tax(filters),
 	)
 
 	append_data(
 		data,
 		"3",
 		_("Supplies subject to the reverse charge provision"),
-		frappe.format(get_reverse_charge_total(filters), "Currency"),
-		frappe.format(get_reverse_charge_tax(filters), "Currency"),
+		get_reverse_charge_total(filters),
+		get_reverse_charge_tax(filters),
 	)
 
-	append_data(data, "4", _("Zero Rated"), frappe.format(get_zero_rated_total(filters), "Currency"), "-")
+	append_data(data, "4", _("Zero Rated"), get_zero_rated_total(filters), None)
 
-	append_data(data, "5", _("Exempt Supplies"), frappe.format(get_exempt_total(filters), "Currency"), "-")
+	append_data(data, "5", _("Exempt Supplies"), get_exempt_total(filters), None)
 
-	append_data(data, "", "", "", "")
+	append_data(data, "", "", None, None)
 
 	return emirates, amounts_by_emirate
 
@@ -92,10 +104,8 @@ def standard_rated_expenses_emiratewise(data, filters):
 	for emirate, amount, vat in total_emiratewise:
 		amounts_by_emirate[emirate] = {
 			"legend": emirate,
-			"raw_amount": amount,
-			"raw_vat_amount": vat,
-			"amount": frappe.format(amount, "Currency"),
-			"vat_amount": frappe.format(vat, "Currency"),
+			"amount": amount,
+			"vat_amount": vat,
 		}
 	amounts_by_emirate = append_emiratewise_expenses(data, emirates, amounts_by_emirate)
 	return emirates, amounts_by_emirate
@@ -113,28 +123,43 @@ def append_emiratewise_expenses(data, emirates, amounts_by_emirate):
 				data,
 				_("1{0}").format(chr(no)),
 				_("Standard rated supplies in {0}").format(emirate),
-				frappe.format(0, "Currency"),
-				frappe.format(0, "Currency"),
+				0,
+				0,
 			)
+	append_supplies_without_emirate(data, emirates, amounts_by_emirate)
 	return amounts_by_emirate
+
+
+def append_supplies_without_emirate(data, emirates, amounts_by_emirate):
+	"""Append standard rated supplies of invoices with no VAT Emirate, so they are not left out of box 1."""
+	rows = [row for emirate, row in amounts_by_emirate.items() if emirate not in emirates]
+	if not rows:
+		return
+	append_data(
+		data,
+		"1",
+		_("Standard rated supplies with no VAT Emirate"),
+		sum(row["amount"] for row in rows),
+		sum(row["vat_amount"] for row in rows),
+	)
 
 
 def append_vat_on_expenses(data, filters):
 	"""Appends Expenses and All Other Inputs."""
-	append_data(data, "", _("VAT on Expenses and All Other Inputs"), "", "")
+	append_data(data, "", _("VAT on Expenses and All Other Inputs"), None, None)
 	append_data(
 		data,
 		"9",
 		_("Standard Rated Expenses"),
-		frappe.format(get_standard_rated_expenses_total(filters), "Currency"),
-		frappe.format(get_standard_rated_expenses_tax(filters), "Currency"),
+		get_standard_rated_expenses_total(filters),
+		get_standard_rated_expenses_tax(filters),
 	)
 	append_data(
 		data,
 		"10",
 		_("Supplies subject to the reverse charge provision"),
-		frappe.format(get_reverse_charge_recoverable_total(filters), "Currency"),
-		frappe.format(get_reverse_charge_recoverable_tax(filters), "Currency"),
+		get_reverse_charge_recoverable_total(filters),
+		get_reverse_charge_recoverable_tax(filters),
 	)
 
 
@@ -220,7 +245,7 @@ def get_filters(filters):
 		query_filters.append(["company", "=", filters["company"]])
 	if filters.get("from_date"):
 		query_filters.append(["posting_date", ">=", filters["from_date"]])
-	if filters.get("from_date"):
+	if filters.get("to_date"):
 		query_filters.append(["posting_date", "<=", filters["to_date"]])
 	return query_filters
 
@@ -246,29 +271,8 @@ def get_reverse_charge_total(filters):
 
 
 def get_reverse_charge_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made."""
-	p = frappe.qb.DocType("Purchase Invoice")
-	gl = frappe.qb.DocType("GL Entry")
-	uae_vat = frappe.qb.DocType("UAE VAT Account")
-	query = (
-		frappe.qb.from_(p)
-		.inner_join(gl)
-		.on(gl.voucher_no == p.name)
-		.select(Sum(gl.debit))
-		.where(
-			(p.reverse_charge == "Y")
-			& (p.docstatus == 1)
-			& (gl.docstatus == 1)
-			& gl.account.isin(
-				frappe.qb.from_(uae_vat)
-				.select(uae_vat.account)
-				.where(uae_vat.parent == filters.get("company"))
-			)
-		)
-	)
-	for condition in get_conditions_join(filters, p):
-		query = query.where(condition)
-	return query.run()[0][0] or 0
+	"""Returns the reverse charge VAT of Purchase Invoices, net of their debit notes."""
+	return get_reverse_charge_vat(filters)
 
 
 def get_reverse_charge_recoverable_total(filters):
@@ -293,27 +297,37 @@ def get_reverse_charge_recoverable_total(filters):
 
 
 def get_reverse_charge_recoverable_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made."""
+	"""Returns the recoverable reverse charge VAT of Purchase Invoices, net of their debit notes."""
+	return get_reverse_charge_vat(filters, recoverable=True)
+
+
+def get_reverse_charge_vat(filters, recoverable=False):
+	"""Sums the UAE VAT rows of reverse charge invoices, so debit notes reduce the total."""
 	p = frappe.qb.DocType("Purchase Invoice")
-	gl = frappe.qb.DocType("GL Entry")
+	t = frappe.qb.DocType("Purchase Taxes and Charges")
 	uae_vat = frappe.qb.DocType("UAE VAT Account")
+	tax = t.base_tax_amount_after_discount_amount
+	if recoverable:
+		tax = tax * p.recoverable_reverse_charge / 100
 	query = (
-		frappe.qb.from_(p)
-		.inner_join(gl)
-		.on(gl.voucher_no == p.name)
-		.select(Sum(gl.debit * p.recoverable_reverse_charge / 100))
+		frappe.qb.from_(t)
+		.inner_join(p)
+		.on(t.parent == p.name)
+		.select(Sum(tax))
 		.where(
-			(p.reverse_charge == "Y")
+			(t.parenttype == "Purchase Invoice")
+			& (p.reverse_charge == "Y")
 			& (p.docstatus == 1)
-			& (p.recoverable_reverse_charge > 0)
-			& (gl.docstatus == 1)
-			& gl.account.isin(
+			& t.category.isin(["Total", "Valuation and Total"])
+			& t.account_head.isin(
 				frappe.qb.from_(uae_vat)
 				.select(uae_vat.account)
 				.where(uae_vat.parent == filters.get("company"))
 			)
 		)
 	)
+	if recoverable:
+		query = query.where(p.recoverable_reverse_charge > 0)
 	for condition in get_conditions_join(filters, p):
 		query = query.where(condition)
 	return query.run()[0][0] or 0
@@ -332,29 +346,51 @@ def get_conditions_join(filters, p):
 
 
 def get_standard_rated_expenses_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
-	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", ">", 0])
-	query_filters.append(["docstatus", "=", 1])
-	try:
-		return (
-			frappe.db.get_all(
-				"Purchase Invoice",
-				filters=query_filters,
-				fields=[{"SUM": "base_total"}],
-				as_list=True,
-				limit=1,
-			)[0][0]
-			or 0
+	"""Returns the net amount of the Purchase Invoice lines with UAE VAT, on invoices with recoverable VAT."""
+	i = frappe.qb.DocType("Purchase Invoice Item")
+	p = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(i)
+		.inner_join(p)
+		.on(i.parent == p.name)
+		.select(Sum(i.base_net_amount))
+		.where(
+			(p.docstatus == 1)
+			& (p.recoverable_standard_rated_expenses != 0)
+			& i.name.isin(get_purchase_items_with_vat(filters))
 		)
-	except (IndexError, TypeError):
-		return 0
+	)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
+	return query.run()[0][0] or 0
+
+
+def get_purchase_items_with_vat(filters):
+	"""Returns a sub query of the Purchase Invoice Item rows that carry UAE VAT."""
+	d = frappe.qb.DocType("Item Wise Tax Detail")
+	t = frappe.qb.DocType("Purchase Taxes and Charges")
+	uae_vat = frappe.qb.DocType("UAE VAT Account")
+	return (
+		frappe.qb.from_(d)
+		.inner_join(t)
+		.on(d.tax_row == t.name)
+		.select(d.item_row)
+		.where(
+			(d.parenttype == "Purchase Invoice")
+			& (d.amount != 0)
+			& t.account_head.isin(
+				frappe.qb.from_(uae_vat)
+				.select(uae_vat.account)
+				.where(uae_vat.parent == filters.get("company"))
+			)
+		)
+	)
 
 
 def get_standard_rated_expenses_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", ">", 0])
+	query_filters.append(["recoverable_standard_rated_expenses", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (
@@ -374,7 +410,7 @@ def get_standard_rated_expenses_tax(filters):
 def get_tourist_tax_return_total(filters):
 	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters.append(["tourist_tax_return", ">", 0])
+	query_filters.append(["tourist_tax_return", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (
@@ -390,7 +426,7 @@ def get_tourist_tax_return_total(filters):
 def get_tourist_tax_return_tax(filters):
 	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters.append(["tourist_tax_return", ">", 0])
+	query_filters.append(["tourist_tax_return", "!=", 0])
 	query_filters.append(["docstatus", "=", 1])
 	try:
 		return (

@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"party\", \"label\": \"Party\"}, {\"fieldname\": \"paid_amount\", \"label\": \"Paid Amount\"}, {\"fieldname\": \"mode_of_payment\", \"label\": \"Mode of Payment\"}, {\"fieldname\": \"reference_no\", \"label\": \"Cheque/Reference No\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.561792",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Paid",
+ "filters": "[[\"Payment Entry\", \"docstatus\", \"=\", 1], [\"Payment Entry\", \"payment_type\", \"=\", \"Pay\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.561792",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Entry-Paid",
+ "owner": "Administrator",
+ "reference_doctype": "Payment Entry",
+ "route_signature": "docstatus=1&payment_type=Pay",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

@@ -9,6 +9,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -400,6 +401,7 @@ class TestPutawayRule(ERPNextTestSuite):
 
 		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
 		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+		serial_numbers = get_serial_numbers_from_bundle(pr.items[0].serial_and_batch_bundle)
 
 		stock_entry = make_stock_entry(
 			item_code="Water Bottle",
@@ -418,7 +420,7 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(stock_entry.items[0].qty, 3)
 		self.assertEqual(stock_entry.items[0].putaway_rule, rule_1.name)
 		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_nos[0:3]
+			get_serial_numbers_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_numbers[0:3]
 		)
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle), batch_no)
 
@@ -426,7 +428,7 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(stock_entry.items[1].qty, 2)
 		self.assertEqual(stock_entry.items[1].putaway_rule, rule_2.name)
 		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_nos[3:5]
+			get_serial_numbers_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_numbers[3:5]
 		)
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[1].serial_and_batch_bundle), batch_no)
 

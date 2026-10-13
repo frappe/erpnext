@@ -10,6 +10,7 @@ from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.buying.utils import update_last_purchase_rate
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	get_bin_details,
@@ -33,6 +34,7 @@ class ChildItemUpdater:
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
 		self._transacted_stock_qty: dict | None = None
+		self._rfqs_before_update: set[str] = set()
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
@@ -47,6 +49,8 @@ class ChildItemUpdater:
 		any_conversion_factor_changed = False
 
 		self._check_permissions("write")
+		self._validate_parent_status()
+		self._validate_changed_uoms(data)
 
 		if self.parent_doctype == "Quotation":
 			self._transacted_stock_qty = get_ordered_items(self.parent.name)
@@ -54,6 +58,7 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		elif self.parent_doctype == "Supplier Quotation":
+			self._rfqs_before_update = self.parent.get_request_for_quotations()
 			self._transacted_stock_qty = get_ordered_supplier_quotation_items(self.parent.name)
 			items_added_or_removed |= validate_and_delete_children(
 				self.parent, data, self._transacted_stock_qty
@@ -94,6 +99,8 @@ class ChildItemUpdater:
 				self._validate_blanket_order_is_open(child_item, d)
 
 			self._validate_quantity_and_rate(child_item, d, rate_unchanged)
+			if not new_child_flag:
+				self._validate_uom_unchanged_after_fulfilment(child_item, d, change_state)
 
 			if flt(child_item.get("qty")) != flt(d.get("qty")):
 				any_qty_changed = True
@@ -200,6 +207,10 @@ class ChildItemUpdater:
 			parent.update_prevdoc_status("submit")
 			parent.update_delivery_status()
 
+		elif self.parent_doctype == "Supplier Quotation":
+			parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), self._rfqs_before_update)
+			parent.set_status(update=True)
+
 		parent.reload()
 		self._validate_workflow()
 
@@ -256,6 +267,24 @@ class ChildItemUpdater:
 				title=_("Insufficient Permissions"),
 			)
 
+	def _validate_parent_status(self) -> None:
+		if self.parent_doctype == "Purchase Order" and self.parent.status in (
+			"Closed",
+			"On Hold",
+			"Delivered",
+		):
+			frappe.throw(
+				_("Cannot update items of Purchase Order {0} because it is {1}.").format(
+					self.parent.name, _(self.parent.status)
+				)
+			)
+
+	def _validate_changed_uoms(self, data: list) -> None:
+		current_uoms = {row.name: row.uom for row in self.parent.get(self.child_docname)}
+		validate_item_uoms(
+			[frappe._dict(d) for d in data if d.get("uom") != current_uoms.get(d.get("docname"))]
+		)
+
 	def _get_new_child_item(self, item_row) -> "frappe.model.document.Document":
 		child_doctype = self.parent_doctype + " Item"
 		return set_order_defaults(
@@ -294,6 +323,22 @@ class ChildItemUpdater:
 			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
 			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
 			blanket_order.validate_items_are_open([child_item.item_code])
+
+	def _validate_uom_unchanged_after_fulfilment(self, child_item, new_data: dict, change_state) -> None:
+		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
+			self.parent_doctype
+		)
+		if not fulfilled_qty_field or not flt(child_item.get(fulfilled_qty_field)):
+			return
+
+		uom_changed = new_data.get("uom") not in (None, child_item.uom)
+		if uom_changed or not change_state.conversion_factor_unchanged:
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
+				).format(child_item.idx, frappe.bold(child_item.item_code)),
+				title=_("Invalid UOM"),
+			)
 
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:
 		if not flt(new_data.get("qty")) and not self.allow_zero_qty:
@@ -499,6 +544,27 @@ def update_bin_on_delete(row, doctype: str) -> None:
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
+def validate_no_issued_proforma(rows) -> None:
+	"""Raise if a Sales Order row being deleted has an issued Proforma Invoice."""
+	if not rows:
+		return
+
+	proformed = set(
+		frappe.get_all(
+			"Proforma Invoice Item",
+			filters={"so_detail": ["in", [row.name for row in rows]], "docstatus": 1},
+			pluck="so_detail",
+		)
+	)
+	for row in rows:
+		if row.name in proformed:
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which has an issued Proforma Invoice.").format(
+					row.idx, row.item_code
+				)
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	"""Delete child rows not present in data; return True if any were removed."""
 	updated_item_names = [d.get("docname") for d in data]
@@ -507,6 +573,9 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	deleted_children = [
 		item for item in parent.items if item.name not in updated_item_names and not item.get("closed")
 	]
+
+	if parent.doctype == "Sales Order":
+		validate_no_issued_proforma(deleted_children)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)

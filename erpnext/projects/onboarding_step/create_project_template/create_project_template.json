@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Project Template",
+ "creation": "2026-10-04 01:51:25.812416",
+ "description": "Save the tasks you repeat on every job, and start the next project from them.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:51:25.812416",
+ "modified_by": "Administrator",
+ "name": "Create Project Template",
+ "owner": "Administrator",
+ "reference_document": "Project Template",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Reuse it as a template",
+ "validate_action": 1
+}

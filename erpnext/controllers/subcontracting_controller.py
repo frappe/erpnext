@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, escape_html, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -21,7 +21,9 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
-from erpnext.stock.utils import _get_incoming_rate
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import _get_incoming_rate, get_valuation_method
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
 
 
 class SubcontractingController(StockController):
@@ -70,6 +72,7 @@ class SubcontractingController(StockController):
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
+			rejected_return_rows = self.get_rejected_return_rows()
 			for row in self.supplied_items:
 				kwargs = frappe._dict(
 					{
@@ -89,7 +92,12 @@ class SubcontractingController(StockController):
 					}
 				)
 
-				rate = _get_incoming_rate(kwargs)
+				rate = (
+					0.0
+					if row.reference_name in rejected_return_rows
+					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
+					else _get_incoming_rate(kwargs)
+				)
 				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
@@ -98,6 +106,25 @@ class SubcontractingController(StockController):
 
 		if rate_changed:
 			self.calculate_items_qty_and_amount()
+
+	def get_rejected_return_rows(self):
+		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
+		if not self.is_return:
+			return set()
+
+		rejected_warehouses = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against},
+				fields=["name", "rejected_warehouse"],
+				as_list=True,
+			)
+		)
+		return {
+			row.name
+			for row in self.items
+			if row.warehouse and row.warehouse == rejected_warehouses.get(row.subcontracting_receipt_item)
+		}
 
 	def validate_rejected_warehouse(self):
 		for item in self.get("items"):
@@ -201,15 +228,17 @@ class SubcontractingController(StockController):
 					item.amount = item.qty * item.rate
 
 				if item.bom:
-					is_active, bom_item = frappe.get_value("BOM", item.bom, ["is_active", "item"])
+					is_active, bom_item, docstatus = frappe.get_value(
+						"BOM", item.bom, ["is_active", "item", "docstatus"]
+					)
 
-					if not is_active:
+					if not is_active or docstatus != 1:
 						frappe.throw(
-							_("Row {0}: Please select an active BOM for Item {1}.").format(
+							_("Row {0}: Please select an active and submitted BOM for Item {1}.").format(
 								item.idx, item.item_name
 							)
 						)
-					if bom_item != item.item_code:
+					if bom_item not in get_applicable_bom_items(item.item_code):
 						frappe.throw(
 							_("Row {0}: Please select a valid BOM for Item {1}.").format(
 								item.idx, item.item_name
@@ -449,8 +478,11 @@ class SubcontractingController(StockController):
 				from erpnext.deprecation_dumpster import deprecation_warning
 
 				deprecation_warning("unknown", "v16", "No instructions.")
+				consumed_serials = SerialBatchIdentity("Serial No").resolve(
+					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+				)
 				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
+					set(self.available_materials[key]["serial_no"]) - set(consumed_serials)
 				)
 
 			# Will be deprecated in v16
@@ -508,7 +540,11 @@ class SubcontractingController(StockController):
 			)
 
 			if row.serial_no:
-				details.serial_no.extend(get_serial_nos(row.serial_no))
+				details.serial_no.extend(
+					SerialBatchIdentity("Serial No").resolve(
+						row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+					)
+				)
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty
 
@@ -590,7 +626,7 @@ class SubcontractingController(StockController):
 		filters = [
 			[doctype, "parent", "=", bom_no],
 			[doctype, "docstatus", "=", 1],
-			["BOM", "item", "=", item_code],
+			["BOM", "item", "in", get_applicable_bom_items(item_code)],
 			[doctype, "sourced_by_supplier", "=", 0],
 		]
 
@@ -598,9 +634,13 @@ class SubcontractingController(StockController):
 		to_remove = []
 		for item in data:
 			if item.is_phantom_item:
-				data += self._get_materials_from_bom(
+				phantom_materials = self._get_materials_from_bom(
 					item.rm_item_code, item.bom_no, exploded_item=exploded_item
 				)
+				for material in phantom_materials:
+					material.qty_consumed_per_unit *= item.qty_consumed_per_unit
+
+				data += phantom_materials
 				to_remove.append(item)
 
 		for item in to_remove:
@@ -682,13 +722,11 @@ class SubcontractingController(StockController):
 		return available_batches
 
 	def __get_serial_nos_for_bundle(self, qty, key):
-		available_sns = sorted(self.available_materials[key]["serial_no"])[0 : cint(qty)]
-		serial_nos = []
-
-		for serial_no in available_sns:
-			serial_nos.append(serial_no)
-
-			self.available_materials[key]["serial_no"].remove(serial_no)
+		available_serials = self.available_materials[key]["serial_no"]
+		numbers = SerialBatchIdentity("Serial No").get_number_map(available_serials)
+		serial_nos = sorted(available_serials, key=lambda name: numbers[name])[: cint(qty)]
+		for serial_no in serial_nos:
+			available_serials.remove(serial_no)
 
 		return serial_nos
 
@@ -765,7 +803,9 @@ class SubcontractingController(StockController):
 				if serial_nos:
 					serial_nos = [sn.get("serial_no") for sn in serial_nos]
 					serial_nos = get_filtered_serial_nos(serial_nos, self, "supplied_items")
-					row.serial_no = "\n".join(serial_nos)
+					row.serial_no = "\n".join(
+						SerialBatchIdentity("Serial No").get_numbers(row.rm_item_code, serial_nos)
+					)
 
 			elif (
 				item_details.has_batch_no
@@ -890,7 +930,9 @@ class SubcontractingController(StockController):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
 		if self.available_materials.get(key) and self.available_materials[key]["serial_no"]:
 			used_serial_nos = self.available_materials[key]["serial_no"][0 : cint(rm_obj.consumed_qty)]
-			rm_obj.serial_no = "\n".join(used_serial_nos)
+			rm_obj.serial_no = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(rm_obj.rm_item_code, used_serial_nos)
+			)
 
 			# Removed the used serial nos from the list
 			for sn in used_serial_nos:
@@ -919,7 +961,9 @@ class SubcontractingController(StockController):
 			return transfer_item.qty
 
 		if self.qty_to_be_received.get(key):
-			qty = (flt(item_row.qty) * flt(transfer_item.qty)) / flt(self.qty_to_be_received.get(key))
+			qty = (self.get_qty_for_costing(item_row) * flt(transfer_item.qty)) / flt(
+				self.qty_to_be_received.get(key)
+			)
 			transfer_item.item_details.required_qty = transfer_item.qty
 
 			if transfer_item.serial_no or frappe.get_cached_value(
@@ -973,7 +1017,7 @@ class SubcontractingController(StockController):
 							row.get(self.subcontract_data.order_field),
 							row.get("bom"),
 						)
-					] -= row.qty
+					] -= self.get_qty_for_costing(row)
 
 	def __set_rate_for_serial_and_batch_bundle(self):
 		if self.doctype != "Subcontracting Receipt":
@@ -1054,7 +1098,9 @@ class SubcontractingController(StockController):
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
 			msg = _("The Batch No {0} has not been supplied against the {1} {2}").format(
-				frappe.bold(row.get("batch_no")), self.subcontract_data.order_doctype, link
+				frappe.bold(SerialBatchIdentity("Batch").get_label(row.get("batch_no"))),
+				self.subcontract_data.order_doctype,
+				link,
 			)
 			frappe.throw(msg, title=_("Incorrect Batch Consumed"))
 
@@ -1064,7 +1110,8 @@ class SubcontractingController(StockController):
 			incorrect_sn = set(serial_nos).difference(self.__transferred_items.get(key).get("serial_no"))
 
 			if incorrect_sn:
-				incorrect_sn = "\n".join(incorrect_sn)
+				numbers = SerialBatchIdentity("Serial No").get_number_map(incorrect_sn)
+				incorrect_sn = "\n".join(escape_html(numbers.get(name, name)) for name in incorrect_sn)
 				link = get_link_to_form(
 					self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 				)
@@ -1254,10 +1301,10 @@ class SubcontractingController(StockController):
 					if not item.get("secondary_item_type") and not item.get("valuation_type"):
 						item.additional_cost_per_qty = (
 							(item.amount * self.total_additional_costs) / total_amt
-						) / item.qty
+						) / self.get_qty_for_costing(item)
 			else:
 				total_qty = sum(
-					flt(item.qty)
+					self.get_qty_for_costing(item)
 					for item in self.get("items")
 					if not item.get("secondary_item_type") and not item.get("valuation_type")
 				)
@@ -1269,6 +1316,10 @@ class SubcontractingController(StockController):
 			for item in self.items:
 				if not item.get("secondary_item_type") and not item.get("valuation_type"):
 					item.additional_cost_per_qty = 0
+
+	def get_qty_for_costing(self, item):
+		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
+		return flt(item.qty) + flt(item.get("rejected_qty")) + flt(item.get("process_loss_qty"))
 
 	@frappe.whitelist()
 	def get_current_stock(self):
@@ -1305,7 +1356,7 @@ class SubcontractingController(StockController):
 			if mr and mr_item_rows:
 				mr_obj = frappe.get_doc("Material Request", mr)
 
-				if mr_obj.status in ["Stopped", "Cancelled"]:
+				if mr_obj.status in ["Stopped", "Cancelled"] and self.get("_action") == "submit":
 					frappe.throw(
 						_("Material Request {0} is cancelled or stopped").format(mr),
 						frappe.InvalidStatusError,
@@ -1331,13 +1382,14 @@ def get_item_details(items):
 
 
 def get_pending_subcontracted_quantity(doctype, name):
+	qty_field = "qty" if doctype == "Purchase Order Item" else "stock_qty"
 	table = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(table)
-		.select(table.name, table.stock_qty, table.subcontracted_qty)
+		.select(table.name, table[qty_field], table.subcontracted_qty)
 		.where(table.parent == name)
 	)
-	return {item.name: item.stock_qty - item.subcontracted_qty for item in query.run(as_dict=True)}
+	return {item.name: item[qty_field] - item.subcontracted_qty for item in query.run(as_dict=True)}
 
 
 @frappe.whitelist()
@@ -1480,7 +1532,9 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 			"t_warehouse": row.item_details["s_warehouse"],
 			"item_code": row.item_details["rm_item_code"],
 			"subcontracted_item": row.item_details["main_item_code"],
-			"serial_no": "\n".join(row.serial_no) if row.serial_no else "",
+			"serial_no": "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(row.item_details["rm_item_code"], row.serial_no)
+			),
 			"use_serial_batch_fields": 1,
 		}
 	)

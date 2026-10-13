@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"stock_entry_type\", \"label\": \"Stock Entry Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"from_warehouse\", \"label\": \"Default Source Warehouse\"}, {\"fieldname\": \"to_warehouse\", \"label\": \"Default Target Warehouse\"}, {\"fieldname\": \"owner\", \"label\": \"Created By\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.864969",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Stock Entry\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.864969",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Stock Entry",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

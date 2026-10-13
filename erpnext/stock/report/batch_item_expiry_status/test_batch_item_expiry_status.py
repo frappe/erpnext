@@ -46,17 +46,17 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 
 		data = self.run_report(item=item)
 
-		# Columns: [item, item_name, batch, stock_uom, quantity, expires_on, expiry_in_days]
-		row = next((r for r in data if r[2] == batch_no), None)
+		row = next((r for r in data if r.batch == batch_no), None)
 		self.assertIsNotNone(row, f"Batch {batch_no} not found in report for item {item}")
 
-		self.assertEqual(row[0], item)
-		self.assertEqual(row[2], batch_no)
-		self.assertEqual(row[4], 10)
+		self.assertEqual(row.item, item)
+		self.assertEqual(row.batch, batch_no)
+		self.assertEqual(row.batch_number, frappe.db.get_value("Batch", batch_no, "batch_id"))
+		self.assertEqual(row.quantity, 10)
 		# expiry = batch manufacturing_date + 30 day shelf life; matches the Batch record
 		batch_expiry = frappe.db.get_value("Batch", batch_no, "expiry_date")
-		self.assertIsNotNone(row[5], "Expiry date should be set for a batch with shelf life")
-		self.assertEqual(frappe.utils.getdate(row[5]), frappe.utils.getdate(batch_expiry))
+		self.assertIsNotNone(row.expires_on, "Expiry date should be set for a batch with shelf life")
+		self.assertEqual(frappe.utils.getdate(row.expires_on), frappe.utils.getdate(batch_expiry))
 		# Expiry (In Days) column = days until expiry
 		expected_days = max((frappe.utils.getdate(batch_expiry) - frappe.utils.datetime.date.today()).days, 0)
-		self.assertEqual(row[6], expected_days)
+		self.assertEqual(row["expiry_(in_days)"], expected_days)

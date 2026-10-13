@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-29 11:53:09.523362",
+ "description": "Plans the work orders and materials needed for your demand.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/production-plan",

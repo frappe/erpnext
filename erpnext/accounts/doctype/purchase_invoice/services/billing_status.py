@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-"""Purchase Receipt billing sync and provisional-entry cancellation for Purchase Invoice."""
+"""Purchase Receipt and Purchase Order billing sync and provisional-entry cancellation for Purchase Invoice."""
 
 import frappe
 from frappe import qb
@@ -9,6 +9,9 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	get_purchase_receipts_against_po_details,
+	get_receipt_billing_data,
+	is_billed_by_qty,
 	update_billed_amount_based_on_po,
 	update_billing_percentage,
 )
@@ -44,15 +47,52 @@ class BillingStatusService:
 		if po_details:
 			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
-		adjust_incoming_rate = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
+		if not is_billed_by_qty():
+			for pr in set(updated_pr):
+				pr_doc = frappe.get_lazy_doc("Purchase Receipt", pr)
+				update_billing_percentage(pr_doc, update_modified=update_modified)
+			return
 
-		for pr in set(updated_pr):
-			pr_doc = frappe.get_lazy_doc("Purchase Receipt", pr)
+		self.update_billing_status_in_receipts_on_po_lines(set(updated_pr), update_modified)
+
+	def update_billing_status_in_receipts_on_po_lines(self, updated_pr: set, update_modified: bool) -> None:
+		"""Order invoices are spread over every receipt on the line, so all of them are refreshed from one split."""
+		pr_docs = [
+			frappe.get_lazy_doc("Purchase Receipt", pr) for pr in updated_pr | self.get_receipts_on_po_lines()
+		]
+
+		pr_items = []
+		for pr_doc in pr_docs:
+			pr_items.extend(pr_doc.items)
+
+		bill_for_rejected = frappe.db.get_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+		)
+		billing_data = get_receipt_billing_data(pr_items, bill_for_rejected)
+
+		for pr_doc in pr_docs:
 			update_billing_percentage(
-				pr_doc, update_modified=update_modified, adjust_incoming_rate=adjust_incoming_rate
+				pr_doc,
+				update_modified=update_modified,
+				adjust_incoming_rate=True,
+				billing_data=billing_data,
+				is_refresh=True,
 			)
+
+	def get_receipts_on_po_lines(self) -> set:
+		po_details = list({d.po_detail for d in self.doc.get("items") if d.po_detail})
+		if not po_details:
+			return set()
+
+		return {pr_item.parent for pr_item in get_purchase_receipts_against_po_details(po_details)}
+
+	def update_billing_status_in_po(self) -> None:
+		doc = self.doc
+		if not is_billed_by_qty() or (doc.is_return and not doc.update_billed_amount_in_purchase_order):
+			return
+
+		for purchase_order in {item.purchase_order for item in doc.items if item.purchase_order}:
+			frappe.get_doc("Purchase Order", purchase_order).update_billing_percentage()
 
 	def get_pr_details_billed_amt(self) -> dict:
 		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice

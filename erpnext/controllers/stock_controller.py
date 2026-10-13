@@ -33,6 +33,8 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
@@ -340,6 +342,10 @@ class StockController(AccountsController):
 		if self.doctype == "Delivery Note":
 			# Bill by amount, falling back to qty when the invoiced amount is short (e.g. rate drop).
 			args["billing_percentage"] = self.get_delivery_note_billing_percentage()
+		elif self.doctype == "Purchase Order" and is_billed_by_qty():
+			from erpnext.buying.doctype.purchase_order.services.status import StatusService
+
+			args["billing_percentage"] = StatusService(self).get_percent_billed_by_qty()
 
 		self._update_percent_field(args, update_modified)
 
@@ -760,7 +766,7 @@ def make_quality_inspections(
 				"item_code": item.get("item_code"),
 				"description": item.get("description"),
 				"sample_size": flt(item.get("sample_size")),
-				"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+				"item_serial_no": get_first_serial_id(item),
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),
 			}
@@ -769,6 +775,18 @@ def make_quality_inspections(
 		inspections.append(quality_inspection.name)
 
 	return inspections
+
+
+def get_first_serial_id(item):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serial_numbers = get_serial_nos(item.get("serial_no"))
+	if not serial_numbers:
+		return None
+	records = SerialBatchIdentity("Serial No").get_records(
+		item.get("item_code"), serial_numbers[:1], ["name"]
+	)
+	return records[0].name if records else None
 
 
 def is_reposting_pending():
@@ -782,17 +800,20 @@ def invalidate_future_sle_cache(voucher_type, voucher_no):
 		frappe.local.future_sle.pop((voucher_type, voucher_no), None)
 
 
-def future_sle_exists(args, sl_entries=None):
+def future_sle_exists(args, sl_entries=None, for_update=False):
 	from erpnext.stock.utils import get_combine_datetime
 
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):
 		frappe.local.future_sle = {}
 
-	if validate_future_sle_not_exists(args, key, sl_entries):
-		return False
-	elif get_cached_data(args, key):
-		return True
+	# The locking read neither uses nor fills the cache: a cached result may come from a plain
+	# read that predates a concurrent later-posted SLE.
+	if not for_update:
+		if validate_future_sle_not_exists(args, key, sl_entries):
+			return False
+		elif get_cached_data(args, key):
+			return True
 
 	if not sl_entries:
 		sl_entries = get_sle_entries_against_voucher(args)
@@ -804,7 +825,7 @@ def future_sle_exists(args, sl_entries=None):
 	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	data = (
+	query = (
 		frappe.qb.from_(sle)
 		.select(sle.item_code, sle.warehouse, Count(sle.name).as_("total_row"))
 		.where(
@@ -814,11 +835,21 @@ def future_sle_exists(args, sl_entries=None):
 			& (sle.is_cancelled == 0)
 		)
 		.groupby(sle.item_code, sle.warehouse)
-		.run(as_dict=1)
 	)
 
-	for d in data:
-		frappe.local.future_sle[key][(d.item_code, d.warehouse)] = d.total_row
+	# A plain read uses the transaction's snapshot, which can predate a later-posted SLE that a
+	# concurrent submit committed meanwhile; this voucher would then skip the repost it needs.
+	# A locking read sees the latest committed rows and waits on uncommitted ones. Only the final
+	# repost decision asks for it: by then this voucher already holds these ranges, whereas an
+	# upfront lock over every item-warehouse pair deadlocks with concurrent submits.
+	if for_update and frappe.db.db_type == "mariadb":
+		query = query.for_update()
+
+	data = query.run(as_dict=1)
+
+	if not for_update:
+		for d in data:
+			frappe.local.future_sle[key][(d.item_code, d.warehouse)] = d.total_row
 
 	return len(data)
 
@@ -905,6 +936,7 @@ def create_item_wise_repost_entries(
 	from erpnext.stock.utils import get_valuation_method
 
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
+	company = frappe.db.get_value(voucher_type, voucher_no, "company")
 
 	distinct_item_warehouses = set()
 	repost_entries = []
@@ -917,7 +949,7 @@ def create_item_wise_repost_entries(
 
 		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
 		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
-		if get_valuation_method(sle.item_code) == "Standard Cost":
+		if get_valuation_method(sle.item_code, company) == "Standard Cost":
 			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
@@ -935,6 +967,23 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+def create_accounting_repost_entry(voucher_type, voucher_no):
+	repost_entry = frappe.new_doc("Repost Item Valuation")
+	repost_entry.based_on = "Transaction"
+	repost_entry.voucher_type = voucher_type
+	repost_entry.voucher_no = voucher_no
+	repost_entry.update(
+		frappe.db.get_value(
+			voucher_type, voucher_no, ["company", "posting_date", "posting_time"], as_dict=True
+		)
+	)
+	repost_entry.repost_only_accounting_ledgers = 1
+	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
+	repost_entry.submit()
+	return repost_entry
 
 
 def make_bundle_for_material_transfer(**kwargs):
@@ -997,6 +1046,8 @@ def make_bundle_for_material_transfer(**kwargs):
 		bundle_doc.save(ignore_permissions=True)
 	else:
 		bundle_doc.submit()
+		if kwargs.docstatus != 2:
+			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
 

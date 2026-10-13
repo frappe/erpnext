@@ -237,3 +237,43 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual([pi.name, project.name, 300], [row.voucher_no, row.project, row.outstanding])
+
+	def test_supplier_invoice_date_ageing_without_bill_date(self):
+		pi = self.create_purchase_invoice()
+		self.assertFalse(pi.bill_date)
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"ageing_based_on": "Supplier Invoice Date",
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+
+		self.assertEqual(row.range1, 300)
+		self.assertEqual(row.total_due, 300)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_bulk_payment_outstanding_in_company_currency(self):
+		from erpnext.accounts.bulk_payment import get_payable_invoices
+
+		invoices = {}
+		for supplier, credit_to in (
+			(self.supplier, self.creditors_usd),
+			("_Test Supplier", "Creditors - _TC"),
+		):
+			pi = make_purchase_invoice(
+				supplier=supplier, currency="USD", conversion_rate=80, qty=1, rate=300, do_not_save=1
+			)
+			pi.credit_to = credit_to
+			invoices[pi.save().submit().name] = credit_to
+
+		payable = get_payable_invoices([{"voucher_no": name} for name in invoices])["payable"]
+
+		self.assertEqual(
+			{row["voucher_no"]: row["outstanding"] for row in payable}, dict.fromkeys(invoices, 24000)
+		)

@@ -20,7 +20,7 @@ class WorkOrderItem(Document):
 		available_qty_at_source_warehouse: DF.Float
 		available_qty_at_wip_warehouse: DF.Float
 		consumed_qty: DF.Float
-		description: DF.Text | None
+		description: DF.TextEditor | None
 		include_item_in_manufacturing: DF.Check
 		is_additional_item: DF.Check
 		is_customer_provided_item: DF.Check

@@ -1,9 +1,9 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "field:serial_no",
+ "autoname": "hash",
  "creation": "2013-05-16 10:59:15",
- "description": "Distinct unit of an Item",
+ "description": "A single unit of an item, tracked by its own number.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/serial-no",
@@ -59,23 +59,28 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Serial No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "unique": 1
+   "search_index": 1,
+   "set_only_once": 1,
+   "in_list_view": 1
   },
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break1",
@@ -197,6 +202,7 @@
   {
    "fieldname": "warranty_expiry_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Warranty Expiry Date",
    "oldfieldname": "warranty_expiry_date",
    "oldfieldtype": "Date",
@@ -313,11 +319,11 @@
  "icon": "hash",
  "idx": 1,
  "links": [],
- "modified": "2026-09-23 15:26:58.310046",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
@@ -400,9 +406,10 @@
  ],
  "row_format": "Dynamic",
  "search_fields": "item_code",
- "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "title_field": "serial_no",
+ "show_title_field_in_link": 1
 }

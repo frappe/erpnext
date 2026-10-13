@@ -655,6 +655,14 @@ erpnext.PointOfSale.Controller = class {
 			const item_row_exists = !$.isEmptyObject(item_row);
 
 			const from_selector = field === "qty" && value === "+1";
+			if (from_selector && item.serial_no) {
+				if (this.is_duplicate_serial_no(item.item_code, item.serial_no)) return;
+				await this.check_serial_no_availablilty(
+					item.item_code,
+					this.frm.doc.set_warehouse,
+					item.serial_no
+				);
+			}
 			if (from_selector) value = flt(item_row.qty) + flt(value);
 
 			if (item_row_exists) {
@@ -673,7 +681,7 @@ erpnext.PointOfSale.Controller = class {
 							item_row.doctype,
 							item_row.name,
 							"serial_no",
-							item_row.serial_no + `\n${item.serial_no}`
+							[item_row.serial_no, item.serial_no].filter(Boolean).join("\n")
 						);
 					}
 					this.update_cart_html(item_row);
@@ -696,7 +704,13 @@ erpnext.PointOfSale.Controller = class {
 				const new_item = { item_code, batch_no, rate, uom, [field]: value, stock_uom };
 
 				if (serial_no) {
-					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
+					if (!from_selector) {
+						await this.check_serial_no_availablilty(
+							item_code,
+							this.frm.doc.set_warehouse,
+							serial_no
+						);
+					}
 					new_item["serial_no"] = serial_no;
 				}
 
@@ -835,6 +849,23 @@ erpnext.PointOfSale.Controller = class {
 			frappe.utils.play_sound("error");
 		}
 		frappe.dom.freeze();
+	}
+
+	is_duplicate_serial_no(item_code, serial_no) {
+		const duplicate = this.frm.doc.items.some(
+			(row) =>
+				row.item_code === item_code &&
+				(row.serial_no || "")
+					.split(/[\n,]/)
+					.some((number) => number.trim().toLowerCase() === serial_no.trim().toLowerCase())
+		);
+		if (duplicate) {
+			frappe.show_alert({
+				message: __("Serial No {0} is already added.", [frappe.utils.escape_html(serial_no)]),
+				indicator: "orange",
+			});
+		}
+		return duplicate;
 	}
 
 	async check_serial_no_availablilty(item_code, warehouse, serial_no) {

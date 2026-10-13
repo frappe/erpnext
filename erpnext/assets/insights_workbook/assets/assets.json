@@ -1,0 +1,1601 @@
+{
+ "charts": {
+  "assets-accumulated-depreciation-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "accumulated_depreciation",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Accumulated Depreciation",
+      "measure_name": "Accumulated Depreciation"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-accumulated-depreciation-2",
+   "query": "assets-accumulated-depreciation",
+   "sort_order": 2,
+   "title": "Accumulated Depreciation",
+   "workbook": "assets"
+  },
+  "assets-additions-this-year": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "purchase_date",
+     "data_type": "Date",
+     "dimension_name": "purchase_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "net_purchase_amount",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Additions This Year",
+      "measure_name": "New Assets (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "assets-additions-this-year",
+   "query": "assets-additions",
+   "sort_order": 4,
+   "title": "New Assets",
+   "workbook": "assets"
+  },
+  "assets-depreciation-by-month": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "posting_date",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Depreciation"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-depreciation-by-month",
+   "query": "assets-depreciation-12-months",
+   "sort_order": 7,
+   "title": "Depreciation by Month",
+   "workbook": "assets"
+  },
+  "assets-depreciation-not-posted-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 0,
+      "negative_is_better": true,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "count_distinct",
+      "column_name": "asset",
+      "data_type": "Integer",
+      "id": "Assets With Depreciation Not Posted",
+      "measure_name": "Assets with Unposted Depreciation"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-depreciation-not-posted-2",
+   "query": "assets-depreciation-not-posted",
+   "sort_order": 6,
+   "title": "Assets with Unposted Depreciation",
+   "workbook": "assets"
+  },
+  "assets-depreciation-this-year": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(posting_date.between(date_sub(fiscal_year_start(date_sub(month_start(today()), 1, 'day')), 1, 'year'), date_sub(date_sub(month_start(today()), 1, 'day'), 1, 'year')), amount)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "Same Months Last Year"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum_if(posting_date.between(fiscal_year_start(date_sub(month_start(today()), 1, 'day')), date_sub(month_start(today()), 1, 'day')), amount)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Depreciation This Year",
+      "measure_name": "Depreciation (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-depreciation-this-year",
+   "query": "assets-depreciation-fiscal-year",
+   "sort_order": 3,
+   "title": "Depreciation",
+   "workbook": "assets"
+  },
+  "assets-disposals-this-year": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "disposal_date",
+     "data_type": "Date",
+     "dimension_name": "disposal_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "net_purchase_amount",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Disposals This Year",
+      "measure_name": "Disposals (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "assets-disposals-this-year",
+   "query": "assets-disposals",
+   "sort_order": 5,
+   "title": "Disposals",
+   "workbook": "assets"
+  },
+  "assets-fully-depreciated-assets-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 20,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Total Asset Cost",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "name",
+      "data_type": "String",
+      "dimension_name": "Asset"
+     },
+     {
+      "column_name": "asset_name",
+      "data_type": "String",
+      "dimension_name": "Asset Name"
+     },
+     {
+      "column_name": "asset_category",
+      "data_type": "String",
+      "dimension_name": "Category"
+     },
+     {
+      "column_name": "location",
+      "data_type": "String",
+      "dimension_name": "Location"
+     },
+     {
+      "column_name": "available_for_use_date",
+      "data_type": "Date",
+      "dimension_name": "Available for Use Date"
+     }
+    ],
+    "values": [
+     {
+      "aggregation": "sum",
+      "column_name": "total_asset_cost",
+      "data_type": "Decimal",
+      "format": "currency",
+      "measure_name": "Total Asset Cost"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "net_book_value",
+      "data_type": "Decimal",
+      "format": "currency",
+      "measure_name": "Asset Value"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "assets-fully-depreciated-assets-2",
+   "query": "assets-fully-depreciated-assets",
+   "sort_order": 9,
+   "title": "Fully Depreciated Assets",
+   "workbook": "assets"
+  },
+  "assets-net-book-value-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "net_book_value",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Net Book Value",
+      "measure_name": "Asset Value"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-net-book-value-2",
+   "query": "assets-net-book-value",
+   "sort_order": 1,
+   "title": "Asset Value",
+   "workbook": "assets"
+  },
+  "assets-net-book-value-by-category": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Asset Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "asset_category",
+      "data_type": "String",
+      "dimension_name": "Category"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "total_asset_cost",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Total Asset Cost"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "net_book_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Asset Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-net-book-value-by-category",
+   "query": "assets-net-book-value",
+   "sort_order": 8,
+   "title": "Asset Value by Category",
+   "workbook": "assets"
+  }
+ },
+ "creation": "2026-09-26 21:12:19.289248",
+ "dashboards": {
+  "assets": {
+   "items": [
+    {
+     "default_operator": "=",
+     "default_user_key": "Company",
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "assets-accumulated-depreciation-2": "`assets-accumulated-depreciation`.`company`",
+      "assets-additions-this-year": "`assets-additions`.`company`",
+      "assets-depreciation-by-month": "`assets-depreciation-12-months`.`company`",
+      "assets-depreciation-not-posted-2": "`assets-depreciation-not-posted`.`company`",
+      "assets-depreciation-this-year": "`assets-depreciation-fiscal-year`.`company`",
+      "assets-disposals-this-year": "`assets-disposals`.`company`",
+      "assets-fully-depreciated-assets-2": "`assets-fully-depreciated-assets`.`company`",
+      "assets-net-book-value-2": "`assets-net-book-value`.`company`",
+      "assets-net-book-value-by-category": "`assets-net-book-value`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "assets-net-book-value-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3khl4jkhtk",
+      "w": 3,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-accumulated-depreciation-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3khuir7uq9",
+      "w": 3,
+      "x": 3,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-depreciation-this-year",
+     "layout": {
+      "h": 5,
+      "i": "chart-3khu2bii75",
+      "w": 3,
+      "x": 6,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-additions-this-year",
+     "layout": {
+      "h": 5,
+      "i": "chart-3kh7ijtnp6",
+      "w": 3,
+      "x": 9,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-disposals-this-year",
+     "layout": {
+      "h": 4,
+      "i": "chart-3khrj5lsc8",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 13
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-depreciation-not-posted-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3kha164cea",
+      "w": 4,
+      "x": 16,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 13
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-depreciation-by-month",
+     "layout": {
+      "h": 17,
+      "i": "chart-3kh7h0drag",
+      "w": 10,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 17
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-net-book-value-by-category",
+     "layout": {
+      "h": 17,
+      "i": "chart-3kh4j18qvm",
+      "w": 10,
+      "x": 10,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 34
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-fully-depreciated-assets-2",
+     "layout": {
+      "h": 22,
+      "i": "chart-3khrspt3qb",
+      "w": 20,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 24,
+       "w": 20,
+       "x": 0,
+       "y": 53
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "assets",
+   "title": "Assets",
+   "vertical_compact_layout": 1,
+   "visible_to_roles": [
+    {
+     "role": "Accounts User"
+    }
+   ],
+   "workbook": "assets"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-28 12:09:41.702007",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "assets",
+ "owner": "Administrator",
+ "queries": {
+  "assets-accumulated-depreciation": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-accumulated-depreciation",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-register",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "name",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "asset",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "depreciation_posted",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "assets-depreciation-posted",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "opening_accumulated_depreciation + coalesce(depreciation_posted, 0)",
+      "type": "expression"
+     },
+     "new_name": "accumulated_depreciation",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "opening_accumulated_depreciation",
+      "depreciation_posted",
+      "accumulated_depreciation",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Accumulated Depreciation",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-additions": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-additions",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "purchase_date",
+      "net_purchase_amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 11,
+   "title": "Additions",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-assets": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-assets",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAsset",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "location",
+      "company",
+      "status",
+      "purchase_date",
+      "available_for_use_date",
+      "disposal_date",
+      "calculate_depreciation",
+      "is_fully_depreciated",
+      "value_after_depreciation",
+      "net_purchase_amount",
+      "total_asset_cost",
+      "opening_accumulated_depreciation"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Assets",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-12-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-12-months",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-depreciation-entries",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(month_start(today()), 12, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Depreciation, 12 Months",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-entries": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-entries",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabGL Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "against_voucher_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Asset"
+      },
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "is_opening",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "No"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "account",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "account_type",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAccount",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "company",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "default_finance_book",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabCompany",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "account_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Depreciation"
+      },
+      {
+       "expression": {
+        "expression": "(coalesce(finance_book, '') == '') | (finance_book == default_finance_book)",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "against_voucher",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "asset_name",
+       "type": "column"
+      },
+      {
+       "column_name": "asset_category",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "against_voucher",
+      "type": "expression"
+     },
+     "new_name": "asset",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "debit - credit",
+      "type": "expression"
+     },
+     "new_name": "amount",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "asset",
+      "asset_name",
+      "asset_category",
+      "voucher_no",
+      "posting_date",
+      "amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Depreciation Entries",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-fiscal-year": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-fiscal-year",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-depreciation-entries",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(fiscal_year_start(date_sub(month_start(today()), 1, 'day')), 1, 'year'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Depreciation, Fiscal Year",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-not-posted": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-not-posted",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabDepreciation Schedule",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "journal_entry",
+        "type": "column"
+       },
+       "operator": "is_not_set",
+       "value": null
+      },
+      {
+       "expression": {
+        "expression": "schedule_date < today()",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "asset",
+       "type": "column"
+      },
+      {
+       "column_name": "finance_book",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAsset Depreciation Schedule",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "asset",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "asset_name",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      },
+      {
+       "column_name": "disposal_date",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "disposal_date",
+        "type": "column"
+       },
+       "operator": "is_not_set",
+       "value": null
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "depreciation_amount",
+      "type": "expression"
+     },
+     "new_name": "amount",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "asset",
+      "asset_name",
+      "finance_book",
+      "schedule_date",
+      "amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 13,
+   "title": "Depreciation Not Posted",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-posted": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-posted",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-depreciation-entries",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "asset",
+       "data_type": "String",
+       "dimension_name": "asset"
+      }
+     ],
+     "measures": [
+      {
+       "aggregation": "sum",
+       "column_name": "amount",
+       "data_type": "Decimal",
+       "measure_name": "depreciation_posted"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Depreciation Posted",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-disposals": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-disposals",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "status",
+      "disposal_date",
+      "net_purchase_amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 12,
+   "title": "Disposals",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-finance-book-values": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-finance-book-values",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAsset Finance Book",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "parenttype",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Asset"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "company",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "company",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "default_finance_book",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabCompany",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "parent",
+       "data_type": "String",
+       "dimension_name": "parent"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count_if((coalesce(default_finance_book, '') != '') & (finance_book == default_finance_book))",
+        "type": "expression"
+       },
+       "measure_name": "default_rows"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((coalesce(default_finance_book, '') != '') & (finance_book == default_finance_book), value_after_depreciation)",
+        "type": "expression"
+       },
+       "measure_name": "default_value"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((coalesce(default_finance_book, '') != '') & (finance_book == default_finance_book), expected_value_after_useful_life)",
+        "type": "expression"
+       },
+       "measure_name": "default_salvage"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(idx == 1, value_after_depreciation)",
+        "type": "expression"
+       },
+       "measure_name": "first_value"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(idx == 1, expected_value_after_useful_life)",
+        "type": "expression"
+       },
+       "measure_name": "first_salvage"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Finance Book Values",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-fully-depreciated-assets": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-fully-depreciated-assets",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-register",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "fully_depreciated",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "location",
+      "available_for_use_date",
+      "total_asset_cost",
+      "net_book_value",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Fully Depreciated Assets",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-net-book-value": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-net-book-value",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-register",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "location",
+      "total_asset_cost",
+      "net_book_value",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Net Book Value",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-register": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-register",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "disposal_date",
+        "type": "column"
+       },
+       "operator": "is_not_set",
+       "value": null
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "name",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "parent",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "default_rows",
+       "type": "column"
+      },
+      {
+       "column_name": "default_value",
+       "type": "column"
+      },
+      {
+       "column_name": "default_salvage",
+       "type": "column"
+      },
+      {
+       "column_name": "first_value",
+       "type": "column"
+      },
+      {
+       "column_name": "first_salvage",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "assets-finance-book-values",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(calculate_depreciation == 1, if_else(default_rows > 0, default_value, first_value), value_after_depreciation)",
+      "type": "expression"
+     },
+     "new_name": "net_book_value",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(default_rows > 0, default_salvage, first_salvage)",
+      "type": "expression"
+     },
+     "new_name": "salvage_value",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "if_else(calculate_depreciation == 1, if_else(net_book_value <= salvage_value, 1, 0), if_else(is_fully_depreciated == 1, 1, 0))",
+      "type": "expression"
+     },
+     "new_name": "fully_depreciated",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Register",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  }
+ },
+ "title": "Assets"
+}

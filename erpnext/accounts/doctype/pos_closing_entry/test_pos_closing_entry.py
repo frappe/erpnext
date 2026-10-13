@@ -440,6 +440,50 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertEqual(pos_si2.pos_closing_entry, pcv_doc2.name)
 			self.assertEqual(pos_rinv2_si.pos_closing_entry, pcv_doc2.name)
 
+	def test_change_is_taken_once_from_modes_sharing_an_account(self):
+		with self.set_user("Administrator"):
+			add_wallet_mode_of_payment(self.pos_profile, "Cash - _TC")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 50), ("_Test Wallet", 50)])
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
+
+	def test_change_is_taken_from_the_mode_on_the_change_account(self):
+		with self.set_user("Administrator"):
+			wallet_account = make_cash_account("_Test Wallet Cash")
+			add_wallet_mode_of_payment(self.pos_profile, wallet_account)
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 40), ("_Test Wallet", 60)], account_for_change_amount=wallet_account)
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
+
+	def test_change_is_taken_after_the_cash_account_changes(self):
+		with self.set_user("Administrator"):
+			new_cash_account = make_cash_account("Zz Test Cash")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 100)])
+		frappe.db.set_value(
+			"Mode of Payment Account",
+			{"parent": "Cash", "company": "_Test Company"},
+			"default_account",
+			new_cash_account,
+		)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 180})
+
+	def test_change_is_taken_when_the_change_account_differs(self):
+		with self.set_user("Administrator"):
+			change_account = make_cash_account("_Test Change Cash")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 100)], account_for_change_amount=change_account)
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 90})
+
 
 def init_user_and_profile(**args):
 	user = "test@example.com"
@@ -502,3 +546,46 @@ def create_multiple_pos_invoices(pos_profile):
 	pos_inv2.submit()
 
 	return pos_inv1, pos_inv2
+
+
+def make_paid_pos_invoice(payments, **args):
+	pos_invoice = create_pos_invoice(rate=90, do_not_submit=1, **args)
+	for mode_of_payment, amount in payments:
+		pos_invoice.append("payments", {"mode_of_payment": mode_of_payment, "amount": amount})
+	pos_invoice.save()
+	pos_invoice.submit()
+	return pos_invoice
+
+
+def get_expected_amounts(opening_entry):
+	closing_entry = make_closing_entry_from_opening(opening_entry)
+	return {row.mode_of_payment: row.expected_amount for row in closing_entry.payment_reconciliation}
+
+
+def make_cash_account(account_name):
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": account_name,
+				"parent_account": frappe.db.get_value("Account", "Cash - _TC", "parent_account"),
+				"company": "_Test Company",
+				"account_type": "Cash",
+			}
+		)
+		.insert()
+		.name
+	)
+
+
+def add_wallet_mode_of_payment(pos_profile, account):
+	frappe.get_doc(
+		{
+			"doctype": "Mode of Payment",
+			"mode_of_payment": "_Test Wallet",
+			"type": "General",
+			"accounts": [{"company": "_Test Company", "default_account": account}],
+		}
+	).insert()
+	pos_profile.append("payments", {"mode_of_payment": "_Test Wallet"})
+	pos_profile.save()

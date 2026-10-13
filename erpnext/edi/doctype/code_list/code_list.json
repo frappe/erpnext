@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2024-09-29 06:55:03.920375",
+ "description": "A published list of codes, like units or tax categories, used in e-invoicing.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

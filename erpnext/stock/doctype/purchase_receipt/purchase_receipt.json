@@ -5,6 +5,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2026-04-06 14:10:33.384946",
+ "description": "Items received from a supplier.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/purchase-receipt",
@@ -34,6 +35,7 @@
   "currency_and_price_list",
   "currency",
   "conversion_rate",
+  "use_transaction_date_exchange_rate",
   "column_break2",
   "buying_price_list",
   "price_list_currency",
@@ -196,7 +198,6 @@
    "bold": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
    "oldfieldtype": "Link",
@@ -220,6 +221,7 @@
   {
    "fieldname": "supplier_delivery_note",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Supplier Delivery Note"
   },
   {
@@ -261,6 +263,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -326,7 +329,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -379,6 +381,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_reference",
    "reqd": 1
   },
   {
@@ -391,6 +394,14 @@
    "precision": "9",
    "print_hide": 1,
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break2",
@@ -440,6 +451,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Accepted Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -1295,7 +1307,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:47.160738",
+ "modified": "2026-10-12 18:16:58.531757",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

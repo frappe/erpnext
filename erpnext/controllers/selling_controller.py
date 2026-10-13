@@ -5,14 +5,14 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, get_link_to_form, nowtime
+from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
-from erpnext.stock.doctype.item.item import set_item_default
+from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
@@ -54,6 +54,7 @@ class SellingController(StockController):
 		super().validate()
 		self.ensure_customer_is_not_blocked()
 		self.validate_items()
+		validate_item_uoms(self.get("items"))
 		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
 		self.validate_selling_price()
@@ -62,6 +63,7 @@ class SellingController(StockController):
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
+		self.validate_price_list_country()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_auto_repeat_subscription_dates()
@@ -69,6 +71,15 @@ class SellingController(StockController):
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
+
+	def validate_price_list_country(self):
+		from erpnext.stock.doctype.price_list.price_list import validate_price_list_country
+
+		if self.get("is_return") or not self.get("customer_address"):
+			return
+
+		country = frappe.db.get_value("Address", self.customer_address, "country")
+		validate_price_list_country(self.get("selling_price_list"), country)
 
 	def validate_standalone_serial_nos_customer(self):
 		if not self.is_return or self.return_against:
@@ -91,14 +102,14 @@ class SellingController(StockController):
 			if serial_nos := frappe.get_all(
 				"Serial No",
 				filters={"name": ("in", serial_nos), "customer": ("is", "set")},
-				fields=["name", "customer"],
+				fields=["serial_no", "customer"],
 			):
 				for sn in serial_nos:
 					if sn.customer and sn.customer != self.customer:
 						frappe.throw(
 							_(
 								"Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
-							).format(frappe.bold(sn.name), frappe.bold(sn.customer)),
+							).format(frappe.bold(escape_html(sn.serial_no)), frappe.bold(sn.customer)),
 							title=_("Serial No Already Assigned"),
 						)
 
@@ -156,7 +167,7 @@ class SellingController(StockController):
 			)
 
 		if self.get("taxes_and_charges") and not self.get("taxes") and not for_validate:
-			taxes = get_taxes_and_charges("Sales Taxes and Charges Template", self.taxes_and_charges)
+			taxes = _get_taxes_and_charges("Sales Taxes and Charges Template", self.taxes_and_charges)
 			for tax in taxes:
 				self.append("taxes", tax)
 
@@ -728,7 +739,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * flt(item_row.qty),
+				"actual_qty": -1 * get_ledger_qty(item_row.qty),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -741,7 +752,7 @@ class SellingController(StockController):
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(
-			item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
+			item_row, {"actual_qty": get_ledger_qty(item_row.qty), "warehouse": item_row.target_warehouse}
 		)
 
 		if self.docstatus == 1:
@@ -1153,7 +1164,7 @@ def set_default_income_account_for_item(obj):
 	    obj: Transaction document containing items table with income_account field
 	"""
 	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
-	for d in obj.get("items", default=[]):
+	for d in sorted(obj.get("items", default=[]), key=lambda row: row.item_code or ""):
 		income_account = getattr(d, "income_account", None)
 		if d.item_code and income_account and income_account != company_default:
 			set_item_default(d.item_code, obj.company, "income_account", income_account)
@@ -1216,10 +1227,18 @@ def get_delivered_serial_batch_for_reservation(item):
 				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
 	else:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		if item.get("serial_no"):
-			serial_nos = get_serial_nos(item.serial_no)
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+			)
 		if item.get("batch_no"):
 			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
 
 	return serial_nos, batch_qty
+
+
+def get_ledger_qty(qty) -> float:
+	"""Stock qty as the stock ledger keeps balances, rounded to its precision."""
+	return flt(qty, frappe.get_precision("Stock Ledger Entry", "actual_qty"))

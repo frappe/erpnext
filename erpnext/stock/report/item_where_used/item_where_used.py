@@ -4,6 +4,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import remove_restricted_masters
+
 WHERE_USED_SECTION = "Where Used"
 REFERENCES_SECTION = "References"
 
@@ -130,7 +132,7 @@ def get_data(filters):
 	if not filters.get("section") or filters.section == REFERENCES_SECTION:
 		data.extend(get_reference_data(filters))
 
-	return data
+	return remove_restricted_masters(data, "related_item", "Item")
 
 
 def get_where_used_data(filters):

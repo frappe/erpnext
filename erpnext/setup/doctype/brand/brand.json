@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:brand",
  "creation": "2013-02-22 01:27:54",
+ "description": "A brand your items are sold under.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/brand",
@@ -29,6 +30,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Description",
    "oldfieldname": "description",

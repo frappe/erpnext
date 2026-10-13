@@ -4,8 +4,10 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
+from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -32,10 +34,16 @@ value_fields = (
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
 	return columns, data
+
+
+def validate_company_permission(company: str | None) -> None:
+	if company and not frappe.has_permission("Company", "select", company):
+		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
 def validate_filters(filters):
@@ -206,6 +214,7 @@ def get_rootwise_opening_balances(
 		)
 
 	opening = frappe._dict()
+	equity_accounts = get_equity_accounts(filters.company) if not ignore_reporting_currency else set()
 	for d in gle:
 		opening_dr_cr = {
 			"account": d.account,
@@ -220,9 +229,7 @@ def get_rootwise_opening_balances(
 			opening[d.account]["opening_credit"] += flt(d.credit)
 
 		else:
-			if d.get("report_type") == "Balance Sheet" and not (
-				d.get("root_type") == "Equity" or d.get("account_type") == "Equity"
-			):
+			if report_type == "Balance Sheet" and d.account not in equity_accounts:
 				opening[d.account]["opening_debit"] += flt(d.debit) * flt(exchange_rate)
 				opening[d.account]["opening_credit"] += flt(d.credit) * flt(exchange_rate)
 			else:
@@ -230,6 +237,20 @@ def get_rootwise_opening_balances(
 				opening[d.account]["opening_credit"] += flt(d.credit_in_reporting_currency)
 
 	return opening
+
+
+def get_equity_accounts(company: str) -> set[str]:
+	"""Equity accounts keep their historical rate when translated to the reporting currency."""
+	account = frappe.qb.DocType("Account")
+	return set(
+		frappe.qb.from_(account)
+		.select(account.name)
+		.where(
+			(account.company == company)
+			& ((account.root_type == "Equity") | (account.account_type == "Equity"))
+		)
+		.run(pluck=True)
+	)
 
 
 def get_opening_balance(
@@ -344,6 +365,9 @@ def get_opening_balance(
 					opening_balance = opening_balance.where(
 						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
 					)
+
+	if match_conditions := build_match_conditions(doctype):
+		opening_balance = opening_balance.where(Bracket(LiteralValue(match_conditions)))
 
 	gle = opening_balance.run(as_dict=1)
 

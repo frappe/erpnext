@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
+from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -232,9 +233,18 @@ class SalesOrder(SellingController):
 				"has_potentially_billable_items",
 				has_potentially_billable_items(self.name),
 			)
+			self.set_onload("has_over_deliverable_rows", self.has_over_deliverable_rows())
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
+
+	def has_over_deliverable_rows(self) -> bool:
+		"""Return True if a fully delivered row can take more qty within its over delivery allowance."""
+		return any(
+			flt(item.qty) <= flt(item.delivered_qty) < flt(item.max_deliverable_qty, item.precision("qty"))
+			for item in self.items
+			if not (item.delivered_by_supplier or cint(item.skip_delivery) or item.closed)
+		)
 
 	def before_validate(self):
 		self.set_has_unit_price_items()
@@ -274,6 +284,7 @@ class SalesOrder(SellingController):
 		StatusService(self).set_default_statuses()
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		pre_submit_validation(self, check_credit_limit=True)
 
 	def set_has_unit_price_items(self):
 		"""
@@ -501,6 +512,12 @@ class SalesOrder(SellingController):
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus.is_cancelled():
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
+
+				if flag == "submit" and doc.status == "Lost":
+					frappe.throw(_("Quotation {0} is Lost").format(quotation))
+
+				if flag == "submit" and not doc.is_active:
+					frappe.throw(_("Quotation {0} is inactive").format(quotation))
 
 				doc.set_status(update=True)
 				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
@@ -921,22 +938,57 @@ def get_stock_reservation_status():
 	return frappe.get_single_value("Stock Settings", "enable_stock_reservation")
 
 
-def get_pending_qty_criterion(sales_order_item):
-	"""Mirror the mapper's pending quantity check."""
+def get_credit_note_return_criterion(invoice):
+	"""Match return invoices that reverse both the delivery and the billing of Sales Order rows."""
+	return (
+		(invoice.is_return == 1)
+		& (invoice.update_stock == 1)
+		& (invoice.update_billed_amount_in_sales_order == 1)
+	)
+
+
+def get_billed_qty_query(sales_order_item):
+	"""Return the qty billed against a Sales Order Item by submitted Sales Invoices."""
 	invoice_item = qb.DocType("Sales Invoice Item")
-	billed_qty = (
+	return (
 		qb.from_(invoice_item)
 		.select(IfNull(Sum(invoice_item.qty), 0))
 		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
 	)
 
+
+def get_pending_qty_criterion(sales_order_item, billed_qty):
+	"""Mirror the mapper's pending quantity check."""
+	invoice = qb.DocType("Sales Invoice")
+	invoice_item = qb.DocType("Sales Invoice Item")
+	credit_note_returned_qty = (
+		qb.from_(invoice_item)
+		.inner_join(invoice)
+		.on(invoice.name == invoice_item.parent)
+		.select(IfNull(Sum(-invoice_item.qty), 0))
+		.where(
+			(invoice_item.docstatus == 1)
+			& (invoice_item.so_detail == sales_order_item.name)
+			& get_credit_note_return_criterion(invoice)
+		)
+	)
+	returned_qty = sales_order_item.returned_qty - credit_note_returned_qty
+
 	qty_precision = frappe.get_precision("Sales Order Item", "qty")
 	has_unbilled_ordered_qty = Round(sales_order_item.qty - billed_qty, qty_precision) > 0
 	has_unbilled_delivered_qty = (
-		Round(sales_order_item.qty - sales_order_item.returned_qty - billed_qty, qty_precision) > 0
+		Round(sales_order_item.qty - returned_qty - billed_qty, qty_precision) > 0
 	) | (Round(sales_order_item.delivered_qty - billed_qty, qty_precision) > 0)
 
 	return has_unbilled_ordered_qty & has_unbilled_delivered_qty
+
+
+def get_qty_billed_below_amount_criterion(sales_order_item, billed_qty):
+	"""Mirror the mapper's check for a fully billed qty that is billed below the row amount."""
+	qty_precision = frappe.get_precision("Sales Order Item", "qty")
+	return (Round(sales_order_item.qty - billed_qty, qty_precision) <= 0) & (
+		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount)
+	)
 
 
 def get_potentially_billable_item_criterion(sales_order, sales_order_item, item):
@@ -950,8 +1002,10 @@ def get_potentially_billable_item_criterion(sales_order, sales_order_item, item)
 		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount) * (1 + allowance / 100)
 	)
 	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
-	is_billable_row = (
-		(sales_order_item.qty != 0) & has_amount_headroom & get_pending_qty_criterion(sales_order_item)
+	billed_qty = get_billed_qty_query(sales_order_item)
+	is_billable_row = (sales_order_item.qty != 0) & (
+		(has_amount_headroom & get_pending_qty_criterion(sales_order_item, billed_qty))
+		| get_qty_billed_below_amount_criterion(sales_order_item, billed_qty)
 	)
 
 	return (sales_order_item.closed == 0) & (is_unit_price_row | is_billable_row)

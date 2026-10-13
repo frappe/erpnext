@@ -35,6 +35,25 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		create_items()
 		reset("Stock Entry")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_fifo_rate_survives_a_balance_below_qty_precision(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Third"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"stock_uom": "Kg", "valuation_method": "FIFO"},
+			uoms=[{"uom": "_Test Third", "conversion_factor": 0.3333333}],
+		).name
+		for _ in range(4):
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=0.5, basic_rate=10.01)
+
+		dn = create_delivery_note(item_code=item, qty=6, rate=50, do_not_save=True)
+		dn.items[0].update({"uom": "_Test Third", "conversion_factor": 0.3333333})
+		dn.submit()
+
+		rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": dn.name, "is_cancelled": 0}, "valuation_rate"
+		)
+		self.assertAlmostEqual(rate, 10.01, delta=0.01)
+
 	def test_stock_write_takes_sle_advisory_gate(self):
 		if frappe.db.db_type != "postgres":
 			self.skipTest("advisory locks are a PostgreSQL feature")
@@ -50,6 +69,22 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
 		self.assertGreater(held_advisory_locks(), before)
 
+	def test_negative_stock_fallback_rate_ignores_later_entries(self):
+		item = make_item(properties={"allow_negative_stock": 1, "valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=300, posting_date=add_days(today(), -5)
+		)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5, posting_date=add_days(today(), -10))
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -400)
+
 	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
 		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
 		serial transferred to another company. posting_date alone is non-total, so two same-date SLEs
@@ -62,7 +97,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		company_a, company_b = "_Test Company", "_Test Company 1"
 		if frappe.db.exists("Serial No", serial):
 			frappe.delete_doc("Serial No", serial, force=1)
-		frappe.get_doc(
+		serial_doc = frappe.get_doc(
 			{"doctype": "Serial No", "serial_no": serial, "item_code": item, "company": company_b}
 		).insert(ignore_permissions=True)
 
@@ -80,7 +115,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 					"actual_qty": 1,
 					"incoming_rate": rate,
 					"is_cancelled": 0,
-					"serial_no": serial,
+					"serial_no": serial_doc.name,
 					"voucher_type": "Stock Entry",
 					"voucher_no": "TEST-TIE",
 				}
@@ -93,7 +128,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		mk_sle("MAT-SLE-TIE-B", 200)  # later/larger name -> deterministic winner
 
 		value = update_entries_after.get_incoming_value_for_serial_nos(
-			frappe._dict(company=company_a), [serial]
+			frappe._dict(company=company_a), [serial_doc.name]
 		)
 		# the latest (creation/name desc) same-date SLE wins -> 200 on both engines
 		self.assertEqual(value, 200.0)
@@ -1059,6 +1094,35 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# same exact queue should be transferred
 		self.assertSLEs(repack, [{"incoming_rate": sum(rates) * 10}], sle_filters={"item_code": packed.name})
 
+	def test_repost_values_dependant_item_with_its_own_valuation_method(self):
+		rm = make_item(properties={"valuation_method": "FIFO"}).name
+		fg = make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=fg, target=warehouse, qty=10, rate=10, posting_date=add_days(today(), -3))
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, rate=100, posting_date=add_days(today(), -3))
+		repack = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=1,
+			purpose="Repack",
+			posting_date=add_days(today(), -2),
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{"item_code": fg, "t_warehouse": warehouse, "qty": 1, "transfer_qty": 1, "is_finished_item": 1},
+		)
+		repack.save()
+		repack.submit()
+
+		issue = make_stock_entry(item_code=fg, source=warehouse, qty=10, posting_date=add_days(today(), -1))
+		self.assertSLEs(issue, [{"stock_value_difference": -181.82}])
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, rate=50, posting_date=add_days(today(), -4))
+
+		self.assertSLEs(issue, [{"stock_value_difference": -136.36}])
+
 	def test_negative_fifo_valuation(self):
 		"""
 		When stock goes negative discard FIFO queue.
@@ -1187,6 +1251,35 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
+
+	def test_repost_does_not_revive_entry_cancelled_midway(self):
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		item_code = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+		second = make_stock_entry(item_code=item_code, target=warehouse, qty=5, rate=120)
+		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": second.name, "is_cancelled": 0})
+
+		process_sle = update_entries_after.process_sle
+
+		def cancel_while_reposting(obj, sle):
+			# the repost has already read this entry as active; the user cancels it now
+			if sle.name == sle_name:
+				frappe.db.set_value("Stock Ledger Entry", sle_name, "is_cancelled", 1)
+			return process_sle(obj, sle)
+
+		with patch.object(update_entries_after, "process_sle", cancel_while_reposting):
+			update_entries_after(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"posting_date": "1900-01-01",
+					"posting_time": "00:01",
+				}
+			)
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_name, "is_cancelled"), 1)
 
 	def test_timestamp_clash(self):
 		item = make_item().name
@@ -1749,6 +1842,315 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			flt(frappe.db.get_value("Bin", {"item_code": fg, "warehouse": warehouse}, "actual_qty")), 615.0
 		)
 
+	def test_previous_sle_includes_backdated_entry_created_later(self):
+		"""A backdated SLE created after a later-posted one (concurrent submits) must still be its previous SLE."""
+		from erpnext.stock.stock_ledger import get_previous_sle_of_current_voucher
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2026-01-06",
+			posting_time="10:00:00",
+		)
+		issue = make_stock_entry(
+			item_code=item,
+			from_warehouse=warehouse,
+			qty=5,
+			posting_date="2026-01-06",
+			posting_time="10:17:20",
+		)
+		# posted before the issue but created after it, as when both are submitted at the same moment
+		receipt = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2026-01-06",
+			posting_time="10:17:09",
+		)
+
+		issue_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			[
+				"name",
+				"item_code",
+				"warehouse",
+				"posting_date",
+				"posting_time",
+				"posting_datetime",
+				"creation",
+			],
+			as_dict=True,
+		)
+		receipt_sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}
+		)
+		self.assertGreater(
+			frappe.db.get_value("Stock Ledger Entry", receipt_sle, "creation"), issue_sle.creation
+		)
+
+		previous_sle = get_previous_sle_of_current_voucher(
+			frappe._dict(
+				{
+					"item_code": item,
+					"warehouse": warehouse,
+					"posting_date": issue_sle.posting_date,
+					"posting_time": issue_sle.posting_time,
+					"posting_datetime": issue_sle.posting_datetime,
+					"creation": issue_sle.creation,
+					"sle_id": issue_sle.name,
+				}
+			)
+		)
+		self.assertEqual(previous_sle.name, receipt_sle)
+		self.assertEqual(previous_sle.qty_after_transaction, 110)
+
+	def test_repost_decision_ignores_stale_future_sle_result(self):
+		"""A concurrent later-posted SLE committed after this voucher's snapshot must still trigger a repost."""
+		from erpnext.controllers.stock_controller import future_sle_exists
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2026-01-06",
+			posting_time="10:00:00",
+		)
+		make_stock_entry(
+			item_code=item,
+			from_warehouse=warehouse,
+			qty=5,
+			posting_date="2026-01-06",
+			posting_time="10:17:20",
+		)
+		receipt = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2026-01-06",
+			posting_time="10:17:09",
+		)
+
+		def repost_entries():
+			return frappe.get_all(
+				"Repost Item Valuation",
+				filters={"docstatus": 1},
+				or_filters={"voucher_no": receipt.name, "item_code": item},
+				pluck="name",
+			)
+
+		existing = set(repost_entries())
+
+		# the snapshot read taken before the later entry committed left "no future SLE" in the cache
+		frappe.local.future_sle = {(receipt.doctype, receipt.name): frappe._dict({})}
+		receipt.repost_future_sle_and_gle()
+
+		self.assertTrue(set(repost_entries()) - existing)
+
+		args = frappe._dict(
+			{
+				"voucher_type": receipt.doctype,
+				"voucher_no": receipt.name,
+				"posting_date": receipt.posting_date,
+				"posting_time": receipt.posting_time,
+			}
+		)
+		self.assertTrue(future_sle_exists(args, for_update=True))
+		if frappe.db.db_type == "mariadb":
+			self.assertIn("for update", frappe.db.last_query.lower())
+
+	def test_repost_keeps_the_fifo_lot_of_a_serial_finished_good(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		company = "_Test Company with perpetual inventory"
+		source, warehouse = "Finished Goods - TCP1", "Stores - TCP1"
+		rm = make_item(properties={"valuation_method": "FIFO"}).name
+		fg = make_item(
+			properties={
+				"valuation_method": "FIFO",
+				"has_serial_no": 1,
+				"use_serial_no_wise_valuation": 0,
+				"serial_no_series": "RFL-.#####",
+			}
+		).name
+		make_stock_entry(
+			item_code=rm, target=source, qty=19, rate=121, company=company, posting_date=add_days(today(), -6)
+		)
+		repack = make_stock_entry(
+			item_code=rm,
+			source=source,
+			qty=2,
+			purpose="Repack",
+			company=company,
+			posting_date=add_days(today(), -2),
+			do_not_save=True,
+		)
+		repack.append(
+			"items",
+			{"item_code": fg, "t_warehouse": warehouse, "qty": 5, "transfer_qty": 5, "is_finished_item": 1},
+		)
+		repack.save()
+		repack.submit()
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			receipt = make_stock_entry(
+				item_code=fg,
+				target=warehouse,
+				qty=2,
+				rate=113,
+				company=company,
+				posting_date=add_days(today(), -3),
+				do_not_save=True,
+			)
+			receipt.append(
+				"items",
+				{
+					"item_code": rm,
+					"t_warehouse": source,
+					"qty": 14,
+					"transfer_qty": 14,
+					"basic_rate": 19,
+					"set_basic_rate_manually": 1,
+				},
+			)
+			receipt.save()
+			receipt.submit()
+			make_stock_entry(
+				item_code=fg,
+				target=warehouse,
+				qty=4,
+				rate=108,
+				company=company,
+				posting_date=add_days(today(), -4),
+			)
+		repost_entries()
+
+		issue = make_stock_entry(
+			item_code=fg, source=warehouse, qty=8, company=company, posting_date=add_days(today(), -1)
+		)
+		self.assertSLEs(issue, [{"stock_value_difference": -(4 * 108 + 2 * 113 + 2 * 48.4)}])
+
+	def test_rate_with_no_earlier_stock_ignores_later_entries(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = make_item(properties={"valuation_method": "Moving Average", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=5,
+			rate=300,
+			company=company,
+			posting_date=add_days(today(), -1),
+		)
+
+		dn_return = create_delivery_note(
+			item_code=item,
+			qty=-3,
+			rate=500,
+			company=company,
+			warehouse=warehouse,
+			is_return=1,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			posting_date=add_days(today(), -3),
+		)
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+		make_stock_entry(item_code=item, target=warehouse, qty=5, rate=1000, company=company)
+		frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item,
+				"warehouse": warehouse,
+				"company": company,
+				"posting_date": add_days(today(), -7),
+				"posting_time": "00:00:00",
+			}
+		).submit()
+
+		self.assertSLEs(dn_return, [{"stock_value_difference": 150}])
+
+	def test_undated_rate_lookup_reads_the_latest_entry(self):
+		from erpnext.stock.utils import _get_incoming_rate
+
+		item = make_item(properties={"valuation_method": "FIFO", "valuation_rate": 50}).name
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, rate=300, company=company)
+
+		rate = _get_incoming_rate(
+			{"item_code": item, "warehouse": "Stores - TCP1", "qty": 1, "company": company}
+		)
+
+		self.assertEqual(rate, 300)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_bin_after_a_failed_submit_reuses_its_name(self):
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		item_a = make_item(properties={"valuation_method": "FIFO"}).name
+		item_b = make_item(properties={"valuation_method": "FIFO"}).name
+
+		make_stock_entry(
+			item_code=item_a,
+			target=warehouse,
+			qty=5,
+			rate=10,
+			company=company,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(
+			item_code=item_a, source=warehouse, qty=5, company=company, posting_date=add_days(today(), -1)
+		)
+		make_stock_entry(
+			item_code=item_b,
+			target=warehouse,
+			qty=2,
+			rate=10,
+			company=company,
+			posting_date=add_days(today(), -1),
+		)
+
+		frappe.db.savepoint("failed_submit")
+		failed = make_stock_entry(
+			item_code=item_a,
+			source=warehouse,
+			qty=2,
+			company=company,
+			posting_date=add_days(today(), -3),
+			do_not_submit=True,
+		)
+		self.assertRaises(frappe.ValidationError, failed.submit)
+		frappe.db.rollback(save_point="failed_submit")
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			receipt = make_stock_entry(
+				item_code=item_b,
+				target=warehouse,
+				qty=3,
+				rate=20,
+				company=company,
+				posting_date=add_days(today(), -2),
+			)
+
+		self.assertEqual(receipt.name, failed.name)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": item_b, "warehouse": warehouse}, "actual_qty"), 5
+		)
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
@@ -1850,7 +2252,9 @@ def setup_item_valuation_test(
 	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
 
 	for i, batch_id in enumerate(batches):
-		if not frappe.db.exists("Batch", batch_id):
+		if batch_name := frappe.db.get_value("Batch", {"item": item.item_code, "batch_id": batch_id}, "name"):
+			batches[i] = batch_name
+		else:
 			ubw = use_batchwise_valuation
 			if isinstance(use_batchwise_valuation, list | tuple):
 				ubw = use_batchwise_valuation[i]
@@ -1861,6 +2265,7 @@ def setup_item_valuation_test(
 			).insert()
 			batch.use_batchwise_valuation = ubw
 			batch.db_update()
+			batches[i] = batch.name
 
 	return item.item_code, warehouses, batches
 

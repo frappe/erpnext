@@ -4,6 +4,7 @@
  "autoname": "prompt",
  "creation": "2023-07-18 14:56:34.477800",
  "default_view": "List",
+ "description": "Build a multi-level BOM in one place.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bom-creator",

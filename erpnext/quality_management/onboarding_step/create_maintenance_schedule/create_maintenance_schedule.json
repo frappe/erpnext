@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Maintenance Schedule",
+ "creation": "2026-10-04 01:54:23.344166",
+ "description": "Regular service visits for equipment you sold, planned ahead for the whole contract. See [Maintenance Schedule](https://docs.frappe.io/erpnext/user/manual/en/maintenance-schedule).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "intro_video_url": "https://www.youtube.com/watch?v=yB2Oqc66TFM",
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:54:23.344166",
+ "modified_by": "Administrator",
+ "name": "Create Maintenance Schedule",
+ "owner": "Administrator",
+ "reference_document": "Maintenance Schedule",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Plan maintenance visits",
+ "validate_action": 1
+}

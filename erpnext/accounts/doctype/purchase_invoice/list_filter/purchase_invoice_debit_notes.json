@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"return_against\", \"label\": \"Return Against Purchase Invoice\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.556573",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Debit Notes",
+ "filters": "[[\"Purchase Invoice\", \"is_return\", \"=\", 1], [\"Purchase Invoice\", \"docstatus\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 5,
+ "modified": "2026-09-30 21:12:56.556573",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Purchase Invoice-Debit Notes",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Invoice",
+ "route_signature": "docstatus=1&is_return=1",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

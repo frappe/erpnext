@@ -5,6 +5,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
+ "description": "An order you place with a supplier.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/purchase-order",
@@ -163,6 +164,7 @@
   "mps",
   "is_internal_supplier",
   "inter_company_order_reference",
+  "remarks",
   "connections_tab"
  ],
  "fields": [
@@ -195,7 +197,6 @@
    "bold": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
@@ -248,6 +249,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Required By"
   },
@@ -358,7 +360,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact Name",
    "read_only": 1
   },
@@ -411,6 +412,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_order_reference",
    "reqd": 1
   },
   {
@@ -897,7 +899,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nCancelled\nClosed\nDelivered",
+   "options": "\nDraft\nOn Hold\nTo Pay\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nCancelled\nClosed\nDelivered",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -930,6 +932,13 @@
    "label": "Inter Company Order Reference",
    "options": "Sales Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_74",
@@ -1300,7 +1309,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-10-12 18:16:58.531757",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

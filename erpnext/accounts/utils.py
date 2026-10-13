@@ -157,15 +157,11 @@ def _get_fiscal_years(company=None):
 
 		if company:
 			FYC = DocType("Fiscal Year Company")
+			company_years = frappe.qb.from_(FYC).select(FYC.parent).where(FYC.company == company)
 			query = query.where(
 				ExistsCriterion(frappe.qb.from_(FYC).select(FYC.name).where(FYC.parent == FY.name)).negate()
-				| ExistsCriterion(
-					frappe.qb.from_(FYC)
-					.select(FYC.company)
-					.where(FYC.parent == FY.name)
-					.where(FYC.company == company)
-				)
-			)
+				| FY.name.isin(company_years)
+			).orderby(Case().when(FY.name.isin(company_years), 0).else_(1))
 
 		query = query.orderby(FY.year_start_date, order=Order.desc)
 		fiscal_years = query.run(as_dict=True)
@@ -214,6 +210,7 @@ def get_balance_on(
 	start_date: str | None = None,
 	finance_book: str | None = None,
 	include_default_fb_balances: bool = False,
+	apply_gl_entry_permissions: bool = False,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -335,6 +332,9 @@ def get_balance_on(
 			)"""
 		)
 
+	if apply_gl_entry_permissions:
+		cond.extend(get_gl_entry_match_conditions())
+
 	if account or (party_type and party) or account_type:
 		precision = get_currency_precision()
 		if in_account_currency:
@@ -353,6 +353,18 @@ def get_balance_on(
 		)[0][0]
 		# if bal is None, return 0
 		return flt(bal)
+
+
+def get_gl_entry_match_conditions() -> list[str]:
+	"""The user's GL Entry permission conditions, for queries aliasing GL Entry as `gle`."""
+	from frappe.desk.reportview import build_match_conditions
+
+	match_conditions = build_match_conditions("GL Entry")
+	if not match_conditions:
+		return []
+	for quoted_table in ("`tabGL Entry`.", '"tabGL Entry".'):
+		match_conditions = match_conditions.replace(quoted_table, "gle.")
+	return [f"({match_conditions})"]
 
 
 def get_count_on(account, fieldname, date):
@@ -2371,7 +2383,9 @@ class QueryPaymentLedger:
 				.where(Criterion.all(self.common_filter))
 				.where(Criterion.all(self.dimensions_filter))
 				.where(Criterion.all(self.voucher_posting_date))
-				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+				.groupby(
+					ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party
+				)
 				# order by the select aliases (postgres can't ORDER BY a non-existent ple column)
 				.orderby(qb.Field("invoice_date"), qb.Field("voucher_no"))
 				# postgres HAVING can't reference a select alias; use the aggregate expression
@@ -2781,48 +2795,21 @@ def is_immutable_ledger_enabled():
 	return frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")
 
 
-PRE_SUBMIT_DOCTYPE_CONFIG = {
-	"Sales Invoice": {
-		"check_prev_docstatus": True,
-		"check_credit_limit": True,
-	},
-	"Purchase Invoice": {
-		"check_prev_docstatus": True,
-	},
-	"Delivery Note": {
-		"check_prev_docstatus": True,
-		"check_credit_limit": True,
-		"check_packed_qty": True,
-	},
-	"Purchase Receipt": {
-		"check_prev_docstatus": True,
-	},
-	"Sales Order": {
-		"check_credit_limit": True,
-	},
-}
-
-
-def pre_submit_validation(doc, method=None):
-	cfg = PRE_SUBMIT_DOCTYPE_CONFIG.get(doc.doctype)
+def pre_submit_validation(doc, check_prev_docstatus=False, check_credit_limit=False, check_packed_qty=False):
 	if (
 		doc.docstatus != 0
 		or not frappe.get_cached_value("Accounts Settings", None, "preview_mode")
-		or not cfg
 		or not doc.company
 	):
 		return
-	_run_pre_submit_checks(doc, cfg)
 
-
-def _run_pre_submit_checks(doc, cfg):
-	if cfg.get("check_prev_docstatus"):
+	if check_prev_docstatus:
 		_check_prev_docstatus(doc)
 
-	if cfg.get("check_credit_limit"):
+	if check_credit_limit:
 		_check_credit_limit_warn(doc)
 
-	if cfg.get("check_packed_qty"):
+	if check_packed_qty:
 		_check_packed_qty_warn(doc)
 
 

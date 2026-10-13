@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:tariff_number",
  "creation": "2017-03-24 15:30:36.314639",
+ "description": "The tariff code an item is declared under at customs.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

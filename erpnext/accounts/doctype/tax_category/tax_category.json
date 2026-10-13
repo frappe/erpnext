@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:title",
  "creation": "2022-01-19 01:09:28.920486",
+ "description": "Picks the right tax template for a customer, supplier or address.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-category",
  "editable_grid": 1,

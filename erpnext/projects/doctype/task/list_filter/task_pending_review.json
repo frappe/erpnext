@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"project\", \"label\": \"Project\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"exp_end_date\", \"label\": \"Expected End Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.948611",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Pending Review",
+ "filters": "[[\"Task\", \"status\", \"=\", \"Pending Review\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.948611",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Task-Pending Review",
+ "owner": "Administrator",
+ "reference_doctype": "Task",
+ "route_signature": "status=Pending Review",
+ "sort_field": "creation",
+ "sort_order": "asc"
+}

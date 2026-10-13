@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, parse_json
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import get_valuation_method
 
 SLE_FIELDS = (
@@ -28,13 +29,14 @@ SLE_FIELDS = (
 	"valuation_rate",
 	"voucher_detail_no",
 	"serial_and_batch_bundle",
+	"is_adjustment_entry",
 )
 
 
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_data(filters):
@@ -74,10 +76,12 @@ def add_invariant_check_fields(sles, filters):
 
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
+		# the reset of an Adjustment Entry moves stock, it does not set a balance
 		if (
 			sle.voucher_type == "Stock Reconciliation"
 			and not sle.batch_no
 			and not sle.serial_and_batch_bundle
+			and not sle.is_adjustment_entry
 		):
 			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
 			if balance_qty is None:

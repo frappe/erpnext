@@ -3,7 +3,7 @@
  "allow_import": 1,
  "autoname": "hash",
  "creation": "2013-05-02 16:29:48",
- "description": "Log the selling and buying rate of an Item",
+ "description": "The price of an item in a price list.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-price",

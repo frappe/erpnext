@@ -13,10 +13,24 @@ class BillingValidationService:
 	def __init__(self, doc):
 		self.doc = doc
 
-	def validate_multiple_billing(self, ref_dt: str, item_ref_dn: str, based_on: str) -> None:
+	def validate_multiple_billing(
+		self,
+		ref_dt: str,
+		item_ref_dn: str,
+		based_on: str,
+		reference_field: str | None = None,
+		billing_flag: str | None = None,
+	) -> None:
+		"""`reference_field` is the reference row's field to bill against, `based_on` by default.
+		With `billing_flag`, debit notes that have that invoice field off do not count as billing."""
 		from erpnext.controllers.status_updater import get_allowance_for
 
-		ref_wise_billed_amount = self.get_reference_wise_billed_amt(ref_dt, item_ref_dn, based_on)
+		if billing_flag and self.doc.get("is_return") and not self.doc.get(billing_flag):
+			return
+
+		ref_wise_billed_amount = self.get_reference_wise_billed_amt(
+			ref_dt, item_ref_dn, based_on, reference_field or based_on, billing_flag
+		)
 		if not ref_wise_billed_amount:
 			return
 
@@ -41,15 +55,11 @@ class BillingValidationService:
 			total_overbilled_amt += overbill_amt
 
 			if overbill_amt > precision_allowance and not is_overbilling_allowed:
-				if self.doc.doctype != "Purchase Invoice" or not cint(
-					frappe.db.get_single_value(
-						"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-					)
-				):
+				if not self.is_rejected_qty_billed_by_amount(based_on):
 					overbilled_items.append(row)
 
 		if overbilled_items:
-			self.throw_overbill_exception(overbilled_items, precision)
+			self.throw_overbill_exception(overbilled_items, precision, based_on)
 
 		if is_overbilling_allowed and total_overbilled_amt > 0.1:
 			frappe.msgprint(
@@ -60,15 +70,31 @@ class BillingValidationService:
 				alert=True,
 			)
 
-	def get_reference_wise_billed_amt(self, ref_dt: str, item_ref_dn: str, based_on: str) -> dict | None:
+	def is_rejected_qty_billed_by_amount(self, based_on: str) -> bool:
+		"""Billed rejected qty has no value on the receipt, so an amount check cannot hold it."""
+		return (
+			based_on == "amount"
+			and self.doc.doctype == "Purchase Invoice"
+			and cint(
+				frappe.db.get_single_value(
+					"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+				)
+			)
+		)
+
+	def get_reference_wise_billed_amt(
+		self, ref_dt: str, item_ref_dn: str, based_on: str, reference_field: str, billing_flag: str | None
+	) -> dict | None:
 		"""Return sum of billed amounts per reference row, including previously submitted invoices."""
 		reference_names = [d.get(item_ref_dn) for d in self.doc.items if d.get(item_ref_dn)]
 		if not reference_names:
 			return
 
 		precision = self.doc.precision(based_on, "items")
-		reference_details = self.get_billing_reference_details(reference_names, ref_dt + " Item", based_on)
-		already_billed = self.get_already_billed_amount(reference_names, item_ref_dn, based_on)
+		reference_details = self.get_billing_reference_details(
+			reference_names, ref_dt + " Item", reference_field
+		)
+		already_billed = self.get_already_billed_amount(reference_names, item_ref_dn, based_on, billing_flag)
 
 		ref_wise_billed_amount = {}
 		for item in self.doc.items:
@@ -92,7 +118,9 @@ class BillingValidationService:
 
 			ref_wise_billed_amount.setdefault(
 				key,
-				frappe._dict(item_code=item.item_code, billed_amt=0.0, ref_amt=ref_amt, rows=[]),
+				frappe._dict(
+					item_code=item.item_code, uom=item.get("uom"), billed_amt=0.0, ref_amt=ref_amt, rows=[]
+				),
 			)
 			ref_wise_billed_amount[key]["rows"].append(item.idx)
 			ref_wise_billed_amount[key]["ref_amt"] = ref_amt
@@ -115,23 +143,31 @@ class BillingValidationService:
 		)
 
 	def get_already_billed_amount(
-		self, reference_names: list, item_ref_dn: str, based_on: str
+		self, reference_names: list, item_ref_dn: str, based_on: str, billing_flag: str | None = None
 	) -> frappe._dict:
 		item_doctype = frappe.qb.DocType(self.doc.items[0].doctype)
-		based_on_field = frappe.qb.Field(based_on)
-		join_field = frappe.qb.Field(item_ref_dn)
+		based_on_field = item_doctype[based_on]
+		join_field = item_doctype[item_ref_dn]
 
-		return frappe._dict(
-			(
-				frappe.qb.from_(item_doctype)
-				.select(join_field, Sum(based_on_field))
-				.where(join_field.isin(reference_names))
-				.where((item_doctype.docstatus == 1) & (item_doctype.parent != self.doc.name))
-				.groupby(join_field)
-			).run()
+		query = (
+			frappe.qb.from_(item_doctype)
+			.select(join_field, Sum(based_on_field))
+			.where(join_field.isin(reference_names))
+			.where((item_doctype.docstatus == 1) & (item_doctype.parent != self.doc.name))
+			.groupby(join_field)
 		)
 
-	def throw_overbill_exception(self, overbilled_items: list, precision: int) -> None:
+		if billing_flag:
+			invoice = frappe.qb.DocType(self.doc.doctype)
+			query = (
+				query.inner_join(invoice)
+				.on(invoice.name == item_doctype.parent)
+				.where((invoice.is_return == 0) | (invoice[billing_flag] == 1))
+			)
+
+		return frappe._dict(query.run())
+
+	def throw_overbill_exception(self, overbilled_items: list, precision: int, based_on: str) -> None:
 		message = (
 			_("<p>Cannot overbill for the following Items:</p>")
 			+ "<ul>"
@@ -139,9 +175,7 @@ class BillingValidationService:
 				_("<li>Item {0} in row(s) {1} billed more than {2}</li>").format(
 					frappe.bold(item.item_code),
 					", ".join(str(x) for x in item.rows),
-					frappe.bold(
-						fmt_money(item.max_allowed_amt, precision=precision, currency=self.doc.currency)
-					),
+					frappe.bold(self.get_formatted_limit(item, precision, based_on)),
 				)
 				for item in overbilled_items
 			)
@@ -149,3 +183,9 @@ class BillingValidationService:
 		)
 		message += _("<p>To allow over-billing, please set allowance in Accounts Settings.</p>")
 		frappe.throw(message)
+
+	def get_formatted_limit(self, item: frappe._dict, precision: int, based_on: str) -> str:
+		if based_on == "qty":
+			return f"{flt(item.max_allowed_amt, precision)} {item.uom}"
+
+		return fmt_money(item.max_allowed_amt, precision=precision, currency=self.doc.currency)

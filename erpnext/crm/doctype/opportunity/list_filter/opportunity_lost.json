@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"opportunity_from\", \"label\": \"Opportunity From\"}, {\"fieldname\": \"opportunity_amount\", \"label\": \"Opportunity Amount\"}, {\"fieldname\": \"order_lost_reason\", \"label\": \"Detailed Reason\"}, {\"fieldname\": \"opportunity_owner\", \"label\": \"Opportunity Owner\"}]",
+ "creation": "2026-09-30 21:12:56.929241",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Lost",
+ "filters": "[[\"Opportunity\", \"status\", \"=\", \"Lost\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.929241",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Opportunity-Lost",
+ "owner": "Administrator",
+ "reference_doctype": "Opportunity",
+ "route_signature": "status=Lost",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

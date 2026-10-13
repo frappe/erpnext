@@ -34,11 +34,13 @@ from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.accounts.utils import (
 	get_account_currency,
 	get_fiscal_year,
+	pre_submit_validation,
 	refresh_subscription_status,
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -233,6 +235,8 @@ class PurchaseInvoice(BuyingController):
 				"source_field": "amount",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and (is_return=0 or update_billed_amount_in_purchase_order=1))""",
 			}
 		]
 		self.closed_source_links = [
@@ -295,7 +299,23 @@ class PurchaseInvoice(BuyingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
-		BillingValidationService(self).validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
+		buying_settings = frappe.get_cached_doc("Buying Settings")
+		billing_validation = BillingValidationService(self)
+		if buying_settings.set_landed_cost_based_on_purchase_invoice_rate:
+			billing_validation.validate_multiple_billing(
+				"Purchase Receipt",
+				"pr_detail",
+				"qty",
+				reference_field="received_qty"
+				if buying_settings.bill_for_rejected_quantity_in_purchase_invoice
+				else "qty",
+				billing_flag="update_billed_amount_in_purchase_receipt",
+			)
+			billing_validation.validate_multiple_billing(
+				"Purchase Order", "po_detail", "qty", billing_flag="update_billed_amount_in_purchase_order"
+			)
+		else:
+			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		self.validate_exchange_rate_with_purchase_receipt()
@@ -310,6 +330,8 @@ class PurchaseInvoice(BuyingController):
 
 		if self.on_hold:
 			self.validate_invoice_hold()
+
+		pre_submit_validation(self, check_prev_docstatus=True)
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
@@ -528,7 +550,7 @@ class PurchaseInvoice(BuyingController):
 					throw(msg, title=_("Mandatory Purchase Order"))
 
 	def pr_required(self):
-		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes" and not self.update_stock:
 			stock_and_asset_items = self.get_stock_items()
 			stock_and_asset_items.extend(self.get_asset_items())
 			if frappe.get_value(
@@ -586,6 +608,9 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
 	def update_status_updater_args(self):
+		if is_billed_by_qty():
+			self.set_purchase_order_billing_by_qty()
+
 		if cint(self.update_stock):
 			self.status_updater.append(
 				{
@@ -616,7 +641,13 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
 					"source_field": "stock_qty",
+					"second_source_dt": "Purchase Receipt Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "material_request_item",
+					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 					"percent_join_field": "material_request",
+					"validate_qty": False,
 				}
 			)
 			if cint(self.is_return):
@@ -635,6 +666,13 @@ class PurchaseInvoice(BuyingController):
 						where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)""",
 					}
 				)
+
+	def set_purchase_order_billing_by_qty(self):
+		"""The status updater keeps billed_amt current; billing % and over-billing follow invoiced qty instead."""
+		for args in self.status_updater:
+			if args.get("overflow_type") == "billing":
+				args.pop("percent_join_field", None)
+				args["validate_overflow"] = False
 
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
@@ -669,6 +707,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		BillingStatusService(self).update_billing_status_in_po()
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
@@ -783,6 +822,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		BillingStatusService(self).update_billing_status_in_po()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
@@ -818,6 +858,7 @@ class PurchaseInvoice(BuyingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
 
@@ -870,6 +911,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
+		self.shift_service_dates(reference_doc, auto_repeat_doc)
 
 	@frappe.whitelist(methods=["POST"])
 	def block_invoice(self, hold_comment: str | None = None, release_date: DateTimeLikeObject | None = None):

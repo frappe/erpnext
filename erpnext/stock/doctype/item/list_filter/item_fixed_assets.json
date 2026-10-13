@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"asset_category\", \"label\": \"Asset Category\"}, {\"fieldname\": \"item_group\", \"label\": \"Item Group\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}]",
+ "creation": "2026-09-30 21:12:56.847095",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Fixed Assets",
+ "filters": "[[\"Item\", \"disabled\", \"=\", 0], [\"Item\", \"is_fixed_asset\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.847095",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item-Fixed Assets",
+ "owner": "Administrator",
+ "reference_doctype": "Item",
+ "route_signature": "disabled=0&is_fixed_asset=1",
+ "sort_field": "item_name",
+ "sort_order": "asc"
+}

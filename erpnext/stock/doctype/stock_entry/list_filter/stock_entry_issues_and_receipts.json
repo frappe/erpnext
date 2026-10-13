@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"stock_entry_type\", \"label\": \"Stock Entry Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"from_warehouse\", \"label\": \"Default Source Warehouse\"}, {\"fieldname\": \"to_warehouse\", \"label\": \"Default Target Warehouse\"}, {\"fieldname\": \"total_amount\", \"label\": \"Total Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.874945",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Issues and Receipts",
+ "filters": "[[\"Stock Entry\", \"docstatus\", \"=\", 1], [\"Stock Entry\", \"purpose\", \"in\", [\"Material Issue\", \"Material Receipt\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 5,
+ "modified": "2026-09-30 21:12:56.874945",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry-Issues and Receipts",
+ "owner": "Administrator",
+ "reference_doctype": "Stock Entry",
+ "route_signature": "docstatus=1&purpose=[\"in\",[\"Material Issue\",\"Material Receipt\"]]",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

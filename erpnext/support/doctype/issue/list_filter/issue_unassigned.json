@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"opening_date\", \"label\": \"Opening Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.984436",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Unassigned",
+ "filters": "[[\"Issue\", \"status\", \"=\", \"Open\"], [\"Issue\", \"_assign\", \"is\", \"not set\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.984436",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Issue-Unassigned",
+ "owner": "Administrator",
+ "reference_doctype": "Issue",
+ "route_signature": "_assign=[\"is\",\"not set\"]&status=Open",
+ "sort_field": "opening_date",
+ "sort_order": "asc"
+}

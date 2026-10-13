@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "MAT-UOM-CNV-.#####",
  "creation": "2018-04-30 17:37:02.347217",
+ "description": "How many of one unit make another, like 1000 g in a kg.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

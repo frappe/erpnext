@@ -7,8 +7,8 @@ import sys
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import DateDiff, Sum
-from frappe.utils import flt, getdate
+from frappe.query_builder.functions import Count, DateDiff, Sum
+from frappe.utils import date_diff, flt
 
 
 class VariablePathNotFound(frappe.ValidationError):
@@ -36,14 +36,11 @@ class SupplierScorecardVariable(Document):
 
 	def validate_path_exists(self):
 		if "." in self.path:
-			try:
-				from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
-					import_string_path,
-				)
+			from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+				import_string_path,
+			)
 
-				import_string_path(self.path)
-			except AttributeError:
-				frappe.throw(_("Could not find path for {0}").format(self.path), VariablePathNotFound)
+			import_string_path(self.path)
 
 		else:
 			if not hasattr(sys.modules[__name__], self.path):
@@ -52,8 +49,7 @@ class SupplierScorecardVariable(Document):
 
 def get_total_workdays(scorecard):
 	"""Gets the number of days in this period"""
-	delta = getdate(scorecard.end_date) - getdate(scorecard.start_date)
-	return delta.days
+	return date_diff(scorecard.end_date, scorecard.start_date) + 1
 
 
 def get_item_workdays(scorecard):
@@ -70,6 +66,7 @@ def get_item_workdays(scorecard):
 		.on(PO_Item.parent == PO.name)
 		.select(Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty)))
 		.where(PO.supplier == scorecard.supplier)
+		.where(PO.docstatus == 1)
 		.where(PO_Item.received_qty < PO_Item.qty)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])  # Équivalent du BETWEEN
 	)
@@ -173,6 +170,7 @@ def get_total_days_late(scorecard):
 			Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty - PO_Item.received_qty))
 		)
 		.where(PO.supplier == scorecard.supplier)
+		.where(PO.docstatus == 1)
 		.where(PO_Item.received_qty < PO_Item.qty)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 	)
@@ -228,7 +226,7 @@ def get_total_received(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Count(pr_item.base_amount))
+		.select(Count(pr_item.base_amount))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -247,7 +245,7 @@ def get_total_received_amount(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Sum(pr_item.received_qty * pr_item.base_rate))
+		.select(Sum(pr_item.received_qty * pr_item.base_rate))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -266,7 +264,7 @@ def get_total_received_items(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Sum(pr_item.received_qty))
+		.select(Sum(pr_item.received_qty))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -285,7 +283,7 @@ def get_total_rejected_amount(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Sum(pr_item.rejected_qty * pr_item.base_rate))
+		.select(Sum(pr_item.rejected_qty * pr_item.base_rate))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -304,7 +302,7 @@ def get_total_rejected_items(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Sum(pr_item.rejected_qty))
+		.select(Sum(pr_item.rejected_qty))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -323,7 +321,7 @@ def get_total_accepted_amount(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Sum(pr_item.qty * pr_item.base_rate))
+		.select(Sum(pr_item.qty * pr_item.base_rate))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -342,7 +340,7 @@ def get_total_accepted_items(scorecard):
 		frappe.qb.from_(pr)
 		.join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(frappe.qb.fn.Sum(pr_item.qty))
+		.select(Sum(pr_item.qty))
 		.where(pr.supplier == scorecard.supplier)
 		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
 		.where(pr_item.docstatus == 1)
@@ -361,7 +359,7 @@ def get_total_shipments(scorecard):
 		frappe.qb.from_(po)
 		.join(po_item)
 		.on(po_item.parent == po.name)
-		.select(frappe.qb.fn.Count(po_item.base_amount))
+		.select(Count(po_item.base_amount))
 		.where(po.supplier == scorecard.supplier)
 		.where(po_item.schedule_date[scorecard.start_date : scorecard.end_date])
 		.where(po_item.docstatus == 1)
@@ -417,7 +415,7 @@ def get_rfq_total_number(scorecard):
 		.on(rfq_item.parent == rfq.name)
 		.join(rfq_sup)
 		.on(rfq_sup.parent == rfq.name)
-		.select(frappe.qb.fn.Count(rfq.name))
+		.select(Count(rfq.name).distinct())
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
 		.where(rfq_item.docstatus == 1)
@@ -439,7 +437,7 @@ def get_rfq_total_items(scorecard):
 		.on(rfq_item.parent == rfq.name)
 		.join(rfq_sup)
 		.on(rfq_sup.parent == rfq.name)
-		.select(frappe.qb.fn.Count(rfq_item.name))
+		.select(Count(rfq_item.name))
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
 		.where(rfq_item.docstatus == 1)
@@ -467,7 +465,7 @@ def get_sq_total_number(scorecard):
 		.on(sq_item.request_for_quotation_item == rfq_item.name)
 		.join(sq)
 		.on(sq_item.parent == sq.name)
-		.select(frappe.qb.fn.Count(sq.name))
+		.select(Count(sq.name).distinct())
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(sq.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
@@ -497,7 +495,7 @@ def get_sq_total_items(scorecard):
 		.on(sq_item.request_for_quotation_item == rfq_item.name)
 		.join(sq)
 		.on(sq_item.parent == sq.name)
-		.select(frappe.qb.fn.Count(sq_item.name))
+		.select(Count(sq_item.name))
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(sq.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
@@ -517,7 +515,7 @@ def get_rfq_response_days(scorecard):
 	sq = frappe.qb.DocType("Supplier Quotation")
 	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
-	query = (
+	responses = (
 		frappe.qb.from_(rfq)
 		.join(rfq_item)
 		.on(rfq_item.parent == rfq.name)
@@ -527,13 +525,12 @@ def get_rfq_response_days(scorecard):
 		.on(sq_item.request_for_quotation_item == rfq_item.name)
 		.join(sq)
 		.on(sq_item.parent == sq.name)
-		.select(frappe.qb.fn.Sum(DateDiff(sq.transaction_date, rfq.transaction_date)))
+		.select(rfq.name, sq.name, DateDiff(sq.transaction_date, rfq.transaction_date))
+		.distinct()
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(sq.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
 		.where(rfq_item.docstatus == 1)
 		.where(sq_item.docstatus == 1)
-	)
-
-	result = query.run()
-	return frappe.utils.cint(result[0][0]) if result else 0
+	).run()
+	return sum(frappe.utils.cint(days) for _rfq, _sq, days in responses)

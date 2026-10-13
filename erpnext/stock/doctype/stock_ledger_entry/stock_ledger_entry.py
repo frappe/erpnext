@@ -17,6 +17,8 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.valuation_adjustment import validate_no_later_adjustment_entry
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -102,6 +104,7 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
+		validate_no_later_adjustment_entry(self)
 		self.validate_inventory_dimension_negative_stock()
 		self.validate_serial_no_inventory_dimension()
 
@@ -125,27 +128,61 @@ class StockLedgerEntry(Document):
 		if diff < 0 and abs(diff) > 0.0001:
 			self.throw_validation_error(diff, dimensions)
 
+		if not self.flags.defer_future_dimension_check:
+			self.validate_future_inventory_dimension_balance(diff, dimensions, flt_precision)
+
+	def validate_future_dimension_balance_after_voucher(self):
+		if self.is_cancelled or self.actual_qty >= 0:
+			return
+
+		dimensions = self._get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		balance = flt(self.get_available_qty_after_prev_transaction(dimensions), flt_precision)
+		self.validate_future_inventory_dimension_balance(balance, dimensions, flt_precision)
+
+	def validate_future_inventory_dimension_balance(self, balance, dimensions, precision):
+		for actual_qty in self.get_future_dimension_qty(dimensions):
+			balance = flt(balance + flt(actual_qty), precision)
+			if balance < 0 and abs(balance) > 0.0001:
+				self.throw_validation_error(balance, dimensions)
+
 	def get_available_qty_after_prev_transaction(self, dimensions):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		available_qty_query = (
-			frappe.qb.from_(sle)
+		available_qty = (
+			self.get_dimension_sle_query(sle, dimensions)
 			.select(Sum(sle.actual_qty))
-			.where(
-				(sle.item_code == self.item_code)
-				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
-				& (sle.company == self.company)
-				& (sle.is_cancelled == 0)
-			)
+			.where(sle.posting_datetime <= self.posting_datetime)
+			.run()
+		)
+
+		return available_qty[0][0] or 0
+
+	def get_future_dimension_qty(self, dimensions):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return (
+			self.get_dimension_sle_query(sle, dimensions)
+			.select(sle.actual_qty)
+			.where(sle.posting_datetime > self.posting_datetime)
+			.orderby(sle.posting_datetime)
+			.orderby(sle.creation)
+			.run(pluck=True)
+		)
+
+	def get_dimension_sle_query(self, sle, dimensions):
+		query = frappe.qb.from_(sle).where(
+			(sle.item_code == self.item_code)
+			& (sle.warehouse == self.warehouse)
+			& (sle.company == self.company)
+			& (sle.is_cancelled == 0)
 		)
 
 		for dimension, values in dimensions.items():
-			dimension_value = values.get("value")
-			available_qty_query = available_qty_query.where(sle[dimension] == dimension_value)
+			query = query.where(sle[dimension] == values.get("value"))
 
-		available_qty = available_qty_query.run()
-
-		return available_qty[0][0] or 0
+		return query
 
 	def throw_validation_error(self, diff, dimensions):
 		msg = _(
@@ -210,7 +247,8 @@ class StockLedgerEntry(Document):
 			if mismatches:
 				frappe.throw(
 					_("Serial No {0} is not available in the selected inventory dimensions: {1}").format(
-						frappe.bold(serial_no), frappe.bold(", ".join(mismatches))
+						frappe.bold(SerialBatchIdentity("Serial No").get_label(serial_no)),
+						frappe.bold(", ".join(mismatches)),
 					),
 					title=_("Incorrect Inventory Dimension"),
 					exc=SerialNoInventoryDimensionError,
@@ -266,7 +304,8 @@ class StockLedgerEntry(Document):
 		if frappe.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
 			return
 
-		if self.is_adjustment_entry:
+		# a write-off moves no serial no or batch; the reset of an Adjustment Entry does
+		if self.is_adjustment_entry and not self.serial_and_batch_bundle:
 			return
 
 		if not self.get("via_landed_cost_voucher"):
@@ -341,32 +380,7 @@ class StockLedgerEntry(Document):
 		frappe.throw(_(message), exception)
 
 	def check_stock_frozen_date(self):
-		stock_settings = frappe.get_cached_doc("Stock Settings")
-
-		if stock_settings.stock_frozen_upto:
-			if (
-				getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)
-				and stock_settings.stock_auth_role not in frappe.get_roles()
-			):
-				frappe.throw(
-					_("Stock transactions before {0} are frozen").format(
-						formatdate(stock_settings.stock_frozen_upto)
-					),
-					StockFreezeError,
-				)
-
-		stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
-		if stock_frozen_upto_days:
-			older_than_x_days_ago = (
-				add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today()
-			)
-			if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
-				frappe.throw(
-					_("Not allowed to update stock transactions older than {0}").format(
-						stock_frozen_upto_days
-					),
-					StockFreezeError,
-				)
+		check_stock_frozen_date(self.posting_date)
 
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == "00:0":
@@ -383,7 +397,9 @@ class StockLedgerEntry(Document):
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):
 					frappe.throw(
-						_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code)
+						_("Batch {0} of Item {1} has expired.").format(
+							SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+						)
 					)
 
 	def validate_and_set_fiscal_year(self):
@@ -464,3 +480,28 @@ def on_doctype_update():
 			index_name="sle_active_posting",
 			where="is_cancelled = 0",
 		)
+
+
+def check_stock_frozen_date(posting_date):
+	stock_settings = frappe.get_cached_doc("Stock Settings")
+
+	if stock_settings.stock_frozen_upto:
+		if (
+			getdate(posting_date) <= getdate(stock_settings.stock_frozen_upto)
+			and stock_settings.stock_auth_role not in frappe.get_roles()
+		):
+			frappe.throw(
+				_("Stock transactions before {0} are frozen").format(
+					formatdate(stock_settings.stock_frozen_upto)
+				),
+				StockFreezeError,
+			)
+
+	stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
+	if stock_frozen_upto_days:
+		older_than_x_days_ago = add_days(getdate(posting_date), stock_frozen_upto_days) <= date.today()
+		if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
+			frappe.throw(
+				_("Not allowed to update stock transactions older than {0}").format(stock_frozen_upto_days),
+				StockFreezeError,
+			)

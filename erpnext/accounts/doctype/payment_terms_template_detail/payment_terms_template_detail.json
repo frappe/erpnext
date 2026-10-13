@@ -27,6 +27,7 @@
    "columns": 2,
    "fieldname": "payment_term",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Payment Term",
    "options": "Payment Term"
@@ -68,6 +69,7 @@
    "fetch_if_empty": 1,
    "fieldname": "credit_days",
    "fieldtype": "Int",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Credit Days",
    "non_negative": 1

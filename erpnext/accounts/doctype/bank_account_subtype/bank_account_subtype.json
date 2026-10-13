@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:account_subtype",
  "creation": "2018-10-25 15:46:08.054586",
+ "description": "A finer grouping of bank accounts, like savings or current.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

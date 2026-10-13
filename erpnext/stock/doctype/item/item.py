@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold
@@ -11,6 +12,7 @@ from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import (
 	cint,
 	cstr,
+	escape_html,
 	flt,
 	formatdate,
 	get_link_to_form,
@@ -30,8 +32,10 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
+from erpnext.stock.doctype.item.item_search import queue_item
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_valuation_method
 
 
@@ -159,7 +163,9 @@ class Item(Document):
 	def onload(self):
 		self.set_onload("stock_exists", self.stock_ledger_created())
 		self.set_onload("asset_naming_series", get_asset_naming_series())
-		self.set_onload("current_valuation_method", get_valuation_method(self.name))
+		self.set_onload(
+			"current_valuation_method", get_valuation_method(self.name, erpnext.get_default_company())
+		)
 		self.set_onload("asset_exists", self.has_submitted_assets())
 
 	def autoname(self):
@@ -220,6 +226,8 @@ class Item(Document):
 		self.validate_conversion_factor()
 		self.validate_item_type()
 		self.validate_naming_series()
+		if self.is_new():
+			self.validate_opening_stock()
 		self.validate_shelf_life()
 		self.check_for_active_boms()
 		self.fill_customer_code()
@@ -239,10 +247,12 @@ class Item(Document):
 		self.clear_retain_sample()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_default_uoms()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
 		self.validate_item_defaults()
 		self.validate_auto_reorder_enabled_in_stock_settings()
+		self.validate_serial_and_batch_no_enabled_in_stock_settings()
 		self.cant_change()
 		self.validate_serialized_change_with_bundle()
 		self.validate_serial_no_wise_valuation()
@@ -259,6 +269,7 @@ class Item(Document):
 		self.update_variants()
 		self.update_item_price()
 		clear_valuation_method_cache()
+		queue_item(self.name)
 
 	def validate_description(self):
 		"""Clean HTML description if set"""
@@ -313,13 +324,23 @@ class Item(Document):
 			)
 			item_price.insert()
 
+	def validate_opening_stock(self):
+		if not self.is_stock_item or not self.opening_stock:
+			return
+
+		if self.has_serial_no and not self.serial_no_series:
+			frappe.throw(
+				_("Serial Number Series is mandatory when entering Opening Stock for a serialized item.")
+			)
+
+		if self.has_batch_no and not self.create_new_batch:
+			frappe.throw(
+				_("Enable Automatically Create New Batch when entering Opening Stock for a batched item.")
+			)
+
 	def set_opening_stock(self):
 		"""set opening stock"""
-		if (
-			not self.is_stock_item
-			or (self.has_serial_no and not self.serial_no_series)
-			or (self.has_batch_no and (not self.create_new_batch or not self.batch_number_series))
-		):
+		if not self.is_stock_item:
 			return
 
 		if self.valuation_rate is None and not self.is_customer_provided_item:
@@ -662,7 +683,9 @@ class Item(Document):
 
 		if merge:
 			self.validate_properties_before_merge(new_name)
+			self.validate_shared_serial_batch_numbers_before_merge(old_name, new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
+			self.validate_duplicate_lead_times_before_merge(old_name, new_name)
 			self.delete_old_bins(old_name)
 
 	def after_rename(self, old_name, new_name, merge):
@@ -679,6 +702,8 @@ class Item(Document):
 		if merge:
 			self.set_last_purchase_rate(new_name)
 			self.recalculate_bin_qty(new_name)
+
+		queue_item(new_name, drop=old_name)
 
 	def delete_old_bins(self, old_name):
 		frappe.db.delete("Bin", {"item_code": old_name})
@@ -725,6 +750,17 @@ class Item(Document):
 			msg += ": \n" + ", ".join([self.meta.get_translated_label(fld) for fld in field_list])
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
+	def validate_shared_serial_batch_numbers_before_merge(self, old_name, new_name):
+		for doctype in ("Serial No", "Batch"):
+			if shared := SerialBatchIdentity(doctype).get_shared_numbers(old_name, new_name):
+				frappe.throw(
+					_("Cannot merge because both items have {0} {1}").format(
+						_(doctype), ", ".join(escape_html(number) for number in shared)
+					),
+					title=_("Cannot Merge"),
+					exc=DataValidationError,
+				)
+
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
 		"Block merge if both old and new items have product bundles."
 		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
@@ -740,6 +776,21 @@ class Item(Document):
 				bundle_link, old_name, new_name
 			)
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
+	def validate_duplicate_lead_times_before_merge(self, old_name, new_name):
+		old_lead_time = frappe.db.get_value("Item Lead Time", {"item_code": old_name})
+		if not (old_lead_time and frappe.db.exists("Item Lead Time", {"item_code": new_name})):
+			return
+
+		frappe.throw(
+			_("Please delete Item Lead Time {0}, before merging {1} into {2}").format(
+				get_link_to_form("Item Lead Time", old_lead_time),
+				frappe.bold(old_name),
+				frappe.bold(new_name),
+			),
+			title=_("Cannot Merge"),
+			exc=DataValidationError,
+		)
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
@@ -1029,15 +1080,16 @@ class Item(Document):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
+		allow_different_uom = frappe.get_cached_value(
+			"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
+		)
+
 		if not self.is_new():
 			check_stock_uom_with_bin(self.name, self.stock_uom)
-		if self.has_variants:
+		if self.has_variants and not allow_different_uom:
 			for d in frappe.db.get_all("Item", filters={"variant_of": self.name}):
 				check_stock_uom_with_bin(d.name, self.stock_uom)
 		if self.variant_of:
-			allow_different_uom = frappe.get_cached_value(
-				"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
-			)
 			if not allow_different_uom:
 				template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 				if template_uom != self.stock_uom:
@@ -1048,14 +1100,30 @@ class Item(Document):
 					)
 
 	def validate_uom_conversion_factor(self):
-		if self.uoms:
-			for d in self.uoms:
-				if d.conversion_factor:
-					continue
+		for d in self.get("uoms"):
+			if not d.conversion_factor:
+				d.conversion_factor = get_uom_conv_factor(d.uom, self.stock_uom)
 
-				value = get_uom_conv_factor(d.uom, self.stock_uom)
-				if value:
-					d.conversion_factor = value
+			if flt(d.conversion_factor) <= 0:
+				frappe.throw(_("Row {0}: Conversion Factor must be greater than zero.").format(d.idx))
+
+	def validate_default_uoms(self):
+		if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+			return
+
+		allowed_uoms = get_allowed_uoms([self])[self.name]
+		for fieldname in ("sales_uom", "purchase_uom"):
+			uom = self.get(fieldname)
+			if uom and uom not in allowed_uoms:
+				frappe.throw(
+					_(
+						"{0} {1} has no conversion factor in this Item. Add it to the UOMs table, or disable {2} in Stock Settings."
+					).format(
+						_(self.meta.get_label(fieldname)),
+						bold(uom),
+						bold(_("Allow UOM with conversion rate defined in Item")),
+					)
+				)
 
 	def validate_attributes(self):
 		if not (self.has_variants or self.variant_of):
@@ -1247,6 +1315,7 @@ class Item(Document):
 				"Sales Order Item",
 				"Purchase Order Item",
 				"Material Request Item",
+				"Work Order Item",
 				"Product Bundle",
 				"BOM",
 			]
@@ -1294,6 +1363,22 @@ class Item(Document):
 					msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."),
 					title=_("Enable Auto Re-Order"),
 					indicator="orange",
+				)
+
+	def validate_serial_and_batch_no_enabled_in_stock_settings(self):
+		if frappe.get_single_value("Stock Settings", "enable_serial_and_batch_no_for_item"):
+			return
+
+		doc_before_save = self.get_doc_before_save()
+		for fieldname in ("has_serial_no", "has_batch_no"):
+			if self.get(fieldname) and not (doc_before_save and doc_before_save.get(fieldname)):
+				frappe.throw(
+					_("Cannot enable {0} as {1} is disabled in {2}").format(
+						bold(self.meta.get_label(fieldname)),
+						bold(_("Activate Serial / Batch No for Item")),
+						get_link_to_form("Stock Settings", "Stock Settings"),
+					),
+					title=_("Serial / Batch No Not Activated"),
 				)
 
 
@@ -1534,6 +1619,7 @@ def set_item_default(item_code, company, fieldname, value):
 		if d.company == company:
 			if not d.get(fieldname):
 				frappe.db.set_value(d.doctype, d.name, fieldname, value)
+				item.clear_cache()
 			return
 
 	# no row found, add a new row for the company
@@ -1601,41 +1687,102 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	if inverse_match and inverse_match.value:
 		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
-	# This attempts to try and get conversion from intermediate UOM.
+	return _get_conv_factor_via_intermediate_uom(from_uom, to_uom)
+
+
+def _get_conv_factor_via_intermediate_uom(from_uom, to_uom):
 	# case:
 	# 			 g -> mg = 1000
 	# 			 g -> kg = 0.001
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
+	value = _get_conv_factor_via_shared_uom("from_uom", "to_uom", to_uom, from_uom)
+	if value is None:
+		value = _get_conv_factor_via_shared_uom("to_uom", "from_uom", from_uom, to_uom)
+
+	if value is not None:
+		return flt(value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+
+def _get_conv_factor_via_shared_uom(shared_field, other_field, first_uom, second_uom):
 	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
 	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
 	# Conversion pairs are not unique, so document names provide stable tie-breakers.
-	shared_source_match = (
+	match = (
 		frappe.qb.from_(first)
 		.join(second)
-		.on(first.from_uom == second.from_uom)
+		.on((first[shared_field] == second[shared_field]) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first.to_uom == to_uom) & (second.to_uom == from_uom) & (second.value != 0))
+		.where((first[other_field] == first_uom) & (second[other_field] == second_uom) & (second.value != 0))
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
 	)
 
-	if shared_source_match:
-		return flt(shared_source_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+	return match[0].value if match else None
 
-	shared_target_match = (
-		frappe.qb.from_(first)
-		.join(second)
-		.on(first.to_uom == second.to_uom)
-		.select((first.value / second.value).as_("value"))
-		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
-		.orderby(first.name, second.name)
-		.limit(1)
-		.run(as_dict=1)
+
+def get_allowed_uoms(items: list) -> dict[str, dict[str, float]]:
+	"""Map items to the UOMs Stock Settings allows them, with conversion factors: the stock UOM, the
+	template's UOM conversions when both share a stock UOM, and the item's own. An Item document's own
+	conversions come from its unsaved rows."""
+	conversions = get_uom_conversions({item.name for item in items} | {item.variant_of for item in items})
+	allowed_uoms = {}
+	for item in items:
+		own = item.uoms if isinstance(item, Document) else conversions[item.name]
+		inherited = [row for row in conversions[item.variant_of] if row.stock_uom == item.stock_uom]
+		allowed_uoms[item.name] = {item.stock_uom: 1.0} | {
+			row.uom: row.conversion_factor for row in inherited + own if flt(row.conversion_factor) > 0
+		}
+
+	return allowed_uoms
+
+
+def get_uom_conversions(item_codes: set) -> defaultdict[str, list]:
+	item = frappe.qb.DocType("Item")
+	detail = frappe.qb.DocType("UOM Conversion Detail")
+	rows = (
+		frappe.qb.from_(detail)
+		.join(item)
+		.on(item.name == detail.parent)
+		.select(detail.parent, detail.uom, detail.conversion_factor, item.stock_uom)
+		.where((detail.parenttype == "Item") & detail.parent.isin(list(item_codes - {None})))
+		.orderby(detail.idx)
+		.run(as_dict=True)
 	)
 
-	if shared_target_match:
-		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+	conversions = defaultdict(list)
+	for row in rows:
+		conversions[row.parent].append(row)
+
+	return conversions
+
+
+def validate_item_uoms(rows: list) -> None:
+	if not frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
+		return
+
+	rows = [row for row in rows if row.item_code and row.uom]
+	if not rows:
+		return
+
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ["in", list({row.item_code for row in rows})]},
+		fields=["name", "stock_uom", "variant_of"],
+	)
+	allowed_uoms = get_allowed_uoms(items)
+	for row in rows:
+		if row.uom not in allowed_uoms.get(row.item_code, {}):
+			frappe.throw(
+				_(
+					"Row #{0}: UOM {1} has no conversion factor in Item {2}. Add it to the Item's UOMs table, or disable {3} in Stock Settings."
+				).format(
+					row.idx,
+					bold(row.uom),
+					bold(row.item_code),
+					bold(_("Allow UOM with conversion rate defined in Item")),
+				)
+			)
 
 
 @frappe.whitelist()

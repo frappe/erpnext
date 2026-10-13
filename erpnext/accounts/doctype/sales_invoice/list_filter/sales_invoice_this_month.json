@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.545127",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "This Month",
+ "filters": "[[\"Sales Invoice\", \"docstatus\", \"=\", 1], [\"Sales Invoice\", \"posting_date\", \"Timespan\", \"this month\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 5,
+ "modified": "2026-09-30 21:12:56.545127",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Invoice-This Month",
+ "owner": "Administrator",
+ "reference_doctype": "Sales Invoice",
+ "route_signature": "docstatus=1&posting_date=[\"Timespan\",\"this month\"]",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

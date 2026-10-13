@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"voucher_type\", \"label\": \"Entry Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"total_debit\", \"label\": \"Total Debit\"}, {\"fieldname\": \"cheque_no\", \"label\": \"Reference Number\"}, {\"fieldname\": \"clearance_date\", \"label\": \"Clearance Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.570726",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Bank and Cash",
+ "filters": "[[\"Journal Entry\", \"docstatus\", \"=\", 1], [\"Journal Entry\", \"voucher_type\", \"in\", [\"Bank Entry\", \"Cash Entry\", \"Contra Entry\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.570726",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Journal Entry-Bank and Cash",
+ "owner": "Administrator",
+ "reference_doctype": "Journal Entry",
+ "route_signature": "docstatus=1&voucher_type=[\"in\",[\"Bank Entry\",\"Cash Entry\",\"Contra Entry\"]]",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

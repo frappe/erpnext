@@ -33,7 +33,7 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
-		ignore_accumulated_values_for_fy=True,
+		ignore_accumulated_values_for_fy=bool(filters.accumulated_values),
 		total=False,
 	)
 
@@ -45,7 +45,7 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
-		ignore_accumulated_values_for_fy=True,
+		ignore_accumulated_values_for_fy=bool(filters.accumulated_values),
 		total=False,
 	)
 
@@ -54,44 +54,16 @@ def execute(filters=None):
 	gross_income = get_revenue(income, period_list)
 	gross_expense = get_revenue(expense, period_list)
 
-	if len(gross_income) == 0 and len(gross_expense) == 0:
+	if gross_income or gross_expense:
+		data.extend(get_gross_rows(gross_income, gross_expense, period_list, filters))
+	else:
+		# Net Profit does not depend on the flag, so it is still shown
 		data.append(
 			{
 				"account_name": "'" + _("Nothing is included in gross") + "'",
 				"account": "'" + _("Nothing is included in gross") + "'",
 			}
 		)
-		return columns, data
-
-	# to avoid error eg: gross_income[0] : list index out of range
-	if not gross_income:
-		gross_income = [{}]
-	if not gross_expense:
-		gross_expense = [{}]
-
-	data.append(
-		{
-			"account_name": "'" + _("Included in Gross Profit") + "'",
-			"account": "'" + _("Included in Gross Profit") + "'",
-		}
-	)
-
-	data.append({})
-	data.extend(gross_income or [])
-
-	data.append({})
-	data.extend(gross_expense or [])
-
-	data.append({})
-	gross_profit = get_profit(
-		gross_income,
-		gross_expense,
-		period_list,
-		filters.company,
-		"Gross Profit",
-		filters.presentation_currency,
-	)
-	data.append(gross_profit)
 
 	non_gross_income = get_revenue(income, period_list, 0)
 	data.append({})
@@ -110,10 +82,43 @@ def execute(filters=None):
 		filters.company,
 		filters.presentation_currency,
 	)
-	data.append({})
-	data.append(net_profit)
+	if net_profit:
+		data.append({})
+		data.append(net_profit)
 
 	return columns, data
+
+
+def get_gross_rows(gross_income, gross_expense, period_list, filters):
+	data = [
+		{
+			"account_name": "'" + _("Included in Gross Profit") + "'",
+			"account": "'" + _("Included in Gross Profit") + "'",
+		}
+	]
+
+	# to avoid error eg: gross_income[0] : list index out of range
+	gross_income = gross_income or [{}]
+	gross_expense = gross_expense or [{}]
+
+	data.append({})
+	data.extend(gross_income)
+
+	data.append({})
+	data.extend(gross_expense)
+
+	data.append({})
+	gross_profit = get_profit(
+		gross_income,
+		gross_expense,
+		period_list,
+		filters.company,
+		"Gross Profit",
+		filters.presentation_currency,
+	)
+	data.append(gross_profit)
+
+	return data
 
 
 def get_revenue(data, period_list, include_in_gross=1):

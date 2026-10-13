@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:30",
+ "description": "Planned visits to service what a customer bought.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/maintenance-schedule",
@@ -239,7 +240,7 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2024-03-27 13:10:03.659952",
+ "modified": "2026-10-05 17:12:54.560318",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
@@ -259,6 +260,10 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Maintenance User"
   }
  ],
  "search_fields": "status,customer,customer_name",

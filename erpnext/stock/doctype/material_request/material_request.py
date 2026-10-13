@@ -269,9 +269,15 @@ class MaterialRequest(BuyingController):
 			)
 			result = query.run(as_dict=True)
 
+			requested_qty = {}
 			for item in items_from_pp:
+				plan_item = item.material_request_plan_item
+				requested_qty[plan_item] = requested_qty.get(plan_item, 0) + item.qty
 				row = next(r for r in result if r.name == item.material_request_plan_item)
-				if item.qty > row.available_qty:
+				if (
+					item.qty > row.available_qty
+					or flt(requested_qty[plan_item], item.precision("qty")) > row.available_qty
+				):
 					frappe.throw(
 						_("Quantity cannot be greater than {0} for Item {1}").format(
 							row.available_qty, item.item_code
@@ -287,6 +293,27 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type != "Customer Provided":
 			self.customer = None
 
+		if self.material_request_type == "Subcontracting":
+			self.validate_subcontracted_items()
+
+	def validate_subcontracted_items(self):
+		items = frappe.get_all(
+			"Item",
+			filters={"name": ["in", list({d.item_code for d in self.items if d.item_code})]},
+			fields=["name", "is_stock_item", "is_sub_contracted_item"],
+		)
+		items = {d.name: d for d in items}
+
+		for row in self.items:
+			item = items.get(row.item_code)
+			if item and not (item.is_stock_item and item.is_sub_contracted_item):
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} must be a stock item with Supply Raw Materials for Purchase enabled for a Subcontracting Material Request"
+					).format(row.idx, get_link_to_form("Item", row.item_code)),
+					title=_("Invalid Item"),
+				)
+
 	def set_title(self):
 		"""Set title as comma separated list of items"""
 		if not self.title:
@@ -297,8 +324,9 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
 		self.update_requested_qty_in_work_order()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
+		if self.material_request_type == "Purchase":
 			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
 				self.validate_budget()
 
@@ -370,7 +398,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
 		self.update_requested_qty_in_work_order()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
@@ -472,17 +500,29 @@ class MaterialRequest(BuyingController):
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
-		item_wh_list = []
-		for d in self.get("items"):
-			if (
-				(not mr_item_rows or d.name in mr_item_rows)
-				and [d.item_code, d.warehouse] not in item_wh_list
-				and d.warehouse
-				and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1
-			):
-				item_wh_list.append([d.item_code, d.warehouse])
+		item_warehouses = dict.fromkeys(
+			(d.item_code, d.warehouse)
+			for d in self.get("items")
+			if d.warehouse and (not mr_item_rows or d.name in mr_item_rows)
+		)
+		if not item_warehouses:
+			return
 
-		for item_code, warehouse in item_wh_list:
+		stock_items = set(
+			frappe.get_all(
+				"Item",
+				filters={
+					"name": ("in", {item_code for item_code, warehouse in item_warehouses}),
+					"is_stock_item": 1,
+				},
+				pluck="name",
+			)
+		)
+
+		for item_code, warehouse in item_warehouses:
+			if item_code not in stock_items:
+				continue
+
 			update_bin_qty(
 				item_code,
 				warehouse,
@@ -515,28 +555,6 @@ class MaterialRequest(BuyingController):
 
 def is_valid_buying_price_list(price_list: str | None) -> bool:
 	return is_price_list_enabled(price_list) and bool(frappe.get_value("Price List", price_list, "buying"))
-
-
-def update_completed_and_requested_qty(stock_entry, method):
-	if stock_entry.doctype == "Stock Entry":
-		material_request_map = {}
-
-		for d in stock_entry.get("items"):
-			if d.material_request:
-				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
-
-		for mr, mr_item_rows in material_request_map.items():
-			if mr and mr_item_rows:
-				mr_obj = frappe.get_doc("Material Request", mr)
-
-				if mr_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(
-						_("{0} {1} is cancelled or stopped").format(_("Material Request"), mr),
-						frappe.InvalidStatusError,
-					)
-
-				mr_obj.update_completed_qty(mr_item_rows)
-				mr_obj.update_requested_qty(mr_item_rows)
 
 
 def get_list_context(context=None):
@@ -614,6 +632,13 @@ def get_material_requests_based_on_supplier(
 @frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str, company: str):
 	mr = frappe.get_doc("Material Request", material_request)
+	mr.check_permission("read")
+	if mr.docstatus != 1:
+		frappe.throw(_("Material Request must be submitted to create Work Orders"))
+	mr.validate_value("material_request_type", "=", "Manufacture")
+	if mr.status == "Stopped":
+		frappe.throw(_("Cannot create Work Orders from a stopped Material Request"))
+
 	errors = []
 	work_orders = []
 	default_wip_warehouse = frappe.get_cached_value("Company", company, "default_wip_warehouse")

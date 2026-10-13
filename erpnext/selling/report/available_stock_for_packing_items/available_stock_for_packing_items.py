@@ -3,7 +3,10 @@
 
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
+
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
 def execute(filters=None):
@@ -71,14 +74,19 @@ def get_item_warehouse_quantity_map():
 	# Components of every active product bundle: (bundle item code, component item, qty per bundle)
 	pb = frappe.qb.DocType("Product Bundle")
 	pbi = frappe.qb.DocType("Product Bundle Item")
-	bundle_components = (
+	query = (
 		frappe.qb.from_(pbi)
 		.inner_join(pb)
 		.on(pbi.parent == pb.name)
-		.select(pb.new_item_code.as_("parent"), pbi.item_code, pbi.qty)
+		.select(pb.new_item_code.as_("parent"), pbi.item_code, Sum(pbi.qty).as_("qty"))
 		.where((pb.is_active == 1) & (pb.docstatus == 1))
-		.run(as_dict=True)
+		.groupby(pb.new_item_code, pbi.item_code)
 	)
+
+	if condition := get_allowed_masters_condition(pb.new_item_code, "Item"):
+		query = query.where(condition)
+
+	bundle_components = query.run(as_dict=True)
 
 	if not bundle_components:
 		return {}

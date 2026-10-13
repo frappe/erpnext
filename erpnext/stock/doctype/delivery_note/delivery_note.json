@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:09",
+ "description": "Items shipped to a customer.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/delivery-note",
@@ -195,7 +196,6 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
@@ -279,6 +279,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -319,6 +320,7 @@
    "allow_on_submit": 1,
    "fieldname": "po_no",
    "fieldtype": "Small Text",
+   "in_global_search": 1,
    "label": "Customer's Purchase Order No",
    "no_copy": 1,
    "oldfieldname": "po_no",
@@ -403,7 +405,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -478,6 +479,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_reference",
    "reqd": 1
   },
   {
@@ -534,6 +536,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -932,13 +935,16 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
+   "no_copy": 1,
    "options": "Driver",
    "print_hide": 1
   },
   {
    "fieldname": "lr_no",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Transport Receipt No",
+   "no_copy": 1,
    "oldfieldname": "lr_no",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -949,6 +955,7 @@
    "fieldname": "vehicle_no",
    "fieldtype": "Data",
    "label": "Vehicle No",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -970,6 +977,7 @@
    "fieldname": "driver_name",
    "fieldtype": "Data",
    "label": "Driver Name",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -977,6 +985,7 @@
    "fieldname": "lr_date",
    "fieldtype": "Date",
    "label": "Transport Receipt Date",
+   "no_copy": 1,
    "oldfieldname": "lr_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -1408,6 +1417,7 @@
    "fieldname": "delivery_trip",
    "fieldtype": "Link",
    "label": "Delivery Trip",
+   "no_copy": 1,
    "options": "Delivery Trip",
    "print_hide": 1
   },
@@ -1510,7 +1520,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-14 12:43:19.480555",
+ "modified": "2026-10-12 18:16:58.531757",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

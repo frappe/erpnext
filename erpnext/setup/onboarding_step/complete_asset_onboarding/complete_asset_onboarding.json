@@ -1,0 +1,21 @@
+{
+ "action": "Complete Onboarding",
+ "action_label": "Open Assets",
+ "creation": "2026-10-04 03:16:15.375405",
+ "description": "Record an asset and see what it's worth year by year.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 03:16:15.375405",
+ "modified_by": "Administrator",
+ "module_onboarding": "Asset Onboarding",
+ "name": "Complete Asset Onboarding",
+ "owner": "Administrator",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Track what your business owns",
+ "validate_action": 1
+}

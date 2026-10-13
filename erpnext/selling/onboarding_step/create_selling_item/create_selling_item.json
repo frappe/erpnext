@@ -1,0 +1,23 @@
+{
+ "action": "Create Entry",
+ "action_label": "Add Item",
+ "creation": "2026-10-04 01:19:10.908252",
+ "description": "A product or a service you sell. See [Item](https://docs.frappe.io/erpnext/user/manual/en/item).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "intro_video_url": "https://www.youtube.com/watch?v=oSYESI-EVCI",
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:31:29.828645",
+ "modified_by": "Administrator",
+ "name": "Create Selling Item",
+ "owner": "Administrator",
+ "reference_document": "Item",
+ "route_options": "{\n    \"is_sales_item\": 1\n}",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Add an item you sell",
+ "validate_action": 1
+}

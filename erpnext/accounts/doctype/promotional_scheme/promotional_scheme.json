@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2019-02-08 17:10:36.077402",
+ "description": "A set of discounts and free items, like buy two get one free.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/promotional-scheme",
  "editable_grid": 1,

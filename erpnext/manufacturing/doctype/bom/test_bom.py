@@ -142,6 +142,36 @@ class TestBOM(ERPNextTestSuite):
 			self.assertNotIn(rm_normal, items_dict)
 
 	@timeout
+	def test_get_items_explodes_phantom_row_by_stock_qty(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		kit = make_item(
+			properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 5}]}
+		).name
+		phantom_bom = make_bom(item=kit, raw_materials=[rm], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(item=fg_item, raw_materials=[kit], do_not_save=True)
+		bom.items[0].update({"qty": 2, "uom": "Box", "bom_no": phantom_bom.name})
+		bom.save()
+		bom.submit()
+
+		for fetch_qty_in_stock_uom in (True, False):
+			items_dict = get_bom_items_as_dict(
+				bom.name,
+				"_Test Company",
+				qty=1,
+				fetch_exploded=0,
+				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+			)
+			self.assertEqual(flt(items_dict[rm].qty), 10.0)
+
+	@timeout
 	def test_get_items_amount_uses_each_lines_own_rate(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -311,7 +341,6 @@ class TestBOM(ERPNextTestSuite):
 
 	@timeout
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
-		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
 		for item_code, rate in (("_Test Item", 3600), ("_Test Item Home Desktop Manufactured", 3000)):
 			item_price = frappe.new_doc("Item Price")
 			item_price.price_list = "_Test Price List"
@@ -320,7 +349,8 @@ class TestBOM(ERPNextTestSuite):
 			item_price.insert()
 
 		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
-		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		for item in bom.items:
+			item.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Price List"
 		bom.buying_price_list = "_Test Price List"
 		bom.items[0].uom = "_Test UOM 1"
@@ -346,7 +376,8 @@ class TestBOM(ERPNextTestSuite):
 	@timeout
 	def test_bom_cost_multi_uom_based_on_valuation_rate(self):
 		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
-		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		for item in bom.items:
+			item.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Valuation Rate"
 		bom.items[0].uom = "_Test UOM 1"
 		bom.items[0].conversion_factor = 6

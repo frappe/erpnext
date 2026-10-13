@@ -1,7 +1,7 @@
 {
  "actions": [],
  "creation": "2021-09-09 17:03:22.754446",
- "description": "Settings for Selling Module",
+ "description": "How leads, opportunities and appointments work.",
  "doctype": "DocType",
  "document_type": "Other",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/crm_settings",

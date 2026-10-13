@@ -1,0 +1,1685 @@
+{
+ "charts": {
+  "stock-delivered-to-customers": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "posting_date",
+     "data_type": "Date",
+     "dimension_name": "posting_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(delivered_value)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Delivered to Customers",
+      "measure_name": "Delivered to Customers (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "stock-delivered-to-customers",
+   "query": "stock-receipts-deliveries",
+   "sort_order": 3,
+   "title": "Delivered to Customers",
+   "workbook": "stock"
+  },
+  "stock-items-short-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "count(item_code)",
+       "type": "expression"
+      },
+      "id": "Items Short",
+      "measure_name": "Items in Shortage"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-items-short-2",
+   "query": "stock-items-short",
+   "sort_order": 5,
+   "title": "Items in Shortage",
+   "workbook": "stock"
+  },
+  "stock-items-to-reorder-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Integer",
+      "expression": {
+       "expression": "count(item_code)",
+       "type": "expression"
+      },
+      "id": "Items to Reorder",
+      "measure_name": "Items to Reorder"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-items-to-reorder-2",
+   "query": "stock-items-to-reorder",
+   "sort_order": 4,
+   "title": "Items to Reorder",
+   "workbook": "stock"
+  },
+  "stock-items-to-reorder-by-shortage": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Actual Qty",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": "<=",
+       "value": 0
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 20,
+    "number_format": {
+     "decimals": 0,
+     "shorten": false
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Shortage Qty",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "item_code",
+      "data_type": "String",
+      "dimension_name": "Item"
+     },
+     {
+      "column_name": "item_name",
+      "data_type": "String",
+      "dimension_name": "Item Name"
+     },
+     {
+      "column_name": "warehouse",
+      "data_type": "String",
+      "dimension_name": "Warehouse"
+     }
+    ],
+    "values": [
+     {
+      "aggregation": "sum",
+      "column_name": "actual_qty",
+      "data_type": "Decimal",
+      "measure_name": "Actual Qty"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "ordered_qty",
+      "data_type": "Decimal",
+      "measure_name": "Ordered Qty"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "projected_qty",
+      "data_type": "Decimal",
+      "measure_name": "Projected Qty"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "reorder_level",
+      "data_type": "Decimal",
+      "measure_name": "Reorder Level"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "reorder_qty",
+      "data_type": "Decimal",
+      "measure_name": "Reorder Qty"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "shortage_qty",
+      "data_type": "Decimal",
+      "measure_name": "Shortage Qty"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "stock-items-to-reorder-by-shortage",
+   "query": "stock-items-to-reorder",
+   "sort_order": 10,
+   "title": "Items Below Reorder Level",
+   "workbook": "stock"
+  },
+  "stock-received-and-delivered-12-months": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "posting_date",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "received_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Received"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "delivered_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Delivered"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "stock-received-and-delivered-12-months",
+   "query": "stock-receipts-deliveries-12-months",
+   "sort_order": 7,
+   "title": "Received and Delivered by Month",
+   "workbook": "stock"
+  },
+  "stock-received-from-suppliers": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "posting_date",
+     "data_type": "Date",
+     "dimension_name": "posting_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(received_value)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Received from Suppliers",
+      "measure_name": "Received from Suppliers (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "stock-received-from-suppliers",
+   "query": "stock-receipts-deliveries",
+   "sort_order": 2,
+   "title": "Received from Suppliers",
+   "workbook": "stock"
+  },
+  "stock-stock-value": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs a month ago",
+       "measure": {
+        "data_type": "Decimal",
+        "expression": {
+         "expression": "sum_if(posting_date <= date_sub(today(), 1, 'month'), stock_value_difference)",
+         "type": "expression"
+        },
+        "format": "currency",
+        "measure_name": "A Month Ago"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(stock_value_difference)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Stock Value",
+      "measure_name": "Stock Value"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "stock-stock-value",
+   "query": "stock-stock-ledger",
+   "sort_order": 1,
+   "title": "Stock Value",
+   "workbook": "stock"
+  },
+  "stock-stock-value-12-months": {
+   "chart_type": "Line",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "stock_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Stock Value"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "stock-stock-value-12-months",
+   "query": "stock-stock-value-by-month",
+   "sort_order": 6,
+   "title": "Stock Value by Month",
+   "workbook": "stock"
+  },
+  "stock-stock-value-by-item-group": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Stock Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "item_group",
+      "data_type": "String",
+      "dimension_name": "Item Group"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Stock Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "stock-stock-value-by-item-group",
+   "query": "stock-stock-balance",
+   "sort_order": 9,
+   "title": "Stock Value by Item Group",
+   "workbook": "stock"
+  },
+  "stock-stock-value-by-warehouse": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Stock Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "warehouse",
+      "data_type": "String",
+      "dimension_name": "Warehouse"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Stock Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "stock-stock-value-by-warehouse",
+   "query": "stock-stock-balance",
+   "sort_order": 8,
+   "title": "Stock Value by Warehouse",
+   "workbook": "stock"
+  }
+ },
+ "creation": "2026-09-26 21:12:17.141735",
+ "dashboards": {
+  "stock": {
+   "items": [
+    {
+     "default_operator": "=",
+     "default_user_key": "Company",
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "stock-delivered-to-customers": "`stock-receipts-deliveries`.`company`",
+      "stock-items-short-2": "`stock-items-short`.`company`",
+      "stock-items-to-reorder-2": "`stock-items-to-reorder`.`company`",
+      "stock-items-to-reorder-by-shortage": "`stock-items-to-reorder`.`company`",
+      "stock-received-and-delivered-12-months": "`stock-receipts-deliveries`.`company`",
+      "stock-received-from-suppliers": "`stock-receipts-deliveries`.`company`",
+      "stock-stock-value": "`stock-stock-ledger`.`company`",
+      "stock-stock-value-12-months": "`stock-stock-ledger`.`company`",
+      "stock-stock-value-by-item-group": "`stock-stock-ledger`.`company`",
+      "stock-stock-value-by-warehouse": "`stock-stock-ledger`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Warehouse",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-warehouse",
+      "w": 4,
+      "x": 4,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 10,
+       "y": 0
+      }
+     },
+     "links": {
+      "stock-delivered-to-customers": "`stock-receipts-deliveries`.`warehouse`",
+      "stock-items-short-2": "`stock-items-short`.`warehouse`",
+      "stock-items-to-reorder-2": "`stock-items-to-reorder`.`warehouse`",
+      "stock-items-to-reorder-by-shortage": "`stock-items-to-reorder`.`warehouse`",
+      "stock-received-and-delivered-12-months": "`stock-receipts-deliveries`.`warehouse`",
+      "stock-received-from-suppliers": "`stock-receipts-deliveries`.`warehouse`",
+      "stock-stock-value": "`stock-stock-ledger`.`warehouse`",
+      "stock-stock-value-12-months": "`stock-stock-ledger`.`warehouse`",
+      "stock-stock-value-by-item-group": "`stock-stock-ledger`.`warehouse`",
+      "stock-stock-value-by-warehouse": "`stock-stock-ledger`.`warehouse`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "stock-stock-value",
+     "layout": {
+      "h": 5,
+      "i": "chart-3jrhc3j45g",
+      "w": 4,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-received-from-suppliers",
+     "layout": {
+      "h": 5,
+      "i": "chart-3jr3r74e59",
+      "w": 4,
+      "x": 4,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-delivered-to-customers",
+     "layout": {
+      "h": 5,
+      "i": "chart-3jrm1jdurm",
+      "w": 4,
+      "x": 8,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-items-to-reorder-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3jre9vh32s",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-items-short-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-3jrkadu0ag",
+      "w": 4,
+      "x": 16,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 13
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-stock-value-12-months",
+     "layout": {
+      "h": 17,
+      "i": "chart-3jrpifjdcn",
+      "w": 10,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 17
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-received-and-delivered-12-months",
+     "layout": {
+      "h": 17,
+      "i": "chart-3jrqivifuv",
+      "w": 10,
+      "x": 10,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 34
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-stock-value-by-warehouse",
+     "layout": {
+      "h": 17,
+      "i": "chart-3jrfiagpuf",
+      "w": 10,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 51
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-stock-value-by-item-group",
+     "layout": {
+      "h": 17,
+      "i": "chart-3jrmigg1gu",
+      "w": 10,
+      "x": 10,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 68
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "stock-items-to-reorder-by-shortage",
+     "layout": {
+      "h": 22,
+      "i": "chart-3jrma81osk",
+      "w": 20,
+      "x": 0,
+      "y": 42
+     },
+     "layouts": {
+      "sm": {
+       "h": 22,
+       "w": 20,
+       "x": 0,
+       "y": 85
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "stock",
+   "title": "Stock",
+   "vertical_compact_layout": 1,
+   "visible_to_roles": [
+    {
+     "role": "Stock User"
+    }
+   ],
+   "workbook": "stock"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-28 12:09:41.648045",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "stock",
+ "owner": "Administrator",
+ "queries": {
+  "stock-bin-quantities": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-bin-quantities",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabBin",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(item_code, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "item_warehouse",
+      "actual_qty"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Bin Quantities",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-items-short": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-items-short",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabBin",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "projected_qty < 0",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_name",
+       "type": "column"
+      },
+      {
+       "column_name": "disabled",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "disabled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "item_code",
+      "item_name",
+      "warehouse",
+      "company",
+      "actual_qty",
+      "ordered_qty",
+      "reserved_qty",
+      "projected_qty"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 11,
+   "title": "Items Short",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-items-to-reorder": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-items-to-reorder",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabBin",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(item_code, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "reorder_level",
+       "type": "column"
+      },
+      {
+       "column_name": "reorder_qty",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "stock-reorder-levels",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_name",
+       "type": "column"
+      },
+      {
+       "column_name": "is_stock_item",
+       "type": "column"
+      },
+      {
+       "column_name": "disabled",
+       "type": "column"
+      },
+      {
+       "column_name": "end_of_life",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_stock_item",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "disabled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "is_not_set(end_of_life) | (end_of_life > today()) | (end_of_life.cast('string') == '0000-00-00')",
+        "type": "expression"
+       }
+      },
+      {
+       "expression": {
+        "expression": "(reorder_level != 0) | (reorder_qty != 0)",
+        "type": "expression"
+       }
+      },
+      {
+       "expression": {
+        "expression": "reorder_level > projected_qty",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "reorder_level - projected_qty",
+      "type": "expression"
+     },
+     "new_name": "shortage_qty",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "item_code",
+      "item_name",
+      "warehouse",
+      "company",
+      "actual_qty",
+      "ordered_qty",
+      "projected_qty",
+      "reorder_level",
+      "reorder_qty",
+      "shortage_qty"
+     ],
+     "type": "select"
+    },
+    {
+     "column": {
+      "column_name": "shortage_qty",
+      "type": "column"
+     },
+     "direction": "desc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Items to Reorder",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-last-12-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-last-12-months",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "column_names": [
+      "name"
+     ],
+     "type": "select"
+    },
+    {
+     "limit": 12,
+     "type": "limit"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "ibis.row_number() + 1",
+      "type": "expression"
+     },
+     "new_name": "months_back",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Date",
+     "expression": {
+      "expression": "month_start(today()) - months_back.as_interval('M')",
+      "type": "expression"
+     },
+     "new_name": "period",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "ibis.literal(0)",
+      "type": "expression"
+     },
+     "new_name": "movement",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "period",
+      "movement"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Last 12 Months",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-receipts-deliveries": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-receipts-deliveries",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "posting_date <= today()",
+        "type": "expression"
+       }
+      },
+      {
+       "column": {
+        "column_name": "voucher_type",
+        "type": "column"
+       },
+       "operator": "in",
+       "value": [
+        "Purchase Receipt",
+        "Purchase Invoice",
+        "Delivery Note",
+        "Sales Invoice"
+       ]
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "voucher_type",
+      "voucher_no",
+      "posting_date",
+      "item_code",
+      "warehouse",
+      "actual_qty",
+      "stock_value_difference",
+      "company"
+     ],
+     "type": "select"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(is_in(voucher_type, 'Purchase Receipt', 'Purchase Invoice'), stock_value_difference, 0)",
+      "type": "expression"
+     },
+     "new_name": "received_value",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(is_in(voucher_type, 'Delivery Note', 'Sales Invoice'), -stock_value_difference, 0)",
+      "type": "expression"
+     },
+     "new_name": "delivered_value",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Receipts & Deliveries",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-receipts-deliveries-12-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-receipts-deliveries-12-months",
+   "operations": [
+    {
+     "table": {
+      "query_name": "stock-receipts-deliveries",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(month_start(today()), 12, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Receipts & Deliveries, 12 Months",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-reorder-levels": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-reorder-levels",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem Reorder",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "parenttype",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Item"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(parent, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "item_warehouse",
+       "data_type": "String",
+       "dimension_name": "item_warehouse"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "max(warehouse_reorder_level)",
+        "type": "expression"
+       },
+       "measure_name": "reorder_level"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "max(warehouse_reorder_qty)",
+        "type": "expression"
+       },
+       "measure_name": "reorder_qty"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Reorder Levels",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-balance": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-balance",
+   "operations": [
+    {
+     "table": {
+      "query_name": "stock-stock-ledger",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "item_code",
+       "data_type": "String",
+       "dimension_name": "item_code"
+      },
+      {
+       "column_name": "warehouse",
+       "data_type": "String",
+       "dimension_name": "warehouse"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "value"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "concat(item_code, '::', warehouse)",
+      "type": "expression"
+     },
+     "new_name": "item_warehouse",
+     "type": "mutate"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_code",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "item_group",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabItem",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "item_warehouse",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "actual_qty",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "stock-bin-quantities",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "item_group",
+      "item_code",
+      "warehouse",
+      "company",
+      "actual_qty",
+      "value"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Stock Balance",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-ledger": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-ledger",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabStock Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "expression": {
+        "expression": "posting_date <= today()",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "voucher_type",
+      "voucher_no",
+      "posting_date",
+      "item_code",
+      "warehouse",
+      "stock_value_difference",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Stock Ledger",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-movement-by-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-movement-by-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "stock-stock-ledger",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date <= date_sub(month_start(today()), 1, 'day')",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "posting_date",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "month"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(stock_value_difference)",
+        "type": "expression"
+       },
+       "measure_name": "movement"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Stock Movement by Month",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-stock-value-by-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "stock-stock-value-by-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "stock-stock-movement-by-month",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "source"
+    },
+    {
+     "distinct": false,
+     "table": {
+      "query_name": "stock-last-12-months",
+      "type": "query",
+      "workbook": "stock"
+     },
+     "type": "union"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "period",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "month"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(movement)",
+        "type": "expression"
+       },
+       "measure_name": "month_movement"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "month_movement.sum().over(ibis.cumulative_window(order_by=period))",
+      "type": "expression"
+     },
+     "new_name": "stock_value",
+     "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "period >= date_sub(month_start(today()), 12, 'month')",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "period",
+      "stock_value"
+     ],
+     "type": "select"
+    },
+    {
+     "column": {
+      "column_name": "period",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Stock Value by Month",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  }
+ },
+ "title": "Stock"
+}

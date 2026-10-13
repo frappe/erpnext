@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"project_name\", \"label\": \"Project Name\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"actual_end_date\", \"label\": \"Actual End Date (via Timesheet)\"}, {\"fieldname\": \"per_gross_margin\", \"label\": \"Gross Margin %\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.936823",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Completed",
+ "filters": "[[\"Project\", \"status\", \"=\", \"Completed\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.936823",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project-Completed",
+ "owner": "Administrator",
+ "reference_doctype": "Project",
+ "route_signature": "status=Completed",
+ "sort_field": "actual_end_date",
+ "sort_order": "desc"
+}

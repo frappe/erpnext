@@ -3,10 +3,16 @@
 
 import random
 import string
+from unittest.mock import patch
 
 import frappe
 
-from erpnext.telephony.doctype.call_log.call_log import link_existing_conversations
+from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.telephony.doctype.call_log.call_log import (
+	add_call_summary_and_call_type,
+	get_linked_call_logs,
+	link_existing_conversations,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -82,6 +88,13 @@ class TestCallLog(ERPNextTestSuite):
 			"Previously-unlinked log matching the number must gain the Contact link",
 		)
 
+	def test_linking_does_not_commit(self):
+		with patch.object(frappe, "in_test", False), patch.object(frappe.db, "commit") as commit:
+			self._run_linker()
+
+		commit.assert_not_called()
+		self.assertEqual(self._contact_links_of(self.unlinked_log), [self.contact.name])
+
 	def test_already_linked_log_is_not_relinked(self):
 		"""The HAVING SUM(CASE ...) == 0 must EXCLUDE the already-linked log from the returned set,
 		so link_existing_conversations never re-saves it. Asserting only the link count is not enough
@@ -110,3 +123,137 @@ class TestCallLog(ERPNextTestSuite):
 		self._run_linker()
 
 		self.assertEqual(self._contact_links_of(other), [], "Log not matching the number must stay unlinked")
+
+	def test_agent_can_save_summary_of_own_call(self):
+		user = "test_call_agent@example.com"
+		employee = make_employee(user, company="_Test Company")
+		call_type = frappe.get_doc({"doctype": "Telephony Call Type", "call_type": "_Test Call Type"})
+		call_type.insert(ignore_if_duplicate=True)
+		call_log = self._make_call_log(
+			**{"from": "+919999999999", "type": "Outgoing"},
+			call_received_by=employee,
+			employee_user_id=user,
+		)
+
+		frappe.set_user(user)
+		try:
+			add_call_summary_and_call_type(call_log, "Wants a quote", "_Test Call Type")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			frappe.db.get_value("Call Log", call_log, ["type_of_call", "summary"]),
+			("_Test Call Type", "Wants a quote"),
+		)
+
+	def test_timeline_shows_only_permitted_call_logs(self):
+		self.assertEqual(len(get_linked_call_logs("Contact", self.contact.name)), 1)
+
+		user = "test_call_log_sales_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sales",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Sales User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		try:
+			self.assertEqual(get_linked_call_logs("Contact", self.contact.name), [])
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_transferred_call_is_stored_with_the_new_agent(self):
+		first_agent = make_employee(
+			"test_call_agent_a@example.com", company="_Test Company", cell_number=f"+91{self.number}1"
+		)
+		second_agent = make_employee(
+			"test_call_agent_b@example.com", company="_Test Company", cell_number=f"+91{self.number}2"
+		)
+		call_log = frappe.get_doc(
+			"Call Log", self._make_call_log(to=f"+91{self.number}1", type="Incoming", status="Ringing")
+		)
+		self.assertEqual(call_log.call_received_by, first_agent)
+
+		call_log.to = f"+91{self.number}2"
+		call_log.save(ignore_permissions=True)
+
+		self.assertEqual(
+			frappe.db.get_value("Call Log", call_log.name, ["call_received_by", "employee_user_id"]),
+			(second_agent, "test_call_agent_b@example.com"),
+		)
+
+	def test_summary_can_be_saved_without_call_type(self):
+		add_call_summary_and_call_type(self.linked_log, "No type chosen", None)
+		self.assertEqual(frappe.db.get_value("Call Log", self.linked_log, "summary"), "No type chosen")
+
+	def test_call_from_customer_contact_links_the_customer(self):
+		number = "97" + "".join(random.choices(string.digits, k=8))
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Customer Caller {number}",
+				"phone_nos": [{"phone": f"+91{number}", "is_primary_phone": 1}],
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+
+		call_log = frappe.get_doc(
+			"Call Log", self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+		)
+
+		self.assertEqual(call_log.customer, "_Test Customer")
+		self.assertIn(("Customer", "_Test Customer"), [(d.link_doctype, d.link_name) for d in call_log.links])
+		self.assertIn(("Contact", contact.name), [(d.link_doctype, d.link_name) for d in call_log.links])
+
+	def test_past_calls_are_linked_to_new_lead_and_new_contact_number(self):
+		number = "96" + "".join(random.choices(string.digits, k=8))
+		call_log = self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "first_name": f"_Test Caller {number}", "mobile_no": f"+91{number}"}
+		).insert(ignore_permissions=True)
+
+		self.contact.reload()
+		self.contact.flags.ignore_auto_link_call_log = False
+		self.contact.append("phone_nos", {"phone": f"+91{number}"})
+		self.contact.save(ignore_permissions=True)
+
+		links = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": "Call Log", "parent": call_log},
+			fields=["link_doctype", "link_name"],
+			as_list=True,
+		)
+		self.assertIn(("Lead", lead.name), links)
+		self.assertIn(("Contact", self.contact.name), links)
+
+	def test_new_contact_number_links_past_calls_to_customer_and_lead_of_contact(self):
+		number = "95" + "".join(random.choices(string.digits, k=8))
+		call_log = self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+		lead = frappe.get_doc({"doctype": "Lead", "first_name": f"_Test Caller {number}"}).insert(
+			ignore_permissions=True
+		)
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Customer Caller {number}",
+				"links": [
+					{"link_doctype": "Customer", "link_name": "_Test Customer"},
+					{"link_doctype": "Lead", "link_name": lead.name},
+				],
+			}
+		).insert(ignore_permissions=True)
+
+		contact.append("phone_nos", {"phone": f"+91{number}", "is_primary_phone": 1})
+		contact.save(ignore_permissions=True)
+
+		call_log = frappe.get_doc("Call Log", call_log)
+		links = [(d.link_doctype, d.link_name) for d in call_log.links]
+		self.assertEqual(call_log.customer, "_Test Customer")
+		self.assertIn(("Customer", "_Test Customer"), links)
+		self.assertIn(("Lead", lead.name), links)

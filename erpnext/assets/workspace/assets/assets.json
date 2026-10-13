@@ -6,7 +6,7 @@
    "label": "Asset Value Analytics"
   }
  ],
- "content": "[{\"id\": \"91d49bd2aa\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Value Analytics\", \"col\": 12}}, {\"id\": \"6e2f5c71fd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Assets\", \"col\": 4}}, {\"id\": \"812fb9cc2a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Asset Value\", \"col\": 4}}, {\"id\": \"f8f0df5c57\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"New Assets (This Year)\", \"col\": 4}}]",
+ "content": "[{\"id\": \"5e2cd99893\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Asset Onboarding\", \"col\": 12}}, {\"id\": \"91d49bd2aa\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Value Analytics\", \"col\": 12}}, {\"id\": \"6e2f5c71fd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Assets\", \"col\": 4}}, {\"id\": \"812fb9cc2a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Asset Value\", \"col\": 4}}, {\"id\": \"f8f0df5c57\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"New Assets (This Year)\", \"col\": 4}}, {\"id\": \"astcard000\", \"type\": \"card\", \"data\": {\"card_name\": \"Asset Reports\", \"col\": 4}}, {\"id\": \"astcard001\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
  "creation": "2020-03-02 15:43:27.634865",
  "custom_blocks": [],
  "docstatus": 0,
@@ -17,8 +17,105 @@
  "idx": 0,
  "is_hidden": 0,
  "label": "Assets",
- "links": [],
- "modified": "2026-08-26 18:34:03.000000",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Reports",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Fixed Asset Register",
+   "link_count": 0,
+   "link_to": "Fixed Asset Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Asset Depreciation Ledger",
+   "link_count": 0,
+   "link_to": "Asset Depreciation Ledger",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Asset Depreciations and Balances",
+   "link_count": 0,
+   "link_to": "Asset Depreciations and Balances",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Activity",
+   "link_count": 0,
+   "link_to": "Asset Activity",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Maintenance Report",
+   "link_count": 0,
+   "link_to": "Asset Maintenance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setup",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Shift Factor",
+   "link_count": 0,
+   "link_to": "Asset Shift Factor",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Shift Allocation",
+   "link_count": 0,
+   "link_to": "Asset Shift Allocation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-10-05 00:10:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "module_onboarding": "Asset Onboarding",

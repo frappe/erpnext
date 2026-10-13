@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"project_name\", \"label\": \"Project Name\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"percent_complete\", \"label\": \"% Completed\"}, {\"fieldname\": \"expected_end_date\", \"label\": \"Expected End Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.934734",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Due This Month",
+ "filters": "[[\"Project\", \"status\", \"=\", \"Open\"], [\"Project\", \"expected_end_date\", \"Timespan\", \"this month\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.934734",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project-Due This Month",
+ "owner": "Administrator",
+ "reference_doctype": "Project",
+ "route_signature": "expected_end_date=[\"Timespan\",\"this month\"]&status=Open",
+ "sort_field": "expected_end_date",
+ "sort_order": "asc"
+}

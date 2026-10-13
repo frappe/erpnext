@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -87,13 +89,22 @@ def get_consumed_details(filters):
 			sle.voucher_no,
 			sle.voucher_type,
 		)
-		.where((sle.is_cancelled == 0) & (sle.item_code == item.name) & (sle.actual_qty < 0))
+		# the stock an Adjustment Entry counts out comes back in, it is not consumed
+		.where(
+			(sle.is_cancelled == 0)
+			& (sle.item_code == item.name)
+			& (sle.actual_qty < 0)
+			& (sle.is_adjustment_entry == 0)
+		)
 	)
 
 	if filters.get("from_date") and filters.get("to_date"):
 		query = query.where(
 			(sle.posting_date >= filters.get("from_date")) & (sle.posting_date <= filters.get("to_date"))
 		)
+
+	if condition := get_allowed_companies_condition(sle.company, "Stock Ledger Entry"):
+		query = query.where(condition)
 
 	consumed_details = {}
 	for d in query.run(as_dict=True):
@@ -128,6 +139,9 @@ def get_suppliers_details(filters):
 		)
 	)
 
+	if condition := get_allowed_companies_condition(pr.company, "Purchase Receipt"):
+		query = query.where(condition)
+
 	for d in query.run(as_dict=True):
 		item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
 
@@ -152,6 +166,9 @@ def get_suppliers_details(filters):
 			)
 		)
 	)
+
+	if condition := get_allowed_companies_condition(pi.company, "Purchase Invoice"):
+		query = query.where(condition)
 
 	for d in query.run(as_dict=True):
 		if d.item_code not in item_supplier_map:

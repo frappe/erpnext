@@ -10,7 +10,6 @@ erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
-		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -86,7 +85,12 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0) {
+		if (
+			!doc.is_return &&
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			this.frm.has_perm("write")
+		) {
 			if (doc.on_hold) {
 				this.frm.add_custom_button(
 					__("Change Release Date"),
@@ -123,7 +127,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if (!doc.is_return && doc.docstatus == 1) {
+		if (!doc.is_return && doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				this.frm.add_custom_button(
 					__("Return / Debit Note"),
@@ -216,7 +220,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted);
 
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (
+			doc.docstatus == 1 &&
+			!doc.inter_company_invoice_reference &&
+			frappe.model.can_create("Sales Invoice")
+		) {
 			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function () {
 				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
 				var internal = supplier.is_internal_supplier;
@@ -451,13 +459,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		const field_copy = ["expense_account", "discount_account", "cost_center"];
-		if (doc.project) {
-			frappe.model.set_value(cdt, cdn, "project", doc.project);
-		} else {
-			field_copy.push("project");
-		}
-		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
+		this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "discount_account"]);
 	}
 
 	on_submit() {
@@ -633,7 +635,12 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100 && frm.doc.update_stock == 0) {
+		if (
+			frm.doc.docstatus == 1 &&
+			frm.doc.per_received < 100 &&
+			frm.doc.update_stock == 0 &&
+			frappe.model.can_create("Purchase Receipt")
+		) {
 			frm.add_custom_button(
 				__("Purchase Receipt"),
 				() => {
@@ -657,7 +664,11 @@ frappe.ui.form.on("Purchase Invoice", {
 			);
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.update_stock) {
+		if (
+			frm.doc.docstatus === 1 &&
+			frm.doc.update_stock &&
+			frappe.model.can_create("Landed Cost Voucher")
+		) {
 			frm.add_custom_button(
 				__("Landed Cost Voucher"),
 				() => {

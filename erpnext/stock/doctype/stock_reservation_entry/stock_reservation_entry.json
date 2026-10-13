@@ -5,6 +5,7 @@
  "autoname": "MAT-SRE-.YYYY.-.#####",
  "creation": "2023-06-06 15:20:48.016846",
  "default_view": "List",
+ "description": "Stock set aside for a sales order or production.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

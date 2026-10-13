@@ -1,0 +1,21 @@
+{
+ "action": "Complete Onboarding",
+ "action_label": "Open Manufacturing",
+ "creation": "2026-10-04 03:16:15.371604",
+ "description": "Write down what goes into a product and make it with a work order.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 03:16:15.371604",
+ "modified_by": "Administrator",
+ "module_onboarding": "Manufacturing Onboarding",
+ "name": "Complete Manufacturing Onboarding",
+ "owner": "Administrator",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Plan and run production",
+ "validate_action": 1
+}

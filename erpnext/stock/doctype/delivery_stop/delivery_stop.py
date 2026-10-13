@@ -17,8 +17,8 @@ class DeliveryStop(Document):
 		address: DF.Link
 		contact: DF.Link | None
 		customer: DF.Link | None
-		customer_address: DF.SmallText | None
-		customer_contact: DF.SmallText | None
+		customer_address: DF.TextEditor | None
+		customer_contact: DF.TextEditor | None
 		delivery_note: DF.Link | None
 		details: DF.TextEditor | None
 		distance: DF.Float

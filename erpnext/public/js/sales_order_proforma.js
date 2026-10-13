@@ -4,19 +4,21 @@
 frappe.ui.form.on("Sales Order", {
 	refresh(frm) {
 		erpnext.proforma.toggle_tab(frm, false);
-		if (frm.doc.docstatus !== 1) return;
+		if (frm.doc.docstatus === 0) return;
 
 		frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice").then((enabled) => {
 			if (!enabled) return;
 
-			// Defer so the button lands after the standard Create options, not before them.
-			setTimeout(() => {
-				frm.add_custom_button(
-					__("Proforma Invoice"),
-					() => erpnext.proforma.open_dialog(frm),
-					__("Create")
-				);
-			}, 0);
+			if (frm.doc.docstatus === 1) {
+				// Defer so the button lands after the standard Create options, not before them.
+				setTimeout(() => {
+					frm.add_custom_button(
+						__("Proforma Invoice"),
+						() => erpnext.proforma.open_dialog(frm),
+						__("Create")
+					);
+				}, 0);
+			}
 			erpnext.proforma.render_list(frm);
 		});
 	},
@@ -118,6 +120,12 @@ Object.assign(erpnext.proforma, {
 							in_list_view: 1,
 						},
 						{
+							fieldname: "description",
+							fieldtype: "Text Editor",
+							label: __("Description"),
+							in_list_view: 1,
+						},
+						{
 							fieldname: "qty",
 							fieldtype: "Float",
 							label: __("Qty"),
@@ -205,11 +213,12 @@ Object.assign(erpnext.proforma, {
 		const by_amount = values.based_on === "Amount";
 		const items = (values.items || [])
 			.filter((row) => flt(by_amount ? row.amount : row.qty) > 0)
-			.map((row) =>
-				by_amount
-					? { so_detail: row.so_detail, qty: row.qty, amount: row.amount }
-					: { so_detail: row.so_detail, qty: row.qty }
-			);
+			.map((row) => ({
+				so_detail: row.so_detail,
+				description: row.description,
+				qty: row.qty,
+				amount: row.amount,
+			}));
 
 		if (!items.length) {
 			frappe.msgprint(__("Please enter a quantity or amount for at least one item."));
@@ -314,6 +323,7 @@ Object.assign(erpnext.proforma, {
 			],
 		});
 		list.refresh();
+		if (frm.doc.docstatus !== 1) return;
 
 		frappe.ui
 			.button({

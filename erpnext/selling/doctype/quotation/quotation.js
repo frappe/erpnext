@@ -12,6 +12,7 @@ frappe.ui.form.on("Quotation", {
 
 		(frm.custom_make_buttons = {
 			"Sales Order": "Sales Order",
+			Quotation: "New Version",
 		}),
 			frm.set_query("quotation_to", function () {
 				return {
@@ -126,6 +127,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
+				doc.is_active &&
 				frappe.model.can_create("Sales Order") &&
 				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
 					!doc.valid_till ||
@@ -144,8 +146,37 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 			if (doc.status !== "Ordered" && this.frm.has_perm("write")) {
 				this.frm.add_custom_button(__("Set as Lost"), () => {
-					this.frm.trigger("set_as_lost_dialog");
+					if (!doc.__onload?.has_versions_to_set_as_lost) {
+						this.frm.trigger("set_as_lost_dialog");
+						return;
+					}
+
+					frappe.confirm(
+						__("The other versions of this Quotation will also be set as Lost. Continue?"),
+						() => this.frm.trigger("set_as_lost_dialog")
+					);
 				});
+			}
+
+			if (frappe.model.can_create("Quotation")) {
+				this.frm.add_custom_button(
+					__("New Version"),
+					() => {
+						if (doc.__onload?.is_latest_version) {
+							this.make_revision();
+							return;
+						}
+
+						frappe.confirm(
+							__(
+								"Newer versions of this Quotation already exist. Create a new version anyway?"
+							),
+							() => this.make_revision()
+						);
+					},
+					__("Create")
+				);
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}
 
@@ -199,6 +230,13 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				frm: me.frm,
 			});
 		}
+	}
+
+	make_revision() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.quotation.mapper.make_revision",
+			frm: this.frm,
+		});
 	}
 
 	set_dynamic_field_label() {

@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2013-01-10 16:34:09",
- "description": "Standard tax template that can be applied to all Sales Transactions. This template can contain a list of tax heads and also other expense/income heads like \"Shipping\", \"Insurance\", \"Handling\" etc.",
+ "description": "The taxes and charges, like shipping or insurance, to add to sales.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-taxes-and-charges-template",
@@ -80,7 +80,7 @@
  "icon": "badge-percent",
  "idx": 1,
  "links": [],
- "modified": "2026-08-21 23:11:48.797423",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges Template",
@@ -133,6 +133,34 @@
   },
   {
    "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
    "select": 1
   }
  ],

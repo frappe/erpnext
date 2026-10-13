@@ -101,6 +101,15 @@ class TestBlanketOrder(ERPNextTestSuite):
 		frappe.db.set_single_value("Buying Settings", "blanket_order_allowance", 10)
 		po.submit()
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 10})
+	def test_blanket_order_allowance_applies_to_blanket_order_qty(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		orders = [make_purchase_order_against(bo, qty=qty) for qty in (90, 15, 10)]
+		orders[0].submit()
+		orders[1].submit()
+
+		self.assertRaises(frappe.ValidationError, orders[2].submit)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"blanket_order_allowance": 0})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	@ERPNextTestSuite.change_settings(
@@ -149,6 +158,17 @@ class TestBlanketOrder(ERPNextTestSuite):
 			},
 		)
 		self.assertRaises(frappe.ValidationError, so.submit)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_last_fraction_of_blanket_order_can_be_ordered(self):
+		item = make_item(properties={"stock_uom": "Kg"}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=1, item_code=item)
+
+		make_purchase_order_against(bo, 0.9).submit()
+		make_purchase_order_against(bo, 0.1).submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 1)
 
 	def test_status_follows_close_reopen_and_cancel(self):
 		bo = make_blanket_order(blanket_order_type="Selling")

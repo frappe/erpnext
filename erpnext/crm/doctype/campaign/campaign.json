@@ -4,7 +4,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:18",
- "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",
+ "description": "A marketing campaign, to see which leads and sales it brought in.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/campaign",

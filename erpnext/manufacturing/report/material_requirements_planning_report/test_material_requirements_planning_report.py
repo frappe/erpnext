@@ -138,7 +138,10 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				mps.items[0].planned_qty = qty
 				mps.save()
 				lead_time.update({"manufacturing_time_in_mins": minutes, "buffer_time": buffer_days})
-				lead_time.save()
+				if minutes < 0:
+					lead_time.db_update()
+				else:
+					lead_time.save()
 				row = get_mrp_rows(mps)[plan.fg_item]
 				self.assertEqual(row.lead_time, expected_days)
 				self.assertEqual(row.release_date, add_days(row.delivery_date, -expected_days))
@@ -306,7 +309,9 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 					"doctype": "Item Group",
 					"item_group_name": group,
 					"parent_item_group": "All Item Groups",
-					"item_group_defaults": [{"company": COMPANY, "default_supplier": SUPPLIER}],
+					"item_group_defaults": [
+						{"company": COMPANY, "default_supplier": SUPPLIER, "default_warehouse": WAREHOUSE}
+					],
 				}
 			).insert()
 

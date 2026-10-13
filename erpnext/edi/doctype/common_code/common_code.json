@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "hash",
  "creation": "2024-09-29 07:01:18.133067",
+ "description": "A code from a code list and what it maps to.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

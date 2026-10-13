@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:group_name",
  "creation": "2025-06-29 05:24:51.819891",
+ "description": "A group of tax withholding categories that apply together.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

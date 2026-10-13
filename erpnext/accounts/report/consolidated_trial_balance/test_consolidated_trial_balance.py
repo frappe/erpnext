@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.report.consolidated_trial_balance.consolidated_trial_balance import execute
 from erpnext.setup.utils import get_exchange_rate
@@ -82,6 +82,69 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 
 		self.assertEqual(total_row["closing_credit"], flt(100000 + ccu_total_credit))
 
+	def test_company_needs_read_permission(self):
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": f"{frappe.generate_hash(length=10)}@example.com",
+				"first_name": "Consolidated Trial Balance Test",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+			}
+		).insert(ignore_permissions=True)
+		filters = frappe._dict({"company": ["Child Company US"], "fiscal_year": self.fiscal_year})
+
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, execute, filters)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_opening_balance_sheet_amounts_translated_at_closing_rate(self):
+		year_start = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_start_date")
+		set_usd_rate(year_start, 80)
+		set_usd_rate(today(), 85)
+		create_journal_entry(
+			company="Child Company US",
+			acc1="Cash - CCU",
+			acc2="Marketing Expenses - CCU",
+			amount=-100,
+			posting_date=year_start,
+		)
+
+		usd_expenses_in_inr = sum(
+			frappe.get_all(
+				"GL Entry",
+				filters={"account": "Marketing Expenses - CCU", "is_cancelled": 0},
+				pluck="debit_in_reporting_currency",
+			)
+		)
+		# Cash: 100000 INR plus 1100 USD at the closing rate of 85
+		expected_cash_credit = 100000 + 1100 * 85
+		expected_reserve_debit = expected_cash_credit - (100000 + usd_expenses_in_inr)
+
+		for from_date in (year_start, add_days(year_start, 1)):
+			filters = frappe._dict(
+				{
+					"company": ["Parent Group Company India", "Child Company US"],
+					"fiscal_year": self.fiscal_year,
+					"from_date": from_date,
+				}
+			)
+			rows = {row.get("acc_name") or row.get("account"): row for row in execute(filters)[1]}
+			cash, reserve = rows["Cash"], rows[_("Foreign Currency Translation Reserve")]
+
+			self.assertEqual(cash["closing_credit"] - cash["closing_debit"], expected_cash_credit)
+			self.assertEqual(reserve["closing_debit"] - reserve["closing_credit"], expected_reserve_debit)
+
 
 def create_journal_entry(**args):
 	args = frappe._dict(args)
@@ -106,3 +169,20 @@ def create_journal_entry(**args):
 	)
 	je.save()
 	je.submit()
+
+
+def set_usd_rate(date, rate):
+	frappe.db.delete(
+		"Currency Exchange", {"date": getdate(date), "from_currency": "USD", "to_currency": "INR"}
+	)
+	frappe.get_doc(
+		{
+			"doctype": "Currency Exchange",
+			"date": date,
+			"from_currency": "USD",
+			"to_currency": "INR",
+			"exchange_rate": rate,
+			"for_buying": 1,
+			"for_selling": 1,
+		}
+	).insert()

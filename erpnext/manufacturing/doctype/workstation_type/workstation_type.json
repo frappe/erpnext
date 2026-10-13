@@ -5,6 +5,7 @@
  "autoname": "field:workstation_type",
  "creation": "2022-11-04 17:03:23.334818",
  "default_view": "List",
+ "description": "A kind of workstation, with its costs.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/workstation_type",

@@ -12,6 +12,10 @@
   "qty",
   "warehouse",
   "delivered_qty",
+  "finished_good_section",
+  "fg_serial_no",
+  "column_break_fg",
+  "fg_batch_no",
   "section_break_6",
   "incoming_rate",
   "column_break_8",
@@ -197,12 +201,44 @@
    "no_copy": 1,
    "options": "Item",
    "read_only": 1
+  },
+  {
+   "depends_on": "fg_serial_no",
+   "description": "Finished good serial no this raw material was consumed into (Manufacture / Repack)",
+   "fieldname": "fg_serial_no",
+   "fieldtype": "Link",
+   "label": "Finished Good Serial No",
+   "no_copy": 1,
+   "options": "Serial No",
+   "read_only": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "fg_batch_no",
+   "description": "Finished good batch this raw material was consumed into (Manufacture / Repack)",
+   "fieldname": "fg_batch_no",
+   "fieldtype": "Link",
+   "label": "Finished Good Batch No",
+   "no_copy": 1,
+   "options": "Batch",
+   "read_only": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "eval:doc.fg_serial_no || doc.fg_batch_no",
+   "fieldname": "finished_good_section",
+   "fieldtype": "Section Break",
+   "label": "Finished Good"
+  },
+  {
+   "fieldname": "column_break_fg",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-11 11:05:10.789054",
+ "modified": "2026-10-01 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",

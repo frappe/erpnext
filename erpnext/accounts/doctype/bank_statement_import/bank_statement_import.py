@@ -72,7 +72,7 @@ class BankStatementImport(DataImport):
 			self.template_warnings = ""
 
 		if self.import_file and not self.import_file.lower().endswith(".txt"):
-			self.validate_import_file()
+			self.get_importer()
 			self.validate_google_sheets_url()
 
 	def start_import(self):

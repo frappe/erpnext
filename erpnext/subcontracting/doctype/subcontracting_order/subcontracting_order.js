@@ -101,10 +101,9 @@ frappe.ui.form.on("Subcontracting Order", {
 		frm.set_query("bom", "items", (doc, cdt, cdn) => {
 			let d = locals[cdt][cdn];
 			return {
+				query: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.finished_good_bom_query",
 				filters: {
-					item: d.item_code,
-					is_active: 1,
-					docstatus: 1,
+					finished_good: d.item_code,
 					company: frm.doc.company,
 				},
 			};
@@ -134,6 +133,7 @@ frappe.ui.form.on("Subcontracting Order", {
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
 		}
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	purchase_order: (frm) => {
@@ -302,7 +302,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 		frm.doc.supplied_items.forEach((item) => {
 			let unreserved_qty =
-				flt(item.required_qty) - flt(item.supplied_qty) - flt(item.stock_reserved_qty);
+				flt(item.required_qty) - flt(item.total_supplied_qty) - flt(item.stock_reserved_qty);
 
 			if (unreserved_qty > 0) {
 				dialog.fields_dict.items.df.data.push({

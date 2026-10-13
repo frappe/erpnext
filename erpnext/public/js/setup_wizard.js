@@ -77,6 +77,7 @@ erpnext.setup.slides_settings = [
 					"SAP",
 					"Microsoft Dynamics",
 					"Oracle NetSuite",
+					"Odoo",
 					"Xero",
 					"Excel / Spreadsheets",
 					"Nothing yet - starting fresh",
@@ -117,7 +118,8 @@ erpnext.setup.slides_settings = [
 	{
 		// Organization
 		name: "organization",
-		title: __("Setup your organization"),
+		title: __("Set up your company"),
+		help: __("We'll use these to create your company and its accounts."),
 		fields: [
 			{
 				fieldname: "company_name",
@@ -130,6 +132,7 @@ erpnext.setup.slides_settings = [
 				label: __("Company Abbreviation"),
 				fieldtype: "Data",
 				reqd: 1,
+				description: __("A short code added to account names, like Cash - AC."),
 			},
 			{ fieldtype: "Section Break" },
 			{
@@ -137,6 +140,7 @@ erpnext.setup.slides_settings = [
 				label: __("Chart of Accounts"),
 				options: "",
 				fieldtype: "Select",
+				description: __("The standard chart for your country works for most businesses."),
 			},
 			{ fieldname: "view_coa", label: __("View Chart of Accounts"), fieldtype: "Button" },
 			{ fieldname: "fy_start_date", label: __("Financial Year Begins On"), fieldtype: "Date", reqd: 1 },
@@ -145,11 +149,9 @@ erpnext.setup.slides_settings = [
 			{ fieldtype: "Section Break" },
 			{
 				fieldname: "setup_demo",
-				label: __("Generate Demo Data for Exploration"),
+				label: __("Add demo data so you can explore"),
 				fieldtype: "Check",
-				description: __(
-					"If checked, we will create demo data for you to explore the system. This demo data can be erased later."
-				),
+				description: __("You can delete it anytime."),
 			},
 		],
 
@@ -168,7 +170,7 @@ erpnext.setup.slides_settings = [
 			}
 
 			if ((this.values.company_name || "").toLowerCase() == "company") {
-				frappe.msgprint(__("Company Name cannot be Company"));
+				frappe.msgprint(__("Please pick a company name other than Company."));
 				return false;
 			}
 			if (!this.values.company_abbr) {
@@ -188,7 +190,7 @@ erpnext.setup.slides_settings = [
 			const start_greater_than_end = this.values.fy_start_date > this.values.fy_end_date;
 
 			if (invalid || start_greater_than_end) {
-				frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
+				frappe.msgprint(__("Please enter a valid date for when your financial year begins."));
 				return false;
 			}
 
@@ -265,7 +267,9 @@ erpnext.setup.slides_settings = [
 				.on("change", function () {
 					let abbr = slide.get_input("company_abbr").val();
 					if (abbr.length > 10) {
-						frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
+						frappe.msgprint(
+							__("Company Abbreviation cannot have more than {0} characters", [10])
+						);
 						abbr = abbr.slice(0, 10);
 					}
 					slide.get_field("company_abbr").set_value(abbr);

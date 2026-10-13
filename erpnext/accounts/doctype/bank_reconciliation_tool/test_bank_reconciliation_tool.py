@@ -10,14 +10,27 @@ from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
+	create_bank_entry_and_reconcile,
 	create_bulk_payment_entry_and_reconcile,
+	create_internal_transfer,
+	create_journal_entry_bts,
 	create_payment_entry_and_reconcile,
+	create_payment_entry_bts,
 	get_auto_reconcile_message,
 	get_bank_transactions,
 	get_linked_payments,
+	reconcile_vouchers,
+	update_clearance_date,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 RATE_METHOD = "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_exchange_rate"
@@ -350,3 +363,265 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		with patch(RATE_METHOD, return_value=rate):
 			result = create_payment_entry_and_reconcile(txn.name, payment_entry_doc)
 		return frappe.get_doc("Payment Entry", result["payment_entry"].name)
+
+	def make_other_company_payment(self):
+		return create_payment_entry(
+			company="_Test Company 1",
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from="Debtors - _TC1",
+			paid_to="_Test Bank - _TC1",
+			paid_amount=100,
+			save=True,
+		)
+
+	def test_reconcile_vouchers_fences_the_bank_transaction(self):
+		txn = self.make_bank_transaction(today())
+
+		def reconcile_kwargs(name):
+			return {"bank_transaction_name": name, "vouchers": []}
+
+		outside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused_for_names(
+				self, reconcile_vouchers, reconcile_kwargs, [txn.name], type_gated=True, caller_supplied=True
+			)
+		inside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(inside):
+			self.assertEqual(reconcile_vouchers(txn.name, []).name, txn.name)
+		with as_user("Administrator"):
+			self.assertEqual(reconcile_vouchers(txn.name, []).name, txn.name)
+
+	def test_reconcile_vouchers_refuses_a_voucher_outside_the_fence(self):
+		txn = self.make_bank_transaction(today())
+		payment = self.make_other_company_payment()
+
+		def voucher_kwargs(name):
+			return {
+				"bank_transaction_name": txn.name,
+				"vouchers": [{"payment_doctype": "Payment Entry", "payment_name": name, "amount": 100}],
+			}
+
+		user = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			assert_refused_for_names(
+				self, reconcile_vouchers, voucher_kwargs, [payment.name], caller_supplied=True
+			)
+
+	def test_reconcile_vouchers_with_a_malformed_name_changes_no_record_for_administrator(self):
+		txn = self.make_bank_transaction(today())
+		payment = self.make_other_company_payment()
+		before = frappe.db.get_value("Payment Entry", payment.name, "modified")
+		transaction_before = frappe.db.get_value("Bank Transaction", txn.name, "modified")
+		for value in ({"name": ["like", "%"]}, ["like", "%"]):
+			vouchers = [{"payment_doctype": "Payment Entry", "payment_name": value, "amount": 100}]
+			with as_user("Administrator"):
+				with self.assertRaises(frappe.ValidationError) as raised:
+					reconcile_vouchers(txn.name, vouchers)
+			self.assertIn(str(value), str(raised.exception))
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "modified"), before)
+		self.assertEqual(frappe.db.get_value("Bank Transaction", txn.name, "modified"), transaction_before)
+		self.assertFalse(frappe.get_all("Bank Transaction Payments", filters={"parent": txn.name}))
+
+	def test_reconcile_vouchers_accepts_doctypes_from_the_hook(self):
+		txn = self.make_bank_transaction(today())
+		vouchers = [{"payment_doctype": "Sales Order", "payment_name": "SO-MISSING-0001", "amount": 1}]
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be reconciled", reconcile_vouchers, txn.name, vouchers
+		)
+		hooked = ["Payment Entry", "Journal Entry", "Purchase Invoice", "Sales Invoice", "Sales Order"]
+		with patch(
+			"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_doctypes_for_bank_reconciliation",
+			return_value=hooked,
+		):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"is not affecting bank account",
+				reconcile_vouchers,
+				txn.name,
+				vouchers,
+			)
+
+	def test_create_bts_entries_check_the_party(self):
+		txn = self.make_bank_transaction(today())
+		for party, fence in (("_Test Customer", "_Test Customer 1"), ("_Test Customer 1", "_Test Customer")):
+			user = make_fenced_user("brt-fenced@example.com", ["Accounts User"], [("Customer", fence)])
+			with as_user(user):
+				assert_refused(
+					self,
+					create_payment_entry_bts,
+					txn.name,
+					party_type="Customer",
+					party=party,
+					posting_date=today(),
+					reference_number="x",
+					reference_date=today(),
+					allow_edit=1,
+				)
+				assert_refused(
+					self,
+					create_journal_entry_bts,
+					txn.name,
+					second_account=self.debit_to,
+					entry_type="Bank Entry",
+					posting_date=today(),
+					party_type="Customer",
+					party=party,
+					allow_edit=1,
+				)
+		user = make_fenced_user("brt-fenced@example.com", ["Accounts User"], [("Customer", "_Test Customer")])
+		with as_user(user):
+			payment = create_payment_entry_bts(
+				txn.name,
+				party_type="Customer",
+				party="_Test Customer",
+				posting_date=today(),
+				reference_number="x",
+				reference_date=today(),
+				allow_edit=1,
+			)
+		self.assertEqual(payment.party, "_Test Customer")
+
+	def test_party_check_refuses_a_non_party_doctype_and_an_empty_party_type(self):
+		txn = self.make_bank_transaction(today())
+		user = make_fenced_user("brt-fenced@example.com", ["Accounts User"])
+		with as_user(user):
+			for party_type, party in (("User", user), ("", "_Test Customer")):
+				assert_refused(
+					self,
+					create_journal_entry_bts,
+					txn.name,
+					second_account=self.debit_to,
+					entry_type="Bank Entry",
+					posting_date=today(),
+					party_type=party_type,
+					party=party,
+					allow_edit=1,
+				)
+
+	def test_bank_entry_and_payment_entry_reconcile_check_the_party(self):
+		txn = self.make_bank_transaction(today())
+		user = make_fenced_user(
+			"brt-fenced@example.com", ["Accounts User"], [("Customer", "_Test Customer 1")]
+		)
+		with as_user(user):
+			assert_refused(
+				self,
+				create_bank_entry_and_reconcile,
+				txn.name,
+				today(),
+				today(),
+				"x",
+				[
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": "_Test Customer",
+						"credit": 100,
+					}
+				],
+			)
+			assert_refused(
+				self,
+				create_payment_entry_and_reconcile,
+				txn.name,
+				{"party_type": "Customer", "party": "_Test Customer"},
+			)
+			assert_refused(
+				self,
+				create_bulk_payment_entry_and_reconcile,
+				[txn.name],
+				"Customer",
+				"_Test Customer",
+				self.debit_to,
+			)
+		outside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused(
+				self,
+				create_bulk_payment_entry_and_reconcile,
+				[txn.name],
+				"Customer",
+				"_Test Customer",
+				self.debit_to,
+			)
+
+	def test_internal_transfer_checks_the_counterpart_account(self):
+		txn = self.make_bank_transaction(today())
+		args = {
+			"posting_date": today(),
+			"reference_date": today(),
+			"reference_no": "x",
+			"paid_to": "_Test Cash - _TC",
+		}
+		user = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			assert_refused(self, create_internal_transfer, txn.name, paid_from="_Test Bank - _TC1", **args)
+			assert_refused(
+				self,
+				create_internal_transfer,
+				txn.name,
+				paid_from="_Test Cash - _TC",
+				dimensions={"payment_type": "Pay"},
+				**args,
+			)
+			result = create_internal_transfer(txn.name, paid_from="_Test Cash - _TC", **args)
+		self.assertEqual(result["payment_entry"].paid_from, "_Test Cash - _TC")
+		account_fenced = make_fenced_user(
+			"brt-fenced@example.com",
+			["Accounts User"],
+			[("Account", "_Test Cash - _TC"), ("Account", self.bank)],
+		)
+		with as_user(account_fenced):
+			assert_refused(self, create_internal_transfer, txn.name, paid_from="_Test Bank - _TC1", **args)
+
+	def test_auto_reconcile_vouchers_fences_the_bank_account(self):
+		self.make_bank_transaction(today())
+
+		def auto_reconcile_kwargs(name):
+			return {"bank_account": name, "from_date": today(), "to_date": today()}
+
+		outside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused_for_names(
+				self,
+				auto_reconcile_vouchers,
+				auto_reconcile_kwargs,
+				[self.bank_account],
+				type_gated=True,
+				caller_supplied=True,
+			)
+		inside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(inside):
+			auto_reconcile_vouchers(self.bank_account, today(), today())
+
+	def test_update_clearance_date_fences_the_voucher(self):
+		payment = self.make_other_company_payment()
+
+		def clearance_kwargs(name):
+			return {
+				"payment_document": "Payment Entry",
+				"payment_entry": name,
+				"account": "_Test Bank - _TC1",
+				"clearance_date": today(),
+			}
+
+		user = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				update_clearance_date,
+				clearance_kwargs,
+				[payment.name],
+				type_gated=True,
+				caller_supplied=True,
+			)
+		self.assertRaises(
+			frappe.ValidationError,
+			update_clearance_date,
+			"Sales Order",
+			"SO-MISSING-0001",
+			self.bank,
+			today(),
+		)

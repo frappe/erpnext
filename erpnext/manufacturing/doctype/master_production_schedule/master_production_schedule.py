@@ -420,7 +420,7 @@ class MasterProductionSchedule(Document):
 			query = query.where(doctype.delivery_date >= kwargs.get("delivery_from_date"))
 
 		if kwargs.get("delivery_to_date"):
-			query = query.where(doctype.delivery_date <= kwargs.get("to_delivery_date"))
+			query = query.where(doctype.delivery_date <= kwargs.get("delivery_to_date"))
 
 		if items := self.get_items_for_mps():
 			doctype_item = frappe.qb.DocType("Sales Order Item")

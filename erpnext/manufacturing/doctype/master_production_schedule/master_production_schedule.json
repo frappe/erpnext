@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2025-08-08 19:54:43.478386",
+ "description": "How much of each item to make, and when.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

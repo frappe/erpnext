@@ -21,6 +21,7 @@ from erpnext.stock.doctype.quality_inspection.quality_inspection import (
 	parse_reading,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -63,10 +64,10 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn.reload()
 		dn.submit()
 
-		qa.reload()
-		qa.cancel()
 		dn.reload()
 		dn.cancel()
+		qa.reload()
+		qa.cancel()
 
 	def test_qa_not_submit(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
@@ -206,6 +207,28 @@ class TestQualityInspection(ERPNextTestSuite):
 			frappe.delete_doc("Quality Inspection", qi)
 		dn.delete()
 
+	def test_make_quality_inspections_links_serial_id_for_row_number(self):
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		serial_id = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)[0]
+		frappe.db.set_value("Serial No", serial_id, "serial_no", "QI-Row-Serial")
+		row = {"item_code": item, "serial_no": "QI-Row-Serial", "sample_size": 1, "qty": 1}
+
+		(inspection,) = make_quality_inspections(se.company, se.doctype, se.name, [row], "Incoming")
+
+		self.assertEqual(frappe.db.get_value("Quality Inspection", inspection, "item_serial_no"), serial_id)
+
+	def test_make_quality_inspections_skips_serial_not_received_yet(self):
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(
+			item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
+		)
+		row = {"item_code": item, "serial_no": "QI-Unreceived-Serial", "sample_size": 1, "qty": 1}
+
+		(inspection,) = make_quality_inspections(se.company, se.doctype, se.name, [row], "Incoming")
+
+		self.assertIsNone(frappe.db.get_value("Quality Inspection", inspection, "item_serial_no"))
+
 	def test_rejected_qi_validation(self):
 		"""Test if rejected QI blocks Stock Entry as per Stock Settings."""
 		se = make_stock_entry(
@@ -234,10 +257,10 @@ class TestQualityInspection(ERPNextTestSuite):
 		se.submit()  # when allowed in Stock settings, allow rejected QI
 
 		# teardown
-		qa.reload()
-		qa.cancel()
 		se.reload()
 		se.cancel()
+		qa.reload()
+		qa.cancel()
 		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Stop")
 
 	def test_qi_status(self):
@@ -535,6 +558,149 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		se.delete()
 
+	def test_qi_of_another_document_or_item_is_refused(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value(
+			"Item",
+			"_Test Item with QA",
+			{"inspection_required_before_purchase": 1, "inspection_required_before_delivery": 1},
+		)
+		other_receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Purchase Receipt", reference_name=other_receipt.name, inspection_type="Incoming"
+		)
+
+		delivery_note = create_delivery_note(item_code="_Test Item with QA", do_not_save=True)
+		delivery_note.items[0].quality_inspection = qa.name
+		self.assertRaises(frappe.ValidationError, delivery_note.insert)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"action_if_quality_inspection_is_not_submitted": "Stop"}
+	)
+	def test_second_qi_does_not_take_over_inspected_row(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_purchase", 1)
+		receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		first = create_quality_inspection(
+			reference_type="Purchase Receipt", reference_name=receipt.name, inspection_type="Incoming"
+		)
+		receipt.reload()
+		receipt.submit()
+
+		second = create_quality_inspection(
+			reference_type="Purchase Receipt",
+			reference_name=receipt.name,
+			inspection_type="Incoming",
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, second.save)
+		self.assertEqual(
+			frappe.db.get_value("Purchase Receipt Item", receipt.items[0].name, "quality_inspection"),
+			first.name,
+		)
+
+	def test_batch_qi_links_to_its_batch_row(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "inspection_required_before_purchase": 1}
+		).name
+		batches = [
+			frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": f"{item}-QI-{i}"}).insert().name
+			for i in range(2)
+		]
+
+		receipt = make_purchase_receipt(item_code=item, qty=1, do_not_save=True, use_serial_batch_fields=1)
+		receipt.items[0].batch_no = batches[0]
+		second_row = receipt.items[0].as_dict().copy()
+		second_row.update({"name": None, "batch_no": batches[1]})
+		receipt.append("items", second_row)
+		receipt.insert()
+
+		qa = create_quality_inspection(
+			item_code=item,
+			reference_type="Purchase Receipt",
+			reference_name=receipt.name,
+			inspection_type="Incoming",
+			do_not_submit=True,
+			do_not_save=True,
+		)
+		qa.batch_no = batches[1]
+		qa.save()
+
+		self.assertEqual(qa.child_row_reference, receipt.items[1].name)
+
+	def test_status_follows_cancellation(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_purchase", 1)
+		receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Purchase Receipt",
+			reference_name=receipt.name,
+			inspection_type="Incoming",
+			do_not_submit=True,
+		)
+		qa.status = "Cancelled"
+		qa.manual_inspection = 1
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		qa.reload()
+		qa.submit()
+		qa.cancel()
+		self.assertEqual(frappe.db.get_value("Quality Inspection", qa.name, "status"), "Cancelled")
+
+	def test_qi_of_submitted_receipt_cannot_be_cancelled(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_purchase", 1)
+		receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Purchase Receipt", reference_name=receipt.name, inspection_type="Incoming"
+		)
+		receipt.reload()
+		receipt.submit()
+
+		self.assertRaises(frappe.ValidationError, qa.cancel)
+
+		receipt.cancel()
+		qa.reload()
+		qa.cancel()
+		self.assertEqual(qa.docstatus, 2)
+
+	def test_item_query_for_job_card_respects_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import item_query
+
+		job_card = make_minimal_job_card(production_item="_Test Item")
+		args = ("Item", "", "name", 0, 20)
+
+		self.assertFalse(item_query(*args, {"reference_doctype": "Job Card"}))
+		self.assertEqual(
+			[
+				row[0]
+				for row in item_query(*args, {"reference_doctype": "Job Card", "reference_name": job_card})
+			],
+			["_Test Item"],
+		)
+
+		user = create_user("test_qi_item_query@example.com", "Website Manager")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				item_query,
+				*args,
+				{"reference_doctype": "Job Card", "reference_name": job_card},
+			)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of
@@ -560,6 +726,18 @@ class TestQualityInspection(ERPNextTestSuite):
 		# The production_item filter excluded the Job Card with a different item.
 		self.assertFalse(frappe.db.get_value("Job Card", non_matching_jc, "quality_inspection"))
 
+	def test_job_card_cancel_ignores_its_quality_inspection(self):
+		from unittest.mock import patch
+
+		job_card = frappe.get_doc("Job Card", make_minimal_job_card(production_item="_Test Item"))
+		with (
+			patch.object(type(job_card), "update_work_order"),
+			patch.object(type(job_card), "set_transferred_qty"),
+		):
+			job_card.on_cancel()
+
+		self.assertIn("Quality Inspection", job_card.ignore_linked_doctypes)
+
 	def test_qi_job_card_reference_respects_production_item(self):
 		"""A QI referencing a Job Card by name but whose item_code does not match the
 		Job Card's production_item must NOT update that Job Card."""
@@ -576,6 +754,82 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		# name matches but production_item != item_code, so the row is left untouched.
 		self.assertFalse(frappe.db.get_value("Job Card", jc, "quality_inspection"))
+
+	def test_job_card_qi_keeps_manually_rejected_reading(self):
+		create_quality_inspection_parameter("Finish")
+		parameter = {"specification": "Finish", "numeric": 0, "value": "OK"}
+		if not frappe.db.exists("Quality Inspection Template", "_Test QI Template Finish"):
+			frappe.get_doc(
+				{
+					"doctype": "Quality Inspection Template",
+					"quality_inspection_template_name": "_Test QI Template Finish",
+					"item_quality_inspection_parameter": [parameter],
+				}
+			).insert()
+		item = create_item("_Test Item QI Finish")
+		item.db_set("quality_inspection_template", "_Test QI Template Finish")
+
+		qa = create_quality_inspection(
+			item_code=item.name,
+			inspection_type="In Process",
+			reference_type="Job Card",
+			reference_name=make_minimal_job_card(production_item=item.name),
+			readings=[
+				dict(parameter, reading_value="Scratched", manual_inspection=1, status="Rejected"),
+			],
+			do_not_submit=True,
+		)
+
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
+	def test_job_card_qi_uses_criteria_of_its_own_template(self):
+		create_quality_inspection_parameter("Length")
+		item_template = make_qi_template("_Test QI Template Item Length", min_value=0, max_value=100)
+		operation_template = make_qi_template("_Test QI Template Operation Length", min_value=5, max_value=10)
+		item = create_item("_Test Item QI Template Length")
+		item.db_set("quality_inspection_template", item_template)
+
+		qa = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "In Process",
+				"reference_type": "Job Card",
+				"reference_name": make_minimal_job_card(production_item=item.name),
+				"item_code": item.name,
+				"quality_inspection_template": operation_template,
+				"sample_size": 1,
+				"inspected_by": "Administrator",
+				"readings": [
+					{
+						"specification": "Length",
+						"numeric": 1,
+						"min_value": 5,
+						"max_value": 10,
+						"reading_1": "50",
+					}
+				],
+			}
+		).insert()
+
+		self.assertEqual((qa.readings[0].min_value, qa.readings[0].max_value), (5, 10))
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
+
+def make_qi_template(name, min_value, max_value):
+	if not frappe.db.exists("Quality Inspection Template", name):
+		frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": name,
+				"item_quality_inspection_parameter": [
+					{"specification": "Length", "numeric": 1, "min_value": min_value, "max_value": max_value}
+				],
+			}
+		).insert()
+
+	return name
 
 
 def make_minimal_job_card(production_item):

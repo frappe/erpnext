@@ -19,6 +19,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
@@ -490,7 +491,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 			{
 				"main_item_code": "Subcontracted Item SA4",
 				"item_code": "Subcontracted SRM Item 3",
-				"qty": 3.0,
+				"qty": 1.0,
 				"rate": 100.0,
 				"stock_uom": "Nos",
 				"warehouse": "_Test Warehouse - _TC",
@@ -997,7 +998,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 					if field == "serial_no":
 						data = sorted(data)
 
-					self.assertEqual(data, transferred_detais.get(field))
+					expected = transferred_detais.get(field)
+					self.assertEqual(data, sorted(expected) if field == "serial_no" else expected)
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
@@ -1012,7 +1014,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 					if field == "serial_no":
 						data = sorted(data)
 
-					self.assertEqual(data, transferred_detais.get(field))
+					expected = transferred_detais.get(field)
+					self.assertEqual(data, sorted(expected) if field == "serial_no" else expected)
 
 	def test_subcontracting_with_same_components_different_fg_with_serial_batch_fields(self):
 		"""
@@ -1179,6 +1182,36 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
 
+	def test_phantom_item_materials_scale_with_phantom_qty(self):
+		phantom_item = make_item(properties={"is_stock_item": 1}).name
+		phantom_bom = make_bom(
+			item=phantom_item, raw_materials=["Subcontracted SRM Item 8"], rm_qty=2, do_not_save=True
+		)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		fg_bom = make_bom(item=fg_item, raw_materials=[phantom_item], rm_qty=3, do_not_save=True)
+		fg_bom.items[0].bom_no = phantom_bom.name
+		fg_bom.save()
+		fg_bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0, do_not_submit=1)
+
+		self.assertEqual(sco.supplied_items[0].rm_item_code, "Subcontracted SRM Item 8")
+		self.assertEqual(sco.supplied_items[0].required_qty, 30)
+
 	def test_co_by_product(self):
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
 
@@ -1298,14 +1331,14 @@ def update_item_details(child_row, details):
 	details.use_serial_batch_fields = child_row.get("use_serial_batch_fields")
 	if child_row.serial_and_batch_bundle:
 		doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
+		serial_ids = [row.serial_no for row in doc.get("entries") if row.serial_no]
+		details.serial_no.extend(SerialBatchIdentity("Serial No").get_numbers(doc.item_code, serial_ids))
 		for row in doc.get("entries"):
-			if row.serial_no:
-				details.serial_no.append(row.serial_no)
-
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty * (
 					-1 if doc.type_of_transaction == "Outward" else 1
 				)
+		details.serial_no.sort()
 	else:
 		if child_row.serial_no:
 			details.serial_no.extend(get_serial_nos(child_row.serial_no))
@@ -1338,7 +1371,7 @@ def make_stock_transfer_entry(**args):
 		batches = defaultdict(float)
 		if item_details and item_details.serial_no:
 			serial_nos = item_details.serial_no[0 : cint(row.qty)]
-			item_details.serial_no = list(set(item_details.serial_no) - set(serial_nos))
+			item_details.serial_no = item_details.serial_no[len(serial_nos) :]
 
 		if item_details and item_details.batch_no:
 			for batch_no, batch_qty in item_details.batch_no.items():
@@ -1358,7 +1391,7 @@ def make_stock_transfer_entry(**args):
 						"warehouse": row.warehouse or "_Test Warehouse - _TC",
 						"qty": (row.qty or 1) * -1,
 						"batches": batches,
-						"serial_nos": serial_nos,
+						"serial_nos": SerialBatchIdentity("Serial No").resolve(row.item_code, serial_nos),
 						"voucher_type": "Delivery Note",
 						"type_of_transaction": "Outward",
 						"do_not_submit": True,

@@ -2,12 +2,22 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProjectTemplate(ERPNextTestSuite):
+	def test_projects_manager_maintains_and_projects_user_reads_templates(self):
+		manager = create_user("project_template_manager@example.com", "Projects Manager").name
+		user = create_user("project_template_user@example.com", "Projects User").name
+
+		for ptype in ("create", "read", "write"):
+			self.assertTrue(frappe.has_permission("Project Template", ptype, user=manager))
+		self.assertTrue(frappe.has_permission("Project Template", "read", user=user))
+		self.assertFalse(frappe.has_permission("Project Template", "write", user=user))
+
 	def test_dependency_task_must_be_in_template(self):
 		dependency = create_task("_Test PT Dependency", is_template=1)
 		dependent = create_task("_Test PT Dependent", is_template=1, depends_on=dependency.name)
@@ -21,6 +31,33 @@ class TestProjectTemplate(ERPNextTestSuite):
 		template.append("tasks", {"task": dependency.name})
 		template.insert()
 		self.assertTrue(frappe.db.exists("Project Template", template.name))
+
+	def test_disabled_template_is_refused_for_projects(self):
+		template = make_project_template("_Test Disabled Project Template")
+		template.db_set("disabled", 1)
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name="_Test Disabled Template Project",
+			project_template=template.name,
+			company="_Test Company",
+		)
+		self.assertRaises(frappe.ValidationError, project.insert)
+
+	def test_template_tasks_are_validated(self):
+		with self.subTest("task that is not a template"):
+			task = create_task("_Test PT Live Task")
+			template = frappe.get_doc(doctype="Project Template", name="_Test PT Live Task Template")
+			template.append("tasks", {"task": task.name})
+			self.assertRaises(frappe.ValidationError, template.insert)
+
+		with self.subTest("child task that ends after its parent"):
+			parent = create_task("_Test PT Phase", is_template=1, is_group=1, duration=2)
+			child = create_task(
+				"_Test PT Long Child", is_template=1, parent_task=parent.name, begin=1, duration=5
+			)
+			template = frappe.get_doc(doctype="Project Template", name="_Test PT Long Child Template")
+			template.extend("tasks", [{"task": parent.name}, {"task": child.name}])
+			self.assertRaises(frappe.ValidationError, template.insert)
 
 
 def make_project_template(project_template_name, project_tasks=None):

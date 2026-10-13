@@ -7,6 +7,7 @@ from frappe.utils.data import add_to_date, now
 from erpnext.manufacturing.doctype.job_card.mapper import make_corrective_job_card
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.cost_of_poor_quality_report.cost_of_poor_quality_report import execute
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -128,3 +129,30 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 			to_date=add_to_date(now(), days=6),
 		)
 		self.assertNotIn(corrective_jc.name, {r["name"] for r in outside})
+
+	def test_serial_and_batch_filters_match_physical_numbers(self):
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card()
+		item = make_item("_Test COPQ Serial Batch Item", {"has_serial_no": 1, "has_batch_no": 1})
+		serial_no = frappe.get_doc(
+			doctype="Serial No", item_code=item.name, serial_no="COPQ-SN-01", company="_Test Company"
+		).insert()
+		batch = frappe.get_doc(doctype="Batch", item=item.name, batch_id="COPQ-B-01").insert()
+		corrective_jc.db_set(
+			{"serial_no": serial_no.serial_no, "batch_no": batch.name, "production_item": item.name}
+		)
+
+		rows = self.run_report(company="_Test Company", serial_no=serial_no.name, batch_no=batch.name)
+
+		self.assertEqual(
+			[(row.name, row.batch_no_number) for row in rows], [(corrective_jc.name, "COPQ-B-01")]
+		)
+
+	def test_serial_filter_ignores_job_cards_of_other_items(self):
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card()
+		other_item = make_item("_Test COPQ Other Serial Item", {"has_serial_no": 1}).name
+		other_serial = frappe.get_doc(
+			doctype="Serial No", item_code=other_item, serial_no="COPQ-SHARED-01", company="_Test Company"
+		).insert()
+		corrective_jc.db_set("serial_no", "COPQ-SHARED-01")
+
+		self.assertEqual(self.run_report(company="_Test Company", serial_no=other_serial.name), [])

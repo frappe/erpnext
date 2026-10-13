@@ -5,7 +5,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:11",
- "description": "Supplier of Goods or Services.",
+ "description": "A company or person you buy goods or services from.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
@@ -112,6 +112,7 @@
   {
    "fieldname": "country",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Country",
    "options": "Country"
   },
@@ -125,12 +126,15 @@
    "description": "Supplier's tax identification number (e.g. PAN, VAT, GST)",
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Tax ID"
   },
   {
    "description": "Determines which tax rules apply to this supplier",
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -138,6 +142,7 @@
    "description": "TDS / withholding tax category applied when paying this supplier",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
   },
@@ -158,11 +163,13 @@
   },
   {
    "depends_on": "is_internal_supplier",
+   "description": "Select the related company that this Supplier represents for inter-company transactions.",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "image",
@@ -180,6 +187,7 @@
   {
    "fieldname": "supplier_group",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier Group",
@@ -254,6 +262,7 @@
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Billing Currency",
    "no_copy": 1,
@@ -267,12 +276,14 @@
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Price List",
    "options": "Price List"
   },
   {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Payment Terms Template",
    "options": "Payment Terms Template"
   },
@@ -395,6 +406,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
    "hidden": 1,
+   "in_global_search": 1,
    "label": "Mobile No",
    "no_copy": 1
   },
@@ -403,6 +415,7 @@
    "fieldname": "email_id",
    "fieldtype": "Read Only",
    "hidden": 1,
+   "in_global_search": 1,
    "label": "Email ID",
    "no_copy": 1
   },
@@ -593,7 +606,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-08-21 23:11:49.780507",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

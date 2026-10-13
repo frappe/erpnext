@@ -6,6 +6,9 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters=None):
 	validate_filters(filters)
@@ -13,7 +16,7 @@ def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def validate_filters(filters):
@@ -83,5 +86,8 @@ def get_batch_details(filters):
 
 	if filters.get("item"):
 		query = query.where(batch.item == filters["item"])
+
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
 
 	return query.run(as_dict=True)

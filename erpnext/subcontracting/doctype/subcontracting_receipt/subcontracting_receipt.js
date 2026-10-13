@@ -15,6 +15,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		frm.custom_make_buttons = {
 			"Purchase Receipt": "Purchase Receipt",
 		};
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	on_submit(frm) {
@@ -333,7 +334,11 @@ frappe.ui.form.on("Subcontracting Receipt", {
 	},
 
 	setup_quality_inspection: (frm) => {
-		if (!frm.is_new() && frm.doc.docstatus === 0 && !frm.doc.is_return) {
+		if (
+			!frm.is_new() &&
+			(frm.doc.docstatus === 0 || frm.doc.__onload?.allow_to_make_qc_after_submission) &&
+			!frm.doc.is_return
+		) {
 			let transaction_controller = new erpnext.TransactionController({ frm: frm });
 			transaction_controller.setup_quality_inspection();
 		}

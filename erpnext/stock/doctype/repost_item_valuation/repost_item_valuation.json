@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
+ "description": "Recalculates stock values after a backdated change.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/repost-item-valuation",
  "editable_grid": 1,

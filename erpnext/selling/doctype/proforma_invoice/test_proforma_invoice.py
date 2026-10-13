@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.services.child_item_update import update_child_qty_rate
 from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	get_sales_order_items,
 	make_proforma_invoice,
@@ -23,6 +24,9 @@ class TestProformaInvoice(ERPNextTestSuite):
 		items = [{"so_detail": so_detail, "qty": qty} for so_detail, qty in lines]
 		name = make_proforma_invoice(sales_order.name, json.dumps(items), **kwargs)
 		return frappe.get_doc("Proforma Invoice", name)
+
+	def make_draft_proforma(self, sales_order, **item):
+		return frappe.new_doc("Proforma Invoice", sales_order=sales_order.name, items=[item]).insert()
 
 	def test_partial_proforma_is_non_blocking(self):
 		"""A proforma must not touch delivery/billing or the source Sales Order."""
@@ -171,6 +175,74 @@ class TestProformaInvoice(ERPNextTestSuite):
 			proforma.get_email_content(),
 			("Proforma Invoice PRO-TEST-0001", "Please find attached the proforma invoice PRO-TEST-0001."),
 		)
+
+	def test_line_description_is_editable(self):
+		sales_order = make_sales_order(qty=10, do_not_submit=True)
+		sales_order.items[0].description = "Ordered description"
+		sales_order.submit()
+		so_detail = sales_order.items[0].name
+
+		edited = make_proforma_invoice(
+			sales_order.name, json.dumps([{"so_detail": so_detail, "qty": 4, "description": "Edited"}])
+		)
+		unedited = self.create_proforma(sales_order, [(so_detail, 4)])
+
+		self.assertEqual(get_sales_order_items(sales_order.name)[0]["description"], "Ordered description")
+		self.assertEqual(frappe.get_doc("Proforma Invoice", edited).items[0].description, "Edited")
+		self.assertEqual(unedited.items[0].description, "Ordered description")
+
+	def test_update_items_cannot_delete_a_proformed_row(self):
+		sales_order = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 5, "rate": 100},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 50},
+			]
+		)
+		proformed, other = sales_order.items
+		proforma = self.create_proforma(sales_order, [(proformed.name, 2)])
+		keep_other = json.dumps(
+			[{"item_code": other.item_code, "qty": other.qty, "rate": other.rate, "docname": other.name}]
+		)
+
+		self.assertRaises(
+			frappe.ValidationError, update_child_qty_rate, "Sales Order", keep_other, sales_order.name
+		)
+
+		proforma.cancel()
+		update_child_qty_rate("Sales Order", keep_other, sales_order.name)
+		sales_order.reload()
+		self.assertEqual([item.name for item in sales_order.items], [other.name])
+
+	def test_line_from_another_sales_order_is_rejected(self):
+		sales_order = make_sales_order(qty=10)
+		other_item = make_sales_order(qty=10).items[0]
+
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_draft_proforma,
+			sales_order,
+			so_detail=other_item.name,
+			item_code=other_item.item_code,
+			qty=4,
+		)
+
+	def test_quantity_basis_bills_at_sales_order_rate(self):
+		sales_order = make_sales_order(qty=10)
+		so_item = sales_order.items[0]
+
+		proforma = self.make_draft_proforma(
+			sales_order, so_detail=so_item.name, item_code=so_item.item_code, qty=4, rate=1, amount=1
+		)
+
+		item = proforma.items[0]
+		self.assertEqual(item.item_code, so_item.item_code)
+		self.assertEqual(flt(item.rate), flt(so_item.rate))
+		self.assertEqual(flt(item.amount), 4 * flt(so_item.rate))
+
+	def test_amended_proforma_is_rejected(self):
+		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
+
+		self.assertRaises(frappe.ValidationError, proforma.validate_amended_doc)
 
 	def test_requires_submitted_sales_order(self):
 		"""The server rejects a proforma against a draft Sales Order (the button is JS-gated only)."""

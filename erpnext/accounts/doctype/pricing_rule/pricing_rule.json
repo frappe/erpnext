@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2014-02-21 15:02:51",
+ "description": "Changes a price or gives a discount when its conditions are met.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pricing-rule",
  "engine": "InnoDB",

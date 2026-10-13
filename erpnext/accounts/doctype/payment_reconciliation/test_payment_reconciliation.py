@@ -330,6 +330,58 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		for row in rows:
 			self.assertIsNotNone(row.outstanding)
 
+	def test_invoice_limit_keeps_a_voucher_outstanding_on_one_account(self):
+		"""The invoice limit must judge each party account on its own, like the main query.
+
+		A Journal Entry with +100 on one receivable account and -100 on another nets to 0. Netting it
+		dropped the voucher before the limit, so its +100 outstanding never showed.
+		"""
+		from erpnext.accounts.utils import get_outstanding_invoices
+
+		self.customer = (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Invoice Limit Customer",
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+				}
+			)
+			.insert()
+			.name
+		)
+		second_receivable = "_Test Receivable - _TC"
+		sales_invoice = self.create_sales_invoice(qty=1, rate=50)
+
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = nowdate()
+		je.company = self.company
+		for account, amount_field in (
+			(self.debit_to, "debit_in_account_currency"),
+			(second_receivable, "credit_in_account_currency"),
+		):
+			je.append(
+				"accounts",
+				{
+					"account": account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"cost_center": self.main_cc,
+					amount_field: 100,
+				},
+			)
+		je.save()
+		je.submit()
+
+		invoices = get_outstanding_invoices(
+			"Customer", self.customer, [self.debit_to, second_receivable], limit=10
+		)
+		outstanding = {(row.voucher_no, row.account): row.outstanding_amount for row in invoices}
+
+		self.assertEqual(
+			outstanding, {(sales_invoice.name, self.debit_to): 50, (je.name, self.debit_to): 100}
+		)
+
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
 		self.create_sales_invoice(qty=1, rate=300)

@@ -6,6 +6,7 @@ from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.test_asset import set_mandatory_dimension_default_for_other_company
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
@@ -112,12 +113,12 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 9070.36, 74445.07],
-			["2023-09-30", 9070.36, 83515.43],
-			["2023-10-31", 9070.36, 92585.79],
-			["2023-11-30", 9070.36, 101656.15],
-			["2023-12-31", 9070.36, 110726.51],
-			["2024-01-15", 4448.2, 115174.71],
+			["2023-08-31", 9134.91, 74509.62],
+			["2023-09-30", 9134.91, 83644.53],
+			["2023-10-31", 9134.91, 92779.44],
+			["2023-11-30", 9134.91, 101914.35],
+			["2023-12-31", 9134.91, 111049.26],
+			["2024-01-15", 4125.45, 115174.71],
 		]
 
 		schedules = [
@@ -126,6 +127,84 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 		]
 
 		self.assertEqual(schedules, expected_schedules)
+
+	def test_adjustment_ignores_dimension_defaults_of_other_companies(self):
+		"""The adjustment's Journal Entry must only take dimension defaults of its own company."""
+		other_company_department = set_mandatory_dimension_default_for_other_company()
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+		asset_doc = frappe.get_doc("Asset", frappe.db.get_value("Asset", {"purchase_receipt": pr.name}))
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
+		asset_doc.append(
+			"finance_books",
+			{
+				"expected_value_after_useful_life": 200,
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": "2023-01-31",
+			},
+		)
+		asset_doc.submit()
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			current_asset_value=get_asset_value_after_depreciation(asset_doc.name),
+			new_asset_value=50000.0,
+			date="2023-01-20",
+		)
+		adjustment.submit()
+
+		departments = frappe.get_all(
+			"Journal Entry Account", {"parent": adjustment.journal_entry}, pluck="department"
+		)
+		self.assertNotIn(other_company_department, departments)
+
+	def test_adjustment_keeps_explicit_dimension_mandatory_only_in_other_company(self):
+		"""An explicit dimension on the adjustment must reach its Journal Entry even when only
+		another company marks that dimension mandatory."""
+		set_mandatory_dimension_default_for_other_company()
+		department = frappe.get_doc(
+			{
+				"doctype": "Department",
+				"department_name": "_Test Adjustment Department",
+				"company": "_Test Company",
+				"parent_department": "All Departments",
+			}
+		).insert(ignore_if_duplicate=True)
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+		asset_doc = frappe.get_doc("Asset", frappe.db.get_value("Asset", {"purchase_receipt": pr.name}))
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
+		asset_doc.append(
+			"finance_books",
+			{
+				"expected_value_after_useful_life": 200,
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": "2023-01-31",
+			},
+		)
+		asset_doc.submit()
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			current_asset_value=get_asset_value_after_depreciation(asset_doc.name),
+			new_asset_value=50000.0,
+			date="2023-01-20",
+		)
+		adjustment.department = department.name
+		adjustment.save()
+		adjustment.submit()
+
+		departments = frappe.get_all(
+			"Journal Entry Account", {"parent": adjustment.journal_entry}, pluck="department"
+		)
+		self.assertIn(department.name, departments)
 
 	def test_depreciation_after_cancelling_asset_repair(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
@@ -204,24 +283,24 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 2847.27, 68221.98],
-			["2023-09-30", 2847.27, 71069.25],
-			["2023-10-31", 2847.27, 73916.52],
-			["2023-11-30", 2847.27, 76763.79],
-			["2023-12-31", 2847.27, 79611.06],
-			["2024-01-31", 2847.27, 82458.33],
-			["2024-02-29", 2847.27, 85305.6],
-			["2024-03-31", 2847.27, 88152.87],
-			["2024-04-30", 2847.27, 91000.14],
-			["2024-05-31", 2847.27, 93847.41],
-			["2024-06-30", 2847.27, 96694.68],
-			["2024-07-31", 2847.27, 99541.95],
-			["2024-08-31", 2847.27, 102389.22],
-			["2024-09-30", 2847.27, 105236.49],
-			["2024-10-31", 2847.27, 108083.76],
-			["2024-11-30", 2847.27, 110931.03],
-			["2024-12-31", 2847.27, 113778.3],
-			["2025-01-31", 1396.41, 115174.71],
+			["2023-08-31", 2853.6, 68228.31],
+			["2023-09-30", 2853.6, 71081.91],
+			["2023-10-31", 2853.6, 73935.51],
+			["2023-11-30", 2853.6, 76789.11],
+			["2023-12-31", 2853.6, 79642.71],
+			["2024-01-31", 2853.6, 82496.31],
+			["2024-02-29", 2853.6, 85349.91],
+			["2024-03-31", 2853.6, 88203.51],
+			["2024-04-30", 2853.6, 91057.11],
+			["2024-05-31", 2853.6, 93910.71],
+			["2024-06-30", 2853.6, 96764.31],
+			["2024-07-31", 2853.6, 99617.91],
+			["2024-08-31", 2853.6, 102471.51],
+			["2024-09-30", 2853.6, 105325.11],
+			["2024-10-31", 2853.6, 108178.71],
+			["2024-11-30", 2853.6, 111032.31],
+			["2024-12-31", 2853.6, 113885.91],
+			["2025-01-31", 1288.8, 115174.71],
 		]
 
 		schedules = [
@@ -249,12 +328,12 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 8970.18, 74344.89],
-			["2023-09-30", 8970.18, 83315.07],
-			["2023-10-31", 8970.18, 92285.25],
-			["2023-11-30", 8970.18, 101255.43],
-			["2023-12-31", 8970.18, 110225.61],
-			["2024-01-15", 4399.1, 114624.71],
+			["2023-08-31", 9034.02, 74408.73],
+			["2023-09-30", 9034.02, 83442.75],
+			["2023-10-31", 9034.02, 92476.77],
+			["2023-11-30", 9034.02, 101510.79],
+			["2023-12-31", 9034.02, 110544.81],
+			["2024-01-15", 4079.9, 114624.71],
 		]
 
 		schedules = [
