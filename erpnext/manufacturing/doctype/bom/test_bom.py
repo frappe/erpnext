@@ -1588,6 +1588,42 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.items[0].stock_qty, 36)
 		self.assertEqual(bom.exploded_items[0].stock_qty, 36)
 
+	def test_variant_bom_keeps_qty_per_unit_of_the_template(self):
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		template_item = make_item(
+			"_TestTemplateItem", {"has_variants": 1, "attributes": [{"attribute": "Test Size"}]}
+		)
+		variant = create_variant(template_item.item_code, {"Test Size": "Large"})
+		variant.insert(ignore_if_duplicate=True)
+		rm_item = make_item("_Test Variant BOM RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		template_rm = make_item(
+			"_Test Variant BOM Template RM", {"has_variants": 1, "attributes": [{"attribute": "Test Size"}]}
+		)
+		rm_variant = create_variant(template_rm.item_code, {"Test Size": "Large"})
+		rm_variant.insert(ignore_if_duplicate=True)
+
+		template_bom = make_bom(
+			item=template_item.item_code, raw_materials=[rm_item], quantity=10, rm_qty=20, do_not_save=True
+		)
+		template_bom.append("items", {"item_code": template_rm.item_code, "qty": 30})
+		template_bom.insert()
+		template_bom.submit()
+
+		variant_bom = make_variant_bom(
+			template_bom.name,
+			template_bom.name,
+			variant.item_code,
+			variant_items=[
+				{"item_code": template_rm.item_code, "variant_item_code": rm_variant.item_code, "qty": 3}
+			],
+		)
+		variant_bom.save()
+
+		per_unit = {row.item_code: row.qty / variant_bom.quantity for row in variant_bom.items}
+		self.assertEqual(per_unit, {rm_item: 2, rm_variant.item_code: 3})
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
