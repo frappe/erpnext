@@ -413,6 +413,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(sq1_row.get("supplier_quotation"), sq1.name)
 		self.assertEqual(sq1_row.get("request_for_quotation_item"), rfq.items[0].name)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_get_supplier_quotations_data_duplicate_item_code_rows(self):
 		rfq = frappe.new_doc("Request for Quotation")
 		rfq.transaction_date = nowdate()
@@ -460,6 +461,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		returned_rfq_item_names = {row.get("request_for_quotation_item") for row in data}
 		self.assertEqual(rfq_item_names, returned_rfq_item_names)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_get_supplier_quotations_data_segregated_in_sq_not_in_rfq(self):
 		rfq = make_request_for_quotation()
 		supplier = rfq.suppliers[0].supplier
@@ -521,6 +523,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data[0].get("supplier"), "_Test Supplier 1")
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_get_supplier_quotations_data_excludes_rows_of_other_rfq(self):
 		rfq = make_request_for_quotation()
 		other_rfq = make_request_for_quotation(qty=7)
