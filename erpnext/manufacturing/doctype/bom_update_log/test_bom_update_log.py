@@ -177,6 +177,38 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=foreign.name),
 		)
 
+	def test_replace_recalculates_rows_in_their_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		rm = make_item("_Test BUL UOM RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_stock_entry(item_code=rm, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sub_item = make_item(
+			"_Test BUL UOM Sub",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		parent_item = make_item("_Test BUL UOM Parent", {"is_stock_item": 1}).name
+		top_item = make_item("_Test BUL UOM Top", {"is_stock_item": 1}).name
+
+		sub_1 = make_test_bom(sub_item, [(rm, None, 1)])
+		sub_2 = make_test_bom(sub_item, [(rm, None, 0.5)])
+		parent = make_test_bom(parent_item, [(sub_item, sub_1.name, 1, "Box")])
+		top = make_test_bom(top_item, [(parent_item, parent.name, 1)])
+		self.assertEqual(frappe.db.get_value("BOM", top.name, "total_cost"), 1200)
+
+		enqueue_replace_bom(boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name))
+
+		row = frappe.db.get_value(
+			"BOM Item", {"parent": parent.name}, ["bom_no", "rate", "amount"], as_dict=True
+		)
+		self.assertEqual((row.bom_no, row.rate, row.amount), (sub_2.name, 600, 600))
+		self.assertEqual(frappe.db.get_value("BOM", parent.name, "total_cost"), 600)
+		self.assertEqual(frappe.db.get_value("BOM", top.name, "total_cost"), 600)
+
 
 def make_test_bom(item, rows):
 	bom = frappe.get_doc(
@@ -187,20 +219,19 @@ def make_test_bom(item, rows):
 			"currency": "INR",
 			"quantity": 1,
 			"rm_cost_as_per": "Valuation Rate",
-			"items": [
-				{
-					"item_code": item_code,
-					"qty": 1,
-					"bom_no": bom_no,
-					"source_warehouse": "_Test Warehouse - _TC",
-				}
-				for item_code, bom_no in rows
-			],
+			"items": [make_test_bom_row(*row) for row in rows],
 		}
 	)
 	bom.insert()
 	bom.submit()
 	return bom
+
+
+def make_test_bom_row(item_code, bom_no, qty=1, uom=None):
+	row = {"item_code": item_code, "qty": qty, "bom_no": bom_no, "source_warehouse": "_Test Warehouse - _TC"}
+	if uom:
+		row["uom"] = uom
+	return row
 
 
 def remove_bom(item_code):
