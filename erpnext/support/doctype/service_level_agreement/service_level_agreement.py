@@ -137,10 +137,8 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
 	def validate_doc(self):
-		if (
-			self.enabled
-			and self.document_type == "Issue"
-			and not frappe.db.get_single_value("Support Settings", "track_service_level_agreement")
+		if self.enabled and not frappe.db.get_single_value(
+			"Support Settings", "track_service_level_agreement"
 		):
 			frappe.throw(
 				_("{0} is not enabled in {1}").format(
