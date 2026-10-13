@@ -15,6 +15,7 @@ def create_ledger_entry(
 	treasury_cost_change=0,
 	is_reversal=False,
 	reversal_of=None,
+	original=None,
 ):
 	posting_sequence = get_next_posting_sequence(transaction.company, posting_date)
 	entry = frappe.get_doc(
@@ -42,6 +43,18 @@ def create_ledger_entry(
 			"reversal_of": reversal_of,
 		}
 	)
+	if original:
+		for field in (
+			"company",
+			"share_class",
+			"transaction_type",
+			"from_share_number",
+			"to_share_number",
+			"currency",
+			"face_value_per_share",
+		):
+			entry.set(field, original.get(field))
+		entry.capital_change = -flt(original.capital_change)
 	entry.flags.from_share_transaction = True
 	entry.insert(ignore_permissions=True)
 	return entry
