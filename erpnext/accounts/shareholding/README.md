@@ -1,31 +1,51 @@
-# Shareholding in Accounting (Phase 1)
+# Shareholding in Accounting
 
-The working shareholding workflow lives in ERPNext's **Accounts** module and
-appears under Share Management in the Accounting workspace.
+Create a Company, Shareholder, and reusable Share Class. A Share Class defines
+ordinary or preference shares and records voting and dividend terms. These
+terms do not automate votes or dividend payments in V1.
 
-Create a Company, Shareholder, and company-specific Share Class. Submitting a
-Share Transaction creates any required Share Folio and immutable Share Ledger
-Entries. The Shareholder form shows its current positions directly from these
-ledger entries. Share Ledger and Equity Position reports show history and
-holdings for a selected date; they do not maintain a second editable balance.
+Share Transaction supports Issue, Transfer, Buyback, Retirement, and Reissue
+using numbered share ranges. Submitting creates the company membership
+(Share Folio), then writes immutable Share Ledger Entries. A Transfer writes
+both sides of the ownership movement. Cancellation writes reversal entries
+and keeps the original history.
 
-Supported transactions are Issue, Transfer, Buyback, Retirement, and Reissue.
-Numbered ranges and whole-quantity holdings are supported. Company-specific
-Equity Accounting Settings choose default accounts. Transactions affecting the
-company create a draft Journal Entry; the General Ledger updates only when
-that Journal Entry is submitted. An ordinary shareholder-to-shareholder
-Transfer creates no company accounting entry.
+Share Ledger and Equity Position show history and holdings for a selected
+date. The Shareholder form also shows a read-only Current Share Balance child
+table. Transactions rebuild this table from the ledger. Users cannot change
+its quantities by saving the Shareholder. A user must have access to every
+company linked to a Shareholder to read that global record.
 
-Phase 2 workflows (corporate actions, dividends, awards, convertibles,
-settlements, and depository comparisons) are outside this active module. If
-Clearing accounting is selected, finance records the actual payment with a
-separate Journal Entry; Phase 1 does not automate that payment or bank matching.
+Equity Accounting Settings stores the default accounts for each company.
+Issue, Buyback, Retirement, and Reissue prepare a draft Journal Entry.
+Finance reviews its settlement account and submits it to update the General
+Ledger. Equity amounts and accounts must match the transaction. An ordinary
+Transfer creates no company journal. Journals are never submitted automatically.
 
-ERPNext's existing Shareholder, Share Type, Share Transfer, and Share Balance
-records are part of Accounts. The migration patch maps existing shareholder
-names and folio numbers into the new identity and Share Folio structure where
-possible. It captures the old identifiers in a staging table before the DocType
-schema changes so they remain auditable. It does not invent tax IDs,
-share-class rights, face values, or ledger movements for old transfers. The
-older Share Transfer and Share Balance forms remain available for historical
-review until a separate data conversion has been approved and verified.
+The Accounting workspace includes shareholding counts, shortcuts, and reports.
+All DocTypes and reports remain in Accounts. V1 does not include a separate
+Equity module, corporate actions, or automated bank reconciliation.
+
+## Existing data
+
+Share Type and Share Transfer remain readable. New records, edits, cancellation,
+and journal generation through those legacy DocTypes are blocked.
+
+Pre-migration patches snapshot legacy identities and Share Balance rows.
+Post-migration patches create folios and replay submitted Share Transfers.
+Map each old Share Type using the Legacy Share Type field on Share Class.
+The backfill validates complete share ranges and compares ending ownership
+against the saved balances. It never reposts historical accounting or guesses
+face values, tax IDs, or share rights.
+
+Incomplete mappings or mismatched balances block new transactions for affected
+companies. After correcting the data and mappings, run:
+
+```sh
+bench --site <site> execute erpnext.patches.v17_0.backfill_legacy_share_transfers.run_backfill
+```
+
+Legacy Purchase removes shares from circulation. It is not mapped to a treasury
+Buyback. Cancelled legacy transfers are not replayed because their cancellation
+dates are unknown. Historical face values remain unknown until independently
+verified. Unreconciled history requires review and an approved opening balance.
