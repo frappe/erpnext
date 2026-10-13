@@ -1052,6 +1052,90 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(flt(scr_return.total_additional_costs, 2), -100)
 
+	def make_receipt_of_two_orders(self, taxes=None, discounts=None, do_not_submit=False):
+		"""Subcontracting Receipt of two orders; taxes and discounts are keyed by the order's position."""
+		set_backflush_based_on("BOM")
+		orders = [get_subcontracting_order(), get_subcontracting_order()]
+		for idx, sco in enumerate(orders):
+			for tax_idx, rate in enumerate((taxes or {}).get(idx, []), 1):
+				frappe.get_doc(
+					{
+						"doctype": "Purchase Taxes and Charges",
+						"parent": sco.purchase_order,
+						"parenttype": "Purchase Order",
+						"parentfield": "taxes",
+						"idx": tax_idx,
+						"category": "Total",
+						"add_deduct_tax": "Add",
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Excise Duty - _TC",
+						"cost_center": "Main - _TC",
+						"description": f"Excise {rate}",
+						"rate": rate,
+					}
+				).db_insert()
+			if discount := (discounts or {}).get(idx):
+				frappe.db.set_value(
+					"Purchase Order",
+					sco.purchase_order,
+					{"apply_discount_on": "Net Total", "additional_discount_percentage": discount},
+				)
+			rm_items = get_rm_items(sco.supplied_items)
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name,
+				rm_items=rm_items,
+				itemwise_details=copy.deepcopy(itemwise_details),
+			)
+
+		scr = make_subcontracting_receipt(orders[0].name)
+		scr = make_subcontracting_receipt(orders[1].name, scr)
+		scr.save()
+		if not do_not_submit:
+			scr.submit()
+		return scr
+
+	def test_purchase_receipt_refuses_orders_with_different_taxes(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		scr = self.make_receipt_of_two_orders(taxes={1: [10]})
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Make one Purchase Receipt for each", make_purchase_receipt, scr.name
+		)
+
+	def test_purchase_receipt_refuses_orders_with_different_discounts(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		scr = self.make_receipt_of_two_orders(discounts={0: 10})
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Make one Purchase Receipt for each", make_purchase_receipt, scr.name
+		)
+
+	def test_purchase_receipt_combines_orders_with_the_same_tax(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		scr = self.make_receipt_of_two_orders(taxes={0: [10], 1: [10]})
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(len({item.purchase_order for item in pr.items}), 2)
+		self.assertEqual([tax.description for tax in pr.taxes], ["Excise 10"])
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	def test_auto_purchase_receipt_is_skipped_for_orders_with_different_taxes(self):
+		scr = self.make_receipt_of_two_orders(taxes={1: [10]}, do_not_submit=True)
+		scr.submit()
+
+		self.assertEqual(scr.docstatus, 1)
+		self.assertFalse(frappe.db.exists("Purchase Receipt", {"subcontracting_receipt": scr.name}))
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
