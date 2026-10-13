@@ -154,6 +154,8 @@ class TestSupportIndex(ERPNextTestSuite):
 
 	def test_result_is_limited_to_six_articles(self):
 		"""At most FAVORITE_ARTICLE_LIMIT articles come back, and they are the most viewed."""
+		# Articles already on the site could outrank ours; this is rolled back after the test
+		frappe.db.set_value("Help Article", {"published": 1}, "published", 0)
 		category = self.make_help_category()
 
 		# Eight candidates with distinct, descending view counts
