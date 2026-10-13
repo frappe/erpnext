@@ -57,7 +57,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			...card,
 			value: this.money0(p.value),
 			delta: this.delta_opts(p, __("since last year")),
-			caption: COUNT.invoices(p.count || 0),
+			caption: p.count ? COUNT.invoices(p.count) : __("No invoices in this period"),
 			onclick: () => this.open_analytics(),
 		};
 	}
@@ -74,13 +74,14 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			{
 				label: labels[0],
 				value: this.money0(outstanding.value),
-				caption: this.outstanding_sub(outstanding),
+				caption: this.outstanding_sub(outstanding) || __("Nothing unpaid"),
 				onclick: () => this.open_ledger(),
 			},
 			{
 				label: labels[1],
 				value: this.money0(overdue.value),
 				delta: this.delta_opts(overdue, __("since last month")),
+				caption: flt(overdue.value) ? null : __("Nothing overdue"),
 				onclick: () => this.open_ledger(),
 			},
 			this.advances_card(labels[2], advances, outstanding.unpaid_count),
@@ -300,6 +301,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 						[COUNT.orders(d.count), d.past_due && __("{0} past promised date", [d.past_due])]
 							.filter(Boolean)
 							.join(" · "),
+					empty: __("Nothing to deliver"),
 					route: [
 						"Sales Order",
 						{ ...open_orders, per_delivered: ["<", 100], skip_delivery_note: 0 },
@@ -309,6 +311,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 					label: __("Pending Billing"),
 					data: pl.billing,
 					caption: (d) => COUNT.orders(d.count) + " · " + __("not fully billed"),
+					empty: __("Nothing to bill"),
 					route: ["Sales Order", { ...open_orders, per_billed: ["<", 100] }],
 				}
 			);
@@ -320,6 +323,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 					[COUNT.invoices(d.count), d.overdue && __("{0} overdue", [d.overdue])]
 						.filter(Boolean)
 						.join(" · "),
+				empty: __("Nothing unpaid"),
 				route: [
 					"Sales Invoice",
 					{

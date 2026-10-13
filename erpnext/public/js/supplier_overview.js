@@ -3,6 +3,7 @@ const COUNT = {
 	bills: (n) => (n === 1 ? __("1 bill") : __("{0} bills", [n])),
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
+	lines_due: (n) => (n === 1 ? __("1 line due") : __("{0} lines due", [n])),
 	days_late: (n) => (n === 1 ? __("oldest 1 day late") : __("oldest {0} days late", [n])),
 	reconcile: (n) =>
 		n === 1 ? __("Reconcile with 1 unpaid bill") : __("Reconcile with {0} unpaid bills", [n]),
@@ -58,7 +59,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			...card,
 			value: this.money0(p.value),
 			delta: this.delta_opts(p, __("since last year")),
-			caption: COUNT.bills(p.count || 0),
+			caption: p.count ? COUNT.bills(p.count) : __("No bills in this period"),
 			onclick: () => this.open_analytics(),
 		};
 	}
@@ -74,18 +75,20 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			{
 				label: labels[0],
 				value: this.money0(outstanding.value),
-				caption: [
-					outstanding.unpaid_count && __("{0} unpaid", [outstanding.unpaid_count]),
-					outstanding.days_to_pay && COUNT.days_to_pay(outstanding.days_to_pay),
-				]
-					.filter(Boolean)
-					.join(" · "),
+				caption:
+					[
+						outstanding.unpaid_count && __("{0} unpaid", [outstanding.unpaid_count]),
+						outstanding.days_to_pay && COUNT.days_to_pay(outstanding.days_to_pay),
+					]
+						.filter(Boolean)
+						.join(" · ") || __("Nothing unpaid"),
 				onclick: () => this.open_ledger(),
 			},
 			{
 				label: labels[1],
 				value: this.money0(overdue.value),
 				delta: this.delta_opts(overdue, __("since last month")),
+				caption: flt(overdue.value) ? null : __("Nothing overdue"),
 				onclick: () => this.open_ledger(),
 			},
 			this.advances_card(labels[2], advances, outstanding.unpaid_count),
@@ -123,7 +126,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			right: this.report_link(__("Purchase Analytics"), () => this.open_analytics()),
 			type: "bar",
 			height: 280,
-			colors: ["--blue-800", "--blue-400"],
+			colors: ["--co-series-1", "--co-series-2"],
 			empty_text: __("No purchases or payments in this period"),
 			notes,
 			data: t?.points.some((p) => flt(p.purchased) || flt(p.paid)) && {
@@ -154,7 +157,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 		const d = this.overview.data?.delivery;
 		const $panel = this.panel(this.$charts, {
 			title: __("Delivery Performance"),
-			subtitle: d?.lines && [__("{0} due", [d.lines]), COUNT.orders(d.orders)].join(" · "),
+			subtitle: d?.lines && [COUNT.lines_due(d.lines), COUNT.orders(d.orders)].join(" · "),
 			right:
 				d?.scorecard &&
 				this.report_link(__("Scorecard"), () =>
@@ -172,7 +175,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 				{ label: __("Received late"), value: d.late, color: "var(--blue-400)" },
 				{ label: __("Overdue"), value: d.overdue, color: "var(--blue-600)" },
 			],
-			center: { value: d.on_time_rate + "%", label: __("on time") },
+			center: { value: Math.round(d.on_time_rate) + "%", label: __("on time") },
 		});
 		$('<div class="co-chart">').append(donut).appendTo($panel);
 	}
@@ -212,12 +215,14 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 						]
 							.filter(Boolean)
 							.join(" · "),
+					empty: __("Nothing to receive"),
 					route: ["Purchase Order", { ...open_orders, per_received: ["<", 100] }],
 				},
 				{
 					label: __("Pending Billing"),
 					data: pl.billing,
 					caption: (d) => COUNT.orders(d.count) + " · " + __("received, not billed"),
+					empty: __("Nothing to bill"),
 					route: [
 						"Purchase Order",
 						{ ...open_orders, per_received: [">", 0], per_billed: ["<", 100] },
@@ -230,6 +235,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 						[COUNT.orders(d.count), d.days_late && COUNT.days_late(d.days_late)]
 							.filter(Boolean)
 							.join(" · "),
+					empty: __("Nothing overdue"),
 					route: [
 						"Purchase Order",
 						{

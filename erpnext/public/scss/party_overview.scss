@@ -1,4 +1,7 @@
 .party-overview {
+	--co-series-1: var(--blue-800);
+	--co-series-2: var(--blue-400);
+
 	.co-period,
 	.co-subtitle,
 	.co-note,
@@ -153,4 +156,9 @@
 			text-align: right;
 		}
 	}
+}
+
+[data-theme="dark"] .party-overview {
+	--co-series-1: var(--blue-300);
+	--co-series-2: var(--blue-600);
 }

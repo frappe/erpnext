@@ -329,7 +329,7 @@ erpnext.PartyOverview = class PartyOverview {
 	}
 
 	draw_trend(el, spec) {
-		const style = getComputedStyle(document.documentElement);
+		const style = getComputedStyle(el);
 		const chart = new frappe.Chart(el, {
 			type: spec.type,
 			height: spec.height || 220,
@@ -384,7 +384,7 @@ erpnext.PartyOverview = class PartyOverview {
 					formatted: this.short_money(b.value),
 				})),
 				format: (v) => this.short_money(v),
-				color: "var(--blue-800)",
+				color: "var(--co-series-1)",
 				name: __("Outstanding"),
 				tooltip_format: (v) => this.money0(v),
 			})
@@ -413,7 +413,7 @@ erpnext.PartyOverview = class PartyOverview {
 		const items = specs.map((s) => ({
 			label: s.label,
 			value: this.money0(s.data.value),
-			caption: s.data.count ? s.caption(s.data) : __("None open"),
+			caption: s.data.count ? s.caption(s.data) : s.empty || __("None open"),
 			onclick: () => this.list_route(s.route[0], s.route[1]),
 		}));
 		frappe.ui.stat_cards({ items }).appendTo(this.$pipeline);
