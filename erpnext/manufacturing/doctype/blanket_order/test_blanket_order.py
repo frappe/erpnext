@@ -642,6 +642,29 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(pricing["children"][0]["base_rate"], expected_base_rate)
 
+	def test_blanket_order_lookup_skips_fully_ordered_order(self):
+		item = make_item("_Test Blanket Order Lookup Item", {"is_stock_item": 1}).name
+		used_up = make_blanket_order(blanket_order_type="Purchasing", quantity=10, rate=100, item_code=item)
+		po = make_purchase_order_against(used_up, qty=10)
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.submit()
+		open_order = make_blanket_order(
+			blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item
+		)
+
+		details = get_blanket_order_details(
+			{
+				"company": "_Test Company",
+				"currency": open_order.currency,
+				"supplier": open_order.supplier,
+				"doctype": "Purchase Order",
+				"item_code": item,
+				"transaction_date": today(),
+			}
+		)
+		self.assertEqual(details.blanket_order, open_order.name)
+		self.assertEqual(details.blanket_order_rate, 90)
+
 	def test_blanket_order_lookup_filters_currency(self):
 		company_currency = get_company_currency("_Test Company")
 		transaction_currency = "USD" if company_currency != "USD" else "EUR"
