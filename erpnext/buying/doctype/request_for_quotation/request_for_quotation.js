@@ -147,7 +147,6 @@ frappe.ui.form.on("Request for Quotation", {
 			);
 
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
-
 		}
 
 		if (frm.doc.docstatus === 0) {
@@ -292,22 +291,35 @@ frappe.ui.form.on("Request for Quotation", {
 			frappe.boot.sysdefaults.currency ||
 			"";
 
+		// Each Supplier Quotation is a separate offer, so revised or alternative quotations
+		// from the same supplier are compared side by side instead of being added together.
 		const rfq_suppliers = (frm.doc.suppliers || []).map((s) => s.supplier).filter(Boolean);
-		const quote_suppliers = (quotes || []).map((q) => q.supplier).filter(Boolean);
-		const quote_suppliers_set = new Set(quote_suppliers);
-		const suppliers = Array.from(
-			new Set(
-				rfq_suppliers
-					.filter((s) => quote_suppliers_set.has(s))
-					.concat(quote_suppliers.filter((s) => !rfq_suppliers.includes(s)))
-			)
-		);
+		const offers = [];
+		const offer_by_sq = {};
+		(quotes || []).forEach((q) => {
+			if (q.supplier_quotation && !offer_by_sq[q.supplier_quotation]) {
+				offer_by_sq[q.supplier_quotation] = {
+					key: q.supplier_quotation,
+					supplier: q.supplier,
+					supplier_quotation: q.supplier_quotation,
+				};
+				offers.push(offer_by_sq[q.supplier_quotation]);
+			}
+		});
+		const supplier_order = (supplier) => {
+			const idx = rfq_suppliers.indexOf(supplier);
+			return idx === -1 ? rfq_suppliers.length : idx;
+		};
+		// stable sort: RFQ supplier order first, unlisted suppliers after, quotation date within a supplier
+		offers.sort((a, b) => supplier_order(a.supplier) - supplier_order(b.supplier));
 
 		const all_items = frm.doc.items || [];
 		const selected_item = frm.quotations_item_filter || "";
 		const items = selected_item ? all_items.filter((i) => i.item_code === selected_item) : all_items;
 
 		const quote_map = {};
+		const get_quote = (item, offer) => quote_map[`${item.name}:::${offer.key}`];
+		const format_qty = (val) => (flt(val) % 1 === 0 ? cint(val) : flt(val, 2));
 
 		function combine_quotes(item, matching_quotes) {
 			if (!matching_quotes || matching_quotes.length === 0) return null;
@@ -326,13 +338,19 @@ frappe.ui.form.on("Request for Quotation", {
 					sq_conv === rfq_item_conv
 						? flt(q.qty)
 						: (flt(q.stock_qty) || flt(q.qty) * sq_conv) / rfq_item_conv;
+				// quantity, rate and unit are all shown in the RFQ item's unit
+				q.display_uom = item.uom || q.uom;
+				q.quoted_as =
+					q.uom && item.uom && q.uom !== item.uom
+						? __("Quoted as {0} {1}", [format_qty(q.qty), q.uom])
+						: "";
 				q.supplier_quotations = [q.supplier_quotation].filter(Boolean);
 				q.is_combined = false;
 				return q;
 			}
 
-			// When multiple quotation items match the same RFQ item (e.g. segregated by supplier),
-			// aggregate (add) the quantities and amounts together
+			// Several lines of the same Supplier Quotation for one RFQ item (e.g. split by rate
+			// slabs) together make up a single offer, so their quantities and amounts are added
 			let total_qty = 0;
 			let total_base_amount = 0;
 			const sq_names = [];
@@ -346,9 +364,7 @@ frappe.ui.form.on("Request for Quotation", {
 				const sq_base_amount = flt(q.base_amount) || flt(q.amount) * (flt(q.conversion_rate) || 1.0);
 				const unit_rate = (sq_base_rate / sq_conv) * rfq_item_conv;
 				const q_conv_qty =
-					sq_conv === rfq_item_conv
-						? q_qty
-						: (flt(q.stock_qty) || q_qty * sq_conv) / rfq_item_conv;
+					sq_conv === rfq_item_conv ? q_qty : (flt(q.stock_qty) || q_qty * sq_conv) / rfq_item_conv;
 
 				total_qty += q_conv_qty;
 				total_base_amount += sq_base_amount;
@@ -357,14 +373,16 @@ frappe.ui.form.on("Request for Quotation", {
 					sq_names.push(q.supplier_quotation);
 				}
 
-				const rate_val = unit_rate % 1 === 0 ? cint(unit_rate) : flt(unit_rate, 2);
-				const qty_val = q_conv_qty % 1 === 0 ? cint(q_conv_qty) : flt(q_conv_qty, 2);
+				const rate_val = format_qty(unit_rate);
+				const qty_val = format_qty(q_conv_qty);
+				const uom = item.uom || q.uom || "";
 
 				rate_breakdown.push(`${qty_val}-${rate_val}`);
-				hover_breakdown.push(`${qty_val} for ${rate_val} per unit`);
+				hover_breakdown.push(__("{0} {1} at {2} per {1}", [qty_val, uom, rate_val]));
 			});
 
 			const first = matching_quotes[0];
+			const lead_times = matching_quotes.map((q) => cint(q.lead_time_days)).filter((d) => d > 0);
 			return {
 				item_code: item.item_code,
 				item_name: item.item_name || first.item_name,
@@ -373,22 +391,24 @@ frappe.ui.form.on("Request for Quotation", {
 				supplier_quotations: sq_names,
 				qty: total_qty,
 				converted_qty: total_qty,
-				uom: first.uom || item.uom,
+				uom: item.uom || first.uom,
+				display_uom: item.uom || first.uom,
+				quoted_as: "",
 				stock_uom: first.stock_uom || item.stock_uom,
 				conversion_factor: rfq_item_conv,
 				converted_rate: total_qty > 0 ? total_base_amount / total_qty : 0,
 				converted_amount: total_base_amount,
 				rate_display: rate_breakdown.join(", "),
 				rate_title: hover_breakdown.join(", "),
-				lead_time_days: null,
-				valid_till: null,
+				lead_time_days: lead_times.length ? Math.max(...lead_times) : null,
+				valid_till: first.valid_till,
 				is_combined: true,
 			};
 		}
 
-		// Map quotes to RFQ items for each supplier
-		suppliers.forEach((sup) => {
-			const sup_quotes = (quotes || []).filter((q) => q.supplier === sup);
+		// Map the lines of each offer to RFQ items
+		offers.forEach((offer) => {
+			const sup_quotes = (quotes || []).filter((q) => q.supplier_quotation === offer.key);
 
 			const item_to_quotes = {};
 			all_items.forEach((item) => {
@@ -437,39 +457,26 @@ frappe.ui.form.on("Request for Quotation", {
 			all_items.forEach((item) => {
 				const combined = combine_quotes(item, item_to_quotes[item.name]);
 				if (combined) {
-					if (item.name) {
-						quote_map[`${item.name}:::${sup}`] = combined;
-					}
-					if (!quote_map[`${item.item_code}:::${sup}`]) {
-						quote_map[`${item.item_code}:::${sup}`] = combined;
-					}
+					quote_map[`${item.name}:::${offer.key}`] = combined;
 				}
 			});
 		});
 
+		// rates are all in company currency per RFQ unit, so they can be compared directly
 		const min_rates = {};
 		all_items.forEach((item) => {
-			const rates = suppliers
-				.map((sup) => {
-					const q = item.name ? quote_map[`${item.name}:::${sup}`] : quote_map[`${item.item_code}:::${sup}`];
-					return q?.converted_rate;
-				})
+			const rates = offers
+				.map((offer) => get_quote(item, offer)?.converted_rate)
 				.filter((r) => r !== undefined && r !== null && r > 0);
 			if (rates.length > 0) {
-				const min = Math.min(...rates);
-				if (item.name) {
-					min_rates[item.name] = min;
-				}
-				min_rates[item.item_code] = min;
+				min_rates[item.name] = Math.min(...rates);
 			}
 		});
 
-		const format_qty = (val) => (flt(val) % 1 === 0 ? cint(val) : flt(val, 2));
-
 		all_items.forEach((item) => {
 			const req_qty = flt(item.qty);
-			suppliers.forEach((sup) => {
-				const q = item.name ? quote_map[`${item.name}:::${sup}`] : quote_map[`${item.item_code}:::${sup}`];
+			offers.forEach((offer) => {
+				const q = get_quote(item, offer);
 				if (q) {
 					const quoted_qty = q.converted_qty !== undefined ? flt(q.converted_qty) : flt(q.qty);
 					if (req_qty > 0 && quoted_qty < req_qty) {
@@ -486,35 +493,36 @@ frappe.ui.form.on("Request for Quotation", {
 			});
 		});
 
-		const supplier_pending_tooltips = {};
-		suppliers.forEach((sup) => {
-			const sup_quotes = (quotes || []).filter((q) => q.supplier === sup);
-			const has_sup_quotes = sup_quotes.length > 0;
+		const offer_pending_tooltips = {};
+		offers.forEach((offer) => {
 			const pending_items = all_items.filter((item) => {
-				const q = item.name ? quote_map[`${item.name}:::${sup}`] : quote_map[`${item.item_code}:::${sup}`];
-				return !q || q.converted_amount === undefined || q.converted_amount === null || flt(q.qty) <= 0;
+				const q = get_quote(item, offer);
+				return (
+					!q || q.converted_amount === undefined || q.converted_amount === null || flt(q.qty) <= 0
+				);
 			});
 
-			if (has_sup_quotes && pending_items.length > 0) {
+			if (pending_items.length > 0) {
 				const pending_names = pending_items
 					.map((i) => i.item_code || i.item_name)
 					.filter(Boolean)
 					.join(", ");
-				supplier_pending_tooltips[sup] = __("partial offer: {0} pending", [pending_names]);
+				offer_pending_tooltips[offer.key] = __("partial offer: {0} pending", [pending_names]);
 			} else {
-				supplier_pending_tooltips[sup] = "";
+				offer_pending_tooltips[offer.key] = "";
 			}
 		});
 
-		const supplier_totals = {};
-		const complete_suppliers = [];
-		const complete_supplier_totals = [];
-		suppliers.forEach((sup) => {
+		// only offers covering every shown item in full are eligible for the cheapest total
+		const offer_totals = {};
+		const complete_offers = [];
+		const complete_offer_totals = [];
+		offers.forEach((offer) => {
 			let total = 0;
 			let is_complete = true;
 			let quoted_items_count = 0;
 			items.forEach((item) => {
-				const q = item.name ? quote_map[`${item.name}:::${sup}`] : quote_map[`${item.item_code}:::${sup}`];
+				const q = get_quote(item, offer);
 				if (q && q.converted_amount !== undefined && q.converted_amount !== null && flt(q.qty) > 0) {
 					total += flt(q.converted_amount);
 					quoted_items_count++;
@@ -529,37 +537,35 @@ frappe.ui.form.on("Request for Quotation", {
 				}
 			});
 			if (quoted_items_count > 0) {
-				supplier_totals[sup] = total;
+				offer_totals[offer.key] = total;
 				if (is_complete && quoted_items_count === items.length) {
-					complete_suppliers.push(sup);
-					complete_supplier_totals.push(total);
+					complete_offers.push(offer.key);
+					complete_offer_totals.push(total);
 				}
 			}
 		});
 
-		const min_supplier_total =
-			complete_supplier_totals.length > 0 ? Math.min(...complete_supplier_totals) : null;
+		const min_offer_total = complete_offer_totals.length > 0 ? Math.min(...complete_offer_totals) : null;
 
-		const quotation_count = suppliers.length;
-		const categorize_by =
-			quotation_count === 1 ? "Item" : frm.quotations_categorize_by || "Supplier";
+		const quotation_count = offers.length;
+		const categorize_by = quotation_count === 1 ? "Item" : frm.quotations_categorize_by || "Supplier";
 		const has_quotes = quotes && quotes.length > 0;
 
 		const context = {
 			docstatus: frm.doc.docstatus,
 			company_currency: company_currency,
-			suppliers: suppliers,
+			offers: offers,
 			all_items: all_items,
 			items: items,
 			selected_item: selected_item,
 			categorize_by: categorize_by,
-			quotes: quotes || [],
-			quote_map: quote_map,
+			get_quote: get_quote,
+			format_qty: format_qty,
 			min_rates: min_rates,
-			supplier_totals: supplier_totals,
-			complete_suppliers: complete_suppliers,
-			min_supplier_total: min_supplier_total,
-			supplier_pending_tooltips: supplier_pending_tooltips,
+			offer_totals: offer_totals,
+			complete_offers: complete_offers,
+			min_offer_total: min_offer_total,
+			offer_pending_tooltips: offer_pending_tooltips,
 			has_quotes: has_quotes,
 			quotation_count: quotation_count,
 		};
@@ -581,10 +587,7 @@ frappe.ui.form.on("Request for Quotation", {
 					unique_item_options.push({ label: label, value: itm.item_code });
 				}
 			});
-			const item_options = [
-				{ label: __("All Items"), value: "" },
-				...unique_item_options,
-			];
+			const item_options = [{ label: __("All Items"), value: "" }, ...unique_item_options];
 
 			const item_control = frappe.ui.form.make_control({
 				df: {

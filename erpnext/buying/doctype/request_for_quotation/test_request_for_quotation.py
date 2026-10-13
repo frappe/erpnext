@@ -512,14 +512,44 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		)
 		self.assertEqual(len(rfq.suppliers), 1)
 
+		# a supplier outside the RFQ can only hold a draft quotation against it
 		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier 1")
 		sq.items[0].rate = 180
 		sq.save()
-		sq.submit()
 
 		data = get_supplier_quotations_data(rfq.name)
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data[0].get("supplier"), "_Test Supplier 1")
+
+	def test_get_supplier_quotations_data_excludes_rows_of_other_rfq(self):
+		rfq = make_request_for_quotation()
+		other_rfq = make_request_for_quotation(qty=7)
+		supplier = rfq.suppliers[0].supplier
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.items[0].rate = 100
+		sq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 7,
+				"rate": 90,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"request_for_quotation": other_rfq.name,
+				"request_for_quotation_item": other_rfq.items[0].name,
+			},
+		)
+		sq.save()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0].get("request_for_quotation_item"), rfq.items[0].name)
+
+		other_data = get_supplier_quotations_data(other_rfq.name)
+		self.assertEqual(len(other_data), 1)
+		self.assertEqual(other_data[0].get("request_for_quotation_item"), other_rfq.items[0].name)
 
 
 def make_request_for_quotation(**args):
