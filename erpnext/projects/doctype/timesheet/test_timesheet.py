@@ -215,6 +215,8 @@ class TestTimesheet(ERPNextTestSuite):
 		sales_invoice.submit()
 		timesheet.reload()
 		self.assertEqual(sales_invoice.timesheets[0].timesheet_detail, timesheet.time_logs[0].name)
+		self.assertEqual(sales_invoice.timesheets[0].from_time, timesheet.time_logs[0].from_time)
+		self.assertEqual(sales_invoice.timesheets[0].to_time, timesheet.time_logs[0].to_time)
 		self.assertEqual(sales_invoice.total_billing_amount, 100)
 		self.assertEqual(timesheet.status, "Billed")
 
