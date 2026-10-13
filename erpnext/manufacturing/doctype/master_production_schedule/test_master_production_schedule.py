@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import add_days, getdate, today
 
 from erpnext.manufacturing.doctype.master_production_schedule.master_production_schedule import (
+	get_mps_details,
 	get_own_lead_time,
 )
 from erpnext.stock.doctype.item.test_item import make_item
@@ -73,6 +74,17 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 			sorted((row.warehouse, row.planned_qty) for row in mps.items),
 			[("Finished Goods - _TC", 4), ("Stores - _TC", 3)],
 		)
+
+	def test_mps_details_need_read_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		mps = make_mps(to_date=add_days(today(), 30))
+		user = create_user("mps-sales-user@example.com", "Sales User")
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, get_mps_details, mps.name)
+
+		self.assertEqual(get_mps_details(mps.name).name, mps.name)
 
 	def test_lead_time_is_not_int_truncated(self):
 		lead_time = frappe._dict(manufacturing_time_in_mins=720, shift_time_in_hours=8, buffer_time=0)

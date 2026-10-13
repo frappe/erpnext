@@ -549,6 +549,7 @@ def get_own_lead_time(lead_time, qty, is_manufactured):
 
 @frappe.whitelist()
 def get_mps_details(mps: str):
+	frappe.has_permission("Master Production Schedule", "read", doc=mps, throw=True)
 	return frappe.db.get_value(
 		"Master Production Schedule",
 		mps,
