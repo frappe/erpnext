@@ -1105,25 +1105,26 @@ class BOM(WebsiteGenerator):
 	def validate_bom_links(self):
 		self.validate_child_boms_on_reactivation()
 		if not self.is_active:
-			bom_item = frappe.qb.DocType("BOM Item")
 			bom = frappe.qb.DocType("BOM")
-			act_pbom = (
-				frappe.qb.from_(bom_item)
-				.join(bom)
-				.on(bom.name == bom_item.parent)
-				.select(bom_item.parent)
-				.distinct()
-				.where(
-					(bom_item.bom_no == self.name)
-					& (bom_item.docstatus == 1)
-					& (bom_item.parenttype == "BOM")
-					& (bom.docstatus == 1)
-					& (bom.is_active == 1)
-				)
-			).run()
+			for doctype in ("BOM Item", "BOM Operation"):
+				child = frappe.qb.DocType(doctype)
+				act_pbom = (
+					frappe.qb.from_(child)
+					.join(bom)
+					.on(bom.name == child.parent)
+					.select(child.parent)
+					.where(
+						(child.bom_no == self.name)
+						& (child.docstatus == 1)
+						& (child.parenttype == "BOM")
+						& (bom.docstatus == 1)
+						& (bom.is_active == 1)
+					)
+					.limit(1)
+				).run()
 
-			if act_pbom and act_pbom[0][0]:
-				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+				if act_pbom and act_pbom[0][0]:
+					frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
 	def validate_transfer_against(self):
 		if not self.with_operations:

@@ -1691,6 +1691,38 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Item", fg_item, "default_bom"), second.name)
 		self.assertEqual(frappe.db.get_value("BOM", second.name, "is_default"), 1)
 
+	def test_bom_used_in_another_boms_operation_cannot_be_deactivated(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		rm_item = make_item("_Test Op Link RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_item = make_item("_Test Op Link Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Op Link FG", {"is_stock_item": 1}).name
+		make_workstation({"workstation": "_Test Op Link Workstation"})
+		make_operation({"operation": "_Test Op Link Operation", "workstation": "_Test Op Link Workstation"})
+		sub_bom = make_bom(item=sub_item, raw_materials=[rm_item])
+
+		parent = frappe.new_doc("BOM", company="_Test Company", item=fg_item, quantity=1)
+		parent.with_operations = 1
+		parent.track_semi_finished_goods = 1
+		operation = {
+			"operation": "_Test Op Link Operation",
+			"workstation": "_Test Op Link Workstation",
+			"time_in_mins": 10,
+		}
+		parent.append(
+			"operations", dict(operation, finished_good=sub_item, bom_no=sub_bom.name, finished_good_qty=1)
+		)
+		parent.append("operations", dict(operation, finished_good=fg_item, is_final_finished_good=1))
+		parent.append("items", {"item_code": sub_item, "qty": 1, "operation_row_id": 2, "do_not_explode": 1})
+		parent.insert()
+		parent.submit()
+
+		sub_bom.reload()
+		sub_bom.is_active = 0
+		self.assertRaisesRegex(frappe.ValidationError, "linked with other BOMs", sub_bom.save)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
