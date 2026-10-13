@@ -97,7 +97,7 @@ class TestQueries(unittest.TestCase):
 		open_dn = create_delivery_note(qty=2)
 
 		query = add_default_params(queries.get_delivery_notes_to_be_billed, "Delivery Note")
-		result = query(filters={"customer": open_dn.customer}, page_len=1000)
+		result = query(filters={"name": ["in", [returned_dn.name, open_dn.name]]})
 
 		self.assert_nested_in(open_dn.name, result)
 		self.assertNotIn(returned_dn.name, [row[0] for row in result])
