@@ -90,6 +90,7 @@ class BOMCostingService:
 		if self.doc.docstatus == 1:
 			self.doc.flags.ignore_validate_update_after_submit = True
 
+		self.doc.set_plc_conversion_rate()
 		self.calculate_cost(save_updates=save, update_hour_rate=update_hour_rate)
 
 		if save:

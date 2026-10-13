@@ -1545,6 +1545,34 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.secondary_items[0].cost, 1)
 		self.assertEqual(bom.total_cost, 19)
 
+	def test_price_list_currency_and_rate_are_set_on_the_server(self):
+		price_list = make_usd_buying_price_list(80)
+		rm_item = make_item("_Test BOM USD Server RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		bom = make_usd_bom(
+			make_item("_Test BOM USD Server FG", {"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+		)
+		self.assertEqual((bom.price_list_currency, bom.plc_conversion_rate), ("USD", 80))
+		self.assertEqual(bom.items[0].rate, 10)
+
+		switched = make_usd_bom(
+			make_item("_Test BOM USD Switched FG", {"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+		)
+		switched.rm_cost_as_per = "Price List"
+		switched.buying_price_list = price_list
+		switched.save()
+		switched.update_cost()
+		switched.reload()
+		self.assertEqual(switched.plc_conversion_rate, 80)
+		self.assertEqual(switched.items[0].rate, 10)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
