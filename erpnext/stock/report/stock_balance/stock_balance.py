@@ -7,7 +7,7 @@ from typing import Any, TypedDict
 
 import frappe
 from frappe import _
-from frappe.query_builder import Order
+from frappe.query_builder import Order, Tuple
 from frappe.query_builder.functions import Coalesce, Count
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
@@ -155,6 +155,8 @@ class StockBalanceReport:
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
+		self.latest_valuation_rates = {}
+		track_rates = self.filters.get("show_dimension_wise_stock") and not self.has_dimension_filter
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
@@ -165,6 +167,8 @@ class StockBalanceReport:
 					self.initialize_data(item_warehouse_map, group_by_key, entry)
 
 				self.prepare_item_warehouse_map(item_warehouse_map, entry, group_by_key)
+				if track_rates:
+					self.latest_valuation_rates[entry.item_code, entry.warehouse] = entry.valuation_rate
 
 				if self.opening_data.get(group_by_key):
 					del self.opening_data[group_by_key]
@@ -180,18 +184,24 @@ class StockBalanceReport:
 		return item_warehouse_map
 
 	def set_pool_rate_on_dimension_rows(self):
-		if not (
-			self.filters.get("show_dimension_wise_stock")
-			or any(self.filters.get(field) for field in self.inventory_dimensions)
-		):
+		if not (self.filters.get("show_dimension_wise_stock") or self.has_dimension_filter):
 			return
 
 		items = self.get_pool_valuation_details({row.item_code for row in self.item_warehouse_map.values()})
 		rows = [row for row in self.item_warehouse_map.values() if self.is_valued_in_pool(row, items)]
-		rates = self.get_latest_valuation_rates(rows)
+		rates = self.latest_valuation_rates
+		rates.update(
+			self.get_latest_valuation_rates(
+				[row for row in rows if (row.item_code, row.warehouse) not in rates]
+			)
+		)
 		for row in rows:
 			row.val_rate = rates.get((row.item_code, row.warehouse), 0.0)
 			row.bal_val = row.bal_qty * row.val_rate
+
+	@property
+	def has_dimension_filter(self) -> bool:
+		return any(self.filters.get(field) for field in self.inventory_dimensions)
 
 	def get_pool_valuation_details(self, item_codes: set) -> dict:
 		if not item_codes:
@@ -238,8 +248,7 @@ class StockBalanceReport:
 			.where(
 				(sle.is_cancelled == 0)
 				& (sle.posting_date <= self.to_date)
-				& sle.item_code.isin({row.item_code for row in rows})
-				& sle.warehouse.isin({row.warehouse for row in rows})
+				& Tuple(sle.item_code, sle.warehouse).isin({(row.item_code, row.warehouse) for row in rows})
 			)
 		).as_("ranked")
 		entries = (
