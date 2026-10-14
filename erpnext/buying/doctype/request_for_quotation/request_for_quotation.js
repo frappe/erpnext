@@ -495,28 +495,6 @@ frappe.ui.form.on("Request for Quotation", {
 			});
 		});
 
-		const offer_pending_tooltips = {};
-		offers.forEach((offer) => {
-			// a zero qty line with a rate is a unit price offer, so the item counts as quoted
-			const pending_items = all_items.filter((item) => {
-				const q = get_quote(item, offer);
-				if (!q || q.converted_amount === undefined || q.converted_amount === null) {
-					return true;
-				}
-				return flt(q.qty) <= 0 && flt(q.converted_rate) <= 0;
-			});
-
-			if (pending_items.length > 0) {
-				const pending_names = pending_items
-					.map((i) => i.item_code || i.item_name)
-					.filter(Boolean)
-					.join(", ");
-				offer_pending_tooltips[offer.key] = __("partial offer: {0} pending", [pending_names]);
-			} else {
-				offer_pending_tooltips[offer.key] = "";
-			}
-		});
-
 		// only offers covering every shown item in full are eligible for the cheapest total
 		const offer_totals = {};
 		const complete_offers = [];
@@ -569,7 +547,6 @@ frappe.ui.form.on("Request for Quotation", {
 			offer_totals: offer_totals,
 			complete_offers: complete_offers,
 			min_offer_total: min_offer_total,
-			offer_pending_tooltips: offer_pending_tooltips,
 			has_quotes: has_quotes,
 			quotation_count: quotation_count,
 		};
