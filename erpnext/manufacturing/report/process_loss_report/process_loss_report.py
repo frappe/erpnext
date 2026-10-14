@@ -141,5 +141,5 @@ def get_columns() -> Columns:
 
 def update_data_with_total_pl_value(data: Data) -> None:
 	for row in data:
-		value_per_unit_fg = row["total_fg_value"] / row["qty_to_manufacture"]
-		row["total_pl_value"] = row["process_loss_qty"] * value_per_unit_fg
+		processed_qty = row["produced_qty"] + row["process_loss_qty"]
+		row["total_pl_value"] = row["process_loss_qty"] * row["total_fg_value"] / processed_qty
