@@ -390,6 +390,11 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self._build_required_item_row(item_dict, d, consider_job_card, wip_warehouse, work_order)
 
 	def _build_required_item_row(self, item_dict, d, consider_job_card, wip_warehouse, work_order):
+		if existing_row := item_dict.get(d.item_code):
+			existing_row["required_qty"] = flt(existing_row["required_qty"]) + flt(d.required_qty)
+			existing_row["transferred_qty"] = flt(existing_row["transferred_qty"]) + flt(d.transferred_qty)
+			return
+
 		item_row = d.as_dict()
 		item_row["idx"] = len(item_dict) + 1
 		if consider_job_card:

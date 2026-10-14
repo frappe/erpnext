@@ -6570,6 +6570,39 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_same_material_in_two_operations_splits_transferred_qty(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": rm_item, "qty": 1, "operation": first_operation},
+				{"item_code": rm_item, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 4)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
+
+		wo.reload()
+		self.assertEqual([row.transferred_qty for row in wo.required_items], [2, 2])
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": rm_item, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty_for_production"
+		)
+		self.assertEqual(reserved_qty, 4)
+
+		next_transfer = make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)
+		self.assertEqual(sum(flt(row["qty"]) for row in next_transfer["items"]), 4)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
