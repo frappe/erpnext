@@ -17,26 +17,30 @@ class InvestmentSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		accrued_interest_account: DF.Link | None
-		charges_account: DF.Link | None
+		from erpnext.treasury.doctype.investment_default_account.investment_default_account import (
+			InvestmentDefaultAccount,
+		)
+
 		company: DF.Link | None
-		dividend_income_account: DF.Link | None
-		fair_value_adjustment_account: DF.Link | None
-		interest_income_account: DF.Link | None
-		investment_account: DF.Link | None
-		realised_gain_loss_account: DF.Link | None
-		tax_withheld_receivable_account: DF.Link | None
-		unrealised_gain_loss_account: DF.Link | None
+		company_accounts: DF.Table[InvestmentDefaultAccount]
 	# end: auto-generated types
 
 	def validate(self):
-		validate_company_links(self, ACCOUNT_FIELDS)
+		companies = set()
+		for row in self.company_accounts:
+			if row.company in companies:
+				frappe.throw(
+					_("Row #{0}: Company {1} is added more than once").format(
+						row.idx, frappe.bold(row.company)
+					)
+				)
+
+			companies.add(row.company)
+			validate_company_links(row, ACCOUNT_FIELDS)
 
 
 def get_default_account(company, fieldname):
-	"""Default ledger account from Investment Settings, only when they are set up for this company."""
+	"""Default ledger account of the company from Investment Settings, if it has one."""
 	settings = frappe.get_cached_doc("Investment Settings")
-	if settings.company != company:
-		return None
-
-	return settings.get(fieldname)
+	row = next((row for row in settings.company_accounts if row.company == company), None)
+	return row.get(fieldname) if row else None

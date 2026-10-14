@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "creation": "2026-10-14 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "accounts_section",
+  "investment_account",
+  "charges_account",
+  "tax_withheld_receivable_account",
+  "column_break_accounts",
+  "interest_income_account",
+  "accrued_interest_account",
+  "dividend_income_account",
+  "gain_loss_section",
+  "realised_gain_loss_account",
+  "unrealised_gain_loss_account",
+  "fair_value_adjustment_account"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "investment_account",
+   "fieldtype": "Link",
+   "label": "Investment Account",
+   "options": "Account",
+   "columns": 3,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "charges_account",
+   "fieldtype": "Link",
+   "label": "Charges Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "tax_withheld_receivable_account",
+   "fieldtype": "Link",
+   "label": "Tax Withheld Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_accounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interest_income_account",
+   "fieldtype": "Link",
+   "label": "Interest Income Account",
+   "options": "Account",
+   "columns": 3,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "accrued_interest_account",
+   "fieldtype": "Link",
+   "label": "Accrued Interest Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "dividend_income_account",
+   "fieldtype": "Link",
+   "label": "Dividend Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "gain_loss_section",
+   "fieldtype": "Section Break",
+   "label": "Gain / Loss Accounts"
+  },
+  {
+   "fieldname": "realised_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Realised Gain / Loss Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "unrealised_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealised Gain / Loss Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "fair_value_adjustment_account",
+   "fieldtype": "Link",
+   "label": "Fair Value Adjustment Account",
+   "options": "Account"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Default Account",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

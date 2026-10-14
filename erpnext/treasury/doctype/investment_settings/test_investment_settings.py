@@ -10,6 +10,7 @@ from erpnext.treasury.doctype.investment.test_investment import (
 	create_investment_type,
 	make_investment,
 )
+from erpnext.treasury.doctype.investment_settings.investment_settings import get_default_account
 from erpnext.treasury.doctype.investment_transaction.test_investment_transaction import (
 	make_submitted_investment,
 )
@@ -23,13 +24,32 @@ class TestInvestmentSettings(ERPNextTestSuite):
 		create_financial_institution("_Test Bank")
 
 	def test_account_must_belong_to_company(self):
-		settings = frappe.get_single("Investment Settings")
-		settings.company = TEST_COMPANY
-		settings.charges_account = frappe.db.get_value(
+		other_account = frappe.db.get_value(
 			"Account", {"company": ("!=", TEST_COMPANY), "is_group": 0}, "name"
 		)
+		settings = get_settings_with_defaults(charges_account=other_account)
 
 		self.assertRaises(frappe.ValidationError, settings.save)
+
+	def test_company_can_be_added_only_once(self):
+		settings = get_settings_with_defaults()
+		settings.append("company_accounts", {"company": TEST_COMPANY})
+
+		self.assertRaises(frappe.ValidationError, settings.save)
+
+	def test_each_company_uses_its_own_defaults(self):
+		other_company = frappe.db.get_value("Company", {"name": ("!=", TEST_COMPANY)}, "name")
+		other_charges_account = frappe.db.get_value(
+			"Account", {"company": other_company, "is_group": 0, "account_type": ("!=", "Stock")}, "name"
+		)
+		settings = get_settings_with_defaults(charges_account=CHARGES_ACCOUNT)
+		settings.append(
+			"company_accounts", {"company": other_company, "charges_account": other_charges_account}
+		)
+		settings.save()
+
+		self.assertEqual(get_default_account(TEST_COMPANY, "charges_account"), CHARGES_ACCOUNT)
+		self.assertEqual(get_default_account(other_company, "charges_account"), other_charges_account)
 
 	def test_empty_account_falls_back_to_settings(self):
 		set_default_charges_account()
@@ -51,7 +71,7 @@ class TestInvestmentSettings(ERPNextTestSuite):
 	def test_defaults_of_another_company_are_not_used(self):
 		other_company = frappe.db.get_value("Company", {"name": ("!=", TEST_COMPANY)}, "name")
 		settings = frappe.get_single("Investment Settings")
-		settings.company = other_company
+		settings.set("company_accounts", [{"company": other_company}])
 		settings.save()
 
 		investment = make_investment().insert()
@@ -59,10 +79,7 @@ class TestInvestmentSettings(ERPNextTestSuite):
 		self.assertFalse(investment.charges_account)
 
 	def test_investment_account_is_required_here_or_in_settings(self):
-		settings = frappe.get_single("Investment Settings")
-		settings.company = TEST_COMPANY
-		settings.investment_account = None
-		settings.save()
+		get_settings_with_defaults(investment_account=None).save()
 
 		investment = make_investment(investment_account=None)
 
@@ -82,7 +99,11 @@ class TestInvestmentSettings(ERPNextTestSuite):
 
 
 def set_default_charges_account():
+	get_settings_with_defaults(charges_account=CHARGES_ACCOUNT).save()
+
+
+def get_settings_with_defaults(**accounts):
+	"""Investment Settings with only the test company's default accounts, not saved yet."""
 	settings = frappe.get_single("Investment Settings")
-	settings.company = TEST_COMPANY
-	settings.charges_account = CHARGES_ACCOUNT
-	settings.save()
+	settings.set("company_accounts", [{"company": TEST_COMPANY, **accounts}])
+	return settings

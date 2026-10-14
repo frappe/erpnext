@@ -4,16 +4,18 @@
 frappe.ui.form.on("Investment Settings", {
 	setup(frm) {
 		for (const fieldname of erpnext.treasury.ACCOUNT_FIELDS) {
-			frm.set_query(fieldname, () => ({
-				filters: { company: frm.doc.company, is_group: 0 },
+			frm.set_query(fieldname, "company_accounts", (doc, cdt, cdn) => ({
+				filters: { company: locals[cdt][cdn].company, is_group: 0 },
 			}));
 		}
 	},
+});
 
-	company(frm) {
+frappe.ui.form.on("Investment Default Account", {
+	company(frm, cdt, cdn) {
 		// accounts of the previous company can't be used for the new one
 		for (const fieldname of erpnext.treasury.ACCOUNT_FIELDS) {
-			frm.set_value(fieldname, null);
+			frappe.model.set_value(cdt, cdn, fieldname, null);
 		}
 	},
 });
