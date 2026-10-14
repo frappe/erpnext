@@ -174,15 +174,8 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		)
 	}
 	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
-	so_details = {row.so_detail for row in original_rows.values() if row.so_detail}
-	so_billed = set(
-		frappe.get_all(
-			"Sales Invoice Item",
-			filters={"so_detail": ("in", list(so_details)), "dn_detail": ("is", "not set"), "docstatus": 1},
-			pluck="so_detail",
-		)
-		if so_details
-		else []
+	so_overbilled_qty = get_so_overbilled_qty(
+		{row.so_detail for row in original_rows.values() if row.so_detail}
 	)
 	returned_qty = {}
 	for row in return_rows:
@@ -195,11 +188,11 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		net_invoiced = flt(invoiced_qty.get(original))
 		uninvoiced = flt(flt(original_rows[original].qty) - net_invoiced, qty_precision)
 		# Until the net qty is fully invoiced, the next invoice still deducts the returns.
-		# Rows also invoiced through the Sales Order stay unsettled.
-		fully_invoiced = (
-			net_invoiced > 0 and returned >= uninvoiced and original_rows[original].so_detail not in so_billed
-		)
-		settleable_qty[original] = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
+		fully_invoiced = net_invoiced > 0 and returned >= uninvoiced
+		settleable = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
+		# Billing of the Sales Order row above its net delivered qty covers returned qty.
+		overbilled = flt(so_overbilled_qty.get(original_rows[original].so_detail))
+		settleable_qty[original] = max(settleable - overbilled, 0)
 
 	settled_qty = {}
 	for row in return_rows:
@@ -208,6 +201,42 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		settled_qty[row.name] = settled
 
 	return settled_qty
+
+
+def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
+	"""Qty of each Sales Order row invoiced above its net delivered qty (deliveries less returns)."""
+	if not so_details:
+		return {}
+
+	si = frappe.qb.DocType("Sales Invoice")
+	si_item = frappe.qb.DocType("Sales Invoice Item")
+	billed_qty = dict(
+		frappe.qb.from_(si_item)
+		.join(si)
+		.on(si.name == si_item.parent)
+		.select(si_item.so_detail, Sum(si_item.qty))
+		.where(si_item.so_detail.isin(list(so_details)) & (si_item.docstatus == 1) & (si.is_return == 0))
+		.groupby(si_item.so_detail)
+		.run()
+	)
+
+	# Return rows have a negative qty, so the sum is the net delivered qty.
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	delivered_qty = dict(
+		frappe.qb.from_(dn_item)
+		.select(dn_item.so_detail, Sum(dn_item.qty))
+		.where(dn_item.so_detail.isin(list(so_details)) & (dn_item.docstatus == 1))
+		.groupby(dn_item.so_detail)
+		.run()
+	)
+
+	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
+	return {
+		so_detail: max(
+			flt(flt(billed_qty.get(so_detail)) - flt(delivered_qty.get(so_detail)), qty_precision), 0
+		)
+		for so_detail in so_details
+	}
 
 
 def update_billing_percentage_of_returns(delivery_note: str) -> None:

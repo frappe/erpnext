@@ -4256,6 +4256,29 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sales_return.per_billed, 0)
 		self.assertEqual(make_sales_invoice(sales_return.name).items[0].qty, -2)
 
+	def test_return_settled_on_split_delivery_with_so_billing(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		first_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(first_delivery.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		dn_invoice = make_sales_invoice(first_delivery.name)
+		self.assertEqual(dn_invoice.items[0].qty, 3)
+		dn_invoice.submit()
+
+		create_dn_against_so(so.name, delivered_qty=5)
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.items[0].qty = 5
+		so_invoice.submit()
+
+		# Billing through the Sales Order covers the second delivery, not the deducted return.
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,
