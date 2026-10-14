@@ -6603,6 +6603,50 @@ class TestWorkOrder(ERPNextTestSuite):
 		next_transfer = make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)
 		self.assertEqual(sum(flt(row["qty"]) for row in next_transfer["items"]), 4)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 1, "allow_editing_of_items_and_quantities_in_work_order": 0},
+	)
+	def test_draft_work_order_rows_follow_qty_and_bom_changes(self):
+		first_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		second_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		other_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": first_item, "qty": 1, "operation": operation},
+				{"item_code": second_item, "qty": 1},
+			],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		other_bom = make_review_bom(fg_item, [{"item_code": other_item, "qty": 2}])
+
+		wo = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"production_item": fg_item,
+				"bom_no": bom.name,
+				"qty": 5,
+				"company": "_Test Company",
+				"source_warehouse": "_Test Warehouse - _TC",
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"fg_warehouse": "_Test Warehouse 2 - _TC",
+			}
+		).insert()
+		self.assertEqual([row.time_in_mins for row in wo.operations], [50])
+
+		wo.qty = 20
+		wo.save()
+		self.assertEqual([row.required_qty for row in wo.required_items], [20, 20])
+		self.assertEqual([row.time_in_mins for row in wo.operations], [200])
+
+		wo.bom_no = other_bom.name
+		wo.save()
+		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
+		self.assertEqual(wo.operations, [])
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""

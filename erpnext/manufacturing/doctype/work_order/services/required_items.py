@@ -104,8 +104,8 @@ class RequiredItemsService:
 
 	def _reset_required_qty(self, item_dict, operation):
 		for d in self.doc.get("required_items"):
-			if item_dict.get(d.item_code):
-				d.required_qty = item_dict.get(d.item_code).get("qty")
+			if bom_item := _find_bom_item(item_dict, d):
+				d.required_qty = bom_item.get("qty")
 
 			if not d.operation:
 				d.operation = operation
@@ -467,6 +467,12 @@ class RequiredItemsService:
 			"is_additional_item": 1,
 			"voucher_detail_reference": row.name,
 		}
+
+
+def _find_bom_item(item_dict, row):
+	for key in ((row.item_code, row.operation), (row.item_code, row.operation_row_id), row.item_code):
+		if key in item_dict:
+			return item_dict[key]
 
 
 def distribute_over_rows(rows, qty_by_item):
