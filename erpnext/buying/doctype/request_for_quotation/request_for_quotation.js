@@ -355,7 +355,6 @@ frappe.ui.form.on("Request for Quotation", {
 			let total_base_amount = 0;
 			const sq_names = [];
 			const rate_breakdown = [];
-			const hover_breakdown = [];
 
 			matching_quotes.forEach((q) => {
 				const q_qty = flt(q.qty);
@@ -373,12 +372,10 @@ frappe.ui.form.on("Request for Quotation", {
 					sq_names.push(q.supplier_quotation);
 				}
 
-				const rate_val = format_qty(unit_rate);
-				const qty_val = format_qty(q_conv_qty);
-				const uom = item.uom || q.uom || "";
-
-				rate_breakdown.push(`${qty_val}-${rate_val}`);
-				hover_breakdown.push(__("{0} {1} at {2} per {1}", [qty_val, uom, rate_val]));
+				rate_breakdown.push({
+					qty_label: `${format_qty(q_conv_qty)} ${item.uom || q.uom || ""}`,
+					rate: unit_rate,
+				});
 			});
 
 			const first = matching_quotes[0];
@@ -396,10 +393,10 @@ frappe.ui.form.on("Request for Quotation", {
 				quoted_as: "",
 				stock_uom: first.stock_uom || item.stock_uom,
 				conversion_factor: rfq_item_conv,
+				// weighted average, so it compares directly with single rate offers
 				converted_rate: total_qty > 0 ? total_base_amount / total_qty : 0,
 				converted_amount: total_base_amount,
-				rate_display: rate_breakdown.join(", "),
-				rate_title: hover_breakdown.join(", "),
+				rate_breakdown: rate_breakdown,
 				lead_time_days: lead_times.length ? Math.max(...lead_times) : null,
 				valid_till: first.valid_till,
 				is_combined: true,
