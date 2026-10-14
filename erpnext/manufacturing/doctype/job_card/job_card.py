@@ -919,11 +919,13 @@ class JobCard(Document):
 		self.validate_inspection()
 		self.validate_transfer_qty()
 		self.validate_job_card()
+		self.validate_later_operations()
 		self.update_work_order()
 		self.set_transferred_qty()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("Quality Inspection",)
+		self.validate_later_operations()
 		self.update_work_order()
 		self.set_transferred_qty()
 
@@ -1567,6 +1569,31 @@ class JobCard(Document):
 				self.validate_previous_operation_manufactured_qty(row, current_operation_qty)
 			else:
 				self.validate_previous_operation(row, current_operation_qty)
+
+	def validate_later_operations(self):
+		if self.is_corrective_job_card or not (self.work_order and self.sequence_id and self.operation_id):
+			return
+
+		data = self.get_current_operation_data()
+		operation_qty = flt(data[0].completed_qty) if data else 0.0
+		later_operations = frappe.get_all(
+			"Work Order Operation",
+			filters={"parent": self.work_order, "sequence_id": (">", self.sequence_id)},
+			fields=["operation", "completed_qty"],
+		)
+		for row in later_operations:
+			if flt(row.completed_qty) > operation_qty:
+				frappe.throw(
+					_(
+						"Operation {0} has already completed {1}, more than the {2} that operation {3} would have. Cancel the Job Cards of operation {0} first."
+					).format(
+						bold(row.operation),
+						bold(self.get_qty_with_uom(row.completed_qty)),
+						bold(self.get_qty_with_uom(operation_qty)),
+						bold(self.operation),
+					),
+					OperationSequenceError,
+				)
 
 	def get_previous_operations(self):
 		previous_operations = frappe.get_all(
