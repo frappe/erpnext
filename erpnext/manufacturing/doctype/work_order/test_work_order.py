@@ -6500,6 +6500,28 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.reload()
 		self.assertEqual(wo.required_items[0].consumed_qty, 10)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_cancel_keeps_closed_and_stopped_status(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+		)
+
+		for status in ("Closed", "Stopped"):
+			wo = make_review_work_order(fg_item, bom.name, 10)
+			job_card = complete_review_job_card(wo.name, 5)
+			if status == "Closed":
+				close_work_order(wo.name, status)
+			else:
+				stop_unstop(wo.name, status)
+
+			job_card.cancel()
+			self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), status)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
@@ -7071,3 +7093,72 @@ def get_unreserved_items(wo):
 		}
 		for row in wo.required_items
 	]
+
+
+def make_review_bom(fg_item, rows, quantity=1, operations=None):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": fg_item,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": quantity,
+			"rm_cost_as_per": "Valuation Rate",
+			"with_operations": 1 if operations else 0,
+			"items": rows,
+			"operations": operations or [],
+		}
+	)
+	bom.insert()
+	bom.submit()
+	return bom
+
+
+def make_review_operation(hour_rate=600):
+	workstation = make_workstation(
+		workstation=f"_Test WO Review Workstation {frappe.generate_hash(length=6)}", hour_rate=hour_rate
+	)
+	operation = make_operation(
+		operation=f"_Test WO Review Operation {frappe.generate_hash(length=6)}",
+		workstation=workstation.name,
+	)
+	return operation.name, workstation.name
+
+
+def make_review_work_order(fg_item, bom_no, qty, submit=True, **kwargs):
+	wo = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"production_item": fg_item,
+			"bom_no": bom_no,
+			"qty": qty,
+			"company": "_Test Company",
+			"source_warehouse": "_Test Warehouse - _TC",
+			"wip_warehouse": "_Test Warehouse 1 - _TC",
+			"fg_warehouse": "_Test Warehouse 2 - _TC",
+			"planned_start_date": now(),
+			**kwargs,
+		}
+	)
+	wo.get_items_and_operations_from_bom()
+	wo.insert()
+	if submit:
+		wo.submit()
+	return wo
+
+
+def complete_review_job_card(work_order, qty, hours_ago=2):
+	job_card = frappe.get_doc("Job Card", {"work_order": work_order})
+	start = add_to_date(now(), hours=-hours_ago)
+	job_card.for_quantity = qty
+	job_card.append(
+		"time_logs",
+		{
+			"from_time": start,
+			"to_time": add_to_date(start, minutes=30),
+			"completed_qty": qty,
+			"time_in_mins": 30,
+		},
+	)
+	job_card.submit()
+	return job_card
