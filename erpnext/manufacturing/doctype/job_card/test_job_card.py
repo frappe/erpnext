@@ -3630,6 +3630,41 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual([row.completed_qty for row in job_card.sub_operations], [10, 10])
 		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (10, 0))
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_operation_cost_uses_each_job_card_workstation_rate(self):
+		first_workstation = make_jc_review_workstation(hour_rate=600)
+		second_workstation = make_jc_review_workstation(hour_rate=1200)
+		operation = make_jc_review_operation(first_workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": first_workstation, "time_in_mins": 60}],
+			skip_transfer=1,
+		)
+
+		first_card = get_jc_review_job_cards(wo.name)[0]
+		second_card = frappe.copy_doc(first_card)
+		first_card.for_quantity = 5
+		first_card.append("time_logs", jc_review_log("2031-03-03 08:00:00", 60, 5))
+		first_card.submit()
+
+		second_card.update({"workstation": second_workstation, "for_quantity": 5})
+		second_card.set("time_logs", [jc_review_log("2031-03-03 10:00:00", 60, 5)])
+		second_card.set("scheduled_time_logs", [])
+		second_card.insert()
+		second_card.submit()
+
+		operation_cost = frappe.db.get_value(
+			"Work Order Operation", {"parent": wo.name}, "actual_operating_cost"
+		)
+		self.assertEqual(operation_cost, 1800)
+
+		second_card.cancel()
+		operation_cost = frappe.db.get_value(
+			"Work Order Operation", {"parent": wo.name}, "actual_operating_cost"
+		)
+		self.assertEqual(operation_cost, 600)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

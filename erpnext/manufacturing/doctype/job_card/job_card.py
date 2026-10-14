@@ -182,6 +182,7 @@ class JobCard(Document):
 		self.validate_on_hold()
 		self.set_status()
 		self.set_operation_id()
+		self.set_hour_rate()
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
@@ -193,6 +194,18 @@ class JobCard(Document):
 
 		if self.docstatus == 1:
 			self.validate_semi_finished_goods()
+
+	def set_hour_rate(self):
+		if self.is_corrective_job_card or not (self.workstation and self.operation_id):
+			return
+
+		operation = frappe.db.get_value(
+			"Work Order Operation", self.operation_id, ["workstation", "hour_rate"], as_dict=True
+		)
+		if operation and operation.workstation == self.workstation and flt(operation.hour_rate):
+			self.hour_rate = operation.hour_rate
+		else:
+			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
 	def validate_semi_finished_goods(self):
 		if not self.track_semi_finished_goods or self.is_subcontracted:
@@ -1172,10 +1185,6 @@ class JobCard(Document):
 		data.actual_operation_time = time_in_mins
 		data.actual_start_time = time_data[0].start_time if time_data else None
 		data.actual_end_time = time_data[0].end_time if time_data else None
-		if data.get("workstation") != self.workstation:
-			# workstations can change in a job card
-			data.workstation = self.workstation
-			data.hour_rate = flt(frappe.get_value("Workstation", self.workstation, "hour_rate"))
 
 	def get_current_operation_data(self):
 		return frappe.get_all(

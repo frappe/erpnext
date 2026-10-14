@@ -11,7 +11,7 @@ are called from other modules.
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime, Max, Min
+from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Min, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -63,8 +63,9 @@ class OperationsService:
 
 	def calculate_operating_cost(self):
 		self.doc.planned_operating_cost, self.doc.actual_operating_cost = 0.0, 0.0
+		job_card_costs = self._job_card_operating_costs()
 		for d in self.doc.get("operations"):
-			self._set_operation_cost(d)
+			self._set_operation_cost(d, job_card_costs)
 			self.doc.planned_operating_cost += flt(d.planned_operating_cost)
 			self.doc.actual_operating_cost += flt(d.actual_operating_cost)
 
@@ -76,16 +77,37 @@ class OperationsService:
 		)
 
 	@staticmethod
-	def _set_operation_cost(d):
+	def _set_operation_cost(d, job_card_costs):
 		if not d.hour_rate and d.workstation:
 			d.hour_rate = get_hour_rate(d.workstation)
 
 		d.planned_operating_cost = flt(
 			flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
 		)
-		d.actual_operating_cost = flt(
-			flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0), d.precision("actual_operating_cost")
-		)
+		actual_cost = job_card_costs.get(d.name)
+		if actual_cost is None:
+			actual_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
+		d.actual_operating_cost = flt(actual_cost, d.precision("actual_operating_cost"))
+
+	def _job_card_operating_costs(self):
+		if self.doc.docstatus != 1 or not self.doc.get("operations"):
+			return {}
+
+		job_card = frappe.qb.DocType("Job Card")
+		rows = (
+			frappe.qb.from_(job_card)
+			.select(
+				job_card.operation_id,
+				Sum(job_card.total_time_in_mins * job_card.hour_rate / 60.0).as_("cost"),
+			)
+			.where(
+				(job_card.work_order == self.doc.name)
+				& (job_card.docstatus == 1)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+			)
+			.groupby(job_card.operation_id)
+		).run(as_dict=True)
+		return {row.operation_id: flt(row.cost) for row in rows}
 
 	def create_job_card(self):
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
