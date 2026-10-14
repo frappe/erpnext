@@ -750,14 +750,19 @@ def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 
 
 def _mr_purchase_conversion_factor(row):
+	if purchase_uom := _mr_purchase_uom(row):
+		return get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
+	return 1.0
+
+
+def _mr_purchase_uom(row):
 	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
 	if (
 		row.get("default_material_request_type") == "Purchase"
 		and item_details.purchase_uom
 		and item_details.purchase_uom != item_details.stock_uom
 	):
-		return get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
-	return 1.0
+		return item_details.purchase_uom
 
 
 def _material_request_item_row(
@@ -793,7 +798,7 @@ def _material_request_item_row(
 		"material_request_type": row.get("default_material_request_type"),
 		"sales_order": sales_order,
 		"description": row.get("description"),
-		"uom": row.get("purchase_uom") or row.get("stock_uom"),
+		"uom": _mr_purchase_uom(row) or row.get("stock_uom"),
 		"main_item_code": row.get("main_bom_item"),
 		"from_bom": row.get("main_bom"),
 	}

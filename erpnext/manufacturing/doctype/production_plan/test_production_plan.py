@@ -935,6 +935,31 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual({row.get("item_code"): row.get("warehouse") for row in items}, warehouses)
 
+	def test_transfer_type_raw_material_stays_in_stock_uom(self):
+		rm_item = make_item(
+			"_Test PP Transfer Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		fg_item = make_item("_Test PP Transfer Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=15, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		row = get_items_for_material_requests(plan.as_dict())[0]
+
+		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (15, "Nos", 1))
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
