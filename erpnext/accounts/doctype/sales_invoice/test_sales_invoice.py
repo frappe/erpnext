@@ -4908,6 +4908,18 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(stock_ledger_entry.qty, 2.0)
 		self.assertEqual(stock_ledger_entry.stock_value_difference, 0.0)
 
+	def test_stand_alone_credit_note_uses_current_valuation_rate(self):
+		item_code = "_Test Item for Credit Note Current Valuation"
+		make_item_for_si(item_code, {"valuation_method": "FIFO"})
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		si = create_sales_invoice(item=item_code, qty=-2, rate=1200, is_return=1, update_stock=1)
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_type": "Sales Invoice", "voucher_no": si.name}, "incoming_rate"
+		)
+		self.assertEqual(incoming_rate, 100.0)
+
 	def test_non_batchwise_valuation_for_moving_average(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
