@@ -164,30 +164,31 @@ def get_customer_stats(filters, tree_view=False):
 	if permitted_customers is not None:
 		si_filters["customer"] = ["in", permitted_customers]
 
-	from_date = getdate(filters.get("from_date"))
-	acquisition = {}  # customer -> (key, date) of their first invoice
-	counted = {}  # key -> {"new": set of customers, "repeat": set of customers}
-	customers_in = {}
-
-	for si in frappe.get_all(
+	invoices = frappe.get_all(
 		"Sales Invoice",
 		filters=si_filters,
 		fields=["territory", "posting_date", "customer", "base_grand_total", "is_return"],
-		# name tie-break makes the first-seen-per-customer classification deterministic across engines
 		order_by="posting_date, name",
-	):
-		posting_date = getdate(si.posting_date)
-		key = si.territory if tree_view else posting_date.strftime("%Y-%m")
+	)
 
-		# a return never acquires a customer; it only nets revenue
+	# resolve each customer's acquisition (first sale) before assigning revenue, so a same-day
+	# return is matched to its acquisition period regardless of row order; returns never acquire
+	acquisition = {}
+	for si in invoices:
 		if not si.is_return and si.customer not in acquisition:
-			acquisition[si.customer] = (key, posting_date)
+			key = si.territory if tree_view else getdate(si.posting_date).strftime("%Y-%m")
+			acquisition[si.customer] = (key, getdate(si.posting_date))
 
+	from_date = getdate(filters.get("from_date"))
+	counted = {}  # key -> {"new": set of customers, "repeat": set of customers}
+	customers_in = {}
+	for si in invoices:
+		posting_date = getdate(si.posting_date)
 		if posting_date < from_date:
 			continue
 
+		key = si.territory if tree_view else posting_date.strftime("%Y-%m")
 		acq = acquisition.get(si.customer)
-		# without an acquiring sale (e.g. a standalone credit note) the customer is never "new"
 		new_or_repeat = "new" if acq and key == acq[0] and acq[1] >= from_date else "repeat"
 
 		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})
