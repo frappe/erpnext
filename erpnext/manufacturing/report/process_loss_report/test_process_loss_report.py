@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import add_days, nowdate
 
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -29,8 +29,8 @@ class TestProcessLossReport(ERPNextTestSuite):
 				return row
 		return None
 
-	def make_manufactured_work_order(self, planned_qty, produced_qty):
-		"""Create a submitted WO and manufacture `produced_qty` of `planned_qty`.
+	def make_manufactured_work_order(self, planned_qty, produced_qty, manufacture_qty=None):
+		"""Create a submitted WO and manufacture `produced_qty` of `manufacture_qty` (default `planned_qty`).
 
 		The difference is booked as process loss on the Manufacture stock entry,
 		which propagates to the work order's `process_loss_qty`.
@@ -52,20 +52,25 @@ class TestProcessLossReport(ERPNextTestSuite):
 		transfer.insert()
 		transfer.submit()
 
-		manufacture = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", planned_qty))
+		self.make_manufacture(wo_order, manufacture_qty or planned_qty, produced_qty)
+		wo_order.reload()
+		return wo_order
+
+	def make_manufacture(self, wo_order, qty, produced_qty, posting_date=None):
+		manufacture = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", qty))
+		if posting_date:
+			manufacture.set_posting_time = 1
+			manufacture.posting_date = posting_date
+
 		# Reduce the finished good qty below fg_completed_qty so the difference is
 		# recorded as process loss.
-		process_loss_qty = planned_qty - produced_qty
-		if process_loss_qty:
+		if qty != produced_qty:
 			for d in manufacture.get("items"):
 				if d.is_finished_item:
 					d.qty = produced_qty
 					d.transfer_qty = produced_qty * (d.conversion_factor or 1)
 		manufacture.insert()
 		manufacture.submit()
-
-		wo_order.reload()
-		return wo_order
 
 	def test_work_order_with_process_loss_is_listed(self):
 		wo_order = self.make_manufactured_work_order(planned_qty=5, produced_qty=4)
@@ -112,3 +117,16 @@ class TestProcessLossReport(ERPNextTestSuite):
 		# the matching work order is included, a different work order name is excluded
 		self.assertIsNotNone(self.find_row(self.run_report(work_order=wo_order.name), wo_order.name))
 		self.assertIsNone(self.find_row(self.run_report(work_order=f"{wo_order.name}-XX"), wo_order.name))
+
+	def test_quantities_follow_the_report_dates(self):
+		wo_order = self.make_manufactured_work_order(planned_qty=10, produced_qty=4, manufacture_qty=5)
+		tomorrow = add_days(nowdate(), 1)
+		self.make_manufacture(wo_order, qty=5, produced_qty=5, posting_date=tomorrow)
+
+		today_row = self.find_row(self.run_report(), wo_order.name)
+		self.assertEqual((today_row.produced_qty, today_row.process_loss_qty), (4, 1))
+
+		both_days_row = self.find_row(self.run_report(to_date=tomorrow), wo_order.name)
+		self.assertEqual((both_days_row.produced_qty, both_days_row.process_loss_qty), (9, 1))
+
+		self.assertIsNone(self.find_row(self.run_report(from_date=tomorrow, to_date=tomorrow), wo_order.name))
