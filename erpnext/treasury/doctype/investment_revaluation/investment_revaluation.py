@@ -60,6 +60,9 @@ class InvestmentRevaluation(AccountsController):
 		self.make_gl_entries()
 		self.update_investments()
 
+	def before_submit(self):
+		self.validate_no_later_exits()
+
 	def before_cancel(self):
 		super().before_cancel()
 		self.validate_is_latest_revaluation()
@@ -239,7 +242,8 @@ class InvestmentRevaluation(AccountsController):
 				)
 
 	def validate_no_later_exits(self):
-		"""Exits after this revaluation took their share of its fair value gain off the books."""
+		"""Exits after the revaluation date take their share of the fair value gain on the books then,
+		so a revaluation cannot be made or cancelled before them."""
 		transaction = frappe.qb.DocType("Investment Transaction")
 		for row in self.investments:
 			if not cint(row.posts_to_ledger):
@@ -251,18 +255,12 @@ class InvestmentRevaluation(AccountsController):
 				.where(transaction.investment == row.investment)
 				.where(transaction.docstatus == 1)
 				.where(transaction.transaction_type.isin(EXIT_TYPES))
-				.where(
-					(transaction.posting_date > self.revaluation_date)
-					| (
-						(transaction.posting_date == self.revaluation_date)
-						& (transaction.creation > self.creation)
-					)
-				)
+				.where(transaction.posting_date > self.revaluation_date)
 				.limit(1)
 			).run()
 			if later_exit:
 				frappe.throw(
-					_("Please cancel the exits of Investment {0} made after {1} first").format(
+					_("Please cancel the exits of Investment {0} dated after {1} first").format(
 						frappe.bold(row.investment),
 						frappe.bold(frappe.format_value(self.revaluation_date, "Date")),
 					)

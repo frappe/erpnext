@@ -143,7 +143,6 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 			row.units_held,
 			row.posts_to_ledger,
 			revaluation.revaluation_date,
-			revaluation.creation.as_("revaluation_creation"),
 		)
 		.where(row.parenttype == "Investment Revaluation")
 		.where(row.investment.isin(investments))
@@ -164,7 +163,7 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 			unrealised[investment] = flt(fair_values.get(investment))
 		elif flt(latest.units_held):
 			# exits take the oldest units first, so they take the valued units before any bought later
-			units_exited = get_units_exited(investment, latest, as_on_date)
+			units_exited = get_units_exited(investment, latest.revaluation_date, as_on_date)
 			valued_units_left = max(flt(latest.units_held) - units_exited, 0)
 			unrealised[investment] = (
 				flt(latest.unrealised_gain_loss) * valued_units_left / flt(latest.units_held)
@@ -173,10 +172,11 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 	return unrealised
 
 
-def get_units_exited(investment, revaluation, upto=None):
-	"""Units that left the investment after a revaluation, optionally up to a date.
+def get_units_exited(investment, after_date, upto=None):
+	"""Units that left the investment after a date, optionally up to another.
 
-	Exits on the revaluation date count only if made after it, as earlier ones were already left out.
+	A revaluation values the units held at the end of its date, and units cannot move on that date once
+	it is made, so exits after the date are exactly those it did not see.
 	"""
 	transaction = frappe.qb.DocType("Investment Transaction")
 	query = (
@@ -185,13 +185,7 @@ def get_units_exited(investment, revaluation, upto=None):
 		.where(transaction.investment == investment)
 		.where(transaction.docstatus == 1)
 		.where(transaction.transaction_type.isin(EXIT_TYPES))
-		.where(
-			(transaction.posting_date > revaluation.revaluation_date)
-			| (
-				(transaction.posting_date == revaluation.revaluation_date)
-				& (transaction.creation > revaluation.revaluation_creation)
-			)
-		)
+		.where(transaction.posting_date > after_date)
 	)
 	if upto:
 		query = query.where(transaction.posting_date <= upto)

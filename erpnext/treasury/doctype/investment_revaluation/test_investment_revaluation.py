@@ -110,7 +110,9 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
 		# half the units go, so half the 200 gain is taken off; the sale books it again as realised
-		sale = make_transaction(investment.name, "Sale", units=50, rate=12).submit()
+		sale = make_transaction(
+			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
 
 		self.assertEqual(sale.realised_gain_loss, 100)
 		entries = get_transaction_gl_entries(sale.name)
@@ -122,7 +124,9 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		investment = make_fund_investment("FVOCI")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
-		sale = make_transaction(investment.name, "Sale", units=100, rate=12).submit()
+		sale = make_transaction(
+			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
 
 		self.assertEqual(sale.realised_gain_loss, 200)
 		entries = get_transaction_gl_entries(sale.name)
@@ -132,10 +136,12 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 	def test_next_revaluation_starts_from_what_the_sale_left(self):
 		investment = make_fund_investment("FVTPL")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
-		make_transaction(investment.name, "Sale", units=50, rate=12).submit()
+		make_transaction(
+			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
 
 		# 50 units at 13 = 650 against a cost of 500 is 150; 100 is still on the books
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=13, days=1).submit()
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=13, days=2).submit()
 
 		row = revaluation.investments[0]
 		self.assertEqual(
@@ -161,7 +167,9 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
 		# the 100 new units were bought at 12, so they carry no gain of their own
-		make_transaction(investment.name, "Purchase", units=100, rate=12).submit()
+		make_transaction(
+			investment.name, "Purchase", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
 
 		investment.reload()
 		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (200, 2400))
@@ -176,14 +184,28 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, revaluation.insert)
 
-	def test_same_day_sale_after_revaluation_takes_the_gain(self):
+	def test_units_cannot_move_on_or_before_a_revaluation(self):
 		investment = make_fund_investment("Amortized Cost")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
-		make_transaction(investment.name, "Sale", units=100, rate=12).submit()
+		# the revaluation valued the units held at the end of its date
+		same_day_sale = make_transaction(investment.name, "Sale", units=100, rate=12)
+		self.assertRaises(frappe.ValidationError, same_day_sale.submit)
 
+		make_transaction(
+			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
 		investment.reload()
 		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (0, 0))
+
+	def test_revaluation_cannot_be_dated_before_an_exit_it_did_not_see(self):
+		investment = make_fund_investment("FVTPL")
+		make_transaction(
+			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 2)
+		).submit()
+
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, days=1)
+		self.assertRaises(frappe.ValidationError, revaluation.insert().submit)
 
 	def test_get_investments_loads_only_the_selected_finance_book(self):
 		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
@@ -208,13 +230,15 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 	def test_exited_investment_has_no_gain_left_to_revalue(self):
 		investment = make_fund_investment("FVTPL")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
-		make_transaction(investment.name, "Sale", units=100, rate=12).submit()
+		make_transaction(
+			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
 
 		revaluation = frappe.get_doc(
 			{
 				"doctype": "Investment Revaluation",
 				"company": TEST_COMPANY,
-				"revaluation_date": add_days(nowdate(), 1),
+				"revaluation_date": add_days(nowdate(), 2),
 			}
 		)
 		revaluation.set_investments()

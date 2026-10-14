@@ -530,9 +530,9 @@ class InvestmentTransaction(AccountsController):
 			)
 
 	def validate_no_later_revaluation(self):
-		"""A revaluation posts the change from the fair value left after earlier exits,
-		so an exit cannot be added or cancelled before it."""
-		if self.transaction_type not in EXIT_TYPES or not self.get_investment().posts_fair_value():
+		"""A revaluation values the units held at the end of its date, so units cannot be bought or sold
+		on or before it once it is made, the way principal cannot change once interest is accrued."""
+		if not self.is_unit_movement():
 			return
 
 		revaluation = frappe.qb.DocType("Investment Revaluation")
@@ -544,19 +544,13 @@ class InvestmentTransaction(AccountsController):
 			.select(revaluation.name)
 			.where(row.investment == self.investment)
 			.where(revaluation.docstatus == 1)
-			.where(
-				(revaluation.revaluation_date > self.posting_date)
-				| (
-					(revaluation.revaluation_date == self.posting_date)
-					& (revaluation.creation > self.creation)
-				)
-			)
+			.where(revaluation.revaluation_date >= self.posting_date)
 			.limit(1)
 		).run()
 		if later:
 			frappe.throw(
 				_(
-					"Investment Revaluation {0} of Investment {1} was made after {2}. Please cancel it first."
+					"Investment {1} is revalued on or after {2} by Investment Revaluation {0}. Please use a later date, or cancel the revaluation first."
 				).format(
 					frappe.get_desk_link("Investment Revaluation", later[0][0]),
 					frappe.bold(self.investment),
