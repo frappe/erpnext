@@ -459,11 +459,16 @@ frappe.ui.form.on("Request for Quotation", {
 			});
 		});
 
-		// rates are all in company currency per RFQ unit, so they can be compared directly
+		// rates are all in company currency per RFQ unit, so they can be compared directly.
+		// Each rate of a split offer is compared on its own, since that is what the card shows.
 		const min_rates = {};
 		all_items.forEach((item) => {
 			const rates = offers
-				.map((offer) => get_quote(item, offer)?.converted_rate)
+				.flatMap((offer) => {
+					const q = get_quote(item, offer);
+					if (!q) return [];
+					return q.is_combined ? q.rate_breakdown.map((row) => row.rate) : [q.converted_rate];
+				})
 				.filter((r) => r !== undefined && r !== null && r > 0);
 			if (rates.length > 0) {
 				min_rates[item.name] = Math.min(...rates);
