@@ -310,59 +310,64 @@ def open_quotations(supplier, company, as_of):
 
 
 def order_tiles(supplier, company, as_of):
-	po = DocType("Purchase Order")
-	open_orders = {
-		"docstatus": 1,
-		"supplier": supplier,
-		"company": company,
-		"status": ["not in", CLOSED_PO_STATUS],
-	}
-
-	unreceived = {
-		row.name: flt(row.value)
-		for row in permitted(
-			"Purchase Order",
-			{**open_orders, "per_received": ["<", 100]},
-			["name", (po.base_grand_total * (100 - po.per_received) / 100).as_("value")],
-		)
-	}
-	late, upcoming = set(), []
-	oldest = None
-	for line in permitted(
+	lines = permitted(
 		"Purchase Order",
+		{
+			"docstatus": 1,
+			"supplier": supplier,
+			"company": company,
+			"status": ["not in", CLOSED_PO_STATUS],
+		},
 		[
-			{**open_orders, "per_received": ["<", 100]},
-			["Purchase Order Item", "closed", "=", 0],
+			"name",
+			"conversion_rate",
+			"items.qty",
+			"items.received_qty",
+			"items.base_amount",
+			"items.billed_amt",
+			"items.schedule_date as due",
+			"items.closed",
 		],
-		["name", "items.schedule_date as due", "items.qty", "items.received_qty"],
-	):
-		if flt(line.received_qty) >= flt(line.qty) or not line.due:
+	)
+
+	receipt, billing, late = {}, {}, {}
+	upcoming, oldest = [], None
+	for line in lines:
+		qty = flt(line.qty)
+		rate = flt(line.base_amount) / qty if qty else 0
+		received = min(max(flt(line.received_qty), 0), qty) if qty else 0
+
+		unbilled = received * rate - flt(line.billed_amt) * flt(line.conversion_rate)
+		if unbilled > 0:
+			billing[line.name] = billing.get(line.name, 0) + unbilled
+
+		pending = (qty - received) * rate
+		if line.closed or qty - received <= 0:
+			continue
+		receipt[line.name] = receipt.get(line.name, 0) + pending
+		if not line.due:
 			continue
 		due = getdate(line.due)
 		if due < as_of:
-			late.add(line.name)
+			late[line.name] = late.get(line.name, 0) + pending
 			oldest = min(oldest or due, due)
 		else:
 			upcoming.append(due)
 
-	billing = permitted(
-		"Purchase Order",
-		[open_orders, po.per_received > po.per_billed],
-		["name", (po.base_grand_total * (po.per_received - po.per_billed) / 100).as_("value")],
-	)
 	return {
 		"receipt": {
-			"value": sum(unreceived.values()),
-			"count": len(unreceived),
+			"value": flt(sum(receipt.values()), 2),
+			"count": len(receipt),
 			"next_due": str(min(upcoming)) if upcoming else None,
+			"orders": sorted(receipt),
 		},
 		"billing": {
-			"value": sum(flt(row.value) for row in billing),
+			"value": flt(sum(billing.values()), 2),
 			"count": len(billing),
-			"orders": [row.name for row in billing],
+			"orders": sorted(billing),
 		},
 		"late": {
-			"value": sum(unreceived.get(name, 0) for name in late),
+			"value": flt(sum(late.values()), 2),
 			"count": len(late),
 			"days_late": date_diff(as_of, oldest) if oldest else None,
 			"orders": sorted(late),

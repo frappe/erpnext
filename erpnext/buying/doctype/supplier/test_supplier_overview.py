@@ -7,9 +7,11 @@ import frappe
 from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_receipt
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier import supplier_overview
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -55,6 +57,42 @@ class TestSupplierOverview(ERPNextTestSuite):
 
 		late = supplier_overview.order_tiles(supplier, COMPANY, as_of)["late"]
 		self.assertEqual(late["orders"], [po.name])
+
+	def test_pipeline_uses_line_amounts(self):
+		supplier = create_supplier(supplier_name="_Test Supplier Overview Lines").name
+		po = create_purchase_order(
+			supplier=supplier,
+			transaction_date=add_days(today(), -10),
+			rate=100,
+			qty=1,
+			do_not_submit=True,
+		)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"qty": 1,
+				"rate": 900,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": add_days(today(), -3),
+			},
+		)
+		po.items[0].schedule_date = add_days(today(), -5)
+		po.schedule_date = po.items[0].schedule_date
+		po.submit()
+
+		pr = make_receipt(po.name)
+		pr.items = [row for row in pr.items if row.purchase_order_item == po.items[0].name]
+		pr.submit()
+		make_invoice(pr.name).submit()
+
+		tiles = supplier_overview.order_tiles(supplier, COMPANY, getdate(today()))
+		self.assertEqual(tiles["receipt"]["value"], 900)
+		self.assertEqual(tiles["receipt"]["orders"], [po.name])
+		self.assertEqual(tiles["billing"]["value"], 0)
+		self.assertEqual(tiles["billing"]["orders"], [])
+		self.assertEqual(tiles["late"]["value"], 900)
+		self.assertEqual(tiles["late"]["orders"], [po.name])
 
 	def test_receipt_only_supplier_has_a_company(self):
 		supplier = create_supplier(supplier_name="_Test Supplier Overview Receipt").name

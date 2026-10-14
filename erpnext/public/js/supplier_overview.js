@@ -1,4 +1,3 @@
-const OPEN_PO_FILTER = ["not in", ["Closed", "Completed", "On Hold", "Delivered"]];
 const COUNT = {
 	bills: (n) => (n === 1 ? __("1 bill") : __("{0} bills", [n])),
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
@@ -187,7 +186,6 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 	pipeline_specs(pl) {
 		const name = this.frm.doc.name;
 		const company = this.state.company;
-		const open_orders = { supplier: name, company, docstatus: 1, status: OPEN_PO_FILTER };
 		const specs = [];
 		if (frappe.model.can_read("Supplier Quotation"))
 			specs.push({
@@ -220,7 +218,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 							.filter(Boolean)
 							.join(" · "),
 					empty: __("Nothing to receive"),
-					route: ["Purchase Order", { ...open_orders, per_received: ["<", 100] }],
+					route: ["Purchase Order", { company, name: ["in", pl.receipt?.orders || []] }],
 				},
 				{
 					label: __("Pending Billing"),
