@@ -50,6 +50,7 @@ env:
   npm_config_cache: /home/ci/.cache/npm
   YARN_CACHE_FOLDER: /home/ci/.cache/yarn
   UV_CACHE_DIR: /home/ci/.cache/uv
+  UV_LINK_MODE: copy
 
 jobs:
   # Build the bench (clone + pip + yarn + assets) and reinstall test_site ONCE, on a free
