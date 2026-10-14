@@ -8,6 +8,8 @@ from frappe.model.workflow import get_workflow_name, get_workflow_state_field
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, getdate
 
+from erpnext.treasury.interest import INTEREST_CLASSES
+
 WORKFLOW_DRAFT_STATES = ("Pending Approval", "Rejected")
 # measurement categories whose fair value changes are posted to the ledger
 GL_CATEGORIES = ("FVOCI", "FVTPL")
@@ -161,6 +163,10 @@ class Investment(Document):
 				frappe.throw(_("{0} {1} is inactive").format(_(doctype), frappe.bold(name)))
 
 	def validate_dates(self):
+		# interest is worked out up to maturity, so without it the schedule would quietly end today
+		if self.instrument_class in INTEREST_CLASSES and not self.maturity_date:
+			frappe.throw(_("Maturity Date is required for {0} investments").format(_(self.instrument_class)))
+
 		if self.maturity_date and getdate(self.maturity_date) <= getdate(self.purchase_date):
 			frappe.throw(_("Maturity Date must be after Purchase Date"))
 

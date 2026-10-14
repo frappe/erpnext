@@ -14,6 +14,10 @@ class TestInvestment(ERPNextTestSuite):
 		create_investment_type("_Test Bank FD", "Deposit")
 		create_financial_institution("_Test Bank")
 
+	def test_deposit_needs_maturity_date(self):
+		investment = make_investment(maturity_date=None)
+		self.assertRaises(frappe.ValidationError, investment.insert)
+
 	def test_maturity_date_must_be_after_purchase_date(self):
 		investment = make_investment(maturity_date=nowdate())
 		self.assertRaises(frappe.ValidationError, investment.insert)
