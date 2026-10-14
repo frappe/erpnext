@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_analytics.sales_analytics import execute
@@ -142,7 +143,9 @@ class TestSalesAnalytics(ERPNextTestSuite):
 	def test_order_type_synthetic_tree(self):
 		"""tree_type='Order Type' drives get_teams: distinct order_type rebuilt in Python
 		under a synthetic 'Order Types' root, then rolled up via get_rows_by_group."""
-		columns, data, *_ = execute(self._base_filters(tree_type="Order Type"))
+		columns, data, _message, _chart, _extra, skip_total_row = execute(
+			self._base_filters(tree_type="Order Type")
+		)
 
 		self.assertTrue(columns)
 		rows = self._row_by_entity(data)
@@ -154,6 +157,59 @@ class TestSalesAnalytics(ERPNextTestSuite):
 		expected = self._expected_value_total()
 		self.assertAlmostEqual(rows["Sales"]["total"], expected, places=2)
 		self.assertAlmostEqual(rows["Order Types"]["total"], expected, places=2)
+		# The 'Order Types' root already carries the grand total, so the framework total row is skipped.
+		self.assertEqual(skip_total_row, 1)
+
+	def _make_payment(self, **args):
+		pe = create_payment_entry(**args)
+		pe.posting_date = pe.reference_date = args.get("posting_date") or "2019-04-20"
+		pe.save().submit()
+		return pe
+
+	def _payment_filters(self, **overrides):
+		return self._base_filters(doc_type="Payment Entry", **overrides)
+
+	def test_payment_entry_scopes_party_type_and_signs_refunds(self):
+		"""doc_type='Payment Entry' must restrict each tree to its own party type and net refunds:
+		Receive adds and Pay (a refund) subtracts for a customer, mirrored for suppliers."""
+		base_customer = self._row_by_entity(execute(self._payment_filters(tree_type="Customer"))[1])
+		base_supplier = self._row_by_entity(execute(self._payment_filters(tree_type="Supplier"))[1])
+		base_cust_total = flt(base_customer.get(CUSTOMER, {}).get("total", 0.0))
+		base_supp_total = flt(base_supplier.get(SUPPLIER, {}).get("total", 0.0))
+
+		self._make_payment(
+			payment_type="Receive",
+			party_type="Customer",
+			party=CUSTOMER,
+			paid_from="Debtors - _TC",
+			paid_to="_Test Bank - _TC",
+			paid_amount=1000,
+		)
+		self._make_payment(
+			payment_type="Pay",
+			party_type="Customer",
+			party=CUSTOMER,
+			paid_from="_Test Bank - _TC",
+			paid_to="Debtors - _TC",
+			paid_amount=300,
+			posting_date="2019-05-20",
+		)
+		self._make_payment(
+			payment_type="Pay",
+			party_type="Supplier",
+			party=SUPPLIER,
+			paid_from="_Test Bank - _TC",
+			paid_to="Creditors - _TC",
+			paid_amount=5000,
+		)
+
+		customer_rows = self._row_by_entity(execute(self._payment_filters(tree_type="Customer"))[1])
+		self.assertNotIn(SUPPLIER, customer_rows)
+		self.assertAlmostEqual(flt(customer_rows[CUSTOMER]["total"]) - base_cust_total, 1000 - 300, places=2)
+
+		supplier_rows = self._row_by_entity(execute(self._payment_filters(tree_type="Supplier"))[1])
+		self.assertNotIn(CUSTOMER, supplier_rows)
+		self.assertAlmostEqual(flt(supplier_rows[SUPPLIER]["total"]) - base_supp_total, 5000, places=2)
 
 	def test_order_type_leaf_rows_in_sorted_order(self):
 		"""get_teams fetches distinct order_types; frappe drops the SQL ORDER BY for distinct queries on
