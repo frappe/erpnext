@@ -39,6 +39,7 @@ class InvestmentInterestAccrual(AccountsController):
 		company: DF.Link
 		conversion_rate: DF.Float
 		cost_center: DF.Link | None
+		finance_book: DF.Link | None
 		currency: DF.Link
 		estimated_interest: DF.Currency
 		from_date: DF.Date
@@ -62,6 +63,7 @@ class InvestmentInterestAccrual(AccountsController):
 		self.validate_investment()
 		set_conversion_rate(self)
 		self.set_missing_values()
+		self.validate_company_in_accounting_dimension()
 		self.validate_dates()
 		self.validate_accrual_period()
 		self.set_estimated_interest()

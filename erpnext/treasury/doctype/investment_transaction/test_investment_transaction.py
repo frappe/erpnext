@@ -77,6 +77,31 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		receipt = make_transaction(investment.name, "Interest Receipt", interest_amount=2000)
 		self.assertRaises(frappe.ValidationError, receipt.insert)
 
+	def test_finance_book_reaches_the_ledger(self):
+		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
+
+		investment = make_submitted_investment()
+		purchase = make_transaction(
+			investment.name, "Purchase", gross_amount=1000, finance_book="_Test Treasury Book"
+		).submit()
+
+		finance_books = frappe.get_all(
+			"GL Entry", filters={"voucher_no": purchase.name}, pluck="finance_book", distinct=True
+		)
+		self.assertEqual(finance_books, ["_Test Treasury Book"])
+
+	def test_cost_center_must_belong_to_company(self):
+		investment = make_submitted_investment()
+		other_cost_center = frappe.db.get_value(
+			"Cost Center", {"company": ("!=", investment.company), "is_group": 0}, "name"
+		)
+
+		purchase = make_transaction(
+			investment.name, "Purchase", gross_amount=1000, cost_center=other_cost_center
+		)
+		self.assertRaises(frappe.ValidationError, purchase.insert)
+
 	def test_purchase_above_approved_amount_is_blocked(self):
 		investment = make_submitted_investment(approved_amount=100000)
 		make_transaction(investment.name, "Purchase", gross_amount=60000).submit()

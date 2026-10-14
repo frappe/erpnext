@@ -27,6 +27,7 @@
   "amortisation_amount",
   "accounts_tab",
   "accounting_section",
+  "finance_book",
   "cost_center",
   "accounting_dimensions_section",
   "dimension_col_break",
@@ -187,6 +188,12 @@
    "fieldtype": "Section Break"
   },
   {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
    "fetch_from": "investment.cost_center",
    "fetch_if_empty": 1,
    "fieldname": "cost_center",
@@ -232,7 +239,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-13 12:00:00.000000",
+ "modified": "2026-10-14 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Interest Accrual",

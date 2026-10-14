@@ -47,6 +47,7 @@ class InvestmentRevaluation(AccountsController):
 
 	def validate(self):
 		self.set_missing_values()
+		self.validate_company_in_accounting_dimension()
 		self.validate_duplicate_investments()
 		self.lock_investments()
 		for row in self.investments:

@@ -62,6 +62,7 @@ class InvestmentTransaction(AccountsController):
 		company: DF.Link
 		conversion_rate: DF.Float
 		cost_center: DF.Link | None
+		finance_book: DF.Link | None
 		cost_of_units_sold: DF.Currency
 		currency: DF.Link
 		gross_amount: DF.Currency
@@ -101,6 +102,7 @@ class InvestmentTransaction(AccountsController):
 		self.validate_has_investment()
 		self.validate_dates()
 		self.set_missing_values()
+		self.validate_company_in_accounting_dimension()
 		self.validate_amounts()
 		self.set_net_amount()
 		self.validate_cash_account()
@@ -783,6 +785,7 @@ class InvestmentTransaction(AccountsController):
 					"credit": max(difference, 0),
 					"against": self.investment,
 					"cost_center": self.cost_center,
+					"finance_book": self.finance_book,
 				},
 				item=self,
 			)
@@ -799,6 +802,7 @@ def get_gl_entry(doc, account, debit, credit, base_debit=None, base_credit=None)
 		"credit": flt(flt(credit) * flt(doc.conversion_rate), precision),
 		"against": doc.investment,
 		"cost_center": doc.cost_center,
+		"finance_book": doc.get("finance_book"),
 		"is_opening": "Yes" if doc.get("transaction_type") == "Opening" else "No",
 	}
 
