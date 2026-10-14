@@ -1148,6 +1148,53 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertRaises(frappe.InvalidStatusError, plan.make_material_request)
 		self.assertFalse(frappe.db.exists("Work Order", {"production_plan": plan.name}))
 
+	def test_subcontract_purchase_order_fills_ordered_qty(self):
+		make_item("_Test PP Subcontract RM", {"is_stock_item": 1})
+		sub_item = make_item(
+			"_Test PP Subcontract SA", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		fg_item = make_item("_Test PP Subcontract FG", {"is_stock_item": 1}).name
+		service_item = make_item("_Test PP Subcontract Service", {"is_stock_item": 0}).name
+		sub_bom = make_bom(item=sub_item, raw_materials=["_Test PP Subcontract RM"], currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], rm_qty=2, currency="INR")
+		if not frappe.db.exists("Subcontracting BOM", {"finished_good": sub_item, "is_active": 1}):
+			frappe.get_doc(
+				{
+					"doctype": "Subcontracting BOM",
+					"finished_good": sub_item,
+					"finished_good_qty": 1,
+					"finished_good_bom": sub_bom.name,
+					"service_item": service_item,
+					"service_item_qty": 1,
+					"is_active": 1,
+				}
+			).insert()
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=5,
+			sub_assembly_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Subcontract"
+			row.supplier = "_Test Supplier"
+		plan.submit()
+		plan.make_work_order()
+
+		purchase_order = frappe.db.get_value("Purchase Order Item", {"production_plan": plan.name}, "parent")
+		frappe.get_doc("Purchase Order", purchase_order).submit()
+
+		row = frappe.db.get_value(
+			"Production Plan Sub Assembly Item",
+			plan.sub_assembly_items[0].name,
+			["ordered_qty", "received_qty"],
+			as_dict=True,
+		)
+		self.assertEqual((row.ordered_qty, row.received_qty), (10, 0))
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
