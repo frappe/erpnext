@@ -138,3 +138,23 @@ class TestProcessLossReport(ERPNextTestSuite):
 		self.assertEqual((both_days_row.produced_qty, both_days_row.process_loss_qty), (9, 1))
 
 		self.assertIsNone(self.find_row(self.run_report(from_date=tomorrow, to_date=tomorrow), wo_order.name))
+
+	def test_process_loss_value_for_intermediate_operation(self):
+		from erpnext.manufacturing.doctype.job_card.test_job_card import TestJobCard
+
+		job_card_tests = TestJobCard()
+		wo_order = job_card_tests.make_semi_fg_work_order("_Test PLR")
+		job_card = job_card_tests.get_semi_fg_job_card(wo_order, "_Test PLR Op A")
+		job_card.append(
+			"time_logs",
+			{"from_time": f"{nowdate()} 08:00:00", "to_time": f"{nowdate()} 09:00:00", "completed_qty": 3},
+		)
+		job_card.pending_qty = 0
+		job_card.process_loss_qty = 2
+		job_card.submit()
+		frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item()).submit()
+
+		row = self.find_row(self.run_report(), wo_order.name)
+		self.assertEqual((row.produced_qty, row.process_loss_qty), (0, 2))
+		self.assertGreater(row.total_fg_value, 0)
+		self.assertAlmostEqual(row.total_pl_value, row.total_fg_value * 2 / 5)
