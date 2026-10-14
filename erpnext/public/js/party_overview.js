@@ -85,6 +85,7 @@ erpnext.PartyOverview = class PartyOverview {
 		this.companies_ready = false;
 		this.list = null;
 		this.destroy_trend();
+		this.clear_charts();
 	}
 
 	build_header() {
@@ -352,20 +353,27 @@ erpnext.PartyOverview = class PartyOverview {
 	}
 
 	draw_donut($parent, { segments, center, format }) {
-		const kept = segments.filter((s) => flt(s.value) > 0);
 		const $chart = $('<div class="co-chart">').appendTo($parent);
-		new frappe.Chart($chart[0], {
-			type: "donut",
-			height: 320,
-			data: {
-				labels: kept.map((s) => s.label),
-				datasets: [{ values: kept.map((s) => flt(s.value)) }],
-			},
-			colors: kept.map((s) => s.color),
-			center,
-			tooltipOptions: format && { formatTooltipY: format },
-		});
+		this.donuts.push(
+			new frappe.Chart($chart[0], {
+				type: "donut",
+				height: 320,
+				data: {
+					labels: segments.map((s) => s.label),
+					datasets: [{ values: segments.map((s) => Math.max(flt(s.value), 0)) }],
+				},
+				colors: segments.map((s) => s.color),
+				center,
+				tooltipOptions: format && { formatTooltipY: format },
+			})
+		);
 		return $chart;
+	}
+
+	clear_charts() {
+		(this.donuts || []).forEach((chart) => chart.destroy());
+		this.donuts = [];
+		return this.$charts ? this.$charts.empty() : $();
 	}
 
 	set_trend_notes(notes) {

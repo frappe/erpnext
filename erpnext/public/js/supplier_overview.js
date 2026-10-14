@@ -141,7 +141,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 	}
 
 	render_charts() {
-		this.$charts.empty();
+		this.clear_charts();
 		if (this.accounts && !this.balances?.none)
 			this.render_ageing({
 				title: __("Payables Ageing"),

@@ -138,7 +138,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 
 	render_charts(key) {
 		if (key !== "balances") return;
-		this.$charts.empty().toggle(!!this.accounts && !this.balances?.none);
+		this.clear_charts().toggle(!!this.accounts && !this.balances?.none);
 		if (!this.accounts || this.balances?.none) return;
 		this.render_ageing({
 			title: __("Receivables Ageing"),
@@ -175,14 +175,17 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			this.empty_note($panel, __("Credit usage is unavailable with your permissions."), 180);
 			return;
 		}
-		const $body = limit ? this.credit_donut(data, limit, used) : this.credit_empty(can_edit);
-		$body.appendTo($panel);
+		if (!limit) {
+			this.credit_empty(can_edit).appendTo($panel);
+			return;
+		}
+		this.credit_donut($panel, data, limit, used);
 	}
 
-	credit_donut(data, limit, used) {
+	credit_donut($panel, data, limit, used) {
 		const receivable = Math.min(Math.max(flt(data.outstanding.value), 0), used);
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
-		const donut = frappe.ui.donut({
+		const $chart = this.draw_donut($panel, {
 			segments: [
 				{ label: __("Overdue"), value: overdue, color: "var(--blue-600)" },
 				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
@@ -195,13 +198,11 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			},
 			format: (v) => this.short_money(v),
 		});
-		const $chart = $('<div class="co-chart">').append(donut);
 		if (used > limit) {
 			$('<div class="text-ink-red-7">')
 				.text(__("Over credit limit by {0}", [this.money0(used - limit)]))
 				.appendTo($chart);
 		}
-		return $chart;
 	}
 
 	credit_empty(can_edit) {
