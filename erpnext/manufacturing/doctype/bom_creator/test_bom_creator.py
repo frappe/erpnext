@@ -634,6 +634,41 @@ class TestBOMCreator(ERPNextTestSuite):
 		row = doc.items[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.amount), (12, 36, 360))
 
+	def test_tree_is_validated_on_insert(self):
+		make_item("City Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+
+		def new_creator(name, items):
+			return frappe.get_doc(
+				{
+					"doctype": "BOM Creator",
+					"name": name,
+					"company": "_Test Company",
+					"item_code": "City Bike",
+					"qty": 1,
+					"currency": "INR",
+					"items": items,
+				}
+			)
+
+		duplicate = new_creator(
+			"City Bike BOM Duplicate",
+			[
+				{"item_code": "Frame", "fg_item": "City Bike", "qty": 1},
+				{"item_code": "Frame", "fg_item": "City Bike", "qty": 1},
+			],
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "added multiple times", duplicate.insert)
+
+		wrong_parent = new_creator(
+			"City Bike BOM Wrong Parent",
+			[
+				{"item_code": "Frame Assembly", "fg_item": "City Bike", "qty": 1},
+				{"item_code": "Fork", "fg_item": "City Bike", "qty": 1},
+				{"item_code": "Frame", "fg_item": "Frame Assembly", "parent_row_no": "2", "qty": 1},
+			],
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "points to item", wrong_parent.insert)
+
 
 def create_items():
 	raw_materials = [

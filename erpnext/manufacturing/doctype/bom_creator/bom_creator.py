@@ -74,17 +74,29 @@ class BOMCreator(Document):
 
 	def before_save(self):
 		self.set_status()
+
+	def validate(self):
 		self.set_exchange_rates()
 		self.set_conversion_factor()
 		self.set_reference_id()
 		self.set_is_expandable()
+		self.validate_finished_good()
+		self.validate_items()
+		self.validate_parent_items()
+		self.validate_duplicate_item()
 		self.validate_no_cycles()
 		self.set_rate_for_items()
 
-	def validate(self):
-		self.validate_finished_good()
-		self.validate_items()
-		self.validate_duplicate_item()
+	def validate_parent_items(self):
+		rows = {row.name: row for row in self.items}
+		for row in self.items:
+			parent = rows.get(row.fg_reference_id)
+			if parent and parent.item_code != row.fg_item:
+				frappe.throw(
+					_("Row #{0}: Parent Row No points to item {1}, not {2}").format(
+						row.idx, bold(parent.item_code), bold(row.fg_item)
+					)
+				)
 
 	def validate_duplicate_item(self):
 		# If same items added multiple times under same parent, raise error
@@ -344,36 +356,10 @@ class BOMCreator(Document):
 		"""
 
 		self.db_set({"status": "In Progress", "error_log": None})
-		production_item_wise_rm = OrderedDict({})
-
-		final_product = (self.item_code, self.name)
-		production_item_wise_rm.setdefault(
-			final_product, frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
-		)
-
-		for row in self.items:
-			if row.is_expandable:
-				if (row.item_code, row.name) not in production_item_wise_rm:
-					production_item_wise_rm.setdefault(
-						(row.item_code, row.name),
-						frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
-					)
-
-			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
-				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
-
-			key = (row.fg_item, row.fg_reference_id)
-			if key not in production_item_wise_rm:
-				production_item_wise_rm.setdefault(
-					key,
-					frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
-				)
-
-			production_item_wise_rm[(row.fg_item, row.fg_reference_id)]["items"].append(row)
-
-		reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
 
 		try:
+			production_item_wise_rm = self.get_production_item_wise_rm()
+			reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
 			for d in reverse_tree:
 				fg_item_data = production_item_wise_rm.get(d).fg_item_data
 				self.create_bom(fg_item_data, production_item_wise_rm)
@@ -390,6 +376,30 @@ class BOMCreator(Document):
 			)
 
 			frappe.msgprint(_("BOMs creation failed"))
+
+	def get_production_item_wise_rm(self):
+		production_item_wise_rm = OrderedDict({})
+		production_item_wise_rm.setdefault(
+			(self.item_code, self.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
+		)
+
+		for row in self.items:
+			if row.is_expandable and (row.item_code, row.name) not in production_item_wise_rm:
+				production_item_wise_rm.setdefault(
+					(row.item_code, row.name),
+					frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
+				)
+
+			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
+				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
+
+			key = (row.fg_item, row.fg_reference_id)
+			production_item_wise_rm.setdefault(
+				key, frappe._dict({"items": [], "bom_no": "", "fg_item_data": row})
+			)
+			production_item_wise_rm[key]["items"].append(row)
+
+		return production_item_wise_rm
 
 	def create_bom(self, row, production_item_wise_rm):
 		bom_creator_item = row.name if row.name != self.name else ""
