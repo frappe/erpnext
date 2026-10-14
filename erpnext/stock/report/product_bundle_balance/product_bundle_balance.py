@@ -63,7 +63,7 @@ def execute(filters=None):
 					"minimum_qty": flt(child_item_detail.qty),
 					"company": company,
 				}
-				child_row["bundle_qty"] = child_row["actual_qty"] // child_row["minimum_qty"]
+				child_row["bundle_qty"] = max(0, child_row["actual_qty"] // child_row["minimum_qty"])
 				child_rows.append(child_row)
 
 			min_bundle_qty = min(map(lambda d: d["bundle_qty"], child_rows))
