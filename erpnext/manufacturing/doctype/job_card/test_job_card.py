@@ -3810,6 +3810,34 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.save()
 		self.assertEqual(job_card.process_loss_qty, 1)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_with_materials_partly_transferred_cannot_be_submitted(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		first_item, second_item = make_jc_review_item(), make_jc_review_item()
+		for item_code in (first_item, second_item):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": first_item, "qty": 2, "operation": operation},
+				{"item_code": second_item, "qty": 3, "operation": operation},
+			],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		transfer = make_stock_entry_from_jc(job_card.name)
+		transfer.items = [row for row in transfer.items if row.item_code == first_item]
+		transfer.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0)
+		job_card.append("time_logs", jc_review_log("2031-03-07 08:00:00", 60, 10))
+		self.assertRaisesRegex(frappe.ValidationError, "Materials need to be transferred", job_card.submit)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

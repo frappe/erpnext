@@ -1361,6 +1361,9 @@ class JobCard(Document):
 	def get_transferred_qty_from_stock_entry(self):
 		from frappe.query_builder.functions import Sum
 
+		if self.items:
+			return self.get_transferred_qty_from_items()
+
 		stock_entry = frappe.qb.DocType("Stock Entry")
 
 		result = (
@@ -1375,6 +1378,18 @@ class JobCard(Document):
 		).run()
 
 		return flt(result[0][0]) if result and result[0][0] else 0
+
+	def get_transferred_qty_from_items(self):
+		items = frappe.get_all(
+			"Job Card Item",
+			filters={"parent": self.name, "parenttype": "Job Card", "required_qty": (">", 0)},
+			fields=["required_qty", "transferred_qty"],
+		)
+		if not items:
+			return 0.0
+
+		transferred_fraction = min(flt(d.transferred_qty) / flt(d.required_qty) for d in items)
+		return flt(transferred_fraction * flt(self.for_quantity), self.precision("transferred_qty"))
 
 	def set_transferred_qty_in_work_order(self):
 		doc = frappe.get_doc("Work Order", self.work_order)
