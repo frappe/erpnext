@@ -920,13 +920,12 @@ class SerialandBatchBundle(Document):
 			if valuation_method == "FIFO" and d.batch_no in batches:
 				fifo_batch_wise_val = False
 
-			if (d.serial_no, d.batch_no) in transfer_rates:
-				rate = transfer_rates[d.serial_no, d.batch_no]
+			entry_rate = transfer_rates.get((d.serial_no, d.batch_no), rate)
 
 			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
-				rate = 0.0
+				entry_rate = 0.0
 			elif (
-				(flt(d.incoming_rate, precision) == flt(rate, precision))
+				(flt(d.incoming_rate, precision) == flt(entry_rate, precision))
 				and not stock_queue
 				and fifo_batch_wise_val
 				and d.qty
@@ -935,9 +934,9 @@ class SerialandBatchBundle(Document):
 				continue
 
 			if is_packed_item and d.incoming_rate:
-				rate = d.incoming_rate
+				entry_rate = d.incoming_rate
 
-			d.incoming_rate = flt(rate)
+			d.incoming_rate = flt(entry_rate)
 			if d.qty:
 				d.stock_value_difference = flt(d.qty) * d.incoming_rate
 
