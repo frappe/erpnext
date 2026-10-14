@@ -35,7 +35,8 @@ def get_columns(data=None):
 		{
 			"fieldname": "document_type",
 			"label": _("Document Type"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 160,
 		},
 		{

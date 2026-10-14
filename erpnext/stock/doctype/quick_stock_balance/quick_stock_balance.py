@@ -10,7 +10,7 @@ from frappe.utils import cstr
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext import _refuse, require_user_permission
-from erpnext.stock.utils import get_stock_balance, get_stock_value_on
+from erpnext.stock.utils import _get_stock_balance, get_stock_value_on
 
 
 class QuickStockBalance(Document):
@@ -62,7 +62,7 @@ def get_stock_item_details(warehouse: str, date: str, item: str | None = None, b
 	barcodes = frappe.db.get_values("Item Barcode", filters={"parent": out["item"]}, fieldname=["barcode"])
 
 	out["barcodes"] = [x[0] for x in barcodes]
-	out["qty"] = get_stock_balance(out["item"], warehouse, date)
+	out["qty"] = _get_stock_balance(out["item"], warehouse, date)
 	out["value"] = get_stock_value_on(warehouse, date, out["item"])
 	out["image"] = frappe.db.get_value("Item", filters={"name": out["item"]}, fieldname=["image"])
 	return out

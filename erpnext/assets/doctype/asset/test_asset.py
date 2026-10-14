@@ -874,6 +874,12 @@ class TestAsset(AssetSetup):
 				self, make_asset_movement, build_kwargs, [[inside.name, outside.name]], caller_supplied=True
 			)
 
+	def test_is_fully_depreciated_asset_status(self):
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.is_fully_depreciated = 1
+		asset.save().submit()
+		self.assertEqual(asset.status, "Fully Depreciated")
+
 
 class TestDepreciationMethods(AssetSetup):
 	def setUp(self):

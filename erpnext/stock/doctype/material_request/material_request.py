@@ -304,6 +304,27 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type != "Customer Provided":
 			self.customer = None
 
+		if self.material_request_type == "Subcontracting":
+			self.validate_subcontracted_items()
+
+	def validate_subcontracted_items(self):
+		items = frappe.get_all(
+			"Item",
+			filters={"name": ["in", list({d.item_code for d in self.items if d.item_code})]},
+			fields=["name", "is_stock_item", "is_sub_contracted_item"],
+		)
+		items = {d.name: d for d in items}
+
+		for row in self.items:
+			item = items.get(row.item_code)
+			if item and not (item.is_stock_item and item.is_sub_contracted_item):
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} must be a stock item with Supply Raw Materials for Purchase enabled for a Subcontracting Material Request"
+					).format(row.idx, get_link_to_form("Item", row.item_code)),
+					title=_("Invalid Item"),
+				)
+
 	def set_title(self):
 		"""Set title as comma separated list of items"""
 		if not self.title:
@@ -313,8 +334,9 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
+		if self.material_request_type == "Purchase":
 			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
 				self.validate_budget()
 
@@ -371,7 +393,7 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
@@ -460,17 +482,29 @@ class MaterialRequest(BuyingController):
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
-		item_wh_list = []
-		for d in self.get("items"):
-			if (
-				(not mr_item_rows or d.name in mr_item_rows)
-				and [d.item_code, d.warehouse] not in item_wh_list
-				and d.warehouse
-				and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1
-			):
-				item_wh_list.append([d.item_code, d.warehouse])
+		item_warehouses = dict.fromkeys(
+			(d.item_code, d.warehouse)
+			for d in self.get("items")
+			if d.warehouse and (not mr_item_rows or d.name in mr_item_rows)
+		)
+		if not item_warehouses:
+			return
 
-		for item_code, warehouse in item_wh_list:
+		stock_items = set(
+			frappe.get_all(
+				"Item",
+				filters={
+					"name": ("in", {item_code for item_code, warehouse in item_warehouses}),
+					"is_stock_item": 1,
+				},
+				pluck="name",
+			)
+		)
+
+		for item_code, warehouse in item_warehouses:
+			if item_code not in stock_items:
+				continue
+
 			update_bin_qty(
 				item_code,
 				warehouse,
@@ -570,6 +604,22 @@ def update_item(obj, target, source_parent):
 			target.stock_qty = target.qty * target.conversion_factor
 
 
+def notify_missing_service_items(purchase_order):
+	finished_goods = list(
+		dict.fromkeys(d.fg_item for d in purchase_order.items if d.fg_item and not d.item_code)
+	)
+	if not finished_goods:
+		return
+
+	frappe.msgprint(
+		_(
+			"No active Subcontracting BOM found for Finished Good {0}. Please select the Service Item manually for these rows."
+		).format(comma_and([get_link_to_form("Item", fg_item) for fg_item in finished_goods])),
+		title=_("Service Item Not Set"),
+		indicator="orange",
+	)
+
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 
@@ -595,7 +645,11 @@ def update_status(name, status):
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None, args=None):
+def make_purchase_order(
+	source_name: str,
+	target_doc: str | dict | Document | None = None,
+	args: str | dict | None = None,
+):
 	if args is None:
 		args = frappe.flags.args or {}
 	if isinstance(args, str):
@@ -666,6 +720,9 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 		target_doc,
 		postprocess,
 	)
+
+	if is_subcontracted:
+		notify_missing_service_items(doclist)
 
 	doclist.set_onload("load_after_mapping", False)
 	return doclist
@@ -1042,8 +1099,9 @@ def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 				target.bom_no = work_order_details.bom_no
 				target.use_multi_level_bom = work_order_details.use_multi_level_bom
 				target.from_bom = 1
-				# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
-				target.fg_completed_qty = 0
+				if not source.job_card:
+					# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
+					target.fg_completed_qty = 0
 
 	doclist = get_mapped_doc(
 		"Material Request",

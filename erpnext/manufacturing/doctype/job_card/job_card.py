@@ -1256,8 +1256,12 @@ class JobCard(Document):
 
 	def set_status(self, update_status=False):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
+		precision = self.precision("total_completed_qty")
 		if self.finished_good and self.docstatus == 1:
-			if (self.manufactured_qty + self.process_loss_qty) >= self.get_qty_to_produce():
+			if (
+				flt(flt(self.manufactured_qty) + flt(self.process_loss_qty), precision)
+				>= self.get_qty_to_produce()
+			):
 				self.status = "Completed"
 			elif self.transferred_qty > 0 or self.skip_material_transfer:
 				self.status = "Work In Progress"
@@ -1287,10 +1291,8 @@ class JobCard(Document):
 			if self.time_logs:
 				self.status = "Work In Progress"
 
-			if self.docstatus == 1 and (
-				self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty)
-				or not self.items
-			):
+			completed_qty = flt(flt(self.total_completed_qty) + flt(self.process_loss_qty), precision)
+			if self.docstatus == 1 and (self.get_qty_to_produce() <= completed_qty or not self.items):
 				self.status = "Completed"
 
 		if self.is_paused:
@@ -1304,7 +1306,7 @@ class JobCard(Document):
 
 	def get_qty_to_produce(self):
 		"""Qty this job card is expected to produce, the pending qty is left to another job card."""
-		return flt(self.for_quantity) - flt(self.pending_qty)
+		return flt(flt(self.for_quantity) - flt(self.pending_qty), self.precision("total_completed_qty"))
 
 	def get_qty_with_uom(self, qty, item_code=None):
 		"""A quantity in a message reads as a count of nothing without the unit it is measured in."""
@@ -1463,7 +1465,9 @@ class JobCard(Document):
 		if data and len(data) > 0:
 			current_operation_qty = flt(data[0].completed_qty)
 
-		return current_operation_qty + flt(self.total_completed_qty)
+		return flt(
+			current_operation_qty + flt(self.total_completed_qty), self.precision("total_completed_qty")
+		)
 
 	def get_max_completable_qty(self):
 		if self.is_corrective_job_card or not (self.work_order and self.sequence_id):

@@ -43,10 +43,6 @@ class QualityProcedure(NestedSet):
 		self.add_child_to_parent()
 		self.remove_child_from_old_parent()
 
-	def after_insert(self):
-		self.set_parent()
-		self.add_child_to_parent()
-
 	def on_trash(self):
 		# clear from child table (sub procedures)
 		frappe.db.sql(
@@ -80,9 +76,7 @@ class QualityProcedure(NestedSet):
 				if not frappe.db.get_value(
 					"Quality Procedure", process.procedure, "parent_quality_procedure"
 				):
-					frappe.db.set_value(
-						"Quality Procedure", process.procedure, "parent_quality_procedure", self.name
-					)
+					self.set_parent_of_child(process.procedure, self.name)
 
 	def remove_parent_from_old_child(self):
 		"""Remove `Parent Procedure` from `Old Child Procedures`"""
@@ -94,10 +88,21 @@ class QualityProcedure(NestedSet):
 				if removed_child_procedures := list(
 					old_child_procedures.difference(current_child_procedures)
 				):
-					for child_procedure in removed_child_procedures:
-						frappe.db.set_value(
-							"Quality Procedure", child_procedure, "parent_quality_procedure", None
-						)
+					for child_procedure in frappe.get_all(
+						"Quality Procedure",
+						filters={
+							"name": ["in", removed_child_procedures],
+							"parent_quality_procedure": self.name,
+						},
+						pluck="name",
+					):
+						self.set_parent_of_child(child_procedure, None)
+
+	def set_parent_of_child(self, procedure, parent):
+		child = frappe.get_doc("Quality Procedure", procedure)
+		child.parent_quality_procedure = parent
+		child.save()
+		self.lft, self.rgt = frappe.db.get_value("Quality Procedure", self.name, ["lft", "rgt"])
 
 	def add_child_to_parent(self):
 		"""Add `Child Procedure` to `Parent Procedure`"""
@@ -115,10 +120,10 @@ class QualityProcedure(NestedSet):
 			if old_parent := old_doc.parent_quality_procedure:
 				if self.parent_quality_procedure != old_parent:
 					parent = frappe.get_doc("Quality Procedure", old_parent)
-					for process in parent.processes:
-						if process.procedure == self.name:
-							parent.remove(process)
-					parent.save()
+					if rows := [d for d in parent.processes if d.procedure == self.name]:
+						for row in rows:
+							parent.remove(row)
+						parent.save()
 
 
 @frappe.whitelist()
@@ -128,6 +133,7 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 
 	if parent:
 		parent_procedure = frappe.get_doc("Quality Procedure", parent)
+		parent_procedure.check_permission("read")
 		# return the list in order
 		return [
 			dict(
@@ -138,7 +144,7 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 			if d.procedure
 		]
 	else:
-		return frappe.get_all(
+		return frappe.get_list(
 			"Quality Procedure",
 			fields=["name as value", "is_group as expandable"],
 			filters=dict(parent_quality_procedure=parent),

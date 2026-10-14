@@ -130,6 +130,7 @@ class SubcontractingInwardController:
 					)
 				)
 
+			precision = item.precision("transfer_qty")
 			if self.purpose == "Return Raw Material to Customer":
 				data = frappe.get_value(
 					"Subcontracting Inward Order Received Item",
@@ -137,7 +138,9 @@ class SubcontractingInwardController:
 					["received_qty", "returned_qty", "work_order_qty"],
 					as_dict=True,
 				)
-				if data.returned_qty + item.transfer_qty > data.received_qty - data.work_order_qty:
+				if flt(data.returned_qty + item.transfer_qty, precision) > flt(
+					data.received_qty - data.work_order_qty, precision
+				):
 					frappe.throw(
 						_(
 							"Row #{0}: Returned quantity cannot be greater than available quantity for Item {1}"
@@ -150,7 +153,7 @@ class SubcontractingInwardController:
 					["returned_qty", "delivered_qty"],
 					as_dict=True,
 				)
-				if item.transfer_qty > data.delivered_qty - data.returned_qty:
+				if flt(item.transfer_qty, precision) > flt(data.delivered_qty - data.returned_qty, precision):
 					frappe.throw(
 						_(
 							"Row #{0}: Returned quantity cannot be greater than available quantity to return for Item {1}"
@@ -730,7 +733,7 @@ class SubcontractingInwardController:
 						"Subcontracting Inward Order Item", item.against_fg, "item_code"
 					),
 				)
-				scio_rm.insert()
+				scio_rm.insert(ignore_permissions=True)
 				scio_rm.submit()
 				item.db_set("scio_detail", scio_rm.name)
 
@@ -772,7 +775,9 @@ class SubcontractingInwardController:
 				)
 
 				if not d.required_qty and not d.received_qty:
-					frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
+					frappe.delete_doc(
+						"Subcontracting Inward Order Received Item", d.name, ignore_permissions=True
+					)
 				else:
 					doc_updates[d.name] = {"received_qty": d.received_qty, "rate": d.rate}
 
@@ -849,7 +854,9 @@ class SubcontractingInwardController:
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
 					doc_updates[d.name] = {"consumed_qty": qty}
 				else:
-					frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
+					frappe.delete_doc(
+						"Subcontracting Inward Order Received Item", d.name, ignore_permissions=True
+					)
 
 			if doc_updates:
 				frappe.db.bulk_update(
@@ -888,7 +895,7 @@ class SubcontractingInwardController:
 					warehouse=extra_item.s_warehouse,
 					is_additional_item=True,
 				)
-				doc.insert()
+				doc.insert(ignore_permissions=True)
 				doc.submit()
 
 	def update_inward_order_secondary_items(self):
@@ -937,7 +944,11 @@ class SubcontractingInwardController:
 							self._action == "cancel"
 							and value.produced_qty - abs(secondary_items.get(key)) == 0
 						):
-							frappe.delete_doc("Subcontracting Inward Order Secondary Item", value.name)
+							frappe.delete_doc(
+								"Subcontracting Inward Order Secondary Item",
+								value.name,
+								ignore_permissions=True,
+							)
 						else:
 							doc_updates[value.name] = {
 								"produced_qty": value.produced_qty + secondary_items.get(key)
@@ -975,7 +986,7 @@ class SubcontractingInwardController:
 							"Work Order", self.work_order, "subcontracting_inward_order_item"
 						),
 					)
-					doc.insert()
+					doc.insert(ignore_permissions=True)
 					doc.submit()
 
 	def cancel_stock_reservation_entries_for_inward(self):

@@ -256,7 +256,8 @@ class TaxWithholdingDetailsReport:
 			{
 				"label": _("Transaction Type"),
 				"fieldname": "transaction_type",
-				"fieldtype": "Data",
+				"fieldtype": "Link",
+				"options": "DocType",
 				"width": 130,
 			},
 			{

@@ -103,24 +103,36 @@ def auto_create_fiscal_year():
 	follow_up_date = add_days(getdate(), days=3)
 	fiscal_year = (
 		frappe.qb.from_(fy)
-		.select(fy.name)
-		.where((fy.year_end_date == follow_up_date) & (fy.is_short_year == 0))
-		.run()
+		.select(fy.name, fy.year_end_date)
+		.where((fy.year_end_date <= follow_up_date) & (fy.is_short_year == 0))
+		.run(as_dict=True)
 	)
 
+	if not fiscal_year:
+		return
+
+	existing_years = set(frappe.get_all("Fiscal Year", pluck="name"))
 	for d in fiscal_year:
+		year_start_date = add_days(d.year_end_date, 1)
+		year_end_date = add_days(add_years(year_start_date, 1), -1)
+		start_year = cstr(year_start_date.year)
+		end_year = cstr(year_end_date.year)
+		year = start_year if start_year == end_year else (start_year + "-" + end_year)
+		if year in existing_years:
+			continue
+
+		# savepoint so a duplicate-year INSERT (Fiscal Year autoname=field:year) that aborts the
+		# statement doesn't poison the whole scheduler transaction on Postgres and kill the next iteration
+		frappe.db.savepoint("auto_create_fiscal_year")
 		try:
-			current_fy = frappe.get_doc("Fiscal Year", d[0])
+			current_fy = frappe.get_doc("Fiscal Year", d.name)
 
 			new_fy = frappe.new_doc("Fiscal Year")
 			new_fy.disabled = cint(current_fy.disabled)
 
-			new_fy.year_start_date = add_days(current_fy.year_end_date, 1)
-			new_fy.year_end_date = add_years(current_fy.year_end_date, 1)
-
-			start_year = cstr(new_fy.year_start_date.year)
-			end_year = cstr(new_fy.year_end_date.year)
-			new_fy.year = start_year if start_year == end_year else (start_year + "-" + end_year)
+			new_fy.year_start_date = year_start_date
+			new_fy.year_end_date = year_end_date
+			new_fy.year = year
 
 			for row in current_fy.companies:
 				new_fy.append("companies", {"company": row.company})
@@ -128,8 +140,9 @@ def auto_create_fiscal_year():
 			new_fy.auto_created = 1
 
 			new_fy.insert(ignore_permissions=True)
+			existing_years.add(year)
 		except frappe.NameError:
-			pass
+			frappe.db.rollback(save_point="auto_create_fiscal_year")
 
 
 def get_from_and_to_date(fiscal_year):

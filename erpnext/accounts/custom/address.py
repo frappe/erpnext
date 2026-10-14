@@ -47,10 +47,13 @@ class ERPNextAddress(Address):
 			super().on_update()
 
 		address_display = get_address_display(self.as_dict())
-		filters = {"customer_primary_address": self.name}
-		customers = frappe.db.get_all("Customer", filters=filters, as_list=True)
-		for customer_name in customers:
-			frappe.db.set_value("Customer", customer_name[0], "primary_address", address_display)
+		customers = frappe.db.get_all(
+			"Customer", filters={"customer_primary_address": self.name}, pluck="name"
+		)
+		for customer in customers:
+			frappe.db.set_value(
+				"Customer", customer, "primary_address", address_display, update_modified=False
+			)
 
 
 @frappe.whitelist()

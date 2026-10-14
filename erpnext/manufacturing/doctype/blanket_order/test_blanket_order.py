@@ -30,6 +30,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		so.submit()
 
 		self.assertEqual(so.doctype, "Sales Order")
+		self.assertNotEqual(so.naming_series, bo.naming_series)
 		self.assertEqual(len(so.get("items")), len(bo.get("items")))
 
 		# check the rate, quantity and updation for the ordered quantity
@@ -55,6 +56,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		po.submit()
 
 		self.assertEqual(po.doctype, "Purchase Order")
+		self.assertNotEqual(po.naming_series, bo.naming_series)
 		self.assertEqual(len(po.get("items")), len(bo.get("items")))
 
 		# check the rate, quantity and updation for the ordered quantity
@@ -96,6 +98,15 @@ class TestBlanketOrder(ERPNextTestSuite):
 		frappe.db.set_single_value("Buying Settings", "blanket_order_allowance", 10)
 		po.submit()
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 10})
+	def test_blanket_order_allowance_applies_to_blanket_order_qty(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		orders = [make_purchase_order_against(bo, qty=qty) for qty in (90, 15, 10)]
+		orders[0].submit()
+		orders[1].submit()
+
+		self.assertRaises(frappe.ValidationError, orders[2].submit)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"blanket_order_allowance": 0})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	@ERPNextTestSuite.change_settings(
@@ -121,6 +132,22 @@ class TestBlanketOrder(ERPNextTestSuite):
 			with self.set_user("test@example.com"):
 				order.flags.ignore_permissions = True
 				self.assertRaises(frappe.ValidationError, order.submit)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_last_fraction_of_blanket_order_can_be_ordered(self):
+		item = make_item(properties={"stock_uom": "Kg", "is_stock_item": 0}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=1, item_code=item)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		for qty in (0.9, 0.1):
+			po = make_order(bo.name)
+			po.currency = get_company_currency(po.company)
+			po.schedule_date = today()
+			po.items[0].qty = qty
+			po.submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 1)
 
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
@@ -472,3 +499,12 @@ def make_blanket_order_price_list(currency, price_list_rate):
 		).insert()
 
 	return price_list
+
+
+def make_purchase_order_against(blanket_order, qty):
+	frappe.flags.args.doctype = "Purchase Order"
+	po = make_order(blanket_order.name)
+	po.currency = get_company_currency(po.company)
+	po.schedule_date = today()
+	po.items[0].qty = qty
+	return po

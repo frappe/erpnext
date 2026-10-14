@@ -1180,7 +1180,8 @@ class ReceivablePayableReport:
 		self.add_column(
 			label=_("Party Type"),
 			fieldname="party_type",
-			fieldtype="Data",
+			fieldtype="Link",
+			options="DocType",
 			width=100,
 		)
 		self.add_column(
@@ -1231,7 +1232,9 @@ class ReceivablePayableReport:
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")
 		self.add_column(label=_("Project"), fieldname="project", fieldtype="Link", options="Project")
-		self.add_column(label=_("Voucher Type"), fieldname="voucher_type", fieldtype="Data")
+		self.add_column(
+			label=_("Voucher Type"), fieldname="voucher_type", fieldtype="Link", options="DocType"
+		)
 		self.add_column(
 			label=_("Voucher No"),
 			fieldname="voucher_no",

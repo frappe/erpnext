@@ -104,3 +104,96 @@ class TestReactivity(ERPNextTestSuite):
 		self.assertEqual(sales_invoice.items[0].uom, "Kg")
 		self.assertEqual(sales_invoice.items[0].conversion_factor, 1)
 		self.assertEqual(sales_invoice.items[0].stock_qty, sales_invoice.items[0].qty)
+
+	def add_optional_items_table(self):
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+		create_custom_fields(
+			{
+				"Sales Order": [
+					{
+						"fieldname": "optional_items",
+						"label": "Optional Items",
+						"fieldtype": "Table",
+						"options": "Sales Order Item",
+						"insert_after": "items",
+					}
+				]
+			}
+		)
+		self.addCleanup(frappe.clear_cache, doctype="Sales Order")
+		self.addCleanup(frappe.delete_doc, "Custom Field", "Sales Order-optional_items")
+
+	def make_sales_order_with_optional_items(self, item_code, optional_item_codes):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		self.add_optional_items_table()
+		sales_order = make_sales_order(item_code=item_code, uom="Kg", rate=500, do_not_save=True)
+		for optional_item_code in optional_item_codes:
+			sales_order.append("optional_items", {"item_code": optional_item_code, "qty": 1})
+
+		return sales_order
+
+	def test_item_selection_updates_the_row_in_its_own_child_table(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
+		optional_item = make_item(properties={"is_stock_item": 0, "stock_uom": "Nos"})
+		sales_order = self.make_sales_order_with_optional_items(item.name, [item.name, optional_item.name])
+
+		standard_row = sales_order.items[0]
+		row_state = (standard_row.item_code, standard_row.uom, standard_row.rate)
+		edited_row = sales_order.optional_items[1]
+
+		sales_order.process_item_selection(
+			edited_row.idx, reset_item_details=True, parentfield="optional_items"
+		)
+
+		self.assertEqual(edited_row.item_name, optional_item.item_name)
+		self.assertEqual(edited_row.uom, "Nos")
+		self.assertEqual((standard_row.item_code, standard_row.uom, standard_row.rate), row_state)
+
+	def test_item_selection_ignores_a_row_that_is_gone(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
+		sales_order = self.make_sales_order_with_optional_items(item.name, [])
+
+		sales_order.process_item_selection(len(sales_order.items) + 1)
+
+		self.assertEqual(len(sales_order.items), 1)
+
+	def test_item_selection_rejects_a_field_that_is_not_a_child_table(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
+		sales_order = self.make_sales_order_with_optional_items(item.name, [])
+
+		self.assertRaises(
+			frappe.ValidationError, sales_order.process_item_selection, 1, parentfield="company"
+		)
+
+	def test_free_item_is_added_to_the_table_that_earned_it(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
+		optional_item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
+		free_item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
+		make_pricing_rule(
+			title=f"_Test Free Item Rule {optional_item.name}",
+			selling=1,
+			item_code=optional_item.name,
+			price_or_product_discount="Product",
+			free_item=free_item.name,
+			free_qty=1,
+		)
+		sales_order = self.make_sales_order_with_optional_items(item.name, [optional_item.name])
+
+		sales_order.process_item_selection(sales_order.optional_items[0].idx, parentfield="optional_items")
+
+		self.assertEqual([row.item_code for row in sales_order.items], [item.name])
+		self.assertEqual(
+			[row.item_code for row in sales_order.optional_items],
+			[optional_item.name, free_item.name],
+		)

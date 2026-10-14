@@ -39,6 +39,37 @@ frappe.ui.form.on("Period Closing Voucher", {
 		}
 	},
 
+	before_submit(frm) {
+		frm.doc.stock_value_difference = 0;
+
+		return frm.call("get_stock_value_difference").then(({ message }) => {
+			if (!message?.within_tolerance) return;
+
+			return new Promise((resolve) => {
+				const currency = erpnext.get_currency(frm.doc.company);
+				frappe.confirm(
+					__(
+						"The closing balance {0} of the Stock Asset accounts differs from the closing value {1} of the Stock Balance report by {2}, which is within the allowed {3}% tolerance. Submit the Period Closing Voucher with this difference?",
+						[
+							format_currency(message.account_balance, currency),
+							format_currency(message.stock_value, currency),
+							format_currency(message.difference, currency),
+							message.tolerance,
+						]
+					),
+					() => {
+						frm.doc.stock_value_difference = message.difference;
+						resolve();
+					},
+					() => {
+						frappe.validated = false;
+						resolve();
+					}
+				);
+			});
+		});
+	},
+
 	refresh: function (frm) {
 		if (frm.doc.docstatus > 0) {
 			frm.add_custom_button(__("Ledger"), function () {

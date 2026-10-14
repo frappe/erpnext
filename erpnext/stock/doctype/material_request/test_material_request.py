@@ -121,10 +121,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		)
 
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		for row in mr.items:
+			frappe.db.set_value("Item", row.item_code, "is_sub_contracted_item", 1)
+
 		mr.material_request_type = "Subcontracting"
 		mr.submit()
-
-		frappe.db.set_value("Item", mr.items[0].item_code, "is_sub_contracted_item", 1)
 
 		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
 		for item in raw_materials:
@@ -179,6 +180,51 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(remaining_po.items[0].stock_qty, 54)
 		self.assertEqual(remaining_po.items[0].uom, "Test UOM")
 		self.assertEqual(remaining_po.items[0].conversion_factor, 3)
+
+		# only the finished good without a Subcontracting BOM is reported
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertNotIn(mr.items[0].item_code, message)
+		self.assertIn(mr.items[1].item_code, message)
+
+	def test_subcontracting_material_request_item_validation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		service_item = make_item(properties={"is_stock_item": 0, "is_sub_contracted_item": 1})
+		stock_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 0})
+
+		for item in (service_item, stock_item):
+			mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+			mr.material_request_type = "Subcontracting"
+			mr.items = mr.items[:1]
+			mr.items[0].item_code = item.name
+			self.assertRaises(frappe.ValidationError, mr.insert)
+
+		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
+		mr.insert()
+		self.assertEqual(mr.items[0].item_code, stock_item.name)
+
+	def test_subcontracted_purchase_order_without_subcontracting_bom(self):
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		mr.submit()
+
+		frappe.clear_messages()
+		make_purchase_order(mr.name)
+		self.assertFalse(frappe.get_message_log())
+
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		for row in mr.items:
+			frappe.db.set_value("Item", row.item_code, "is_sub_contracted_item", 1)
+
+		mr.material_request_type = "Subcontracting"
+		mr.submit()
+
+		po = make_purchase_order(mr.name)
+		self.assertFalse(po.items[0].item_code)
+		self.assertEqual(po.items[0].fg_item, mr.items[0].item_code)
+
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertIn("No active Subcontracting BOM found", message)
+		self.assertIn(mr.items[0].item_code, message)
 
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
@@ -1152,6 +1198,50 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 
 		self.assertRaises(OverAllowanceError, mr.submit)
+
+	def test_subcontracting_requested_qty_from_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"is_sub_contracted_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		)
+		for purpose in ("Purchase", "Subcontracting"):
+			for uom, conversion_factor in ((item.stock_uom, 1), ("Box", 12)):
+				with self.subTest(purpose=purpose, uom=uom):
+					so = make_sales_order(item_code=item.name, qty=10, uom=uom)
+					mr = make_material_request(so.name)
+					mr.material_request_type = purpose
+					mr.items[0].qty = 4
+					mr.insert()
+					mr.submit()
+
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 4 * conversion_factor)
+					remaining_mr = make_material_request(so.name)
+					self.assertEqual(remaining_mr.items[0].qty, 6)
+					self.assertEqual(remaining_mr.items[0].stock_qty, 6 * conversion_factor)
+					remaining_mr.material_request_type = purpose
+					remaining_mr.insert()
+					remaining_mr.submit()
+
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 10 * conversion_factor)
+					with self.assertRaisesRegex(
+						frappe.ValidationError, "Material Request already created for the ordered quantity"
+					):
+						make_material_request(so.name)
+
+					remaining_mr.cancel()
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 4 * conversion_factor)
+					self.assertEqual(make_material_request(so.name).items[0].qty, 6)
+
+					mr.cancel()
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 0)
+					self.assertEqual(make_material_request(so.name).items[0].qty, 10)
 
 	def test_get_remaining_qty_from_sales_order(self):
 		from frappe.utils import add_to_date, today
