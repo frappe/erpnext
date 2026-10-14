@@ -411,16 +411,25 @@ def calculate_values(
 	ignore_accumulated_values_for_fy,
 ):
 	grouped_by_dimension = is_dimension_grouped(period_list)
+	year_start_date = period_list[0].year_start_date
 
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
-			d = accounts_by_name.get(entry.account)
-			if not d:
+			account_row = accounts_by_name.get(entry.account)
+			if not account_row:
 				frappe.msgprint(
 					_("Could not retrieve information for {0}.").format(entry.account),
 					title="Error",
 					raise_exception=1,
 				)
+
+			amount = flt(entry.debit) - flt(entry.credit)
+
+			# Balance Sheet only: opening balance is kept per column, so each dimension gets its own
+			before_year_start = entry.posting_date < year_start_date
+			if before_year_start:
+				opening_balance = account_row.setdefault("opening_balance", {})
+
 			for period in period_list:
 				if grouped_by_dimension and entry.get(period.dimension_field) != period.dimension_value:
 					continue
@@ -430,25 +439,27 @@ def calculate_values(
 						not (accumulated_values and ignore_accumulated_values_for_fy)
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
-						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+						account_row[period.key] = account_row.get(period.key, 0.0) + amount
 
-			# Balance Sheet only: track pre-FY entries as opening_balance (no per-dimension breakdown possible).
-			if not grouped_by_dimension and entry.posting_date < period_list[0].year_start_date:
-				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
+				if before_year_start:
+					opening_balance[period.key] = opening_balance.get(period.key, 0.0) + amount
 
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 	"""accumulate children's values in parent accounts"""
-	for d in reversed(accounts):
-		if d.parent_account:
-			for period in period_list:
-				accounts_by_name[d.parent_account][period.key] = accounts_by_name[d.parent_account].get(
-					period.key, 0.0
-				) + d.get(period.key, 0.0)
+	for account_row in reversed(accounts):
+		if not account_row.parent_account:
+			continue
 
-			accounts_by_name[d.parent_account]["opening_balance"] = accounts_by_name[d.parent_account].get(
-				"opening_balance", 0.0
-			) + d.get("opening_balance", 0.0)
+		parent = accounts_by_name[account_row.parent_account]
+		opening_balance = account_row.get("opening_balance") or {}
+		parent_opening_balance = parent.setdefault("opening_balance", {})
+
+		for period in period_list:
+			key = period.key
+
+			parent[key] = parent.get(key, 0.0) + account_row.get(key, 0.0)
+			parent_opening_balance[key] = parent_opening_balance.get(key, 0.0) + opening_balance.get(key, 0.0)
 
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency, accumulated_values):
@@ -471,7 +482,10 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 				"include_in_gross": d.include_in_gross,
 				"account_type": d.account_type,
 				"is_group": d.is_group,
-				"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1),
+				"opening_balance": {
+					key: value * (1 if balance_must_be == "Debit" else -1)
+					for key, value in (d.get("opening_balance") or {}).items()
+				},
 				"account_name": (
 					f"{_(d.account_number)} - {_(d.account_name)}" if d.account_number else _(d.account_name)
 				),
@@ -525,20 +539,28 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 		"account_name": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
 		"account": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
 		"currency": company_currency,
-		"opening_balance": 0.0,
+		"opening_balance": {},
 	}
 
 	for row in out:
-		if not row.get("parent_account"):
-			for period in period_list:
-				total_row.setdefault(period.key, 0.0)
-				total_row[period.key] += row.get(period.key, 0.0)
+		if row.get("parent_account"):
+			continue
 
-			total_row.setdefault("total", 0.0)
-			total_row["total"] += flt(row["total"])
-			total_row["opening_balance"] += row["opening_balance"]
+		for period in period_list:
+			total_row.setdefault(period.key, 0.0)
+			total_row[period.key] += row.get(period.key, 0.0)
+
+		total_row.setdefault("total", 0.0)
+		total_row["total"] += flt(row["total"])
+
+		for key, value in row["opening_balance"].items():
+			total_row["opening_balance"][key] = total_row["opening_balance"].get(key, 0.0) + value
 
 	if "total" in total_row:
+		# rows don't need opening_balance anymore; the total row keeps it for the Balance Sheet
+		for row in out:
+			row.pop("opening_balance", None)
+
 		out.append(total_row)
 
 		# blank row after Total
