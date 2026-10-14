@@ -82,6 +82,14 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		transaction = make_transaction(investment.name, "Purchase", gross_amount=50000)
 		self.assertRaises(frappe.ValidationError, transaction.insert)
 
+	def test_approved_amount_leaves_out_bought_interest(self):
+		investment = make_submitted_investment(approved_amount=100000)
+
+		# 101000 paid, but only 99000 is the investment itself; 2000 is interest bought with it
+		make_transaction(
+			investment.name, "Purchase", gross_amount=101000, accrued_interest_in_purchase=2000
+		).submit()
+
 	def test_sale_uses_fifo_cost(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()

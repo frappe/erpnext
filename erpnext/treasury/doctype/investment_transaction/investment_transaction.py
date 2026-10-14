@@ -254,7 +254,9 @@ class InvestmentTransaction(AccountsController):
 			return
 
 		approved_amount = flt(self.get_investment().approved_amount)
-		total_purchased = self.get_submitted_total("gross_amount", PURCHASE_TYPES) + flt(self.gross_amount)
+		# interest bought with a purchase is not part of the investment's cost, so it does not count
+		other_purchases = sum(p.amount for p in get_purchases(self.investment) if p.name != self.name)
+		total_purchased = flt(other_purchases + get_investment_amount(self), self.precision("gross_amount"))
 
 		if total_purchased > approved_amount:
 			frappe.throw(
