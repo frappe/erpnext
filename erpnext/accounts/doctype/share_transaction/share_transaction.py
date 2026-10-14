@@ -81,7 +81,7 @@ class ShareTransaction(TransactionAccounting, Document):
 				frappe.throw(_("Cancellation date must be between the original posting date and today."))
 		lock_company(self.company)
 		self.lock_shareholders()
-		assert_cancellable(self)
+		assert_cancellable(self, self.get_reversal_date())
 		assert_journal_unreconciled(self)
 
 	def on_cancel(self):
@@ -246,8 +246,6 @@ class ShareTransaction(TransactionAccounting, Document):
 			)
 
 	def create_reversal_entries(self):
-		from erpnext.accounts.utils import is_immutable_ledger_enabled
-
 		original_entries = frappe.get_all(
 			"Share Ledger Entry",
 			filters={"share_transaction": self.name, "is_reversal": 0},
@@ -275,20 +273,22 @@ class ShareTransaction(TransactionAccounting, Document):
 		for original in original_entries:
 			if frappe.db.exists("Share Ledger Entry", {"reversal_of": original.name}):
 				continue
-			reversal_date = nowdate()
-			if self.transaction_type != "Transfer":
-				reversal_date = (
-					frappe.utils.getdate(frappe.form_dict.get("posting_date") or nowdate())
-					if is_immutable_ledger_enabled()
-					else original.posting_date
-				)
 			create_ledger_entry(
 				transaction=self,
 				share_folio=original.share_folio,
 				quantity_change=-original.quantity_change,
-				posting_date=reversal_date,
+				posting_date=self.get_reversal_date(),
 				treasury_cost_change=-flt(original.treasury_cost_change),
 				is_reversal=True,
 				reversal_of=original.name,
 				original=original,
 			)
+
+	def get_reversal_date(self):
+		from erpnext.accounts.utils import is_immutable_ledger_enabled
+
+		if self.transaction_type == "Transfer":
+			return nowdate()
+		if is_immutable_ledger_enabled():
+			return frappe.utils.getdate(frappe.form_dict.get("posting_date") or nowdate())
+		return self.posting_date

@@ -23,7 +23,7 @@ def validate_posting(company, share_class, posting_date):
 		frappe.throw(_("Post chronologically: this class already has movements dated {0}.").format(latest))
 
 
-def assert_cancellable(source):
+def assert_cancellable(source, reversal_date=None):
 	"""Require dependent ownership operations to be reversed first."""
 	lock_company(source.company)
 	entries = frappe.get_all(
@@ -58,4 +58,27 @@ def assert_cancellable(source):
 			frappe.throw(
 				_("Reverse later ownership movements in this class before cancelling this document.")
 			)
+		if reversal_date:
+			incompatible_reversal = (
+				frappe.qb.from_(movement)
+				.join(reversal)
+				.on(reversal.reversal_of == movement.name)
+				.select(movement.name)
+				.where(
+					(movement.company == source.company)
+					& (movement.share_class == entry.share_class)
+					& (movement.creation > entry.creation)
+					& ~((movement.source_doctype == source.doctype) & (movement.source_name == source.name))
+					& (movement.is_reversal == 0)
+					& (reversal.posting_date > movement.posting_date)
+					& (reversal.posting_date > getdate(reversal_date))
+				)
+				.limit(1)
+			).run()
+			if incompatible_reversal:
+				frappe.throw(
+					_(
+						"Cancellation would invalidate historical ownership before a later movement's reversal."
+					)
+				)
 		validate_posting(source.company, entry.share_class, nowdate())

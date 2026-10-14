@@ -8,6 +8,31 @@ from frappe.model.document import Document
 from frappe.utils import flt, now_datetime, nowdate
 
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def shareholder_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
+	"""Find readable shareholders with membership in the payment's company."""
+	filters = frappe.parse_json(filters) if isinstance(filters, str) else filters or {}
+	company = filters.get("company")
+	if not isinstance(company, str) or not company:
+		return []
+	frappe.has_permission("Company", "read", doc=company, throw=True)
+	folio = frappe.qb.DocType("Share Folio")
+	holder = frappe.qb.DocType("Shareholder")
+	members = frappe.qb.from_(folio).select(folio.shareholder).where(folio.company == company)
+	query = frappe.qb.get_query("Shareholder", fields=["name", "legal_name"], ignore_permissions=False)
+	return (
+		query.where(holder.name.isin(members))
+		.where(holder.name.like(f"%{txt}%") | holder.legal_name.like(f"%{txt}%"))
+		.orderby(holder.name)
+		.limit(page_len)
+		.offset(start)
+		.run()
+	)
+
+
 class Shareholder(Document):
 	def validate_share(self, share):
 		frappe.throw(

@@ -488,6 +488,7 @@ frappe.ui.form.on("Payment Entry", {
 				return erpnext.queries.party(frm.doc);
 			} else if (frm.doc.party_type == "Shareholder") {
 				return {
+					query: "erpnext.accounts.doctype.shareholder.shareholder.shareholder_query",
 					filters: {
 						company: frm.doc.company,
 					},

@@ -14,6 +14,8 @@ Accounting transaction reversals follow ERPNext's immutable ledger setting.
 With immutable accounting enabled, cancellation takes effect on the cancellation
 date. Otherwise, ownership reversals use the original posting date to match
 the General Ledger. Ordinary Transfer reversals retain their cancellation date.
+Cancellation is blocked if an earlier reversal date would invalidate historical
+ownership before a later movement's reversal.
 
 Share Ledger and Equity Position show history and holdings for a selected
 date. The Shareholder form also shows a read-only Current Share Balance child
