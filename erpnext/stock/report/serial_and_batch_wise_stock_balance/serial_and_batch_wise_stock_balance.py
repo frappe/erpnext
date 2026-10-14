@@ -52,6 +52,8 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 	def prepare_serial_batch_map(self):
 		self.batch_map = {}
 		self.serial_map = {}
+		self.pooled_valuation_keys = set()
+		pool_batch_values = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
 
 		query = self.get_serial_batch_query()
 		with frappe.db.unbuffered_cursor():
@@ -59,6 +61,12 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 				group_by_key = self.get_group_by_key(entry)
 				if entry.batch_no:
 					self.add_batch_entry(group_by_key, entry)
+					if (entry.has_serial_no and not entry.use_serial_no_wise_valuation) or (
+						pool_batch_values
+						and not entry.has_serial_no
+						and (entry.valuation_method or entry.company_valuation_method) == "Moving Average"
+					):
+						self.pooled_valuation_keys.add(group_by_key)
 
 				if entry.serial_no:
 					self.add_serial_nos(group_by_key, entry)
@@ -74,11 +82,14 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item_table = frappe.qb.DocType("Item")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		company = frappe.qb.DocType("Company")
 
 		query = (
 			frappe.qb.from_(sle)
 			.inner_join(item_table)
 			.on(sle.item_code == item_table.name)
+			.inner_join(company)
+			.on(sle.company == company.name)
 			.left_join(bundle_entry)
 			.on(bundle_entry.parent == sle.serial_and_batch_bundle)
 			.select(
@@ -97,6 +108,10 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
+				item_table.has_serial_no,
+				item_table.use_serial_no_wise_valuation,
+				item_table.valuation_method,
+				company.valuation_method.as_("company_valuation_method"),
 			)
 			.where(
 				(sle.docstatus < 2)
@@ -143,6 +158,11 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		for batch_no, batch_data in sorted(
 			batches, key=lambda item: self.batch_numbers.get(item[0], item[0])
 		):
+			if key in self.pooled_valuation_keys:
+				batch_data.bal_val = (
+					batch_data.bal_qty * item_row.bal_val / item_row.bal_qty if item_row.bal_qty else 0.0
+				)
+
 			if self.is_hidden_zero_stock(batch_data):
 				continue
 
