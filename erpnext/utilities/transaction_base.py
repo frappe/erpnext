@@ -371,6 +371,9 @@ class TransactionBase(StatusUpdater):
 			):
 				item_obj.set(fieldname, None)
 
+			if item_obj.get("mapped_additional_discount_amount"):
+				self.drop_mapped_discount(item_obj)
+
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
 

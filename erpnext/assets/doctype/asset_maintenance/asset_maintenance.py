@@ -22,7 +22,7 @@ class AssetMaintenance(Document):
 
 		from erpnext.assets.doctype.asset_maintenance_task.asset_maintenance_task import AssetMaintenanceTask
 
-		asset_category: DF.ReadOnly | None
+		asset_category: DF.Link | None
 		asset_maintenance_tasks: DF.Table[AssetMaintenanceTask]
 		asset_name: DF.Link
 		company: DF.Link
