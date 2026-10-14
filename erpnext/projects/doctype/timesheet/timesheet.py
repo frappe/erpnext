@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Concat, Date, Round
-from frappe.utils import cstr, flt, get_datetime, getdate
+from frappe.utils import cstr, flt, get_datetime, getdate, nowdate
 from frappe.utils.deprecations import deprecated
 
 from erpnext import _refuse
@@ -151,9 +151,7 @@ class Timesheet(Document):
 			self.status = "Completed"
 
 	def set_user(self):
-		self.user = (
-			self.employee and frappe.db.get_value("Employee", self.employee, "user_id")
-		) or self.owner
+		self.user = frappe.db.get_value("Employee", self.employee, "user_id") if self.employee else self.owner
 
 	def set_dates(self):
 		if self.docstatus < 2 and self.time_logs:
@@ -209,13 +207,20 @@ class Timesheet(Document):
 			time_log.validate_dates()
 
 	def validate_time_logs(self):
+		previous = self.get_doc_before_save()
+		saved_activity_types = (
+			{row.name: row.activity_type for row in previous.time_logs}
+			if previous and previous.docstatus == 1
+			else {}
+		)
 		for time_log in self.time_logs:
 			time_log.set_to_time()
 			self.validate_overlap(time_log)
 			time_log.set_project()
 			time_log.validate_parent_project(self.parent_project)
 			time_log.validate_task_project()
-			time_log.validate_activity_type()
+			if time_log.activity_type != saved_activity_types.get(time_log.name):
+				time_log.validate_activity_type()
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single("Projects Settings")
@@ -578,6 +583,13 @@ def _get_activity_cost(
 		)
 	if rate and currency and currency != base_currency:
 		exchange_rate = get_exchange_rate(base_currency, currency)
+		if not exchange_rate:
+			frappe.throw(
+				_(
+					"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+				).format(base_currency, currency, nowdate())
+			)
+
 		rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
 		rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 

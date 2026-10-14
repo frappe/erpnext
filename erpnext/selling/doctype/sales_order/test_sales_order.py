@@ -619,6 +619,29 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].billed_amt, 500)
 
+	def test_order_neutral_credit_note_stays_out_of_later_billing(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 6
+		si.insert()
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.items[0].qty = -2
+		credit_note.update_billed_amount_in_sales_order = 0
+		credit_note.submit()
+
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 4
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].billed_amt, 1000)
+		self.assertEqual(so.per_billed, 100)
+
 	def test_make_sales_invoice_after_update_stock_credit_note(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 

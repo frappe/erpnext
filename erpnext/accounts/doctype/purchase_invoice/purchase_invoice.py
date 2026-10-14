@@ -235,6 +235,8 @@ class PurchaseInvoice(BuyingController):
 				"source_field": "amount",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and (is_return=0 or update_billed_amount_in_purchase_order=1))""",
 			}
 		]
 		self.closed_source_links = [

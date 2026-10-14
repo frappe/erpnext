@@ -215,6 +215,9 @@ def make_sales_invoice(
 def make_delivery_trip(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
+	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
+
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 
@@ -445,6 +448,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 

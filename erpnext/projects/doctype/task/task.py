@@ -92,6 +92,7 @@ class Task(NestedSet):
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
+		self.set_default_weight()
 		self.validate_parent_is_group()
 		self.validate_parent_not_completed()
 		self.validate_web_form_project_permission()
@@ -101,6 +102,10 @@ class Task(NestedSet):
 		self.validate_from_to_dates("act_start_date", "act_end_date")
 		self.validate_parent_expected_end_date()
 		self.validate_parent_project_dates()
+
+	def set_default_weight(self):
+		if self.type and self.task_weight is None:
+			self.task_weight = frappe.get_cached_value("Task Type", self.type, "weight")
 
 	def set_default_end_date_if_missing(self):
 		if self.exp_start_date and self.expected_time and not self.exp_end_date:
@@ -118,7 +123,9 @@ class Task(NestedSet):
 			self.report_date_conflict(
 				_(
 					"Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-				).format(format_date(parent_exp_end_date))
+				).format(format_date(parent_exp_end_date)),
+				"exp_end_date",
+				"parent_task",
 			)
 
 	def validate_parent_project_dates(self):
@@ -141,7 +148,9 @@ class Task(NestedSet):
 						get_link_to_form("Task", self.name),
 						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
-					)
+					),
+					fieldname,
+					"project",
 				)
 
 			if project_start_date and date_diff(task_date, getdate(project_start_date)) < 0:
@@ -150,12 +159,17 @@ class Task(NestedSet):
 						get_link_to_form("Task", self.name),
 						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
-					)
+					),
+					fieldname,
+					"project",
 				)
 
-	def report_date_conflict(self, message: str):
+	def report_date_conflict(self, message: str, *fieldnames: str):
+		"""Refuse a date conflict this save causes; warn when a reschedule causes it."""
 		if not self.flags.rescheduled:
-			frappe.throw(message, frappe.exceptions.InvalidDates)
+			if self.is_new() or any(self.has_value_changed(fieldname) for fieldname in fieldnames):
+				frappe.throw(message, frappe.exceptions.InvalidDates)
+			return
 
 		frappe.msgprint(
 			_("{0} was moved after the task it depends on. {1}").format(
@@ -376,7 +390,7 @@ class Task(NestedSet):
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
-		if not end_date:
+		if not end_date or self.flags.ignore_reschedule:
 			return
 
 		dependent_parents = frappe.get_all(
