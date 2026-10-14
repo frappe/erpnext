@@ -58,6 +58,8 @@ jobs:
   # The expensive, non-parallelisable work happens here exactly once instead of on every shard.
   setup:
     name: Build & reinstall (setup)
+    outputs:
+      bench_sha256: ${{ steps.stage.outputs.sha256 }}
     # Dedicated scale set (fat cpu request) so the build+reinstall runs at full speed, uncontended
     # by the many thin test shards. Same CI image + /home/ci path + 127.0.0.1 DB as the shards,
     # so the packaged bench (and its venv) transplants cleanly.
@@ -134,6 +136,7 @@ jobs:
       # the shards just untar it locally. NOTE: this assumes one node — a shard on a different
       # node could not read this path (then you'd need GitHub artifacts or an NFS/RWX volume).
       - name: Stage bench on node (hostPath)
+        id: stage
         run: |
           cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/frappe-bench/hydrate.sh
           cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/frappe-bench/start-db.sh
@@ -141,9 +144,11 @@ jobs:
           # self-clean: drop bench tars from runs older than 2h
           find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +120 -delete 2>/dev/null || true
           # Exclude .git/node_modules; the mariadb-data datadir IS included (the pre-loaded DB).
-          tar -I 'zstd -T0' -cpf "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" -C /home/ci \
-            --exclude='.git' --exclude='node_modules' frappe-bench
+          sha256=$(tar -I 'zstd -T0' -cpf - -C /home/ci \
+            --exclude='.git' --exclude='node_modules' frappe-bench \
+            | tee "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" | sha256sum | cut -d' ' -f1)
           ls -lh "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
 
   # Fan-out: each shard downloads the bench, untars it, starts MariaDB on the baked datadir, and
   # runs its slice of the suite. No clone, no build, no reinstall, no DB dump restore on the shards.
@@ -174,8 +179,13 @@ jobs:
       # GitHub download. -p preserves the ci (uid 1001) ownership so bench runs as ci cleanly.
       - name: Untar bench from node (hostPath)
         run: |
-          tar -I zstd -xpf "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" -C /home/ci
+          cp "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" /tmp/bench.tar.zst
+          echo "${BENCH_SHA256}  /tmp/bench.tar.zst" | sha256sum --check --strict -
+          tar -I zstd -xpf /tmp/bench.tar.zst -C /home/ci
+          rm /tmp/bench.tar.zst
           ls -ld /home/ci/frappe-bench
+        env:
+          BENCH_SHA256: ${{ needs.setup.outputs.bench_sha256 }}
 
       - name: Hydrate (start DB on baked datadir + bench start)
         run: bash /home/ci/frappe-bench/hydrate.sh
