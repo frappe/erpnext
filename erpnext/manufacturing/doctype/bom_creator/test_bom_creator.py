@@ -440,6 +440,37 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(enqueue_doc.call_args.args, ("BOM Creator", doc.name, "create_boms"))
 
+	def test_raw_material_keeps_its_own_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		make_item("Balance Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		semi_bom = make_bom(item="Pedal Assembly", raw_materials=["Pedal Body"], currency="INR")
+		doc = make_bom_creator(
+			name="Balance Bike BOM Semi",
+			company="_Test Company",
+			item_code="Balance Bike",
+			qty=1,
+			currency="INR",
+		)
+		doc.add_item(fg_item="Balance Bike", fg_reference_id=doc.name, item_code="Pedal Assembly", qty=1)
+		doc.reload()
+		doc.items[0].do_not_explode = 0
+		doc.items[0].bom_no = semi_bom.name
+		doc.save()
+		doc.submit()
+		doc.create_boms()
+
+		top_bom = frappe.db.get_value(
+			"BOM", {"bom_creator": doc.name, "item": "Balance Bike", "docstatus": 1}
+		)
+		row = frappe.db.get_value(
+			"BOM Item",
+			{"parent": top_bom, "item_code": "Pedal Assembly"},
+			["bom_no", "do_not_explode"],
+			as_dict=True,
+		)
+		self.assertEqual((row.bom_no, row.do_not_explode), (semi_bom.name, 0))
+
 
 def create_items():
 	raw_materials = [

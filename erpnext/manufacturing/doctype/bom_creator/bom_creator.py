@@ -385,11 +385,11 @@ class BOMCreator(Document):
 				bom.set(field, self.get(field))
 
 		for item in production_item_wise_rm[(row.item_code, row.name)]["items"]:
-			bom_no = ""
-			item.do_not_explode = 1
+			bom_no = "" if item.do_not_explode else item.bom_no
+			do_not_explode = item.do_not_explode
 			if (item.item_code, item.name) in production_item_wise_rm:
 				bom_no = production_item_wise_rm.get((item.item_code, item.name)).bom_no
-				item.do_not_explode = 0
+				do_not_explode = 0
 
 			item_args = {}
 			for field in BOM_ITEM_FIELDS:
@@ -398,6 +398,7 @@ class BOMCreator(Document):
 			item_args.update(
 				{
 					"bom_no": bom_no,
+					"do_not_explode": do_not_explode,
 					"allow_alternative_item": 1,
 					"include_item_in_manufacturing": 1,
 				}
