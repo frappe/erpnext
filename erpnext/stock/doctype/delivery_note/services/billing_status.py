@@ -165,15 +165,25 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 	if not return_rows:
 		return {}
 
-	delivered_qty = frappe._dict(
-		frappe.get_all(
+	original_rows = {
+		row.name: row
+		for row in frappe.get_all(
 			"Delivery Note Item",
 			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
-			fields=["name", "qty"],
-			as_list=True,
+			fields=["name", "qty", "so_detail"],
 		)
-	)
+	}
 	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
+	so_details = {row.so_detail for row in original_rows.values() if row.so_detail}
+	so_billed = set(
+		frappe.get_all(
+			"Sales Invoice Item",
+			filters={"so_detail": ("in", list(so_details)), "dn_detail": ("is", "not set"), "docstatus": 1},
+			pluck="so_detail",
+		)
+		if so_details
+		else []
+	)
 	returned_qty = {}
 	for row in return_rows:
 		returned_qty[row.dn_detail] = flt(returned_qty.get(row.dn_detail)) + abs(flt(row.qty))
@@ -183,10 +193,12 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 	for original, returned in returned_qty.items():
 		returned = flt(returned, qty_precision)
 		net_invoiced = flt(invoiced_qty.get(original))
-		uninvoiced = flt(flt(delivered_qty.get(original)) - net_invoiced, qty_precision)
+		uninvoiced = flt(flt(original_rows[original].qty) - net_invoiced, qty_precision)
 		# Until the net qty is fully invoiced, the next invoice still deducts the returns.
-		# Rows invoiced through the Sales Order have no invoiced qty here and stay unsettled.
-		fully_invoiced = net_invoiced > 0 and returned >= uninvoiced
+		# Rows also invoiced through the Sales Order stay unsettled.
+		fully_invoiced = (
+			net_invoiced > 0 and returned >= uninvoiced and original_rows[original].so_detail not in so_billed
+		)
 		settleable_qty[original] = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
 
 	settled_qty = {}

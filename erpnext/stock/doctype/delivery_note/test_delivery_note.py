@@ -4235,6 +4235,27 @@ class TestDeliveryNote(ERPNextTestSuite):
 			deducted_return.reload()
 			self.assertEqual(deducted_return.per_billed, 100)
 
+	def test_return_after_mixed_dn_and_so_billing_is_not_settled(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		delivery_note = create_dn_against_so(so.name, delivered_qty=10)
+
+		dn_invoice = make_sales_invoice(delivery_note.name)
+		dn_invoice.items[0].qty = 8
+		dn_invoice.submit()
+		so_invoice = make_si_from_so(so.name)
+		self.assertEqual(so_invoice.items[0].qty, 2)
+		so_invoice.submit()
+
+		# All 10 were billed, so the return needs a credit note for its full qty.
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -2
+		sales_return.submit()
+		self.assertEqual(sales_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(sales_return.name).items[0].qty, -2)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,
