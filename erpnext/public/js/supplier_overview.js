@@ -159,7 +159,9 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 		const d = this.overview.data?.delivery;
 		const $panel = this.panel(this.$charts, {
 			title: __("Delivery Performance"),
-			subtitle: d?.lines && [COUNT.lines_due(d.lines), COUNT.orders(d.orders)].join(" · "),
+			subtitle: d?.lines
+				? [COUNT.lines_due(d.lines), COUNT.orders(d.orders)].join(" · ")
+				: __("Order lines received by their due date"),
 			right:
 				d?.scorecard &&
 				this.report_link(__("Scorecard"), () =>
