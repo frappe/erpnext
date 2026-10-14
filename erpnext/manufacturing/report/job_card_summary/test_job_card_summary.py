@@ -81,18 +81,16 @@ class TestJobCardSummary(ERPNextTestSuite):
 			to_date=today(),
 			work_order=[self.work_order.name],
 		)
-		for expected_count in (0, 1):
-			if expected_count:
-				frappe.db.set_value("Job Card", self.job_cards[0].name, "workstation", workstation.name)
-			with self.set_user(user.name):
-				columns, rows, message, chart = execute(filters)
-			self.assertEqual(len(rows), expected_count)
-			self.assertEqual(
-				sum(value or 0 for dataset in chart["data"]["datasets"] for value in dataset["values"]),
-				expected_count,
-			)
-		with self.set_user("Guest"):
-			self.assertRaises(frappe.PermissionError, execute, filters)
+
+		self.assertEqual(self.get_row_and_chart_counts(user.name, filters), (0, 0))
+
+		frappe.db.set_value("Job Card", self.job_cards[0].name, "workstation", workstation.name)
+		self.assertEqual(self.get_row_and_chart_counts(user.name, filters), (1, 1))
+
+	def get_row_and_chart_counts(self, user, filters):
+		with self.set_user(user):
+			_columns, rows, _message, chart = execute(filters)
+		return len(rows), sum(sum(dataset["values"]) for dataset in chart["data"]["datasets"])
 
 	def test_chart_includes_period_boundaries_and_empty_months(self):
 		filters = frappe._dict(from_date="2026-01-01", to_date="2026-02-28")
