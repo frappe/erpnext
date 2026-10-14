@@ -4,6 +4,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import flt, getdate
+from pypika import Order
+from pypika.analytics import RowNumber
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
@@ -46,8 +48,56 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 
 	def prepare_new_data(self):
 		self.prepare_serial_batch_map()
+		self.pooled_valuation_rates = self.get_pooled_valuation_rates()
+		for key, item_row in self.item_warehouse_map.items():
+			if key in self.pooled_valuation_keys and self.pooled_valuation_rates:
+				rate = self.pooled_valuation_rates[(item_row.item_code, item_row.warehouse)]
+				item_row.val_rate = flt(rate, self.float_precision)
+				item_row.bal_val = flt(item_row.bal_qty * rate, self.float_precision)
+
 		super().prepare_new_data()
 		self.data = [row for item_row in self.data for row in self.get_item_and_batch_rows(item_row)]
+
+	def get_pooled_valuation_rates(self) -> dict:
+		if not self.pooled_valuation_keys or not (
+			self.filters.get("show_dimension_wise_stock")
+			or any(self.filters.get(field) for field in self.inventory_dimensions)
+		):
+			return {}
+
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		ranked = (
+			frappe.qb.from_(sle)
+			.select(
+				sle.item_code,
+				sle.warehouse,
+				sle.stock_value,
+				sle.qty_after_transaction,
+				RowNumber()
+				.over(sle.item_code, sle.warehouse)
+				.orderby(sle.posting_datetime, sle.creation, sle.name, order=Order.desc)
+				.as_("row_no"),
+			)
+			.where(
+				(sle.docstatus < 2)
+				& (sle.is_cancelled == 0)
+				& (sle.posting_date <= self.to_date)
+				& sle.item_code.isin({key[0] for key in self.pooled_valuation_keys})
+				& sle.warehouse.isin({key[1] for key in self.pooled_valuation_keys})
+			)
+		).as_("ranked")
+		entries = (
+			frappe.qb.from_(ranked)
+			.select(ranked.item_code, ranked.warehouse, ranked.stock_value, ranked.qty_after_transaction)
+			.where(ranked.row_no == 1)
+			.run(as_dict=True)
+		)
+		return {
+			(entry.item_code, entry.warehouse): flt(entry.stock_value / entry.qty_after_transaction)
+			if entry.qty_after_transaction
+			else 0.0
+			for entry in entries
+		}
 
 	def prepare_serial_batch_map(self):
 		self.batch_map = {}
@@ -159,9 +209,11 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 			batches, key=lambda item: self.batch_numbers.get(item[0], item[0])
 		):
 			if key in self.pooled_valuation_keys:
-				batch_data.bal_val = (
-					batch_data.bal_qty * item_row.bal_val / item_row.bal_qty if item_row.bal_qty else 0.0
+				rate = self.pooled_valuation_rates.get(
+					(item_row.item_code, item_row.warehouse),
+					item_row.bal_val / item_row.bal_qty if item_row.bal_qty else 0.0,
 				)
+				batch_data.bal_val = batch_data.bal_qty * rate
 
 			if self.is_hidden_zero_stock(batch_data):
 				continue
