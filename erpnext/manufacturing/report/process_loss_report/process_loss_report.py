@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Max, Sum
+from frappe.query_builder.functions import Coalesce, Max, Sum
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -23,19 +23,28 @@ def execute(filters: Filters) -> tuple[Columns, Data]:
 def get_data(filters: Filters) -> Data:
 	wo = frappe.qb.DocType("Work Order")
 	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	finished_items = (
+		frappe.qb.from_(sed)
+		.select(sed.parent, sed.item_code, Sum(sed.transfer_qty).as_("produced_qty"))
+		.where(sed.is_finished_item == 1)
+		.groupby(sed.parent, sed.item_code)
+	).as_("finished_items")
 
 	query = (
 		frappe.qb.from_(wo)
 		.inner_join(se)
 		.on(wo.name == se.work_order)
+		.left_join(finished_items)
+		.on((finished_items.parent == se.name) & (finished_items.item_code == wo.production_item))
 		.select(
 			# grouped by se.work_order (== wo.name); the work-order columns are constant per group ->
 			# Max() keeps the GROUP BY valid on postgres with the same value.
 			Max(wo.name).as_("name"),
 			Max(wo.status).as_("status"),
 			Max(wo.production_item).as_("production_item"),
-			Max(wo.produced_qty).as_("produced_qty"),
-			Max(wo.process_loss_qty).as_("process_loss_qty"),
+			Coalesce(Sum(finished_items.produced_qty), 0).as_("produced_qty"),
+			Sum(se.process_loss_qty).as_("process_loss_qty"),
 			Max(wo.qty).as_("qty_to_manufacture"),
 			Sum(se.fg_completed_qty).as_("manufactured_qty"),
 			Sum(se.total_incoming_value).as_("total_fg_value"),
