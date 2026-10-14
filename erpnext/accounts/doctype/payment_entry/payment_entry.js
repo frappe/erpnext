@@ -657,7 +657,6 @@ frappe.ui.form.on("Payment Entry", {
 		);
 	},
 
-<<<<<<< HEAD
 	set_account_currency_and_balance: function (
 		frm,
 		account,
@@ -665,10 +664,6 @@ frappe.ui.form.on("Payment Entry", {
 		balance_field,
 		callback_function
 	) {
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
-=======
-	set_account_currency_and_balance: function (frm, account, currency_field, callback_function) {
->>>>>>> 6551867 (fix(accounts): re-derive bank side amount when payment account currency changes (#59582))
 		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
