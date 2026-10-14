@@ -479,7 +479,8 @@
    "fieldname": "investment_account",
    "fieldtype": "Link",
    "label": "Investment Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "column_break_accounting",
@@ -496,7 +497,8 @@
    "fieldname": "charges_account",
    "fieldtype": "Link",
    "label": "Charges Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "accounts_section",
@@ -508,21 +510,24 @@
    "fieldname": "interest_income_account",
    "fieldtype": "Link",
    "label": "Interest Income Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
    "fieldname": "accrued_interest_account",
    "fieldtype": "Link",
    "label": "Accrued Interest Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "depends_on": "eval:doc.instrument_class=='Units'",
    "fieldname": "dividend_income_account",
    "fieldtype": "Link",
    "label": "Dividend Income Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "column_break_accounts",
@@ -532,7 +537,8 @@
    "fieldname": "tax_withheld_receivable_account",
    "fieldtype": "Link",
    "label": "Tax Withheld Receivable Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
@@ -545,7 +551,8 @@
    "fieldname": "realised_gain_loss_account",
    "fieldtype": "Link",
    "label": "Realised Gain / Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category=='FVTPL'",
@@ -553,7 +560,8 @@
    "fieldtype": "Link",
    "label": "Unrealised Gain / Loss Account",
    "options": "Account",
-   "description": "Profit and loss account where FVTPL fair value gains and losses are posted"
+   "description": "Profit and loss account where FVTPL fair value gains and losses are posted",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "column_break_gain_loss",
@@ -564,7 +572,8 @@
    "fieldname": "fair_value_adjustment_account",
    "fieldtype": "Link",
    "label": "Fair Value Adjustment Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category=='FVOCI'",
@@ -572,7 +581,8 @@
    "fieldname": "fair_value_reserve_account",
    "fieldtype": "Link",
    "label": "Fair Value Reserve Account",
-   "options": "Account"
+   "options": "Account",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "connections_tab",
@@ -607,7 +617,7 @@
    "link_fieldname": "original_investment"
   }
  ],
- "modified": "2026-10-14 13:00:00.000000",
+ "modified": "2026-10-14 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment",

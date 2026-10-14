@@ -85,17 +85,29 @@ class TestInvestmentSettings(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, investment.insert)
 
-	def test_submitted_investment_takes_default_when_posting(self):
+	def test_missing_account_is_not_filled_in_while_posting(self):
 		investment = make_submitted_investment(charges_account=None)
 		frappe.db.set_value("Investment", investment.name, "charges_account", None)
 		set_default_charges_account()
 
 		investment.reload()
 
+		self.assertRaises(frappe.ValidationError, investment.get_account, "charges_account")
+		self.assertFalse(frappe.db.get_value("Investment", investment.name, "charges_account"))
+
+	def test_empty_account_can_be_set_after_approval_but_not_changed(self):
+		investment = make_submitted_investment(charges_account=None)
+		frappe.db.set_value("Investment", investment.name, "charges_account", None)
+		investment.reload()
+
+		investment.charges_account = CHARGES_ACCOUNT
+		investment.save()
 		self.assertEqual(investment.get_account("charges_account"), CHARGES_ACCOUNT)
-		self.assertEqual(
-			frappe.db.get_value("Investment", investment.name, "charges_account"), CHARGES_ACCOUNT
+
+		investment.charges_account = frappe.db.get_value(
+			"Account", {"company": TEST_COMPANY, "is_group": 0, "name": ("!=", CHARGES_ACCOUNT)}, "name"
 		)
+		self.assertRaises(frappe.ValidationError, investment.save)
 
 
 def set_default_charges_account():

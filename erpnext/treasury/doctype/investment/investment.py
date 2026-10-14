@@ -338,21 +338,30 @@ class Investment(Document):
 		return self.get_account("unrealised_gain_loss_account")
 
 	def get_account(self, fieldname):
-		"""Account set on this investment, else the Investment Settings default (saved on the investment)."""
-		from erpnext.treasury.doctype.investment_settings.investment_settings import get_default_account
+		"""Account set on this investment. Defaults are filled in when it is saved, never while posting,
+		as reports find an investment's entries through its accounts."""
+		if account := self.get(fieldname):
+			return account
 
-		account = self.get(fieldname)
-		if not account and (account := get_default_account(self.company, fieldname)):
-			self.db_set(fieldname, account)
+		frappe.throw(
+			_(
+				"Please set {0} in Investment {1}. It can be set even after the investment is approved."
+			).format(frappe.bold(_(self.meta.get_label(fieldname))), frappe.bold(self.name))
+		)
 
-		if not account:
-			frappe.throw(
-				_("Please set {0} in Investment {1}").format(
-					frappe.bold(_(self.meta.get_label(fieldname))), frappe.bold(self.name)
+	def before_update_after_submit(self):
+		"""An empty account can be filled in after approval, but one in use cannot change,
+		as entries already posted to it would no longer be found."""
+		before = self.get_doc_before_save()
+		for fieldname in ACCOUNT_FIELDS:
+			if before.get(fieldname) and before.get(fieldname) != self.get(fieldname):
+				frappe.throw(
+					_("{0} cannot be changed once the investment is approved").format(
+						_(self.meta.get_label(fieldname))
+					)
 				)
-			)
 
-		return account
+		self.validate_company_links()
 
 
 def validate_company_links(doc, fieldnames, doctype="Account"):
