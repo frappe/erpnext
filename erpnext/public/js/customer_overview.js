@@ -452,6 +452,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	render_receivables() {
+		this.destroy_credit_chart();
 		this.$charts.empty().toggle(!!this.accounts && !this.ar?.none);
 		if (!this.accounts || this.ar?.none) return;
 		this.render_ageing();
@@ -537,7 +538,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 			{ label: __("Available"), value: Math.max(limit - used, 0), color: "var(--green-600)" },
 		].filter((s) => s.value > 0);
 		const $chart = $('<div class="co-chart">').appendTo($panel);
-		this.destroy_credit_chart();
 		this.credit_chart = new frappe.Chart($chart[0], {
 			type: "donut",
 			height: 320,
