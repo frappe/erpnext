@@ -108,9 +108,16 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(get_investment(investment.name).interest_schedule[1].estimated_interest, 1820)
 
 	def test_reference_period_matches_stepping_back_from_maturity(self):
-		for maturity_date, frequency in (("2031-01-31", "Monthly"), ("2030-08-31", "Quarterly"), ("2032-02-29", "Semi-Annual")):
+		for maturity_date, frequency in (
+			("2031-01-31", "Monthly"),
+			("2030-08-31", "Quarterly"),
+			("2032-02-29", "Semi-Annual"),
+		):
 			investment = frappe._dict(
-				name="_Test No Lots", instrument_class="Bond", coupon_frequency=frequency, maturity_date=maturity_date
+				name="_Test No Lots",
+				instrument_class="Bond",
+				coupon_frequency=frequency,
+				maturity_date=maturity_date,
 			)
 			calculator = InterestCalculator(investment)
 			date = getdate(add_months(maturity_date, -60))
@@ -125,6 +132,18 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 				)
 				self.assertEqual(calculator.get_reference_period(date), expected, date)
 				date = getdate(add_days(date, 1))
+
+	def test_submit_reads_accrued_date_with_a_lock(self):
+		investment = make_fd(FD_TERMS)
+		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).insert()
+
+		with patch.object(frappe.db, "get_value", wraps=frappe.db.get_value) as get_value:
+			accrual.submit()
+
+		self.assertIn(
+			((("Investment", investment.name, "accrued_upto"), {"for_update": True})),
+			[(call.args, call.kwargs) for call in get_value.call_args_list],
+		)
 
 	def test_accrual_posts_bank_figure_and_fills_schedule(self):
 		investment = make_fd(FD_TERMS)

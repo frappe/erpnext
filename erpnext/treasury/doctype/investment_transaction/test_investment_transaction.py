@@ -141,6 +141,47 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 			sale.submit()
 			self.assertTrue(any(call.kwargs.get("for_update") for call in get_values.call_args_list))
 
+	def test_cannot_cancel_sale_a_later_sale_was_costed_after(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
+		make_transaction(investment.name, "Purchase", units=100, rate=12).submit()
+		first_sale = make_transaction(investment.name, "Sale", units=50, rate=15).submit()
+		# 50 units at 10 + 50 units at 12, after the first sale took 50 at 10
+		second_sale = make_transaction(investment.name, "Sale", units=100, rate=15).submit()
+		self.assertEqual(second_sale.cost_of_units_sold, 1100)
+
+		self.assertRaises(frappe.ValidationError, first_sale.cancel)
+		second_sale.cancel()
+		first_sale.reload().cancel()
+
+	def test_cannot_submit_sale_dated_before_a_later_sale(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
+		make_transaction(
+			investment.name, "Sale", units=20, rate=15, posting_date=add_days(nowdate(), 5)
+		).submit()
+
+		backdated_sale = make_transaction(
+			investment.name, "Sale", units=20, rate=15, posting_date=add_days(nowdate(), 1)
+		)
+		self.assertRaises(frappe.ValidationError, backdated_sale.submit)
+
+	def test_submit_reads_interest_with_locks(self):
+		investment = make_submitted_investment()
+		make_transaction(investment.name, "Purchase", gross_amount=100000).submit()
+		make_interest_accrual(investment.name, nowdate(), nowdate(), 50).submit()
+		receipt = make_transaction(investment.name, "Interest Receipt", interest_amount=50).insert()
+
+		with patch.object(frappe.db, "get_value", wraps=frappe.db.get_value) as get_value:
+			receipt.submit()
+
+		investment_locks = [
+			call
+			for call in get_value.call_args_list
+			if call.args[0] == "Investment" and call.kwargs.get("for_update")
+		]
+		self.assertTrue(investment_locks)
+
 	def test_cannot_sell_more_units_than_held(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()

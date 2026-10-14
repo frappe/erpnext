@@ -10,7 +10,10 @@ from frappe.utils import cint, flt, getdate
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.treasury.doctype.investment_transaction.investment_transaction import get_units_held
+from erpnext.treasury.doctype.investment_transaction.investment_transaction import (
+	get_units_held,
+	lock_investment,
+)
 
 OPEN_STATUSES = ("Active", "Partially Redeemed")
 REVALUATION_INSTRUMENTS = ("Units", "Bond")
@@ -46,6 +49,7 @@ class InvestmentRevaluation(AccountsController):
 	def validate(self):
 		self.set_missing_values()
 		self.validate_duplicate_investments()
+		self.lock_investments()
 		for row in self.investments:
 			self.validate_row(row)
 			self.set_row_values(row)
@@ -75,13 +79,22 @@ class InvestmentRevaluation(AccountsController):
 
 		return self._investments[investment]
 
+	def lock_investments(self):
+		"""On submit, lock the investments so two revaluations submitted together cannot both
+		post the change from the same previous value. Sorted, so they always lock in the same order."""
+		if self.docstatus == 1:
+			for investment in sorted({row.investment for row in self.investments}):
+				lock_investment(investment)
+
 	def get_previous_row(self, investment):
 		"""Row of the investment's latest other submitted revaluation, fetched once."""
 		if not hasattr(self, "_previous_rows"):
 			self._previous_rows = {}
 
 		if investment not in self._previous_rows:
-			self._previous_rows[investment] = get_latest_revaluation_row(investment, self.name)
+			self._previous_rows[investment] = get_latest_revaluation_row(
+				investment, self.name, for_update=self.docstatus == 1
+			)
 
 		return self._previous_rows[investment]
 
@@ -294,7 +307,7 @@ def get_investments_to_value(company):
 	)
 
 
-def get_latest_revaluation_row(investment, exclude_revaluation=None):
+def get_latest_revaluation_row(investment, exclude_revaluation=None, for_update=False):
 	"""Row of the investment's latest submitted revaluation, optionally ignoring one revaluation."""
 	revaluation = frappe.qb.DocType("Investment Revaluation")
 	row = frappe.qb.DocType("Investment Revaluation Detail")
@@ -316,6 +329,9 @@ def get_latest_revaluation_row(investment, exclude_revaluation=None):
 	)
 	if exclude_revaluation:
 		query = query.where(revaluation.name != exclude_revaluation)
+
+	if for_update:
+		query = query.for_update()
 
 	result = query.run(as_dict=True)
 	return result[0] if result else None

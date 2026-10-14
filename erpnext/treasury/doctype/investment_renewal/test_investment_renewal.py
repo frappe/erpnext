@@ -55,6 +55,12 @@ class TestInvestmentRenewal(ERPNextTestSuite):
 		renewal = make_renewal(self.investment.name, principal_renewed=50000).insert()
 		self.assertRaises(frappe.ValidationError, renewal.submit)
 
+	def test_cannot_cancel_payment_a_renewal_reinvested(self):
+		maturity = make_transaction(self.investment.name, "Maturity", gross_amount=100000).submit()
+		make_renewal(self.investment.name, principal_renewed=60000).insert().submit()
+
+		self.assertRaises(frappe.ValidationError, maturity.cancel)
+
 	def test_submit_creates_draft_new_investment(self):
 		renewal = make_submitted_renewal(self.investment.name)
 		new_investment = frappe.get_doc("Investment", renewal.new_investment)

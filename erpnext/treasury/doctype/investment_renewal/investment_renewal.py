@@ -9,6 +9,7 @@ from frappe.utils import add_days, cstr, date_diff, flt, getdate
 from erpnext.treasury.doctype.investment_transaction.investment_transaction import (
 	EXIT_TYPES,
 	get_submitted_sum,
+	lock_investment,
 )
 from erpnext.treasury.interest import INTEREST_CLASSES
 
@@ -101,6 +102,8 @@ class InvestmentRenewal(Document):
 
 	def validate_available_proceeds(self):
 		"""Only money the original investment actually paid out (and not already renewed) can be renewed."""
+		# lock, and read the rows with locks, so two renewals submitted together cannot reuse the same money
+		lock_investment(self.original_investment)
 		for fieldname, transaction_types in (
 			("principal_renewed", EXIT_TYPES),
 			("interest_renewed", ("Interest Receipt",)),
@@ -123,6 +126,7 @@ class InvestmentRenewal(Document):
 			self.original_investment,
 			self.renewal_date,
 			transaction_types=transaction_types,
+			for_update=True,
 		)
 
 	def get_already_renewed(self, fieldname):
@@ -132,6 +136,7 @@ class InvestmentRenewal(Document):
 			self.original_investment,
 			exclude=self.name,
 			link_field="original_investment",
+			for_update=True,
 		)
 
 	def link_or_create_new_investment(self):

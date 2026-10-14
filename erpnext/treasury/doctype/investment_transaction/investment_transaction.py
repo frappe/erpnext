@@ -92,6 +92,7 @@ class InvestmentTransaction(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
+		self.lock_investment()
 		self.validate_investment()
 		set_conversion_rate(self)
 		self.validate_transaction_type()
@@ -122,6 +123,7 @@ class InvestmentTransaction(AccountsController):
 		self.validate_no_later_exits()
 		self.validate_after_accrued_interest()
 		self.validate_accrued_interest_not_received()
+		self.validate_proceeds_not_renewed()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -135,6 +137,14 @@ class InvestmentTransaction(AccountsController):
 			self._investment = frappe.get_doc("Investment", self.investment)
 
 		return self._investment
+
+	def lock_investment(self):
+		"""On submit, lock the investment so vouchers submitted together check against each other.
+
+		A draft save posts nothing, so it does not lock.
+		"""
+		if self.docstatus == 1:
+			self.get_investment().accrued_upto = lock_investment(self.investment, "accrued_upto")
 
 	def validate_investment(self):
 		if self.get_investment().docstatus != 1:
@@ -281,13 +291,9 @@ class InvestmentTransaction(AccountsController):
 			self.validate_balance("amount", _("Principal"), flt(self.gross_amount))
 
 	def validate_balance(self, purchase_field, label, required):
-		# lock the investment so two exits submitted together cannot both spend the same balance,
-		# and read with locks too, so the second exit sees the first one once it commits;
-		# a draft save posts nothing, so it does not lock
+		# on submit the investment is locked, and rows are read with locks too, so the second of two
+		# exits submitted together sees the first one once it commits
 		lock = self.docstatus == 1
-		if lock:
-			frappe.db.get_value("Investment", self.investment, "name", for_update=True)
-
 		# only what was bought by the posting date can leave, so an exit never takes a later purchase's cost
 		purchased = sum(
 			flt(p.get(purchase_field))
@@ -343,7 +349,9 @@ class InvestmentTransaction(AccountsController):
 		if self.transaction_type != "Interest Receipt":
 			return
 
-		available = get_unreceived_interest(self.investment, self.posting_date, self.name)
+		available = get_unreceived_interest(
+			self.investment, self.posting_date, self.name, for_update=self.docstatus == 1
+		)
 		if flt(self.interest_amount) > flt(available, self.precision("interest_amount")):
 			frappe.throw(
 				_(
@@ -356,6 +364,40 @@ class InvestmentTransaction(AccountsController):
 				),
 				title=_("Interest Not Accrued"),
 			)
+
+	def validate_proceeds_not_renewed(self):
+		"""Renewals reinvest money this investment paid out, so a payment they use cannot be taken back."""
+		if self.transaction_type in EXIT_TYPES:
+			fieldname, transaction_types = "principal_renewed", EXIT_TYPES
+		elif self.transaction_type == "Interest Receipt":
+			fieldname, transaction_types = "interest_renewed", ("Interest Receipt",)
+		else:
+			return
+
+		renewals = frappe.get_all(
+			"Investment Renewal",
+			filters={"original_investment": self.investment, "docstatus": 1, fieldname: (">", 0)},
+			fields=["name", "renewal_date", fieldname],
+			order_by="renewal_date asc, creation asc",
+		)
+		renewed = 0
+		for renewal in renewals:
+			# a renewal can only use money paid out by its date, as checked when it was submitted
+			renewed += flt(renewal.get(fieldname))
+			paid_out = get_submitted_sum(
+				self.doctype,
+				"net_amount",
+				self.investment,
+				renewal.renewal_date,
+				self.name,
+				transaction_types,
+			)
+			if renewed > flt(paid_out, self.precision("net_amount")):
+				frappe.throw(
+					_(
+						"Investment Renewal {0} reinvests money paid out by this transaction. Please cancel the renewal (and its new investment) first."
+					).format(frappe.get_desk_link("Investment Renewal", renewal.name))
+				)
 
 	def validate_accrued_interest_not_received(self):
 		"""Interest bought with a purchase that a receipt has already collected cannot be taken back."""
@@ -435,19 +477,12 @@ class InvestmentTransaction(AccountsController):
 			frappe.throw(_("Cannot cancel this purchase because it has already been sold or withdrawn"))
 
 	def validate_no_later_exits(self):
-		"""Exits are costed from the oldest units, so a purchase cannot change once exits on or after it exist."""
-		if not (self.instrument_class in UNIT_CLASSES and self.transaction_type in PURCHASE_TYPES):
+		"""Exits are costed from the oldest units left after the exits before them,
+		so a purchase or exit cannot change once later exits exist."""
+		if not self.is_unit_movement():
 			return
 
-		if frappe.db.exists(
-			"Investment Transaction",
-			{
-				"investment": self.investment,
-				"docstatus": 1,
-				"transaction_type": ("in", EXIT_TYPES),
-				"posting_date": (">=", self.posting_date),
-			},
-		):
+		if self.has_later_exits():
 			frappe.throw(
 				_(
 					"Investment {0} has exits on or after {1} that were costed without this change. Please cancel them first."
@@ -455,6 +490,29 @@ class InvestmentTransaction(AccountsController):
 					frappe.bold(self.investment), frappe.bold(frappe.format_value(self.posting_date, "Date"))
 				)
 			)
+
+	def has_later_exits(self):
+		transaction = frappe.qb.DocType(self.doctype)
+		if self.transaction_type in PURCHASE_TYPES:
+			# an exit on the purchase date may have taken this purchase's cost
+			later = transaction.posting_date >= self.posting_date
+		else:
+			# exits are costed in (posting date, creation) order, as in get_exit_transactions
+			later = (transaction.posting_date > self.posting_date) | (
+				(transaction.posting_date == self.posting_date) & (transaction.creation > self.creation)
+			)
+
+		return bool(
+			frappe.qb.from_(transaction)
+			.select(transaction.name)
+			.where(transaction.investment == self.investment)
+			.where(transaction.docstatus == 1)
+			.where(transaction.transaction_type.isin(EXIT_TYPES))
+			.where(transaction.name != self.name)
+			.where(later)
+			.limit(1)
+			.run()
+		)
 
 	def update_investment(self):
 		self.get_investment().update_position()
@@ -659,19 +717,29 @@ def set_conversion_rate(doc):
 		)
 
 
-def get_accrued_interest(investment, upto=None, exclude=None):
+def get_accrued_interest(investment, upto=None, exclude=None, for_update=False):
 	"""Interest accrued by Investment Interest Accruals, plus interest bought with bond purchases."""
-	accrued = get_submitted_sum("Investment Interest Accrual", "interest_amount", investment, upto, exclude)
+	accrued = get_submitted_sum(
+		"Investment Interest Accrual", "interest_amount", investment, upto, exclude, for_update=for_update
+	)
 	bought = get_submitted_sum(
-		"Investment Transaction", "accrued_interest_in_purchase", investment, upto, exclude, PURCHASE_TYPES
+		"Investment Transaction",
+		"accrued_interest_in_purchase",
+		investment,
+		upto,
+		exclude,
+		PURCHASE_TYPES,
+		for_update=for_update,
 	)
 
 	return accrued + bought
 
 
-def get_unreceived_interest(investment, upto=None, exclude_receipt=None):
+def get_unreceived_interest(investment, upto=None, exclude_receipt=None, for_update=False):
 	"""Interest accrued up to a date and not yet received."""
-	return get_accrued_interest(investment, upto) - get_interest_received(investment, exclude_receipt)
+	return get_accrued_interest(investment, upto, for_update=for_update) - get_interest_received(
+		investment, exclude_receipt, for_update=for_update
+	)
 
 
 def validate_interest_not_received(doc, message):
@@ -682,7 +750,7 @@ def validate_interest_not_received(doc, message):
 		frappe.throw(message.format(frappe.bold(doc.investment)))
 
 
-def get_interest_received(investment, exclude=None, upto=None):
+def get_interest_received(investment, exclude=None, upto=None, for_update=False):
 	return get_submitted_sum(
 		"Investment Transaction",
 		"interest_amount",
@@ -690,17 +758,27 @@ def get_interest_received(investment, exclude=None, upto=None):
 		upto,
 		exclude,
 		transaction_types=("Interest Receipt",),
+		for_update=for_update,
 	)
 
 
 def get_submitted_sum(
-	doctype, fieldname, investment, upto=None, exclude=None, transaction_types=None, link_field="investment"
+	doctype,
+	fieldname,
+	investment,
+	upto=None,
+	exclude=None,
+	transaction_types=None,
+	link_field="investment",
+	for_update=False,
 ):
-	"""Sum of a field over the submitted documents of an investment, optionally up to a posting date."""
+	"""Sum of a field over the submitted documents of an investment, optionally up to a posting date.
+
+	With `for_update`, the rows are locked, so the sum includes rows another submit committed meanwhile.
+	"""
 	table = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(table)
-		.select(Sum(table[fieldname]))
 		.where(table[link_field] == investment)
 		.where(table.docstatus == 1)
 		.where(table.name != (exclude or ""))
@@ -711,7 +789,16 @@ def get_submitted_sum(
 	if upto:
 		query = query.where(table.posting_date <= upto)
 
-	return flt(query.run()[0][0])
+	if for_update:
+		# PostgreSQL cannot lock rows inside SUM(), so the rows are locked and summed here
+		return sum(flt(value) for (value,) in query.select(table[fieldname]).for_update().run())
+
+	return flt(query.select(Sum(table[fieldname])).run()[0][0])
+
+
+def lock_investment(investment, fieldname="name"):
+	"""Lock the investment until commit; returns `fieldname` as last committed, not as first read."""
+	return frappe.db.get_value("Investment", investment, fieldname, for_update=True)
 
 
 def get_units_held(investment, upto=None):
