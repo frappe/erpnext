@@ -100,7 +100,7 @@ class ShareTransaction(TransactionAccounting, Document):
 			filters={"name": ["in", folios], "is_treasury": 0},
 			pluck="shareholder",
 		)
-		for shareholder in sorted(set(filter(None, shareholders))):
+		for shareholder in sorted({shareholder for shareholder in shareholders if shareholder}):
 			rebuild_current_holdings(shareholder)
 
 	def lock_shareholders(self):

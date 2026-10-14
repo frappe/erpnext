@@ -32,7 +32,7 @@ class ShareClass(Document):
 			if self.get(field) != previous.get(field):
 				frappe.throw(
 					_("{0} cannot be changed after shares have been posted.").format(
-						self.meta.get_label(field)
+						_(self.meta.get_label(field))
 					)
 				)
 
