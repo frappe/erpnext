@@ -4021,6 +4021,27 @@ class TestJobCard(ERPNextTestSuite):
 		next_transfer = make_stock_entry_from_jc(job_card.name)
 		self.assertEqual([(row.item_code, row.qty) for row in next_transfer.items], [(second_item, 30)])
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_corrective_job_card_after_process_loss(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		rework = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			skip_transfer=1,
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		job_card.append("time_logs", jc_review_log("2031-03-12 08:00:00", 60, 8))
+		job_card.save()
+		job_card.submit()
+		self.assertEqual(job_card.process_loss_qty, 2)
+
+		corrective = make_corrective_job_card(job_card.name, operation=rework, for_operation=operation)
+		corrective.insert()
+		self.assertEqual((corrective.process_loss_qty, corrective.pending_qty), (0, 0))
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

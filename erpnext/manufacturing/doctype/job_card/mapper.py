@@ -182,6 +182,8 @@ def make_corrective_job_card(
 		target.operation = operation
 		target.for_operation = for_operation
 		target.total_completed_qty = 0
+		target.process_loss_qty = 0
+		target.pending_qty = 0
 
 		target.set("time_logs", [])
 		target.set("employee", [])

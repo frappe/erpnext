@@ -274,7 +274,7 @@ class JobCard(Document):
 		return query.run()[0][0] or 0.0
 
 	def validate_job_card_qty(self):
-		if not (self.operation_id and self.work_order):
+		if self.is_corrective_job_card or not (self.operation_id and self.work_order):
 			return
 
 		wo_qty = self.get_allowed_wo_qty()
@@ -300,6 +300,7 @@ class JobCard(Document):
 				(job_card.work_order == self.work_order)
 				& (job_card.operation_id == self.operation_id)
 				& (job_card.docstatus != 2)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 			)
 			.run()
 		)
