@@ -26,9 +26,9 @@ frappe.ui.form.on("Bank Guarantee", {
 		});
 		frm.set_query("project", function () {
 			return {
+				query: "erpnext.controllers.queries.get_project_name",
 				filters: {
 					customer: frm.doc.customer,
-					status: ["=", "Open"],
 				},
 			};
 		});
