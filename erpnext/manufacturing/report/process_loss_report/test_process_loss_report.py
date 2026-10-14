@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, add_to_date, now_datetime, nowdate
 
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
@@ -82,9 +82,12 @@ class TestProcessLossReport(ERPNextTestSuite):
 		job_card_tests = TestJobCard()
 		wo_order = job_card_tests.make_semi_fg_work_order("_Test PLR")
 		job_card = job_card_tests.get_semi_fg_job_card(wo_order, "_Test PLR Op A")
+		# Op B is scheduled on the same workstation after the work order starts.
+		# Log Op A before that start so the test does not depend on the time of day.
+		from_time = add_to_date(now_datetime(), hours=-2)
 		job_card.append(
 			"time_logs",
-			{"from_time": f"{nowdate()} 08:00:00", "to_time": f"{nowdate()} 09:00:00", "completed_qty": 3},
+			{"from_time": from_time, "to_time": add_to_date(from_time, hours=1), "completed_qty": 3},
 		)
 		job_card.pending_qty = 0
 		job_card.process_loss_qty = 2
