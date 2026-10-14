@@ -561,7 +561,10 @@ class InvestmentTransaction(AccountsController):
 		elif self.transaction_type == "Interest Receipt":
 			account = investment.get_account("accrued_interest_account")
 			amount = flt(self.interest_amount)
-			held = get_unreceived_interest(self.investment, self.posting_date, self.name)
+			# receipts dated later are left out, as the ledger balance below is also up to this date
+			held = get_accrued_interest(self.investment, self.posting_date) - get_interest_received(
+				self.investment, self.name, self.posting_date
+			)
 		else:
 			return None
 
@@ -665,12 +668,13 @@ def validate_interest_not_received(doc, message):
 		frappe.throw(message.format(frappe.bold(doc.investment)))
 
 
-def get_interest_received(investment, exclude=None):
+def get_interest_received(investment, exclude=None, upto=None):
 	return get_submitted_sum(
 		"Investment Transaction",
 		"interest_amount",
 		investment,
-		exclude=exclude,
+		upto,
+		exclude,
 		transaction_types=("Interest Receipt",),
 	)
 

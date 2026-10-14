@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests import freeze_time
-from frappe.utils import getdate, nowdate
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.treasury.doctype.investment.test_investment import (
@@ -370,6 +370,25 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		self.assertEqual(
 			get_gl_entries(receipt.name),
 			{BANK_ACCOUNT: (4200, 0), "Earnest Money - _TC": (0, 4100), get_exchange_account(): (0, 100)},
+		)
+		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
+
+	def test_backdated_interest_receipt_settles_its_share(self):
+		investment = make_usd_investment()
+		make_usd_transaction(investment.name, "Purchase", 82, gross_amount=1000).submit()
+		make_usd_accrual(investment.name, 50, 82)
+		make_usd_transaction(
+			investment.name, "Interest Receipt", 84, interest_amount=30, posting_date=add_days(nowdate(), 10)
+		).submit()
+
+		# dated before the receipt above, so it settles 20 of the 50 held then: 4,100 * 20 / 50
+		receipt = make_usd_transaction(
+			investment.name, "Interest Receipt", 84, interest_amount=20, posting_date=add_days(nowdate(), 5)
+		).submit()
+
+		self.assertEqual(
+			get_gl_entries(receipt.name),
+			{BANK_ACCOUNT: (1680, 0), "Earnest Money - _TC": (0, 1640), get_exchange_account(): (0, 40)},
 		)
 		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
 
