@@ -132,6 +132,20 @@ class TestStockBalance(FrappeTestCase):
 			{plant_a: (5, 500), plant_b: (3, 300)},
 		)
 
+	def test_reconciliation_sets_the_balance(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=100)])
+		create_stock_reconciliation(
+			item_code=self.item.name, warehouse="_Test Warehouse - _TC", qty=8, rate=100
+		)
+
+		rows = stock_balance(self.filters)
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in rows], [(8, 800)])
+		self.assertInvariants(rows)
+
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
 			self.item.name,
