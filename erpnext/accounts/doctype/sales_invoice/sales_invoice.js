@@ -14,6 +14,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	erpnext.selling.SellingController
 ) {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 		this.frm.make_methods = {
@@ -583,7 +584,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "discount_account"]);
+		const field_copy = ["income_account", "discount_account", "cost_center"];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
+		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 	}
 
 	set_dynamic_labels() {
