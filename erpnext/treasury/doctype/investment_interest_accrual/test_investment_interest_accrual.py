@@ -304,6 +304,43 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(maturity.realised_gain_loss, 0)
 		self.assertEqual(get_investment(investment.name).total_cost, 0)
 
+	def test_bond_sale_clears_the_accrued_interest_the_buyer_pays(self):
+		investment = make_submitted_investment(**BOND_TERMS)
+		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 2000).submit()
+
+		# 1210 a bond: about 1000 clean price + 200 accrued interest + 10 gain
+		sale = make_transaction(
+			investment.name,
+			"Sale",
+			posting_date="2026-04-01",
+			units=10,
+			rate=1210,
+			accrued_interest_in_sale=2000,
+		).submit()
+
+		# the interest is not gain: 12100 - 2000 - book value
+		self.assertEqual(sale.realised_gain_loss, flt(12100 - 2000 - sale.cost_of_units_sold, 2))
+		entries = get_gl_entries(sale.name)
+		self.assertEqual(entries["Earnest Money - _TC"], (0, 2000))
+		self.assertEqual(entries["Gain/Loss on Asset Disposal - _TC"], (0, sale.realised_gain_loss))
+		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
+
+	def test_bond_sale_cannot_collect_more_interest_than_accrued(self):
+		investment = make_submitted_investment(**BOND_TERMS)
+		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 2000).submit()
+
+		sale = make_transaction(
+			investment.name,
+			"Sale",
+			posting_date="2026-04-01",
+			units=10,
+			rate=1250,
+			accrued_interest_in_sale=2500,
+		)
+		self.assertRaises(frappe.ValidationError, sale.insert)
+
 	def test_30_360_day_count(self):
 		# every month counts as 30 days, and the 31st is treated as the 30th
 		self.assertEqual(get_days_30_360(getdate("2026-02-01"), getdate("2026-03-01")), 30)

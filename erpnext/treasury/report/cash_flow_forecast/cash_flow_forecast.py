@@ -11,7 +11,7 @@ from frappe.utils import add_days, cint, flt, formatdate, getdate
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.treasury.dashboard import HELD_STATUSES, get_month_ends
-from erpnext.treasury.doctype.investment_transaction.investment_transaction import PURCHASE_TYPES
+from erpnext.treasury.doctype.investment_transaction.investment_transaction import EXIT_TYPES, PURCHASE_TYPES
 from erpnext.treasury.report.bank_and_cash_balances.bank_and_cash_balances import get_cash_balances
 from erpnext.treasury.report.utils import get_currency_column, parse_filters
 
@@ -155,13 +155,22 @@ def get_interest_received(investments):
 	if not investments:
 		return {}
 
+	# accrued interest also comes in from buyers, with bond sales
 	receipts = frappe.get_all(
 		"Investment Transaction",
-		filters={"investment": ("in", investments), "docstatus": 1, "transaction_type": "Interest Receipt"},
-		fields=["investment", {"SUM": "interest_amount", "as": "received"}],
+		filters={
+			"investment": ("in", investments),
+			"docstatus": 1,
+			"transaction_type": ("in", ("Interest Receipt", *EXIT_TYPES)),
+		},
+		fields=[
+			"investment",
+			{"SUM": "interest_amount", "as": "received"},
+			{"SUM": "accrued_interest_in_sale", "as": "sold"},
+		],
 		group_by="investment",
 	)
-	return {receipt.investment: flt(receipt.received) for receipt in receipts}
+	return {receipt.investment: flt(receipt.received) + flt(receipt.sold) for receipt in receipts}
 
 
 def add_bought_interest(periods, investments):

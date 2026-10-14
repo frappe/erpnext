@@ -29,6 +29,7 @@
   "net_amount",
   "bond_section",
   "accrued_interest_in_purchase",
+  "accrued_interest_in_sale",
   "exit_section",
   "penalty_applied",
   "cost_of_units_sold",
@@ -215,6 +216,14 @@
    "options": "currency"
   },
   {
+   "depends_on": "eval:in_list(['Sale', 'Redemption'], doc.transaction_type)",
+   "description": "Interest accrued since the last coupon that the buyer pays you with the price. It is included in Gross Amount, and is not part of the gain or loss.",
+   "fieldname": "accrued_interest_in_sale",
+   "fieldtype": "Currency",
+   "label": "Accrued Interest in Sale",
+   "options": "currency"
+  },
+  {
    "depends_on": "eval:in_list(['Sale', 'Redemption', 'Withdrawal', 'Maturity'], doc.transaction_type)",
    "fieldname": "exit_section",
    "fieldtype": "Section Break",
@@ -324,7 +333,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-13 12:00:00.000000",
+ "modified": "2026-10-14 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Transaction",

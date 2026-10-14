@@ -30,6 +30,7 @@ AMOUNT_FIELDS = (
 	"tax_withheld",
 	"interest_amount",
 	"accrued_interest_in_purchase",
+	"accrued_interest_in_sale",
 	"penalty_applied",
 )
 
@@ -54,6 +55,7 @@ class InvestmentTransaction(AccountsController):
 		from frappe.types import DF
 
 		accrued_interest_in_purchase: DF.Currency
+		accrued_interest_in_sale: DF.Currency
 		amended_from: DF.Link | None
 		cash_account: DF.Link | None
 		charges: DF.Currency
@@ -106,6 +108,7 @@ class InvestmentTransaction(AccountsController):
 		self.validate_available_balance()
 		self.validate_after_accrued_interest()
 		self.validate_interest_accrued()
+		self.validate_accrued_interest_in_sale()
 
 	def before_submit(self):
 		self.validate_no_later_exits()
@@ -205,6 +208,12 @@ class InvestmentTransaction(AccountsController):
 		if self.transaction_type != "Purchase":
 			self.accrued_interest_in_purchase = 0
 
+		if not (self.instrument_class == "Bond" and self.transaction_type in ("Sale", "Redemption")):
+			self.accrued_interest_in_sale = 0
+
+		if self.transaction_type != "Interest Receipt":
+			self.interest_amount = 0
+
 		if not (self.instrument_class == "Deposit" and self.transaction_type == "Withdrawal"):
 			self.penalty_applied = 0
 
@@ -224,6 +233,9 @@ class InvestmentTransaction(AccountsController):
 
 		if flt(self.accrued_interest_in_purchase) > flt(self.gross_amount):
 			frappe.throw(_("Accrued Interest in Purchase cannot be more than Gross Amount"))
+
+		if flt(self.accrued_interest_in_sale) > flt(self.gross_amount):
+			frappe.throw(_("Accrued Interest in Sale cannot be more than Gross Amount"))
 
 	def set_net_amount(self):
 		self.net_amount = flt(self.get_net_amount(), self.precision("net_amount"))
@@ -401,6 +413,26 @@ class InvestmentTransaction(AccountsController):
 					).format(frappe.get_desk_link("Investment Renewal", renewal.name))
 				)
 
+	def validate_accrued_interest_in_sale(self):
+		"""The buyer pays interest the books already accrued, so a sale cannot collect more than that."""
+		if not flt(self.accrued_interest_in_sale):
+			return
+
+		available = get_unreceived_interest(
+			self.investment, self.posting_date, self.name, for_update=self.docstatus == 1
+		)
+		if flt(self.accrued_interest_in_sale) > flt(available, self.precision("accrued_interest_in_sale")):
+			frappe.throw(
+				_(
+					"Accrued Interest in Sale {0} is more than the {1} accrued and not yet received for Investment {2}. Please make an Investment Interest Accrual first."
+				).format(
+					frappe.bold(frappe.format_value(self.accrued_interest_in_sale, currency=self.currency)),
+					frappe.bold(frappe.format_value(max(available, 0), currency=self.currency)),
+					frappe.bold(self.investment),
+				),
+				title=_("Interest Not Accrued"),
+			)
+
 	def validate_accrued_interest_not_received(self):
 		"""Interest bought with a purchase that a receipt has already collected cannot be taken back."""
 		if flt(self.accrued_interest_in_purchase):
@@ -457,8 +489,10 @@ class InvestmentTransaction(AccountsController):
 			cost = self.get_investment().get_book_value_in_investment_currency(exclude=self.name)
 
 		self.cost_of_units_sold = flt(cost, self.precision("cost_of_units_sold"))
+		# accrued interest the buyer paid with the price is interest, not gain
 		self.realised_gain_loss = flt(
-			flt(self.gross_amount) - self.cost_of_units_sold, self.precision("realised_gain_loss")
+			flt(self.gross_amount) - flt(self.accrued_interest_in_sale) - self.cost_of_units_sold,
+			self.precision("realised_gain_loss"),
 		)
 
 	def sells_last_units(self, units_already_sold):
@@ -566,20 +600,22 @@ class InvestmentTransaction(AccountsController):
 			"Charges": self.get_charges_gl_entries,
 		}
 		builder = builders.get(self.transaction_type, self.get_exit_gl_entries)
-		settled = self.get_settled_book_value()
+		settlements = self.get_settlements()
 
 		gl_entries = []
 		for account, debit, credit in builder():
 			if not (debit or credit):
 				continue
 
-			if settled and account == settled.account and credit:
-				gl_entries.append(get_gl_entry(self, account, debit, credit, base_credit=settled.base_credit))
+			if credit and account in settlements:
+				gl_entries.append(
+					get_gl_entry(self, account, debit, credit, base_credit=settlements[account])
+				)
 			else:
 				gl_entries.append(get_gl_entry(self, account, debit, credit))
 
 		gl_entries += self.get_fair_value_release_entries()
-		if settled:
+		if settlements:
 			gl_entries += self.get_exchange_gain_loss_entries(gl_entries)
 
 		return gl_entries
@@ -660,6 +696,11 @@ class InvestmentTransaction(AccountsController):
 			*self.get_charges_and_tax_entries(),
 		]
 
+		if flt(self.accrued_interest_in_sale):
+			entries.append(
+				(self.get_investment_account("accrued_interest_account"), 0, self.accrued_interest_in_sale)
+			)
+
 		if flt(self.realised_gain_loss):
 			gain_loss_account = self.get_investment_account("realised_gain_loss_account")
 			entries.append(
@@ -685,35 +726,37 @@ class InvestmentTransaction(AccountsController):
 	def get_investment_account(self, fieldname):
 		return self.get_investment().get_account(fieldname)
 
-	def get_settled_book_value(self):
-		"""Value an exit or receipt settles at its booked rates, so a rate change shows as exchange gain."""
+	def get_settlements(self):
+		"""Company currency value each settled account leaves at, at its booked rates, so a rate change
+		shows as exchange gain."""
 		if self.currency == erpnext.get_company_currency(self.company):
-			return None
+			return {}
 
 		investment = self.get_investment()
+		settled = []
 		if self.transaction_type in EXIT_TYPES:
-			account = investment.get_account("investment_account")
-			amount = flt(self.cost_of_units_sold)
 			held = investment.get_book_value_in_investment_currency(self.posting_date, self.name)
-		elif self.transaction_type == "Interest Receipt":
-			account = investment.get_account("accrued_interest_account")
-			amount = flt(self.interest_amount)
-			# receipts dated later are left out, as the ledger balance below is also up to this date
+			settled.append((investment.get_account("investment_account"), flt(self.cost_of_units_sold), held))
+
+		interest = flt(self.interest_amount) + flt(self.accrued_interest_in_sale)
+		if interest:
+			# collections dated later are left out, as the ledger balance below is also up to this date
 			held = get_accrued_interest(self.investment, self.posting_date) - get_interest_received(
 				self.investment, self.name, self.posting_date
 			)
-		else:
-			return None
+			settled.append((investment.get_account("accrued_interest_account"), interest, held))
 
-		held = flt(held, self.precision("net_amount"))
-		if held <= 0:
-			return None
+		settlements = {}
+		for account, amount, held in settled:
+			held = flt(held, self.precision("net_amount"))
+			if held <= 0:
+				continue
 
-		# everything still held leaves at its full book value, so the account ends at exactly zero
-		base_held = investment.get_ledger_balance(account, self.posting_date)
-		base_credit = base_held if amount >= held else base_held * amount / held
+			# everything still held leaves at its full book value, so the account ends at exactly zero
+			base_held = investment.get_ledger_balance(account, self.posting_date)
+			settlements[account] = base_held if amount >= held else base_held * amount / held
 
-		return frappe._dict(account=account, base_credit=base_credit)
+		return settlements
 
 	def get_exchange_gain_loss_entries(self, gl_entries):
 		"""Cash moves at today's rate, the settled amount at its booked rate; the gap is exchange gain/loss."""
@@ -819,7 +862,8 @@ def validate_interest_not_received(doc, message):
 
 
 def get_interest_received(investment, exclude=None, upto=None, for_update=False):
-	return get_submitted_sum(
+	"""Accrued interest collected: by interest receipts, and from buyers with bond sales."""
+	received = get_submitted_sum(
 		"Investment Transaction",
 		"interest_amount",
 		investment,
@@ -828,6 +872,16 @@ def get_interest_received(investment, exclude=None, upto=None, for_update=False)
 		transaction_types=("Interest Receipt",),
 		for_update=for_update,
 	)
+	sold = get_submitted_sum(
+		"Investment Transaction",
+		"accrued_interest_in_sale",
+		investment,
+		upto,
+		exclude,
+		transaction_types=EXIT_TYPES,
+		for_update=for_update,
+	)
+	return received + sold
 
 
 def get_submitted_sum(
