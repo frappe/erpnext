@@ -212,6 +212,8 @@ class BOMCreator(Document):
 						"stock_uom": row.stock_uom,
 						"conversion_factor": row.conversion_factor,
 						"sourced_by_supplier": row.sourced_by_supplier,
+						"set_rate_based_on_warehouse": self.set_rate_based_on_warehouse,
+						"warehouse": self.default_warehouse,
 					},
 					self,
 				)
@@ -412,6 +414,9 @@ class BOMCreator(Document):
 		for field in BOM_FIELDS:
 			if self.get(field):
 				bom.set(field, self.get(field))
+
+		if self.set_rate_based_on_warehouse and self.default_warehouse:
+			bom.default_source_warehouse = self.default_warehouse
 
 		for item in production_item_wise_rm[(row.item_code, row.name)]["items"]:
 			bom_no = "" if item.do_not_explode else item.bom_no

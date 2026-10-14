@@ -541,6 +541,29 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual([row.item_code for row in result.items], ["Seat"])
 		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "raw_material_cost"), seat.amount)
 
+	def test_rate_is_taken_from_the_default_warehouse(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		make_item("Fat Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		rm_item = make_item("_Test BOM Creator Warehouse RM", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=rm_item, target="Finished Goods - _TC", qty=10, basic_rate=300)
+
+		doc = make_bom_creator(
+			name="Fat Bike BOM Warehouse",
+			company="_Test Company",
+			item_code="Fat Bike",
+			qty=1,
+			currency="INR",
+			rm_cost_as_per="Valuation Rate",
+			set_rate_based_on_warehouse=1,
+			default_warehouse="Stores - _TC",
+		)
+		doc.add_item(fg_item="Fat Bike", fg_reference_id=doc.name, item_code=rm_item, qty=1)
+		doc.reload()
+
+		self.assertEqual(doc.items[0].rate, 100)
+
 
 def create_items():
 	raw_materials = [
