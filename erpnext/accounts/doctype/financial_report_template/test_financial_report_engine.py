@@ -13,6 +13,8 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_engine 
 	FinancialReportEngine,
 	FormulaCalculator,
 	GrowthViewTransformer,
+	ReportContext,
+	RowProcessor,
 	get_total_keys,
 )
 from erpnext.accounts.doctype.financial_report_template.test_financial_report_template import (
@@ -2588,6 +2590,52 @@ class TestGroupByDimension(FinancialReportTemplateTestCase):
 		periods = [frappe._dict(key="h1"), frappe._dict(key="h2")]
 		self.assertEqual(get_total_keys(periods, "Closing Balance", 0), ["h1", "h2"])
 		self.assertEqual(get_total_keys(periods, "Closing Balance", None), [])
+
+	def test_row_totals(self):
+		movement = "Period Movement (Debits - Credits)"
+		template = self.create_test_template_with_rows(
+			[
+				{"reference_code": "REV", "data_source": "Account Data", "balance_type": movement},
+				{"reference_code": "COST", "data_source": "Account Data", "balance_type": movement},
+				{
+					"reference_code": "PROFIT",
+					"data_source": "Calculated Amount",
+					"calculation_formula": "REV - COST",
+				},
+				{
+					"reference_code": "MARGIN",
+					"data_source": "Calculated Amount",
+					"calculation_formula": "PROFIT / REV * 100",
+					"fieldtype": "Percent",
+				},
+				{
+					"reference_code": "SHARE",
+					"data_source": "Account Data",
+					"balance_type": movement,
+					"fieldtype": "Percent",
+				},
+			]
+		)
+
+		# columns: north_h1, north_h2, south_h1, south_h2
+		summary = {
+			"REV": [1000, 3000, 4000, 2000],
+			"COST": [800, 2100, 2000, 1100],
+			"SHARE": [10, 20, 30, 40],
+		}
+		context = ReportContext(
+			template=template,
+			filters=frappe._dict(),
+			period_list=self.get_periods(),
+			raw_data={"summary": summary},
+		)
+
+		rows = RowProcessor(context).process_all_rows()
+		totals = {row_data.row.reference_code: row_data.total for row_data in rows}
+
+		# formula rows run on the totals: margin is 4,000 / 10,000, not the sum of the column margins
+		# percent rows are averaged, not summed
+		self.assertEqual(totals, {"REV": 10000, "COST": 6000, "PROFIT": 4000, "MARGIN": 40, "SHARE": 25})
 
 	def test_growth_view_restarts_per_dimension(self):
 		row = {"north_h1": 100, "north_h2": 150, "south_h1": 200, "south_h2": 100}

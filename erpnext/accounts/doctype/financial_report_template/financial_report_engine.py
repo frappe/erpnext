@@ -1306,11 +1306,14 @@ class RowProcessor:
 				self.context.filters.get("accumulated_values"),
 			)
 
-			row_data.total = sum(
+			total = sum(
 				flt(value)
 				for period, value in zip(self.period_list, row_data.values, strict=False)
 				if period["key"] in keys
 			)
+
+			# avg for percent
+			row_data.total = total / len(keys) if row.fieldtype == "Percent" else total
 
 		if row.reference_code:
 			self.row_totals[row.reference_code] = row_data.total
@@ -1513,6 +1516,7 @@ class DataFormatter:
 			self.context.period_list,
 			self.context.filters.get("accumulated_values") in (1, None),
 			self.context.filters.get("company"),
+			selected_view=self.context.filters.get("selected_view"),
 		)
 
 		return self.formatter.get_columns(self.organizer.section_with_max_segments.segments, base_columns)
