@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 
 Filters = frappe._dict
@@ -30,12 +31,13 @@ def get_data(filters: Filters) -> Data:
 		.inner_join(se)
 		.on(wo.name == se.work_order)
 		.left_join(finished_items)
-		.on((finished_items.stock_entry == se.name) & (finished_items.item_code == wo.production_item))
+		.on(finished_items.stock_entry == se.name)
 		.select(
 			wo.name,
 			wo.status,
 			wo.production_item,
 			Coalesce(Sum(finished_items.produced_qty), 0).as_("produced_qty"),
+			Coalesce(Sum(finished_items.output_qty), 0).as_("output_qty"),
 			Sum(se.process_loss_qty).as_("process_loss_qty"),
 			wo.qty.as_("qty_to_manufacture"),
 			Sum(se.total_incoming_value).as_("total_fg_value"),
@@ -60,15 +62,23 @@ def get_data(filters: Filters) -> Data:
 
 
 def get_finished_items(filters: Filters):
+	wo = frappe.qb.DocType("Work Order")
 	se = frappe.qb.DocType("Stock Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	production_item_qty = Case().when(sed.item_code == wo.production_item, sed.transfer_qty).else_(0)
 	return (
 		frappe.qb.from_(sed)
 		.inner_join(se)
 		.on(sed.parent == se.name)
-		.select(sed.parent.as_("stock_entry"), sed.item_code, Sum(sed.transfer_qty).as_("produced_qty"))
+		.inner_join(wo)
+		.on(se.work_order == wo.name)
+		.select(
+			sed.parent.as_("stock_entry"),
+			Sum(production_item_qty).as_("produced_qty"),
+			Sum(sed.transfer_qty).as_("output_qty"),
+		)
 		.where((sed.is_finished_item == 1) & get_stock_entry_conditions(se, filters))
-		.groupby(sed.parent, sed.item_code)
+		.groupby(sed.parent)
 	).as_("finished_items")
 
 
@@ -139,5 +149,5 @@ def get_columns() -> Columns:
 
 def update_data_with_total_pl_value(data: Data) -> None:
 	for row in data:
-		processed_qty = row["produced_qty"] + row["process_loss_qty"]
+		processed_qty = row["output_qty"] + row["process_loss_qty"]
 		row["total_pl_value"] = row["process_loss_qty"] * row["total_fg_value"] / processed_qty
