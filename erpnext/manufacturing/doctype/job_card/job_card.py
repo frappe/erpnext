@@ -1776,6 +1776,7 @@ class JobCard(Document):
 
 	def add_time_logs_for_employess(self, kwargs):
 		update_status = False
+		kwargs.employees = kwargs.employees or [frappe._dict(employee=None)]
 
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
