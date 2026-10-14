@@ -64,6 +64,17 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 			{"Short-term Investments - _TC": (100000, 0), BANK_ACCOUNT: (0, 100000)},
 		)
 
+	def test_opening_ignores_hidden_bought_interest(self):
+		investment = make_submitted_investment()
+		opening = make_transaction(
+			investment.name, "Opening", gross_amount=100000, accrued_interest_in_purchase=2000
+		).submit()
+
+		self.assertEqual(opening.accrued_interest_in_purchase, 0)
+		# no interest was accrued, so nothing can be received
+		receipt = make_transaction(investment.name, "Interest Receipt", interest_amount=2000)
+		self.assertRaises(frappe.ValidationError, receipt.insert)
+
 	def test_purchase_above_approved_amount_is_blocked(self):
 		investment = make_submitted_investment(approved_amount=100000)
 		make_transaction(investment.name, "Purchase", gross_amount=60000).submit()

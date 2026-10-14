@@ -183,12 +183,15 @@ class InvestmentTransaction(AccountsController):
 		if self.is_unit_movement():
 			self.gross_amount = flt(flt(self.units) * flt(self.rate), self.precision("gross_amount"))
 
-		self.clear_hidden_deductions()
+		self.clear_hidden_amounts()
 
-	def clear_hidden_deductions(self):
+	def clear_hidden_amounts(self):
 		"""The form hides these for other types but keeps their value, which would still be posted."""
 		if self.transaction_type not in (*EXIT_TYPES, *INCOME_TYPES):
 			self.tax_withheld = 0
+
+		if self.transaction_type != "Purchase":
+			self.accrued_interest_in_purchase = 0
 
 		if not (self.instrument_class == "Deposit" and self.transaction_type == "Withdrawal"):
 			self.penalty_applied = 0
