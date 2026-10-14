@@ -275,6 +275,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			fields.extend(["received_qty"])
 
 	already_returned_data = already_returned_items.get(key) or {}
+	returns_nothing = not (flt(args.get("qty")) or flt(args.get("rejected_qty")))
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	field_precision = get_field_precision(
@@ -317,7 +318,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if reference_qty:
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and flt(current_stock_qty) >= 0:
+			elif returned_qty >= reference_qty and returns_nothing:
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
