@@ -44,7 +44,7 @@ def get_data(filters):
 		if filters.get(field):
 			query_filters[field] = filters.get(field)
 
-	data = frappe.get_all("Job Card", fields=fields, filters=query_filters)
+	data = frappe.get_list("Job Card", fields=fields, filters=query_filters, limit_page_length=0)
 
 	if not data:
 		return []
@@ -67,9 +67,6 @@ def get_data(filters):
 
 	res = []
 	for d in data:
-		if d.status != "Completed":
-			d.status = "Open"
-
 		if job_card_time_details.get(d.name):
 			d.from_time = job_card_time_details.get(d.name).from_time
 			d.to_time = job_card_time_details.get(d.name).to_time
@@ -109,15 +106,14 @@ def prepare_chart_data(job_card_details, filters):
 		period = get_period(end_date, filters)
 		if period not in labels:
 			labels.append(period)
+			for status in periodic_data:
+				periodic_data[status][period] = 0
 
 		for d in job_card_details:
-			if getdate(d.posting_date) > from_date and getdate(d.posting_date) <= end_date:
+			if from_date <= getdate(d.posting_date) <= end_date:
 				status = "Completed" if d.status == "Completed" else "Open"
 
-				if periodic_data.get(status).get(period):
-					periodic_data[status][period] += 1
-				else:
-					periodic_data[status][period] = 1
+				periodic_data[status][period] += 1
 
 	return labels, periodic_data
 
