@@ -82,7 +82,10 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("project", function () {
 			return {
-				filters: [["Project", "status", "not in", "Completed, Cancelled"]],
+				query: "erpnext.controllers.queries.get_project_name",
+				filters: {
+					company: frm.doc.company,
+				},
 			};
 		});
 
@@ -107,7 +110,6 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
-		frm.events.set_company_filters(frm, "project");
 		frm.events.set_company_filters(frm, "default_source_warehouse");
 		frm.events.set_company_filters(frm, "default_target_warehouse");
 

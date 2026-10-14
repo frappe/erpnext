@@ -28,6 +28,7 @@ frappe.ui.form.on("Bank Guarantee", {
 			return {
 				filters: {
 					customer: frm.doc.customer,
+					status: ["=", "Open"],
 				},
 			};
 		});
