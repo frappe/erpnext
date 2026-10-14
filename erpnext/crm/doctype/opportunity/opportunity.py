@@ -451,7 +451,8 @@ class Opportunity(TransactionBase, CRMNote):
 
 		party_meta = frappe.get_meta(self.opportunity_from)
 		for fieldname in PARTY_DERIVED_FIELDS:
-			if party_meta.has_field(fieldname) and self.get(fieldname) == previous.get(fieldname):
+			previous_party_value = get_party_field_value(previous, fieldname)
+			if party_meta.has_field(fieldname) and self.get(fieldname) == previous_party_value:
 				self.set(fieldname, frappe.db.get_value(self.opportunity_from, self.party_name, fieldname))
 
 	def has_party_changed(self) -> bool:
@@ -502,6 +503,14 @@ def get_party_prospect(opportunity_from: str, party_name: str | None) -> str | N
 		return party_name
 	if opportunity_from == "Lead":
 		return frappe.db.get_value("Prospect Lead", {"lead": party_name}, "parent")
+
+
+def get_party_field_value(opportunity: "Opportunity", fieldname: str) -> str | None:
+	"""Return the value the opportunity's party supplies for `fieldname`, if the party has that field."""
+	if not opportunity.party_name or not frappe.get_meta(opportunity.opportunity_from).has_field(fieldname):
+		return None
+
+	return frappe.db.get_value(opportunity.opportunity_from, opportunity.party_name, fieldname)
 
 
 @frappe.whitelist()
