@@ -2055,13 +2055,14 @@ def validate_job_card_submitted_for_manufacture(job_card):
 		)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_time_log(kwargs: str | dict):
 	kwargs = frappe.parse_json(kwargs)
 
 	kwargs = frappe._dict(kwargs)
 	doc = frappe.get_doc("Job Card", kwargs.job_card_id)
 	frappe.has_permission("Job Card", "write", doc=doc, throw=True)
+	doc.validate_docstatus()
 	doc.validate_sequence_id()
 	doc.add_time_log(kwargs)
 	doc.set_status(update_status=True)

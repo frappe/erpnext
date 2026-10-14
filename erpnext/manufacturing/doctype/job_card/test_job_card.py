@@ -3908,6 +3908,31 @@ class TestJobCard(ERPNextTestSuite):
 			)
 			self.assertEqual([(row.docstatus, row.status) for row in job_cards], [(2, "Cancelled")])
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_make_time_log_refuses_submitted_job_card(self):
+		from erpnext.manufacturing.doctype.job_card.job_card import make_time_log
+
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			skip_transfer=1,
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		job_card.append("time_logs", jc_review_log("2031-03-09 08:00:00", 60, 10))
+		job_card.submit()
+		time_logs = frappe.db.count("Job Card Time Log", {"parent": job_card.name})
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Submitted Job Card cannot be processed",
+			make_time_log,
+			{"job_card_id": job_card.name, "start_time": "2031-03-09 10:00:00"},
+		)
+		self.assertEqual(frappe.db.count("Job Card Time Log", {"parent": job_card.name}), time_logs)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
