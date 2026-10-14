@@ -286,12 +286,15 @@ def fulfilment_dates(supplier, company, ordered):
 
 	dates = {}
 	for line, by_day in receipts.items():
-		received = 0
+		received, fulfilled = 0, None
 		for posted in sorted(by_day):
 			received += by_day[posted]
-			if received >= ordered[line]:
-				dates[line] = posted
-				break
+			if received < ordered[line]:
+				fulfilled = None
+			elif not fulfilled:
+				fulfilled = posted
+		if fulfilled:
+			dates[line] = fulfilled
 	return dates
 
 

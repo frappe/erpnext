@@ -12,6 +12,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.buying.doctype.supplier import supplier_overview
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.item_close import update_closed_status
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
@@ -142,6 +143,33 @@ class TestSupplierOverview(ERPNextTestSuite):
 		as_of = getdate(today())
 		data = supplier_overview.delivery(supplier, COMPANY, add_days(as_of, -30), as_of, as_of)
 		self.assertEqual((data["on_time"], data["late"]), (1, 0))
+
+	def test_late_replacement_after_return_is_late(self):
+		supplier = create_supplier(supplier_name="_Test Supplier Overview Return").name
+		po = create_purchase_order(
+			supplier=supplier, transaction_date=add_days(today(), -10), qty=10, do_not_submit=True
+		)
+		po.schedule_date = add_days(today(), -2)
+		po.items[0].schedule_date = po.schedule_date
+		po.submit()
+
+		def receive(days_ago):
+			pr = make_receipt(po.name)
+			pr.set_posting_time = 1
+			pr.posting_date = add_days(today(), days_ago)
+			pr.submit()
+			return pr
+
+		first = receive(-5)
+		returned = make_return_doc("Purchase Receipt", first.name)
+		returned.set_posting_time = 1
+		returned.posting_date = add_days(today(), -4)
+		returned.submit()
+		receive(0)
+
+		as_of = getdate(today())
+		data = supplier_overview.delivery(supplier, COMPANY, add_days(as_of, -30), as_of, as_of)
+		self.assertEqual((data["on_time"], data["late"]), (0, 1))
 
 	def test_receipt_only_supplier_has_a_company(self):
 		supplier = create_supplier(supplier_name="_Test Supplier Overview Receipt").name
