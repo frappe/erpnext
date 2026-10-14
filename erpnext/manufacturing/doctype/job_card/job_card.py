@@ -7,6 +7,7 @@ from typing import Any
 
 import frappe
 from frappe import _, bold
+from frappe.model import default_fields
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
@@ -42,6 +43,7 @@ from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+from erpnext.utilities.query import get_match_conditions_qb
 
 from .mapper import (
 	make_stock_entry,
@@ -2070,7 +2072,7 @@ def make_time_log(kwargs: str | dict):
 
 @frappe.whitelist()
 def get_operation_details(work_order: str, operation: str):
-	frappe.has_permission("Work Order", "read", throw=True)
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 
 	if work_order and operation:
 		return frappe.get_all(
@@ -2087,6 +2089,8 @@ def get_operations(doctype: str, txt: str, searchfield: str, start: int, page_le
 	if not filters.get("work_order"):
 		frappe.msgprint(_("Please select a Work Order first."))
 		return []
+
+	frappe.has_permission("Work Order", "read", doc=filters.get("work_order"), throw=True)
 	args = {"parent": filters.get("work_order")}
 	if txt:
 		args["operation"] = ("like", f"%{txt}%")
@@ -2139,7 +2143,11 @@ def get_job_card_filter_conditions(jc, filters):
 		return []
 
 	conditions = []
+	meta = frappe.get_meta("Job Card")
 	for field, operator, value in normalize_calendar_filters(filters):
+		if not (meta.has_field(field) or field in default_fields):
+			frappe.throw(_("{0} is not a field of Job Card").format(field))
+
 		builder = FILTER_OPERATORS.get((operator or "=").lower())
 		if builder:
 			conditions.append(builder(jc[field], value))
@@ -2208,7 +2216,7 @@ def get_job_cards_for_calendar(filters):
 		.groupby(jc.name)
 	)
 
-	for condition in get_job_card_filter_conditions(jc, filters):
+	for condition in get_job_card_filter_conditions(jc, filters) + get_match_conditions_qb("Job Card", jc):
 		query = query.where(condition)
 
 	return query.run(as_dict=True)

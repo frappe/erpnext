@@ -3933,6 +3933,38 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		self.assertEqual(frappe.db.count("Job Card Time Log", {"parent": job_card.name}), time_logs)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_lookups_follow_work_order_user_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.manufacturing.doctype.job_card.job_card import get_job_details, get_operation_details
+		from erpnext.manufacturing.page.shop_floor.shop_floor import (
+			get_data,
+			get_quality_inspection_checklist,
+		)
+
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
+		operations = [{"operation": operation, "workstation": workstation, "time_in_mins": 60}]
+		fg_item = make_jc_review_item()
+		allowed = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+		restricted = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+		restricted_card = get_jc_review_job_cards(restricted.name)[0]
+		restricted_card.append("time_logs", jc_review_log("2031-03-10 08:00:00", 60, 0))
+		restricted_card.save()
+
+		user = create_user("jc-lookup-restricted@example.com", "Manufacturing User")
+		add_user_permission("Work Order", allowed.name, user.name)
+
+		with self.set_user(user.name):
+			self.assertEqual(get_job_details(None, None, {"work_order": restricted.name}), [])
+			self.assertRaises(frappe.PermissionError, get_operation_details, restricted.name, operation)
+			self.assertEqual(get_data(work_order=restricted.name)["job_cards"], [])
+			self.assertRaises(frappe.PermissionError, get_quality_inspection_checklist, restricted_card.name)
+			self.assertEqual(len(get_data(work_order=allowed.name)["job_cards"]), 1)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
