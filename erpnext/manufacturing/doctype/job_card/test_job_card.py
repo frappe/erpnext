@@ -3965,6 +3965,36 @@ class TestJobCard(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_quality_inspection_checklist, restricted_card.name)
 			self.assertEqual(len(get_data(work_order=allowed.name)["job_cards"]), 1)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_shop_floor_inspection_only_for_permitted_draft_job_cards(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.manufacturing.page.shop_floor.shop_floor import submit_quality_inspection
+
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
+		operations = [{"operation": operation, "workstation": workstation, "time_in_mins": 60}]
+		fg_item = make_jc_review_item()
+		allowed = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+		restricted = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+
+		submitted_card = get_jc_review_job_cards(allowed.name)[0]
+		submitted_card.append("time_logs", jc_review_log("2031-03-11 08:00:00", 60, 10))
+		submitted_card.submit()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "only to a draft Job Card", submit_quality_inspection, submitted_card.name
+		)
+
+		user = create_user("jc-inspection-restricted@example.com", "Manufacturing User", "Quality Manager")
+		add_user_permission("Work Order", allowed.name, user.name)
+		restricted_card = get_jc_review_job_cards(restricted.name)[0]
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, submit_quality_inspection, restricted_card.name)
+
+		self.assertFalse(frappe.db.get_value("Job Card", restricted_card.name, "quality_inspection"))
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

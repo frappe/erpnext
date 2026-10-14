@@ -215,7 +215,7 @@ def get_quality_inspection_checklist(job_card: str):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def submit_quality_inspection(job_card: str, readings: str | None = None):
 	"""Create + submit an In-Process Quality Inspection for the job card and link it back, so the
 	standard Job Card.validate_inspection() gate passes when the card is submitted.
@@ -230,6 +230,9 @@ def submit_quality_inspection(job_card: str, readings: str | None = None):
 	frappe.has_permission("Quality Inspection", "submit", throw=True)
 
 	jc = frappe.get_doc("Job Card", job_card)
+	jc.check_permission("write")
+	if jc.docstatus != 0:
+		frappe.throw(_("Quality Inspection can be added only to a draft Job Card"))
 
 	# Idempotent: if a submitted inspection is already linked, don't create another.
 	if jc.quality_inspection:
