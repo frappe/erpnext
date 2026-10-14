@@ -14,6 +14,7 @@ from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
+from erpnext import require_user_permission
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -123,6 +124,31 @@ def get_stock_balance(
 	with_serial_no: bool = False,
 	inventory_dimensions_dict: dict | None = None,
 ):
+	frappe.has_permission("Item", "read", throw=True)
+	require_user_permission("Item", item_code)
+	require_user_permission("Warehouse", warehouse)
+	check_warehouse_company(warehouse)
+
+	return _get_stock_balance(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		with_valuation_rate,
+		with_serial_no,
+		inventory_dimensions_dict,
+	)
+
+
+def _get_stock_balance(
+	item_code: str,
+	warehouse: str | None,
+	posting_date: DateTimeLikeObject | None = None,
+	posting_time: DateTimeLikeObject | datetime.timedelta | None = None,
+	with_valuation_rate: bool = False,
+	with_serial_no: bool = False,
+	inventory_dimensions_dict: dict | None = None,
+):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
@@ -208,19 +234,43 @@ def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
 	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)
 
 	if warehouse:
-		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
-
-		if is_group:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				bin_dt.warehouse.isin(
-					frappe.qb.from_(wh).select(wh.name).where((wh.lft >= lft) & (wh.rgt <= rgt))
-				)
-			)
-		else:
-			query = query.where(bin_dt.warehouse == warehouse)
+		query = query.where(get_bin_warehouse_condition(warehouse))
 
 	return query.run()[0][0]
+
+
+def get_latest_stock_qty_for_items(items_by_warehouse: dict[str, set[str]]) -> dict[tuple[str, str], float]:
+	"""Return quantities by (item, warehouse), aggregating each warehouse's requested items."""
+	if not items_by_warehouse:
+		return {}
+
+	frappe.has_permission("Item", "read", throw=True)
+	bin_dt = frappe.qb.DocType("Bin")
+	quantities = {}
+	for warehouse, item_codes in items_by_warehouse.items():
+		check_warehouse_company(warehouse)
+		query = (
+			frappe.qb.from_(bin_dt)
+			.select(bin_dt.item_code, Sum(bin_dt.actual_qty))
+			.where(bin_dt.item_code.isin(item_codes))
+			.where(get_bin_warehouse_condition(warehouse))
+			.groupby(bin_dt.item_code)
+		)
+
+		for item_code, qty in query.run():
+			quantities[item_code, warehouse] = qty
+
+	return quantities
+
+
+def get_bin_warehouse_condition(warehouse):
+	bin_dt = frappe.qb.DocType("Bin")
+	lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
+	if not is_group:
+		return bin_dt.warehouse == warehouse
+
+	wh = frappe.qb.DocType("Warehouse")
+	return bin_dt.warehouse.isin(frappe.qb.from_(wh).select(wh.name).where((wh.lft >= lft) & (wh.rgt <= rgt)))
 
 
 def get_latest_stock_balance():
@@ -318,6 +368,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
+	posting_datetime = args.get("posting_datetime")
+
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
@@ -327,13 +379,18 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		as_dict=1,
 	)
 
-	use_moving_avg_for_batch = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
 	skip_serial_batch_valuation = bool(
 		item_details and item_details.has_serial_no and not item_details.use_serial_no_wise_valuation
 	)
 
 	if isinstance(args, dict):
 		args = frappe._dict(args)
+
+	valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
+	skip_batch_valuation = valuation_method == "Standard Cost" or (
+		frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+		and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
+	)
 
 	if (
 		item_details
@@ -354,7 +411,7 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		item_details
 		and item_details.has_batch_no
 		and args.get("serial_and_batch_bundle")
-		and not use_moving_avg_for_batch
+		and not skip_batch_valuation
 		and not skip_serial_batch_valuation
 	):
 		args.actual_qty = args.qty
@@ -383,7 +440,7 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 	elif (
 		args.get("batch_no")
 		and not args.get("serial_and_batch_bundle")
-		and not use_moving_avg_for_batch
+		and not skip_batch_valuation
 		and not skip_serial_batch_valuation
 	):
 		args.actual_qty = args.qty
@@ -397,8 +454,7 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 
 		return batch_obj.get_incoming_rate()
 	else:
-		valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
-		previous_sle = get_previous_sle(args)
+		previous_sle = get_previous_sle({**args, "serial_no": None})
 		if valuation_method in ("FIFO", "LIFO"):
 			if previous_sle:
 				previous_stock_queue = json.loads(previous_sle.get("stock_queue", "[]") or "[]")
@@ -422,9 +478,25 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 			company=args.get("company"),
 			fallbacks=fallbacks,
 			raise_error_if_no_rate=raise_error_if_no_rate,
+			posting_datetime=posting_datetime,
+			creation=args.get("creation"),
 		)
 
 	return flt(in_rate)
+
+
+def has_batchwise_valued_batch(batch_no: str | None, serial_and_batch_bundle: str | None) -> bool:
+	"""Pooling applies to Moving Average batches only; FIFO batches keep batch-wise valuation."""
+	batches = [batch_no] if batch_no else []
+	if serial_and_batch_bundle:
+		batches = frappe.get_all(
+			"Serial and Batch Entry", {"parent": serial_and_batch_bundle}, pluck="batch_no"
+		)
+
+	return (
+		bool(batches)
+		and frappe.db.exists("Batch", {"name": ("in", batches), "use_batchwise_valuation": 1}) is not None
+	)
 
 
 def get_avg_purchase_rate(serial_nos):

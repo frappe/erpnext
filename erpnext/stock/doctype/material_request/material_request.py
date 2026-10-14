@@ -293,6 +293,27 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type != "Customer Provided":
 			self.customer = None
 
+		if self.material_request_type == "Subcontracting":
+			self.validate_subcontracted_items()
+
+	def validate_subcontracted_items(self):
+		items = frappe.get_all(
+			"Item",
+			filters={"name": ["in", list({d.item_code for d in self.items if d.item_code})]},
+			fields=["name", "is_stock_item", "is_sub_contracted_item"],
+		)
+		items = {d.name: d for d in items}
+
+		for row in self.items:
+			item = items.get(row.item_code)
+			if item and not (item.is_stock_item and item.is_sub_contracted_item):
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} must be a stock item with Supply Raw Materials for Purchase enabled for a Subcontracting Material Request"
+					).format(row.idx, get_link_to_form("Item", row.item_code)),
+					title=_("Invalid Item"),
+				)
+
 	def set_title(self):
 		"""Set title as comma separated list of items"""
 		if not self.title:
@@ -303,8 +324,9 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
 		self.update_requested_qty_in_work_order()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
+		if self.material_request_type == "Purchase":
 			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
 				self.validate_budget()
 
@@ -376,7 +398,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
 		self.update_requested_qty_in_work_order()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type in ("Purchase", "Subcontracting"):
 			self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):

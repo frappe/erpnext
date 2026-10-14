@@ -55,6 +55,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		if not self.finance_book_id:
 			self.create_depreciation_schedule()
 		self.update_shift_depr_schedule()
+		self.validate_manual_schedule()
 
 	def validate_another_asset_depr_schedule_does_not_exist(self):
 		finance_book_filter = ["finance_book", "is", "not set"]
@@ -84,6 +85,43 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 					)
 				)
 
+	def validate_manual_schedule(self):
+		if self.depreciation_method != "Manual" or self.flags.is_rescheduled:
+			return
+
+		available_for_use_date = frappe.db.get_value("Asset", self.asset, "available_for_use_date")
+		for row in self.get("depreciation_schedule"):
+			self.validate_manual_row(row, available_for_use_date)
+
+		self.validate_manual_total()
+		self.set_accumulated_depreciation()
+
+	def validate_manual_row(self, row, available_for_use_date):
+		if flt(row.depreciation_amount) <= 0:
+			frappe.throw(_("Row #{0}: Depreciation Amount must be greater than zero").format(row.idx))
+
+		if getdate(row.schedule_date) < getdate(available_for_use_date):
+			frappe.throw(
+				_("Row #{0}: Schedule Date cannot be before the Available-for-use Date {1}").format(
+					row.idx, frappe.format(available_for_use_date, "Date")
+				)
+			)
+
+	def validate_manual_total(self):
+		precision = self.precision("value_after_depreciation")
+		pending_amount = sum(
+			flt(row.depreciation_amount) for row in self.depreciation_schedule if not row.journal_entry
+		)
+		depreciable_amount = flt(self.value_after_depreciation) - flt(self.expected_value_after_useful_life)
+
+		if flt(pending_amount, precision) != flt(depreciable_amount, precision):
+			frappe.throw(
+				_("Total Depreciation Amount {0} must be equal to the depreciable value {1}").format(
+					frappe.bold(frappe.format(pending_amount, "Currency")),
+					frappe.bold(frappe.format(depreciable_amount, "Currency")),
+				)
+			)
+
 	def on_submit(self):
 		self.validate_asset()
 		self.db_set("status", "Active")
@@ -101,6 +139,17 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 				_("Asset {0} is not submitted. Please submit the asset before proceeding.").format(
 					get_link_to_form("Asset", self.asset)
 				)
+			)
+
+	def before_cancel(self):
+		if self.flags.should_not_cancel_depreciation_entries:
+			return
+
+		if frappe.db.get_value("Asset", self.asset, "docstatus") == 1:
+			frappe.throw(
+				_(
+					"Cannot cancel the depreciation schedule of submitted Asset {0}. Cancel the Asset instead."
+				).format(get_link_to_form("Asset", self.asset))
 			)
 
 	def on_cancel(self):
@@ -210,6 +259,7 @@ def reschedule_depreciation(asset_doc, notes, disposal_date=None):
 
 		new_schedule.create_depreciation_schedule(row, disposal_date)
 		new_schedule.notes = notes
+		new_schedule.flags.is_rescheduled = True
 
 		if current_schedule and current_schedule.docstatus == 1:
 			current_schedule.flags.should_not_cancel_depreciation_entries = True
@@ -274,6 +324,13 @@ def get_asset_shift_factors_map():
 
 
 @frappe.whitelist()
+def get_asset_depreciation_schedule(
+	asset_name: str, status: str | None = None, finance_book: str | None = None
+):
+	frappe.has_permission("Asset", "read", asset_name, throw=True)
+	return get_asset_depr_schedule_doc(asset_name, status, finance_book)
+
+
 def get_depr_schedule(asset_name: str, status: str, finance_book: str | None = None):
 	asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_name, status, finance_book)
 
@@ -283,7 +340,6 @@ def get_depr_schedule(asset_name: str, status: str, finance_book: str | None = N
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
 
-@frappe.whitelist()
 def get_asset_depr_schedule_doc(asset_name: str, status: str | None = None, finance_book: str | None = None):
 	asset_depr_schedule = get_asset_depr_schedule_name(asset_name, status, finance_book)
 

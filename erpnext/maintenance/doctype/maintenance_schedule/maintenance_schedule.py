@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Max
 from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
@@ -176,6 +177,12 @@ class MaintenanceSchedule(TransactionBase):
 						getdate(start_date_copy), sales_person, start_date
 					)
 					if schedule_date > getdate(end_date):
+						if schedule_date != getdate(start_date_copy):
+							throw(
+								_("Every day from {0} to {1} is a holiday for Sales Person {2}.").format(
+									formatdate(start_date), formatdate(end_date), sales_person
+								)
+							)
 						schedule_date = getdate(end_date)
 					schedule_list.append(schedule_date)
 
@@ -200,25 +207,6 @@ class MaintenanceSchedule(TransactionBase):
 				working_date = add_days(working_date, 1)
 
 		return working_date
-
-	def validate_dates_with_periodicity(self):
-		for d in self.get("items"):
-			if d.start_date and d.end_date and d.periodicity and d.periodicity != "Random":
-				date_diff = (getdate(d.end_date) - getdate(d.start_date)).days + 1
-				days_in_period = {
-					"Weekly": 7,
-					"Monthly": 30,
-					"Quarterly": 90,
-					"Half Yearly": 180,
-					"Yearly": 365,
-				}
-
-				if date_diff < days_in_period[d.periodicity]:
-					throw(
-						_(
-							"Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
-						).format(d.idx, d.periodicity, days_in_period[d.periodicity])
-					)
 
 	def validate_maintenance_detail(self):
 		if not self.get("items"):
@@ -287,7 +275,6 @@ class MaintenanceSchedule(TransactionBase):
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
-		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
 		self.validate_serial_no_bundle()
 		if not self.schedules or self.validate_items_table_change() or self.validate_no_of_visits():
@@ -425,7 +412,10 @@ class MaintenanceSchedule(TransactionBase):
 			.groupby(entry.serial_no)
 		).run(as_dict=True)
 
-		return {row.serial_no: row.posting_datetime for row in rows}
+		dates = {row.serial_no: row.posting_datetime for row in rows}
+		if missing := [serial_no for serial_no in serial_nos if serial_no not in dates]:
+			dates.update(get_legacy_delivery_dates(item_code, missing))
+		return dates
 
 	def validate_schedule(self):
 		item_lst1 = []
@@ -549,6 +539,28 @@ def validate_serial_no_for_customer(serial, customer):
 			title=_("Different Customer"),
 			indicator="orange",
 		)
+
+
+def get_legacy_delivery_dates(item_code: str, serial_nos: list[str]) -> dict:
+	"""Latest delivery per serial kept on the Stock Ledger Entry itself, from before Serial and Batch Bundles."""
+	ledger = frappe.qb.DocType("Stock Ledger Entry")
+	rows = (
+		frappe.qb.from_(ledger)
+		.select(ledger.serial_no, ledger.posting_datetime)
+		.where(
+			(ledger.item_code == item_code)
+			& (ledger.is_cancelled == 0)
+			& (ledger.actual_qty < 0)
+			& ledger.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			& Criterion.any([ledger.serial_no.like(f"%{serial_no}%") for serial_no in serial_nos])
+		)
+	).run(as_dict=True)
+
+	dates = {}
+	for row in rows:
+		for serial_no in set(get_serial_nos(row.serial_no)).intersection(serial_nos):
+			dates[serial_no] = max(dates.get(serial_no, row.posting_datetime), row.posting_datetime)
+	return dates
 
 
 @frappe.whitelist()

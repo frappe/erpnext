@@ -191,7 +191,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
 				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--green-400)" },
 				{ label: __("Available"), value: Math.max(limit - used, 0), color: "var(--green-600)" },
-			],
+			].filter((s) => s.value > 0),
 			center: {
 				value: flt((used / limit) * 100, 1) + "%",
 				label: __("used"),

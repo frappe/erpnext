@@ -448,6 +448,9 @@ doc_events = {
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
+	"Company": {
+		"after_rename": "erpnext.regional.rename_vat_settings",
+	},
 	"Address": {
 		"validate": [
 			"erpnext.regional.italy.utils.set_state_code",
@@ -455,8 +458,11 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": ["erpnext.crm.utils.update_lead_phone_numbers"],
+	},
+	"Lead": {
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"

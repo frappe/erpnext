@@ -235,6 +235,8 @@ class PurchaseInvoice(BuyingController):
 				"source_field": "amount",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and (is_return=0 or update_billed_amount_in_purchase_order=1))""",
 			}
 		]
 		self.closed_source_links = [
@@ -639,7 +641,13 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
 					"source_field": "stock_qty",
+					"second_source_dt": "Purchase Receipt Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "material_request_item",
+					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 					"percent_join_field": "material_request",
+					"validate_qty": False,
 				}
 			)
 			if cint(self.is_return):
@@ -850,6 +858,7 @@ class PurchaseInvoice(BuyingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
 
@@ -902,6 +911,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
+		self.shift_service_dates(reference_doc, auto_repeat_doc)
 
 	@frappe.whitelist(methods=["POST"])
 	def block_invoice(self, hold_comment: str | None = None, release_date: DateTimeLikeObject | None = None):

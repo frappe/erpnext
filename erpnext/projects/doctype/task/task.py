@@ -83,6 +83,7 @@ class Task(NestedSet):
 
 	def validate(self):
 		self.validate_parent_project()
+		self.validate_children_project()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -91,6 +92,7 @@ class Task(NestedSet):
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
+		self.set_default_weight()
 		self.validate_parent_is_group()
 		self.validate_parent_not_completed()
 		self.validate_web_form_project_permission()
@@ -100,6 +102,10 @@ class Task(NestedSet):
 		self.validate_from_to_dates("act_start_date", "act_end_date")
 		self.validate_parent_expected_end_date()
 		self.validate_parent_project_dates()
+
+	def set_default_weight(self):
+		if self.type and self.task_weight is None:
+			self.task_weight = frappe.get_cached_value("Task Type", self.type, "weight")
 
 	def set_default_end_date_if_missing(self):
 		if self.exp_start_date and self.expected_time and not self.exp_end_date:
@@ -117,7 +123,9 @@ class Task(NestedSet):
 			self.report_date_conflict(
 				_(
 					"Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-				).format(format_date(parent_exp_end_date))
+				).format(format_date(parent_exp_end_date)),
+				"exp_end_date",
+				"parent_task",
 			)
 
 	def validate_parent_project_dates(self):
@@ -140,7 +148,9 @@ class Task(NestedSet):
 						get_link_to_form("Task", self.name),
 						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
-					)
+					),
+					fieldname,
+					"project",
 				)
 
 			if project_start_date and date_diff(task_date, getdate(project_start_date)) < 0:
@@ -149,12 +159,17 @@ class Task(NestedSet):
 						get_link_to_form("Task", self.name),
 						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
-					)
+					),
+					fieldname,
+					"project",
 				)
 
-	def report_date_conflict(self, message: str):
+	def report_date_conflict(self, message: str, *fieldnames: str):
+		"""Refuse a date conflict this save causes; warn when a reschedule causes it."""
 		if not self.flags.rescheduled:
-			frappe.throw(message, frappe.exceptions.InvalidDates)
+			if self.is_new() or any(self.has_value_changed(fieldname) for fieldname in fieldnames):
+				frappe.throw(message, frappe.exceptions.InvalidDates)
+			return
 
 		frappe.msgprint(
 			_("{0} was moved after the task it depends on. {1}").format(
@@ -258,6 +273,21 @@ class Task(NestedSet):
 				title=_("Invalid Parent Task"),
 			)
 
+	def validate_children_project(self):
+		if self.is_new() or not self.has_value_changed("project"):
+			return
+
+		child_projects = frappe.get_all(
+			"Task", filters={"parent_task": self.name}, pluck="project", distinct=True
+		)
+		if any((project or None) != (self.project or None) for project in child_projects):
+			frappe.throw(
+				_("Task {0} has child tasks in another project. Move them out of this group first.").format(
+					get_link_to_form("Task", self.name)
+				),
+				title=_("Invalid Project"),
+			)
+
 	def validate_parent_not_completed(self):
 		if not self.parent_task or self.status in ("Completed", "Cancelled"):
 			return
@@ -285,11 +315,11 @@ class Task(NestedSet):
 	def on_update(self):
 		self.update_nsm_model()
 		self.check_recursion()
+		self.remove_from_previous_parent_depends_on()
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.update_previous_project()
 		self.unassign_todo()
-		self.remove_from_previous_parent_depends_on()
 		self.populate_depends_on()
 
 	def unassign_todo(self):
@@ -360,7 +390,7 @@ class Task(NestedSet):
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
-		if not end_date:
+		if not end_date or self.flags.ignore_reschedule:
 			return
 
 		dependent_parents = frappe.get_all(
@@ -388,7 +418,7 @@ class Task(NestedSet):
 				task.exp_end_date = add_days(task.exp_start_date, task_duration)
 				task.flags.ignore_recursion_check = True
 				task.flags.rescheduled = True
-				task.save()
+				task.save(ignore_permissions=self.flags.ignore_permissions)
 
 	def has_webform_permission(self):
 		project_user = frappe.db.get_value(
@@ -460,7 +490,7 @@ class Task(NestedSet):
 
 @frappe.whitelist()
 def check_if_child_exists(name: str):
-	frappe.has_permission("Task", "read", doc=name, throw=True)
+	frappe.get_doc("Task", name).check_permission("read")
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
 	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
 	return child_tasks

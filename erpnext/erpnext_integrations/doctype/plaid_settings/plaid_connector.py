@@ -77,9 +77,9 @@ class PlaidConnector:
 			response = self.client.Transactions.get(**kwargs)
 			transactions = response["transactions"]
 			while len(transactions) < response["total_transactions"]:
-				response = self.client.Transactions.get(
-					self.access_token, start_date=start_date, end_date=end_date, offset=len(transactions)
-				)
+				response = self.client.Transactions.get(**kwargs, offset=len(transactions))
+				if not response["transactions"]:
+					break
 				transactions.extend(response["transactions"])
 			return transactions
 		except ItemError as e:

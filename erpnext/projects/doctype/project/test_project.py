@@ -490,8 +490,9 @@ class TestProject(ERPNextTestSuite):
 
 		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
 		copied_tasks = frappe.get_all(
-			"Task", filters={"project": copy}, fields=["name", "parent_task", "depends_on_tasks"]
+			"Task", filters={"project": copy}, fields=["name", "subject", "parent_task", "depends_on_tasks"]
 		)
+		copied = {task.subject: task.name for task in copied_tasks}
 		links = {
 			link
 			for task in copied_tasks
@@ -501,8 +502,8 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(len(copied_tasks), 3)
 		self.assertFalse(links & {group.name, design.name, build.name})
 		self.assertEqual(
-			set(frappe.get_all("Task Depends On", filters={"parent": group.name}, pluck="task")),
-			{design.name, build.name},
+			set(frappe.get_all("Task Depends On", filters={"parent": copied["Phase 1"]}, pluck="task")),
+			{copied["Design"], copied["Build"]},
 		)
 
 	def test_create_duplicate_project_detaches_parents_outside_the_project(self):
@@ -570,6 +571,37 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", tasks[0], "status"), "Cancelled")
 
+	def test_set_project_status_by_projects_manager_reschedules_dependent_task(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 2)
+		frappe.db.set_value("Task", tasks[0], "exp_end_date", add_days(nowdate(), 5))
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+		user = create_user("projects-manager-only@example.com", "Projects Manager")
+
+		with self.set_user(user.name):
+			set_project_status(project.name, "Cancelled")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[1], "status"), "Cancelled")
+
+	def test_set_project_status_keeps_dependent_task_dates(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 2)
+		frappe.db.set_value("Task", tasks[0], "exp_end_date", add_days(nowdate(), 5))
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+		planned = frappe.db.get_value("Task", tasks[1], ["exp_start_date", "exp_end_date"])
+
+		set_project_status(project.name, "Completed")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[1], ["exp_start_date", "exp_end_date"]), planned)
+
 	def test_set_project_status_rejects_invalid_status(self):
 		from erpnext.projects.doctype.project.project import set_project_status
 
@@ -608,6 +640,18 @@ class TestProject(ERPNextTestSuite):
 			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
 				twice_daily_reminder()
 			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
+	def test_twice_daily_reminder_sends_both_overdue_updates(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="22:10:00", second_email="22:40:00"
+		)
+		with freeze_time("2026-01-05 23:00:00"), patch("frappe.sendmail") as sendmail:
+			twice_daily_reminder()
+
+		self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), 2)
+		self.assertEqual(sendmail.call_count, 2)
 
 	def test_costing_rollup_from_sales_documents(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

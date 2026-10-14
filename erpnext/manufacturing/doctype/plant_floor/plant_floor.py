@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Order
 from frappe.utils import get_link_to_form, nowdate, nowtime
@@ -20,6 +21,26 @@ class PlantFloor(Document):
 		floor_name: DF.Data | None
 		warehouse: DF.Link | None
 	# end: auto-generated types
+
+	def validate(self):
+		self.validate_warehouse()
+
+	def validate_warehouse(self):
+		if not self.warehouse:
+			return
+
+		warehouse = frappe.get_cached_value(
+			"Warehouse", self.warehouse, ["is_group", "company"], as_dict=True
+		)
+		if warehouse.is_group:
+			frappe.throw(_("Warehouse {0} is a group warehouse").format(frappe.bold(self.warehouse)))
+
+		if self.company and warehouse.company != self.company:
+			frappe.throw(
+				_("Warehouse {0} does not belong to company {1}").format(
+					frappe.bold(self.warehouse), frappe.bold(self.company)
+				)
+			)
 
 	@frappe.whitelist()
 	def make_stock_entry(self, kwargs: str | dict):
@@ -127,6 +148,14 @@ def get_stock_details(warehouse, start=0, item_code=None, item_group=None):
 		query = query.where(bin_table.item_code == item_code)
 
 	if item_group:
-		query = query.where(item_table.item_group == item_group)
+		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
+		item_group_table = frappe.qb.DocType("Item Group")
+		query = query.where(
+			item_table.item_group.isin(
+				frappe.qb.from_(item_group_table)
+				.select(item_group_table.name)
+				.where((item_group_table.lft >= lft) & (item_group_table.rgt <= rgt))
+			)
+		)
 
 	return query.run(as_dict=True)

@@ -10,6 +10,7 @@ from frappe.utils import escape_html, format_date, get_datetime
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	validate_serial_no_for_customer,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
 
 CLAIM_STATUS = {"Fully Completed": "Closed", "Partially Completed": "Work In Progress"}
@@ -67,7 +68,7 @@ class MaintenanceVisit(TransactionBase):
 						escape_html(serial.serial_no), escape_html(d.item_code)
 					)
 				)
-			if serial.warehouse and was_delivered_to(d.serial_no, self.customer):
+			if serial.warehouse and was_delivered_to(d.serial_no, d.item_code, self.customer):
 				continue
 			validate_serial_no_for_customer(serial, self.customer)
 
@@ -135,7 +136,7 @@ class MaintenanceVisit(TransactionBase):
 				)
 			)
 		for purpose in self.purposes:
-			row_item = items.get(purpose.maintenance_schedule_detail)
+			row_item = items.get(self.maintenance_schedule_detail or purpose.maintenance_schedule_detail)
 			if row_item and row_item != purpose.item_code:
 				frappe.throw(
 					_("Row #{0}: Item {1} does not match the item of its schedule row").format(
@@ -169,7 +170,7 @@ class MaintenanceVisit(TransactionBase):
 			)
 
 	def get_submitted_schedule_visits(self, details):
-		"""Submitted visits referencing the schedule rows, latest first."""
+		"""Submitted visits referencing the schedule rows, latest first, locked so concurrent cancels see each other."""
 		visit = frappe.qb.DocType("Maintenance Visit")
 		purpose = frappe.qb.DocType("Maintenance Visit Purpose")
 		visits = (
@@ -191,6 +192,7 @@ class MaintenanceVisit(TransactionBase):
 			)
 			.orderby(visit.mntc_date, order=Order.desc)
 			.orderby(visit.creation, order=Order.desc)
+			.for_update()
 		).run(as_dict=True)
 
 		for row in visits:
@@ -201,6 +203,8 @@ class MaintenanceVisit(TransactionBase):
 		if not self.maintenance_schedule:
 			for d in self.get("purposes"):
 				if d.prevdoc_docname and d.prevdoc_doctype == "Warranty Claim":
+					if self.is_superseded_by_completed_visit(d.prevdoc_docname):
+						continue
 					if flag == 1:
 						mntc_date = self.mntc_date
 						service_person = d.service_person
@@ -241,13 +245,36 @@ class MaintenanceVisit(TransactionBase):
 					wc_doc.update(
 						{
 							"resolution_date": mntc_date,
-							"resolved_by": service_person,
+							"resolved_by": get_user_of_sales_person(service_person),
 							"resolution_details": work_done,
 							"status": status,
 						}
 					)
 
 					wc_doc.db_update()
+
+	def is_superseded_by_completed_visit(self, warranty_claim: str) -> bool:
+		"""Submitting or cancelling a non-final visit must not reopen a claim closed by a completed visit."""
+		if self.completion_status == "Fully Completed":
+			return False
+
+		mv = frappe.qb.DocType("Maintenance Visit")
+		mvp = frappe.qb.DocType("Maintenance Visit Purpose")
+		completed_visit = (
+			frappe.qb.from_(mv)
+			.inner_join(mvp)
+			.on(mvp.parent == mv.name)
+			.select(mv.name)
+			.where(
+				(mvp.prevdoc_docname == warranty_claim)
+				& (mv.name != self.name)
+				& (mv.docstatus == 1)
+				& (mv.completion_status == "Fully Completed")
+			)
+			.limit(1)
+			.run()
+		)
+		return bool(completed_visit)
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same Warranty Claim"""
@@ -301,10 +328,30 @@ class MaintenanceVisit(TransactionBase):
 		pass
 
 
-def was_delivered_to(serial_no, customer):
+def get_user_of_sales_person(sales_person: str | None) -> str | None:
+	"""Resolved By on a Warranty Claim is a User; a Sales Person maps to one through its Employee."""
+	employee = sales_person and frappe.db.get_value("Sales Person", sales_person, "employee")
+	return frappe.db.get_value("Employee", employee, "user_id") if employee else None
+
+
+def was_delivered_to(serial_no: str, item_code: str, customer: str) -> bool:
 	"""Whether the serial was ever delivered to the customer, e.g. before coming back for repair."""
+	return has_delivery_to(get_bundle_deliveries(serial_no), customer) or has_delivery_to(
+		get_legacy_deliveries(serial_no, item_code), customer
+	)
+
+
+def has_delivery_to(deliveries: list, customer: str) -> bool:
+	for doctype in ("Delivery Note", "Sales Invoice"):
+		names = [row.voucher_no for row in deliveries if row.voucher_type == doctype]
+		if names and frappe.db.exists(doctype, {"name": ("in", names), "customer": customer}):
+			return True
+	return False
+
+
+def get_bundle_deliveries(serial_no: str) -> list:
 	entry = frappe.qb.DocType("Serial and Batch Entry")
-	deliveries = (
+	return (
 		frappe.qb.from_(entry)
 		.select(entry.voucher_type, entry.voucher_no)
 		.where(
@@ -316,8 +363,18 @@ def was_delivered_to(serial_no, customer):
 		)
 	).run(as_dict=True)
 
-	for doctype in ("Delivery Note", "Sales Invoice"):
-		names = [row.voucher_no for row in deliveries if row.voucher_type == doctype]
-		if names and frappe.db.exists(doctype, {"name": ("in", names), "customer": customer}):
-			return True
-	return False
+
+def get_legacy_deliveries(serial_no: str, item_code: str) -> list:
+	"""Deliveries kept on the Stock Ledger Entry itself, from before Serial and Batch Bundles."""
+	entries = frappe.get_all(
+		"Stock Ledger Entry",
+		filters={
+			"item_code": item_code,
+			"serial_no": ["like", f"%{serial_no}%"],
+			"actual_qty": ["<", 0],
+			"is_cancelled": 0,
+			"voucher_type": ["in", ["Delivery Note", "Sales Invoice"]],
+		},
+		fields=["voucher_type", "voucher_no", "serial_no"],
+	)
+	return [entry for entry in entries if serial_no in get_serial_nos(entry.serial_no)]
