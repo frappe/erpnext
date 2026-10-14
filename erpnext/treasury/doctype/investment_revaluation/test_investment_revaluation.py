@@ -176,6 +176,35 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, revaluation.insert)
 
+	def test_same_day_sale_after_revaluation_takes_the_gain(self):
+		investment = make_fund_investment("Amortized Cost")
+		make_market_revaluation(investment.name, nav_per_unit=12).submit()
+
+		make_transaction(investment.name, "Sale", units=100, rate=12).submit()
+
+		investment.reload()
+		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (0, 0))
+
+	def test_get_investments_loads_only_the_selected_finance_book(self):
+		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
+
+		in_book = make_fund_investment("FVTPL", finance_book="_Test Treasury Book")
+		in_no_book = make_fund_investment("FVTPL")
+		revaluation = frappe.get_doc(
+			{
+				"doctype": "Investment Revaluation",
+				"company": TEST_COMPANY,
+				"finance_book": "_Test Treasury Book",
+			}
+		)
+
+		revaluation.set_investments()
+
+		loaded = {row.investment for row in revaluation.investments}
+		self.assertIn(in_book.name, loaded)
+		self.assertNotIn(in_no_book.name, loaded)
+
 	def test_exited_investment_has_no_gain_left_to_revalue(self):
 		investment = make_fund_investment("FVTPL")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
@@ -192,10 +221,13 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		self.assertNotIn(investment.name, [row.investment for row in revaluation.investments])
 
 
-def make_fund_investment(measurement_category):
+def make_fund_investment(measurement_category, **args):
 	"""Equity fund investment of 100 units bought at 10."""
 	investment = make_submitted_investment(
-		investment_type="_Test Equity Fund", measurement_category=measurement_category, **REVALUATION_ACCOUNTS
+		investment_type="_Test Equity Fund",
+		measurement_category=measurement_category,
+		**REVALUATION_ACCOUNTS,
+		**args,
 	)
 	make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
 	return investment

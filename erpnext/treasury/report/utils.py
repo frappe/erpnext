@@ -143,6 +143,7 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 			row.units_held,
 			row.posts_to_ledger,
 			revaluation.revaluation_date,
+			revaluation.creation.as_("revaluation_creation"),
 		)
 		.where(row.parenttype == "Investment Revaluation")
 		.where(row.investment.isin(investments))
@@ -163,7 +164,7 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 			unrealised[investment] = flt(fair_values.get(investment))
 		elif flt(latest.units_held):
 			# exits take the oldest units first, so they take the valued units before any bought later
-			units_exited = get_units_exited(investment, latest.revaluation_date, as_on_date)
+			units_exited = get_units_exited(investment, latest, as_on_date)
 			valued_units_left = max(flt(latest.units_held) - units_exited, 0)
 			unrealised[investment] = (
 				flt(latest.unrealised_gain_loss) * valued_units_left / flt(latest.units_held)
@@ -172,8 +173,11 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 	return unrealised
 
 
-def get_units_exited(investment, after_date, upto=None):
-	"""Units that left the investment after a date, optionally up to another."""
+def get_units_exited(investment, revaluation, upto=None):
+	"""Units that left the investment after a revaluation, optionally up to a date.
+
+	Exits on the revaluation date count only if made after it, as earlier ones were already left out.
+	"""
 	transaction = frappe.qb.DocType("Investment Transaction")
 	query = (
 		frappe.qb.from_(transaction)
@@ -181,7 +185,13 @@ def get_units_exited(investment, after_date, upto=None):
 		.where(transaction.investment == investment)
 		.where(transaction.docstatus == 1)
 		.where(transaction.transaction_type.isin(EXIT_TYPES))
-		.where(transaction.posting_date > after_date)
+		.where(
+			(transaction.posting_date > revaluation.revaluation_date)
+			| (
+				(transaction.posting_date == revaluation.revaluation_date)
+				& (transaction.creation > revaluation.revaluation_creation)
+			)
+		)
 	)
 	if upto:
 		query = query.where(transaction.posting_date <= upto)

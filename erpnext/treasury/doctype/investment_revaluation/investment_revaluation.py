@@ -320,7 +320,7 @@ class InvestmentRevaluation(AccountsController):
 	def set_investments(self):
 		"""Fill the table with investments to value, including exited ones still carrying an amount."""
 		self.set("investments", [])
-		for investment in get_investments_to_value(self.company):
+		for investment in get_investments_to_value(self.company, self.finance_book):
 			if self.has_amount_to_carry(investment):
 				row = self.append("investments", {"investment": investment.name})
 				self.set_row_preview(row)
@@ -345,10 +345,16 @@ class InvestmentRevaluation(AccountsController):
 		self.set_row_conversion_rate(row)
 
 
-def get_investments_to_value(company):
+def get_investments_to_value(company, finance_book=None):
+	"""Approved investments that have a market value, kept in the given finance book (or in none)."""
 	return frappe.get_list(
 		"Investment",
-		filters={"company": company, "docstatus": 1, "instrument_class": ("in", REVALUATION_INSTRUMENTS)},
+		filters={
+			"company": company,
+			"docstatus": 1,
+			"instrument_class": ("in", REVALUATION_INSTRUMENTS),
+			"finance_book": finance_book or ("is", "not set"),
+		},
 		fields=["name", "status"],
 		order_by="name asc",
 	)
