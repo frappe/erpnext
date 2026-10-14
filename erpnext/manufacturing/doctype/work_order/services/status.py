@@ -251,10 +251,11 @@ class StatusService:
 		allowance = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		if not allowance and purpose == "Material Transfer for Manufacture":
-			allowance = flt(
+		if purpose == "Material Transfer for Manufacture":
+			transfer_extra = flt(
 				frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
 			)
+			allowance = transfer_extra or allowance
 		return allowance
 
 	def _update_produced_qty_in_so(self):

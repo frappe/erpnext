@@ -6696,6 +6696,24 @@ class TestWorkOrder(ERPNextTestSuite):
 			[("BOM Operation", operation, 60)],
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"overproduction_percentage_for_work_order": 10, "transfer_extra_materials_percentage": 50},
+	)
+	def test_transfer_allowance_uses_transfer_extra_first(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 15)).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, "material_transferred_for_manufacturing"), 15
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
