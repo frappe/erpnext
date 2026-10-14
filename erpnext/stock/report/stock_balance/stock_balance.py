@@ -274,6 +274,7 @@ class StockBalanceReport:
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0
+				balance.bal_qty = 0.0
 				qty_diff = flt(entry.actual_qty)
 				value_diff = flt(entry.stock_value_difference)
 			else:
