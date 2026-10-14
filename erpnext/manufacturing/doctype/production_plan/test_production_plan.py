@@ -1049,6 +1049,28 @@ class TestProductionPlan(ERPNextTestSuite):
 			[("_Test PP Kept SA", 2), ("_Test PP Kept SA RM 2", 2)],
 		)
 
+	def test_material_request_is_made_from_the_stored_plan_rows(self):
+		import json
+
+		from frappe.handler import run_doc_method
+
+		plan = create_production_plan(
+			item_code="Test Production Item 1", for_warehouse="_Test Warehouse - _TC"
+		)
+		stored = {row.item_code: row.quantity for row in plan.mr_items}
+
+		posted = plan.as_dict()
+		posted["mr_items"] = [dict(posted["mr_items"][0], item_code="_Test Item", quantity=999)]
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+		frappe.local.response = frappe._dict(docs=[])
+		run_doc_method("make_material_request", docs=json.dumps(posted, default=str))
+
+		requested = frappe.get_all(
+			"Material Request Item", filters={"production_plan": plan.name}, fields=["item_code", "qty"]
+		)
+		self.assertEqual({row.item_code: row.qty for row in requested}, stored)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
