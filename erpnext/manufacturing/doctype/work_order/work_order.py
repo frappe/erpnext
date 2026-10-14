@@ -781,17 +781,65 @@ class WorkOrder(Document):
 			return
 
 		if self.has_batch_no:
-			self.create_batch_for_finished_good()
+			remaining_qty = flt(self.qty) - self.reuse_batches_of_amended_order()
+			if remaining_qty > 0:
+				self.create_batch_for_finished_good(remaining_qty)
 
 		args = {"item_code": self.production_item, "work_order": self.name}
 
 		if self.has_serial_no:
-			self.make_serial_nos(args)
+			remaining_qty = flt(self.qty) - self.reuse_serial_nos_of_amended_order()
+			if remaining_qty > 0:
+				self.make_serial_nos(args, remaining_qty)
 
-	def create_batch_for_finished_good(self):
-		total_qty = self.qty
+	def reuse_batches_of_amended_order(self):
+		if not self.amended_from:
+			return 0
+
+		batches = frappe.get_all(
+			"Batch",
+			filters={
+				"reference_doctype": self.doctype,
+				"reference_name": self.amended_from,
+				"item": self.production_item,
+			},
+			fields=["name", "qty_to_produce"],
+		)
+		if not batches:
+			return 0
+
+		batch = frappe.qb.DocType("Batch")
+		frappe.qb.update(batch).set(batch.reference_name, self.name).where(
+			batch.name.isin([d.name for d in batches])
+		).run()
+		return sum(flt(d.qty_to_produce) for d in batches)
+
+	def reuse_serial_nos_of_amended_order(self):
+		if not self.amended_from:
+			return 0
+
+		serial_nos = frappe.get_all(
+			"Serial No",
+			filters={
+				"work_order": self.amended_from,
+				"item_code": self.production_item,
+				"status": "Inactive",
+			},
+			order_by="creation",
+			limit=cint(self.qty),
+			pluck="name",
+		)
+		if serial_nos:
+			serial_no = frappe.qb.DocType("Serial No")
+			frappe.qb.update(serial_no).set(serial_no.work_order, self.name).where(
+				serial_no.name.isin(serial_nos)
+			).run()
+		return len(serial_nos)
+
+	def create_batch_for_finished_good(self, total_qty=None):
+		total_qty = total_qty or self.qty
 		if not self.batch_size:
-			self.batch_size = total_qty
+			self.batch_size = self.qty
 
 		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
 		if not batch_auto_creation:
@@ -826,7 +874,7 @@ class WorkOrder(Document):
 				)
 			)
 
-	def make_serial_nos(self, args):
+	def make_serial_nos(self, args, qty=None):
 		item_details = frappe.get_cached_value(
 			"Item", self.production_item, ["serial_no_series", "item_name", "description"], as_dict=1
 		)
@@ -840,7 +888,7 @@ class WorkOrder(Document):
 		serial_nos = []
 		if item_details.serial_no_series:
 			serial_nos = get_available_serial_nos(
-				item_details.serial_no_series, self.qty, self.production_item
+				item_details.serial_no_series, qty or self.qty, self.production_item
 			)
 
 		if not serial_nos:
