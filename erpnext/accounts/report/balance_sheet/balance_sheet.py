@@ -90,20 +90,8 @@ def execute(filters=None):
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
-	if opening_balance and round(opening_balance, 2) != 0:
-		unclosed = {
-			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
-			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
-			"warn_if_negative": True,
-			"currency": currency,
-		}
-		for period in period_list:
-			unclosed[period.key] = opening_balance
-			if provisional_profit_loss:
-				provisional_profit_loss[period.key] = provisional_profit_loss[period.key] - opening_balance
-
-		unclosed["total"] = opening_balance
-		data.append(unclosed)
+	if opening_balance and filters.accumulated_values:
+		data.append(get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency))
 
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
@@ -173,16 +161,40 @@ def get_provisional_profit_loss(
 		total_row["total"] = flt(sum(total_row.get(k, 0.0) for k in total_keys))
 
 		if has_value:
-			provisional_profit_loss.update(
-				{
-					"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
-					"account": "'" + _("Provisional Profit / Loss (Credit)") + "'",
-					"warn_if_negative": True,
-					"currency": currency,
-				}
-			)
+			set_provisional_profit_loss_labels(provisional_profit_loss, currency)
 
 	return provisional_profit_loss, total_row
+
+
+def set_provisional_profit_loss_labels(provisional_profit_loss: dict, currency: str) -> None:
+	provisional_profit_loss.update(
+		{
+			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
+			"account": "'" + _("Provisional Profit / Loss (Credit)") + "'",
+			"warn_if_negative": True,
+			"currency": currency,
+		}
+	)
+
+
+def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency):
+	"""Row for profit or loss of earlier years not yet closed, taken out of the provisional profit or loss."""
+	unclosed = {
+		"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
+		"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
+		"warn_if_negative": True,
+		"currency": currency,
+		"total": opening_balance,
+	}
+	for period in period_list:
+		unclosed[period.key] = opening_balance
+		if provisional_profit_loss:
+			provisional_profit_loss[period.key] -= opening_balance
+
+	if provisional_profit_loss:
+		provisional_profit_loss["total"] -= opening_balance
+		set_provisional_profit_loss_labels(provisional_profit_loss, currency)
+	return unclosed
 
 
 def check_opening_balance(asset, liability, equity):
@@ -190,16 +202,21 @@ def check_opening_balance(asset, liability, equity):
 	opening_balance = 0
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 	if asset:
-		opening_balance = flt(asset[-1].get("opening_balance", 0), float_precision)
+		opening_balance = flt(get_total_row(asset).get("opening_balance", 0), float_precision)
 	if liability:
-		opening_balance -= flt(liability[-1].get("opening_balance", 0), float_precision)
+		opening_balance -= flt(get_total_row(liability).get("opening_balance", 0), float_precision)
 	if equity:
-		opening_balance -= flt(equity[-1].get("opening_balance", 0), float_precision)
+		opening_balance -= flt(get_total_row(equity).get("opening_balance", 0), float_precision)
 
 	opening_balance = flt(opening_balance, float_precision)
 	if opening_balance:
 		return _("Previous Financial Year is not closed"), opening_balance
 	return None, None
+
+
+def get_total_row(rows: list) -> dict:
+	"""The total row, which add_total_row follows with a blank row."""
+	return rows[-2] if rows[-1] == {} and len(rows) > 1 else rows[-1]
 
 
 def get_report_summary(
@@ -314,19 +331,8 @@ def execute_snapshot_report(filters):
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
-	if opening_balance and round(opening_balance, 2) != 0:
-		unclosed = {
-			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
-			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
-			"warn_if_negative": True,
-			"currency": currency,
-		}
-		for period in period_list:
-			unclosed[period.key] = opening_balance
-			if provisional_profit_loss:
-				provisional_profit_loss[period.key] = provisional_profit_loss[period.key] - opening_balance
-		unclosed["total"] = opening_balance
-		data.append(unclosed)
+	if opening_balance and filters.accumulated_values:
+		data.append(get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency))
 
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
