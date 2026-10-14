@@ -52,6 +52,18 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		self.assertEqual(investment.total_cost, 100000)
 		self.assertEqual(investment.status, "Active")
 
+	def test_purchase_ignores_hidden_tax_and_penalty(self):
+		investment = make_submitted_investment()
+		transaction = make_transaction(
+			investment.name, "Purchase", gross_amount=100000, tax_withheld=100, penalty_applied=50
+		).submit()
+
+		self.assertEqual((transaction.tax_withheld, transaction.penalty_applied), (0, 0))
+		self.assertEqual(
+			get_gl_entries(transaction.name),
+			{"Short-term Investments - _TC": (100000, 0), BANK_ACCOUNT: (0, 100000)},
+		)
+
 	def test_purchase_above_approved_amount_is_blocked(self):
 		investment = make_submitted_investment(approved_amount=100000)
 		make_transaction(investment.name, "Purchase", gross_amount=60000).submit()
