@@ -234,7 +234,7 @@ class TransactionAccounting:
 		if not self.journal_entry or not frappe.db.exists("Journal Entry", self.journal_entry):
 			return
 
-		journal_entry = frappe.get_doc("Journal Entry", self.journal_entry)
+		journal_entry = frappe.get_doc("Journal Entry", self.journal_entry, for_update=True)
 		if journal_entry.docstatus == 1:
 			previous = frappe.flags.get("share_transaction_cancelling")
 			frappe.flags.share_transaction_cancelling = self.name
