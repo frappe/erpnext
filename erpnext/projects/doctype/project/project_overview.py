@@ -45,10 +45,14 @@ class ProjectOverview:
 		"summary",
 		"milestone",
 		"stats",
+		"delivery",
 		"needs_attention",
+		"loose_ends",
 		"planned_vs_completed",
 		"tasks_by_status",
 		"workload",
+		"tasks_by_delivery",
+		"completed_by_assignee",
 		"unbilled",
 	)
 
@@ -60,6 +64,7 @@ class ProjectOverview:
 				"name",
 				"status",
 				"actual_time",
+				"percent_complete",
 				"percent_complete_method",
 				"expected_start_date",
 				"expected_end_date",
@@ -105,6 +110,12 @@ class ProjectOverview:
 	def workload(self) -> dict:
 		return TaskBreakdown(self).by_assignee()
 
+	def tasks_by_delivery(self) -> dict | None:
+		return TaskBreakdown(self).by_delivery() if self.is_closed else None
+
+	def completed_by_assignee(self) -> dict | None:
+		return TaskBreakdown(self).by_completer() if self.is_closed else None
+
 	def unbilled(self) -> dict | None:
 		return get_unbilled_time(self.project.name)
 
@@ -113,6 +124,34 @@ class ProjectOverview:
 			"open_tasks": self.open_task_stats(),
 			"overdue": self.overdue_stats(),
 			"hours": self.hours_stats(),
+		}
+
+	def delivery(self) -> dict | None:
+		"""For a completed or cancelled project, how it ended: when it finished against plan, how far
+		it got, and how many tasks were done on time.
+
+		It finished on the latest Completed On of its completed tasks. A task counts as on time when
+		it was completed by its Expected End Date; tasks without either date are left out of that count.
+		"""
+		if not self.is_closed:
+			return None
+
+		completed = [task for task in self.tasks if task.status == "Completed"]
+		finished_on = max((self.completed_date(task) for task in completed), default=None)
+		planned_end = getdate(self.project.expected_end_date) if self.project.expected_end_date else None
+		rated = [task for task in completed if self.can_be_late(task)]
+		return {
+			"status": self.project.status,
+			"percent_complete": flt(self.project.percent_complete, 1),
+			"finished_on": finished_on,
+			"planned_end": planned_end,
+			"days_late": date_diff(finished_on, planned_end) if finished_on and planned_end else None,
+			"total": len(self.tasks),
+			"completed": len(completed),
+			"cancelled": sum(1 for task in self.tasks if task.status == "Cancelled"),
+			"open": len(self.open_tasks),
+			"rated": len(rated),
+			"late": sum(1 for task in rated if self.finished_late(task)),
 		}
 
 	def needs_attention(self) -> dict:
@@ -135,6 +174,27 @@ class ProjectOverview:
 			"total": len(flagged),
 			"tasks": [self.attention_row(reason, task) for reason, task in flagged[:ATTENTION_LIMIT]],
 			"due_soon_days": DUE_SOON_DAYS,
+		}
+
+	def loose_ends(self) -> dict | None:
+		"""For a completed or cancelled project, the tasks it was closed with still open, each under its status.
+
+		Nearly all of them are past their Expected End Date by now, so they are listed under their own
+		status rather than as Overdue; the due date shows how late each one is. Sorted by priority, then
+		Expected End Date (undated last), then name.
+		"""
+		if not self.is_closed:
+			return None
+
+		tasks = sorted(
+			self.open_tasks,
+			key=lambda task: (self.priority_rank(task), task.due_date or date.max, task.name),
+		)
+		return {
+			"total": len(tasks),
+			"tasks": [
+				self.attention_row(self.workflow_status(task), task) for task in tasks[:ATTENTION_LIMIT]
+			],
 		}
 
 	def milestone_details(self, task: frappe._dict) -> dict:
@@ -192,6 +252,14 @@ class ProjectOverview:
 			"days_late": self.days_late(task) if self.is_overdue(task) else 0,
 		}
 
+	def open_status(self, task: frappe._dict) -> str:
+		"""An open task's status, with Overdue decided by its Expected End Date as elsewhere on the tab."""
+		return "Overdue" if self.is_overdue(task) else self.workflow_status(task)
+
+	def workflow_status(self, task: frappe._dict) -> str:
+		"""An open task's status without Overdue, which the daily job sets and may not have reset."""
+		return "Open" if task.status == "Overdue" else task.status
+
 	def priority_rank(self, task: frappe._dict) -> int:
 		if task.priority in TASK_PRIORITIES:
 			return TASK_PRIORITIES.index(task.priority)
@@ -203,6 +271,22 @@ class ProjectOverview:
 
 	def is_due_soon(self, task: frappe._dict) -> bool:
 		return bool(task.due_date) and self.today <= task.due_date <= self.due_soon_until
+
+	@property
+	def is_closed(self) -> bool:
+		"""A completed or cancelled project's overview reports how it ended rather than what is open."""
+		return self.project.status in CLOSED_STATUSES
+
+	def can_be_late(self, task: frappe._dict) -> bool:
+		"""Only a task with both an Expected End Date and a Completed On can be judged on time or late."""
+		return bool(task.due_date and task.completed_on)
+
+	def finished_late(self, task: frappe._dict) -> bool:
+		return self.can_be_late(task) and self.completed_date(task) > task.due_date
+
+	def completed_date(self, task: frappe._dict) -> date:
+		"""Completed On, or the last change for a task completed without one."""
+		return getdate(task.completed_on or task.modified)
 
 	def days_late(self, task: frappe._dict) -> int:
 		return date_diff(self.today, task.due_date)

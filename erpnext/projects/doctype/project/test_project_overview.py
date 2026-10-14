@@ -6,6 +6,7 @@ from itertools import pairwise
 from unittest.mock import patch
 
 import frappe
+from frappe.desk.form.assign_to import add as add_assignment
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project import project_overview
@@ -25,6 +26,89 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.make_task("Scoping")
 		data = project_overview.get_project_overview(self.project)
 		self.assertTrue(data["summary"]["has_tasks"])
+
+	def test_delivery_of_a_completed_project(self):
+		self.make_task("On time", due=-10, status="Completed", completed_on=add_days(nowdate(), -12))
+		self.make_task("Late", due=-8, status="Completed", completed_on=add_days(nowdate(), -3))
+		self.make_task("Undated", status="Completed", completed_on=add_days(nowdate(), -5))
+		self.make_task("Dropped", due=-6, status="Cancelled")
+		self.make_task("Left open", due=-4)
+		self.assertIsNone(project_overview.get_project_overview(self.project)["delivery"])
+
+		frappe.db.set_value(
+			"Project", self.project, {"status": "Completed", "expected_end_date": add_days(nowdate(), -7)}
+		)
+		delivery = project_overview.get_project_overview(self.project)["delivery"]
+
+		self.assertEqual(delivery["finished_on"], getdate(add_days(nowdate(), -3)))
+		self.assertEqual(delivery["days_late"], 4)
+		self.assertEqual(
+			(delivery["total"], delivery["completed"], delivery["cancelled"], delivery["open"]), (5, 3, 1, 1)
+		)
+		# the undated task can't be early or late
+		self.assertEqual((delivery["rated"], delivery["late"]), (2, 1))
+
+	def test_delivery_breakdown_and_who_completed_what(self):
+		on_time = self.make_task("On time", due=-10)
+		add_assignment({"doctype": "Task", "name": on_time.name, "assign_to": ["Administrator"]})
+		on_time.reload()
+		on_time.update({"status": "Completed", "completed_on": add_days(nowdate(), -12)})
+		on_time.save()
+		self.make_task(
+			"Late", due=-8, status="Completed", completed_on=add_days(nowdate(), -3), assigned=True
+		)
+		self.make_task("Undated", status="Completed", completed_on=add_days(nowdate(), -5))
+		self.make_task("Dropped", due=-6, status="Cancelled")
+		self.make_task("Left open", due=-4)
+		data = project_overview.get_project_overview(self.project)
+		self.assertIsNone(data["tasks_by_delivery"])
+		self.assertIsNone(data["completed_by_assignee"])
+
+		frappe.db.set_value("Project", self.project, "status", "Completed")
+		data = project_overview.get_project_overview(self.project)
+
+		outcomes = {row["outcome"]: row["count"] for row in data["tasks_by_delivery"]["outcomes"]}
+		self.assertEqual(
+			outcomes, {"On Time": 1, "Late": 1, "No Due Date": 1, "Still Open": 1, "Cancelled": 1}
+		)
+		# completing the task closed its assignment, yet its assignee is still credited
+		self.assertFalse(json.loads(frappe.db.get_value("Task", on_time.name, "_assign") or "[]"))
+		rows = data["completed_by_assignee"]["rows"]
+		self.assertEqual(
+			[(row["user"], row["completed"], row["late"]) for row in rows],
+			[("Administrator", 2, 1), (None, 1, 0)],
+		)
+
+	def test_loose_ends_of_a_completed_project(self):
+		self.make_task("Done", due=-10, status="Completed", completed_on=add_days(nowdate(), -10))
+		self.make_task("Late and open", due=-4, priority="Low")
+		self.make_task("Still in review", due=-2, status="Pending Review", priority="Urgent")
+		self.make_task("Dropped", due=-6, status="Cancelled")
+		self.assertIsNone(project_overview.get_project_overview(self.project)["loose_ends"])
+
+		frappe.db.set_value("Project", self.project, "status", "Completed")
+		loose_ends = project_overview.get_project_overview(self.project)["loose_ends"]
+
+		self.assertEqual(loose_ends["total"], 2)
+		# urgent first, each under its own status; how late it is comes with the row
+		self.assertEqual(
+			[(row["subject"], row["reason"], row["days_late"]) for row in loose_ends["tasks"]],
+			[("Still in review", "Pending Review", 2), ("Late and open", "Open", 4)],
+		)
+
+	def test_a_cancelled_project_reports_how_far_it_got_without_a_chart(self):
+		self.make_task("Done", due=-10, status="Completed", completed_on=add_days(nowdate(), -10))
+		self.make_task("Never started", due=5)
+		frappe.db.set_value("Project", self.project, {"status": "Cancelled", "percent_complete": 50})
+
+		data = project_overview.get_project_overview(self.project)
+
+		self.assertEqual(data["delivery"]["status"], "Cancelled")
+		self.assertEqual(data["delivery"]["percent_complete"], 50)
+		self.assertEqual((data["delivery"]["completed"], data["delivery"]["open"]), (1, 1))
+		self.assertEqual(data["planned_vs_completed"]["points"], [])
+		self.assertEqual([row["subject"] for row in data["loose_ends"]["tasks"]], ["Never started"])
+		self.assertEqual(data["tasks_by_delivery"]["total"], 2)
 
 	def test_stat_cards(self):
 		self.make_task("Five days late", due=-5, expected_time=4)
@@ -177,6 +261,23 @@ class TestProjectOverview(ERPNextTestSuite):
 
 		chart = project_overview.get_project_overview(self.project)["planned_vs_completed"]
 		self.assertEqual(chart["points"], [])
+
+	def test_a_late_cancellation_does_not_stretch_a_finished_projects_chart(self):
+		frappe.db.set_value(
+			"Project",
+			self.project,
+			{"expected_start_date": add_days(nowdate(), -60), "expected_end_date": add_days(nowdate(), -30)},
+		)
+		self.make_task("Done", due=-40, status="Completed", completed_on=add_days(nowdate(), -40))
+		self.make_task("Dropped", due=-35, status="Cancelled")
+		frappe.db.set_value("Project", self.project, "status", "Completed")
+
+		chart = project_overview.get_project_overview(self.project)["planned_vs_completed"]
+
+		last = chart["points"][-1]
+		self.assertLess(getdate(last["date"]), getdate(add_days(nowdate(), -23)))
+		# the cancellation still counts, by the chart's last point
+		self.assertEqual(last["completed"], 100)
 
 	def make_progress_plan(self):
 		"""Four tasks over a project running three weeks either side of today, with weights 1, 1, 2, 4."""

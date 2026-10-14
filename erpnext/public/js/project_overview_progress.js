@@ -44,14 +44,14 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 				lineOptions: { regionFill: 1, showGaps: 1 },
 			},
 		];
-		const colors = [this.token_color("--surface-green-7")];
+		const colors = ["var(--surface-green-7)"];
 		if (has_plan) {
 			datasets.unshift({
 				name: __("Planned"),
 				values: points.map((point) => point.planned),
 				lineOptions: { dashed: 1 },
 			});
-			colors.unshift(this.token_color("--surface-gray-5"));
+			colors.unshift("var(--surface-gray-5)");
 		}
 
 		frappe.utils.make_chart(wrapper, {
@@ -73,13 +73,11 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		});
 	}
 
-	// frappe-charts blends colours from literal values, so a design token is read as the theme sets it
-	token_color(token) {
-		return getComputedStyle(document.documentElement).getPropertyValue(token).trim();
-	}
-
 	// where the project stands today, and the gap to plan or why there is no plan
 	subtitle() {
+		const delivery = this.overview.data.delivery;
+		if (delivery) return this.delivery_subtitle(delivery);
+
 		const { points, has_plan, today_index } = this.chart;
 		const latest = Math.max(
 			points.findLastIndex((point) => point.completed != null),
@@ -99,6 +97,50 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		return $subtitle
 			.text(prefix + __("{0} completed of {1} planned", [completed, planned]) + " · ")
 			.append(this.gap_text(point));
+	}
+
+	// a completed project: how it finished against plan, and how far behind it fell on the way
+	delivery_subtitle({ days_late, finished_on }) {
+		const parts = [];
+		if (days_late > 0) {
+			parts.push(
+				days_late === 1
+					? __("Finished 1 day after plan")
+					: __("Finished {0} days after plan", [days_late])
+			);
+		} else if (days_late < 0) {
+			parts.push(
+				days_late === -1
+					? __("Finished 1 day ahead of plan")
+					: __("Finished {0} days ahead of plan", [-days_late])
+			);
+		} else if (days_late === 0) {
+			parts.push(__("Finished on plan"));
+		} else if (finished_on) {
+			parts.push(__("Finished {0}", [moment(finished_on).format("D MMM YYYY")]));
+		}
+
+		const { points, has_plan, undated, total } = this.chart;
+		if (!has_plan) {
+			parts.push(__("No plan: {0} of {1} tasks have no Expected End Date", [undated, total]));
+			return $("<span>").text(parts.join(" · "));
+		}
+
+		const tracked = points.filter((point) => point.completed != null);
+		if (!tracked.length) return $("<span>").text(parts.join(" · "));
+		const $subtitle = $("<span>").text(parts.length ? parts.join(" · ") + " · " : "");
+		const worst = tracked.reduce((a, b) => (b.planned - b.completed > a.planned - a.completed ? b : a));
+		const gap = Math.round(worst.planned - worst.completed);
+		if (gap <= 0) {
+			return $subtitle.append(
+				$('<span class="po-chart-gap text-ink-green-7">').text(__("Never behind plan"))
+			);
+		}
+		return $subtitle.append(
+			$('<span class="po-chart-gap">')
+				.addClass(gap > BEHIND_PLAN_WARNING ? "text-ink-amber-7" : "text-ink-gray-7")
+				.text(__("At most {0} pts behind, on {1}", [gap, moment(worst.date).format("D MMM")]))
+		);
 	}
 
 	gap_text({ planned, completed }) {

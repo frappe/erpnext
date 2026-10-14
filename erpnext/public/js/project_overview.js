@@ -76,21 +76,62 @@ erpnext.ProjectOverview = class ProjectOverview {
 			this.data = data;
 			this.render_stats(data.stats);
 			this.progress.render(data.planned_vs_completed);
-			this.attention.render(data.needs_attention);
-			this.breakdown.render(data.tasks_by_status, data.workload);
+			this.attention.render(data);
+			this.breakdown.render(data);
 		}
 	}
 
 	render_header(data) {
 		const items = [];
-		const milestone = data?.summary?.has_tasks && data.milestone;
-		if (milestone && (milestone.next || milestone.all_met)) items.push(this.milestone_item(milestone));
-		const range = this.date_range_text();
-		if (range) items.push($("<span>").text(range));
+		if (data?.delivery) {
+			// once the project is completed, how it finished replaces what is coming up
+			items.push(
+				data.delivery.status === "Cancelled"
+					? this.cancelled_item(data.delivery)
+					: this.delivery_item(data.delivery)
+			);
+		} else {
+			const milestone = data?.summary?.has_tasks && data.milestone;
+			if (milestone && (milestone.next || milestone.all_met))
+				items.push(this.milestone_item(milestone));
+			const range = this.date_range_text();
+			if (range) items.push($("<span>").text(range));
+		}
 		if (!items.length) return;
 
 		const $header = $('<div class="po-header">').appendTo(this.$root);
 		items.forEach((item, i) => $header.append(i ? '<span class="po-header-divider"></span>' : "", item));
+	}
+
+	delivery_item({ finished_on, planned_end, days_late }) {
+		const full = (date) => moment(date).format("D MMM YYYY");
+		const $item = $('<span class="po-milestone">').append(frappe.utils.icon("circle-check", "sm"));
+		$('<span class="po-milestone-link">')
+			.text(finished_on ? __("Completed {0}", [full(finished_on)]) : __("Completed"))
+			.appendTo($item);
+		if (days_late != null) {
+			let schedule = __("On time");
+			if (days_late > 0) schedule = this.days_late_text(days_late);
+			else if (days_late < 0) schedule = this.days_early_text(-days_late);
+			$('<span class="po-milestone-due">')
+				.toggleClass("po-error", days_late > 0)
+				.text(schedule + " · " + __("planned {0}", [full(planned_end)]))
+				.appendTo($item);
+		}
+		return $item;
+	}
+
+	// how far a cancelled project got, against the dates it was planned for
+	cancelled_item({ percent_complete }) {
+		const $item = $('<span class="po-milestone">').append(frappe.utils.icon("circle-x", "sm"));
+		$('<span class="po-milestone-link">').text(__("Cancelled")).appendTo($item);
+		const notes = [
+			__("{0}% complete", [format_number(percent_complete, null, percent_complete % 1 ? 1 : 0)]),
+		];
+		const range = this.date_range_text();
+		if (range) notes.push(__("planned {0}", [range]));
+		$('<span class="po-milestone-due">').text(notes.join(" · ")).appendTo($item);
+		return $item;
 	}
 
 	milestone_item({ next, all_met }) {
@@ -133,11 +174,22 @@ erpnext.ProjectOverview = class ProjectOverview {
 	}
 
 	render_stats(stats, loading) {
-		const labels = [__("Open Tasks"), __("Overdue"), __("Hours Logged")];
+		// a closed project has nothing open or overdue, so those cards report how it ended instead;
+		// a cancelled one never reached its dates, so being on time doesn't apply
+		const delivery = stats && this.data.delivery;
+		const cancelled = delivery?.status === "Cancelled";
+		let labels = [__("Open Tasks"), __("Overdue"), __("Hours Logged")];
+		if (cancelled) labels = [__("Tasks Delivered"), __("Hours Logged")];
+		else if (delivery) labels = [__("Tasks Delivered"), __("On Time"), __("Hours Logged")];
 		const failed = () => ({ value: "—", caption: this.error_text(__("Could not load tasks")) });
-		const cards = stats
-			? [this.open_tasks_card(stats), this.overdue_card(stats), this.hours_card(stats)]
-			: labels.map((label) => (loading ? { loading } : failed()));
+		let cards = labels.map((label) => (loading ? { loading } : failed()));
+		if (cancelled) {
+			cards = [this.delivered_card(delivery), this.hours_card(stats)];
+		} else if (delivery) {
+			cards = [this.delivered_card(delivery), this.on_time_card(delivery), this.hours_card(stats)];
+		} else if (stats) {
+			cards = [this.open_tasks_card(stats), this.overdue_card(stats), this.hours_card(stats)];
+		}
 		cards.forEach((card, i) => (card.label = labels[i]));
 		// left out when the user can't read Timesheets
 		if (stats && this.data.unbilled) cards.push(this.unbilled_card(this.data.unbilled));
@@ -166,6 +218,29 @@ erpnext.ProjectOverview = class ProjectOverview {
 			value: count ? $('<span class="po-error">').text(format_number(count, null, 0)) : "0",
 			caption,
 			onclick: () => this.open_task_list({ exp_end_date: ["<", this.data.as_of] }),
+		};
+	}
+
+	delivered_card({ total, completed, cancelled, open }) {
+		const notes = [];
+		if (cancelled) notes.push(__("{0} cancelled", [cancelled]));
+		if (open) notes.push(__("{0} still open", [open]));
+		return {
+			value: __("{0} of {1}", [format_number(completed, null, 0), format_number(total, null, 0)]),
+			caption: notes.length ? notes.join(" · ") : __("All tasks completed"),
+			onclick: () => this.open_list("Task", { project: this.project, status: "Completed" }),
+		};
+	}
+
+	// only tasks with both an Expected End Date and a Completed On can be on time or late
+	on_time_card({ rated, late }) {
+		if (!rated) return { value: "—", caption: __("No Expected End Dates to compare") };
+		let caption = __("Every task finished on time");
+		if (late) caption = late === 1 ? __("1 task finished late") : __("{0} tasks finished late", [late]);
+		return {
+			value: Math.round(((rated - late) / rated) * 100) + "%",
+			caption,
+			onclick: () => this.open_list("Task", { project: this.project, status: "Completed" }),
 		};
 	}
 
@@ -284,6 +359,10 @@ erpnext.ProjectOverview = class ProjectOverview {
 
 	days_late_text(days) {
 		return days === 1 ? __("1 day late") : __("{0} days late", [days]);
+	}
+
+	days_early_text(days) {
+		return days === 1 ? __("1 day early") : __("{0} days early", [days]);
 	}
 
 	hours_text(hours) {
