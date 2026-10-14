@@ -464,7 +464,10 @@ class StatusService:
 		if self.doc.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.doc.product_bundle_item)
 		else:
-			query = query.where(wo.production_item == self.doc.production_item)
+			query = query.where(
+				(wo.production_item == self.doc.production_item)
+				& (wo.sales_order_item == self.doc.sales_order_item)
+			)
 
 		qty = query.run(as_list=1)
 		return qty[0][0] if qty and qty[0][0] else 0
