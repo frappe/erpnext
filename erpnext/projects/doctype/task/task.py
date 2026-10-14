@@ -100,7 +100,8 @@ class Task(NestedSet):
 		self.validate_parent_project_dates()
 
 	def set_default_weight(self):
-		if self.type and self.task_weight is None:
+		type_changed_alone = self.has_value_changed("type") and not self.has_value_changed("task_weight")
+		if self.type and (self.task_weight is None or type_changed_alone):
 			self.task_weight = frappe.get_cached_value("Task Type", self.type, "weight")
 
 	def validate_parent_expected_end_date(self):
