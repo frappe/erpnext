@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 
 
@@ -19,9 +20,14 @@ def get_data(report_filters):
 	invoice = frappe.qb.DocType("Purchase Invoice")
 	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 	item = frappe.qb.DocType("Item")
+	receipt = frappe.qb.DocType("Purchase Receipt")
 	received = get_received_as_on(as_on_date)
 	returned = get_returned_as_on(as_on_date)
-	received_qty = IfNull(received.qty, 0)
+	received_qty = (
+		IfNull(received.qty, 0)
+		+ Case().when(receipt.name.isnotnull(), invoice_item.qty).else_(0)
+		- IfNull(returned.stock_qty, 0)
+	)
 	returned_qty = IfNull(returned.qty, 0)
 
 	query = (
@@ -34,6 +40,12 @@ def get_data(report_filters):
 		.on(received.detail == invoice_item.name)
 		.left_join(returned)
 		.on(returned.detail == invoice_item.name)
+		.left_join(receipt)
+		.on(
+			(receipt.name == invoice_item.purchase_receipt)
+			& (receipt.docstatus == 1)
+			& (receipt.posting_date <= as_on_date)
+		)
 		.select(
 			invoice.name,
 			invoice.supplier,
@@ -85,14 +97,19 @@ def get_received_as_on(as_on_date):
 
 
 def get_returned_as_on(as_on_date):
-	"""Qty cancelled per invoice row by debit notes posted on or before the date."""
+	"""Qty cancelled and stock sent back per invoice row by debit notes posted on or before the date."""
 	debit_note = frappe.qb.DocType("Purchase Invoice")
 	debit_note_item = frappe.qb.DocType("Purchase Invoice Item")
+	stock_returned_qty = Case().when(debit_note.update_stock == 1, -debit_note_item.received_qty).else_(0)
 	return (
 		frappe.qb.from_(debit_note_item)
 		.join(debit_note)
 		.on(debit_note.name == debit_note_item.parent)
-		.select(debit_note_item.purchase_invoice_item.as_("detail"), Sum(-debit_note_item.qty).as_("qty"))
+		.select(
+			debit_note_item.purchase_invoice_item.as_("detail"),
+			Sum(-debit_note_item.qty).as_("qty"),
+			Sum(stock_returned_qty).as_("stock_qty"),
+		)
 		.where(
 			(debit_note.docstatus == 1)
 			& (debit_note.is_return == 1)
