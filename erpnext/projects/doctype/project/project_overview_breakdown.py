@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 # workflow order, so the donut and its legend read from new work to closed work
 TASK_STATUSES = ("Open", "Working", "Pending Review", "Overdue", "Completed", "Cancelled")
+# how a completed project's tasks ended up, best first
+DELIVERY_OUTCOMES = ("On Time", "Late", "No Due Date", "Still Open", "Cancelled")
 
 
 class TaskBreakdown:
@@ -53,11 +55,70 @@ class TaskBreakdown:
 			)
 		}
 
+	def by_delivery(self) -> dict:
+		"""For a completed or cancelled project, its tasks by how they ended: on time, late, without a date to
+		judge, still open, or cancelled."""
+		counts = Counter(self.outcome(task) for task in self.overview.tasks)
+		return {
+			"outcomes": [
+				{"outcome": outcome, "count": counts[outcome]}
+				for outcome in DELIVERY_OUTCOMES
+				if counts[outcome]
+			],
+			"total": len(self.overview.tasks),
+		}
+
+	def by_completer(self) -> dict:
+		"""For a completed or cancelled project, completed tasks per assignee and how many of them were late; most first.
+
+		Completing a task closes its assignments, which empties its Assigned To, so the people are read
+		from its ToDos as well; each row lists its tasks, as no list filter can find them that way.
+		Group tasks are left out, as their subtasks carry the work.
+		"""
+		completed = [task for task in self.overview.tasks if task.status == "Completed" and not task.is_group]
+		assignees = self.assignees(completed)
+		rows = {}
+		for task in completed:
+			for user in sorted(assignees[task.name]) or [None]:
+				row = rows.setdefault(user, {"user": user, "completed": 0, "late": 0, "tasks": []})
+				row["completed"] += 1
+				row["late"] += self.overview.finished_late(task)
+				row["tasks"].append(task.name)
+
+		return {
+			"rows": sorted(
+				rows.values(), key=lambda row: (row["user"] is None, -row["completed"], row["late"])
+			)
+		}
+
+	def assignees(self, tasks: list[frappe._dict]) -> dict[str, set[str]]:
+		"""Everyone assigned to each task, including assignments closed when it was completed."""
+		people = {task.name: set(task.assigned_to) for task in tasks}
+		if not tasks:
+			return people
+		for todo in frappe.get_all(
+			"ToDo",
+			filters={
+				"reference_type": "Task",
+				"reference_name": ["in", list(people)],
+				"status": ["!=", "Cancelled"],
+			},
+			fields=["reference_name", "allocated_to"],
+		):
+			people[todo.reference_name].add(todo.allocated_to)
+		return people
+
+	def outcome(self, task: frappe._dict) -> str:
+		if task.status == "Cancelled":
+			return "Cancelled"
+		if task.status != "Completed":
+			return "Still Open"
+		if not self.overview.can_be_late(task):
+			return "No Due Date"
+		return "Late" if self.overview.finished_late(task) else "On Time"
+
 	def status(self, task: frappe._dict) -> str:
-		if not task.is_closed and self.overview.is_overdue(task):
-			return "Overdue"
-		# the daily job may not have reset a task it marked Overdue before its date moved
-		return "Open" if task.status == "Overdue" else task.status
+		return task.status if task.is_closed else self.overview.open_status(task)
 
 	@cached_property
 	def workload_tasks(self) -> list[frappe._dict]:

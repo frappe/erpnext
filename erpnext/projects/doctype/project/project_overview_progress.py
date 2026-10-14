@@ -30,8 +30,13 @@ class PlannedVsCompleted:
 		self.method = project.percent_complete_method
 
 	def build(self) -> dict:
-		# cancelled tasks count as closed, so a project of only cancelled tasks would chart as 100% done
-		if self.method == "Manual" or all(task.status == "Cancelled" for task in self.tasks):
+		# cancelled tasks count as closed, so a project of only cancelled tasks would chart as 100% done;
+		# a cancelled project was stopped short of its plan, so there is nothing to measure against it
+		if (
+			self.method == "Manual"
+			or self.project.status == "Cancelled"
+			or all(task.status == "Cancelled" for task in self.tasks)
+		):
 			return {"method": self.method, "points": []}
 
 		dates = self.axis_dates()
@@ -124,9 +129,11 @@ class PlannedVsCompleted:
 
 	@cached_property
 	def task_dates(self) -> list[date]:
+		"""Dates the chart must cover. A cancellation is left out: it has no date of its own, and
+		its last change can come long after the project ended."""
 		dates = [task.due_date for task in self.tasks if task.due_date]
 		dates += [getdate(task.exp_start_date) for task in self.tasks if task.exp_start_date]
-		dates += [self.closed_date(task) for task in self.tasks if task.is_closed]
+		dates += [self.closed_date(task) for task in self.tasks if task.status == "Completed"]
 		return dates
 
 	@cached_property
@@ -144,7 +151,11 @@ class PlannedVsCompleted:
 		return self.axis_end
 
 	def closed_date(self, task: frappe._dict) -> date:
-		return getdate(task.completed_on or task.modified)
+		"""Completed On, or the last change; a cancelled task counts by the chart's end at the latest."""
+		closed_on = getdate(task.completed_on or task.modified)
+		if task.status == "Cancelled":
+			return min(closed_on, self.axis_end)
+		return closed_on
 
 	@cached_property
 	def weights(self) -> dict[str, float]:
