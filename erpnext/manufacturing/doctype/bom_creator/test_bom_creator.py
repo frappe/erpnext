@@ -385,6 +385,31 @@ class TestBOMCreator(ERPNextTestSuite):
 			["Frame Assembly"],
 		)
 
+	def test_deleting_a_grid_row_keeps_the_tree(self):
+		make_item("Scooter", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Scooter BOM Grid Delete",
+			company="_Test Company",
+			item_code="Scooter",
+			qty=1,
+			currency="INR",
+		)
+		frame = add_test_sub_assembly(doc, "Scooter", doc.name, "Frame Assembly", ["Frame", "Fork"])
+		seat = add_test_sub_assembly(doc, "Scooter", doc.name, "Seat Assembly", ["Seat"])
+
+		doc.items = [row for row in doc.items if row.item_code != "Frame"]
+		for idx, row in enumerate(doc.items, start=1):
+			row.idx = idx
+		doc.save()
+		doc.reload()
+
+		self.assertEqual(child_items(doc, frame), ["Fork"])
+		self.assertEqual(child_items(doc, seat), ["Seat"])
+
+		doc.submit()
+		doc.create_boms()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
+
 
 def create_items():
 	raw_materials = [
