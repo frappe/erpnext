@@ -891,7 +891,10 @@ class JobCard(Document):
 				)
 			)
 
-		if not (self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id):
+		if d.operation_row_id and self.operation_row_id:
+			if self.operation_row_id != d.operation_row_id:
+				return
+		elif self.get("operation") != d.operation:
 			return
 
 		self.append(

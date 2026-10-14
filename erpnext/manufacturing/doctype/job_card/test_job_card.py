@@ -3838,6 +3838,34 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.append("time_logs", jc_review_log("2031-03-07 08:00:00", 60, 10))
 		self.assertRaisesRegex(frappe.ValidationError, "Materials need to be transferred", job_card.submit)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_repeated_operation_gets_only_its_own_materials(self):
+		workstation = make_jc_review_workstation()
+		cutting = make_jc_review_operation(workstation)
+		welding = make_jc_review_operation(workstation)
+		first_item, second_item = make_jc_review_item(), make_jc_review_item()
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": first_item, "qty": 1, "operation": cutting, "operation_row_id": 1},
+				{"item_code": second_item, "qty": 2, "operation": cutting, "operation_row_id": 3},
+			],
+			[
+				{"operation": cutting, "workstation": workstation, "time_in_mins": 60},
+				{"operation": welding, "workstation": workstation, "time_in_mins": 60},
+				{"operation": cutting, "workstation": workstation, "time_in_mins": 60},
+			],
+			qty=5,
+			transfer_material_against="Job Card",
+		)
+
+		items_by_row = {
+			job_card.operation_row_id: [(row.item_code, row.required_qty) for row in job_card.items]
+			for job_card in get_jc_review_job_cards(wo.name)
+		}
+		self.assertEqual(items_by_row[1], [(first_item, 5)])
+		self.assertEqual(items_by_row[3], [(second_item, 10)])
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
