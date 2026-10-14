@@ -67,3 +67,11 @@ class TestProcessLossReport(ERPNextTestSuite):
 		self.assertEqual((both_days_row.produced_qty, both_days_row.process_loss_qty), (9, 1))
 
 		self.assertIsNone(self.find_row(self.run_report(from_date=tomorrow, to_date=tomorrow), wo_order.name))
+
+	def test_process_loss_value_for_partial_production(self):
+		wo_order = self.make_manufactured_work_order(planned_qty=10, produced_qty=4, manufacture_qty=5)
+
+		row = self.find_row(self.run_report(), wo_order.name)
+		self.assertEqual(row.qty_to_manufacture, 10)
+		self.assertGreater(row.total_fg_value, 0)
+		self.assertAlmostEqual(row.total_pl_value, row.total_fg_value / 5)
