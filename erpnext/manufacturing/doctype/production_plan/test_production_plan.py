@@ -1071,6 +1071,46 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual({row.item_code: row.qty for row in requested}, stored)
 
+	def test_consolidated_orders_get_the_work_order_qty_in_order(self):
+		item = "Test Production Item 1"
+		first = make_sales_order(item_code=item, qty=5)
+		second = make_sales_order(item_code=item, qty=3)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = first.company
+		plan.get_items_from = "Sales Order"
+		for order in (first, second):
+			plan.append(
+				"sales_orders",
+				{
+					"sales_order": order.name,
+					"sales_order_date": order.transaction_date,
+					"customer": order.customer,
+				},
+			)
+		plan.combine_items = 1
+		plan.get_items()
+		plan.submit()
+		plan.make_work_order()
+
+		draft = frappe.get_doc("Work Order", {"production_plan": plan.name, "docstatus": 0})
+		draft.wip_warehouse = "Work In Progress - _TC"
+		draft.qty = 4
+		other = frappe.copy_doc(draft)
+		draft.submit()
+
+		def work_order_qty():
+			return [
+				frappe.db.get_value("Sales Order Item", order.items[0].name, "work_order_qty")
+				for order in (first, second)
+			]
+
+		self.assertEqual(work_order_qty(), [4, 0])
+		other.submit()
+		self.assertEqual(work_order_qty(), [5, 3])
+		draft.cancel()
+		self.assertEqual(work_order_qty(), [4, 0])
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
