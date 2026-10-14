@@ -3714,6 +3714,30 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		self.assertFalse(frappe.db.exists("Stock Entry", {"job_card": job_card.name, "docstatus": 1}))
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_workstation_capacity_counts_logs_of_other_employees(self):
+		workstation = make_jc_review_workstation(capacity=1)
+		operation = make_jc_review_operation(workstation)
+		operations = [{"operation": operation, "workstation": workstation, "time_in_mins": 60}]
+		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
+		fg_item = make_jc_review_item()
+		first_card = get_jc_review_job_cards(
+			make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1).name
+		)[0]
+		second_card = get_jc_review_job_cards(
+			make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1).name
+		)[0]
+
+		first_card.append(
+			"time_logs", jc_review_log("2031-03-03 17:20:00", 60, 10, make_jc_review_employee())
+		)
+		first_card.submit()
+
+		second_card.append(
+			"time_logs", jc_review_log("2031-03-03 17:50:00", 60, 10, make_jc_review_employee())
+		)
+		self.assertRaises(OverlapError, second_card.save)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

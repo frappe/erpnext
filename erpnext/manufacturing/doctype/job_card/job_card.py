@@ -528,11 +528,8 @@ class JobCard(Document):
 		return query
 
 	def apply_employee_filters(self, query, jc, jctl, args, doctype, open_job_cards):
-		if args.get("employee"):
-			if doctype == "Job Card Time Log":
-				query = query.where(jctl.employee == args.get("employee"))
-			else:
-				query = query.where(jc.name.isin(open_job_cards))
+		if args.get("employee") and doctype == "Job Card Scheduled Time":
+			query = query.where(jc.name.isin(open_job_cards))
 
 		return query
 
