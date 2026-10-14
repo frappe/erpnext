@@ -125,6 +125,33 @@ class TestStockBalance(ERPNextTestSuite):
 			{plant_a: (5, 500), plant_b: (3, 300)},
 		)
 
+	def test_reconciliation_without_dimension_in_dimension_wise_stock(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+			make_plant_dimension,
+		)
+
+		plant_a, _plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		def receive_into_plant_a(qty):
+			receipt = make_stock_entry(
+				item_code=item, to_warehouse=self.test_warehouse, qty=qty, rate=100, do_not_save=True
+			)
+			receipt.items[0].to_id_plant = plant_a
+			receipt.insert().submit()
+
+		receive_into_plant_a(10)
+		make_stock_entry(item_code=item, to_warehouse=self.test_warehouse, qty=5, rate=100)
+		create_stock_reconciliation(item_code=item, warehouse=self.test_warehouse, qty=20, rate=100)
+		receive_into_plant_a(5)
+
+		rows = stock_balance(_dict(self.filters, item_code=[item], show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (15, 1500), None: (10, 1000)},
+		)
+
 	def test_include_zero_stock_items(self):
 		"""Items whose balance nets to zero are hidden by default and shown only when the filter is on."""
 		self.generate_stock_ledger(
