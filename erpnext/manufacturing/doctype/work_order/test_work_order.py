@@ -6668,6 +6668,34 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "Only a submitted", stop_unstop, wo.name, "Stopped")
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Cancelled")
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_from_work_order_uses_produced_qty(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 2}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10, skip_transfer=1)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10)).submit()
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(new_bom.quantity, 10)
+		self.assertEqual([(row.item_code, row.qty) for row in new_bom.items], [(rm_item, 20)])
+
+		operation, workstation = make_review_operation()
+		bom_with_operation = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 2}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+		)
+		wo = make_review_work_order(fg_item, bom_with_operation.name, 10)
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(
+			[(row.doctype, row.operation, row.time_in_mins) for row in new_bom.operations],
+			[("BOM Operation", operation, 60)],
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""

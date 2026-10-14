@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, IfNull, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Min, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -95,6 +95,18 @@ class ItemHasVariantError(frappe.ValidationError):
 
 class SerialNoQtyError(frappe.ValidationError):
 	pass
+
+
+_BOM_OPERATION_FIELDS_FROM_WORK_ORDER = (
+	"operation",
+	"workstation",
+	"workstation_type",
+	"description",
+	"hour_rate",
+	"sequence_id",
+	"batch_size",
+	"quality_inspection_required",
+)
 
 
 class WorkOrder(Document):
@@ -969,35 +981,51 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_bom(self):
+		bom = frappe.new_doc("BOM")
+		bom.item = self.production_item
+		bom.conversion_rate = 1
+		bom.quantity = flt(self.produced_qty) or flt(self.qty)
+
+		for d in self.get_consumed_items_for_bom():
+			bom.append("items", {"item_code": d.item_code, "qty": d.qty, "source_warehouse": d.s_warehouse})
+
+		if self.operations:
+			bom.with_operations = 1
+			for operation in self.operations:
+				bom.append("operations", self.get_bom_operation_row(operation, bom.quantity))
+
+		bom.set_bom_material_details()
+		return bom
+
+	def get_consumed_items_for_bom(self):
 		sed = frappe.qb.DocType("Stock Entry Detail")
 		se = frappe.qb.DocType("Stock Entry")
-		data = (
+		return (
 			frappe.qb.from_(sed)
 			.inner_join(se)
 			.on(se.name == sed.parent)
-			.select(sed.item_code, sed.qty, sed.s_warehouse)
+			.select(sed.item_code, sed.s_warehouse, Sum(sed.transfer_qty).as_("qty"))
 			.where(
 				(se.purpose == "Manufacture")
 				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
 				& (se.docstatus == 1)
 				& (se.work_order == self.name)
 			)
+			.groupby(sed.item_code, sed.s_warehouse)
+			.orderby(Min(sed.idx))
 			.run(as_dict=1)
 		)
 
-		bom = frappe.new_doc("BOM")
-		bom.item = self.production_item
-		bom.conversion_rate = 1
+	def get_bom_operation_row(self, operation, bom_qty):
+		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
+			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
+		else:
+			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 
-		for d in data:
-			bom.append("items", {"item_code": d.item_code, "qty": d.qty, "source_warehouse": d.s_warehouse})
-
-		if self.operations:
-			bom.set("operations", self.operations)
-			bom.with_operations = 1
-
-		bom.set_bom_material_details()
-		return bom
+		row = {"time_in_mins": time_per_unit * flt(bom_qty)}
+		for fieldname in _BOM_OPERATION_FIELDS_FROM_WORK_ORDER:
+			row[fieldname] = operation.get(fieldname)
+		return row
 
 	def calculate_operating_cost(self):
 		return OperationsService(self).calculate_operating_cost()
