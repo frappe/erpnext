@@ -97,6 +97,16 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		# 101790 * 7.3% * 91 / 365
 		self.assertEqual(schedule[1].estimated_interest, 1852.58)
 
+	def test_interest_paid_out_stops_compounding(self):
+		investment = make_fd(CUMULATIVE_FD_TERMS)
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).submit()
+		make_transaction(
+			investment.name, "Interest Receipt", posting_date="2026-04-01", interest_amount=1800
+		).submit()
+
+		# the first quarter's interest was paid out, so the second earns on 100000 only: 100000 * 7.3% * 91 / 365
+		self.assertEqual(get_investment(investment.name).interest_schedule[1].estimated_interest, 1820)
+
 	def test_accrual_posts_bank_figure_and_fills_schedule(self):
 		investment = make_fd(FD_TERMS)
 		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1795).submit()

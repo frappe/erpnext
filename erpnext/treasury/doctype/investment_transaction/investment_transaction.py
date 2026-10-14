@@ -386,7 +386,8 @@ class InvestmentTransaction(AccountsController):
 			)
 
 	def update_interest_schedule(self):
-		if self.is_principal_movement():
+		# interest paid out of a cumulative deposit no longer compounds
+		if self.is_principal_movement() or self.transaction_type == "Interest Receipt":
 			update_interest_schedule(self.investment)
 
 	def set_cost_and_realised_gain_loss(self):

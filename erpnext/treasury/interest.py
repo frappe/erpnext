@@ -6,6 +6,7 @@
 from functools import cached_property
 from itertools import pairwise
 
+import frappe
 from frappe.utils import add_days, add_months, date_diff, flt, getdate
 
 INTEREST_CLASSES = ("Deposit", "Bond")
@@ -24,6 +25,7 @@ class InterestCalculator:
 		self.unit_value = flt(investment.face_value) if self.is_bond else 1
 		self.period_months = FREQUENCY_MONTHS.get(self.get_frequency(), DEFAULT_PERIOD_MONTHS)
 		self.lots = get_lot_timelines(investment.name, self.is_bond)
+		self.receipts = get_interest_receipts(investment.name) if self.compounds else []
 
 	def get_frequency(self):
 		if self.is_bond:
@@ -67,7 +69,9 @@ class InterestCalculator:
 		interest = 0
 		for piece_start, piece_end in self.split_at_balance_changes(start, end):
 			principal = sum(lot.get_quantity(piece_start) for lot in self.lots) * self.unit_value
-			balance = principal + compounded_interest if principal else 0
+			# interest paid out stops earning; receipts beyond what was compounded never touch principal
+			received = sum(amount for date, amount in self.receipts if date <= piece_start)
+			balance = principal + max(compounded_interest - received, 0) if principal else 0
 			interest += balance * self.rate * self.get_year_fraction(piece_start, piece_end)
 
 		return interest
@@ -98,6 +102,7 @@ class InterestCalculator:
 	def split_at_balance_changes(self, start, end):
 		start, end = getdate(start), getdate(end)
 		change_dates = {date for lot in self.lots for date in lot.get_change_dates() if start < date < end}
+		change_dates.update(date for date, _amount in self.receipts if start < date < end)
 		boundaries = [start, *sorted(change_dates), end]
 
 		return list(pairwise(boundaries))
@@ -242,6 +247,16 @@ def get_lot_timelines(investment, is_bond):
 			remaining -= lot.consume(getdate(exit_transaction.posting_date), remaining)
 
 	return lots
+
+
+def get_interest_receipts(investment):
+	"""Interest paid out of the investment, as (date, amount)."""
+	receipts = frappe.get_all(
+		"Investment Transaction",
+		filters={"investment": investment, "docstatus": 1, "transaction_type": "Interest Receipt"},
+		fields=["posting_date", "interest_amount"],
+	)
+	return [(getdate(receipt.posting_date), flt(receipt.interest_amount)) for receipt in receipts]
 
 
 def take_fifo(lots, get_quantity, already_taken, to_take):
