@@ -549,9 +549,12 @@ frappe.ui.form.on("Payment Entry", {
 
 		let description = "";
 		if (cheque.cheque_book) {
-			description = cheque.cheque_no
-				? __("Free: {0}", [cheque.free])
-				: __("Free: {0}. Enter a cheque number manually.", [cheque.free]);
+			description = __("Free: {0} · Start No: {1} · End No: {2}", [
+				cheque.free,
+				cheque.cheque_start_no,
+				cheque.cheque_end_no,
+			]);
+			if (!cheque.cheque_no) description += " " + __("Enter a cheque number manually.");
 		}
 		frm.set_df_property("cheque_book", "description", description);
 

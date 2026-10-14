@@ -17,6 +17,26 @@ frappe.ui.form.on("Cancelled Cheque", {
 		});
 	},
 
+	refresh(frm) {
+		return frm.events.cheque_book(frm);
+	},
+
+	async cheque_book(frm) {
+		const cheque_book = frm.doc.cheque_book;
+		frm.set_df_property("cheque_book", "description", "");
+		if (!cheque_book) return;
+		const { message } = await frappe.db.get_value("Cheque Book", cheque_book, [
+			"cheque_start_no",
+			"cheque_end_no",
+		]);
+		if (cheque_book !== frm.doc.cheque_book || !message) return;
+		frm.set_df_property(
+			"cheque_book",
+			"description",
+			__("Start No: {0} · End No: {1}", [message.cheque_start_no, message.cheque_end_no])
+		);
+	},
+
 	async payment_entry(frm) {
 		const payment_entry = frm.doc.payment_entry;
 		if (!payment_entry) return;

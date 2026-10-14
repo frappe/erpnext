@@ -270,7 +270,16 @@ class TestChequeBook(ERPNextTestSuite):
 
 	def test_next_cheque_no_starts_at_cheque_start_no(self):
 		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000101")
-		self.assertEqual(get_next_cheque(BANK_LEDGER, include_free=True)["free"], 5)
+		self.assertEqual(
+			get_next_cheque(BANK_LEDGER, include_free=True),
+			{
+				"cheque_book": self.book.name,
+				"cheque_no": "000101",
+				"free": 5,
+				"cheque_start_no": "000101",
+				"cheque_end_no": "000105",
+			},
+		)
 
 		self.make_cheque_payment()
 		self.assertEqual(get_next_cheque(BANK_LEDGER, include_free=True)["free"], 4)
@@ -352,7 +361,13 @@ class TestChequeBook(ERPNextTestSuite):
 		self.book.reload()
 		self.assertEqual(self.book.status, "Submitted")
 		self.assertEqual(
-			get_next_cheque(BANK_LEDGER, include_free=True), {"cheque_book": self.book.name, "free": 1}
+			get_next_cheque(BANK_LEDGER, include_free=True),
+			{
+				"cheque_book": self.book.name,
+				"free": 1,
+				"cheque_start_no": "000101",
+				"cheque_end_no": "000105",
+			},
 		)
 
 		self.make_cheque_payment("000101")

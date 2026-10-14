@@ -263,6 +263,8 @@ def get_next_cheque(account: str, cheque_book: str | None = None, include_free: 
 		result["cheque_no"] = book.cheque_no
 	if include_free:
 		result["free"] = book.free
+		result["cheque_start_no"] = book.cheque_start_no
+		result["cheque_end_no"] = book.cheque_end_no
 	return result
 
 
