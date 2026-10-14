@@ -8,6 +8,8 @@ from frappe.utils import escape_html
 from frappe.utils.file_manager import save_file
 from lxml import etree
 
+from erpnext.edi.doctype.code_list.code_list import get_required_text
+
 GENERICODE_FETCH_TIMEOUT = 15
 LOCAL_FILE_PREFIXES = ("/files/", "/private/files/")
 
@@ -106,7 +108,7 @@ def import_genericode_content(
 	root = parse_genericode_content(content)
 
 	# Extract the name (CanonicalVersionUri) from the parsed XML
-	name = root.find(".//CanonicalVersionUri").text
+	name = get_required_text(root, ".//CanonicalVersionUri")
 	docname = docname or name
 
 	if frappe.db.exists(doctype, docname):
