@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Case, DocType
-from frappe.query_builder.functions import Coalesce, Count, Max, Sum
+from frappe.query_builder.functions import Coalesce, Count, Sum
 from frappe.utils import add_days, add_months, cint, date_diff, flt, getdate, today
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
@@ -231,7 +231,7 @@ def delivery(supplier, company, from_date, to_date, as_of):
 			"items.closed",
 		],
 	)
-	received_on = receipt_dates(supplier, company, from_date)
+	received_on = fulfilment_dates(supplier, company, {line.line: flt(line.qty) for line in lines})
 	counts = {"on_time": 0, "late": 0, "overdue": 0}
 	orders = set()
 	for line in lines:
@@ -258,30 +258,40 @@ def delivery(supplier, company, from_date, to_date, as_of):
 	}
 
 
-def receipt_dates(supplier, company, from_date):
-	dates = {}
+def fulfilment_dates(supplier, company, ordered):
+	receipts = {}
 	for doctype, line_field, extra in (
 		("Purchase Receipt", "purchase_order_item", {}),
 		("Purchase Invoice", "po_detail", {"update_stock": 1}),
 	):
-		if not frappe.has_permission(doctype, "read"):
+		if not ordered or not frappe.has_permission(doctype, "read"):
 			continue
-		parent = DocType(doctype)
+		item = DocType(f"{doctype} Item")
 		for row in permitted(
 			doctype,
-			{
-				"docstatus": 1,
-				"supplier": supplier,
-				"company": company,
-				"posting_date": [">=", from_date],
-				**extra,
-			},
-			[f"items.{line_field} as line", Max(parent.posting_date).as_("received_on")],
-			group_by=f"items.{line_field}",
+			[
+				{"docstatus": 1, "supplier": supplier, "company": company, **extra},
+				[f"{doctype} Item", line_field, "in", list(ordered)],
+			],
+			[
+				f"items.{line_field} as line",
+				"posting_date",
+				Sum(item.received_qty).as_("qty"),
+			],
+			group_by=f"items.{line_field}, posting_date",
 		):
-			if row.line:
-				received = getdate(row.received_on)
-				dates[row.line] = max(received, dates.get(row.line, received))
+			day = receipts.setdefault(row.line, {})
+			posted = getdate(row.posting_date)
+			day[posted] = day.get(posted, 0) + flt(row.qty)
+
+	dates = {}
+	for line, by_day in receipts.items():
+		received = 0
+		for posted in sorted(by_day):
+			received += by_day[posted]
+			if received >= ordered[line]:
+				dates[line] = posted
+				break
 	return dates
 
 

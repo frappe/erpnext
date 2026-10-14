@@ -11,6 +11,7 @@ from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt a
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier import supplier_overview
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.controllers.item_close import update_closed_status
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
@@ -94,15 +95,15 @@ class TestSupplierOverview(ERPNextTestSuite):
 		self.assertEqual(tiles["late"]["value"], 900)
 		self.assertEqual(tiles["late"]["orders"], [po.name])
 
-	def test_pipeline_skips_closed_lines(self):
+	def test_closed_line_leaves_billing(self):
 		supplier = create_supplier(supplier_name="_Test Supplier Overview Closed").name
-		po = create_purchase_order(supplier=supplier, rate=300, qty=2, do_not_submit=True)
+		po = create_purchase_order(supplier=supplier, rate=100, qty=1, do_not_submit=True)
 		po.append(
 			"items",
 			{
 				"item_code": "_Test Item 2",
 				"qty": 1,
-				"rate": 500,
+				"rate": 900,
 				"warehouse": po.items[0].warehouse,
 				"schedule_date": po.items[0].schedule_date,
 			},
@@ -111,14 +112,36 @@ class TestSupplierOverview(ERPNextTestSuite):
 
 		pr = make_receipt(po.name)
 		pr.items = [row for row in pr.items if row.purchase_order_item == po.items[0].name]
-		pr.items[0].qty = 1
 		pr.submit()
-		frappe.db.set_value("Purchase Order Item", po.items[0].name, "closed", 1)
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
 
 		tiles = supplier_overview.order_tiles(supplier, COMPANY, getdate(today()))
 		self.assertEqual(tiles["billing"]["value"], 0)
 		self.assertEqual(tiles["billing"]["orders"], [])
-		self.assertEqual(tiles["receipt"]["value"], 500)
+		self.assertEqual(tiles["receipt"]["value"], 900)
+		self.assertEqual(tiles["receipt"]["orders"], [po.name])
+
+	def test_extra_unit_after_due_date_keeps_line_on_time(self):
+		supplier = create_supplier(supplier_name="_Test Supplier Overview Timing").name
+		po = create_purchase_order(
+			supplier=supplier, transaction_date=add_days(today(), -10), qty=10, do_not_submit=True
+		)
+		po.schedule_date = add_days(today(), -2)
+		po.items[0].schedule_date = po.schedule_date
+		po.submit()
+		frappe.db.set_value("Item", po.items[0].item_code, "over_delivery_receipt_allowance", 50)
+
+		for days_ago, qty in ((-5, 10), (0, 1)):
+			pr = make_receipt(po.name)
+			pr.set_posting_time = 1
+			pr.posting_date = add_days(today(), days_ago)
+			pr.items[0].qty = qty
+			pr.items[0].received_qty = qty
+			pr.submit()
+
+		as_of = getdate(today())
+		data = supplier_overview.delivery(supplier, COMPANY, add_days(as_of, -30), as_of, as_of)
+		self.assertEqual((data["on_time"], data["late"]), (1, 0))
 
 	def test_receipt_only_supplier_has_a_company(self):
 		supplier = create_supplier(supplier_name="_Test Supplier Overview Receipt").name
