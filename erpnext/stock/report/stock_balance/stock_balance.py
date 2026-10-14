@@ -93,6 +93,7 @@ class StockBalanceReport:
 			group_by_key = self.get_group_by_key(entry)
 			if group_by_key not in self.opening_data:
 				self.opening_data.setdefault(group_by_key, entry)
+				self.add_to_item_warehouse_opening(entry)
 
 	def prepare_new_data(self):
 		self.item_warehouse_map = self.get_item_warehouse_map()
@@ -257,7 +258,7 @@ class StockBalanceReport:
 
 	def prepare_item_warehouse_map(self, item_warehouse_map, entry, group_by_key):
 		qty_dict = item_warehouse_map[group_by_key]
-		balance = self.get_item_warehouse_balance(item_warehouse_map, entry, qty_dict)
+		balance = self.get_item_warehouse_balance(entry, qty_dict)
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
@@ -308,19 +309,23 @@ class StockBalanceReport:
 			balance.bal_qty += qty_diff
 			balance.bal_val += value_diff
 
-	def get_item_warehouse_balance(self, item_warehouse_map, entry, qty_dict) -> frappe._dict:
+	def get_item_warehouse_balance(self, entry, qty_dict) -> frappe._dict:
 		"""Balance of the whole item and warehouse, which a dimension-wise row holds only part of."""
 		if not self.filters.get("show_dimension_wise_stock"):
 			return qty_dict
 
 		key = (entry.company, entry.item_code, entry.warehouse)
-		if key not in self.item_warehouse_balances:
-			opening = item_warehouse_map.get(key) or self.opening_data.get(key) or frappe._dict()
-			self.item_warehouse_balances[key] = frappe._dict(
-				bal_qty=opening.get("bal_qty") or 0.0, bal_val=opening.get("bal_val") or 0.0
-			)
+		return self.item_warehouse_balances.setdefault(key, frappe._dict(bal_qty=0.0, bal_val=0.0))
 
-		return self.item_warehouse_balances[key]
+	def add_to_item_warehouse_opening(self, entry):
+		"""Closing rows carry the dimensions of their last entry, so add each to its item and warehouse."""
+		if not self.filters.get("show_dimension_wise_stock"):
+			return
+
+		key = (entry.company, entry.item_code, entry.warehouse)
+		balance = self.item_warehouse_balances.setdefault(key, frappe._dict(bal_qty=0.0, bal_val=0.0))
+		balance.bal_qty += flt(entry.bal_qty)
+		balance.bal_val += flt(entry.bal_val)
 
 	def initialize_data(self, item_warehouse_map, group_by_key, entry):
 		opening_data = self.opening_data.get(group_by_key, {})
