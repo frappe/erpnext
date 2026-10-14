@@ -173,8 +173,8 @@ class TestSupplierScorecard(ERPNextTestSuite):
 
 		self.assertTrue(frappe.db.exists("Supplier Scorecard Period", {"scorecard": healthy}))
 		self.assertTrue(
-			frappe.db.exists(
-				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}
+			frappe.get_all(
+				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}, limit=1
 			)
 		)
 

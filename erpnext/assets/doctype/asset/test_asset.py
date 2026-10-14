@@ -1091,7 +1091,7 @@ class TestAsset(AssetSetup):
 
 		self.assertFalse(frappe.db.get_value("Asset", assets[0], "booked_fixed_asset"))
 		self.assertTrue(frappe.db.get_value("Asset", assets[1], "booked_fixed_asset"))
-		self.assertTrue(frappe.db.exists("Error Log", {"reference_name": assets[0]}))
+		self.assertTrue(frappe.get_all("Error Log", filters={"reference_name": assets[0]}, limit=1))
 
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):

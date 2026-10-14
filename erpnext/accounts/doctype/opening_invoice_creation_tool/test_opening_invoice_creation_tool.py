@@ -94,9 +94,10 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		)
 
 		# Check if missing debit account error raised
-		error_log = frappe.db.exists(
+		error_log = frappe.get_all(
 			"Error Log",
-			{"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]},
+			filters={"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]},
+			limit=1,
 		)
 		self.assertTrue(error_log)
 
