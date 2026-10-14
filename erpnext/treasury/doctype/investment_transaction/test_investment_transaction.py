@@ -106,6 +106,19 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		self.assertEqual(investment.total_cost, 600)
 		self.assertEqual(investment.status, "Partially Redeemed")
 
+	def test_last_sale_takes_cost_left_after_rounding(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		# 0.3 units for 1.00 is 3.333... per unit, so each 0.1 unit sale costs 0.33 after rounding
+		make_transaction(investment.name, "Purchase", units=0.3, rate=3.33).submit()
+		make_transaction(investment.name, "Sale", units=0.1, rate=4).submit()
+		make_transaction(investment.name, "Sale", units=0.1, rate=4).submit()
+
+		last_sale = make_transaction(investment.name, "Sale", units=0.1, rate=4).submit()
+
+		self.assertEqual(last_sale.cost_of_units_sold, 0.34)
+		investment.reload()
+		self.assertEqual((investment.total_cost, investment.status), (0, "Redeemed"))
+
 	def test_cannot_sell_more_units_than_held(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()

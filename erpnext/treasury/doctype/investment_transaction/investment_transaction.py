@@ -402,10 +402,18 @@ class InvestmentTransaction(AccountsController):
 		else:
 			cost = flt(self.gross_amount)
 
+		if self.instrument_class in UNIT_CLASSES and self.sells_last_units(units_already_sold):
+			# the last units take all the cost left, so rounding on earlier exits leaves no balance behind
+			cost = self.get_investment().get_book_value_in_investment_currency(exclude=self.name)
+
 		self.cost_of_units_sold = flt(cost, self.precision("cost_of_units_sold"))
 		self.realised_gain_loss = flt(
 			flt(self.gross_amount) - self.cost_of_units_sold, self.precision("realised_gain_loss")
 		)
+
+	def sells_last_units(self, units_already_sold):
+		units_bought = self.get_submitted_total("units", PURCHASE_TYPES)
+		return flt(units_bought - units_already_sold - flt(self.units), self.precision("units")) <= 0
 
 	def validate_purchase_not_consumed(self):
 		if self.transaction_type not in PURCHASE_TYPES:
