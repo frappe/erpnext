@@ -97,7 +97,7 @@ SEGMENTS_SQL = """
 			sum(CASE WHEN NOT is_opening AND stock_value_difference < 0 THEN -stock_value_difference ELSE 0 END) AS out_val,
 			sum(stock_value_difference) AS bal_val
 		FROM (
-			SELECT *, count_if(replay) OVER (PARTITION BY item_code, warehouse, dimension_key ORDER BY row_no) AS segment
+			SELECT *, count_if(replay) OVER (PARTITION BY item_code, warehouse ORDER BY row_no) AS segment
 			FROM ledger
 		)
 		WHERE NOT replay
@@ -299,6 +299,9 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 			return
 
 		balance = self.item_warehouse_map[key]
+		self.add_to_item_warehouse_balance(
+			self.get_item_warehouse_balance(change, balance), balance, change.bal_qty, change.bal_val
+		)
 		for field in MOVEMENT_FIELDS:
 			balance[field] += change[field]
 		balance.val_rate = change.valuation_rate

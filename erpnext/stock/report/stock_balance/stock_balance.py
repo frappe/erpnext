@@ -524,9 +524,7 @@ class StockBalanceReport:
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		if balance is not qty_dict:
-			balance.bal_qty += qty_diff
-			balance.bal_val += value_diff
+		self.add_to_item_warehouse_balance(balance, qty_dict, qty_diff, value_diff)
 
 	def is_reconciled_balance(self, entry) -> bool:
 		"""A write-off of stranded value moves nothing, so it is a plain delta. An Adjustment Entry
@@ -547,6 +545,11 @@ class StockBalanceReport:
 			self.item_warehouse_balances[key] = frappe._dict(bal_qty=opening.bal_qty, bal_val=opening.bal_val)
 
 		return self.item_warehouse_balances[key]
+
+	def add_to_item_warehouse_balance(self, balance, qty_dict, qty_diff, value_diff):
+		if balance is not qty_dict:
+			balance.bal_qty += qty_diff
+			balance.bal_val += value_diff
 
 	def initialize_data(self, group_by_key, entry):
 		self.item_warehouse_map[group_by_key] = frappe._dict(
