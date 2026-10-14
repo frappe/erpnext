@@ -51,14 +51,19 @@ class AssetMaintenance(Document):
 			if task.next_due_date and getdate(task.next_due_date) < getdate(task.start_date):
 				throw(_("Row #{0}: Next Due Date cannot be before the Start Date").format(task.idx))
 			self.set_task_status(task)
-			if not task.assign_to and self.docstatus == 0:
-				throw(_("Row #{}: Please assign task to a member.").format(task.idx))
-			if task.assign_to and task.assign_to not in team_members:
-				throw(
-					_("Row #{0}: {1} is not a member of the maintenance team {2}").format(
-						task.idx, task.assign_to, self.maintenance_team
-					)
+			self.validate_assignee(task, team_members)
+
+	def validate_assignee(self, task, team_members: list[str]):
+		if task.maintenance_status == "Cancelled":
+			return
+		if not task.assign_to and self.docstatus == 0:
+			throw(_("Row #{}: Please assign task to a member.").format(task.idx))
+		if task.assign_to and task.assign_to not in team_members:
+			throw(
+				_("Row #{0}: {1} is not a member of the maintenance team {2}").format(
+					task.idx, task.assign_to, self.maintenance_team
 				)
+			)
 
 	def validate_asset(self):
 		if frappe.db.get_value("Asset", self.asset_name, "docstatus") != 1:
@@ -108,9 +113,9 @@ class AssetMaintenance(Document):
 	def sync_maintenance_tasks(self):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
-			tasks_names.append(task.name)
 			if task.maintenance_status == "Cancelled":
 				continue
+			tasks_names.append(task.name)
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
 			)
@@ -243,7 +248,7 @@ def get_team_members(
 	filters: dict[str, Any],
 ) -> list[tuple[str]]:
 	team = filters.get("maintenance_team")
-	frappe.has_permission("Asset Maintenance Team", "read", team, throw=True)
+	frappe.has_permission("Asset Maintenance Team", "select", team, throw=True)
 	return frappe.get_all(
 		"Maintenance Team Member",
 		filters={"parent": team, "parenttype": "Asset Maintenance Team", "team_member": ("like", f"%{txt}%")},

@@ -4,7 +4,10 @@
 import frappe
 from frappe.utils import add_days, add_months, get_last_day, getdate, nowdate
 
-from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
+from erpnext.assets.doctype.asset_maintenance.asset_maintenance import (
+	calculate_next_due_date,
+	get_team_members,
+)
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -156,12 +159,33 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		try:
 			asset_maintenance = self.make_asset_maintenance()
 			asset_maintenance.save()
+			members = get_team_members("User", "", "name", 0, 20, {"maintenance_team": "Team Awesome"})
+			self.assertIn(("marcus@abc.com",), list(members))
 		finally:
 			frappe.set_user("Administrator")
 
 		self.assertTrue(
 			frappe.db.exists("Asset Maintenance Log", {"asset_maintenance": asset_maintenance.name})
 		)
+
+	def test_cancelled_task_releases_its_log_and_assignee(self):
+		asset_maintenance = self.make_asset_maintenance()
+		task = asset_maintenance.asset_maintenance_tasks[1]
+		task.maintenance_status = "Cancelled"
+		asset_maintenance.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Asset Maintenance Log", {"task": task.name}, "maintenance_status"),
+			"Cancelled",
+		)
+
+		team = frappe.get_doc("Asset Maintenance Team", "Team Awesome")
+		team.maintenance_team_members = [
+			row for row in team.maintenance_team_members if row.team_member != task.assign_to
+		]
+		team.save()
+		asset_maintenance.reload()
+		asset_maintenance.save()
 
 	def test_todo_of_an_unassigned_user_is_closed(self):
 		asset_maintenance = self.make_asset_maintenance()
@@ -194,10 +218,7 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		)
 
 	def test_lookups_need_read_permission(self):
-		from erpnext.assets.doctype.asset_maintenance.asset_maintenance import (
-			get_maintenance_log,
-			get_team_members,
-		)
+		from erpnext.assets.doctype.asset_maintenance.asset_maintenance import get_maintenance_log
 
 		self.make_asset_maintenance()
 		self.assertEqual(
