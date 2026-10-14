@@ -491,9 +491,14 @@ frappe.ui.form.on("Payment Entry", {
 		if (frm.doc.docstatus !== 0 || !suggest) return;
 
 		if (!is_cheque || !frm.doc.paid_from) {
-			frm.set_value("cheque_book", "");
+			// picking a cheque mode again is a fresh start, so forget an earlier clear
+			await set_cheque_book_value(frm, "");
+			frm.cheque_book_cleared = false;
 			return;
 		}
+
+		// emptied by the user, so this entry stays without a cheque book
+		if (frm.cheque_book_cleared) return;
 
 		if (frm.doc.cheque_book && !reset) {
 			frm.events.cheque_book(frm);
@@ -508,6 +513,7 @@ frappe.ui.form.on("Payment Entry", {
 		);
 		if (
 			frm.doc.docstatus !== 0 ||
+			frm.cheque_book_cleared ||
 			account !== frm.doc.paid_from ||
 			previous_book !== frm.doc.cheque_book ||
 			!is_cheque_payment(frm)
@@ -517,12 +523,14 @@ frappe.ui.form.on("Payment Entry", {
 		if (cheque_book === frm.doc.cheque_book) {
 			frm.events.cheque_book(frm);
 		} else {
-			frm.set_value("cheque_book", cheque_book || "");
+			await set_cheque_book_value(frm, cheque_book || "");
 		}
 	},
 
 	cheque_book: async function (frm) {
 		const cheque_book = frm.doc.cheque_book;
+		// only the user emptying the field counts as opting out of a cheque book
+		if (!frm.setting_cheque_book) frm.cheque_book_cleared = !cheque_book;
 		const account = frm.doc.paid_from;
 		let cheque = {};
 		if (cheque_book) {
@@ -2085,6 +2093,16 @@ function prompt_for_missing_account(frm, account) {
 			__("Please Specify Account")
 		);
 	});
+}
+
+// the form's own writes must not look like the user clearing the field
+async function set_cheque_book_value(frm, value) {
+	frm.setting_cheque_book = true;
+	try {
+		await frm.set_value("cheque_book", value);
+	} finally {
+		frm.setting_cheque_book = false;
+	}
 }
 
 function is_cheque_payment(frm) {
