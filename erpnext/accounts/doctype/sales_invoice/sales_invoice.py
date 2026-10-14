@@ -2386,15 +2386,6 @@ def validate_inter_company_transaction(doc, doctype):
 		partytype = "Supplier" if doctype in ["Sales Invoice", "Sales Order"] else "Customer"
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
-	company = details.get("company")
-	default_currency = frappe.get_cached_value("Company", company, "default_currency")
-	if default_currency != doc.currency:
-		frappe.throw(
-			_("Company currencies of both the companies should match for Inter Company Transactions.")
-		)
-
-	return
-
 
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name, target_doc=None):
@@ -2429,6 +2420,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 
@@ -2448,7 +2440,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		_, reference_field = get_inter_company_counterpart(target_doc.doctype)
 		target_doc.set(reference_field, source_doc.name)
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
-			currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.is_internal_supplier = 1
@@ -2485,9 +2476,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 					target_doc, "billing_address", "billing_address_display", source_doc.customer_address
 				)
 
-			if currency:
-				target_doc.currency = currency
-
 			update_taxes(
 				target_doc,
 				party=target_doc.supplier,
@@ -2499,7 +2487,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 		else:
-			currency = frappe.db.get_value("Customer", details.get("party"), "default_currency")
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
@@ -2520,9 +2507,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				source_doc.shipping_address, "Customer", details.get("party")
 			):
 				update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
-
-			if currency:
-				target_doc.currency = currency
 
 			update_taxes(
 				target_doc,
