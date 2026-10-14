@@ -1195,6 +1195,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual((row.ordered_qty, row.received_qty), (10, 0))
 
+	def test_partial_material_request_keeps_the_plan_open_for_requests(self):
+		plan = create_production_plan(
+			item_code="Test Production Item 1", planned_qty=10, for_warehouse="_Test Warehouse - _TC"
+		)
+		plan.submit_material_request = 0
+		plan.make_material_request()
+
+		request = frappe.get_doc(
+			"Material Request",
+			frappe.db.get_value("Material Request Item", {"production_plan": plan.name}, "parent"),
+		)
+		request.items = request.items[:1]
+		request.items[0].qty = 4
+		request.submit()
+
+		self.assertNotEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Material Requested")
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.

@@ -517,10 +517,8 @@ class ProductionPlan(Document):
 					return
 
 	def update_requested_status(self):
-		for d in self.mr_items:
-			if d.requested_qty:
-				self.status = "Material Requested"
-				break
+		if self.mr_items and all(flt(d.requested_qty) >= flt(d.quantity) for d in self.mr_items):
+			self.status = "Material Requested"
 
 	def get_production_items(self):
 		return WorkOrderCreationService(self).get_production_items()
