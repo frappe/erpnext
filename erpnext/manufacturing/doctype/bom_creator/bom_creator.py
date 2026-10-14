@@ -277,9 +277,22 @@ class BOMCreator(Document):
 				)
 
 	def set_conversion_factor(self):
+		item_codes = list({row.item_code for row in self.items if not row.conversion_factor})
+		uom_factors = {}
+		if item_codes:
+			uom_factors = {
+				(row.parent, row.uom): row.conversion_factor
+				for row in frappe.get_all(
+					"UOM Conversion Detail",
+					filters={"parent": ("in", item_codes), "parenttype": "Item"},
+					fields=["parent", "uom", "conversion_factor"],
+				)
+			}
+
 		for row in self.items:
 			if not row.conversion_factor:
-				row.conversion_factor = 1.0
+				row.conversion_factor = flt(uom_factors.get((row.item_code, row.uom))) or 1.0
+			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
 
 	def validate_fields(self):
 		fields = {
@@ -447,17 +460,26 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def edit_bom_creator(self, docname: str, data: str | dict):
-		if not frappe.db.exists("BOM Creator Item", {"parent": self.name, "name": docname}):
+		if docname != self.name and not frappe.db.exists(
+			"BOM Creator Item", {"parent": self.name, "name": docname}
+		):
 			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(docname))
 
 		if isinstance(data, str):
 			data = frappe.parse_json(data)
 
 		updated = False
+		if docname == self.name:
+			if data.get("qty") and flt(data.get("qty")) != flt(self.qty):
+				self.qty = flt(data.get("qty"))
+				updated = True
+
 		for row in self.items:
 			if row.name == docname:
 				for key, value in data.items():
 					if key in BOM_ITEM_FIELDS and row.get(key) != value:
+						if key == "uom":
+							row.conversion_factor = 0
 						row.set(key, value)
 						updated = True
 				break

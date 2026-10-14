@@ -604,6 +604,36 @@ class TestBOMCreator(ERPNextTestSuite):
 		)
 		self.assertTrue(frappe.get_meta("BOM Creator").get_field("error_log").no_copy)
 
+	def test_edit_root_qty_and_row_uom(self):
+		make_item("Touring Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		rm_item = make_item(
+			"_Test BOM Creator Box RM",
+			{
+				"item_group": "Raw Material",
+				"stock_uom": "Nos",
+				"valuation_rate": 10,
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		doc = make_bom_creator(
+			name="Touring Bike BOM Edit",
+			company="_Test Company",
+			item_code="Touring Bike",
+			qty=1,
+			currency="INR",
+		)
+		doc.edit_bom_creator(docname=doc.name, data={"qty": 5})
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "qty"), 5)
+
+		doc.add_item(fg_item="Touring Bike", fg_reference_id=doc.name, item_code=rm_item, qty=3)
+		doc.reload()
+		self.assertEqual(doc.items[0].stock_qty, 3)
+
+		doc.edit_bom_creator(docname=doc.items[0].name, data={"uom": "Box"})
+		doc.reload()
+		row = doc.items[0]
+		self.assertEqual((row.conversion_factor, row.stock_qty, row.amount), (12, 36, 360))
+
 
 def create_items():
 	raw_materials = [
