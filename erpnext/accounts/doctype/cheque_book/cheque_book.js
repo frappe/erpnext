@@ -39,6 +39,11 @@ frappe.ui.form.on("Cheque Book", {
 	},
 
 	refresh(frm) {
+		frm.set_df_property(
+			"no_of_cheques",
+			"description",
+			frm.is_new() ? __("Enter any two of Cheque Start No, Cheque End No and Number of Cheques") : ""
+		);
 		if (frm.doc.docstatus !== 1) return;
 
 		frm.add_custom_button(

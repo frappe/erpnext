@@ -339,7 +339,7 @@ class PaymentEntry(AccountsController):
 		if self.cheque_book:
 			book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
 			release_cheque(book, self.reference_no, self.doctype, self.name)
-			book.advance_next_cheque_no(self.reference_no, freed=True)
+			book.update_status()
 
 	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (

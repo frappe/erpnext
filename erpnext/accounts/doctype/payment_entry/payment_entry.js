@@ -276,7 +276,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
-		frm.events.set_cheque_book(frm, false, frm.is_new());
+		frm.events.set_cheque_book(frm, false, frm.is_new() && frm.cscript.is_onload);
 	},
 
 	validate: async function (frm) {
@@ -501,12 +501,18 @@ frappe.ui.form.on("Payment Entry", {
 		}
 
 		const account = frm.doc.paid_from;
+		const previous_book = frm.doc.cheque_book;
 		const { cheque_book } = await frappe.xcall(
 			"erpnext.accounts.doctype.cheque_book.cheque_book.get_next_cheque",
 			{ account }
 		);
-		// Paid From changed while waiting, a newer call will set the book
-		if (account !== frm.doc.paid_from || !is_cheque_payment(frm)) return;
+		if (
+			frm.doc.docstatus !== 0 ||
+			account !== frm.doc.paid_from ||
+			previous_book !== frm.doc.cheque_book ||
+			!is_cheque_payment(frm)
+		)
+			return;
 
 		if (cheque_book === frm.doc.cheque_book) {
 			frm.events.cheque_book(frm);

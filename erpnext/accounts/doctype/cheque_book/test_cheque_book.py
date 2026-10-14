@@ -34,7 +34,9 @@ class TestChequeBook(ERPNextTestSuite):
 		args.setdefault("paid_from", BANK_LEDGER)
 		pe = create_payment_entry(**args)
 		pe.mode_of_payment = "Cheque"
-		pe.cheque_book = cheque_book or (self.book.name if reference_no else None)
+		pe.cheque_book = cheque_book or (
+			self.book.name if reference_no else get_next_cheque(pe.paid_from).get("cheque_book")
+		)
 		pe.reference_no = reference_no
 		pe.save()
 		if submit:
@@ -93,7 +95,7 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "987650")
 		self.make_cheque_payment("987650", cheque_book=book.name)
 		book.reload()
-		self.assertEqual(book.next_cheque_no, "987651")
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "987651")
 
 	def test_at_least_two_range_values_are_required(self):
 		for start, end, count in (("000201", None, None), (None, "000205", None), (None, None, 5)):
@@ -109,11 +111,12 @@ class TestChequeBook(ERPNextTestSuite):
 			(book.cheque_start_no, book.cheque_end_no, book.no_of_cheques), ("000200", "000205", 6)
 		)
 
-	def test_bookmark_can_pass_six_digit_end(self):
+	def test_next_cheque_number_can_pass_six_digit_end(self):
 		book = make_cheque_book(self.bank_account, "CB-END", "999999", "999999")
 		self.make_cheque_payment("999999", cheque_book=book.name)
 		book.reload()
-		self.assertEqual((book.next_cheque_no, book.status), ("1000000", "Finished"))
+		self.assertEqual(book.status, "Finished")
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name), {})
 
 	def test_longer_out_of_range_cheque_numbers_are_rejected(self):
 		with self.assertRaises(frappe.ValidationError):
@@ -129,17 +132,17 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name, include_free=True)["free"], 1)
 		self.make_cheque_payment("9007199254740994", cheque_book=book.name)
 		book.reload()
-		self.assertEqual((book.next_cheque_no, book.status), ("9007199254740995", "Finished"))
+		self.assertEqual(book.status, "Finished")
 		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name), {})
 
-	def test_bookmark_skips_occupied_cheques_across_digit_widths(self):
+	def test_next_cheque_number_uses_numeric_maximum_across_digit_widths(self):
 		book = make_cheque_book(self.bank_account, "CB-WIDTH", "999998", "1000002")
 		self.make_cheque_payment("1000000", cheque_book=book.name)
 		cancel_cheque(book.name, "999999")
 		self.make_cheque_payment("999998", cheque_book=book.name)
 		book.reload()
-		self.assertEqual(book.next_cheque_no, "1000001")
-		self.assertEqual(get_occupied_cheque_nos(book, from_no="999999"), {999999, 1000000})
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "1000001")
+		self.assertEqual(get_occupied_cheque_nos(book), {999998, 999999, 1000000})
 
 	def test_extra_leading_zeros_do_not_create_distinct_cheque_numbers(self):
 		pe = self.make_cheque_payment("0000101")
@@ -266,20 +269,18 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, self.make_cheque_payment, "000200", cheque_book=book.name)
 
 	def test_next_cheque_no_starts_at_cheque_start_no(self):
-		self.assertEqual(self.book.next_cheque_no, "000101")
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000101")
 		self.assertEqual(get_next_cheque(BANK_LEDGER, include_free=True)["free"], 5)
 
 		self.make_cheque_payment()
 		self.assertEqual(get_next_cheque(BANK_LEDGER, include_free=True)["free"], 4)
 
-	def test_submitted_bookmark_cannot_be_changed_with_normal_save(self):
-		self.book.next_cheque_no = "000104"
-		with self.assertRaises(frappe.UpdateAfterSubmitError):
-			self.book.save()
-		self.book.reload()
-		self.assertEqual(self.book.next_cheque_no, "000101")
+	def test_next_cheque_number_is_not_a_doctype_field(self):
+		self.assertFalse(self.book.meta.has_field("next_cheque_no"))
+		self.assertNotIn("next_cheque_no", self.book.as_dict())
+		self.assertFalse(frappe.db.has_column("Cheque Book", "next_cheque_no"))
 
-	def test_free_count_uses_all_numbers_not_just_bookmark(self):
+	def test_free_count_includes_skipped_numbers(self):
 		self.make_cheque_payment("000104")
 		cancelled = cancel_cheque(self.book.name, "000105")
 		self.assertEqual(get_next_cheque(BANK_LEDGER, self.book.name, include_free=True)["free"], 3)
@@ -291,38 +292,47 @@ class TestChequeBook(ERPNextTestSuite):
 		cancelled.cancel()
 		self.assertEqual(get_next_cheque(BANK_LEDGER, self.book.name, include_free=True)["free"], 4)
 
-	def test_occupied_cheques_can_be_limited_from_cursor(self):
+	def test_occupied_cheques_include_payments_and_cancelled_cheques(self):
 		self.make_cheque_payment("000101")
 		cancel_cheque(self.book.name, "000102")
 		self.make_cheque_payment("000103")
 
-		self.assertEqual(get_occupied_cheque_nos(self.book, from_no="000102"), {102, 103})
+		self.assertEqual(get_occupied_cheque_nos(self.book), {101, 102, 103})
 
 	def test_next_cheque_is_suggested_and_marked_used_on_submit(self):
 		pe = self.make_cheque_payment()
 		self.assertEqual((pe.cheque_book, pe.reference_no), (self.book.name, "000101"))
 		self.book.reload()
-		self.assertEqual(self.book.next_cheque_no, "000102")
 		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000102")
 
 	def test_out_of_sequence_cheque_keeps_earlier_numbers_available(self):
 		self.make_cheque_payment("000104")
 		self.book.reload()
-		self.assertEqual((self.book.next_cheque_no, self.book.status), ("000101", "Submitted"))
-		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000101")
+		self.assertEqual(self.book.status, "Submitted")
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000105")
 
-		# and the number already used is stepped over when it is reached
 		for cheque_no in ("000101", "000102", "000103"):
 			self.make_cheque_payment(cheque_no)
 		self.book.reload()
-		self.assertEqual(self.book.next_cheque_no, "000105")
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000105")
 
-	def test_cancelling_a_later_cheque_does_not_move_the_next_cheque_no(self):
+	def test_voiding_a_later_cheque_advances_the_suggestion(self):
 		self.make_cheque_payment()
 		cancel_cheque(self.book.name, "000105")
 		self.book.reload()
-		self.assertEqual((self.book.next_cheque_no, self.book.status), ("000102", "Submitted"))
-		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000102")
+		self.assertEqual(self.book.status, "Submitted")
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {"cheque_book": self.book.name})
+
+	def test_next_cheque_number_follows_highest_occupied_number(self):
+		book = make_cheque_book(self.bank_account, "CB-SKIPPED", "1", "10")
+		for number in ("1", "2", "3", "6"):
+			self.make_cheque_payment(number, cheque_book=book.name)
+		payment = self.make_cheque_payment("8", cheque_book=book.name)
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "000009")
+		payment.cancel()
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "000007")
+		self.make_cheque_payment("4", cheque_book=book.name)
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "000007")
 
 	def test_book_is_finished_when_the_last_cheque_is_used(self):
 		cancel_cheque(self.book.name, "000105")
@@ -330,17 +340,17 @@ class TestChequeBook(ERPNextTestSuite):
 			self.make_cheque_payment(cheque_no)
 
 		self.book.reload()
-		self.assertEqual((self.book.next_cheque_no, self.book.status), ("000106", "Finished"))
+		self.assertEqual(self.book.status, "Finished")
 		self.assertEqual(get_next_cheque(BANK_LEDGER), {})
 
-	def test_book_stays_submitted_when_bookmark_passes_a_freed_cheque(self):
+	def test_book_stays_submitted_when_highest_number_is_used_but_earlier_number_is_free(self):
 		payment = self.make_cheque_payment("000101")
 		payment.cancel()
 		for cheque_no in ("000102", "000103", "000104", "000105"):
 			self.make_cheque_payment(cheque_no)
 
 		self.book.reload()
-		self.assertEqual((self.book.next_cheque_no, self.book.status), ("000106", "Submitted"))
+		self.assertEqual(self.book.status, "Submitted")
 		self.assertEqual(
 			get_next_cheque(BANK_LEDGER, include_free=True), {"cheque_book": self.book.name, "free": 1}
 		)
@@ -356,12 +366,15 @@ class TestChequeBook(ERPNextTestSuite):
 
 		payments[1].cancel()
 		self.book.reload()
-		self.assertEqual((self.book.next_cheque_no, self.book.status), ("000102", "Submitted"))
-		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000102")
+		self.assertEqual(self.book.status, "Submitted")
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {"cheque_book": self.book.name})
 
 		payments[0].cancel()
 		self.book.reload()
-		self.assertEqual(self.book.next_cheque_no, "000102")
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {"cheque_book": self.book.name})
+		payments[-1].cancel()
+		self.book.reload()
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000105")
 
 	def test_cancelling_payment_with_reason_records_cancelled_cheque(self):
 		payment = self.make_cheque_payment("000101")
@@ -429,8 +442,11 @@ class TestChequeBook(ERPNextTestSuite):
 		cancelled[2].cancel()
 		self.assertEqual(frappe.db.get_value("Cancelled Cheque", cancelled[2].name, "docstatus"), 2)
 		self.book.reload()
-		self.assertEqual((self.book.next_cheque_no, self.book.status), ("000103", "Submitted"))
-		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000103")
+		self.assertEqual(self.book.status, "Submitted")
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {"cheque_book": self.book.name})
+		cancelled[-1].cancel()
+		self.book.reload()
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000105")
 
 	def test_reversed_cancellation_allows_book_cancellation_but_preserves_audit(self):
 		book = make_cheque_book(self.bank_account, "CB-ONE", "000201", "000201")
@@ -440,7 +456,8 @@ class TestChequeBook(ERPNextTestSuite):
 
 		cancelled.cancel()
 		book.reload()
-		self.assertEqual((book.next_cheque_no, book.status), ("000201", "Submitted"))
+		self.assertEqual(book.status, "Submitted")
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name)["cheque_no"], "000201")
 		book.cancel()
 		with self.assertRaises(frappe.LinkExistsError):
 			book.delete()
@@ -471,7 +488,8 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertEqual(amended.reference_no, "000201")
 
 		book.reload()
-		self.assertEqual((book.next_cheque_no, book.status), ("000202", "Finished"))
+		self.assertEqual(book.status, "Finished")
+		self.assertEqual(get_next_cheque(BANK_LEDGER, book.name), {})
 
 	def test_typed_number_is_padded(self):
 		pe = self.make_cheque_payment("103")
@@ -562,7 +580,7 @@ class TestChequeBook(ERPNextTestSuite):
 		payment.submit()
 		self.assertEqual(get_cheque_usage(self.book.name, "000101").source_name, payment.name)
 
-	def test_ledger_change_does_not_allow_missing_book_for_tracked_numbers(self):
+	def test_ledger_change_allows_payments_without_a_cheque_book(self):
 		ledger = self.change_bank_ledger()
 		for status in ("Submitted", "Finished", "Disabled"):
 			with self.subTest(status=status):
@@ -570,8 +588,11 @@ class TestChequeBook(ERPNextTestSuite):
 				payment = create_payment_entry(paid_from=ledger)
 				payment.mode_of_payment = "Cheque"
 				payment.reference_no = "000101"
-				with self.assertRaisesRegex(frappe.ValidationError, "Please select a Cheque Book"):
-					payment.save()
+				payment.reference_date = payment.posting_date
+				payment.save()
+				payment.submit()
+				self.assertFalse(payment.cheque_book)
+				self.assertIsNone(get_cheque_usage(self.book.name, "000101"))
 
 	def test_cheque_book_dropdown_uses_current_bank_ledger(self):
 		from frappe.desk.search import search_link
@@ -597,14 +618,44 @@ class TestChequeBook(ERPNextTestSuite):
 				)
 				self.assertEqual([row["value"] for row in results], expected)
 
-	def test_cheque_book_is_required_when_account_has_books(self):
+	def test_cheque_book_is_optional_when_account_has_books(self):
 		for status in ("Submitted", "Finished", "Disabled"):
 			with self.subTest(status=status):
 				self.book.db_set("status", status)
 				pe = create_payment_entry(paid_from=BANK_LEDGER)
 				pe.mode_of_payment = "Cheque"
 				pe.reference_no = "ANY"
-				self.assertRaises(frappe.ValidationError, pe.save)
+				pe.reference_date = pe.posting_date
+				book_modified = frappe.db.get_value("Cheque Book", self.book.name, "modified")
+				pe.save()
+				pe.submit()
+				self.assertFalse(pe.cheque_book)
+				self.assertEqual(pe.reference_no, "ANY")
+				pe.cancel()
+				self.assertFalse(get_occupied_cheque_nos(self.book))
+				self.assertEqual(
+					frappe.db.get_value("Cheque Book", self.book.name, "modified"), book_modified
+				)
+
+	def test_cleared_cheque_book_is_not_reselected_on_save(self):
+		payment = self.make_cheque_payment(submit=False)
+		payment.cheque_book = None
+		payment.reference_no = "MANUAL-1"
+		payment.save()
+		payment.submit()
+		payment.reload()
+		self.assertFalse(payment.cheque_book)
+		self.assertEqual(payment.reference_no, "MANUAL-1")
+		self.assertFalse(get_occupied_cheque_nos(self.book))
+
+	def test_blank_cheque_book_does_not_autofill_when_reference_is_missing(self):
+		payment = create_payment_entry(paid_from=BANK_LEDGER)
+		payment.mode_of_payment = "Cheque"
+		payment.reference_no = None
+		with self.assertRaisesRegex(frappe.ValidationError, "Reference No and Reference Date is mandatory"):
+			payment.save()
+		self.assertFalse(payment.cheque_book)
+		self.assertIsNone(payment.reference_no)
 
 	def test_non_cheque_payments_are_not_checked(self):
 		pe = create_payment_entry(paid_from=BANK_LEDGER)
@@ -636,10 +687,10 @@ class TestChequeBook(ERPNextTestSuite):
 			self.assertTrue(is_cheque_payment(frappe._dict(payment_type="Pay", mode_of_payment=mode)))
 		self.assertFalse(is_cheque_payment(frappe._dict(payment_type="Pay", mode_of_payment="Chèque")))
 
-	def test_cancelled_payment_is_not_suggested_again_but_can_be_reused(self):
+	def test_cancelled_highest_payment_is_suggested_again_and_can_be_amended(self):
 		pe = self.make_cheque_payment("000101")
 		pe.cancel()
-		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000102")
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000101")
 
 		# the number is free again, so amending keeps the same cheque
 		amended = frappe.copy_doc(pe)
@@ -730,7 +781,7 @@ class TestChequeBook(ERPNextTestSuite):
 		cancelled.save()
 		self.assertIsNone(get_cheque_usage(self.book.name, "000101"))
 		self.book.reload()
-		self.assertEqual(self.book.next_cheque_no, "000101")
+		self.assertEqual(get_next_cheque(BANK_LEDGER)["cheque_no"], "000101")
 		self.assertEqual(get_next_cheque(BANK_LEDGER, include_free=True)["free"], 5)
 		cancelled.submit()
 		self.assertEqual(get_cheque_usage(self.book.name, "000101").reason, "Lost")
@@ -834,7 +885,7 @@ class TestChequeBook(ERPNextTestSuite):
 
 		payment = self.make_cheque_payment("000101", submit=False)
 		frappe.db.savepoint("failed_cheque_submission")
-		with patch.object(ChequeBook, "advance_next_cheque_no", side_effect=frappe.ValidationError("Failed")):
+		with patch.object(ChequeBook, "update_status", side_effect=frappe.ValidationError("Failed")):
 			with self.assertRaises(frappe.ValidationError):
 				payment.submit()
 		frappe.db.rollback(save_point="failed_cheque_submission")
@@ -977,7 +1028,8 @@ class TestChequeBook(ERPNextTestSuite):
 		amended.amended_from = self.book.name
 		amended.cheque_end_no = "000110"
 		amended.submit()
-		self.assertEqual((amended.status, amended.next_cheque_no), ("Submitted", "000101"))
+		self.assertEqual(amended.status, "Submitted")
+		self.assertEqual(get_next_cheque(BANK_LEDGER, amended.name)["cheque_no"], "000101")
 
 
 def make_company_bank_account(account_name="_Test Cheque Bank", bank_account_name="_Test Cheque Account"):

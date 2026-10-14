@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -27,7 +29,6 @@ class ChequeBook(Document):
 		cheque_start_no: DF.Data
 		company: DF.Link | None
 		naming_series: DF.Literal["CHQ-BK-.YYYY.-"]
-		next_cheque_no: DF.Data | None
 		no_of_cheques: DF.Int
 		status: DF.Literal["Draft", "Submitted", "Finished", "Disabled", "Cancelled"]
 		title: DF.Data | None
@@ -70,9 +71,6 @@ class ChequeBook(Document):
 
 	def before_submit(self):
 		self.status = "Submitted"
-		# an amended book keeps its place, unless the new range no longer covers it
-		if not self.is_in_range(self.next_cheque_no or ""):
-			self.next_cheque_no = self.cheque_start_no
 
 	def validate_bank_account(self):
 		bank_account = frappe.db.get_value(
@@ -177,56 +175,24 @@ class ChequeBook(Document):
 			and int(self.cheque_start_no) <= int(cheque_no) <= int(self.cheque_end_no)
 		)
 
-	def next_no_after(self, cheque_no):
-		return str(int(cheque_no) + 1).zfill(CHEQUE_NO_WIDTH)
-
-	def is_used(self, cheque_no):
-		return bool(get_cheque_usage(self.name, cheque_no, for_update=True))
-
-	def advance_next_cheque_no(self, cheque_no, *, freed=False):
-		"""Advance after use, or reopen a Finished book when a cheque is freed."""
-		if freed:
-			cheque_no = self.format_cheque_no(cheque_no)
-			if self.status == "Finished" and not self.is_used(cheque_no):
-				self.db_set({"next_cheque_no": cheque_no, "status": "Submitted"})
+	def update_status(self):
+		if self.status not in ("Submitted", "Finished"):
 			return
-
-		if cheque_no != self.next_cheque_no and self.is_in_range(self.next_cheque_no):
-			return
-
-		next_no = self.next_cheque_no
-		if cheque_no == next_no:
-			next_no = self.next_no_after(cheque_no)
-			if self.is_in_range(next_no):
-				occupied = get_occupied_cheque_nos(self, from_no=next_no, for_update=True)
-				while self.is_in_range(next_no) and int(next_no) in occupied:
-					next_no = self.next_no_after(next_no)
-
-		values = {}
-		if next_no != self.next_cheque_no:
-			values["next_cheque_no"] = next_no
-		if not self.is_in_range(next_no) and self.status == "Submitted":
-			if count_free_cheques(self, for_update=True) == 0:
-				values["status"] = "Finished"
-
-		if values:
-			self.db_set(values)
+		status = "Submitted" if count_free_cheques(self, for_update=True) else "Finished"
+		if status != self.status:
+			self.db_set("status", status)
 
 
-def get_occupied_cheque_nos(book, from_no=None, for_update=False):
-	filters = {"cheque_book": book.name}
-
-	numbers = frappe.db.get_values(
-		"Cheque Usage",
-		filters,
-		"cheque_no",
-		pluck=True,
-		for_update=for_update,
-	)
+def get_occupied_cheque_nos(book, for_update=False, *, numbers=None):
+	if numbers is None:
+		numbers = frappe.db.get_values(
+			"Cheque Usage",
+			{"cheque_book": book.name},
+			"cheque_no",
+			pluck=True,
+			for_update=for_update,
+		)
 	start, end = int(book.cheque_start_no), int(book.cheque_end_no)
-	if from_no:
-		# Cheque numbers can have different widths, so compare numerically.
-		start = max(start, int(from_no))
 	return {int(no) for no in numbers if no and no.isdigit() and start <= int(no) <= end}
 
 
@@ -276,18 +242,27 @@ def get_next_cheque(account: str, cheque_book: str | None = None, include_free: 
 			"docstatus": 1,
 			"status": "Submitted",
 		},
-		fields=["name", "next_cheque_no", "cheque_start_no", "cheque_end_no", "no_of_cheques"],
+		fields=["name", "cheque_start_no", "cheque_end_no", "no_of_cheques"],
 		order_by="creation",
 	)
 
 	if not books:
 		return {}
-	book = next((book for book in books if int(book.next_cheque_no) <= int(book.cheque_end_no)), books[0])
+	usage = defaultdict(list)
+	for name, number in frappe.db.get_values(
+		"Cheque Usage", {"cheque_book": ("in", [book.name for book in books])}, ["cheque_book", "cheque_no"]
+	):
+		usage[name].append(number)
+	for book in books:
+		occupied = get_occupied_cheque_nos(book, numbers=usage[book.name])
+		book.cheque_no = str(max(occupied, default=int(book.cheque_start_no) - 1) + 1).zfill(CHEQUE_NO_WIDTH)
+		book.free = book.no_of_cheques - len(occupied)
+	book = next((book for book in books if int(book.cheque_no) <= int(book.cheque_end_no)), books[0])
 	result = {"cheque_book": book.name}
-	if int(book.next_cheque_no) <= int(book.cheque_end_no):
-		result["cheque_no"] = book.next_cheque_no
+	if int(book.cheque_no) <= int(book.cheque_end_no):
+		result["cheque_no"] = book.cheque_no
 	if include_free:
-		result["free"] = count_free_cheques(book)
+		result["free"] = book.free
 	return result
 
 
@@ -304,19 +279,13 @@ def validate_cheque(payment_entry):
 		doc.cheque_book = None
 		return
 
+	if not doc.cheque_book:
+		return
+
 	if doc.docstatus == 0 and not doc.reference_no:
 		cheque = get_next_cheque(doc.paid_from, doc.cheque_book)
-		doc.cheque_book = cheque.get("cheque_book", doc.cheque_book)
 		doc.reference_no = cheque.get("cheque_no")
 		doc.reference_date = doc.reference_date or doc.posting_date
-
-	if not doc.cheque_book:
-		bank_accounts = frappe.get_all("Bank Account", filters={"account": doc.paid_from}, pluck="name")
-		if bank_accounts and frappe.db.exists(
-			"Cheque Book", {"bank_account": ("in", bank_accounts), "docstatus": 1}
-		):
-			frappe.throw(_("Please select a Cheque Book"))
-		return
 
 	# Match Cheque Book saves: account first, then book, then usage. Reading the
 	# link without locking avoids acquiring the book before its account.
@@ -394,7 +363,7 @@ def update_cheque_book(payment_entry):
 	if is_cheque_payment(payment_entry) and payment_entry.cheque_book:
 		book = frappe.get_doc("Cheque Book", payment_entry.cheque_book, for_update=True)
 		claim_cheque(book, payment_entry.reference_no, "Payment Entry", payment_entry.name)
-		book.advance_next_cheque_no(payment_entry.reference_no)
+		book.update_status()
 
 
 @frappe.whitelist(methods=["POST"])

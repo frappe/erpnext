@@ -92,7 +92,7 @@ class CancelledCheque(Document):
 	def on_submit(self):
 		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
 		claim_cheque(book, self.cheque_no, self.doctype, self.name, self.reason)
-		book.advance_next_cheque_no(self.cheque_no)
+		book.update_status()
 
 	def before_cancel(self):
 		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
@@ -100,7 +100,7 @@ class CancelledCheque(Document):
 	def on_cancel(self):
 		book = frappe.get_doc("Cheque Book", self.cheque_book, for_update=True)
 		release_cheque(book, self.cheque_no, self.doctype, self.name)
-		book.advance_next_cheque_no(self.cheque_no, freed=True)
+		book.update_status()
 
 	def on_trash(self):
 		frappe.throw(_("Cancelled Cheque records cannot be deleted. Cancel the record to reverse it."))
