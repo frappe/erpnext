@@ -351,6 +351,23 @@ erpnext.PartyOverview = class PartyOverview {
 		});
 	}
 
+	draw_donut($parent, { segments, center, format }) {
+		const kept = segments.filter((s) => flt(s.value) > 0);
+		const $chart = $('<div class="co-chart">').appendTo($parent);
+		new frappe.Chart($chart[0], {
+			type: "donut",
+			height: 320,
+			data: {
+				labels: kept.map((s) => s.label),
+				datasets: [{ values: kept.map((s) => flt(s.value)) }],
+			},
+			colors: kept.map((s) => s.color),
+			center,
+			tooltipOptions: format && { formatTooltipY: format },
+		});
+		return $chart;
+	}
+
 	set_trend_notes(notes) {
 		if (!this.$trend_notes) return;
 		this.$trend_notes.text(notes.join(" · ")).toggle(!!notes.length);

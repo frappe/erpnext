@@ -2,7 +2,6 @@ const COUNT = {
 	bills: (n) => (n === 1 ? __("1 bill") : __("{0} bills", [n])),
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
-	lines_due: (n) => (n === 1 ? __("1 line due") : __("{0} lines due", [n])),
 	days_late: (n) => (n === 1 ? __("oldest 1 day late") : __("oldest {0} days late", [n])),
 	reconcile: (n) =>
 		n === 1 ? __("Reconcile with 1 unpaid bill") : __("Reconcile with {0} unpaid bills", [n]),
@@ -159,7 +158,9 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 		const $panel = this.panel(this.$charts, {
 			title: __("Delivery Performance"),
 			subtitle: d?.lines
-				? [COUNT.lines_due(d.lines), COUNT.orders(d.orders)].join(" · ")
+				? d.orders === 1
+					? __("Across 1 purchase order")
+					: __("Across {0} purchase orders", [d.orders])
 				: __("Order lines received by their due date"),
 			right:
 				d?.scorecard &&
@@ -172,15 +173,14 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			this.empty_note($panel, __("No order lines were due in this period"), 180);
 			return;
 		}
-		const donut = frappe.ui.donut({
+		this.draw_donut($panel, {
 			segments: [
 				{ label: __("On time"), value: d.on_time, color: "var(--green-600)" },
 				{ label: __("Received late"), value: d.late, color: "var(--blue-400)" },
 				{ label: __("Overdue"), value: d.overdue, color: "var(--blue-600)" },
 			],
-			center: { value: Math.round(d.on_time_rate) + "%", label: __("on time") },
+			center: { value: d.lines, label: d.lines === 1 ? __("delivery") : __("deliveries") },
 		});
-		$('<div class="co-chart">').append(donut).appendTo($panel);
 	}
 
 	pipeline_specs(pl) {
