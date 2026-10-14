@@ -3906,7 +3906,54 @@ class TestProductionPlan(ERPNextTestSuite):
 		first_wo.cancel()
 		self.assertEqual(batch_delivered_qty(), {first_source: 0, second_source: 5})
 
+	def test_cancelling_later_work_order_keeps_source_totals_in_line_with_batches(self):
+		(
+			first_source,
+			second_source,
+			first_wo,
+			second_wo,
+			batch_delivered_qty,
+		) = self.make_work_orders_sharing_a_batch("TOTL")
+		second_wo.cancel()
+		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 1})
+		self.assertEqual(get_sre_delivered_qty(first_source, second_source), batch_delivered_qty())
+
+		plan = frappe.get_doc("Production Plan", first_wo.production_plan)
+		self.make_work_order_from_plan(plan, 5, first_wo.source_warehouse)
+		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 6})
+		self.assertEqual(get_sre_delivered_qty(first_source, second_source), batch_delivered_qty())
+
+	def test_unreserving_partially_transferred_reservation(self):
+		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+			cancel_stock_reservation_entries,
+		)
+
+		plan, first_source, second_source, batch_delivered_qty = self.make_plan_reserving_a_shared_batch(
+			"UNRS"
+		)
+		work_order = self.make_work_order_from_plan(plan, 5, "_Test Warehouse - _TC")
+		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 1})
+
+		cancel_stock_reservation_entries(plan, [second_source])
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", second_source, "docstatus"), 2)
+
+		work_order.cancel()
+		self.assertEqual(batch_delivered_qty(), {first_source: 0, second_source: 1})
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", second_source, "status"), "Cancelled")
+
 	def make_work_orders_sharing_a_batch(self, suffix):
+		plan, first_source, second_source, batch_delivered_qty = self.make_plan_reserving_a_shared_batch(
+			suffix
+		)
+
+		# The first Work Order takes 4 from the first reservation and 1 from the second, the next takes 5
+		first_wo = self.make_work_order_from_plan(plan, 5, "_Test Warehouse - _TC")
+		second_wo = self.make_work_order_from_plan(plan, 5, "_Test Warehouse - _TC")
+		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 6})
+		return first_source, second_source, first_wo, second_wo, batch_delivered_qty
+
+	def make_plan_reserving_a_shared_batch(self, suffix):
+		"""Production Plan holding one batch in two reservations, of 4 and 6."""
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 			reserve_stock_for_production_plan,
@@ -3946,14 +3993,6 @@ class TestProductionPlan(ERPNextTestSuite):
 			row.name for row in StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
 		)
 
-		def make_work_order(qty):
-			plan.make_work_order()
-			wo = frappe.get_last_doc("Work Order", {"production_plan": plan.name, "docstatus": 0})
-			wo.qty = qty
-			wo.source_warehouse = wo.wip_warehouse = wo.fg_warehouse = warehouse
-			wo.submit()
-			return wo
-
 		def batch_delivered_qty():
 			return {
 				name: frappe.db.get_value(
@@ -3962,11 +4001,15 @@ class TestProductionPlan(ERPNextTestSuite):
 				for name in (first_source, second_source)
 			}
 
-		# The first Work Order takes 4 from the first reservation and 1 from the second, the next takes 5
-		first_wo = make_work_order(5)
-		second_wo = make_work_order(5)
-		self.assertEqual(batch_delivered_qty(), {first_source: 4, second_source: 6})
-		return first_source, second_source, first_wo, second_wo, batch_delivered_qty
+		return plan, first_source, second_source, batch_delivered_qty
+
+	def make_work_order_from_plan(self, plan, qty, warehouse):
+		plan.make_work_order()
+		wo = frappe.get_last_doc("Work Order", {"production_plan": plan.name, "docstatus": 0})
+		wo.qty = qty
+		wo.source_warehouse = wo.wip_warehouse = wo.fg_warehouse = warehouse
+		wo.submit()
+		return wo
 
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
@@ -4616,6 +4659,10 @@ def submit_work_order_from_plan(plan, qty, source_warehouse):
 		item.source_warehouse = source_warehouse
 	work_order.submit()
 	return work_order
+
+
+def get_sre_delivered_qty(*sre_names):
+	return {name: frappe.db.get_value("Stock Reservation Entry", name, "delivered_qty") for name in sre_names}
 
 
 def make_plan_with_sub_assembly():
