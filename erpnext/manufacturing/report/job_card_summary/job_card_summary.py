@@ -44,7 +44,7 @@ def get_data(filters):
 		if filters.get(field):
 			query_filters[field] = filters.get(field)
 
-	data = frappe.get_list("Job Card", fields=fields, filters=query_filters, limit_page_length=0)
+	data = frappe.get_list("Job Card", fields=fields, filters=query_filters)
 
 	if not data:
 		return []
