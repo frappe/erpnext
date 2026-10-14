@@ -181,6 +181,7 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
 	settleable_qty = {}
 	for original, returned in returned_qty.items():
+		returned = flt(returned, qty_precision)
 		net_invoiced = flt(invoiced_qty.get(original))
 		uninvoiced = flt(flt(delivered_qty.get(original)) - net_invoiced, qty_precision)
 		# Until the net qty is fully invoiced, the next invoice still deducts the returns.

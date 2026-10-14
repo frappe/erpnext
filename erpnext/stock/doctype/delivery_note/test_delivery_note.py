@@ -4218,18 +4218,22 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		item = make_item(properties={"stock_uom": "Kg"}).name
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
-		delivery_note = create_delivery_note(item_code=item, qty=0.8, rate=500)
+		delivery_note = create_delivery_note(item_code=item, qty=1, rate=500)
 
-		deducted_return = make_sales_return(delivery_note.name)
-		deducted_return.items[0].qty = -0.1
-		deducted_return.submit()
+		returns = []
+		for qty in (-0.1, -0.7):
+			deducted_return = make_sales_return(delivery_note.name)
+			deducted_return.items[0].qty = qty
+			deducted_return.submit()
+			returns.append(deducted_return)
 
 		invoice = make_sales_invoice(delivery_note.name)
-		self.assertEqual(invoice.items[0].qty, 0.7)
+		self.assertEqual(invoice.items[0].qty, 0.2)
 		invoice.submit()
 
-		deducted_return.reload()
-		self.assertEqual(deducted_return.per_billed, 100)
+		for deducted_return in returns:
+			deducted_return.reload()
+			self.assertEqual(deducted_return.per_billed, 100)
 
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
