@@ -37,8 +37,19 @@ class BaseStockEntry:
 		if self.wo_doc.status == "Stopped":
 			msg = _("Transaction not allowed against stopped Work Order {0}").format(self.doc.work_order)
 
+		if self._is_new_entry_against_closed_work_order():
+			msg = _("Transaction not allowed against closed Work Order {0}").format(self.doc.work_order)
+
 		if msg:
 			frappe.throw(msg)
+
+	def _is_new_entry_against_closed_work_order(self):
+		return (
+			self.wo_doc.status == "Closed"
+			and self.doc.docstatus == 1
+			and not self.doc.is_return
+			and self.doc.purpose in ("Material Transfer for Manufacture", "Manufacture")
+		)
 
 	def validate_alternative_items(self):
 		if not self.wo_doc:
