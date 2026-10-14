@@ -197,7 +197,12 @@ class JournalEntry(AccountsController):
 		self.has_asset_adjustment_entry()
 
 	def cancel(self):
+<<<<<<< HEAD
 		if len(self.accounts) > 100:
+=======
+		"""Cancel inline, or queue cancellation in the background for large entries."""
+		if len(self.accounts) > 100 and not self.meta.queue_in_background:
+>>>>>>> c372c06 (fix(journal-entry): Skip nested cancel queueing when queue_in_background is set)
 			queue_submission(self, "_cancel")
 		else:
 			return self._cancel()
