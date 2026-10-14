@@ -333,6 +333,8 @@ def order_tiles(supplier, company, as_of):
 	receipt, billing, late = {}, {}, {}
 	upcoming, oldest = [], None
 	for line in lines:
+		if line.closed:
+			continue
 		qty = flt(line.qty)
 		rate = flt(line.base_amount) / qty if qty else 0
 		received = min(max(flt(line.received_qty), 0), qty) if qty else 0
@@ -342,7 +344,7 @@ def order_tiles(supplier, company, as_of):
 			billing[line.name] = billing.get(line.name, 0) + unbilled
 
 		pending = (qty - received) * rate
-		if line.closed or qty - received <= 0:
+		if qty - received <= 0:
 			continue
 		receipt[line.name] = receipt.get(line.name, 0) + pending
 		if not line.due:

@@ -94,6 +94,32 @@ class TestSupplierOverview(ERPNextTestSuite):
 		self.assertEqual(tiles["late"]["value"], 900)
 		self.assertEqual(tiles["late"]["orders"], [po.name])
 
+	def test_pipeline_skips_closed_lines(self):
+		supplier = create_supplier(supplier_name="_Test Supplier Overview Closed").name
+		po = create_purchase_order(supplier=supplier, rate=300, qty=2, do_not_submit=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"qty": 1,
+				"rate": 500,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+
+		pr = make_receipt(po.name)
+		pr.items = [row for row in pr.items if row.purchase_order_item == po.items[0].name]
+		pr.items[0].qty = 1
+		pr.submit()
+		frappe.db.set_value("Purchase Order Item", po.items[0].name, "closed", 1)
+
+		tiles = supplier_overview.order_tiles(supplier, COMPANY, getdate(today()))
+		self.assertEqual(tiles["billing"]["value"], 0)
+		self.assertEqual(tiles["billing"]["orders"], [])
+		self.assertEqual(tiles["receipt"]["value"], 500)
+
 	def test_receipt_only_supplier_has_a_company(self):
 		supplier = create_supplier(supplier_name="_Test Supplier Overview Receipt").name
 		make_purchase_receipt(supplier=supplier)
