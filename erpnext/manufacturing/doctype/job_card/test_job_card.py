@@ -3761,6 +3761,33 @@ class TestJobCard(ERPNextTestSuite):
 		first_card.append("time_logs", jc_review_log("2031-03-04 08:00:00", 60, 0, employee))
 		self.assertRaisesRegex(OverlapError, "is already working", first_card.save)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_two_operators_on_one_job_charge_the_workstation_once(self):
+		workstation = make_jc_review_workstation(hour_rate=600, capacity=1)
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			skip_transfer=1,
+		)
+
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		job_card.append("time_logs", jc_review_log("2031-03-05 08:00:00", 60, 0, make_jc_review_employee()))
+		job_card.append("time_logs", jc_review_log("2031-03-05 08:00:00", 60, 10, make_jc_review_employee()))
+		job_card.submit()
+
+		self.assertEqual(job_card.total_time_in_mins, 60)
+		operation_row = frappe.db.get_value(
+			"Work Order Operation",
+			{"parent": wo.name},
+			["actual_operation_time", "actual_operating_cost"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			(operation_row.actual_operation_time, operation_row.actual_operating_cost), (60, 600)
+		)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
