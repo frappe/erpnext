@@ -5,6 +5,9 @@ import frappe
 
 from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.accounts.report.delivered_items_to_be_billed.delivered_items_to_be_billed import execute
+from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -137,3 +140,36 @@ class TestDeliveredItemsToBeBilled(ERPNextTestSuite):
 
 		row = self.run_report(delivery_note=dn.name, posting_date="2026-06-10")[0]
 		self.assertEqual((row.billed_amount, row.pending_amount), (400, 600))
+
+	def test_order_billing_after_the_as_on_date_is_not_deducted(self):
+		self.stock_up_item()
+		so = make_sales_order(qty=10, rate=100, warehouse="Stores - _TC", transaction_date="2026-05-25")
+		first_dn = make_delivery_from_order(so.name, qty=4, posting_date="2026-06-01")
+		second_dn = make_delivery_from_order(so.name, qty=6, posting_date="2026-06-02")
+		make_invoice_from_order(so.name, qty=5, posting_date="2026-06-05")
+		make_invoice_from_order(so.name, qty=5, posting_date="2026-06-20")
+
+		data = self.run_report(posting_date="2026-06-10")
+		self.assertNotIn(first_dn.name, [row.name for row in data])
+		row = next(row for row in data if row.name == second_dn.name)
+		self.assertEqual((row.billed_amount, row.pending_amount), (100, 500))
+		self.assertEqual(self.run_report(delivery_note=second_dn.name), [])
+
+
+def make_delivery_from_order(sales_order, qty, posting_date):
+	dn = make_delivery_note(sales_order)
+	dn.posting_date = posting_date
+	dn.set_posting_time = 1
+	dn.items[0].qty = qty
+	dn.submit()
+	return dn
+
+
+def make_invoice_from_order(sales_order, qty, posting_date):
+	si = make_si_from_so(sales_order)
+	si.posting_date = posting_date
+	si.set_posting_time = 1
+	si.items[0].qty = qty
+	si.insert()
+	si.submit()
+	return si
