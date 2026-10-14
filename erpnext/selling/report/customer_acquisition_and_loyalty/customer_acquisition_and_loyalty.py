@@ -172,24 +172,26 @@ def get_customer_stats(filters, tree_view=False):
 	if permitted_customers is not None:
 		query = query.where(si.customer.isin(permitted_customers))
 
+	invoices = query.run(as_dict=True)
+
+	# resolve each customer's acquisition (first sale) before assigning revenue, so a same-day
+	# return is matched to its acquisition period regardless of row order; returns never acquire
+	acquisition = {}
+	for row in invoices:
+		if not row.is_return and row.customer not in acquisition:
+			key = row.territory if tree_view else getdate(row.posting_date).strftime("%Y-%m")
+			acquisition[row.customer] = (key, getdate(row.posting_date))
+
 	from_date = getdate(filters.get("from_date"))
-	acquisition = {}  # customer -> (key, date) of their first invoice
 	counted = {}  # key -> {"new": set of customers, "repeat": set of customers}
 	customers_in = {}
-
-	for row in query.run(as_dict=True):
+	for row in invoices:
 		posting_date = getdate(row.posting_date)
-		key = row.territory if tree_view else posting_date.strftime("%Y-%m")
-
-		# a return never acquires a customer; it only nets revenue
-		if not row.is_return and row.customer not in acquisition:
-			acquisition[row.customer] = (key, posting_date)
-
 		if posting_date < from_date:
 			continue
 
+		key = row.territory if tree_view else posting_date.strftime("%Y-%m")
 		acq = acquisition.get(row.customer)
-		# without an acquiring sale (e.g. a standalone credit note) the customer is never "new"
 		new_or_repeat = "new" if acq and key == acq[0] and acq[1] >= from_date else "repeat"
 
 		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})
