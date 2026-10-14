@@ -768,8 +768,8 @@ class SubcontractingController(StockController):
 
 				self.set_rate_for_supplied_items(rm_obj, item_row)
 			elif self.backflush_based_on == "BOM":
-				self.update_rate_for_supplied_items()
 				self.set_batch_for_supplied_items()
+				self.update_rate_for_supplied_items()
 
 	def set_batch_for_supplied_items(self):
 		from erpnext.stock.get_item_details import get_filtered_serial_nos
@@ -1231,6 +1231,8 @@ class SubcontractingController(StockController):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
+		self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
 		for item in self.get("items"):
 			if item.item_code in stock_items and item.warehouse:
 				scr_qty = flt(item.qty) * flt(item.conversion_factor)
@@ -1260,7 +1262,6 @@ class SubcontractingController(StockController):
 						)
 					)
 
-		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,
