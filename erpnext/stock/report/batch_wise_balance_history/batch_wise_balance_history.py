@@ -13,6 +13,8 @@ from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockC
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.utils import get_valuation_method
 
 SLE_COUNT_LIMIT = 100_000
 
@@ -314,7 +316,33 @@ def get_item_warehouse_batch_map(filters, float_precision):
 		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
 		qty_dict.bal_value += flt(d.stock_value_difference)
 
+	set_pooled_batch_values(filters, iwb_map)
 	return iwb_map
+
+
+def set_pooled_batch_values(filters, iwb_map):
+	moving_average_is_pooled = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+	cutoff = get_datetime(filters.to_datetime or f"{filters.to_date} 23:59:59")
+	for item, warehouses in iwb_map.items():
+		if not is_pooled(item, filters.company, moving_average_is_pooled):
+			continue
+
+		for warehouse, batches in warehouses.items():
+			last_sle = get_previous_sle(
+				{"item_code": item, "warehouse": warehouse, "posting_datetime": cutoff}
+			)
+			for balance in batches.values():
+				balance.bal_value = balance.bal_qty * flt(last_sle.get("valuation_rate"))
+
+
+def is_pooled(item, company, moving_average_is_pooled):
+	has_serial_no, serial_no_wise = frappe.get_cached_value(
+		"Item", item, ["has_serial_no", "use_serial_no_wise_valuation"]
+	)
+	if has_serial_no:
+		return not serial_no_wise
+
+	return moving_average_is_pooled and get_valuation_method(item, company) == "Moving Average"
 
 
 def get_item_details(filters):
