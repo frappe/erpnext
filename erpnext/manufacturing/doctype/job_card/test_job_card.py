@@ -3889,6 +3889,25 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertRaises(OperationSequenceError, first_card.cancel)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_cancelled_or_closed_work_order_discards_its_draft_job_cards(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
+		operations = [{"operation": operation, "workstation": workstation, "time_in_mins": 60}]
+		fg_item = make_jc_review_item()
+
+		cancelled = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+		cancelled.cancel()
+		closed = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+		close_work_order(closed.name, "Closed")
+
+		for wo in (cancelled, closed):
+			job_cards = frappe.get_all(
+				"Job Card", filters={"work_order": wo.name}, fields=["docstatus", "status"]
+			)
+			self.assertEqual([(row.docstatus, row.status) for row in job_cards], [(2, "Cancelled")])
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
