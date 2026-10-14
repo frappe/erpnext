@@ -65,6 +65,8 @@ jobs:
     # so the packaged bench (and its venv) transplants cleanly.
     runs-on: erpnext-arc-setup
     timeout-minutes: 40
+    env:
+      CI_DB_DATADIR: /home/ci/db-ram/data
     container:
       image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24
       credentials:
@@ -95,7 +97,6 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
         env:
           SKIP_SYSTEM_SETUP: "1"
-          CI_DB_DATADIR: /home/ci/db-data
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
@@ -123,11 +124,11 @@ jobs:
       - name: Stop DB and stage datadir
         run: |
           mariadb-admin -h 127.0.0.1 -P 3306 -u root -proot shutdown || true
-          for _ in $(seq 1 30); do [ -f /home/ci/db-data/mysqld.pid ] || break; sleep 1; done
+          for _ in $(seq 1 30); do [ -f "${CI_DB_DATADIR}/mysqld.pid" ] || break; sleep 1; done
           # Don't bake a dirty datadir — fail if mariadbd didn't finish stopping, rather than ship
           # an inconsistent datadir the shards would have to crash-recover.
-          [ -f /home/ci/db-data/mysqld.pid ] && { echo "mariadbd did not shut down cleanly"; exit 1; }
-          mv /home/ci/db-data /home/ci/frappe-bench/mariadb-data
+          [ -f "${CI_DB_DATADIR}/mysqld.pid" ] && { echo "mariadbd did not shut down cleanly"; exit 1; }
+          mv "${CI_DB_DATADIR}" /home/ci/frappe-bench/mariadb-data
 
       # Package the whole bench (apps, venv, node_modules, sites, the DB dump, and hydrate.sh)
       # into one artifact for the test shards to consume.
