@@ -144,7 +144,7 @@ class InvestmentTransaction(AccountsController):
 		A draft save posts nothing, so it does not lock.
 		"""
 		if self.docstatus == 1:
-			self.get_investment().accrued_upto = lock_investment(self.investment, "accrued_upto")
+			lock_investment(self.investment)
 
 	def validate_investment(self):
 		if self.get_investment().docstatus != 1:
@@ -796,9 +796,21 @@ def get_submitted_sum(
 	return flt(query.select(Sum(table[fieldname])).run()[0][0])
 
 
-def lock_investment(investment, fieldname="name"):
-	"""Lock the investment until commit; returns `fieldname` as last committed, not as first read."""
-	return frappe.db.get_value("Investment", investment, fieldname, for_update=True)
+def lock_investment(investment):
+	"""Lock the investment until commit, so vouchers submitted together check against each other.
+
+	Once locked, reads still see the database as this transaction first saw it. Every posting
+	updates the investment, so if it changed meanwhile, ask for a retry rather than use old balances.
+	"""
+	first_seen = frappe.db.get_value("Investment", investment, "modified")
+	if frappe.db.get_value("Investment", investment, "modified", for_update=True) != first_seen:
+		frappe.throw(
+			_("Investment {0} was just updated by another entry. Please try again.").format(
+				frappe.bold(investment)
+			),
+			exc=frappe.TimestampMismatchError,
+			title=_("Please Retry"),
+		)
 
 
 def get_units_held(investment, upto=None):

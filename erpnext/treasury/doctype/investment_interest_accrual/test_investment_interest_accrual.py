@@ -133,7 +133,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 				self.assertEqual(calculator.get_reference_period(date), expected, date)
 				date = getdate(add_days(date, 1))
 
-	def test_submit_reads_accrued_date_with_a_lock(self):
+	def test_submit_locks_the_investment(self):
 		investment = make_fd(FD_TERMS)
 		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).insert()
 
@@ -141,7 +141,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 			accrual.submit()
 
 		self.assertIn(
-			((("Investment", investment.name, "accrued_upto"), {"for_update": True})),
+			(("Investment", investment.name, "modified"), {"for_update": True}),
 			[(call.args, call.kwargs) for call in get_value.call_args_list],
 		)
 

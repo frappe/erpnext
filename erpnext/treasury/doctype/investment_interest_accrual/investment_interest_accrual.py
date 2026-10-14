@@ -12,6 +12,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.treasury.doctype.investment_transaction.investment_transaction import (
 	EXIT_TYPES,
 	get_gl_entry,
+	lock_investment,
 	set_conversion_rate,
 	validate_interest_not_received,
 )
@@ -54,6 +55,10 @@ class InvestmentInterestAccrual(AccountsController):
 	"""Interest earned on a Deposit or Bond over a date range, as reported by the bank / issuer."""
 
 	def validate(self):
+		# on submit, lock the investment so two accruals of the same days cannot both pass
+		if self.docstatus == 1:
+			lock_investment(self.investment)
+
 		self.validate_investment()
 		set_conversion_rate(self)
 		self.set_missing_values()
@@ -150,10 +155,7 @@ class InvestmentInterestAccrual(AccountsController):
 			)
 
 	def validate_from_date(self, schedule_end):
-		# on submit, locking reads the latest accrued date, so two accruals of the same days cannot both pass
-		next_date = get_next_accrual_date(
-			self.investment, self.get_schedule(), for_update=self.docstatus == 1
-		)
+		next_date = get_next_accrual_date(self.investment, self.get_schedule())
 		if next_date > schedule_end:
 			frappe.throw(
 				_("Interest of Investment {0} is already accrued up to its last day, {1}").format(
@@ -259,9 +261,9 @@ def get_next_accrual(investment, schedule):
 	)
 
 
-def get_next_accrual_date(investment, schedule, for_update=False):
+def get_next_accrual_date(investment, schedule):
 	"""The day after interest is accrued up to, or the first day of the schedule."""
-	accrued_upto = frappe.db.get_value("Investment", investment, "accrued_upto", for_update=for_update)
+	accrued_upto = frappe.db.get_value("Investment", investment, "accrued_upto")
 	if accrued_upto:
 		return getdate(add_days(accrued_upto, 1))
 

@@ -182,6 +182,20 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		]
 		self.assertTrue(investment_locks)
 
+	def test_submit_asks_for_retry_if_investment_changed_while_waiting(self):
+		investment = make_submitted_investment()
+		purchase = make_transaction(investment.name, "Purchase", gross_amount=1000).insert()
+		get_value = frappe.db.get_value
+
+		def committed_meanwhile(doctype, name, fieldname, *args, **kwargs):
+			# the locked read sees what another entry committed while this one waited for the lock
+			if doctype == "Investment" and kwargs.get("for_update"):
+				return add_days(get_value(doctype, name, fieldname), 1)
+			return get_value(doctype, name, fieldname, *args, **kwargs)
+
+		with patch.object(frappe.db, "get_value", side_effect=committed_meanwhile):
+			self.assertRaises(frappe.TimestampMismatchError, purchase.submit)
+
 	def test_cannot_sell_more_units_than_held(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
