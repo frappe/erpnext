@@ -36,7 +36,7 @@ def get_chart_data(data, conditions, filters):
 
 	# fetch only periodic columns as labels
 	columns = conditions.get("columns")[start:-2][2::2]
-	labels = [column.split(":")[0] for column in columns]
+	labels = [column.split(":")[0].rsplit(" (", 1)[0] for column in columns]
 	datapoints = [0] * len(labels)
 
 	group_by_col_idx = None
