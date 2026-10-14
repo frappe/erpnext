@@ -93,24 +93,28 @@ class TestQueries(ERPNextTestSuite):
 	def test_project_query(self):
 		query = add_default_params(queries.get_project_name, "Project")
 
+		if test_project := frappe.db.get_value("Project", {"project_name": "_Test Project"}):
+			frappe.db.set_value("Project", test_project, "status", "Open")
+
 		self.assertGreaterEqual(len(query(txt="_Test Project")), 1)
 
-		# Verify that Disabled projects are excluded from query results
-		# Create a test project with Disabled status if it doesn't exist
-		disabled_project_name = "_Test Disabled Project"
-		if not frappe.db.exists("Project", {"project_name": disabled_project_name}):
-			frappe.get_doc(
-				{
-					"doctype": "Project",
-					"project_name": disabled_project_name,
-					"status": "Disabled",
-					"company": "_Test Company",
-				}
-			).insert()
+		# Verify that only Open projects are returned by the query
+		# Create test projects with non-Open statuses if they don't exist
+		for status in ("Completed", "Disabled"):
+			project_name = f"_Test {status} Project"
+			if not frappe.db.exists("Project", {"project_name": project_name}):
+				frappe.get_doc(
+					{
+						"doctype": "Project",
+						"project_name": project_name,
+						"status": status,
+						"company": "_Test Company",
+					}
+				).insert()
 
-		# Search for the disabled project - it should not appear in results
-		results = query(txt=disabled_project_name)
-		self.assertEqual(len([r for r in results if disabled_project_name in str(r)]), 0)
+			# Search for the non-open project - it should not appear in results
+			results = query(txt=project_name)
+			self.assertEqual(len([r for r in results if project_name in str(r)]), 0)
 
 	def test_account_query(self):
 		query = add_default_params(queries.get_account_list, "Account")
