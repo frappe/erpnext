@@ -62,6 +62,22 @@ def update_item(obj, target, source_parent):
 			target.stock_qty = target.qty * target.conversion_factor
 
 
+def notify_missing_service_items(purchase_order):
+	finished_goods = list(
+		dict.fromkeys(d.fg_item for d in purchase_order.items if d.fg_item and not d.item_code)
+	)
+	if not finished_goods:
+		return
+
+	frappe.msgprint(
+		_(
+			"No active Subcontracting BOM found for Finished Good {0}. Please select the Service Item manually for these rows."
+		).format(comma_and([get_link_to_form("Item", fg_item) for fg_item in finished_goods])),
+		title=_("Service Item Not Set"),
+		indicator="orange",
+	)
+
+
 @frappe.whitelist()
 def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: dict | str | None = None
@@ -134,6 +150,9 @@ def make_purchase_order(
 		target_doc,
 		postprocess,
 	)
+
+	if is_subcontracted:
+		notify_missing_service_items(doclist)
 
 	doclist.set_onload("load_after_mapping", False)
 	return doclist
