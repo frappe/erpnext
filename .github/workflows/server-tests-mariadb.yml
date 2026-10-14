@@ -1,12 +1,19 @@
 name: Server (Mariadb)
 
 on:
+  repository_dispatch:
+    types: [frappe-framework-change]
   pull_request:
     paths-ignore:
       - '**.js'
       - '**.css'
+      - '**.svg'
       - '**.md'
       - '**.html'
+      - 'crowdin.yml'
+      - '.coderabbit.yml'
+      - '.mergify.yml'
+      - '**.po'
   schedule:
     # Run everday at midnight UTC / 5:30 IST
     - cron: "0 0 * * *"
@@ -23,90 +30,73 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: read
+  packages: read
+
 concurrency:
   group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
+# Shared across both jobs. Both run in the SAME CI image so the bench lives at the identical
+# path (/home/ci/frappe-bench) on the setup runner and the test shards — that's what makes the
+# packaged Python venv portable between them.
+env:
+  TZ: 'Asia/Kolkata'
+  DEBIAN_FRONTEND: noninteractive
+  NODE_ENV: "production"
+  ERPNEXT_CI_USER: ci
+  PIP_CACHE_DIR: /home/ci/.cache/pip
+  npm_config_cache: /home/ci/.cache/npm
+  YARN_CACHE_FOLDER: /home/ci/.cache/yarn
+  UV_CACHE_DIR: /home/ci/.cache/uv
+  UV_LINK_MODE: copy
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-
-    strategy:
-      fail-fast: false
-
-      matrix:
-        container: [1, 2, 3, 4]
-
-    name: Python Unit Tests
-
-    services:
-      mysql:
-        image: mariadb:10.6
-        env:
-          MARIADB_ROOT_PASSWORD: 'root'
-        ports:
-          - 3306:3306
-        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-
+  # Build the bench (clone + pip + yarn + assets) and reinstall test_site ONCE, on a free
+  # GitHub-hosted runner, then publish the whole bench (with a DB dump baked in) as an artifact.
+  # The expensive, non-parallelisable work happens here exactly once instead of on every shard.
+  setup:
+    name: Build & reinstall (setup)
+    outputs:
+      bench_sha256: ${{ steps.stage.outputs.sha256 }}
+    # Dedicated scale set (fat cpu request) so the build+reinstall runs at full speed, uncontended
+    # by the many thin test shards. Same CI image + /home/ci path + 127.0.0.1 DB as the shards,
+    # so the packaged bench (and its venv) transplants cleanly.
+    runs-on: erpnext-arc-setup
+    timeout-minutes: 40
+    env:
+      CI_DB_DATADIR: /home/ci/db-ram/data
+    container:
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.11-node18
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_TOKEN || github.token }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Clone
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
+        uses: actions/checkout@v6
 
       - name: Check for valid Python & Merge Conflicts
         run: |
-          python -m compileall -f "${GITHUB_WORKSPACE}"
+          python -m compileall -fq "${GITHUB_WORKSPACE}"
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
           fi
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18
-          check-latest: true
-
       - name: Add to Hosts
-        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+        run: echo "127.0.0.1 test_site" | tee -a /etc/hosts
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
-
-      - name: Cache node modules
-        uses: actions/cache@v4
+      # MariaDB runs in-container on a datadir OUTSIDE the bench, because install.sh's next step
+      # does `rm -rf ~/frappe-bench`. After the reinstall, the datadir is moved into the bench so
+      # it ships in the artifact — test shards then start an already-loaded server (no restore).
+      - name: Start DB
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
         env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v4
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          SKIP_SYSTEM_SETUP: "1"
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
@@ -114,15 +104,101 @@ jobs:
           DB: mariadb
           TYPE: server
           FRAPPE_USER: ${{ github.event.inputs.user }}
-          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+          FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
+          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
+          CI_GITHUB_TOKEN: ${{ github.token }}
+          DB_HOST: 127.0.0.1
+          DB_USER_HOST: '%'
+          WKHTMLTOX_DEB: /tmp/wkhtmltox.deb
+          SKIP_SYSTEM_SETUP: "1"
+          SKIP_WKHTMLTOX_SETUP: "1"
+
+      # Clean shutdown (consistent InnoDB datadir), then stage it inside the bench for packaging.
+      - name: Stop DB and stage datadir
+        run: |
+          mariadb-admin -h 127.0.0.1 -P 3306 -u root -proot shutdown || true
+          for _ in $(seq 1 30); do [ -f "${CI_DB_DATADIR}/mysqld.pid" ] || break; sleep 1; done
+          # Don't bake a dirty datadir — fail if mariadbd didn't finish stopping, rather than ship
+          # an inconsistent datadir the shards would have to crash-recover.
+          [ -f "${CI_DB_DATADIR}/mysqld.pid" ] && { echo "mariadbd did not shut down cleanly"; exit 1; }
+          mv "${CI_DB_DATADIR}" /home/ci/frappe-bench/mariadb-data
+
+      # Package the whole bench (apps, venv, node_modules, sites, the DB dump, and hydrate.sh)
+      # into one artifact for the test shards to consume.
+      # Single-node hand-off: stage the bench on a node-local hostPath instead of round-tripping
+      # through GitHub artifact storage (~60s/shard). Setup and shards share the same disk, so
+      # the shards just untar it locally. NOTE: this assumes one node — a shard on a different
+      # node could not read this path (then you'd need GitHub artifacts or an NFS/RWX volume).
+      - name: Stage bench on node (hostPath)
+        id: stage
+        run: |
+          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/frappe-bench/hydrate.sh
+          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/frappe-bench/start-db.sh
+          mkdir -p /opt/ci-bench-staging
+          # self-clean: drop bench tars from runs older than 2h
+          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +120 -delete 2>/dev/null || true
+          # Exclude .git/node_modules; the mariadb-data datadir IS included (the pre-loaded DB).
+          sha256=$(tar -I 'zstd -T0' -cpf - -C /home/ci \
+            --exclude='.git' --exclude='node_modules' frappe-bench \
+            | tee "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" | sha256sum | cut -d' ' -f1)
+          ls -lh "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+
+  # Fan-out: each shard downloads the bench, untars it, starts MariaDB on the baked datadir, and
+  # runs its slice of the suite. No clone, no build, no reinstall, no DB dump restore on the shards.
+  test:
+    name: Python Unit Tests
+    needs: setup
+    runs-on: erpnext-arc
+    timeout-minutes: 60
+    container:
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.11-node18
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_TOKEN || github.token }}
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        container: [1, 2, 3, 4]
+
+    steps:
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | tee -a /etc/hosts
+
+      # Read the bench straight from the node-local hostPath the setup job staged it on — no
+      # GitHub download. -p preserves the ci (uid 1001) ownership so bench runs as ci cleanly.
+      - name: Untar bench from node (hostPath)
+        run: |
+          cp "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" /tmp/bench.tar.zst
+          echo "${BENCH_SHA256}  /tmp/bench.tar.zst" | sha256sum --check --strict -
+          tar -I zstd -xpf /tmp/bench.tar.zst -C /home/ci
+          rm /tmp/bench.tar.zst
+          ls -ld /home/ci/frappe-bench
+        env:
+          BENCH_SHA256: ${{ needs.setup.outputs.bench_sha256 }}
+
+      - name: Hydrate (start DB on baked datadir + bench start)
+        run: bash /home/ci/frappe-bench/hydrate.sh
+        env:
+          DB_HOST: 127.0.0.1
+          SKIP_SYSTEM_SETUP: "1"
 
       - name: Run Tests
-        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds 4 --build-number ${{ matrix.container }}'
+        run: |
+          su -m "${ERPNEXT_CI_USER:-frappe}" -s /bin/bash <<'EOF'
+          cd ~/frappe-bench/
+          bench --site test_site run-parallel-tests --app erpnext \
+            --total-builds ${{ strategy.job-total }} \
+            --build-number ${{ matrix.container }}
+          EOF
         env:
           TYPE: server
-          CI_BUILD_ID: ${{ github.run_id }}
-          ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
 
       - name: Show bench output
         if: ${{ always() }}
         run: cat ~/frappe-bench/bench_start.log || true
+

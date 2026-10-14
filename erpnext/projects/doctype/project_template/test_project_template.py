@@ -1,15 +1,30 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.projects.doctype.task.test_task import create_task
 
 
-class TestProjectTemplate(unittest.TestCase):
+class TestProjectTemplate(FrappeTestCase):
+	def test_template_tasks_are_validated(self):
+		with self.subTest("task that is not a template"):
+			task = create_task("_Test PT Live Task")
+			template = frappe.get_doc(doctype="Project Template", name="_Test PT Live Task Template")
+			template.append("tasks", {"task": task.name})
+			self.assertRaises(frappe.ValidationError, template.insert)
+
+		with self.subTest("child task that ends after its parent"):
+			parent = create_task("_Test PT Phase", is_template=1, is_group=1, duration=2)
+			child = create_task(
+				"_Test PT Long Child", is_template=1, parent_task=parent.name, begin=1, duration=5
+			)
+			template = frappe.get_doc(doctype="Project Template", name="_Test PT Long Child Template")
+			template.extend("tasks", [{"task": parent.name}, {"task": child.name}])
+			self.assertRaises(frappe.ValidationError, template.insert)
+
 	def test_projects_manager_maintains_and_projects_user_reads_templates(self):
 		manager = create_user("project_template_manager@example.com", "Projects Manager").name
 		user = create_user("project_template_user@example.com", "Projects User").name
