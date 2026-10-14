@@ -4,7 +4,17 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, now_datetime, nowdate, nowtime, today
+from frappe.utils import (
+	add_days,
+	add_months,
+	flt,
+	get_first_day,
+	getdate,
+	now_datetime,
+	nowdate,
+	nowtime,
+	today,
+)
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -82,6 +92,20 @@ class TestAssetRepair(ERPNextTestSuite):
 		for item in asset_repair.stock_items:
 			total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 			self.assertEqual(item.total_value, total_value)
+
+	def test_historical_repair_fixture_has_stock_before_consumption(self):
+		repair = create_asset_repair(stock_consumption=1, failure_date="2021-01-10", submit=1)
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": repair.name, "docstatus": 1})
+		self.assertTrue(stock_entry)
+		movement = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": stock_entry, "is_cancelled": 0},
+			["posting_date", "actual_qty", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual(movement.posting_date, getdate("2021-01-11"))
+		self.assertEqual(movement.actual_qty, -1)
+		self.assertEqual(movement.stock_value_difference, -100)
 
 	def test_total_repair_cost(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
@@ -596,7 +620,14 @@ def create_asset_repair(**args):
 
 		if args.stock_consumption:
 			stock_entry = frappe.get_doc(
-				{"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": asset.company}
+				{
+					"doctype": "Stock Entry",
+					"stock_entry_type": "Material Receipt",
+					"company": asset.company,
+					"set_posting_time": 1,
+					"posting_date": getdate(asset_repair.failure_date),
+					"posting_time": "00:00:00",
+				}
 			)
 			stock_entry.append(
 				"items",
