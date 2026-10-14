@@ -3158,6 +3158,360 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([row.amount for row in scr_return.additional_costs], [-100, 100])
 
+	def test_subcontracting_receipt_distinct_batch_valuation_rates(self):
+		set_backflush_based_on("BOM")
+
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-FG-TEST-.####",
+			},
+		).name
+
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-RM-TEST-.####",
+			},
+		).name
+
+		service_item = make_item(
+			properties={"is_stock_item": 0},
+		).name
+
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		se1 = make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=100,
+		)
+		se1.reload()
+		batch_1 = se1.items[0].batch_no or get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+
+		se2 = make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=200,
+		)
+		se2.reload()
+		batch_2 = se2.items[0].batch_no or get_batch_from_bundle(se2.items[0].serial_and_batch_bundle)
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": 20,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 20,
+				}
+			]
+		)
+
+		transfer_1 = make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			source="_Test Warehouse - _TC",
+			target=sco.supplier_warehouse,
+			batch_no=batch_1,
+			purpose="Send to Subcontractor",
+			do_not_save=True,
+		)
+		transfer_1.subcontracting_order = sco.name
+		transfer_1.items[0].subcontracted_item = fg_item
+		transfer_1.save()
+		transfer_1.submit()
+
+		transfer_2 = make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			source="_Test Warehouse - _TC",
+			target=sco.supplier_warehouse,
+			batch_no=batch_2,
+			purpose="Send to Subcontractor",
+			do_not_save=True,
+		)
+		transfer_2.subcontracting_order = sco.name
+		transfer_2.items[0].subcontracted_item = fg_item
+		transfer_2.save()
+		transfer_2.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		# Verify supplied items have distinct rates matching their batches
+		self.assertEqual(len(scr.supplied_items), 2)
+		batch_rates = {row.batch_no: row.rate for row in scr.supplied_items}
+		self.assertEqual(batch_rates[batch_1], 100.0)
+		self.assertEqual(batch_rates[batch_2], 200.0)
+
+		scr.submit()
+		scr.reload()
+
+		# FG item amount = RM amount (10*100 + 10*200 = 3000) + service (20*50 = 1000) = 4000
+		self.assertEqual(scr.items[0].amount, 4000.0)
+		self.assertEqual(scr.items[0].rate, 200.0)
+
+		fg_bundle = scr.items[0].serial_and_batch_bundle
+		if fg_bundle:
+			bundle_doc = frappe.get_doc("Serial and Batch Bundle", fg_bundle)
+			self.assertEqual(bundle_doc.avg_rate, 200.0)
+			self.assertEqual(bundle_doc.total_amount, 4000.0)
+
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "item_code": fg_item, "is_cancelled": 0},
+			["stock_value_difference", "incoming_rate", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual(fg_sle.stock_value_difference, 4000.0)
+		self.assertEqual(fg_sle.incoming_rate, 200.0)
+		self.assertEqual(fg_sle.stock_value, 4000.0)
+
+		# Later stock movement: issue 5 FG items
+		delivery = make_stock_entry(
+			item_code=fg_item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			purpose="Material Issue",
+		)
+		delivery_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": delivery.name, "item_code": fg_item, "is_cancelled": 0},
+			["actual_qty", "valuation_rate", "stock_value_difference", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual(delivery_sle.actual_qty, -5)
+		self.assertEqual(delivery_sle.valuation_rate, 200.0)
+		self.assertEqual(delivery_sle.stock_value_difference, -1000.0)
+		self.assertEqual(delivery_sle.stock_value, 3000.0)
+
+		# Test reposting: update earlier raw-material receipt (se1) rate from 100 to 150
+		se1_row = se1.items[0]
+		frappe.db.set_value(
+			"Stock Entry Detail",
+			se1_row.name,
+			{
+				"basic_rate": 150.0,
+				"basic_amount": 1500.0,
+				"amount": 1500.0,
+				"valuation_rate": 150.0,
+			},
+		)
+		if se1_row.serial_and_batch_bundle:
+			bundle = frappe.get_doc("Serial and Batch Bundle", se1_row.serial_and_batch_bundle)
+			for entry in bundle.entries:
+				frappe.db.set_value(
+					"Serial and Batch Entry",
+					entry.name,
+					{"incoming_rate": 150.0, "stock_value_difference": 1500.0},
+				)
+			bundle.db_set({"avg_rate": 150.0, "total_amount": 1500.0})
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Entry", "voucher_no": se1.name, "is_cancelled": 0},
+			{"incoming_rate": 150.0, "stock_value_difference": 1500.0},
+		)
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Transaction",
+				"voucher_type": "Stock Entry",
+				"voucher_no": se1.name,
+			}
+		).insert()
+		riv.submit()
+
+		scr.reload()
+		# RM amount: 10 * 150 + 10 * 200 = 3500; Service: 1000; Total FG: 4500 (rate: 225)
+		self.assertEqual(scr.items[0].amount, 4500.0)
+		self.assertEqual(scr.items[0].rate, 225.0)
+
+		if fg_bundle:
+			bundle_doc = frappe.get_doc("Serial and Batch Bundle", fg_bundle)
+			self.assertEqual(bundle_doc.avg_rate, 225.0)
+			self.assertEqual(bundle_doc.total_amount, 4500.0)
+
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "item_code": fg_item, "is_cancelled": 0},
+			["stock_value_difference", "incoming_rate", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual(fg_sle.stock_value_difference, 4500.0)
+		self.assertEqual(fg_sle.incoming_rate, 225.0)
+		self.assertEqual(fg_sle.stock_value, 4500.0)
+
+		delivery_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": delivery.name, "item_code": fg_item, "is_cancelled": 0},
+			["actual_qty", "valuation_rate", "stock_value_difference", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual(delivery_sle.actual_qty, -5)
+		self.assertEqual(delivery_sle.valuation_rate, 225.0)
+		self.assertEqual(delivery_sle.stock_value_difference, -1125.0)
+		self.assertEqual(delivery_sle.stock_value, 3375.0)
+
+		# Check GL entries for Subcontracting Receipt
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Subcontracting Receipt", "voucher_no": scr.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		if gl_entries:
+			total_debit = sum(flt(gle.debit) for gle in gl_entries)
+			total_credit = sum(flt(gle.credit) for gle in gl_entries)
+			self.assertAlmostEqual(total_debit, 4500.0)
+			self.assertAlmostEqual(total_credit, 4500.0)
+
+	def test_subcontracting_receipt_standard_cost_bundle_preserved_on_repost(self):
+		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
+			create_item_standard_cost,
+		)
+
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"valuation_method": "Standard Cost",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-FG-STD-.####",
+			},
+		).name
+
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-RM-STD-.####",
+			},
+		).name
+
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		create_item_standard_cost(fg_item, 300.0, company="_Test Company")
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		se = make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=100,
+		)
+		se.reload()
+		batch = se.items[0].batch_no or get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": 10,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			]
+		)
+
+		transfer = make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			source="_Test Warehouse - _TC",
+			target=sco.supplier_warehouse,
+			batch_no=batch,
+			purpose="Send to Subcontractor",
+			do_not_save=True,
+		)
+		transfer.subcontracting_order = sco.name
+		transfer.items[0].subcontracted_item = fg_item
+		transfer.save()
+		transfer.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+		scr.reload()
+
+		fg_bundle = scr.items[0].serial_and_batch_bundle
+		if fg_bundle:
+			bundle_doc = frappe.get_doc("Serial and Batch Bundle", fg_bundle)
+			bundle_doc.set_incoming_rate(row=frappe._dict(rate=300.0, valuation_rate=300.0), save=True)
+			bundle_doc.calculate_qty_and_amount(save=True)
+			self.assertEqual(bundle_doc.avg_rate, 300.0)
+			self.assertEqual(bundle_doc.total_amount, 3000.0)
+
+		# Repost raw material entry with a different rate
+		se_row = se.items[0]
+		frappe.db.set_value(
+			"Stock Entry Detail",
+			se_row.name,
+			{
+				"basic_rate": 150.0,
+				"basic_amount": 1500.0,
+				"amount": 1500.0,
+				"valuation_rate": 150.0,
+			},
+		)
+		if se_row.serial_and_batch_bundle:
+			bundle = frappe.get_doc("Serial and Batch Bundle", se_row.serial_and_batch_bundle)
+			for entry in bundle.entries:
+				frappe.db.set_value(
+					"Serial and Batch Entry",
+					entry.name,
+					{"incoming_rate": 150.0, "stock_value_difference": 1500.0},
+				)
+			bundle.db_set({"avg_rate": 150.0, "total_amount": 1500.0})
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Entry", "voucher_no": se.name, "is_cancelled": 0},
+			{"incoming_rate": 150.0, "stock_value_difference": 1500.0},
+		)
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Transaction",
+				"voucher_type": "Stock Entry",
+				"voucher_no": se.name,
+			}
+		).insert()
+		riv.submit()
+
+		scr.reload()
+		# Production cost changed: 10 * 150 (RM) + 10 * 50 (Service) = 2000 (rate: 200)
+		self.assertEqual(scr.items[0].amount, 2000.0)
+		self.assertEqual(scr.items[0].rate, 200.0)
+
+		# But standard cost bundle must preserve standard rate (300)
+		if fg_bundle:
+			bundle_doc = frappe.get_doc("Serial and Batch Bundle", fg_bundle)
+			self.assertEqual(bundle_doc.avg_rate, 300.0)
+			self.assertEqual(bundle_doc.total_amount, 3000.0)
+
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "item_code": fg_item, "is_cancelled": 0},
+			["stock_value_difference", "incoming_rate", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual(fg_sle.incoming_rate, 300.0)
+		self.assertEqual(fg_sle.stock_value_difference, 3000.0)
+		self.assertEqual(fg_sle.stock_value, 3000.0)
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
