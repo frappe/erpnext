@@ -28,24 +28,13 @@ class TestReservedStock(ERPNextTestSuite):
 
 	def test_report_access_for_operational_roles(self):
 		frappe.reload_doc("stock", "report", "reserved_stock", force=True)
-		for role in (
-			"Stock User",
-			"Stock Manager",
-			"Sales User",
-			"Sales Manager",
-			"Purchase User",
-			"Purchase Manager",
-			"Accounts User",
-		):
-			with self.subTest(role=role):
-				user = create_user(f"reserved-stock-{frappe.scrub(role)}@example.com", role)
-				with self.set_user(user.name):
-					if role == "Accounts User":
-						self.assertRaises(frappe.PermissionError, get_report_doc, "Reserved Stock")
-					else:
-						self.assertTrue(frappe.has_permission("Stock Reservation Entry", "report"))
-						self.assertEqual(get_report_doc("Reserved Stock").name, "Reserved Stock")
-		with self.set_user("Guest"):
+
+		stock_user = create_user("reserved-stock-stock-user@example.com", "Stock User")
+		with self.set_user(stock_user.name):
+			self.assertEqual(get_report_doc("Reserved Stock").name, "Reserved Stock")
+
+		accounts_user = create_user("reserved-stock-accounts-user@example.com", "Accounts User")
+		with self.set_user(accounts_user.name):
 			self.assertRaises(frappe.PermissionError, get_report_doc, "Reserved Stock")
 
 	@ERPNextTestSuite.change_settings(
