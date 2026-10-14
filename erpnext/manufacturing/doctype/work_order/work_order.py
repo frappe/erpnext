@@ -489,12 +489,8 @@ class WorkOrder(Document):
 				row.source_warehouse = self.source_warehouse
 
 	def reset_use_multi_level_bom(self):
-		if self.is_new():
-			return
-
-		before_save_obj = self.get_doc_before_save()
-		if before_save_obj.use_multi_level_bom != self.use_multi_level_bom:
-			self.get_items_and_operations_from_bom()
+		previous = None if self.is_new() else self.get_doc_before_save()
+		OperationsService(self).sync_operations_with_bom(previous)
 
 	def validate_workstation_type(self):
 		if not self.docstatus.is_submitted():
