@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import DocType
+from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Abs, NullIf, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
@@ -285,8 +285,12 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	)
 
 	for column in fields:
+		returned_column = column
+		if args.get("return_qty_from_rejected_warehouse") and doc.doctype == "Purchase Receipt":
+			returned_column = "rejected_qty"
+
 		returned_qty = (
-			flt(already_returned_data.get(column, 0), field_precision)
+			flt(already_returned_data.get(returned_column, 0), field_precision)
 			if len(already_returned_data) > 0
 			else 0
 		)
@@ -392,6 +396,13 @@ def get_already_returned_items(doc):
 		else "dn_detail"
 	)
 
+	stock_qty = Abs(child.stock_qty)
+	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
+	if doc.doctype == "Purchase Receipt":
+		from_rejected_warehouse = child.return_qty_from_rejected_warehouse == 1
+		rejected_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
+		stock_qty = Case().when(from_rejected_warehouse, 0).else_(stock_qty)
+
 	query = (
 		frappe.qb.from_(child)
 		.inner_join(par)
@@ -399,7 +410,7 @@ def get_already_returned_items(doc):
 		.select(
 			child.item_code,
 			Sum(Abs(child.qty)).as_("qty"),
-			Sum(Abs(child.stock_qty)).as_("stock_qty"),
+			Sum(stock_qty).as_("stock_qty"),
 			child[field],
 		)
 		.where((par.docstatus == 1) & (par.is_return == 1) & (par.return_against == doc.return_against))
@@ -407,7 +418,7 @@ def get_already_returned_items(doc):
 	)
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		query = query.select(
-			Sum(Abs(child.rejected_qty) * child.conversion_factor).as_("rejected_qty"),
+			Sum(rejected_qty).as_("rejected_qty"),
 			Sum(Abs(child.received_qty) * child.conversion_factor).as_("received_qty"),
 		)
 
