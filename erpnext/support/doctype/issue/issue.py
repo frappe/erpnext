@@ -211,7 +211,7 @@ class Issue(Document):
 			replicated_issue.service_level_agreement = None
 			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
-			replicated_issue.resolution_by = None
+			replicated_issue.sla_resolution_by = None
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -415,7 +415,7 @@ def calculate_first_response_time(issue, first_responded_on):
 		"Service Level Agreement", issue.service_level_agreement
 	).support_and_resolution
 
-	if issue_creation_date.day == first_responded_on.day:
+	if getdate(issue_creation_date) == getdate(first_responded_on):
 		if is_work_day(issue_creation_date, support_hours):
 			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
 
