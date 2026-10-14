@@ -97,9 +97,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 		if not target.conversion_factor:
 			target.conversion_factor = 1
 
-		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
-		if pending_rm_qty > 0:
-			target.qty = pending_rm_qty
+		target.qty = flt(source.required_qty) - flt(source.transferred_qty)
 
 	def set_missing_values(source, target):
 		if not source.items:
@@ -151,7 +149,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 					"name": "job_card_item",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.required_qty > 0,
+				"condition": lambda doc: flt(doc.required_qty) > flt(doc.transferred_qty),
 			},
 		},
 		target_doc,
