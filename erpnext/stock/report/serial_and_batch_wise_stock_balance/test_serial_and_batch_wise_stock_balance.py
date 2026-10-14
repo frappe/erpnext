@@ -1,6 +1,6 @@
 import frappe
 from frappe import _dict
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -51,6 +51,83 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		)
 		self.assertTrue(all(row.batch_no for row in rows[1:]))
 		self.assertEqual(rows[0].batch_no, f"{rows[1].batch_no}\n{rows[2].batch_no}")
+
+	def test_batch_values_follow_valuation_mode(self):
+		frappe.db.set_value("Company", "_Test Company", "valuation_method", "Moving Average")
+		frappe.clear_document_cache("Company", "_Test Company")
+		for method, pooled, serial_valuation, expected_rates in (
+			("Moving Average", 1, None, [150, 150]),
+			("Moving Average", 0, None, [100, 200]),
+			("FIFO", 1, None, [100, 200]),
+			("", 1, None, [150, 150]),
+			("Moving Average", 0, 0, [150, 150]),
+			("Moving Average", 1, 0, [150, 150]),
+			("FIFO", 0, 0, [150, 150]),
+			("Moving Average", 1, 1, [100, 200]),
+		):
+			with self.subTest(valuation_method=method, pooled=pooled, serial_valuation=serial_valuation):
+				frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", pooled)
+				rows = self.run_report(
+					{
+						"has_batch_no": 1,
+						"create_new_batch": 1,
+						"batch_number_series": "SBW-V-.#####",
+						"valuation_method": method,
+						"has_serial_no": serial_valuation is not None,
+						"serial_no_series": "SBW-VS-.#####",
+						"use_serial_no_wise_valuation": serial_valuation or 0,
+					},
+					[{"qty": 10, **RECEIVE}, {"qty": 10, **RECEIVE, "rate": 200}],
+				)
+				self.assertEqual([row.val_rate for row in rows[1:]], expected_rates)
+				self.assertEqual([row.bal_val for row in rows[1:]], [10 * rate for rate in expected_rates])
+				self.assertEqual(sum(row.bal_val for row in rows[1:]), rows[0].bal_val)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	def test_pooled_values_preserve_item_total(self):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		rows = self.run_report(
+			{"has_batch_no": 1, "create_new_batch": 1, "valuation_method": "Moving Average"},
+			[{"qty": 10000, **RECEIVE, "rate": 1}, {"qty": 20000, **RECEIVE, "rate": 2}],
+		)
+		self.assertEqual(rows[0].bal_val, 50000)
+		self.assertAlmostEqual(sum(row.bal_val for row in rows[1:]), rows[0].bal_val)
+		for row in rows[1:]:
+			self.assertAlmostEqual(row.bal_val, row.bal_qty * 50000 / 30000)
+
+	def test_pooled_values_at_cutoff_and_for_empty_batches(self):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		rows = self.run_report(
+			{"has_batch_no": 1, "create_new_batch": 1, "valuation_method": "Moving Average"},
+			[
+				{"qty": 10, **RECEIVE, "rate": rate, "posting_date": add_days(today(), days)}
+				for days, rate in ((-3, 100), (-2, 200))
+			],
+		)
+		item = rows[0].item_code
+		filters = _dict(
+			company="_Test Company",
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			from_date=add_days(today(), -4),
+			to_date=add_days(today(), -3),
+		)
+		rows = [_dict(row) for row in execute(filters)[1]]
+		self.assertEqual(
+			[(row.bal_qty, row.bal_val, row.val_rate) for row in rows], [(10, 1000, 100), (10, 1000, 100)]
+		)
+		make_stock_entry(
+			item_code=item,
+			qty=10,
+			from_warehouse=WAREHOUSE,
+			batch_no=rows[1].batch_no,
+			posting_date=add_days(today(), -1),
+		)
+		filters.to_date = today()
+		for include_empty, expected in ((0, [(10, 1500, 150)]), (1, [(0, 0, 0), (10, 1500, 150)])):
+			filters.include_zero_stock_items = include_empty
+			rows = [_dict(row) for row in execute(filters)[1]]
+			self.assertEqual(sorted((row.bal_qty, row.bal_val, row.val_rate) for row in rows[1:]), expected)
 
 	def test_item_row_lists_the_batches_under_it(self):
 		rows = self.run_report(
@@ -120,6 +197,7 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		)
 		report.inventory_dimensions = ["project"]
 		report.serial_map = {}
+		report.pooled_valuation_keys = set()
 		report.batch_numbers = {}
 		report.batch_map = {
 			("SBW Item", WAREHOUSE, "SBW Project"): {"SBW Batch": _dict(bal_qty=5, bal_val=500)}
