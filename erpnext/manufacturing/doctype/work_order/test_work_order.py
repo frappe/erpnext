@@ -6755,6 +6755,24 @@ class TestWorkOrder(ERPNextTestSuite):
 			[(sub_assembly_bom.name, 120), (fg_bom.name, 60)],
 		)
 
+	def test_planned_qty_leaves_out_process_loss(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}], process_loss_percentage=20)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10, skip_transfer=1)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5)).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, ["produced_qty", "process_loss_qty"]), (4, 1)
+		)
+		planned_qty = frappe.db.get_value(
+			"Bin", {"item_code": fg_item, "warehouse": "_Test Warehouse 2 - _TC"}, "planned_qty"
+		)
+		self.assertEqual(planned_qty, 5)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
@@ -7328,7 +7346,7 @@ def get_unreserved_items(wo):
 	]
 
 
-def make_review_bom(fg_item, rows, quantity=1, operations=None):
+def make_review_bom(fg_item, rows, quantity=1, operations=None, **kwargs):
 	bom = frappe.get_doc(
 		{
 			"doctype": "BOM",
@@ -7340,6 +7358,7 @@ def make_review_bom(fg_item, rows, quantity=1, operations=None):
 			"with_operations": 1 if operations else 0,
 			"items": rows,
 			"operations": operations or [],
+			**kwargs,
 		}
 	)
 	bom.insert()
