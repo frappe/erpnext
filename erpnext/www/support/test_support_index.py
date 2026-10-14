@@ -34,8 +34,7 @@ class TestSupportIndex(ERPNextTestSuite):
 		return article.name
 
 	def seed_page_views(self, path, count):
-		# Web Page View is in_create/read_only; insert the minimal row the
-		# converted JOIN reads (path == Help Article.route) directly.
+		# Use the controller so fixtures follow virtual log storage too.
 		for _ in range(count):
 			view = frappe.new_doc("Web Page View")
 			view.path = path
@@ -43,6 +42,7 @@ class TestSupportIndex(ERPNextTestSuite):
 			view.flags.name_set = True
 			view.name = frappe.generate_hash("wpv", 12)
 			view.db_insert()
+			self.addCleanup(view.delete)
 
 	def test_favorite_articles_ordered_by_page_view_count(self):
 		category = self.make_help_category()
@@ -61,8 +61,12 @@ class TestSupportIndex(ERPNextTestSuite):
 		# would not reproduce these exact counts or this ordering.
 		self.seed_page_views(route_hi, 3)
 		self.seed_page_views(route_lo, 1)
+		private_route = route_hi + "-private"
+		self.make_help_article(category, private_route, "Private Article", "Private content", published=0)
+		self.seed_page_views(private_route, 10)
 
 		results = get_favorite_articles_by_page_view()
+		self.assertNotIn(private_route, [row.route for row in results])
 
 		by_route = {row.route: row for row in results if row.route in (route_hi, route_lo)}
 
@@ -74,7 +78,7 @@ class TestSupportIndex(ERPNextTestSuite):
 		self.assertEqual(by_route[route_hi]["count"], 3)
 		self.assertEqual(by_route[route_lo]["count"], 1)
 
-		# Max()-wrapped columns carry the article's own data (one row per route).
+		# Ranked rows retain the published article's own data.
 		self.assertEqual(by_route[route_hi].name, name_hi)
 		self.assertEqual(by_route[route_hi].title, "High Views Article")
 		self.assertEqual(by_route[route_hi].category, category)

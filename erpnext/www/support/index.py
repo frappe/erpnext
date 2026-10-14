@@ -1,5 +1,4 @@
 import frappe
-from frappe.query_builder.functions import Count, Max
 
 
 def get_context(context):
@@ -31,28 +30,33 @@ def get_context(context):
 
 
 def get_favorite_articles_by_page_view():
-	ha = frappe.qb.DocType("Help Article")
-	wpv = frappe.qb.DocType("Web Page View")
-	return (
-		frappe.qb.from_(ha)
-		.inner_join(wpv)
-		.on(ha.route == wpv.path)
-		.select(
-			# route is the unique page URL, so there is one published article per route: Max() just
-			# returns that row's columns while keeping the GROUP BY route valid on postgres
-			Max(ha.name).as_("name"),
-			Max(ha.title).as_("title"),
-			Max(ha.content).as_("content"),
-			ha.route,
-			Max(ha.category).as_("category"),
-			Count(ha.route).as_("count"),
-		)
-		.where(ha.published == 1)
-		.groupby(ha.route)
-		.orderby(Count(ha.route), order=frappe.qb.desc)
-		.limit(6)
-		.run(as_dict=True)
+	routes = [
+		route for route in frappe.get_all("Help Article", filters={"published": 1}, pluck="route") if route
+	]
+	if not routes:
+		return []
+	# Page views may live in the log database, so they cannot join the article SQL table.
+	views = frappe.get_all(
+		"Web Page View",
+		filters={"path": ["in", routes]},
+		fields=["path", {"COUNT": "name", "as": "view_count"}],
+		group_by="path",
+		order_by="view_count desc, path asc",
+		limit=6,
 	)
+	if not views:
+		return []
+	articles = frappe.get_all(
+		"Help Article",
+		filters={"published": 1, "route": ["in", [view.path for view in views]]},
+		fields=["name", "title", "content", "route", "category"],
+	)
+	by_route = {article.route: article for article in articles}
+	return [
+		frappe._dict({**by_route[view.path], "count": view.view_count})
+		for view in views
+		if view.path in by_route
+	]
 
 
 def get_favorite_articles(favorite_articles):
