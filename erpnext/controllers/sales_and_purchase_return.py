@@ -341,11 +341,17 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 def add_returned_row(doc, key, row, already_returned_items):
 	"""Count a validated row so that the next rows of the same return see it."""
 	conversion_factor = flt(row.conversion_factor or 1)
+	stock_qty = get_returned_stock_qty(doc, row)
+	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	if doc.doctype == "Purchase Receipt" and row.get("return_qty_from_rejected_warehouse"):
+		rejected_qty += stock_qty
+		stock_qty = 0
+
 	returned = already_returned_items.setdefault(key, frappe._dict())
 	returned.qty = flt(returned.qty) + abs(flt(row.qty))
-	returned.stock_qty = flt(returned.stock_qty) + get_returned_stock_qty(doc, row)
+	returned.stock_qty = flt(returned.stock_qty) + stock_qty
 	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
-	returned.rejected_qty = flt(returned.rejected_qty) + abs(flt(row.get("rejected_qty"))) * conversion_factor
+	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
 
 
 def get_returned_stock_qty(doc, row):
