@@ -645,7 +645,11 @@ def update_status(name, status):
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None, args=None):
+def make_purchase_order(
+	source_name: str,
+	target_doc: str | dict | Document | None = None,
+	args: str | dict | None = None,
+):
 	if args is None:
 		args = frappe.flags.args or {}
 	if isinstance(args, str):
