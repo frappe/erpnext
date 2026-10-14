@@ -220,8 +220,8 @@ class StockBalanceReport:
 			return False
 
 		if item.has_batch_no:
-			valuation_method = item.valuation_method or frappe.get_cached_value(
-				"Company", row.company, "valuation_method"
+			valuation_method = item.valuation_method or frappe.db.get_single_value(
+				"Stock Settings", "valuation_method"
 			)
 			return valuation_method == "Moving Average" and bool(
 				frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
