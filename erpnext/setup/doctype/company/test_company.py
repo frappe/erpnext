@@ -214,23 +214,109 @@ class TestCompany(ERPNextTestSuite):
 		child_company.save()
 		self.test_basic_tree()
 
+<<<<<<< HEAD
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
+=======
+	def test_get_children_root_includes_empty_string_parent(self):
+		"""get_children at the root mirrors the original ifnull(parent_company,"")="": the converted
+		`["is", "not set"]` filter expands to `parent_company IS NULL OR parent_company = ''`, so a
+		company whose parent_company is '' (MariaDB keeps '') is still listed as a root. Guards against
+		narrowing this to an IS NULL-only check."""
+		from erpnext.setup.doctype.company.company import get_children
 
-		self.load_test_records("Company")
+		company = "_Test Company"
+		cd = frappe.qb.DocType("Company")
+		# force '' (not NULL) at the SQL layer, bypassing frappe's empty -> NULL doc coercion
+		frappe.qb.update(cd).set(cd.parent_company, "").where(cd.name == company).run()
 
-		setup_demo_data(self.globalTestRecords["Company"][0]["company_name"])
-		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
-		self.assertTrue(company_name)
+		roots = {row.value for row in get_children("Company", parent="")}
+		self.assertIn(company, roots)
 
-		for transaction in frappe.get_hooks("demo_transaction_doctypes"):
-			self.assertTrue(frappe.db.exists(frappe.unscrub(transaction), {"company": company_name}))
+	def test_annual_transaction_history_merges_dates_across_doctypes(self):
+		"""get_all_transactions_annual_history aggregates each DocType separately, then merges the
+		per-date counts. Two transactions of different DocTypes sharing a transaction_date must land
+		in one date bucket with the summed count (the UNION GROUP BY -> Counter-merge conversion)."""
+		from frappe.utils import add_days, get_timestamp, nowdate
+
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.setup.doctype.company.company import get_all_transactions_annual_history
+
+		company = "_Test Company"
+		txn_date = add_days(nowdate(), -30)
+		key = get_timestamp(txn_date)
+
+		before = get_all_transactions_annual_history(company).get(key, 0)
+
+		make_quotation(company=company, transaction_date=txn_date, do_not_submit=True)
+		make_sales_order(company=company, transaction_date=txn_date, do_not_submit=True)
+
+		after = get_all_transactions_annual_history(company).get(key, 0)
+		self.assertEqual(after - before, 2)
+
+	def test_sdbnb_validation_requires_account_when_enabled(self):
+		company = get_test_company()
+
+		company.enable_stock_delivered_but_not_billed = 1
+		company.stock_delivered_but_not_billed = None
+
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_disable_sdbnb_with_outstanding_delivery_note_fails(self):
+		company = get_test_company()
+
+		item_code = create_stock_item_with_inventory()
+		create_outstanding_delivery_note(item_code)
+
+		company.enable_stock_delivered_but_not_billed = 0
+
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_cannot_change_sdbnb_account_with_outstanding_delivery_note(self):
+		company = get_test_company()
+
+		item_code = create_stock_item_with_inventory()
+		create_outstanding_delivery_note(item_code)
+
+		new_account = create_account(
+			account_name="Stock Delivered But Not Billed - New",
+			account_type="Stock Delivered But Not Billed",
+			parent_account="Stock Assets - _TSDBNB",
+			company=company.name,
+		)
+
+		company.stock_delivered_but_not_billed = new_account
+
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_clear_demo_data(self):
+		from erpnext.setup.demo import clear_demo_data, read_data_file_using_hooks
+>>>>>>> a34dfaa (chore(setup): remove demo data option and make persona capture less stringent (#60658))
+
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "_Test Company (Demo)",
+				"abbr": "_TCD",
+				"default_currency": "INR",
+				"country": "India",
+			}
+		).insert()
+		frappe.db.set_single_value("Global Defaults", "demo_company", company.name)
+		for doctype in frappe.get_hooks("demo_master_doctypes"):
+			for record in json.loads(read_data_file_using_hooks(doctype)):
+				frappe.get_doc(record).insert(ignore_if_duplicate=True)
 
 		clear_demo_data()
-		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
-		self.assertFalse(company_name)
-		for transaction in frappe.get_hooks("demo_transaction_doctypes"):
-			self.assertFalse(frappe.db.exists(frappe.unscrub(transaction), {"company": company_name}))
+
+		self.assertFalse(frappe.db.exists("Company", company.name))
+		self.assertFalse(frappe.db.get_single_value("Global Defaults", "demo_company"))
+		self.assertFalse(frappe.db.exists("Customer", {"customer_name": "Grant Plastics Ltd."}))
+		self.assertFalse(frappe.db.exists("Item", "SKU001"))
 
 
 def create_company_communication(doctype, docname):

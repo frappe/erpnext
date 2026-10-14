@@ -3,10 +3,10 @@
 
 import json
 import os
-from random import randint
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.utils import add_days, get_url_to_form, getdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -54,6 +54,8 @@ def log_demo_data_failed_notification(error_log):
 	}
 
 	make_notification_logs(notif_log_doc, users)
+=======
+>>>>>>> a34dfaa (chore(setup): remove demo data option and make persona capture less stringent (#60658))
 
 
 @frappe.whitelist()
@@ -79,6 +81,7 @@ def clear_demo_data():
 		)
 
 
+<<<<<<< HEAD
 def create_demo_company(company):
 	company_doc = frappe.get_doc("Company", company).as_dict()
 
@@ -199,6 +202,8 @@ def get_random_date(start_date, start_range, end_range):
 	return add_days(start_date, randint(start_range, end_range))
 
 
+=======
+>>>>>>> a34dfaa (chore(setup): remove demo data option and make persona capture less stringent (#60658))
 def create_transaction_deletion_record(company):
 	transaction_deletion_record = frappe.new_doc("Transaction Deletion Record")
 	transaction_deletion_record.company = company
@@ -249,8 +254,3 @@ def read_data_file_using_hooks(doctype):
 		data = f.read()
 
 	return data
-
-
-def get_warehouse(company):
-	warehouses = frappe.db.get_all("Warehouse", {"company": company, "is_group": 0})
-	return warehouses[randint(0, 3)].name
