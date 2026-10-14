@@ -26,6 +26,9 @@ FORMULA_FUNCTIONS = {
 	"floor": math.floor,
 }
 
+# rows that have values (the rest are layout rows)
+DATA_SOURCES_WITH_VALUES = ("Account Data", "Calculated Amount", "Custom API")
+
 
 def get_valid_api_method(api_path: str):
 	"""Resolve `api_path`, ensuring it is whitelisted and permits GET (i.e. read-only)."""
@@ -211,7 +214,7 @@ class TemplateStructureValidator(Validator):
 				)
 
 			# Calculation formula required
-			if row.data_source in ["Account Data", "Calculated Amount", "Custom API"]:
+			if row.data_source in DATA_SOURCES_WITH_VALUES:
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(

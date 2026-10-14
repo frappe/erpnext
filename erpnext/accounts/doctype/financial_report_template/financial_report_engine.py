@@ -28,6 +28,7 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_templat
 	FinancialReportTemplate,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+	DATA_SOURCES_WITH_VALUES,
 	FORMULA_FUNCTIONS,
 	AccountFilterValidator,
 	CalculationFormulaValidator,
@@ -220,7 +221,6 @@ class FinancialReportEngine:
 		# Initialize context
 		context = self._initialize_context(filters)
 
-		# grouped by a dimension that has no values
 		if not context.period_list:
 			return context.get_result()
 
@@ -502,7 +502,7 @@ class FinancialQueryBuilder:
 		self.account_meta = {}  # {name: {account_name, account_number}}
 		self.ignore_opening_entries = False
 
-		# not grouped: dimension_field is None and everything falls under the `None` key
+		# group by dimension
 		self.dimension_field = periods[0].get("dimension_field") if periods else None
 		self.first_period_keys = get_first_period_keys(periods)
 
@@ -596,6 +596,7 @@ class FinancialQueryBuilder:
 
 	def _get_zero_balances(self, account_names: list[str]) -> dict[tuple, float]:
 		zero_balances = {}
+
 		for account in account_names:
 			for dimension in self.first_period_keys:
 				zero_balances[(account, dimension)] = 0.0
@@ -612,7 +613,9 @@ class FinancialQueryBuilder:
 		return (row["account"], row.get(self.dimension_field))
 
 	def _rebase_closing_balances(
-		self, closing_data: dict[tuple, float], closing_date: str
+		self,
+		closing_data: dict[tuple, float],
+		closing_date: str,
 	) -> dict[str, dict[str, dict[str, float]]]:
 		balances_data = {}
 
@@ -620,14 +623,14 @@ class FinancialQueryBuilder:
 		closing_end = getdate(closing_date)
 
 		has_gap = date_diff(report_start, closing_end) > 1
-
 		gap_movements = {}
+
 		if has_gap:
 			account_names = list({account for account, _dimension in closing_data})
 			gap_movements = self._get_gap_movements(account_names, closing_date, report_start)
 
 		for (account, dimension), closing_balance in closing_data.items():
-			# e.g. blank cost center: no column for it
+			# no column for it, e.g. entries without a cost center
 			if dimension not in self.first_period_keys:
 				continue
 
@@ -689,6 +692,7 @@ class FinancialQueryBuilder:
 		ignore_is_opening = frappe.get_single_value(
 			"Accounts Settings", "ignore_is_opening_check_for_reporting"
 		)
+
 		if self.ignore_opening_entries and not ignore_is_opening:
 			# This filter here applies to all accounts (BS & PL)
 			# However, in legacy query, this filter only applies to BS accounts
@@ -696,9 +700,8 @@ class FinancialQueryBuilder:
 
 		# Add period-specific columns
 		for period in self.periods:
-			in_period = (gl_table.posting_date >= period["from_date"]) & (
-				gl_table.posting_date <= period["to_date"]
-			)
+			in_period = gl_table.posting_date.between(period["from_date"], period["to_date"])
+
 			if self.dimension_field:
 				in_period &= gl_table[self.dimension_field] == period["dimension_value"]
 
@@ -708,7 +711,7 @@ class FinancialQueryBuilder:
 		query = self._apply_standard_filters(query, gl_table)
 		return self._execute_with_permissions(query, "GL Entry")
 
-	def _calculate_running_balances(self, balances_data: dict, gl_data: list[dict]) -> dict:
+	def _calculate_running_balances(self, balances_data: dict, gl_data: list[dict]) -> None:
 		gl_dict = {row["account"]: row for row in gl_data}
 		accounts = set(balances_data.keys()) | set(gl_dict.keys())
 		first_period_keys = set(self.first_period_keys.values())
@@ -1167,8 +1170,9 @@ def get_children_accounts(
 
 
 def get_first_period_keys(period_list: list[dict]) -> dict:
-	"""{dimension_value: key of its first period}, or {None: first key} when not grouped."""
+	"""{dimension_value: key of its first period}, or {None: first key} when not grouped by dimension."""
 	first_period_keys = {}
+
 	for period in period_list:
 		first_period_keys.setdefault(period.get("dimension_value"), period["key"])
 
@@ -1185,10 +1189,9 @@ def get_total_keys(period_list: list[dict], balance_type: str | None, accumulate
 	if balance_type == "Opening Balance":
 		return list(get_first_period_keys(period_list).values())
 
-	# running total (e.g. cash so far): take each dimension's last period, adding them would double count
-	# change in the period: add every period
-	# Accumulated Values: not set -> the row's balance type decides, on -> all running totals,
-	# off -> all changes (see `_handle_balance_accumulation`)
+	# running total: each period already includes the previous ones, so take only the last per dimension
+	# change: add every period
+	# accumulated_values is None when the report has no such filter, then the row's balance type decides
 	if accumulated_values is None:
 		is_running_total = balance_type == "Closing Balance"
 	else:
@@ -1223,12 +1226,9 @@ class RowProcessor:
 			row_data = self._process_single_row(row, account_summary, account_details)
 			processed_rows.append(row_data)
 
-			if self.grouped_by_dimension and row.data_source in (
-				"Account Data",
-				"Calculated Amount",
-				"Custom API",
-			):
-				self._set_total(row_data)
+			# Total column; done here so formula rows can use the totals of the rows they refer to
+			if self.grouped_by_dimension and row.data_source in DATA_SOURCES_WITH_VALUES:
+				self._calculate_row_total(row_data)
 
 		processed_rows.sort(key=lambda x: getattr(x.row, "idx", 0) or 0)
 
@@ -1292,7 +1292,7 @@ class RowProcessor:
 
 		return RowData(row=row, values=values)
 
-	def _set_total(self, row_data: RowData) -> None:
+	def _calculate_row_total(self, row_data: RowData) -> None:
 		row = row_data.row
 
 		# run the formula on the totals, so ratios stay ratios
@@ -1301,8 +1301,11 @@ class RowProcessor:
 			row_data.total = calculator.evaluate_formula(row)[0]
 		else:
 			keys = get_total_keys(
-				self.period_list, row.balance_type, self.context.filters.get("accumulated_values")
+				self.period_list,
+				row.balance_type,
+				self.context.filters.get("accumulated_values"),
 			)
+
 			row_data.total = sum(
 				flt(value)
 				for period, value in zip(self.period_list, row_data.values, strict=False)
@@ -1868,9 +1871,7 @@ class DetailRowBuilder:
 
 		for account_data in self.parent_row_data.account_details.values():
 			detail_row = self._create_detail_row_object(account_data, parent_row)
-
-			balance_type = getattr(parent_row, "balance_type", "Closing Balance")
-			values = account_data.get_values_by_type(balance_type)
+			values = account_data.get_values_by_type(detail_row.balance_type)
 
 			detail_row_data = RowData(
 				row=detail_row,
@@ -1900,7 +1901,7 @@ class DetailRowBuilder:
 				"data_source": "Account Detail",
 				"indentation_level": getattr(parent_row, "indentation_level", 0) + 1,
 				"fieldtype": getattr(parent_row, "fieldtype", None),
-				"balance_type": getattr(parent_row, "balance_type", None),
+				"balance_type": getattr(parent_row, "balance_type", "Closing Balance"),
 				"bold_text": False,
 				"italic_text": True,
 				"reverse_sign": getattr(parent_row, "reverse_sign", False),
@@ -1970,6 +1971,7 @@ class GrowthViewTransformer:
 		self.context = context
 		self.formatted_rows = context.raw_data.get("formatted_data", [])
 		self.period_list = context.period_list
+		self.first_period_keys = set(get_first_period_keys(self.period_list).values())
 
 	def transform(self):
 		for row_data in self.formatted_rows:
@@ -1992,7 +1994,7 @@ class GrowthViewTransformer:
 				continue
 
 			# first period of each dimension has nothing to compare with
-			if i == 0 or period.get("dimension_value") != self.period_list[i - 1].get("dimension_value"):
+			if current_period in self.first_period_keys:
 				transformed[current_period] = current_value
 			else:
 				previous_period = self.period_list[i - 1]["key"]
