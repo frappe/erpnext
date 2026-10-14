@@ -16,8 +16,8 @@ from pypika import functions as fn
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	CONSUMPTION_PURPOSES,
 	WorkOrderStockReservation,
-	get_consumed_qty,
 	get_row_wise_serial_batch,
 )
 from erpnext.manufacturing.doctype.work_order.services.status import StatusService
@@ -167,8 +167,9 @@ class RequiredItemsService:
 		if self.doc.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name)
 
+		transferred_by_row = distribute_over_rows(self.doc.required_items, transferred_items)
 		for row in self.doc.required_items:
-			transferred_qty = transferred_items.get(row.item_code) or 0.0
+			transferred_qty = transferred_by_row[row.name]
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
 			if self.doc.reserve_stock:
 				WorkOrderStockReservation(self.doc).update_qty_in_stock_reservation(
@@ -222,9 +223,11 @@ class RequiredItemsService:
 		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_returned_qty(self):
-		returned_dict = self._material_transfer_qty_by_item(is_return=1)
+		returned_by_row = distribute_over_rows(
+			self.doc.required_items, self._material_transfer_qty_by_item(is_return=1)
+		)
 		for row in self.doc.required_items:
-			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
+			row.db_set("returned_qty", returned_by_row[row.name], update_modified=False)
 
 	def validate_incoming_material_demand(self, incoming_qty_by_item):
 		"""Reject demand exceeding the pending requirement; callers must hold the
@@ -259,9 +262,11 @@ class RequiredItemsService:
 
 	def update_requested_qty_for_required_items(self):
 		"""Refresh per-row qty requested via open Material Requests but not yet transferred."""
-		requested_items = self._material_request_pending_qty_by_item()
+		requested_by_row = distribute_over_rows(
+			self.doc.required_items, self._material_request_pending_qty_by_item()
+		)
 		for row in self.doc.required_items:
-			row.db_set("requested_qty", (requested_items.get(row.item_code) or 0.0), update_modified=False)
+			row.db_set("requested_qty", requested_by_row[row.name], update_modified=False)
 
 	def _material_request_pending_qty_by_item(self):
 		mr = frappe.qb.DocType("Material Request")
@@ -285,9 +290,9 @@ class RequiredItemsService:
 	def update_picked_qty_for_required_items(self):
 		"""Refresh per-row qty picked but not yet transferred. Rows of a live material
 		request count as requested_qty instead, until that request stops or cancels."""
-		picked_items = self._pick_list_pending_qty_by_item()
+		picked_by_row = distribute_over_rows(self.doc.required_items, self._pick_list_pending_qty_by_item())
 		for row in self.doc.required_items:
-			row.db_set("picked_qty", (picked_items.get(row.item_code) or 0.0), update_modified=False)
+			row.db_set("picked_qty", picked_by_row[row.name], update_modified=False)
 
 	def _pick_list_pending_qty_by_item(self):
 		pick_list = frappe.qb.DocType("Pick List")
@@ -380,8 +385,9 @@ class RequiredItemsService:
 		if self.doc.skip_transfer and not self.doc.from_wip_warehouse:
 			wip_warehouse = None
 
+		consumed_by_row = distribute_over_rows(self.doc.required_items, self._consumed_qty_by_item())
 		for item in self.doc.required_items:
-			consumed_qty = get_consumed_qty(self.doc.name, item.item_code) + item.returned_qty
+			consumed_qty = consumed_by_row[item.name] + flt(item.returned_qty)
 			item.db_set("consumed_qty", flt(consumed_qty), update_modified=False)
 
 			if not self.doc.reserve_stock:
@@ -391,6 +397,25 @@ class RequiredItemsService:
 			WorkOrderStockReservation(self.doc).update_consumed_qty_in_stock_reservation(
 				item, consumed_qty, warehouse
 			)
+
+	def _consumed_qty_by_item(self):
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		item_code = fn.Coalesce(ste_child.original_item, ste_child.item_code)
+		query = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(item_code.as_("item_code"), fn.Sum(ste_child.transfer_qty).as_("qty"))
+			.where(
+				(ste.work_order == self.doc.name)
+				& (ste.purpose.isin(CONSUMPTION_PURPOSES))
+				& (ste.docstatus == 1)
+				& (ste_child.s_warehouse.isnotnull())
+			)
+			.groupby(item_code)
+		)
+		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
 
 	def remove_additional_items(self, stock_entry):
 		for row in stock_entry.items:
@@ -442,3 +467,24 @@ class RequiredItemsService:
 			"is_additional_item": 1,
 			"voucher_detail_reference": row.name,
 		}
+
+
+def distribute_over_rows(rows, qty_by_item):
+	rows_by_item = {}
+	for row in rows:
+		rows_by_item.setdefault(row.item_code, []).append(row)
+
+	qty_by_row = {}
+	for item_code, item_rows in rows_by_item.items():
+		_split_item_qty(item_rows, flt(qty_by_item.get(item_code)), qty_by_row)
+	return qty_by_row
+
+
+def _split_item_qty(rows, qty, qty_by_row):
+	required_qty = sum(flt(row.required_qty) for row in rows)
+	remaining_qty = qty
+	for row in rows[:-1]:
+		share = qty * flt(row.required_qty) / required_qty if required_qty else 0.0
+		qty_by_row[row.name] = share
+		remaining_qty -= share
+	qty_by_row[rows[-1].name] = remaining_qty
