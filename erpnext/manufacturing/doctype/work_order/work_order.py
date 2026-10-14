@@ -981,6 +981,9 @@ class WorkOrder(Document):
 		if self.qty <= 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
+		if flt(self.batch_size) < 0:
+			frappe.throw(_("Batch Size cannot be negative."))
+
 		if (
 			self.stock_uom
 			and frappe.get_cached_value("UOM", self.stock_uom, "must_be_whole_number")
