@@ -220,8 +220,8 @@ class SalesOrderSourcingService:
 				continue
 
 			item_details = get_item_details(data.item_code, throw=False)
-			if self.doc.combine_items:
-				self._add_combine_ref(refs, data, item_details)
+			if self.doc.combine_items and self._add_combine_ref(refs, data, item_details):
+				continue
 
 			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
 			if not bom_no:
@@ -238,9 +238,10 @@ class SalesOrderSourcingService:
 		if bom_no in refs:
 			refs[bom_no]["so_details"].append(detail)
 			refs[bom_no]["qty"] += data.pending_qty
-			return
+			return True
 
 		refs[bom_no] = {"qty": data.pending_qty, "po_item_ref": data.name, "so_details": [detail]}
+		return False
 
 	def _append_po_item(self, data, item_details, bom_no):
 		pi = self.doc.append("po_items", self._po_item_values(data, item_details, bom_no))

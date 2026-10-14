@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -414,21 +415,19 @@ class ProductionPlan(Document):
 				)
 
 	def update_sales_order(self):
-		sales_orders = [row.sales_order for row in self.po_items if row.sales_order]
-		if sales_orders:
-			so_wise_planned_qty = self.get_so_wise_planned_qty(sales_orders)
+		so_items = {
+			(row.sales_order, row.sales_order_item)
+			for row in self.po_items + self.prod_plan_references
+			if row.sales_order and row.sales_order_item
+		}
+		if not so_items:
+			return
 
-			for row in self.po_items:
-				if not row.sales_order and not row.sales_order_item:
-					continue
-
-				key = (row.sales_order, row.sales_order_item)
-				frappe.db.set_value(
-					"Sales Order Item",
-					row.sales_order_item,
-					"production_plan_qty",
-					flt(so_wise_planned_qty.get(key)),
-				)
+		so_wise_planned_qty = self.get_so_wise_planned_qty(list({key[0] for key in so_items}))
+		for key in so_items:
+			frappe.db.set_value(
+				"Sales Order Item", key[1], "production_plan_qty", flt(so_wise_planned_qty.get(key))
+			)
 
 	@staticmethod
 	def get_so_wise_planned_qty(sales_orders):
@@ -444,9 +443,20 @@ class ProductionPlan(Document):
 			group_by="sales_order, sales_order_item",
 		)
 
+		reference = frappe.qb.DocType("Production Plan Item Reference")
+		plan = frappe.qb.DocType("Production Plan")
+		data += (
+			frappe.qb.from_(reference)
+			.join(plan)
+			.on(plan.name == reference.parent)
+			.select(reference.sales_order, reference.sales_order_item, Sum(reference.qty).as_("qty"))
+			.where(reference.sales_order.isin(sales_orders) & (plan.docstatus == 1))
+			.groupby(reference.sales_order, reference.sales_order_item)
+		).run(as_dict=True)
+
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
-			so_wise_planned_qty[key] = row.qty
+			so_wise_planned_qty[key] = flt(so_wise_planned_qty.get(key)) + flt(row.qty)
 
 		return so_wise_planned_qty
 
