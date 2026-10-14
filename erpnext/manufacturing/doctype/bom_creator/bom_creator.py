@@ -151,7 +151,7 @@ class BOMCreator(Document):
 				has_completed = False
 				break
 
-		if not frappe.get_cached_value("BOM", {"bom_creator": self.name, "item": self.item_code}, "name"):
+		if not frappe.db.exists("BOM", {"bom_creator": self.name, "item": self.item_code, "docstatus": 1}):
 			has_completed = False
 
 		if has_completed:

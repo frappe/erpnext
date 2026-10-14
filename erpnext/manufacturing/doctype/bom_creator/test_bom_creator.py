@@ -564,6 +564,25 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(doc.items[0].rate, 100)
 
+	def test_cancelling_the_top_bom_reopens_the_creator(self):
+		make_item("Gravel Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Gravel Bike BOM Status",
+			company="_Test Company",
+			item_code="Gravel Bike",
+			qty=1,
+			currency="INR",
+		)
+		doc.add_item(fg_item="Gravel Bike", fg_reference_id=doc.name, item_code="Frame", qty=1)
+		doc.reload()
+		doc.submit()
+		doc.create_boms()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
+
+		top_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Gravel Bike", "docstatus": 1})
+		top_bom.cancel()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Submitted")
+
 
 def create_items():
 	raw_materials = [
