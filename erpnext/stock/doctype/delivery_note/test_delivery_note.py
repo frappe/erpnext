@@ -4301,6 +4301,28 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
 		self.assertEqual(make_sales_invoice(billed_return.name).items[0].qty, -2)
 
+	def test_return_settled_again_when_sibling_delivery_is_submitted(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		first_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(first_delivery.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		make_sales_invoice(first_delivery.name).submit()
+
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.items[0].qty = 5
+		so_invoice.submit()
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 0)
+
+		# The second delivery takes up the Sales Order billing, so the return is settled again.
+		create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,

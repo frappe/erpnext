@@ -43,10 +43,8 @@ class BillingStatusService:
 			dn_doc = doc if (dn == doc.name) else frappe.get_lazy_doc("Delivery Note", dn)
 			update_dn_modified = update_modified and dn != doc.return_against
 			dn_doc.update_billing_percentage(update_modified=update_dn_modified)
-
-		if doc.is_return and doc.return_against:
-			# A submitted or cancelled return can shift which other returns are settled.
-			update_billing_percentage_of_returns(doc.return_against)
+			# Deliveries and returns of the same Sales Order row can shift which returns are settled.
+			update_billing_percentage_of_returns(dn)
 
 		doc.load_from_db()
 
