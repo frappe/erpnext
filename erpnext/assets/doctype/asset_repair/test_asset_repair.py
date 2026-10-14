@@ -624,8 +624,8 @@ def create_asset_repair(**args):
 					"doctype": "Stock Entry",
 					"stock_entry_type": "Material Receipt",
 					"company": asset.company,
-					"set_posting_time": 1,
 					"posting_date": getdate(asset_repair.failure_date),
+					"set_posting_time": 1,
 					"posting_time": "00:00:00",
 				}
 			)
