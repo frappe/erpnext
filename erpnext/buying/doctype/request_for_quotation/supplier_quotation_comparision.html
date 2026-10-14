@@ -59,7 +59,6 @@
 		padding: 4px 28px 4px 12px;
 		background-color: var(--control-bg, var(--surface-gray-2, #f4f5f6));
 		border: 1px solid transparent;
-		border-radius: var(--radius-sm, 6px);
 		color: var(--text-color, #171717);
 		font-size: 13px;
 		font-weight: 500;
@@ -100,17 +99,9 @@
 		display: block;
 		stroke: var(--text-muted, #7c7c7c);
 	}
-	.quotations-table th a.quotation-link.partial-quotation-link,
-	.quotations-table td a.quotation-link.partial-quotation-link,
-	.quotations-table .partial-quotation-link {
-		color: var(--red-500, #e02424) !important;
-		font-weight: 600;
-		cursor: help;
-	}
 	.quotations-table .partial-qty-text {
 		color: var(--red-500, #e02424) !important;
 		font-weight: 600;
-		cursor: help;
 	}
 	.quotations-inner-container {
 		width: 100%;
@@ -142,13 +133,12 @@
 							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
 							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Item") }}</th>
 							{% for (let o = 0; o < offers.length; o++) {
-								const offer = offers[o];
-								const pending_tip = offer_pending_tooltips[offer.key];
-							%}
+								const offer = offers[o];							%}
 								<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
-									<div class="text-center" title="{{ frappe.utils.escape_html(offer.supplier) }} : {{ frappe.utils.escape_html(offer.supplier_quotation) }}">
-										<span>{{ frappe.utils.escape_html(offer.supplier) }}</span> :
-										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link {% if (pending_tip) { %}partial-quotation-link{% } %}" title="{{ frappe.utils.escape_html(pending_tip || offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
+									<div class="flex flex-col items-center gap-1">
+										<div class="flex items-center justify-center gap-1.5 w-full">
+											<span class="truncate" title="{{ frappe.utils.escape_html(offer.supplier) }}">{{ frappe.utils.escape_html(offer.supplier) }}</span>										</div>
+										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small truncate">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
 									</div>
 								</th>
 							{% } %}
@@ -197,7 +187,7 @@
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
 									{% } else { %}
-										<td style="vertical-align: middle; padding: 6px;">
+										<td style="vertical-align: top; padding: 6px;">
 											{{ frappe.render_template("supplier_quotation_offer_card", { q: q, item: item, min_rate: min_rates[item.name], company_currency: company_currency, format_qty: format_qty }) }}
 										</td>
 									{% } %}
@@ -228,28 +218,23 @@
 						{% } %}
 					{% } else { %}
 						{% for (let idx = 0; idx < offers.length; idx++) {
-							const offer = offers[idx];
-							const pending_tip = offer_pending_tooltips[offer.key];
-						%}
+							const offer = offers[idx];						%}
 							<tr>
 								<td style="width: 50px; text-align: center; vertical-align: middle;">
 									{{ idx + 1 }}
 								</td>
 								<td style="width: 200px; min-width: 160px; vertical-align: middle; font-size: 14px;">
-									<div class="flex flex-col gap-1 truncate" title="{{ frappe.utils.escape_html(offer.supplier) }} : {{ frappe.utils.escape_html(offer.supplier_quotation) }}">
-										<div class="truncate">
-											<span>{{ frappe.utils.escape_html(offer.supplier) }}</span>
-										</div>
-										<div class="flex flex-wrap gap-1">
-											<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link truncate {% if (pending_tip) { %}partial-quotation-link{% } %}" title="{{ frappe.utils.escape_html(pending_tip || offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
-										</div>
+									<div class="flex flex-col items-start gap-1">
+										<div class="flex items-center gap-1.5 w-full">
+											<span class="font-weight-bold truncate" title="{{ frappe.utils.escape_html(offer.supplier) }}">{{ frappe.utils.escape_html(offer.supplier) }}</span>										</div>
+										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small truncate">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
 									</div>
 								</td>
 								{% for (let it = 0; it < items.length; it++) { const item = items[it]; const q = get_quote(item, offer); %}
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
 									{% } else { %}
-										<td style="vertical-align: middle; padding: 6px;">
+										<td style="vertical-align: top; padding: 6px;">
 											{{ frappe.render_template("supplier_quotation_offer_card", { q: q, item: item, min_rate: min_rates[item.name], company_currency: company_currency, format_qty: format_qty }) }}
 										</td>
 									{% } %}
