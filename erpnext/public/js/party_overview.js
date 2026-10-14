@@ -330,14 +330,11 @@ erpnext.PartyOverview = class PartyOverview {
 
 	draw_trend(el, spec) {
 		const style = getComputedStyle(el);
-		const chart = new frappe.Chart(el, {
+		return new frappe.Chart(el, {
 			type: spec.type,
 			height: spec.height || 220,
 			colors: spec.colors.map((token) => style.getPropertyValue(token).trim()),
-			data: {
-				labels: spec.data.labels,
-				datasets: spec.data.datasets.map((d) => ({ name: d.name, values: d.values.map(() => 0) })),
-			},
+			data: spec.data,
 			lineOptions: { regionFill: 1, hideDots: 1 },
 			axisOptions: {
 				xIsSeries: 1,
@@ -352,10 +349,6 @@ erpnext.PartyOverview = class PartyOverview {
 			animate: 1,
 			disableEntryAnimation: 1,
 		});
-		requestAnimationFrame(() => {
-			if (this.trend_chart === chart) chart.update(this.trend_target);
-		});
-		return chart;
 	}
 
 	set_trend_notes(notes) {
