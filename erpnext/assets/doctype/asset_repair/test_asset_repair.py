@@ -4,7 +4,17 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, now_datetime, nowdate, nowtime, today
+from frappe.utils import (
+	add_days,
+	add_months,
+	flt,
+	get_first_day,
+	getdate,
+	now_datetime,
+	nowdate,
+	nowtime,
+	today,
+)
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -596,7 +606,13 @@ def create_asset_repair(**args):
 
 		if args.stock_consumption:
 			stock_entry = frappe.get_doc(
-				{"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": asset.company}
+				{
+					"doctype": "Stock Entry",
+					"stock_entry_type": "Material Receipt",
+					"company": asset.company,
+					"posting_date": getdate(asset_repair.failure_date),
+					"set_posting_time": 1,
+				}
 			)
 			stock_entry.append(
 				"items",
