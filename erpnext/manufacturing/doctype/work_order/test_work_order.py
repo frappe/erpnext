@@ -6773,6 +6773,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(planned_qty, 5)
 
+	def test_lead_time_is_saved_from_stock_entries(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -3),
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer.update(
+			{"set_posting_time": 1, "posting_date": add_days(today(), -1), "posting_time": "10:00:00"}
+		)
+		transfer.submit()
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		manufacture.update({"set_posting_time": 1, "posting_date": today(), "posting_time": "10:00:00"})
+		manufacture.submit()
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "lead_time"), 1440)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
