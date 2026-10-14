@@ -6,7 +6,8 @@
 import frappe
 from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 from erpnext.controllers.item_close import validate_parent_reopen
@@ -204,21 +205,29 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 
 
 def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
-	"""Qty of each Sales Order row invoiced above its net delivered qty (deliveries less returns)."""
+	"""Qty of each Sales Order row invoiced above its net delivered qty (deliveries less returns),
+	limited to the qty invoiced directly against the Sales Order."""
 	if not so_details:
 		return {}
 
 	si = frappe.qb.DocType("Sales Invoice")
 	si_item = frappe.qb.DocType("Sales Invoice Item")
-	billed_qty = dict(
+	billed = (
 		frappe.qb.from_(si_item)
 		.join(si)
 		.on(si.name == si_item.parent)
-		.select(si_item.so_detail, Sum(si_item.qty))
+		.select(
+			si_item.so_detail,
+			Sum(si_item.qty),
+			Sum(Case().when(IfNull(si_item.dn_detail, "") == "", si_item.qty).else_(0)),
+		)
 		.where(si_item.so_detail.isin(list(so_details)) & (si_item.docstatus == 1) & (si.is_return == 0))
 		.groupby(si_item.so_detail)
 		.run()
 	)
+	billed_qty = {so_detail: qty for so_detail, qty, _so_qty in billed}
+	# Invoices made from a Delivery Note leave out its returns, so they do not cover them.
+	billed_against_so_qty = {so_detail: so_qty for so_detail, _qty, so_qty in billed}
 
 	# Return rows have a negative qty, so the sum is the net delivered qty.
 	dn_item = frappe.qb.DocType("Delivery Note Item")
@@ -231,12 +240,12 @@ def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
 	)
 
 	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
-	return {
-		so_detail: max(
-			flt(flt(billed_qty.get(so_detail)) - flt(delivered_qty.get(so_detail)), qty_precision), 0
-		)
-		for so_detail in so_details
-	}
+	overbilled_qty = {}
+	for so_detail in so_details:
+		overbilled = flt(flt(billed_qty.get(so_detail)) - flt(delivered_qty.get(so_detail)), qty_precision)
+		overbilled_qty[so_detail] = max(min(overbilled, flt(billed_against_so_qty.get(so_detail))), 0)
+
+	return overbilled_qty
 
 
 def update_billing_percentage_of_returns(delivery_note: str) -> None:

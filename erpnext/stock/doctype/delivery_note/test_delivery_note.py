@@ -4279,6 +4279,28 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(deducted_return.per_billed, 100)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
 
+	def test_return_stays_settled_when_sibling_delivery_has_unsettled_return(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		first_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(first_delivery.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		make_sales_invoice(first_delivery.name).submit()
+
+		second_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		make_sales_invoice(second_delivery.name).submit()
+		billed_return = make_sales_return(second_delivery.name)
+		billed_return.items[0].qty = -2
+		billed_return.submit()
+
+		# Only the return after the full invoice needs a credit note.
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+		self.assertEqual(make_sales_invoice(billed_return.name).items[0].qty, -2)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,
