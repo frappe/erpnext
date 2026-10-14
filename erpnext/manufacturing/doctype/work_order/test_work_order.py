@@ -6826,6 +6826,22 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(serial_nos, [amended.name] * 3)
 		self.assertEqual(batches, [amended.name])
 
+	def test_negative_batch_size_is_refused(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Batch Size cannot be negative",
+			make_review_work_order,
+			fg_item,
+			bom.name,
+			10,
+			submit=False,
+			batch_size=-1,
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
