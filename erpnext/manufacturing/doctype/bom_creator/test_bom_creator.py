@@ -491,6 +491,37 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(doc.items[0].rate, 10)
 		self.assertEqual(doc.raw_material_cost, 10)
 
+	def test_get_children_follows_user_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_children
+
+		for item in ("Allowed Bike", "Restricted Bike"):
+			make_item(item, {"item_group": "Raw Material", "stock_uom": "Nos"})
+
+		make_bom_creator(
+			name="Allowed Bike BOM", company="_Test Company", item_code="Allowed Bike", qty=1, currency="INR"
+		)
+		restricted = make_bom_creator(
+			name="Restricted Bike BOM",
+			company="_Test Company",
+			item_code="Restricted Bike",
+			qty=1,
+			currency="INR",
+		)
+		restricted.add_item(
+			fg_item="Restricted Bike", fg_reference_id=restricted.name, item_code="Frame", qty=3
+		)
+
+		user = create_user("bom-creator-restricted@example.com", "Manufacturing User")
+		add_user_permission("Item", "Allowed Bike", user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(
+				frappe.PermissionError, get_children, parent=restricted.name, parent_id=restricted.name
+			)
+
 
 def create_items():
 	raw_materials = [

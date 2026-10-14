@@ -618,13 +618,16 @@ class BOMCreator(Document):
 
 @frappe.whitelist()
 def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
-	frappe.has_permission("BOM Creator", "read", throw=True)
-
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
+
+	if not kwargs.parent_id:
+		return []
+
+	frappe.has_permission("BOM Creator", "read", doc=kwargs.parent_id, throw=True)
 
 	fields = [
 		"name as value",
