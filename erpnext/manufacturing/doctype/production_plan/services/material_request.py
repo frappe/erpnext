@@ -730,8 +730,6 @@ def _adjust_required_qty_for_uom(row, required_qty):
 				)
 			)
 
-	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
-		required_qty = ceil(required_qty)
 	return required_qty
 
 
@@ -746,6 +744,12 @@ def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 		grid = Decimal(10) ** -precision
 		exact = Decimal(str(min_order_qty)) / Decimal(str(conversion_factor))
 		quantity = flt(exact.quantize(grid, rounding=ROUND_CEILING))
+	return quantity
+
+
+def _round_up_whole_uom(quantity, uom):
+	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
+		return ceil(quantity)
 	return quantity
 
 
@@ -781,10 +785,13 @@ def _material_request_item_row(
 		or row.get("default_warehouse")
 		or item_group_defaults.get("default_warehouse")
 	)
+	uom = _mr_purchase_uom(row) or row.get("stock_uom")
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty),
+		"quantity": _round_up_whole_uom(
+			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
+		),
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -798,7 +805,7 @@ def _material_request_item_row(
 		"material_request_type": row.get("default_material_request_type"),
 		"sales_order": sales_order,
 		"description": row.get("description"),
-		"uom": _mr_purchase_uom(row) or row.get("stock_uom"),
+		"uom": uom,
 		"main_item_code": row.get("main_bom_item"),
 		"from_bom": row.get("main_bom"),
 	}
@@ -859,12 +866,9 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	if flt(required_qty, precision) <= 0:
 		return
 
-	purchase_uom = frappe.db.get_value("Item", item.get("item_code"), "purchase_uom")
-	if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
-		required_qty = ceil(required_qty)
-
 	min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
-	item["quantity"] = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
+	quantity = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
+	item["quantity"] = _round_up_whole_uom(quantity, item.get("uom"))
 	new_mr_items.append(item)
 
 
