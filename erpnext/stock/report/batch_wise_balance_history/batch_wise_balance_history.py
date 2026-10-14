@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from datetime import timedelta
-
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
@@ -323,28 +321,28 @@ def get_item_warehouse_batch_map(filters, float_precision):
 
 
 def set_non_batchwise_valuation(filters, iwb_map):
-	if not frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
-		return
-
-	posting_datetime = get_datetime(add_to_date(filters.to_date, days=1)) - timedelta(microseconds=1)
-	if filters.get("to_datetime"):
-		posting_datetime = min(posting_datetime, get_datetime(filters.to_datetime))
-
+	moving_average_is_pooled = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+	cutoff = get_datetime(filters.to_datetime or f"{filters.to_date} 23:59:59")
 	for item, warehouses in iwb_map.items():
-		# Only this mode pools every batch; legacy batches otherwise retain their own values.
-		if get_valuation_method(item, filters.company) != "Moving Average":
+		if not is_pooled(item, filters.company, moving_average_is_pooled):
 			continue
 
 		for warehouse, batches in warehouses.items():
 			last_sle = get_previous_sle(
-				{
-					"item_code": item,
-					"warehouse": warehouse,
-					"posting_datetime": posting_datetime,
-				}
+				{"item_code": item, "warehouse": warehouse, "posting_datetime": cutoff}
 			)
 			for balance in batches.values():
 				balance.bal_value = balance.bal_qty * flt(last_sle.get("valuation_rate"))
+
+
+def is_pooled(item, company, moving_average_is_pooled):
+	has_serial_no, serial_no_wise = frappe.get_cached_value(
+		"Item", item, ["has_serial_no", "use_serial_no_wise_valuation"]
+	)
+	if has_serial_no:
+		return not serial_no_wise
+
+	return moving_average_is_pooled and get_valuation_method(item, company) == "Moving Average"
 
 
 def get_item_details(filters):
