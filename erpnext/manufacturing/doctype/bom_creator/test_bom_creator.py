@@ -471,6 +471,26 @@ class TestBOMCreator(ERPNextTestSuite):
 		)
 		self.assertEqual((row.bom_no, row.do_not_explode), (semi_bom.name, 0))
 
+	def test_rates_are_converted_to_the_creator_currency(self):
+		make_item("Cargo Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		make_item("_Test BOM Creator USD RM", {"item_group": "Raw Material", "valuation_rate": 800})
+		doc = make_bom_creator(
+			name="Cargo Bike BOM USD",
+			company="_Test Company",
+			item_code="Cargo Bike",
+			qty=1,
+			currency="USD",
+			conversion_rate=80,
+			rm_cost_as_per="Valuation Rate",
+		)
+		doc.add_item(
+			fg_item="Cargo Bike", fg_reference_id=doc.name, item_code="_Test BOM Creator USD RM", qty=1
+		)
+		doc.reload()
+
+		self.assertEqual(doc.items[0].rate, 10)
+		self.assertEqual(doc.raw_material_cost, 10)
+
 
 def create_items():
 	raw_materials = [

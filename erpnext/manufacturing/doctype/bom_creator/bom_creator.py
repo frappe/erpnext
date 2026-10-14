@@ -9,7 +9,9 @@ from frappe.model.document import Document
 from frappe.utils import cint, flt, sbool
 from pypika.terms import ValueWrapper
 
+import erpnext
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+from erpnext.setup.utils import get_exchange_rate
 
 BOM_FIELDS = [
 	"company",
@@ -72,6 +74,7 @@ class BOMCreator(Document):
 
 	def before_save(self):
 		self.set_status()
+		self.set_exchange_rates()
 		self.set_conversion_factor()
 		self.set_reference_id()
 		self.set_is_expandable()
@@ -212,6 +215,7 @@ class BOMCreator(Document):
 					},
 					self,
 				)
+				row.rate = self.convert_to_bom_currency(row.rate)
 			else:
 				row.rate = flt(
 					self.get_raw_material_cost(row.name, children, visited)
@@ -223,6 +227,31 @@ class BOMCreator(Document):
 			amount += flt(row.amount)
 
 		return amount
+
+	def convert_to_bom_currency(self, rate):
+		if self.rm_cost_as_per == "Price List":
+			rate = flt(rate) * flt(self.plc_conversion_rate or 1)
+
+		return flt(rate) / flt(self.conversion_rate or 1)
+
+	def set_exchange_rates(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		if self.currency == company_currency:
+			self.conversion_rate = 1
+		elif flt(self.conversion_rate) in (0, 1):
+			self.conversion_rate = get_exchange_rate(self.currency, company_currency, args="for_buying")
+
+		if self.rm_cost_as_per != "Price List" or not self.buying_price_list:
+			self.plc_conversion_rate = 1
+			return
+
+		self.price_list_currency = frappe.get_cached_value("Price List", self.buying_price_list, "currency")
+		if self.price_list_currency == company_currency:
+			self.plc_conversion_rate = 1
+		elif flt(self.plc_conversion_rate) in (0, 1):
+			self.plc_conversion_rate = get_exchange_rate(
+				self.price_list_currency, company_currency, args="for_buying"
+			)
 
 	def set_is_expandable(self):
 		parent_ids = {row.fg_reference_id for row in self.items}
