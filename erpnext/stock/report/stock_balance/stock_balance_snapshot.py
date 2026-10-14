@@ -84,6 +84,16 @@ SERIAL_RECONCILIATIONS_SQL = """
 
 REPLAY_ROWS_SQL = "SELECT * FROM replay"
 
+LATEST_RATES_SQL = """
+	SELECT sle.item_code, sle.warehouse, sle.valuation_rate::DOUBLE AS valuation_rate
+	FROM "tabStock Ledger Entry" sle
+	JOIN rate_pairs USING (item_code, warehouse)
+	WHERE sle.is_cancelled = 0 AND sle.posting_date <= $to_date
+	QUALIFY row_number() OVER (
+		PARTITION BY sle.item_code, sle.warehouse ORDER BY sle.posting_datetime DESC, sle.creation DESC, sle.name DESC
+	) = 1
+"""
+
 SEGMENTS_SQL = """
 	SELECT segment.*, item.item_group, item.stock_uom, item.item_name
 	FROM (
@@ -307,6 +317,18 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		balance.val_rate = change.valuation_rate
 		for field in self.inventory_dimensions:
 			balance[field] = change.get(field)
+
+	def get_latest_valuation_rates(self, rows) -> dict:
+		pairs = {(row.item_code, row.warehouse) for row in rows}
+		if not pairs:
+			return {}
+
+		self.conn.register(
+			"rate_pairs",
+			pa.Table.from_pylist([{"item_code": item, "warehouse": warehouse} for item, warehouse in pairs]),
+		)
+		rates = self.run_sql(LATEST_RATES_SQL, {"to_date": self.to_date})
+		return {(rate.item_code, rate.warehouse): rate.valuation_rate for rate in rates}
 
 	def run_sql(self, sql, params=None):
 		cursor = self.conn.execute(sql, params)
