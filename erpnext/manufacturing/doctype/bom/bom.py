@@ -1093,8 +1093,16 @@ class BOM(WebsiteGenerator):
 			)
 
 	def set_routing_operations(self):
+		self.validate_routing()
 		if self.routing and self.with_operations and not self.operations:
 			self.get_routing()
+
+	def validate_routing(self):
+		if not self.routing or not self.has_value_changed("routing"):
+			return
+
+		if frappe.db.get_value("Routing", self.routing, "disabled"):
+			frappe.throw(_("Routing {0} is disabled").format(get_link_to_form("Routing", self.routing)))
 
 	def validate_operations(self):
 		if self.with_operations and not self.get("operations") and self.docstatus == 1:

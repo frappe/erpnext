@@ -73,9 +73,11 @@ class RequestforQuotation(BuyingController):
 
 	def validate(self):
 		self.validate_duplicate_supplier()
+		self.ensure_supplier_is_not_blocked()
 		self.validate_supplier_list()
 		super().validate_qty_is_not_zero()
 		validate_for_items(self)
+		self.set_missing_item_names()
 		super().set_qty_as_per_stock_uom()
 		self.update_email_id()
 
@@ -83,11 +85,17 @@ class RequestforQuotation(BuyingController):
 			# after amend and save, status still shows as cancelled, until submit
 			self.db_set("status", "Draft")
 
+	def set_missing_item_names(self):
+		for row in self.items:
+			if row.item_code and not row.item_name:
+				row.item_name = frappe.get_cached_value("Item", row.item_code, "item_name")
+
 	def set_has_unit_price_items(self):
 		"""
 		If permitted in settings and any item has 0 qty, the RFQ has unit price items.
 		"""
 		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_request_for_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -126,7 +134,7 @@ class RequestforQuotation(BuyingController):
 
 			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, "prevent_rfqs")
 			if prevent_rfqs:
-				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
+				standing = frappe.db.get_value("Supplier Scorecard", {"supplier": d.supplier}, "status")
 				frappe.throw(
 					_("RFQs are not allowed for {0} due to a scorecard standing of {1}").format(
 						d.supplier, standing
@@ -134,7 +142,7 @@ class RequestforQuotation(BuyingController):
 				)
 			warn_rfqs = frappe.db.get_value("Supplier", d.supplier, "warn_rfqs")
 			if warn_rfqs:
-				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
+				standing = frappe.db.get_value("Supplier Scorecard", {"supplier": d.supplier}, "status")
 				frappe.msgprint(
 					_(
 						"{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution."
@@ -290,6 +298,7 @@ class RequestforQuotation(BuyingController):
 				"first_name": contact_name or rfq_supplier.supplier_name or rfq_supplier.supplier,
 				"user_type": "Website User",
 				"redirect_url": link,
+				"roles": [{"role": "Supplier"}],
 			}
 		)
 		user.save(ignore_permissions=True)

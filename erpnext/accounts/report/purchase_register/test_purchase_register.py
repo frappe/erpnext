@@ -142,17 +142,24 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		foreign_invoice.db_set("currency", "USD")
 		foreign_invoice.db_set("conversion_rate", 80)
 		foreign_invoice.db_set("credit_to", usd_creditors.name)
+		foreign_invoice.db_set("party_account_currency", "USD")
 		foreign_invoice.db_set("outstanding_amount", 100.236)
 		local_invoice = make_purchase_invoice()
 		local_invoice.db_set("currency", "INR")
 		local_invoice.db_set("conversion_rate", 1)
 		local_invoice.db_set("outstanding_amount", 200.456)
+		# foreign currency invoice on a company currency payable: outstanding is already in INR
+		foreign_invoice_on_local_payable = make_purchase_invoice()
+		foreign_invoice_on_local_payable.db_set("currency", "USD")
+		foreign_invoice_on_local_payable.db_set("conversion_rate", 80)
+		foreign_invoice_on_local_payable.db_set("outstanding_amount", 800)
 		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
 		outstanding_precision = 2
 
 		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
 		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
 		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
+		self.assertEqual(data_by_name.get(foreign_invoice_on_local_payable.name), 800)
 
 	def test_purchase_register_ledger_view(self):
 		filters = frappe._dict(
@@ -171,9 +178,193 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.voucher_type, "Payment Entry")
 		self.assertEqual(first_row.voucher_no, pe.name)
 		self.assertEqual(first_row.payable_account, "Creditors - _TC6")
-		self.assertEqual(first_row.debit, 0)
-		self.assertEqual(first_row.credit, 600)
-		self.assertEqual(first_row.balance, 500)
+		self.assertEqual(first_row.debit, 600)
+		self.assertEqual(first_row.credit, 0)
+		self.assertEqual(first_row.balance, -500)
+
+	def test_ledger_view_shows_journal_credit_to_the_supplier_as_credit(self):
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Credit Note",
+				"company": "_Test Company 6",
+				"posting_date": today(),
+				"accounts": [
+					{"account": "Write Off - _TC6", "debit_in_account_currency": 300},
+					{
+						"account": "Creditors - _TC6",
+						"party_type": "Supplier",
+						"party": "_Test Supplier",
+						"credit_in_account_currency": 300,
+					},
+				],
+			}
+		).submit()
+		filters = frappe._dict(
+			company="_Test Company 6",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier="_Test Supplier",
+		)
+
+		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == je.name)
+
+		self.assertEqual((row["debit"], row["credit"]), (0, 300))
+		self.assertEqual(row["voucher_type"], "Journal Entry")
+
+	def test_write_off_settles_the_payable_of_paid_and_unpaid_invoices(self):
+		write_off = {"write_off_amount": 100, "write_off_account": "Write Off - _TC6"}
+		unpaid = make_purchase_invoice(write_off)
+		paid = make_purchase_invoice(
+			{"is_paid": 1, "cash_bank_account": "Cash - _TC6", "paid_amount": 1000, **write_off}
+		)
+
+		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
+		debit = {row.get("voucher_no"): row.get("debit") for row in execute(filters)[1]}
+
+		self.assertEqual(debit[unpaid.name], 100)
+		self.assertEqual(debit[paid.name], 1100)
+
+	def test_paid_rounded_invoice_leaves_nothing_owed(self):
+		pi = make_purchase_invoice(
+			{
+				"disable_rounded_total": 0,
+				"is_paid": 1,
+				"cash_bank_account": "Cash - _TC6",
+				"paid_amount": 1100,
+			},
+			rate=1000.4,
+		)
+		self.assertEqual(pi.base_rounded_total, 1100)
+
+		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
+		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == pi.name)
+
+		self.assertEqual(row["debit"], row["credit"])
+
+	def test_ledger_view_needs_access_to_the_supplier(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		create_payment_entry(
+			company="_Test Company",
+			party_type="Supplier",
+			party="_Test Supplier",
+			payment_type="Pay",
+			paid_from="Cash - _TC",
+			paid_to="Creditors - _TC",
+			paid_amount=100,
+			save=1,
+			submit=1,
+		)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": "test@example.com",
+				"allow": "Supplier",
+				"for_value": "_Test Supplier 1",
+			}
+		).insert()
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier="_Test Supplier",
+		)
+
+		frappe.set_user("test@example.com")
+		try:
+			self.assertRaises(frappe.PermissionError, execute, filters)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_internal_transfer_invoice_columns(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		unrealized_account = create_account(
+			account_name="_Test Unrealized Profit",
+			parent_account="Current Liabilities - _TC6",
+			company="_Test Company 6",
+		)
+		pi = make_purchase_invoice()
+		pi.db_set(
+			{
+				"is_internal_supplier": 1,
+				"represents_company": pi.company,
+				"unrealized_profit_loss_account": unrealized_account,
+			}
+		)
+
+		filters = frappe._dict(company=pi.company, from_date=add_months(today(), -1), to_date=today())
+		columns, data, *_ = execute(filters)
+		row = next(row for row in data if row.get("voucher_no") == pi.name)
+
+		self.assertEqual(row[frappe.scrub("Stock Received But Not Billed - _TC6")], 0)
+		self.assertIn(frappe.scrub(unrealized_account + "_unrealized"), [col["fieldname"] for col in columns])
+
+	def test_ledger_view_shows_nothing_payable_for_internal_transfer_invoices(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		si = create_sales_invoice(
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			warehouse="Stores - TCP1",
+		)
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+		filters = frappe._dict(
+			company=pi.company,
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier=pi.supplier,
+		)
+
+		row = next(row for row in execute(filters)[1] if row.get("voucher_no") == pi.name)
+
+		self.assertEqual((row["debit"], row["credit"]), (0, 0))
+
+	def test_group_filters_include_children(self):
+		pi = make_purchase_invoice()
+		filters = frappe._dict(
+			company=pi.company,
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			cost_center=frappe.db.get_value("Cost Center", pi.items[0].cost_center, "parent_cost_center"),
+			item_group="All Item Groups",
+			supplier_group="All Supplier Groups",
+		)
+
+		self.assertIn(pi.name, [row.get("voucher_no") for row in execute(filters)[1]])
+
+	def test_group_filters_need_no_access_to_the_tree(self):
+		pi = make_purchase_invoice()
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "_test_pr_auditor@example.com", "first_name": "Auditor"}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles("Auditor")
+		filters = frappe._dict(
+			company=pi.company,
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			supplier_group="All Supplier Groups",
+		)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertIn(pi.name, [row.get("voucher_no") for row in execute(filters)[1]])
+		finally:
+			frappe.set_user("Administrator")
 
 	def test_supplier_group_filter_uses_supplier_master(self):
 		# invoices created before the supplier_group field existed have it blank
@@ -193,7 +384,7 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(rows[0].supplier_group, supplier_group)
 
 
-def make_purchase_invoice():
+def make_purchase_invoice(values: dict | None = None, rate: float = 1000):
 	from erpnext.accounts.doctype.account.test_account import create_account
 	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -207,12 +398,13 @@ def make_purchase_invoice():
 	)
 	create_warehouse(warehouse_name="_Test Warehouse - _TC6", company="_Test Company 6")
 	create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company 6")
-	pi = create_purchase_invoice_with_taxes()
+	pi = create_purchase_invoice_with_taxes(rate)
+	pi.update(values or {})
 	pi.submit()
 	return pi
 
 
-def create_purchase_invoice_with_taxes():
+def create_purchase_invoice_with_taxes(rate: float = 1000):
 	return frappe.get_doc(
 		{
 			"doctype": "Purchase Invoice",
@@ -229,7 +421,7 @@ def create_purchase_invoice_with_taxes():
 					"cost_center": "_Test Cost Center - _TC6",
 					"item_code": "_Test Item",
 					"qty": 1,
-					"rate": 1000,
+					"rate": rate,
 					"expense_account": "Stock Received But Not Billed - _TC6",
 				}
 			],

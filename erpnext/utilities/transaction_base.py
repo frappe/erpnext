@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, get_item_details
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
 from erpnext.stock.utils import _get_incoming_rate
 
 
@@ -296,7 +296,7 @@ class TransactionBase(StatusUpdater):
 					)
 
 	def fetch_item_details(self, item: dict) -> dict:
-		return get_item_details(
+		return _get_item_details(
 			frappe._dict(
 				{
 					"item_code": item.get("item_code"),
@@ -570,7 +570,7 @@ class TransactionBase(StatusUpdater):
 
 		self.in_apply_price_list = True
 
-		from erpnext.stock.get_item_details import apply_price_list
+		from erpnext.stock.get_item_details import _apply_price_list
 
 		args = {
 			# pass child_docname so the maintain-same-rate lock in apply_price_list can
@@ -589,7 +589,7 @@ class TransactionBase(StatusUpdater):
 			"plc_conversion_rate": self.plc_conversion_rate,
 			"company": self.company,
 			"transaction_date": self.transaction_date or self.posting_date,
-			"campaign": self.campaign,
+			"campaign": self.get("utm_campaign"),
 			"sales_partner": self.sales_partner,
 			"ignore_pricing_rule": self.ignore_pricing_rule,
 			"doctype": self.doctype,
@@ -603,7 +603,7 @@ class TransactionBase(StatusUpdater):
 			"is_internal_customer": self.is_internal_customer,
 		}
 		# TODO: test method call impact on document
-		apply_price_list(ctx=args, as_doc=True, doc=self)
+		_apply_price_list(ctx=args, as_doc=True, doc=self)
 
 
 def delete_events(ref_type, ref_name):

@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
+from erpnext.utilities.query import get_match_conditions_qb
 
 JOB_CARD_FIELDS = [
 	"name",
@@ -366,6 +367,8 @@ def _bucket_criterion(wo, status_group):
 def _apply_work_order_filters(query, wo, status_group, search, with_job_cards_only):
 	"""Shared WHERE clauses for the board's row + count queries (bucket, search, job-card toggle)."""
 	query = query.where((wo.docstatus == 1) & _bucket_criterion(wo, status_group))
+	for condition in get_match_conditions_qb("Work Order", wo):
+		query = query.where(condition)
 	if search:
 		like = f"%{search}%"
 		query = query.where(wo.name.like(like) | wo.production_item.like(like) | wo.item_name.like(like))
