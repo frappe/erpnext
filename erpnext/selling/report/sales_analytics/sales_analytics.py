@@ -67,7 +67,13 @@ class Analytics:
 		# Skipping total row for tree-view reports
 		skip_total_row = 0
 
-		if self.filters.tree_type in ["Supplier Group", "Item Group", "Customer Group", "Territory"]:
+		if self.filters.tree_type in [
+			"Supplier Group",
+			"Item Group",
+			"Customer Group",
+			"Territory",
+			"Order Type",
+		]:
 			skip_total_row = 1
 
 		return self.columns, self.data, None, self.chart, None, skip_total_row
