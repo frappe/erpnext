@@ -281,9 +281,18 @@ def get_accrual_defaults(investment: str) -> dict | None:
 
 
 def make_draft_accruals():
-	"""Daily job: draft an accrual for each ended period, so the user only types the bank's figure."""
+	"""Daily job: draft an accrual for each ended period, so the user only types the bank's figure.
+
+	Each investment gets its own background job, so one failure does not stop the others.
+	"""
 	for investment in get_investments_due_for_accrual():
-		make_draft_accrual(investment)
+		frappe.enqueue(
+			make_draft_accrual,
+			investment=investment,
+			job_id=f"draft_interest_accrual::{investment}",
+			deduplicate=True,
+			now=frappe.flags.in_test,
+		)
 
 
 def get_investments_due_for_accrual():
@@ -308,20 +317,16 @@ def get_investments_due_for_accrual():
 
 
 def make_draft_accrual(investment):
-	"""Make one investment's draft in its own database transaction, so one failure does not stop the others."""
-	try:
-		values = get_next_accrual(investment, get_schedule(investment))
-		if values:
-			accrual = frappe.get_doc({"doctype": "Investment Interest Accrual", "investment": investment})
-			accrual.update(values)
-			accrual.conversion_rate = get_draft_conversion_rate(investment, values.to_date)
-			accrual.remarks = _("Prefilled with the estimated interest. Please enter the bank's figure.")
-			accrual.insert()
+	"""Draft the next accrual of one investment; run as its own background job."""
+	values = get_next_accrual(investment, get_schedule(investment))
+	if not values:
+		return
 
-		frappe.db.commit()  # nosemgrep: scheduled job, commit each investment separately
-	except Exception:
-		frappe.db.rollback()
-		frappe.log_error(title=_("Draft interest accrual failed for {0}").format(investment))
+	accrual = frappe.get_doc({"doctype": "Investment Interest Accrual", "investment": investment})
+	accrual.update(values)
+	accrual.conversion_rate = get_draft_conversion_rate(investment, values.to_date)
+	accrual.remarks = _("Prefilled with the estimated interest. Please enter the bank's figure.")
+	accrual.insert()
 
 
 def get_draft_conversion_rate(investment, to_date):

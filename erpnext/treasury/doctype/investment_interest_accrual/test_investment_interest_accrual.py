@@ -341,6 +341,21 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, sale.insert)
 
+	def test_daily_job_drafts_each_investment_in_its_own_job(self):
+		first, second = make_fd(FD_TERMS), make_fd(FD_TERMS)
+
+		with (
+			freeze_time("2026-04-02"),
+			patch("frappe.enqueue") as enqueue,
+		):
+			make_draft_accruals()
+
+		job_ids = {call.kwargs["job_id"] for call in enqueue.call_args_list}
+		self.assertTrue(
+			{f"draft_interest_accrual::{first.name}", f"draft_interest_accrual::{second.name}"} <= job_ids
+		)
+		self.assertTrue(all(call.kwargs["deduplicate"] for call in enqueue.call_args_list))
+
 	def test_30_360_day_count(self):
 		# every month counts as 30 days, and the 31st is treated as the 30th
 		self.assertEqual(get_days_30_360(getdate("2026-02-01"), getdate("2026-03-01")), 30)
