@@ -8,15 +8,20 @@ from frappe import _
 from frappe.query_builder.functions import Count, Date
 from frappe.utils import flt
 
-from erpnext.accounts.report.utils import convert
-
 
 def validate_filters(from_date, to_date, company):
-	if from_date and to_date and (from_date >= to_date):
+	if from_date and to_date and (from_date > to_date):
 		frappe.throw(_("To Date must be greater than From Date"))
 
 	if not company:
 		frappe.throw(_("Please select a Company"))
+
+
+def base_amount(opportunity):
+	# company-currency value: convert via the live rate, falling back to the stored base
+	return flt(opportunity["opportunity_amount"]) * flt(opportunity["conversion_rate"]) or flt(
+		opportunity["base_opportunity_amount"]
+	)
 
 
 @frappe.whitelist()
@@ -102,22 +107,21 @@ def get_opp_by(by_field, from_date, to_date, company, ignore_permissions=False):
 			["company", "=", company],
 			["transaction_date", "Between", [from_date, to_date]],
 		],
-		fields=["currency", "sales_stage", "opportunity_amount", "probability", by_field],
+		fields=[
+			"sales_stage",
+			"base_opportunity_amount",
+			"opportunity_amount",
+			"conversion_rate",
+			"probability",
+			by_field,
+		],
 	)
 
 	if opportunities:
-		default_currency = frappe.get_cached_value("Global Defaults", "None", "default_currency")
-
 		cp_opportunities = [
 			dict(
 				x,
-				**{
-					"compound_amount": (
-						convert(x["opportunity_amount"], x["currency"], default_currency, to_date)
-						* x["probability"]
-						/ 100
-					)
-				},
+				**{"compound_amount": (base_amount(x) * x["probability"] / 100)},
 			)
 			for x in opportunities
 			if x.get(by_field)
@@ -157,29 +161,28 @@ def get_pipeline_data(from_date: str, to_date: str, company: str):
 			["company", "=", company],
 			["transaction_date", "Between", [from_date, to_date]],
 		],
-		fields=["currency", "sales_stage", "opportunity_amount", "probability"],
+		fields=[
+			"sales_stage",
+			"base_opportunity_amount",
+			"opportunity_amount",
+			"conversion_rate",
+			"probability",
+		],
 	)
 
 	if opportunities:
-		default_currency = frappe.get_cached_value("Global Defaults", "None", "default_currency")
-
 		cp_opportunities = [
 			dict(
 				x,
-				**{
-					"compound_amount": (
-						convert(x["opportunity_amount"], x["currency"], default_currency, to_date)
-						* x["probability"]
-						/ 100
-					)
-				},
+				**{"compound_amount": (base_amount(x) * x["probability"] / 100)},
 			)
 			for x in opportunities
 		]
 
 		summary = {}
-		for sales_stage, rows in groupby(cp_opportunities, lambda o: o["sales_stage"]):
-			summary[sales_stage] = sum(flt(r["compound_amount"]) for r in rows)
+		for opportunity in cp_opportunities:
+			sales_stage = opportunity["sales_stage"]
+			summary[sales_stage] = summary.get(sales_stage, 0) + flt(opportunity["compound_amount"])
 
 		result = {
 			"labels": list(summary.keys()),
