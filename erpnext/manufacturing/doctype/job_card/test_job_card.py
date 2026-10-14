@@ -3602,6 +3602,34 @@ class TestJobCard(ERPNextTestSuite):
 		work_order.reload()
 		self.assertEqual([row.status for row in work_order.operations], ["Completed", "Completed"])
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_sub_operations_with_two_operators_keep_completed_qty(self):
+		workstation = make_jc_review_workstation()
+		cutting = make_jc_review_operation(workstation)
+		welding = make_jc_review_operation(workstation)
+		operation = make_jc_review_operation(
+			workstation, sub_operations=[{"operation": cutting}, {"operation": welding}]
+		)
+		rm_item = make_jc_review_item()
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": rm_item, "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+		)
+		first_operator, second_operator = make_jc_review_employee(), make_jc_review_employee()
+
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		for idx, sub_operation in enumerate((cutting, welding)):
+			start = add_to_date("2031-03-03 08:00:00", hours=idx)
+			job_card.append("time_logs", jc_review_log(start, 30, 0, first_operator, operation=sub_operation))
+			job_card.append(
+				"time_logs", jc_review_log(start, 30, 10, second_operator, operation=sub_operation)
+			)
+		job_card.save()
+
+		self.assertEqual([row.completed_qty for row in job_card.sub_operations], [10, 10])
+		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (10, 0))
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
@@ -3831,3 +3859,93 @@ class TestJobCardLogic(ERPNextTestSuite):
 		jc.finished_good = None
 		jc.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
+
+
+def make_jc_review_item(**properties):
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	return make_item(properties={"is_stock_item": 1, "valuation_rate": 100, **properties}).name
+
+
+def make_jc_review_workstation(hour_rate=600, capacity=1):
+	workstation = make_workstation(
+		workstation_name=f"_Test JC Review Workstation {frappe.generate_hash(length=6)}",
+		hour_rate_rent=hour_rate,
+	).name
+	frappe.db.set_value("Workstation", workstation, "production_capacity", capacity)
+	return workstation
+
+
+def make_jc_review_operation(workstation, **values):
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+	operation = make_operation(
+		operation=f"_Test JC Review Operation {frappe.generate_hash(length=6)}", workstation=workstation
+	)
+	if values:
+		operation.update(values)
+		operation.save()
+	return operation.name
+
+
+def make_jc_review_work_order(fg_item, rows, operations, qty=10, **kwargs):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": fg_item,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": 1,
+			"rm_cost_as_per": "Valuation Rate",
+			"with_operations": 1,
+			"items": rows,
+			"operations": operations,
+		}
+	)
+	bom.insert()
+	bom.submit()
+
+	wo = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"production_item": fg_item,
+			"bom_no": bom.name,
+			"qty": qty,
+			"company": "_Test Company",
+			"source_warehouse": "_Test Warehouse - _TC",
+			"wip_warehouse": "_Test Warehouse 1 - _TC",
+			"fg_warehouse": "_Test Warehouse 2 - _TC",
+			"planned_start_date": now(),
+			**kwargs,
+		}
+	)
+	wo.get_items_and_operations_from_bom()
+	wo.insert()
+	wo.submit()
+	return wo
+
+
+def make_jc_review_employee():
+	from erpnext.setup.doctype.employee.test_employee import make_employee
+
+	return make_employee(f"jc-review-{frappe.generate_hash(length=8)}@example.com", company="_Test Company")
+
+
+def get_jc_review_job_cards(work_order):
+	return [
+		frappe.get_doc("Job Card", name)
+		for name in frappe.get_all(
+			"Job Card", filters={"work_order": work_order}, order_by="sequence_id, creation", pluck="name"
+		)
+	]
+
+
+def jc_review_log(from_time, minutes, completed_qty=0, employee=None, **values):
+	return {
+		"from_time": from_time,
+		"to_time": add_to_date(from_time, minutes=minutes),
+		"time_in_mins": minutes,
+		"completed_qty": completed_qty,
+		"employee": employee,
+		**values,
+	}
