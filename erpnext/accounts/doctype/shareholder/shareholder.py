@@ -44,6 +44,7 @@ class Shareholder(Document):
 		if not self.is_new():
 			frappe.db.get_value("Shareholder", self.name, "name", for_update=True)
 		self.validate_joint_holding()
+		self.validate_tax_identity()
 		self.validate_nominees()
 		self.set_current_holdings()
 
@@ -79,6 +80,19 @@ class Shareholder(Document):
 		self.tax_id_type = None
 		self.tax_id = None
 		self.tax_id_country = None
+
+	def validate_tax_identity(self):
+		if self.is_joint_holding:
+			return
+		for field in ("tax_id_type", "tax_id", "tax_id_country"):
+			value = self.get(field)
+			if not isinstance(value, str) or not value.strip():
+				frappe.throw(
+					_("{0} is required for a non-joint shareholder.").format(
+						self.meta.get_translated_label(field)
+					),
+					frappe.MandatoryError,
+				)
 
 	def validate_nominees(self):
 		if not self.nominees:

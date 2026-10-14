@@ -7,8 +7,14 @@ import frappe
 from frappe import _
 
 
-def get_allowed_companies(user=None):
-	return frappe.get_list("Company", pluck="name", limit=0, user=user or frappe.session.user)
+def get_allowed_companies(user=None, *, reference_doctype=None):
+	return frappe.get_list(
+		"Company",
+		pluck="name",
+		limit=0,
+		user=user or frappe.session.user,
+		reference_doctype=reference_doctype,
+	)
 
 
 def shareholder_has_permission(doc, user=None, ptype=None):

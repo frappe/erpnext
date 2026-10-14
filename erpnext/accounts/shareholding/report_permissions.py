@@ -13,7 +13,7 @@ def apply_report_filters(query, entry, folio, filters, *, ignore_company_permiss
 	for field in ("company", "share_class", "share_folio", "shareholder"):
 		if filters.get(field) and not isinstance(filters[field], str):
 			frappe.throw(_("{0} must be a document name.").format(field))
-	companies = get_allowed_companies()
+	companies = get_allowed_companies(reference_doctype="Share Ledger Entry")
 	if filters.get("company"):
 		companies = (
 			[filters.company]
@@ -25,10 +25,14 @@ def apply_report_filters(query, entry, folio, filters, *, ignore_company_permiss
 	for company in companies:
 		assert_legacy_history_backfilled(company)
 	if not ignore_company_permissions and frappe.session.user != "Administrator":
-		companies = get_allowed_companies()
+		companies = get_allowed_companies(reference_doctype="Share Ledger Entry")
 		if filters.get("company") and filters.company not in companies:
 			frappe.throw(_("You do not have access to this company."), frappe.PermissionError)
 		query = query.where(entry.company.isin(companies or [""]))
+		permitted_entries = frappe.qb.get_query(
+			"Share Ledger Entry", fields=["name"], ignore_permissions=False
+		)
+		query = query.where(entry.name.isin(permitted_entries))
 	for field in ("company", "share_class", "share_folio"):
 		if filters.get(field):
 			query = query.where(entry[field] == filters[field])
