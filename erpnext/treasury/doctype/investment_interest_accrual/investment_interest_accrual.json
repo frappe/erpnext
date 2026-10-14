@@ -191,7 +191,9 @@
    "fieldname": "finance_book",
    "fieldtype": "Link",
    "label": "Finance Book",
-   "options": "Finance Book"
+   "options": "Finance Book",
+   "fetch_from": "investment.finance_book",
+   "read_only": 1
   },
   {
    "fetch_from": "investment.cost_center",
@@ -239,7 +241,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-14 15:00:00.000000",
+ "modified": "2026-10-14 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Interest Accrual",

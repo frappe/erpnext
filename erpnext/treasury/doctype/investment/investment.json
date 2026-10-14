@@ -63,6 +63,7 @@
   "investment_account",
   "column_break_accounting",
   "cost_center",
+  "finance_book",
   "charges_account",
   "accounts_section",
   "interest_income_account",
@@ -493,6 +494,13 @@
    "options": "Cost Center"
   },
   {
+   "description": "All entries of this investment are posted to this finance book",
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
    "description": "Brokerage, fees and premature-withdrawal penalty",
    "fieldname": "charges_account",
    "fieldtype": "Link",
@@ -617,7 +625,7 @@
    "link_fieldname": "original_investment"
   }
  ],
- "modified": "2026-10-14 16:00:00.000000",
+ "modified": "2026-10-14 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment",

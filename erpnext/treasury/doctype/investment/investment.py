@@ -61,6 +61,7 @@ class Investment(Document):
 		face_value: DF.Currency
 		fair_value_adjustment_account: DF.Link | None
 		fair_value_reserve_account: DF.Link | None
+		finance_book: DF.Link | None
 		instrument_class: DF.Data | None
 		instrument_id: DF.Data | None
 		interest_income_account: DF.Link | None

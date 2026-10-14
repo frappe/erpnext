@@ -137,7 +137,13 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 		frappe.qb.from_(row)
 		.join(revaluation)
 		.on(row.parent == revaluation.name)
-		.select(row.investment, row.unrealised_gain_loss, row.units_held, row.posts_to_ledger)
+		.select(
+			row.investment,
+			row.unrealised_gain_loss,
+			row.units_held,
+			row.posts_to_ledger,
+			revaluation.revaluation_date,
+		)
 		.where(row.parenttype == "Investment Revaluation")
 		.where(row.investment.isin(investments))
 		.where(revaluation.docstatus == 1)
@@ -150,18 +156,37 @@ def get_unrealised_gain_loss(investments, as_on_date=None):
 	# later rows overwrite earlier ones, leaving the latest per investment
 	latest_rows = {r.investment: r for r in query.run(as_dict=True)}
 	fair_values = get_fair_value_balances(list(latest_rows), as_on_date)
-	units = get_units_held(list(latest_rows), as_on_date or getdate())
 
 	unrealised = {}
 	for investment, latest in latest_rows.items():
 		if cint(latest.posts_to_ledger):
 			unrealised[investment] = flt(fair_values.get(investment))
 		elif flt(latest.units_held):
+			# exits take the oldest units first, so they take the valued units before any bought later
+			units_exited = get_units_exited(investment, latest.revaluation_date, as_on_date)
+			valued_units_left = max(flt(latest.units_held) - units_exited, 0)
 			unrealised[investment] = (
-				flt(latest.unrealised_gain_loss) * flt(units.get(investment)) / flt(latest.units_held)
+				flt(latest.unrealised_gain_loss) * valued_units_left / flt(latest.units_held)
 			)
 
 	return unrealised
+
+
+def get_units_exited(investment, after_date, upto=None):
+	"""Units that left the investment after a date, optionally up to another."""
+	transaction = frappe.qb.DocType("Investment Transaction")
+	query = (
+		frappe.qb.from_(transaction)
+		.select(Sum(transaction.units))
+		.where(transaction.investment == investment)
+		.where(transaction.docstatus == 1)
+		.where(transaction.transaction_type.isin(EXIT_TYPES))
+		.where(transaction.posting_date > after_date)
+	)
+	if upto:
+		query = query.where(transaction.posting_date <= upto)
+
+	return flt(query.run()[0][0])
 
 
 def get_fair_value_balances(investments, as_on_date=None):

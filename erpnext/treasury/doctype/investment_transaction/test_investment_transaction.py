@@ -78,12 +78,14 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, receipt.insert)
 
 	def test_finance_book_reaches_the_ledger(self):
-		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
-			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
+		for book in ("_Test Treasury Book", "_Test Other Book"):
+			if not frappe.db.exists("Finance Book", book):
+				frappe.get_doc({"doctype": "Finance Book", "finance_book_name": book}).insert()
 
-		investment = make_submitted_investment()
+		investment = make_submitted_investment(finance_book="_Test Treasury Book")
+		# the holding's book is used, whatever the voucher says, so purchases and exits share one book
 		purchase = make_transaction(
-			investment.name, "Purchase", gross_amount=1000, finance_book="_Test Treasury Book"
+			investment.name, "Purchase", gross_amount=1000, finance_book="_Test Other Book"
 		).submit()
 
 		finance_books = frappe.get_all(

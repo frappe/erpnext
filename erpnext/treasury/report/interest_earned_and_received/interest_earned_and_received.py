@@ -6,7 +6,7 @@ from frappe import _
 from frappe.utils import add_days, flt, getdate
 
 import erpnext
-from erpnext.treasury.doctype.investment_transaction.investment_transaction import PURCHASE_TYPES
+from erpnext.treasury.doctype.investment_transaction.investment_transaction import EXIT_TYPES, PURCHASE_TYPES
 from erpnext.treasury.interest import INTEREST_CLASSES
 from erpnext.treasury.report.utils import (
 	add_total_row,
@@ -63,7 +63,10 @@ def get_row(investment, opening_receivable, movements, currency):
 		opening_receivable=opening_receivable,
 		interest_accrued=sum_movements(movements, "accrued_interest_account", ("Interest Accrual",)),
 		interest_bought=sum_movements(movements, "accrued_interest_account", PURCHASE_TYPES),
-		interest_received=-sum_movements(movements, "accrued_interest_account", ("Interest Receipt",)),
+		# interest comes in by receipts, and from buyers with bond sales
+		interest_received=-sum_movements(
+			movements, "accrued_interest_account", ("Interest Receipt", *EXIT_TYPES)
+		),
 		amortisation=sum_movements(movements, "investment_account", ("Interest Accrual",)),
 		interest_income=-sum_movements(movements, "interest_income_account"),
 	)

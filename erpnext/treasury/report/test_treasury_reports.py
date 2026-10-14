@@ -88,6 +88,28 @@ class TestTreasuryReports(ERPNextTestSuite):
 		self.assertEqual(data[0].closing_receivable, 300)
 		self.assertEqual(chart["data"]["datasets"][1]["values"], [200])
 
+	def test_interest_received_includes_interest_sold_with_a_bond(self):
+		create_investment_type("_Test Corporate Bond", "Bond")
+		investment = make_submitted_investment(**BOND_TERMS)
+		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 2000).submit()
+		make_transaction(
+			investment.name,
+			"Sale",
+			posting_date="2026-04-01",
+			units=10,
+			rate=1200,
+			accrued_interest_in_sale=2000,
+		).submit()
+
+		_columns, data, _message, _chart = interest_earned_and_received.execute(
+			frappe._dict(
+				company=TEST_COMPANY, investment=investment.name, from_date="2026-01-01", to_date="2026-04-30"
+			)
+		)
+
+		self.assertEqual((data[0].interest_received, data[0].closing_receivable), (2000, 0))
+
 	def test_investment_returns(self):
 		_columns, data, _message, chart = investment_returns.execute(
 			self.get_filters(from_date=nowdate(), to_date=nowdate())

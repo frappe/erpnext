@@ -156,6 +156,26 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		).submit()
 		self.assertRaises(frappe.ValidationError, revaluation.cancel)
 
+	def test_amortized_cost_gain_stays_with_the_valued_units(self):
+		investment = make_fund_investment("Amortized Cost")
+		make_market_revaluation(investment.name, nav_per_unit=12).submit()
+
+		# the 100 new units were bought at 12, so they carry no gain of their own
+		make_transaction(investment.name, "Purchase", units=100, rate=12).submit()
+
+		investment.reload()
+		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (200, 2400))
+
+	def test_revaluation_stays_in_the_investments_finance_book(self):
+		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
+
+		investment = make_fund_investment("FVTPL")
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=12)
+		revaluation.finance_book = "_Test Treasury Book"
+
+		self.assertRaises(frappe.ValidationError, revaluation.insert)
+
 	def test_exited_investment_has_no_gain_left_to_revalue(self):
 		investment = make_fund_investment("FVTPL")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()

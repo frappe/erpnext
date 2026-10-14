@@ -5,7 +5,7 @@ from copy import copy
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, cstr, flt, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
@@ -122,6 +122,16 @@ class InvestmentRevaluation(AccountsController):
 
 	def validate_row_investment(self, row):
 		investment = self.get_investment(row.investment)
+		if cstr(investment.finance_book) != cstr(self.finance_book):
+			frappe.throw(
+				_("Row #{0}: Investment {1} is kept in Finance Book {2}, not {3}").format(
+					row.idx,
+					frappe.bold(row.investment),
+					frappe.bold(investment.finance_book or _("(none)")),
+					frappe.bold(self.finance_book or _("(none)")),
+				)
+			)
+
 		if investment.docstatus != 1 or investment.company != self.company:
 			frappe.throw(
 				_(
