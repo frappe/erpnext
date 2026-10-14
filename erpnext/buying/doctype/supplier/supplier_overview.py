@@ -237,7 +237,9 @@ def delivery(supplier, company, from_date, to_date, as_of):
 	for line in lines:
 		due = getdate(line.schedule_date)
 		if flt(line.received_qty) >= flt(line.qty):
-			outcome = "late" if received_on.get(line.line, due) > due else "on_time"
+			if line.line not in received_on:
+				continue
+			outcome = "late" if received_on[line.line] > due else "on_time"
 		elif due < as_of and not line.closed:
 			outcome = "overdue"
 		else:

@@ -171,6 +171,20 @@ class TestSupplierOverview(ERPNextTestSuite):
 		data = supplier_overview.delivery(supplier, COMPANY, add_days(as_of, -30), as_of, as_of)
 		self.assertEqual((data["on_time"], data["late"]), (0, 1))
 
+	def test_received_line_without_receipt_is_not_counted(self):
+		supplier = create_supplier(supplier_name="_Test Supplier Overview Drop Ship").name
+		po = create_purchase_order(
+			supplier=supplier, transaction_date=add_days(today(), -10), qty=5, do_not_submit=True
+		)
+		po.schedule_date = add_days(today(), -2)
+		po.items[0].schedule_date = po.schedule_date
+		po.submit()
+		frappe.db.set_value("Purchase Order Item", po.items[0].name, "received_qty", 5)
+
+		as_of = getdate(today())
+		data = supplier_overview.delivery(supplier, COMPANY, add_days(as_of, -30), as_of, as_of)
+		self.assertEqual(data["lines"], 0)
+
 	def test_receipt_only_supplier_has_a_company(self):
 		supplier = create_supplier(supplier_name="_Test Supplier Overview Receipt").name
 		make_purchase_receipt(supplier=supplier)
