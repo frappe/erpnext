@@ -11,14 +11,13 @@ import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.treasury.doctype.investment_transaction.investment_transaction import (
+	EXIT_TYPES,
 	get_units_held,
 	lock_investment,
 )
 
 OPEN_STATUSES = ("Active", "Partially Redeemed")
 REVALUATION_INSTRUMENTS = ("Units", "Bond")
-# measurement categories whose fair value changes are posted to the ledger
-GL_CATEGORIES = ("FVOCI", "FVTPL")
 
 
 class InvestmentRevaluation(AccountsController):
@@ -63,6 +62,7 @@ class InvestmentRevaluation(AccountsController):
 	def before_cancel(self):
 		super().before_cancel()
 		self.validate_is_latest_revaluation()
+		self.validate_no_later_exits()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -172,7 +172,7 @@ class InvestmentRevaluation(AccountsController):
 
 	def set_row_values(self, row):
 		investment = self.get_investment(row.investment)
-		row.posts_to_ledger = int(investment.measurement_category in GL_CATEGORIES)
+		row.posts_to_ledger = int(investment.posts_fair_value())
 		self.set_book_values(row, investment)
 		self.set_fair_value(row, investment)
 		row.adjustment_amount = flt(
@@ -181,9 +181,16 @@ class InvestmentRevaluation(AccountsController):
 
 	def set_book_values(self, row, investment):
 		"""Book value, previous amount and units held on the revaluation date."""
-		previous_row = self.get_previous_row(row.investment)
 		row.book_value = investment.get_ledger_balance(investment.investment_account, self.revaluation_date)
-		row.previous_gain_loss = flt(previous_row.unrealised_gain_loss) if previous_row else 0
+		if investment.posts_fair_value():
+			# what is on the books, after exits took their share of earlier revaluations
+			row.previous_gain_loss = investment.get_ledger_balance(
+				investment.fair_value_adjustment_account, self.revaluation_date
+			)
+		else:
+			previous_row = self.get_previous_row(row.investment)
+			row.previous_gain_loss = flt(previous_row.unrealised_gain_loss) if previous_row else 0
+
 		row.units_held = flt(
 			get_units_held(investment.name, self.revaluation_date), row.precision("units_held")
 		)
@@ -220,6 +227,36 @@ class InvestmentRevaluation(AccountsController):
 					)
 				)
 
+	def validate_no_later_exits(self):
+		"""Exits after this revaluation took their share of its fair value gain off the books."""
+		transaction = frappe.qb.DocType("Investment Transaction")
+		for row in self.investments:
+			if not cint(row.posts_to_ledger):
+				continue
+
+			later_exit = (
+				frappe.qb.from_(transaction)
+				.select(transaction.name)
+				.where(transaction.investment == row.investment)
+				.where(transaction.docstatus == 1)
+				.where(transaction.transaction_type.isin(EXIT_TYPES))
+				.where(
+					(transaction.posting_date > self.revaluation_date)
+					| (
+						(transaction.posting_date == self.revaluation_date)
+						& (transaction.creation > self.creation)
+					)
+				)
+				.limit(1)
+			).run()
+			if later_exit:
+				frappe.throw(
+					_("Please cancel the exits of Investment {0} made after {1} first").format(
+						frappe.bold(row.investment),
+						frappe.bold(frappe.format_value(self.revaluation_date, "Date")),
+					)
+				)
+
 	def update_investments(self):
 		for row in self.investments:
 			self.get_investment(row.investment).update_revaluation()
@@ -243,7 +280,7 @@ class InvestmentRevaluation(AccountsController):
 		investment = self.get_investment(row.investment)
 		increase, decrease = max(flt(row.adjustment_amount), 0), max(-flt(row.adjustment_amount), 0)
 		debit_account = investment.get_account("fair_value_adjustment_account")
-		credit_account = investment.get_account(get_fair_value_gain_field(investment))
+		credit_account = investment.get_fair_value_gain_account()
 
 		return [(debit_account, increase, decrease), (credit_account, decrease, increase)]
 
@@ -281,8 +318,7 @@ class InvestmentRevaluation(AccountsController):
 		if investment.status in OPEN_STATUSES:
 			return True
 
-		previous_row = self.get_previous_row(investment.name)
-		return bool(previous_row and flt(previous_row.unrealised_gain_loss))
+		return bool(self.get_investment(investment.name).get_unrealised_gain_loss())
 
 	def set_row_preview(self, row):
 		"""Ledger figures shown before the user enters prices; recalculated in full on save."""
@@ -296,14 +332,6 @@ class InvestmentRevaluation(AccountsController):
 		)
 		self.set_book_values(row, investment)
 		self.set_row_conversion_rate(row)
-
-
-def get_fair_value_gain_field(investment):
-	"""Where fair value gains go: other comprehensive income for FVOCI, profit and loss for FVTPL."""
-	if investment.measurement_category == "FVOCI":
-		return "fair_value_reserve_account"
-
-	return "unrealised_gain_loss_account"
 
 
 def get_investments_to_value(company):

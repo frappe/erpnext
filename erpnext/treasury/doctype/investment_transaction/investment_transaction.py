@@ -109,6 +109,7 @@ class InvestmentTransaction(AccountsController):
 
 	def before_submit(self):
 		self.validate_no_later_exits()
+		self.validate_no_later_revaluation()
 		self.validate_interest_accrued_before_exit()
 		self.set_cost_and_realised_gain_loss()
 
@@ -121,6 +122,7 @@ class InvestmentTransaction(AccountsController):
 		super().before_cancel()
 		self.validate_purchase_not_consumed()
 		self.validate_no_later_exits()
+		self.validate_no_later_revaluation()
 		self.validate_after_accrued_interest()
 		self.validate_accrued_interest_not_received()
 		self.validate_proceeds_not_renewed()
@@ -491,6 +493,41 @@ class InvestmentTransaction(AccountsController):
 				)
 			)
 
+	def validate_no_later_revaluation(self):
+		"""A revaluation posts the change from the fair value left after earlier exits,
+		so an exit cannot be added or cancelled before it."""
+		if self.transaction_type not in EXIT_TYPES or not self.get_investment().posts_fair_value():
+			return
+
+		revaluation = frappe.qb.DocType("Investment Revaluation")
+		row = frappe.qb.DocType("Investment Revaluation Detail")
+		later = (
+			frappe.qb.from_(row)
+			.join(revaluation)
+			.on(row.parent == revaluation.name)
+			.select(revaluation.name)
+			.where(row.investment == self.investment)
+			.where(revaluation.docstatus == 1)
+			.where(
+				(revaluation.revaluation_date > self.posting_date)
+				| (
+					(revaluation.revaluation_date == self.posting_date)
+					& (revaluation.creation > self.creation)
+				)
+			)
+			.limit(1)
+		).run()
+		if later:
+			frappe.throw(
+				_(
+					"Investment Revaluation {0} of Investment {1} was made after {2}. Please cancel it first."
+				).format(
+					frappe.get_desk_link("Investment Revaluation", later[0][0]),
+					frappe.bold(self.investment),
+					frappe.bold(frappe.format_value(self.posting_date, "Date")),
+				)
+			)
+
 	def has_later_exits(self):
 		transaction = frappe.qb.DocType(self.doctype)
 		if self.transaction_type in PURCHASE_TYPES:
@@ -537,14 +574,42 @@ class InvestmentTransaction(AccountsController):
 				continue
 
 			if settled and account == settled.account and credit:
-				gl_entries.append(get_gl_entry(self, account, debit, credit, settled.base_credit))
+				gl_entries.append(get_gl_entry(self, account, debit, credit, base_credit=settled.base_credit))
 			else:
 				gl_entries.append(get_gl_entry(self, account, debit, credit))
 
+		gl_entries += self.get_fair_value_release_entries()
 		if settled:
 			gl_entries += self.get_exchange_gain_loss_entries(gl_entries)
 
 		return gl_entries
+
+	def get_fair_value_release_entries(self):
+		"""An exit takes its share of the fair value gain off the books, so the gain is counted once, as
+		realised. For FVOCI this moves it from the equity reserve into profit and loss."""
+		investment = self.get_investment()
+		if self.transaction_type not in EXIT_TYPES or not investment.posts_fair_value():
+			return []
+
+		fair_value_account = investment.fair_value_adjustment_account
+		balance = investment.get_ledger_balance(fair_value_account, self.posting_date)
+		# this exit is already submitted, so the units held include it
+		units_left = get_units_held(self.investment, self.posting_date)
+		units_before = units_left + flt(self.units)
+		share = 1 if units_left <= 0 or not units_before else flt(self.units) / units_before
+		release = flt(balance * share, self.precision("net_amount"))
+		if not release:
+			return []
+
+		# amounts are in company currency; the investment currency amount converts back to exactly them
+		amount = release / flt(self.conversion_rate)
+		gain, loss = max(release, 0), max(-release, 0)
+		return [
+			get_gl_entry(self, fair_value_account, max(-amount, 0), max(amount, 0), loss, gain),
+			get_gl_entry(
+				self, investment.get_fair_value_gain_account(), max(amount, 0), max(-amount, 0), gain, loss
+			),
+		]
 
 	def get_opening_gl_entries(self):
 		opening_account = get_temporary_opening_account(self.company)
@@ -681,8 +746,9 @@ class InvestmentTransaction(AccountsController):
 		]
 
 
-def get_gl_entry(doc, account, debit, credit, base_credit=None):
-	"""GL Entry converted at the Exchange Rate; `base_credit` overrides the company currency credit."""
+def get_gl_entry(doc, account, debit, credit, base_debit=None, base_credit=None):
+	"""GL Entry converted at the Exchange Rate; `base_debit` / `base_credit` override the company
+	currency amounts."""
 	precision = doc.precision("interest_amount")
 	args = {
 		"account": account,
@@ -693,10 +759,12 @@ def get_gl_entry(doc, account, debit, credit, base_credit=None):
 		"is_opening": "Yes" if doc.get("transaction_type") == "Opening" else "No",
 	}
 
-	if base_credit is not None:
-		args["credit"] = flt(base_credit, precision)
-		if get_account_currency(account) != erpnext.get_company_currency(doc.company):
-			args["credit_in_account_currency"] = flt(credit, precision)
+	is_foreign_account = get_account_currency(account) != erpnext.get_company_currency(doc.company)
+	for side, base_amount, amount in (("debit", base_debit, debit), ("credit", base_credit, credit)):
+		if base_amount is not None:
+			args[side] = flt(base_amount, precision)
+			if is_foreign_account:
+				args[f"{side}_in_account_currency"] = flt(amount, precision)
 
 	return doc.get_gl_dict(args, item=doc)
 

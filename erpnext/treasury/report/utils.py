@@ -8,7 +8,8 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder import Case, Criterion
-from frappe.utils import flt, getdate
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, flt, getdate
 
 import erpnext
 from erpnext.treasury.dashboard import validate_company_permission
@@ -121,28 +122,69 @@ def sum_movements(movements, role, transaction_types=None):
 	)
 
 
-def get_unrealised_gain_loss(investments, as_on_date):
-	"""Unrealised gain or loss of each investment per its latest revaluation up to the date."""
+def get_unrealised_gain_loss(investments, as_on_date=None):
+	"""Unrealised gain or loss of each investment on the date, in company currency.
+
+	Where revaluations post to the ledger, it is the fair value adjustment still on the books, which
+	sales take off. Otherwise it is the latest revaluation's figure for the share of its units still held.
+	"""
 	if not investments:
 		return {}
 
 	revaluation = frappe.qb.DocType("Investment Revaluation")
 	row = frappe.qb.DocType("Investment Revaluation Detail")
-	rows = (
+	query = (
 		frappe.qb.from_(row)
 		.join(revaluation)
 		.on(row.parent == revaluation.name)
-		.select(row.investment, row.unrealised_gain_loss)
+		.select(row.investment, row.unrealised_gain_loss, row.units_held, row.posts_to_ledger)
 		.where(row.parenttype == "Investment Revaluation")
 		.where(row.investment.isin(investments))
 		.where(revaluation.docstatus == 1)
-		.where(revaluation.revaluation_date <= as_on_date)
 		.orderby(revaluation.revaluation_date)
 		.orderby(revaluation.creation)
-	).run(as_dict=True)
+	)
+	if as_on_date:
+		query = query.where(revaluation.revaluation_date <= as_on_date)
 
 	# later rows overwrite earlier ones, leaving the latest per investment
-	return {r.investment: flt(r.unrealised_gain_loss) for r in rows}
+	latest_rows = {r.investment: r for r in query.run(as_dict=True)}
+	fair_values = get_fair_value_balances(list(latest_rows), as_on_date)
+	units = get_units_held(list(latest_rows), as_on_date or getdate())
+
+	unrealised = {}
+	for investment, latest in latest_rows.items():
+		if cint(latest.posts_to_ledger):
+			unrealised[investment] = flt(fair_values.get(investment))
+		elif flt(latest.units_held):
+			unrealised[investment] = (
+				flt(latest.unrealised_gain_loss) * flt(units.get(investment)) / flt(latest.units_held)
+			)
+
+	return unrealised
+
+
+def get_fair_value_balances(investments, as_on_date=None):
+	"""Balance of each investment's Fair Value Adjustment Account, up to the date."""
+	if not investments:
+		return {}
+
+	ledger = get_investment_gl_query(include_revaluations=True)
+	gl_entry = ledger.gl_entry
+	investment = frappe.qb.DocType("Investment")
+	query = (
+		ledger.query.join(investment)
+		.on(ledger.investment == investment.name)
+		.select(ledger.investment, Sum(gl_entry.debit) - Sum(gl_entry.credit))
+		.where(gl_entry.account == investment.fair_value_adjustment_account)
+		.where(gl_entry.is_cancelled == 0)
+		.where(ledger.investment.isin(investments))
+		.groupby(ledger.investment)
+	)
+	if as_on_date:
+		query = query.where(gl_entry.posting_date <= as_on_date)
+
+	return dict(query.run())
 
 
 def get_units_held(investments, as_on_date):

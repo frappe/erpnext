@@ -9,6 +9,8 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, getdate
 
 WORKFLOW_DRAFT_STATES = ("Pending Approval", "Rejected")
+# measurement categories whose fair value changes are posted to the ledger
+GL_CATEGORIES = ("FVOCI", "FVTPL")
 ACCOUNT_FIELDS = (
 	"investment_account",
 	"accrued_interest_account",
@@ -210,11 +212,13 @@ class Investment(Document):
 		"""Recompute position totals from the ledger; called on transaction submit/cancel."""
 		total_cost = self.get_ledger_balance(self.investment_account)
 		units_held = self.get_units_held()
+		unrealised_gain_loss = self.get_unrealised_gain_loss()
 		values = {
 			"total_cost": total_cost,
 			"accrued_interest": self.get_ledger_balance(self.accrued_interest_account),
 			"units_held": units_held,
-			"market_value": total_cost + flt(self.unrealised_gain_loss),
+			"unrealised_gain_loss": unrealised_gain_loss,
+			"market_value": total_cost + unrealised_gain_loss,
 			"unamortised_premium_discount": self.get_unamortised_premium_discount(units_held),
 			"status": self.get_position_status(total_cost),
 		}
@@ -226,7 +230,7 @@ class Investment(Document):
 
 		from erpnext.treasury.ledger import get_investment_gl_query
 
-		ledger = get_investment_gl_query()
+		ledger = get_investment_gl_query(include_revaluations=True)
 		gl_entry = ledger.gl_entry
 		query = (
 			ledger.query.select(Sum(gl_entry.debit) - Sum(gl_entry.credit))
@@ -303,12 +307,7 @@ class Investment(Document):
 
 	def update_revaluation(self):
 		"""Take the figures of the latest submitted Investment Revaluations; called on revaluation submit/cancel."""
-		from erpnext.treasury.doctype.investment_revaluation.investment_revaluation import (
-			get_latest_revaluation_row,
-		)
-
-		latest_row = get_latest_revaluation_row(self.name)
-		unrealised_gain_loss = flt(latest_row.unrealised_gain_loss) if latest_row else 0
+		unrealised_gain_loss = self.get_unrealised_gain_loss()
 
 		self.db_set(
 			{
@@ -316,6 +315,21 @@ class Investment(Document):
 				"market_value": flt(self.total_cost) + unrealised_gain_loss,
 			}
 		)
+
+	def get_unrealised_gain_loss(self):
+		from erpnext.treasury.report.utils import get_unrealised_gain_loss
+
+		return get_unrealised_gain_loss([self.name]).get(self.name, 0)
+
+	def posts_fair_value(self):
+		return self.measurement_category in GL_CATEGORIES
+
+	def get_fair_value_gain_account(self):
+		"""Where fair value gains go: other comprehensive income for FVOCI, profit and loss for FVTPL."""
+		if self.measurement_category == "FVOCI":
+			return self.get_account("fair_value_reserve_account")
+
+		return self.get_account("unrealised_gain_loss_account")
 
 	def get_account(self, fieldname):
 		"""Account set on this investment, else the Investment Settings default (saved on the investment)."""

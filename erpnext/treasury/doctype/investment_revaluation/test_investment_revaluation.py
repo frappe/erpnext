@@ -105,7 +105,58 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		self.assertEqual(get_gl_entries(second.name), {})
 		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 200)
 
-	def test_get_investments_clears_gain_of_exited_investment(self):
+	def test_sale_takes_its_share_of_fvtpl_gain_off_the_books(self):
+		investment = make_fund_investment("FVTPL")
+		make_market_revaluation(investment.name, nav_per_unit=12).submit()
+
+		# half the units go, so half the 200 gain is taken off; the sale books it again as realised
+		sale = make_transaction(investment.name, "Sale", units=50, rate=12).submit()
+
+		self.assertEqual(sale.realised_gain_loss, 100)
+		entries = get_transaction_gl_entries(sale.name)
+		self.assertEqual((entries[FAIR_VALUE_ACCOUNT], entries[UNREALISED_ACCOUNT]), ((0, 100), (100, 0)))
+		investment.reload()
+		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (100, 600))
+
+	def test_full_sale_moves_fvoci_reserve_to_profit_and_loss(self):
+		investment = make_fund_investment("FVOCI")
+		make_market_revaluation(investment.name, nav_per_unit=12).submit()
+
+		sale = make_transaction(investment.name, "Sale", units=100, rate=12).submit()
+
+		self.assertEqual(sale.realised_gain_loss, 200)
+		entries = get_transaction_gl_entries(sale.name)
+		self.assertEqual((entries[FAIR_VALUE_ACCOUNT], entries[RESERVE_ACCOUNT]), ((0, 200), (200, 0)))
+		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 0)
+
+	def test_next_revaluation_starts_from_what_the_sale_left(self):
+		investment = make_fund_investment("FVTPL")
+		make_market_revaluation(investment.name, nav_per_unit=12).submit()
+		make_transaction(investment.name, "Sale", units=50, rate=12).submit()
+
+		# 50 units at 13 = 650 against a cost of 500 is 150; 100 is still on the books
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=13, days=1).submit()
+
+		row = revaluation.investments[0]
+		self.assertEqual(
+			(row.unrealised_gain_loss, row.previous_gain_loss, row.adjustment_amount), (150, 100, 50)
+		)
+
+	def test_exit_and_revaluation_follow_each_other_in_order(self):
+		investment = make_fund_investment("FVTPL")
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, days=2).submit()
+
+		sale = make_transaction(
+			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 1)
+		)
+		self.assertRaises(frappe.ValidationError, sale.submit)
+
+		make_transaction(
+			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 3)
+		).submit()
+		self.assertRaises(frappe.ValidationError, revaluation.cancel)
+
+	def test_exited_investment_has_no_gain_left_to_revalue(self):
 		investment = make_fund_investment("FVTPL")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
 		make_transaction(investment.name, "Sale", units=100, rate=12).submit()
@@ -118,15 +169,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 			}
 		)
 		revaluation.set_investments()
-		self.assertIn(investment.name, [row.investment for row in revaluation.investments])
-
-		revaluation.set(
-			"investments", [row for row in revaluation.investments if row.investment == investment.name]
-		)
-		revaluation.insert().submit()
-
-		self.assertEqual(revaluation.investments[0].adjustment_amount, -200)
-		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 0)
+		self.assertNotIn(investment.name, [row.investment for row in revaluation.investments])
 
 
 def make_fund_investment(measurement_category):
@@ -153,6 +196,15 @@ def make_market_revaluation(investment, days=0, **row):
 			"investments": [{"investment": investment, **row}],
 		}
 	)
+
+
+def get_transaction_gl_entries(voucher_no):
+	entries = frappe.get_all(
+		"GL Entry",
+		filters={"voucher_type": "Investment Transaction", "voucher_no": voucher_no, "is_cancelled": 0},
+		fields=["account", "debit", "credit"],
+	)
+	return {entry.account: (entry.debit, entry.credit) for entry in entries}
 
 
 def get_gl_entries(voucher_no):
