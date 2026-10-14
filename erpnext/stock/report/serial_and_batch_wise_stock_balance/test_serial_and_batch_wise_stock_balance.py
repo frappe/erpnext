@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe import _dict
 from frappe.utils import add_days, today
@@ -128,6 +130,66 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 			filters.include_zero_stock_items = include_empty
 			rows = [_dict(row) for row in execute(filters)[1]]
 			self.assertEqual(sorted((row.bal_qty, row.bal_val, row.val_rate) for row in rows[1:]), expected)
+
+	def test_pooled_values_with_inventory_dimensions(self):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		projects = [
+			frappe.get_doc(
+				doctype="Project", company="_Test Company", project_name=frappe.generate_hash(length=10)
+			)
+			.insert()
+			.name
+			for _ in range(2)
+		]
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"valuation_method": "Moving Average",
+			}
+		).name
+
+		def move(project, **movement):
+			entry = make_stock_entry(item_code=item, do_not_save=True, posting_time="10:00:00", **movement)
+			entry.project = project
+			entry.items[0].project = project
+			return entry.insert().submit().reload()
+
+		first = move(projects[0], qty=10, posting_date=add_days(today(), -4), **RECEIVE)
+		move(projects[1], qty=10, posting_date=add_days(today(), -3), **{**RECEIVE, "rate": 200})
+		batch = (
+			frappe.get_doc("Serial and Batch Bundle", first.items[0].serial_and_batch_bundle)
+			.entries[0]
+			.batch_no
+		)
+		move(projects[0], qty=5, batch_no=batch, posting_date=add_days(today(), -2), **ISSUE)
+		filters = _dict(
+			company="_Test Company",
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			from_date=add_days(today(), -5),
+			to_date=today(),
+		)
+		with patch(
+			"erpnext.stock.report.stock_balance.stock_balance.get_inventory_dimensions",
+			return_value=[_dict(fieldname="project", doctype="Project")],
+		):
+			rows = execute(_dict(filters, show_dimension_wise_stock=1))[1]
+			self.assertEqual([row.val_rate for row in rows], [150] * 4)
+			self.assertEqual([row.bal_val for row in rows], [750, 750, 1500, 1500])
+
+			filters.project = [projects[0]]
+			rows = execute(filters)[1]
+			self.assertEqual([row.bal_val for row in rows], [750, 750])
+
+			move(projects[1], qty=5, posting_date=add_days(today(), -1), **{**RECEIVE, "rate": 250})
+			rows = execute(filters)[1]
+			self.assertEqual([(row.bal_val, row.val_rate) for row in rows], [(875, 175), (875, 175)])
+
+			filters.to_date = add_days(today(), -2)
+			rows = execute(filters)[1]
+			self.assertEqual([(row.bal_val, row.val_rate) for row in rows], [(750, 150), (750, 150)])
 
 	def test_item_row_lists_the_batches_under_it(self):
 		rows = self.run_report(
