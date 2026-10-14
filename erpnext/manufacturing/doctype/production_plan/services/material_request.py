@@ -290,6 +290,8 @@ def _build_sub_assembly_map(doc):
 
 	sub_assembly_items = defaultdict(int)
 	for d in doc.get("sub_assembly_items"):
+		if d.get("type_of_manufacturing") == "Material Request":
+			continue
 		key = (d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
 		sub_assembly_items[key] += d.get("qty")
 	return {k[:2]: v for k, v in sub_assembly_items.items()}
@@ -302,9 +304,15 @@ def _collect_item_details(doc, po_items):
 	so_item_details = frappe._dict()
 	qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
+	requested_sub_assemblies = {
+		frappe._dict(row).production_item
+		for row in doc.get("sub_assembly_items") or []
+		if frappe._dict(row).type_of_manufacturing == "Material Request"
+	}
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
+		data["requested_sub_assemblies"] = requested_sub_assemblies
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
@@ -375,7 +383,11 @@ def _explode_bom_items(
 			sub_assembly_items,
 			planned_qty=planned_qty,
 		)
-	if data.get("include_exploded_items") and include_subcontracted_items:
+	if (
+		data.get("include_exploded_items")
+		and include_subcontracted_items
+		and not data.get("requested_sub_assemblies")
+	):
 		return get_exploded_items(
 			item_details, company, bom_no, include_non_stock_items, planned_qty=planned_qty, doc=doc
 		)

@@ -985,6 +985,39 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (2, "Box", 10))
 
+	def test_requested_sub_assembly_components_are_not_requested(self):
+		for item in (
+			"_Test PP Bought SA RM",
+			"_Test PP Bought SA RM 2",
+			"_Test PP Bought SA",
+			"_Test PP Bought SA FG",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Bought SA", raw_materials=["_Test PP Bought SA RM"], rm_qty=2, currency="INR")
+		make_bom(
+			item="_Test PP Bought SA FG",
+			raw_materials=["_Test PP Bought SA", "_Test PP Bought SA RM 2"],
+			currency="INR",
+		)
+
+		plan = create_production_plan(
+			item_code="_Test PP Bought SA FG",
+			planned_qty=5,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			sorted((row.get("item_code"), row.get("quantity")) for row in items),
+			[("_Test PP Bought SA", 5), ("_Test PP Bought SA RM 2", 5)],
+		)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.

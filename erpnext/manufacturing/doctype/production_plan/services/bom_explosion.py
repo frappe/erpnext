@@ -234,6 +234,9 @@ def _subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items):
 def _process_subitem(
 	doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 ):
+	if d.item_code in (data.get("requested_sub_assemblies") or ()):
+		return
+
 	if not data.get("include_exploded_items") or not d.default_bom:
 		_merge_subitem(item_details, d)
 
