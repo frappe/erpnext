@@ -948,7 +948,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
 
 	def make_receipt_of_two_orders(
-		self, taxes=None, discounts=None, cost_centers=("Main - _TC", "Main - _TC")
+		self, taxes=None, discounts=None, cost_centers=("Main - _TC", "Main - _TC"), currencies=None
 	):
 		"""Subcontracting Receipt of two orders; taxes and discounts are keyed by the order's position."""
 		set_backflush_based_on("BOM")
@@ -971,6 +971,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 						"rate": rate,
 					}
 				).db_insert()
+			if currency := (currencies or {}).get(idx):
+				frappe.db.set_value("Purchase Order", sco.purchase_order, "currency", currency)
 			if discount := (discounts or {}).get(idx):
 				frappe.db.set_value(
 					"Purchase Order",
@@ -1002,6 +1004,11 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr = self.make_receipt_of_two_orders(
 			taxes={0: [10], 1: [10]}, cost_centers=("Main - _TC", "_Test Cost Center - _TC")
 		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def test_receipt_refuses_orders_in_different_currencies(self):
+		scr = self.make_receipt_of_two_orders(currencies={1: "USD"})
 
 		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
 

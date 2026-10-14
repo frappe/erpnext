@@ -1050,7 +1050,7 @@ def get_purchase_orders(scr_doc) -> list[str]:
 
 
 def can_combine_purchase_orders(purchase_orders: list[str]) -> bool:
-	"""One Purchase Receipt carries one set of rate-based taxes and one header discount."""
+	"""One Purchase Receipt carries one currency, one set of rate-based taxes and one header discount."""
 	if len(purchase_orders) < 2:
 		return True
 
@@ -1083,11 +1083,17 @@ def can_combine_purchase_orders(purchase_orders: list[str]) -> bool:
 		return ()
 
 	terms = {
-		(get_tax_terms(taxes[order.name], key_fields), get_discount(order))
+		(order.currency, get_tax_terms(taxes[order.name], key_fields), get_discount(order))
 		for order in frappe.get_all(
 			"Purchase Order",
 			filters={"name": ["in", purchase_orders]},
-			fields=["name", "apply_discount_on", "additional_discount_percentage", "discount_amount"],
+			fields=[
+				"name",
+				"currency",
+				"apply_discount_on",
+				"additional_discount_percentage",
+				"discount_amount",
+			],
 		)
 	}
 	return len(terms) == 1
@@ -1123,7 +1129,7 @@ def get_charge_key_fields() -> list[str]:
 
 def get_uncombinable_orders_message(purchase_orders: list[str]) -> str:
 	return _(
-		"Purchase Orders {0} have different taxes or discounts, so they cannot share one Purchase Receipt. Make one Subcontracting Receipt for each Purchase Order."
+		"Purchase Orders {0} have different currencies, taxes or discounts, so they cannot share one Purchase Receipt. Make one Subcontracting Receipt for each Purchase Order."
 	).format(comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders]))
 
 
