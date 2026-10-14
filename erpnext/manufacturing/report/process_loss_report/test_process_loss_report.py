@@ -87,10 +87,18 @@ class TestProcessLossReport(ERPNextTestSuite):
 		self.assertEqual(row.produced_qty, 4)
 		self.assertEqual(row.process_loss_qty, 1)
 
-		# total_pl_value = process_loss_qty * (total_fg_value / qty_to_manufacture)
-		expected_pl_value = row.process_loss_qty * (row.total_fg_value / row.qty_to_manufacture)
+		# total_pl_value = process_loss_qty * (total_fg_value / (produced_qty + process_loss_qty))
+		expected_pl_value = row.process_loss_qty * (row.total_fg_value / 5)
 		self.assertAlmostEqual(row.total_pl_value, expected_pl_value)
 		self.assertGreater(row.total_pl_value, 0)
+
+	def test_process_loss_value_for_partial_production(self):
+		wo_order = self.make_manufactured_work_order(planned_qty=10, produced_qty=4, manufacture_qty=5)
+
+		row = self.find_row(self.run_report(), wo_order.name)
+		self.assertEqual(row.qty_to_manufacture, 10)
+		self.assertGreater(row.total_fg_value, 0)
+		self.assertAlmostEqual(row.total_pl_value, row.total_fg_value / 5)
 
 	def test_work_order_without_process_loss_is_not_listed(self):
 		wo_order = self.make_manufactured_work_order(planned_qty=5, produced_qty=5)
