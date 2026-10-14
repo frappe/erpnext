@@ -1,6 +1,9 @@
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, add_months, nowdate
 
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.report.delayed_tasks_summary.delayed_tasks_summary import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -53,3 +56,26 @@ class TestDelayedTasksSummary(ERPNextTestSuite):
 		tasks = {row.name for row in execute(frappe._dict())[1]}
 		self.assertNotIn(cancelled.name, tasks)
 		self.assertNotIn(template.name, tasks)
+
+	def make_delayed_task(self, project):
+		return frappe.get_doc(
+			doctype="Task",
+			subject=f"_Test Delayed {project}",
+			project=project,
+			exp_start_date=add_days(nowdate(), -10),
+			exp_end_date=add_days(nowdate(), -5),
+		).insert()
+
+	def test_restricted_user_sees_only_permitted_tasks(self):
+		permitted = make_project({"project_name": "_Test Delayed Tasks Permitted"}).name
+		other = make_project({"project_name": "_Test Delayed Tasks Other"}).name
+		permitted_task = self.make_delayed_task(permitted)
+		self.make_delayed_task(other)
+		user = create_user("delayed_tasks_restricted@example.com", "Projects User").name
+		add_user_permission("Project", permitted, user)
+
+		with self.set_user(user):
+			_columns, data, _message, chart = execute(frappe._dict())
+
+		self.assertEqual({row.name for row in data}, {permitted_task.name})
+		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), 1)

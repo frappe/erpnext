@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.utils import DateTimeLikeObject, getdate, today
 
 import erpnext
@@ -99,6 +100,8 @@ def get_data(filters, conditions):
 
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"
+
+	cond += get_permission_condition(conditions["trans"])
 
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
@@ -247,6 +250,12 @@ def get_data(filters, conditions):
 		data.append(total_row)
 
 	return data
+
+
+def get_permission_condition(doctype):
+	if match_conditions := build_match_conditions(doctype):
+		return f" and t1.name in (select name from `tab{doctype}` where {match_conditions})"
+	return ""
 
 
 def calculate_total_row(data, columns, company_currency=None):

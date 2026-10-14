@@ -38,6 +38,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "review.procedure",
+   "fetch_if_empty": 1,
    "fieldname": "procedure",
    "fieldtype": "Link",
    "label": "Procedure",
@@ -94,7 +96,7 @@
  "icon": "check-check",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-05 14:52:56.725983",
+ "modified": "2026-10-05 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",

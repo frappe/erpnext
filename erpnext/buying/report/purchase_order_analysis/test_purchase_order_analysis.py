@@ -4,6 +4,8 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
@@ -169,3 +171,19 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 	def test_company_is_mandatory_without_a_default(self):
 		with patch("erpnext.get_default_company", return_value=None):
 			self.assertRaises(frappe.ValidationError, execute, self.get_filters(company=None))
+
+	def test_restricted_user_sees_only_permitted_suppliers(self):
+		create_item(ITEM_CODE)
+		permitted = create_purchase_order(item_code=ITEM_CODE, supplier="_Test Supplier", qty=10, rate=100)
+		other = create_purchase_order(item_code=ITEM_CODE, supplier="_Test Supplier 1", qty=4, rate=250)
+		user = create_user("po_analysis_restricted@example.com", "Purchase User").name
+		add_user_permission("Supplier", "_Test Supplier", user)
+
+		with self.set_user(user):
+			_columns, data, _message, chart = execute(
+				self.get_filters(group_by_item=1, name=[permitted.name, other.name])
+			)
+
+		row = self.get_item_rows(data)[0]
+		self.assertEqual((row["qty"], row["amount"]), (10, 1000))
+		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), 1000)

@@ -297,6 +297,8 @@ def _so_item_columns(so_item):
 		so_item.warehouse,
 		(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
 		so_item.work_order_qty,
+		so_item.stock_qty,
+		so_item.production_plan_qty,
 		so_item.delivered_qty,
 		so_item.conversion_factor,
 		so_item.description,
@@ -310,14 +312,16 @@ def _so_items_filter(so_item, so_list):
 		(so_item.parent.isin(so_list))
 		& (so_item.docstatus == 1)
 		& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
+		& (so_item.stock_qty > so_item.production_plan_qty)
 	)
 
 
 def _set_so_item_pending_qty(items):
 	for item in items:
-		item.pending_qty = flt(item.qty) - max(
+		pending_qty = flt(item.qty) - max(
 			item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
 		)
+		item.pending_qty = min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty))
 
 
 def _so_packed_columns(so_item, pi):

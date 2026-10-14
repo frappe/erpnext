@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.inactive_sales_items.inactive_sales_items import execute
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
@@ -30,3 +31,46 @@ class TestInactiveSalesItems(ERPNextTestSuite):
 	def test_report_runs_for_sales_invoice(self):
 		columns, _data = execute(frappe._dict({"based_on": "Sales Invoice", "days": 30}))
 		self.assertTrue(columns)
+
+	def test_group_territory_includes_sales_of_child_territories(self):
+		item = make_item("_Test Inactive Sales Item Territory").name
+		create_sales_invoice(item=item, qty=1, rate=100)
+
+		data = self.run_report(territory="All Territories")
+
+		self.assertNotIn(item, [row["item"] for row in data])
+
+	def test_auditor_can_run_report_for_group_territory(self):
+		item = make_item("_Test Inactive Sales Item Auditor").name
+		auditor = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test_inactive_sales_auditor@example.com",
+				"first_name": "Auditor",
+				"roles": [{"role": "Auditor"}],
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(auditor.name):
+			data = self.run_report(territory="All Territories")
+
+		self.assertIn(item, [row["item"] for row in data])
+
+	def run_report(self, **filters) -> list[dict]:
+		return execute(frappe._dict(based_on="Sales Invoice", days=30, **filters))[1]
+
+	def test_item_group_includes_child_groups(self):
+		item = make_item("_Test Inactive Sales Item Group", {"item_group": "_Test Item Group"}).name
+
+		data = self.run_report(item_group="All Item Groups")
+
+		self.assertIn(item, [row["item"] for row in data])
+
+	def test_credit_note_is_not_an_order(self):
+		item = make_item("_Test Inactive Sales Item Return").name
+		invoice = create_sales_invoice(item=item, qty=2, rate=100, posting_date=add_days(today(), -100))
+		create_sales_invoice(item=item, qty=-1, rate=100, is_return=1, return_against=invoice.name)
+
+		row = next(row for row in self.run_report(item=item) if row.get("last_order_date"))
+
+		self.assertEqual(row["last_order_date"], getdate(invoice.posting_date))

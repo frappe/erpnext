@@ -13,6 +13,7 @@ import erpnext
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
 	get_invoiced_qty_against_po_items,
 )
+from erpnext.utilities.query import get_match_conditions_qb
 
 
 def execute(filters=None):
@@ -98,6 +99,9 @@ def get_data(filters):
 
 	if filters.get("project"):
 		query = query.where(po_item.project == filters.get("project"))
+
+	for condition in get_match_conditions_qb("Purchase Order", table=po):
+		query = query.where(condition)
 
 	data = query.run(as_dict=True)
 

@@ -11,7 +11,7 @@ are called from other modules.
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime
+from frappe.query_builder.functions import CombineDatetime, Max, Min
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -358,22 +358,23 @@ class OperationsService:
 		# {"TIMESTAMP": [...]} renders MySQL's TIMESTAMP(date, time), invalid on postgres; use the
 		# portable CombineDatetime via query builder instead.
 		se = frappe.qb.DocType("Stock Entry")
+		posting_datetime = CombineDatetime(se.posting_date, se.posting_time)
 		data = (
 			frappe.qb.from_(se)
-			.select(CombineDatetime(se.posting_date, se.posting_time).as_("posting_datetime"))
+			.select(Min(posting_datetime).as_("start_date"), Max(posting_datetime).as_("end_date"))
 			.where(
 				(se.work_order == self.doc.name)
+				& (se.docstatus == 1)
 				& (se.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
 			)
 			.run(as_dict=True)
 		)
-		if not data:
-			return
-
-		dates = [d.posting_datetime for d in data]
-		self.doc.db_set("actual_start_date", min(dates))
-		if self.doc.status == "Completed":
-			self.doc.db_set("actual_end_date", max(dates))
+		self.doc.db_set(
+			{
+				"actual_start_date": data[0].start_date,
+				"actual_end_date": data[0].end_date if self.doc.status == "Completed" else None,
+			}
+		)
 
 	def set_lead_time(self):
 		if self.doc.actual_start_date and self.doc.actual_end_date:

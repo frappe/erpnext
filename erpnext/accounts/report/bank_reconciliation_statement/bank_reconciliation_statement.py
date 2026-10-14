@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Field
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt, getdate
@@ -206,6 +206,7 @@ def get_payment_entries(filters):
 def get_purchase_invoices(filters):
 	pi = frappe.qb.DocType("Purchase Invoice")
 	acc = frappe.qb.DocType("Account")
+	paid_amount = get_amount_in_bank_currency(filters, pi.paid_amount, pi.base_paid_amount)
 	return (
 		frappe.qb.from_(pi)
 		.inner_join(acc)
@@ -215,8 +216,8 @@ def get_purchase_invoices(filters):
 			pi.name.as_("payment_entry"),
 			pi.bill_no.as_("reference_no"),
 			pi.posting_date.as_("ref_date"),
-			Case().when(pi.paid_amount < 0, pi.paid_amount * -1).else_(0).as_("debit"),
-			Case().when(pi.paid_amount > 0, pi.paid_amount).else_(0).as_("credit"),
+			Case().when(paid_amount < 0, paid_amount * -1).else_(0).as_("debit"),
+			Case().when(paid_amount > 0, paid_amount).else_(0).as_("credit"),
 			pi.posting_date,
 			pi.supplier.as_("against_account"),
 			pi.clearance_date,
@@ -248,7 +249,7 @@ def get_pos_entries(filters):
 		.select(
 			ConstantColumn("Sales Invoice").as_("payment_document"),
 			si.name.as_("payment_entry"),
-			si_payment.amount.as_("debit"),
+			get_amount_in_bank_currency(filters, si_payment.amount, si_payment.base_amount).as_("debit"),
 			si.posting_date,
 			si.debit_to.as_("against_account"),
 			si_payment.clearance_date,
@@ -306,9 +307,11 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	pe_amount = (
 		frappe.qb.from_(pe)
 		.select(
-			Sum(Case().when(pe.paid_from == filters.account, pe.paid_amount).else_(pe.received_amount)).as_(
-				"amount"
-			),
+			Sum(
+				Case()
+				.when(pe.paid_to == filters.account, pe.received_amount_after_tax)
+				.else_(-pe.paid_amount_after_tax)
+			).as_("amount"),
 		)
 		.where(
 			((pe.paid_from == filters.account) | (pe.paid_to == filters.account))
@@ -325,7 +328,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	pi_amount = (
 		frappe.qb.from_(pi)
 		.select(
-			Sum(pi.paid_amount).as_("amount"),
+			Sum(-get_amount_in_bank_currency(filters, pi.paid_amount, pi.base_paid_amount)).as_("amount"),
 		)
 		.where(
 			(pi.docstatus == 1)
@@ -340,6 +343,13 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 	pi_amount = flt(pi_amount[0].amount) if pi_amount else 0.0
 
 	return je_amount + pe_amount + pi_amount
+
+
+def get_amount_in_bank_currency(filters: dict, amount: Field, base_amount: Field) -> Field:
+	"""Invoice amount as posted to the bank: the base amount when the bank is in company currency."""
+	bank_currency = frappe.get_cached_value("Account", filters.account, "account_currency")
+	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	return base_amount if bank_currency == company_currency else amount
 
 
 def get_balance_row(label, amount, account_currency):

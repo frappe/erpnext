@@ -34,5 +34,10 @@ frappe.query_reports["Procurement Tracker"] = {
 			fieldtype: "Date",
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 		},
+		{
+			fieldname: "show_completed_orders",
+			label: __("Show Completed Orders"),
+			fieldtype: "Check",
+		},
 	],
 };

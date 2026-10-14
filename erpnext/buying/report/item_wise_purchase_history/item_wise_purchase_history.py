@@ -6,6 +6,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.utilities.query import get_match_conditions_qb
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -246,6 +248,9 @@ def get_purchase_order_details(company_list, filters):
 
 	if filters.get("supplier"):
 		query = query.where(db_po.supplier == filters.supplier)
+
+	for condition in get_match_conditions_qb("Purchase Order", table=db_po):
+		query = query.where(condition)
 
 	return query.run(as_dict=1)
 

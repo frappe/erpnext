@@ -9,6 +9,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -24,6 +25,24 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			item_code="Self RM", qty=100, to_warehouse="Stores - _TC", purpose="Material Receipt"
 		)
 		return super().setUp()
+
+	def test_service_item_in_a_larger_uom_can_be_fully_subcontracted(self):
+		item_list = [
+			{
+				"item_code": "Service Item 1",
+				"qty": 1,
+				"uom": "Box",
+				"conversion_factor": 12,
+				"fg_item": "Basic FG Item",
+				"fg_item_qty": 12,
+			}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.submit()
+
+		self.assertEqual(scio.items[0].qty, 12)
 
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
@@ -151,6 +170,93 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertTrue(
 			next((item for item in scio.received_items if item.rm_item_code == "Basic RM 2"), None)
+		)
+
+	def test_stock_user_can_receive_extra_customer_provided_item(self):
+		so, scio = create_so_scio()
+		stock_user = make_fenced_user("scio-extra-stock@example.com", ["Stock User", "Stock Manager"])
+
+		with as_user(stock_user):
+			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			for item in rm_in.items:
+				item.basic_rate = 10
+			rm_in.append(
+				"items",
+				{
+					"item_code": "Basic RM 2",
+					"qty": 5,
+					"t_warehouse": rm_in.items[0].t_warehouse,
+					"basic_rate": 10,
+					"against_fg": scio.items[0].name,
+				},
+			)
+			rm_in.insert()
+			rm_in.submit()
+
+		scio.reload()
+		self.assertTrue(
+			next((item for item in scio.received_items if item.rm_item_code == "Basic RM 2"), None)
+		)
+
+	def test_stock_user_can_cancel_receipt_of_extra_customer_provided_item(self):
+		so, scio = create_so_scio()
+		stock_user = make_fenced_user("scio-extra-cancel@example.com", ["Stock User"])
+
+		with as_user(stock_user):
+			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			for item in rm_in.items:
+				item.basic_rate = 10
+			rm_in.append(
+				"items",
+				{
+					"item_code": "Basic RM 2",
+					"qty": 5,
+					"t_warehouse": rm_in.items[0].t_warehouse,
+					"basic_rate": 10,
+					"against_fg": scio.items[0].name,
+				},
+			)
+			rm_in.insert()
+			rm_in.submit()
+			rm_in.cancel()
+
+		scio.reload()
+		self.assertFalse(
+			next((item for item in scio.received_items if item.rm_item_code == "Basic RM 2"), None)
+		)
+
+	def test_manufacturing_user_can_manufacture_with_extra_own_item(self):
+		make_stock_entry(
+			item_code="Self RM 2", qty=5, to_warehouse="Stores - _TC", purpose="Material Receipt"
+		)
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		next(
+			item for item in wo.required_items if item.item_code == "Self RM"
+		).source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacturing_user = make_fenced_user(
+			"scio-extra-manufacturing@example.com", ["Manufacturing User", "Stock User"]
+		)
+
+		with as_user(manufacturing_user):
+			manufacture = frappe.new_doc("Stock Entry").update(
+				make_stock_entry_from_wo(wo.name, "Manufacture")
+			)
+			manufacture.append(
+				"items",
+				{"item_code": "Self RM 2", "qty": 5, "s_warehouse": "Stores - _TC", "basic_rate": 10},
+			)
+			manufacture.insert()
+			manufacture.submit()
+
+		scio.reload()
+		self.assertTrue(
+			next((item for item in scio.received_items if item.rm_item_code == "Self RM 2"), None)
 		)
 
 	def test_add_extra_item_during_manufacture(self):
@@ -632,6 +738,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(basic_rm.work_order_qty, 2)
 		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
 		self.assertEqual(reserved_qty[basic_rm.name], 3)
+
+	def test_cancel_closed_work_order_releases_inward_allocation_once(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		close_work_order(wo.name, "Closed")
+		wo.reload()
+		wo.cancel()
+
+		scio.reload()
+		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
+		self.assertEqual(basic_rm.work_order_qty, 0)
 
 	def test_rm_return_skips_own_materials(self):
 		so, scio = create_so_scio()

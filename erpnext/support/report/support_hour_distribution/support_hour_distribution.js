@@ -17,5 +17,11 @@ frappe.query_reports["Support Hour Distribution"] = {
 			default: frappe.datetime.nowdate(),
 			reqd: 1,
 		},
+		{
+			label: __("Company"),
+			fieldname: "company",
+			fieldtype: "Link",
+			options: "Company",
+		},
 	],
 };

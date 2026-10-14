@@ -185,15 +185,13 @@ class StatusService:
 		return flt(self.doc.qty, precision) > flt(total_qty, precision)
 
 	def _reservation_status(self, status):
-		for row in self.doc.required_items:
-			if not row.stock_reserved_qty:
-				continue
+		if not any(row.stock_reserved_qty for row in self.doc.required_items):
+			return status
 
-			if row.stock_reserved_qty >= row.required_qty:
-				status = "Stock Reserved"
-			else:
-				return "Stock Partially Reserved"
-		return status
+		if any(row.stock_reserved_qty < row.required_qty for row in self.doc.required_items):
+			return "Stock Partially Reserved"
+
+		return "Stock Reserved"
 
 	def update_work_order_qty(self):
 		"""Update Manufactured Qty and Material Transferred for Qty based on Stock Entry"""
@@ -270,11 +268,12 @@ class StatusService:
 			update_produced_qty_in_so_item(self.doc.sales_order, self.doc.sales_order_item)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		precision = self.doc.precision("disassembled_qty")
 		if is_cancel:
-			self.doc.disassembled_qty = max(0, self.doc.disassembled_qty - qty)
+			self.doc.disassembled_qty = max(0, flt(self.doc.disassembled_qty - qty, precision))
 		else:
 			if self.doc.docstatus == 1:
-				self.doc.disassembled_qty += qty
+				self.doc.disassembled_qty = flt(self.doc.disassembled_qty + qty, precision)
 
 		if not is_cancel and self.doc.disassembled_qty > self.doc.produced_qty:
 			frappe.throw(_("Cannot disassemble more than produced quantity."))
@@ -371,23 +370,15 @@ class StatusService:
 		if self.doc.track_semi_finished_goods:
 			return
 
-		update_bin_qty(self.doc.production_item, self.doc.fg_warehouse, self._planned_qty_dict())
+		update_bin_qty(
+			self.doc.production_item,
+			self.doc.fg_warehouse,
+			{"planned_qty": get_planned_qty(self.doc.production_item, self.doc.fg_warehouse)},
+		)
 
 		if self.doc.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.doc.material_request)
 			mr_obj.update_requested_qty([self.doc.material_request_item])
-
-	def _planned_qty_dict(self):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_reserved_qty_for_sub_assembly,
-		)
-
-		qty_dict = {"planned_qty": get_planned_qty(self.doc.production_item, self.doc.fg_warehouse)}
-		if self.doc.production_plan_sub_assembly_item and self.doc.production_plan:
-			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
-				self.doc.production_item, self.doc.fg_warehouse
-			)
-		return qty_dict
 
 	def set_produced_qty_for_sub_assembly_item(self):
 		produced_qty = self._sub_assembly_produced_qty()
@@ -428,7 +419,7 @@ class StatusService:
 		doc = frappe.get_doc("Production Plan", self.doc.production_plan)
 		doc.flags.ignore_permissions = True
 		doc.update_status_and_bin_qty()
-		doc.update_raw_material_bin_qty({d.item_code for d in self.doc.required_items})
+		doc.update_bin_qty({d.item_code for d in self.doc.required_items})
 
 	def _production_plan_ordered_qty(self):
 		table = frappe.qb.DocType("Work Order")

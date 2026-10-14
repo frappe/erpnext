@@ -314,6 +314,42 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+	def test_parent_task_must_be_in_the_same_project(self):
+		other_project = frappe.get_doc(
+			doctype="Project", project_name="_Test Parent Task Project", company="_Test Company"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Other Project Group", project=other_project.name, is_group=1
+		).insert()
+
+		child_task = create_task("_Test Child In Another Project", parent_task=group.name, save=False)
+		self.assertRaises(frappe.ValidationError, child_task.save)
+
+		child_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group.name
+		).insert()
+		self.assertEqual(child_without_project.project, other_project.name)
+
+	def test_group_with_children_cannot_move_to_another_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		group = create_task("_Test Group Moving Project", is_group=1)
+		create_task("_Test Child Of Group Moving Project", parent_task=group.name)
+		group.reload()
+
+		group.project = make_project({"project_name": "_Test Project Group Target"}).name
+		self.assertRaises(frappe.ValidationError, group.save)
+
+		group_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Group Without Project", is_group=1
+		).insert()
+		frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group_without_project.name
+		).insert()
+		group_without_project.reload()
+		group_without_project.project = group.project
+		self.assertRaises(frappe.ValidationError, group_without_project.save)
+
 	def test_open_task_under_completed_parent(self):
 		parent = create_task("_Test Completed Parent", is_group=1)
 		parent.status = "Completed"
@@ -429,6 +465,29 @@ class TestTask(ERPNextTestSuite):
 			frappe.get_all("Task Depends On", filters={"parent": new_parent.name}, pluck="task"), [child.name]
 		)
 
+	def test_moving_child_out_does_not_reschedule_old_parent(self):
+		group = create_task("_Test Group Left By Child", nowdate(), add_days(nowdate(), 19), is_group=1)
+		child = create_task(
+			"_Test Child Leaving Group",
+			add_days(nowdate(), 4),
+			add_days(nowdate(), 9),
+			parent_task=group.name,
+		)
+		dependent = create_task(
+			"_Test Task After Left Group", add_days(nowdate(), 20), add_days(nowdate(), 21), group.name
+		)
+
+		child.parent_task = None
+		child.save()
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", group.name, "exp_end_date")), getdate(add_days(nowdate(), 19))
+		)
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 20)),
+		)
+
 	def test_child_task_registers_in_parent_depends_on(self):
 		parent = create_task("_Test Parent Depends On", is_group=1)
 		child = create_task("_Test Child Depends On", parent_task=parent.name)
@@ -442,16 +501,45 @@ class TestTask(ERPNextTestSuite):
 		from erpnext.projects.doctype.project.test_project import make_project
 
 		parent = create_task("_Test Parent In Restricted Project", is_group=1)
-		child = create_task("_Test Child In Permitted Project", parent_task=parent.name, save=False)
-		child.project = make_project({"project_name": "_Test Project Child Only"}).name
-		child.save()
+		child = create_task("_Test Child In Permitted Project", parent_task=parent.name)
+		child_project = make_project({"project_name": "_Test Project Child Only"}).name
+		frappe.db.set_value("Task", child.name, "project", child_project)
 		user = create_user("test_task_child_deleter@example.com", "Projects User")
-		frappe.permissions.add_user_permission("Project", child.project, user.name)
+		frappe.permissions.add_user_permission("Project", child_project, user.name)
 
 		with self.set_user(user.name):
 			frappe.delete_doc("Task", child.name)
 
 		self.assertFalse(frappe.db.exists("Task", child.name))
+
+	def test_child_tasks_are_listed_only_for_a_readable_task(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+		from erpnext.projects.doctype.task.task import check_if_child_exists
+
+		group = create_task("_Test Group Hidden From User", is_group=1)
+		create_task("_Test Child Hidden From User", parent_task=group.name)
+		user = create_user("test_task_child_lister@example.com", "Projects User")
+		other_project = make_project({"project_name": "_Test Project Child Lister"}).name
+		frappe.permissions.add_user_permission("Project", other_project, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, check_if_child_exists, group.name)
+
+	def test_root_tasks_are_not_listed_as_children_of_an_empty_name(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+		from erpnext.projects.doctype.task.task import check_if_child_exists
+
+		create_task("_Test Root Hidden From User")
+		user = create_user("test_task_root_lister@example.com", "Projects User")
+		other_project = make_project({"project_name": "_Test Project Root Lister"}).name
+		frappe.permissions.add_user_permission("Project", other_project, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.DoesNotExistError, check_if_child_exists, "")
 
 
 def create_task(
