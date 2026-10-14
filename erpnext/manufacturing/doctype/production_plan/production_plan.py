@@ -527,7 +527,18 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def make_work_order(self):
+		self.validate_plan_is_open()
 		return WorkOrderCreationService(self).make_work_order()
+
+	def validate_plan_is_open(self):
+		status = (
+			frappe.db.get_value("Production Plan", self.name, "status") if not self.is_new() else self.status
+		)
+		if status in ("Closed", "Completed"):
+			frappe.throw(
+				_("Production Plan {0} is {1}").format(frappe.bold(self.name), _(status)),
+				frappe.InvalidStatusError,
+			)
 
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
 		return WorkOrderCreationService(self).make_work_order_for_finished_goods(wo_list, default_warehouses)
@@ -601,6 +612,7 @@ class ProductionPlan(Document):
 			self.load_from_db()
 			self.check_permission("write")
 		self.submit_material_request = submit_material_request
+		self.validate_plan_is_open()
 
 		return MaterialRequestService(self).make_material_request()
 

@@ -1137,6 +1137,17 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual(len(requested), len(plan.mr_items))
 
+	def test_closed_plan_creates_no_documents(self):
+		plan = create_production_plan(
+			item_code="Test Production Item 1", for_warehouse="_Test Warehouse - _TC"
+		)
+		plan.set_status(close=True)
+		plan.reload()
+
+		self.assertRaises(frappe.InvalidStatusError, plan.make_work_order)
+		self.assertRaises(frappe.InvalidStatusError, plan.make_material_request)
+		self.assertFalse(frappe.db.exists("Work Order", {"production_plan": plan.name}))
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
