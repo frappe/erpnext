@@ -249,7 +249,7 @@ frappe.ui.form.on("Job Card", {
 		const excess_transfer_allowed = doc.__onload.job_card_excess_transfer;
 		const to_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
-		const to_request = to_transfer;
+		const to_request = to_transfer && flt(doc.requested_qty) < flt(doc.for_quantity);
 
 		if (has_items && (to_request || excess_transfer_allowed)) {
 			frm.add_custom_button(

@@ -1399,6 +1399,28 @@ class JobCard(Document):
 		transferred_fraction = min(flt(d.transferred_qty) / flt(d.required_qty) for d in items)
 		return flt(transferred_fraction * flt(self.for_quantity), self.precision("transferred_qty"))
 
+	def set_requested_qty(self):
+		mr = frappe.qb.DocType("Material Request")
+		mr_item = frappe.qb.DocType("Material Request Item")
+		requested = frappe._dict(
+			(
+				frappe.qb.from_(mr_item)
+				.inner_join(mr)
+				.on(mr_item.parent == mr.name)
+				.select(mr_item.job_card_item, Sum(mr_item.stock_qty))
+				.where((mr.job_card == self.name) & (mr.docstatus == 1) & (mr.status != "Stopped"))
+				.groupby(mr_item.job_card_item)
+			).run()
+		)
+
+		items = [d for d in self.items if flt(d.required_qty) > 0]
+		requested_fraction = (
+			min(flt(requested.get(d.name)) / flt(d.required_qty) for d in items) if items else 0.0
+		)
+		self.db_set(
+			"requested_qty", flt(requested_fraction * flt(self.for_quantity), self.precision("requested_qty"))
+		)
+
 	def set_transferred_qty_in_work_order(self):
 		doc = frappe.get_doc("Work Order", self.work_order)
 
