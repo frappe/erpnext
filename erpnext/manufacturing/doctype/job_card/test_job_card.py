@@ -3665,6 +3665,55 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		self.assertEqual(operation_cost, 600)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_manufacture_entry_needs_a_submitted_job_card(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		rm_item, fg_item = make_jc_review_item(), make_jc_review_item()
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		bom = frappe.new_doc(
+			"BOM",
+			item=fg_item,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+			company="_Test Company",
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.append(
+			"operations",
+			{
+				"operation": operation,
+				"workstation": workstation,
+				"is_final_finished_good": 1,
+				"skip_material_transfer": 1,
+				"time_in_mins": 60,
+			},
+		)
+		bom.insert()
+		bom.submit()
+
+		wo = make_work_order(bom.name, fg_item, 5, variant_items=[], use_multi_level_bom=0)
+		wo.update(
+			{
+				"company": "_Test Company",
+				"source_warehouse": "_Test Warehouse - _TC",
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"fg_warehouse": "_Test Warehouse 2 - _TC",
+			}
+		)
+		wo.submit()
+
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"before making its Manufacture entry",
+			job_card.make_stock_entry_for_semi_fg_item,
+			True,
+		)
+		self.assertFalse(frappe.db.exists("Stock Entry", {"job_card": job_card.name, "docstatus": 1}))
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

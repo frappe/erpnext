@@ -1763,6 +1763,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if job_card.is_corrective_job_card or job_card.is_subcontracted:
 			return
 
+		if self.docstatus == 1:
+			from erpnext.manufacturing.doctype.job_card.job_card import (
+				validate_job_card_submitted_for_manufacture,
+			)
+
+			validate_job_card_submitted_for_manufacture(job_card)
+
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		pending_qty = flt(
 			flt(job_card.get_qty_to_produce())

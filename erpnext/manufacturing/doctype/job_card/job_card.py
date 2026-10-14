@@ -1854,6 +1854,7 @@ class JobCard(Document):
 	def make_stock_entry_for_semi_fg_item(self, auto_submit: bool = False):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 		frappe.has_permission("Stock Entry", "create", throw=True)
+		validate_job_card_submitted_for_manufacture(self)
 
 		ste = self.build_manufacture_stock_entry()
 		self.populate_manufacture_stock_entry(ste)
@@ -1913,6 +1914,15 @@ class JobCard(Document):
 		for row in ste.stock_entry.items:
 			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
+
+
+def validate_job_card_submitted_for_manufacture(job_card):
+	if job_card.docstatus != 1:
+		frappe.throw(
+			_("Submit Job Card {0} before making its Manufacture entry").format(
+				get_link_to_form("Job Card", job_card.name)
+			)
+		)
 
 
 @frappe.whitelist()
