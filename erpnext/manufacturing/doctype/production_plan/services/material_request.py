@@ -443,8 +443,6 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
 	for sales_order, item_dict in so_item_details.items():
 		for details in item_dict.values():
 			fallback = details.get("source_warehouse") or details.get("default_warehouse")
-			scope_warehouse = scope_warehouse or fallback
-			target_warehouse = target_warehouse or fallback
 			row = _mr_item_for_details(
 				doc,
 				details,
@@ -452,8 +450,8 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
 				company,
 				ignore_ordered_qty,
 				include_safety_stock,
-				scope_warehouse,
-				target_warehouse,
+				scope_warehouse or fallback,
+				target_warehouse or fallback,
 				consumed_qty,
 				is_transfer,
 			)

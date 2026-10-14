@@ -912,6 +912,29 @@ class TestProductionPlan(ERPNextTestSuite):
 		third.get_pending_material_requests()
 		self.assertNotIn(request.name, [row.material_request for row in third.material_requests])
 
+	def test_raw_materials_keep_their_own_default_warehouse(self):
+		warehouses = {
+			"_Test PP Default WH RM 1": "Stores - _TC",
+			"_Test PP Default WH RM 2": "Finished Goods - _TC",
+		}
+		for item_code, warehouse in warehouses.items():
+			make_item(
+				item_code,
+				{
+					"is_stock_item": 1,
+					"item_defaults": [{"company": "_Test Company", "default_warehouse": warehouse}],
+				},
+			)
+		fg_item = make_item("_Test PP Default WH FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=list(warehouses), currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual({row.get("item_code"): row.get("warehouse") for row in items}, warehouses)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
