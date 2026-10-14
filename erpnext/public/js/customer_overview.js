@@ -102,6 +102,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.companies_ready = false;
 		this.list = null;
 		this.destroy_trend();
+		this.destroy_credit_chart();
 	}
 
 	build_header() {
@@ -451,6 +452,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	render_receivables() {
+		this.destroy_credit_chart();
 		this.$charts.empty().toggle(!!this.accounts && !this.ar?.none);
 		if (!this.accounts || this.ar?.none) return;
 		this.render_ageing();
@@ -519,33 +521,44 @@ erpnext.CustomerOverview = class CustomerOverview {
 			this.empty_note($panel, __("Credit usage is unavailable with your permissions."), 180);
 			return;
 		}
-		const $body = limit ? this.credit_donut(data, limit, used) : this.credit_empty(can_edit);
-		$body.appendTo($panel);
+		if (!limit) {
+			this.credit_empty(can_edit).appendTo($panel);
+			return;
+		}
+		this.credit_donut($panel, data, limit, used);
 	}
 
-	credit_donut(data, limit, used) {
+	credit_donut($panel, data, limit, used) {
 		const receivable = Math.min(Math.max(flt(data.outstanding.value), 0), used);
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
-		const donut = frappe.ui.donut({
-			segments: [
-				{ label: __("Overdue"), value: overdue, color: "var(--blue-600)" },
-				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
-				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--green-400)" },
-				{ label: __("Available"), value: Math.max(limit - used, 0), color: "var(--green-600)" },
-			],
-			center: {
-				value: flt((used / limit) * 100, 1) + "%",
-				label: __("used"),
+		const segments = [
+			{ label: __("Overdue"), value: overdue, color: "var(--blue-600)" },
+			{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
+			{ label: __("Unbilled orders"), value: used - receivable, color: "var(--green-400)" },
+			{ label: __("Available"), value: Math.max(limit - used, 0), color: "var(--green-600)" },
+		].filter((s) => s.value > 0);
+		const $chart = $('<div class="co-chart">').appendTo($panel);
+		this.credit_chart = new frappe.Chart($chart[0], {
+			type: "donut",
+			height: 320,
+			data: {
+				labels: segments.map((s) => s.label),
+				datasets: [{ values: segments.map((s) => s.value) }],
 			},
-			format: (v) => this.short_money(v),
+			colors: segments.map((s) => s.color),
+			center: { value: flt((used / limit) * 100, 1) + "%", label: __("used") },
+			tooltipOptions: { formatTooltipY: (v) => this.short_money(v) },
 		});
-		const $chart = $('<div class="co-chart">').append(donut);
 		if (used > limit) {
 			$('<div class="text-ink-red-7">')
 				.text(__("Over credit limit by {0}", [this.money0(used - limit)]))
 				.appendTo($chart);
 		}
-		return $chart;
+	}
+
+	destroy_credit_chart() {
+		if (this.credit_chart) this.credit_chart.destroy();
+		this.credit_chart = null;
 	}
 
 	credit_empty(can_edit) {

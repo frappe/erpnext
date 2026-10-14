@@ -5,6 +5,7 @@ import re
 from typing import TYPE_CHECKING
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import escape_html
 
@@ -31,9 +32,22 @@ class CodeList(Document):
 		version: DF.Data | None
 	# end: auto-generated types
 
+	def validate(self):
+		self.validate_default_common_code()
+
+	def validate_default_common_code(self):
+		if not self.default_common_code:
+			return
+
+		if frappe.db.get_value("Common Code", self.default_common_code, "code_list") != self.name:
+			frappe.throw(
+				_("Default Common Code {0} does not belong to Code List {1}").format(
+					frappe.bold(self.default_common_code), frappe.bold(self.name)
+				)
+			)
+
 	def on_trash(self):
-		if not frappe.flags.in_bulk_delete:
-			self.__delete_linked_docs()
+		self.__delete_linked_docs()
 
 	def __delete_linked_docs(self):
 		self.db_set("default_common_code", None)
@@ -65,9 +79,9 @@ class CodeList(Document):
 
 	def from_genericode(self, root: "Element"):
 		"""Extract Code List details from genericode XML"""
-		self.title = escape_html(root.find(".//Identification/ShortName").text)
-		self.version = root.find(".//Identification/Version").text
-		self.canonical_uri = root.find(".//CanonicalUri").text
+		self.title = escape_html(get_required_text(root, ".//Identification/ShortName"))
+		self.version = get_required_text(root, ".//Identification/Version")
+		self.canonical_uri = get_required_text(root, ".//CanonicalUri")
 		# optionals
 		self.description = escape_html(getattr(root.find(".//Identification/LongName"), "text", None))
 		self.publisher = escape_html(getattr(root.find(".//Identification/Agency/ShortName"), "text", None))
@@ -77,6 +91,18 @@ class CodeList(Document):
 			)
 		self.publisher_id = getattr(root.find(".//Identification/Agency/Identifier"), "text", None)
 		self.url = getattr(root.find(".//Identification/LocationUri"), "text", None)
+
+
+def get_required_text(root: "Element", path: str) -> str | None:
+	"""Return the text of a required genericode element, refusing files without it."""
+	element = root.find(path)
+	if element is None:
+		frappe.throw(
+			_("The uploaded genericode file has no {0} element.").format(path.split("/")[-1]),
+			title=_("Parsing Error"),
+		)
+
+	return element.text
 
 
 def _version_key(version: str | None) -> list:
