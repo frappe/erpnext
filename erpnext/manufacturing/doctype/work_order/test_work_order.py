@@ -6730,6 +6730,31 @@ class TestWorkOrder(ERPNextTestSuite):
 			[frappe.db.get_value("Sales Order Item", row.name, "work_order_qty") for row in so.items], [5, 3]
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_multi_level_operation_time_with_batch_size(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+		batch_operation = [
+			{"operation": operation, "workstation": workstation, "time_in_mins": 60, "batch_size": 10}
+		]
+		sub_assembly_bom = make_review_bom(
+			sub_assembly, [{"item_code": rm_item, "qty": 1}], operations=batch_operation
+		)
+		fg_bom = make_review_bom(
+			fg_item,
+			[{"item_code": sub_assembly, "qty": 2, "bom_no": sub_assembly_bom.name}],
+			operations=batch_operation,
+		)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 10, submit=False, use_multi_level_bom=1)
+		self.assertEqual(
+			[(row.bom, row.time_in_mins) for row in wo.operations],
+			[(sub_assembly_bom.name, 120), (fg_bom.name, 60)],
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""

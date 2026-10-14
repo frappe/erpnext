@@ -259,18 +259,18 @@ class OperationsService:
 			for node in reversed(bom_tree.level_order_traversal()):
 				if node.is_bom:
 					qty = node.exploded_qty / node.bom_qty
-					groups.append((self._bom_operations(node.name), qty, True))
+					groups.append((self._bom_operations(node.name), qty, node.exploded_qty, True))
 
 		bom_qty = frappe.get_cached_value("BOM", self.doc.bom_no, "quantity")
-		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, False))
+		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, 1, False))
 
-		all_rows = [d for rows, qty, exploded in groups for d in rows]
+		all_rows = [d for rows, _qty, _units, _exploded in groups for d in rows]
 		batch_size_flags = self._get_batch_size_flags(d.operation for d in all_rows)
 
 		operations = []
-		for rows, qty, exploded in groups:
+		for rows, qty, units, exploded in groups:
 			for d in rows:
-				self._adjust_operation_row(d, qty, exploded, batch_size_flags)
+				self._adjust_operation_row(d, qty, units, exploded, batch_size_flags)
 				operations.append(d)
 		return operations
 
@@ -293,11 +293,9 @@ class OperationsService:
 			)
 		)
 
-	def _adjust_operation_row(self, d, qty, exploded, batch_size_flags):
+	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
 		if not d.fixed_time:
-			if batch_size_flags.get(d.operation):
-				qty = d.batch_size
-			d.time_in_mins = d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
+			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 		d.status = "Pending"
 		if self.doc.track_semi_finished_goods and not d.sequence_id:
@@ -405,6 +403,12 @@ class OperationsService:
 			self.doc.lead_time = flt(
 				time_diff_in_hours(self.doc.actual_end_date, self.doc.actual_start_date) * 60
 			)
+
+
+def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
+	if batch_size_flags.get(d.operation) and flt(d.batch_size):
+		return d.time_in_mins * flt(units) / flt(d.batch_size)
+	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
 
 
 @frappe.request_cache
