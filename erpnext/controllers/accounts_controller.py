@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
+from frappe.automation.doctype.auto_repeat.auto_repeat import month_map
 from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
@@ -17,13 +18,13 @@ from frappe.utils import (
 	cint,
 	comma_and,
 	cstr,
+	date_diff,
 	flt,
 	fmt_money,
 	formatdate,
 	get_last_day,
 	get_link_to_form,
 	getdate,
-	nowdate,
 	parse_json,
 	today,
 )
@@ -70,11 +71,11 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
+	_get_item_details,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_bin_details,
 	get_conversion_factor,
-	get_item_details,
 	get_item_tax_map,
 	get_item_warehouse,
 )
@@ -106,6 +107,16 @@ force_item_fields = (
 	"total_weight",
 	"valuation_rate",
 )
+
+
+COUNTERPART_REFERENCE = {
+	"Sales Invoice": ("inter_company_invoice_reference", "Purchase Invoice"),
+	"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
+	"Sales Order": ("inter_company_order_reference", "Purchase Order"),
+	"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+	"Delivery Note": ("inter_company_reference", "Purchase Receipt"),
+	"Purchase Receipt": ("inter_company_reference", "Delivery Note"),
+}
 
 
 class AccountsController(TransactionBase):
@@ -181,24 +192,39 @@ class AccountsController(TransactionBase):
 			self.remove_serial_and_batch_bundle()
 
 	def ensure_supplier_is_not_blocked(self):
-		is_supplier_payment = self.doctype == "Payment Entry" and self.party_type == "Supplier"
-		is_buying_invoice = self.doctype in ["Purchase Invoice", "Purchase Order"]
-		supplier = None
-		supplier_name = None
+		if self.meta.has_field("is_return") and self.is_return:
+			return
 
-		if is_buying_invoice or is_supplier_payment:
-			supplier_name = self.supplier if is_buying_invoice else self.party
-			supplier = frappe.get_doc("Supplier", supplier_name)
+		hold_type, suppliers = self.get_supplier_hold_scope()
+		for supplier in {supplier for supplier in suppliers if supplier}:
+			if frappe.get_lazy_doc("Supplier", supplier).is_blocked_for(hold_type):
+				frappe.msgprint(
+					_("{0} is blocked so this transaction cannot proceed").format(supplier),
+					raise_exception=1,
+				)
 
-		if supplier and supplier_name and supplier.on_hold:
-			if (is_buying_invoice and supplier.hold_type in ["All", "Invoices"]) or (
-				is_supplier_payment and supplier.hold_type in ["All", "Payments"]
-			):
-				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
-					frappe.msgprint(
-						_("{0} is blocked so this transaction cannot proceed").format(supplier_name),
-						raise_exception=1,
-					)
+	def get_supplier_hold_scope(self) -> tuple[str | None, list[str]]:
+		"""Return the Hold Type that blocks this document and the suppliers it applies to."""
+		if self.doctype in ("Purchase Order", "Purchase Invoice"):
+			return "Invoices", [self.supplier]
+		if self.doctype in ("Purchase Receipt", "Supplier Quotation"):
+			return "All", [self.supplier]
+		if self.doctype == "Request for Quotation":
+			return "All", [row.supplier for row in self.suppliers]
+		if self.doctype == "Payment Entry" and self.party_type == "Supplier":
+			return "Payments", [self.party]
+		if self.doctype == "Journal Entry" and any(
+			flt(row.credit_in_account_currency) - flt(row.debit_in_account_currency) > 0
+			and frappe.get_cached_value("Account", row.account, "account_type") in ("Bank", "Cash")
+			for row in self.accounts
+		):
+			return "Payments", [
+				row.party
+				for row in self.accounts
+				if row.party_type == "Supplier"
+				and flt(row.debit_in_account_currency) - flt(row.credit_in_account_currency) > 0
+			]
+		return None, []
 
 	def validate_against_voucher_outstanding(self):
 		from frappe.model.meta import get_meta
@@ -272,6 +298,7 @@ class AccountsController(TransactionBase):
 				self.validate_deferred_start_and_end_date()
 
 		self.validate_inter_company_reference()
+		self.validate_inter_company_currency()
 		# validate inter  company transaction rate
 		self.validate_internal_transaction()
 
@@ -771,6 +798,52 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
 			self.validate_non_invoice_documents_schedule()
 
+	def shift_service_dates(self, reference_doc, auto_repeat_doc):
+		"""Move item service dates into the new invoice period (used by Auto Repeat)."""
+		if not (self.from_date and self.to_date and reference_doc.from_date and reference_doc.to_date):
+			return
+
+		from_date = getdate(self.from_date)
+		reference_from_date = getdate(reference_doc.from_date)
+		months = (
+			(from_date.year - reference_from_date.year) * 12 + from_date.month - reference_from_date.month
+		)
+		days = date_diff(from_date, reference_from_date)
+		shift_by_months = auto_repeat_doc.frequency in month_map
+
+		reference_to_date = getdate(reference_doc.to_date)
+		to_date = getdate(self.to_date)
+
+		def shift(date):
+			# Keep the period end aligned, e.g. 1-28 Feb becomes 1-31 Mar.
+			if getdate(date) == reference_to_date:
+				return to_date
+			if not shift_by_months:
+				return add_days(date, days)
+			# Whole months never reverse a period, e.g. 29-31 Jan becomes 28-28 Feb.
+			shifted_date = getdate(add_months(date, months))
+			# Month ends stay month ends, e.g. 1-28 Feb becomes 1-31 Mar.
+			if getdate(date) == get_last_day(date):
+				shifted_date = get_last_day(shifted_date)
+			# Dates inside the reference period stay inside the new period, which can end earlier in the month.
+			if getdate(date) < reference_to_date:
+				return min(shifted_date, to_date)
+			return shifted_date
+
+		for item, reference_item in zip(self.items, reference_doc.items, strict=True):
+			if reference_item.service_start_date:
+				item.service_start_date = shift(reference_item.service_start_date)
+			if reference_item.service_end_date:
+				item.service_end_date = shift(reference_item.service_end_date)
+			# The new period can end later in the month, e.g. 30 Jan-26 Feb becomes 27 Feb-29 Mar.
+			# A start date moved to the period end can then pass the end date, so move the end date after it.
+			if (
+				item.service_start_date
+				and item.service_end_date
+				and getdate(item.service_end_date) < getdate(item.service_start_date)
+			):
+				item.service_end_date = add_days(to_date, 1)
+
 	def before_print(self, settings=None):
 		self.set_missing_terms()
 
@@ -919,6 +992,23 @@ class AccountsController(TransactionBase):
 				if not row.get(field):
 					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
 					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
+
+	def validate_inter_company_currency(self):
+		if self.doctype not in COUNTERPART_REFERENCE:
+			return
+
+		reference_field, counterpart_doctype = COUNTERPART_REFERENCE[self.doctype]
+		counterpart = self.get(reference_field)
+		if not counterpart:
+			return
+
+		currency = frappe.db.get_value(counterpart_doctype, counterpart, "currency")
+		if currency and self.currency != currency:
+			frappe.throw(
+				_("Currency must be {0} to match {1} {2}").format(
+					bold(currency), counterpart_doctype, bold(counterpart)
+				)
+			)
 
 	def validate_internal_transaction(self):
 		if not cint(
@@ -1090,17 +1180,6 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
-			if (
-				self.currency
-				and buying_or_selling == "Buying"
-				and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
-				and self.doctype == "Purchase Invoice"
-			):
-				self.use_transaction_date_exchange_rate = True
-				self.conversion_rate = get_exchange_rate(
-					self.currency, self.company_currency, transaction_date, args
-				)
-
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1143,7 +1222,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+					ret = _get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -4075,6 +4154,14 @@ def update_child_qty_rate(
 				title=_("Insufficient Permissions"),
 			)
 
+	def validate_parent_status(doc):
+		if doc.doctype == "Purchase Order" and doc.status in ("Closed", "On Hold", "Delivered"):
+			frappe.throw(
+				_("Cannot update items of Purchase Order {0} because it is {1}.").format(
+					doc.name, _(doc.status)
+				)
+			)
+
 	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
@@ -4154,6 +4241,23 @@ def update_child_qty_rate(
 				if flt(new_data.get("qty")) < qty_to_check:
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
+	def validate_uom_unchanged_after_fulfilment(child_item, new_data):
+		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
+			parent_doctype
+		)
+		if not fulfilled_qty_field or not flt(child_item.get(fulfilled_qty_field)):
+			return
+
+		uom_changed = new_data.get("uom") not in (None, child_item.uom)
+		factor_changed = flt(new_data.get("conversion_factor")) not in (0, flt(child_item.conversion_factor))
+		if uom_changed or factor_changed:
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
+				).format(child_item.idx, frappe.bold(child_item.item_code)),
+				title=_("Invalid UOM"),
+			)
+
 	def should_update_supplied_items(doc) -> bool:
 		"""Subcontracted PO can allow following changes *after submit*:
 
@@ -4201,13 +4305,16 @@ def update_child_qty_rate(
 	any_conversion_factor_changed = False
 
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+	rfqs_before_update = set()
 
 	check_doc_permissions(parent, "write")
+	validate_parent_status(parent)
 
 	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, ordered_items)
 	elif parent_doctype == "Supplier Quotation":
+		rfqs_before_update = parent.get_request_for_quotations()
 		purchased_items = get_purchased_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, purchased_items)
 	else:
@@ -4267,6 +4374,8 @@ def update_child_qty_rate(
 				continue
 
 		validate_quantity_and_rate(child_item, d)
+		if not new_child_flag:
+			validate_uom_unchanged_after_fulfilment(child_item, d)
 
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True
@@ -4430,6 +4539,9 @@ def update_child_qty_rate(
 		parent.update_project()
 		parent.update_prevdoc_status("submit")
 		parent.update_delivery_status()
+
+	elif parent_doctype == "Supplier Quotation":
+		parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), rfqs_before_update)
 
 	parent.reload()
 	validate_workflow_conditions(parent)

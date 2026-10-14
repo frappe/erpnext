@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import CombineDatetime, Max, Min, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -519,11 +519,12 @@ class WorkOrder(Document):
 			self.update_production_plan_status()
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		precision = self.precision("disassembled_qty")
 		if is_cancel:
-			self.disassembled_qty = max(0, self.disassembled_qty - qty)
+			self.disassembled_qty = max(0, flt(self.disassembled_qty - qty, precision))
 		else:
 			if self.docstatus == 1:
-				self.disassembled_qty += qty
+				self.disassembled_qty = flt(self.disassembled_qty + qty, precision)
 
 		if not is_cancel and self.disassembled_qty > self.produced_qty:
 			frappe.throw(_("Cannot disassemble more than produced quantity."))
@@ -1089,21 +1090,24 @@ class WorkOrder(Document):
 			if actual_end_dates:
 				self.actual_end_date = max(actual_end_dates)
 		else:
-			data = frappe.get_all(
-				"Stock Entry",
-				fields=["timestamp(posting_date, posting_time) as posting_datetime"],
-				filters={
-					"work_order": self.name,
-					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
-				},
+			stock_entry = frappe.qb.DocType("Stock Entry")
+			posting_datetime = CombineDatetime(stock_entry.posting_date, stock_entry.posting_time)
+			data = (
+				frappe.qb.from_(stock_entry)
+				.select(Min(posting_datetime).as_("start_date"), Max(posting_datetime).as_("end_date"))
+				.where(
+					(stock_entry.work_order == self.name)
+					& (stock_entry.docstatus == 1)
+					& (stock_entry.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
+				)
+				.run(as_dict=True)
 			)
-
-			if data and len(data):
-				dates = [d.posting_datetime for d in data]
-				self.db_set("actual_start_date", min(dates))
-
-				if self.status == "Completed":
-					self.db_set("actual_end_date", max(dates))
+			self.db_set(
+				{
+					"actual_start_date": data[0].start_date,
+					"actual_end_date": data[0].end_date if self.status == "Completed" else None,
+				}
+			)
 
 		self.set_lead_time()
 
@@ -1390,8 +1394,8 @@ class WorkOrder(Document):
 						AND entry.docstatus = 1
 						AND detail.parent = entry.name
 						AND detail.s_warehouse IS NOT null
-						AND (detail.item_code = %(item)s
-							OR detail.original_item = %(item)s)
+						AND (detail.original_item = %(item)s
+							OR (IFNULL(detail.original_item, '') = '' AND detail.item_code = %(item)s))
 				""",
 				{"name": self.name, "item": item.item_code},
 			)[0][0]
@@ -1693,7 +1697,10 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 		frappe.db.get_value("Stock Entry", filters, "sum(fg_completed_qty)", order_by=None)
 	)
 
-	return flt(se.fg_completed_qty) - already_disassembled
+	return flt(
+		flt(se.fg_completed_qty) - already_disassembled,
+		frappe.get_precision("Stock Entry", "fg_completed_qty"),
+	)
 
 
 @frappe.whitelist()

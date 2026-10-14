@@ -154,6 +154,7 @@ class PurchaseReceipt(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transporter_name: DF.Data | None
+		use_transaction_date_exchange_rate: DF.Check
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -185,6 +186,11 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_field": "per_received",
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
+				"second_source_dt": "Purchase Invoice Item",
+				"second_source_field": "stock_qty",
+				"second_join_field": "material_request_item",
+				"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 				"percent_join_field": "material_request",
 				"validate_qty": False,
 			},
@@ -212,42 +218,46 @@ class PurchaseReceipt(BuyingController):
 			},
 		]
 
+	def update_prevdoc_status(self):
 		if cint(self.is_return):
-			self.status_updater.extend(
-				[
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Order Item",
-						"join_field": "purchase_order_item",
-						"target_field": "returned_qty",
-						"source_field": "-1 * qty",
-						"second_source_dt": "Purchase Invoice Item",
-						"second_source_field": "-1 * qty",
-						"second_join_field": "po_detail",
-						"extra_cond": """ and exists (select name from `tabPurchase Receipt`
-						where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
-						"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
-						where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
-					},
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Receipt Item",
-						"join_field": "purchase_receipt_item",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Purchase Receipt",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "received_stock_qty",
-						"source_field": "-1 * received_stock_qty",
-						"percent_join_field_parent": "return_against",
-					},
-				]
-			)
+			self.status_updater.extend(self.get_return_status_updaters())
+
+		super().update_prevdoc_status()
+
+	def get_return_status_updaters(self):
+		return [
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Purchase Order Item",
+				"join_field": "purchase_order_item",
+				"target_field": "returned_qty",
+				"source_field": "-1 * qty",
+				"second_source_dt": "Purchase Invoice Item",
+				"second_source_field": "-1 * qty",
+				"second_join_field": "po_detail",
+				"extra_cond": """ and exists (select name from `tabPurchase Receipt`
+				where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
+				"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
+			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Purchase Receipt Item",
+				"join_field": "purchase_receipt_item",
+				"target_field": "returned_qty",
+				"target_parent_dt": "Purchase Receipt",
+				"target_parent_field": "per_returned",
+				"target_ref_field": "received_stock_qty",
+				"source_field": "-1 * received_stock_qty",
+				"percent_join_field_parent": "return_against",
+			},
+		]
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
-			apply_putaway_rule(self.doctype, self.get("items"), self.company)
+			_apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
 	def validate(self):
 		self.validate_posting_time()
@@ -331,6 +341,7 @@ class PurchaseReceipt(BuyingController):
 	def po_required(self):
 		if (
 			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_return
 			and not self.is_internal_transfer()
 		):
 			for d in self.get("items"):

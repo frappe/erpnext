@@ -2539,6 +2539,105 @@ class TestSalesInvoice(FrappeTestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
+	@change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_on_recurring_keeps_terms_and_shifts_service_dates(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		reference = make_recurring_reference_invoice(
+			"2025-01-01",
+			"2025-01-31",
+			[("2025-01-01", "2025-01-31"), ("2025-01-29", "2025-01-31"), ("2025-01-10", "2025-01-20")],
+		)
+		reference.payment_terms_template = "Test Receivable Template"
+		reference.po_no = "PO-0001"
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(new_invoice.po_no, "PO-0001")
+		self.assertEqual(new_invoice.payment_terms_template, "Test Receivable Template")
+		self.assertEqual(
+			[getdate(row.due_date) for row in new_invoice.payment_schedule],
+			[getdate("2025-02-02"), getdate("2025-02-03")],
+		)
+		self.assertEqual(
+			[(getdate(row.service_start_date), getdate(row.service_end_date)) for row in new_invoice.items],
+			[
+				(getdate("2025-02-01"), getdate("2025-02-28")),
+				(getdate("2025-02-28"), getdate("2025-02-28")),
+				(getdate("2025-02-10"), getdate("2025-02-20")),
+			],
+		)
+
+	def test_on_recurring_keeps_service_dates_in_shorter_period(self):
+		# Auto Repeat without frappe/frappe#44189 moves 30-31 Jan to 28-28 Feb, then to 28-28 Mar
+		reference = make_recurring_reference_invoice(
+			"2025-01-30", "2025-01-31", [("2025-01-30", "2025-01-31")]
+		)
+		reference.insert()
+
+		for from_date, to_date in [("2025-02-28", "2025-02-28"), ("2025-03-28", "2025-03-28")]:
+			new_invoice = make_recurring_invoice(reference, from_date, to_date)
+			self.assertEqual(
+				(
+					getdate(new_invoice.items[0].service_start_date),
+					getdate(new_invoice.items[0].service_end_date),
+				),
+				(getdate(from_date), getdate(to_date)),
+			)
+
+	def test_on_recurring_keeps_service_dates_after_period_end_ordered(self):
+		# Auto Repeat moves the period 30 Jan-26 Feb to 27 Feb-29 Mar
+		reference = make_recurring_reference_invoice(
+			"2025-01-30", "2025-02-26", [("2025-02-26", "2025-02-27")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-27", "2025-03-29")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-03-29"), getdate("2025-03-30")),
+		)
+
+	def test_on_recurring_keeps_short_service_range_after_period_end(self):
+		# Auto Repeat builds the full next month after a half-month period
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-15", [("2025-01-20", "2025-01-25")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-02-20"), getdate("2025-02-25")),
+		)
+
+	def test_on_recurring_keeps_service_end_at_month_end(self):
+		# Billing in advance: the January invoice covers the service in February
+		reference = make_recurring_reference_invoice(
+			"2025-01-01", "2025-01-31", [("2025-02-01", "2025-02-28")]
+		)
+		reference.insert()
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(
+			(
+				getdate(new_invoice.items[0].service_start_date),
+				getdate(new_invoice.items[0].service_end_date),
+			),
+			(getdate("2025-03-01"), getdate("2025-03-31")),
+		)
+
 	@change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
@@ -2731,6 +2830,73 @@ class TestSalesInvoice(FrappeTestCase):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def make_cross_currency_inter_company_purchase_invoice(self):
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 62.9,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+
+		for doctype, party, company in (
+			("Customer", "_Test Internal Customer 3", "Wind Power LLC"),
+			("Supplier", "_Test Internal Supplier", "_Test Company"),
+		):
+			party_doc = frappe.get_doc(doctype, party)
+			party_doc.append("companies", {"company": company})
+			party_doc.save()
+
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer 3",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			rate=100,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		draft_pi = frappe.new_doc(
+			"Purchase Invoice", company="_Test Company", conversion_rate=1, plc_conversion_rate=1
+		)
+		pi = make_inter_company_transaction("Sales Invoice", si.name, draft_pi)
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"warehouse": "Stores - _TC",
+			}
+		)
+		return pi
+
+	def test_inter_company_purchase_invoice_uses_buying_company_exchange_rate(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
+		pi.save()
+
+		self.assertEqual(pi.company, "_Test Company")
+		self.assertEqual(pi.currency, "USD")
+		self.assertEqual(pi.conversion_rate, 62.9)
+		self.assertEqual(pi.base_net_total, 6290)
+
+	def test_inter_company_purchase_invoice_keeps_sales_invoice_currency(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
+		pi.currency = "INR"
+		pi.credit_to = "Creditors - _TC"
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Currency must be"):
+			pi.save()
 
 	def test_restrict_inter_company_pi_when_sales_invoice_qty_fully_consumed(self):
 		item_code_1 = "_Test IC Item 1"
@@ -4809,6 +4975,18 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(stock_ledger_entry.qty, 2.0)
 		self.assertEqual(stock_ledger_entry.stock_value_difference, 0.0)
 
+	def test_stand_alone_credit_note_uses_current_valuation_rate(self):
+		item_code = "_Test Item for Credit Note Current Valuation"
+		make_item_for_si(item_code, {"valuation_method": "FIFO"})
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		si = create_sales_invoice(item=item_code, qty=-2, rate=1200, is_return=1, update_stock=1)
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_type": "Sales Invoice", "voucher_no": si.name}, "incoming_rate"
+		)
+		self.assertEqual(incoming_rate, 100.0)
+
 	def test_non_batchwise_valuation_for_moving_average(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -5069,6 +5247,71 @@ class TestSalesInvoice(FrappeTestCase):
 		si = make_si(reserved[0])
 		si.submit()
 		self.assertEqual(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle), reserved)
+
+	def test_repeat_inter_company_pi_converts_invoiced_qty_to_sales_invoice_uom(self):
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=20,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		accounts = {"expense_account": "Cost of Goods Sold - _TC1", "cost_center": "Main - _TC1"}
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update({"qty": 1, "uom": "_Test UOM 1", "conversion_factor": 10, **accounts})
+		pi.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		self.assertEqual(pi.items[0].qty, 10)
+		pi.items[0].update(accounts)
+		pi.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been fully invoiced",
+			make_inter_company_transaction,
+			"Sales Invoice",
+			si.name,
+		)
+
+	def test_cancelling_one_partial_inter_company_pi_keeps_sales_invoice_linked_to_the_other(self):
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=2,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		purchase_invoices = []
+		for _ in range(2):
+			pi = make_inter_company_transaction("Sales Invoice", si.name)
+			pi.items[0].update(
+				{"qty": 1, "expense_account": "Cost of Goods Sold - _TC1", "cost_center": "Main - _TC1"}
+			)
+			pi.submit()
+			purchase_invoices.append(pi.name)
+
+		frappe.get_doc("Purchase Invoice", purchase_invoices[1]).cancel()
+		self.assertEqual(si.get_db_value("inter_company_invoice_reference"), purchase_invoices[0])
+
+		frappe.get_doc("Purchase Invoice", purchase_invoices[0]).cancel()
+		self.assertFalse(si.get_db_value("inter_company_invoice_reference"))
 
 
 def make_item_for_si(item_code, properties=None):
@@ -5390,3 +5633,42 @@ def add_taxes(doc):
 			"rate": 12,
 		},
 	)
+
+
+def make_recurring_reference_invoice(from_date, to_date, service_dates):
+	"""Return an unsaved Sales Invoice for the period, with one deferred item row per service date range."""
+	deferred_account = create_account(
+		account_name="Deferred Revenue",
+		parent_account="Current Liabilities - _TC",
+		company="_Test Company",
+	)
+	item = create_item("_Test Item for Deferred Accounting")
+	item.enable_deferred_revenue = 1
+	item.item_defaults[0].deferred_revenue_account = deferred_account
+	item.save()
+
+	reference = create_sales_invoice(item=item.name, posting_date=from_date, do_not_save=True)
+	reference.set_posting_time = 1
+	reference.from_date = from_date
+	reference.to_date = to_date
+	reference.items[0].enable_deferred_revenue = 1
+	reference.items[0].deferred_revenue_account = deferred_account
+	first_row = reference.items[0].as_dict(no_default_fields=True)
+	reference.items = []
+	for service_start_date, service_end_date in service_dates:
+		row = reference.append("items", first_row)
+		row.service_start_date = service_start_date
+		row.service_end_date = service_end_date
+	return reference
+
+
+def make_recurring_invoice(reference, from_date, to_date):
+	"""Same steps as Auto Repeat: copy without no_copy fields, set dates and period, call on_recurring."""
+	new_invoice = frappe.copy_doc(reference, ignore_no_copy=False)
+	new_invoice.set_posting_time = 1
+	new_invoice.posting_date = from_date
+	new_invoice.from_date = from_date
+	new_invoice.to_date = to_date
+	auto_repeat = frappe._dict(frequency="Monthly")
+	new_invoice.run_method("on_recurring", reference_doc=reference, auto_repeat_doc=auto_repeat)
+	return new_invoice.insert()

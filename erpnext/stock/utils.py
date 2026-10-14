@@ -12,6 +12,7 @@ from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
+from erpnext import require_user_permission
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -96,6 +97,30 @@ def get_stock_value_on(
 
 @frappe.whitelist()
 def get_stock_balance(
+	item_code: str,
+	warehouse: str | None,
+	posting_date: DateTimeLikeObject | None = None,
+	posting_time: DateTimeLikeObject | datetime.timedelta | None = None,
+	with_valuation_rate: bool = False,
+	with_serial_no: bool = False,
+	inventory_dimensions_dict: dict | None = None,
+):
+	frappe.has_permission("Item", "read", throw=True)
+	require_user_permission("Item", item_code)
+	require_user_permission("Warehouse", warehouse)
+
+	return _get_stock_balance(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		with_valuation_rate,
+		with_serial_no,
+		inventory_dimensions_dict,
+	)
+
+
+def _get_stock_balance(
 	item_code: str,
 	warehouse: str | None,
 	posting_date: DateTimeLikeObject | None = None,
@@ -294,16 +319,20 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
+	posting_datetime = args.get("posting_datetime")
+
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
 		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
 	)
 
-	use_moving_avg_for_batch = frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
-
 	if isinstance(args, dict):
 		args = frappe._dict(args)
+
+	use_moving_avg_for_batch = frappe.db.get_single_value(
+		"Stock Settings", "do_not_use_batchwise_valuation"
+	) and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
 
 	if item_details and item_details.has_serial_no and args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
@@ -374,6 +403,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 			company=args.get("company"),
 			fallbacks=fallbacks,
 			raise_error_if_no_rate=raise_error_if_no_rate,
+			posting_datetime=posting_datetime,
+			creation=args.get("creation"),
 		)
 
 	return flt(in_rate)
@@ -405,6 +436,20 @@ def get_batch_incoming_rate(item_code, warehouse, batch_no, posting_date, postin
 
 	if batch_details and batch_details[0].batch_qty:
 		return batch_details[0].batch_value / batch_details[0].batch_qty
+
+
+def has_batchwise_valued_batch(batch_no: str | None, serial_and_batch_bundle: str | None) -> bool:
+	"""Pooling applies to Moving Average batches only; FIFO batches keep batch-wise valuation."""
+	batches = [batch_no] if batch_no else []
+	if serial_and_batch_bundle:
+		batches = frappe.get_all(
+			"Serial and Batch Entry", {"parent": serial_and_batch_bundle}, pluck="batch_no"
+		)
+
+	return (
+		bool(batches)
+		and frappe.db.exists("Batch", {"name": ("in", batches), "use_batchwise_valuation": 1}) is not None
+	)
 
 
 def get_avg_purchase_rate(serial_nos):

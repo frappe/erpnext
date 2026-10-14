@@ -1647,6 +1647,42 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.items[0].rate, rate)
 		self.assertEqual(dn.items[0].net_rate, rate)
 
+	def test_ledger_balance_matches_the_qty_posted_in_a_fractional_uom(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Third"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "_Test Third", "conversion_factor": 0.3333333}]
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=10)
+
+		for _ in range(3):
+			dn = create_delivery_note(item_code=item, qty=1, rate=50, do_not_save=True)
+			dn.items[0].update({"uom": "_Test Third", "conversion_factor": 0.3333333})
+			dn.submit()
+
+		entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item, "is_cancelled": 0},
+			fields=["actual_qty", "qty_after_transaction"],
+			order_by="posting_datetime, creation",
+		)
+		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
+		self.assertEqual(
+			entries[-1].qty_after_transaction, flt(sum(row.actual_qty for row in entries), precision)
+		)
+
+	def test_cancel_reverses_a_qty_posted_below_ledger_precision(self):
+		item = make_item(properties={"stock_uom": "Kg"}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=10)
+		dn = create_delivery_note(item_code=item, qty=1, rate=50)
+
+		sub_precision_qty = 0.4 / 10 ** frappe.get_precision("Stock Ledger Entry", "actual_qty")
+		frappe.db.set_value("Delivery Note Item", dn.items[0].name, "stock_qty", sub_precision_qty)
+		frappe.db.set_value("Stock Ledger Entry", {"voucher_no": dn.name}, "actual_qty", -sub_precision_qty)
+
+		frappe.get_doc("Delivery Note", dn.name).cancel()
+
+		self.assertFalse(frappe.db.exists("Stock Ledger Entry", {"voucher_no": dn.name, "is_cancelled": 0}))
+
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
@@ -3174,6 +3210,40 @@ class TestDeliveryNote(FrappeTestCase):
 		so.save()
 
 		self.assertEqual(so.items[0].ensure_delivery_based_on_produced_serial_no, 0)
+
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
+	def test_reserve_stock_skipped_on_submit_for_ensure_delivery_by_serial_no(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item(
+			"Test Produced Serial FG",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TPSFG-.####"},
+		).name
+		rm_item = make_item("Test Produced Serial RM", {"is_stock_item": 1}).name
+		plain_item = make_item("Test Produced Serial Plain", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse)
+		make_stock_entry(item_code=fg_item, target=warehouse, qty=1, basic_rate=100)
+		make_stock_entry(item_code=plain_item, target=warehouse, qty=1, basic_rate=100)
+
+		so = make_sales_order(item_code=fg_item, qty=1, warehouse=warehouse, do_not_submit=True)
+		so.append("items", {"item_code": plain_item, "warehouse": warehouse, "qty": 1, "rate": 100})
+		so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+		so.reserve_stock = 1
+		so.submit()
+		so.reload()
+
+		self.assertEqual(so.items[0].reserve_stock, 1)
+		self.assertEqual(so.items[0].stock_reserved_qty, 0)
+		self.assertEqual(so.items[1].stock_reserved_qty, 1)
+
+		so.create_stock_reservation_entries(
+			items_details=[
+				{"sales_order_item": so.items[0].name, "warehouse": warehouse, "qty_to_reserve": 1}
+			]
+		)
+		so.reload()
+		self.assertEqual(so.items[0].stock_reserved_qty, 1)
 
 
 def make_so_with_reserved_produced_serial_no():

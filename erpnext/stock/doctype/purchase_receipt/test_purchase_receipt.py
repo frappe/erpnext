@@ -525,6 +525,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.per_billed, 0)
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_purchase_return_full(self):
@@ -557,6 +558,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.status, "Return Issued")
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_purchase_return_for_rejected_qty(self):
@@ -603,6 +605,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(actual_qty, -2)
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_per_billed_for_fully_rejected_receipt(self):
@@ -730,6 +733,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(abs(return_pr.items[0].stock_qty), 1.0)
 
 		return_pr.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_closed_purchase_receipt(self):
@@ -960,6 +964,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr_return.submit()
 
 		pr_return.cancel()
+		pr.load_from_db()
 		pr.cancel()
 
 	def test_purchase_receipt_cost_center(self):
@@ -1122,6 +1127,70 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
 
 		pr.cancel()
+
+	def test_internal_transfer_on_half_cent_moves_no_value(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		prepare_data_for_internal_transfer()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=2, basic_rate=10.005)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].from_warehouse = "Work In Progress - TCP1"
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		ledger = {
+			(row.voucher_type, row.warehouse): row.stock_value_difference
+			for row in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"item_code": item, "voucher_no": ("in", [dn.name, pr.name]), "is_cancelled": 0},
+				fields=["voucher_type", "warehouse", "stock_value_difference"],
+			)
+		}
+		self.assertEqual(
+			ledger,
+			{
+				("Delivery Note", "Stores - TCP1"): -10.01,
+				("Delivery Note", "Work In Progress - TCP1"): 10.01,
+				("Purchase Receipt", "Work In Progress - TCP1"): -10.01,
+				("Purchase Receipt", "Finished Goods - TCP1"): 10.01,
+			},
+		)
+
+	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "_Test Lb", "conversion_factor": 0.4536}],
+		).name
+		pr = make_purchase_receipt(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			qty=7,
+			rate=12.34,
+			do_not_save=True,
+		)
+		pr.items[0].update({"uom": "_Test Lb", "conversion_factor": 0.4536, "cost_center": "Main - TCP1"})
+		pr.submit()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pr.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(stock_value, pr.items[0].base_net_amount)
 
 	def test_inter_company_purchase_receipt_does_not_inherit_party_fields(self):
 		"""
@@ -1481,6 +1550,53 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
+
+	@change_settings("Buying Settings", {"use_transaction_date_exchange_rate": 1})
+	def test_transaction_date_exchange_rate_applies_only_when_mapping_from_purchase_order(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_purchase_receipt_from_invoice,
+		)
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as make_purchase_invoice_from_order,
+		)
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_purchase_receipt_from_order,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		frappe.db.delete("Currency Exchange", {"date": today(), "from_currency": "USD", "to_currency": "INR"})
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 83,
+				"for_buying": 1,
+			}
+		).insert()
+
+		po = create_purchase_order(supplier="_Test Supplier USD", currency="USD", do_not_save=1)
+		po.conversion_rate = 70
+		po.insert()
+		po.submit()
+
+		pr = make_purchase_receipt_from_order(po.name)
+		self.assertTrue(pr.use_transaction_date_exchange_rate)
+		self.assertEqual(pr.conversion_rate, 83)
+
+		pr.conversion_rate = 80
+		pr.set_missing_values()
+		self.assertEqual(pr.conversion_rate, 80)
+
+		pi = make_purchase_invoice_from_order(po.name)
+		pi.conversion_rate = 75
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.submit()
+
+		pr = make_purchase_receipt_from_invoice(pi.name)
+		self.assertFalse(pr.use_transaction_date_exchange_rate)
+		self.assertEqual(pr.conversion_rate, 75)
 
 	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
@@ -5742,6 +5858,63 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.status, status_before)
 		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
+
+	def test_moving_average_purchase_return_keeps_its_rate_on_repost(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"valuation_method": "Moving Average"}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=10,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -3),
+		)
+		pr_return = make_purchase_receipt(
+			item_code=item,
+			qty=-5,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			is_return=1,
+			return_against=pr.name,
+			posting_date=add_days(today(), -1),
+		)
+
+		make_stock_entry(
+			item_code=item,
+			target=warehouse,
+			qty=10,
+			rate=300,
+			company=company,
+			posting_date=add_days(today(), -5),
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr_return.name, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			-500,
+		)
+
+	def test_return_allowed_when_purchase_order_required(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		pr = make_purchase_receipt(qty=4, rate=50)
+
+		with change_settings("Buying Settings", {"po_required": "Yes"}):
+			pr_return = make_purchase_return(pr.name)
+			pr_return.items[0].qty = -1
+			pr_return.items[0].received_qty = -1
+			pr_return.submit()
+
+		self.assertEqual(pr_return.docstatus, 1)
 
 
 def prepare_data_for_internal_transfer():

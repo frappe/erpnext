@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, nowdate, nowtime
 
-from erpnext.stock.utils import get_or_make_bin, get_stock_balance
+from erpnext.stock.utils import _get_stock_balance, get_or_make_bin
 
 
 class StockReservationEntry(Document):
@@ -460,7 +460,7 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 		if qty_to_be_reserved > allowed_qty:
-			actual_qty = get_stock_balance(self.item_code, self.warehouse)
+			actual_qty = _get_stock_balance(self.item_code, self.warehouse)
 			msg = """
 				Cannot reserve more than Allowed Qty {} {} for Item {} against {} {}.<br /><br />
 				The <b>Allowed Qty</b> is calculated as follows:<br />
@@ -524,7 +524,7 @@ def get_available_qty_to_reserve(
 			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=[ignore_sre]
 		)
 
-	available_qty = get_stock_balance(item_code, warehouse)
+	available_qty = _get_stock_balance(item_code, warehouse)
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -973,6 +973,17 @@ def create_stock_reservation_entries_for_so_items(
 	for item in items if items_details else sales_order.get("items"):
 		# Skip if `Reserved Stock` is not checked for the item.
 		if not item.get("reserve_stock"):
+			continue
+
+		# Skip on submit, the produced Serial Nos are reserved from the Sales Order after manufacture.
+		if not items_details and item.get("ensure_delivery_based_on_produced_serial_no"):
+			frappe.msgprint(
+				_(
+					"Row #{0}: Stock is not reserved for the Item {1} as its delivery is ensured based on the produced Serial Nos. Reserve the produced Serial Nos against the Sales Order after manufacture."
+				).format(item.idx, frappe.bold(item.item_code)),
+				title=_("Stock Reservation"),
+				indicator="yellow",
+			)
 			continue
 
 		# Stock should be reserved from the Pick List if has Picked Qty.
