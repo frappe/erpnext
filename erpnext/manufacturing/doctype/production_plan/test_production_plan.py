@@ -1018,6 +1018,37 @@ class TestProductionPlan(ERPNextTestSuite):
 			[("_Test PP Bought SA", 5), ("_Test PP Bought SA RM 2", 5)],
 		)
 
+	def test_exploded_row_keeps_sub_assemblies_it_does_not_explode(self):
+		make_item("_Test PP Kept SA RM", {"is_stock_item": 1})
+		make_item("_Test PP Kept SA RM 2", {"is_stock_item": 1})
+		make_item(
+			"_Test PP Kept SA", {"is_stock_item": 1, "default_material_request_type": "Material Transfer"}
+		)
+		make_item("_Test PP Kept SA FG", {"is_stock_item": 1})
+		make_bom(item="_Test PP Kept SA", raw_materials=["_Test PP Kept SA RM"], currency="INR")
+		make_bom(
+			item="_Test PP Kept SA FG",
+			raw_materials=["_Test PP Kept SA", "_Test PP Kept SA RM 2"],
+			rm_qty=2,
+			currency="INR",
+		)
+
+		plan = create_production_plan(
+			item_code="_Test PP Kept SA FG",
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.include_subcontracted_items = 0
+		plan.po_items[0].include_exploded_items = 1
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			sorted((row.get("item_code"), row.get("quantity")) for row in items),
+			[("_Test PP Kept SA", 2), ("_Test PP Kept SA RM 2", 2)],
+		)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
