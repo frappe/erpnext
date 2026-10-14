@@ -69,6 +69,11 @@ doctype_js = {
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
+	"Investment": "public/js/treasury_form.js",
+	"Investment Settings": "public/js/treasury_form.js",
+	"Investment Transaction": "public/js/treasury_form.js",
+	"Investment Interest Accrual": "public/js/treasury_form.js",
+	"Investment Revaluation": "public/js/treasury_form.js",
 }
 doctype_list_js = {
 	"Code List": [

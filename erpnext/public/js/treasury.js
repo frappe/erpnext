@@ -1,21 +1,11 @@
 // Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.treasury");
+// Helpers of the Treasury reports and dashboard charts. They stay in the desk bundle because a report
+// reads its filters as soon as its script runs, before anything loaded on demand would be ready.
+// The form helpers are in treasury_form.js, added to just the Treasury forms.
 
-// listed once so Investment and Investment Settings always offer the same accounts
-erpnext.treasury.ACCOUNT_FIELDS = [
-	"investment_account",
-	"accrued_interest_account",
-	"interest_income_account",
-	"dividend_income_account",
-	"realised_gain_loss_account",
-	"unrealised_gain_loss_account",
-	"fair_value_adjustment_account",
-	"fair_value_reserve_account",
-	"tax_withheld_receivable_account",
-	"charges_account",
-];
+frappe.provide("erpnext.treasury");
 
 // rows flagged `bold` (totals and section headings) are shown in bold, with links shown as plain text
 erpnext.treasury.report_formatter = function (value, row, column, data, default_formatter) {
@@ -69,32 +59,6 @@ erpnext.treasury.get_period_filters = function () {
 			reqd: 1,
 		},
 	];
-};
-
-// General Ledger of this voucher, from `from_date` to the day it was last changed
-erpnext.treasury.show_general_ledger = function (frm, from_date) {
-	frappe.route_options = {
-		voucher_no: frm.doc.name,
-		from_date: from_date,
-		to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
-		company: frm.doc.company,
-		categorize_by: "Categorize by Voucher (Consolidated)",
-		show_cancelled_entries: frm.doc.docstatus === 2,
-		ignore_prepared_report: true,
-	};
-	frappe.set_route("query-report", "General Ledger");
-};
-
-// an investment in company currency has nothing to convert, so its Exchange Rate is always 1
-erpnext.treasury.set_conversion_rate = function (frm) {
-	if (!frm.doc.currency || !frm.doc.company || frm.doc.docstatus !== 0) return;
-
-	const is_company_currency = frm.doc.currency === erpnext.get_currency(frm.doc.company);
-	frm.set_df_property("conversion_rate", "read_only", is_company_currency);
-
-	if (is_company_currency && frm.doc.conversion_rate !== 1) {
-		frm.set_value("conversion_rate", 1);
-	}
 };
 
 erpnext.treasury.get_investment_filters = function () {
