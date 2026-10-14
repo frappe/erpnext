@@ -6647,6 +6647,27 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
 		self.assertEqual(wo.operations, [])
 
+	def test_status_change_accepts_only_its_own_statuses(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		draft = make_review_work_order(fg_item, bom.name, 10, submit=False)
+
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be set to", stop_unstop, wo.name, "Closed")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be set to", close_work_order, wo.name, "Not Started"
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Only a submitted", close_work_order, draft.name, "Closed"
+		)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Not Started")
+		self.assertEqual(frappe.db.get_value("Work Order", draft.name, "status"), "Draft")
+
+		wo.cancel()
+		self.assertRaisesRegex(frappe.ValidationError, "Only a submitted", stop_unstop, wo.name, "Stopped")
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Cancelled")
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""

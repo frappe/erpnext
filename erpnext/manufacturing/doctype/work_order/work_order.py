@@ -1153,6 +1153,14 @@ def get_default_warehouse(company: str):
 	}
 
 
+def validate_status_change(work_order, status, allowed_statuses):
+	if status not in allowed_statuses:
+		frappe.throw(_("Work Order status cannot be set to {0}").format(frappe.bold(status)))
+
+	if work_order.docstatus != 1:
+		frappe.throw(_("Only a submitted Work Order can be closed, stopped or resumed"))
+
+
 @frappe.whitelist(methods=["POST"])
 def stop_unstop(work_order: str, status: str):
 	"""Called from client side on Stop/Unstop event"""
@@ -1162,6 +1170,7 @@ def stop_unstop(work_order: str, status: str):
 	# the check above is doctype level and never consults User Permissions, so on its own it lets
 	# a caller restricted to one company stop another company's orders
 	pro_order = frappe.get_doc("Work Order", work_order, check_permission="write")
+	validate_status_change(pro_order, status, ("Stopped", "Resumed"))
 
 	if pro_order.status == "Closed":
 		frappe.throw(_("Closed Work Order can not be stopped or Re-opened"))
@@ -1198,6 +1207,7 @@ def close_work_order(work_order: str, status: str):
 
 	# doctype level above, record level here — see stop_unstop()
 	work_order = frappe.get_doc("Work Order", work_order, check_permission="write")
+	validate_status_change(work_order, status, ("Closed",))
 	if work_order.status == "Closed":
 		frappe.throw(_("Work Order {0} is already Closed").format(work_order.name))
 
