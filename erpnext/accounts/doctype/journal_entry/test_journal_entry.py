@@ -1,12 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-<<<<<<< HEAD
 
 import unittest
-=======
 from unittest.mock import patch
->>>>>>> e0aaecf (test(journal-entry): Cancel large entry with queue_in_background)
 
 import frappe
 from frappe.tests.utils import change_settings
