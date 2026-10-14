@@ -7306,6 +7306,26 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(rejected_return.items[0].rejected_qty, -5)
 		rejected_return.submit()
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_rejected_warehouse_return_rows_share_the_rejected_qty(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		pr = make_purchase_receipt(
+			qty=5,
+			rejected_qty=5,
+			warehouse="_Test Warehouse - _TC",
+			rejected_warehouse="_Test Rejected Warehouse - _TC",
+		)
+
+		return_doc = make_purchase_return_against_rejected_warehouse(pr.name)
+		return_doc.items[0].qty = -3
+		return_doc.items[0].received_qty = -3
+		return_doc.append("items", return_doc.items[0].as_dict(no_default_fields=True))
+
+		self.assertRaises(StockOverReturnError, return_doc.insert)
+
 	def test_do_not_use_batchwise_valuation_with_fifo(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 

@@ -148,6 +148,7 @@ def validate_returned_items(doc):
 				validate_quantity(doc, key, d, ref, valid_items, already_returned_items)
 				if doc.doctype == "Delivery Note":
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
+				add_returned_row(doc, key, d, already_returned_items)
 
 				if (
 					ref.rate
@@ -228,9 +229,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-		if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
-			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
+		bundle_stock_qty = get_returned_stock_qty(doc, row)
 		for component in components[bundle]:
 			ref = valid_items.get(component.item_code)
 			if not ref:
@@ -332,18 +331,40 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
-	"""Hold all returns of an item, with or without dn_detail and across rows, to its total delivered qty."""
+	"""Hold all returns of an item, with or without dn_detail, to its total delivered qty."""
 	if key != row.item_code:
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
+		add_returned_row(doc, row.item_code, row, already_returned_items)
 
+
+def add_returned_row(doc, key, row, already_returned_items):
+	"""Count a validated row so that the next rows of the same return see it."""
+	conversion_factor = flt(row.conversion_factor or 1)
+	stock_qty = get_returned_stock_qty(doc, row)
+	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	if doc.doctype == "Purchase Receipt" and row.get("return_qty_from_rejected_warehouse"):
+		rejected_qty += stock_qty
+		stock_qty = 0
+
+	returned = already_returned_items.setdefault(key, frappe._dict())
+	returned.qty = flt(returned.qty) + abs(flt(row.qty))
+	returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
+	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+
+
+def get_returned_stock_qty(doc, row):
+	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
 	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+	setting = (
+		"allow_to_edit_stock_uom_qty_for_sales"
+		if doc.doctype in ("Delivery Note", "Sales Invoice", "POS Invoice")
+		else "allow_to_edit_stock_uom_qty_for_purchase"
+	)
+	if frappe.get_single_value("Stock Settings", setting):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
-	for returned_key in {key, row.item_code}:
-		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
-		returned.qty = flt(returned.qty) + abs(flt(row.qty))
-		returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	return stock_qty
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
