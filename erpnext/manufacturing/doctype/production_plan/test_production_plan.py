@@ -1111,6 +1111,32 @@ class TestProductionPlan(ERPNextTestSuite):
 		draft.cancel()
 		self.assertEqual(work_order_qty(), [4, 0])
 
+	def test_repeated_create_does_not_duplicate_drafts(self):
+		plan = create_production_plan(
+			item_code="Test Production Item 1", for_warehouse="_Test Warehouse - _TC"
+		)
+
+		plan.make_work_order()
+		plan.make_work_order()
+		self.assertEqual(frappe.db.count("Work Order", {"production_plan": plan.name, "docstatus": 0}), 1)
+
+		plan.reload()
+		plan.submit_material_request = 0
+		plan.make_material_request()
+		plan.reload()
+		plan.submit_material_request = 0
+		plan.make_material_request()
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": plan.name},
+			fields=["material_request_plan_item", "qty"],
+		)
+		self.assertEqual(
+			{row.material_request_plan_item: row.qty for row in requested},
+			{row.name: row.quantity for row in plan.mr_items},
+		)
+		self.assertEqual(len(requested), len(plan.mr_items))
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
