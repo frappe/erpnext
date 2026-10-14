@@ -146,13 +146,6 @@ erpnext.setup.slides_settings = [
 			{ fieldname: "fy_start_date", label: __("Financial Year Begins On"), fieldtype: "Date", reqd: 1 },
 			// end date should be hidden (auto calculated)
 			{ fieldname: "fy_end_date", label: __("End Date"), fieldtype: "Date", reqd: 1, hidden: 1 },
-			{ fieldtype: "Section Break" },
-			{
-				fieldname: "setup_demo",
-				label: __("Add demo data so you can explore"),
-				fieldtype: "Check",
-				description: __("You can delete it anytime."),
-			},
 		],
 
 		onload: function (slide) {
