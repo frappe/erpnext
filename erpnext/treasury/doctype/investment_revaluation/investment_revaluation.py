@@ -239,11 +239,11 @@ class InvestmentRevaluation(AccountsController):
 		return gl_entries
 
 	def get_row_entries(self, row):
-		"""Fair value adjustment against unrealised gain / loss."""
+		"""Fair value adjustment against profit and loss (FVTPL) or the equity reserve (FVOCI)."""
 		investment = self.get_investment(row.investment)
 		increase, decrease = max(flt(row.adjustment_amount), 0), max(-flt(row.adjustment_amount), 0)
 		debit_account = investment.get_account("fair_value_adjustment_account")
-		credit_account = investment.get_account("unrealised_gain_loss_account")
+		credit_account = investment.get_account(get_fair_value_gain_field(investment))
 
 		return [(debit_account, increase, decrease), (credit_account, decrease, increase)]
 
@@ -296,6 +296,14 @@ class InvestmentRevaluation(AccountsController):
 		)
 		self.set_book_values(row, investment)
 		self.set_row_conversion_rate(row)
+
+
+def get_fair_value_gain_field(investment):
+	"""Where fair value gains go: other comprehensive income for FVOCI, profit and loss for FVTPL."""
+	if investment.measurement_category == "FVOCI":
+		return "fair_value_reserve_account"
+
+	return "unrealised_gain_loss_account"
 
 
 def get_investments_to_value(company):

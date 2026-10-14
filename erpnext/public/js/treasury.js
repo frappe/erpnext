@@ -12,6 +12,7 @@ erpnext.treasury.ACCOUNT_FIELDS = [
 	"realised_gain_loss_account",
 	"unrealised_gain_loss_account",
 	"fair_value_adjustment_account",
+	"fair_value_reserve_account",
 	"tax_withheld_receivable_account",
 	"charges_account",
 ];

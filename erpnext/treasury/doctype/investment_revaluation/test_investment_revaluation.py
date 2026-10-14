@@ -9,6 +9,7 @@ from erpnext.treasury.doctype.investment.test_investment import (
 	TEST_COMPANY,
 	create_financial_institution,
 	create_investment_type,
+	make_investment,
 )
 from erpnext.treasury.doctype.investment_transaction.test_investment_transaction import (
 	make_submitted_investment,
@@ -16,10 +17,12 @@ from erpnext.treasury.doctype.investment_transaction.test_investment_transaction
 )
 
 FAIR_VALUE_ACCOUNT = "Earnest Money - _TC"
-UNREALISED_ACCOUNT = "Revaluation Surplus - _TC"
+UNREALISED_ACCOUNT = "Service - _TC"
+RESERVE_ACCOUNT = "Revaluation Surplus - _TC"
 REVALUATION_ACCOUNTS = {
 	"fair_value_adjustment_account": FAIR_VALUE_ACCOUNT,
 	"unrealised_gain_loss_account": UNREALISED_ACCOUNT,
+	"fair_value_reserve_account": RESERVE_ACCOUNT,
 }
 
 
@@ -51,8 +54,25 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		self.assertEqual(revaluation.investments[0].previous_gain_loss, 200)
 		self.assertEqual(revaluation.investments[0].adjustment_amount, -100)
 		self.assertEqual(
-			get_gl_entries(revaluation.name), {UNREALISED_ACCOUNT: (100, 0), FAIR_VALUE_ACCOUNT: (0, 100)}
+			get_gl_entries(revaluation.name), {RESERVE_ACCOUNT: (100, 0), FAIR_VALUE_ACCOUNT: (0, 100)}
 		)
+
+	def test_fvoci_gain_goes_to_equity_reserve(self):
+		investment = make_fund_investment("FVOCI")
+		revaluation = make_market_revaluation(investment.name, nav_per_unit=12).submit()
+
+		self.assertEqual(
+			get_gl_entries(revaluation.name), {FAIR_VALUE_ACCOUNT: (200, 0), RESERVE_ACCOUNT: (0, 200)}
+		)
+
+	def test_fair_value_reserve_must_be_equity(self):
+		investment = make_investment(
+			investment_type="_Test Equity Fund",
+			measurement_category="FVOCI",
+			**{**REVALUATION_ACCOUNTS, "fair_value_reserve_account": UNREALISED_ACCOUNT},
+		)
+
+		self.assertRaises(frappe.ValidationError, investment.insert)
 
 	def test_amortized_cost_market_revaluation_posts_no_gl(self):
 		investment = make_fund_investment("Amortized Cost")

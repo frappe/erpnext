@@ -75,6 +75,7 @@
   "unrealised_gain_loss_account",
   "column_break_gain_loss",
   "fair_value_adjustment_account",
+  "fair_value_reserve_account",
   "connections_tab"
  ],
  "fields": [
@@ -547,11 +548,12 @@
    "options": "Account"
   },
   {
-   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category!='Amortized Cost'",
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category=='FVTPL'",
    "fieldname": "unrealised_gain_loss_account",
    "fieldtype": "Link",
    "label": "Unrealised Gain / Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "description": "Profit and loss account where FVTPL fair value gains and losses are posted"
   },
   {
    "fieldname": "column_break_gain_loss",
@@ -562,6 +564,14 @@
    "fieldname": "fair_value_adjustment_account",
    "fieldtype": "Link",
    "label": "Fair Value Adjustment Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class) && doc.measurement_category=='FVOCI'",
+   "description": "Equity reserve (other comprehensive income) where FVOCI fair value gains and losses are posted",
+   "fieldname": "fair_value_reserve_account",
+   "fieldtype": "Link",
+   "label": "Fair Value Reserve Account",
    "options": "Account"
   },
   {
@@ -597,7 +607,7 @@
    "link_fieldname": "original_investment"
   }
  ],
- "modified": "2026-10-07 15:58:36.516234",
+ "modified": "2026-10-14 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment",

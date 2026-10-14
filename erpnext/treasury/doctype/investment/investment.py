@@ -17,6 +17,7 @@ ACCOUNT_FIELDS = (
 	"realised_gain_loss_account",
 	"unrealised_gain_loss_account",
 	"fair_value_adjustment_account",
+	"fair_value_reserve_account",
 	"tax_withheld_receivable_account",
 	"charges_account",
 )
@@ -55,6 +56,7 @@ class Investment(Document):
 		dividend_income_account: DF.Link | None
 		face_value: DF.Currency
 		fair_value_adjustment_account: DF.Link | None
+		fair_value_reserve_account: DF.Link | None
 		instrument_class: DF.Data | None
 		instrument_id: DF.Data | None
 		interest_income_account: DF.Link | None
@@ -170,6 +172,15 @@ class Investment(Document):
 
 	def validate_company_links(self):
 		validate_company_links(self, ACCOUNT_FIELDS)
+		self.validate_fair_value_reserve_account()
+
+	def validate_fair_value_reserve_account(self):
+		"""FVOCI gains are other comprehensive income, which is kept in equity, not profit and loss."""
+		account = self.fair_value_reserve_account
+		if account and frappe.get_cached_value("Account", account, "root_type") != "Equity":
+			frappe.throw(
+				_("Fair Value Reserve Account {0} must be an Equity account").format(frappe.bold(account))
+			)
 		validate_company_links(self, ("cost_center",), "Cost Center")
 
 	def validate_investment_renewal(self):

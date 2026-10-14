@@ -17,7 +17,8 @@
   "gain_loss_section",
   "realised_gain_loss_account",
   "unrealised_gain_loss_account",
-  "fair_value_adjustment_account"
+  "fair_value_adjustment_account",
+  "fair_value_reserve_account"
  ],
  "fields": [
   {
@@ -100,11 +101,18 @@
    "fieldtype": "Link",
    "label": "Fair Value Adjustment Account",
    "options": "Account"
+  },
+  {
+   "description": "Equity reserve (other comprehensive income) where FVOCI fair value gains and losses are posted",
+   "fieldname": "fair_value_reserve_account",
+   "fieldtype": "Link",
+   "label": "Fair Value Reserve Account",
+   "options": "Account"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-10-14 12:00:00.000000",
+ "modified": "2026-10-14 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Default Account",
