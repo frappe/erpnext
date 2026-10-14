@@ -1,5 +1,5 @@
 {%
-	const is_lowest = min_rate !== undefined && Math.abs(q.converted_rate - min_rate) < 0.0001;
+	const is_min = (rate) => min_rate !== undefined && Math.abs(rate - min_rate) < 0.0001;
 	const qty_title = [q.is_partial_qty ? q.partial_qty_tooltip : "", q.quoted_as].filter(Boolean).join(" · ");
 %}
 <div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
@@ -17,14 +17,14 @@
 			{% for (const row of q.rate_breakdown) { %}
 				<div class="flex justify-between items-center ml-3">
 					<span class="text-muted">{{ frappe.utils.escape_html(row.qty_label) }}</span>
-					<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(row.rate, company_currency) }}</span>
+					<span class="{% if (is_min(row.rate)) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(row.rate, company_currency) }}</span>
 				</div>
 			{% } %}
 		</div>
 	{% } else { %}
 		<div class="flex justify-between items-center mb-2">
 			<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
-			<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
+			<span class="{% if (is_min(q.converted_rate)) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
 		</div>
 	{% } %}
 	<div class="flex justify-between items-center mb-2">
