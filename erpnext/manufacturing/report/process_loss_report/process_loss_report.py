@@ -37,6 +37,7 @@ def get_data(filters: Filters) -> Data:
 			Max(wo.produced_qty).as_("produced_qty"),
 			Max(wo.process_loss_qty).as_("process_loss_qty"),
 			Max(wo.qty).as_("qty_to_manufacture"),
+			Sum(se.fg_completed_qty).as_("manufactured_qty"),
 			Sum(se.total_incoming_value).as_("total_fg_value"),
 			Sum(se.total_outgoing_value).as_("total_rm_value"),
 		)
@@ -121,5 +122,5 @@ def get_columns() -> Columns:
 
 def update_data_with_total_pl_value(data: Data) -> None:
 	for row in data:
-		value_per_unit_fg = row["total_fg_value"] / row["qty_to_manufacture"]
+		value_per_unit_fg = row["total_fg_value"] / row["manufactured_qty"] if row["manufactured_qty"] else 0
 		row["total_pl_value"] = row["process_loss_qty"] * value_per_unit_fg
