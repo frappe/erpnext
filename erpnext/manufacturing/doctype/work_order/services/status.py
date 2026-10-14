@@ -10,6 +10,7 @@ callers (job cards, sales orders, production plans, patches) keep working.
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
@@ -53,12 +54,11 @@ class StatusService:
 		wo = frappe.qb.DocType("Work Order")
 		return (
 			frappe.qb.from_(wo)
-			.select(Sum(wo.qty - wo.process_loss_qty))
+			.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
 			.where(
 				(wo.production_item == self.doc.production_item)
 				& (wo.sales_order == self.doc.sales_order)
 				& (wo.docstatus == 1)
-				& (wo.status != "Closed")
 				& (wo.name != self.doc.name)
 			)
 		).run()[0][0]
@@ -457,8 +457,8 @@ class StatusService:
 		wo = frappe.qb.DocType("Work Order")
 		query = (
 			frappe.qb.from_(wo)
-			.select(Sum(wo.qty))
-			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1) & (wo.status != "Closed"))
+			.select(Sum(qty_against_sales_order(wo, wo.qty)))
+			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1))
 		)
 		if self.doc.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.doc.product_bundle_item)
@@ -498,3 +498,7 @@ class StatusService:
 			frappe.get_doc("Material Request", self.doc.material_request).update_completed_qty(
 				[self.doc.material_request_item]
 			)
+
+
+def qty_against_sales_order(wo, open_qty):
+	return Case().when(wo.status == "Closed", wo.produced_qty).else_(open_qty)

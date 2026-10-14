@@ -6522,6 +6522,35 @@ class TestWorkOrder(ERPNextTestSuite):
 			job_card.cancel()
 			self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), status)
 
+	def test_closed_work_order_keeps_produced_qty_on_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+		so = make_sales_order(item_code=fg_item, qty=10, rate=100)
+		wo = make_review_work_order(
+			fg_item, bom.name, 10, skip_transfer=1, sales_order=so.name, sales_order_item=so.items[0].name
+		)
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
+		manufacture.submit()
+		close_work_order(wo.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 4)
+		self.assertEqual(get_work_order_items(so.name)[0]["pending_qty"], 6)
+		self.assertRaises(
+			OverProductionError,
+			make_review_work_order,
+			fg_item,
+			bom.name,
+			10,
+			sales_order=so.name,
+			sales_order_item=so.items[0].name,
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
