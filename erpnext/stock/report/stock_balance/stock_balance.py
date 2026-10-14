@@ -53,6 +53,7 @@ class StockBalanceReport:
 		self.data = []
 		self.columns = []
 		self.sle_entries: list[SLEntry] = []
+		self.item_warehouse_balances = {}
 		self.set_company_currency()
 
 	def set_company_currency(self) -> None:
@@ -256,6 +257,7 @@ class StockBalanceReport:
 
 	def prepare_item_warehouse_map(self, item_warehouse_map, entry, group_by_key):
 		qty_dict = item_warehouse_map[group_by_key]
+		balance = self.get_item_warehouse_balance(item_warehouse_map, entry, qty_dict)
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
@@ -275,8 +277,8 @@ class StockBalanceReport:
 				qty_diff = flt(entry.actual_qty)
 				value_diff = flt(entry.stock_value_difference)
 			else:
-				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
-				value_diff = flt(entry.stock_value) - flt(qty_dict.bal_val)
+				qty_diff = flt(entry.qty_after_transaction) - flt(balance.bal_qty)
+				value_diff = flt(entry.stock_value) - flt(balance.bal_val)
 		else:
 			qty_diff = flt(entry.actual_qty)
 			value_diff = flt(entry.stock_value_difference)
@@ -301,6 +303,23 @@ class StockBalanceReport:
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
+		if balance is not qty_dict:
+			balance.bal_qty += qty_diff
+			balance.bal_val += value_diff
+
+	def get_item_warehouse_balance(self, item_warehouse_map, entry, qty_dict) -> frappe._dict:
+		"""Balance of the whole item and warehouse, which a dimension-wise row holds only part of."""
+		if not self.filters.get("show_dimension_wise_stock"):
+			return qty_dict
+
+		key = (entry.company, entry.item_code, entry.warehouse)
+		if key not in self.item_warehouse_balances:
+			opening = item_warehouse_map.get(key) or self.opening_data.get(key) or frappe._dict()
+			self.item_warehouse_balances[key] = frappe._dict(
+				bal_qty=opening.get("bal_qty") or 0.0, bal_val=opening.get("bal_val") or 0.0
+			)
+
+		return self.item_warehouse_balances[key]
 
 	def initialize_data(self, item_warehouse_map, group_by_key, entry):
 		opening_data = self.opening_data.get(group_by_key, {})
