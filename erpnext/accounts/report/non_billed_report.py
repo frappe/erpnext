@@ -4,7 +4,11 @@
 
 import frappe
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import IfNull, Round, Sum
+from pypika.analytics import Sum as WindowSum
+from pypika.queries import QueryBuilder, Table
+from pypika.terms import Term
 
 from erpnext import get_default_currency
 
@@ -12,6 +16,8 @@ BILLING_LINKS = {
 	"Delivery Note": frappe._dict(
 		invoice="Sales Invoice",
 		invoice_link="dn_detail",
+		order_link="so_detail",
+		invoice_order_link="so_detail",
 		billing_flag="update_billed_amount_in_delivery_note",
 		return_link="dn_detail",
 		returned_qty="stock_qty",
@@ -19,6 +25,8 @@ BILLING_LINKS = {
 	"Purchase Receipt": frappe._dict(
 		invoice="Purchase Invoice",
 		invoice_link="pr_detail",
+		order_link="purchase_order_item",
+		invoice_order_link="po_detail",
 		billing_flag="update_billed_amount_in_purchase_receipt",
 		return_link="purchase_receipt_item",
 		returned_qty="stock_qty",
@@ -40,6 +48,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 	links = BILLING_LINKS[doctype]
 	as_on_date = filters.get("posting_date")
 	later_billed = get_billed_after(links, as_on_date)
+	order_billed_later = get_order_billed_after(doctype, child_tab, links, as_on_date)
 	returned = get_returned_as_on(doctype, child_tab, links, as_on_date)
 
 	doctype = frappe.qb.DocType(doctype)
@@ -48,9 +57,8 @@ def get_ordered_to_be_billed_data(args, filters=None):
 
 	docname = filters.get(args.get("reference_field"), None)
 	project_field = get_project_field(doctype, child_doctype, party)
-	billed_amount = (child_doctype.billed_amt - IfNull(later_billed.amount, 0)) * IfNull(
-		doctype.conversion_rate, 1
-	)
+	later_billed_amount = IfNull(later_billed.amount, 0) + IfNull(order_billed_later.amount, 0)
+	billed_amount = (child_doctype.billed_amt - later_billed_amount) * IfNull(doctype.conversion_rate, 1)
 	returned_amount = child_doctype.base_rate * IfNull(returned.qty, 0) / child_doctype.conversion_factor
 
 	query = (
@@ -61,6 +69,8 @@ def get_ordered_to_be_billed_data(args, filters=None):
 		.on(item.name == child_doctype.item_code)
 		.left_join(later_billed)
 		.on(later_billed.detail == child_doctype.name)
+		.left_join(order_billed_later)
+		.on(order_billed_later.detail == child_doctype.name)
 		.left_join(returned)
 		.on(returned.detail == child_doctype.name)
 		.select(
@@ -82,7 +92,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 			(doctype.docstatus == 1)
 			& (doctype.status != "Closed")
 			# a completed document was still to bill on the date only if billed after it
-			& ((doctype.status != "Completed") | later_billed.amount.isnotnull())
+			& ((doctype.status != "Completed") | (later_billed_amount != 0))
 			& (doctype.company == filters.get("company"))
 			& (doctype.posting_date <= as_on_date)
 			& (child_doctype.amount > 0)
@@ -101,17 +111,80 @@ def get_ordered_to_be_billed_data(args, filters=None):
 def get_billed_after(links, as_on_date):
 	"""Amount billed per row by invoices posted after the date, to take out of the stored billed_amt."""
 	invoice = frappe.qb.DocType(links.invoice)
+	return get_billed_against_rows(links).where(invoice.posting_date > as_on_date).as_("later_billed")
+
+
+def get_billed_against_rows(links: frappe._dict) -> QueryBuilder:
+	"""Amount billed per row by invoices made against it, skipping notes that don't update billing."""
+	invoice = frappe.qb.DocType(links.invoice)
 	invoice_item = frappe.qb.DocType(links.invoice + " Item")
 	return (
 		frappe.qb.from_(invoice_item)
 		.inner_join(invoice)
 		.on(invoice.name == invoice_item.parent)
 		.select(invoice_item[links.invoice_link].as_("detail"), Sum(invoice_item.amount).as_("amount"))
-		.where((invoice.docstatus == 1) & (invoice.posting_date > as_on_date))
+		.where(invoice.docstatus == 1)
 		.where((invoice.is_return == 0) | (invoice[links.billing_flag] == 1))
 		.where(invoice_item[links.invoice_link].isnotnull())
 		.groupby(invoice_item[links.invoice_link])
-	).as_("later_billed")
+	)
+
+
+def get_order_billed_after(
+	doctype: str, child_tab: str, links: frappe._dict, as_on_date: str
+) -> QueryBuilder:
+	"""Share of each row's billed_amt that came from order-level invoices posted after the date."""
+	parent = frappe.qb.DocType(doctype)
+	child = frappe.qb.DocType(child_tab)
+	billed_against_rows = get_billed_against_rows(links).as_("billed_against_rows")
+	later_order_billed = get_order_billed_after_by_line(links, as_on_date)
+	order_share = child.billed_amt - IfNull(billed_against_rows.amount, 0)
+	taken_back = get_order_share_taken_back(parent, child, links, order_share, later_order_billed.amount)
+
+	return (
+		frappe.qb.from_(child)
+		.inner_join(parent)
+		.on(parent.name == child.parent)
+		.inner_join(later_order_billed)
+		.on(later_order_billed.order_detail == child[links.order_link])
+		.left_join(billed_against_rows)
+		.on(billed_against_rows.detail == child.name)
+		.select(child.name.as_("detail"), taken_back.as_("amount"))
+		.where((parent.docstatus == 1) & (parent.is_return == 0) & (order_share > 0))
+	).as_("order_billed_later")
+
+
+def get_order_share_taken_back(
+	parent: Table, child: Table, links: frappe._dict, order_share: Term, later_amount: Term
+) -> Term:
+	"""Order-level billing fills an order's rows first in, first out, so the later amount sits on
+	the newest rows: take it back from them first, up to each row's order share."""
+	newer_rows_share = (
+		WindowSum(order_share)
+		.over(child[links.order_link])
+		.orderby(parent.posting_date, parent.posting_time, parent.name, child.idx, order=Order.desc)
+	) - order_share
+	still_to_take = later_amount - newer_rows_share
+	return (
+		Case().when(still_to_take <= 0, 0).when(still_to_take < order_share, still_to_take).else_(order_share)
+	)
+
+
+def get_order_billed_after_by_line(links: frappe._dict, as_on_date: str) -> QueryBuilder:
+	"""Amount billed per order line by invoices posted after the date without a receipt or delivery row."""
+	invoice = frappe.qb.DocType(links.invoice)
+	invoice_item = frappe.qb.DocType(links.invoice + " Item")
+	order_link = invoice_item[links.invoice_order_link]
+	return (
+		frappe.qb.from_(invoice_item)
+		.inner_join(invoice)
+		.on(invoice.name == invoice_item.parent)
+		.select(order_link.as_("order_detail"), Sum(invoice_item.amount).as_("amount"))
+		.where((invoice.docstatus == 1) & (invoice.posting_date > as_on_date) & (invoice.update_stock == 0))
+		.where((invoice.is_return == 0) | (invoice[links.billing_flag] == 1))
+		.where(order_link.isnotnull() & (IfNull(invoice_item[links.invoice_link], "") == ""))
+		.groupby(order_link)
+	).as_("later_order_billed")
 
 
 def get_returned_as_on(doctype, child_tab, links, as_on_date):
