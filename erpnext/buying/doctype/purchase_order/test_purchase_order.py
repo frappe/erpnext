@@ -1292,6 +1292,27 @@ class TestPurchaseOrder(FrappeTestCase):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_order_neutral_debit_note_stays_out_of_later_billing(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+
+		po = create_purchase_order(qty=10, rate=100)
+		pi = make_pi_from_po(po.name)
+		pi.items[0].qty = 6
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -2
+		debit_note.update_billed_amount_in_purchase_order = 0
+		debit_note.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.items[0].qty = 4
+		pi.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].billed_amt, 1000)
+		self.assertEqual(po.per_billed, 100)
+
 	@change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
 	def test_receive_zero_qty_purchase_order(self):
 		"""

@@ -135,6 +135,92 @@ class TestTask(FrappeTestCase):
 
 		self.assertRaises(ParentIsGroupError, child_task.save)
 
+	def test_parent_task_must_be_in_the_same_project(self):
+		other_project = frappe.get_doc(
+			doctype="Project", project_name="_Test Parent Task Project", company="_Test Company"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Other Project Group", project=other_project.name, is_group=1
+		).insert()
+
+		child_task = create_task("_Test Child In Another Project", parent_task=group.name, save=False)
+		self.assertRaises(frappe.ValidationError, child_task.save)
+
+		child_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group.name
+		).insert()
+		self.assertEqual(child_without_project.project, other_project.name)
+
+	def test_child_takes_the_company_of_the_inherited_project(self):
+		project = frappe.get_doc(
+			doctype="Project", project_name="_Test Inherited Company Project", company="_Test Company 1"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Inherited Company Group", project=project.name, is_group=1
+		).insert()
+
+		child = frappe.get_doc(
+			doctype="Task", subject="_Test Inherited Company Child", parent_task=group.name
+		).insert()
+		self.assertEqual(child.company, "_Test Company 1")
+
+	def test_child_with_blank_project_saves_under_a_group_without_project(self):
+		group = frappe.get_doc(doctype="Task", subject="_Test Group Without Project", is_group=1).insert()
+
+		child = frappe.get_doc(
+			doctype="Task", subject="_Test Child With Blank Project", project="", parent_task=group.name
+		).insert()
+		self.assertFalse(child.project)
+
+	def test_group_with_children_cannot_move_to_another_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		group = create_task("_Test Group Moving Project", is_group=1)
+		create_task("_Test Child Of Group Moving Project", parent_task=group.name)
+		group.reload()
+
+		group.project = make_project({"project_name": "_Test Project Group Target"}).name
+		self.assertRaises(frappe.ValidationError, group.save)
+
+		group_without_project = frappe.get_doc(
+			doctype="Task", subject="_Test Group Without Project", is_group=1
+		).insert()
+		frappe.get_doc(
+			doctype="Task", subject="_Test Child Without Project", parent_task=group_without_project.name
+		).insert()
+		group_without_project.reload()
+		group_without_project.project = group.project
+		self.assertRaises(frappe.ValidationError, group_without_project.save)
+
+	def test_child_tasks_are_listed_only_for_a_readable_task(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+		from erpnext.projects.doctype.task.task import check_if_child_exists
+
+		group = create_task("_Test Group Hidden From User", is_group=1)
+		create_task("_Test Child Hidden From User", parent_task=group.name)
+		user = create_user("test_task_child_lister@example.com", "Projects User")
+		other_project = make_project({"project_name": "_Test Project Child Lister"}).name
+		frappe.permissions.add_user_permission("Project", other_project, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, check_if_child_exists, group.name)
+
+	def test_root_tasks_are_not_listed_as_children_of_an_empty_name(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.test_project import make_project
+		from erpnext.projects.doctype.task.task import check_if_child_exists
+
+		create_task("_Test Root Hidden From User")
+		user = create_user("test_task_root_lister@example.com", "Projects User")
+		other_project = make_project({"project_name": "_Test Project Root Lister"}).name
+		frappe.permissions.add_user_permission("Project", other_project, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.DoesNotExistError, check_if_child_exists, "")
+
 	def test_actual_dates_outside_project_dates(self):
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 		frappe.db.set_value(
