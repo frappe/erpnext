@@ -123,6 +123,10 @@ class TestSupplierScorecardPeriod(ERPNextTestSuite):
 		period.insert()
 		self.assertEqual(period.supplier, supplier)
 
+		period.supplier = "_Test Supplier"
+		period.submit()
+		self.assertEqual(frappe.db.get_value(period.doctype, period.name, "supplier"), supplier)
+
 	def test_custom_variable_path_in_unimported_module(self):
 		for attribute in ("get_value", "Metrics.get_value"):
 			with self.subTest(attribute=attribute):

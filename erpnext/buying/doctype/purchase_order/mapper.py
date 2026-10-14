@@ -23,6 +23,10 @@ def set_missing_values(source, target):
 	target.run_method("set_use_serial_batch_fields")
 
 
+def is_unit_price_row(po_item, has_unit_price_items) -> bool:
+	return bool(has_unit_price_items) and po_item.qty == 0
+
+
 @frappe.whitelist()
 def make_purchase_receipt(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
@@ -32,10 +36,6 @@ def make_purchase_receipt(
 	args = frappe.parse_json(args)
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
-
-	def is_unit_price_row(source):
-		return has_unit_price_items and source.qty == 0
-
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
 
 	def get_max_receivable_qty(source):
@@ -47,7 +47,7 @@ def make_purchase_receipt(
 		qty = flt(obj.qty)
 		pending_qty = qty - received_qty
 
-		if is_unit_price_row(obj):
+		if is_unit_price_row(obj, has_unit_price_items):
 			target.qty = qty
 		elif pending_qty > 0:
 			target.qty = pending_qty
@@ -89,7 +89,7 @@ def make_purchase_receipt(
 				"postprocess": update_item,
 				"condition": lambda doc: (
 					doc.name not in mapped_qty_by_item
-					if is_unit_price_row(doc)
+					if is_unit_price_row(doc, has_unit_price_items)
 					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0))
 					< abs(get_max_receivable_qty(doc))
 				)
@@ -156,13 +156,18 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		)
 		return query.run(pluck="qty")[0] or 0
 
+	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
 
 	def get_billed_and_mapped_qty(po_item_name):
 		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
 
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+		target.qty = (
+			0
+			if is_unit_price_row(obj, has_unit_price_items)
+			else flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -201,11 +206,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: (
-				doc.base_amount == 0
-				or abs(doc.billed_amt) < abs(doc.amount)
-				or doc.qty > flt(get_billed_qty(doc.name))
+				doc.name not in mapped_qty_by_item
+				if is_unit_price_row(doc, has_unit_price_items)
+				else doc.qty > get_billed_and_mapped_qty(doc.name)
 			)
-			and (doc.name not in mapped_qty_by_item or doc.qty > get_billed_and_mapped_qty(doc.name))
 			and not doc.closed
 			and select_item(doc),
 		},
@@ -272,7 +276,7 @@ def is_po_fully_subcontracted(po_name: str) -> bool:
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name)
-		.where((table.parent == po_name) & (table.qty != table.subcontracted_qty))
+		.where((table.parent == po_name) & (table.qty > table.subcontracted_qty) & (table.closed == 0))
 	)
 	return not query.run(as_dict=True)
 
@@ -282,6 +286,7 @@ def get_mapped_subcontracting_order(
 ) -> Document:
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
+		source_rows = {row.name: row for row in source_doc.items}
 
 		if target_doc.set_warehouse:
 			for item in target_doc.items:
@@ -291,11 +296,11 @@ def get_mapped_subcontracting_order(
 				for item in target_doc.items:
 					item.warehouse = source_doc.set_warehouse
 			else:
-				for idx, item in enumerate(target_doc.items):
-					item.warehouse = source_doc.items[idx].warehouse
+				for item in target_doc.items:
+					item.warehouse = source_rows[item.purchase_order_item].warehouse
 
-		for idx, item in enumerate(target_doc.items):
-			item.job_card = source_doc.items[idx].job_card
+		for item in target_doc.items:
+			item.job_card = source_rows[item.purchase_order_item].job_card
 			if not target_doc.supplier_warehouse:
 				# WIP warehouse is set as Supplier Warehouse in Job Card
 				target_doc.supplier_warehouse = frappe.get_cached_value(
@@ -336,7 +341,7 @@ def get_mapped_subcontracting_order(
 					"material_request_item": "material_request_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: item.qty != item.subcontracted_qty,
+				"condition": lambda item: not item.closed and item.qty > item.subcontracted_qty,
 			},
 		},
 		target_doc,

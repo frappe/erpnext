@@ -14,3 +14,13 @@ class TestActivityType(ERPNextTestSuite):
 		frappe.db.set_value("Activity Type", "_Test Activity Type", "disabled", 1)
 		employee = make_employee("test_employee_6@salary.com", company="_Test Company")
 		self.assertRaises(frappe.ValidationError, make_timesheet, employee, simulate=True)
+
+	def test_disabled_activity_type_allows_updates_after_submit(self):
+		employee = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(employee, simulate=True)
+		draft = make_timesheet(employee, simulate=True, do_not_submit=True)
+		frappe.db.set_value("Activity Type", "_Test Activity Type", "disabled", 1)
+
+		timesheet.title = "_Test Updated Title"
+		timesheet.save()
+		self.assertRaises(frappe.ValidationError, draft.submit)

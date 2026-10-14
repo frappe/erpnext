@@ -118,9 +118,15 @@ class Opportunity(TransactionBase, CRMNote):
 			ignore_permissions = self.flags.ignore_permissions
 			link_open_tasks(self.opportunity_from, self.party_name, self, ignore_permissions)
 			link_open_events(self.opportunity_from, self.party_name, self, ignore_permissions)
-			if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
-				copy_comments(self.opportunity_from, self.party_name, self, ignore_permissions)
-				link_communications(self.opportunity_from, self.party_name, self, ignore_permissions)
+
+		if self.opportunity_from in ("Lead", "Prospect"):
+			self.carry_forward_communication()
+
+	def carry_forward_communication(self):
+		if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			ignore_permissions = self.flags.ignore_permissions
+			copy_comments(self.opportunity_from, self.party_name, self, ignore_permissions)
+			link_communications(self.opportunity_from, self.party_name, self, ignore_permissions)
 
 	def validate(self):
 		self.set_opportunity_type()

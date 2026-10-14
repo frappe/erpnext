@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
+from frappe.utils import add_days, add_months, flt, get_first_day, now_datetime, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -71,6 +71,7 @@ class TestAssetRepair(ERPNextTestSuite):
 			self.assertEqual(asset.status, "Out of Order")
 
 		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = nowdate()
 		asset_repair.save()
 		asset_status = frappe.db.get_value("Asset", asset_repair.asset, "status")
 		self.assertEqual(asset_status, initial_status)
@@ -155,6 +156,7 @@ class TestAssetRepair(ERPNextTestSuite):
 		)
 
 		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = nowdate()
 		self.assertRaises(frappe.ValidationError, asset_repair.submit)
 
 	def test_no_increase_in_asset_value_when_not_capitalized(self):
@@ -378,6 +380,150 @@ class TestAssetRepair(ERPNextTestSuite):
 
 		self.assertEqual(asset.additional_asset_cost, asset_repair.repair_cost)
 		self.assertEqual(booked_value, asset_repair.repair_cost)
+
+	def test_capitalized_stock_items_are_valued_at_the_stock_ledger_rate(self):
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		asset = create_asset(calculate_depreciation=1, submit=1)
+		spare_part = create_item("_Test Asset Repair Spare Part").name
+		asset_repair = create_asset_repair(
+			asset=asset, stock_consumption=1, item_code=spare_part, rate=500, qty=2
+		)
+		make_stock_entry(
+			item_code=spare_part, target=asset_repair.stock_items[0].warehouse, qty=2, basic_rate=100
+		)
+
+		asset_repair.update(
+			{
+				"repair_status": "Completed",
+				"completion_date": now_datetime(),
+				"capitalize_repair_cost": 1,
+				"cost_center": "Main - _TC",
+			}
+		)
+		asset_repair.submit()
+		asset.reload()
+
+		self.assertEqual(asset_repair.stock_items[0].total_value, 200)
+		self.assertEqual(asset_repair.total_repair_cost, 200)
+		self.assertEqual(asset.additional_asset_cost, 200)
+
+	def test_stock_entry_is_cancelled_only_with_its_repair(self):
+		asset_repair = create_asset_repair(stock_consumption=1, submit=1)
+		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name})
+
+		self.assertRaises(frappe.ValidationError, stock_entry.cancel)
+
+		asset_repair.cancel()
+		self.assertEqual(stock_entry.db_get("docstatus"), 2)
+
+	def test_stock_entry_is_posted_on_the_completion_date(self):
+		asset_repair = create_asset_repair(stock_consumption=1, failure_date=add_days(nowdate(), -5))
+		frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Receipt",
+				"company": asset_repair.company,
+				"set_posting_time": 1,
+				"posting_date": add_days(nowdate(), -5),
+				"items": [
+					{
+						"t_warehouse": asset_repair.stock_items[0].warehouse,
+						"item_code": asset_repair.stock_items[0].item_code,
+						"qty": 1,
+						"basic_rate": 100,
+					}
+				],
+			}
+		).submit()
+
+		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = add_days(nowdate(), -3)
+		asset_repair.submit()
+
+		posting_date = frappe.db.get_value("Stock Entry", {"asset_repair": asset_repair.name}, "posting_date")
+		self.assertEqual(str(posting_date), add_days(nowdate(), -3))
+
+	def test_asset_stays_out_of_order_while_a_repair_is_pending(self):
+		asset = create_asset(submit=1)
+		create_asset_repair(asset=asset)
+		completed_repair = create_asset_repair(asset=asset)
+		completed_repair.update({"repair_status": "Completed", "completion_date": nowdate()})
+		completed_repair.save()
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+		asset.reload()
+		asset.set_status()
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+	def test_discarded_repair_does_not_keep_asset_out_of_order(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(asset=asset)
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+		asset_repair.discard()
+		self.assertNotEqual(asset.db_get("status"), "Out of Order")
+
+		asset.reload()
+		asset.set_status()
+		self.assertNotEqual(asset.db_get("status"), "Out of Order")
+
+	def test_capitalized_repair_raises_value_of_asset_without_depreciation(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000 + asset_repair.repair_cost)
+		self.assertTrue(asset_repair.db_get("asset_value_updated"))
+
+		asset_repair.cancel()
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
+
+	def test_cancelling_old_repair_does_not_lower_value_of_asset_without_depreciation(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		# simulate a repair submitted before its cost was added to the value after depreciation
+		asset_repair.db_set("asset_value_updated", 0)
+		asset.db_set("value_after_depreciation", 100000)
+
+		asset_repair.cancel()
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
+
+	def test_repair_with_cancelled_status_cannot_be_submitted(self):
+		asset_repair = create_asset_repair()
+		asset_repair.update({"repair_status": "Cancelled", "completion_date": nowdate()})
+
+		self.assertRaises(frappe.ValidationError, asset_repair.submit)
+
+	def test_daily_status_update_finds_pending_repair_by_asset(self):
+		from erpnext.assets.doctype.asset.asset import update_maintenance_status
+
+		asset = create_asset(maintenance_required=1, submit=1)
+		create_asset_repair(asset=asset)
+		frappe.get_doc(
+			{
+				"doctype": "Asset Maintenance Task",
+				"parent": asset.name,
+				"parenttype": "Asset Maintenance",
+				"parentfield": "asset_maintenance_tasks",
+				"maintenance_task": "Inspection",
+				"next_due_date": nowdate(),
+			}
+		).db_insert()
+
+		update_maintenance_status()
+
+		self.assertNotEqual(asset.asset_name, asset.name)
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+	def test_completed_repair_requires_completion_date(self):
+		asset_repair = create_asset_repair()
+		asset_repair.repair_status = "Completed"
+
+		self.assertRaises(frappe.ValidationError, asset_repair.save)
 
 
 def num_of_depreciations(asset):

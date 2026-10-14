@@ -619,6 +619,29 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].billed_amt, 500)
 
+	def test_order_neutral_credit_note_stays_out_of_later_billing(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 6
+		si.insert()
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.items[0].qty = -2
+		credit_note.update_billed_amount_in_sales_order = 0
+		credit_note.submit()
+
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 4
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].billed_amt, 1000)
+		self.assertEqual(so.per_billed, 100)
+
 	def test_make_sales_invoice_after_update_stock_credit_note(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
@@ -1239,8 +1262,10 @@ class TestSalesOrder(ERPNextTestSuite):
 
 	def test_unconfigured_uom_rejected_when_uoms_are_restricted(self):
 		item = make_item(
-			uoms=[{"uom": "Box", "conversion_factor": 12}, {"uom": "Kg", "conversion_factor": 0}]
+			uoms=[{"uom": "Box", "conversion_factor": 12}, {"uom": "Kg", "conversion_factor": 1}]
 		)
+		# Simulate a legacy conversion factor that Item validation no longer permits.
+		item.uoms[1].db_set("conversion_factor", 0)
 
 		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
 			for uom in ("Pair", "Kg"):
@@ -3024,7 +3049,7 @@ class TestSalesOrder(ERPNextTestSuite):
 			{"valid_upto": add_days(nowdate(), 1), "expected_rate": 111.0},
 		]:
 			with self.subTest(scenario=scenario):
-				frappe.get_doc(
+				item_price = frappe.get_doc(
 					{
 						"doctype": "Item Price",
 						"item_code": packed_item,
@@ -3046,6 +3071,7 @@ class TestSalesOrder(ERPNextTestSuite):
 				so.selling_price_list = "_Test Price List"
 				so.append("items", {"item_code": bundle, "qty": 1})
 				so.save()
+				item_price.delete()
 
 				self.assertEqual(len(so.items), 1)
 				self.assertEqual(len(so.packed_items), 1)

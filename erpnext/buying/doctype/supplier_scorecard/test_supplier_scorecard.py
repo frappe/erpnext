@@ -5,7 +5,8 @@
 from itertools import pairwise
 
 import frappe
-from frappe.utils import add_days, getdate, nowdate
+from frappe.utils import add_days, getdate, now, nowdate
+from frappe.utils.logging import get_log_db
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
@@ -169,12 +170,19 @@ class TestSupplierScorecard(ERPNextTestSuite):
 
 		frappe.db.delete("Supplier Scorecard Period", {"scorecard": ["in", scorecards]})
 		frappe.db.set_value("Supplier Scorecard", broken, "weighting_function", "{total_score} +")
+		# Error Logs are not rolled back between tests, so only count the ones logged here
+		started = now()
 		refresh_scorecards()
 
 		self.assertTrue(frappe.db.exists("Supplier Scorecard Period", {"scorecard": healthy}))
 		self.assertTrue(
-			frappe.db.exists(
-				"Error Log", {"reference_doctype": "Supplier Scorecard", "reference_name": broken}
+			get_log_db().exists(
+				"Error Log",
+				{
+					"reference_doctype": "Supplier Scorecard",
+					"reference_name": broken,
+					"creation": [">=", started],
+				},
 			)
 		)
 

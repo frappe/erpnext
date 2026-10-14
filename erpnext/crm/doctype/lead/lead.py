@@ -98,8 +98,12 @@ class Lead(SellingController, CRMNote):
 		self.validate_email_id()
 
 	def set_status(self, update: bool = False, status: str | None = None, update_modified: bool = True):
-		if self.status != "Do Not Contact":
-			super().set_status(update=update, status=status, update_modified=update_modified)
+		if self.status == "Do Not Contact":
+			return
+
+		super().set_status(update=update, status=status, update_modified=update_modified)
+		if update:
+			self.update_prospect()
 
 	def before_insert(self):
 		self.contact_doc = None
@@ -226,17 +230,9 @@ class Lead(SellingController, CRMNote):
 
 		for linked_prospect in linked_prospects:
 			prospect = frappe.get_doc("Prospect", linked_prospect.parent)
-			if len(prospect.get("leads")) == 1:
-				prospect.delete(ignore_permissions=True)
-			else:
-				to_remove = None
-				for lead in prospect.get("leads"):
-					if lead.lead == self.name:
-						to_remove = lead
-
-				if to_remove:
-					prospect.remove(to_remove)
-					prospect.save(ignore_permissions=True)
+			prospect.set("leads", [row for row in prospect.leads if row.lead != self.name])
+			prospect.flags.ignore_mandatory = True
+			prospect.save(ignore_permissions=True)
 
 	def get_linked_prospects(self):
 		return frappe.get_all(

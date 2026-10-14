@@ -6,18 +6,15 @@ from frappe import _
 from frappe.utils import flt
 
 import erpnext
-from erpnext.assets.doctype.asset.depreciation import (
-	depreciate_asset,
-	get_gl_entries_on_asset_disposal,
-)
+from erpnext.assets.doctype.asset.depreciation import get_gl_entries_on_asset_disposal
 from erpnext.stock.services.base_stock_gl_composer import BaseStockGLComposer
 
 
 class AssetCapitalizationGLComposer(BaseStockGLComposer):
 	"""GL composer for Asset Capitalization.
 
-	Builds GL entries for consumed stock items, consumed asset items (with
-	depreciation side-effects), consumed service items, and the target asset debit.
+	Builds GL entries for consumed stock items, consumed asset items, consumed
+	service items, and the target asset debit.
 	"""
 
 	def compose(
@@ -40,10 +37,7 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 		self._get_gl_entries_for_consumed_asset_items(gl_entries, target_account, target_against)
 		self._get_gl_entries_for_consumed_service_items(gl_entries, target_account, target_against)
 
-		composite_component_value = doc.get_composite_component_value()
-		self._get_gl_entries_for_target_item(
-			gl_entries, target_account, target_against, composite_component_value
-		)
+		self._get_gl_entries_for_target_item(gl_entries, target_account, target_against)
 
 		return gl_entries
 
@@ -87,34 +81,22 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 		doc = self.doc
 		for item in doc.asset_items:
 			asset = frappe.get_doc("Asset", item.asset)
+			if asset.asset_type == "Composite Component":
+				continue
 
-			if asset.asset_type != "Composite Component":
-				if asset.calculate_depreciation:
-					notes = _(
-						"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
-					).format(
-						frappe.utils.get_link_to_form(asset.doctype, asset.name),
-						frappe.utils.get_link_to_form(doc.doctype, doc.get("name")),
-					)
-					depreciate_asset(asset, doc.posting_date, notes)
-					asset.reload()
+			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
+				asset,
+				item.asset_value,
+				item.get("finance_book") or doc.get("finance_book"),
+				doc.get("doctype"),
+				doc.get("name"),
+				doc.get("posting_date"),
+			)
 
-				fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-					asset,
-					item.asset_value,
-					item.get("finance_book") or doc.get("finance_book"),
-					doc.get("doctype"),
-					doc.get("name"),
-					doc.get("posting_date"),
-				)
-
-				for gle in fixed_asset_gl_entries:
-					gle["against"] = target_account
-					gl_entries.append(self.get_gl_dict(gle, item=item))
-					target_against.add(gle["account"])
-
-			asset.db_set("disposal_date", doc.posting_date)
-			doc.set_consumed_asset_status(asset)
+			for gle in fixed_asset_gl_entries:
+				gle["against"] = target_account
+				gl_entries.append(self.get_gl_dict(gle, item=item))
+				target_against.add(gle["account"])
 
 	def _get_gl_entries_for_consumed_service_items(
 		self, gl_entries: list, target_account: str, target_against: set
@@ -139,14 +121,11 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 			)
 
 	def _get_gl_entries_for_target_item(
-		self,
-		gl_entries: list,
-		target_account: str,
-		target_against: set,
-		composite_component_value: float,
+		self, gl_entries: list, target_account: str, target_against: set
 	) -> None:
+		"""Debit the target with the net of the consumed credits, which follow the stock ledger on repost."""
 		doc = self.doc
-		total_value = flt(doc.total_value - composite_component_value, self.precision)
+		total_value = flt(sum(flt(gle.credit) - flt(gle.debit) for gle in gl_entries), self.precision)
 		if total_value:
 			gl_entries.append(
 				self.get_gl_dict(

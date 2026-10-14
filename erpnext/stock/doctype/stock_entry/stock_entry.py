@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -27,6 +28,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
+from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.get_item_details import (
 	get_barcode_data,
 	get_bin_details,
@@ -57,6 +59,12 @@ from .services.material_transfer import (
 )
 from .services.serial_batch import StockEntrySABB, set_fg_mapping_on_submit
 from .services.subcontracting import SendToSubcontractorStockEntry
+
+WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES = (
+	"Material Transfer for Manufacture",
+	"Manufacture",
+	"Material Consumption for Manufacture",
+)
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -266,17 +274,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.set_serial_batch_from_reserved_entry()
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_validate"):
 			self.purpose_cls(self).before_validate()
 
 		self.set_default_cost_center()
+		self.set_allow_alternative_item()
 
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
 		if self.get("items") and apply_rule:
-			if items := apply_putaway_rule(
+			if items := _apply_putaway_rule(
 				self.doctype, self.get("items"), self.company, purpose=self.purpose
 			):
 				self.items = items
@@ -297,6 +306,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 					self.company,
 				)
 
+	def set_allow_alternative_item(self):
+		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""
+		if not self.work_order or self.purpose not in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES:
+			return
+
+		wo_allows_alternative_item = frappe.db.get_value(
+			"Work Order", self.work_order, "allow_alternative_item"
+		)
+		for row in self.items:
+			if not row.s_warehouse or row.is_finished_item:
+				continue
+
+			row.allow_alternative_item = cint(
+				wo_allows_alternative_item
+				and frappe.get_cached_value(
+					"Item", row.original_item or row.item_code, "allow_alternative_item"
+				)
+			)
+
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
@@ -309,6 +337,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_item()
+		validate_item_uoms(self.get("items"))
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -340,6 +369,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.purpose_cls(self).validate_disassembly_quantities()
 
 		self.validate_batch()
+		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.set_process_loss_qty()
 		self.validate_job_card_pending_production()
@@ -395,6 +425,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
 			self.purpose_cls(self).on_cancel()
 
+		self.validate_asset_repair_is_cancelled()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontracting_order_status()
@@ -412,6 +443,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 
 		self.make_gl_entries_on_cancel()
@@ -476,6 +508,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
+
+	def validate_asset_repair_is_cancelled(self):
+		if self.asset_repair and frappe.db.get_value("Asset Repair", self.asset_repair, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel Asset Repair {0} instead, it cancels this Stock Entry").format(
+					get_link_to_form("Asset Repair", self.asset_repair)
+				)
+			)
 
 	def delink_asset_repair_sabb(self):
 		if not self.asset_repair:
@@ -1127,7 +1167,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
-		stock_ledger.make_sl_entries(source_entries, allow_negative_stock, via_landed_cost_voucher)
+		stock_ledger.make_sl_entries(
+			source_entries, allow_negative_stock, via_landed_cost_voucher, defer_dimension_checks=True
+		)
 		if self.recalculate_for_bundles_picked_while_posting():
 			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
 			for sle in target_entries:
@@ -1138,6 +1180,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
+		stock_ledger.run_pending_dimension_checks(self.doctype, self.name)
 
 	def recalculate_for_bundles_picked_while_posting(self) -> bool:
 		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""
@@ -1518,6 +1561,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose == "Send to Subcontractor":
 			ret["allow_alternative_item"] = item.allow_alternative_item
+		elif self.work_order and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES:
+			ret["allow_alternative_item"] = cint(
+				item.allow_alternative_item
+				and frappe.db.get_value("Work Order", self.work_order, "allow_alternative_item")
+			)
 
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get("item_code"), args.get("uom"), args.get("qty")))
@@ -1825,6 +1873,43 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return item_dict
 
+	def validate_against_pick_list(self):
+		pick_list_items = {d.pick_list_item for d in self.items if d.pick_list_item}
+		if not pick_list_items or self.is_return:
+			return
+
+		picked_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Pick List Item",
+				filters={"name": ("in", list(pick_list_items))},
+				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
+			)
+		}
+		transfer_qty = defaultdict(float)
+		for d in self.items:
+			picked_row = picked_rows.get(d.pick_list_item)
+			if not picked_row:
+				continue
+
+			if d.s_warehouse and d.s_warehouse != picked_row.warehouse:
+				frappe.throw(
+					_("Row #{0}: Item {1} was picked from {2}, not {3}.").format(
+						d.idx,
+						frappe.bold(d.item_code),
+						frappe.bold(picked_row.warehouse),
+						frappe.bold(d.s_warehouse),
+					)
+				)
+
+			transfer_qty[d.pick_list_item] += flt(d.qty) * flt(d.conversion_factor or 1)
+			if flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item] > flt(picked_row.picked_qty):
+				frappe.throw(
+					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+					)
+				)
+
 	def validate_batch(self):
 		if self.purpose in [
 			"Material Transfer for Manufacture",
@@ -1905,6 +1990,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
+		target.add_to_transit = 0
 		target.set_missing_values()
 
 		if not frappe.get_single_value("Stock Settings", "use_serial_batch_fields"):
@@ -1922,7 +2008,19 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 				target_doc.t_warehouse = warehouse
 
 		target_doc.s_warehouse = source_doc.t_warehouse
-		target_doc.qty = get_remaining_transfer_qty(source_doc) / flt(source_doc.conversion_factor)
+		target_doc.qty = get_remaining_qty_in_row_uom(source_doc)
+
+	def get_remaining_qty_in_row_uom(source_doc):
+		remaining_qty = get_remaining_transfer_qty(source_doc)
+		conversion_factor = flt(source_doc.conversion_factor)
+		qty = flt(
+			flt(source_doc.qty) - flt(source_doc.transferred_qty) / conversion_factor,
+			source_doc.precision("qty"),
+		)
+		if flt(qty * conversion_factor, qty_precision) == remaining_qty:
+			return qty
+
+		return remaining_qty / conversion_factor
 
 	doclist = get_mapped_doc(
 		"Stock Entry",
