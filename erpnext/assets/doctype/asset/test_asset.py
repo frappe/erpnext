@@ -11,9 +11,11 @@ from frappe.utils import (
 	get_last_day,
 	getdate,
 	is_last_day_of_the_month,
+	now,
 	nowdate,
 )
 from frappe.utils.data import add_to_date
+from frappe.utils.logging import get_log_db
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -1086,12 +1088,16 @@ class TestAsset(AssetSetup):
 				raise frappe.ValidationError("Posting date is in a closed accounting period")
 			return original_make_gl_entries(doc)
 
+		# Error Logs are not rolled back between tests, so only count the ones logged here
+		started = now()
 		with patch.object(Asset, "make_gl_entries", fail_for_first_asset):
 			make_post_gl_entry()
 
 		self.assertFalse(frappe.db.get_value("Asset", assets[0], "booked_fixed_asset"))
 		self.assertTrue(frappe.db.get_value("Asset", assets[1], "booked_fixed_asset"))
-		self.assertTrue(frappe.get_all("Error Log", filters={"reference_name": assets[0]}, limit=1))
+		self.assertTrue(
+			get_log_db().exists("Error Log", {"reference_name": assets[0], "creation": [">=", started]})
+		)
 
 	def test_value_after_depreciation_is_stored_for_draft(self):
 		for calculate_depreciation in (0, 1):
