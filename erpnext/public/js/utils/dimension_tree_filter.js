@@ -162,10 +162,24 @@ erpnext.accounts.dimensions = {
 	},
 
 	copy_header_to_rows(frm, fieldname) {
-		this.get_tables_with_dimensions(frm.doctype, [fieldname]).forEach((table) => {
-			(frm.doc[table.fieldname] || []).forEach((row) => {
-				frappe.model.set_value(row.doctype, row.name, fieldname, frm.doc[fieldname]);
-			});
-		});
+		const value = frm.doc[fieldname];
+		const rows = this.get_tables_with_dimensions(frm.doctype, [fieldname]).flatMap(
+			(table) => frm.doc[table.fieldname] || []
+		);
+		const set_value = (targets) =>
+			targets.forEach((row) => frappe.model.set_value(row.doctype, row.name, fieldname, value));
+
+		if (rows.every((row) => !row[fieldname] || row[fieldname] === value)) {
+			set_value(rows);
+			return;
+		}
+
+		frappe.confirm(
+			__("Some rows have a different {0}. Overwrite those rows too?", [
+				__(frappe.meta.get_label(frm.doctype, fieldname)),
+			]),
+			() => set_value(rows),
+			() => set_value(rows.filter((row) => !row[fieldname]))
+		);
 	},
 };
