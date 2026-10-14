@@ -121,7 +121,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(getdate(investment.accrued_upto), getdate("2026-03-31"))
 		self.assertEqual(investment.accrued_interest, 1795)
 		first_quarter = investment.interest_schedule[0]
-		self.assertEqual((first_quarter.status, first_quarter.interest_accrual), ("Accrued", accrual.name))
+		self.assertEqual((first_quarter.status, first_quarter.interest_accruals), ("Accrued", accrual.name))
 
 	def test_accrual_across_periods_is_split_by_days(self):
 		investment = make_fd(FD_TERMS)
@@ -132,6 +132,15 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual((first_quarter.actual_interest, first_quarter.status), (1800, "Accrued"))
 		self.assertEqual((second_quarter.actual_interest, second_quarter.status), (600, "Partially Accrued"))
 		self.assertEqual(second_quarter.variance, 0)
+
+	def test_period_lists_every_accrual_covering_it(self):
+		investment = make_fd(FD_TERMS)
+		first = make_interest_accrual(investment.name, "2026-01-01", "2026-02-28", 1180).submit()
+		second = make_interest_accrual(investment.name, "2026-03-01", "2026-03-31", 620).submit()
+
+		first_quarter = get_investment(investment.name).interest_schedule[0]
+		self.assertEqual(first_quarter.actual_interest, 1800)
+		self.assertEqual(first_quarter.interest_accruals, f"{first.name}, {second.name}")
 
 	def test_accruals_cannot_leave_gaps_or_overlap(self):
 		investment = make_fd(FD_TERMS)

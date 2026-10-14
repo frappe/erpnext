@@ -16,7 +16,7 @@ class InvestmentInterestSchedule(Document):
 		actual_interest: DF.Currency
 		amortisation_amount: DF.Currency
 		estimated_interest: DF.Currency
-		interest_accrual: DF.Link | None
+		interest_accruals: DF.SmallText | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

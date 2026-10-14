@@ -23,7 +23,7 @@ def update_interest_schedule(investment_name):
 def get_schedule_rows(calculator, accruals, accrued_upto):
 	precision = get_amount_precision()
 	rows = [
-		frappe._dict(period_from=start, period_to=add_days(end, -1), actual_interest=0)
+		frappe._dict(period_from=start, period_to=add_days(end, -1), actual_interest=0, accruals=[])
 		for start, end in calculator.get_schedule_periods()
 	]
 	allocate_accruals(rows, accruals, precision)
@@ -51,7 +51,11 @@ def allocate_accruals(rows, accruals, precision):
 			share = flt(flt(accrual.interest_amount) * covered_days / total_days, precision) - allocated
 			allocated += share
 			row.actual_interest = flt(row.actual_interest + share, precision)
-			row.interest_accrual = accrual.name
+			row.accruals.append(accrual.name)
+
+	# a period can be accrued in parts, so it lists every accrual that covers it
+	for row in rows:
+		row.interest_accruals = ", ".join(row.pop("accruals"))
 
 
 def get_overlap_days(from_date, to_date, other_from_date, other_to_date):
