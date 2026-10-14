@@ -5,7 +5,9 @@
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
+from pypika import Order
 from pypika import functions as fn
+from pypika.analytics import RowNumber
 
 from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
@@ -13,7 +15,6 @@ from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockC
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.utils import get_valuation_method
 
 SLE_COUNT_LIMIT = 100_000
@@ -322,17 +323,48 @@ def get_item_warehouse_batch_map(filters, float_precision):
 
 def set_pooled_batch_values(filters, iwb_map):
 	moving_average_is_pooled = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
-	cutoff = get_datetime(filters.to_datetime or f"{filters.to_date} 23:59:59")
-	for item, warehouses in iwb_map.items():
-		if not is_pooled(item, filters.company, moving_average_is_pooled):
-			continue
+	pooled_items = [item for item in iwb_map if is_pooled(item, filters.company, moving_average_is_pooled)]
+	if not pooled_items:
+		return
 
-		for warehouse, batches in warehouses.items():
-			last_sle = get_previous_sle(
-				{"item_code": item, "warehouse": warehouse, "posting_datetime": cutoff}
-			)
+	warehouses = {warehouse for item in pooled_items for warehouse in iwb_map[item]}
+	cutoff = get_datetime(filters.to_datetime or f"{filters.to_date} 23:59:59")
+	rates = get_last_valuation_rates(pooled_items, warehouses, cutoff)
+
+	for item in pooled_items:
+		for warehouse, batches in iwb_map[item].items():
+			rate = flt(rates.get((item, warehouse)))
 			for balance in batches.values():
-				balance.bal_value = balance.bal_qty * flt(last_sle.get("valuation_rate"))
+				balance.bal_value = balance.bal_qty * rate
+
+
+def get_last_valuation_rates(items, warehouses, cutoff):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	ranked = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			sle.valuation_rate,
+			RowNumber()
+			.over(sle.item_code, sle.warehouse)
+			.orderby(sle.posting_datetime, sle.creation, order=Order.desc)
+			.as_("row_no"),
+		)
+		.where(
+			(sle.is_cancelled == 0)
+			& sle.item_code.isin(items)
+			& sle.warehouse.isin(list(warehouses))
+			& (sle.posting_datetime <= cutoff)
+		)
+	)
+	rows = (
+		frappe.qb.from_(ranked)
+		.select(ranked.item_code, ranked.warehouse, ranked.valuation_rate)
+		.where(ranked.row_no == 1)
+		.run(as_dict=True)
+	)
+	return {(row.item_code, row.warehouse): row.valuation_rate for row in rows}
 
 
 def is_pooled(item, company, moving_average_is_pooled):
