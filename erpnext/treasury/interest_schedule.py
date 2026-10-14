@@ -77,9 +77,8 @@ def get_period_status(row, accrued_upto):
 
 
 def set_estimated_interest(calculator, rows, precision):
-	"""Compound on actual interest where known, so later estimates follow what the bank credited."""
-	compounded_interest = 0
-	for row in rows:
+	# each row's estimate is set before the next row is taken, so it can compound into the next one
+	for row, compounded_interest in with_compounded_interest(calculator, rows):
 		end = add_days(row.period_to, 1)
 		row.estimated_interest = flt(
 			calculator.get_interest(row.period_from, end, compounded_interest), precision
@@ -87,8 +86,15 @@ def set_estimated_interest(calculator, rows, precision):
 		is_accrued = row.status == "Accrued"
 		row.variance = flt(row.actual_interest - row.estimated_interest, precision) if is_accrued else 0
 
+
+def with_compounded_interest(calculator, rows):
+	"""Each row with the interest a cumulative deposit added before it; compounds on actual interest
+	where known, so later estimates follow what the bank credited."""
+	compounded_interest = 0
+	for row in rows:
+		yield row, compounded_interest
 		if calculator.compounds:
-			compounded_interest += row.actual_interest if is_accrued else row.estimated_interest
+			compounded_interest += row.actual_interest if row.status == "Accrued" else row.estimated_interest
 
 
 def set_amortisation(calculator, rows):
@@ -111,16 +117,12 @@ def get_rounded_amortisation(calculator, start, end):
 def get_estimated_interest(investment_name, from_date, to_date):
 	"""Estimated interest of a date range, on the balance actually held each day of it."""
 	calculator = InterestCalculator(frappe.get_doc("Investment", investment_name))
-	estimate, compounded_interest = 0, 0
-	for row in get_schedule(investment_name):
+	estimate = 0
+	for row, compounded_interest in with_compounded_interest(calculator, get_schedule(investment_name)):
 		start = max(getdate(row.period_from), getdate(from_date))
 		end = min(getdate(row.period_to), getdate(to_date))
 		if start <= end:
 			estimate += calculator.get_interest(start, add_days(end, 1), compounded_interest)
-
-		# same compounding as set_estimated_interest, so the two estimates agree
-		if calculator.compounds:
-			compounded_interest += row.actual_interest if row.status == "Accrued" else row.estimated_interest
 
 	return flt(estimate, get_amount_precision())
 
