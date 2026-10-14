@@ -133,14 +133,19 @@ class InterestCalculator:
 
 	def get_reference_period(self, date):
 		"""Interest period containing `date` (before maturity), counted back from the maturity date."""
-		count = 1
-		while getdate(add_months(self.maturity_date, -count * self.period_months)) > date:
+		# jump near the period by month count, then step, as month lengths make the jump approximate
+		months = (self.maturity_date.year - date.year) * 12 + self.maturity_date.month - date.month
+		count = max(-(-months // self.period_months), 1)
+		while count > 1 and self.get_period_start(count - 1) <= date:
+			count -= 1
+
+		while self.get_period_start(count) > date:
 			count += 1
 
-		return (
-			getdate(add_months(self.maturity_date, -count * self.period_months)),
-			getdate(add_months(self.maturity_date, -(count - 1) * self.period_months)),
-		)
+		return self.get_period_start(count), self.get_period_start(count - 1)
+
+	def get_period_start(self, periods_before_maturity):
+		return getdate(add_months(self.maturity_date, -periods_before_maturity * self.period_months))
 
 	def get_carrying_value(self, lot, date):
 		"""Amortised (clean) cost of one bond unit of `lot` on `date`."""
@@ -187,10 +192,10 @@ class InterestCalculator:
 			return [(first_date, self.maturity_date)]
 
 		periods = [self.get_reference_period(add_days(self.maturity_date, -1))]
-		while periods[0][0] > first_date:
-			periods.insert(0, self.get_reference_period(add_days(periods[0][0], -1)))
+		while periods[-1][0] > first_date:
+			periods.append(self.get_reference_period(add_days(periods[-1][0], -1)))
 
-		return periods
+		return periods[::-1]
 
 	def get_coupon(self, start, end):
 		return self.unit_value * self.rate * self.get_year_fraction(start, end)

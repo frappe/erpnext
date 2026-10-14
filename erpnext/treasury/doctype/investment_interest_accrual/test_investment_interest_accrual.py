@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests import freeze_time
-from frappe.utils import flt, getdate
+from frappe.utils import add_days, add_months, flt, getdate
 
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.treasury.doctype.investment.test_investment import (
@@ -22,7 +22,7 @@ from erpnext.treasury.doctype.investment_transaction.test_investment_transaction
 	make_submitted_investment,
 	make_transaction,
 )
-from erpnext.treasury.interest import get_days_30_360
+from erpnext.treasury.interest import InterestCalculator, get_days_30_360
 
 FD_TERMS = {
 	"purchase_date": "2026-01-01",
@@ -106,6 +106,25 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 
 		# the first quarter's interest was paid out, so the second earns on 100000 only: 100000 * 7.3% * 91 / 365
 		self.assertEqual(get_investment(investment.name).interest_schedule[1].estimated_interest, 1820)
+
+	def test_reference_period_matches_stepping_back_from_maturity(self):
+		for maturity_date, frequency in (("2031-01-31", "Monthly"), ("2030-08-31", "Quarterly"), ("2032-02-29", "Semi-Annual")):
+			investment = frappe._dict(
+				name="_Test No Lots", instrument_class="Bond", coupon_frequency=frequency, maturity_date=maturity_date
+			)
+			calculator = InterestCalculator(investment)
+			date = getdate(add_months(maturity_date, -60))
+			while date < getdate(maturity_date):
+				count = 1
+				while getdate(add_months(maturity_date, -count * calculator.period_months)) > date:
+					count += 1
+
+				expected = (
+					getdate(add_months(maturity_date, -count * calculator.period_months)),
+					getdate(add_months(maturity_date, -(count - 1) * calculator.period_months)),
+				)
+				self.assertEqual(calculator.get_reference_period(date), expected, date)
+				date = getdate(add_days(date, 1))
 
 	def test_accrual_posts_bank_figure_and_fills_schedule(self):
 		investment = make_fd(FD_TERMS)
