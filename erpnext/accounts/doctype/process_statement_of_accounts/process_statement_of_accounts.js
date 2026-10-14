@@ -90,6 +90,7 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 			return {
 				filters: {
 					company: frm.doc.company,
+					status: ["=", "Open"],
 				},
 			};
 		});
