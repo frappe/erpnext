@@ -522,6 +522,25 @@ class TestBOMCreator(ERPNextTestSuite):
 				frappe.PermissionError, get_children, parent=restricted.name, parent_id=restricted.name
 			)
 
+	def test_delete_node_saves_the_cost_without_the_deleted_rows(self):
+		make_item("Tandem Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Tandem Bike BOM Delete",
+			company="_Test Company",
+			item_code="Tandem Bike",
+			qty=1,
+			currency="INR",
+		)
+		frame = add_test_sub_assembly(doc, "Tandem Bike", doc.name, "Frame Assembly", ["Frame", "Fork"])
+		doc.add_item(fg_item="Tandem Bike", fg_reference_id=doc.name, item_code="Seat", qty=1)
+		doc.reload()
+
+		result = doc.delete_node(doctype="BOM Creator Item", docname=frame)
+		seat = next(row for row in doc.items if row.item_code == "Seat")
+
+		self.assertEqual([row.item_code for row in result.items], ["Seat"])
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "raw_material_cost"), seat.amount)
+
 
 def create_items():
 	raw_materials = [

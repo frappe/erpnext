@@ -588,10 +588,10 @@ class BOMCreator(Document):
 			if not row:
 				frappe.throw(_("BOM Creator Item with name {0} does not exist").format(kwargs.docname))
 
-			row.delete()
+			self.remove(row)
 			updated = True
 
-		if self.delete_child_nodes(kwargs.docname or self.name):
+		if self.remove_child_nodes(kwargs.docname or self.name):
 			updated = True
 
 		if updated:
@@ -602,18 +602,14 @@ class BOMCreator(Document):
 
 		return frappe._dict()
 
-	def delete_child_nodes(self, fg_reference_id: str):
-		deleted = False
-		for item in get_children(parent=fg_reference_id, parent_id=self.name):
-			child_row = next((row for row in self.items if row.name == item.name), None)
-			if child_row:
-				child_row.delete()
+	def remove_child_nodes(self, fg_reference_id: str):
+		removed = False
+		for row in [row for row in self.items if row.fg_reference_id == fg_reference_id]:
+			self.remove(row)
+			removed = True
+			self.remove_child_nodes(row.name)
 
-			deleted = True
-			if item.expandable:
-				self.delete_child_nodes(item.name)
-
-		return deleted
+		return removed
 
 
 @frappe.whitelist()
