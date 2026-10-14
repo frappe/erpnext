@@ -189,11 +189,22 @@ class JobCard(Document):
 		if self.sub_operations:
 			self.set_total_completed_qty_from_sub_operations()
 
+		self.validate_pending_qty()
 		self.validate_work_order()
 		self.set_employees()
 
 		if self.docstatus == 1:
 			self.validate_semi_finished_goods()
+
+	def validate_pending_qty(self):
+		precision = self.precision("total_completed_qty")
+		remaining_qty = flt(flt(self.for_quantity) - flt(self.total_completed_qty), precision)
+		if flt(self.for_quantity) and flt(self.pending_qty, precision) > remaining_qty:
+			frappe.throw(
+				_("Pending Qty {0} cannot be more than the {1} left after the Total Completed Qty").format(
+					bold(self.get_qty_with_uom(self.pending_qty)), bold(self.get_qty_with_uom(remaining_qty))
+				)
+			)
 
 	def set_hour_rate(self):
 		if self.is_corrective_job_card or not (self.workstation and self.operation_id):
@@ -1082,10 +1093,11 @@ class JobCard(Document):
 
 		self.process_loss_qty = 0.0
 		if should_set_process_loss and self.for_quantity > self.total_completed_qty:
-			self.process_loss_qty = (
+			self.process_loss_qty = max(
 				flt(self.for_quantity, precision)
 				- flt(self.total_completed_qty, precision)
-				- flt(self.pending_qty, precision)
+				- flt(self.pending_qty, precision),
+				0.0,
 			)
 
 	def update_work_order(self):
