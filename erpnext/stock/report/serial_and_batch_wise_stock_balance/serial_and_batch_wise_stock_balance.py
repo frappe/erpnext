@@ -46,6 +46,9 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 
 	def prepare_new_data(self):
 		self.prepare_serial_batch_map()
+		self.pool_valuation_details = self.get_pool_valuation_details(
+			{row.item_code for row in self.item_warehouse_map.values()}
+		)
 		super().prepare_new_data()
 		self.data = [row for item_row in self.data for row in self.get_item_and_batch_rows(item_row)]
 
@@ -143,6 +146,9 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		for batch_no, batch_data in sorted(
 			batches, key=lambda item: self.batch_numbers.get(item[0], item[0])
 		):
+			if self.is_valued_in_pool(item_row, self.pool_valuation_details):
+				batch_data.bal_val = batch_data.bal_qty * item_row.val_rate
+
 			if self.is_hidden_zero_stock(batch_data):
 				continue
 
