@@ -657,6 +657,7 @@ frappe.ui.form.on("Payment Entry", {
 		);
 	},
 
+<<<<<<< HEAD
 	set_account_currency_and_balance: function (
 		frm,
 		account,
@@ -665,6 +666,9 @@ frappe.ui.form.on("Payment Entry", {
 		callback_function
 	) {
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+=======
+	set_account_currency_and_balance: function (frm, account, currency_field, callback_function) {
+>>>>>>> 6551867 (fix(accounts): re-derive bank side amount when payment account currency changes (#59582))
 		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
@@ -676,6 +680,25 @@ frappe.ui.form.on("Payment Entry", {
 				callback: function (r, rt) {
 					if (r.message) {
 						frappe.run_serially([
+							() => {
+								// bank side amount is re-derived from the party side amount below
+								// when the bank account currency changes
+								if (r.message["account_currency"] == frm.doc[currency_field]) return;
+
+								if (
+									frm.doc.payment_type == "Pay" &&
+									currency_field == "paid_from_account_currency" &&
+									frm.doc.received_amount
+								) {
+									frm.doc.paid_amount = 0;
+								} else if (
+									frm.doc.payment_type == "Receive" &&
+									currency_field == "paid_to_account_currency" &&
+									frm.doc.paid_amount
+								) {
+									frm.doc.received_amount = 0;
+								}
+							},
 							() => frm.set_value(currency_field, r.message["account_currency"]),
 							() => {
 								frm.set_value(balance_field, r.message["account_balance"]);
@@ -701,19 +724,6 @@ frappe.ui.form.on("Payment Entry", {
 
 									if (!frm.doc.paid_amount && frm.doc.received_amount)
 										frm.events.received_amount(frm);
-
-									if (
-										frm.doc.paid_from_account_currency ==
-											frm.doc.paid_to_account_currency &&
-										frm.doc.paid_amount != frm.doc.received_amount
-									) {
-										if (
-											company_currency != frm.doc.paid_from_account_currency &&
-											frm.doc.payment_type == "Pay"
-										) {
-											frm.doc.paid_amount = frm.doc.received_amount;
-										}
-									}
 								}
 							},
 							() => {
