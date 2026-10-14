@@ -375,6 +375,8 @@ class JobCard(Document):
 			self.total_completed_qty += d.completed_qty
 
 	def validate_overlap_in_time_log(self, d):
+		self.validate_employee_time_overlap(d)
+
 		open_job_cards = []
 		if d.get("employee"):
 			open_job_cards = self.get_open_job_cards(d.get("employee"), workstation=self.workstation)
@@ -387,6 +389,49 @@ class JobCard(Document):
 				),
 				OverlapError,
 			)
+
+	def validate_employee_time_overlap(self, d):
+		if not (d.get("employee") and d.from_time and d.to_time):
+			return
+
+		clash = self.get_employee_clash_in_card(d) or self.get_employee_clash_in_other_cards(d)
+		if clash:
+			frappe.throw(
+				_("Row {0}: Employee {1} is already working from {2} to {3} on Job Card {4}").format(
+					d.idx, d.employee, clash.from_time, clash.to_time, clash.name
+				),
+				OverlapError,
+			)
+
+	def get_employee_clash_in_card(self, d):
+		for row in self.time_logs:
+			if row is d or row.employee != d.employee or not (row.from_time and row.to_time):
+				continue
+
+			if get_datetime(row.from_time) < get_datetime(d.to_time) and get_datetime(
+				row.to_time
+			) > get_datetime(d.from_time):
+				return frappe._dict(name=self.name, from_time=row.from_time, to_time=row.to_time)
+
+	def get_employee_clash_in_other_cards(self, d):
+		jc = frappe.qb.DocType("Job Card")
+		jctl = frappe.qb.DocType("Job Card Time Log")
+		clashes = (
+			frappe.qb.from_(jctl)
+			.inner_join(jc)
+			.on(jctl.parent == jc.name)
+			.select(jc.name, jctl.from_time, jctl.to_time)
+			.where(
+				(jctl.employee == d.employee)
+				& (jctl.parenttype == "Job Card")
+				& (jc.docstatus < 2)
+				& (jc.name != (self.name or ""))
+				& (jctl.from_time < d.to_time)
+				& (jctl.to_time > d.from_time)
+			)
+			.limit(1)
+		).run(as_dict=True)
+		return clashes[0] if clashes else None
 
 	def save_time_log_totals(self):
 		self.db_set(
