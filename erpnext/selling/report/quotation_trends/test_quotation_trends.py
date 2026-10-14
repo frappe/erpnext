@@ -203,6 +203,8 @@ class TestQuotationTrends(ERPNextTestSuite):
 		# 400 (item/customer) + 100 (item/customer1) + 300 (item2/customer) = 800
 		self.assertEqual(expected_total, 800)
 		self.assertEqual(chart_total, expected_total)
+		# chart labels drop the measure suffix carried by the column header
+		self.assertTrue(all("(Amt)" not in label for label in chart["data"]["labels"]))
 
 	def test_group_by_swapped_roles_based_on_customer_group_by_item(self):
 		# Same regression, opposite role assignment: based_on="Customer" with group_by="Item".
