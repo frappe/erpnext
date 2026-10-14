@@ -29,7 +29,7 @@ def assert_cancellable(source, reversal_date=None):
 	entries = frappe.get_all(
 		"Share Ledger Entry",
 		filters={"source_doctype": source.doctype, "source_name": source.name, "is_reversal": 0},
-		fields=["name", "share_class", "creation"],
+		fields=["name", "share_class", "creation", "from_share_number", "to_share_number"],
 	)
 	earliest_by_class = {}
 	for entry in entries:
@@ -47,6 +47,8 @@ def assert_cancellable(source, reversal_date=None):
 			.where(
 				(movement.company == source.company)
 				& (movement.share_class == entry.share_class)
+				& (movement.from_share_number <= entry.to_share_number)
+				& (movement.to_share_number >= entry.from_share_number)
 				& (movement.creation > entry.creation)
 				& ~((movement.source_doctype == source.doctype) & (movement.source_name == source.name))
 				& (movement.is_reversal == 0)
@@ -56,7 +58,9 @@ def assert_cancellable(source, reversal_date=None):
 		).run()
 		if later:
 			frappe.throw(
-				_("Reverse later ownership movements in this class before cancelling this document.")
+				_(
+					"Reverse later ownership movements affecting these share numbers before cancelling this document."
+				)
 			)
 		if reversal_date:
 			incompatible_reversal = (
@@ -67,6 +71,8 @@ def assert_cancellable(source, reversal_date=None):
 				.where(
 					(movement.company == source.company)
 					& (movement.share_class == entry.share_class)
+					& (movement.from_share_number <= entry.to_share_number)
+					& (movement.to_share_number >= entry.from_share_number)
 					& (movement.creation > entry.creation)
 					& ~((movement.source_doctype == source.doctype) & (movement.source_name == source.name))
 					& (movement.is_reversal == 0)

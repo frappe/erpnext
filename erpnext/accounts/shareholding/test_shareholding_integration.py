@@ -133,3 +133,59 @@ class TestShareholdingIntegration(ShareholdingTestCase):
 			)[1][0].quantity,
 			3,
 		)
+
+	def test_unrelated_cancelled_transfer_does_not_block_issue_cancellation(self):
+		holder, issue, transfer = self.make_disjoint_issues_and_transfer(4, 6)
+		transfer.cancel()
+		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=False):
+			issue.cancel()
+		self.assertEqual(frappe.db.get_value("Share Transaction", issue.name, "docstatus"), 2)
+		filters = {"company": self.company, "share_class": self.share_class}
+		self.assertEqual([(row.shareholder, row.quantity) for row in positions(filters)[1]], [(holder, 3)])
+		self.assertEqual(
+			[
+				(row.shareholder, row.quantity)
+				for row in positions({**filters, "as_of_date": transfer.posting_date})[1]
+			],
+			[(transfer.to_shareholder, 3)],
+		)
+
+	def test_unrelated_active_transfer_does_not_block_issue_cancellation(self):
+		holder, issue, transfer = self.make_disjoint_issues_and_transfer(4, 6)
+		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=False):
+			issue.cancel()
+		rows = positions({"company": self.company, "share_class": self.share_class})[1]
+		self.assertEqual([(row.shareholder, row.quantity) for row in rows], [(transfer.to_shareholder, 3)])
+
+	def test_partially_overlapping_cancelled_transfer_blocks_issue_cancellation(self):
+		holder, issue, transfer = self.make_disjoint_issues_and_transfer(3, 4)
+		transfer.cancel()
+		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=False):
+			with self.assertRaisesRegex(frappe.ValidationError, "historical ownership"):
+				issue.cancel()
+		self.assertEqual(frappe.db.get_value("Share Transaction", issue.name, "docstatus"), 1)
+		self.assertFalse(
+			frappe.db.exists("Share Ledger Entry", {"share_transaction": issue.name, "is_reversal": 1})
+		)
+
+	def make_disjoint_issues_and_transfer(self, start, end):
+		holder = self.create_shareholder()
+		for start_number, end_number, days_ago in ((4, 6, -3), (1, 3, -2)):
+			issue = self.create_transaction(
+				transaction_type="Issue",
+				to_shareholder=holder,
+				posting_date=add_days(nowdate(), days_ago),
+				from_share_number=start_number,
+				to_share_number=end_number,
+				face_value_per_share=10,
+				rate_per_share=15,
+			)
+		transfer = self.create_transaction(
+			transaction_type="Transfer",
+			from_shareholder=holder,
+			to_shareholder=self.create_shareholder(),
+			posting_date=add_days(nowdate(), -1),
+			from_share_number=start,
+			to_share_number=end,
+		)
+		return holder, issue, transfer
