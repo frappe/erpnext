@@ -9,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import flt, get_link_to_form, getdate
 
+from erpnext.accounts.doctype.sales_invoice.services.inter_company import get_inter_company_counterpart
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
 
 
@@ -162,15 +163,6 @@ def validate_inter_company_transaction(doc, doctype):
 		partytype = "Supplier" if doctype in ["Sales Invoice", "Sales Order"] else "Customer"
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
-	company = details.get("company")
-	default_currency = frappe.get_cached_value("Company", company, "default_currency")
-	if default_currency != doc.currency:
-		frappe.throw(
-			_("Company currencies of both the companies should match for Inter Company Transactions.")
-		)
-
-	return
-
 
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name: str, target_doc: str | dict | Document | None = None):
@@ -190,24 +182,38 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
-		received_items = {}
+		received_items = (
+			get_received_items(source_name, "Sales Order", "purchase_order_item")
+			if doctype == "Purchase Order"
+			else {}
+		)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 
 	def update_details(source_doc, target_doc, source_parent):
-		target_doc.inter_company_invoice_reference = source_doc.name
+		_, reference_field = get_inter_company_counterpart(target_doc.doctype)
+		target_doc.set(reference_field, source_doc.name)
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			_apply_purchase_party_details(target_doc, source_doc, details)
 		else:
 			_apply_sales_party_details(target_doc, source_doc, details)
 
+	def get_pending_qty(row):
+		received_stock_qty = received_items.get(row.name, 0.0)
+		if not received_stock_qty:
+			return flt(row.qty)
+
+		pending_stock_qty = flt(flt(row.stock_qty) - received_stock_qty, row.precision("stock_qty"))
+		return flt(max(pending_stock_qty, 0) / (flt(row.conversion_factor) or 1), row.precision("qty"))
+
 	def update_item(source, target, source_parent):
-		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
+		target.qty = get_pending_qty(source)
 		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
 			target.purchase_order = source.parent
 			target.purchase_order_item = source.name
@@ -232,7 +238,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
+		"condition": lambda doc: not doc.get("closed") and get_pending_qty(doc) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -263,6 +269,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		{
 			doctype: {
 				"doctype": target_doctype,
+				"validation": {"docstatus": ["=", 1]},
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
 				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse", "cost_center"],
@@ -273,12 +280,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		set_missing_values,
 	)
 	if not doclist.get("items"):
-		frappe.throw(
-			_(
+		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
+			message = _(
 				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
 				"Please check the existing linked {2}s."
-			).format(target_doctype, doctype, target_doctype)
-		)
+			)
+		else:
+			message = _(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully ordered. "
+				"Please check the existing linked {2}s."
+			)
+		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
 
@@ -297,7 +309,6 @@ def _get_linked_address(address, link_doctype, link_name):
 
 
 def _apply_purchase_party_details(target_doc, source_doc, details):
-	currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
 	target_doc.company = details.get("company")
 	target_doc.supplier = details.get("party")
 	target_doc.is_internal_supplier = 1
@@ -326,9 +337,6 @@ def _apply_purchase_party_details(target_doc, source_doc, details):
 	):
 		update_address(target_doc, "billing_address", "billing_address_display", source_doc.customer_address)
 
-	if currency:
-		target_doc.currency = currency
-
 	update_taxes(
 		target_doc,
 		party=target_doc.supplier,
@@ -341,7 +349,6 @@ def _apply_purchase_party_details(target_doc, source_doc, details):
 
 
 def _apply_sales_party_details(target_doc, source_doc, details):
-	currency = frappe.db.get_value("Customer", details.get("party"), "default_currency")
 	target_doc.company = details.get("company")
 	target_doc.customer = details.get("party")
 	target_doc.selling_price_list = source_doc.buying_price_list
@@ -359,9 +366,6 @@ def _apply_sales_party_details(target_doc, source_doc, details):
 	):
 		update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
 
-	if currency:
-		target_doc.currency = currency
-
 	update_taxes(
 		target_doc,
 		party=target_doc.customer,
@@ -376,16 +380,17 @@ def _apply_sales_party_details(target_doc, source_doc, details):
 
 @frappe.whitelist()
 def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
-	# The only two targets this resolves a reference field for. Stating them rejects a caller
+	# The targets this resolves a reference field for. Stating them rejects a caller
 	# supplied doctype that would otherwise be filtered on a column it does not have.
 	reference_fields = {
-		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
-		"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice", "sales_invoice_item"),
+		"Purchase Order": ("inter_company_order_reference", "Sales Order", "sales_order_item"),
+		"Sales Order": ("inter_company_order_reference", "Purchase Order", "purchase_order_item"),
 	}
 	if doctype not in reference_fields:
 		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
 
-	reference_field, source_doctype = reference_fields[doctype]
+	reference_field, source_doctype, item_reference_field = reference_fields[doctype]
 
 	# `reference_name` is the caller's own document. The targets belong to the counterpart company
 	# and the caller legitimately may not be able to read them, so the source is what decides
@@ -394,7 +399,7 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 
 	# `reference_fieldname` is selected as a column below and its value becomes the result key,
 	# so an unchecked one returns any field of the item table to the caller.
-	if not frappe.get_meta(doctype + " Item").has_field(reference_fieldname):
+	if reference_fieldname != item_reference_field:
 		frappe.throw(_("Invalid field {0}").format(reference_fieldname), frappe.PermissionError)
 
 	filters = {
@@ -412,12 +417,12 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
-			fields=[reference_fieldname, "qty"],
+			fields=[reference_fieldname, "stock_qty"],
 		)
 		for item in received_items_data:
 			key = item.get(reference_fieldname)
 			if key:
-				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
 
 	return received_items_map
 

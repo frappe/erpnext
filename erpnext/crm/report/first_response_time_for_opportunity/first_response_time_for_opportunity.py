@@ -29,9 +29,15 @@ def execute(filters=None):
 		.where(
 			creation_date.between(filters.from_date, filters.to_date) & (opportunity.first_response_time > 0)
 		)
+		.where(opportunity.name.isin(get_permitted_opportunities(filters)))
 		.groupby(creation_date)
 		.orderby(creation_date, order=Order.desc)
 		.run()
 	)
 
 	return columns, data
+
+
+def get_permitted_opportunities(filters):
+	query_filters = {"company": filters.company} if filters.get("company") else {}
+	return frappe.qb.get_query("Opportunity", filters=query_filters, ignore_permissions=False)

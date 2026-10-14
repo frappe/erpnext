@@ -65,6 +65,8 @@ class AssetMaintenance(Document):
 			throw(_("Asset {0} must be submitted").format(self.asset_name))
 
 	def set_task_status(self, task):
+		if task.maintenance_status == "Cancelled":
+			return
 		if getdate(task.next_due_date) < getdate(nowdate()):
 			task.maintenance_status = "Overdue"
 		elif task.maintenance_status == "Overdue":
@@ -107,6 +109,8 @@ class AssetMaintenance(Document):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
 			tasks_names.append(task.name)
+			if task.maintenance_status == "Cancelled":
+				continue
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
 			)

@@ -220,7 +220,7 @@ class LIFOValuation(BinWiseValuation):
 
 		args:
 		        qty: quantity to remove
-		        rate: outgoing rate - ignored. Kept for backwards compatibility.
+		        outgoing_rate: rate of the bin a purchase return takes first
 		        rate_generator: function to be called if stack is not found and rate is required.
 		"""
 		if not rate_generator:
@@ -232,8 +232,16 @@ class LIFOValuation(BinWiseValuation):
 				# rely on rate generator.
 				self.stack.append([0, rate_generator()])
 
-			# start at the end.
 			index = -1
+			if is_return_purchase_entry:
+				index = next(
+					(
+						idx
+						for idx in reversed(range(len(self.stack)))
+						if self.stack[idx][RATE] == outgoing_rate
+					),
+					-1,
+				)
 
 			stock_bin = self.stack[index]
 			if qty >= stock_bin[QTY]:

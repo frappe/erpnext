@@ -5,15 +5,17 @@
 import frappe
 from frappe.query_builder.functions import Lower
 from frappe.rate_limiter import rate_limit
-from frappe.utils import escape_html
+from frappe.utils import escape_html, validate_email_address
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public Contact Us form; only parses the sender and sets lead ownership
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=3 * 60)
 def send_message(sender: str, message: str, subject: str = "Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
 	website_send_message(sender, message, subject)
+	sender = validate_email_address(sender, throw=True)
 
 	message = escape_html(message)
 
