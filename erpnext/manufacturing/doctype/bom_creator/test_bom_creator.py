@@ -410,6 +410,36 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.create_boms()
 		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
 
+	def test_boms_are_created_from_the_saved_creator(self):
+		import json
+		from unittest.mock import patch
+
+		from frappe.handler import run_doc_method
+
+		make_item("Kick Scooter", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Kick Scooter BOM Saved",
+			company="_Test Company",
+			item_code="Kick Scooter",
+			qty=1,
+			currency="INR",
+		)
+		doc.add_item(fg_item="Kick Scooter", fg_reference_id=doc.name, item_code="Frame", qty=1)
+		doc.reload()
+		doc.submit()
+
+		posted = doc.as_dict()
+		posted["qty"] = 7
+		posted["items"][0]["qty"] = 50
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+
+		with patch.object(frappe, "enqueue_doc") as enqueue_doc:
+			frappe.local.response = frappe._dict(docs=[])
+			run_doc_method("enqueue_create_boms", docs=json.dumps(posted, default=str))
+
+		self.assertEqual(enqueue_doc.call_args.args, ("BOM Creator", doc.name, "create_boms"))
+
 
 def create_items():
 	raw_materials = [
