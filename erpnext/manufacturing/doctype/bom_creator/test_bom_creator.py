@@ -583,6 +583,27 @@ class TestBOMCreator(ERPNextTestSuite):
 		top_bom.cancel()
 		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Submitted")
 
+	def test_successful_run_clears_the_error_log(self):
+		make_item("Road Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Road Bike BOM Error Log",
+			company="_Test Company",
+			item_code="Road Bike",
+			qty=1,
+			currency="INR",
+		)
+		doc.add_item(fg_item="Road Bike", fg_reference_id=doc.name, item_code="Frame", qty=1)
+		doc.reload()
+		doc.submit()
+		doc.db_set({"status": "Failed", "error_log": "Disabled Item Frame cannot be used in BOMs"})
+
+		doc.reload()
+		doc.create_boms()
+		self.assertEqual(
+			frappe.db.get_value("BOM Creator", doc.name, ["status", "error_log"]), ("Completed", None)
+		)
+		self.assertTrue(frappe.get_meta("BOM Creator").get_field("error_log").no_copy)
+
 
 def create_items():
 	raw_materials = [

@@ -330,7 +330,7 @@ class BOMCreator(Document):
 		}
 		"""
 
-		self.db_set("status", "In Progress")
+		self.db_set({"status": "In Progress", "error_log": None})
 		production_item_wise_rm = OrderedDict({})
 
 		final_product = (self.item_code, self.name)
