@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, nowdate
 
@@ -126,6 +128,18 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		self.assertEqual(last_sale.cost_of_units_sold, 0.34)
 		investment.reload()
 		self.assertEqual((investment.total_cost, investment.status), (0, "Redeemed"))
+
+	def test_only_submit_locks_the_balance(self):
+		investment = make_submitted_investment(investment_type="_Test Equity Fund")
+		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
+		sale = make_transaction(investment.name, "Sale", units=40, rate=10)
+
+		with patch.object(frappe.db, "get_values", wraps=frappe.db.get_values) as get_values:
+			sale.insert()
+			self.assertFalse(any(call.kwargs.get("for_update") for call in get_values.call_args_list))
+
+			sale.submit()
+			self.assertTrue(any(call.kwargs.get("for_update") for call in get_values.call_args_list))
 
 	def test_cannot_sell_more_units_than_held(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")

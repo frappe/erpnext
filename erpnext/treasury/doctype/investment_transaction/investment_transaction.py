@@ -282,13 +282,16 @@ class InvestmentTransaction(AccountsController):
 
 	def validate_balance(self, purchase_field, label, required):
 		# lock the investment so two exits submitted together cannot both spend the same balance,
-		# and read with locks too, so the second exit sees the first one once it commits
-		frappe.db.get_value("Investment", self.investment, "name", for_update=True)
+		# and read with locks too, so the second exit sees the first one once it commits;
+		# a draft save posts nothing, so it does not lock
+		lock = self.docstatus == 1
+		if lock:
+			frappe.db.get_value("Investment", self.investment, "name", for_update=True)
 
 		# only what was bought by the posting date can leave, so an exit never takes a later purchase's cost
 		purchased = sum(
 			flt(p.get(purchase_field))
-			for p in get_purchases(self.investment, for_update=True)
+			for p in get_purchases(self.investment, for_update=lock)
 			if getdate(p.posting_date) <= getdate(self.posting_date)
 		)
 		exit_field = "units" if purchase_field == "units" else "gross_amount"
@@ -302,7 +305,7 @@ class InvestmentTransaction(AccountsController):
 				"name": ("!=", self.name or ""),
 			},
 			exit_field,
-			for_update=True,
+			for_update=lock,
 		)
 		available = purchased - sum(flt(value) for (value,) in exits)
 
