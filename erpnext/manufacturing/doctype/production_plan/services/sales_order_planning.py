@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, now_datetime
 from pypika.terms import ExistsCriterion
 
@@ -68,6 +68,7 @@ class SalesOrderSourcingService:
 				& (mr.status != "Stopped")
 				& (mr.company == self.doc.company)
 				& (mr_item.qty > IfNull(mr_item.ordered_qty, 0))
+				& (mr_item.stock_qty > IfNull(_mr_item_planned_qty_query(mr_item), 0))
 				& bom_exists
 			)
 		)
@@ -211,7 +212,12 @@ class SalesOrderSourcingService:
 		)
 		if self.doc.item_code:
 			query = query.where(mr_item.item_code == self.doc.item_code)
-		return query.run(as_dict=True)
+
+		items = query.run(as_dict=True)
+		for item in items:
+			item.pending_qty = max(min(flt(item.pending_qty), flt(item.stock_qty) - flt(item.planned_qty)), 0)
+
+		return items
 
 	def add_items(self, items):
 		refs = {}
@@ -371,7 +377,18 @@ def _mr_item_columns(mr_item):
 		mr_item.description,
 		mr_item.bom_no,
 		((mr_item.qty - mr_item.ordered_qty) * mr_item.conversion_factor).as_("pending_qty"),
+		mr_item.stock_qty,
+		IfNull(_mr_item_planned_qty_query(mr_item), 0).as_("planned_qty"),
 	]
+
+
+def _mr_item_planned_qty_query(mr_item):
+	plan_item = frappe.qb.DocType("Production Plan Item")
+	return (
+		frappe.qb.from_(plan_item)
+		.select(Sum(plan_item.planned_qty))
+		.where((plan_item.material_request_item == mr_item.name) & (plan_item.docstatus == 1))
+	)
 
 
 def _mr_items_filter(bom, mr_item, mr_list):

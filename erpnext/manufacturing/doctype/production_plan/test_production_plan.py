@@ -878,6 +878,40 @@ class TestProductionPlan(ERPNextTestSuite):
 				frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty"), qty
 			)
 
+	def test_material_request_is_not_planned_twice(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		request = make_material_request(
+			item_code="Test Production Item 1", qty=10, uom="Nos", material_request_type="Manufacture"
+		)
+
+		def plan_from_request(planned_qty=None):
+			plan = frappe.new_doc("Production Plan")
+			plan.company = request.company
+			plan.get_items_from = "Material Request"
+			plan.append("material_requests", {"material_request": request.name})
+			plan.get_items()
+			if planned_qty:
+				plan.po_items[0].planned_qty = planned_qty
+			return plan
+
+		first = plan_from_request(planned_qty=6)
+		first.submit()
+
+		second = plan_from_request()
+		self.assertEqual([row.planned_qty for row in second.po_items], [4])
+
+		second.get_pending_material_requests()
+		self.assertIn(request.name, [row.material_request for row in second.material_requests])
+
+		second.po_items[0].planned_qty = 4
+		second.submit()
+		third = frappe.new_doc("Production Plan")
+		third.company = request.company
+		third.get_items_from = "Material Request"
+		third.get_pending_material_requests()
+		self.assertNotIn(request.name, [row.material_request for row in third.material_requests])
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
