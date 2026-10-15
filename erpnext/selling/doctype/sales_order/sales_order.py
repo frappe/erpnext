@@ -2134,6 +2134,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 	"""Returns items with BOM that already do not have a linked work order"""
 	if sales_order:
 		so = frappe.get_doc("Sales Order", sales_order)
+		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
 
