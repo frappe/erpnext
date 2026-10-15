@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.model.document import Document
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -47,6 +48,33 @@ class TestAccountsPayableSummary(ERPNextTestSuite):
 		pi.due_date = due_date or today()
 		pi.insert()
 		return pi.submit()
+
+	def _make_journal_entry(self, amount: float, offset_account: str, **supplier_row) -> Document:
+		"""Credit the supplier by `amount` (a negative amount debits it) against `offset_account`."""
+		je = frappe.new_doc("Journal Entry")
+		je.update({"company": self.company, "posting_date": today()})
+		je.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": max(amount, 0),
+				"debit_in_account_currency": max(-amount, 0),
+				**supplier_row,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": offset_account,
+				"cost_center": "_Test Cost Center - _TC",
+				"debit_in_account_currency": max(amount, 0),
+				"credit_in_account_currency": max(-amount, 0),
+			},
+		)
+		return je.submit()
 
 	def _expected_row(self, pi, **overrides):
 		supplier_group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
@@ -176,3 +204,14 @@ class TestAccountsPayableSummary(ERPNextTestSuite):
 		row = execute(self._filters(cost_center="Main - _TC"))[1][0]
 
 		self.assertEqual((row.advance, row.paid, row.outstanding), (50.0, 0.0, -50.0))
+
+	def test_06_payment_against_journal_entry_is_not_advance(self):
+		debt = self._make_journal_entry(500, "_Test Account Cost for Goods Sold - _TC")
+		self._make_journal_entry(
+			-300, "_Test Bank - _TC", reference_type="Journal Entry", reference_name=debt.name
+		)
+		self._make_journal_entry(-80, "_Test Bank - _TC")
+
+		row = execute(self._filters())[1][0]
+
+		self.assertEqual((row.advance, row.invoiced, row.paid, row.outstanding), (80.0, 500.0, 300.0, 120.0))
