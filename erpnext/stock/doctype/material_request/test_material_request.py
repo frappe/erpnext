@@ -1997,6 +1997,12 @@ class TestMaterialRequest(ERPNextTestSuite):
 			}
 		).insert(ignore_permissions=True)
 		self.assertNotIn(scoped_user.email, get_email_list("_Test Company 1"))
+		self.assertIn(scoped_user.email, get_email_list("_Test Company"))
+
+		from unittest.mock import patch
+
+		with patch("erpnext.stock.reorder_item.get_ancestors_of", return_value=["_Test Company"]):
+			self.assertIn(user.email, get_email_list("_Test Company 1"))
 
 		message = frappe.render_template(
 			"templates/emails/reorder_item.html",

@@ -7,6 +7,7 @@ from math import ceil
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, escape_html, flt, nowdate
+from frappe.utils.nestedset import get_ancestors_of
 
 import erpnext
 
@@ -342,7 +343,7 @@ def get_email_list(company):
 
 	if users:
 		query = query.where(user_table.name.isin(users))
-	elif restricted_users := get_company_restricted_users():
+	elif restricted_users := get_company_restricted_users(company):
 		query = query.where(user_table.name.notin(restricted_users))
 
 	emails = query.run(as_dict=True)
@@ -360,26 +361,32 @@ def get_comapny_wise_users(company):
 	if parent_company := frappe.db.get_value("Company", company, "parent_company"):
 		companies.append(parent_company)
 
-	users = frappe.get_all(
-		"User Permission",
-		filters={"allow": "Company", "for_value": ("in", companies), "apply_to_all_doctypes": 1},
-		fields=["user"],
-	)
-
-	return [user.user for user in users]
-
-
-def get_company_restricted_users():
-	if frappe.db.count("Company") == 1:
-		return []
-
 	return frappe.get_all(
 		"User Permission",
-		filters={"allow": "Company"},
+		filters={"allow": "Company", "for_value": ("in", companies)},
 		or_filters={"apply_to_all_doctypes": 1, "applicable_for": "Material Request"},
 		pluck="user",
 		distinct=True,
 	)
+
+
+def get_company_restricted_users(company):
+	if frappe.db.count("Company") == 1:
+		return []
+
+	permissions = frappe.get_all(
+		"User Permission",
+		filters={"allow": "Company"},
+		or_filters={"apply_to_all_doctypes": 1, "applicable_for": "Material Request"},
+		fields=["user", "for_value", "hide_descendants"],
+	)
+	ancestors = set(get_ancestors_of("Company", company))
+	allowed_users = {
+		d.user
+		for d in permissions
+		if d.for_value == company or (d.for_value in ancestors and not d.hide_descendants)
+	}
+	return list({d.user for d in permissions} - allowed_users)
 
 
 def notify_errors(exceptions_list):
