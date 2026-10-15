@@ -601,9 +601,12 @@ class JobCard(Document):
 
 		if not self.workstation:
 			workstations = get_workstations(self.workstation_type)
-			if workstations:
-				# Get the first workstation
-				self.workstation = workstations[0]
+			if not workstations:
+				frappe.throw(
+					_("Workstation Type {0} has no enabled Workstation").format(bold(self.workstation_type))
+				)
+
+			self.workstation = workstations[0]
 
 		if not data:
 			row.planned_start_time = args.from_time

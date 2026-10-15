@@ -41,6 +41,37 @@ class TestWorkstationType(ERPNextTestSuite):
 		workstation = frappe.db.get_value("Job Card", {"work_order": work_order.name}, "workstation")
 		self.assertEqual(workstation, active.name)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 0})
+	def test_type_without_enabled_workstation_gives_a_clear_error(self):
+		workstation_type = create_workstation_type(workstation_type="_Test WT All Disabled").name
+		make_workstation(workstation_name="_Test WS All Disabled", workstation_type=workstation_type).db_set(
+			"disabled", 1
+		)
+
+		fg_item = make_item("_Test FG All Disabled", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test RM All Disabled", {"is_stock_item": 1}).name
+		operation = make_operation(operation="_Test Op All Disabled").name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_submit=True)
+		bom.append(
+			"operations",
+			{
+				"operation": operation,
+				"workstation_type": workstation_type,
+				"time_in_mins": 60,
+				"hour_rate": 100,
+			},
+		)
+		bom.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"has no enabled Workstation",
+			make_wo_order_test_record,
+			item=fg_item,
+			bom_no=bom.name,
+			qty=1,
+		)
+
 	def test_type_cost_change_reaches_its_workstations(self):
 		component = "_Test Component Type Rate"
 		if not frappe.db.exists("Workstation Operating Component", component):
