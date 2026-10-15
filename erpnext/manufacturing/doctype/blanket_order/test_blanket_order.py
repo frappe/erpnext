@@ -300,6 +300,26 @@ class TestBlanketOrder(ERPNextTestSuite):
 			[frappe.db.get_value("Purchase Order Item", row.name, "qty") for row in po.items], [40, 60]
 		)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 10})
+	def test_blanket_order_lookup_keeps_order_within_allowance(self):
+		item = make_item("_Test Blanket Order Allowance Lookup Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item)
+		po = make_purchase_order_against(bo, qty=100)
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.submit()
+
+		details = get_blanket_order_details(
+			{
+				"company": "_Test Company",
+				"currency": bo.currency,
+				"supplier": bo.supplier,
+				"doctype": "Purchase Order",
+				"item_code": item,
+				"transaction_date": today(),
+			}
+		)
+		self.assertEqual(details.blanket_order, bo.name)
+
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
 		po = make_purchase_order_against(bo, qty=10)
