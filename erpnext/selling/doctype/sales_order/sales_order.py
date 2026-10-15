@@ -2156,7 +2156,7 @@ def get_potentially_billable_sales_orders(
 	item = qb.DocType("Item")
 
 	query = frappe.qb.get_query(
-		"Sales Order", fields=["name", "customer", "transaction_date"], filters=filters
+		"Sales Order", fields=["name", "customer", "transaction_date", "creation"], filters=filters
 	)
 	if txt:
 		query = query.where(get_text_search_criterion(so, txt))
@@ -2169,7 +2169,8 @@ def get_potentially_billable_sales_orders(
 		.where(get_potentially_billable_item_criterion(so, so_item, item))
 		.where(Criterion.all(build_qb_match_conditions("Sales Order")))
 		.distinct()
-		.orderby(so.transaction_date, order=Order.desc)
+		.orderby(so.transaction_date, order=Order.asc)
+		.orderby(so.creation, order=Order.asc)
 		.limit(cint(page_len))
 		.offset(cint(start))
 		.run(as_dict=True)
