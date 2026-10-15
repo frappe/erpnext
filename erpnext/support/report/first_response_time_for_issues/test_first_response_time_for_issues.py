@@ -78,9 +78,22 @@ class TestFirstResponseTimeForIssues(ERPNextTestSuite):
 		self.assertEqual(float(execute(frappe._dict(filters, company="_Test Company"))[1][0][1]), 5400)
 		self.assertEqual(execute(frappe._dict(filters, company="_Test Company 1"))[1], ())
 
+	def test_average_ignores_fractional_seconds_on_every_database(self):
+		today = getdate()
+		frappe.db.delete("Issue", {"creation": (">=", today)})
+
+		# Each timestamp is cut to whole seconds: 3601.2 - 0.7 counts as 3601 - 0
+		make_responded_issue(3600, 3600.5, creation_microsecond=700000)
+
+		_columns, data = execute(frappe._dict(from_date=today, to_date=today))
+		self.assertEqual(float(data[0][1]), 3601)
+
 
 def make_responded_issue(
-	first_response_time: float, calendar_seconds: float, customer: str | None = None
+	first_response_time: float,
+	calendar_seconds: float,
+	customer: str | None = None,
+	creation_microsecond: int = 0,
 ) -> str:
 	issue = frappe.get_doc(
 		{
@@ -93,7 +106,7 @@ def make_responded_issue(
 		}
 	).insert(ignore_permissions=True)
 
-	creation = now_datetime().replace(hour=0, minute=0, second=0, microsecond=0)
+	creation = now_datetime().replace(hour=0, minute=0, second=0, microsecond=creation_microsecond)
 	frappe.db.set_value(
 		"Issue",
 		issue.name,
