@@ -292,7 +292,8 @@ erpnext.sales_common = {
 						.filter(
 							(item) =>
 								item.parent_detail_docname === cdn ||
-								parseInt(item.parent_detail_docname) === locals[cdt][cdn].idx
+								(/^\d+$/.test(String(item.parent_detail_docname)) &&
+									Number(item.parent_detail_docname) === locals[cdt][cdn].idx)
 						)
 						.forEach((item) => {
 							frappe.model.set_value(
