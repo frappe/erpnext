@@ -121,6 +121,10 @@
 		padding-top: var(--margin-md);
 	}
 
+	.co-two-col .co-panel > .co-chart:last-child {
+		margin-top: auto;
+	}
+
 	.co-age-chart {
 		display: flex;
 		flex: 1;
