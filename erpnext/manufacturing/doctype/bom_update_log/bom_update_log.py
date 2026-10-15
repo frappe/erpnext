@@ -60,6 +60,7 @@ class BOMUpdateLog(Document):
 			self.validate_boms_are_specified()
 			self.validate_same_bom()
 			self.validate_bom_items()
+			self.validate_not_a_semi_finished_goods_operation_bom()
 		else:
 			self.validate_bom_cost_update_in_progress()
 
@@ -100,6 +101,30 @@ class BOMUpdateLog(Document):
 
 		if (current_bom.company, current_bom.currency) != (new_bom.company, new_bom.currency):
 			frappe.throw(_("Current BOM and New BOM must have the same company and currency"))
+
+	def validate_not_a_semi_finished_goods_operation_bom(self):
+		bom = frappe.qb.DocType("BOM")
+		bom_operation = frappe.qb.DocType("BOM Operation")
+		parents = (
+			frappe.qb.from_(bom_operation)
+			.inner_join(bom)
+			.on(bom.name == bom_operation.parent)
+			.select(bom.name)
+			.distinct()
+			.where(
+				(bom_operation.bom_no == self.current_bom)
+				& (bom_operation.parenttype == "BOM")
+				& (bom.docstatus < 2)
+				& (bom.track_semi_finished_goods == 1)
+			)
+		).run(pluck=True)
+
+		if parents:
+			frappe.throw(
+				_(
+					"BOM {0} is the BOM of an operation in {1}, which track semi-finished goods. Amend those BOMs to use the new BOM so their operation materials are fetched again."
+				).format(frappe.bold(self.current_bom), ", ".join(frappe.bold(name) for name in parents))
+			)
 
 	def validate_bom_cost_update_in_progress(self):
 		"If another Cost Updation Log is still in progress, dont make new ones."

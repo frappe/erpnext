@@ -209,7 +209,7 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("BOM", parent.name, "total_cost"), 600)
 		self.assertEqual(frappe.db.get_value("BOM", top.name, "total_cost"), 600)
 
-	def test_replace_updates_operation_boms(self):
+	def test_replace_refuses_semi_finished_goods_operation_boms(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -241,12 +241,15 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 		parent.insert()
 		parent.submit()
 
-		enqueue_replace_bom(boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name))
-
-		operation_boms = frappe.get_all(
-			"BOM Operation", filters={"parent": parent.name}, pluck="bom_no", order_by="idx"
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"track semi-finished goods",
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name),
 		)
-		self.assertEqual(operation_boms[0], sub_2.name)
+		self.assertEqual(
+			frappe.db.get_value("BOM Operation", {"parent": parent.name, "idx": 1}, "bom_no"), sub_1.name
+		)
 
 
 def make_test_bom(item, rows):
