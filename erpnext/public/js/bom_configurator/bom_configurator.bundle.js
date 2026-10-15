@@ -248,9 +248,7 @@ class BOMConfigurator {
 		dialog.show();
 		view.events.set_default_qty(dialog);
 
-		dialog.set_primary_action(__("Add"), () => {
-			let bom_item = dialog.get_values();
-
+		dialog.set_primary_action(__("Add"), (bom_item) => {
 			frappe.call({
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
@@ -345,9 +343,7 @@ class BOMConfigurator {
 		dialog.show();
 		view.events.set_default_qty(dialog);
 
-		dialog.set_primary_action(__("Add"), () => {
-			let bom_item = dialog.get_values();
-
+		dialog.set_primary_action(__("Add"), (bom_item) => {
 			frappe.call({
 				method: "add_sub_assembly",
 				doc: this.frm.doc,

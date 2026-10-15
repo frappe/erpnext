@@ -585,8 +585,8 @@ erpnext.utils.select_alternate_items = function (opts) {
 				],
 			},
 		],
-		primary_action: function () {
-			const args = this.get_values()["alternative_items"];
+		primary_action: function (values) {
+			const args = values.alternative_items;
 			const alternative_items = args.filter((d) => {
 				if (d.alternate_item && d.item_code != d.alternate_item) {
 					return true;
