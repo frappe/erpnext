@@ -1180,6 +1180,7 @@ class SubcontractingController(StockController):
 
 	def make_sl_entries_for_supplier_warehouse(self, sl_entries):
 		if hasattr(self, "supplied_items"):
+			projects = {row.name: row.get("project") for row in self.get("items")}
 			for item in self.get("supplied_items"):
 				# negative quantity is passed, as raw material qty has to be decreased
 				# when SCR is submitted and it has to be increased when SCR is cancelled
@@ -1192,6 +1193,7 @@ class SubcontractingController(StockController):
 							"warehouse": self.supplier_warehouse,
 							"actual_qty": -1 * flt(item.consumed_qty, item.precision("consumed_qty")),
 							"dependant_sle_voucher_detail_no": item.reference_name,
+							"project": projects.get(item.reference_name) or self.get("project"),
 						},
 					)
 				)
