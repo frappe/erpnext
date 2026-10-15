@@ -149,6 +149,17 @@ class TestBilledItemsToBeReceived(FrappeTestCase):
 
 		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
 
+	def test_receipt_return_counted_once_across_invoices_of_one_receipt_row(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=200)
+		first_invoice, second_invoice = (self.bill_receipt(receipt.name, qty=5) for _ in range(2))
+		self.return_to_supplier(receipt.name, qty=2)
+
+		data = self.run_report()
+
+		self.assertEqual(self.get_rows_for(data, first_invoice), [])
+		rows = self.get_rows_for(data, second_invoice)
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
+
 	def test_receipt_return_reopens_invoice_received_later(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
@@ -169,6 +180,13 @@ class TestBilledItemsToBeReceived(FrappeTestCase):
 		receipt.insert()
 		receipt.submit()
 		return receipt.name
+
+	def bill_receipt(self, receipt: str, qty: float) -> str:
+		invoice = make_invoice_from_receipt(receipt)
+		invoice.items[0].qty = qty
+		invoice.insert()
+		invoice.submit()
+		return invoice.name
 
 	def return_to_supplier(self, receipt: str, qty: float) -> None:
 		receipt_return = make_purchase_return(receipt)
