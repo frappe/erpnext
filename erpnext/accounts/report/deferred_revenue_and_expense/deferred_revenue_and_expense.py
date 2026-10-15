@@ -106,6 +106,9 @@ class Deferred_Item:
 		actual_months = rounded(total_months * prorate, 1)
 
 		already_booked_amount = self.get_item_total()
+		if not actual_months:
+			return self.base_net_amount - already_booked_amount
+
 		base_amount = self.base_net_amount / actual_months
 
 		if base_amount + already_booked_amount > self.base_net_amount:
@@ -152,7 +155,7 @@ class Deferred_Item:
 		forecast_start_date = (
 			add_days(self.last_entry_date, 1) if self.last_entry_date else self.service_start_date
 		)
-		if self.service_start_date != self.service_end_date and forecast_start_date < self.service_end_date:
+		if forecast_start_date <= self.service_end_date:
 			self.estimate_for_period_list = get_period_list(
 				self.filters.from_fiscal_year,
 				self.filters.to_fiscal_year,

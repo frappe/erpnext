@@ -395,6 +395,23 @@ class TestDeferredRevenueAndExpense(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(row["apr_2021"], 3000)
 		self.assertEqual(flt(sum(v for k, v in row.items() if k.endswith(("_2021", "_2022"))), 2), 36500)
 
+	def test_forecast_one_day_service(self):
+		for booking_basis in ("Days", "Months"):
+			with (
+				self.subTest(booking_basis=booking_basis),
+				self.change_settings("Accounts Settings", {"book_deferred_entries_based_on": booking_basis}),
+			):
+				si = self.make_deferred_sales_invoice("2021-04-15", "2021-04-15", 500)
+
+				row = next(
+					row
+					for row in self.get_report_rows("2021-04-01", "2021-06-30")
+					if row.get("name") == si.name
+				)
+
+				self.assertEqual(row["apr_2021"], 500)
+				self.assertEqual(row["may_2021"], 0)
+
 	def make_deferred_sales_invoice(self, service_start_date, service_end_date, rate, customer=None):
 		si = create_sales_invoice(
 			company=self.company,
