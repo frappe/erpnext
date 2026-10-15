@@ -59,7 +59,7 @@ erpnext.sales_common = {
 
 				if (this.frm.fields_dict.selling_price_list) {
 					this.frm.set_query("selling_price_list", function () {
-						return { filters: { selling: 1 } };
+						return { filters: { selling: 1, enabled: 1 } };
 					});
 				}
 
