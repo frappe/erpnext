@@ -860,19 +860,7 @@ class Item(Document):
 		item_group = frappe.get_cached_doc("Item Group", self.item_group)
 		if item_group.item_group_defaults:
 			for item in item_group.item_group_defaults:
-				self.append(
-					"item_defaults",
-					{
-						"company": item.company,
-						"default_warehouse": item.default_warehouse,
-						"default_price_list": item.default_price_list,
-						"buying_cost_center": item.buying_cost_center,
-						"default_supplier": item.default_supplier,
-						"expense_account": item.expense_account,
-						"selling_cost_center": item.selling_cost_center,
-						"income_account": item.income_account,
-					},
-				)
+				self.append("item_defaults", frappe.copy_doc(item))
 		else:
 			defaults = frappe.defaults.get_defaults() or {}
 

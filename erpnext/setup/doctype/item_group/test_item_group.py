@@ -84,6 +84,45 @@ class TestItemGroup(ERPNextTestSuite):
 		rebuild_tree("Item Group")
 		self.test_basic_tree()
 
+	def test_group_defaults_copy_all_populated_fields(self):
+		group = frappe.get_doc("Item Group", "_Test Item Group")
+		group.set(
+			"item_group_defaults",
+			[
+				{
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"default_discount_account": "_Test Account Sales - _TC",
+					"deferred_revenue_account": "_Test Account Sales - _TC",
+				}
+			],
+		)
+		group.set("taxes", [{"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"}])
+		group.save()
+		item = frappe.get_doc(
+			doctype="Item", item_code="_Test Copied Group Defaults", item_group=group.name, stock_uom="Nos"
+		).insert()
+		defaults = item.item_defaults[0]
+		self.assertEqual(defaults.default_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(defaults.default_discount_account, "_Test Account Sales - _TC")
+		self.assertEqual(defaults.deferred_revenue_account, "_Test Account Sales - _TC")
+		self.assertNotEqual(defaults.name, group.item_group_defaults[0].name)
+		self.assertEqual(item.taxes[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+
+		group.item_group_defaults[0].default_discount_account = "_Test Account Stock Expenses - _TC"
+		group.taxes[0].item_tax_template = "_Test Account Excise Duty @ 12 - _TC"
+		group.save()
+		item.save()
+		self.assertEqual(item.item_defaults[0].default_discount_account, "_Test Account Sales - _TC")
+		self.assertEqual(item.taxes[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+		new_item = frappe.get_doc(
+			doctype="Item", item_code="_Test Updated Group Defaults", item_group=group.name, stock_uom="Nos"
+		).insert()
+		self.assertEqual(
+			new_item.item_defaults[0].default_discount_account, "_Test Account Stock Expenses - _TC"
+		)
+		self.assertEqual(new_item.taxes[0].item_tax_template, "_Test Account Excise Duty @ 12 - _TC")
+
 	def test_move_group_into_another(self):
 		# before move
 		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
