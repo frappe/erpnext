@@ -102,25 +102,36 @@ def _diff_table_field(df, doc1, doc2, out):
 		return
 
 	identifier = _BOM_DIFF_IDENTIFIERS[df.fieldname]
-	old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
-	old_map = {d.get(identifier): d for d in old_value}
-	new_map = {d.get(identifier): d for d in new_value}
+	old_rows = {}
+	for row in doc1.get(df.fieldname):
+		old_rows.setdefault(row.get(identifier), []).append(row)
 
-	_collect_row_changes(df, identifier, old_map, new_value, out)
-	for d in old_value:
-		if d.get(identifier) not in new_map:
-			out.removed.append([df.fieldname, d.as_dict()])
+	unmatched_rows = []
+	for index, row in enumerate(doc2.get(df.fieldname)):
+		if not _pop_unchanged_row(old_rows.get(row.get(identifier), []), row):
+			unmatched_rows.append((index, row))
+
+	_collect_row_changes(df, identifier, old_rows, unmatched_rows, out)
+	for rows in old_rows.values():
+		out.removed.extend([df.fieldname, row.as_dict()] for row in rows)
 
 
-def _collect_row_changes(df, identifier, old_map, new_value, out):
-	for i, d in enumerate(new_value):
-		if d.get(identifier) not in old_map:
-			out.added.append([df.fieldname, d.as_dict()])
+def _pop_unchanged_row(candidates, row):
+	for index, candidate in enumerate(candidates):
+		if not get_diff(candidate, row, for_child=True):
+			return candidates.pop(index)
+
+
+def _collect_row_changes(df, identifier, old_rows, unmatched_rows, out):
+	for index, row in unmatched_rows:
+		candidates = old_rows.get(row.get(identifier))
+		if not candidates:
+			out.added.append([df.fieldname, row.as_dict()])
 			continue
 
-		diff = get_diff(old_map[d.get(identifier)], d, for_child=True)
+		diff = get_diff(candidates.pop(0), row, for_child=True)
 		if diff and diff.changed:
-			out.row_changed.append((df.fieldname, i, d.get(identifier), diff.changed))
+			out.row_changed.append((df.fieldname, index, row.get(identifier), diff.changed))
 
 
 @frappe.whitelist()
