@@ -361,6 +361,30 @@ class TestOpportunity(ERPNextTestSuite):
 		self.assertEqual(opp.territory, "_Test Territory Maharashtra")
 		self.assertEqual(opp.customer_group, "_Test Customer Group 1")
 
+	def test_party_change_keeps_explicit_edits_matching_previous_party(self):
+		frappe.db.set_value(
+			"Customer",
+			"_Test Customer",
+			{"territory": "_Test Territory India", "customer_group": "_Test Customer Group"},
+		)
+		frappe.db.set_value(
+			"Customer",
+			"_Test Customer 1",
+			{"territory": "_Test Territory Rest Of The World", "customer_group": "_Test Customer Group 1"},
+		)
+
+		opp = make_opportunity(with_items=0)
+		opp.territory = "_Test Territory Maharashtra"
+		opp.customer_group = "_Test Customer Group 1"
+		opp.save()
+
+		opp.party_name = "_Test Customer 1"
+		opp.territory = "_Test Territory India"
+		opp.customer_group = "_Test Customer Group"
+		opp.save()
+		self.assertEqual(opp.territory, "_Test Territory India")
+		self.assertEqual(opp.customer_group, "_Test Customer Group")
+
 	def test_get_item_details(self):
 		details = get_item_details("_Test Item")
 		self.assertEqual(details["item_name"], frappe.db.get_value("Item", "_Test Item", "item_name"))

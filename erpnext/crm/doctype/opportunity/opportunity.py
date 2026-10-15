@@ -451,9 +451,15 @@ class Opportunity(TransactionBase, CRMNote):
 
 		party_meta = frappe.get_meta(self.opportunity_from)
 		for fieldname in PARTY_DERIVED_FIELDS:
-			previous_party_value = get_party_field_value(previous, fieldname)
-			if party_meta.has_field(fieldname) and self.get(fieldname) == previous_party_value:
+			if party_meta.has_field(fieldname) and self.holds_previous_party_value(previous, fieldname):
 				self.set(fieldname, frappe.db.get_value(self.opportunity_from, self.party_name, fieldname))
+
+	def holds_previous_party_value(self, previous: "Opportunity", fieldname: str) -> bool:
+		"""True if `fieldname` was not edited in this save and still matches what the previous party supplies."""
+		if self.has_value_changed(fieldname):
+			return False
+
+		return self.get(fieldname) == get_party_field_value(previous, fieldname)
 
 	def has_party_changed(self) -> bool:
 		return self.has_value_changed("party_name") or self.has_value_changed("opportunity_from")
