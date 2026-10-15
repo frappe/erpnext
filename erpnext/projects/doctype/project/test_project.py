@@ -786,6 +786,21 @@ class TestProject(ERPNextTestSuite):
 		self.assertNotEqual(board, lead_board)
 		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
 
+	def test_kanban_board_skips_another_users_private_board(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		project = make_project({"project_name": f"_Test Kanban Private {frappe.generate_hash(length=6)}"})
+		private_board = quick_kanban_board("Task", f"{project.project_name} private", "status", project.name)
+		private_board.db_set("private", 1)
+
+		user = self._create_portal_user(f"kanban_private_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", user).add_roles("Projects User")
+		with self.set_user(user):
+			board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, private_board.name)
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "owner"), user)
+
 	def test_cost_center_name_needs_project_access(self):
 		project = make_project({"project_name": f"_Test Cost Center Access {frappe.generate_hash(length=6)}"})
 		project.db_set("cost_center", "_Test Cost Center - _TC")
