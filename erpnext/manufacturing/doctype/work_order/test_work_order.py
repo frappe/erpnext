@@ -4304,6 +4304,27 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "auto_reserve_serial_and_batch": 1},
+	)
+	def test_consumption_counts_split_batch_once_across_reservations(self):
+		wo = make_partially_reserved_work_order(
+			"Test Split Batch Consumption RM",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TST-SPLIT-CON-.###"},
+		)
+		for _ in range(2):
+			frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3)).submit()
+
+		consumed_qty = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": wo.name, "warehouse": wo.wip_warehouse, "docstatus": 1},
+			pluck="consumed_qty",
+			order_by="creation",
+		)
+		self.assertEqual(consumed_qty, [2, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
 	def test_ledger_preview_ignores_own_work_order_reservation(self):

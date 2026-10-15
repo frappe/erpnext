@@ -3300,14 +3300,14 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 		if key not in row_wise_serial_batch:
 			row_wise_serial_batch[key] = frappe._dict(
 				{
-					"serial_nos": [],
+					"serial_nos": set(),
 					"batch_nos": defaultdict(float),
 				}
 			)
 
 		details = row_wise_serial_batch[key]
 		if entry.serial_no:
-			details.serial_nos.append(entry.serial_no)
+			details.serial_nos.add(entry.serial_no)
 		if entry.batch_no:
 			details.batch_nos[entry.batch_no] += abs(entry.qty)
 
