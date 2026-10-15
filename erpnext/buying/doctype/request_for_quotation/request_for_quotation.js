@@ -531,7 +531,6 @@ frappe.ui.form.on("Request for Quotation", {
 
 		const min_offer_total = complete_offer_totals.length > 0 ? Math.min(...complete_offer_totals) : null;
 
-		const quotation_count = offers.length;
 		const categorize_by = frm.quotations_categorize_by || "Supplier";
 		const has_quotes = quotes && quotes.length > 0;
 
@@ -550,7 +549,6 @@ frappe.ui.form.on("Request for Quotation", {
 			complete_offers: complete_offers,
 			min_offer_total: min_offer_total,
 			has_quotes: has_quotes,
-			quotation_count: quotation_count,
 		};
 
 		const html = frappe.render_template("supplier_quotation_comparision", context);

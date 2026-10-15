@@ -2,7 +2,7 @@
 	const is_min = (rate) => min_rate !== undefined && Math.abs(rate - min_rate) < 0.0001;
 	const qty_title = [q.is_partial_qty ? q.partial_qty_tooltip : "", q.quoted_as].filter(Boolean).join(" · ");
 %}
-<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
+<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px;">
 	<div class="flex justify-between items-center mb-2 {% if (qty_title) { %}cursor-pointer{% } %}" {% if (qty_title) { %}title="{{ frappe.utils.escape_html(qty_title) }}"{% } %}>
 		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
 		<span class="{% if (q.is_partial_qty) { %}partial-qty-text{% } %}">{{ format_qty(q.converted_qty) }}</span>
