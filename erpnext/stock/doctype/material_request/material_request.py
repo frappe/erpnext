@@ -12,7 +12,7 @@ import frappe.defaults
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
@@ -574,18 +574,32 @@ class MaterialRequest(BuyingController):
 		if not items_from_pp:
 			return
 
-		plan_items = self.get_plan_items(items_from_pp)
-		for d in items_from_pp:
-			row = plan_items[d.material_request_plan_item]
-			qty = get_qty_in_plan_uom(d, row)
-			row.requested_qty = flt(row.requested_qty) + (-qty if cancel else qty)
-			frappe.db.set_value("Material Request Plan Item", row.name, "requested_qty", row.requested_qty)
+		update_plan_item_requested_qty({d.material_request_plan_item for d in items_from_pp})
 
 		for production_plan in {d.production_plan for d in items_from_pp}:
 			doc = frappe.get_doc("Production Plan", production_plan)
 			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
+
+
+def update_plan_item_requested_qty(plan_item_names):
+	mr_item = frappe.qb.DocType("Material Request Item")
+	plan_item = frappe.qb.DocType("Material Request Plan Item")
+	requested = (
+		frappe.qb.from_(plan_item)
+		.left_join(mr_item)
+		.on((mr_item.material_request_plan_item == plan_item.name) & (mr_item.docstatus == 1))
+		.select(
+			plan_item.name, plan_item.conversion_factor, Sum(IfNull(mr_item.stock_qty, 0)).as_("stock_qty")
+		)
+		.where(plan_item.name.isin(list(plan_item_names)))
+		.groupby(plan_item.name, plan_item.conversion_factor)
+	).run(as_dict=True)
+
+	for row in requested:
+		requested_qty = flt(row.stock_qty) / (flt(row.conversion_factor) or 1)
+		frappe.db.set_value("Material Request Plan Item", row.name, "requested_qty", requested_qty)
 
 
 def get_qty_in_plan_uom(item, plan_item):
