@@ -400,6 +400,7 @@ frappe.ui.form.on("Request for Quotation", {
 				rate_breakdown: rate_breakdown,
 				lead_time_days: lead_times.length ? Math.max(...lead_times) : null,
 				valid_till: first.valid_till,
+				status: first.status,
 				is_combined: true,
 			};
 		}
