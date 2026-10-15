@@ -54,6 +54,7 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -1365,11 +1366,17 @@ class SalesInvoice(SellingController):
 			)
 
 	def update_current_stock(self):
+		bin_qty_map = get_bin_qty_map(self.items + self.packed_items)
+
 		for item in self.items:
-			item.set_actual_qty()
+			if item.item_code and item.warehouse:
+				bin_data = bin_qty_map.get((item.item_code, item.warehouse))
+				item.actual_qty = bin_data.actual_qty if bin_data else 0
 
 		for packed_item in self.packed_items:
-			packed_item.set_actual_and_projected_qty()
+			bin_data = bin_qty_map.get((packed_item.item_code, packed_item.warehouse))
+			packed_item.actual_qty = bin_data.actual_qty if bin_data else 0
+			packed_item.projected_qty = bin_data.projected_qty if bin_data else 0
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
