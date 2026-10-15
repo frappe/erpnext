@@ -581,7 +581,6 @@ erpnext.pre_sales = {
 			set_as_lost_dialog: function (frm) {
 				var dialog = new frappe.ui.Dialog({
 					title: __("Set as Lost"),
-<<<<<<< HEAD
 					fields: [
 						{
 							fieldtype: "Table MultiSelect",
@@ -605,13 +604,7 @@ erpnext.pre_sales = {
 							fieldname: "detailed_reason",
 						},
 					],
-					primary_action: function () {
-						let values = dialog.get_values();
-
-=======
-					fields: erpnext.pre_sales.lost_reason_fields(frm.doctype),
 					primary_action: function (values) {
->>>>>>> 3f91c21 (fix: use dialog values in Set as Lost primary action (#60795))
 						frm.call({
 							doc: frm.doc,
 							method: "declare_enquiry_lost",
