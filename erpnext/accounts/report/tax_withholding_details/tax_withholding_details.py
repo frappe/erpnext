@@ -299,7 +299,13 @@ def get_columns(filters):
 				"fieldtype": "Float",
 				"width": 170,
 			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 130},
+			{
+				"label": _("Transaction Type"),
+				"fieldname": "transaction_type",
+				"fieldtype": "Link",
+				"options": "DocType",
+				"width": 130,
+			},
 			{
 				"label": _("Reference No."),
 				"fieldname": "ref_no",
