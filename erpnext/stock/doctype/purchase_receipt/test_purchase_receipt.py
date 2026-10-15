@@ -14,7 +14,7 @@ from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item, make_uom_conversion_factor
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -28,6 +28,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.get_item_details import get_conversion_factor
 
 
 class TestPurchaseReceipt(FrappeTestCase):
@@ -4328,6 +4329,33 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		self.assertEqual(pr.items[0].conversion_factor, 1.0)
+
+	def test_conversion_factor_via_shared_target_uom(self):
+		transaction_uom = "_Test 3 Kg Bag"
+		stock_uom = "_Test 25 Kg Bag"
+		make_uom_conversion_factor(transaction_uom, "Kg", 3)
+		make_uom_conversion_factor(stock_uom, "Kg", 25)
+		item = make_item("Test Item for Shared Target UOM", {"stock_uom": stock_uom})
+
+		conversion_factor = get_conversion_factor(item.name, transaction_uom).get("conversion_factor")
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=10,
+			uom=transaction_uom,
+			stock_uom=stock_uom,
+			conversion_factor=conversion_factor,
+		)
+
+		self.assertEqual(conversion_factor, 0.12)
+		self.assertEqual(pr.items[0].stock_qty, 1.2)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_type": pr.doctype, "voucher_no": pr.name, "voucher_detail_no": pr.items[0].name},
+				"actual_qty",
+			),
+			1.2,
+		)
 
 	def test_purchase_receipt_return_valuation_without_use_serial_batch_field(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
