@@ -1829,6 +1829,11 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 
 @frappe.whitelist()
+def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
+	return _aggregate_bin_details(get_bin_details(row, company, for_warehouse))
+
+
+@frappe.whitelist()
 def get_so_details(sales_order):
 	return frappe.db.get_value(
 		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
