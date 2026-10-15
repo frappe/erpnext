@@ -251,6 +251,45 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 			frappe.db.get_value("BOM Operation", {"parent": parent.name, "idx": 1}, "bom_no"), sub_1.name
 		)
 
+	def test_replace_needs_write_access_to_operation_linked_parents(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		rm = make_item("_Test BUL Perm RM", {"is_stock_item": 1}).name
+		sub_item = make_item("_Test BUL Perm Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test BUL Perm FG", {"is_stock_item": 1}).name
+		make_workstation({"workstation": "_Test BUL Perm Workstation"})
+		make_operation({"operation": "_Test BUL Perm Operation", "workstation": "_Test BUL Perm Workstation"})
+		sub_1 = make_test_bom(sub_item, [(rm, None, 1)])
+		sub_2 = make_test_bom(sub_item, [(rm, None, 2)])
+
+		parent = frappe.new_doc("BOM", company="_Test Company", item=fg_item, quantity=1, currency="INR")
+		parent.with_operations = 1
+		parent.append(
+			"operations",
+			{
+				"operation": "_Test BUL Perm Operation",
+				"workstation": "_Test BUL Perm Workstation",
+				"time_in_mins": 10,
+				"bom_no": sub_1.name,
+			},
+		)
+		parent.append("items", {"item_code": rm, "qty": 1})
+		parent.insert()
+		parent.submit()
+
+		fenced = make_fenced_user(
+			"bom-op-fenced@example.com", ["Manufacturing Manager"], [("BOM", sub_1.name), ("BOM", sub_2.name)]
+		)
+		with as_user(fenced):
+			self.assertRaises(
+				frappe.PermissionError,
+				enqueue_replace_bom,
+				boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name),
+			)
+
 
 def make_test_bom(item, rows):
 	bom = frappe.get_doc(
