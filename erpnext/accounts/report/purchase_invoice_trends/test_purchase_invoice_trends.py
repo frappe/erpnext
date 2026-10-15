@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.purchase_invoice_trends.purchase_invoice_trends import execute
@@ -44,7 +45,8 @@ class TestPurchaseInvoiceTrends(ERPNextTestSuite):
 
 	@staticmethod
 	def _cell(labels, row, label):
-		return row[labels.index(label)]
+		# Period columns are SUM(CASE ... ELSE NULL), so a month with no invoices comes back as None.
+		return flt(row[labels.index(label)])
 
 	def _find_row(self, data, key):
 		for row in data:
