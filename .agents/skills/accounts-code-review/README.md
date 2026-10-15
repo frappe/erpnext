@@ -82,7 +82,7 @@ The run changes the site and the bench, and undoes the changes when it stops:
 - It pauses the scheduler.
 - It changes settings (for example, Accounts Settings) to each value it tests.
 - It creates companies, masters and documents. At the end, it deletes them.
-- For UI changes: it builds the ERPNext assets and starts a web server on a free local port. It also creates the user `review-ui@example.com`.
+- For UI changes: it builds the ERPNext assets and starts a web server on a free local port. It also creates a user for the run, `<run>-ui@example.com`, and deletes it at the end.
 
 At the end, the run restores the settings, the scheduler, the branch and the
 assets. It also deletes the data that it created. To keep the data, give

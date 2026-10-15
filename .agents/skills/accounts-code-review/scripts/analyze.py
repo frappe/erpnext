@@ -271,21 +271,34 @@ def index_defs(index, name):
 	return index.defs.get(name, [])
 
 
-def field_values(apps_dir, apps, doctype, field):
-	"""Values to test for one setting, from the doctype JSON. None if not enumerable."""
+def field_values(apps_dir, app, apps, doctype, field, commits):
+	"""Values to test for one setting, from the doctype JSON. None if not enumerable.
+
+	The reviewed app is read at the reviewed commits (head first, then base), so a
+	setting or option that the PR adds is tested. Other apps are read from their
+	checkouts, which the PR does not change.
+	"""
 	if PRECISION_SETTINGS.get((doctype, field)):
 		return PRECISION_SETTINGS[(doctype, field)], "preset", field.replace("_", " ").title()
 	scrub = doctype.lower().replace(" ", "_")
-	for app in apps:
-		for path in sorted(Path(apps_dir, app).glob(f"**/doctype/{scrub}/{scrub}.json")):
-			for df in json.loads(path.read_text()).get("fields", []):
-				if df.get("fieldname") != field:
-					continue
-				if df["fieldtype"] == "Check":
-					return [0, 1], "Check", df.get("label")
-				if df["fieldtype"] == "Select":
-					return (df.get("options") or "").split("\n"), "Select", df.get("label")
-				return None, df["fieldtype"], df.get("label")
+	suffix = f"/doctype/{scrub}/{scrub}.json"
+	sources = []
+	for sha in commits:
+		paths = git(Path(apps_dir, app), "ls-tree", "-r", "--name-only", sha).splitlines()
+		sources += [
+			lambda p=p, sha=sha: show(Path(apps_dir, app), sha, p) for p in paths if p.endswith(suffix)
+		]
+	for other in (a for a in apps if a != app):
+		sources += [p.read_text for p in sorted(Path(apps_dir, other).glob(f"**{suffix}"))]
+	for read_source in sources:
+		for df in json.loads(read_source() or "{}").get("fields", []):
+			if df.get("fieldname") != field:
+				continue
+			if df["fieldtype"] == "Check":
+				return [0, 1], "Check", df.get("label")
+			if df["fieldtype"] == "Select":
+				return (df.get("options") or "").split("\n"), "Select", df.get("label")
+			return None, df["fieldtype"], df.get("label")
 	return None, "not found (custom field?)", None
 
 
@@ -346,7 +359,7 @@ def analyze(apps_dir, app, apps, base, head):
 
 	setting_rows = []
 	for (dt, field), sources in sorted(settings.items()):
-		values, kind, label = field_values(apps_dir, apps, dt, field)
+		values, kind, label = field_values(apps_dir, app, apps, dt, field, (head, base))
 		setting_rows.append(
 			{
 				"doctype": dt,

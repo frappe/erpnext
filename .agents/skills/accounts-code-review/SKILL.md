@@ -44,7 +44,7 @@ them when it ends, also when it fails:
 - It pauses the scheduler.
 - It runs `migrate` on the base code, and again on the PR code if the PR changes doctype JSON, `patches.txt` or `hooks.py`.
 - It switches the shared `apps/erpnext` checkout, which every site on the bench uses.
-- With UI checks, it builds the app's assets for each code, serves the site on a free local port, and creates the user `review-ui@example.com`. Cleanup rebuilds the assets for the original checkout.
+- With UI checks, it builds the app's assets for each code, serves the site on a free local port, and creates a new user for the run, `<run>-ui@example.com`. The run refuses to use a user that already exists. Cleanup rebuilds the assets for the original checkout.
 
 ```
 review.py init --workdir <workdir> --pr <N> --requirement <issue url or ticket ref> --site <site> --bench <bench path>

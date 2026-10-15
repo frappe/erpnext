@@ -115,13 +115,19 @@ class _Session:
 		print("PREFLIGHT", results)
 
 	def cmd_ui_user(self):
-		"""A fixed review user for the browser. Its password lives only in the workdir."""
-		email, password = "review-ui@example.com", (self.workdir / ".ui-password").read_text().strip()
-		if not self.frappe.db.exists("User", email):
-			self.frappe.get_doc(
-				{"doctype": "User", "email": email, "first_name": "Review", "send_welcome_email": 0}
-			).insert(ignore_permissions=True)
-			self.L.CREATED.setdefault("User", []).append(email)
+		"""A new user for this run's browser. Its password lives only in the workdir.
+
+		The run grants it System Manager, so it never touches an account it did not create.
+		"""
+		email = f"{self.run['prefix'].lower()}-ui@example.com"
+		password = (self.workdir / ".ui-password").read_text().strip()
+		if self.frappe.db.exists("User", email):
+			raise RuntimeError(f"user {email} already exists; the review only uses a user it creates")
+		self.frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": "Review", "send_welcome_email": 0}
+		).insert(ignore_permissions=True)
+		self.L.CREATED.setdefault("User", []).append(email)
+		_write(self.rundir / "ui-user.json", {"email": email})
 		user = self.frappe.get_doc("User", email)
 		user.add_roles(
 			"System Manager",
@@ -143,17 +149,18 @@ class _Session:
 		print("CLEANED", self.args["prefix"])
 
 	def save_created(self):
-		"""Merge this session's CREATED records into <workdir>/site-created.json."""
+		"""Merge this session's CREATED records into the run's site-created.json."""
 		if not self.L.CREATED:
 			return
 		known = self._created()
 		for doctype, names in self.L.CREATED.items():
 			known[doctype] = sorted(set(known.get(doctype, [])) | set(names))
-		_write(self.workdir / "site-created.json", known)
+		_write(self.rundir / "site-created.json", known)
 		self.L.CREATED.clear()
 
 	def _created(self):
-		path = self.workdir / "site-created.json"
+		"""Records this run created. Each run has its own file, so cleanup never touches another run."""
+		path = self.rundir / "site-created.json"
 		return json.loads(path.read_text()) if path.exists() else {}
 
 	def cmd_switch(self):

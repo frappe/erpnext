@@ -25,6 +25,9 @@ const targets = JSON.parse(
 const password = fs
   .readFileSync(path.join(workdir, ".ui-password"), "utf8")
   .trim();
+const user = JSON.parse(
+  fs.readFileSync(path.join(rundir, "ui-user.json"), "utf8")
+).email;
 const spec = (
   await import(pathToFileURL(path.join(workdir, "ui.spec.mjs")).href)
 ).default;
@@ -290,7 +293,7 @@ function makeUi(page, record, scenarioId) {
 const browser = await chromium.launch();
 const login = await browser.newContext({ baseURL: baseUrl });
 const res = await login.request.post(`${baseUrl}/api/method/login`, {
-  form: { usr: "review-ui@example.com", pwd: password },
+  form: { usr: user, pwd: password },
 });
 if (!res.ok()) throw new Error(`login failed: ${res.status()}`);
 const storageState = await login.storageState();

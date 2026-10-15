@@ -154,7 +154,7 @@ def evaluate(workdir, run_id):
 		if i not in declared_hits:
 			check("WARN", "declared", rule["path"], f"declared change not observed ({rule['comparison']})")
 
-	_assertions(expect, active, load, check)
+	_assertions(expect, active, run.get("skipped_variants", {}), load, check)
 
 	statuses = {c["status"] for c in checks}
 	verdict = next((s for s in VERDICT_ORDER[:-1] if s in statuses), "PASS")
@@ -214,55 +214,63 @@ def _ui(base, head, allowed, declared_hits, changes, check):
 				check("FAIL", "ui", f"v0 {path}", "undeclared change")
 
 
-def _assertions(expect, active, load, check):
-	assertions = expect.get("assertions", [])
-	sides = {a["snapshot"] for a in assertions}
-	if expect.get("kind", "bug") == "bug" and not sides & {"base", "ui_base"}:
-		check(
-			"INVALID",
-			"assertion",
-			"expect.json",
-			"a bug review needs at least one 'base' assertion (Reported)",
-		)
-	if not sides & {"head", "ui_head"}:
-		check(
-			"INVALID",
-			"assertion",
-			"expect.json",
-			"needs at least one 'head' or 'ui_head' assertion (Expected)",
-		)
-	for a in assertions:
-		for v in active:
-			if a.get("variants", "*") != "*" and v["id"] not in a["variants"]:
-				continue
-			snap = load(SIDES[a["snapshot"]].format(v=v["id"]))
+def _assertions(expect, active, skipped, load, check):
+	"""Evaluate every assertion. A required side passes only if one of its assertions ran.
+
+	A variant the run skipped had the same settings as the site default, so its
+	assertions run against v0. An unknown variant id makes the review INVALID.
+	"""
+	order = [v["id"] for v in active]
+	ran = {"base": 0, "head": 0}
+	for a in expect.get("assertions", []):
+		wanted = order if a.get("variants", "*") == "*" else a["variants"]
+		targets = set()
+		for vid in wanted:
+			if vid in order:
+				targets.add(vid)
+			elif vid in skipped:
+				targets.add("v0")
+			else:
+				check("INVALID", "assertion", a["path"], f"assertion names unknown variant {vid!r}")
+		if a["snapshot"].startswith("ui_"):
+			targets &= {"v0"}  # the browser runs in the default variant only
+		for vid in sorted(targets, key=order.index):
+			snap = load(SIDES[a["snapshot"]].format(v=vid))
 			if a["snapshot"].startswith("ui_"):
-				if v["id"] != "v0":
-					continue
 				actual = flatten_deep(snap["ui"], "ui").get(a["path"]) if snap else "<missing UI results>"
 			else:
 				actual = flatten(snap).get(a["path"]) if snap else "<missing snapshot>"
-			if not _equal(actual, a["equals"]):
-				status = "NOT REPRODUCED" if a["snapshot"] in ("base", "ui_base") else "FAIL"
-				check(
-					status,
-					"assertion",
-					f"{v['id']} {a['snapshot']} {a['path']}",
-					f"want {a['equals']!r}, got {actual!r} ({a.get('why', '')})",
-					assertion=a,
-					actual=actual,
-					variant=v["id"],
-				)
-			else:
-				check(
-					"PASS",
-					"assertion",
-					f"{v['id']} {a['snapshot']} {a['path']}",
-					f"= {actual!r}",
-					assertion=a,
-					actual=actual,
-					variant=v["id"],
-				)
+			side = "base" if a["snapshot"] in ("base", "ui_base") else "head"
+			if a["snapshot"] in ("base", "ui_base", "head", "ui_head"):
+				ran[side] += 1
+			passed = _equal(actual, a["equals"])
+			status = (
+				"PASS" if passed else ("NOT REPRODUCED" if a["snapshot"] in ("base", "ui_base") else "FAIL")
+			)
+			detail = (
+				f"= {actual!r}" if passed else f"want {a['equals']!r}, got {actual!r} ({a.get('why', '')})"
+			)
+			check(
+				status,
+				"assertion",
+				f"{vid} {a['snapshot']} {a['path']}",
+				detail,
+				assertion=a,
+				actual=actual,
+				variant=vid,
+			)
+
+	if expect.get("kind", "bug") == "bug" and not ran["base"]:
+		check(
+			"INVALID", "assertion", "expect.json", "no 'base' assertion ran: a bug review must show Reported"
+		)
+	if not ran["head"]:
+		check(
+			"INVALID",
+			"assertion",
+			"expect.json",
+			"no 'head' or 'ui_head' assertion ran: the review must show Expected",
+		)
 
 
 def _match(allowed, comparison, key, path):

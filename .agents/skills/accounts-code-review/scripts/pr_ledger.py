@@ -314,10 +314,16 @@ class Lab:
 		"""Run fn in a savepoint; record "ok" or the error. Never raises."""
 		savepoint = f"attempt_{len(self.outcomes)}"
 		frappe.db.savepoint(savepoint)
+		registry, owners = dict(self.registry), dict(self.owners)
+		created = {doctype: list(names) for doctype, names in CREATED.items()}
 		try:
 			result = fn()
 		except Exception as e:
+			# Undo the labels and records with the rows, so nothing points at a rolled-back document.
 			frappe.db.rollback(save_point=savepoint)
+			self.registry, self.owners = registry, owners
+			CREATED.clear()
+			CREATED.update(created)
 			frappe.local.message_log = []
 			self.outcomes[label] = f"{type(e).__name__}: {frappe.utils.strip_html(str(e))[:300]}"
 			return None
