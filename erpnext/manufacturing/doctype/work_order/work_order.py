@@ -1286,11 +1286,14 @@ class WorkOrder(Document):
 	def update_transferred_qty_for_required_items(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
@@ -1301,6 +1304,7 @@ class WorkOrder(Document):
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
@@ -1377,7 +1381,8 @@ class WorkOrder(Document):
 		returned_dict = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
 		for row in self.required_items:
-			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
+			returned_qty = min(flt(returned_dict.get(row.item_code)), flt(row.transferred_qty))
+			row.db_set("returned_qty", returned_qty, update_modified=False)
 
 	def update_consumed_qty_for_required_items(self):
 		"""
