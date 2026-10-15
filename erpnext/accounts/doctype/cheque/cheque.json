@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "autoname": "format:{cheque_book}-{cheque_no}",
+ "creation": "2026-10-15 16:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cheque_no",
+  "cheque_book",
+  "bank_account",
+  "company",
+  "column_break_status",
+  "status",
+  "payment_entry",
+  "payment_section",
+  "party_name",
+  "cheque_date",
+  "column_break_payment",
+  "amount",
+  "currency",
+  "cancellation_section",
+  "cancellation_reason",
+  "column_break_cancellation",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cheque No",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cheque_book",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Cheque Book",
+   "options": "Cheque Book",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "cheque_book.bank_account",
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company Bank Account",
+   "options": "Bank Account",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "cheque_book.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Available",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Available\nIssued\nCancelled",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "payment_entry",
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "payment_entry.party_name",
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "payment_entry.reference_date",
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Cheque Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "payment_entry.paid_amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "payment_entry.paid_from_account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.status==\"Cancelled\"",
+   "fieldname": "cancellation_section",
+   "fieldtype": "Section Break",
+   "label": "Cancellation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Autocomplete",
+   "label": "Cancellation Reason",
+   "options": "Spoiled\nLost\nOther",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cancellation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cheque",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-15 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cheque",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User",
+   "select": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "cheque_book",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Available"
+  },
+  {
+   "color": "Green",
+   "title": "Issued"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
+ "title_field": "cheque_no",
+ "track_changes": 1
+}
