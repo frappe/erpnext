@@ -219,7 +219,7 @@ class StockBalanceReport:
 		_system_settings = frappe.get_cached_doc("System Settings")
 		adjustment_netting = AdjustmentNetting()
 		self.latest_valuation_rates = {}
-		track_rates = self.filters.get("show_dimension_wise_stock") and not self.has_dimension_filter
+		track_rates = self.shows_whole_pools
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
@@ -249,13 +249,46 @@ class StockBalanceReport:
 				[row for row in rows if (row.item_code, row.warehouse) not in rates]
 			)
 		)
+		pools = self.get_pool_balances(rows)
 		for row in rows:
 			row.val_rate = rates.get((row.item_code, row.warehouse), 0.0)
 			row.bal_val = row.bal_qty * row.val_rate
 
+		self.add_stranded_pool_values(pools, rates)
+
+	def get_pool_balances(self, rows) -> dict:
+		"""Whole item and warehouse balances, read before the rows are revalued."""
+		if not self.shows_whole_pools:
+			return {}
+
+		pools = {}
+		for row in rows:
+			key = (row.item_code, row.warehouse)
+			if key not in pools:
+				balance = self.item_warehouse_balances.get(key, row)
+				pools[key] = frappe._dict(row=row, bal_qty=balance.bal_qty, bal_val=balance.bal_val)
+
+		return pools
+
+	def add_stranded_pool_values(self, pools, rates):
+		"""Keep pool value its qty does not carry, like a residue at zero qty, on the row without dimensions."""
+		for key, pool in pools.items():
+			stranded_value = flt(pool.bal_val) - flt(pool.bal_qty) * rates.get(key, 0.0)
+			if not flt(stranded_value, self.float_precision):
+				continue
+
+			if key not in self.item_warehouse_map:
+				self.initialize_data(key, pool.row)
+
+			self.item_warehouse_map[key].bal_val += stranded_value
+
 	@property
 	def has_dimension_filter(self) -> bool:
 		return any(self.filters.get(field) for field in self.inventory_dimensions)
+
+	@property
+	def shows_whole_pools(self) -> bool:
+		return bool(self.filters.get("show_dimension_wise_stock")) and not self.has_dimension_filter
 
 	def get_pool_valuation_details(self, item_codes: set) -> dict:
 		if not item_codes:

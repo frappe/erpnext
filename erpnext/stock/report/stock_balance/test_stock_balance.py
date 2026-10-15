@@ -180,6 +180,34 @@ class TestStockBalance(ERPNextTestSuite):
 		rows = stock_balance(_dict(filters, id_plant=[plant_a]))
 		self.assertEqual([(row.bal_qty, row.bal_val) for row in rows], [(5, 750)])
 
+	def test_dimension_wise_stock_keeps_stranded_pool_value(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		entries = []
+		for field, plant, movement in (
+			("to_id_plant", plant_a, {"to_warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 100}),
+			("id_plant", plant_a, {"from_warehouse": "_Test Warehouse - _TC", "qty": 10}),
+			("to_id_plant", plant_b, {"to_warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 100}),
+		):
+			entry = make_stock_entry(item_code=item, do_not_save=True, **movement)
+			entry.items[0].set(field, plant)
+			entry.insert().submit()
+			entries.append(entry)
+
+		receipt_sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entries[0].name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", receipt_sle, "stock_value_difference", 1500)
+
+		filters = _dict(self.filters, item_code=[item])
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in stock_balance(filters)], [(10, 1500)])
+
+		rows = stock_balance(_dict(filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_b: (10, 1000), None: (0, 500)},
+		)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 3})
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
