@@ -479,3 +479,4 @@ erpnext.patches.v16_0.rebuild_production_plan_requested_qty
 erpnext.patches.v16_0.round_open_job_card_required_qty
 erpnext.patches.v16_0.restrict_company_address_flag
 erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
+erpnext.patches.v16_0.packed_item_inv_dimen
