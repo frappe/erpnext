@@ -1118,6 +1118,54 @@ class TestProductionPlan(ERPNextTestSuite):
 			[("_Test PP Bought SA", 5), ("_Test PP Bought SA RM 2", 5)],
 		)
 
+	def test_sub_assembly_bought_for_one_row_is_still_made_for_another(self):
+		for item in (
+			"_Test PP Mixed SA RM",
+			"_Test PP Mixed RM",
+			"_Test PP Mixed SA",
+			"_Test PP Mixed FG 1",
+			"_Test PP Mixed FG 2",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Mixed SA", raw_materials=["_Test PP Mixed SA RM"], rm_qty=2, currency="INR")
+		boms = [
+			make_bom(item=fg, raw_materials=["_Test PP Mixed SA", "_Test PP Mixed RM"], currency="INR")
+			for fg in ("_Test PP Mixed FG 1", "_Test PP Mixed FG 2")
+		]
+
+		plan = create_production_plan(
+			item_code="_Test PP Mixed FG 1",
+			planned_qty=5,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				"item_code": "_Test PP Mixed FG 2",
+				"bom_no": boms[1].name,
+				"planned_qty": 5,
+				"warehouse": plan.po_items[0].warehouse,
+				"planned_start_date": plan.po_items[0].planned_start_date,
+			},
+		)
+		plan.save()
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.production_plan_item == plan.po_items[0].name:
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		quantities = {}
+		for row in items:
+			quantities[row.get("item_code")] = quantities.get(row.get("item_code"), 0) + row.get("quantity")
+		self.assertEqual(
+			quantities,
+			{"_Test PP Mixed SA": 5, "_Test PP Mixed SA RM": 10, "_Test PP Mixed RM": 10},
+		)
+
 	def test_exploded_row_keeps_sub_assemblies_it_does_not_explode(self):
 		make_item("_Test PP Kept SA RM", {"is_stock_item": 1})
 		make_item("_Test PP Kept SA RM 2", {"is_stock_item": 1})

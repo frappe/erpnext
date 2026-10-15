@@ -322,15 +322,16 @@ def _collect_item_details(doc, po_items):
 	so_item_details = frappe._dict()
 	qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
-	requested_sub_assemblies = {
-		frappe._dict(row).production_item
-		for row in doc.get("sub_assembly_items") or []
-		if frappe._dict(row).type_of_manufacturing == "Material Request"
-	}
+	requested_sub_assemblies = {}
+	for row in doc.get("sub_assembly_items") or []:
+		row = frappe._dict(row)
+		if row.type_of_manufacturing == "Material Request":
+			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(row.production_item)
+
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
-		data["requested_sub_assemblies"] = requested_sub_assemblies
+		data["requested_sub_assemblies"] = requested_sub_assemblies.get(data.get("name"), set())
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
