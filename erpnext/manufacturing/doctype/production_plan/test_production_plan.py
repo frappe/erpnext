@@ -8,6 +8,7 @@ from erpnext.controllers.item_variant import create_variant
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_non_completed_production_plans,
+	get_pooled_bin_details,
 	get_sales_orders,
 	get_warehouse_list,
 )
@@ -2417,6 +2418,18 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertFalse(row.fg_warehouse)
 			self.assertEqual(row.production_item, sf_item)
 			self.assertEqual(row.qty, 5.0)
+
+	def test_pooled_bin_details_sum_group_warehouse_children(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, qty=3, rate=100, target="_Test Warehouse Group-C1 - _TC")
+		make_stock_entry(item_code=rm_item, qty=4, rate=100, target="_Test Warehouse Group-C2 - _TC")
+
+		bin_details = get_pooled_bin_details(
+			{"item_code": rm_item}, "_Test Company", "_Test Warehouse Group - _TC"
+		)
+
+		self.assertEqual(flt(bin_details["actual_qty"]), 7.0)
+		self.assertEqual(flt(bin_details["projected_qty"]), 7.0)
 
 	def test_group_sub_assembly_warehouse_pools_child_stock(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
