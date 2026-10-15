@@ -3,6 +3,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days
 
+from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.controllers.item_close import update_closed_status
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -493,3 +494,32 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 		# whichever row is closed (it sorts first or second), the open row's delay must survive
 		self.assertEqual(grouped_delay(early), expected_delay)
 		self.assertEqual(grouped_delay(late), expected_delay)
+
+	def test_16_credit_note_keeps_billed_qty_consistent_with_amount(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+
+		sinv = self.create_sales_invoice(so, do_not_save=True)
+		sinv.items[0].qty = 6
+		sinv.save().submit()
+
+		credit_note = make_sales_return(sinv.name)
+		credit_note.posting_date = transaction_date
+		credit_note.items[0].qty = -2
+		credit_note.save().submit()
+
+		columns, data, message, chart = execute(
+			{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+		)
+		self.assertEqual(len(data), 1)
+		expected_value = {
+			"billed_qty": 6,
+			"qty_to_bill": 4,
+			"billed_amount": 600000,
+			"pending_amount": 400000,
+		}
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
+>>>>>>> 83e8f5e84e (fix: keep billed qty consistent with billed amount after a credit note in Sales Order Analysis)
+>>>>>>> 1bad7736f8 (fix: keep billed qty consistent with billed amount after a credit note in Sales Order Analysis)

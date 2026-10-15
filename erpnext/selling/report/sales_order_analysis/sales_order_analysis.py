@@ -57,6 +57,7 @@ def get_data(filters):
 	so = qb.DocType("Sales Order")
 	soi = qb.DocType("Sales Order Item")
 	sii = qb.DocType("Sales Invoice Item")
+	si = qb.DocType("Sales Invoice")
 
 	# Use the application's today (nowdate, System Settings timezone) rather than the database
 	# server's CURRENT_DATE: the two differ by a day when the DB server runs in a different timezone
@@ -69,12 +70,19 @@ def get_data(filters):
 	is_closed = (so.status == "Closed") | (soi.closed == 1)
 	no_delay = so.status.isin(["Completed", "To Bill"]) | is_closed
 
+	# credit notes don't reduce the order's billed_amt, so exclude them to keep billed qty in step
+	counts_as_billed = (Coalesce(si.is_return, 0) == 0) | (
+		Coalesce(si.update_billed_amount_in_sales_order, 0) == 1
+	)
+
 	query = (
 		qb.from_(so)
 		.join(soi)
 		.on(soi.parent == so.name)
 		.left_join(sii)
 		.on((sii.so_detail == soi.name) & (sii.docstatus == 1))
+		.left_join(si)
+		.on(si.name == sii.parent)
 		.select(
 			so.transaction_date.as_("date"),
 			soi.delivery_date.as_("delivery_date"),
@@ -89,7 +97,7 @@ def get_data(filters):
 			soi.delivered_qty,
 			soi.closed,
 			Case().when(is_closed, 0).else_(soi.qty - soi.delivered_qty).as_("pending_qty"),
-			Coalesce(Sum(sii.qty), 0).as_("billed_qty"),
+			Coalesce(Sum(Case().when(counts_as_billed, sii.qty).else_(0)), 0).as_("billed_qty"),
 			soi.base_amount.as_("amount"),
 			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
 			(soi.billed_amt * conversion_rate).as_("billed_amount"),
