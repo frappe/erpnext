@@ -139,6 +139,7 @@ class CallLog(Document):
 
 @frappe.whitelist(methods=["POST"])
 def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str | None = None):
+	validate_call_type(call_type)
 	doc = frappe.get_doc("Call Log", call_log)
 	doc.check_permission("read")
 	# the agent who took the call may record its summary without write access
@@ -150,6 +151,11 @@ def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str |
 	doc.summary = summary
 	doc.save(ignore_permissions=True)
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
+
+
+def validate_call_type(call_type: str | None):
+	if call_type and frappe.db.get_value("Telephony Call Type", call_type, "docstatus") != 1:
+		frappe.throw(_("Call Type {0} is not submitted.").format(frappe.bold(call_type)))
 
 
 def get_employees_with_number(number):
