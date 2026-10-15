@@ -176,6 +176,7 @@ def trend(supplier, company, from_date, to_date, accounts):
 			["posting_date as date", Sum(signed).as_("amount")],
 			group_by="posting_date",
 		)
+		+ journal_payments(supplier, company, from_date, to_date)
 	)
 
 	points = []
@@ -196,6 +197,24 @@ def trend(supplier, company, from_date, to_date, accounts):
 		"purchased": sum(p["purchased"] for p in points),
 		"paid": sum(p["paid"] for p in points),
 	}
+
+
+def journal_payments(supplier, company, from_date, to_date):
+	if not frappe.has_permission("Journal Entry", "read"):
+		return []
+	rows = permitted(
+		"Journal Entry",
+		[
+			["docstatus", "=", 1],
+			["company", "=", company],
+			["voucher_type", "in", ("Bank Entry", "Cash Entry")],
+			["posting_date", "between", (from_date, to_date)],
+			["Journal Entry Account", "party_type", "=", "Supplier"],
+			["Journal Entry Account", "party", "=", supplier],
+		],
+		["posting_date as date", "accounts.debit", "accounts.credit"],
+	)
+	return [frappe._dict(date=row.date, amount=flt(row.debit) - flt(row.credit)) for row in rows]
 
 
 def monthly(rows):
@@ -336,6 +355,7 @@ def order_tiles(supplier, company, as_of):
 		[
 			"name",
 			"conversion_rate",
+			"items.name as line",
 			"items.qty",
 			"items.received_qty",
 			"items.base_amount",
@@ -345,6 +365,7 @@ def order_tiles(supplier, company, as_of):
 		],
 	)
 
+	billed_qty = invoiced_quantities(supplier, company, [line.line for line in lines])
 	receipt, billing, late = {}, {}, {}
 	upcoming, oldest = [], None
 	for line in lines:
@@ -354,7 +375,10 @@ def order_tiles(supplier, company, as_of):
 		rate = flt(line.base_amount) / qty if qty else 0
 		received = min(max(flt(line.received_qty), 0), qty) if qty else 0
 
-		unbilled = received * rate - flt(line.billed_amt) * flt(line.conversion_rate)
+		if billed_qty is None:
+			unbilled = received * rate - flt(line.billed_amt) * flt(line.conversion_rate)
+		else:
+			unbilled = (received - billed_qty.get(line.line, 0)) * rate
 		if unbilled > 0:
 			billing[line.name] = billing.get(line.name, 0) + unbilled
 
@@ -389,6 +413,26 @@ def order_tiles(supplier, company, as_of):
 			"days_late": date_diff(as_of, oldest) if oldest else None,
 			"orders": sorted(late),
 		},
+	}
+
+
+def invoiced_quantities(supplier, company, lines):
+	if not frappe.has_permission("Purchase Invoice", "read"):
+		return None
+	if not lines:
+		return {}
+	item = DocType("Purchase Invoice Item")
+	return {
+		row.line: flt(row.qty)
+		for row in permitted(
+			"Purchase Invoice",
+			[
+				{"docstatus": 1, "supplier": supplier, "company": company},
+				["Purchase Invoice Item", "po_detail", "in", lines],
+			],
+			["items.po_detail as line", Sum(item.qty).as_("qty")],
+			group_by="items.po_detail",
+		)
 	}
 
 
