@@ -351,8 +351,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							default: me.frm.doc.project,
 						},
 					],
-					primary_action: function () {
-						const data = d.get_values();
+					primary_action: function (data) {
 						me.frm.events.add_timesheet_data(me.frm, {
 							from_time: data.from_time,
 							to_time: data.to_time,

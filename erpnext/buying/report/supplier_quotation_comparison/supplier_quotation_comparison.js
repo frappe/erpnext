@@ -199,9 +199,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			],
 		});
 
-		dialog.set_primary_action(__("Set Default Supplier"), () => {
-			let values = dialog.get_values();
-
+		dialog.set_primary_action(__("Set Default Supplier"), (values) => {
 			if (values) {
 				// Set the default_supplier field of the appropriate Item to the selected supplier
 				frappe.call({
