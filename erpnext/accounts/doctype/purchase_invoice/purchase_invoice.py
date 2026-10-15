@@ -41,6 +41,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
 from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	get_item_account_wise_additional_cost,
@@ -1838,23 +1839,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
-		projects = frappe._dict()
-		for d in self.items:
-			if d.project:
-				if self.docstatus == 1:
-					projects[d.project] = projects.get(d.project, 0) + d.base_net_amount
-				elif self.docstatus == 2:
-					projects[d.project] = projects.get(d.project, 0) - d.base_net_amount
-
-		pj = frappe.qb.DocType("Project")
-		for proj, value in projects.items():
-			res = frappe.qb.from_(pj).select(pj.total_purchase_cost).where(pj.name == proj).for_update().run()
-			current_purchase_cost = res and res[0][0] or 0
-			# frappe.db.set_value("Project", proj, "total_purchase_cost", current_purchase_cost + value)
-			project_doc = frappe.get_doc("Project", proj)
-			project_doc.total_purchase_cost = current_purchase_cost + value
-			project_doc.calculate_gross_margin()
-			project_doc.db_update()
+		update_purchase_cost({d.project for d in self.items if d.project})
 
 	def validate_supplier_invoice(self):
 		if self.bill_no:

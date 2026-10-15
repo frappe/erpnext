@@ -10,8 +10,18 @@ from frappe import _, qb
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.query_builder import Interval
-from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
-from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, get_url, nowtime, today
+from frappe.query_builder.functions import Count, CurDate, Date, IfNull, Sum, UnixTimestamp
+from frappe.utils import (
+	add_days,
+	create_batch,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	get_url,
+	nowtime,
+	today,
+)
 from frappe.utils.html_utils import sanitize_html
 from frappe.utils.user import is_website_user
 
@@ -19,6 +29,13 @@ from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+
+CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
+
+LANDED_COST_RECEIPT_ITEMS = {
+	"Purchase Receipt": ("Purchase Receipt Item", "purchase_receipt_item"),
+	"Purchase Invoice": ("Purchase Invoice Item", "purchase_receipt_item"),
+}
 
 
 class Project(Document):
@@ -171,6 +188,47 @@ class Project(Document):
 
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
+
+	def set_consumed_material_cost(self):
+		self.total_consumed_material_cost = (
+			self.get_stock_value_consumed() + self.get_stock_entry_additional_costs()
+		)
+
+	def get_stock_value_consumed(self) -> float:
+		sle = qb.DocType("Stock Ledger Entry")
+		stock_entry = qb.DocType("Stock Entry")
+		value_change = (
+			qb.from_(sle)
+			.left_join(stock_entry)
+			.on((sle.voucher_type == "Stock Entry") & (stock_entry.name == sle.voucher_no))
+			.select(Sum(sle.stock_value_difference))
+			.where(
+				(sle.project == self.name)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_type.isin(CONSUMPTION_VOUCHER_TYPES)
+				& (stock_entry.purpose.isnull() | (stock_entry.purpose != "Material Receipt"))
+			)
+		).run()
+		return -flt(value_change[0][0])
+
+	def get_stock_entry_additional_costs(self) -> float:
+		stock_entry = qb.DocType("Stock Entry")
+		stock_entry_item = qb.DocType("Stock Entry Detail")
+		amount = (
+			qb.from_(stock_entry_item)
+			.join(stock_entry)
+			.on(stock_entry.name == stock_entry_item.parent)
+			.select(Sum(stock_entry_item.additional_cost))
+			.where(
+				(
+					(stock_entry_item.project == self.name)
+					| ((IfNull(stock_entry_item.project, "") == "") & (stock_entry.project == self.name))
+				)
+				& (stock_entry.docstatus == 1)
+				& (stock_entry.purpose != "Material Receipt")
+			)
+		).run()
+		return flt(amount[0][0])
 
 	def check_depends_on_value(self, template_task, project_task, project_tasks):
 		if template_task.get("depends_on") and not project_task.get("depends_on"):
@@ -328,9 +386,65 @@ class Project(Document):
 		else:
 			self.per_gross_margin = 0
 
+	def db_set_cost(self, cost_field: str):
+		self.calculate_gross_margin()
+		self.db_set(
+			{
+				cost_field: self.get(cost_field),
+				"gross_margin": self.gross_margin,
+				"per_gross_margin": self.per_gross_margin,
+			},
+			update_modified=False,
+		)
+
 	def update_purchase_costing(self):
-		total_purchase_cost = calculate_total_purchase_cost(self.name)
-		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+		self.total_purchase_cost = self.get_non_stock_purchase_cost() - self.get_capitalised_landed_cost()
+
+	def get_non_stock_purchase_cost(self) -> float:
+		invoice_item = qb.DocType("Purchase Invoice Item")
+		item = qb.DocType("Item")
+		purchase_order = qb.DocType("Purchase Order")
+		amount = (
+			qb.from_(invoice_item)
+			.left_join(item)
+			.on(item.name == invoice_item.item_code)
+			.left_join(purchase_order)
+			.on(purchase_order.name == invoice_item.purchase_order)
+			.select(Sum(invoice_item.base_net_amount))
+			.where(
+				(invoice_item.project == self.name)
+				& (invoice_item.docstatus == 1)
+				& (
+					item.is_stock_item.isnull()
+					| (item.is_stock_item == 0)
+					| (invoice_item.delivered_by_supplier == 1)
+				)
+				& (purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0))
+			)
+		).run()
+		return flt(amount[0][0])
+
+	def get_capitalised_landed_cost(self) -> float:
+		voucher = qb.DocType("Landed Cost Voucher")
+		voucher_item = qb.DocType("Landed Cost Item")
+		amount = 0
+		for receipt_type, (receipt_item_doctype, link_field) in LANDED_COST_RECEIPT_ITEMS.items():
+			receipt_item = qb.DocType(receipt_item_doctype)
+			charges = (
+				qb.from_(voucher_item)
+				.join(voucher)
+				.on(voucher.name == voucher_item.parent)
+				.join(receipt_item)
+				.on(receipt_item.name == voucher_item[link_field])
+				.select(Sum(voucher_item.applicable_charges))
+				.where(
+					(voucher.docstatus == 1)
+					& (voucher_item.receipt_document_type == receipt_type)
+					& (receipt_item.project == self.name)
+				)
+			).run()
+			amount += flt(charges[0][0])
+		return amount
 
 	def update_sales_amount(self):
 		total_sales_amount = frappe.db.sql(
@@ -849,22 +963,43 @@ def get_users_email(doc):
 	return [d.email for d in doc.users if frappe.db.get_value("User", d.user, "enabled")]
 
 
-def calculate_total_purchase_cost(project: str | None = None):
-	if project:
-		pitem = qb.DocType("Purchase Invoice Item")
-		total_purchase_cost = (
-			qb.from_(pitem)
-			.select(Sum(pitem.base_net_amount))
-			.where((pitem.project == project) & (pitem.docstatus == 1))
-			.run(as_list=True)
+def update_purchase_cost(projects: set[str]):
+	for name in projects:
+		project = frappe.get_doc("Project", name, for_update=True)
+		project.update_purchase_costing()
+		project.db_set_cost("total_purchase_cost")
+
+
+def update_consumed_material_cost(projects: set[str]):
+	for name in projects:
+		project = frappe.get_doc("Project", name, for_update=True)
+		project.set_consumed_material_cost()
+		project.db_set_cost("total_consumed_material_cost")
+
+
+def update_consumed_material_cost_for_vouchers(vouchers: list[tuple[str, str]]):
+	sle = qb.DocType("Stock Ledger Entry")
+	projects = set()
+	for voucher_nos in create_batch([voucher_no for _voucher_type, voucher_no in vouchers], 1000):
+		projects.update(
+			qb.from_(sle)
+			.select(sle.project)
+			.distinct()
+			.where(
+				sle.voucher_no.isin(voucher_nos)
+				& sle.voucher_type.isin(CONSUMPTION_VOUCHER_TYPES)
+				& sle.project.isnotnull()
+				& (sle.project != "")
+			)
+			.run(pluck=True)
 		)
-		return total_purchase_cost
-	return None
+	update_consumed_material_cost(projects)
 
 
 @frappe.whitelist()
 def update_costing_and_billing(project: str | None = None):
 	project = frappe.get_doc("Project", project)
 	project.check_permission("write")
+	project.set_consumed_material_cost()
 	project.update_costing()
 	project.db_update()

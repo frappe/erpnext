@@ -323,7 +323,7 @@
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
-   "label": "Total Consumed Material Cost (via Stock Entry)",
+   "label": "Total Consumed Material Cost",
    "read_only": 1
   },
   {
@@ -466,7 +466,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-09-16 12:00:00.000000",
+ "modified": "2026-10-15 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
