@@ -1,0 +1,1287 @@
+{
+ "charts": {
+  "treasury-accrued-interest": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "accrued_interest",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Accrued Interest Receivable",
+      "measure_name": "Accrued Interest Receivable"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "treasury-accrued-interest",
+   "query": "treasury-investments",
+   "sort_order": 3,
+   "title": "Accrued Interest Receivable",
+   "workbook": "treasury"
+  },
+  "treasury-book-vs-market-by-type": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Book Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "investment_type",
+      "data_type": "String",
+      "dimension_name": "Investment Type"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "total_cost",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Book Value"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "market_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Market Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "treasury-book-vs-market-by-type",
+   "query": "treasury-held-investments",
+   "sort_order": 7,
+   "title": "Book vs Market Value by Investment Type",
+   "workbook": "treasury"
+  },
+  "treasury-exposure-by-issuer": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Exposure",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "issuer",
+      "data_type": "String",
+      "dimension_name": "Issuer"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "exposure",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Exposure"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "treasury-exposure-by-issuer",
+   "query": "treasury-held-investments",
+   "sort_order": 6,
+   "title": "Exposure by Issuer",
+   "workbook": "treasury"
+  },
+  "treasury-interest-earned": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "posting_date",
+     "data_type": "Date",
+     "dimension_name": "posting_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "income",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Interest Earned (This FY)",
+      "measure_name": "Interest Earned (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "treasury-interest-earned",
+   "query": "treasury-interest-income",
+   "sort_order": 4,
+   "title": "Interest Earned",
+   "workbook": "treasury"
+  },
+  "treasury-maturity-ladder": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "maturity_date",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "total_cost",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Book Value Maturing"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "treasury-maturity-ladder",
+   "query": "treasury-maturities-12-months",
+   "sort_order": 8,
+   "title": "Maturity Ladder",
+   "workbook": "treasury"
+  },
+  "treasury-monthly-interest-income": {
+   "chart_type": "Line",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "posting_date",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "income",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Interest Income"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "treasury-monthly-interest-income",
+   "query": "treasury-interest-income-12-months",
+   "sort_order": 9,
+   "title": "Monthly Interest Income",
+   "workbook": "treasury"
+  },
+  "treasury-realised-gain-loss-this-year": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "posting_date",
+     "data_type": "Date",
+     "dimension_name": "posting_date"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last FY",
+       "show": "change",
+       "source": "last year"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "income",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Realised Gain or Loss (This FY)",
+      "measure_name": "Realised Gain or Loss (This FY)"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false,
+    "window": {
+     "span": "fiscal year to date"
+    }
+   },
+   "folder": null,
+   "name": "treasury-realised-gain-loss-this-year",
+   "query": "treasury-realised-gain-loss",
+   "sort_order": 5,
+   "title": "Realised Gain or Loss",
+   "workbook": "treasury"
+  },
+  "treasury-revaluation-gain-loss": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "revaluation_date",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "total_gain_loss",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Gain or Loss"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "treasury-revaluation-gain-loss",
+   "query": "treasury-revaluations-12-months",
+   "sort_order": 10,
+   "title": "Revaluation Gain and Loss",
+   "workbook": "treasury"
+  },
+  "treasury-total-invested": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "total_cost",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Total Invested",
+      "measure_name": "Total Invested"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "treasury-total-invested",
+   "query": "treasury-investments",
+   "sort_order": 1,
+   "title": "Total Invested",
+   "workbook": "treasury"
+  },
+  "treasury-unrealised-gain-loss": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "unrealised_gain_loss",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Unrealised Gain or Loss",
+      "measure_name": "Unrealised Gain or Loss"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "treasury-unrealised-gain-loss",
+   "query": "treasury-investments",
+   "sort_order": 2,
+   "title": "Unrealised Gain or Loss",
+   "workbook": "treasury"
+  },
+  "treasury-upcoming-maturities": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 20,
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Maturity Date",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "maturity_date",
+      "data_type": "Date",
+      "dimension_name": "Maturity Date",
+      "granularity": "day"
+     },
+     {
+      "column_name": "name",
+      "data_type": "String",
+      "dimension_name": "Investment"
+     },
+     {
+      "column_name": "issuer",
+      "data_type": "String",
+      "dimension_name": "Issuer"
+     }
+    ],
+    "values": [
+     {
+      "aggregation": "sum",
+      "column_name": "total_cost",
+      "data_type": "Decimal",
+      "format": "currency",
+      "measure_name": "Book Value"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "treasury-upcoming-maturities",
+   "query": "treasury-maturities-12-months",
+   "sort_order": 11,
+   "title": "Upcoming Maturities",
+   "workbook": "treasury"
+  }
+ },
+ "creation": "2026-10-15 12:00:00.000000",
+ "dashboards": {
+  "treasury": {
+   "items": [
+    {
+     "default_operator": "=",
+     "default_user_key": "Company",
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "treasury-accrued-interest": "`treasury-investments`.`company`",
+      "treasury-book-vs-market-by-type": "`treasury-held-investments`.`company`",
+      "treasury-exposure-by-issuer": "`treasury-held-investments`.`company`",
+      "treasury-interest-earned": "`treasury-interest-income`.`company`",
+      "treasury-maturity-ladder": "`treasury-maturities-12-months`.`company`",
+      "treasury-monthly-interest-income": "`treasury-interest-income-12-months`.`company`",
+      "treasury-realised-gain-loss-this-year": "`treasury-realised-gain-loss`.`company`",
+      "treasury-revaluation-gain-loss": "`treasury-revaluations-12-months`.`company`",
+      "treasury-total-invested": "`treasury-investments`.`company`",
+      "treasury-unrealised-gain-loss": "`treasury-investments`.`company`",
+      "treasury-upcoming-maturities": "`treasury-maturities-12-months`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "treasury-total-invested",
+     "layout": {
+      "h": 4,
+      "i": "chart-total-invested",
+      "w": 4,
+      "x": 0,
+      "y": 2
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 2
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-unrealised-gain-loss",
+     "layout": {
+      "h": 4,
+      "i": "chart-unrealised-gain-loss",
+      "w": 4,
+      "x": 4,
+      "y": 2
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 2
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-accrued-interest",
+     "layout": {
+      "h": 4,
+      "i": "chart-accrued-interest",
+      "w": 4,
+      "x": 8,
+      "y": 2
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 6
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-interest-earned",
+     "layout": {
+      "h": 5,
+      "i": "chart-interest-earned",
+      "w": 4,
+      "x": 12,
+      "y": 2
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 6
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-realised-gain-loss-this-year",
+     "layout": {
+      "h": 5,
+      "i": "chart-realised-gain-loss-this-year",
+      "w": 4,
+      "x": 16,
+      "y": 2
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 11
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-exposure-by-issuer",
+     "layout": {
+      "h": 17,
+      "i": "chart-exposure-by-issuer",
+      "w": 10,
+      "x": 0,
+      "y": 7
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 16
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-book-vs-market-by-type",
+     "layout": {
+      "h": 17,
+      "i": "chart-book-vs-market-by-type",
+      "w": 10,
+      "x": 10,
+      "y": 7
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 33
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-maturity-ladder",
+     "layout": {
+      "h": 17,
+      "i": "chart-maturity-ladder",
+      "w": 10,
+      "x": 0,
+      "y": 24
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 50
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-monthly-interest-income",
+     "layout": {
+      "h": 17,
+      "i": "chart-monthly-interest-income",
+      "w": 10,
+      "x": 10,
+      "y": 24
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 67
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-revaluation-gain-loss",
+     "layout": {
+      "h": 17,
+      "i": "chart-revaluation-gain-loss",
+      "w": 10,
+      "x": 0,
+      "y": 41
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 84
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "treasury-upcoming-maturities",
+     "layout": {
+      "h": 17,
+      "i": "chart-upcoming-maturities",
+      "w": 10,
+      "x": 10,
+      "y": 41
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 101
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "treasury",
+   "title": "Treasury",
+   "vertical_compact_layout": 1,
+   "visible_to_roles": [
+    {
+     "role": "Accounts User"
+    },
+    {
+     "role": "Accounts Manager"
+    }
+   ],
+   "workbook": "treasury"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-10-15 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "treasury",
+ "owner": "Administrator",
+ "queries": {
+  "treasury-accrual-vouchers": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-accrual-vouchers",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabInvestment Interest Accrual",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "investment"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Accrual Vouchers",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-held-investments": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-held-investments",
+   "operations": [
+    {
+     "table": {
+      "query_name": "treasury-investments",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "status",
+        "type": "column"
+       },
+       "operator": "in",
+       "value": [
+        "Active",
+        "Partially Redeemed"
+       ]
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "total_cost + coalesce(accrued_interest, 0)",
+      "type": "expression"
+     },
+     "new_name": "exposure",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Held Investments",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-income-entries": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-income-entries",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabGL Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "voucher_type",
+        "type": "column"
+       },
+       "operator": "in",
+       "value": [
+        "Investment Transaction",
+        "Investment Interest Accrual"
+       ]
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "voucher_no",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "investment",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "treasury-investment-vouchers",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "investment",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "interest_income_account",
+       "type": "column"
+      },
+      {
+       "column_name": "realised_gain_loss_account",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabInvestment",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "credit - debit",
+      "type": "expression"
+     },
+     "new_name": "income",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "account",
+      "company",
+      "investment",
+      "income",
+      "interest_income_account",
+      "realised_gain_loss_account"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Income Entries",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-interest-income": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-interest-income",
+   "operations": [
+    {
+     "table": {
+      "query_name": "treasury-income-entries",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "account == interest_income_account",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Interest Income",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-interest-income-12-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-interest-income-12-months",
+   "operations": [
+    {
+     "table": {
+      "query_name": "treasury-interest-income",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(month_start(today()), 11, 'month'), date_sub(date_add(month_start(today()), 1, 'month'), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Interest Income, 12 Months",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-investment-vouchers": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-investment-vouchers",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabInvestment Transaction",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "investment"
+     ],
+     "type": "select"
+    },
+    {
+     "distinct": false,
+     "table": {
+      "query_name": "treasury-accrual-vouchers",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "union"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Investment Vouchers",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-investments": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-investments",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabInvestment",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "investment_type",
+      "issuer",
+      "company",
+      "status",
+      "maturity_date",
+      "total_cost",
+      "market_value",
+      "unrealised_gain_loss",
+      "accrued_interest"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Investments",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-maturities-12-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-maturities-12-months",
+   "operations": [
+    {
+     "table": {
+      "query_name": "treasury-held-investments",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "maturity_date.between(month_start(today()), date_sub(date_add(month_start(today()), 12, 'month'), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Maturities, 12 Months",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-realised-gain-loss": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-realised-gain-loss",
+   "operations": [
+    {
+     "table": {
+      "query_name": "treasury-income-entries",
+      "type": "query",
+      "workbook": "treasury"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "account == realised_gain_loss_account",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Realised Gain or Loss",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  },
+  "treasury-revaluations-12-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "treasury-revaluations-12-months",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabInvestment Revaluation",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "expression": {
+        "expression": "revaluation_date.between(date_sub(month_start(today()), 11, 'month'), date_sub(date_add(month_start(today()), 1, 'month'), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "company",
+      "revaluation_date",
+      "total_gain_loss"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Revaluations, 12 Months",
+   "use_live_connection": 1,
+   "workbook": "treasury"
+  }
+ },
+ "title": "Treasury"
+}
