@@ -35,7 +35,7 @@ class ChildItemUpdater:
 		self.child_docname = child_docname
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
-		self._blanket_order_increase = defaultdict(float)
+		self._blanket_order_change = defaultdict(float)
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
 
@@ -100,7 +100,7 @@ class ChildItemUpdater:
 						).format(child_item.idx, child_item.item_code)
 					)
 
-				self._validate_blanket_order_is_open(child_item, d)
+				self._track_blanket_order_change(child_item, d)
 
 			self._validate_quantity_and_rate(child_item, d, rate_unchanged)
 			if not new_child_flag:
@@ -139,6 +139,7 @@ class ChildItemUpdater:
 			else:
 				child_item.save(ignore_permissions=True)
 
+		self._validate_blanket_order_changes()
 		self._post_update(
 			any_qty_changed, items_added_or_removed, any_conversion_factor_changed, had_mapped_discount
 		)
@@ -324,7 +325,7 @@ class ChildItemUpdater:
 
 		return flt(get_conversion_factor(child_item.item_code, uom).get("conversion_factor")) or 1
 
-	def _validate_blanket_order_is_open(self, child_item, new_data: dict) -> None:
+	def _track_blanket_order_change(self, child_item, new_data: dict) -> None:
 		if not child_item.get("blanket_order"):
 			return
 
@@ -332,16 +333,18 @@ class ChildItemUpdater:
 			flt(new_data.get("qty")) * flt(new_data.get("conversion_factor")),
 			child_item.precision("stock_qty"),
 		)
-		if new_stock_qty > flt(child_item.stock_qty):
-			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
-			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
-			blanket_order.validate_items_are_open([child_item.item_code])
+		key = (child_item.blanket_order, child_item.item_code)
+		self._blanket_order_change[key] += new_stock_qty - flt(child_item.stock_qty)
 
-			key = (child_item.blanket_order, child_item.item_code)
-			self._blanket_order_increase[key] += new_stock_qty - flt(child_item.stock_qty)
-			blanket_order.validate_qty_can_be_ordered(
-				{child_item.item_code: self._blanket_order_increase[key]}, self.parent_doctype
-			)
+	def _validate_blanket_order_changes(self) -> None:
+		for (blanket_order_name, item_code), change in sorted(self._blanket_order_change.items()):
+			if change <= 0:
+				continue
+
+			blanket_order = frappe.get_doc("Blanket Order", blanket_order_name, for_update=True)
+			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
+			blanket_order.validate_items_are_open([item_code])
+			blanket_order.validate_qty_can_be_ordered({item_code: change}, self.parent_doctype)
 
 	def _validate_uom_unchanged_after_fulfilment(self, child_item, new_data: dict, change_state) -> None:
 		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(

@@ -273,6 +273,33 @@ class TestBlanketOrder(ERPNextTestSuite):
 			0,
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_checks_the_net_change(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=50)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 50})
+		po.submit()
+
+		payload = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": qty,
+				"rate": row.rate,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"schedule_date": str(row.schedule_date),
+			}
+			for row, qty in zip(po.items, (40, 60), strict=True)
+		]
+		update_child_qty_rate("Purchase Order", json.dumps(payload), po.name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Purchase Order Item", row.name, "qty") for row in po.items], [40, 60]
+		)
+
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
 		po = make_purchase_order_against(bo, qty=10)
