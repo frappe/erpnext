@@ -81,22 +81,28 @@ def evaluate(workdir, run_id):
 	if run.get("lock") != _current_lock(workdir):
 		check("INVALID", "lock", "lock", "a locked file or the scripts snapshot changed after the run's lock")
 
-	active = [v for v in plan["variants"] if v["id"] not in run.get("skipped_variants", {})]
+	skipped = run.get("skipped_variants", {})
+	base_ids, head_ids = _active_ids(plan, run)
 	pairs = []
-	for v in active:
-		vid = v["id"]
-		pairs += [
-			("selfcheck", vid, f"C-{vid}-built", f"T-{vid}-built"),
-			("build", vid, f"T-{vid}-built", f"H-{vid}-built"),
-			("rescan", vid, f"T-{vid}-built", f"T-{vid}-rescan"),
-			("legacy", vid, f"C-{vid}-legacy", f"T-{vid}-legacy"),
-		]
-	for a, b in plan["flips"]:
-		if a in {v["id"] for v in active} and b in {v["id"] for v in active}:
+	for vid in base_ids:
+		pairs.append(("selfcheck", vid, f"C-{vid}-built", f"T-{vid}-built"))
+		if vid in head_ids:
 			pairs += [
-				("selfcheck", f"{a}-{b}", f"FC-{a}-{b}-built", f"FT-{a}-{b}-built"),
-				("flip", f"{a}-{b}", f"FC-{a}-{b}-legacy", f"FT-{a}-{b}-legacy"),
+				("build", vid, f"T-{vid}-built", f"H-{vid}-built"),
+				("rescan", vid, f"T-{vid}-built", f"T-{vid}-rescan"),
+				("legacy", vid, f"C-{vid}-legacy", f"T-{vid}-legacy"),
 			]
+		else:
+			check("WARN", "coverage", vid, "the PR removes this setting value: tested on base code only")
+	for vid in head_ids:
+		if vid not in base_ids:
+			# The setting exists only on PR code. Base code behaves as the site defaults.
+			pairs.append(("build", vid, "T-v0-built", f"H-{vid}-built"))
+	for a, b in run.get("flips", plan["flips"]):
+		pairs += [
+			("selfcheck", f"{a}-{b}", f"FC-{a}-{b}-built", f"FT-{a}-{b}-built"),
+			("flip", f"{a}-{b}", f"FC-{a}-{b}-legacy", f"FT-{a}-{b}-legacy"),
+		]
 
 	for comparison, key, left, right in pairs:
 		sa, sb = load(left), load(right)
@@ -137,24 +143,24 @@ def evaluate(workdir, run_id):
 	if run.get("ui"):
 		_ui(load("ui:base"), load("ui:head"), allowed, declared_hits, changes, check)
 
-	for v in active:
-		base = load(f"T-{v['id']}-built") or {}
+	for vid in base_ids:
+		base = load(f"T-{vid}-built") or {}
 		for sid, outcome in sorted(base.get("outcomes", {}).items()):
 			if sid.startswith("build-") and outcome != "ok":
 				check(
 					"WARN",
 					"coverage",
-					f"{v['id']} {sid}",
+					f"{vid} {sid}",
 					f"fails on base code, gives no coverage: {outcome}",
 				)
 		for violation in base.get("invariants", []):
-			check("WARN", "invariant", f"{v['id']} base", f"pre-existing: {violation}")
+			check("WARN", "invariant", f"{vid} base", f"pre-existing: {violation}")
 
 	for i, rule in enumerate(allowed):
 		if i not in declared_hits:
 			check("WARN", "declared", rule["path"], f"declared change not observed ({rule['comparison']})")
 
-	_assertions(expect, active, run.get("skipped_variants", {}), load, check)
+	_assertions(expect, base_ids, head_ids, skipped, load, check)
 
 	statuses = {c["status"] for c in checks}
 	verdict = next((s for s in VERDICT_ORDER[:-1] if s in statuses), "PASS")
@@ -214,35 +220,65 @@ def _ui(base, head, allowed, declared_hits, changes, check):
 				check("FAIL", "ui", f"v0 {path}", "undeclared change")
 
 
-def _assertions(expect, active, skipped, load, check):
+def _active_ids(plan, run):
+	"""Variant ids that ran on base code and on PR code."""
+	if "active" in run:
+		return run["active"].get("base", []), run["active"].get("head", [])
+	ids = [v["id"] for v in plan["variants"] if v["id"] not in run.get("skipped_variants", {})]
+	return ids, ids  # runs recorded before variants had sides
+
+
+def _snapshot_variant(snapshot, vid, base_ids, head_ids):
+	"""The variant whose snapshot an assertion reads, or None when no such snapshot exists."""
+	if snapshot.startswith("ui_"):
+		return "v0" if vid == "v0" else None  # the browser runs in the default variant only
+	if snapshot == "base":
+		if vid in base_ids:
+			return vid
+		return "v0" if vid in head_ids else None  # a setting only the PR has: base code at defaults
+	if snapshot == "base_legacy":
+		return vid if vid in base_ids else None
+	if snapshot == "head":
+		return vid if vid in head_ids else None
+	return vid if vid in base_ids and vid in head_ids else None  # head_legacy
+
+
+def _assertions(expect, base_ids, head_ids, skipped, load, check):
 	"""Evaluate every assertion. A required side passes only if one of its assertions ran.
 
 	A variant the run skipped had the same settings as the site default, so its
 	assertions run against v0. An unknown variant id makes the review INVALID.
 	"""
-	order = [v["id"] for v in active]
+	order = list(dict.fromkeys(["v0", *base_ids, *head_ids]))
 	ran = {"base": 0, "head": 0}
 	for a in expect.get("assertions", []):
 		wanted = order if a.get("variants", "*") == "*" else a["variants"]
 		targets = set()
 		for vid in wanted:
-			if vid in order:
-				targets.add(vid)
-			elif vid in skipped:
-				targets.add("v0")
-			else:
+			vid = "v0" if vid in skipped else vid
+			if vid not in order:
 				check("INVALID", "assertion", a["path"], f"assertion names unknown variant {vid!r}")
-		if a["snapshot"].startswith("ui_"):
-			targets &= {"v0"}  # the browser runs in the default variant only
+				continue
+			target = _snapshot_variant(a["snapshot"], vid, base_ids, head_ids)
+			if target is None:
+				check(
+					"WARN",
+					"assertion",
+					f"{vid} {a['snapshot']} {a['path']}",
+					"not run: this variant has no such snapshot",
+				)
+			else:
+				targets.add(target)
 		for vid in sorted(targets, key=order.index):
 			snap = load(SIDES[a["snapshot"]].format(v=vid))
 			if a["snapshot"].startswith("ui_"):
 				actual = flatten_deep(snap["ui"], "ui").get(a["path"]) if snap else "<missing UI results>"
 			else:
 				actual = flatten(snap).get(a["path"]) if snap else "<missing snapshot>"
-			side = "base" if a["snapshot"] in ("base", "ui_base") else "head"
-			if a["snapshot"] in ("base", "ui_base", "head", "ui_head"):
-				ran[side] += 1
+			if a["snapshot"] in ("base", "ui_base"):
+				ran["base"] += 1
+			elif a["snapshot"] in ("head", "ui_head"):
+				ran["head"] += 1
 			passed = _equal(actual, a["equals"])
 			status = (
 				"PASS" if passed else ("NOT REPRODUCED" if a["snapshot"] in ("base", "ui_base") else "FAIL")

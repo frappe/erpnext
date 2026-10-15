@@ -303,14 +303,15 @@ class Review:
 			self._checkout(f"review-{self.state['pr']}-base")
 			self._bench("migrate")
 			self._bench("scheduler", "pause")
-			self._session(record, "probe")
+			self._session(record, "probe", side="base")
 			self._session(record, "preflight")
-			active, skipped = self._active_variants(plan, rundir)
-			record["skipped_variants"] = skipped
-			flips = [f for f in plan["flips"] if f[0] in active and f[1] in active]
-			for vid in active:
+			record["active"] = {"base": self._active_variants(plan, rundir, "base", record)}
+			for vid in record["active"]["base"]:
 				self._session(record, "switch", variant=vid)
 				self._session(record, "base_build", variant=vid)
+			# A flip needs both settings on both codes; the analysis only makes such flips.
+			flips = [f for f in plan["flips"] if set(f) <= set(record["active"]["base"])]
+			record["flips"] = flips
 			for a, b in flips:
 				self._session(record, "switch", variant=b)
 				self._session(record, "base_flip", flip=[a, b])
@@ -321,7 +322,10 @@ class Review:
 			self._checkout(f"review-{self.state['pr']}-head")
 			if analysis["needs_migrate"]:
 				self._bench("migrate")
-			for vid in active:
+			# settings that only the PR code has exist now: record their site values
+			self._session(record, "probe", side="head")
+			record["active"]["head"] = self._active_variants(plan, rundir, "head", record)
+			for vid in record["active"]["head"]:
 				self._session(record, "switch", variant=vid)
 				self._session(record, "head_variant", variant=vid)
 			if record["ui"]:
@@ -340,11 +344,15 @@ class Review:
 			f"run {run_id}: {record['status']}{' - ' + record.get('error', '')[:500] if record['status'] != 'complete' else ''}"
 		)
 
-	def _active_variants(self, plan, rundir):
-		originals = read(self.workdir / "settings-original.json")
+	def _active_variants(self, plan, rundir, side, record):
+		"""Variants that this code side supports, less those equal to the site defaults."""
+		originals = read(rundir / "settings-original.json")
 		company_defaults = read(rundir / "company-defaults.json")
-		active, skipped = [], {}
+		skipped = record.setdefault("skipped_variants", {})
+		active = []
 		for v in plan["variants"]:
+			if side not in v.get("sides", ("base", "head")):
+				continue
 			same_singles = all(
 				str(originals.get(dt, {}).get(f) or "") == str(val or "")
 				for dt, values in v.get("singles", {}).items()
@@ -358,7 +366,7 @@ class Review:
 				skipped[v["id"]] = "same as default on this site"
 			else:
 				active.append(v["id"])
-		return active, skipped
+		return active
 
 	def _cleanup(self, record, scheduler_was_paused):
 		errors = []

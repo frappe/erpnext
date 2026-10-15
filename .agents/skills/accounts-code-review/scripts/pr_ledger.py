@@ -250,10 +250,17 @@ def day(offset):
 # orchestrator switches them in one console session and runs phases in the next.
 
 
-def record_originals(variants, path):
+def record_originals(variants, path, side):
+	"""Record the site value of every single that a variant on this code side sets.
+
+	A setting that only the PR code has does not exist on the base code: the head
+	probe records it after the PR code is migrated.
+	"""
 	path = Path(path)
 	originals = json.loads(path.read_text()) if path.exists() else {}
 	for variant in variants:
+		if side not in variant.get("sides", ("base", "head")):
+			continue
 		for dt, values in variant.get("singles", {}).items():
 			for field in values:
 				if field not in originals.setdefault(dt, {}):

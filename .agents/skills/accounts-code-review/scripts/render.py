@@ -61,7 +61,11 @@ def _summary(ctx, result, plan, record):
 	undeclared = [c for c in result["changes"] if not c["declared"]]
 	new_invariants = [c for c in result["checks"] if c["kind"] == "invariant" and c["status"] == "FAIL"]
 	ui_fail = [c for c in result["checks"] if c["kind"] == "ui" and c["status"] == "FAIL"]
-	ran = [v for v in plan["variants"] if v["id"] not in record.get("skipped_variants", {})]
+	ran = [
+		v
+		for v in plan["variants"]
+		if _ran(v, record) not in ("no", *record.get("skipped_variants", {}).values())
+	]
 	lines = ["## Summary", ""]
 	if base:
 		lines.append(
@@ -243,16 +247,15 @@ def _scenarios(ctx, rundir):
 def _settings(ctx, plan, analysis, record):
 	lines = ["## Settings tested", "", "| Combination | Ran |", "| --- | --- |"]
 	for v in plan["variants"]:
-		lines.append(
-			f"| {_esc(ctx.variant(v['id']))} | {record.get('skipped_variants', {}).get(v['id'], 'yes')} |"
-		)
-	if plan["flips"]:
+		lines.append(f"| {_esc(ctx.variant(v['id']))} | {_ran(v, record)} |")
+	flips = record.get("flips", plan["flips"])
+	if flips:
 		lines += [
 			"",
 			"Changed after posting (documents created under the first, then acted on under the second):",
 			"",
 		]
-		lines += [f"- {_esc(ctx.variant(a))} → {_esc(ctx.variant(b))}" for a, b in plan["flips"]]
+		lines += [f"- {_esc(ctx.variant(a))} → {_esc(ctx.variant(b))}" for a, b in flips]
 	not_varied = [s for s in analysis["settings"] if s["values"] is None]
 	if not_varied:
 		lines += [
@@ -262,6 +265,23 @@ def _settings(ctx, plan, analysis, record):
 			+ ".",
 		]
 	return [*lines, ""]
+
+
+def _ran(variant, record):
+	vid = variant["id"]
+	if vid in record.get("skipped_variants", {}):
+		return record["skipped_variants"][vid]
+	active = record.get("active")
+	if not active:
+		return "yes"
+	on_base, on_head = vid in active.get("base", []), vid in active.get("head", [])
+	if on_base and on_head:
+		return "yes"
+	if on_head:
+		return "PR code only (the PR adds this setting); compared with the base code at site defaults"
+	if on_base:
+		return "base code only (the PR removes this setting)"
+	return "no"
 
 
 def _blast_radius(analysis):

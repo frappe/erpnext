@@ -76,22 +76,33 @@ class _Session:
 		self.variants = {v["id"]: v for v in self.plan["variants"]}
 		self.rundir = workdir / "runs" / str(self.run["run_id"])
 		self.snapdir = self.rundir / "snapshots"
+		# per run: a later run must restore the values the site had when it started
+		self.originals_path = self.rundir / "settings-original.json"
 		self.snapdir.mkdir(parents=True, exist_ok=True)
 		self.s0 = _load_s0(workdir)
 
 	# ------------------------------------------------------------ commands
 
 	def cmd_probe(self):
-		"""Record the site's clock and original singles; resolve company field defaults."""
-		(self.rundir / "site-started.txt").write_text(self.frappe.utils.now())
-		self.L.record_originals(self.plan["variants"], self.workdir / "settings-original.json")
+		"""Record the site's original singles and company field defaults for one code side.
+
+		The base probe runs first, on the base code. The head probe runs after the PR
+		code is migrated and adds the settings that only the PR code has.
+		"""
+		side = self.args.get("side", "base")
+		if side == "base":
+			(self.rundir / "site-started.txt").write_text(self.frappe.utils.now())
+		self.L.record_originals(self.plan["variants"], self.originals_path, side)
+		path = self.rundir / "company-defaults.json"
+		defaults = json.loads(path.read_text()) if path.exists() else {}
 		meta = self.frappe.get_meta("Company")
-		defaults = {}
 		for v in self.plan["variants"]:
+			if side not in v.get("sides", ("base", "head")):
+				continue
 			for field in v.get("company", {}):
 				df = meta.get_field(field)
-				defaults[field] = df.default if df else None
-		_write(self.workdir / "runs" / str(self.run["run_id"]) / "company-defaults.json", defaults)
+				defaults.setdefault(field, df.default if df else None)
+		_write(path, defaults)
 
 	def cmd_preflight(self):
 		"""Build every scenario once in a throwaway company, then roll it all back."""
@@ -164,13 +175,13 @@ class _Session:
 		return json.loads(path.read_text()) if path.exists() else {}
 
 	def cmd_switch(self):
-		originals = json.loads((self.workdir / "settings-original.json").read_text())
+		originals = json.loads(self.originals_path.read_text())
 		target = self.L.target_singles(self.variants[self.args["variant"]], originals)
 		self.L.save_singles(target)
 		print("SWITCHED", self.args["variant"], target)
 
 	def cmd_restore(self):
-		path = self.workdir / "settings-original.json"
+		path = self.originals_path
 		if path.exists():
 			self.L.save_singles(json.loads(path.read_text()))
 			print("RESTORED", path.read_text())
@@ -196,6 +207,11 @@ class _Session:
 	def cmd_head_variant(self):
 		vid = self.args["variant"]
 		self._assert_variant(vid)
+		if "base" not in self.variants[vid].get("sides", ("base", "head")):
+			# A setting only the PR code has: no base-code company to rescan or act on.
+			# verdict.py compares this build with the base code at the site defaults.
+			self._build("H", vid, vid)
+			return
 		lab = self._lab("T", vid, vid)
 		self._snapshot(lab, f"T-{vid}-rescan")
 		self._legacy("T", vid, vid)
@@ -209,7 +225,7 @@ class _Session:
 	# ------------------------------------------------------------ steps
 
 	def _assert_variant(self, vid):
-		originals = json.loads((self.workdir / "settings-original.json").read_text())
+		originals = json.loads(self.originals_path.read_text())
 		wrong = self.L.singles_mismatch(self.L.target_singles(self.variants[vid], originals))
 		if wrong:
 			raise AssertionError(f"site singles are not variant {vid}: {wrong}")

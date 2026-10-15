@@ -271,35 +271,63 @@ def index_defs(index, name):
 	return index.defs.get(name, [])
 
 
-def field_values(apps_dir, app, apps, doctype, field, commits):
-	"""Values to test for one setting, from the doctype JSON. None if not enumerable.
+SIDES = ("base", "head")
 
-	The reviewed app is read at the reviewed commits (head first, then base), so a
-	setting or option that the PR adds is tested. Other apps are read from their
-	checkouts, which the PR does not change.
+
+def field_values(apps_dir, app, apps, doctype, field, commits):
+	"""Values to test for one setting, and the code sides that support each value.
+
+	Returns (values, kind, label, sides) where sides maps str(value) to the sides
+	("base", "head") whose doctype JSON has the field and, for a Select, the option.
+	The reviewed app is read at each reviewed commit, so a setting or option that
+	the PR adds or removes is known. Other apps are read from their checkouts,
+	which the PR does not change, so their values exist on both sides.
 	"""
 	if PRECISION_SETTINGS.get((doctype, field)):
-		return PRECISION_SETTINGS[(doctype, field)], "preset", field.replace("_", " ").title()
+		values = PRECISION_SETTINGS[(doctype, field)]
+		return values, "preset", field.replace("_", " ").title(), {str(v): list(SIDES) for v in values}
 	scrub = doctype.lower().replace(" ", "_")
 	suffix = f"/doctype/{scrub}/{scrub}.json"
-	sources = []
-	for sha in commits:
-		paths = git(Path(apps_dir, app), "ls-tree", "-r", "--name-only", sha).splitlines()
-		sources += [
-			lambda p=p, sha=sha: show(Path(apps_dir, app), sha, p) for p in paths if p.endswith(suffix)
-		]
-	for other in (a for a in apps if a != app):
-		sources += [p.read_text for p in sorted(Path(apps_dir, other).glob(f"**{suffix}"))]
-	for read_source in sources:
-		for df in json.loads(read_source() or "{}").get("fields", []):
-			if df.get("fieldname") != field:
-				continue
-			if df["fieldtype"] == "Check":
-				return [0, 1], "Check", df.get("label")
-			if df["fieldtype"] == "Select":
-				return (df.get("options") or "").split("\n"), "Select", df.get("label")
-			return None, df["fieldtype"], df.get("label")
-	return None, "not found (custom field?)", None
+	found = {}
+	for side in ("head", "base"):
+		sha = commits[side]
+		for path in git(Path(apps_dir, app), "ls-tree", "-r", "--name-only", sha).splitlines():
+			if path.endswith(suffix):
+				found[side] = _docfield(show(Path(apps_dir, app), sha, path), field) or found.get(side)
+	if not found.get("head") and not found.get("base"):
+		for other in (a for a in apps if a != app):
+			for path in sorted(Path(apps_dir, other).glob(f"**{suffix}")):
+				df = _docfield(path.read_text(), field)
+				if df:
+					found = {"head": df, "base": df}
+					break
+	df = found.get("head") or found.get("base")
+	if not df:
+		return None, "not found (custom field?)", None, {}
+	values = _enumerate(df)
+	if values is None:
+		return None, df["fieldtype"], df.get("label"), {}
+	for extra in _enumerate(found.get("base")) or []:
+		if extra not in values:
+			values.append(extra)  # an option the PR removes
+	sides = {str(v): [s for s in SIDES if v in (_enumerate(found.get(s)) or [])] for v in values}
+	return values, df["fieldtype"], df.get("label"), sides
+
+
+def _docfield(text, field):
+	return next(
+		(df for df in json.loads(text or "{}").get("fields", []) if df.get("fieldname") == field), None
+	)
+
+
+def _enumerate(df):
+	if not df:
+		return None
+	if df["fieldtype"] == "Check":
+		return [0, 1]
+	if df["fieldtype"] == "Select":
+		return (df.get("options") or "").split("\n")
+	return None
 
 
 # ---------------------------------------------------------------- main
@@ -359,7 +387,9 @@ def analyze(apps_dir, app, apps, base, head):
 
 	setting_rows = []
 	for (dt, field), sources in sorted(settings.items()):
-		values, kind, label = field_values(apps_dir, app, apps, dt, field, (head, base))
+		values, kind, label, sides = field_values(
+			apps_dir, app, apps, dt, field, {"head": head, "base": base}
+		)
 		setting_rows.append(
 			{
 				"doctype": dt,
@@ -420,22 +450,27 @@ def _find(apps_dir, rel_file, qual):
 
 
 def generate_plan(analysis, pr):
-	"""Variants: default, then one per (setting, value), sorted. Flips: default -> each Check variant."""
-	variants = [{"id": "v0", "label": "default", "singles": {}, "company": {}}]
+	"""Variants: default, then one per (setting, value), sorted. Flips: default -> each Check variant.
+
+	Each variant lists the code sides that support it. A value that only the PR
+	code has (a new setting or option) runs on the PR code only; a value that the
+	PR removes runs on the base code only. A flip needs both sides.
+	"""
+	variants = [{"id": "v0", "label": "default", "sides": ["base", "head"], "singles": {}, "company": {}}]
 	flips = []
 	for row in analysis["settings"]:
 		if row["values"] is None:
 			continue
 		for value in row["values"]:
 			vid = f"v{len(variants)}"
-			scope = "company" if row["doctype"] == "Company" else "singles"
-			variant = {"id": vid, "label": _label(row, value), "singles": {}, "company": {}}
-			if scope == "company":
+			sides = row.get("sides", {}).get(str(value), ["base", "head"])
+			variant = {"id": vid, "label": _label(row, value), "sides": sides, "singles": {}, "company": {}}
+			if row["doctype"] == "Company":
 				variant["company"] = {row["field"]: value}
 			else:
 				variant["singles"] = {row["doctype"]: {row["field"]: value}}
 			variants.append(variant)
-			if row["kind"] == "Check":
+			if row["kind"] == "Check" and sides == ["base", "head"]:
 				flips.append(["v0", vid])
 	return {
 		"pr": pr,

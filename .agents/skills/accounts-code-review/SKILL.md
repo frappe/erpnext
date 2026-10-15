@@ -94,7 +94,9 @@ review.py analyze --workdir <workdir>
 
 This writes `analysis.json` (changed symbols, callers, settings) and `plan.json`
 (variants and flips). The generated plan varies every enumerable setting on a
-changed path, one value at a time.
+changed path, one value at a time. Each variant lists the code it exists on. A setting or option that
+the PR adds runs on the PR code only, and is compared with the base code at the
+site defaults. A value that the PR removes runs on the base code only.
 
 Edit `plan.json` only to add, or to match the requirement's **Setup**:
 
