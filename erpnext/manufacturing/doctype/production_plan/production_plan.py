@@ -443,16 +443,7 @@ class ProductionPlan(Document):
 			group_by="sales_order, sales_order_item",
 		)
 
-		reference = frappe.qb.DocType("Production Plan Item Reference")
-		plan = frappe.qb.DocType("Production Plan")
-		data += (
-			frappe.qb.from_(reference)
-			.join(plan)
-			.on(plan.name == reference.parent)
-			.select(reference.sales_order, reference.sales_order_item, Sum(reference.qty).as_("qty"))
-			.where(reference.sales_order.isin(sales_orders) & (plan.docstatus == 1))
-			.groupby(reference.sales_order, reference.sales_order_item)
-		).run(as_dict=True)
+		data += get_planned_qty_of_references(sales_orders)
 
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
@@ -643,3 +634,58 @@ def get_schedule_signature(doc):
 			for row in doc.sub_assembly_items
 		),
 	)
+
+
+def get_planned_qty_of_references(sales_orders):
+	plans = get_plans_with_references(sales_orders)
+	if not plans:
+		return []
+
+	reference = frappe.qb.DocType("Production Plan Item Reference")
+	references = (
+		frappe.qb.from_(reference)
+		.select(
+			reference.parent,
+			reference.item_reference,
+			reference.sales_order,
+			reference.sales_order_item,
+			reference.qty,
+		)
+		.where(reference.parent.isin(plans))
+		.orderby(reference.idx)
+	).run(as_dict=True)
+	planned_qty = get_planned_qty_by_order_row(plans)
+
+	allocated = []
+	for row in references:
+		key = (row.parent, row.item_reference)
+		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
+		planned_qty[key] = planned_qty.get(key, 0) - qty
+		allocated.append(
+			frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+		)
+	return allocated
+
+
+def get_plans_with_references(sales_orders):
+	reference = frappe.qb.DocType("Production Plan Item Reference")
+	plan = frappe.qb.DocType("Production Plan")
+	return (
+		frappe.qb.from_(reference)
+		.join(plan)
+		.on(plan.name == reference.parent)
+		.select(reference.parent)
+		.distinct()
+		.where(reference.sales_order.isin(sales_orders) & (plan.docstatus == 1))
+	).run(pluck=True)
+
+
+def get_planned_qty_by_order_row(plans):
+	plan_item = frappe.qb.DocType("Production Plan Item")
+	rows = (
+		frappe.qb.from_(plan_item)
+		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
+		.where(plan_item.parent.isin(plans))
+		.groupby(plan_item.parent, plan_item.sales_order_item)
+	).run(as_dict=True)
+	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}

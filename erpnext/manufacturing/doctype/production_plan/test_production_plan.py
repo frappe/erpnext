@@ -899,6 +899,33 @@ class TestProductionPlan(ERPNextTestSuite):
 				frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty"), qty
 			)
 
+	def test_reduced_consolidated_row_records_only_its_planned_qty(self):
+		item = "Test Production Item 1"
+		first = make_sales_order(item_code=item, qty=5)
+		second = make_sales_order(item_code=item, qty=3)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = first.company
+		plan.get_items_from = "Sales Order"
+		for order in (first, second):
+			plan.append(
+				"sales_orders",
+				{
+					"sales_order": order.name,
+					"sales_order_date": order.transaction_date,
+					"customer": order.customer,
+				},
+			)
+		plan.combine_items = 1
+		plan.get_items()
+		plan.po_items[0].planned_qty = 4
+		plan.submit()
+
+		for order, qty in ((first, 4), (second, 0)):
+			self.assertEqual(
+				frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty"), qty
+			)
+
 	def test_material_request_is_not_planned_twice(self):
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
