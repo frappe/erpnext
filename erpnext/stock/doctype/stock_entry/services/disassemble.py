@@ -157,7 +157,7 @@ class DisassembleStockEntry(BaseStockEntry):
 	def get_received_component_qty(self) -> dict:
 		received_qty = defaultdict(float)
 		for row in self.doc.items:
-			if row.t_warehouse and not row.is_finished_item and not row.secondary_item_type:
+			if row.t_warehouse and not row.is_finished_item:
 				received_qty[row.item_code] += flt(row.transfer_qty)
 
 		return received_qty

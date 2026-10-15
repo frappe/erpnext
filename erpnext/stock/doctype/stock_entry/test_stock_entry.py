@@ -5174,7 +5174,16 @@ class TestStockEntry(ERPNextTestSuite):
 	def test_bom_disassembly_refuses_component_qty_not_in_the_bom(self):
 		self.assertRaises(frappe.ValidationError, self.make_bom_disassembly, component_qty=10)
 
-	def make_bom_disassembly(self, component_qty=None):
+	def test_bom_disassembly_checks_secondary_rows_too(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"does not match the BOM quantity",
+			self.make_bom_disassembly,
+			component_qty=10,
+			secondary_item_type="Scrap",
+		)
+
+	def make_bom_disassembly(self, component_qty=None, secondary_item_type=None):
 		rm_item = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -5208,6 +5217,7 @@ class TestStockEntry(ERPNextTestSuite):
 		for row in entry.items:
 			if component_qty and row.item_code == rm_item:
 				row.qty = component_qty
+				row.secondary_item_type = secondary_item_type
 
 		entry.insert()
 		return entry
