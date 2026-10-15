@@ -6623,18 +6623,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		other_bom = make_review_bom(fg_item, [{"item_code": other_item, "qty": 2}])
 
-		wo = frappe.get_doc(
-			{
-				"doctype": "Work Order",
-				"production_item": fg_item,
-				"bom_no": bom.name,
-				"qty": 5,
-				"company": "_Test Company",
-				"source_warehouse": "_Test Warehouse - _TC",
-				"wip_warehouse": "_Test Warehouse 1 - _TC",
-				"fg_warehouse": "_Test Warehouse 2 - _TC",
-			}
-		).insert()
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False)
 		self.assertEqual([row.time_in_mins for row in wo.operations], [50])
 
 		wo.qty = 20
@@ -6642,9 +6631,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([row.required_qty for row in wo.required_items], [20, 20])
 		self.assertEqual([row.time_in_mins for row in wo.operations], [200])
 
+		wo.qty = 10
+		wo.get_items_and_operations_from_bom()
+		wo.save()
+		self.assertEqual([row.time_in_mins for row in wo.operations], [100])
+
 		wo.bom_no = other_bom.name
 		wo.save()
-		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
+		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 20)])
 		self.assertEqual(wo.operations, [])
 
 	def test_status_change_accepts_only_its_own_statuses(self):

@@ -208,27 +208,12 @@ class OperationsService:
 
 	def sync_operations_with_bom(self, previous):
 		if previous is None:
-			self._set_missing_operations()
-		elif (
-			previous.bom_no != self.doc.bom_no or previous.use_multi_level_bom != self.doc.use_multi_level_bom
-		):
+			return
+
+		if previous.bom_no != self.doc.bom_no or previous.use_multi_level_bom != self.doc.use_multi_level_bom:
 			self.doc.get_items_and_operations_from_bom()
-		elif flt(previous.qty) != flt(self.doc.qty):
-			self._scale_operation_time(previous.qty)
-
-	def _set_missing_operations(self):
-		if self.doc.get("operations") or not self.doc.bom_no:
-			return
-		if frappe.get_cached_value("BOM", self.doc.bom_no, "with_operations"):
+		elif flt(previous.qty) != flt(self.doc.qty) and self.doc.get("operations"):
 			self.set_work_order_operations()
-
-	def _scale_operation_time(self, previous_qty):
-		if not flt(previous_qty):
-			return
-		for d in self.doc.get("operations"):
-			if not d.fixed_time:
-				d.time_in_mins = flt(d.time_in_mins) * flt(self.doc.qty) / flt(previous_qty)
-		self.calculate_operating_cost()
 
 	def set_operation_warehouses(self):
 		"""For semi-finished goods tracking, default each operation's warehouses from the Work
