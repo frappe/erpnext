@@ -158,7 +158,7 @@ class StockBalanceReport:
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
 		self.latest_valuation_rates = {}
-		track_rates = self.filters.get("show_dimension_wise_stock") and not self.has_dimension_filter
+		track_rates = self.shows_whole_pools
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
@@ -206,7 +206,7 @@ class StockBalanceReport:
 
 	def get_pool_balances(self, rows) -> dict:
 		"""Whole item and warehouse balances, read before the rows are revalued."""
-		if not self.filters.get("show_dimension_wise_stock") or self.has_dimension_filter:
+		if not self.shows_whole_pools:
 			return {}
 
 		pools = {}
@@ -233,6 +233,10 @@ class StockBalanceReport:
 	@property
 	def has_dimension_filter(self) -> bool:
 		return any(self.filters.get(field) for field in self.inventory_dimensions)
+
+	@property
+	def shows_whole_pools(self) -> bool:
+		return bool(self.filters.get("show_dimension_wise_stock")) and not self.has_dimension_filter
 
 	def get_pool_valuation_details(self, item_codes: set) -> dict:
 		if not item_codes:
