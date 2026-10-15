@@ -864,6 +864,55 @@ class TestProject(ERPNextTestSuite):
 		project.reload()
 		self.assertEqual(project.total_consumed_material_cost, 1050)
 
+	def test_landed_cost_on_manufactured_stock_is_counted_once(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		project = make_project(
+			{
+				"project_name": f"_Test Landed Manufacture {frappe.generate_hash(length=6)}",
+				"company": company,
+			}
+		)
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=raw_material, qty=10, to_warehouse=warehouse, rate=100, company=company)
+
+		manufacture = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Manufacture",
+				"stock_entry_type": "Manufacture",
+				"company": company,
+				"project": project.name,
+				"items": [
+					{"item_code": raw_material, "qty": 10, "s_warehouse": warehouse},
+					{"item_code": finished_good, "qty": 1, "t_warehouse": warehouse, "is_finished_item": 1},
+				],
+			}
+		)
+		manufacture.insert()
+		manufacture.submit()
+		make_landed_cost_voucher(
+			company=company,
+			receipt_document_type="Stock Entry",
+			receipt_document=manufacture.name,
+			charges=50,
+		)
+
+		issue = make_stock_entry(
+			item_code=finished_good, qty=1, from_warehouse=warehouse, company=company, do_not_save=True
+		)
+		issue.project = project.name
+		issue.insert()
+		issue.submit()
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
 	def test_landed_cost_is_not_counted_twice(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
