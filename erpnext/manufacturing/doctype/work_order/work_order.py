@@ -1827,11 +1827,14 @@ class WorkOrder(Document):
 	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
@@ -1843,6 +1846,7 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == is_return)
 			)
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
@@ -1852,7 +1856,20 @@ class WorkOrder(Document):
 		for d in data:
 			key = d.original_item or d.item_code
 			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
+
+		if is_return:
+			return self._cap_returned_qty_to_transferred(transferred_items)
+
 		return transferred_items
+
+	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
+		transferred_qty_by_item = self._material_transfer_qty_by_item(is_return=0)
+		return frappe._dict(
+			{
+				item_code: min(flt(returned_qty), flt(transferred_qty_by_item.get(item_code)))
+				for item_code, returned_qty in returned_qty_by_item.items()
+			}
+		)
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
 		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
@@ -2407,6 +2424,11 @@ class WorkOrder(Document):
 			return
 
 		if stock_entry.purpose != "Material Transfer for Manufacture":
+			return
+
+		if stock_entry.job_card and frappe.get_cached_value(
+			"Job Card", stock_entry.job_card, "is_corrective_job_card"
+		):
 			return
 
 		required_items = [d.item_code for d in self.required_items]
