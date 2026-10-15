@@ -102,3 +102,12 @@ class TestDowntimeAnalysis(ERPNextTestSuite):
 		row = self.row_for_entry(rows, self.entry.name)
 		self.assertIsNotNone(row)
 		self.assertEqual(row.get("downtime"), 0.5)
+
+	def test_reversed_date_range_is_refused(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"From Date must be before To Date",
+			self.run_report,
+			from_date=get_datetime(f"{today()} 10:30:00"),
+			to_date=get_datetime(f"{today()} 10:00:00"),
+		)
