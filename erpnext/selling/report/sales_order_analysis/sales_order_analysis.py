@@ -50,6 +50,10 @@ def validate_filters(filters):
 
 
 def get_data(filters):
+	permitted_orders = get_permitted_sales_orders(filters)
+	if not permitted_orders:
+		return []
+
 	so = qb.DocType("Sales Order")
 	soi = qb.DocType("Sales Order Item")
 	sii = qb.DocType("Sales Invoice Item")
@@ -92,23 +96,40 @@ def get_data(filters):
 			soi.name,
 			soi.description.as_("description"),
 		)
-		.where((so.status.notin(["Stopped", "On Hold"])) & (so.docstatus == 1))
-		.where(so.company == filters.get("company"))
+		.where(so.name.isin(permitted_orders))
 		.groupby(soi.name, so.name)
 		.orderby(so.transaction_date)
 		.orderby(soi.item_code)
 	)
 
-	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(so.transaction_date[filters.get("from_date") : filters.get("to_date")])
-	if filters.get("sales_order"):
-		query = query.where(so.name.isin(filters.get("sales_order")))
-	if filters.get("status"):
-		query = query.where(so.status.isin(filters.get("status")))
 	if filters.get("warehouse"):
 		query = query.where(soi.warehouse == filters.get("warehouse"))
 
 	return query.run(as_dict=True)
+
+
+def get_permitted_sales_orders(filters):
+	so_filters = [
+		["Sales Order", "docstatus", "=", 1],
+		["Sales Order", "company", "=", filters.get("company")],
+		["Sales Order", "status", "not in", ["Stopped", "On Hold"]],
+	]
+
+	if filters.get("from_date") and filters.get("to_date"):
+		so_filters.append(
+			["Sales Order", "transaction_date", "between", [filters.get("from_date"), filters.get("to_date")]]
+		)
+	if filters.get("sales_order"):
+		so_filters.append(["Sales Order", "name", "in", filters.get("sales_order")])
+	if filters.get("status"):
+		so_filters.append(["Sales Order", "status", "in", filters.get("status")])
+
+	return frappe.qb.get_query(
+		table="Sales Order",
+		fields=["name"],
+		filters=so_filters,
+		ignore_permissions=False,
+	).run(pluck="name")
 
 
 def get_so_elapsed_time(data):

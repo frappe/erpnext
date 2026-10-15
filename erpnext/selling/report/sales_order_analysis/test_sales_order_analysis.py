@@ -374,3 +374,38 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 				execute,
 				{"from_date": "2021-06-01", "to_date": "2021-06-30"},
 			)
+
+	def test_14_user_permission_restricts_rows_and_chart(self):
+		transaction_date = "2021-06-01"
+		item = create_item("_Test SOA Perm Item", is_stock_item=0).item_code
+		visible = make_sales_order(
+			customer="_Test Customer 1", item=item, qty=2, rate=100, transaction_date=transaction_date
+		)
+		hidden = make_sales_order(
+			customer="_Test Customer 2", item=item, qty=3, rate=100, transaction_date=transaction_date
+		)
+
+		user = "_test_soa_perm@example.com"
+		if not frappe.db.exists("User", user):
+			u = frappe.new_doc("User")
+			u.email = user
+			u.first_name = "SOA Perm"
+			u.append("roles", {"role": "Sales User"})
+			u.insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			columns, data, message, chart = execute(
+				{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		orders = {row["sales_order"] for row in data}
+		self.assertIn(visible.name, orders)
+		self.assertNotIn(hidden.name, orders)
+
+		labels = chart["data"]["labels"]
+		values = chart["data"]["datasets"][0]["values"]
+		self.assertEqual(values[labels.index("Amount to Bill")], 200)
