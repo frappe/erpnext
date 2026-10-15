@@ -230,6 +230,15 @@ class TestItemGroup(ERPNextTestSuite):
 		# cannot delete group with child, but can delete leaf
 		self.assertRaises(NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B")
 
+	def test_merge_group_into_descendant(self):
+		with self.assertRaises(NestedSetInvalidMergeError):
+			frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group B - 1", merge=True)
+		self.assertEqual(
+			frappe.db.get_value("Item Group", "_Test Item Group B - 1", "parent_item_group"),
+			"_Test Item Group B",
+		)
+		self.test_basic_tree()
+
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
 		records_to_test = self.globalTestRecords["Item Group"][2:]
