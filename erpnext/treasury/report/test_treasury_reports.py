@@ -50,31 +50,29 @@ class TestTreasuryReports(ERPNextTestSuite):
 	def get_filters(self, **filters):
 		return frappe._dict(company=TEST_COMPANY, investment=self.investment.name, **filters)
 
-	def test_portfolio_statement(self):
+	def test_position_reports(self):
 		_columns, data, *_ = portfolio_statement.execute(self.get_filters(as_on_date=nowdate()))
-
 		self.assertEqual(data[0].book_value, 100000)
 		self.assertEqual(data[0].accrued_interest, 500)
 		self.assertEqual(data[0].market_value, 100000)
 
-	def test_portfolio_statement_before_purchase_is_empty(self):
+		# nothing was held the day before the purchase
 		_columns, data, *_ = portfolio_statement.execute(self.get_filters(as_on_date=add_days(nowdate(), -1)))
-
 		self.assertEqual(data, [])
 
-	def test_upcoming_maturities_bucket(self):
 		_columns, data, *_ = upcoming_maturities.execute(self.get_filters(as_on_date=nowdate()))
-
 		self.assertEqual(data[0].days_to_maturity, 365)
 		self.assertEqual(data[0].bucket, "181-365 Days")
 		self.assertEqual(data[0].total, 100500)
 
-	def test_investments_by_issuer_includes_accrued_interest(self):
+		# exposure includes the accrued interest
 		_columns, data, *_ = investments_by_issuer.execute(self.get_filters(as_on_date=nowdate()))
-
 		self.assertEqual(data[0].issuer, "_Test Bank")
 		self.assertEqual(data[0].exposure, 100500)
 		self.assertEqual(data[0].share, 100)
+
+		# the purchase was paid from the bank today
+		self.assertEqual(get_bank_balance(nowdate()) - get_bank_balance(add_days(nowdate(), -1)), -100000)
 
 	def test_interest_earned_and_received_rolls_forward_receivable(self):
 		make_transaction(self.investment.name, "Interest Receipt", interest_amount=200).submit()
@@ -88,7 +86,7 @@ class TestTreasuryReports(ERPNextTestSuite):
 		self.assertEqual(data[0].closing_receivable, 300)
 		self.assertEqual(chart["data"]["datasets"][1]["values"], [200])
 
-	def test_interest_received_includes_interest_sold_with_a_bond(self):
+		# interest the buyer of a bond pays counts as received
 		create_investment_type("_Test Corporate Bond", "Bond")
 		investment = make_submitted_investment(**BOND_TERMS)
 		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
@@ -138,13 +136,12 @@ class TestTreasuryReports(ERPNextTestSuite):
 		self.assertEqual(data[0].exchange_gain_loss, 5000)
 		self.assertEqual(data[0].total_return, 22000)
 
-	def test_bank_and_cash_balances_reflects_purchase_payment(self):
-		today = get_bank_balance(nowdate())
-		yesterday = get_bank_balance(add_days(nowdate(), -1))
-
-		self.assertEqual(today - yesterday, -100000)
-
 	def test_cash_flow_forecast_flows(self):
+		# the purchased deposit's maturity and interest
+		totals = get_forecast_totals(investment_maturity=self.investment.maturity_date)
+		self.assertGreaterEqual(totals["Investment Maturities"], 100000)
+		self.assertGreater(totals["Investment Interest"], 0)
+
 		before = get_forecast_totals()
 		invoice = create_sales_invoice(qty=1, rate=5000)
 		make_submitted_investment()  # approved but nothing bought yet
@@ -208,12 +205,6 @@ class TestTreasuryReports(ERPNextTestSuite):
 		after = sum(amount for _date, amount in cash_flow_forecast.get_investment_flows(filters)["interest"])
 
 		self.assertEqual(before, after)
-
-	def test_cash_flow_forecast_includes_maturity_and_interest(self):
-		totals = get_forecast_totals(investment_maturity=self.investment.maturity_date)
-
-		self.assertGreaterEqual(totals["Investment Maturities"], 100000)
-		self.assertGreater(totals["Investment Interest"], 0)
 
 
 def get_bank_balance(as_on_date):

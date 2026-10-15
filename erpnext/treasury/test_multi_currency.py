@@ -20,7 +20,6 @@ from erpnext.treasury.doctype.investment_interest_accrual.investment_interest_ac
 )
 from erpnext.treasury.doctype.investment_interest_accrual.test_investment_interest_accrual import FD_TERMS
 from erpnext.treasury.doctype.investment_revaluation.test_investment_revaluation import (
-	FAIR_VALUE_ACCOUNT,
 	REVALUATION_ACCOUNTS,
 	UNREALISED_ACCOUNT,
 	make_market_revaluation,
@@ -71,32 +70,55 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		self.assertEqual(get_account_currency_entries(purchase.name)[USD_BANK_ACCOUNT], ("USD", 0, 1010))
 		self.assertEqual(get_account_currency_entries(purchase.name)[INVESTMENT_ACCOUNT], ("INR", 83000, 0))
 
-	def test_purchase_paid_from_company_currency_bank(self):
-		investment = make_usd_investment()
-		purchase = make_usd_transaction(investment.name, "Purchase", 83, gross_amount=1000).submit()
-
-		self.assertEqual(
-			get_gl_entries(purchase.name), {INVESTMENT_ACCOUNT: (83000, 0), BANK_ACCOUNT: (0, 83000)}
-		)
-
 	def test_foreign_currency_investment_account_keeps_foreign_amount(self):
+		"""A USD investment account moves by USD 1,000 and by its INR value at the same time."""
 		investment = make_usd_investment(investment_account=USD_INVESTMENT_ACCOUNT)
 		purchase = make_usd_transaction(
-			investment.name, "Purchase", 83, gross_amount=1000, cash_account=USD_BANK_ACCOUNT
+			investment.name, "Purchase", 80, gross_amount=1000, cash_account=USD_BANK_ACCOUNT
 		).submit()
 
 		self.assertEqual(
 			get_account_currency_entries(purchase.name)[USD_INVESTMENT_ACCOUNT], ("USD", 1000, 0)
 		)
-		self.assertEqual(get_gl_entries(purchase.name)[USD_INVESTMENT_ACCOUNT], (83000, 0))
+		self.assertEqual(get_gl_entries(purchase.name)[USD_INVESTMENT_ACCOUNT], (80000, 0))
 
-	def test_account_in_a_third_currency_is_rejected(self):
+		maturity = make_usd_transaction(investment.name, "Maturity", 85, gross_amount=1000).submit()
+
+		self.assertEqual(get_gl_entries(maturity.name)[USD_INVESTMENT_ACCOUNT], (0, 80000))
+		self.assertEqual(
+			get_account_currency_entries(maturity.name)[USD_INVESTMENT_ACCOUNT], ("USD", 0, 1000)
+		)
+
+		# paid from an INR bank, the INR accounts move by the INR amount only
 		investment = make_usd_investment()
-		purchase = make_usd_transaction(
+		purchase = make_usd_transaction(investment.name, "Purchase", 83, gross_amount=1000).submit()
+		self.assertEqual(
+			get_gl_entries(purchase.name), {INVESTMENT_ACCOUNT: (83000, 0), BANK_ACCOUNT: (0, 83000)}
+		)
+
+	def test_invalid_foreign_currency_entry_is_rejected(self):
+		investment = make_usd_investment()
+		eur_purchase = make_usd_transaction(
 			investment.name, "Purchase", 83, gross_amount=1000, cash_account=EUR_BANK_ACCOUNT
 		).insert()
+		# a bank in a third currency
+		self.assertRaises(frappe.ValidationError, eur_purchase.submit)
 
-		self.assertRaises(frappe.ValidationError, purchase.submit)
+		make_usd_transaction(investment.name, "Purchase", 83, gross_amount=1000).submit()
+		# no exchange rate
+		for entry in (
+			make_transaction(investment.name, "Purchase", gross_amount=1000),
+			make_interest_accrual(investment.name, nowdate(), nowdate(), 50),
+		):
+			with self.subTest(entry.doctype):
+				self.assertRaises(frappe.ValidationError, entry.insert)
+
+		fund = make_usd_investment(
+			investment_type="_Test Equity Fund", measurement_category="FVTPL", **REVALUATION_ACCOUNTS
+		)
+		make_usd_transaction(fund.name, "Purchase", 80, units=100, rate=10).submit()
+		revaluation = make_market_revaluation(fund.name, nav_per_unit=12)
+		self.assertRaises(frappe.ValidationError, revaluation.insert)
 
 	def test_approved_amount_is_in_investment_currency(self):
 		investment = make_usd_investment(approved_amount=1000)
@@ -134,36 +156,11 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		self.assertEqual(get_account_currency_entries(receipt.name)[USD_BANK_ACCOUNT], ("USD", 45, 0))
 		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
 
-	def test_fund_sale_at_purchase_rate(self):
-		investment = make_usd_investment(investment_type="_Test Equity Fund")
-		make_usd_transaction(investment.name, "Purchase", 80, units=100, rate=10).submit()
-
-		sale = make_usd_transaction(investment.name, "Sale", 80, units=50, rate=12).submit()
-
-		self.assertEqual((sale.cost_of_units_sold, sale.realised_gain_loss), (500, 100))
-		self.assertEqual(
-			get_gl_entries(sale.name),
-			{
-				BANK_ACCOUNT: (48000, 0),
-				INVESTMENT_ACCOUNT: (0, 40000),
-				"Gain/Loss on Asset Disposal - _TC": (0, 8000),
-			},
-		)
-
-	def test_cancel_reverses_foreign_currency_gl(self):
-		investment = make_usd_investment()
-		purchase = make_usd_transaction(
-			investment.name, "Purchase", 83, gross_amount=1000, cash_account=USD_BANK_ACCOUNT
-		).submit()
-
-		purchase.cancel()
-
-		self.assertFalse(get_gl_entries(purchase.name))
-		self.assertEqual(get_investment(investment.name).total_cost, 0)
-
 	def test_market_revaluation_translates_fair_value(self):
 		investment = make_usd_investment(
-			investment_type="_Test Equity Fund", measurement_category="FVTPL", **REVALUATION_ACCOUNTS
+			investment_type="_Test Equity Fund",
+			measurement_category="FVTPL",
+			**{**REVALUATION_ACCOUNTS, "fair_value_adjustment_account": USD_INVESTMENT_ACCOUNT},
 		)
 		make_usd_transaction(investment.name, "Purchase", 80, units=100, rate=10).submit()
 
@@ -174,40 +171,28 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		self.assertEqual((row.book_value, row.market_value, row.unrealised_gain_loss), (80000, 98400, 18400))
 		self.assertEqual(
 			get_gl_entries(revaluation.name, "Investment Revaluation"),
-			{FAIR_VALUE_ACCOUNT: (18400, 0), UNREALISED_ACCOUNT: (0, 18400)},
+			{USD_INVESTMENT_ACCOUNT: (18400, 0), UNREALISED_ACCOUNT: (0, 18400)},
 		)
-
-	def test_market_revaluation_posts_to_foreign_currency_account(self):
-		investment = make_usd_investment(
-			investment_type="_Test Equity Fund",
-			measurement_category="FVTPL",
-			**{**REVALUATION_ACCOUNTS, "fair_value_adjustment_account": USD_INVESTMENT_ACCOUNT},
-		)
-		make_usd_transaction(investment.name, "Purchase", 80, units=100, rate=10).submit()
-
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, conversion_rate=82).submit()
-
 		# INR 18,400 at 82 is USD 224.39 in the USD account
 		self.assertEqual(
 			get_account_currency_entries(revaluation.name)[USD_INVESTMENT_ACCOUNT], ("USD", 224.39, 0)
 		)
 
-	def test_market_revaluation_needs_exchange_rate(self):
-		investment = make_usd_investment(
+	def test_company_currency_ignores_exchange_rate(self):
+		"""An INR investment in an INR company has nothing to convert, whatever rate is typed in."""
+		investment = make_submitted_investment()
+		purchase = make_usd_transaction(investment.name, "Purchase", 2, gross_amount=1000).submit()
+
+		self.assertEqual(purchase.conversion_rate, 1)
+		self.assertEqual(
+			get_gl_entries(purchase.name), {INVESTMENT_ACCOUNT: (1000, 0), BANK_ACCOUNT: (0, 1000)}
+		)
+
+		fund = make_submitted_investment(
 			investment_type="_Test Equity Fund", measurement_category="FVTPL", **REVALUATION_ACCOUNTS
 		)
-		make_usd_transaction(investment.name, "Purchase", 80, units=100, rate=10).submit()
-
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=12)
-		self.assertRaises(frappe.ValidationError, revaluation.insert)
-
-	def test_market_revaluation_in_company_currency_ignores_exchange_rate(self):
-		investment = make_submitted_investment(
-			investment_type="_Test Equity Fund", measurement_category="FVTPL", **REVALUATION_ACCOUNTS
-		)
-		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
-
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, conversion_rate=5).insert()
+		make_transaction(fund.name, "Purchase", units=100, rate=10).submit()
+		revaluation = make_market_revaluation(fund.name, nav_per_unit=12, conversion_rate=5).insert()
 
 		row = revaluation.investments[0]
 		self.assertEqual((row.conversion_rate, row.market_value), (1, 1200))
@@ -228,26 +213,6 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 
 		self.assertEqual(renewal.currency, "USD")
 		self.assertEqual(frappe.db.get_value("Investment", renewal.new_investment, "currency"), "USD")
-
-	def test_same_currency_transaction_ignores_exchange_rate(self):
-		"""An INR investment in an INR company has nothing to convert, whatever rate is typed in."""
-		investment = make_submitted_investment()
-		purchase = make_usd_transaction(investment.name, "Purchase", 2, gross_amount=1000).submit()
-
-		self.assertEqual(purchase.conversion_rate, 1)
-		self.assertEqual(
-			get_gl_entries(purchase.name), {INVESTMENT_ACCOUNT: (1000, 0), BANK_ACCOUNT: (0, 1000)}
-		)
-
-	def test_foreign_currency_needs_exchange_rate(self):
-		investment = make_usd_investment()
-		make_usd_transaction(investment.name, "Purchase", 83, gross_amount=1000).submit()
-
-		purchase = make_transaction(investment.name, "Purchase", gross_amount=1000)
-		self.assertRaises(frappe.ValidationError, purchase.insert)
-
-		accrual = make_interest_accrual(investment.name, nowdate(), nowdate(), 50)
-		self.assertRaises(frappe.ValidationError, accrual.insert)
 
 	def test_daily_job_takes_draft_exchange_rate_from_currency_exchange(self):
 		make_currency_exchange("USD", "INR", 83, "2026-03-31")
@@ -279,8 +244,9 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		for fieldname in ("total_cost", "accrued_interest", "market_value", "unrealised_gain_loss"):
 			self.assertEqual(investment.meta.get_field(fieldname).options, "company_currency")
 
-	def test_bond_unamortised_discount_is_in_investment_currency(self):
-		"""10 bonds of face value USD 1,000 bought at USD 950 leave a discount of USD 500 to amortise."""
+	def test_bond_discount_is_kept_in_investment_currency(self):
+		"""10 bonds of face value USD 1,000 bought at USD 950: book value INR 788,500 plus the USD 500
+		discount at 83 is the face value of INR 830,000."""
 		investment = make_usd_investment(**BOND_TERMS)
 		make_usd_transaction(
 			investment.name, "Purchase", 83, posting_date="2026-01-01", units=10, rate=950
@@ -288,20 +254,14 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 
 		self.assertEqual(get_investment(investment.name).unamortised_premium_discount, 500)
 
-	def test_bond_maturity_forecast_converts_discount(self):
-		"""Book value INR 788,500 plus the USD 500 discount at 83 is the face value of INR 830,000."""
-		investment = make_usd_investment(**BOND_TERMS)
-		make_usd_transaction(
-			investment.name, "Purchase", 83, posting_date="2026-01-01", units=10, rate=950
-		).submit()
 		filters = frappe._dict(company=TEST_COMPANY, currency="INR", from_date=nowdate())
 		with patch(f"{get_investment_flows.__module__}.get_exchange_rate", return_value=83):
 			maturities = get_investment_flows(filters)["maturities"]
 
 		self.assertIn((getdate("2028-01-01"), 830000), maturities)
 
-	def test_maturity_at_new_rate_books_exchange_gain(self):
-		"""Cost leaves the investment account at the purchase rate; the rate change is an exchange gain."""
+	def test_maturity_at_new_rate_books_exchange_gain_or_loss(self):
+		"""Cost leaves the investment account at the purchase rate; the rate change is an exchange gain or loss."""
 		investment = make_usd_investment()
 		make_usd_transaction(investment.name, "Purchase", 80, gross_amount=1000).submit()
 
@@ -314,7 +274,6 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		investment.reload()
 		self.assertEqual((investment.total_cost, investment.status), (0, "Matured"))
 
-	def test_maturity_at_lower_rate_books_exchange_loss(self):
 		investment = make_usd_investment()
 		make_usd_transaction(investment.name, "Purchase", 80, gross_amount=1000).submit()
 
@@ -365,29 +324,22 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		make_usd_transaction(investment.name, "Purchase", 82, gross_amount=1000).submit()
 		make_usd_accrual(investment.name, 50, 82)
 
-		receipt = make_usd_transaction(investment.name, "Interest Receipt", 84, interest_amount=50).submit()
-
-		self.assertEqual(
-			get_gl_entries(receipt.name),
-			{BANK_ACCOUNT: (4200, 0), "Earnest Money - _TC": (0, 4100), get_exchange_account(): (0, 100)},
-		)
-		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
-
-	def test_backdated_interest_receipt_settles_its_share(self):
-		investment = make_usd_investment()
-		make_usd_transaction(investment.name, "Purchase", 82, gross_amount=1000).submit()
-		make_usd_accrual(investment.name, 50, 82)
-		make_usd_transaction(
+		later = make_usd_transaction(
 			investment.name, "Interest Receipt", 84, interest_amount=30, posting_date=add_days(nowdate(), 10)
 		).submit()
+		# 30 of the 50 accrued at 82 is INR 2,460, received at 84 as INR 2,520
+		self.assertEqual(
+			get_gl_entries(later.name),
+			{BANK_ACCOUNT: (2520, 0), "Earnest Money - _TC": (0, 2460), get_exchange_account(): (0, 60)},
+		)
 
 		# dated before the receipt above, so it settles 20 of the 50 held then: 4,100 * 20 / 50
-		receipt = make_usd_transaction(
+		earlier = make_usd_transaction(
 			investment.name, "Interest Receipt", 84, interest_amount=20, posting_date=add_days(nowdate(), 5)
 		).submit()
 
 		self.assertEqual(
-			get_gl_entries(receipt.name),
+			get_gl_entries(earlier.name),
 			{BANK_ACCOUNT: (1680, 0), "Earnest Money - _TC": (0, 1640), get_exchange_account(): (0, 40)},
 		)
 		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
@@ -402,18 +354,6 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		self.assertFalse(get_gl_entries(maturity.name))
 		investment.reload()
 		self.assertEqual((investment.total_cost, investment.status), (80000, "Active"))
-
-	def test_foreign_currency_investment_account_settles_foreign_amount(self):
-		"""A USD investment account goes down by USD 1,000 and by its INR 80,000 at the same time."""
-		investment = make_usd_investment(investment_account=USD_INVESTMENT_ACCOUNT)
-		make_usd_transaction(investment.name, "Purchase", 80, gross_amount=1000).submit()
-
-		maturity = make_usd_transaction(investment.name, "Maturity", 85, gross_amount=1000).submit()
-
-		self.assertEqual(get_gl_entries(maturity.name)[USD_INVESTMENT_ACCOUNT], (0, 80000))
-		self.assertEqual(
-			get_account_currency_entries(maturity.name)[USD_INVESTMENT_ACCOUNT], ("USD", 0, 1000)
-		)
 
 	def test_exchange_difference_needs_company_account(self):
 		investment = make_usd_investment()

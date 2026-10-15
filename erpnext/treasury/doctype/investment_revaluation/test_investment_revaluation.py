@@ -57,7 +57,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 			get_gl_entries(revaluation.name), {RESERVE_ACCOUNT: (100, 0), FAIR_VALUE_ACCOUNT: (0, 100)}
 		)
 
-	def test_fvoci_gain_goes_to_equity_reserve(self):
+	def test_fvoci_gain_goes_to_equity_reserve_until_sold(self):
 		investment = make_fund_investment("FVOCI")
 		revaluation = make_market_revaluation(investment.name, nav_per_unit=12).submit()
 
@@ -65,14 +65,36 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 			get_gl_entries(revaluation.name), {FAIR_VALUE_ACCOUNT: (200, 0), RESERVE_ACCOUNT: (0, 200)}
 		)
 
-	def test_fair_value_reserve_must_be_equity(self):
+		# a full sale moves the reserve to profit and loss
+		sale = make_transaction(
+			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
+
+		self.assertEqual(sale.realised_gain_loss, 200)
+		entries = get_transaction_gl_entries(sale.name)
+		self.assertEqual((entries[FAIR_VALUE_ACCOUNT], entries[RESERVE_ACCOUNT]), ((0, 200), (200, 0)))
+		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 0)
+
+	def test_invalid_revaluation_is_rejected(self):
+		# the fair value reserve must be an equity account
 		investment = make_investment(
 			investment_type="_Test Equity Fund",
 			measurement_category="FVOCI",
 			**{**REVALUATION_ACCOUNTS, "fair_value_reserve_account": UNREALISED_ACCOUNT},
 		)
-
 		self.assertRaises(frappe.ValidationError, investment.insert)
+
+		# deposits have no market value
+		deposit = make_deposit_investment("Amortized Cost")
+		self.assertRaises(frappe.ValidationError, make_market_revaluation(deposit.name).insert)
+
+		# the revaluation stays in the investment's finance book
+		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
+		fund = make_fund_investment("FVTPL")
+		revaluation = make_market_revaluation(fund.name, nav_per_unit=12)
+		revaluation.finance_book = "_Test Treasury Book"
+		self.assertRaises(frappe.ValidationError, revaluation.insert)
 
 	def test_amortized_cost_market_revaluation_posts_no_gl(self):
 		investment = make_fund_investment("Amortized Cost")
@@ -82,28 +104,44 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		self.assertEqual(get_gl_entries(revaluation.name), {})
 		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 200)
 
-	def test_market_revaluation_does_not_apply_to_deposits(self):
-		investment = make_deposit_investment("Amortized Cost")
-		revaluation = make_market_revaluation(investment.name)
-		self.assertRaises(frappe.ValidationError, revaluation.insert)
-
-	def test_revaluation_cannot_be_back_dated(self):
-		investment = make_fund_investment("FVTPL")
-		make_market_revaluation(investment.name, nav_per_unit=12, days=1).submit()
-
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=11)
-		self.assertRaises(frappe.ValidationError, revaluation.insert)
-
-	def test_only_latest_revaluation_can_be_cancelled(self):
+	def test_revaluations_and_exits_stay_in_date_order(self):
 		investment = make_fund_investment("FVTPL")
 		first = make_market_revaluation(investment.name, nav_per_unit=12).submit()
-		second = make_market_revaluation(investment.name, nav_per_unit=15, days=1).submit()
+		second = make_market_revaluation(investment.name, nav_per_unit=15, days=2).submit()
 
+		backdated = make_market_revaluation(investment.name, nav_per_unit=11, days=1)
+		self.assertRaises(frappe.ValidationError, backdated.insert)
+		# only the latest revaluation can be cancelled
 		self.assertRaises(frappe.ValidationError, first.cancel)
+
+		# the revaluation valued the units held at the end of its date
+		for days in (1, 2):
+			with self.subTest(days=days):
+				sale = make_transaction(
+					investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), days)
+				)
+				self.assertRaises(frappe.ValidationError, sale.submit)
 
 		second.cancel()
 		self.assertEqual(get_gl_entries(second.name), {})
 		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 200)
+
+		make_transaction(
+			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 3)
+		).submit()
+		# a revaluation cannot be dated before an exit it did not see, nor cancelled after one
+		missed_exit = make_market_revaluation(investment.name, nav_per_unit=12, days=2)
+		self.assertRaises(frappe.ValidationError, missed_exit.insert().submit)
+		self.assertRaises(frappe.ValidationError, first.cancel)
+
+		# the next day's exit of all units takes the whole gain off
+		valued_at_cost = make_fund_investment("Amortized Cost")
+		make_market_revaluation(valued_at_cost.name, nav_per_unit=12).submit()
+		make_transaction(
+			valued_at_cost.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
+		valued_at_cost.reload()
+		self.assertEqual((valued_at_cost.unrealised_gain_loss, valued_at_cost.market_value), (0, 0))
 
 	def test_sale_takes_its_share_of_fvtpl_gain_off_the_books(self):
 		investment = make_fund_investment("FVTPL")
@@ -120,19 +158,6 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		investment.reload()
 		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (100, 600))
 
-	def test_full_sale_moves_fvoci_reserve_to_profit_and_loss(self):
-		investment = make_fund_investment("FVOCI")
-		make_market_revaluation(investment.name, nav_per_unit=12).submit()
-
-		sale = make_transaction(
-			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
-		).submit()
-
-		self.assertEqual(sale.realised_gain_loss, 200)
-		entries = get_transaction_gl_entries(sale.name)
-		self.assertEqual((entries[FAIR_VALUE_ACCOUNT], entries[RESERVE_ACCOUNT]), ((0, 200), (200, 0)))
-		self.assertEqual(frappe.db.get_value("Investment", investment.name, "unrealised_gain_loss"), 0)
-
 	def test_next_revaluation_starts_from_what_the_sale_left(self):
 		investment = make_fund_investment("FVTPL")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
@@ -148,20 +173,6 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 			(row.unrealised_gain_loss, row.previous_gain_loss, row.adjustment_amount), (150, 100, 50)
 		)
 
-	def test_exit_and_revaluation_follow_each_other_in_order(self):
-		investment = make_fund_investment("FVTPL")
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, days=2).submit()
-
-		sale = make_transaction(
-			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 1)
-		)
-		self.assertRaises(frappe.ValidationError, sale.submit)
-
-		make_transaction(
-			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 3)
-		).submit()
-		self.assertRaises(frappe.ValidationError, revaluation.cancel)
-
 	def test_amortized_cost_gain_stays_with_the_valued_units(self):
 		investment = make_fund_investment("Amortized Cost")
 		make_market_revaluation(investment.name, nav_per_unit=12).submit()
@@ -174,40 +185,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 		investment.reload()
 		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (200, 2400))
 
-	def test_revaluation_stays_in_the_investments_finance_book(self):
-		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
-			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
-
-		investment = make_fund_investment("FVTPL")
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=12)
-		revaluation.finance_book = "_Test Treasury Book"
-
-		self.assertRaises(frappe.ValidationError, revaluation.insert)
-
-	def test_units_cannot_move_on_or_before_a_revaluation(self):
-		investment = make_fund_investment("Amortized Cost")
-		make_market_revaluation(investment.name, nav_per_unit=12).submit()
-
-		# the revaluation valued the units held at the end of its date
-		same_day_sale = make_transaction(investment.name, "Sale", units=100, rate=12)
-		self.assertRaises(frappe.ValidationError, same_day_sale.submit)
-
-		make_transaction(
-			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
-		).submit()
-		investment.reload()
-		self.assertEqual((investment.unrealised_gain_loss, investment.market_value), (0, 0))
-
-	def test_revaluation_cannot_be_dated_before_an_exit_it_did_not_see(self):
-		investment = make_fund_investment("FVTPL")
-		make_transaction(
-			investment.name, "Sale", units=50, rate=12, posting_date=add_days(nowdate(), 2)
-		).submit()
-
-		revaluation = make_market_revaluation(investment.name, nav_per_unit=12, days=1)
-		self.assertRaises(frappe.ValidationError, revaluation.insert().submit)
-
-	def test_get_investments_loads_only_the_selected_finance_book(self):
+	def test_get_investments_loads_only_what_can_be_revalued(self):
 		if not frappe.db.exists("Finance Book", "_Test Treasury Book"):
 			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test Treasury Book"}).insert()
 
@@ -220,18 +198,16 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 				"finance_book": "_Test Treasury Book",
 			}
 		)
-
 		revaluation.set_investments()
 
 		loaded = {row.investment for row in revaluation.investments}
 		self.assertIn(in_book.name, loaded)
 		self.assertNotIn(in_no_book.name, loaded)
 
-	def test_exited_investment_has_no_gain_left_to_revalue(self):
-		investment = make_fund_investment("FVTPL")
-		make_market_revaluation(investment.name, nav_per_unit=12).submit()
+		# an exited investment has no gain left to revalue
+		make_market_revaluation(in_no_book.name, nav_per_unit=12).submit()
 		make_transaction(
-			investment.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
+			in_no_book.name, "Sale", units=100, rate=12, posting_date=add_days(nowdate(), 1)
 		).submit()
 
 		revaluation = frappe.get_doc(
@@ -242,7 +218,7 @@ class TestInvestmentRevaluation(ERPNextTestSuite):
 			}
 		)
 		revaluation.set_investments()
-		self.assertNotIn(investment.name, [row.investment for row in revaluation.investments])
+		self.assertNotIn(in_no_book.name, [row.investment for row in revaluation.investments])
 
 
 def make_fund_investment(measurement_category, **args):

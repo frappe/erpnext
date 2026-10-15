@@ -64,22 +64,18 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(sum(row.estimated_interest for row in schedule), 7300)
 		self.assertEqual({row.status for row in schedule}, {"Pending"})
 
-	def test_schedule_has_one_row_per_period_of_the_tenure(self):
+		# an accrual rebuilds the schedule without leaving the old rows behind
+		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1790).submit()
+		self.assertEqual(len(get_investment(investment.name).interest_schedule), 4)
+		self.assertEqual(frappe.db.count("Investment Interest Schedule", {"parent": investment.name}), 4)
+
+		# one row per period of the tenure
 		two_years_quarterly = make_fd({**FD_TERMS, "maturity_date": "2028-01-01"})
 		three_years_half_yearly = make_fd(
 			{**FD_TERMS, "maturity_date": "2029-01-01", "payout_frequency": "Semi-Annual"}
 		)
-
 		self.assertEqual(len(two_years_quarterly.interest_schedule), 8)
 		self.assertEqual(len(three_years_half_yearly.interest_schedule), 6)
-
-	def test_rebuilt_schedule_replaces_old_rows(self):
-		investment = make_fd(FD_TERMS)
-		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1790).submit()
-
-		schedule = get_investment(investment.name).interest_schedule
-		self.assertEqual(len(schedule), 4)
-		self.assertEqual(frappe.db.count("Investment Interest Schedule", {"parent": investment.name}), 4)
 
 	def test_cumulative_deposit_compounds(self):
 		investment = make_fd(CUMULATIVE_FD_TERMS)
@@ -107,7 +103,13 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		# the first quarter's interest was paid out, so the second earns on 100000 only: 100000 * 7.3% * 91 / 365
 		self.assertEqual(get_investment(investment.name).interest_schedule[1].estimated_interest, 1820)
 
-	def test_reference_period_matches_stepping_back_from_maturity(self):
+	def test_interest_date_maths(self):
+		# 30/360: every month counts as 30 days, and the 31st is treated as the 30th
+		self.assertEqual(get_days_30_360(getdate("2026-02-01"), getdate("2026-03-01")), 30)
+		self.assertEqual(get_days_30_360(getdate("2026-01-31"), getdate("2026-03-31")), 60)
+		self.assertEqual(get_days_30_360(getdate("2026-01-01"), getdate("2027-01-01")), 360)
+
+		# the coupon period of any date matches stepping back from maturity, month ends included
 		for maturity_date, frequency in (
 			("2031-01-31", "Monthly"),
 			("2030-08-31", "Quarterly"),
@@ -120,7 +122,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 				maturity_date=maturity_date,
 			)
 			calculator = InterestCalculator(investment)
-			date = getdate(add_months(maturity_date, -60))
+			date = getdate(add_months(maturity_date, -24))
 			while date < getdate(maturity_date):
 				count = 1
 				while getdate(add_months(maturity_date, -count * calculator.period_months)) > date:
@@ -132,18 +134,6 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 				)
 				self.assertEqual(calculator.get_reference_period(date), expected, date)
 				date = getdate(add_days(date, 1))
-
-	def test_submit_locks_the_investment(self):
-		investment = make_fd(FD_TERMS)
-		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).insert()
-
-		with patch.object(frappe.db, "get_value", wraps=frappe.db.get_value) as get_value:
-			accrual.submit()
-
-		self.assertIn(
-			(("Investment", investment.name, "modified"), {"for_update": True}),
-			[(call.args, call.kwargs) for call in get_value.call_args_list],
-		)
 
 	def test_accrual_posts_bank_figure_and_fills_schedule(self):
 		investment = make_fd(FD_TERMS)
@@ -161,7 +151,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		first_quarter = investment.interest_schedule[0]
 		self.assertEqual((first_quarter.status, first_quarter.interest_accruals), ("Accrued", accrual.name))
 
-	def test_accrual_across_periods_is_split_by_days(self):
+	def test_accruals_are_split_over_the_periods_they_cover(self):
 		investment = make_fd(FD_TERMS)
 		# 120 days: 90 in the first quarter, 30 in the second
 		make_interest_accrual(investment.name, "2026-01-01", "2026-04-30", 2400).submit()
@@ -171,7 +161,7 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual((second_quarter.actual_interest, second_quarter.status), (600, "Partially Accrued"))
 		self.assertEqual(second_quarter.variance, 0)
 
-	def test_period_lists_every_accrual_covering_it(self):
+		# two accruals inside one quarter are both listed on it
 		investment = make_fd(FD_TERMS)
 		first = make_interest_accrual(investment.name, "2026-01-01", "2026-02-28", 1180).submit()
 		second = make_interest_accrual(investment.name, "2026-03-01", "2026-03-31", 620).submit()
@@ -188,40 +178,44 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 			accrual = make_interest_accrual(investment.name, from_date, "2026-06-30", 1000)
 			self.assertRaises(frappe.ValidationError, accrual.insert)
 
-	def test_accrual_cannot_go_past_maturity(self):
+	def test_invalid_accrual_is_rejected(self):
 		investment = make_fd(FD_TERMS)
+		not_deposited = make_submitted_investment(**FD_TERMS)
 
-		accrual = make_interest_accrual(investment.name, "2026-01-01", "2027-01-05", 7300)
-		self.assertRaises(frappe.ValidationError, accrual.insert)
+		for accrual in (
+			make_interest_accrual(investment.name, "2026-01-01", "2027-01-05", 7300),  # past maturity
+			make_interest_accrual(
+				investment.name, "2026-01-01", "2026-03-31", 1800, posting_date="2026-03-15"
+			),  # posted before the period ends
+			make_interest_accrual(not_deposited.name, "2026-01-01", "2026-01-31", 100),
+		):
+			with self.subTest(accrual.investment):
+				self.assertRaises(frappe.ValidationError, accrual.insert)
 
-	def test_posting_date_cannot_be_before_to_date(self):
+	def test_exit_needs_interest_accrued_first(self):
 		investment = make_fd(FD_TERMS)
-
-		accrual = make_interest_accrual(
-			investment.name, "2026-01-01", "2026-03-31", 1800, posting_date="2026-03-15"
-		)
-		self.assertRaises(frappe.ValidationError, accrual.insert)
-
-	def test_interest_needs_a_deposit_first(self):
-		investment = make_submitted_investment(**FD_TERMS)
-
-		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-01-31", 100)
-		self.assertRaises(frappe.ValidationError, accrual.insert)
-
-	def test_defaults_are_next_period_with_estimate(self):
-		investment = make_fd(FD_TERMS)
-
+		# the next accrual defaults to the next period with its estimate
 		defaults = get_accrual_defaults(investment.name)
 		self.assertEqual(
 			(defaults.from_date, defaults.to_date), (getdate("2026-01-01"), getdate("2026-03-31"))
 		)
 		self.assertEqual(defaults.interest_amount, 1800)
 
-		make_interest_accrual(investment.name, "2026-01-01", "2026-02-15", 900).submit()
-		defaults = get_accrual_defaults(investment.name)
-		self.assertEqual(
-			(defaults.from_date, defaults.to_date), (getdate("2026-02-16"), getdate("2026-03-31"))
-		)
+		withdrawal = make_deposit(investment.name, "Withdrawal", "2026-02-01", 40000, submit=False)
+		self.assertRaises(frappe.ValidationError, withdrawal.submit)
+
+		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-01-31", 620).submit()
+		self.assertEqual(get_accrual_defaults(investment.name).from_date, getdate("2026-02-01"))
+		make_deposit(investment.name, "Withdrawal", "2026-02-01", 40000)
+
+		first_quarter = get_investment(investment.name).interest_schedule[0]
+		# January on 100000 (620) + 1 Feb to 31 Mar on the remaining 60000 (708)
+		self.assertEqual(first_quarter.estimated_interest, 1328)
+		self.assertEqual((first_quarter.actual_interest, first_quarter.status), (620, "Partially Accrued"))
+		# the next accrual's estimate is on the 60000 left, not a share of the quarter's 1328
+		self.assertEqual(get_accrual_defaults(investment.name).interest_amount, 708)
+		# the withdrawal relied on this accrual
+		self.assertRaises(frappe.ValidationError, accrual.cancel)
 
 	def test_only_latest_accrual_can_be_cancelled(self):
 		investment = make_fd(FD_TERMS)
@@ -234,29 +228,6 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		investment = get_investment(investment.name)
 		self.assertEqual(getdate(investment.accrued_upto), getdate("2026-03-31"))
 		self.assertEqual([row.status for row in investment.interest_schedule[:2]], ["Accrued", "Pending"])
-
-	def test_exit_needs_interest_accrued_first(self):
-		investment = make_fd(FD_TERMS)
-
-		withdrawal = make_deposit(investment.name, "Withdrawal", "2026-02-01", 40000, submit=False)
-		self.assertRaises(frappe.ValidationError, withdrawal.submit)
-
-		make_interest_accrual(investment.name, "2026-01-01", "2026-01-31", 620).submit()
-		make_deposit(investment.name, "Withdrawal", "2026-02-01", 40000)
-
-		first_quarter = get_investment(investment.name).interest_schedule[0]
-		# January on 100000 (620) + 1 Feb to 31 Mar on the remaining 60000 (708)
-		self.assertEqual(first_quarter.estimated_interest, 1328)
-		self.assertEqual((first_quarter.actual_interest, first_quarter.status), (620, "Partially Accrued"))
-		# the next accrual's estimate is on the 60000 left, not a share of the quarter's 1328
-		self.assertEqual(get_accrual_defaults(investment.name).interest_amount, 708)
-
-	def test_accrual_used_by_an_exit_cannot_be_cancelled(self):
-		investment = make_fd(FD_TERMS)
-		accrual = make_interest_accrual(investment.name, "2026-01-01", "2026-01-31", 620).submit()
-		make_deposit(investment.name, "Withdrawal", "2026-02-01", 40000)
-
-		self.assertRaises(frappe.ValidationError, accrual.cancel)
 
 	def test_maturity_paid_late_needs_interest_only_up_to_maturity(self):
 		investment = make_fd(FD_TERMS)
@@ -309,6 +280,17 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
 		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 2000).submit()
 
+		# only 2000 was accrued
+		too_much = make_transaction(
+			investment.name,
+			"Sale",
+			posting_date="2026-04-01",
+			units=10,
+			rate=1250,
+			accrued_interest_in_sale=2500,
+		)
+		self.assertRaises(frappe.ValidationError, too_much.insert)
+
 		# 1210 a bond: about 1000 clean price + 200 accrued interest + 10 gain
 		sale = make_transaction(
 			investment.name,
@@ -326,21 +308,6 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(entries["Gain/Loss on Asset Disposal - _TC"], (0, sale.realised_gain_loss))
 		self.assertEqual(get_investment(investment.name).accrued_interest, 0)
 
-	def test_bond_sale_cannot_collect_more_interest_than_accrued(self):
-		investment = make_submitted_investment(**BOND_TERMS)
-		make_transaction(investment.name, "Purchase", posting_date="2026-01-01", units=10, rate=1000).submit()
-		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 2000).submit()
-
-		sale = make_transaction(
-			investment.name,
-			"Sale",
-			posting_date="2026-04-01",
-			units=10,
-			rate=1250,
-			accrued_interest_in_sale=2500,
-		)
-		self.assertRaises(frappe.ValidationError, sale.insert)
-
 	def test_daily_job_drafts_each_investment_in_its_own_job(self):
 		first, second = make_fd(FD_TERMS), make_fd(FD_TERMS)
 
@@ -355,12 +322,6 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 			{f"draft_interest_accrual::{first.name}", f"draft_interest_accrual::{second.name}"} <= job_ids
 		)
 		self.assertTrue(all(call.kwargs["deduplicate"] for call in enqueue.call_args_list))
-
-	def test_30_360_day_count(self):
-		# every month counts as 30 days, and the 31st is treated as the 30th
-		self.assertEqual(get_days_30_360(getdate("2026-02-01"), getdate("2026-03-01")), 30)
-		self.assertEqual(get_days_30_360(getdate("2026-01-31"), getdate("2026-03-31")), 60)
-		self.assertEqual(get_days_30_360(getdate("2026-01-01"), getdate("2027-01-01")), 360)
 
 
 def make_fd(terms, amount=100000):

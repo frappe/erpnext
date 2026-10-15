@@ -23,22 +23,26 @@ class TestInvestmentSettings(ERPNextTestSuite):
 		create_investment_type("_Test Bank FD", "Deposit")
 		create_financial_institution("_Test Bank")
 
-	def test_account_must_belong_to_company(self):
+	def test_invalid_settings_are_rejected(self):
 		other_account = frappe.db.get_value(
 			"Account", {"company": ("!=", TEST_COMPANY), "is_group": 0}, "name"
 		)
-		settings = get_settings_with_defaults(charges_account=other_account)
+		self.assertRaises(
+			frappe.ValidationError, get_settings_with_defaults(charges_account=other_account).save
+		)
 
-		self.assertRaises(frappe.ValidationError, settings.save)
-
-	def test_company_can_be_added_only_once(self):
 		settings = get_settings_with_defaults()
-		settings.append("company_accounts", {"company": TEST_COMPANY})
-
+		settings.append("company_accounts", {"company": TEST_COMPANY})  # same company twice
 		self.assertRaises(frappe.ValidationError, settings.save)
 
-	def test_each_company_uses_its_own_defaults(self):
+	def test_investment_takes_its_own_companys_defaults(self):
 		other_company = frappe.db.get_value("Company", {"name": ("!=", TEST_COMPANY)}, "name")
+		settings = frappe.get_single("Investment Settings")
+		settings.set("company_accounts", [{"company": other_company}])
+		settings.save()
+		# another company's defaults are not used
+		self.assertFalse(make_investment().insert().charges_account)
+
 		other_charges_account = frappe.db.get_value(
 			"Account", {"company": other_company, "is_group": 0, "account_type": ("!=", "Stock")}, "name"
 		)
@@ -47,58 +51,28 @@ class TestInvestmentSettings(ERPNextTestSuite):
 			"company_accounts", {"company": other_company, "charges_account": other_charges_account}
 		)
 		settings.save()
-
 		self.assertEqual(get_default_account(TEST_COMPANY, "charges_account"), CHARGES_ACCOUNT)
 		self.assertEqual(get_default_account(other_company, "charges_account"), other_charges_account)
 
-	def test_empty_account_falls_back_to_settings(self):
-		set_default_charges_account()
-
-		investment = make_investment().insert()
-
-		self.assertEqual(investment.charges_account, CHARGES_ACCOUNT)
-
-	def test_own_account_is_kept(self):
-		set_default_charges_account()
+		# an empty account falls back to settings, an own account is kept
+		self.assertEqual(make_investment().insert().charges_account, CHARGES_ACCOUNT)
 		own_account = frappe.db.get_value(
 			"Account", {"company": TEST_COMPANY, "is_group": 0, "name": ("!=", CHARGES_ACCOUNT)}, "name"
 		)
+		self.assertEqual(make_investment(charges_account=own_account).insert().charges_account, own_account)
 
-		investment = make_investment(charges_account=own_account).insert()
+		# the investment account is required here or in settings
+		self.assertRaises(frappe.ValidationError, make_investment(investment_account=None).insert)
 
-		self.assertEqual(investment.charges_account, own_account)
-
-	def test_defaults_of_another_company_are_not_used(self):
-		other_company = frappe.db.get_value("Company", {"name": ("!=", TEST_COMPANY)}, "name")
-		settings = frappe.get_single("Investment Settings")
-		settings.set("company_accounts", [{"company": other_company}])
-		settings.save()
-
-		investment = make_investment().insert()
-
-		self.assertFalse(investment.charges_account)
-
-	def test_investment_account_is_required_here_or_in_settings(self):
-		get_settings_with_defaults(investment_account=None).save()
-
-		investment = make_investment(investment_account=None)
-
-		self.assertRaises(frappe.ValidationError, investment.insert)
-
-	def test_missing_account_is_not_filled_in_while_posting(self):
+	def test_empty_account_after_approval_is_set_once_never_filled_while_posting(self):
 		investment = make_submitted_investment(charges_account=None)
 		frappe.db.set_value("Investment", investment.name, "charges_account", None)
 		set_default_charges_account()
-
 		investment.reload()
 
+		# posting does not quietly save the default
 		self.assertRaises(frappe.ValidationError, investment.get_account, "charges_account")
 		self.assertFalse(frappe.db.get_value("Investment", investment.name, "charges_account"))
-
-	def test_empty_account_can_be_set_after_approval_but_not_changed(self):
-		investment = make_submitted_investment(charges_account=None)
-		frappe.db.set_value("Investment", investment.name, "charges_account", None)
-		investment.reload()
 
 		investment.charges_account = CHARGES_ACCOUNT
 		investment.save()

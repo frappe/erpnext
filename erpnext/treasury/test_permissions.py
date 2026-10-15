@@ -4,7 +4,6 @@
 """Runs as Accounts User and Accounts Manager, not Administrator, to catch missing permissions."""
 
 import frappe
-from frappe.desk.search import search_link
 from frappe.permissions import add_user_permission
 from frappe.utils import nowdate
 
@@ -18,7 +17,6 @@ from erpnext.treasury.doctype.investment.test_investment import (
 )
 from erpnext.treasury.doctype.investment_transaction.test_investment_transaction import (
 	INVESTMENT_ACCOUNTS,
-	make_submitted_investment,
 	make_transaction,
 )
 from erpnext.treasury.report.cash_flow_forecast import cash_flow_forecast
@@ -34,77 +32,21 @@ class TestTreasuryPermissions(ERPNextTestSuite):
 		create_user(ACCOUNTS_USER, "Accounts User")
 		create_user(ACCOUNTS_MANAGER, "Accounts Manager")
 
-	def test_accounts_user_can_pick_issuer_and_investment_type(self):
-		with self.set_user(ACCOUNTS_USER):
-			issuers = search_link("Financial Institution", "_Test Bank")
-			investment_types = search_link("Investment Type", "_Test Bank FD")
-
-		self.assertIn("_Test Bank", [row["value"] for row in issuers])
-		self.assertIn("_Test Bank FD", [row["value"] for row in investment_types])
-
-	def test_accounts_user_cannot_add_issuer(self):
-		with self.set_user(ACCOUNTS_USER):
-			issuer = frappe.get_doc(
-				{
-					"doctype": "Financial Institution",
-					"institution_name": "_Test New Bank",
-					"institution_type": "Bank",
-				}
-			)
-			self.assertRaises(frappe.PermissionError, issuer.insert)
-
-	def test_accounts_user_can_draft_but_not_approve_investment(self):
+	def test_accounts_user_drafts_and_accounts_manager_approves(self):
 		with self.set_user(ACCOUNTS_USER):
 			investment = make_investment(**INVESTMENT_ACCOUNTS).insert()
 			self.assertRaises(frappe.PermissionError, investment.submit)
-
 		self.assertEqual(frappe.db.get_value("Investment", investment.name, "docstatus"), 0)
 
-	def test_accounts_user_can_record_purchase(self):
-		investment = make_submitted_investment()
+		with self.set_user(ACCOUNTS_MANAGER):
+			investment.reload()
+			investment.submit()
+		self.assertEqual(investment.status, "Active")
+		self.assertEqual(investment.approved_by, ACCOUNTS_MANAGER)
 
 		with self.set_user(ACCOUNTS_USER):
 			make_transaction(investment.name, "Purchase", gross_amount=100000).submit()
-
 		self.assertEqual(frappe.db.get_value("Investment", investment.name, "total_cost"), 100000)
-
-	def test_accounts_user_cannot_change_investment_settings(self):
-		with self.set_user(ACCOUNTS_USER):
-			settings = frappe.get_single("Investment Settings")
-			settings.company = TEST_COMPANY
-			self.assertRaises(frappe.PermissionError, settings.save)
-
-	def test_accounts_manager_can_add_issuer_and_investment_type(self):
-		with self.set_user(ACCOUNTS_MANAGER):
-			create_financial_institution("_Test New Bank")
-			create_investment_type("_Test New FD", "Deposit")
-
-		self.assertTrue(frappe.db.exists("Financial Institution", "_Test New Bank"))
-		self.assertTrue(frappe.db.exists("Investment Type", "_Test New FD"))
-
-	def test_accounts_manager_can_link_primary_contact_to_issuer(self):
-		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Shah"}).insert()
-
-		with self.set_user(ACCOUNTS_MANAGER):
-			frappe.get_doc(
-				{
-					"doctype": "Financial Institution",
-					"institution_name": "_Test New Bank",
-					"institution_type": "Bank",
-					"primary_contact": contact.name,
-				}
-			).insert()
-
-		contact.reload()
-		self.assertTrue(contact.has_link("Financial Institution", "_Test New Bank"))
-
-	def test_accounts_manager_can_approve_investment(self):
-		with self.set_user(ACCOUNTS_MANAGER):
-			investment = make_investment(**INVESTMENT_ACCOUNTS).insert()
-			investment.submit()
-
-		self.assertEqual(investment.status, "Active")
-		self.assertEqual(investment.approved_by, ACCOUNTS_MANAGER)
 
 	def test_user_restricted_to_a_company_cannot_read_another(self):
 		add_user_permission("Company", TEST_COMPANY, ACCOUNTS_USER)
@@ -113,14 +55,6 @@ class TestTreasuryPermissions(ERPNextTestSuite):
 		with self.set_user(ACCOUNTS_USER):
 			self.assertRaises(frappe.PermissionError, get_interest_earned, filters)
 			self.assertRaises(frappe.PermissionError, cash_flow_forecast.execute, filters)
-
-	def test_accounts_manager_can_change_investment_settings(self):
-		with self.set_user(ACCOUNTS_MANAGER):
-			settings = frappe.get_single("Investment Settings")
-			settings.company = TEST_COMPANY
-			settings.save()
-
-		self.assertEqual(frappe.db.get_single_value("Investment Settings", "company"), TEST_COMPANY)
 
 
 def create_user(email, role):

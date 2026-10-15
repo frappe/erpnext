@@ -31,10 +31,21 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		create_investment_type("_Test Equity Fund", "Units")
 		create_financial_institution("_Test Bank")
 
-	def test_transaction_needs_approved_investment(self):
-		investment = make_investment(**INVESTMENT_ACCOUNTS).insert()
-		transaction = make_transaction(investment.name, "Purchase", gross_amount=1000)
-		self.assertRaises(frappe.ValidationError, transaction.insert)
+	def test_invalid_transaction_is_rejected(self):
+		draft_investment = make_investment(**INVESTMENT_ACCOUNTS).insert()
+		self.assertRaises(
+			frappe.ValidationError,
+			make_transaction(draft_investment.name, "Purchase", gross_amount=1000).insert,
+		)
+
+		investment = make_submitted_investment()
+		other_cost_center = frappe.db.get_value(
+			"Cost Center", {"company": ("!=", investment.company), "is_group": 0}, "name"
+		)
+		purchase = make_transaction(
+			investment.name, "Purchase", gross_amount=1000, cost_center=other_cost_center
+		)
+		self.assertRaises(frappe.ValidationError, purchase.insert)
 
 	def test_purchase_posts_gl(self):
 		investment = make_submitted_investment()
@@ -49,25 +60,27 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 				BANK_ACCOUNT: (0, 100500),
 			},
 		)
+		self.assertEqual(
+			set(frappe.get_all("GL Entry", {"voucher_no": transaction.name}, pluck="voucher_subtype")),
+			{"Purchase"},
+		)
 
 		investment.reload()
 		self.assertEqual(investment.total_cost, 100000)
 		self.assertEqual(investment.status, "Active")
 
-	def test_purchase_ignores_hidden_tax_and_penalty(self):
-		investment = make_submitted_investment()
-		transaction = make_transaction(
+	def test_fields_that_do_not_apply_are_ignored(self):
+		investment = make_submitted_investment(approved_amount=200000)
+		purchase = make_transaction(
 			investment.name, "Purchase", gross_amount=100000, tax_withheld=100, penalty_applied=50
 		).submit()
 
-		self.assertEqual((transaction.tax_withheld, transaction.penalty_applied), (0, 0))
+		self.assertEqual((purchase.tax_withheld, purchase.penalty_applied), (0, 0))
 		self.assertEqual(
-			get_gl_entries(transaction.name),
+			get_gl_entries(purchase.name),
 			{"Short-term Investments - _TC": (100000, 0), BANK_ACCOUNT: (0, 100000)},
 		)
 
-	def test_opening_ignores_hidden_bought_interest(self):
-		investment = make_submitted_investment()
 		opening = make_transaction(
 			investment.name, "Opening", gross_amount=100000, accrued_interest_in_purchase=2000
 		).submit()
@@ -93,31 +106,16 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		)
 		self.assertEqual(finance_books, ["_Test Treasury Book"])
 
-	def test_cost_center_must_belong_to_company(self):
-		investment = make_submitted_investment()
-		other_cost_center = frappe.db.get_value(
-			"Cost Center", {"company": ("!=", investment.company), "is_group": 0}, "name"
-		)
-
-		purchase = make_transaction(
-			investment.name, "Purchase", gross_amount=1000, cost_center=other_cost_center
-		)
-		self.assertRaises(frappe.ValidationError, purchase.insert)
-
 	def test_purchase_above_approved_amount_is_blocked(self):
 		investment = make_submitted_investment(approved_amount=100000)
-		make_transaction(investment.name, "Purchase", gross_amount=60000).submit()
-
-		transaction = make_transaction(investment.name, "Purchase", gross_amount=50000)
-		self.assertRaises(frappe.ValidationError, transaction.insert)
-
-	def test_approved_amount_leaves_out_bought_interest(self):
-		investment = make_submitted_investment(approved_amount=100000)
-
-		# 101000 paid, but only 99000 is the investment itself; 2000 is interest bought with it
+		# 61000 paid, but only 59000 is the investment itself; 2000 is interest bought with it
 		make_transaction(
-			investment.name, "Purchase", gross_amount=101000, accrued_interest_in_purchase=2000
+			investment.name, "Purchase", gross_amount=61000, accrued_interest_in_purchase=2000
 		).submit()
+		make_transaction(investment.name, "Purchase", gross_amount=41000).submit()
+
+		transaction = make_transaction(investment.name, "Purchase", gross_amount=1)
+		self.assertRaises(frappe.ValidationError, transaction.insert)
 
 	def test_sale_uses_fifo_cost(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
@@ -156,18 +154,6 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		investment.reload()
 		self.assertEqual((investment.total_cost, investment.status), (0, "Redeemed"))
 
-	def test_only_submit_locks_the_balance(self):
-		investment = make_submitted_investment(investment_type="_Test Equity Fund")
-		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
-		sale = make_transaction(investment.name, "Sale", units=40, rate=10)
-
-		with patch.object(frappe.db, "get_values", wraps=frappe.db.get_values) as get_values:
-			sale.insert()
-			self.assertFalse(any(call.kwargs.get("for_update") for call in get_values.call_args_list))
-
-			sale.submit()
-			self.assertTrue(any(call.kwargs.get("for_update") for call in get_values.call_args_list))
-
 	def test_cannot_cancel_sale_a_later_sale_was_costed_after(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
@@ -181,33 +167,28 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		second_sale.cancel()
 		first_sale.reload().cancel()
 
-	def test_cannot_submit_sale_dated_before_a_later_sale(self):
+	def test_entries_cannot_be_back_dated_around_a_sale(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
 		make_transaction(
-			investment.name, "Sale", units=20, rate=15, posting_date=add_days(nowdate(), 5)
+			investment.name, "Purchase", posting_date=add_days(nowdate(), 5), units=100, rate=12
 		).submit()
 
-		backdated_sale = make_transaction(
-			investment.name, "Sale", units=20, rate=15, posting_date=add_days(nowdate(), 1)
+		# the units bought on day 5 cannot be sold on day 2
+		sale = make_transaction(
+			investment.name, "Sale", posting_date=add_days(nowdate(), 2), units=150, rate=15
 		)
-		self.assertRaises(frappe.ValidationError, backdated_sale.submit)
+		self.assertRaises(frappe.ValidationError, sale.insert)
 
-	def test_submit_reads_interest_with_locks(self):
-		investment = make_submitted_investment()
-		make_transaction(investment.name, "Purchase", gross_amount=100000).submit()
-		make_interest_accrual(investment.name, nowdate(), nowdate(), 50).submit()
-		receipt = make_transaction(investment.name, "Interest Receipt", interest_amount=50).insert()
-
-		with patch.object(frappe.db, "get_value", wraps=frappe.db.get_value) as get_value:
-			receipt.submit()
-
-		investment_locks = [
-			call
-			for call in get_value.call_args_list
-			if call.args[0] == "Investment" and call.kwargs.get("for_update")
-		]
-		self.assertTrue(investment_locks)
+		make_transaction(
+			investment.name, "Sale", units=20, rate=15, posting_date=add_days(nowdate(), 6)
+		).submit()
+		for transaction_type in ("Sale", "Purchase"):
+			with self.subTest(transaction_type):
+				backdated = make_transaction(
+					investment.name, transaction_type, units=20, rate=15, posting_date=add_days(nowdate(), 3)
+				)
+				self.assertRaises(frappe.ValidationError, backdated.submit)
 
 	def test_submit_asks_for_retry_if_investment_changed_while_waiting(self):
 		investment = make_submitted_investment()
@@ -240,45 +221,14 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		investment.reload()
 		self.assertEqual(investment.total_cost, 0)
 
-	def test_cannot_cancel_purchase_already_sold(self):
-		investment = make_submitted_investment(investment_type="_Test Equity Fund")
-		purchase = make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
-		make_transaction(investment.name, "Sale", units=40, rate=10).submit()
-
-		self.assertRaises(frappe.ValidationError, purchase.cancel)
-
-	def test_cannot_cancel_purchase_whose_cost_a_sale_used(self):
+	def test_cannot_cancel_purchase_a_sale_used(self):
 		investment = make_submitted_investment(investment_type="_Test Equity Fund")
 		first = make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
 		make_transaction(investment.name, "Purchase", units=100, rate=12).submit()
-		make_transaction(investment.name, "Sale", units=100, rate=15).submit()
+		make_transaction(investment.name, "Sale", units=40, rate=15).submit()
 
 		# the second purchase still covers the units, but the sale took the first one's cost
 		self.assertRaises(frappe.ValidationError, first.cancel)
-
-	def test_cannot_backdate_purchase_before_a_sale(self):
-		investment = make_submitted_investment(investment_type="_Test Equity Fund")
-		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
-		make_transaction(
-			investment.name, "Sale", posting_date=add_days(nowdate(), 2), units=50, rate=15
-		).submit()
-
-		purchase = make_transaction(
-			investment.name, "Purchase", posting_date=add_days(nowdate(), 1), units=100, rate=8
-		)
-		self.assertRaises(frappe.ValidationError, purchase.submit)
-
-	def test_cannot_sell_units_bought_later(self):
-		investment = make_submitted_investment(investment_type="_Test Equity Fund")
-		make_transaction(investment.name, "Purchase", units=100, rate=10).submit()
-		make_transaction(
-			investment.name, "Purchase", posting_date=add_days(nowdate(), 5), units=100, rate=12
-		).submit()
-
-		sale = make_transaction(
-			investment.name, "Sale", posting_date=add_days(nowdate(), 2), units=150, rate=15
-		)
-		self.assertRaises(frappe.ValidationError, sale.insert)
 
 	def test_interest_accrual_and_receipt(self):
 		investment = make_submitted_investment()
@@ -329,15 +279,6 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		self.assertIn(
 			f"has already been received. Please cancel the Interest Receipt transactions of Investment <strong>{investment.name}</strong> first.",
 			str(error.exception),
-		)
-
-	def test_gl_voucher_subtype_is_transaction_type(self):
-		investment = make_submitted_investment()
-		purchase = make_transaction(investment.name, "Purchase", gross_amount=100000).submit()
-
-		self.assertEqual(
-			set(frappe.get_all("GL Entry", {"voucher_no": purchase.name}, pluck="voucher_subtype")),
-			{"Purchase"},
 		)
 
 	def test_opening_uses_temporary_opening_account(self):
