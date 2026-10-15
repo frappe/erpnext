@@ -79,6 +79,7 @@
   "override_tax_withholding_entries",
   "tax_withholding_entries",
   "transaction_references",
+  "cheque",
   "reference_no",
   "column_break_23",
   "reference_date",
@@ -433,6 +434,15 @@
    "label": "Transaction ID"
   },
   {
+   "depends_on": "eval:in_list([\"Pay\", \"Internal Transfer\"], doc.payment_type) && in_list([\"Cheque\", \"Check\"], doc.mode_of_payment)",
+   "fieldname": "cheque",
+   "fieldtype": "Link",
+   "label": "Cheque",
+   "no_copy": 1,
+   "options": "Cheque",
+   "search_index": 1
+  },
+  {
    "bold": 1,
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
@@ -441,7 +451,8 @@
    "in_import_template": 1,
    "in_standard_filter": 1,
    "label": "Cheque/Reference No",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
+   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
+   "read_only_depends_on": "eval:doc.cheque"
   },
   {
    "fieldname": "column_break_23",
@@ -820,7 +831,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-10-13 12:00:00.000000",
+ "modified": "2026-10-15 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

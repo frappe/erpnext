@@ -96,6 +96,7 @@ class PaymentEntry(AccountsController):
 		base_total_allocated_amount: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		book_advance_payments_in_separate_party_account: DF.Check
+		cheque: DF.Link | None
 		clearance_date: DF.Date | None
 		company: DF.Link
 		contact_email: DF.Data | None
