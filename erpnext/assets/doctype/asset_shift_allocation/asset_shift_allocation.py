@@ -38,6 +38,7 @@ class AssetShiftAllocation(Document):
 		depreciation_schedule: DF.Table[DepreciationSchedule]
 		finance_book: DF.Link | None
 		naming_series: DF.Literal["ACC-ASA-.YYYY.-"]
+		previous_depreciation_schedule: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -49,6 +50,9 @@ class AssetShiftAllocation(Document):
 
 	def after_insert(self):
 		self.fetch_and_set_depr_schedule()
+
+	def before_submit(self):
+		self.previous_depreciation_schedule = self.asset_depr_schedule_doc.name
 
 	def on_submit(self):
 		self.create_new_asset_depr_schedule()
@@ -256,6 +260,17 @@ class AssetShiftAllocation(Document):
 
 	def restore_previous_depr_schedule(self):
 		active_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
+		self.validate_previous_depr_schedule_restorable(active_schedule_doc)
+
+		restored_schedule_doc = frappe.copy_doc(
+			frappe.get_doc("Asset Depreciation Schedule", self.previous_depreciation_schedule)
+		)
+		restored_schedule_doc.notes = _(
+			"This schedule was restored when Asset Shift Allocation {0} was cancelled."
+		).format(get_link_to_form(self.doctype, self.name))
+		replace_active_depr_schedule(active_schedule_doc, restored_schedule_doc)
+
+	def validate_previous_depr_schedule_restorable(self, active_schedule_doc: Document) -> None:
 		if get_schedule_rows(active_schedule_doc.depreciation_schedule) != get_schedule_rows(
 			self.depreciation_schedule
 		):
@@ -265,22 +280,10 @@ class AssetShiftAllocation(Document):
 				)
 			)
 
-		previous_schedule = frappe.db.get_value(
-			"Asset Depreciation Schedule",
-			{
-				"asset": self.asset,
-				"finance_book": self.finance_book or ["is", "not set"],
-				"docstatus": 2,
-			},
-			order_by="modified desc",
-		)
-		restored_schedule_doc = frappe.copy_doc(
-			frappe.get_doc("Asset Depreciation Schedule", previous_schedule)
-		)
-		restored_schedule_doc.notes = _(
-			"This schedule was restored when Asset Shift Allocation {0} was cancelled."
-		).format(get_link_to_form(self.doctype, self.name))
-		replace_active_depr_schedule(active_schedule_doc, restored_schedule_doc)
+		if not self.previous_depreciation_schedule:
+			frappe.throw(
+				_("Cannot cancel since the depreciation schedule replaced by this allocation is not known")
+			)
 
 
 def replace_active_depr_schedule(active_schedule_doc: Document, new_schedule_doc: Document) -> None:
