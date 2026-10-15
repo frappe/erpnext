@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 from frappe.model.document import Document
 
 
@@ -28,4 +29,14 @@ class Cheque(Document):
 		status: DF.Literal["Available", "Issued", "Cancelled"]
 	# end: auto-generated types
 
-	pass
+	def check_if_latest(self):
+		# Every cheque writer locks the book, then the cheque.
+		# Frappe locks this cheque in the parent method, so lock the book first.
+		frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
+		super().check_if_latest()
+
+	def before_cancel(self):
+		self.status = "Cancelled"
+
+	def on_cancel(self):
+		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).update_status()
