@@ -98,6 +98,46 @@ class TestBOM(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_bom_diff, bom1, bom2)
 
 	@timeout
+	def test_bom_diff_preserves_repeated_rows(self):
+		from erpnext.manufacturing.doctype.bom.mapper import diff_table_field
+
+		for table, identifier, value_field in (
+			("items", "item_code", "qty"),
+			("operations", "operation", "time_in_mins"),
+			("secondary_items", "item_code", "qty"),
+			("exploded_items", "item_code", "stock_qty"),
+		):
+			for old_values, new_values, added, removed, changed in (
+				([1, 2], [1, 2], [], [], 0),
+				([1, 2], [2, 1], [], [], 0),
+				([1, 2], [2, 2], [], [], 1),
+				([1, 2], [3, 2], [], [], 1),
+				([1, 2], [3, 1, 2], [3], [], 0),
+				([1, 2], [2], [], [1], 0),
+				([1], [1, 1], [1], [], 0),
+				([1, 1], [1], [], [1], 0),
+			):
+				with self.subTest(table=table, old_values=old_values, new_values=new_values):
+					old = frappe.get_doc({"doctype": "BOM"})
+					new = frappe.get_doc({"doctype": "BOM"})
+					for value in old_values:
+						old.append(table, {identifier: "Repeated row", value_field: value})
+					for value in new_values:
+						new.append(table, {identifier: "Repeated row", value_field: value})
+
+					out = frappe._dict(added=[], removed=[], row_changed=[])
+					diff_table_field(old.meta.get_field(table), old, new, out)
+
+					self.assertEqual([row[value_field] for field, row in out.added], added)
+					self.assertEqual([row[value_field] for field, row in out.removed], removed)
+					self.assertEqual(len(out.row_changed), changed)
+					if changed:
+						field, index, label, changes = out.row_changed[0]
+						expected_index = 1 if new_values == [2, 2] else 0
+						self.assertEqual((field, index, label), (table, expected_index, "Repeated row"))
+						self.assertEqual([change[0] for change in changes], [value_field])
+
+	@timeout
 	def test_get_items_keeps_bom_no_phantom_pair_coherent(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
