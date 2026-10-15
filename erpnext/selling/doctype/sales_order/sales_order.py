@@ -1829,6 +1829,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 						"item_tax_template",
 						"discount_percentage",
 						"discount_amount",
+						"mapped_additional_discount_amount",
 						"pricing_rules",
 						"margin_type",
 						"margin_rate_or_amount",
