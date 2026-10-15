@@ -43,6 +43,10 @@
 	.quotations-table .quotation-link {
 		font-weight: 400;
 	}
+	.quotations-table .valid-till.expired {
+		color: var(--red-600, #e03636);
+		cursor: help;
+	}
 
 	.quotations-filters-bar .frappe-control {
 		position: relative;
@@ -132,6 +136,7 @@
 						<tr>
 							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
 							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Item") }}</th>
+<<<<<<< Updated upstream
 							{% for (let o = 0; o < offers.length; o++) {
 								const offer = offers[o];							%}
 								<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
@@ -141,6 +146,24 @@
 										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small truncate">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
 									</div>
 								</th>
+=======
+							{% if (suppliers && suppliers.length) { %}
+								{% for (let s = 0; s < suppliers.length; s++) {
+									const sup = suppliers[s];
+									const sq = (quotes || []).find(q => q.supplier === sup)?.supplier_quotation;
+								%}
+									<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
+										<div class="flex flex-col items-center justify-center gap-1 text-center" title="{{ frappe.utils.escape_html(sup) }}{% if (sq) { %} : {{ frappe.utils.escape_html(sq) }}{% } %}">
+											<div class="truncate" style="max-width: 100%;">
+												{{ frappe.utils.escape_html(sup) }}
+											</div>
+											{% if (sq) { %}
+												<a href="/app/supplier-quotation/{{ encodeURIComponent(sq) }}" class="quotation-link truncate" style="max-width: 100%;" title="{{ frappe.utils.escape_html(sq) }}">{{ frappe.utils.escape_html(sq) }}</a>
+											{% } %}
+										</div>
+									</th>
+								{% } %}
+>>>>>>> Stashed changes
 							{% } %}
 						</tr>
 					{% } else { %}
@@ -187,8 +210,38 @@
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
 									{% } else { %}
+<<<<<<< Updated upstream
 										<td style="vertical-align: top; padding: 6px;">
 											{{ frappe.render_template("supplier_quotation_offer_card", { q: q, item: item, min_rate: min_rates[item.name], company_currency: company_currency, format_qty: format_qty }) }}
+=======
+										<td style="vertical-align: middle; padding: 6px;">
+											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
+													<span>{{ q.qty || item.qty || "" }} {{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.rate, q.currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
+													<span>{{ format_currency(q.amount, q.currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
+													{% if (q.status === "Expired") { %}
+														<span class="valid-till expired" title="{{ __("Expired on {0}", [frappe.datetime.str_to_user(q.valid_till)]) }}">{{ frappe.datetime.str_to_user(q.valid_till) }}</span>
+													{% } else { %}
+														<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+													{% } %}
+												</div>
+												<div class="flex justify-between items-center">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
+													<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
+												</div>
+											</div>
+>>>>>>> Stashed changes
 										</td>
 									{% } %}
 								{% } %}
@@ -234,8 +287,38 @@
 									{% if (!q) { %}
 										<td class="text-center text-muted" style="vertical-align: middle; padding: 6px;">-</td>
 									{% } else { %}
+<<<<<<< Updated upstream
 										<td style="vertical-align: top; padding: 6px;">
 											{{ frappe.render_template("supplier_quotation_offer_card", { q: q, item: item, min_rate: min_rates[item.name], company_currency: company_currency, format_qty: format_qty }) }}
+=======
+										<td style="vertical-align: middle; padding: 6px;">
+											<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px; max-width: 280px;">
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
+													<span>{{ q.qty || item.qty || "" }} {{ frappe.utils.escape_html(q.uom || item.uom || "") }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+													<span class="{% if (is_lowest) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.rate, q.currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
+													<span>{{ format_currency(q.amount, q.currency) }}</span>
+												</div>
+												<div class="flex justify-between items-center mb-2">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
+													{% if (q.status === "Expired") { %}
+														<span class="valid-till expired" title="{{ __("Expired on {0}", [frappe.datetime.str_to_user(q.valid_till)]) }}">{{ frappe.datetime.str_to_user(q.valid_till) }}</span>
+													{% } else { %}
+														<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+													{% } %}
+												</div>
+												<div class="flex justify-between items-center">
+													<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
+													<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
+												</div>
+											</div>
+>>>>>>> Stashed changes
 										</td>
 									{% } %}
 								{% } %}
