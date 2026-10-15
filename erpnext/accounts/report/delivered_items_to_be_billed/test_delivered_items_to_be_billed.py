@@ -155,6 +155,18 @@ class TestDeliveredItemsToBeBilled(ERPNextTestSuite):
 		self.assertEqual((row.billed_amount, row.pending_amount), (100, 500))
 		self.assertEqual(self.run_report(delivery_note=second_dn.name), [])
 
+	def test_order_billing_beyond_deliveries_after_the_as_on_date_is_not_deducted(self):
+		self.stock_up_item()
+		so = make_sales_order(qty=20, rate=100, warehouse="Stores - _TC", transaction_date="2026-05-25")
+		dn = make_delivery_from_order(so.name, qty=10, posting_date="2026-06-01")
+		make_invoice_from_order(so.name, qty=10, posting_date="2026-06-05")
+		make_invoice_from_order(so.name, qty=10, posting_date="2026-06-20")
+
+		self.assertEqual(self.run_report(delivery_note=dn.name, posting_date="2026-06-10"), [])
+		self.assertEqual(
+			self.run_report(delivery_note=dn.name, posting_date="2026-06-03")[0].pending_amount, 1000
+		)
+
 
 def make_delivery_from_order(sales_order, qty, posting_date):
 	dn = make_delivery_note(sales_order)

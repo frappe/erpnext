@@ -185,6 +185,23 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 		self.assertEqual((row.billed_amount, row.pending_amount), (100, 500))
 		self.assertIsNone(self.get_row(self.run_report(), second_pr.name))
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_billing_at_another_rate_after_the_as_on_date_is_spread_by_qty(self):
+		po = create_purchase_order(qty=10, rate=100, transaction_date="2026-05-25")
+		first_pr = make_receipt_from_order(po.name, qty=4, posting_date="2026-06-01")
+		second_pr = make_receipt_from_order(po.name, qty=6, posting_date="2026-06-02")
+		make_invoice_from_order(po.name, qty=5, posting_date="2026-06-05")
+		make_invoice_from_order(po.name, qty=5, posting_date="2026-06-20", rate=80)
+
+		data = self.run_report(posting_date="2026-06-10")
+		self.assertIsNone(self.get_row(data, first_pr.name))
+		row = self.get_row(data, second_pr.name)
+		self.assertEqual((row.billed_amount, row.pending_amount), (100, 500))
+
+		data = self.run_report()
+		self.assertEqual(self.get_row(data, first_pr.name).pending_amount, 40)
+		self.assertEqual(self.get_row(data, second_pr.name).pending_amount, 60)
+
 
 def make_receipt_from_order(purchase_order, qty, posting_date):
 	pr = make_pr_from_po(purchase_order)
@@ -196,11 +213,13 @@ def make_receipt_from_order(purchase_order, qty, posting_date):
 	return pr
 
 
-def make_invoice_from_order(purchase_order, qty, posting_date):
+def make_invoice_from_order(purchase_order, qty, posting_date, rate=None):
 	pi = make_pi_from_po(purchase_order)
 	pi.set_posting_time = 1
 	pi.posting_date = posting_date
 	pi.items[0].qty = qty
+	if rate:
+		pi.items[0].rate = rate
 	pi.submit()
 	return pi
 
