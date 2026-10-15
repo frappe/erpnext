@@ -1,6 +1,8 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
@@ -17,6 +19,7 @@ from frappe.utils import (
 )
 
 from erpnext.assets.doctype.asset.asset import (
+	Asset,
 	get_asset_account,
 	get_asset_value_after_depreciation,
 )
@@ -117,6 +120,7 @@ class TestAssetRepair(ERPNextTestSuite):
 		second_repair = create_asset_repair(asset=asset)
 
 		first_repair.repair_status = "Completed"
+		first_repair.completion_date = now_datetime()
 		first_repair.save()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
@@ -124,6 +128,7 @@ class TestAssetRepair(ERPNextTestSuite):
 		self.assertFalse([subject for subject in subjects if "back in service" in subject])
 
 		second_repair.repair_status = "Completed"
+		second_repair.completion_date = now_datetime()
 		second_repair.save()
 
 		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
@@ -134,6 +139,28 @@ class TestAssetRepair(ERPNextTestSuite):
 				for subject in subjects
 				if second_repair.name in subject and "back in service" in subject
 			]
+		)
+
+	def test_completed_repair_ignores_stale_pending_repair_snapshot(self):
+		asset = create_asset(submit=1)
+		first_repair = create_asset_repair(asset=asset)
+		second_repair = create_asset_repair(asset=asset)
+		first_repair.repair_status = "Completed"
+		first_repair.completion_date = now_datetime()
+		first_repair.save()
+
+		# Simulates a concurrent save whose read snapshot still shows the first repair as Pending
+		second_repair.repair_status = "Completed"
+		second_repair.completion_date = now_datetime()
+		with patch.object(Asset, "has_pending_repair", return_value=True):
+			second_repair.save()
+
+		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		self.assertTrue(
+			frappe.db.exists(
+				"Asset Activity",
+				{"asset": asset.name, "subject": ("like", f"%back in service%{second_repair.name}%")},
+			)
 		)
 
 	def test_stock_item_total_value(self):
