@@ -1872,7 +1872,9 @@ def create_stock_reservation_entries_for_so_items(
 		qty_to_be_reserved = get_whole_sales_unit_qty(
 			item,
 			qty_to_be_reserved,
-			min(unreserved_qty, available_qty_to_reserve) if from_voucher_type else None,
+			min(unreserved_qty, available_qty_to_reserve)
+			if from_voucher_type == "Purchase Receipt"
+			else None,
 		)
 		if not qty_to_be_reserved:
 			continue
