@@ -187,6 +187,9 @@ class TestCustomerOverview(ERPNextTestSuite):
 			"erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary.execute",
 			return_value=([], []),
 		):
-			self.assertEqual(customer_overview.reported_advances(CUSTOMER, COMPANY, today()), 0)
+			with patch.object(
+				customer_overview, "get_partywise_advanced_payment_amount", return_value={CUSTOMER: 500}
+			):
+				self.assertEqual(customer_overview.reported_advances(CUSTOMER, COMPANY, today()), 500)
 			with patch.object(customer_overview, "_unrestricted_read", return_value=False):
 				self.assertIsNone(customer_overview.reported_advances(CUSTOMER, COMPANY, today()))
