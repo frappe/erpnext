@@ -536,8 +536,14 @@ class TestIssue(TestSetUp):
 				issue.service_level_agreement,
 				"_Test Customer",
 			)
+			self.assertRaises(
+				frappe.PermissionError, reset_service_level_agreement, "Issue", issue.name, "not mine"
+			)
 		finally:
 			frappe.set_user("Administrator")
+		self.assertFalse(
+			frappe.db.exists("Comment", {"reference_name": issue.name, "content": ["like", "%not mine%"]})
+		)
 
 	def test_update_agreement_status_on_custom_status(self):
 		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
