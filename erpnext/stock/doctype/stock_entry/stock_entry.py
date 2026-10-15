@@ -562,7 +562,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue
 
 			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			materials = available_materials.get((row.item_code, warehouse, None))
 			if not materials:
 				continue
 
@@ -5272,6 +5272,7 @@ def get_items_from_subcontract_order(source_name, target_doc=None):
 
 def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 	data = get_stock_entry_data(work_order, stock_entry_doc=stock_entry_doc)
+	is_disassemble = stock_entry_doc and stock_entry_doc.purpose == "Disassemble"
 
 	available_materials = {}
 	for row in data:
@@ -5279,22 +5280,15 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 		if row.purpose != "Material Transfer for Manufacture" or row.is_return:
 			key = (row.item_code, row.s_warehouse)
 
-		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
+		if is_disassemble:
 			key = (row.item_code, row.s_warehouse or row.warehouse)
 
-		if key not in available_materials:
-			available_materials.setdefault(
-				key,
-				frappe._dict(
-					{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
-				),
-			)
-
-		item_data = available_materials[key]
+		key = (*key, None if is_disassemble else (row.original_item or None))
 
 		if (row.purpose == "Material Transfer for Manufacture" and not row.is_return) or (
-			stock_entry_doc and stock_entry_doc.purpose == "Disassemble" and row.purpose == "Manufacture"
+			is_disassemble and row.purpose == "Manufacture"
 		):
+			item_data = _get_available_material(available_materials, key, row)
 			item_data.qty += row.qty
 			if row.batch_no:
 				item_data.batch_details[row.batch_no] += row.qty
@@ -5312,26 +5306,70 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 				item_data.serial_nos.sort()
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
-
-			item_data.qty -= row.qty
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] -= row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
-
-			if row.serial_no:
-				for serial_no in get_serial_nos(row.serial_no):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
-
-			elif row.serial_nos:
-				for serial_no in get_serial_nos(row.serial_nos):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
+			buckets = _get_consumption_buckets(available_materials, key) or [
+				_get_available_material(available_materials, key, row)
+			]
+			_deduct_consumed_material(buckets, row)
 
 	return available_materials
+
+
+def _get_available_material(available_materials, key, row):
+	if key not in available_materials:
+		available_materials[key] = frappe._dict(
+			{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
+		)
+
+	return available_materials[key]
+
+
+def _get_consumption_buckets(available_materials, key):
+	return [bucket for material_key, bucket in available_materials.items() if material_key[:2] == key[:2]]
+
+
+def _deduct_consumed_material(buckets, row):
+	consumed_qty = flt(row.qty)
+	batches = (
+		{row.batch_no: flt(row.qty)}
+		if row.batch_no
+		else {batch_no: -flt(qty) for batch_no, qty in (row.batch_nos or {}).items()}
+	)
+	for batch_no, batch_qty in batches.items():
+		_deduct_consumed_batch_qty(buckets, batch_no, batch_qty)
+		consumed_qty -= batch_qty
+
+	for serial_no in get_serial_nos(row.serial_no or row.serial_nos):
+		bucket = next((bucket for bucket in buckets if serial_no in bucket.serial_nos), None)
+		if not bucket:
+			continue
+
+		bucket.serial_nos.remove(serial_no)
+		if not batches:
+			bucket.qty -= 1
+			consumed_qty -= 1
+
+	_deduct_consumed_qty(buckets, consumed_qty)
+
+
+def _deduct_consumed_qty(buckets, consumed_qty):
+	for bucket in buckets[:-1]:
+		deducted = min(max(flt(bucket.qty), 0.0), consumed_qty)
+		bucket.qty -= deducted
+		consumed_qty -= deducted
+
+	buckets[-1].qty -= consumed_qty
+
+
+def _deduct_consumed_batch_qty(buckets, batch_no, consumed_qty):
+	holders = [bucket for bucket in buckets if batch_no in bucket.batch_details] or buckets[-1:]
+	for bucket in holders[:-1]:
+		deducted = min(max(flt(bucket.batch_details[batch_no]), 0.0), consumed_qty)
+		bucket.batch_details[batch_no] -= deducted
+		bucket.qty -= deducted
+		consumed_qty -= deducted
+
+	holders[-1].batch_details[batch_no] -= consumed_qty
+	holders[-1].qty -= consumed_qty
 
 
 def get_stock_entry_data(work_order, stock_entry_doc=None):
