@@ -930,7 +930,13 @@ class WorkOrder(Document):
 				.where(child.is_finished_item == 1)
 			)
 		else:
-			query = query.select(Sum(parent.fg_completed_qty))
+			job_card = frappe.qb.DocType("Job Card")
+			query = (
+				query.left_join(job_card)
+				.on(parent.job_card == job_card.name)
+				.where(IfNull(job_card.is_corrective_job_card, 0) == 0)
+				.select(Sum(parent.fg_completed_qty))
+			)
 
 		return flt(query.run()[0][0])
 
