@@ -3990,7 +3990,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item = frappe.new_doc(child_doctype, parent_doc=p_doc, parentfield=child_docname)
 	item = frappe.get_doc("Item", trans_item.get("item_code"))
 
-	for field in ("item_code", "item_name", "description", "item_group"):
+	for field in ("item_code", "item_name", "description", "item_group", "weight_per_unit", "weight_uom"):
 		child_item.update({field: item.get(field)})
 
 	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
@@ -4433,7 +4433,7 @@ def update_child_qty_rate(
 				flt(d.get("conversion_factor"), conv_fac_precision) or conversion_factor
 			)
 
-		if child_item.get("total_weight") and child_item.get("weight_per_unit"):
+		if child_item.get("weight_per_unit"):
 			child_item.total_weight = flt(
 				child_item.weight_per_unit * child_item.qty * child_item.conversion_factor,
 				child_item.precision("total_weight"),
