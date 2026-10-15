@@ -204,11 +204,36 @@ class TestChequeBook(ERPNextTestSuite):
 		make_cheque_book(self.bank_account, "07", "000201", "000205")
 		self.assertEqual(get_next_cheque_book_no(self.bank_account), 8)
 
-		# the highest number wins, not the latest book, and a cancelled one still counts
+		# the highest number wins, not the latest book, and a cancelled one frees its number
 		book = make_cheque_book(self.bank_account, "09", "000301", "000305")
 		make_cheque_book(self.bank_account, "08", "000401", "000405")
 		book.cancel()
-		self.assertEqual(get_next_cheque_book_no(self.bank_account), 10)
+		self.assertEqual(get_next_cheque_book_no(self.bank_account), 9)
+
+	def test_cancelled_book_frees_its_number(self):
+		book = make_cheque_book(self.bank_account, "07", "000201", "000205")
+		book.cancel()
+
+		# nothing was issued from it, so another book may carry the number
+		reused = make_cheque_book(self.bank_account, "07", "000301", "000305")
+		self.assertEqual(reused.cheque_book_no, 7)
+
+	def test_amendment_cannot_take_a_live_book_number(self):
+		book = make_cheque_book(self.bank_account, "07", "000201", "000205")
+		other = make_cheque_book(self.bank_account, "08", "000301", "000305")
+		book.cancel()
+
+		amended = frappe.copy_doc(book)
+		amended.docstatus = 0
+		amended.amended_from = book.name
+		amended.cheque_book_no = other.cheque_book_no
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			amended.insert()
+
+		# the number of the cancelled book it replaces is still its own to keep
+		amended.cheque_book_no = book.cheque_book_no
+		amended.insert()
+		self.assertEqual(amended.cheque_book_no, 7)
 
 	def test_blank_cheque_book_no_is_filled_in_on_save(self):
 		book = make_cheque_book(self.bank_account, None, "000201", "000205")

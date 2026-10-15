@@ -57,16 +57,19 @@ class ChequeBook(Document):
 		self.validate_overlapping_range()
 
 	def validate_duplicate_cheque_book_no(self):
-		"""An amendment keeps the number of the book it replaces, so it is left alone."""
-		if self.amended_from:
-			return
+		"""Only live books hold a number.
 
+		A cancelled book has no cheque of its own left, so its number is free again. That
+		is also what lets an amendment keep the number of the cancelled book it replaces,
+		while still clashing with any book that is in use.
+		"""
 		if name := frappe.db.get_value(
 			"Cheque Book",
 			{
 				"bank_account": self.bank_account,
 				"cheque_book_no": self.cheque_book_no,
 				"name": ("!=", self.name or ""),
+				"docstatus": ("!=", 2),
 			},
 			"name",
 			for_update=True,
@@ -237,14 +240,19 @@ def count_free_cheques(book, for_update=False):
 
 
 def get_next_cheque_book_no(bank_account: str, exclude: str | None = None) -> int:
-	"""The number after the highest numbered cheque book of the bank account, else 1.
+	"""The number after the highest numbered live cheque book of the bank account, else 1.
 
-	Cancelled books count too, so their book numbers are not reused. Every book of the
-	account is read, whatever the saving user may list, or the number would repeat.
+	Cancelled books are skipped, matching the duplicate check that frees their numbers.
+	Every book of the account is read, whatever the saving user may list, or the number
+	would repeat.
 	"""
 	numbers = frappe.db.get_values(
 		"Cheque Book",
-		filters={"bank_account": bank_account, "name": ("!=", exclude or "")},
+		filters={
+			"bank_account": bank_account,
+			"name": ("!=", exclude or ""),
+			"docstatus": ("!=", 2),
+		},
 		fieldname="cheque_book_no",
 		pluck=True,
 		for_update=True,

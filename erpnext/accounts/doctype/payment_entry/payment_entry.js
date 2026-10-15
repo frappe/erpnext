@@ -17,6 +17,8 @@ frappe.ui.form.on("Payment Entry", {
 			"Unreconcile Payment Entries",
 			"Bank Transaction",
 		];
+		// the form object is reused for the next entry, so start it without an opt out
+		frm.cheque_book_cleared = false;
 
 		if (frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
@@ -554,7 +556,6 @@ frappe.ui.form.on("Payment Entry", {
 				cheque.cheque_start_no,
 				cheque.cheque_end_no,
 			]);
-			if (!cheque.cheque_no) description += " " + __("Enter a cheque number manually.");
 		}
 		frm.set_df_property("cheque_book", "description", description);
 
