@@ -252,7 +252,9 @@ class BOMCreator(Document):
 		company_currency = erpnext.get_company_currency(self.company)
 		if self.currency == company_currency:
 			self.conversion_rate = 1
-		elif flt(self.conversion_rate) in (0, 1):
+		elif flt(self.conversion_rate) in (0, 1) or (
+			not self.is_new() and self.has_value_changed("currency")
+		):
 			self.conversion_rate = get_exchange_rate(self.currency, company_currency, args="for_buying")
 
 		if self.rm_cost_as_per != "Price List" or not self.buying_price_list:

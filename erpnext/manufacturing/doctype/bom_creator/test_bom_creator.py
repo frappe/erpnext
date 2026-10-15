@@ -491,6 +491,34 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(doc.items[0].rate, 10)
 		self.assertEqual(doc.raw_material_cost, 10)
 
+	def test_currency_change_refreshes_the_exchange_rate(self):
+		if not frappe.db.exists("Currency", "TSR"):
+			frappe.get_doc({"doctype": "Currency", "currency_name": "TSR", "enabled": 1}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": frappe.utils.today(),
+				"from_currency": "TSR",
+				"to_currency": "INR",
+				"exchange_rate": 50,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		).insert()
+
+		make_item("Cargo Bike Currency", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Cargo Bike BOM Currency Change",
+			company="_Test Company",
+			item_code="Cargo Bike Currency",
+			qty=1,
+			currency="USD",
+			conversion_rate=80,
+		)
+		doc.currency = "TSR"
+		doc.save()
+		self.assertEqual(doc.conversion_rate, 50)
+
 	def test_get_children_follows_user_permissions(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 		from frappe.permissions import add_user_permission
