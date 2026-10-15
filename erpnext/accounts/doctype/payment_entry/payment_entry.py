@@ -2783,12 +2783,16 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
+<<<<<<< HEAD
 	account_balance = (
 		get_balance_on(party_account, date, cost_center=cost_center)
 		if frappe.get_single_value("Accounts Settings", "show_account_balance")
 		else 0
 	)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
+=======
+	_party_name = frappe.get_meta(party_type).get_title_field()
+>>>>>>> e36428a (fix(payment-entry): use party metadata for display names)
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = (
 		get_balance_on(party_type=party_type, party=party, company=company, cost_center=cost_center)
