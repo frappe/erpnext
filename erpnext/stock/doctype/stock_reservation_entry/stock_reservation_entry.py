@@ -1258,6 +1258,7 @@ class StockReservation:
 		if sre_names:
 			for sre_name in sre_names:
 				sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name.name)
+				sre_doc.flags.ignore_permissions = True
 				sre_doc.cancel()
 
 		if sre_names and names:

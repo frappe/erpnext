@@ -4477,6 +4477,13 @@ class TestWorkOrder(ERPNextTestSuite):
 			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
 		)
 
+		with as_user(user):
+			frappe.get_doc("Work Order", work_order.name).cancel()
+
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_partial_reservation": 0, "allow_negative_stock": 0},
