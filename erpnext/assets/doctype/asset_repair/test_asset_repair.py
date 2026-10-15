@@ -93,6 +93,20 @@ class TestAssetRepair(ERPNextTestSuite):
 			total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 			self.assertEqual(item.total_value, total_value)
 
+	def test_historical_repair_fixture_has_stock_before_consumption(self):
+		repair = create_asset_repair(stock_consumption=1, failure_date="2021-01-10", submit=1)
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": repair.name, "docstatus": 1})
+		self.assertTrue(stock_entry)
+		movement = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": stock_entry, "is_cancelled": 0},
+			["posting_date", "actual_qty", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual(movement.posting_date, getdate("2021-01-11"))
+		self.assertEqual(movement.actual_qty, -1)
+		self.assertEqual(movement.stock_value_difference, -100)
+
 	def test_total_repair_cost(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 
@@ -612,6 +626,7 @@ def create_asset_repair(**args):
 					"company": asset.company,
 					"posting_date": getdate(asset_repair.failure_date),
 					"set_posting_time": 1,
+					"posting_time": "00:00:00",
 				}
 			)
 			stock_entry.append(

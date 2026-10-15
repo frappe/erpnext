@@ -67,8 +67,12 @@ class TestSupportIndex(ERPNextTestSuite):
 		# would not reproduce these exact counts or this ordering.
 		self.seed_page_views(route_hi, 3)
 		self.seed_page_views(route_lo, 1)
+		private_route = route_hi + "-private"
+		self.make_help_article(category, private_route, "Private Article", "Private content", published=0)
+		self.seed_page_views(private_route, 10)
 
 		results = get_favorite_articles_by_page_view()
+		self.assertNotIn(private_route, [row.route for row in results])
 
 		by_route = {row.route: row for row in results if row.route in (route_hi, route_lo)}
 

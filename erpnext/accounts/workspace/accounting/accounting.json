@@ -6,7 +6,7 @@
    "label": "Profit and Loss"
   }
  ],
- "content": "[{\"id\": \"0dd9453224\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accounting Onboarding\", \"col\": 12}}, {\"id\": \"a17de17773\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Profit and Loss\", \"col\": 12}}, {\"id\": \"9a0e234f25\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Outgoing Bills\", \"col\": 4}}, {\"id\": \"58b384d2dd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Bills\", \"col\": 4}}, {\"id\": \"575d11919a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Payment\", \"col\": 4}}, {\"id\": \"acccard000\", \"type\": \"card\", \"data\": {\"card_name\": \"Financial Statements\", \"col\": 4}}, {\"id\": \"acccard001\", \"type\": \"card\", \"data\": {\"card_name\": \"Receivables & Payables\", \"col\": 4}}, {\"id\": \"acccard002\", \"type\": \"card\", \"data\": {\"card_name\": \"Registers & Profitability\", \"col\": 4}}, {\"id\": \"acccard003\", \"type\": \"card\", \"data\": {\"card_name\": \"Tax & Compliance\", \"col\": 4}}, {\"id\": \"acccard004\", \"type\": \"card\", \"data\": {\"card_name\": \"Invoicing & Payments\", \"col\": 4}}, {\"id\": \"acccard005\", \"type\": \"card\", \"data\": {\"card_name\": \"Banking\", \"col\": 4}}, {\"id\": \"acccard006\", \"type\": \"card\", \"data\": {\"card_name\": \"Reconciliation\", \"col\": 4}}, {\"id\": \"acccard007\", \"type\": \"card\", \"data\": {\"card_name\": \"Opening & Closing\", \"col\": 4}}, {\"id\": \"acccard008\", \"type\": \"card\", \"data\": {\"card_name\": \"Ledger Tools\", \"col\": 4}}, {\"id\": \"acccard009\", \"type\": \"card\", \"data\": {\"card_name\": \"Share Management\", \"col\": 4}}, {\"id\": \"acccard010\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
+ "content": "[{\"id\":\"0dd9453224\",\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Accounting Onboarding\",\"col\":12}},{\"id\":\"a17de17773\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Profit and Loss\",\"col\":12}},{\"id\":\"9a0e234f25\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Bills\",\"col\":4}},{\"id\":\"58b384d2dd\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Bills\",\"col\":4}},{\"id\":\"575d11919a\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Payment\",\"col\":4}},{\"id\":\"acccard000\",\"type\":\"card\",\"data\":{\"card_name\":\"Financial Statements\",\"col\":4}},{\"id\":\"acccard001\",\"type\":\"card\",\"data\":{\"card_name\":\"Receivables & Payables\",\"col\":4}},{\"id\":\"acccard002\",\"type\":\"card\",\"data\":{\"card_name\":\"Registers & Profitability\",\"col\":4}},{\"id\":\"acccard003\",\"type\":\"card\",\"data\":{\"card_name\":\"Tax & Compliance\",\"col\":4}},{\"id\":\"acccard004\",\"type\":\"card\",\"data\":{\"card_name\":\"Invoicing & Payments\",\"col\":4}},{\"id\":\"acccard005\",\"type\":\"card\",\"data\":{\"card_name\":\"Banking\",\"col\":4}},{\"id\":\"acccard006\",\"type\":\"card\",\"data\":{\"card_name\":\"Reconciliation\",\"col\":4}},{\"id\":\"acccard007\",\"type\":\"card\",\"data\":{\"card_name\":\"Opening & Closing\",\"col\":4}},{\"id\":\"acccard008\",\"type\":\"card\",\"data\":{\"card_name\":\"Ledger Tools\",\"col\":4}},{\"id\":\"acccard009\",\"type\":\"card\",\"data\":{\"card_name\":\"Share Management\",\"col\":4}},{\"id\":\"acccard010\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}},{\"id\":\"shareholding-title\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Shareholding</b></span>\",\"col\":12}},{\"id\":\"shareholding-count-0\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Equity Shareholders\",\"col\":3}},{\"id\":\"shareholding-count-1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Equity Folios\",\"col\":3}},{\"id\":\"shareholding-count-2\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Submitted Equity Transactions\",\"col\":3}},{\"id\":\"shareholding-count-3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Share Ledger Movements\",\"col\":3}},{\"id\":\"shareholding-shareholder\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shareholder\",\"col\":4}},{\"id\":\"shareholding-share-class\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Share Class\",\"col\":4}},{\"id\":\"shareholding-share-transaction\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Share Transaction\",\"col\":4}},{\"id\":\"shareholding-report-share-ledger\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Share Ledger\",\"col\":6}},{\"id\":\"shareholding-report-equity-position\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Equity Position\",\"col\":6}}]",
  "creation": "2026-07-14 12:00:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -761,7 +761,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Share Management",
-   "link_count": 5,
+   "link_count": 8,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -778,9 +778,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Share Transfer",
+   "label": "Share Class",
    "link_count": 0,
-   "link_to": "Share Transfer",
+   "link_to": "Share Class",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -788,9 +788,39 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Share Type",
+   "label": "Share Transaction",
    "link_count": 0,
-   "link_to": "Share Type",
+   "link_to": "Share Transaction",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Share Folio",
+   "link_count": 0,
+   "link_to": "Share Folio",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Share Ledger Entry",
+   "link_count": 0,
+   "link_to": "Share Ledger Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Equity Accounting Settings",
+   "link_count": 0,
+   "link_to": "Equity Accounting Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -808,9 +838,9 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Share Balance",
+   "label": "Equity Position",
    "link_count": 0,
-   "link_to": "Share Balance",
+   "link_to": "Equity Position",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -941,14 +971,66 @@
   {
    "label": "Total Incoming Payment",
    "number_card_name": "Total Incoming Payment"
+  },
+  {
+   "label": "Equity Shareholders",
+   "number_card_name": "Equity Shareholders"
+  },
+  {
+   "label": "Equity Folios",
+   "number_card_name": "Equity Folios"
+  },
+  {
+   "label": "Submitted Equity Transactions",
+   "number_card_name": "Submitted Equity Transactions"
+  },
+  {
+   "label": "Share Ledger Movements",
+   "number_card_name": "Share Ledger Movements"
   }
  ],
  "owner": "Administrator",
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 4.0,
- "shortcuts": [],
+ "sequence_id": 4,
+ "shortcuts": [
+  {
+   "label": "Shareholder",
+   "link_to": "Shareholder",
+   "type": "DocType",
+   "doc_view": "List",
+   "color": "Grey"
+  },
+  {
+   "label": "Share Class",
+   "link_to": "Share Class",
+   "type": "DocType",
+   "doc_view": "List",
+   "color": "Grey"
+  },
+  {
+   "label": "Share Transaction",
+   "link_to": "Share Transaction",
+   "type": "DocType",
+   "doc_view": "List",
+   "color": "Grey"
+  },
+  {
+   "label": "Share Ledger",
+   "link_to": "Share Ledger",
+   "type": "Report",
+   "is_query_report": 1,
+   "color": "Grey"
+  },
+  {
+   "label": "Equity Position",
+   "link_to": "Equity Position",
+   "type": "Report",
+   "is_query_report": 1,
+   "color": "Grey"
+  }
+ ],
  "sidebar_items": [
   {
    "child": 0,
@@ -1426,11 +1508,53 @@
    "child": 1,
    "collapsible": 1,
    "default_workspace": 0,
+   "icon": "tag",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Share Class",
+   "link_to": "Share Class",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "folder-normal",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Share Folio",
+   "link_to": "Share Folio",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "default_workspace": 0,
    "icon": "move-horizontal",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Share Transfer",
-   "link_to": "Share Transfer",
+   "label": "Share Transaction",
+   "link_to": "Share Transaction",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "settings",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Equity Accounting Settings",
+   "link_to": "Equity Accounting Settings",
    "link_type": "DocType",
    "open_in_new_tab": 0,
    "show_arrow": 0,
@@ -1562,10 +1686,24 @@
    "child": 1,
    "collapsible": 1,
    "default_workspace": 0,
+   "icon": "chart-bar",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Equity Position",
+   "link_to": "Equity Position",
+   "link_type": "Report",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "default_workspace": 0,
    "icon": "notepad-text",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Share Balance",
+   "label": "Legacy Share Balance",
    "link_to": "Share Balance",
    "link_type": "Report",
    "open_in_new_tab": 0,

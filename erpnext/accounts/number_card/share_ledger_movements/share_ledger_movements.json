@@ -1,0 +1,19 @@
+{
+ "creation": "2026-09-28 06:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Share Ledger Entry",
+ "filters_json": "[]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Share Ledger Movements",
+ "modified": "2026-09-28 06:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Share Ledger Movements",
+ "owner": "Administrator",
+ "show_percentage_stats": 0,
+ "type": "Document Type"
+}

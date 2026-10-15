@@ -338,6 +338,7 @@ sounds = [
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
 permission_query_conditions = {
+	"Shareholder": "erpnext.accounts.shareholding.permissions.shareholder_query_conditions",
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
@@ -346,6 +347,7 @@ permission_query_conditions = {
 }
 
 has_permission = {
+	"Shareholder": "erpnext.accounts.shareholding.permissions.shareholder_has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
@@ -391,6 +393,10 @@ period_closing_doctypes = [
 sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
 
 doc_events = {
+	"Journal Entry": {
+		"validate": "erpnext.accounts.shareholding.accounting.validate_equity_journal_entry",
+		"before_cancel": "erpnext.accounts.shareholding.accounting.prevent_independent_cancellation",
+	},
 	"*": {
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",

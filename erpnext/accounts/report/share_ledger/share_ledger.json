@@ -9,11 +9,11 @@
  "is_standard": "Yes", 
  "modified": "2019-04-19 10:50:36.061588", 
  "modified_by": "Administrator", 
- "module": "Accounts", 
+ "module": "Accounts",
  "name": "Share Ledger", 
  "owner": "Administrator", 
  "prepared_report": 0, 
- "ref_doctype": "Share Transfer", 
+ "ref_doctype": "Share Ledger Entry",
  "report_name": "Share Ledger", 
  "report_type": "Script Report", 
  "roles": [
@@ -22,6 +22,12 @@
   }, 
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
   }
  ]
 }

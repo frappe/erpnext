@@ -1,0 +1,85 @@
+{
+ "doctype": "DocType",
+ "name": "Equity Accounting Settings",
+ "module": "Accounts",
+ "autoname": "field:company",
+ "naming_rule": "By fieldname",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "cash_or_bank_account",
+  "share_capital_account",
+  "securities_premium_account",
+  "treasury_shares_account",
+  "equity_adjustment_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cash_or_bank_account",
+   "fieldtype": "Link",
+   "label": "Default Settlement Account",
+   "options": "Account",
+   "description": "Draft Journal Entry default only. Finance must confirm payment and select the actual bank or settlement account before submitting."
+  },
+  {
+   "fieldname": "share_capital_account",
+   "fieldtype": "Link",
+   "label": "Share Capital Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "securities_premium_account",
+   "fieldtype": "Link",
+   "label": "Securities Premium Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "treasury_shares_account",
+   "fieldtype": "Link",
+   "label": "Treasury Shares Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "equity_adjustment_account",
+   "fieldtype": "Link",
+   "label": "Equity Adjustment Account",
+   "options": "Account"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "create": 1,
+   "write": 1,
+   "delete": 1,
+   "report": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "read": 1,
+   "create": 1,
+   "write": 1,
+   "delete": 1,
+   "report": 1
+  },
+  {
+   "role": "Accounts User",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "track_changes": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "modified": "2026-10-13 00:00:00.000000"
+}

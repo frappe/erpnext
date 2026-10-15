@@ -308,7 +308,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		new_bom.items[1].qty = 2
 		new_bom.items[2].qty = 3
 		new_bom.submit()
-		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")
+		sc_bom = frappe.get_doc(
+			"Subcontracting BOM",
+			{"finished_good": "Basic FG Item", "service_item": "Service Item 1", "is_active": 1},
+		)
 		sc_bom.finished_good_bom = new_bom.name
 		sc_bom.save()
 
@@ -617,7 +620,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, secondary_item_type="Scrap")
 		)
 		new_bom.submit()
-		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")
+		sc_bom = frappe.get_doc(
+			"Subcontracting BOM",
+			{"finished_good": "Basic FG Item", "service_item": "Service Item 1", "is_active": 1},
+		)
 		sc_bom.finished_good_bom = new_bom.name
 		sc_bom.save()
 

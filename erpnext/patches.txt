@@ -262,6 +262,8 @@ erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.convert_commission_rate_to_percent
 erpnext.patches.v16_0.convert_hide_currency_symbol_to_check
+erpnext.patches.v17_0.stage_legacy_shareholders
+erpnext.patches.v17_0.stage_legacy_share_balances
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -547,3 +549,7 @@ erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
 erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types
 erpnext.patches.v16_0.unhide_item_barcode_fields
 execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report", 1)
+erpnext.patches.v17_0.migrate_legacy_shareholders_to_folios
+erpnext.patches.v17_0.backfill_legacy_share_transfers
+erpnext.patches.v17_0.rebuild_shareholder_current_balances
+erpnext.patches.v17_0.remove_shareholder_document_shares

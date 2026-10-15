@@ -556,7 +556,9 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			_party_name = "title" if self.party_type == "Shareholder" else self.party_type.lower() + "_name"
+			_party_name = (
+				"legal_name" if self.party_type == "Shareholder" else self.party_type.lower() + "_name"
+			)
 
 			if frappe.db.has_column(self.party_type, _party_name):
 				self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
@@ -649,6 +651,8 @@ class PaymentEntry(AccountsController):
 	def validate_party_details(self):
 		if self.party and not frappe.db.exists(self.party_type, self.party):
 			frappe.throw(_("{0} {1} does not exist").format(_(self.party_type), self.party))
+		if self.party and self.party_type == "Shareholder":
+			validate_party_company(self.party_type, self.party, self.company)
 
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
@@ -2457,7 +2461,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
-	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
+	_party_name = "legal_name" if party_type == "Shareholder" else party_type.lower() + "_name"
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 
 	if party_type in ["Customer", "Supplier"]:

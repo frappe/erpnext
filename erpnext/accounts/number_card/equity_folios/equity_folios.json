@@ -1,0 +1,19 @@
+{
+ "creation": "2026-09-28 06:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Share Folio",
+ "filters_json": "[[\"Share Folio\", \"is_treasury\", \"=\", 0]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Equity Folios",
+ "modified": "2026-09-28 06:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Equity Folios",
+ "owner": "Administrator",
+ "show_percentage_stats": 0,
+ "type": "Document Type"
+}
