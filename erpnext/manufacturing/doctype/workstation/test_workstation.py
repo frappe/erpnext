@@ -297,6 +297,21 @@ class TestWorkstation(ERPNextTestSuite):
 			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-03 13:00:00", "2031-03-03 15:00:00")],
 		)
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "allow_overtime": 0, "mins_between_operations": 10},
+	)
+	def test_start_moved_into_a_shift_is_checked_for_overlap(self):
+		shifts = [("08:00:00", "17:00:00")]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Overlap", shifts, 60, "2031-03-05 08:00:00"),
+			[("2031-03-05 08:00:00", "2031-03-05 09:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Overlap", shifts, 60, "2031-03-05 06:00:00"),
+			[("2031-03-05 09:10:00", "2031-03-05 10:10:00")],
+		)
+
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
 	def test_disabled_working_hours_are_not_used(self):
 		shifts = [("08:00:00", "12:00:00"), ("13:00:00", "17:00:00", 0)]
