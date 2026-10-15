@@ -5,6 +5,7 @@
 import copy
 import json
 from collections import defaultdict
+from decimal import ROUND_CEILING, Decimal
 
 import frappe
 from frappe import _, msgprint
@@ -1531,17 +1532,19 @@ def get_material_request_items(
 		conversion_factor = get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
 
 	uom = purchase_uom or row.get("stock_uom")
+	min_order_qty = flt(row.get("min_order_qty")) if doc.get("consider_minimum_order_qty") else 0
 	if is_transfer:  # whole stock UOM; what is left to purchase rounds later
 		quantity = round_up_whole_uom(required_qty, row.get("stock_uom")) / conversion_factor
 	else:
-		quantity = round_up_whole_uom(required_qty / conversion_factor, uom)
+		quantity = round_up_whole_uom(
+			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
+		)
 
 	if flt(row.get("qty")) > 0:
-		precision = frappe.get_precision("Material Request Plan Item", "quantity")
 		return {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": flt(quantity, precision),
+			"quantity": quantity,
 			"conversion_factor": conversion_factor,
 			"required_bom_qty": row.get("qty"),
 			"stock_uom": row.get("stock_uom"),
@@ -1601,6 +1604,18 @@ def _adjust_required_qty_for_uom(row, required_qty):
 			)
 
 	return required_qty
+
+
+def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
+	"""Convert to purchase UOM; a binding minimum order qty takes the smallest
+	representable quantity whose stock equivalent still meets it."""
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
+	quantity = flt(required_qty / conversion_factor, precision)
+	if min_order_qty and quantity * conversion_factor < min_order_qty <= required_qty:
+		grid = Decimal(10) ** -precision
+		exact = Decimal(str(min_order_qty)) / Decimal(str(conversion_factor))
+		quantity = flt(exact.quantize(grid, rounding=ROUND_CEILING))
+	return quantity
 
 
 def get_sales_orders(self):
@@ -2047,9 +2062,9 @@ def get_materials_from_other_locations(
 		if consider_minimum_order_qty:
 			required_qty = max(required_qty, flt(item.get("min_order_qty")))
 
-		item["quantity"] = round_up_whole_uom(
-			flt(required_qty / item.get("conversion_factor"), precision), item.get("uom")
-		)
+		min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
+		quantity = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
+		item["quantity"] = round_up_whole_uom(quantity, item.get("uom"))
 
 		new_mr_items.append(item)
 
