@@ -445,6 +445,36 @@ class TestProject(ERPNextTestSuite):
 			self.assertEqual(project.percent_complete, 100)
 			self.assertEqual(project.status, "Completed")
 
+	def test_tasks_tab_sorts_priority_and_status_by_their_options(self):
+		from erpnext.projects.doctype.project.project import get_project_tasks
+
+		project = make_project({"project_name": "_Test Task Sorting"}).name
+		for subject, priority, status in (
+			("Low", "Low", "Completed"),
+			("Urgent", "Urgent", "Open"),
+			("None", None, "Working"),
+			("High", "High", "Pending Review"),
+		):
+			task = frappe.get_doc(
+				doctype="Task", subject=subject, project=project, priority=priority, status=status
+			).insert()
+			# a new task gets the first option; older or imported ones can have none
+			if not priority:
+				task.db_set("priority", None)
+
+		def subjects(**sort):
+			return [task.subject for task in get_project_tasks(project, **sort)]
+
+		# by rank, not alphabetically, with the empty priority last both ways
+		self.assertEqual(subjects(sort_by="priority", sort_order="desc"), ["Urgent", "High", "Low", "None"])
+		self.assertEqual(subjects(sort_by="priority", sort_order="asc"), ["Low", "High", "Urgent", "None"])
+		self.assertEqual(subjects(sort_by="status", sort_order="asc"), ["Urgent", "None", "High", "Low"])
+		self.assertEqual(subjects(), ["Low", "Urgent", "None", "High"])
+		# any Task column works; internal ones and names that aren't columns don't
+		self.assertEqual(len(get_project_tasks(project, sort_by="expected_time")), 4)
+		self.assertRaises(frappe.ValidationError, get_project_tasks, project, sort_by="_assign")
+		self.assertRaises(frappe.ValidationError, get_project_tasks, project, sort_by="subject; drop")
+
 	def test_completed_status_is_refused_until_tasks_are_done(self):
 		project, tasks = self._project_with_tasks("Task Progress", 1)
 		project.status = "Completed"
