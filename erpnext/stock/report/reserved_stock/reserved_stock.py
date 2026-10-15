@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Date
+from frappe.utils import add_days, getdate
 
 
 def execute(filters=None):
@@ -30,37 +30,12 @@ def validate_filters(filters):
 
 
 def get_data(filters):
-	sre = frappe.qb.DocType("Stock Reservation Entry")
-	query = (
-		frappe.qb.from_(sre)
-		.select(
-			sre.creation,
-			sre.warehouse,
-			sre.item_code,
-			sre.stock_uom,
-			sre.voucher_qty,
-			sre.reserved_qty,
-			sre.delivered_qty,
-			(sre.available_qty - sre.reserved_qty).as_("available_qty"),
-			sre.voucher_type,
-			sre.voucher_no,
-			sre.from_voucher_type,
-			sre.from_voucher_no,
-			sre.name.as_("stock_reservation_entry"),
-			sre.status,
-			sre.project,
-			sre.company,
-		)
-		.where(
-			(sre.docstatus == 1)
-			& (sre.company == filters.get("company"))
-			& (
-				(Date(sre.creation) >= filters.get("from_date"))
-				& (Date(sre.creation) <= filters.get("to_date"))
-			)
-		)
-	)
-
+	query_filters = [
+		["docstatus", "=", 1],
+		["company", "=", filters.get("company")],
+		["creation", ">=", getdate(filters.get("from_date"))],
+		["creation", "<", add_days(filters.get("to_date"), 1)],
+	]
 	for field in [
 		"item_code",
 		"warehouse",
@@ -73,14 +48,41 @@ def get_data(filters):
 		"project",
 	]:
 		if value := filters.get(field):
-			query = query.where(sre[field] == value)
+			query_filters.append([field, "=", value])
 
 	if value := filters.get("stock_reservation_entry"):
-		query = query.where(sre.name == value)
+		query_filters.append(["name", "=", value])
 
-	data = query.run(as_list=True)
-
-	return data
+	data = frappe.get_list(
+		"Stock Reservation Entry",
+		fields=[
+			"creation",
+			"warehouse",
+			"item_code",
+			"stock_uom",
+			"voucher_qty",
+			"reserved_qty",
+			"delivered_qty",
+			"available_qty",
+			"voucher_type",
+			"voucher_no",
+			"from_voucher_type",
+			"from_voucher_no",
+			"name as stock_reservation_entry",
+			"status",
+			"project",
+			"company",
+		],
+		filters=query_filters,
+		limit_page_length=0,
+		as_list=True,
+	)
+	rows = []
+	for row in data:
+		row = list(row)
+		row[7] = row[7] - row[5] if row[7] is not None and row[5] is not None else None
+		rows.append(row)
+	return rows
 
 
 def get_columns():
