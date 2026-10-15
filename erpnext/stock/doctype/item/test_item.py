@@ -150,6 +150,7 @@ class TestItem(FrappeTestCase):
 				"conversion_factor": 1,
 				"price_list_uom_dependant": 1,
 				"ignore_pricing_rule": 1,
+				"qty": 1,
 			}
 		)
 
