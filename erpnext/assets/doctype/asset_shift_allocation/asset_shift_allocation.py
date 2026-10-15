@@ -288,6 +288,8 @@ class AssetShiftAllocation(Document):
 
 def replace_active_depr_schedule(active_schedule_doc: Document, new_schedule_doc: Document) -> None:
 	active_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+	# The submitting allocation links the schedule it replaces, which would otherwise block this cancel
+	active_schedule_doc.ignore_linked_doctypes = ("Asset Shift Allocation",)
 	active_schedule_doc.cancel()
 	new_schedule_doc.submit()
 
