@@ -132,7 +132,7 @@ class BlanketOrder(StatusUpdater):
 		if not self.get(party_field):
 			frappe.throw(
 				_("{0} is mandatory for a {1} Blanket Order").format(
-					self.meta.get_label(party_field), _(self.blanket_order_type)
+					_(self.meta.get_label(party_field)), _(self.blanket_order_type)
 				),
 				frappe.MandatoryError,
 			)
