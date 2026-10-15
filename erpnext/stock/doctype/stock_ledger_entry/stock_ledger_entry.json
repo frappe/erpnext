@@ -242,7 +242,8 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -363,7 +364,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 19:07:43.537450",
+ "modified": "2026-10-15 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
