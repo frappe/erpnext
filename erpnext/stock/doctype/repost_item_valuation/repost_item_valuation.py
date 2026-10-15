@@ -656,6 +656,9 @@ def repost(doc):
 
 		repost_gl_entries(doc)
 
+		if not doc.repost_only_accounting_ledgers:
+			update_consumed_material_cost_for_vouchers(get_reposted_vouchers(doc))
+
 		doc.skip_reposts_covered_by_dependents()
 
 		doc.set_status("Completed")
@@ -757,11 +760,7 @@ def repost_gl_entries(doc):
 		)
 		return
 
-	# directly modified transactions
-	directly_dependent_transactions = _get_directly_dependent_vouchers(doc)
-	repost_affected_transaction = get_affected_transactions(doc)
-
-	transactions = directly_dependent_transactions + list(repost_affected_transaction)
+	transactions = get_reposted_vouchers(doc)
 
 	# handle stock delivered but not billed ledger entries
 	if frappe.get_cached_value("Company", doc.company, "enable_stock_delivered_but_not_billed"):
@@ -789,7 +788,9 @@ def repost_gl_entries(doc):
 			repost_doc=doc,
 		)
 
-	update_consumed_material_cost_for_vouchers(transactions)
+
+def get_reposted_vouchers(doc):
+	return _get_directly_dependent_vouchers(doc) + list(get_affected_transactions(doc))
 
 
 def _get_directly_dependent_vouchers(doc):
