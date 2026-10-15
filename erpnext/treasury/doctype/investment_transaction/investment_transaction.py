@@ -114,6 +114,7 @@ class InvestmentTransaction(AccountsController):
 
 	def before_submit(self):
 		self.validate_no_later_exits()
+		self.validate_no_later_collections()
 		self.validate_no_later_revaluation()
 		self.validate_interest_accrued_before_exit()
 		self.set_cost_and_realised_gain_loss()
@@ -545,6 +546,24 @@ class InvestmentTransaction(AccountsController):
 				)
 			)
 
+	def validate_no_later_collections(self):
+		"""A foreign currency collection settles its share of the interest at the rates booked by its date,
+		so one dated before a later collection would leave the later one's share wrong."""
+		if not (flt(self.interest_amount) or flt(self.accrued_interest_in_sale)):
+			return
+
+		if self.currency == erpnext.get_company_currency(self.company):
+			return
+
+		if get_later_collection_dates(self.investment, self.posting_date, self.name):
+			frappe.throw(
+				_(
+					"Investment {0} has interest collected after {1} at exchange rates booked without this collection. Please cancel those Interest Receipts or Sales first."
+				).format(
+					frappe.bold(self.investment), frappe.bold(frappe.format_value(self.posting_date, "Date"))
+				)
+			)
+
 	def validate_no_later_revaluation(self):
 		"""A revaluation values the units held at the end of its date, so units cannot be bought or sold
 		on or before it once it is made, the way principal cannot change once interest is accrued."""
@@ -865,24 +884,27 @@ def get_unreceived_interest(investment, upto, exclude_receipt=None, for_update=F
 
 	Each collection must stay within the interest accrued by its own date, so taking more on `upto`
 	may leave a later one short: the least unreceived interest over `upto` and the dates after it."""
-	later_collections = frappe.get_all(
+	return min(
+		get_accrued_interest(investment, date, for_update=for_update)
+		- get_interest_received(investment, exclude_receipt, date, for_update=for_update)
+		for date in {getdate(upto), *get_later_collection_dates(investment, upto, exclude_receipt)}
+	)
+
+
+def get_later_collection_dates(investment, after, exclude=None):
+	"""Dates after `after` on which interest was collected, by receipts or from bond buyers."""
+	return frappe.get_all(
 		"Investment Transaction",
 		filters={
 			"investment": investment,
 			"docstatus": 1,
-			"name": ("!=", exclude_receipt or ""),
-			"posting_date": (">", upto),
+			"name": ("!=", exclude or ""),
+			"posting_date": (">", after),
 			"transaction_type": ("in", ("Interest Receipt", *EXIT_TYPES)),
 		},
 		or_filters={"interest_amount": (">", 0), "accrued_interest_in_sale": (">", 0)},
 		pluck="posting_date",
 		distinct=True,
-	)
-
-	return min(
-		get_accrued_interest(investment, date, for_update=for_update)
-		- get_interest_received(investment, exclude_receipt, date, for_update=for_update)
-		for date in {getdate(upto), *later_collections}
 	)
 
 

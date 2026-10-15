@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.treasury.doctype.investment.test_investment import (
@@ -156,16 +158,31 @@ class TestTreasuryReports(ERPNextTestSuite):
 		invoice = create_sales_invoice(qty=1, rate=5000, do_not_save=1)
 		invoice.due_date = add_days(nowdate(), 60)
 		for days in (30, 60):
+			create_payment_term(f"_Test {days} Days")
 			invoice.append(
 				"payment_schedule",
-				{"due_date": add_days(nowdate(), days), "invoice_portion": 50, "payment_amount": 2500},
+				{
+					"payment_term": f"_Test {days} Days",
+					"due_date": add_days(nowdate(), days),
+					"invoice_portion": 50,
+					"payment_amount": 2500,
+				},
 			)
 		invoice.insert().submit()
 
 		receivables = cash_flow_forecast.get_party_flows(TEST_COMPANY)["receivables"]
+		for days in (30, 60):
+			self.assertIn((getdate(add_days(nowdate(), days)), 2500), receivables)
 
-		for term in invoice.payment_schedule:
-			self.assertIn((getdate(term.due_date), term.base_payment_amount), receivables)
+		# the customer pays the second term, so the first is still expected on its own date
+		payment = get_payment_entry("Sales Invoice", invoice.name, party_amount=2500)
+		payment.references[0].payment_term = "_Test 60 Days"
+		payment.references[0].allocated_amount = 2500
+		payment.insert().submit()
+
+		receivables = cash_flow_forecast.get_party_flows(TEST_COMPANY)["receivables"]
+		self.assertIn((getdate(add_days(nowdate(), 30)), 2500), receivables)
+		self.assertNotIn((getdate(add_days(nowdate(), 60)), 2500), receivables)
 
 	def test_cash_flow_forecast_leaves_out_received_interest(self):
 		investment = make_fd(FD_TERMS)

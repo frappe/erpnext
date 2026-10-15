@@ -333,13 +333,19 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 			{BANK_ACCOUNT: (2520, 0), "Earnest Money - _TC": (0, 2460), get_exchange_account(): (0, 60)},
 		)
 
-		# dated before the receipt above, so it settles 20 of the 50 held then: 4,100 * 20 / 50
-		earlier = make_usd_transaction(
+		# one dated before it would change the rates that receipt settled at
+		backdated = make_usd_transaction(
 			investment.name, "Interest Receipt", 84, interest_amount=20, posting_date=add_days(nowdate(), 5)
+		).insert()
+		self.assertRaises(frappe.ValidationError, backdated.submit)
+
+		# the 20 left of the 50 accrued at 82 is INR 1,640
+		last = make_usd_transaction(
+			investment.name, "Interest Receipt", 84, interest_amount=20, posting_date=add_days(nowdate(), 12)
 		).submit()
 
 		self.assertEqual(
-			get_gl_entries(earlier.name),
+			get_gl_entries(last.name),
 			{BANK_ACCOUNT: (1680, 0), "Earnest Money - _TC": (0, 1640), get_exchange_account(): (0, 40)},
 		)
 		self.assertEqual(get_investment(investment.name).accrued_interest, 0)

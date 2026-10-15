@@ -108,7 +108,9 @@ def get_party_flows(company):
 
 
 def get_payment_terms(rows):
-	"""Payment schedule (due date, company currency amount) of each invoice, earliest first."""
+	"""Payment schedule (due date, company currency amount still owed) of each invoice, earliest first.
+
+	A payment allocated to a term is already off that term's outstanding; other payments are not."""
 	terms = {}
 	for voucher_type in {row.voucher_type for row in rows}:
 		schedules = frappe.get_all(
@@ -117,19 +119,25 @@ def get_payment_terms(rows):
 				"parenttype": voucher_type,
 				"parent": ("in", [row.voucher_no for row in rows if row.voucher_type == voucher_type]),
 			},
-			fields=["parent", "due_date", "base_payment_amount"],
+			fields=["parent", "due_date", "payment_amount", "outstanding", "base_payment_amount"],
 			order_by="due_date asc, idx asc",
 		)
 		for schedule in schedules:
-			terms.setdefault((voucher_type, schedule.parent), []).append(
-				(schedule.due_date, flt(schedule.base_payment_amount))
+			if not flt(schedule.payment_amount):
+				continue
+
+			# outstanding is in the invoice currency
+			owed = (
+				flt(schedule.base_payment_amount) * flt(schedule.outstanding) / flt(schedule.payment_amount)
 			)
+			terms.setdefault((voucher_type, schedule.parent), []).append((schedule.due_date, owed))
 
 	return terms
 
 
 def spread_over_terms(outstanding, terms):
-	"""The outstanding amount on the due dates of the terms it is left on: payments settled the earliest first."""
+	"""The outstanding amount on the due dates of the terms it is left on: payments not allocated to a term
+	settled the earliest first."""
 	paid = sum(amount for _due_date, amount in terms) - outstanding
 	flows = []
 	for due_date, amount in terms:
