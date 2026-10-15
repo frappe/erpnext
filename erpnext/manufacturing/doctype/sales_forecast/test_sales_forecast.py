@@ -85,6 +85,15 @@ class TestSalesForecastIntegration(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Sales Forecast", amended.name, "status"), "Planned")
 		create_mps(amended.name).insert()
 
+	def test_second_mps_draft_of_a_forecast_is_refused(self):
+		forecast = make_sales_forecast()
+		first, second = create_mps(forecast.name), create_mps(forecast.name)
+
+		first.insert()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "already has Master Production Schedule", second.insert
+		)
+
 	def test_selected_items_need_no_demand_qty(self):
 		forecast = make_sales_forecast(selected_items=[{"item_code": "_Test Item"}], do_not_submit=True)
 		self.assertTrue(forecast.items)
