@@ -474,7 +474,7 @@ class StockEntry(StockController):
 				continue
 
 			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			materials = available_materials.get((row.item_code, warehouse, None))
 			if not materials:
 				continue
 
@@ -4415,66 +4415,115 @@ def get_items_from_subcontract_order(source_name, target_doc=None):
 
 def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 	data = get_stock_entry_data(work_order, stock_entry_doc=stock_entry_doc)
+	is_disassembly = stock_entry_doc and stock_entry_doc.purpose == "Disassemble"
 
 	available_materials = {}
 	for row in data:
-		key = (row.item_code, row.warehouse)
+		warehouse = row.warehouse
 		if row.purpose != "Material Transfer for Manufacture":
-			key = (row.item_code, row.s_warehouse)
+			warehouse = row.s_warehouse
 
-		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-			key = (row.item_code, row.s_warehouse or row.warehouse)
-
-		if key not in available_materials:
-			available_materials.setdefault(
-				key,
-				frappe._dict(
-					{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
-				),
-			)
-
-		item_data = available_materials[key]
+		if is_disassembly:
+			warehouse = row.s_warehouse or row.warehouse
 
 		if row.purpose == "Material Transfer for Manufacture" or (
-			stock_entry_doc and stock_entry_doc.purpose == "Disassemble" and row.purpose == "Manufacture"
+			is_disassembly and row.purpose == "Manufacture"
 		):
-			item_data.qty += row.qty
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] += row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
-
-			if row.serial_no:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
-				item_data.serial_nos.sort()
-
-			elif row.serial_nos:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
-				item_data.serial_nos.sort()
+			key = (row.item_code, warehouse, None if is_disassembly else row.original_item or None)
+			item_data = available_materials.setdefault(key, get_available_material_bucket(row))
+			add_transferred_material(item_data, row)
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
-
-			item_data.qty -= row.qty
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] -= row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
-
-			if row.serial_no:
-				for serial_no in get_serial_nos(row.serial_no):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
-
-			elif row.serial_nos:
-				for serial_no in get_serial_nos(row.serial_nos):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
+			buckets = get_available_buckets(available_materials, row, warehouse)
+			deduct_consumed_material(buckets, row)
 
 	return available_materials
+
+
+def get_available_material_bucket(row):
+	return frappe._dict(
+		{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
+	)
+
+
+def add_transferred_material(item_data, row):
+	item_data.qty += row.qty
+	if row.batch_no:
+		item_data.batch_details[row.batch_no] += row.qty
+
+	elif row.batch_nos:
+		for batch_no, qty in row.batch_nos.items():
+			item_data.batch_details[batch_no] += qty
+
+	if row.serial_no:
+		item_data.serial_nos.extend(get_serial_nos(row.serial_no))
+		item_data.serial_nos.sort()
+
+	elif row.serial_nos:
+		item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
+		item_data.serial_nos.sort()
+
+
+def get_available_buckets(available_materials, row, warehouse):
+	buckets = [bucket for key, bucket in available_materials.items() if key[:2] == (row.item_code, warehouse)]
+	if not buckets:
+		key = (row.item_code, warehouse, None)
+		buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
+
+	return buckets
+
+
+def deduct_consumed_material(buckets, row):
+	serial_nos = get_serial_nos(row.serial_no or row.serial_nos)
+	if row.batch_no:
+		batches = {row.batch_no: flt(row.qty)}
+	else:
+		batches = {batch_no: -flt(qty) for batch_no, qty in (row.batch_nos or {}).items()}
+
+	if serial_nos:
+		deduct_consumed_serial_nos(buckets, serial_nos)
+	elif not batches:
+		deduct_consumed_qty(buckets, flt(row.qty))
+
+	for batch_no, qty in batches.items():
+		deduct_consumed_batch_qty(buckets, batch_no, qty, deduct_qty=not serial_nos)
+
+
+def deduct_consumed_qty(buckets, consumed_qty):
+	for bucket in buckets[:-1]:
+		deducted = min(max(flt(bucket.qty), 0.0), consumed_qty)
+		bucket.qty -= deducted
+		consumed_qty -= deducted
+	buckets[-1].qty -= consumed_qty
+
+
+def deduct_consumed_serial_nos(buckets, serial_nos):
+	for serial_no in serial_nos:
+		bucket = get_serial_no_bucket(buckets, serial_no)
+		if serial_no in bucket.serial_nos:
+			bucket.serial_nos.remove(serial_no)
+		bucket.qty -= 1
+
+
+def get_serial_no_bucket(buckets, serial_no):
+	for bucket in buckets:
+		if serial_no in bucket.serial_nos:
+			return bucket
+	return buckets[-1]
+
+
+def deduct_consumed_batch_qty(buckets, batch_no, consumed_qty, deduct_qty=True):
+	holders = [bucket for bucket in buckets if batch_no in bucket.batch_details] or buckets[-1:]
+	for bucket in holders[:-1]:
+		deducted = min(max(flt(bucket.batch_details[batch_no]), 0.0), consumed_qty)
+		bucket.batch_details[batch_no] -= deducted
+		if deduct_qty:
+			bucket.qty -= deducted
+		consumed_qty -= deducted
+
+	holders[-1].batch_details[batch_no] -= consumed_qty
+	if deduct_qty:
+		holders[-1].qty -= consumed_qty
 
 
 def get_stock_entry_data(work_order, stock_entry_doc=None):
