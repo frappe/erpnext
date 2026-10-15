@@ -165,7 +165,7 @@ def get_pos_entries(filters: dict) -> list:
 			ConstantColumn("Sales Invoice").as_("payment_document"),
 			si.name.as_("payment_entry"),
 			si.posting_date,
-			ConstantColumn(None).as_("cheque_no"),
+			si_payment.reference_no.as_("cheque_no"),
 			si_payment.clearance_date,
 			si.customer.as_("against_account"),
 			get_amount_in_bank_currency(filters.account, si, si_payment.amount, si_payment.base_amount),

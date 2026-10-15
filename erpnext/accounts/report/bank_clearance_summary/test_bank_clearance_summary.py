@@ -11,6 +11,7 @@ from erpnext.accounts.report.bank_clearance_summary.bank_clearance_summary impor
 from erpnext.tests.utils import ERPNextTestSuite
 
 BANK_ACCOUNT = "_Test Bank - _TC"
+POSTING_DATE = "2026-06-15"
 
 
 class TestBankClearanceSummary(ERPNextTestSuite):
@@ -82,15 +83,19 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 		self.assertEqual(self.find_row(data, payment.name)[6], -1180)
 
 	def test_pos_invoice_payment_into_bank(self):
-		invoice = create_sales_invoice(rate=300, do_not_save=True)
+		invoice = create_sales_invoice(rate=300, posting_date=POSTING_DATE, do_not_save=True)
 		invoice.is_pos = 1
-		invoice.append("payments", {"mode_of_payment": self.make_mode_of_payment(), "amount": 300})
+		invoice.append(
+			"payments",
+			{"mode_of_payment": self.make_mode_of_payment(), "amount": 300, "reference_no": "UTR-300"},
+		)
 		invoice.insert()
 		invoice.submit()
 
 		row = self.find_row(self.run_report(), invoice.name)
 		self.assertIsNotNone(row, "POS invoice payment not listed in Bank Clearance Summary")
 		self.assertEqual(row[0], "Sales Invoice")
+		self.assertEqual(row[3], "UTR-300")
 		self.assertEqual(row[6], 300)
 
 	def test_foreign_currency_paid_invoice_in_bank_currency(self):
@@ -102,8 +107,10 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 			conversion_rate=80,
 			is_paid=1,
 			cash_bank_account=BANK_ACCOUNT,
+			posting_date=POSTING_DATE,
 			do_not_save=True,
 		)
+		invoice.set_posting_time = 1
 		invoice.insert()
 		invoice.paid_amount = invoice.grand_total
 		invoice.submit()
@@ -114,6 +121,7 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 		bank_field = "paid_to" if payment_type == "Receive" else "paid_from"
 		party[bank_field] = BANK_ACCOUNT
 		payment_entry = create_payment_entry(payment_type=payment_type, paid_amount=amount, **party)
+		payment_entry.posting_date = payment_entry.reference_date = POSTING_DATE
 		tax.setdefault("add_deduct_tax", "Add")
 		payment_entry.append(
 			"taxes",
