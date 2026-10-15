@@ -169,8 +169,7 @@ class TestChequeBook(ERPNextTestSuite):
 		self.assertLess(locks.index("Bank Account"), locks.index("Cheque Book"))
 
 		cheque = frappe.get_doc("Cheque", f"{self.book.name}-000101")
-		cheque.flags.ignore_permissions = True
-		locks = record_locks(cheque.cancel)
+		locks = record_locks(lambda: cheque.cancel_with_reason("Spoiled"))
 		self.assertLess(locks.index("Cheque Book"), locks.index("Cheque"))
 
 

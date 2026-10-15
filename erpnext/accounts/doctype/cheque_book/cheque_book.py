@@ -86,9 +86,8 @@ class ChequeBook(Document):
 		self.db_set("status", "Cancelled")
 		for cheque in cheques:
 			doc = frappe.get_doc("Cheque", cheque.name, for_update=True)
-			doc.remarks = _("Cheque Book {0} cancelled").format(self.name)
 			doc.flags.ignore_permissions = True
-			doc.cancel()
+			doc.void(remarks=_("Cheque Book {0} cancelled").format(self.name))
 
 	def update_status(self):
 		"""Set Finished when no cheque is free. The caller must hold the book lock."""
