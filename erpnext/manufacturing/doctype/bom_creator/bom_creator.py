@@ -337,7 +337,9 @@ class BOMCreator(Document):
 		self.enqueue_bom_creation()
 
 	def enqueue_bom_creation(self):
-		frappe.enqueue_doc("BOM Creator", self.name, "create_boms", queue="short", timeout=600)
+		frappe.enqueue_doc(
+			"BOM Creator", self.name, "create_boms", queue="short", timeout=600, enqueue_after_commit=True
+		)
 
 		frappe.msgprint(
 			_("BOMs creation has been enqueued, kindly check the status after some time"), alert=True
