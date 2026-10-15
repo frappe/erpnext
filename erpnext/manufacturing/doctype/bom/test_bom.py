@@ -1506,6 +1506,37 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("BOM", bom.name, "quantity"), 1)
 		self.assertEqual(frappe.db.get_value("BOM Item", {"parent": bom.name}, "qty"), 1)
 
+	def test_update_cost_without_save_writes_nothing(self):
+		import json
+
+		from frappe.handler import run_doc_method
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item("_Test BOM Preview RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item("_Test BOM Preview FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_save=True)
+		bom.append(
+			"operations",
+			{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 60},
+		)
+		bom.insert()
+
+		posted = bom.as_dict()
+		posted["operations"][0]["time_in_mins"] = 999
+
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+		frappe.local.response = frappe._dict(docs=[])
+		with self.set_user(make_user_with_roles("bom-preview-reader@example.com", "Stock User")):
+			run_doc_method(
+				"update_cost",
+				docs=json.dumps(posted, default=str),
+				args=json.dumps({"update_parent": False, "save": False, "from_child_bom": True}),
+			)
+
+		self.assertEqual(frappe.db.get_value("BOM Operation", {"parent": bom.name}, "time_in_mins"), 60)
+
 	def test_price_list_rate_conversion_applies_only_to_price_list_rates(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 

@@ -146,7 +146,7 @@ class BOMCostingService:
 
 	def calculate_cost(self, save_updates=False, update_hour_rate=False):
 		"""Calculate bom totals"""
-		self.calculate_op_cost(update_hour_rate)
+		self.calculate_op_cost(update_hour_rate, save=save_updates)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_secondary_items_costs(save=save_updates)
 		self.doc.set_fg_cost_allocation()
@@ -168,19 +168,19 @@ class BOMCostingService:
 		if self.doc.total_cost != old_cost:
 			self.doc.flags.cost_updated = True
 
-	def calculate_op_cost(self, update_hour_rate=False):
+	def calculate_op_cost(self, update_hour_rate=False, save=True):
 		"""Update workstation rate and calculates totals"""
 		self.doc.operating_cost = 0
 		self.doc.base_operating_cost = 0
 		if self.doc.get("with_operations"):
 			for d in self.doc.get("operations"):
-				self._accumulate_operation_cost(d, update_hour_rate)
+				self._accumulate_operation_cost(d, update_hour_rate, save)
 		elif self.doc.get("fg_based_operating_cost"):
 			self._set_fg_based_operating_cost()
 
-	def _accumulate_operation_cost(self, d, update_hour_rate):
+	def _accumulate_operation_cost(self, d, update_hour_rate, save=True):
 		if d.workstation or d.workstation_type:
-			self.update_rate_and_time(d, update_hour_rate)
+			self.update_rate_and_time(d, update_hour_rate, save)
 
 		operating_cost = d.operating_cost
 		base_operating_cost = d.base_operating_cost
@@ -196,7 +196,7 @@ class BOMCostingService:
 		self.doc.operating_cost = total
 		self.doc.base_operating_cost = flt(total * self.doc.conversion_rate, 2)
 
-	def update_rate_and_time(self, row, update_hour_rate=False):
+	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
 			self._set_row_hour_rate(row)
 
@@ -205,7 +205,7 @@ class BOMCostingService:
 			if row.time_in_mins:
 				self._set_row_operating_costs(row)
 
-		if update_hour_rate:
+		if update_hour_rate and save:
 			row.db_update()
 
 	def _set_row_hour_rate(self, row):
