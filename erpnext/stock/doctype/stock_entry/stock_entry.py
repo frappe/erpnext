@@ -4330,7 +4330,7 @@ def get_warehouse_details(args):
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
+def validate_sample_quantity(item_code: str, sample_quantity: int, qty: float, batch_no: str | None = None):
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
@@ -4350,12 +4350,15 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
 		sample_quantity = 0
 	qty_diff = max_retain_qty - retainted_qty
 	if cint(sample_quantity) > cint(qty_diff):
-		frappe.msgprint(
-			_("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
+		if batch_no:
+			message = _("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
 				max_retain_qty, batch_no, item_code
-			),
-			alert=True,
-		)
+			)
+		else:
+			message = _("Maximum Samples - {0} can be retained for Item {1}.").format(
+				max_retain_qty, item_code
+			)
+		frappe.msgprint(message, alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
 
