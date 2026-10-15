@@ -3457,9 +3457,10 @@ class AccountsController(TransactionBase):
 			return
 
 		for item in self.items:
-			if item.qty:
+			stock_qty = get_qty_in_stock_uom(item)
+			if stock_qty:
 				item.mapped_additional_discount_amount = flt(
-					flt(item.distributed_discount_amount) / item.qty,
+					flt(item.distributed_discount_amount) / stock_qty,
 					item.precision("mapped_additional_discount_amount"),
 				)
 
@@ -3571,7 +3572,13 @@ class AccountsController(TransactionBase):
 		item_table = frappe.qb.DocType(self.meta.get_field("items").options)
 		applied = flt(
 			frappe.qb.from_(item_table)
-			.select(Sum(item_table.mapped_additional_discount_amount * item_table.qty))
+			.select(
+				Sum(
+					item_table.mapped_additional_discount_amount
+					* item_table.qty
+					* item_table.conversion_factor
+				)
+			)
 			.where(item_table.docstatus == 1)
 			.where(item_table[reference_fieldname] == source_doc.name)
 			.where(item_table.mapped_additional_discount_amount != 0)
@@ -5082,3 +5089,7 @@ def update_doc_company_address(current_doctype, docname, company_address, detail
 		.set(getattr(DocType, display_field), get_address_display(company_address))
 		.where(DocType.name == docname)
 	).run()
+
+
+def get_qty_in_stock_uom(item) -> float:
+	return flt(item.qty) * (flt(item.get("conversion_factor")) or 1)

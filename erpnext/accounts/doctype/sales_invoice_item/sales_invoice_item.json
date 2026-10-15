@@ -958,10 +958,10 @@
   },
   {
    "default": "0",
-   "description": "Tax-exclusive additional discount carried from a source document, per unit.",
+   "description": "Tax-exclusive additional discount carried from a source document, per stock unit.",
    "fieldname": "mapped_additional_discount_amount",
    "fieldtype": "Currency",
-   "label": "Additional Discount per Unit",
+   "label": "Additional Discount per Stock Unit",
    "options": "currency",
    "precision": "9",
    "print_hide": 1,
