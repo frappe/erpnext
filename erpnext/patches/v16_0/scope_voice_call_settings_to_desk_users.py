@@ -23,6 +23,7 @@ def remove_shares():
 
 
 def move_customised_rules():
+	frappe.db.set_value("Custom DocPerm", {"parent": DOCTYPE}, "share", 0)
 	mirror_rules({DOCTYPE: {"Desk User": DESK_USER_PTYPES}})
 	removed = False
 	for rule in get_role_rules(DOCTYPE, "All"):

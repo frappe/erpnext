@@ -55,7 +55,7 @@
  "icon": "phone-call",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-15 15:16:45.554169",
+ "modified": "2026-10-15 22:19:14.883211",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Voice Call Settings",
@@ -80,7 +80,6 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
    "write": 1
   },
   {
@@ -92,7 +91,6 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
    "write": 1
   },
   {
@@ -104,7 +102,6 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
    "write": 1
   },
   {

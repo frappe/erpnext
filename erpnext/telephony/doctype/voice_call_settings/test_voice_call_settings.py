@@ -52,6 +52,9 @@ class TestVoiceCallSettings(ERPNextTestSuite):
 
 		with as_user(make_fenced_user("voice-call-manager@example.com", ["System Manager"])):
 			self.assertIn(owner, frappe.get_list("Voice Call Settings", pluck="name"))
+			self.assertRaises(
+				frappe.PermissionError, frappe.share.add, "Voice Call Settings", owner, other_user
+			)
 			self.assertEqual(
 				frappe.client.get("Voice Call Settings", owner)["greeting_message"], "Owner changed"
 			)
