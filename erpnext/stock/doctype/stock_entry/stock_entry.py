@@ -4465,7 +4465,17 @@ def add_transferred_material(item_data, row):
 
 
 def get_available_buckets(available_materials, row, warehouse):
-	buckets = [bucket for key, bucket in available_materials.items() if key[:2] == (row.item_code, warehouse)]
+	"""Use exact attribution when present; otherwise drain the direct item first."""
+	key = (row.item_code, warehouse, row.original_item or None)
+	if row.original_item and key in available_materials:
+		return [available_materials[key]]
+
+	buckets = [available_materials[key]] if key in available_materials else []
+	buckets.extend(
+		bucket
+		for material_key, bucket in available_materials.items()
+		if material_key[:2] == key[:2] and material_key != key
+	)
 	if not buckets:
 		key = (row.item_code, warehouse, None)
 		buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
@@ -4474,19 +4484,26 @@ def get_available_buckets(available_materials, row, warehouse):
 
 
 def deduct_consumed_material(buckets, row):
-	serial_nos = get_serial_nos(row.serial_no or row.serial_nos)
+	remaining_qty = flt(row.qty)
 	if row.batch_no:
 		batches = {row.batch_no: flt(row.qty)}
 	else:
 		batches = {batch_no: -flt(qty) for batch_no, qty in (row.batch_nos or {}).items()}
 
-	if serial_nos:
-		deduct_consumed_serial_nos(buckets, serial_nos)
-	elif not batches:
-		deduct_consumed_qty(buckets, flt(row.qty))
-
 	for batch_no, qty in batches.items():
-		deduct_consumed_batch_qty(buckets, batch_no, qty, deduct_qty=not serial_nos)
+		remaining_qty = deduct_consumed_batch_qty(buckets, batch_no, qty, remaining_qty)
+
+	for serial_no in get_serial_nos(row.serial_no or row.serial_nos):
+		bucket = get_serial_no_bucket(buckets, serial_no)
+		if serial_no not in bucket.serial_nos:
+			continue
+
+		bucket.serial_nos.remove(serial_no)
+		if not batches and remaining_qty > 0:
+			bucket.qty -= 1
+			remaining_qty -= 1
+
+	deduct_consumed_qty(buckets, remaining_qty)
 
 
 def deduct_consumed_qty(buckets, consumed_qty):
@@ -4497,14 +4514,6 @@ def deduct_consumed_qty(buckets, consumed_qty):
 	buckets[-1].qty -= consumed_qty
 
 
-def deduct_consumed_serial_nos(buckets, serial_nos):
-	for serial_no in serial_nos:
-		bucket = get_serial_no_bucket(buckets, serial_no)
-		if serial_no in bucket.serial_nos:
-			bucket.serial_nos.remove(serial_no)
-		bucket.qty -= 1
-
-
 def get_serial_no_bucket(buckets, serial_no):
 	for bucket in buckets:
 		if serial_no in bucket.serial_nos:
@@ -4512,18 +4521,21 @@ def get_serial_no_bucket(buckets, serial_no):
 	return buckets[-1]
 
 
-def deduct_consumed_batch_qty(buckets, batch_no, consumed_qty, deduct_qty=True):
+def deduct_consumed_batch_qty(buckets, batch_no, consumed_qty, remaining_qty):
 	holders = [bucket for bucket in buckets if batch_no in bucket.batch_details] or buckets[-1:]
-	for bucket in holders[:-1]:
-		deducted = min(max(flt(bucket.batch_details[batch_no]), 0.0), consumed_qty)
+	for bucket in holders:
+		deducted = consumed_qty
+		if bucket is not holders[-1]:
+			deducted = min(max(flt(bucket.batch_details[batch_no]), 0.0), consumed_qty)
+
 		bucket.batch_details[batch_no] -= deducted
-		if deduct_qty:
-			bucket.qty -= deducted
 		consumed_qty -= deducted
 
-	holders[-1].batch_details[batch_no] -= consumed_qty
-	if deduct_qty:
-		holders[-1].qty -= consumed_qty
+		qty = max(min(deducted, remaining_qty), 0.0)
+		bucket.qty -= qty
+		remaining_qty -= qty
+
+	return remaining_qty
 
 
 def get_stock_entry_data(work_order, stock_entry_doc=None):

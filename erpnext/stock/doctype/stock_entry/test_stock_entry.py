@@ -1609,26 +1609,45 @@ class TestStockEntry(FrappeTestCase):
 			stock_entry._validate_no_excess_transfer()
 
 	def test_tracked_consumption_deducts_matching_attribution_bucket(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry import (
-			deduct_consumed_batch_qty,
-			deduct_consumed_serial_nos,
-		)
+		from erpnext.stock.doctype.stock_entry.stock_entry import deduct_consumed_material
 
 		serial_buckets = [
-			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"]),
-			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"]),
+			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"], batch_details={}),
+			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"], batch_details={}),
 		]
-		deduct_consumed_serial_nos(serial_buckets, ["SERIAL-3"])
+		deduct_consumed_material(serial_buckets, frappe._dict(qty=1, serial_no="SERIAL-3"))
 		self.assertEqual([bucket.qty for bucket in serial_buckets], [2, 1])
 		self.assertEqual(serial_buckets[1].serial_nos, ["SERIAL-4"])
 
 		batch_buckets = [
-			frappe._dict(qty=2, batch_details={"BATCH-1": 2}),
-			frappe._dict(qty=3, batch_details={"BATCH-2": 3}),
+			frappe._dict(qty=2, serial_nos=[], batch_details={"BATCH-1": 2}),
+			frappe._dict(qty=3, serial_nos=[], batch_details={"BATCH-2": 3}),
 		]
-		deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
+		deduct_consumed_material(batch_buckets, frappe._dict(qty=1, batch_no="BATCH-2"))
 		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
 		self.assertEqual(batch_buckets[1].batch_details["BATCH-2"], 2)
+
+		shared_bundle_buckets = [
+			frappe._dict(qty=3, serial_nos=[], batch_details={"BATCH-1": 3}),
+			frappe._dict(qty=5, serial_nos=[], batch_details={"BATCH-2": 5}),
+		]
+		deduct_consumed_material(
+			shared_bundle_buckets, frappe._dict(qty=3, batch_nos={"BATCH-1": -3, "BATCH-2": -5})
+		)
+		self.assertEqual([bucket.qty for bucket in shared_bundle_buckets], [0, 5])
+
+	def test_consumption_prefers_exact_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_available_buckets
+
+		alternative = frappe._dict(original_item="REQUIRED-ITEM")
+		direct = frappe._dict(original_item=None)
+		available_materials = {("ITEM", "WIP", "REQUIRED-ITEM"): alternative, ("ITEM", "WIP", None): direct}
+
+		legacy_row = frappe._dict(item_code="ITEM", original_item=None)
+		self.assertEqual(get_available_buckets(available_materials, legacy_row, "WIP"), [direct, alternative])
+
+		attributed_row = frappe._dict(item_code="ITEM", original_item="REQUIRED-ITEM")
+		self.assertEqual(get_available_buckets(available_materials, attributed_row, "WIP"), [alternative])
 
 	@change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
