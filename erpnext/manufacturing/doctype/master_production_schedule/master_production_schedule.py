@@ -323,24 +323,44 @@ class MasterProductionSchedule(Document):
 
 	def get_sales_order_schedules(self):
 		doctype = frappe.qb.DocType("Delivery Schedule Item")
-		query = frappe.qb.from_(doctype).select(
-			doctype.item_code,
-			doctype.warehouse,
-			doctype.stock_uom,
-			doctype.delivery_date,
-			doctype.sales_order,
-			doctype.sales_order_item,
-			doctype.stock_qty.as_("qty"),
+		parent = frappe.qb.DocType("Sales Order")
+		so_item = frappe.qb.DocType("Sales Order Item")
+		query = (
+			frappe.qb.from_(doctype)
+			.join(parent)
+			.on(parent.name == doctype.sales_order)
+			.join(so_item)
+			.on(so_item.name == doctype.sales_order_item)
+			.select(
+				doctype.item_code,
+				doctype.warehouse,
+				doctype.stock_uom,
+				doctype.delivery_date,
+				doctype.sales_order,
+				doctype.sales_order_item,
+				doctype.stock_qty.as_("qty"),
+				(IfNull(so_item.delivered_qty, 0) * so_item.conversion_factor).as_("delivered_qty"),
+			)
+			.where(
+				(parent.docstatus == 1)
+				& (parent.company == self.company)
+				& parent.status.notin(["Closed", "Completed"])
+			)
+			.orderby(doctype.sales_order_item)
+			.orderby(doctype.delivery_date)
 		)
 
 		if self.sales_orders:
 			names = [s.sales_order for s in self.sales_orders if s.sales_order]
 			query = query.where(doctype.sales_order.isin(names))
 
-		if self.from_date:
-			query = query.where(doctype.delivery_date >= self.from_date)
+		schedules = self.filter_selected_items(query, doctype).run(as_dict=True)
+		return [row for row in deduct_delivered_qty(schedules) if self.is_in_date_range(row.delivery_date)]
 
-		return self.filter_selected_items(query, doctype).run(as_dict=True)
+	def is_in_date_range(self, delivery_date):
+		if self.from_date and getdate(delivery_date) < getdate(self.from_date):
+			return False
+		return not (self.to_date and getdate(delivery_date) > getdate(self.to_date))
 
 	def get_item_wise_mps_data(self, data):
 		item_wise_data = frappe._dict({})
@@ -556,3 +576,16 @@ def get_mps_details(mps: str):
 		["name", "from_date", "to_date", "company", "posting_date"],
 		as_dict=True,
 	)
+
+
+def deduct_delivered_qty(schedules):
+	delivered_by_row = {}
+	pending = []
+	for row in schedules:
+		delivered = delivered_by_row.setdefault(row.sales_order_item, flt(row.delivered_qty))
+		covered = min(delivered, flt(row.qty))
+		delivered_by_row[row.sales_order_item] = delivered - covered
+		row.qty = flt(row.qty) - covered
+		if row.qty > 0:
+			pending.append(row)
+	return pending
