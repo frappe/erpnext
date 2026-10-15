@@ -801,6 +801,22 @@ class TestProject(ERPNextTestSuite):
 		project.reload()
 		self.assertEqual(project.total_consumed_material_cost, 0)
 
+	def test_stock_delivered_on_a_project_row_is_consumed_material(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		project = make_project({"project_name": f"_Test Row Delivered Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		delivery_note = create_delivery_note(item_code=item, qty=10, rate=500, do_not_save=True)
+		delivery_note.items[0].project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+
+		project.reload()
+		self.assertFalse(delivery_note.project)
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
 	def test_manufactured_stock_is_counted_once(self):
 		project = make_project({"project_name": f"_Test Manufactured Cost {frappe.generate_hash(length=6)}"})
 		raw_material = make_item(properties={"is_stock_item": 1}).name
