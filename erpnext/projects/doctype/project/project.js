@@ -132,33 +132,17 @@ frappe.ui.form.on("Project", {
 			// a refresh while loading starts over with a list of its own
 			if (frm.tasks_list !== pending) return;
 
+			const sort = { sort_by: "priority", sort_order: "desc" };
 			const list = new frappe.ui.EmbeddedList({
 				wrapper: $wrapper,
-				get_page: ({ start, page_length, txt }) => {
-					const args = {
-						fields: [
-							"name",
-							"subject",
-							"status",
-							"priority",
-							"_assign",
-							"exp_start_date",
-							"exp_end_date",
-							"progress",
-						],
-						filters: { project },
-						order_by: "creation asc",
+				get_page: ({ start, page_length, txt }) =>
+					frappe.xcall("erpnext.projects.doctype.project.project.get_project_tasks", {
+						project,
 						start,
-						limit: page_length,
-					};
-					if (txt) {
-						args.or_filters = [
-							["subject", "like", `%${txt}%`],
-							["name", "like", `%${txt}%`],
-						];
-					}
-					return frappe.db.get_list("Task", args);
-				},
+						page_length,
+						txt,
+						...sort,
+					}),
 				empty_message: __("No Tasks in this Project yet."),
 				add_button: frappe.model.can_create("Task") && {
 					label: __("Add Task"),
@@ -188,7 +172,16 @@ frappe.ui.form.on("Project", {
 							});
 						},
 					},
-					{ label: __("Priority"), render: (row) => __(row.priority || "") },
+					{
+						label: __("Priority"),
+						render: (row) =>
+							row.priority
+								? frappe.ui.badge.html({
+										label: __(row.priority),
+										theme: TASK_PRIORITY_COLORS[row.priority] || "gray",
+								  })
+								: "",
+					},
 					{
 						label: __("Start Date"),
 						render: (row) => frappe.datetime.str_to_user(row.exp_start_date, false, true),
@@ -224,6 +217,26 @@ frappe.ui.form.on("Project", {
 
 				const row = list.data[$(e.currentTarget).closest("tr").attr("data-row-idx")];
 				frm.events.assign_task(frm, row, () => list.refresh());
+			});
+
+			// the same "sort by" control as list views, between the search box and Add Task
+			new frappe.ui.SortSelector({
+				parent: $("<div>").insertAfter(list.$header.find("[data-action='search']")),
+				doctype: "Task",
+				args: {
+					...sort,
+					options: [
+						{ fieldname: "priority", label: __("Priority") },
+						{ fieldname: "exp_start_date", label: __("Start Date") },
+						{ fieldname: "exp_end_date", label: __("End Date") },
+						{ fieldname: "subject", label: __("Task Name") },
+						{ fieldname: "creation", label: __("Created On") },
+					],
+				},
+				onchange: (sort_by, sort_order) => {
+					Object.assign(sort, { sort_by, sort_order });
+					list.refresh();
+				},
 			});
 
 			list.refresh();
@@ -380,6 +393,8 @@ frappe.ui.form.on("Project", {
 		}
 	},
 });
+
+const TASK_PRIORITY_COLORS = { Urgent: "red", High: "orange", Medium: "blue", Low: "gray" };
 
 function open_form(frm, doctype, child_doctype, parentfield) {
 	frappe.model.with_doctype(doctype, () => {

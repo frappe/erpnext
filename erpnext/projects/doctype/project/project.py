@@ -7,6 +7,7 @@ from graphlib import TopologicalSorter
 import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
+from frappe.model import data_fieldtypes
 from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Locate, Lower, Sum, UnixTimestamp
@@ -624,6 +625,76 @@ def get_users_for_project(doctype: str, txt: str, searchfield: str, start: int, 
 def get_cost_center_name(project: str):
 	frappe.has_permission("Project", "select", project, throw=True)
 	return frappe.db.get_value("Project", project, "cost_center")
+
+
+@frappe.whitelist()
+def get_project_tasks(
+	project: str,
+	start: int = 0,
+	page_length: int = 50,
+	txt: str | None = None,
+	sort_by: str = "priority",
+	sort_order: str = "desc",
+) -> list[dict]:
+	"""Return a page of a project's tasks for the Tasks tab, matching `txt` and in the chosen order.
+
+	By priority, "desc" puts the most urgent first. Tasks with the same value are oldest first."""
+	meta = frappe.get_meta("Task")
+	if not is_sortable_task_field(meta, sort_by):
+		frappe.throw(_("Cannot sort Tasks by {0}").format(sort_by))
+	if sort_order not in ("asc", "desc"):
+		frappe.throw(_("Sort order must be asc or desc"))
+	frappe.has_permission("Project", "read", project, throw=True)
+
+	task = frappe.qb.DocType("Task")
+	query = frappe.qb.get_query(
+		"Task",
+		fields=[
+			"name",
+			"subject",
+			"status",
+			"priority",
+			"_assign",
+			"exp_start_date",
+			"exp_end_date",
+			"progress",
+		],
+		filters={"project": project},
+		or_filters=[["subject", "like", f"%{txt}%"], ["name", "like", f"%{txt}%"]] if txt else None,
+		ignore_permissions=False,
+		offset=start,
+		limit=page_length,
+	)
+
+	order = Order.desc if sort_order == "desc" else Order.asc
+	if sort_by == "priority":
+		# the field's options run from least to most urgent, also as changed through Customize Form;
+		# any other value (e.g. a removed option) ranks below them all
+		priorities = [option for option in (meta.get_options("priority") or "").split("\n") if option]
+		rank = Case()
+		for index, priority in enumerate(priorities, start=1):
+			rank = rank.when(task.priority == priority, index)
+		query = query.orderby(rank.else_(0), order=order)
+	else:
+		query = query.orderby(task[sort_by], order=order)
+
+	return query.orderby(task.creation, order=Order.asc).run(as_dict=True)
+
+
+def is_sortable_task_field(meta, fieldname: str) -> bool:
+	"""Whether the Tasks tab may sort by a field: a standard column, or a stored field the user may read."""
+	if fieldname in ("name", "creation", "modified"):
+		return True
+
+	df = meta.get_field(fieldname)
+	return bool(
+		df
+		and df.fieldtype in data_fieldtypes
+		and df.fieldtype != "Password"
+		and not df.is_virtual
+		# every reader of a task can read its level 0 fields
+		and (not df.permlevel or df.permlevel in meta.get_permlevel_access())
+	)
 
 
 def hourly_reminder():

@@ -7,7 +7,11 @@ import frappe
 from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.projects.doctype.project.project import create_kanban_board_if_not_exists, get_cost_center_name
+from erpnext.projects.doctype.project.project import (
+	create_kanban_board_if_not_exists,
+	get_cost_center_name,
+	get_project_tasks,
+)
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.mapper import make_project as make_project_from_so
@@ -775,6 +779,42 @@ class TestProject(ERPNextTestSuite):
 			self.assertEqual(get_cost_center_name(project.name), "_Test Cost Center - _TC")
 		with self.set_user(website_user):
 			self.assertRaises(frappe.PermissionError, get_cost_center_name, project.name)
+
+	def test_project_tasks_are_most_urgent_first(self):
+		project = make_project({"project_name": f"_Test Task Sorting {frappe.generate_hash(length=6)}"})
+		# created least urgent first, so creation order alone would be wrong
+		tasks = [
+			frappe.get_doc(
+				doctype="Task",
+				subject=f"{project.project_name} {priority}",
+				project=project.name,
+				priority=priority,
+			)
+			.insert()
+			.name
+			for priority in ("Low", "Medium", "High", "Urgent")
+		]
+
+		self.assertEqual([task.name for task in get_project_tasks(project.name)], tasks[::-1])
+
+		# sort_by reaches the query, so only Task fields may be used
+		for sort_by in ("owner", "subject; drop table tabTask"):
+			with self.subTest(sort_by=sort_by):
+				self.assertRaises(frappe.ValidationError, get_project_tasks, project.name, sort_by=sort_by)
+
+	def test_project_tasks_need_task_read(self):
+		project = make_project({"project_name": f"_Test Task Access {frappe.generate_hash(length=6)}"})
+		stock_user = self._create_portal_user(f"task_access_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", stock_user).add_roles("Stock User")
+
+		# can only select Projects
+		with self.set_user(stock_user):
+			self.assertRaises(frappe.PermissionError, get_project_tasks, project.name)
+
+		# can now read this Project, but still not Tasks
+		frappe.share.add("Project", project.name, stock_user, read=1)
+		with self.set_user(stock_user):
+			self.assertRaises(frappe.PermissionError, get_project_tasks, project.name)
 
 
 def get_project(name, template):
