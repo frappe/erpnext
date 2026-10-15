@@ -104,7 +104,8 @@
 		margin: 0 calc(-1 * var(--padding-sm));
 	}
 
-	.co-chart .chart-container {
+	.co-chart .chart-container,
+	.co-age-chart .chart-container {
 		--charts-label-color: var(--ink-gray-5);
 		--charts-muted-color: var(--ink-gray-5);
 		--charts-legend-label: var(--ink-gray-7);

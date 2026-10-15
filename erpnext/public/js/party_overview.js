@@ -354,7 +354,7 @@ erpnext.PartyOverview = class PartyOverview {
 
 	draw_donut($parent, { segments, center, format }) {
 		const $chart = $('<div class="co-chart">').appendTo($parent);
-		this.donuts.push(
+		this.charts.push(
 			new frappe.Chart($chart[0], {
 				type: "donut",
 				height: 320,
@@ -371,8 +371,8 @@ erpnext.PartyOverview = class PartyOverview {
 	}
 
 	clear_charts() {
-		(this.donuts || []).forEach((chart) => chart.destroy());
-		this.donuts = [];
+		(this.charts || []).forEach((chart) => chart.destroy());
+		this.charts = [];
 		return this.$charts ? this.$charts.empty() : $();
 	}
 
@@ -394,19 +394,20 @@ erpnext.PartyOverview = class PartyOverview {
 			return;
 		}
 
-		frappe.ui
-			.bar_list({
-				items: a.buckets.map((b) => ({
-					label: b.label,
-					value: flt(b.value),
-					formatted: this.short_money(b.value),
-				})),
-				format: (v) => this.short_money(v),
-				color: "var(--co-series-1)",
-				name: __("Outstanding"),
-				tooltip_format: (v) => this.money0(v),
+		const $chart = $('<div class="co-age-chart">').appendTo($panel);
+		this.charts.push(
+			new frappe.Chart($chart[0], {
+				type: "bar",
+				barOptions: { horizontal: 1 },
+				data: {
+					labels: a.buckets.map((b) => b.label),
+					datasets: [{ name: __("Outstanding"), values: a.buckets.map((b) => flt(b.value)) }],
+				},
+				colors: ["var(--co-series-1)"],
+				axisOptions: { numberFormatter: (v) => this.short_money(v) },
+				tooltipOptions: { formatTooltipY: (v) => this.money0(v) },
 			})
-			.appendTo($('<div class="co-age-chart">').appendTo($panel));
+		);
 
 		$('<div class="co-note">')
 			.text(flt(a.overdue) > 0 ? note(a) : __("Nothing overdue"))
