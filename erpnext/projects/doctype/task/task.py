@@ -114,7 +114,8 @@ class Task(NestedSet):
 		self.validate_parent_project_dates()
 
 	def set_default_weight(self):
-		if self.type and self.task_weight is None:
+		type_changed_alone = self.has_value_changed("type") and not self.has_value_changed("task_weight")
+		if self.type and (self.task_weight is None or type_changed_alone):
 			self.task_weight = frappe.get_cached_value("Task Type", self.type, "weight")
 
 	def set_default_end_date_if_missing(self):
@@ -272,10 +273,10 @@ class Task(NestedSet):
 		):
 			return
 
-		parent_project = frappe.db.get_value("Task", self.parent_task, "project")
-		if not self.project:
-			self.project = parent_project
-		elif self.project != parent_project:
+		parent_project, parent_company = frappe.db.get_value("Task", self.parent_task, ["project", "company"])
+		if not self.project and parent_project:
+			self.project, self.company = parent_project, parent_company
+		elif (self.project or None) != (parent_project or None):
 			frappe.throw(
 				_("Parent Task {0} is not in Project {1}. Pick a group task of the same project.").format(
 					get_link_to_form("Task", self.parent_task), frappe.bold(self.project)

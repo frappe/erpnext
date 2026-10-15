@@ -3757,6 +3757,28 @@ class TestWorkOrder(ERPNextTestSuite):
 			status = frappe.db.get_value("Serial No", row, "status")
 			self.assertEqual(status, "Consumed")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_manufacturing_user_can_reserve_stock(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		production_item = make_item("Test SR Manufacturing User FG", {"is_stock_item": 1}).name
+		rm_item = make_item("Test SR Manufacturing User RM", {"is_stock_item": 1}).name
+		make_bom(item=production_item, source_warehouse="Stores - _TC", raw_materials=[rm_item])
+		make_stock_entry_test_record(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=100)
+		wo = make_wo_order_test_record(
+			item=production_item, qty=10, reserve_stock=1, source_warehouse="Stores - _TC", do_not_submit=True
+		)
+
+		user = create_user("sre-manufacturing-user@example.com", "Manufacturing User")
+		with self.set_user(user.name):
+			wo.submit()
+
+		self.assertTrue(frappe.get_all("Stock Reservation Entry", filters={"voucher_no": wo.name}))
+
 	def test_stock_reservation_for_serialized_raw_material(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
