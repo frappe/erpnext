@@ -13,6 +13,7 @@ from erpnext.selling.doctype.customer.customer_overview import (
 	permitted,
 	resolve_period,
 )
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_invoiced_qty_against_po_items
 
 CLOSED_PO_STATUS = ("Closed", "Completed", "On Hold", "Delivered")
 OPEN_SQ_STATUS = ("Submitted", "Partially Ordered")
@@ -354,18 +355,16 @@ def order_tiles(supplier, company, as_of):
 		},
 		[
 			"name",
-			"conversion_rate",
 			"items.name as line",
 			"items.qty",
 			"items.received_qty",
 			"items.base_amount",
-			"items.billed_amt",
 			"items.schedule_date as due",
 			"items.closed",
 		],
 	)
 
-	billed_qty = invoiced_quantities(supplier, company, [line.line for line in lines])
+	billed_qty = invoiced_quantities([line.line for line in lines])
 	receipt, billing, late = {}, {}, {}
 	upcoming, oldest = [], None
 	for line in lines:
@@ -375,10 +374,7 @@ def order_tiles(supplier, company, as_of):
 		rate = flt(line.base_amount) / qty if qty else 0
 		received = min(max(flt(line.received_qty), 0), qty) if qty else 0
 
-		if billed_qty is None:
-			unbilled = received * rate - flt(line.billed_amt) * flt(line.conversion_rate)
-		else:
-			unbilled = (received - billed_qty.get(line.line, 0)) * rate
+		unbilled = (received - flt(billed_qty.get(line.line))) * rate if billed_qty is not None else 0
 		if unbilled > 0:
 			billing[line.name] = billing.get(line.name, 0) + unbilled
 
@@ -402,7 +398,9 @@ def order_tiles(supplier, company, as_of):
 			"next_due": str(min(upcoming)) if upcoming else None,
 			"orders": sorted(receipt),
 		},
-		"billing": {
+		"billing": None
+		if billed_qty is None
+		else {
 			"value": flt(sum(billing.values()), 2),
 			"count": len(billing),
 			"orders": sorted(billing),
@@ -416,24 +414,12 @@ def order_tiles(supplier, company, as_of):
 	}
 
 
-def invoiced_quantities(supplier, company, lines):
+def invoiced_quantities(lines):
 	if not _unrestricted_read("Purchase Invoice"):
 		return None
 	if not lines:
 		return {}
-	item = DocType("Purchase Invoice Item")
-	return {
-		row.line: flt(row.qty)
-		for row in permitted(
-			"Purchase Invoice",
-			[
-				{"docstatus": 1, "supplier": supplier, "company": company},
-				["Purchase Invoice Item", "po_detail", "in", lines],
-			],
-			["items.po_detail as line", Sum(item.qty).as_("qty")],
-			group_by="items.po_detail",
-		)
-	}
+	return get_invoiced_qty_against_po_items(lines)
 
 
 def payables(supplier, company, report_date):
