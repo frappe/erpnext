@@ -81,7 +81,6 @@
   "secondary_items_section",
   "secondary_items",
   "reference_section",
-  "update_consumed_material_cost_in_project",
   "project",
   "subcontracting_inward_order",
   "production_plan",
@@ -510,12 +509,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
-   "fieldname": "update_consumed_material_cost_in_project",
-   "fieldtype": "Check",
-   "label": "Update Consumed Material Cost In Project"
-  },
-  {
    "description": "This is a location where raw materials are available.",
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
@@ -768,7 +761,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-15 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
