@@ -1,6 +1,6 @@
 <style>
 	.quotations-table {
-		width: auto;
+		width: 100%;
 		min-width: 0;
 		border-collapse: separate;
 		border-spacing: 0;
@@ -42,6 +42,15 @@
 	}
 	.quotations-table .quotation-link {
 		font-weight: 400;
+	}
+	.quotations-table .column-name {
+		display: block;
+		width: 220px;
+		max-width: 100%;
+		margin: 0 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.quotations-table .valid-till.expired {
 		color: var(--red-600, #e03636);
@@ -110,19 +119,9 @@
 	.quotations-inner-container {
 		width: 100%;
 	}
-	.quotations-inner-container.inner-centered {
-		width: fit-content;
-		max-width: 100%;
-		margin-left: auto;
-		margin-right: auto;
-	}
-	.quotations-inner-container.inner-centered .quotations-table {
-		margin-left: auto;
-		margin-right: auto;
-	}
 </style>
 <div class="quotations-tab-wrapper my-2 w-full">
-	<div class="quotations-inner-container {% if (quotation_count === 2) { %}inner-centered{% } %}">
+	<div class="quotations-inner-container">
 		<div class="flex justify-end items-center w-full mb-3 gap-2.5 quotations-filters-bar">
 			<div class="item-filter-container" style="min-width: 180px; max-width: 240px;"></div>
 			<div class="categorize-by-filter-container" style="min-width: 200px; max-width: 240px;"></div>
@@ -138,11 +137,10 @@
 							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Item") }}</th>
 							{% for (let o = 0; o < offers.length; o++) {
 								const offer = offers[o];							%}
-								<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
+								<th class="text-center" style="padding: 14px 16px;">
 									<div class="flex flex-col items-center gap-1">
-										<div class="flex items-center justify-center gap-1.5 w-full">
-											<span class="truncate" title="{{ frappe.utils.escape_html(offer.supplier) }}">{{ frappe.utils.escape_html(offer.supplier) }}</span>										</div>
-										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small truncate">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
+										<span class="column-name" title="{{ frappe.utils.escape_html(offer.supplier) }}">{{ frappe.utils.escape_html(offer.supplier) }}</span>
+										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small column-name" title="{{ frappe.utils.escape_html(offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
 									</div>
 								</th>
 							{% } %}
@@ -152,14 +150,14 @@
 							<th style="width: 50px; text-align: center; padding: 14px 16px;">#</th>
 							<th style="width: 200px; min-width: 160px; padding: 14px 16px;">{{ __("Supplier") }}</th>
 							{% for (let it = 0; it < items.length; it++) { const itm = items[it]; %}
-								<th class="text-center" style="min-width: 270px; width: 280px; max-width: 300px; padding: 14px 16px;">
-									<div class="truncate" title="{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}">{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}</div>
+								<th class="text-center" style="padding: 14px 16px;">
+									<div class="column-name" title="{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}">{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}</div>
 									{%
 										const raw_desc = (itm.description ? (frappe.utils.strip_html ? frappe.utils.strip_html(itm.description) : itm.description.replace(/<[^>]*>/g, "")) : "").trim();
 										const clean_desc = raw_desc.length > 45 ? raw_desc.slice(0, 42) + "..." : raw_desc;
 									%}
 									{% if (raw_desc && raw_desc !== itm.item_name && raw_desc !== itm.item_code) { %}
-										<div class="text-muted small truncate font-normal mx-auto" title="{{ frappe.utils.escape_html(raw_desc) }}" style="max-width: 240px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+										<div class="text-muted small font-normal column-name" title="{{ frappe.utils.escape_html(raw_desc) }}">
 											{{ frappe.utils.escape_html(clean_desc) }}
 										</div>
 									{% } %}
