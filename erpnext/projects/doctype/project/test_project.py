@@ -12,6 +12,8 @@ from erpnext.projects.doctype.project_template.test_project_template import make
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.mapper import make_project as make_project_from_so
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -699,6 +701,98 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.total_consumed_material_cost, sum(row.amount for row in issue.items))
 		self.assertGreater(project.total_consumed_material_cost, 0)
 
+	def test_stock_bought_for_the_project_is_counted_when_issued(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		project = make_project({"project_name": f"_Test Stock Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		make_purchase_invoice(item_code=item, qty=10, rate=100, update_stock=1, project=project.name)
+		issue_to_project(item, 10, project.name)
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 0)
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+	def test_stock_delivered_for_the_project_is_consumed_material(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		project = make_project({"project_name": f"_Test Delivered Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		delivery_note = create_delivery_note(item_code=item, qty=10, rate=500, do_not_save=True)
+		delivery_note.project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+		delivery_note.cancel()
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 0)
+
+	def test_manufactured_stock_is_counted_once(self):
+		project = make_project({"project_name": f"_Test Manufactured Cost {frappe.generate_hash(length=6)}"})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=raw_material, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		manufacture = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Manufacture",
+				"stock_entry_type": "Manufacture",
+				"company": "_Test Company",
+				"project": project.name,
+				"items": [
+					{"item_code": raw_material, "qty": 10, "s_warehouse": "_Test Warehouse - _TC"},
+					{
+						"item_code": finished_good,
+						"qty": 1,
+						"t_warehouse": "_Test Warehouse - _TC",
+						"is_finished_item": 1,
+					},
+				],
+				"additional_costs": [
+					{
+						"expense_account": "Expenses Included In Valuation - _TC",
+						"description": "Labour",
+						"amount": 50,
+					}
+				],
+			}
+		)
+		manufacture.insert()
+		manufacture.submit()
+		issue_to_project(finished_good, 1, project.name)
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
+	def test_landed_cost_is_not_counted_twice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Landed Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=100, do_not_save=True)
+		receipt.items[0].project = project.name
+		receipt.insert()
+		receipt.submit()
+		make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=50, project=project.name)
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, receipt.company, charges=50)
+		issue_to_project(item, 10, project.name)
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 0)
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
@@ -811,6 +905,15 @@ def make_project(args):
 	project.insert()
 
 	return project
+
+
+def issue_to_project(item_code, qty, project):
+	issue = make_stock_entry(
+		item_code=item_code, qty=qty, from_warehouse="_Test Warehouse - _TC", do_not_save=True
+	)
+	issue.project = project
+	issue.insert()
+	issue.submit()
 
 
 def task_exists(subject):

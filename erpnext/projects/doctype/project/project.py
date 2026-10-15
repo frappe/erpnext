@@ -19,6 +19,13 @@ from erpnext import get_default_company
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
+LANDED_COST_RECEIPT_ITEMS = {
+	"Purchase Receipt": ("Purchase Receipt Item", "purchase_receipt_item"),
+	"Purchase Invoice": ("Purchase Invoice Item", "purchase_receipt_item"),
+	"Subcontracting Receipt": ("Subcontracting Receipt Item", "purchase_receipt_item"),
+	"Stock Entry": ("Stock Entry Detail", "stock_entry_item"),
+}
+
 
 class Project(Document):
 	# begin: auto-generated types
@@ -180,38 +187,42 @@ class Project(Document):
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
 	def set_consumed_material_cost(self):
-		parent_doc = frappe.qb.DocType("Stock Entry")
-		child_doc = frappe.qb.DocType("Stock Entry Detail")
-		lcv_doc = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		self.total_consumed_material_cost = (
+			self.get_stock_value_consumed() + self.get_stock_entry_additional_costs()
+		)
 
+	def get_stock_value_consumed(self) -> float:
+		sle = qb.DocType("Stock Ledger Entry")
+		stock_entry = qb.DocType("Stock Entry")
+		value_change = (
+			qb.from_(sle)
+			.left_join(stock_entry)
+			.on((sle.voucher_type == "Stock Entry") & (stock_entry.name == sle.voucher_no))
+			.select(Sum(sle.stock_value_difference))
+			.where(
+				(sle.project == self.name)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_type.isin(["Stock Entry", "Delivery Note", "Sales Invoice"])
+				& (stock_entry.purpose.isnull() | (stock_entry.purpose != "Material Receipt"))
+			)
+		).run()
+		return -flt(value_change[0][0])
+
+	def get_stock_entry_additional_costs(self) -> float:
+		stock_entry = qb.DocType("Stock Entry")
+		additional_cost = qb.DocType("Landed Cost Taxes and Charges")
 		amount = (
-			qb.from_(child_doc)
-			.select(Sum(child_doc.amount))
+			qb.from_(stock_entry)
+			.join(additional_cost)
+			.on((additional_cost.parent == stock_entry.name) & (additional_cost.parenttype == "Stock Entry"))
+			.select(Sum(additional_cost.base_amount))
 			.where(
-				(child_doc.project == self.name)
-				& (child_doc.docstatus == 1)
-				& ((child_doc.t_warehouse.isnull()) | (child_doc.t_warehouse == ""))
+				(stock_entry.project == self.name)
+				& (stock_entry.docstatus == 1)
+				& (stock_entry.purpose != "Material Receipt")
 			)
-		).run(as_list=1)
-
-		amount = flt(amount[0][0]) if amount else 0
-
-		additional_costs = (
-			qb.from_(parent_doc)
-			.join(lcv_doc)
-			.on(parent_doc.name == lcv_doc.parent)
-			.select(Sum(lcv_doc.base_amount))
-			.where(
-				(parent_doc.project == self.name)
-				& (parent_doc.docstatus == 1)
-				& (parent_doc.purpose == "Manufacture")
-			)
-		).run(as_list=1)
-
-		additional_cost_amt = flt(additional_costs[0][0]) if additional_costs else 0
-
-		amount += additional_cost_amt
-		self.total_consumed_material_cost = amount
+		).run()
+		return flt(amount[0][0])
 
 	def check_depends_on_value(self, template_task, project_task, project_tasks):
 		if template_task.get("depends_on") and not project_task.get("depends_on"):
@@ -391,8 +402,49 @@ class Project(Document):
 			self.per_gross_margin = 0
 
 	def update_purchase_costing(self):
-		total_purchase_cost = calculate_total_purchase_cost(self.name)
-		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+		self.total_purchase_cost = self.get_non_stock_purchase_cost() - self.get_capitalised_landed_cost()
+
+	def get_non_stock_purchase_cost(self) -> float:
+		invoice_item = qb.DocType("Purchase Invoice Item")
+		item = qb.DocType("Item")
+		purchase_order = qb.DocType("Purchase Order")
+		amount = (
+			qb.from_(invoice_item)
+			.left_join(item)
+			.on(item.name == invoice_item.item_code)
+			.left_join(purchase_order)
+			.on(purchase_order.name == invoice_item.purchase_order)
+			.select(Sum(invoice_item.base_net_amount))
+			.where(
+				(invoice_item.project == self.name)
+				& (invoice_item.docstatus == 1)
+				& (item.is_stock_item.isnull() | (item.is_stock_item == 0))
+				& (purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0))
+			)
+		).run()
+		return flt(amount[0][0])
+
+	def get_capitalised_landed_cost(self) -> float:
+		voucher = qb.DocType("Landed Cost Voucher")
+		voucher_item = qb.DocType("Landed Cost Item")
+		amount = 0
+		for receipt_type, (receipt_item_doctype, link_field) in LANDED_COST_RECEIPT_ITEMS.items():
+			receipt_item = qb.DocType(receipt_item_doctype)
+			charges = (
+				qb.from_(voucher_item)
+				.join(voucher)
+				.on(voucher.name == voucher_item.parent)
+				.join(receipt_item)
+				.on(receipt_item.name == voucher_item[link_field])
+				.select(Sum(voucher_item.applicable_charges))
+				.where(
+					(voucher.docstatus == 1)
+					& (voucher_item.receipt_document_type == receipt_type)
+					& (receipt_item.project == self.name)
+				)
+			).run()
+			amount += flt(charges[0][0])
+		return amount
 
 	def update_sales_amount(self):
 		so = frappe.qb.DocType("Sales Order")
@@ -937,22 +989,26 @@ def get_users_email(doc):
 	return [d.email for d in doc.users if frappe.db.get_value("User", d.user, "enabled")]
 
 
-def calculate_total_purchase_cost(project: str | None = None):
-	if project:
-		pitem = qb.DocType("Purchase Invoice Item")
-		total_purchase_cost = (
-			qb.from_(pitem)
-			.select(Sum(pitem.base_net_amount))
-			.where((pitem.project == project) & (pitem.docstatus == 1))
-			.run(as_list=True)
-		)
-		return total_purchase_cost
-	return None
+def update_purchase_cost(projects: set[str]):
+	for name in projects:
+		project = frappe.get_doc("Project", name)
+		project.update_purchase_costing()
+		project.calculate_gross_margin()
+		project.db_update()
+
+
+def update_consumed_material_cost(projects: set[str]):
+	for name in projects:
+		project = frappe.get_doc("Project", name)
+		project.set_consumed_material_cost()
+		project.calculate_gross_margin()
+		project.db_update()
 
 
 @frappe.whitelist()
 def update_costing_and_billing(project: str | None = None):
 	project = frappe.get_doc("Project", project)
 	project.check_permission("write")
+	project.set_consumed_material_cost()
 	project.update_costing()
 	project.db_update()

@@ -560,6 +560,7 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -581,6 +582,7 @@ class DeliveryNote(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
