@@ -797,6 +797,7 @@ def update_project_sales_billing():
 @frappe.whitelist()
 def create_kanban_board_if_not_exists(project: str) -> str:
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+	from frappe.model.naming import append_number_if_name_exists
 
 	project = frappe.get_doc("Project", project)
 	project.check_permission("read")
@@ -804,10 +805,7 @@ def create_kanban_board_if_not_exists(project: str) -> str:
 	if board := get_project_kanban_board(project.name):
 		return board
 
-	board_name = project.project_name
-	if frappe.db.exists("Kanban Board", board_name):
-		board_name = f"{project.project_name} ({project.name})"
-
+	board_name = append_number_if_name_exists("Kanban Board", project.project_name)
 	return quick_kanban_board("Task", board_name, "status", project.name).name
 
 
