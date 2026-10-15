@@ -17,6 +17,7 @@ from rq.timeouts import JobTimeoutException
 import erpnext
 from erpnext.accounts.general_ledger import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
+from erpnext.projects.doctype.project.project import update_consumed_material_cost_for_vouchers
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
@@ -431,6 +432,9 @@ def repost(doc):
 
 		repost_gl_entries(doc)
 
+		if not doc.repost_only_accounting_ledgers:
+			update_consumed_material_cost_for_vouchers(get_reposted_vouchers(doc))
+
 		doc.set_status("Completed")
 		doc.db_set("reposting_data_file", None)
 		remove_attached_file(doc.name)
@@ -534,11 +538,7 @@ def repost_gl_entries(doc):
 		)
 		return
 
-	# directly modified transactions
-	directly_dependent_transactions = _get_directly_dependent_vouchers(doc)
-	repost_affected_transaction = get_affected_transactions(doc)
-
-	transactions = directly_dependent_transactions + list(repost_affected_transaction)
+	transactions = get_reposted_vouchers(doc)
 	enable_separate_reposting_for_gl = frappe.db.get_single_value(
 		"Stock Reposting Settings", "enable_separate_reposting_for_gl"
 	)
@@ -560,6 +560,10 @@ def repost_gl_entries(doc):
 			doc.company,
 			repost_doc=doc,
 		)
+
+
+def get_reposted_vouchers(doc):
+	return _get_directly_dependent_vouchers(doc) + list(get_affected_transactions(doc))
 
 
 def _get_directly_dependent_vouchers(doc):

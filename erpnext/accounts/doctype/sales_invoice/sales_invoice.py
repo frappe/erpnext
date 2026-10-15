@@ -516,6 +516,7 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -641,6 +642,7 @@ class SalesInvoice(SellingController):
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		self.db_set("status", "Cancelled")
 

@@ -40,6 +40,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -812,42 +813,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 
 	def update_cost_in_project(self):
-		if self.work_order and not frappe.db.get_value(
-			"Work Order", self.work_order, "update_consumed_material_cost_in_project"
-		):
-			return
-
-		projects = set(item.project for item in self.items if item.project)
-		for project in projects:
-			amount = frappe.db.sql(
-				""" select ifnull(sum(amount), 0)
-				from
-					`tabStock Entry Detail`
-				where
-					docstatus = 1 and project = %s
-					and (t_warehouse is null or t_warehouse = '')""",
-				project,
-				as_list=1,
-			)
-
-			amount = amount[0][0] if amount else 0
-			additional_costs = frappe.db.sql(
-				""" select ifnull(sum(sed.base_amount), 0)
-				from
-					`tabStock Entry` se, `tabLanded Cost Taxes and Charges` sed
-				where
-					se.docstatus = 1 and se.project = %s and sed.parent = se.name
-					and se.purpose = 'Manufacture'""",
-				project,
-				as_list=1,
-			)
-
-			additional_cost_amt = additional_costs[0][0] if additional_costs else 0
-
-			amount += additional_cost_amt
-			project = frappe.get_doc("Project", project)
-			project.total_consumed_material_cost = amount
-			project.save(ignore_permissions=True)
+		update_consumed_material_cost({item.project for item in self.items if item.project})
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
