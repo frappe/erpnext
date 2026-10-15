@@ -66,6 +66,8 @@ def get_data(filters):
 	# soi.name primary key, so this is valid under both.
 	delay = DateDiff(nowdate(), soi.delivery_date)
 	conversion_rate = Coalesce(so.conversion_rate, 1)
+	is_closed = (so.status == "Closed") | (soi.closed == 1)
+	no_delay = so.status.isin(["Completed", "To Bill"]) | is_closed
 
 	query = (
 		qb.from_(so)
@@ -82,15 +84,19 @@ def get_data(filters):
 			soi.item_code,
 			soi.uom,
 			delay.as_("delay_days"),
-			Case().when(so.status.isin(["Completed", "To Bill"]), 0).else_(delay).as_("delay"),
+			Case().when(no_delay, 0).else_(delay).as_("delay"),
 			soi.qty,
 			soi.delivered_qty,
-			(soi.qty - soi.delivered_qty).as_("pending_qty"),
+			soi.closed,
+			Case().when(is_closed, 0).else_(soi.qty - soi.delivered_qty).as_("pending_qty"),
 			Coalesce(Sum(sii.qty), 0).as_("billed_qty"),
 			soi.base_amount.as_("amount"),
 			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
 			(soi.billed_amt * conversion_rate).as_("billed_amount"),
-			(soi.base_amount - (soi.billed_amt * conversion_rate)).as_("pending_amount"),
+			Case()
+			.when(is_closed, 0)
+			.else_(soi.base_amount - (soi.billed_amt * conversion_rate))
+			.as_("pending_amount"),
 			soi.warehouse.as_("warehouse"),
 			so.company,
 			soi.name,
@@ -203,7 +209,9 @@ def prepare_data(data, so_elapsed_time, filters):
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
 
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		row["qty_to_bill"] = (
+			0 if row["status"] == "Closed" or row["closed"] else flt(row["qty"]) - flt(row["billed_qty"])
+		)
 		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
 		row["time_taken_to_deliver"] = (
 			so_elapsed_time.get((row.sales_order, row.item_code))
@@ -230,12 +238,16 @@ def group_by_sales_order(data):
 			sales_order_map[row["sales_order"]] = copy.deepcopy(row)
 			continue
 
-		group["delay"] = (
-			min(group["delay"], row["delay"]) if row["delay"] and group["delay"] else group["delay"]
-		)
+		group["delay"] = least_delay(group["delay"], row["delay"])
 		add_aggregated_fields(group, row)
 
 	return list(sales_order_map.values())
+
+
+def least_delay(*delays):
+	# completed/closed/not-yet-due lines carry 0; ignore them so none masks an overdue line
+	overdue = [d for d in delays if d]
+	return min(overdue) if overdue else 0
 
 
 def group_by_item(data):
