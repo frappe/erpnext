@@ -374,11 +374,12 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
 
-def make_entry(args, adv_adj, update_outstanding, from_repost=False):
+def make_entry(args, adv_adj, update_outstanding, from_repost=False, *, from_reversal=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
+	gle.flags.from_reversal = from_reversal
 	gle.flags.adv_adj = adv_adj
 	gle.flags.update_outstanding = update_outstanding or "Yes"
 	gle.flags.notify_update = False
@@ -722,7 +723,7 @@ def make_reverse_gl_entries(
 				new_gle["posting_date"] = posting_date
 
 			if new_gle["debit"] or new_gle["credit"]:
-				make_entry(new_gle, adv_adj, "Yes")
+				make_entry(new_gle, adv_adj, "Yes", from_reversal=True)
 
 
 def set_as_cancel(voucher_type, voucher_no):
