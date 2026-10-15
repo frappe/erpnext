@@ -418,7 +418,11 @@ class Project(Document):
 			.where(
 				(invoice_item.project == self.name)
 				& (invoice_item.docstatus == 1)
-				& (item.is_stock_item.isnull() | (item.is_stock_item == 0))
+				& (
+					item.is_stock_item.isnull()
+					| (item.is_stock_item == 0)
+					| (invoice_item.delivered_by_supplier == 1)
+				)
 				& (purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0))
 			)
 		).run()

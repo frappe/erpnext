@@ -714,6 +714,22 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.total_purchase_cost, 0)
 		self.assertEqual(project.total_consumed_material_cost, 1000)
 
+	def test_drop_shipped_stock_is_purchase_cost(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		project = make_project({"project_name": f"_Test Drop Ship Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		invoice = make_purchase_invoice(
+			item_code=item, qty=10, rate=100, project=project.name, do_not_save=True
+		)
+		invoice.items[0].delivered_by_supplier = 1
+		invoice.insert()
+		invoice.submit()
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 1000)
+
 	def test_stock_delivered_for_the_project_is_consumed_material(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
