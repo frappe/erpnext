@@ -10,7 +10,16 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Locate, Lower, Sum, UnixTimestamp
-from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
+from frappe.utils import (
+	add_days,
+	create_batch,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	nowtime,
+	today,
+)
 from frappe.utils.html_utils import sanitize_html
 from frappe.utils.user import is_website_user
 from pypika import Order
@@ -18,6 +27,8 @@ from pypika import Order
 from erpnext import get_default_company
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+
+CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
 
 LANDED_COST_RECEIPT_ITEMS = {
 	"Purchase Receipt": ("Purchase Receipt Item", "purchase_receipt_item"),
@@ -202,7 +213,7 @@ class Project(Document):
 			.where(
 				(sle.project == self.name)
 				& (sle.is_cancelled == 0)
-				& sle.voucher_type.isin(["Stock Entry", "Delivery Note", "Sales Invoice"])
+				& sle.voucher_type.isin(CONSUMPTION_VOUCHER_TYPES)
 				& (stock_entry.purpose.isnull() | (stock_entry.purpose != "Material Receipt"))
 			)
 		).run()
@@ -1016,6 +1027,25 @@ def update_consumed_material_cost(projects: set[str]):
 		project = frappe.get_doc("Project", name, for_update=True)
 		project.set_consumed_material_cost()
 		project.db_set_cost("total_consumed_material_cost")
+
+
+def update_consumed_material_cost_for_vouchers(vouchers: list[tuple[str, str]]):
+	sle = qb.DocType("Stock Ledger Entry")
+	projects = set()
+	for voucher_nos in create_batch([voucher_no for _voucher_type, voucher_no in vouchers], 1000):
+		projects.update(
+			qb.from_(sle)
+			.select(sle.project)
+			.distinct()
+			.where(
+				sle.voucher_no.isin(voucher_nos)
+				& sle.voucher_type.isin(CONSUMPTION_VOUCHER_TYPES)
+				& sle.project.isnotnull()
+				& (sle.project != "")
+			)
+			.run(pluck=True)
+		)
+	update_consumed_material_cost(projects)
 
 
 @frappe.whitelist()

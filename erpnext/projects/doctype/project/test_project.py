@@ -714,6 +714,58 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.total_purchase_cost, 0)
 		self.assertEqual(project.total_consumed_material_cost, 1000)
 
+	def test_landed_cost_after_delivery_reaches_consumed_cost(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		company = "_Test Company with perpetual inventory"
+		project = make_project(
+			{
+				"project_name": f"_Test Landed After Delivery {frappe.generate_hash(length=6)}",
+				"company": company,
+			}
+		)
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		receipt = make_purchase_receipt(
+			company=company, warehouse="Stores - TCP1", item_code=item, qty=10, rate=100, do_not_save=True
+		)
+		receipt.items[0].project = project.name
+		receipt.insert()
+		receipt.submit()
+		delivery_note = create_delivery_note(
+			company=company,
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			item_code=item,
+			qty=10,
+			rate=500,
+			do_not_save=True,
+		)
+		delivery_note.project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+		make_purchase_invoice(
+			company=company,
+			warehouse="Stores - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=50,
+			project=project.name,
+		)
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, company, charges=50)
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 0)
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
 	def test_drop_shipped_stock_is_purchase_cost(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
