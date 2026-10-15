@@ -36,6 +36,7 @@
   "paid_from_account_type",
   "paid_from_account_currency",
   "paid_from_bank_account",
+  "cheque",
   "reference_no",
   "column_break_18",
   "paid_to",
@@ -427,6 +428,15 @@
    "options": "Payment Entry Deduction"
   },
   {
+   "depends_on": "eval:in_list([\"Pay\", \"Internal Transfer\"], doc.payment_type) && in_list([\"Cheque\", \"Check\"], doc.mode_of_payment)",
+   "fieldname": "cheque",
+   "fieldtype": "Link",
+   "label": "Cheque",
+   "no_copy": 1,
+   "options": "Cheque",
+   "search_index": 1
+  },
+  {
    "bold": 1,
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
@@ -435,7 +445,8 @@
    "in_import_template": 1,
    "in_standard_filter": 1,
    "label": "Cheque/Reference No",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
+   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
+   "read_only_depends_on": "eval:doc.cheque"
   },
   {
    "bold": 1,
@@ -819,7 +830,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-15 00:15:39.543329",
+ "modified": "2026-11-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
