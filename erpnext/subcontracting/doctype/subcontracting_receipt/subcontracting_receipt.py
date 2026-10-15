@@ -378,7 +378,7 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 		if recalculate_rate:
-			self.calculate_additional_costs()
+			self.set_additional_costs()
 			self.calculate_items_qty_and_amount()
 
 	def remove_scrap_items(self, recalculate_rate=False):
@@ -394,8 +394,54 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def set_missing_values(self):
 		self.set_available_qty_for_consumption()
-		self.calculate_additional_costs()
+		self.set_additional_costs()
 		self.calculate_items_qty_and_amount()
+
+	def set_additional_costs(self):
+		if self.is_return and self.return_against:
+			self.set_additional_costs_for_return()
+		else:
+			self.calculate_additional_costs()
+
+	def set_additional_costs_for_return(self):
+		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
+		original = frappe.get_doc("Subcontracting Receipt", self.return_against)
+		original.check_permission("read")
+		original_rows = {row.name: row for row in original.items if row.bom}
+		basis = "amount" if original.distribute_additional_costs_based_on == "Amount" else "qty"
+		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
+		total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in original_rows.values())
+		returned_basis = returned_cost = 0.0
+		for row in self.items:
+			original_row = original_rows.get(row.subcontracting_receipt_item)
+			if not original_row:
+				continue
+
+			row.additional_cost_per_qty = 0.0
+			if flt(original_row.qty) and row.warehouse and row.warehouse != original_row.rejected_warehouse:
+				row.additional_cost_per_qty = flt(original_row.additional_cost_per_qty)
+				returned_cost += flt(row.qty) * row.additional_cost_per_qty
+				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
+
+		if total_cost:
+			ratio = returned_cost / total_cost
+		else:
+			ratio = returned_basis / total_basis if total_basis else 0.0
+
+		self.set("additional_costs", [])
+		for row in original.additional_costs:
+			self.append(
+				"additional_costs",
+				{
+					"expense_account": row.expense_account,
+					"account_currency": row.account_currency,
+					"exchange_rate": row.exchange_rate,
+					"description": row.description,
+					"amount": flt(row.amount * ratio, row.precision("amount")),
+					"base_amount": flt(row.base_amount * ratio, row.precision("base_amount")),
+				},
+			)
+		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
