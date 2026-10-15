@@ -674,9 +674,8 @@ $.extend(erpnext.journal_entry, {
 			],
 		});
 
-		dialog.set_primary_action(__("Save"), function () {
+		dialog.set_primary_action(__("Save"), function (values) {
 			var btn = this;
-			var values = dialog.get_values();
 
 			frm.set_value("posting_date", values.posting_date);
 			frm.set_value("naming_series", values.naming_series);
