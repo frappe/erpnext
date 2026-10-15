@@ -32,7 +32,7 @@ def get_columns():
 			"label": _("Reference Document Type"),
 			"fieldname": "reference_document_type",
 			"fieldtype": "Link",
-			"options": "Doctype",
+			"options": "DocType",
 			"width": 100,
 		},
 		{
