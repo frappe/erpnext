@@ -8,9 +8,12 @@ from typing import Any, TypedDict
 
 import frappe
 from frappe import _
+from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Coalesce, Count
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
+from pypika import Order
+from pypika.analytics import RowNumber
 
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -73,6 +76,7 @@ class StockBalanceReport:
 		self.prepare_opening_stock()
 		self.prepare_sle_query()
 		self.prepare_item_warehouse_map_for_current_period()
+		self.set_pool_rate_on_dimension_rows()
 		self.prepare_new_data()
 
 		if not self.columns:
@@ -214,6 +218,8 @@ class StockBalanceReport:
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
 		adjustment_netting = AdjustmentNetting()
+		self.latest_valuation_rates = {}
+		track_rates = self.filters.get("show_dimension_wise_stock") and not self.has_dimension_filter
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
@@ -224,10 +230,94 @@ class StockBalanceReport:
 					self.initialize_data(group_by_key, entry)
 
 				self.prepare_item_warehouse_map(entry, group_by_key)
+				if track_rates:
+					self.latest_valuation_rates[entry.item_code, entry.warehouse] = entry.valuation_rate
 
 		self.item_warehouse_map = filter_items_with_no_transactions(
 			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
 		)
+
+	def set_pool_rate_on_dimension_rows(self):
+		if not (self.filters.get("show_dimension_wise_stock") or self.has_dimension_filter):
+			return
+
+		items = self.get_pool_valuation_details({row.item_code for row in self.item_warehouse_map.values()})
+		rows = [row for row in self.item_warehouse_map.values() if self.is_valued_in_pool(row, items)]
+		rates = self.latest_valuation_rates
+		rates.update(
+			self.get_latest_valuation_rates(
+				[row for row in rows if (row.item_code, row.warehouse) not in rates]
+			)
+		)
+		for row in rows:
+			row.val_rate = rates.get((row.item_code, row.warehouse), 0.0)
+			row.bal_val = row.bal_qty * row.val_rate
+
+	@property
+	def has_dimension_filter(self) -> bool:
+		return any(self.filters.get(field) for field in self.inventory_dimensions)
+
+	def get_pool_valuation_details(self, item_codes: set) -> dict:
+		if not item_codes:
+			return {}
+
+		items = frappe.get_all(
+			"Item",
+			filters={"name": ("in", list(item_codes))},
+			fields=[
+				"name",
+				"has_batch_no",
+				"has_serial_no",
+				"use_serial_no_wise_valuation",
+				"valuation_method",
+			],
+		)
+		return {item.name: item for item in items}
+
+	def is_valued_in_pool(self, row, items: dict) -> bool:
+		item = items[row.item_code]
+		if item.has_serial_no:
+			return not item.use_serial_no_wise_valuation
+
+		if item.has_batch_no:
+			valuation_method = item.valuation_method or frappe.get_cached_value(
+				"Company", row.company, "valuation_method"
+			)
+			return valuation_method == "Moving Average" and bool(
+				frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+			)
+
+		return True
+
+	def get_latest_valuation_rates(self, rows) -> dict:
+		if not rows:
+			return {}
+
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		ranked = (
+			frappe.qb.from_(sle)
+			.select(
+				sle.item_code,
+				sle.warehouse,
+				sle.valuation_rate,
+				RowNumber()
+				.over(sle.item_code, sle.warehouse)
+				.orderby(sle.posting_datetime, sle.creation, sle.name, order=Order.desc)
+				.as_("row_no"),
+			)
+			.where(
+				(sle.is_cancelled == 0)
+				& (sle.posting_date <= self.to_date)
+				& Tuple(sle.item_code, sle.warehouse).isin({(row.item_code, row.warehouse) for row in rows})
+			)
+		).as_("ranked")
+		entries = (
+			frappe.qb.from_(ranked)
+			.select(ranked.item_code, ranked.warehouse, ranked.valuation_rate)
+			.where(ranked.row_no == 1)
+			.run(as_dict=True)
+		)
+		return {(entry.item_code, entry.warehouse): flt(entry.valuation_rate) for entry in entries}
 
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()

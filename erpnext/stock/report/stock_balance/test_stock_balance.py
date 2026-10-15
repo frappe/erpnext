@@ -156,6 +156,30 @@ class TestStockBalance(ERPNextTestSuite):
 			{plant_a: (15, 1500), None: (10, 1000)},
 		)
 
+	def test_dimension_rows_use_the_pool_rate(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		for field, plant, movement in (
+			("to_id_plant", plant_a, {"to_warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 100}),
+			("to_id_plant", plant_b, {"to_warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 200}),
+			("id_plant", plant_a, {"from_warehouse": "_Test Warehouse - _TC", "qty": 5}),
+		):
+			entry = make_stock_entry(item_code=item, do_not_save=True, **movement)
+			entry.items[0].set(field, plant)
+			entry.insert().submit()
+
+		filters = _dict(self.filters, item_code=[item])
+		rows = stock_balance(_dict(filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val, row.val_rate) for row in rows},
+			{plant_a: (5, 750, 150), plant_b: (10, 1500, 150)},
+		)
+
+		rows = stock_balance(_dict(filters, id_plant=[plant_a]))
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in rows], [(5, 750)])
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 3})
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
