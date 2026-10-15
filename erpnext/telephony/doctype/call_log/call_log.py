@@ -83,11 +83,16 @@ class CallLog(Document):
 			return
 
 		if _is_call_missed(doc_before_save, self):
-			frappe.publish_realtime(f"call_{self.id}_missed", self)
+			self.notify_popup_recipients(doc_before_save, "missed")
 			self.trigger_call_popup()
 
 		if _is_call_ended(doc_before_save, self):
-			frappe.publish_realtime(f"call_{self.id}_ended", self)
+			self.notify_popup_recipients(doc_before_save, "ended")
+
+	def notify_popup_recipients(self, doc_before_save: "CallLog", event: str):
+		# The popup was shown for the call as it was before this update.
+		for email in doc_before_save.get_popup_recipients():
+			frappe.publish_realtime(f"call_{self.id}_{event}", self, user=email)
 
 	def is_incoming_call(self):
 		return self.type == "Incoming"
@@ -130,6 +135,13 @@ class CallLog(Document):
 
 		for email in emails:
 			frappe.publish_realtime("show_call_popup", self, user=email)
+
+	def get_popup_recipients(self) -> set[str]:
+		if not self.is_incoming_call():
+			return set()
+
+		employee_emails = [employee.get("user_id") for employee in get_employees_with_number(self.to)]
+		return set(get_scheduled_employees_for_popup(self.medium)).intersection(employee_emails)
 
 	def update_received_by(self):
 		if employees := get_employees_with_number(self.get("to")):

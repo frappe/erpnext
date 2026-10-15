@@ -187,6 +187,27 @@ class TestCallLog(ERPNextTestSuite):
 			(second_agent, "test_call_agent_b@example.com"),
 		)
 
+	def test_call_status_events_go_only_to_popup_recipients(self):
+		agent = "test_call_agent_a@example.com"
+		make_employee(agent, company="_Test Company", cell_number=f"+91{self.number}1")
+
+		for scheduled, expected_users in (([agent], [agent]), ([], [])):
+			call_log = frappe.get_doc(
+				"Call Log", self._make_call_log(to=f"+91{self.number}1", type="Incoming", status="Ringing")
+			)
+			call_log.status = "Completed"
+			with (
+				patch(
+					"erpnext.telephony.doctype.call_log.call_log.get_scheduled_employees_for_popup",
+					return_value=scheduled,
+				),
+				patch.object(frappe, "publish_realtime") as publish,
+			):
+				call_log.save(ignore_permissions=True)
+
+			ended = [c for c in publish.call_args_list if c.args[0] == f"call_{call_log.id}_ended"]
+			self.assertEqual([c.kwargs.get("user") for c in ended], expected_users)
+
 	def test_summary_can_be_saved_without_call_type(self):
 		add_call_summary_and_call_type(self.linked_log, "No type chosen", None)
 		self.assertEqual(frappe.db.get_value("Call Log", self.linked_log, "summary"), "No type chosen")
